@@ -1,0 +1,32 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}{% include "sprites/achievements.svg" %}{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1>Направления и базовые курсы</h1>
+                <p class="title_description">CS центр предлагает студентам три направления обучения: Computer Science*,
+                    Data Science, Software
+                    Engineering. Каждое направление предлагает список базовых курсов, пройдя которые, студент может
+                    претендовать на выпуск.
+                </p>
+                <ul class="nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Санкт-Петербург</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Новосибирск</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Казань</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">Екатеринбург</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

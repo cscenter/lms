@@ -13,6 +13,7 @@ export function getSections() {
 }
 
 export function showComponentError(error, msg='An error occurred while loading the component') {
+    showErrorNotification(msg);
     console.error(error);
     alert(error);  // TODO: add jGrowl or something similar
 }
@@ -21,7 +22,7 @@ export function showNotification(msg, options) {
     new Noty({
         layout: 'topLeft',
         type: 'info',
-        theme: 'bootstrap-v4',
+        theme: 'notification',
         text: msg,
         timeout: 2000,
         ...options

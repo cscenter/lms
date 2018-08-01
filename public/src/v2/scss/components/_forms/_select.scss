@@ -1,0 +1,71 @@
+.react-select-container {
+  margin-bottom: 20px;
+  .react-select__control {
+    margin: 0;
+    width: 100%;
+    outline: none;
+    -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+    text-align: left;
+    line-height: $input-line-height;
+    font-family: $font-family-base;
+    padding: $input-padding-y $input-padding-x;
+    background: $input-bg;
+    border: $input-border-width solid $input-border-color;
+    color: $input-color;
+    border-radius: $input-border-radius;
+    &:hover {
+      transition: $input-transition;
+      border: $input-border-width solid $input-border-color-hover;
+    }
+    .react-select__value-container{
+      padding: 0;
+    }
+  }
+}
+
+.react-select__control.react-select__control-is-focused{
+  border: $input-border-width solid $input-border-color-hover;
+  box-shadow: none !important;
+}
+
+.react-select__indicators{
+  .react-select__indicator.react-select__dropdown-indicator, .react-select__indicator.react-select__clear-indicator{
+    padding: 0;
+    .react-select__single-value{
+      color: $black !important; //TODO: fix it later
+    }
+  }
+
+  .react-select__indicator-separator{
+    display: none;
+  }
+}
+
+// Placeholder
+
+/* browsers require these rules separate */
+
+.react-select__placeholder {
+  color: $input-placeholder-color !important; //TODO: fix it later
+}
+
+.react-select__menu {
+  box-shadow: 0 0 2rem transparentize($gray-500, .8);
+  .react-select__option.react-select__option--is-selected {
+    background-color: $teal;
+    &:hover {
+      background-color: $teal;
+    }
+  }
+  .react-select__option.react-select__option--is-focused.react-select__option--is-selected {
+    background-color: $teal;
+    &:hover {
+      background-color: $teal;
+    }
+
+  }
+  .react-select__option.react-select__option--is-focused {
+    background-color: $gray-100;
+  }
+}
+

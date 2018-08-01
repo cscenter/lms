@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30px" height="30px" viewBox="0 0 30 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>icons/checkmark</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="icons/checkmark" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M8.21916801,15.6247656 C7.87415847,15.1935037 7.94407984,14.5642113 8.37534178,14.2192017 C8.80660371,13.8741922 9.43589608,13.9441136 9.78090563,14.3753755 L12.9621691,18.3519548 L20.1913007,8.41189885 C20.516139,7.96524624 21.1415559,7.8664962 21.5882085,8.19133446 C22.0348611,8.51617272 22.1336112,9.14158964 21.8087729,9.58824224 L14.5796413,19.5282982 C14.4746889,19.6726078 14.3508961,19.8022229 14.2115592,19.9136925 C13.3490353,20.6037116 12.0904506,20.4638688 11.4004315,19.6013449 L8.21916801,15.6247656 Z" id="checkmark" fill="#FFFFFF" fill-rule="nonzero"></path>
+    </g>
+</svg>

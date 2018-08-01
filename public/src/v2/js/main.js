@@ -5,7 +5,7 @@ import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 
 import ravenOptions from './raven_conf';
-import {showComponentError, getSections} from 'utils';
+import {showComponentError, getSections, showNotification} from 'utils';
 
 // Configure `raven-js`
 Raven
@@ -70,6 +70,14 @@ $(function () {
             scrollTop: $(scrollTo).offset().top - offset
         }, 700);
     });
+
+    // Notifications
+    if (window.__CSC_NOTIFICATIONS__ !== undefined) {
+        window.__CSC_NOTIFICATIONS__.forEach((item) => {
+            const {text, ...props} = item;
+            showNotification(text, props);
+        });
+    }
 
     // TODO: section or component-based approach. What to choose?
     let sections = getSections();

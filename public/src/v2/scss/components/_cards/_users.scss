@@ -2,7 +2,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: left;
-  margin: 0 -10px 0 -10px;
+  margin: 0 #{-$grid-gutter-width / 2} 0 -#{$grid-gutter-width / 2};
   @include media-breakpoint-up(sm) {
     justify-content: space-between;
   }
@@ -13,7 +13,7 @@
 }
 
 .user-card {
-  width: 170px;
+  width: 176px;
   float: left; // for older browsers
   vertical-align: top;
   line-height: 1.25;
@@ -26,10 +26,10 @@
   }
 
   @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
-    width: 170px;
+    width: 176px;
   }
   @include media-breakpoint-up(lg) {
-    width: 190px;
+    width: (160px + $grid-gutter-width);
   }
 
 }

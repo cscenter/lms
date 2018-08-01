@@ -1,0 +1,300 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+
+{% block content %}
+    <div class="svg-inline">
+        {% include "sprites/common.svg" %}
+        {% include "sprites/index.svg" %}
+        {% include "sprites/ui.svg" %}
+    </div>
+    <div class="container page-content">
+        <h1 class="mt-5">Fields</h1>
+        <form class="ui form __no-border" action="">
+            <div class="row">
+                <div class="field col-lg-4">
+                    <div class="ui input">
+                        <input type="text" placeholder="Placeholder">
+                    </div>
+                </div>
+                <div class="field col-lg-4">
+                    <div class="ui input error">
+                        <input type="text" placeholder="Error" value="name@mailcom">
+                    </div>
+                        <p class="input-hint __invalid-feedback">
+                            Вы совершили ошибку, но непоправимых ошибок нет :)
+                        </p>
+                </div>
+                <div class="field col-lg-4">
+                    <div class="ui disabled input">
+                        <input type="text" placeholder="Disabled" tabindex="-1">
+                    </div>
+                </div>
+                <div class="field col-lg-4">
+                    <div class="ui icon disabled input loading">
+                        <input type="text" placeholder="Loading content" tabindex="-1">
+                        <i class="icon"></i>
+                    </div>
+                        <p class="input-hint">
+                            Значение подрузится с вашего Яндекс-профиля
+                        </p>
+                </div>
+                <div class="field col-lg-4">
+                    <div class="ui icon input">
+                        <input type="text" placeholder="" value="Удалить контент">
+                        <i class="icon">{{ macros.svg_inline('cross') }}</i>
+                    </div>
+                </div>
+                <div class="field col-lg-4">
+                    <div class="ui input custom-file">
+                        <input type="file" class="custom-file-input" id="customFile" multiple>
+                        <label class="custom-file-label" for="customFile">Загрузить файл</label>
+                    </div>
+                    <p class="input-hint">
+                        Вставить сюда имя загруженного файла
+                    </p>
+                </div>
+                <div class="field col-lg-4">
+                    <div class="ui action input">
+                        <input type="text" placeholder="Электронный адрес">
+                        <a class="ui button btn btn--green">Отправить</a>
+                    </div>
+                        <p class="input-hint">
+                            Подпишитесь на рассылку чтобы быть в курсе новостей центра
+                        </p>
+                </div>
+                <div class="field col-4">
+                    <div class="ui icon input">
+                        <input type="search" placeholder="Поиск">
+                        <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <h1 class="mt-5">Basic forms</h1>
+        <div class="row">
+            <div class="col-lg-6">
+                <form class="ui form" action="">
+                    <div class="form_title">
+                        <h2>Вход на сайт</h2>
+                    </div>
+                    <div class="form-body">
+                        <div class="row">
+                            <div class="field col-12">
+                                <div class="ui input">
+                                    <input type="text" placeholder="Логин">
+                                </div>
+                                <div class="input-hint">
+                                    Логин, номер телефона или электронная почта
+                                </div>
+                            </div>
+                            <div class="field col-12">
+                                <div class="ui icon input">
+                                    <input type="password" placeholder="Пароль">
+                                    <i class="_password-hidden icon">{{ macros.svg_inline('password-hidden') }}</i>
+                                </div>
+                            </div>
+                            <div class="field col-lg-auto">
+                                <a href="" class="btn btn--green _m-wide">Войти</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <form class="ui form" action="">
+                    <div class="form_title">
+                        <h2>Редактировать профиль</h2>
+                        <p>Напишите свои актуальные контакты, чтобы наши кураторы всегда могли быть с вами на связи</p>
+                    </div>
+                    <div class="form-body">
+                        <div class="row">
+                            <div class="field col-12">
+                                <div class="ui input">
+                                    <label for="">Ф.И.О.</label>
+                                    <input type="text" placeholder="Фамилия Имя Отчество">
+                                </div>
+                            </div>
+                            <div class="field col-12">
+                                <div class="ui input">
+                                    <label for="">Телефон</label>
+                                    <input type="text" placeholder="+7 911 629-19-29">
+                                </div>
+                            </div>
+                            <div class="field col-12">
+                                <div class="ui checkbox-group">
+                                    <label class="title-label">На каком направлении вы хотите учиться?</label>
+                                    <label class="custom-checkbox fill-checkbox">
+                                        <input type="checkbox" class="fill-control-input">
+                                        <span class="fill-control-indicator"></span>
+                                        <span class="fill-control-description">Зеленый</span>
+                                    </label>
+                                    <label class="custom-checkbox fill-checkbox">
+                                        <input type="checkbox" class="fill-control-input">
+                                        <span class="fill-control-indicator"></span>
+                                        <span class="fill-control-description">Красный</span>
+                                    </label>
+                                    <label class="custom-checkbox fill-checkbox disabled">
+                                        <input type="checkbox" class="fill-control-input" checked disabled>
+                                        <span class="fill-control-indicator"></span>
+                                        <span class="fill-control-description">Синий (checked disabled)</span>
+                                    </label>
+                                    <label class="custom-checkbox fill-checkbox disabled">
+                                        <input type="checkbox" class="fill-control-input" disabled>
+                                        <span class="fill-control-indicator"></span>
+                                        <span class="fill-control-description">Фиолетовый (disabled)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="field col-12">
+                                <div class="ui input">
+                                    <label for="">Электронная почта</label>
+                                    <input type="text" placeholder="name@mail.com">
+                                </div>
+                            </div>
+
+                            <div class="field col-12">
+                                <div class="ui radiobtn-group">
+                                    <label class="title-label">Ваш любимый цвет:</label>
+                                    <label class="custom-radiobtn fill-radiobtn">
+                                        <input type="radio" name="Colors" class="fill-control-input">
+                                        <span class="fill-control-indicator"></span>
+                                        <span class="fill-control-description">Зеленый</span>
+                                    </label>
+                                    <label class="custom-radiobtn fill-radiobtn">
+                                        <input type="radio" name="Colors" class="fill-control-input">
+                                        <span class="fill-control-indicator"></span>
+                                        <span class="fill-control-description">Красный</span>
+                                    </label>
+                                    <label class="custom-radiobtn fill-radiobtn disabled">
+                                        <input type="radio" name="Colors-disabled" class="fill-control-input" checked disabled>
+                                        <span class="fill-control-indicator"></span>
+                                        <span class="fill-control-description">Синий (checked disabled)</span>
+                                    </label>
+                                    <label class="custom-radiobtn fill-radiobtn disabled">
+                                        <input type="radio" name="Colors-disabled" class="fill-control-input" disabled>
+                                        <span class="fill-control-indicator"></span>
+                                        <span class="fill-control-description">Фиолетовый (disabled)</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="field col-12">
+                                <div class="ui input">
+                                    <label>Short Text</label>
+                                    <textarea rows="6" placeholder="Расскажите о своих увлечениях"></textarea>
+                                </div>
+                            </div>
+                            <div class="field col-12">
+                                <label class="custom-checkbox fill-checkbox">
+                                    <input type="checkbox" class="fill-control-input" checked>
+                                    <span class="fill-control-indicator"></span>
+                                    <span class="fill-control-description __user-agreement">Я принимаю условия <a href="">Лицензионного соглашения</a> и согласен на обработку персональных данных</span>
+                                </label>
+                            </div>
+
+                            <div class="field col-lg-auto">
+                                <a href="" class="btn btn--green _m-wide">Сохранить изменения</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <h1 class="mt-5">Grid Form</h1>
+        <form class="ui form" action="">
+            <div class="form_title __inverse">
+                <h2>Новый пользователь</h2>
+            </div>
+            <div class="form-body">
+                <div class="form-section">
+                    <div class="form_title _subtitle">
+                        <h3>Личная информация</h3>
+                    </div>
+
+                    <div class="row">
+                        <div class="field col-lg-12">
+                            <div class="ui input">
+                                <label for="">Ф.И.О.</label>
+                                <input type="text" placeholder="Фамилия Имя Отчество">
+                            </div>
+                        </div>
+                        <div class="field col-lg-4">
+                            <div class="ui input">
+                                <label for="">Телефон</label>
+                                <input type="text" placeholder="+7(911)212-23-23">
+                            </div>
+                        </div>
+                        <div class="field col-lg-4">
+                            <div class="ui input">
+                                <label for="">Место работы и должность</label>
+                                <input type="text" placeholder="">
+                            </div>
+                            <div class="input-hint">
+                                Если вы еще учитесь напишите место учебы и курс
+                            </div>
+                        </div>
+                        <div class="field col-lg-4">
+                            <div class="ui input">
+                                <label for="">Примечание</label>
+                                <input type="text" placeholder="Увлечения, хобби…">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <div class="form_title _subtitle">
+                        <h3>Профили пользователя</h3>
+                    </div>
+                    <div class="row">
+                        <div class="field col-lg-4">
+                            <div class="ui input">
+                                <label for="">Stepik</label>
+                                <input type="text" placeholder="">
+                            </div>
+                        </div>
+                        <div class="field col-lg-4">
+                            <div class="ui input">
+                                <label for="">Yandex</label>
+                                <input type="text" placeholder="">
+                            </div>
+                        </div>
+                        <div class="field col-lg-4">
+                            <div class="ui input">
+                                <label for="">Github</label>
+                                <input type="text" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="field col-lg-auto">
+                        <div class="ui input">
+                            <a href="" class="btn btn--green _m-wide">Добавить пользователя</a>
+                        </div>
+                    </div>
+                    <div class="field col-lg-auto">
+                        <div class="ui input">
+                            <a href="" class="btn btn--outline_gray _m-wide">Отмена</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <h1>Single input with btn</h1>
+        <form class="ui form __no-border" action="">
+            <div class="row">
+                <div class="field col-lg-6">
+                    <div class="ui action input">
+                        <input type="text" placeholder="Электронный адрес">
+                        <a class="ui button btn btn--green">Подписаться</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% endblock content %}

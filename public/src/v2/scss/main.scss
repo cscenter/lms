@@ -10,6 +10,7 @@
 
 @import "layouts/base";
 
+@import "components/forms";
 @import "components/notifications";
 @import "components/images";
 @import "components/banners";
@@ -19,12 +20,13 @@
 @import "components/forms";
 @import "components/grid";
 @import "components/tooltips";
-@import "components/sprites";
+@import "components/sprites"; // Before: menu
 @import "components/menu";  // After: buttons
 @import "components/typography";  // After: reboot
 @import "components/misc";
 @import "components/pagination";
 @import "components/preloader";
+@import "components/nav-tabs";
 
 @import "pages/index";
-
+@import "pages/program-card";

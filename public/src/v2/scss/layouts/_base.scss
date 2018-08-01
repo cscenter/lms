@@ -44,6 +44,9 @@ body {
 .cover__title {
   padding: 60px 0 20px;
   max-width: 900px;
+  @include media-breakpoint-up(lg) {
+    font-size: 3.5rem;
+  }
 }
 
 .cover__text {
@@ -70,7 +73,7 @@ body {
     border-top: $hr-border-width solid $hr-border-color;
     margin-bottom: 2rem;
     color: $gray-600;
-    font-size: .9375rem;
+    font-size: $font-size-sm;
     line-height: 1.5rem;
     @include font-smoothing();
   }
@@ -107,5 +110,12 @@ body {
     @include media-breakpoint-down(md) {
       margin-bottom: 10px;
     }
+  }
+}
+
+.content-block{
+  margin-bottom: 2rem;
+  li{
+    margin-bottom: .5rem;
   }
 }
