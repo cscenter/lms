@@ -4,17 +4,14 @@
   background: $gray-100;
 }
 
-.container {
-  @include media-breakpoint-down(md) {
-    padding-left: $mobile-padding-x;
-    padding-right: $mobile-padding-x;
+.page-content {
+  padding-top: 80px;
+  padding-bottom: 2rem;
+  @include media-breakpoint-up(lg) {
+    padding-top: 40px;
   }
 }
 
-.page-content {
-  margin-top: 70px;
-  padding-bottom: 2rem;
-  @include media-breakpoint-up(lg) {
-    margin-top: 40px;
-  }
+.content-center{
+  justify-content: center;
 }

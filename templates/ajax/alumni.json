@@ -1,0 +1,217 @@
+{
+  "data": [
+    {
+      "id": 1642,
+      "name": "Александр Бзикадзе",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": null,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 894,
+      "name": "Даниил Бордынюк",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "se",
+        "cs"
+      ]
+    },
+    {
+      "id": 3297,
+      "name": "Кирилл Бродт",
+      "sex": "m",
+      "year": 2018,
+      "city": "nsk",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "ds"
+      ]
+    },
+    {
+      "id": 923,
+      "name": "Дарья Васина",
+      "sex": "f",
+      "year": 2018,
+      "city": "spb",
+      "photo": null,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 3298,
+      "name": "Роман Герасимов",
+      "sex": "m",
+      "year": 2018,
+      "city": "nsk",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "ds"
+      ]
+    },
+    {
+      "id": 912,
+      "name": "Егор Голованов",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": null,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 1633,
+      "name": "Станислав Гордеев",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": null,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 893,
+      "name": "Павел Гуляев",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "ds"
+      ]
+    },
+    {
+      "id": 1717,
+      "name": "Олег Евсеев",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 925,
+      "name": "Сергей Завгородний",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": null,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 772,
+      "name": "Валентина Кирюшкина",
+      "sex": "f",
+      "year": 2018,
+      "city": "spb",
+      "photo": null,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 1645,
+      "name": "Михаил Кормышов",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": null,
+      "areas": [
+        "ds",
+        "se"
+      ]
+    },
+    {
+      "id": 766,
+      "name": "Фёдор Корчажников",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 1734,
+      "name": "Иван Кремнев",
+      "sex": "m",
+      "year": 2018,
+      "city": "spb",
+      "photo": null,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 902,
+      "name": "Вячеслав Кукушкин",
+      "sex": "m",
+      "year": 2017,
+      "city": "spb",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "ds",
+        "se"
+      ]
+    },
+    {
+      "id": 919,
+      "name": "Абдукодири Курбонзода",
+      "sex": "m",
+      "year": 2016,
+      "city": "spb",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 891,
+      "name": "Анастасия Лавренко",
+      "sex": "f",
+      "year": 2015,
+      "city": "spb",
+      "photo": null,
+      "areas": [
+        "ds",
+        "se"
+      ]
+    },
+    {
+      "id": 884,
+      "name": "Александр Лучко",
+      "sex": "m",
+      "year": 2014,
+      "city": "spb",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 882,
+      "name": "Сергей Лучко",
+      "sex": "m",
+      "year": 2013,
+      "city": "spb",
+      "photo": "/media/user_card.jpg",
+      "areas": [
+        "se"
+      ]
+    }
+  ]
+}

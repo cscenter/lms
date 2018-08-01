@@ -4,7 +4,7 @@ import UserCard from './UserCard';
 
 class UserCardList extends React.Component {
     static defaultProps = {
-        className: ''
+        className: 'user-cards'
     };
 
     render() {

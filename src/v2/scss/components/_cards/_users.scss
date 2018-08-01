@@ -2,7 +2,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: left;
-  margin: 0 -10px 0 -10px;
+  margin: 0 #{-$grid-gutter-width / 2} 0 -#{$grid-gutter-width / 2};
   @include media-breakpoint-up(sm) {
     justify-content: space-between;
   }
@@ -13,30 +13,38 @@
 }
 
 .user-card {
-  width: 150px;
+  width: 176px;
   float: left; // for older browsers
   vertical-align: top;
-  line-height: 20px;
+  line-height: 1.25;
   margin-bottom: 32px;
-  margin-left: $grid-gutter-width / 2;
-  margin-right: $grid-gutter-width / 2;
-  @include media-breakpoint-up(lg) {
-    width: 170px;
+  padding-left: $grid-gutter-width / 2;
+  padding-right: $grid-gutter-width / 2;
+
+  @include media-breakpoint-up(iphone5, $mobile-breakpoints) {
+      width: 50%;
   }
 
-  img {
-    max-width: 100%;
-    height: auto;
+  @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
+    width: 176px;
   }
+  @include media-breakpoint-up(lg) {
+    width: (160px + $grid-gutter-width);
+  }
+
 }
 
 .user-card__photo {
   position: relative;
   margin: 0 auto 5px;
+
+  img {
+    height: auto;
+    max-width: 100%;
+  }
 }
 
 .achievements {
-  width: 50px;
   position: absolute;
   top: 2px;
   right: -2px;

@@ -22,7 +22,7 @@ $card-img-overlay-padding: 1.25rem !default;
   word-wrap: break-word;
   background-color: $card-bg;
   background-clip: border-box;
-  font-size: 1rem;
+  font-size: $font-size-base;
   border: $card-border-width solid $card-border-color;
   @include border-radius($card-border-radius);
 
@@ -65,7 +65,7 @@ $card-img-overlay-padding: 1.25rem !default;
 
   // FIXME: rename to `small-text`
   &._small {
-    font-size: $small-font-size;
+    font-size: $font-size-sm;
   }
 }
 

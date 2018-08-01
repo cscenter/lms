@@ -10,7 +10,7 @@ $(document).ready(function () {
     if (sections.includes("applicant_list")) {
         initApplicantListSection();
     }
-    if (sections.includes("applicant")) {
+    if (sections.includes("applicant_detail")) {
         initApplicantDetailSection();
     }
     if (sections.includes("interview")) {

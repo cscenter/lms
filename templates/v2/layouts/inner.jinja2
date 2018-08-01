@@ -48,6 +48,10 @@
     </div>
 </footer>
 {%- endblock footer %}
+<script type="text/javascript">
+    window.__CSC_NOTIFICATIONS__ = {{ messages(request)|tojson }};
+</script>
+
 {{ render_bundle('common', config='V2') }}
 {{ render_bundle('main', config='V2') }}
 </body>

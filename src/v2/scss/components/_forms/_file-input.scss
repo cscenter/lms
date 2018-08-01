@@ -1,0 +1,59 @@
+.ui.form {
+  .custom-file {
+    position: relative;
+
+    .custom-file-input {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      opacity: 0;
+      font-size: $font-size-base;
+      padding: $input-padding-y $input-padding-x;
+      line-height: 15px; //Didn't find another solution for same height
+
+      &:focus ~ .custom-file-label {
+        border-color: $input-border-color-hover;
+      }
+
+      &:hover ~ .custom-file-label {
+        &::after {
+          background: darken($gray-400, 5%);
+        }
+      }
+    }
+  }
+}
+
+.ui.form {
+  .custom-file-label {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 1;
+    font-size: $font-size-normal;
+    line-height: $input-line-height;
+    font-weight: $font-weight-base;
+    padding: $input-padding-y $input-padding-x;
+    color: $input-placeholder-color;
+    background-color: $input-bg;
+    border: $border-width solid transparent;
+    border-radius: $border-radius;
+    &::after {
+      position: absolute;
+      top: -1px;
+      right: -1px;
+      bottom: -1px;
+      z-index: 3;
+      display: block;
+      color: $white;
+      padding: $input-btn-padding-y $input-btn-padding-x;
+      background: $gray-400;
+      content: "Выбрать";
+      border-radius: $border-radius;
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+    }
+  }
+}
+
