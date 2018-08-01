@@ -97,6 +97,8 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .menu-desktop-wrapper {
+  // Hack to show rows with menu items vertically closer to each other.
+  margin: (($nav-link-line-height - $nav-link-real-line-height) / 2) 0;
   display: none;
   @include media-breakpoint-up(lg) {
     display: flex;
@@ -110,8 +112,6 @@ $navbar-toggler-border-radius: $btn-border-radius;
   flex-wrap: wrap;
   padding-left: 0;
   margin-bottom: 0;
-  // Hack to show rows with menu items vertically closer to each other.
-  margin-top: ($nav-link-line-height - $nav-link-real-line-height) / 2;
   list-style: none;
   width: 100%; // ie 10 fix
 
