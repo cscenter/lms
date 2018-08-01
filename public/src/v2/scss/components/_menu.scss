@@ -245,9 +245,12 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .menu-btn-reg {
-  margin: ($navbar-padding-y - $nav-link-padding-y) 0 0 auto;
+  // this button less than $navbar-line-height
+  margin: (($navbar-line-height - 24px - 2px) / 2) 0 0 auto;  // 24px - <icon height>, 2px - border width correction
   padding: $nav-link-padding-y $nav-link-padding-x;
-  line-height: $line-height-lg;
+  @include media-breakpoint-up(lg) {
+    margin-top: 14px;
+  }
 }
 
 .dropdown-user-menu {
