@@ -14,9 +14,12 @@ class FormSelect extends React.Component {
                 name={this.props.name}
                 value={this.props.value}
                 clearable={false}
+                className='react-select-container'
+                classNamePrefix='react-select'
+                getStyles={() => {}}
                 {...this.props}
                 onChange={this.handleChange}
-                searchable={false}
+                isSearchable={false}
             />
         );
     }

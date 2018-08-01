@@ -1,3 +1,4 @@
+$footer-mobile-height: 134px;
 $footer-height: 90px;
 
 @mixin append-hr-to-container() {
@@ -16,6 +17,7 @@ html {
 }
 
 body {
+  margin-bottom: $footer-mobile-height;
   @include media-breakpoint-up(lg) {
     margin-bottom: $footer-height;
   }
@@ -42,6 +44,9 @@ body {
 .cover__title {
   padding: 60px 0 20px;
   max-width: 900px;
+  @include media-breakpoint-up(lg) {
+    font-size: 3.5rem;
+  }
 }
 
 .cover__text {
@@ -54,9 +59,10 @@ body {
   overflow: hidden;
   display: block;
   width: 100%;
+  position: absolute;
+  bottom: 0;
+  height: $footer-mobile-height;
   @include media-breakpoint-up(lg) {
-    position: absolute;
-    bottom: 0;
     height: $footer-height;
   }
 
@@ -67,7 +73,7 @@ body {
     border-top: $hr-border-width solid $hr-border-color;
     margin-bottom: 2rem;
     color: $gray-600;
-    font-size: .9375rem;
+    font-size: $font-size-sm;
     line-height: 1.5rem;
     @include font-smoothing();
   }
@@ -104,5 +110,12 @@ body {
     @include media-breakpoint-down(md) {
       margin-bottom: 10px;
     }
+  }
+}
+
+.content-block{
+  margin-bottom: 2rem;
+  li{
+    margin-bottom: .5rem;
   }
 }

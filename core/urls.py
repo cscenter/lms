@@ -20,6 +20,8 @@ from django.contrib.auth import views as auth_views
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
+from core.views import NotyView, AlumniView
+
 
 class HtmlView(generic.TemplateView):
     def get_template_names(self):
@@ -58,5 +60,7 @@ urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + [
     url(r'^$', HtmlView.as_view(), name='index'),
     url(r'^login/$', auth_views.LoginView.as_view(), name='login'),
     url(r'^ajax/(?P<path_to_json>.*)$', JSONView.as_view(), name='json_data'),
+    url(r'^v2/components/noty/$', NotyView.as_view(), name='noty_component'),
+    url(r'^v2/pages/alumni/$', AlumniView.as_view(), name='alumni'),
     url(r'^(?P<path_to_template>.*)$', HtmlView.as_view(), name='html_pages'),
 ]

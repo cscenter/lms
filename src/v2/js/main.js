@@ -5,7 +5,7 @@ import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 
 import ravenOptions from './raven_conf';
-import {showComponentError, getSections} from 'utils';
+import {showComponentError, getSections, showNotification} from 'utils';
 
 // Configure `raven-js`
 Raven
@@ -71,14 +71,18 @@ $(function () {
         }, 700);
     });
 
+    // Notifications
+    if (window.__CSC_NOTIFICATIONS__ !== undefined) {
+        window.__CSC_NOTIFICATIONS__.forEach((item) => {
+            const {text, ...props} = item;
+            showNotification(text, props);
+        });
+    }
+
     // TODO: section or component-based approach. What to choose?
     let sections = getSections();
-    if (sections.includes("testimonials")) {
-        import(/* webpackChunkName: "testimonials" */ 'sections/testimonials')
-            .then(module => { module.launch(); })
-            .catch(error => showComponentError(error));
-    } else if (sections.includes("honorBoard")) {
-        import(/* webpackChunkName: "honorBoard" */ 'sections/honorBoard')
+    if (sections.includes("honorBoard")) {
+        import(/* webpackChunkName: "honorBoard" */ 'apps/honorBoard')
             .then(module => { module.launch(); })
             .catch(error => showComponentError(error));
     } else {

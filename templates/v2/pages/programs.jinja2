@@ -1,0 +1,97 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1>Направления и базовые курсы</h1>
+                <p class="title_description">CS центр предлагает студентам три направления обучения: Computer Science*,
+                    Data Science, Software
+                    Engineering. Каждое направление предлагает список базовых курсов, пройдя которые, студент может
+                    претендовать на выпуск.
+                </p>
+                <ul class="nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Санкт-Петербург</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Новосибирск</a>
+                    </li>
+                </ul>
+            <div class="program-card">
+                <a class="_card-img cs col-sm-4"></a>
+                <div class="card-info col-sm">
+                    <h3><a href="#" class="_card-eng-title">Computer Science</a></h3>
+                    <p class="_translate">
+                        Современная информатика
+                    </p>
+                    <p class="_card-description">
+                        Цель обучения на направлении Computer Science — подготовка специалистов по современной
+                        информатике. Студенты направления изучают как теоретические основы информатики, так и
+                        более
+                        прикладные научные области.
+                    </p>
+                </div>
+            </div>
+            <div class="program-card">
+                <a class="_card-img se col-sm-4"></a>
+                <div class="card-info col-sm">
+                    <h3><a href="#" class="_card-eng-title">Software Engineering</a></h3>
+                    <p class="_translate">
+                        Разработка ПО
+                    </p>
+                    <p class="_card-description">
+                        Знания и практический опыт, полученные на направлении Software Engineering, позволят выпускникам
+                        стать квалифицированными специалистами как в разработке ПО, так и в научно-исследовательской
+                        сфере.
+                    </p>
+                </div>
+            </div>
+            <div class="program-card">
+                <a class="_card-img ds col-sm-4"></a>
+                <div class="card-info col-sm">
+                    <h3><a href="#" class="_card-eng-title">Data Science</a></h3>
+                    <p class="_translate">
+                        Анализ данных
+                    </p>
+                    <p class="_card-description">
+                        Направление Data Science посути является отделеним Школы анализа данных Яндекса в
+                        Санкт-Петербурге и в Новосибирске. Здесь ведётся подготовка специалистов в области обработки и
+                        анализа данных и извлечения информации из интернета.
+                    </p>
+                </div>
+            </div>
+            </div>
+             <div class="col-lg-3 offset-lg-1">
+            <div class="text-note">
+                <a href="#">Поступление</a>
+                <p class="_text">Обучение в центре бесплатное. Набор учащихся проходит по конкурсу один раз в
+                    год.</p>
+            </div>
+
+            <div class="card _inversed mb-3">
+                <img class="card-img d-none d-lg-block" src="/media/pages/text-page/info-card-image.jpg" alt="">
+                <div class="card-body _small">
+                    Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                    живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по будним вечерам и
+                    выходным.
+                </div>
+            </div>
+
+            <div class="testimonial _bubble">
+                <div class="testimonial__quote">
+                    <div class="testimonial__text">
+                        CSCenter — явление, которое наполняет чувством искренней гордости за свою страну. В его основе заложены справедливость, свободный дух
+                    </div>
+                </div>
+                <img class="img-rounded" src="/media/pages/index/student.png" width="50" height="50">
+                <div class="testimonial__author">
+                    <a href="#">Евгений Игоревич Викулов</a>
+                    <span>Выпуск 2017, Разработка ПО, Современная информатика</span>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    </div>
+{% endblock content %}

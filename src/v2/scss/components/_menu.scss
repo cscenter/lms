@@ -2,17 +2,17 @@ $navbar-padding-y: $spacer;
 $navbar-padding-x: $spacer;
 $navbar-nav-link-padding-x: 0;
 $nav-link-padding-x: .5rem;
-$nav-link-padding-y: .3rem;
+$nav-link-padding-y: .5rem;
 $nav-link-mobile-padding-x: 20px;
 $navbar-brand-font-size: $font-size-lg;
+$navbar-line-height: 32px;
 // Compute the navbar-brand padding-y so the navbar-brand will have the same height as navbar-text and nav-link
 $nav-link-height: ($font-size-base * $line-height-base + $nav-link-padding-y * 2);
 $navbar-brand-height: $navbar-brand-font-size * $line-height-base;
 $navbar-brand-padding-y: ($nav-link-height - $navbar-brand-height) / 2;
 
-$navbar-toggler-padding-y: .25rem;
-$navbar-toggler-padding-x: .25rem;
-$navbar-toggler-padding-x: 10px;
+$navbar-toggler-padding-y: 15px;  // humburger size is 18px, to fit in 8pt grid, remove px here
+$navbar-toggler-padding-x: 16px;
 $navbar-toggler-margin-x: $nav-link-padding-x - $input-btn-padding-x;
 $navbar-toggler-font-size: $font-size-lg;
 $navbar-toggler-border-radius: $btn-border-radius;
@@ -45,15 +45,24 @@ $navbar-toggler-border-radius: $btn-border-radius;
 
 .navbar-logo {
   display: flex; // ie 10 fix
-  padding: $nav-link-padding-y 0;
-  margin: ($navbar-padding-y - $nav-link-padding-y) $navbar-padding-x ($navbar-padding-y - $nav-link-padding-y) 0;
+  padding: $nav-link-padding-y ($navbar-padding-x / 2);
+  @include media-breakpoint-up(lg) {
+    margin-top: ($navbar-padding-y - $nav-link-padding-y);
+    margin-bottom: ($navbar-padding-y - $nav-link-padding-y);
+  }
+
+}
+
+._logo-csc {
+  height: $navbar-line-height;
+  width: 88px;
 }
 
 .navbar-toggler {
   display: flex;
   align-self: center;
 
-  padding: $navbar-padding-y $navbar-toggler-padding-x;
+  padding: $navbar-toggler-padding-y $navbar-toggler-padding-x;
   margin-left: -$navbar-toggler-padding-x;
   background-color: transparent; // remove default button style
   border: none; // remove default button style
@@ -70,6 +79,8 @@ $navbar-toggler-border-radius: $btn-border-radius;
   color: $white;
   opacity: .5;
   white-space: nowrap;
+  //line-height: $navbar-line-height;
+
   &:hover {
     color: $white;
     opacity: 1;
@@ -84,7 +95,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .menu-desktop-wrapper {
-  padding: ($navbar-padding-y - $nav-link-padding-y) 0;
+  margin: ($navbar-padding-y - $nav-link-padding-y) 0;
   display: none;
   @include media-breakpoint-up(lg) {
     display: flex;
@@ -108,8 +119,8 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .navbar-main {
-  .nav-item {
-    margin-bottom: 1px; // hack to avoid blinking on hovering two vertically adjacent links
+  .nav-link {
+    margin: 3px 1px; // hack to avoid blinking on hovering two vertically adjacent links
   }
 }
 
@@ -179,8 +190,9 @@ $navbar-toggler-border-radius: $btn-border-radius;
     text-align: left;
     display: block;
     color: $gray-400;
-    font-size: $font-size-base;
-    padding: 10px 20px;
+    font-size: $font-size-normal;
+    line-height: 24px; // crutch
+    padding: 12px 20px;
     &:hover {
       color: $white;
     }
@@ -204,7 +216,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
 .navbar-submenu {
   height: 40px;
   align-items: center;
-  font-size: $font-size-sm;
+  font-size: $font-size-base;
   display: none;
   background-color: $gray-200;
   @include media-breakpoint-up(lg) {
@@ -233,35 +245,48 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .menu-btn-reg {
-  //display: flex;
-  margin: ($navbar-padding-y - $input-btn-padding-y) 0 0 auto;
+  margin: ($navbar-padding-y - $nav-link-padding-y) 0 0 auto;
+  padding: $nav-link-padding-y $nav-link-padding-x;
+  line-height: $line-height-lg;
 }
 
-
 .dropdown-user-menu {
-  padding: ($navbar-padding-y - $input-btn-padding-y) 0 0; // skip bottom padding since user img height > logo height
-  margin-top: -1px;
   margin-left: auto;
-  margin-right: -$navbar-toggler-padding-x;
+  margin-right: (-$navbar-toggler-padding-x / 2);
+  @include media-breakpoint-up(lg) {
+    margin-top: 0;
+  }
 
   .dropdown-menu {
-    right: $navbar-toggler-padding-x;
+    font-size: $font-size-normal;
+    right: ($navbar-toggler-padding-x / 2);
     left: auto;
+    @include media-breakpoint-up(lg) {
+      margin: (-$navbar-toggler-padding-x / 2) 0 0 0;
+    }
   }
 
   .btn {
     color: $white;
-    border-color: transparent;
+    border: 0;
     background-color: rgba(0, 0, 0, 0);
-    padding-left: $navbar-toggler-padding-x;
-    padding-right: $navbar-toggler-padding-x;
-
+    padding: $nav-link-padding-y $nav-link-padding-x;
+    @include media-breakpoint-up(lg) {
+      margin: ($navbar-padding-y - $nav-link-padding-y) 0;
+    }
     span {
       margin-right: 10px;
       display: none;
       @include media-breakpoint-up(lg) {
         display: inline-block;
       }
+    }
+    &:focus{
+      box-shadow: none;
+      .user-menu-img {
+        box-shadow: 0px 0px 0px 5px transparentize($gray-400,.6);
+      }
+
     }
   }
 }

@@ -5,13 +5,21 @@ import {showComponentError} from 'utils';
 
 export function renderComponentInElement(el) {
     let componentName = el.id;
-    import(/* webpackChunkName: "[request]" */ `sections/${componentName}`)
+    import(/* webpackChunkName: "[request]" */ `apps/${componentName}`)
         .then(component => {
             const props = Object.assign({}, el.dataset);
             // get props from elements data attribute
             Object.keys(props).map((k) => {
                 if (k === "init") {
-                    props[k] = JSON.parse(props[k]);
+                    // Allow passing initial props from backend
+                    let data = JSON.parse(props[k]);
+                    if (data.props !== undefined) {
+                        Object.keys(data.props).map((k) => {
+                            props[k] = data.props[k];
+                        });
+                        delete data.props;
+                    }
+                    props[k] = data;
                 }
             });
             let Component = component.default;

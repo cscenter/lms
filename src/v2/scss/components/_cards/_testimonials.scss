@@ -17,7 +17,7 @@
   color: $gray-500;
   flex-direction: row;
   flex-wrap: wrap;
-  font-size: .9375rem;
+  font-size: $font-size-base;
   justify-content: center;
   text-align: center;
   @include media-breakpoint-up(lg) {
@@ -80,10 +80,11 @@
   }
 
   a {
-    font-size: 1rem;
+    font-size: $font-size-base;
   }
 
   span {
+    font-size: $font-size-sm;
     margin: .3rem 0;
     display: block;
     color: $gray-400;
@@ -92,7 +93,7 @@
 
 .testimonial__quote {
   color: $body-color;
-  font-size: .875rem;
+  font-size: $font-size-sm;
   padding: 1rem 1rem .875rem 1rem;
   position: relative;
   background-color: $gray-300;

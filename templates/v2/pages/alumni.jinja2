@@ -1,0 +1,15 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://unpkg.com/react-select@1.2.1/dist/react-select.css">
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="Alumni" data-init='{{ app_data|tojson|safe }}' class="__react-root"></div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

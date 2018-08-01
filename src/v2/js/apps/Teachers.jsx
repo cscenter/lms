@@ -10,11 +10,12 @@ import UserCardList from 'components/UserCardList';
 
 
 // TODO: replace with HOC `UserCardFilter`
-class Alumni extends React.Component {
+class App extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            "loading": true,
             "items": [],
         };
         this.fetch = _debounce(this._fetch, 300);
@@ -46,6 +47,7 @@ class Alumni extends React.Component {
 
     componentDidMount = () => {
         // Set initial state and fetch data
+        // TODO: move to constructor?
         this.setState(this.props.init.state);
     };
 
@@ -80,6 +82,7 @@ class Alumni extends React.Component {
             dataType: "json"
         }).done((result) => {
             this.setState({
+                loading: false,
                 items: result.data,
             });
         });
@@ -100,8 +103,8 @@ class Alumni extends React.Component {
         });
 
         return (
-            <div>
-                <div className="row">
+            <div className={this.state.loading ? "_loading" : ""}>
+                <div className="row mb-4">
                     <div className="col-lg-3">
                         <SearchInput
                             onChange={this.handleSearchInputChange}
@@ -114,8 +117,8 @@ class Alumni extends React.Component {
                             onChange={this.handleAreaChange}
                             value={area}
                             name="area"
-                            placeholder="Направление обучения"
-                            clearable={true}
+                            placeholder="Направление"
+                            isClearable={true}
                             options={areas}
                             key="area"
                         />
@@ -125,8 +128,8 @@ class Alumni extends React.Component {
                             onChange={this.handleYearChange}
                             value={year}
                             name="year"
-                            clearable={true}
-                            placeholder="Год поступления"
+                            isClearable={true}
+                            placeholder="Год выпуска"
                             options={years}
                             key="year"
                         />
@@ -136,17 +139,17 @@ class Alumni extends React.Component {
                             onChange={this.handleCityChange}
                             value={city}
                             name="city"
-                            clearable={true}
+                            isClearable={true}
                             placeholder="Город"
                             options={cities}
                             key="city"
                         />
                     </div>
                 </div>
-                <UserCardList className="graduates-list" users={filteredItems} />
+                <UserCardList users={filteredItems} />
             </div>
         );
     }
 }
 
-export default Alumni;
+export default App;
