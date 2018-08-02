@@ -89,10 +89,6 @@
     align-items: center;
   }
 
-  .row {
-    margin: 0;
-  }
-
   h2 {
     margin-bottom: 1rem;
   }
@@ -105,34 +101,13 @@
     margin-bottom: 2rem;
   }
 
-  &__img {
-    height: 400px;
-    background-image: url("/static/v2/img/pages/index/cscenter_meetup.jpg");
-    @include make-col(12);
-
-    @include media-breakpoint-up(lg) {
-      @include make-col(8);
-    }
-
+  .img-fluid {
     @include media-breakpoint-down(lg) {
       margin-bottom: 1rem;
     }
   }
-
-  &__description {
-    @include media-breakpoint-up(lg) {
-      @include make-col(4);
-      padding-left: 20px;
-    }
-
-  }
-
-  .supported-by {
-    a {
-      @include make-col(3);
-    }
-  }
 }
+
 
 // 4 - screen csc-online
 

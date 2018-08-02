@@ -80,21 +80,23 @@
     <div class="container">
         <h2>О центре</h2>
         <div class="row">
-            <div class="about-csc__img"></div>
-            <div class="about-csc__description">
+            <div class="col-lg-8">
+                <img src="{{ static("v2/img/pages/index/cscenter_meetup.jpg") }}" class="img-fluid" alt="Computer Science Center Meetup">
+            </div>
+            <div class="col-lg-4 about-csc__description">
                 <p>
                     Computer Science Center — объединённая инициатива Школы анализа данных, Computer Science клуба и
                     JetBrains. Мы существуем, чтобы дать возможность талантливым студентам и выпускникам развиваться
                     в интересном им направлении.
                 </p>
-                <a class="btn btn--small btn--outline_gray" href="#">Подробнее</a>
+                <a class="btn btn--small btn--outline_gray" href="/about/">Подробнее</a>
 
                 <h4>Организаторы</h4>
                 <div class="supported-by">
-                    <a href="#" title="JetBrains">{{ macros.svg_inline('logo-jetbrains') }}</a>
-                    <a href="#" title="Яндекс ШАД">{{ macros.svg_inline('logo-shad') }}</a>
-                    <a href="#" title="ФМЛ №239">{{ macros.svg_inline('logo-fml239') }}</a>
-                    <a href="#" title="Computer Science Club">{{ macros.svg_inline('logo-csclub') }}</a>
+                    <a target="_blank" rel="noopener" href="https://jetbrains.ru/students" title="JetBrains">{{ macros.svg_inline('logo-jetbrains') }}</a>
+                    <a target="_blank" rel="noopener" href="https://yandexdataschool.ru/" title="Яндекс ШАД">{{ macros.svg_inline('logo-shad') }}</a>
+                    <a target="_blank" rel="noopener" href="http://239.ru/" title="ФМЛ №239">{{ macros.svg_inline('logo-fml239') }}</a>
+                    <a target="_blank" rel="noopener" href="https://compsciclub.ru/" title="Computer Science Club">{{ macros.svg_inline('logo-csclub') }}</a>
                 </div>
             </div>
         </div>
