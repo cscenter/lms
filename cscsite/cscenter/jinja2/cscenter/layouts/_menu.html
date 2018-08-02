@@ -32,7 +32,7 @@
                     <span>{{ request.user.get_short_name() }}</span>
                     {%- with im = request.user.get_thumbnail("60x60", use_stub=False) -%}
                         {%- if im -%}
-                            <img class="user-menu-img" src="{{ im.url }}" width="30" height="30" alt="{{ request.user.get_full_name() }}">
+                            <img class="user-menu-img" src="{{ im.url }}" width="32" height="32" alt="{{ request.user.get_full_name() }}">
                         {%- else -%}
                             {{ macros.svg_inline('user-sign') }}
                         {%- endif -%}
