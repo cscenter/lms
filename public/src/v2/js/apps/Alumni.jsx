@@ -24,6 +24,8 @@ class Alumni extends React.Component {
             ...props.init.state
         };
         this.fetch = _debounce(this.fetch, 300);
+        // FIXME: bind all functions here?
+        // https://github.com/erikras/react-redux-universal-hot-example/issues/1010
     }
 
     handleYearChange = (year) => {

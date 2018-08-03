@@ -91,7 +91,9 @@ $(function () {
     let reactApps = document.querySelectorAll('.__react-root');
     if (reactApps.length > 0) {
         import(/* webpackChunkName: "react" */ 'react_app')
-            .then(m => { reactApps.forEach(m.renderComponentInElement); })
+            .then(m => {
+                Array.from(reactApps).forEach(m.renderComponentInElement);
+            })
             .catch(error => showComponentError(error));
     }
 });
