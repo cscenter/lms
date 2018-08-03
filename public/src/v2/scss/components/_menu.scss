@@ -280,7 +280,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
 
   .dropdown-menu {
     font-size: $font-size-normal;
-    right: ($navbar-toggler-padding-x / 2);
+    right: $navbar-toggler-padding-x;
     left: auto;
   }
 
