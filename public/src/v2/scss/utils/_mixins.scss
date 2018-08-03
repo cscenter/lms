@@ -8,3 +8,17 @@
     -moz-osx-font-smoothing: auto;
   }
 }
+
+
+// Customize mobile grid margins for extra small devices
+@mixin make-container() {
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: $grid-gutter-width;
+  padding-left: $grid-gutter-width;
+  @include media-breakpoint-up(sm) {
+    padding-right: ($grid-gutter-width / 2);
+    padding-left: ($grid-gutter-width / 2);
+  }
+}

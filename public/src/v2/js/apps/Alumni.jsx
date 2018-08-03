@@ -152,7 +152,11 @@ class Alumni extends React.Component {
                                 />
                             </div>
                 </div>
-                <UserCardList users={filteredItems} />
+                {
+                    filteredItems.length > 0 ?
+                        <UserCardList users={filteredItems} />
+                        : "Таких выпускников у нас нет. Выберите другие параметры фильтрации."
+                }
             </Fragment>
         );
     }
