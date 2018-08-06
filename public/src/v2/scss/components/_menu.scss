@@ -289,7 +289,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
     border: 0;
     background-color: rgba(0, 0, 0, 0);
     padding: $nav-link-padding-y $nav-link-padding-x;
-    //line-height: $nav-link-line-height;
+    line-height: $nav-link-line-height;
     box-shadow: none;
 
     &:focus {

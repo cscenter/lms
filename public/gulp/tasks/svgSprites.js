@@ -44,7 +44,7 @@ const svgSprites = () => {
                     defs: {
                         dest: '.',
                         sprite: path.join(paths.build.svgSprites, `${dir}.svg`),
-                        prefix: "._%s",
+                        prefix: ".sprite-img._%s",
                         dimensions: "%s",
                         bust: false,
                         example: false,
