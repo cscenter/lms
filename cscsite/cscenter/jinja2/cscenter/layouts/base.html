@@ -60,6 +60,10 @@
     </footer>
     {% endblock footer %}
 
+    <script type="text/javascript">
+        window.__CSC_NOTIFICATIONS__ = {{ messages(request)|tojson }};
+    </script>
+
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
         (function (d, w, c) {
