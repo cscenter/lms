@@ -21,7 +21,7 @@ class Alumni extends React.Component {
         this.state = {
             "loading": true,
             "items": [],
-            ...props.init.state
+            ...props.initialState
         };
         this.fetch = _debounce(this.fetch, 300);
         // FIXME: bind all functions here?
@@ -46,7 +46,7 @@ class Alumni extends React.Component {
         });
     };
 
-    componentDidMount = () => {
+    componentDidMount() {
         const filterState = this.getFilterState(this.state);
         console.log("filterState", filterState);
         const newPayload = this.getRequestPayload(filterState);
@@ -54,11 +54,11 @@ class Alumni extends React.Component {
         this.fetch(newPayload);
     };
 
-    componentWillUnmount = function () {
+    componentWillUnmount() {
         this.serverRequest.abort();
     };
 
-    componentDidUpdate = (prevProps, prevState) => {
+    componentDidUpdate(prevProps, prevState) {
         if (this.state.loading) {
             const filterState = this.getFilterState(this.state);
             const newPayload = this.getRequestPayload(filterState);

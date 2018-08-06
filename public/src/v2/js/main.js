@@ -5,7 +5,12 @@ import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 
 import ravenOptions from './raven_conf';
-import {showComponentError, getSections, showNotification} from 'utils';
+import {
+    showComponentError,
+    getSections,
+    showNotification,
+    showErrorNotification
+} from 'utils';
 
 // Configure `raven-js`
 Raven
@@ -75,7 +80,11 @@ $(function () {
     if (window.__CSC_NOTIFICATIONS__ !== undefined) {
         window.__CSC_NOTIFICATIONS__.forEach((item) => {
             const {text, ...props} = item;
-            showNotification(text, props);
+            if (props.type === "error") {
+                showErrorNotification(text, props);
+            } else {
+                showNotification(text, props);
+            }
         });
     }
 

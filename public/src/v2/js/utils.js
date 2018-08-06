@@ -20,17 +20,20 @@ export function showComponentError(error, msg='An error occurred while loading t
 
 export function showNotification(msg, options) {
     new Noty({
-        layout: 'topLeft',
+        layout: 'bottomRight',
         type: 'info',
         theme: 'notification',
         text: msg,
         timeout: 2000,
+        animation: {
+            close: 'noty_effects_close'
+        },
         ...options
     }).show();
 }
 
 export function showErrorNotification(msg) {
-    showNotification(msg, {type: "error", timeout: false});
+    showNotification(msg, {type: "error", timeout: false, closeWith: ['button']});
 }
 
 export function showBodyPreloader() {
