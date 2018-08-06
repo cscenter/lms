@@ -75,9 +75,15 @@ export const plumberConfig = {
     errorHandler
 };
 
-let PROXY_PORT = 8000;
+let proxyPort, i = process.argv.indexOf("--port");
+if (i > -1) {
+    proxyPort = process.argv[i + 1];
+} else {
+    proxyPort = 8000;
+}
+
 export const browserSyncConfig = {
-    proxy: `localhost:${PROXY_PORT}`,
+    proxy: `localhost:${proxyPort}`,
     notify: false,
     reloadOnRestart: true,
     startPath: `/${staticVersion}/pages/`,
