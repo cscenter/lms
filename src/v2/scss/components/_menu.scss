@@ -1,19 +1,18 @@
-$navbar-padding-y: $spacer;
-$navbar-padding-x: $spacer;
-$navbar-nav-link-padding-x: 0;
-$nav-link-padding-x: .5rem;
-$nav-link-padding-y: .5rem;
-$nav-link-mobile-padding-x: 20px;
-$navbar-brand-font-size: $font-size-lg;
-$navbar-line-height: 32px;
-// Compute the navbar-brand padding-y so the navbar-brand will have the same height as navbar-text and nav-link
-$nav-link-height: ($font-size-base * $line-height-base + $nav-link-padding-y * 2);
-$navbar-brand-height: $navbar-brand-font-size * $line-height-base;
-$navbar-brand-padding-y: ($nav-link-height - $navbar-brand-height) / 2;
+$navbar-padding-y: .25rem;
 
-$navbar-toggler-padding-y: 15px;  // humburger size is 18px, to fit in 8pt grid, remove px here
-$navbar-toggler-padding-x: 16px;
-$navbar-toggler-margin-x: $nav-link-padding-x - $input-btn-padding-x;
+$nav-link-padding-x: 8px;
+$nav-link-padding-y: 8px;
+$nav-link-line-height: 32px;
+// logo, navbar-toggler, .nav-link and reg button should have the same size
+$nav-link-height: ($nav-link-line-height + $nav-link-padding-y * 2);
+// Hack to show rows with menu items vertically closer to each other.
+// Remove if in fact it's not a problem
+$nav-link-real-line-height: 24px;
+
+$nav-link-mobile-padding-x: 16px;
+
+$navbar-toggler-padding-y: $grid-gutter-width / 2 - 1;  // humburger size is 18px, to fit in 8pt grid, remove px here
+$navbar-toggler-padding-x: $grid-gutter-width / 2;
 $navbar-toggler-font-size: $font-size-lg;
 $navbar-toggler-border-radius: $btn-border-radius;
 
@@ -31,7 +30,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .navbar {
-  background-color: $gray-500;
+  background-color: $gray-darker;
 
   > .container {
     display: flex;
@@ -45,18 +44,22 @@ $navbar-toggler-border-radius: $btn-border-radius;
 
 .navbar-logo {
   display: flex; // ie 10 fix
-  padding: $nav-link-padding-y ($navbar-padding-x / 2);
-  @include media-breakpoint-up(lg) {
-    margin-top: ($navbar-padding-y - $nav-link-padding-y);
-    margin-bottom: ($navbar-padding-y - $nav-link-padding-y);
+  //align-self: center;
+  padding: $nav-link-padding-y $nav-link-padding-x;
+  margin-left: -$nav-link-padding-x;
+
+  ._logo-csc {
+    height: 24px;
+    width: 72px;
+    margin: (($nav-link-line-height - 24px) / 2) 0;
+    @include media-breakpoint-up(lg) {
+        height: 32px;
+        width: 88px;
+        margin: 0;
+    }
   }
-
 }
 
-._logo-csc {
-  height: $navbar-line-height;
-  width: 88px;
-}
 
 .navbar-toggler {
   display: flex;
@@ -79,7 +82,6 @@ $navbar-toggler-border-radius: $btn-border-radius;
   color: $white;
   opacity: .5;
   white-space: nowrap;
-  //line-height: $navbar-line-height;
 
   &:hover {
     color: $white;
@@ -95,7 +97,8 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .menu-desktop-wrapper {
-  margin: ($navbar-padding-y - $nav-link-padding-y) 0;
+  // Hack to show rows with menu items vertically closer to each other.
+  margin: (($nav-link-line-height - $nav-link-real-line-height) / 2) 0;
   display: none;
   @include media-breakpoint-up(lg) {
     display: flex;
@@ -119,8 +122,17 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .navbar-main {
+  @include media-breakpoint-up(lg) {
+    padding: $navbar-padding-y 0;
+  }
+
   .nav-link {
-    margin: 3px 1px; // hack to avoid blinking on hovering two vertically adjacent links
+    $__blinking-effect-fix: 4px; // avoid blinking on hovering two vertically adjacent links
+    // Hack to show rows with menu items vertically closer to each other.
+    // Replace with $nav-link-line-height to render designed size
+    line-height: $nav-link-real-line-height - $__blinking-effect-fix;
+    margin: ($__blinking-effect-fix / 2);
+    //margin: 3px 1px; // hack
   }
 }
 
@@ -133,20 +145,20 @@ $navbar-toggler-border-radius: $btn-border-radius;
   }
 
   ul {
-    border-top: 1px solid $gray-600;
+    border-top: 1px solid $gray-disable-dark;
     list-style: none;
     padding: 0;
     margin: 0 auto;
     min-height: 100vh;
 
-    background-color: $gray-500;
+    background-color: $gray-darker;
 
     @include media-breakpoint-up(lg) {
       display: none;
     }
 
     li {
-      border-bottom: 1px solid $gray-600;
+      border-bottom: 1px solid $gray-disable-dark;
       font-size: $font-size-lg;
       &:last-child {
         border-bottom: 0;
@@ -189,10 +201,10 @@ $navbar-toggler-border-radius: $btn-border-radius;
   .mobile-submenu__item {
     text-align: left;
     display: block;
-    color: $gray-400;
-    font-size: $font-size-normal;
+    color: $gray-dark;
+    font-size: $font-size-content-base;
     line-height: 24px; // crutch
-    padding: 12px 20px;
+    padding: 12px $nav-link-mobile-padding-x;
     &:hover {
       color: $white;
     }
@@ -207,7 +219,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .__transparent-theme {
-  background-color: $gray-500;
+  background-color: $gray-darker;
   @include media-breakpoint-up(lg) {
     background-color: transparent;
   }
@@ -218,7 +230,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
   align-items: center;
   font-size: $font-size-base;
   display: none;
-  background-color: $gray-200;
+  background-color: $gray-disable-light;
   @include media-breakpoint-up(lg) {
     display: flex;
   }
@@ -236,7 +248,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
   }
 
   .nav-link {
-    color: $gray-500;
+    color: $gray-darker;
     opacity: .5;
     &:hover {
       opacity: 1;
@@ -245,28 +257,31 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .menu-btn-reg {
-  // this button less than $navbar-line-height
-  margin: (($navbar-line-height - 24px - 2px) / 2) 0 0 auto;  // 24px - <icon height>, 2px - border width correction
-  padding: $nav-link-padding-y $nav-link-padding-x;
-  @include media-breakpoint-up(lg) {
-    margin-top: 14px;
-  }
+  padding: ($nav-link-padding-y / 2) $nav-link-padding-x;
+  margin: ($nav-link-padding-y / 2) 0 ($nav-link-padding-y / 2) auto;
+  line-height: $nav-link-line-height - 2 * $btn-border-width;
 }
 
 .dropdown-user-menu {
   margin-left: auto;
   margin-right: (-$navbar-toggler-padding-x / 2);
-  @include media-breakpoint-up(lg) {
-    margin-top: 0;
+
+  ._user-sign {
+    margin: 2px;
+  }
+
+  &.show {
+    .btn {
+      .user-menu-img {
+        box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
+      }
+    }
   }
 
   .dropdown-menu {
-    font-size: $font-size-normal;
-    right: ($navbar-toggler-padding-x / 2);
+    font-size: $font-size-content-base;
+    right: $navbar-toggler-padding-x;
     left: auto;
-    @include media-breakpoint-up(lg) {
-      margin: (-$navbar-toggler-padding-x / 2) 0 0 0;
-    }
   }
 
   .btn {
@@ -274,22 +289,20 @@ $navbar-toggler-border-radius: $btn-border-radius;
     border: 0;
     background-color: rgba(0, 0, 0, 0);
     padding: $nav-link-padding-y $nav-link-padding-x;
-    @include media-breakpoint-up(lg) {
-      margin: ($navbar-padding-y - $nav-link-padding-y) 0;
+    box-shadow: none;
+
+    &:focus {
+      .user-menu-img {
+        box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
+      }
     }
+
     span {
       margin-right: 10px;
       display: none;
       @include media-breakpoint-up(lg) {
         display: inline-block;
       }
-    }
-    &:focus{
-      box-shadow: none;
-      .user-menu-img {
-        box-shadow: 0px 0px 0px 5px transparentize($gray-400,.6);
-      }
-
     }
   }
 }

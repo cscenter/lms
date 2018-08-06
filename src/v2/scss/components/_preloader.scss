@@ -20,7 +20,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: $gray-300;
+    background-color: $gray-lighter;
     //opacity: .95;
   }
 
@@ -37,8 +37,8 @@
     border-radius: 50%;
     width: 24px;
     height: 24px;
-    border: .25rem solid $gray-400;
-    border-top-color: $gray-300;
+    border: .25rem solid $gray-dark;
+    border-top-color: $gray-light;
     animation: spin 700ms infinite linear;
   }
 

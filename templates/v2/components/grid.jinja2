@@ -1,0 +1,148 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block content %}
+    <style>
+        .example-row .row > .col, .example-row .row > [class^=col-] {
+            padding-top: .75rem;
+            padding-bottom: .75rem;
+            background-color: #563d7c26;
+            border: 1px solid #563d7c33;
+        }
+    </style>
+    <div class="container page-content">
+        <h1>Default grid</h1>
+        <div class="row">
+            <div class="col-lg-8" style="background: lightgreen">
+                <div style="background: red;">.col-lg-8</div>
+            </div>
+            <div class="col-lg-4">
+                <div style="background: red;">.col-lg-4</div>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-lg-3" style="background: lightgreen">
+                <div style="background: red;">.col-lg-3</div>
+            </div>
+            <div class="col-lg-3">
+                <div style="background: red;">.col-lg-3</div>
+            </div>
+            <div class="col-lg-3">
+                <div style="background: red;">.col-lg-3</div>
+            </div>
+            <div class="col-lg-3">
+                <div style="background: red;">.col-lg-3</div>
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="col-lg-4" style="background: lightgreen">
+                <div style="background: red;">.col-lg-4</div>
+            </div>
+            <div class="col-lg-4" style="background: lightgreen">
+                <div style="background: red;">.col-lg-4</div>
+            </div>
+            <div class="col-lg-4" style="background: lightgreen">
+                <div style="background: red;">.col-lg-4</div>
+            </div>
+        </div>
+
+{#        <br><br>#}
+{#        <div class="example-row">#}
+{#            <h1>Default grid nesting</h1>#}
+{#            <div class="row">#}
+{#                <div class="col-sm-9">#}
+{#                    Level 1: .col-sm-9#}
+{#                    <div class="row">#}
+{#                        <div class="col-8 col-sm-6">#}
+{#                            Level 2: .col-8 .col-sm-6#}
+{#                        </div>#}
+{#                        <div class="col-4 col-sm-6">#}
+{#                            Level 2: .col-4 .col-sm-6#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+    </div>
+
+    <div class="container narrow">
+        <h1>Test css 4-column grid with grid-gap</h1>
+        <div class="css-grid" style="display: grid; grid-template-columns: calc(25% - 16px) 1fr 1fr calc(25% - 16px); grid-gap: 16px;">
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+        </div>
+
+        <div class="css-grid" style="display: grid; grid-template-columns:0 3fr 3fr 3fr 3fr; grid-gap: 32px; margin-left: -32px;">
+            <div></div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+        </div>
+
+{#
+Ниже более корректные вычисления, с учётом размера контейнера .row
+1. Сначала увеличиваем размер контейнера до размера .row (+ 32px), т.к. процент высчитывается от размера контейнера без вычета grid-gap
+2. Рассчитываем размер колонки
+3. Для самой левой колонки (и самой правой соответственно) указываем фиксированный размер:
+ вычитаем 16px, добавленные на шаге 1 и <grid-gap-value / 2), т.к. левая и правая колонки должны получить только половинный отступ
+ Остальным можно проставить 1fr, всё оставшееся свободное пространство поделится между колонками пропорционально
+#}
+        <div class="css-grid" style="display: grid; grid-template-columns: calc((100% + 32px) / 4 - 24px) 1fr 1fr calc((100% + 32px) / 4 - 24px); grid-gap: 16px;">
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.grid-item</div>
+            </div>
+        </div>
+        <br>
+        <div class="css-grid" style="display: grid; grid-template-columns: calc(2 * (100% + 32px) / 3 - 24px) 1fr; grid-gap: 16px;">
+            <div class="grid-item">
+                <div style="background: red;">lg-8</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">.lg-4</div>
+            </div>
+        </div>
+
+        <div class="css-grid" style="display: grid; grid-template-columns: calc((100% + 32px) / 3 - 24px) 1fr calc((100% + 32px) / 3 - 24px); grid-gap: 16px;">
+            <div class="grid-item">
+                <div style="background: red;">lg-4</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">lg-4</div>
+            </div>
+            <div class="grid-item">
+                <div style="background: red;">lg-4</div>
+            </div>
+        </div>
+
+
+    </div>
+{% endblock content %}

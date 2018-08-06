@@ -26,7 +26,7 @@
   .nav-link {
     border: $border-width solid $border-color;
     padding: .375rem 1rem;
-    color: $gray-400;
+    color: $gray-dark;
     opacity: 1;
     &.disabled {
       color: $input-disabled-bg;
@@ -37,7 +37,7 @@
       }
     }
     &:hover{
-      background-color: $gray-100;
+      background-color: $gray-lighter;
     }
   }
 

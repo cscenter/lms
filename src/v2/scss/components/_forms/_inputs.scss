@@ -54,7 +54,7 @@
   display: block;
   width: 100%;
   font-size: $font-size-extra-sm;
-  color: $gray-400;
+  color: $gray-dark;
   margin: 5px 0 0;
   line-height: $input-btn-line-height;
   &.__invalid-feedback {
@@ -193,7 +193,7 @@ flex-direction: row;
   content: '';
   animation-iteration-count: infinite;
   border-radius: 50%;
-  border: .125rem solid $gray-400;
+  border: .125rem solid $gray-dark;
   border-top-color: $border-color;
   animation: spin 700ms infinite linear;
   min-width: 1.25rem; //For IE

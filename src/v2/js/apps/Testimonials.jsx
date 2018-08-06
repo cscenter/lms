@@ -25,7 +25,7 @@ class App extends React.Component {
         this.state = {
             loading: true,
             items: [],
-            ...props.init.state
+            ...props.initialState
         };
         // bind function in constructor instead of render (https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md)
         this.onChangePage = this.onChangePage.bind(this);
@@ -49,7 +49,7 @@ class App extends React.Component {
         }
 
         history.listen((location, action) => {
-          let nextPage = this.props.init.state.page;
+          let nextPage = this.props.initialState.page;
           if (location.state && location.state.page !== this.state.page) {
               nextPage = location.state.page;
           }
