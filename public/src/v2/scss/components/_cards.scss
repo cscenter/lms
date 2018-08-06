@@ -6,7 +6,7 @@
 
 // FIXME: class name is too generic, since css below hardcoded for 6 columns on desktop, rename it to more appropriate name
 .responsive-card {
-  color: $gray-500;
+  color: $gray-darker;
   //position: relative;
   @include make-col-ready();
 
@@ -26,9 +26,9 @@
 // Note: Can be easily replaced with `div.card>div.card-body._small>a.h4+p`. Let's leave this one for now.
 .text-note {
   position: relative;
-  border: 1px solid $gray-300;
+  border: 1px solid $border-color;
   border-radius: $border-radius-sm;
-  padding: 15px 15px 10px 15px;
+  padding: 1rem;
   margin-bottom: 1rem;
 
   &::after {
@@ -41,7 +41,14 @@
   }
 
   ._text {
-    margin-top: 5px;
+    margin: 0;
+    font-size: $font-size-sm;
+  }
+}
+
+aside{
+  .card{
+    margin-bottom: 1rem;
     font-size: $font-size-sm;
   }
 }

@@ -50,7 +50,7 @@
 }
 
 .react-select__menu {
-  box-shadow: 0 0 2rem transparentize($gray-500, .8);
+  box-shadow: 0 0 2rem transparentize($gray-darker, .8);
   .react-select__option.react-select__option--is-selected {
     background-color: $teal;
     &:hover {
@@ -65,7 +65,7 @@
 
   }
   .react-select__option.react-select__option--is-focused {
-    background-color: $gray-100;
+    background-color: $gray-lighter;
   }
 }
 

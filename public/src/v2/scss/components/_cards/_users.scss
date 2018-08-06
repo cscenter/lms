@@ -37,7 +37,7 @@ $user-card-gutter-width: $grid-gutter-width / 2;
   margin: 0 auto 5px;
   padding-bottom: 140%; // calc((100% - #{$border-width} * 2) * 1.4
   overflow: hidden;
-  background: $gray-300;
+  background: $gray-lighter;
   background-size: cover;
   &._m {
     background-image: url("/static/v2/img/placeholder/boy.png");

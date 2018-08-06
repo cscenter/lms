@@ -30,7 +30,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .navbar {
-  background-color: $gray-500;
+  background-color: $gray-darker;
 
   > .container {
     display: flex;
@@ -145,20 +145,20 @@ $navbar-toggler-border-radius: $btn-border-radius;
   }
 
   ul {
-    border-top: 1px solid $gray-600;
+    border-top: 1px solid $gray-disable-dark;
     list-style: none;
     padding: 0;
     margin: 0 auto;
     min-height: 100vh;
 
-    background-color: $gray-500;
+    background-color: $gray-darker;
 
     @include media-breakpoint-up(lg) {
       display: none;
     }
 
     li {
-      border-bottom: 1px solid $gray-600;
+      border-bottom: 1px solid $gray-disable-dark;
       font-size: $font-size-lg;
       &:last-child {
         border-bottom: 0;
@@ -201,8 +201,8 @@ $navbar-toggler-border-radius: $btn-border-radius;
   .mobile-submenu__item {
     text-align: left;
     display: block;
-    color: $gray-400;
-    font-size: $font-size-normal;
+    color: $gray-dark;
+    font-size: $font-size-content-base;
     line-height: 24px; // crutch
     padding: 12px $nav-link-mobile-padding-x;
     &:hover {
@@ -219,7 +219,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
 }
 
 .__transparent-theme {
-  background-color: $gray-500;
+  background-color: $gray-darker;
   @include media-breakpoint-up(lg) {
     background-color: transparent;
   }
@@ -230,7 +230,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
   align-items: center;
   font-size: $font-size-base;
   display: none;
-  background-color: $gray-200;
+  background-color: $gray-disable-light;
   @include media-breakpoint-up(lg) {
     display: flex;
   }
@@ -248,7 +248,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
   }
 
   .nav-link {
-    color: $gray-500;
+    color: $gray-darker;
     opacity: .5;
     &:hover {
       opacity: 1;
@@ -273,13 +273,13 @@ $navbar-toggler-border-radius: $btn-border-radius;
   &.show {
     .btn {
       .user-menu-img {
-        box-shadow: 0 0 0 4px transparentize($gray-400, .6);
+        box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
       }
     }
   }
 
   .dropdown-menu {
-    font-size: $font-size-normal;
+    font-size: $font-size-content-base;
     right: $navbar-toggler-padding-x;
     left: auto;
   }
@@ -289,12 +289,12 @@ $navbar-toggler-border-radius: $btn-border-radius;
     border: 0;
     background-color: rgba(0, 0, 0, 0);
     padding: $nav-link-padding-y $nav-link-padding-x;
-    line-height: $nav-link-line-height;
+    //line-height: $nav-link-line-height;
     box-shadow: none;
 
     &:focus {
       .user-menu-img {
-        box-shadow: 0 0 0 4px transparentize($gray-400, .6);
+        box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
       }
     }
 
