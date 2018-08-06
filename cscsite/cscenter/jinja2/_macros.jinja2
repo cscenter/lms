@@ -1,5 +1,5 @@
-{% macro svg_inline(id, class='') -%}
-<svg class="sprite-img {% if class %}{{ class }}{% else %}_{{ id }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
+{% macro svg_inline(id, modifiers='') -%}
+<svg aria-hidden="true" class="sprite-img _{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
 {%- endmacro %}
 
 {% macro testimonial_card(student) -%}
