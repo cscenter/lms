@@ -72,7 +72,7 @@ body {
     padding-top: 2rem;
     border-top: $hr-border-width solid $hr-border-color;
     margin-bottom: 2rem;
-    color: $gray-600;
+    color: $gray-darker;
     font-size: $font-size-sm;
     line-height: 1.5rem;
     @include font-smoothing();
@@ -115,7 +115,8 @@ body {
 
 .content-block{
   margin-bottom: 2rem;
-  li{
-    margin-bottom: .5rem;
+  .figure{
+    display: block;
+    margin-bottom: 1.5rem;
   }
 }

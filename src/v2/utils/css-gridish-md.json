@@ -4,19 +4,19 @@
     "xs": {
       "breakpoint": 0,
       "columns": 1,
-      "gutter": "32px",
+      "gutter": "16px",
       "margin": 0
     },
     "sm": {
       "breakpoint": 34,
       "columns": 4,
-      "gutter": "32px",
+      "gutter": "16px",
       "margin": 0
     },
     "md": {
       "breakpoint": 45,
       "columns": 12,
-      "gutter": "32px",
+      "gutter": "16px",
       "margin": 0
     }
   },

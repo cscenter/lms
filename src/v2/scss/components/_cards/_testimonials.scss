@@ -14,7 +14,7 @@
 .testimonial {
   @include font-smoothing();
   padding: 1.7rem;
-  color: $gray-500;
+  color: $gray-darker;
   flex-direction: row;
   flex-wrap: wrap;
   font-size: $font-size-base;
@@ -87,7 +87,7 @@
     font-size: $font-size-sm;
     margin: .3rem 0;
     display: block;
-    color: $gray-400;
+    color: $gray-dark;
   }
 }
 
@@ -96,7 +96,7 @@
   font-size: $font-size-sm;
   padding: 1rem 1rem .875rem 1rem;
   position: relative;
-  background-color: $gray-300;
+  background-color: $gray-lighter;
   margin-bottom: 1rem;
   border-radius: $border-radius-sm;
   text-align: left;
@@ -110,7 +110,7 @@
     height: 0;
     border-left: 18px solid transparent;
     border-right: 18px solid transparent;
-    border-top: 14px solid $gray-300;
+    border-top: 14px solid $gray-lighter;
     left: 50%;
     margin-left: -18px;
     @include media-breakpoint-up(lg) {

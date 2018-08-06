@@ -17,7 +17,7 @@
 
       &:hover ~ .custom-file-label {
         &::after {
-          background: darken($gray-400, 5%);
+          background: darken($gray-dark, 5%);
         }
       }
     }
@@ -31,7 +31,7 @@
     right: 0;
     left: 0;
     z-index: 1;
-    font-size: $font-size-normal;
+    font-size: $font-size-content-base;
     line-height: $input-line-height;
     font-weight: $font-weight-base;
     padding: $input-padding-y $input-padding-x;
@@ -48,7 +48,7 @@
       display: block;
       color: $white;
       padding: $input-btn-padding-y $input-btn-padding-x;
-      background: $gray-400;
+      background: $gray-dark;
       content: "Выбрать";
       border-radius: $border-radius;
       border-top-left-radius: 0 !important;
