@@ -17,14 +17,9 @@
   ],
   "plugins": [
     "@babel/plugin-proposal-object-rest-spread",
-    "@babel/syntax-object-rest-spread",
-    "transform-es2015-spread",
+    "@babel/syntax-object-rest-spread"
+    // FIXME: `transform-class-properties` included with preset-stage-2, but without spec=True. How to deal with it?
     // Allow class constants
-    [
-      "transform-class-properties",
-      {
-        "spec": true
-      }
-    ]
+    // ["transform-class-properties", {"spec": true}]
   ]
 }
