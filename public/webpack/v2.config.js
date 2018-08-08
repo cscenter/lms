@@ -32,6 +32,7 @@ const common = {
 
     entry: {
         common: [
+            // FIXME: investigate `useBuiltIns=entry` in .babelrc instead of including all polyfills?
             '@babel/polyfill',
             'jquery',
             'popper.js',
