@@ -2,16 +2,21 @@
 
 import itertools
 import json
+import math
 import random
 
 from collections import Counter, OrderedDict
 from datetime import datetime
+
+from django.contrib import messages
 from django.contrib.staticfiles.storage import staticfiles_storage
 from typing import NamedTuple
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache, caches, InvalidCacheBackendError
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_integer
 from django.http.response import HttpResponseRedirect, HttpResponseNotFound
 from django.urls import reverse
 from django.db.models import Q, Count, Prefetch, Case, When, Value
@@ -172,25 +177,35 @@ class TestimonialsListView(generic.ListView):
                 .order_by("-graduation_year", "last_name"))
 
 
+def positive_integer(value):
+    validate_integer(value)
+    value = int(value)
+    if value <= 0:
+        raise ValidationError("Negative integer is not allowed here")
+    return value
+
+
 class TestimonialsListV2View(TemplateView):
     template_name = "cscenter/testimonials.html"
 
     def get_context_data(self, **kwargs):
         total = TestimonialList.get_base_queryset().count()
+        page_size = 16
         try:
-            current_page = int(self.request.GET.get("page"))
-            current_page = max(current_page, 1)
-        except (ValueError, TypeError):
-            # TODO: redirect instead?
-            # TODO: compare page num with `total // page_size` and redirect if needed
-            current_page = 1
+            current_page = positive_integer(self.request.GET.get("page", 1))
+        except ValidationError:
+            raise Http404
+        max_page = math.ceil(total / page_size)
+        if current_page > max_page:
+            base_url = reverse('testimonials_v2')
+            raise Redirect(to=f"{base_url}?page={max_page}")
         return {
             "app_data": {
                 "state": {
                     "page": current_page,
                 },
                 "props": {
-                    "page_size": 16,
+                    "page_size": page_size,
                     "entry_url": reverse("api:testimonials"),
                     "total": total,
                 }
