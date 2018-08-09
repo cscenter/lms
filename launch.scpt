@@ -11,7 +11,7 @@ on run argv
     tell current window
       create tab with default profile
       tell current session of current tab
-        write text "gulp --port " & opts's port
+        write text "npm run gulp -- --port " & opts's port
       end tell
 
       create tab with default profile

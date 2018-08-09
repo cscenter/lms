@@ -1,6 +1,6 @@
 {% import "v2/_macros.jinja2" as macros %}
 
-{% macro render(show_submenu=True, show_notification=True, show_login_button=False, theme_class='') -%}
+{% macro render(show_submenu=True, show_notification=True, show_login_button=False, has_avatar=True, theme_class='') -%}
 
     <div class="navbar-container">
         {% if show_notification %}
@@ -69,7 +69,11 @@
                     <div class="dropdown dropdown-user-menu">
                         <button class="btn" type="button" id="userMenuButton" data-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
-                            <span>Святослав Михайлов</span><img class="user-menu-img" src="/media/pages/index/student.png" width="32" height="32" alt="">
+                            <span>Святослав Михайлов</span>{%- if has_avatar -%}
+                                <img class="user-menu-img" src="/media/pages/index/student.png" width="32" height="32" alt="">
+                            {%- else -%}
+                                {{ macros.svg_inline('user-sign') }}
+                            {%- endif -%}
                         </button>
                         <div class="dropdown-menu _arrow-right _user-menu" aria-labelledby="userMenuButton">
                             <a class="dropdown-item" href="#">Обучение</a>

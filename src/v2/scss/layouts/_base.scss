@@ -101,7 +101,7 @@ body {
   &__social-media-icons {
 
     a {
-      margin: 0 .3rem;
+      margin: 0 0 0 .25rem;
     }
   }
 
@@ -110,6 +110,10 @@ body {
     @include media-breakpoint-down(md) {
       margin-bottom: 10px;
     }
+  }
+  .sprite-img{
+    fill:$gray;
+    transition: $transition-base;
   }
 }
 

@@ -15,3 +15,41 @@
   left: -10000px;
   top: -10000px;
 }
+
+// Social icons customization
+.sprite-img._facebook {
+  &:hover {
+    fill: #475993;
+  }
+}
+
+.sprite-img._instagram {
+  width: 24px;
+  height: 24px;
+  &:hover {
+    fill: #de194c;
+  }
+}
+
+.sprite-img._logo-csc {
+  width: 74px;
+  height: 26px;
+}
+
+.sprite-img._twitter {
+  &:hover {
+    fill: #76a9ea;
+  }
+}
+
+.sprite-img._vk {
+  &:hover {
+    fill: #4c75a3;
+  }
+}
+
+.sprite-img._youtube {
+  &:hover {
+    fill: #f00;
+  }
+}

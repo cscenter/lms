@@ -1,6 +1,6 @@
 import { task, series } from "gulp";
-import build from "./gulp/tasks/build";
-import dev from "./gulp/tasks/dev";
+import build from "./tasks/build";
+import dev from "./tasks/dev";
 
 // Main tasks
 task("build", build);

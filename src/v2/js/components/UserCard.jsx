@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-// TODO: из-за стилей на тег img (height: auto) браузер не знает, какие размеры выделить под рендеринг картинги до полной загрузки источника. Надо ему как-то помочь с этим
 class UserCard extends React.Component {
     static defaultProps = {
         className: 'user-card'

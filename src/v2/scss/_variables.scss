@@ -245,7 +245,7 @@ $text-muted:                  $gray-disable-dark !default;
 $blockquote-small-color:      $gray-disable-dark !default;
 $blockquote-font-size:        ($font-size-base * 1.25) !default;
 
-$hr-border-color:             rgba($black, .1) !default;
+$hr-border-color:             transparentize($gray, .75);
 $hr-border-width:             $border-width !default;
 
 $mark-padding:                .2em !default;

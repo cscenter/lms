@@ -2,14 +2,17 @@ var env = process.env.BABEL_ENV || process.env.NODE_ENV;
 var plugins = [
     "@babel/plugin-proposal-object-rest-spread",
     "@babel/syntax-object-rest-spread",
-    "transform-es2015-spread",
-    // Allow class constants
-    [
-        "transform-class-properties",
-        {
-            "spec": true
-        }
-    ]
+    // Stage 2
+    ["@babel/plugin-proposal-decorators", {"legacy": true}],
+    "@babel/plugin-proposal-function-sent",
+    "@babel/plugin-proposal-export-namespace-from",
+    "@babel/plugin-proposal-numeric-separator",
+    "@babel/plugin-proposal-throw-expressions",
+    // Stage 3
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/plugin-syntax-import-meta",
+    ["@babel/plugin-proposal-class-properties", {"loose": false}],
+    "@babel/plugin-proposal-json-strings"
 ];
 if (env === 'production') {
     plugins.push.apply(plugins, [
@@ -22,21 +25,38 @@ if (env === 'production') {
     ])
 }
 
+if (env === 'test') {
+    plugins.push.apply(plugins, [
+        "@babel/plugin-transform-modules-commonjs",
+        "dynamic-import-node"
+    ])
+}
+
 module.exports = {
     presets: [
         [
-            "@babel/preset-stage-2",
-            {
-                "decoratorsLegacy": true
-            }
-        ],
-        [
             "@babel/preset-env",
             {
-                // FIXME: specify targets
-                "modules": false,
-                "useBuiltIns": false,
-                "loose": true
+                modules: false,
+                useBuiltIns: false,
+                debug: false,
+                loose: true,
+                spec: true,
+                targets: {
+                    browsers: [
+                        "last 1 major version",
+                        ">= 1%",
+                        "Chrome >= 45",
+                        "Firefox >= 38",
+                        "Edge >= 12",
+                        "Explorer >= 10",
+                        "iOS >= 9",
+                        "Safari >= 9",
+                        "Android >= 4.4",
+                        "Opera >= 30"
+
+                    ]
+                },
             }
         ],
         "@babel/preset-react"

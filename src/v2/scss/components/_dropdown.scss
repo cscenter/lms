@@ -32,6 +32,7 @@ $caret-width: 0;
 
 .dropdown-menu {
   border: none;
+  box-shadow: $dropdown-box-shadow;
 }
 
 ._arrow-right {
