@@ -38,7 +38,7 @@ available_sites:
     site_user_group: "shared"
     site_root: "/home/csclub/site/repo"
     media_root: "/shared/media"
-    static_root: "/home/cscenter/site/repo/cscsite/static"
+    static_root: "/home/csclub/site/repo/cscsite/static"
     backup_root: "/shared/backup_tmp"
     apps_dir_name: cscsite
     app_settings: "csclub"
