@@ -276,6 +276,8 @@ $navbar-toggler-border-radius: $border-radius;
 
   &.show {
     .btn {
+      box-shadow: none;
+
       .user-menu-img {
         box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
       }
@@ -294,9 +296,9 @@ $navbar-toggler-border-radius: $border-radius;
     background-color: rgba(0, 0, 0, 0);
     padding: $nav-link-padding-y $nav-link-padding-x;
     line-height: $nav-link-line-height;
-    box-shadow: none;
 
     &:focus {
+      box-shadow: none;
       .user-menu-img {
         box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
       }
