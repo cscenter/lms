@@ -26,7 +26,7 @@ body {
 .cover {
   @include font-smoothing();
   position: relative;
-  background: url("/static/v2/img/pages/index/bg-main-page.jpg") no-repeat;
+  background: #201f20 no-repeat;
   background-size: cover;
   color: $white;
   padding: 60px 0 100px;
@@ -39,6 +39,10 @@ body {
   nav {
     z-index: 5;
   }
+}
+
+.cover-index-page {
+  background-image: url("/static/v2/img/pages/index/bg-main-page.jpg");
 }
 
 .cover__title {
