@@ -1,5 +1,5 @@
-$footer-mobile-height: 134px;
-$footer-height: 90px;
+$footer-mobile-height: 144px;
+$footer-height: 88px;
 
 @mixin append-hr-to-container() {
   .container::after {
@@ -69,13 +69,18 @@ body {
   > .container {
     display: flex;
     flex-wrap: wrap;
-    padding-top: 2rem;
-    border-top: $hr-border-width solid $hr-border-color;
     margin-bottom: 2rem;
     color: $gray-darker;
     font-size: $font-size-sm;
     line-height: 1.5rem;
     @include font-smoothing();
+
+    &::before {
+      content: "";
+      width: 100%;
+      border-top: $hr-border-width solid $hr-border-color;
+      margin-bottom: 2rem;
+    }
   }
 
   &__copyright {
@@ -108,7 +113,7 @@ body {
   &__email {
     margin-right: 10px;
     @include media-breakpoint-down(md) {
-      margin-bottom: 10px;
+      margin-bottom: .5rem;
     }
   }
   .sprite-img{
