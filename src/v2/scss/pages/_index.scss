@@ -206,6 +206,7 @@
     color: $white;
     margin: 1rem 0;
     overflow: hidden;
+    width: 100%; //fix for IE
 
     &--dark {
       color: $gray-darker;

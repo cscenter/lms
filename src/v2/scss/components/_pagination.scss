@@ -1,7 +1,7 @@
 // Pagination
 
-$pagination-padding-y:              .5rem !default;
-$pagination-padding-x:               1rem !default;
+$pagination-padding-y:              .25rem !default;
+$pagination-padding-x:               .8rem !default;
 $pagination-padding-y-sm:           .5rem !default;
 $pagination-padding-x-sm:           .5rem !default;
 $pagination-padding-y-lg:           1rem !default;
@@ -16,8 +16,8 @@ $pagination-border-color:           $gray-lighter !default;
 $pagination-focus-box-shadow:       $input-btn-focus-box-shadow !default;
 $pagination-focus-outline:          0 !default;
 
-$pagination-hover-color:            $link-hover-color !default;
-$pagination-hover-bg:               $dropdown-link-hover-bg !default;
+$pagination-hover-color:            $teal;
+$pagination-hover-bg:               $white;
 $pagination-hover-border-color:     $gray-lighter !default;
 
 $pagination-active-color:           $component-active-color !default;
@@ -31,8 +31,34 @@ $pagination-disabled-border-color:  $gray-lighter !default;
 
 @import "bootstrap/scss/pagination";
 
-.pagination{
-  .page-item.active{
-    z-index: 100;
+.pagination {
+
+  .page-item {
+    &.active {
+      z-index: 100;
+    }
+    &.disabled {
+      .page-link,
+      .ellipsis {
+        fill: $gray-disable-dark;
+        opacity: .6;
+      }
+    }
+  }
+
+  .page-link:hover {
+    fill: $teal;
+  }
+
+  .page-status,
+  .ellipsis {
+    position: relative;
+    display: block;
+    padding: $pagination-padding-y $pagination-padding-x;
+    margin-left: -$pagination-border-width;
+    line-height: $pagination-line-height;
+    color: $pagination-color;
+    background-color: $pagination-bg;
+    border: $pagination-border-width solid $pagination-border-color;
   }
 }

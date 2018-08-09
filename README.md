@@ -20,10 +20,11 @@ media/  # Put static which not directly related to layout or page (some dynamic 
 ```
 # Run dev server
 $ ./manage.py runserver 8000
-# Run static watcher
-$ gulp
-# Run webpack
-npm start
+# Compile css
+$ npm run gulp:build
+# Build js with webpack
+npm run prod
+# In ITerm2 you can use `make` command
 ```
 
 TODO: browserify-incremental

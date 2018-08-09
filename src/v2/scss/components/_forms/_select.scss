@@ -23,7 +23,7 @@
   }
 }
 
-.react-select__control.react-select__control-is-focused{
+.react-select__control.react-select__control--is-focused{
   border: $input-border-width solid $input-border-color-hover;
   box-shadow: none !important;
 }
