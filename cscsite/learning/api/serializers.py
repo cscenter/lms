@@ -33,7 +33,7 @@ class PhotoSerializerField(serializers.Field):
         pass
 
     def to_representation(self, obj):
-        # TODO: move size to settings?
+        # TODO: get dimensions from map and throw warning if unspecified value passed
         image = obj.get_thumbnail(self.photo_dimensions, use_stub=False)
         if image:
             return image.url
@@ -45,7 +45,7 @@ class AlumniSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     name = serializers.SerializerMethodField()
     sex = serializers.SerializerMethodField()
-    photo = PhotoSerializerField("170x238")
+    photo = PhotoSerializerField("176x246")
     year = serializers.IntegerField(source="graduation_year")
     city = serializers.CharField(source="city_id")
     areas = serializers.PrimaryKeyRelatedField(many=True, read_only=True,
