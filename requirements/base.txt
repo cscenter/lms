@@ -52,7 +52,7 @@ webdavclient==1.0.5
 
 # Monitoring
 raven==6.9.0
-newrelic==4.0.0.99
+newrelic==4.2.0.100
 
 # Localization
 
