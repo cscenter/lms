@@ -43,7 +43,7 @@ class App extends React.Component {
                 initLayout: false
             });
             grid.on('layoutComplete', function() {
-                console.log("layoutComplete");
+                console.debug("masonry event: layoutComplete");
                 hideBodyPreloader();
             });
         }
@@ -69,7 +69,7 @@ class App extends React.Component {
 
         // Pagination component controls fetch
         this.setState({ loading: true, page: this.state.page });
-        console.debug("componentDidMount");
+        console.debug("Testimonials: componentDidMount");
     };
 
     componentWillUnmount() {
@@ -86,8 +86,8 @@ class App extends React.Component {
         this.setState({ loading: true, page: page });
     }
 
-    componentDidUpdate = (prevProps, prevState) => {
-        console.debug("componentDidUpdate");
+    componentDidUpdate(prevProps, prevState) {
+        console.debug("Testimonials: componentDidUpdate");
         if (this.state.loading) {
             const payload = this.getRequestPayload(this.state);
             this.fetch(payload);
@@ -145,7 +145,8 @@ class App extends React.Component {
                     )}
                     <div className="grid-sizer" />
                 </div>
-                <Pagination totalItems={this.props.total} pageSize={this.props.page_size} currentPage={this.state.page} onChangePage={this.onChangePage} />
+                <Pagination totalItems={this.props.total} pageSize={this.props.page_size}
+                            currentPage={this.state.page} onChangePage={this.onChangePage} />
             </div>
         );
     }
