@@ -8,6 +8,9 @@
 @import "utils/mixins";
 @import "utils/misc";
 
+@import "components/sprites"; // Before: menu
+
+@import "layouts/menu";
 @import "layouts/base";
 
 @import "components/forms";
@@ -20,8 +23,6 @@
 @import "components/forms";
 @import "components/grid";
 @import "components/tooltips";
-@import "components/sprites"; // Before: menu
-@import "components/menu";  // After: buttons
 @import "components/typography";  // After: reboot
 @import "components/misc";
 @import "components/pagination";
