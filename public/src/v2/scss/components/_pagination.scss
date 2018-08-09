@@ -34,7 +34,7 @@ $pagination-disabled-border-color:  $gray-lighter !default;
 .pagination {
   justify-content: center;
   @include media-breakpoint-up(md) {
-    justify-content: unset;
+    justify-content: flex-start;
   }
 
   .page-item {
