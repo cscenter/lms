@@ -264,7 +264,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
 
 .dropdown-user-menu {
   margin-left: auto;
-  margin-right: (-$navbar-toggler-padding-x / 2);
+  margin-right: -$navbar-toggler-padding-x;
 
   ._user-sign {
     margin: 2px;
