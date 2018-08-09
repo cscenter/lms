@@ -32,6 +32,10 @@ $pagination-disabled-border-color:  $gray-lighter !default;
 @import "bootstrap/scss/pagination";
 
 .pagination {
+  justify-content: center;
+  @include media-breakpoint-up(md) {
+    justify-content: unset;
+  }
 
   .page-item {
     &.active {
