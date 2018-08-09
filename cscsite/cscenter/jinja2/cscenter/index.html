@@ -142,7 +142,6 @@
             <div class="row">
                 {% if instagram_posts %}
                     <div class="col-lg-6">
-                        <div class="row">
                         {% for post in instagram_posts %}
                             <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--instagram social-media--full-size" style="background-image:url('{{ post.thumbnail }}')">
                                 <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/instagram.svg') }}" width="34" alt="">
@@ -150,20 +149,17 @@
                                 <p class="social-media__date social-media__date--light">{{ post.date|date("j b") }}</p>
                             </a>
                         {% endfor %}
-                        </div>
                     </div>
                 {% endif %}
 
                 <div class="col-lg-6">
                     {% if vk_news %}
                         {% for post in vk_news %}
-                            <div class="row">
-                                <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--vk social-media--half-size">
-                                    <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}" width="40" alt="">
-                                    <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
-                                    <p class="social-media__date">{{ post.date|date("j b") }}</p>
-                                </a>
-                            </div>
+                            <a href="{{ post.post_url }}" target="_blank" rel="noopener" class="social-media social-media--vk social-media--half-size">
+                                <img class="social-media__icon" src="{{ static('v2/img/pages/index/social-media-posts/vk.svg') }}" width="40" alt="">
+                                <div class="social-media__text social-media__text--dark">{{ post.text }}</div>
+                                <p class="social-media__date">{{ post.date|date("j b") }}</p>
+                            </a>
                         {% endfor %}
                     {% endif %}
                 </div>
