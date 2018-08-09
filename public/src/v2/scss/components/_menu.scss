@@ -144,6 +144,10 @@ $navbar-toggler-border-radius: $btn-border-radius;
     display: none;
   }
 
+  .sprite-img._arrow-bottom {
+    fill: $white;
+  }
+
   ul {
     border-top: 1px solid $gray-disable-dark;
     list-style: none;
