@@ -29,5 +29,6 @@ class Command(BaseCommand):
             user.status = ""
             user.save()
 
+        cache.delete("cscenter_last_graduation_year")
         # Drop cache on /{YEAR}/ page
         cache.delete("alumni_{}_stats".format(now().year))
