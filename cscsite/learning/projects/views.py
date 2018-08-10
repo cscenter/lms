@@ -204,8 +204,7 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
         return queryset
 
     def get_context_data(self, **kwargs):
-        context = super(CurrentTermProjectsView,
-                        self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["current_term"] = Semester.get_current()
         if self.request.user.is_curator:
             context["filter"] = self.filterset
@@ -225,6 +224,7 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
 
 
 class ProjectListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
+    strict = False
     paginate_by = 50
     filterset_class = ProjectsFilter
     context_object_name = "projects"
@@ -238,7 +238,7 @@ class ProjectListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
         return queryset
 
     def get_context_data(self, **kwargs):
-        context = super(ProjectListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["filter"] = self.filterset
         return context
 

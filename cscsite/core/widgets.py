@@ -21,7 +21,7 @@ class AdminRichTextAreaWidget(UbereditorWidget):
     template_name = 'widgets/ubertextarea.html'
 
 
-class DateTimeRangeWidget(SuffixedMultiWidget, RangeWidget):
+class DateTimeRangeWidget(RangeWidget):
     template_name = 'widgets/datetime_range.html'
     suffixes = ['from', 'to']
 

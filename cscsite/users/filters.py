@@ -27,10 +27,10 @@ class UserFilter(FilterSet):
     _lexeme_trans_map = dict((ord(c), None) for c in '*|&:')
 
     name = CharFilter(method='name_filter')
-    cities = CharInFilter(name='city_id')
-    curriculum_year = NumberInFilter(name='curriculum_year')
+    cities = CharInFilter(field_name='city_id')
+    curriculum_year = NumberInFilter(field_name='curriculum_year')
     # TODO: Restrict choices
-    groups = NumberInFilter(name='groups', distinct=True)
+    groups = NumberInFilter(field_name='groups', distinct=True)
     # TODO: TypedChoiceFilter?
     status = CharFilter(method='status_filter')
     cnt_enrollments = CharFilter(method='cnt_enrollments_filter')

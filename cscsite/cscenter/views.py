@@ -472,9 +472,9 @@ class CourseOfferingsView(FilterMixin, TemplateView):
     def get_context_data(self, **kwargs):
         filterset_class = self.get_filterset_class()
         filterset = self.get_filterset(filterset_class)
-        if not filterset.form.is_valid():
+        if not filterset.is_valid():
             raise Redirect(to=reverse("course_list"))
-        TERM_TYPES = {
+        term_options = {
             Semester.TYPES.autumn: pgettext_lazy("adjective", "autumn"),
             Semester.TYPES.spring: pgettext_lazy("adjective", "spring"),
         }
@@ -490,7 +490,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         serializer = CourseOfferingSerializer(courses)
         courses = serializer.data
         context = {
-            "TERM_TYPES": TERM_TYPES,
+            "TERM_TYPES": term_options,
             "cities": filterset.form.fields['city'].choices,
             "terms": terms,
             "courses": courses,
@@ -506,7 +506,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                     "termSlug": active_slug
                 },
                 "terms": terms,
-                "termOptions": TERM_TYPES,
+                "termOptions": term_options,
                 "courses": courses
             }).decode('utf-8'),
         }
@@ -514,7 +514,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
 
     def get_term(self, filters, courses):
         # Not sure this is the best place for this method
-        assert filters.form.is_valid()
+        assert filters.is_valid()
         if "semester" in filters.data:
             valid_slug = filters.data["semester"]
             term_year, term_type = valid_slug.split("-")
