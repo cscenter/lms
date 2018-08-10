@@ -134,7 +134,7 @@ class InterviewsFilter(InterviewsBaseFilter):
 
 class InterviewsCuratorFilter(InterviewsBaseFilter):
     campaign = django_filters.ModelChoiceFilter(
-        name="applicant__campaign",
+        field_name="applicant__campaign",
         label=_("Campaign"),
         queryset=(Campaign.objects
                   .select_related("city")

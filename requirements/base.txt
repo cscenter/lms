@@ -102,7 +102,7 @@ django-mptt==0.9.0
 django-bootstrap-pagination==1.6.4
 django-bitfield==1.9.3
 django-multiselectfield==0.1.8
-django-filter==1.1.0
+django-filter==2.0.0
 hashids==1.2.0
 django-recaptcha==1.2.1
 django-registration-redux==1.4

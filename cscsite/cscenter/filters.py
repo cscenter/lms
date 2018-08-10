@@ -1,9 +1,8 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from django.forms import SlugField
 from django.http import QueryDict
-from django_filters import FilterSet, Filter, ChoiceFilter, STRICTNESS
+from django_filters import FilterSet, Filter, ChoiceFilter
 from django.utils.translation import ugettext_lazy as _
 
 from learning.models import CourseOffering, Semester
@@ -65,14 +64,13 @@ class CoursesFilter(FilterSet):
     Note: `semester` query value is only validated. This field used in
     filtering on client side only.
     """
-    city = CityChoiceFilter(name="city_id", empty_label=None, choices=CITIES)
+    city = CityChoiceFilter(field_name="city_id", empty_label=None,
+                            choices=CITIES)
     semester = SemesterSlugFilter(method='semester_slug_filter')
 
     class Meta:
         model = CourseOffering
         fields = ['city', 'semester']
-        # Return empty queryset if not all fields are valid
-        strict = STRICTNESS.RETURN_NO_RESULTS
 
     def __init__(self, data=None, queryset=None, request=None, **kwargs):
         """

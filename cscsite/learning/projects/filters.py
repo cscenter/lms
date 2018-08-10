@@ -242,13 +242,13 @@ class CurrentTermProjectsFilter(django_filters.FilterSet):
 
     class Meta:
         model = Project
-        fields = ['supervisor_grade',
-                  'presentation_grade',
-                  'final_grade',
-                  'report',
-                  'participant_slides'
-                  ]
-
+        fields = [
+            'supervisor_grade',
+            'presentation_grade',
+            'final_grade',
+            'report',
+            'participant_slides'
+        ]
 
     @property
     def form(self):
