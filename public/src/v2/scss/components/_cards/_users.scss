@@ -35,7 +35,7 @@ $user-card-gutter-width: $grid-gutter-width / 2;
 .user-card__photo {
   position: relative;
   margin: 0 auto 5px;
-  padding-bottom: 140%; // calc((100% - #{$border-width} * 2) * 1.4
+  padding-bottom: 139.75%; // calc((100% - #{$border-width} * 2) * 1.4
   overflow: hidden;
   background: $gray-lighter;
   background-size: cover;
