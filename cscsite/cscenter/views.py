@@ -402,9 +402,17 @@ class AlumniV2View(generic.TemplateView):
     template_name = "cscenter/alumni.html"
 
     def get_context_data(self, **kwargs):
-        # FIXME: А если нет ещё выпуска?
-        now_year = now().year + 1
-        show_year = self.kwargs.get("year", now_year - 1)
+        cache_key = 'cscenter_last_graduation_year'
+        last_graduation_year = cache.get(cache_key)
+        if last_graduation_year is None:
+            from_last_graduation = (CSCUser.objects
+                                    .filter(groups=CSCUser.group.GRADUATE_CENTER)
+                                    .order_by("-graduation_year")
+                                    .only("graduation_year")
+                                    .first())
+            last_graduation_year = from_last_graduation.graduation_year
+            cache.set(cache_key, last_graduation_year, 86400 * 31)
+        show_year = self.kwargs.get("year", last_graduation_year)
         app_data = {
             "state": {
                 "year": {"value": show_year, "label": show_year},
@@ -417,9 +425,8 @@ class AlumniV2View(generic.TemplateView):
                            in settings.CITIES.items()],
                 "areas": [{"label": a.name, "value": a.code} for a
                           in AreaOfStudy.objects.all()],
-                # TODO: retrieve last year?
                 "years": [{"label": y, "value": y} for y
-                          in reversed(range(2013, now_year))]
+                          in reversed(range(2013, last_graduation_year + 1))]
             }
         }
         return {
