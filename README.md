@@ -19,6 +19,6 @@ Section | Description
 
     # Recreate DB
     psql -h localhost postgres -c "DROP DATABASE cscdb;"; psql -h localhost postgres -c "CREATE DATABASE cscdb;"; psql -h localhost postgres -c "GRANT ALL privileges ON DATABASE cscdb TO csc;"
-    psql -h localhost cscdb csc < /path/to/dump.sql
+    psql -h localhost cscdb csc < 
     ./manage.py changepassword admin
 

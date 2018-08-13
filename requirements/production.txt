@@ -1,4 +1,4 @@
 -r base.txt
 
-uwsgi==2.0.15
+uwsgi==2.0.17.1
 uwsgitop==0.10
