@@ -8,6 +8,10 @@
 sudo apt-get install libjpeg-dev libpng-dev libpq-dev libxml2-dev libxslt1-dev libmagic-dev
 # For mac users
 brew install libpng libjpeg libpqxx libmagic
+# Install pycurl on Mac OS
+brew install curl --with-openssl
+PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib" CPPFLAGS="-I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include" pip install --no-cache-dir pycurl
+
 ```
 * Setup PostgreSQL database:
 
@@ -16,6 +20,8 @@ brew install libpng libjpeg libpqxx libmagic
 [sudo] password for user:
 psql (9.4.1)
 Type "help" for help.
+# On Mac OS
+> psql postgres
 
 postgres=# CREATE DATABASE cscdb;
 CREATE DATABASE
