@@ -92,6 +92,17 @@
       debug:
         msg: "{{ ec2 }}"
 
+    - name: Ensure root volume for launched instances is tagged
+      ec2_tag:
+        region: "{{ item.region }}"
+        # Note: Make sure to use the save device name as in `ec2` task
+        resource: '{{ item.block_device_mapping["/dev/sda1"]["volume_id"] }}'
+        state: present
+        tags:
+          Name: "{{ aws_ec2_instance_tag }}"
+      # FIXME: tagged_instances or instances?
+      loop: "{{ ec2.instances }}"
+
     - name: display an IP of newly launched instance
       debug:
         msg: "{{ ec2.instances[0].public_ip }}"
