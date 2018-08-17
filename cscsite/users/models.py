@@ -25,7 +25,7 @@ from sorl.thumbnail.images import DummyImageFile
 
 from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
-from core.utils import is_club_site
+from core.utils import is_club_site, en_to_ru_mapping
 from cscenter.utils import PublicRoute
 from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
@@ -460,6 +460,19 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
         abbrev_name = smart_text(". ".join(p for p in parts if p).strip())
         return abbrev_name or self.username
+
+    def get_abbreviated_name_in_latin(self):
+        """
+        Returns transliterated user surname + rest initials in lower case.
+        Fallback to username. Useful for LDAP accounts.
+
+        Жуков Иван Викторович -> zhukov.i.v
+        Иванов Кирилл -> ivanov.k
+        """
+        parts = [self.last_name, self.first_name[:1], self.patronymic[:1]]
+        parts = [p.lower() for p in parts if p] or [self.username.lower()]
+        # TODO: remove apostrophe
+        return ".".join(parts).translate(en_to_ru_mapping)
 
     @property
     def photo_data(self):
