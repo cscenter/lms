@@ -36,7 +36,7 @@ class NotificationTest(TestCase):
     def test_use_timezone(self):
 
         from_user = UserFactory.create(username="from", password="pwd", email="example@example.com")
-        to_user = UserFactory.create(username="to", password="pwd", email="example@example.com")
+        to_user = UserFactory.create(username="to", password="pwd", email="example2@example.com")
         from notifications import types
         notify.send(from_user, type=types.LOG,
                     recipient=to_user, verb='commented',

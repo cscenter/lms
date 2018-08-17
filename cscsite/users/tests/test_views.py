@@ -136,24 +136,24 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         Tests properties based on groups (is_student, is_graduate, is_teacher)
         """
-        user = CSCUser(username="foo")
+        user = CSCUser(username="foo", email="foo@localhost.ru")
         user.save()
         self.assertFalse(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
-        user = CSCUser(username="bar")
+        user = CSCUser(username="bar", email="bar@localhost.ru")
         user.save()
         user.groups.set([user.group.STUDENT_CENTER])
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
-        user = CSCUser(username="baz")
+        user = CSCUser(username="baz", email="baz@localhost.ru")
         user.save()
         user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER])
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
-        user = CSCUser(username="baq")
+        user = CSCUser(username="baq", email="baq@localhost.ru")
         user.save()
         user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER,
                          user.group.GRADUATE_CENTER])
@@ -323,11 +323,16 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         user = UserFactory()
         form_data = {'username': user.username,
+                     'email': user.email,
                      'password1': "test123foobar@!",
                      'password2': "test123foobar@!"}
         form = CSCUserCreationForm(data=form_data)
         self.assertFalse(form.is_valid())
-        form_data.update({'username': 'testuser2'})
+        new_user = UserFactory.build()
+        form_data.update({
+            'username': new_user.username,
+            'email': new_user.email
+        })
         form = CSCUserCreationForm(data=form_data)
         self.assertTrue(form.is_valid())
 

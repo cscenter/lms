@@ -22,19 +22,7 @@ from .import_export import SHADCourseRecordResource, CSCUserRecordResource
 class CSCUserCreationForm(UserCreationForm):
     class Meta:
         model = CSCUser
-        # FIXME: Ok, it's really don't work.
-        fields = ('username',)
-        error_messages = {
-            'duplicate_username': _("Username must be unique"),
-        }
-
-    def clean_username(self):
-        username = self.cleaned_data['username']
-        try:
-            self._meta.model._default_manager.get(username=username)
-        except self._meta.model.DoesNotExist:
-            return username
-        raise ValidationError(self._meta.error_messages["duplicate_username"])
+        fields = ('username', 'email')
 
 
 class CSCUserChangeForm(UserChangeForm):
@@ -134,8 +122,14 @@ class SHADCourseRecordInlineAdmin(admin.StackedInline):
 
 
 class CSCUserAdmin(AdminImageMixin, UserAdmin):
-    form = CSCUserChangeForm
     add_form = CSCUserCreationForm
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'password1', 'password2'),
+        }),
+    )
+    form = CSCUserChangeForm
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
     inlines = [OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
