@@ -95,6 +95,8 @@ python-dateutil==2.6.1
 
 django-jinja==2.4.1
 
+python-ldap==3.1.0
+
 # Misc utils
 django-vanilla-views==1.0.5
 django-autocomplete-light==3.2.10
