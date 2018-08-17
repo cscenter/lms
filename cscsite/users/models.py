@@ -192,6 +192,8 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 
     modified = AutoLastModifiedField(_('modified'))
 
+    email = models.EmailField(_('email address'), unique=True)
+
     patronymic = models.CharField(
         _("CSCUser|patronymic"),
         max_length=100,
