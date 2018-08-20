@@ -63,6 +63,11 @@
     - "{{ python_pkg }}-dev"
     - python3-pip
     - python-pycurl
+    # LDAP support
+    - ldap-utils
+    - libldap2-dev
+    - libsasl2-dev
+    # - libssl-dev not sure we need this package to install python-ldap with pip
 
 - name: install global python 3 dependencies
   pip:
