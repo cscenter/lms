@@ -156,15 +156,18 @@ class CourseClassForm(forms.ModelForm):
     date = forms.DateField(
         label=_("Date"),
         help_text=_("Format: dd.mm.yyyy"),
-        widget=DateInputAsTextInput(attrs={'class': 'datepicker'}))
+        widget=DateInputAsTextInput(attrs={'class': 'datepicker',
+                                           'autocomplete': 'off'}))
     starts_at = forms.TimeField(
         label=_("Starts at"),
         help_text=_("Format: hh:mm"),
-        widget=TimeInputAsTextInput(format="%H:%M"))
+        widget=TimeInputAsTextInput(format="%H:%M",
+                                    attrs={'autocomplete': 'off'}))
     ends_at = forms.TimeField(
         label=_("Ends at"),
         help_text=_("Format: hh:mm"),
-        widget=TimeInputAsTextInput(format="%H:%M"))
+        widget=TimeInputAsTextInput(format="%H:%M",
+                                    attrs={'autocomplete': 'off'}))
 
     def __init__(self, *args, **kwargs):
         course_offering = kwargs.pop('course_offering', None)
