@@ -111,7 +111,7 @@ class Gerrit:
             **payload
         })
 
-    def include_group(self, group_id, groups):
+    def include_group(self, parent_group_id, groups):
         """
         Adds one or several groups as subgroups to a Gerrit internal group.
 
@@ -123,7 +123,7 @@ class Gerrit:
         """
         if not isinstance(groups, list):
             groups = [groups]
-        uri = f"groups/{quote_plus(group_id)}/groups"
+        uri = f"groups/{quote_plus(parent_group_id)}/groups"
         return self._request("POST", uri, json={"groups": groups})
 
     def get_group_members(self, group_id):
@@ -200,7 +200,7 @@ class Gerrit:
             "use_contributor_agreements": "FALSE",
             "use_signed_off_by": "FALSE",
             "reject_empty_commit": "TRUE",
-            # TODO: project parent?
+            # Project parent is `All-Projects` by default
             **payload
         })
 
