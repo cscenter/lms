@@ -56,5 +56,45 @@ $(document).ready(function () {
                 });
             })
             .catch(error => showComponentError(error));
+    } else if (sections.includes("datetimepicker")) {
+        $('[data-toggle="tooltip"]').tooltip();
+        import('forms')
+            .then(_ => {
+                $('#div_id_date .input-group').datetimepicker({
+                    allowInputToggle: true,
+                    locale: 'ru',
+                    format: 'DD.MM.YYYY',
+                    stepping: 5,
+                    toolbarPlacement: "bottom",
+                    keyBinds: {
+                        left: false,
+                        right: false,
+                        escape: function () {
+                            this.hide();
+                        },
+                    },
+                    icons: TIMEPICKER_ICONS,
+                    tooltips: TIMEPICKER_TOOLTIPS,
+
+                });
+
+                $('#div_id_starts_at .input-group, #div_id_ends_at .input-group').datetimepicker({
+                    locale: 'ru',
+                    format: 'HH:mm',
+                    stepping: 5,
+                    useCurrent: false,
+                    icons: TIMEPICKER_ICONS,
+                    defaultDate: new Date("01/01/1980 18:00"),
+                    allowInputToggle: true,
+                    tooltips: TIMEPICKER_TOOLTIPS,
+                    keyBinds: {
+                        left: false,
+                        right: false,
+                        up: false,
+                        down: false
+                    }
+                });
+            })
+            .catch(error => showComponentError(error));
     }
 });
