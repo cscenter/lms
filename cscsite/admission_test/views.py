@@ -15,7 +15,7 @@ from vanilla import CreateView
 
 from admission_test.forms import AdmissionTestApplicationForm
 from admission_test.models import AdmissionTestApplicant
-from core.api.yandex_oauth import YandexRuOAuth2Backend
+from api.providers.yandex_oauth import YandexRuOAuth2Backend
 
 STRATEGY = 'social_django.strategy.DjangoStrategy'
 # Override `user` attribute to prevent accidental user creation

@@ -7,7 +7,7 @@ from django.utils.timezone import now
 from django_rq import job
 from post_office import mail
 
-from core.api.yandex_contest import YandexContestAPIException, YandexContestAPI, \
+from api.providers.yandex_contest import YandexContestAPIException, YandexContestAPI, \
     RegisterStatus
 from learning.admission.models import Test, Contest
 
