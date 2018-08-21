@@ -1,3 +1,4 @@
+import base64
 import logging
 from random import choice
 from string import ascii_lowercase, digits
@@ -411,6 +412,27 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                 attempts=attempts - 1)
         except CSCUser.DoesNotExist:
             return username
+
+    @property
+    def password_hash_ldap(self) -> Optional[bytes]:
+        """
+        Converts Django's password hash representation to LDAP compatible
+        hasher format. Supports pbkdf2 hasher only.
+        """
+        algorithm, iterations, salt, hash = self.password.split('$', 3)
+        if algorithm == "pbkdf2_sha256":
+            ldap_hasher_code = "{PBKDF2-SHA256}"
+        elif algorithm == "pbkdf2_sha512":
+            ldap_hasher_code = "{PBKDF2-SHA512}"
+        elif algorithm == "pbkdf2_sha1":
+            ldap_hasher_code = "{PBKDF2-SHA1}"
+        else:
+            return None
+        # Works like `passlib.utils.binary.ab64_encode` except
+        # converting "+" to "."
+        ab64_salt = base64.b64encode(salt.encode("utf-8")).rstrip(b"=\n")
+        h = f"{ldap_hasher_code}{iterations}${ab64_salt.decode('utf-8')}${hash}"
+        return h.encode("utf-8")
 
     def __str__(self):
         return smart_text(self.get_full_name(True))

@@ -55,6 +55,32 @@ class Connection:
                                         ldap.SCOPE_SUBTREE)
         return res
 
+    def set_password(self, user, *, new_password, old_password=None) -> bool:
+        """
+        Provide `old_password` if you are trying to change password not from
+        rootdn user. Uses sync method version for changing password.
+        """
+        try:
+            dn = f'uid={user},ou=users,{self._suffix}'
+            self._connection.passwd_s(dn, old_password, new_password)
+            return True
+        except ldap.LDAPError as e:
+            logger.warning(f"Unable to change password for {user}. {e}")
+        return False
+
+    def set_password_hash(self, user, password_hash) -> bool:
+        """
+        Modify `userPassword` attribute in synchronous mode for provided user
+        """
+        try:
+            dn = f'uid={user},ou=users,{self._suffix}'
+            mod_list = [(ldap.MOD_REPLACE, 'userPassword', password_hash)]
+            self._connection.modify_s(dn, modlist=mod_list)
+            return True
+        except ldap.LDAPError as e:
+            logger.warning(f"Unable to change password for {user}. {e}")
+        return False
+
 
 @contextmanager
 def connection(**kwargs):
