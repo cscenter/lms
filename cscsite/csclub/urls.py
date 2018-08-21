@@ -54,34 +54,27 @@ urlpatterns = i18n_patterns(
         name="international_schools_list"),
     # Auth
     url(r'^login/$', LoginView.as_view(), name='login'),
-
     url(r'^users/password_change$',
-        auth_views.password_change,
-        {'post_change_redirect': 'password_change_complete'},
+        auth_views.PasswordChangeView.as_view(),
         name='password_change'),
     url(r'^users/password_change/done$',
-        auth_views.password_change_done,
-        name='password_change_complete'),
-    # Django 1.11: rewrite with class, this function based view is deprecated
+        auth_views.PasswordChangeDoneView.as_view(),
+        name='password_change_done'),
     url(r'^users/password_reset$',
-        auth_views.password_reset,
-        {
-            'password_reset_form': UserPasswordResetForm,
-            'post_reset_redirect': 'password_reset_done',
-            'html_email_template_name': html_email_template_name,
-            'email_template_name': email_template_name,
-            'subject_template_name': subject_template_name
-        },
+        auth_views.PasswordResetView.as_view(
+            form_class=UserPasswordResetForm,
+            email_template_name=email_template_name,
+            html_email_template_name=html_email_template_name,
+            subject_template_name=subject_template_name),
         name='password_reset'),
     url(r'^users/password_reset/done$',
-        auth_views.password_reset_done,
+        auth_views.PasswordResetDoneView.as_view(),
         name='password_reset_done'),
     url(r'^users/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        auth_views.password_reset_confirm,
-        {'post_reset_redirect': 'password_reset_complete'},
+        auth_views.PasswordResetConfirmView.as_view(),
         name='password_reset_confirm'),
     url(r'^users/reset/done$',
-        auth_views.password_reset_complete,
+        auth_views.PasswordResetCompleteView.as_view(),
         name='password_reset_complete'),
     prefix_default_language=False
 )
