@@ -65,7 +65,7 @@ class Connection:
             self._connection.passwd_s(dn, old_password, new_password)
             return True
         except ldap.LDAPError as e:
-            logger.warning(f"Unable to change password for {user}. {e}")
+            logger.error(f"Unable to change password for {user}. {e}")
         return False
 
     def set_password_hash(self, user, password_hash) -> bool:
@@ -78,7 +78,7 @@ class Connection:
             self._connection.modify_s(dn, modlist=mod_list)
             return True
         except ldap.LDAPError as e:
-            logger.warning(f"Unable to change password for {user}. {e}")
+            logger.error(f"Unable to change password for {user}. {e}")
         return False
 
 

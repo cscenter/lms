@@ -20,6 +20,7 @@ TIME_FORMAT_RU = "%H:%M"
 ASSIGNMENT_TASK_ATTACHMENT = 0
 ASSIGNMENT_COMMENT_ATTACHMENT = 1
 
+# TODO: Move to users.settings?
 PARTICIPANT_GROUPS = getattr(settings, 'PARTICIPANT_GROUPS', Choices(
     (1, 'STUDENT_CENTER', _('Student [CENTER]')),
     (2, 'TEACHER_CENTER', _('Teacher [CENTER]')),

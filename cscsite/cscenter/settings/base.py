@@ -161,3 +161,11 @@ POST_OFFICE = {
         'LOG_LEVEL': 1
     }
 }
+
+
+LDAP_CLIENT_URI = "ldap:///"
+LDAP_DB_SUFFIX = "dc=review,dc=compscicenter,dc=ru"
+LDAP_CLIENT_USERNAME = ""
+LDAP_CLIENT_PASSWORD = ""
+LDAP_TLS_TRUSTED_CA_CERT_FILE = None
+LDAP_SYNC_PASSWORD = False

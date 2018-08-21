@@ -10,7 +10,6 @@ from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter import views as cscenter_views
 from htmlpages import views
-from learning.views import CoursesListView
 from learning.views.students import UsefulListView, InternshipListView
 from users.forms import UserPasswordResetForm
 from users.tasks import html_email_template_name, email_template_name, \

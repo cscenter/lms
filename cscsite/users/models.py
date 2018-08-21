@@ -32,6 +32,8 @@ from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.utils import is_positive_grade, is_negative_grade
 from learning.permissions import LearningPermissionsMixin
+from users.settings import GROUPS_IMPORT_TO_GERRIT
+from users.tasks import update_password_in_gerrit
 from users.thumbnails import BoyStubImage, GirlStubImage, BaseStubImage
 from .managers import CustomUserManager
 
@@ -328,11 +330,22 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         self.csc_review = self.csc_review.strip()
 
     def save(self, **kwargs):
+        created = self.pk is None
+        password_changed = self._password is not None
         if self.email and not self.yandex_id:
             username, domain = self.email.split("@", 1)
             if domain in YANDEX_DOMAINS:
                 self.yandex_id = username
-        super(CSCUser, self).save(**kwargs)
+        super().save(**kwargs)
+        # Schedules redis queue task to update user password in gerrit's
+        # LDAP database if password was changed.
+        gerrit_sync_enabled = getattr(settings, "LDAP_SYNC_PASSWORD", False)
+        if not created and password_changed and gerrit_sync_enabled:
+            if self.get_cached_groups().intersection(GROUPS_IMPORT_TO_GERRIT):
+                update_password_in_gerrit.delay(user_id=self.pk)
+        elif created and gerrit_sync_enabled:
+            # TODO: schedule task for creating LDAP account
+            pass
 
     @property
     def city_code(self):
@@ -549,7 +562,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     # TODO: think how to add declension method with ru/en support
 
     @cached_property
-    def _cached_groups(self):
+    def _cached_groups(self) -> set:
         try:
             gs = self._prefetched_objects_cache['groups']
             user_groups = set(g.pk for g in gs)
