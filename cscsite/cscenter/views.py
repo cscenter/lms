@@ -28,7 +28,6 @@ from django_filters.views import FilterView, FilterMixin
 from rest_framework.renderers import JSONRenderer
 from vanilla import TemplateView, ListView
 
-from core.api.utils import SocialPost
 from core.exceptions import Redirect
 from core.models import Faq
 from cscenter.serializers import CourseOfferingSerializer

@@ -3,7 +3,7 @@ import textwrap
 
 from django.conf import settings
 
-from core.api.gerrit import Gerrit
+from api.providers.gerrit import Gerrit
 from learning.models import CourseOfferingTeacher, Enrollment
 
 logger = logging.getLogger(__name__)

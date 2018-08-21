@@ -44,7 +44,7 @@ from social_django.models import DjangoStorage
 from social_django.strategy import DjangoStrategy
 
 from api.permissions import CuratorAccessPermission
-from core.api.yandex_oauth import YandexRuOAuth2Backend
+from api.providers.yandex_oauth import YandexRuOAuth2Backend
 from core.exceptions import Redirect
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.utils import render_markdown

@@ -1,20 +1,27 @@
 # -*- coding: utf-8 -*-
 import logging
 from datetime import datetime
+from typing import NamedTuple
 
 from django.core.cache import caches
 from django.core.management.base import BaseCommand
 from requests import RequestException
 
-from core.api.instagram import InstagramAPI
-from core.api.utils import SocialPost
-from core.api.vk import VkOpenAPI, CSCENTER_GROUP_ID, VkAPIException
+from api.providers.instagram import InstagramAPI
+from api.providers.vk import VkOpenAPI, CSCENTER_GROUP_ID, VkAPIException
 from cscenter.views import IndexView
 
 logger = logging.getLogger(__name__)
 
 
 CACHE_EXPIRES_IN = None  # Manually clean cache on each command run
+
+
+class SocialPost(NamedTuple):
+    text: str
+    date: datetime
+    post_url: str
+    thumbnail: str = ''
 
 
 class Command(BaseCommand):
