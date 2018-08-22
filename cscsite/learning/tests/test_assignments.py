@@ -1,6 +1,7 @@
 import datetime
 from decimal import Decimal
 
+import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
@@ -236,7 +237,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         co = CourseOfferingFactory.create(teachers=[teacher])
-        form = AssignmentFactory.attributes(create=True)
+        form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
         form.update({'course_offering': co.pk,
                      'attached_file': None})
         url = co.get_create_assignment_url()
@@ -283,7 +284,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         teacher = TeacherCenterFactory()
         CourseOfferingFactory.create_batch(3, teachers=[teacher])
         co = CourseOfferingFactory.create(teachers=[teacher])
-        form = AssignmentFactory.attributes(create=True)
+        form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
         deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
         deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
         form.update({'course_offering': co.pk,
@@ -827,7 +828,7 @@ def test_studentassignment_submission_grade(client):
 def test_assignment_attachment_permissions(curator, client, tmpdir):
     teacher = TeacherCenterFactory()
     co = CourseOfferingFactory.create(teachers=[teacher])
-    form = AssignmentFactory.attributes(create=True)
+    form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     tmp_file = tmpdir.mkdir("attachment").join("attachment.txt")

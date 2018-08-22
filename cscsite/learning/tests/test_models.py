@@ -167,8 +167,8 @@ class CourseOfferingTests(TestCase):
         co = CourseOfferingFactory.build(course=course, semester=semester)
         assert not co.completed_at
         co.save()
-        assert co.completed_at == next_term_starts_at(semester.index,
-                                                      co.get_city_timezone())
+        next_term_dt = next_term_starts_at(semester.index, co.get_city_timezone())
+        assert co.completed_at == next_term_dt.date()
 
 
 @pytest.mark.django_db

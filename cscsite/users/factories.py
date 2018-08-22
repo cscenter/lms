@@ -55,35 +55,80 @@ class CuratorFactory(UserFactory):
 
 
 class StudentFactory(UserFactory):
-    groups = [PARTICIPANT_GROUPS.STUDENT_CENTER,
-              PARTICIPANT_GROUPS.STUDENT_CLUB]
     city_id = 'spb'
+
+    @factory.post_generation
+    def groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        groups = extracted or [PARTICIPANT_GROUPS.STUDENT_CENTER,
+                               PARTICIPANT_GROUPS.STUDENT_CLUB]
+        for group in groups:
+            self.groups.add(group)
 
 
 class StudentCenterFactory(UserFactory):
-    groups = [PARTICIPANT_GROUPS.STUDENT_CENTER]
     enrollment_year = 2015
     city_id = 'spb'
 
+    @factory.post_generation
+    def groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        groups = extracted or [PARTICIPANT_GROUPS.STUDENT_CENTER]
+        for group in groups:
+            self.groups.add(group)
+
 
 class StudentClubFactory(UserFactory):
-    groups = [PARTICIPANT_GROUPS.STUDENT_CLUB]
+    @factory.post_generation
+    def groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        groups = extracted or [PARTICIPANT_GROUPS.STUDENT_CLUB]
+        for group in groups:
+            self.groups.add(group)
 
 
 class TeacherCenterFactory(UserFactory):
-    groups = [PARTICIPANT_GROUPS.TEACHER_CENTER]
+    @factory.post_generation
+    def groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        groups = extracted or [PARTICIPANT_GROUPS.TEACHER_CENTER]
+        for group in groups:
+            self.groups.add(group)
 
 
 class VolunteerFactory(UserFactory):
-    groups = [PARTICIPANT_GROUPS.VOLUNTEER]
+    @factory.post_generation
+    def groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        groups = extracted or [PARTICIPANT_GROUPS.VOLUNTEER]
+        for group in groups:
+            self.groups.add(group)
 
 
 class GraduateFactory(UserFactory):
-    groups = [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+    @factory.post_generation
+    def groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        groups = extracted or [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+        for group in groups:
+            self.groups.add(group)
 
 
 class ProjectReviewerFactory(UserFactory):
-    groups = [PARTICIPANT_GROUPS.PROJECT_REVIEWER]
+    @factory.post_generation
+    def groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        groups = extracted or [PARTICIPANT_GROUPS.PROJECT_REVIEWER]
+        for group in groups:
+            self.groups.add(group)
 
 
 class OnlineCourseRecordFactory(factory.DjangoModelFactory):

@@ -89,7 +89,14 @@ class InterviewAssignmentFactory(factory.DjangoModelFactory):
 
 
 class InterviewerFactory(UserFactory):
-    groups = [PARTICIPANT_GROUPS.INTERVIEWER]
+    @factory.post_generation
+    def groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        groups = extracted or [PARTICIPANT_GROUPS.INTERVIEWER]
+        for group in groups:
+            self.groups.add(group)
 
 
 class InterviewFactory(factory.DjangoModelFactory):

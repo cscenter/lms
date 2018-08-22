@@ -172,7 +172,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(len(form.select('input[type="submit"]')), 1)
 
     def test_login_works(self):
-        good_user_attrs = UserFactory.attributes()
+        good_user_attrs = factory.build(dict, FACTORY_CLASS=UserFactory)
         good_user = CSCUser.objects.create_user(**good_user_attrs)
         # graduated students redirected to LOGIN_REDIRECT_URL
         good_user.groups.add(PARTICIPANT_GROUPS.GRADUATE_CENTER)
@@ -191,7 +191,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         def assertLoginRedirect(url):
             self.assertRedirects(self.client.get(url),
                                  "{}?next={}".format(settings.LOGIN_URL, url))
-        user_data = UserFactory.attributes()
+        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = CSCUser.objects.create_user(**user_data)
         url = reverse('assignment_list_teacher')
         assertLoginRedirect(url)
@@ -216,7 +216,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_logout_works(self):
-        user_data = UserFactory.attributes()
+        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         CSCUser.objects.create_user(**user_data)
         login = self.client.login(**user_data)
         self.assertTrue(login)
@@ -227,7 +227,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_logout_redirect_works(self):
-        user_data = UserFactory.attributes()
+        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         CSCUser.objects.create_user(**user_data)
         login = self.client.login(**user_data)
         resp = self.client.get(reverse('logout'),
@@ -250,7 +250,8 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         get_short_note should split note on first paragraph
         """
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
+        user = CSCUser.objects.create_user(**user_data)
         user.note = "Some small text"
         self.assertEqual(user.get_short_note(), "Some small text")
         user.note = """Some large text.
@@ -259,7 +260,8 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(user.get_short_note(), "Some large text.")
 
     def test_teacher_detail_view(self):
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
+        user = CSCUser.objects.create_user(**user_data)
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 404)
         user.groups.set([user.group.TEACHER_CENTER])
@@ -269,7 +271,8 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(resp.context['teacher'], user)
 
     def test_user_detail_view(self):
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
+        user = CSCUser.objects.create_user(user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context['profile_user'], user)
@@ -277,7 +280,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     def test_user_can_update_profile(self):
         test_note = "The best user in the world"
-        user_data = UserFactory.attributes()
+        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = CSCUser.objects.create_user(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.client.login(**user_data)
@@ -300,7 +303,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         profiles
         """
         test_review = "CSC are the bollocks"
-        user_data = UserFactory.attributes()
+        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = CSCUser.objects.create_user(**user_data)
         self.client.login(**user_data)
         resp = self.client.get(reverse('user_update', args=[user.pk]))
@@ -451,7 +454,7 @@ def test_login_restrictions(client, settings):
     """Again. Club students and teachers have no access to center site"""
     assert settings.SITE_ID == settings.CENTER_SITE_ID
 
-    user_data = UserFactory.attributes()
+    user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
     student = CSCUser.objects.create_user(**user_data)
     # Try to login without groups at all
     response = client.post(reverse('login'), user_data)
@@ -551,7 +554,8 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         """
         curator = UserFactory.create(is_superuser=True, is_staff=True)
         self.doLogin(curator)
-        user = CSCUser.objects.create_user(**UserFactory.attributes())
+        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
+        user = CSCUser.objects.create_user(**user_data)
         form_url = reverse('user_reference_add', args=[user.id])
         response = self.client.get(form_url)
         soup = BeautifulSoup(response.content, "html.parser")
