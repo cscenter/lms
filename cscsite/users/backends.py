@@ -3,7 +3,7 @@ from django.contrib.auth.backends import ModelBackend
 
 
 class EmailOrUsernameModelBackend(ModelBackend):
-    def authenticate(self, username=None, password=None, **kwargs):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         # XXX this is fine, since @ is not allowed in usernames.
         field = "email" if "@" in username else "username"
         user_model = get_user_model()
