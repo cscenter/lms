@@ -288,7 +288,8 @@ class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
         self.teacher_other = TeacherCenterFactory()
         self.co = CourseOfferingFactory.create(teachers=[self.teacher])
         self.url = self.co.get_create_news_url()
-        self.n_dict = CourseOfferingNewsFactory.attributes(create=True)
+        self.n_dict = factory.build(dict,
+                                    FACTORY_CLASS=CourseOfferingNewsFactory)
         self.n_dict.update({'course_offering': self.co})
 
     def test_security(self):
@@ -394,7 +395,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_security(self):
         teacher = TeacherCenterFactory()
         co = CourseOfferingFactory.create(teachers=[teacher])
-        form = CourseClassFactory.attributes(create=True)
+        form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
         form.update({'venue': VenueFactory.create().pk})
         url = co.get_create_class_url()
         self.assertLoginRedirect(url)
@@ -407,7 +408,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                                           teachers=[teacher], semester=s)
         co_other = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
                                                 semester=s)
-        form = CourseClassFactory.attributes(create=True)
+        form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
         venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
         form.update({'venue': venue.pk})
         del form['slides']
@@ -433,7 +434,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                                           teachers=[teacher], semester=s)
         co_other = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
                                                 semester=s)
-        form = CourseClassFactory.attributes(create=True)
+        form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
         venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
         form.update({'venue': venue.pk, '_addanother': True})
         del form['slides']

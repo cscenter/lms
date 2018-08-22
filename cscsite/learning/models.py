@@ -284,8 +284,8 @@ class CourseOffering(TimeStampedModel):
         # Make sure `self.completed_at` always has value
         if self.semester_id and not self.completed_at:
             index = get_term_index(self.semester.year, self.semester.type)
-            self.completed_at = next_term_starts_at(index,
-                                                    self.get_city_timezone())
+            next_term_dt = next_term_starts_at(index, self.get_city_timezone())
+            self.completed_at = next_term_dt.date()
         super().save(*args, **kwargs)
 
     def _get_url_kwargs(self) -> dict:

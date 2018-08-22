@@ -55,12 +55,13 @@ def date_to_term_pair(date):
     return TermTuple(year, current_term)
 
 
-def convert_term_parts_to_datetime(year, term_start, tz=pytz.UTC):
+def convert_term_parts_to_datetime(year, term_start,
+                                   tz=pytz.UTC) -> datetime.datetime:
     dt_naive = dparser.parse(term_start).replace(year=year)
     return tz.localize(dt_naive)
 
 
-def get_term_start(year, term_type, tz: Timezone):
+def get_term_start(year, term_type, tz: Timezone) -> datetime.datetime:
     """Returns term start point in datetime format."""
     if term_type == SEMESTER_TYPES.spring:
         term_start_str = SPRING_TERM_START
@@ -73,7 +74,8 @@ def get_term_start(year, term_type, tz: Timezone):
     return convert_term_parts_to_datetime(year, term_start_str, tz)
 
 
-def next_term_starts_at(term_index=None, tz_aware=pytz.UTC):
+def next_term_starts_at(term_index=None,
+                        tz_aware=pytz.UTC) -> datetime.datetime:
     if not term_index:
         term_index = get_current_term_index(tz_aware)
     year, next_term = get_term_by_index(term_index + 1)

@@ -6,6 +6,7 @@ import datetime
 import factory
 from django.utils import timezone
 from django.utils.timezone import now
+from factory import CREATE_STRATEGY
 
 from core.models import City
 from learning.models import Course, Semester, CourseOffering, \
@@ -59,16 +60,6 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
-
-    @classmethod
-    def create(cls, **kwargs):
-        attrs = cls.attributes(create=True, extra=kwargs)
-        # FIXME: replace with Trait
-        if "completed_at" not in kwargs:
-            term = attrs["semester"]
-            attrs["completed_at"] = (term.ends_at +
-                                     datetime.timedelta(days=1)).date()
-        return cls._generate(True, attrs)
 
     @factory.post_generation
     def city(self, create, extracted, **kwargs):
