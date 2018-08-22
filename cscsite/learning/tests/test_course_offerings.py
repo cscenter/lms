@@ -96,6 +96,7 @@ def test_news_get_city_timezone(settings):
     news = CourseOfferingNewsFactory(course_offering__city_id='nsk')
     assert news.get_city_timezone() == settings.TIME_ZONES['nsk']
     news.course_offering.city_id = 'spb'
+    news.course_offering.save()
     news.refresh_from_db()
     assert news.get_city_timezone() == settings.TIME_ZONES['spb']
 

@@ -26,7 +26,8 @@ django-crispy-forms==1.7.0
 django-formtools==2.1
 
 # Models
-django-model-utils==3.1.2
+# django-model-utils==3.1.2
+git+git://github.com/jazzband/django-model-utils.git@bf1adce0b819b59ca8e5075ca1f45230286a1ae8
 
 # Html parsing
 beautifulsoup4==4.6.0
