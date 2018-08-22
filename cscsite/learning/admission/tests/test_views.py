@@ -18,6 +18,7 @@ from learning.admission.factories import ApplicantFactory, InterviewFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
 from learning.admission.forms import InterviewFromStreamForm
 from learning.admission.models import Applicant, Interview, InterviewInvitation
+from learning.utils import now_local
 from users.factories import UserFactory
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
@@ -47,19 +48,25 @@ def test_autoclose_application_form(client):
 @pytest.mark.django_db
 def test_simple_interviews_list(client, curator, settings):
     settings.LANGUAGE_CODE = 'ru'
+    curator.city_id = 'nsk'
+    curator.save()
     client.login(curator)
     interviewer = InterviewerFactory()
-    campaign = CampaignFactory(current=True)
-    today = timezone.now()
+    campaign = CampaignFactory(current=True, city_id='nsk')
+    today_utc = timezone.now()
+    today_date = formats.date_format(today_utc, "SHORT_DATE_FORMAT")
+    today_local_nsk = now_local('nsk')
+    today_local_nsk_date = formats.date_format(today_local_nsk,
+                                               "SHORT_DATE_FORMAT")
     interview1, interview2, interview3 = InterviewFactory.create_batch(3,
         interviewers=[interviewer],
-        date=today,
+        date=today_utc,
         status=Interview.COMPLETED,
         applicant__status=Applicant.INTERVIEW_COMPLETED,
         applicant__campaign=campaign)
-    interview2.date = today + datetime.timedelta(days=1)
+    interview2.date = today_utc + datetime.timedelta(days=1)
     interview2.save()
-    interview3.date = today + datetime.timedelta(days=2)
+    interview3.date = today_utc + datetime.timedelta(days=2)
     interview3.save()
     response = client.get(reverse('admission:interviews'))
     # For curator set default filters and redirect
@@ -67,14 +74,15 @@ def test_simple_interviews_list(client, curator, settings):
     assert f"campaign={campaign.pk}" in response.url
     assert f"status={Interview.COMPLETED}" in response.url
     assert f"status={Interview.APPROVED}" in response.url
-    today_date = formats.date_format(today, "SHORT_DATE_FORMAT")
-    assert f"date_from={today_date}&date_to={today_date}" in response.url
+    assert f"date_from={today_local_nsk_date}" in response.url
+    assert f"date_to={today_local_nsk_date}" in response.url
 
     def format_url(campaign_id, date_from: str, date_to: str):
         return (reverse('admission:interviews') +
                 f"?campaign={campaign_id}&status={Interview.COMPLETED}&"
                 f"status={Interview.APPROVED}&"
                 f"date_from={date_from}&date_to={date_to}")
+
     url = format_url(campaign.pk, today_date, today_date)
     response = client.get(url)
     assert response.status_code == 200
