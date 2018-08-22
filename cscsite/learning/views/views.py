@@ -11,6 +11,7 @@ import nbconvert
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.contrib.auth.mixins import AccessMixin
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -862,14 +863,24 @@ class AssignmentProgressBaseView(AccessMixin):
     template_name = "learning/assignment_submission_detail.html"
     form_class = AssignmentCommentForm
 
+    def handle_no_permission(self, request):
+        """
+        AccessMixin.handle_no_permission behavior was changed in Django 2.1
+        Trying to save previous one.
+        """
+        # TODO: Remove AccessMixin
+        return redirect_to_login(request.get_full_path(),
+                                 settings.LOGIN_URL,
+                                 REDIRECT_FIELD_NAME)
+
     def dispatch(self, request, *args, **kwargs):
         if not self.has_permissions_coarse(request.user):
-            return self.handle_no_permission()
+            return self.handle_no_permission(request)
         self.student_assignment = self.get_student_assignment()
         if not self.student_assignment:
             raise Http404
         if not self.has_permissions_precise(request.user):
-            return self.handle_no_permission()
+            return self.handle_no_permission(request)
         return super().dispatch(request, *args, **kwargs)
 
     def get_student_assignment(self) -> Optional[StudentAssignment]:
