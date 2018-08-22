@@ -7,6 +7,7 @@ import uuid
 from collections import Counter
 from functools import wraps
 from itertools import groupby
+from urllib import parse
 
 from django.apps import apps
 from django.conf import settings
@@ -555,6 +556,9 @@ class InterviewAssignmentDetailView(CuratorOnlyMixin, generic.DetailView):
 
 
 class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
+    """
+    XXX: Filter by date uses UTC time zone.
+    """
     context_object_name = 'interviews'
     model = Interview
     paginate_by = 50
@@ -581,13 +585,14 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 today_local = timezone.now()  # stub
             else:
                 today_local = now_local(current_campaign.get_city_timezone())
-            # Duplicate initial values from filterset
-            statuses = "&".join(f"status={s}" for s in
-                                [Interview.COMPLETED, Interview.APPROVED])
             date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
-            url = "{}?campaign={}&{statuses}&date_from={date_from}&date_to={date_to}".format(
-                reverse("admission:interviews"), current_campaign.pk,
-                statuses=statuses, date_from=date, date_to=date)
+            params = parse.urlencode({
+                'campaign': current_campaign.pk,
+                'status': [Interview.COMPLETED, Interview.APPROVED],
+                'date_from': date,
+                'date_to': date
+            }, doseq=True)
+            url = "{}?{}".format(reverse("admission:interviews"), params)
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
 
@@ -597,8 +602,6 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         return InterviewsFilter
 
     def get_filterset_kwargs(self, filterset_class):
-        # Note: With django-filter 1.0.4 the best way to define initial value
-        # for form without magic is to put it in the view.
         kwargs = super().get_filterset_kwargs(filterset_class)
         if not kwargs["data"]:
             today = formats.date_format(timezone.now(), "SHORT_DATE_FORMAT")
@@ -633,7 +636,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
              .annotate(average=Coalesce(Avg('comments__score'), Value(0)))
              .order_by("date", "pk"))
         if not self.request.user.is_curator:
-            # Show interviewers only interviews from current campaigns where
+            # To interviewers show interviews from current campaigns where
             # they participate.
             try:
                 current_campaigns = list(Campaign.objects.filter(current=True)
