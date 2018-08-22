@@ -61,7 +61,8 @@ class LoginView(generic.FormView):
             elif user_groups == {CSCUser.group.TEACHER_CENTER}:
                 redirect_to = reverse(TEACHING_BASE)
 
-        if not is_safe_url(redirect_to, self.request.get_host()):
+        if not is_safe_url(redirect_to,
+                           allowed_hosts={self.request.get_host()}):
             redirect_to = settings.LOGOUT_REDIRECT_URL
 
         return redirect_to
@@ -97,8 +98,8 @@ class LogoutView(LoginRequiredMixin,
 
         if self.redirect_field_name in self.request.GET:
             maybe_redirect_to = self.request.GET[self.redirect_field_name]
-            if is_safe_url(url=maybe_redirect_to,
-                           host=self.request.get_host()):
+            if is_safe_url(maybe_redirect_to,
+                           allowed_hosts={self.request.get_host()}):
                 redirect_to = maybe_redirect_to
 
         return redirect_to
