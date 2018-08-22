@@ -260,7 +260,7 @@ def test_invitation_creation(curator, client, settings):
     """Create invitation from single stream"""
     settings.LANGUAGE_CODE = 'ru'
     applicant = ApplicantFactory(campaign__city_id='nsk')
-    tomorrow = now() + datetime.timedelta(days=1)
+    tomorrow = now() + datetime.timedelta(days=2)
     InterviewStreamFactory(date=tomorrow.date(),
                            with_assignments=True,
                            venue__city_id='nsk')
@@ -289,12 +289,10 @@ def test_invitation_creation(curator, client, settings):
 @pytest.mark.django_db
 def test_create_interview_from_slot(curator, client, settings):
     settings.LANGUAGE_CODE = 'ru'
-    admission_settings = apps.get_app_config("admission")
-    expired_after = admission_settings.INVITATION_EXPIRED_IN_HOURS
-    applicant = ApplicantFactory(campaign__city_id='nsk')
-    tomorrow = now() + datetime.timedelta(days=1)
+    applicant_nsk = ApplicantFactory(campaign__city_id='nsk')
+    tomorrow_utc = now() + datetime.timedelta(days=2)
     interviewer = InterviewerFactory()
-    stream_nsk = InterviewStreamFactory(date=tomorrow.date(),
+    stream_nsk = InterviewStreamFactory(date=tomorrow_utc.date(),
                                         start_at=datetime.time(hour=12),
                                         end_at=datetime.time(hour=15),
                                         with_assignments=False,
@@ -307,13 +305,13 @@ def test_create_interview_from_slot(curator, client, settings):
     slot.interview_id = interview.pk
     slot.save()
     # Try to create interview for reserved slot
+    assert Interview.objects.count() == 1
     client.login(curator)
     form_data = {
         InterviewFromStreamForm.prefix + "-streams": stream_nsk.pk,
         InterviewFromStreamForm.prefix + "-slot": slot.pk
     }
-    assert Interview.objects.count() == 1
-    response = client.post(applicant.get_absolute_url(), form_data, follow=True)
+    response = client.post(applicant_nsk.get_absolute_url(), form_data, follow=True)
     assert response.status_code == 200
     message = list(response.context['messages'])[0]
     assert 'error' in message.tags
@@ -321,13 +319,13 @@ def test_create_interview_from_slot(curator, client, settings):
     # Empty slot and repeat
     slot.interview_id = None
     slot.save()
-    response = client.post(applicant.get_absolute_url(), form_data, follow=True)
+    response = client.post(applicant_nsk.get_absolute_url(), form_data, follow=True)
     message = list(response.context['messages'])[0]
     assert 'success' in message.tags
     assert InterviewInvitation.objects.count() == 0
     assert Interview.objects.count() == 2
     # Check interview date
-    interview = Interview.objects.get(applicant=applicant)
+    interview = Interview.objects.get(applicant=applicant_nsk)
     assert interview.date.hour == 5  # UTC +7 for nsk
     assert interview.date_local().hour == slot.start_at.hour
     assert interview.date_local().minute == slot.start_at.minute
