@@ -18,7 +18,6 @@ django-extensions==2.1.0
 djdt-flamegraph==0.2.12
 
 # Tests
-mock==2.0.0
 coverage==4.5.1
 django-coverage==1.2.4
 
