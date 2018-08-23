@@ -104,6 +104,7 @@ django-autocomplete-light==3.2.10
 django-mptt==0.9.1
 # django-bootstrap-pagination==1.6.4
 git+git://github.com/pacahon/django-bootstrap-pagination.git
+# FIXME: check core.compat for widget if new version was released
 django-bitfield==1.9.3
 django-multiselectfield==0.1.8
 django-filter==2.0.0
