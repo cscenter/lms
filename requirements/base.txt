@@ -1,4 +1,4 @@
-Django==2.0.8
+Django==2.1
 
 requests==2.19.1
 unicodecsv==0.14.1
@@ -18,7 +18,7 @@ standardjson==0.3.1
 
 # Images
 Pillow==4.1.1
-sorl-thumbnail==12.3
+sorl-thumbnail==12.4.1
 python-magic==0.4.12
 
 # Forms
@@ -102,7 +102,8 @@ python-ldap==3.1.0
 django-vanilla-views==1.0.5
 django-autocomplete-light==3.2.10
 django-mptt==0.9.0
-django-bootstrap-pagination==1.6.4
+# django-bootstrap-pagination==1.6.4
+git+git://github.com/pacahon/django-bootstrap-pagination.git
 django-bitfield==1.9.3
 django-multiselectfield==0.1.8
 django-filter==2.0.0

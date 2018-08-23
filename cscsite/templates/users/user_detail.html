@@ -23,7 +23,7 @@
                 var href = $(this).attr("href");
                 $('<form>', {
                     "method": "POST",
-                    "html": "{% csrf_token %}",
+                    "html": '{% csrf_token %}',
                     "action": href
                 }).appendTo(document.body).submit();
             });
