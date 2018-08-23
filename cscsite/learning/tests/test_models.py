@@ -6,6 +6,7 @@ import datetime
 
 import unittest
 from decimal import Decimal
+from unittest import mock
 
 import pytest
 import pytz
@@ -31,7 +32,8 @@ from users.factories import UserFactory, StudentCenterFactory, \
 
 
 class CommonTests(TestCase):
-    def test_to_strings(self):
+    @mock.patch("learning.tasks.maybe_upload_slides_yandex.delay")
+    def test_to_strings(self, _):
         course = CourseFactory.build()
         self.assertEquals(smart_text(course), course.name)
         semester = Semester(year=2015, type='spring')
