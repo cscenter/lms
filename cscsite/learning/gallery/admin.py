@@ -2,13 +2,12 @@ from __future__ import absolute_import, unicode_literals
 
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
-from sorl.thumbnail.admin import AdminImageMixin
 
 from learning.models import CourseOffering
 from .models import Album, Image
 
 
-class InlineImageAdmin(AdminImageMixin, admin.TabularInline):
+class InlineImageAdmin(admin.TabularInline):
     model = Image
     fieldsets = ((None, {
         'fields': ['image', 'user', 'title', 'order', 'album']
@@ -23,7 +22,7 @@ class AlbumAdmin(MPTTModelAdmin):
     inlines = [InlineImageAdmin]
 
 
-class ImageAdmin(AdminImageMixin, admin.ModelAdmin):
+class ImageAdmin(admin.ModelAdmin):
     list_display = ('title', 'user', 'order', 'album', 'width', 'height')
     raw_id_fields = ('user', )
     list_filter = ('album', )
