@@ -1,19 +1,18 @@
 from __future__ import absolute_import, unicode_literals
 
 from bitfield import BitField
-from bitfield.forms import BitFieldCheckboxSelectMultiple
 from dal import autocomplete
 from django import forms
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
-from django.utils import formats
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField
+from core.compat import Django21BitFieldCheckboxSelectMultiple
 from core.widgets import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
 from core.utils import admin_datetime, is_club_site
@@ -70,7 +69,7 @@ class CourseOfferingTeacherInline(admin.TabularInline):
     extra = 0
     min_num = 1
     formfield_overrides = {
-            BitField: {'widget': BitFieldCheckboxSelectMultiple},
+            BitField: {'widget': Django21BitFieldCheckboxSelectMultiple},
     }
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
@@ -152,7 +151,7 @@ class VenueAdminForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'description': AdminRichTextAreaWidget(),
-            'flags': BitFieldCheckboxSelectMultiple()
+            'flags': Django21BitFieldCheckboxSelectMultiple()
         }
 
 
