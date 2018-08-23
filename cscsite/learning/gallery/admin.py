@@ -2,13 +2,13 @@ from __future__ import absolute_import, unicode_literals
 
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
-from sorl.thumbnail.admin import AdminInlineImageMixin, AdminImageMixin
+from sorl.thumbnail.admin import AdminImageMixin
 
 from learning.models import CourseOffering
 from .models import Album, Image
 
 
-class InlineImageAdmin(AdminInlineImageMixin, admin.TabularInline):
+class InlineImageAdmin(AdminImageMixin, admin.TabularInline):
     model = Image
     fieldsets = ((None, {
         'fields': ['image', 'user', 'title', 'order', 'album']
