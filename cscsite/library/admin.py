@@ -41,5 +41,6 @@ class StockAdmin(RelatedSpecMixin, admin.ModelAdmin):
     def copies_left(self, instance):
         return instance.available_copies
 
+
 admin.site.register(Book, BookAdmin)
 admin.site.register(Stock, StockAdmin)

@@ -101,7 +101,7 @@ python-ldap==3.1.0
 # Misc utils
 django-vanilla-views==1.0.5
 django-autocomplete-light==3.2.10
-django-mptt==0.9.0
+django-mptt==0.9.1
 # django-bootstrap-pagination==1.6.4
 git+git://github.com/pacahon/django-bootstrap-pagination.git
 django-bitfield==1.9.3
@@ -116,7 +116,7 @@ django-bootstrap3==10.0.1
 django-extra-views==0.9.0
 # Generic, reusable mixins
 django-braces==1.13.0
-django-taggit==0.22.2
+django-taggit==0.23.0
 sqlparse==0.2.2
 django-pipeline==1.6.12
 django-loginas==0.3.3
