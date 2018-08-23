@@ -8,7 +8,6 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.db import models as db_models
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
-from sorl.thumbnail.admin import AdminImageMixin
 from import_export.admin import ImportExportMixin, ImportMixin
 
 from core.widgets import AdminRichTextAreaWidget
@@ -121,7 +120,7 @@ class SHADCourseRecordInlineAdmin(admin.StackedInline):
     extra = 0
 
 
-class CSCUserAdmin(AdminImageMixin, UserAdmin):
+class CSCUserAdmin(UserAdmin):
     add_form = CSCUserCreationForm
     add_fieldsets = (
         (None, {
