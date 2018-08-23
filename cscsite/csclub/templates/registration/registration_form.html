@@ -1,6 +1,6 @@
 {% extends "registration/registration_base.html" %}
 {% load i18n %}
-{% load bootstrap3 %}
+{% load crispy_forms_tags %}
 
 {% block title %}{% trans "Register for an account" %}{% endblock %}
 
@@ -10,7 +10,7 @@
     <h1>{% trans 'Registration' %}</h1>
     <form method="post" action="">
         {% csrf_token %}
-        {% bootstrap_form form  %}
+        {% crispy form %}
         <input type="submit" class="btn btn-default" value="{% trans 'Submit' %}" />
     </form>
 {% endblock %}
