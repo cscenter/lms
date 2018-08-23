@@ -30,7 +30,7 @@ class AsyncEmailRegistrationView(RegistrationView):
     SEND_ACTIVATION_EMAIL = False  # Prevent sending email on request
 
     def register(self, form):
-        new_user = super(AsyncEmailRegistrationView, self).register(form)
+        new_user = super().register(form)
         queue = django_rq.get_queue('club')
         site = get_current_site(self.request)
         queue.enqueue(tasks.send_activation_email,
