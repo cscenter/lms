@@ -210,7 +210,7 @@ class InterviewSlotsInline(admin.TabularInline):
     # FIXME: edit queryset for interview and remove from readonly
     readonly_fields = ["interview", "start_at", "end_at"]
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None):
         return False
 
 
@@ -241,7 +241,7 @@ class InterviewStreamAdmin(admin.ModelAdmin):
 class InterviewStreamsInline(admin.TabularInline):
     model = InterviewInvitation.streams.through
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None):
         return False
 
 
