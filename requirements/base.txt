@@ -12,8 +12,8 @@ pytz==2018.5
 # Db support
 psycopg2-binary==2.7.5
 # JsonField support for Django <= 1.8 or dbs other than postgres
-jsonfield==2.0.1
-django-prettyjson==0.2.2
+jsonfield==2.0.2
+django-prettyjson==0.4.1
 standardjson==0.3.1
 
 # Images
