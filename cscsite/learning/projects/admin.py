@@ -72,6 +72,7 @@ class ReportAdmin(admin.ModelAdmin):
                            "project_student__student"]
     list_display = ['get_student_name', 'get_project_name', 'status']
     list_filter = ['status']
+    raw_id_fields = ["project_student"]
 
     def get_student_name(self, instance):
         return instance.project_student.student
@@ -93,6 +94,7 @@ class ReportAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_filter = ['is_completed']
     list_display = ['reviewer', 'report', 'get_project_name', 'is_completed']
+    raw_id_fields = ["report", "reviewer"]
 
     def get_project_name(self, instance):
         return instance.report.project_student.project.name

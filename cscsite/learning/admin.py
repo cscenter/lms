@@ -281,6 +281,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
     list_filter = ['course_offering__semester']
     search_fields = ['course_offering__course__name']
     exclude = ['grade_changed']
+    raw_id_fields = ["student", "course_offering"]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
@@ -304,13 +305,13 @@ class EnrollmentAdmin(admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
-class StudentAssignmentAdmin(RelatedSpecMixin,
-                             admin.ModelAdmin):
+class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     list_display = ['student', 'assignment', 'grade', 'grade_changed', 'state']
     related_spec = {'select': [('assignment',
                                 [('course_offering', ['semester', 'course'])]),
                                'student']}
     search_fields = ['student__last_name']
+    raw_id_fields = ["assignment", "student"]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
