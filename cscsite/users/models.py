@@ -134,7 +134,6 @@ class MonitorStatusField(models.ForeignKey):
         return name, path, args, kwargs
 
 
-@python_2_unicode_compatible
 class CSCUserStatusLog(models.Model):
     created = models.DateField(_("created"), default=now)
     semester = models.ForeignKey(
@@ -161,8 +160,8 @@ class CSCUserStatusLog(models.Model):
             self.semester_id = Semester.get_current().pk
 
     def __str__(self):
-        return smart_text(
-            "{} [{}]".format(self.student.get_full_name(True), self.semester))
+        return smart_text("{} [{}]".format(
+            self.student.get_full_name(True), self.semester))
 
 
 class CSCUser(LearningPermissionsMixin, AbstractUser):

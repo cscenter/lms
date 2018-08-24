@@ -102,8 +102,10 @@ class CSCUserStatusLogAdmin(RelatedSpecMixin, admin.TabularInline):
     readonly_fields = ('created', 'status')
     related_spec = {'select': ['semester', 'student']}
 
-    def has_add_permission(self, request, obj=None):
-        return False
+    # Uncomment on Django > 2.1.0
+    # https://code.djangoproject.com/ticket/29637
+    # def has_add_permission(self, request):
+    #     return False
 
 
     # FIXME: formfield_for_foreignkey creates additional queries :<
@@ -161,6 +163,15 @@ class CSCUserAdmin(UserAdmin):
          {'fields': ['comment', 'comment_changed_at', 'comment_last_author']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
+    def get_formsets_with_inlines(self, request, obj=None):
+        """
+        Yield formsets and the corresponding inlines.
+        """
+        if obj is None:
+            return None
+        for inline in self.get_inline_instances(request, obj):
+            yield inline.get_formset(request, obj), inline
+
     def save_model(self, request, obj, form, change):
         if "comment" in form.changed_data:
             obj.comment_last_author = request.user
@@ -181,6 +192,7 @@ class SHADCourseRecordResourceAdmin(ImportExportMixin, admin.ModelAdmin):
 class CSCUserRecordResourceAdmin(ImportMixin, CSCUserAdmin):
     resource_class = CSCUserRecordResource
     pass
+
 
 admin.site.register(CSCUser, CSCUserRecordResourceAdmin)
 admin.site.register(CSCUserReference)
