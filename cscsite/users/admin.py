@@ -65,12 +65,6 @@ class CSCUserChangeForm(UserChangeForm):
                 and self.instance.group.STUDENT_CENTER in groups:
             self.add_error('groups', ValidationError(
                 _("User can't be simultaneously in graduate and student group")))
-        # Validate that the supplied email address is unique for the site.
-        if "email" in self.changed_data:
-            email = self.cleaned_data['email']
-            if email and CSCUser.objects.filter(email__iexact=email).exists():
-                self.add_error('email',
-                               ValidationError(_("Email must be unique.")))
 
 
 class ForeignKeyCacheMixin(object):
