@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
+from rest_pandas import SimpleSerializer
 
 from users.models import CSCUser
 
@@ -12,3 +13,8 @@ class StageByYearSerializer(serializers.Serializer):
         else:
             instance["course__name"] = _("Other")
         return instance
+
+
+class ApplicationSubmissionSerializer(SimpleSerializer):
+    class Meta:
+        pandas_index = ['date']

@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.urls import path
 
 from stats.admission.views import CampaignsStagesByYears, \
     CampaignStatsApplicantsResults, CampaignStatsStudentsResults, \
@@ -6,7 +7,8 @@ from stats.admission.views import CampaignsStagesByYears, \
     CampaignStatsExamScoreByUniversities, \
     CampaignStagesByUniversities, CampaignStagesByCourses, \
     CampaignStatsTestingScoreByCourses, CampaignStatsExamScoreByCourses, \
-    CampaignResultsByUniversities, CampaignResultsByCourses
+    CampaignResultsByUniversities, CampaignResultsByCourses, \
+    ApplicationSubmission
 
 urlpatterns = [
     # Stages
@@ -29,6 +31,9 @@ urlpatterns = [
     url(r'^campaigns/(?P<campaign_id>\d+)/applicants/by-course/$',
         CampaignResultsByCourses.as_view(),
         name='stats_admission_campaign_applicants_by_course'),
+    path("campaigns/<int:campaign_id>/applicants/by-day/",
+         ApplicationSubmission.as_view(),
+         name="application_submission"),
     # Students
     url(r'^campaigns/(?P<campaign_id>\d+)/students/$',
         CampaignStatsStudentsResults.as_view({'get': 'list'}),

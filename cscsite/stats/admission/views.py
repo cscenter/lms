@@ -1,8 +1,9 @@
 from django.db.models import Count, When, IntegerField, Case, Q
+from django.db.models.functions import TruncDate
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
-from rest_pandas.serializers import SimpleSerializer
+from rest_pandas.serializers import SimpleSerializer, PandasSerializer
 
 from api.permissions import CuratorAccessPermission
 from learning.admission.models import Applicant, Test, Exam
@@ -10,8 +11,9 @@ from stats.admission.pandas_serializers import \
     CampaignResultsTimelineSerializer, \
     ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
     CampaignResultsByUniversitiesSerializer, \
-    CampaignResultsByCoursesSerializer
-from stats.admission.serializers import StageByYearSerializer
+    CampaignResultsByCoursesSerializer, ApplicationSubmissionPandasSerializer
+from stats.admission.serializers import StageByYearSerializer, \
+    ApplicationSubmissionSerializer
 from stats.renderers import ListRenderersMixin
 
 TestingCountAnnotation = Count(
@@ -202,3 +204,19 @@ class CampaignStatsExamScoreByCourses(ListRenderersMixin, PandasView):
                 .values('score', 'applicant__course')
                 .annotate(total=Count('score'))
                 .order_by('applicant__course'))
+
+
+class ApplicationSubmission(ListRenderersMixin, PandasView):
+    """Application submission by day in UTC timezone"""
+    permission_classes = [CuratorAccessPermission]
+    serializer_class = SimpleSerializer
+    pandas_serializer_class = ApplicationSubmissionPandasSerializer
+
+    def get_queryset(self):
+        campaign_id = self.kwargs.get('campaign_id')
+        return (Applicant.objects
+                .filter(campaign_id=campaign_id)
+                .annotate(date=TruncDate('created'))
+                .values('date')
+                .annotate(total=Count('date'))
+                .order_by('date'))

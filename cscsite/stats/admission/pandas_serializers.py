@@ -67,3 +67,9 @@ class ScoreByCoursesSerializer(PandasSerializer):
         return df
 
 
+class ApplicationSubmissionPandasSerializer(PandasSerializer):
+    def transform_dataframe(self, dataframe):
+        dataframe.date = dataframe.date.apply(lambda d: d.strftime("%d.%m.%Y"))
+        dataframe.set_index('date', inplace=True)
+        return dataframe
+
