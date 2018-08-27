@@ -1,29 +1,20 @@
+import json
+
 from django.conf import settings
 from pandas import DataFrame
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 from rest_pandas import PandasCSVRenderer, PandasJSONRenderer
 
 
-class PandasListIndentJSONRenderer(JSONRenderer):
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        if not isinstance(data, DataFrame):
-            raise Exception(
-                "Response data is a %s, not a DataFrame!" % type(data)
-            )
-        # FIXME: this solution is unordered! But PandasJSONRenderer not indented
-        request = renderer_context['request']
-        orient = request.GET.get('orient', '')
-        if orient not in {'split', 'records', 'dict', 'list', 'series'}:
-            orient = 'records'
-        return super().render(data.to_dict(orient=orient),
-                              accepted_media_type,
-                              renderer_context)
+class PandasListIndentJSONRenderer(PandasJSONRenderer):
+    def get_output(self):
+        value = self.output.getvalue()
+        return json.dumps(json.loads(value), indent=4)
 
 
 if settings.DEBUG:
     _PandasJSONRenderer = PandasListIndentJSONRenderer
 else:
-    # Default orient is `records` for output JSON
     _PandasJSONRenderer = PandasJSONRenderer
 
 
