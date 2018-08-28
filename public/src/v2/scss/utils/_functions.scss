@@ -1,0 +1,7 @@
+@function str-replace($str, $old, $new) {
+	@while str-index($str, $old) {
+		$index: str-index($str, $old);
+		$str: str-slice($str, 0, (-1 + $index)) + $new + str-slice($str, $index + 1);
+    }
+	@return $str;
+}

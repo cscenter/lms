@@ -1,7 +1,0 @@
-@function spacer($key) {
-  @if map-has-key($spacers, $key) {
-    @return map-get($spacers, $key);
-  }
-
-  @error "Unknown `#{$key}` in $spacers.";
-}
