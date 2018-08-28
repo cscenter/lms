@@ -1,45 +1,95 @@
 // Pagination
 
-$pagination-padding-y:              .25rem !default;
-$pagination-padding-x:               .8rem !default;
-$pagination-padding-y-sm:           .5rem !default;
-$pagination-padding-x-sm:           .5rem !default;
-$pagination-padding-y-lg:           1rem !default;
-$pagination-padding-x-lg:           1.5rem !default;
-$pagination-line-height:            1.5;
+$pagination-color: $gray-darker;
+$pagination-bg: $white;
+$pagination-border-width: $border-width;
+$pagination-border-color: $gray-lighter;
 
-$pagination-color:                  $gray-darker !default;
-$pagination-bg:                     $white !default;
-$pagination-border-width:           $border-width !default;
-$pagination-border-color:           $gray-lighter !default;
+$pagination-focus-box-shadow: $input-btn-focus-box-shadow;
+$pagination-focus-outline: 0;
 
-$pagination-focus-box-shadow:       $input-btn-focus-box-shadow !default;
-$pagination-focus-outline:          0 !default;
+$pagination-hover-color: $teal;
+$pagination-hover-bg: $white;
+$pagination-hover-border-color: $gray-lighter;
 
-$pagination-hover-color:            $teal;
-$pagination-hover-bg:               $white;
-$pagination-hover-border-color:     $gray-lighter !default;
+$pagination-active-color: $component-active-color;
+$pagination-active-bg: $component-active-bg;
+$pagination-active-border-color: $pagination-active-bg;
 
-$pagination-active-color:           $component-active-color !default;
-$pagination-active-bg:              $component-active-bg !default;
-$pagination-active-border-color:    $pagination-active-bg !default;
-
-$pagination-disabled-color:         $gray-darker !default;
-$pagination-disabled-bg:            $white !default;
-$pagination-disabled-border-color:  $gray-lighter !default;
-
-
-@import "bootstrap/scss/pagination";
+$pagination-disabled-color: $gray-darker;
+$pagination-disabled-bg: $white;
+$pagination-disabled-border-color: $gray-lighter;
 
 .pagination {
   justify-content: center;
+  display: flex;
+  @include list-unstyled();
+  @include border-radius();
   @include media-breakpoint-up(md) {
     justify-content: flex-start;
+  }
+
+  .page-link {
+    position: relative;
+    display: block;
+    padding: spacer("1x") spacer("3x");
+    margin-left: -$pagination-border-width;
+    line-height: $line-height-base;
+    color: $pagination-color;
+    background-color: $pagination-bg;
+    border: $pagination-border-width solid $pagination-border-color;
+
+    &:hover {
+      z-index: 2;
+      color: $pagination-hover-color;
+      text-decoration: none;
+      background-color: $pagination-hover-bg;
+      border-color: $pagination-hover-border-color;
+      fill: $teal;
+    }
+
+    &:focus {
+      z-index: 2;
+      outline: $pagination-focus-outline;
+      box-shadow: $pagination-focus-box-shadow;
+    }
+
+    // Opinionated: add "hand" cursor to non-disabled .page-link elements
+    &:not(:disabled):not(.disabled) {
+      cursor: pointer;
+    }
   }
 
   .page-item {
     &.active {
       z-index: 100;
+    }
+    &:first-child {
+      .page-link {
+        margin-left: 0;
+        @include border-left-radius($border-radius);
+      }
+    }
+    &:last-child {
+      .page-link {
+        @include border-right-radius($border-radius);
+      }
+    }
+
+    &.active .page-link {
+      z-index: 1;
+      color: $pagination-active-color;
+      background-color: $pagination-active-bg;
+      border-color: $pagination-active-border-color;
+    }
+
+    &.disabled .page-link {
+      color: $pagination-disabled-color;
+      pointer-events: none;
+      // Opinionated: remove the "hand" cursor set previously for .page-link
+      cursor: auto;
+      background-color: $pagination-disabled-bg;
+      border-color: $pagination-disabled-border-color;
     }
     &.disabled {
       .page-link,
@@ -48,21 +98,17 @@ $pagination-disabled-border-color:  $gray-lighter !default;
         opacity: .6;
       }
     }
-  }
 
-  .page-link:hover {
-    fill: $teal;
-  }
-
-  .page-status,
-  .ellipsis {
-    position: relative;
-    display: block;
-    padding: $pagination-padding-y $pagination-padding-x;
-    margin-left: -$pagination-border-width;
-    line-height: $pagination-line-height;
-    color: $pagination-color;
-    background-color: $pagination-bg;
-    border: $pagination-border-width solid $pagination-border-color;
+    .page-status,
+    .ellipsis {
+      position: relative;
+      display: block;
+      padding: spacer("1x") spacer("3x");
+      margin-left: -$pagination-border-width;
+      line-height: $line-height-base;
+      color: $pagination-color;
+      background-color: $pagination-bg;
+      border: $pagination-border-width solid $pagination-border-color;
+    }
   }
 }

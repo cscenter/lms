@@ -3,7 +3,7 @@
   display: flex;
   flex-wrap: wrap;
   padding-left: 0;
-  margin-bottom: 30px;
+  margin-bottom: spacer("6x");
   list-style: none;
   border-bottom: $border-width solid $border-color;
 
@@ -25,7 +25,7 @@
 
   .nav-link {
     border: $border-width solid $border-color;
-    padding: .375rem 1rem;
+    padding: spacer("1x") spacer("4x");
     color: $gray-dark;
     opacity: 1;
     &.disabled {

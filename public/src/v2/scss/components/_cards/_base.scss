@@ -1,6 +1,4 @@
 // Variables
-$card-spacer-y: .75rem !default;
-$card-spacer-x: 1rem !default;
 $card-border-width: 1px;
 $card-border-radius: $border-radius !default;
 $card-border-color: $gray-lighter;
@@ -8,7 +6,6 @@ $card-inner-border-radius: $card-border-radius;
 $card-cap-bg: rgba($black, .03) !default;
 $card-bg: $white !default;
 
-$card-img-overlay-padding: 1.25rem !default;
 
 //
 // Base styles
@@ -28,10 +25,10 @@ $card-img-overlay-padding: 1.25rem !default;
 
   &._inversed {
     background-color: $gray-lighter;
-    padding: 1rem;
+    padding: spacer("4x");
 
     .card-img {
-      margin-bottom: 1rem;
+      margin-bottom: spacer("4x");
     }
 
     .card-body {
@@ -61,7 +58,7 @@ $card-img-overlay-padding: 1.25rem !default;
   // Enable `flex-grow: 1` for decks and groups so that card blocks take up
   // as much space as possible, ensuring footers are aligned to the bottom.
   flex: 1 1 auto;
-  padding: $card-spacer-x;
+  padding: spacer("4x");
 
   // FIXME: rename to `small-text`
   &._small {
@@ -70,7 +67,7 @@ $card-img-overlay-padding: 1.25rem !default;
 }
 
 .card-title {
-  margin-bottom: $card-spacer-y;
+  margin-bottom: spacer("3x");
 }
 
 
@@ -84,7 +81,7 @@ $card-img-overlay-padding: 1.25rem !default;
   }
 
   + .card-link {
-    margin-left: $card-spacer-x;
+    margin-left: spacer("4x");
   }
 }
 
@@ -143,7 +140,7 @@ $card-img-overlay-padding: 1.25rem !default;
   right: 0;
   bottom: 0;
   left: 0;
-  padding: $card-img-overlay-padding;
+  padding: spacer("4x");
 }
 
 .card-img {

@@ -8,8 +8,8 @@
       width: 100%;
       opacity: 0;
       font-size: $font-size-base;
-      padding: $input-padding-y $input-padding-x;
-      line-height: 15px; //Didn't find another solution for same height
+      padding: spacer("3x") spacer("4x");
+      @include inputheight(48px);
 
       &:focus ~ .custom-file-label {
         border-color: $input-border-color-hover;
@@ -32,12 +32,12 @@
     left: 0;
     z-index: 1;
     font-size: $font-size-content-base;
-    line-height: $input-line-height;
+    @include inputheight(48px);
     font-weight: $font-weight-base;
-    padding: $input-padding-y $input-padding-x;
+    padding: spacer("3x") spacer("4x");
     color: $input-placeholder-color;
     background-color: $input-bg;
-    border: $border-width solid transparent;
+    border: $border-width solid $input-border-color;
     border-radius: $border-radius;
     &::after {
       position: absolute;
@@ -45,9 +45,10 @@
       right: -1px;
       bottom: -1px;
       z-index: 3;
+      @include inputheight(48px);
       display: block;
       color: $white;
-      padding: $input-btn-padding-y $input-btn-padding-x;
+      padding: spacer("3x") spacer("6x");
       background: $gray-dark;
       content: "Выбрать";
       border-radius: $border-radius;

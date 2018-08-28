@@ -7,24 +7,24 @@
 
 // 2 - screen offline-courses
 .csc-offline-courses {
-  padding: 30px 0 0;
+  padding: spacer("10x") 0 0;
   @include append-hr-to-container;
 }
 
 .card-offline-course {
   background-color: $gray-lighter;
   text-align: center;
-  padding: 25px 10px 35px;
+  padding: spacer("6x") spacer("2x") spacer("8x");
   border-radius: 0;
 
   .card-offline-course__icon {
-    height: 100px;
+    height: 96px;
   }
 
   svg {
     margin-left: 30px;
     fill: #1d1d1d;
-    height: 100px;
+    height: 96px;
   }
 
   &:hover {
@@ -51,6 +51,7 @@
   }
 
   &__text {
+    margin-bottom: spacer("6x");
     @include media-breakpoint-down(md) {
       text-align: center;
     }
@@ -117,8 +118,6 @@
   }
 
   .card-img-wrapper {
-    // max-width: 200px;
-    // max-height: 200px;
     text-align: center;
     overflow: hidden;
     position: relative;
@@ -180,7 +179,7 @@
 //5-screen students-reviews
 
 .csc-student-reviews {
-  padding: 30px 0 40px;
+  padding: spacer("8x") 0 spacer("10x");
   background-color: $light;
 
   .card-columns {
@@ -198,8 +197,8 @@
 .social-media {
   display: flex;
   flex-flow: column;
-  padding: 2rem 1.5rem 1rem;
-  margin-bottom: 1rem;
+  padding: spacer("8x") spacer("6x") spacer("2x");
+  margin-bottom: spacer("4x");
   background-size: cover;
   @include media-breakpoint-down(md) {
     text-align: center;
@@ -207,7 +206,7 @@
   }
   &__text {
     color: $white;
-    margin: 1rem 0;
+    margin: spacer("4x") 0;
     overflow: hidden;
     width: 100%; //fix for IE
 

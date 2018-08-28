@@ -14,8 +14,8 @@ $user-card-gutter-width: $grid-gutter-width / 2;
 .user-card {
   float: left; // for older browsers
   vertical-align: top;
-  line-height: 1.25;
-  margin-bottom: 32px;
+  line-height: $line-height-sm;
+  margin-bottom: spacer("8x");
   padding-left: $user-card-gutter-width;
   padding-right: $user-card-gutter-width;
 
@@ -34,7 +34,7 @@ $user-card-gutter-width: $grid-gutter-width / 2;
 
 .user-card__photo {
   position: relative;
-  margin: 0 auto 5px;
+  margin: 0 auto spacer("1x");
   padding-bottom: 139.75%; // calc((100% - #{$border-width} * 2) * 1.4
   overflow: hidden;
   background: $gray-lighter;
@@ -63,12 +63,12 @@ $user-card-gutter-width: $grid-gutter-width / 2;
 }
 
 .achievements__item {
-  margin-bottom: 5px;
+  margin-bottom: spacer("1x");
   transition: all 200ms;
   &:hover {
     transform: scale(1.3);
     transition: all 200ms ease;
-    padding-bottom: 4px;
+    padding-bottom: spacer("1x");
   }
 }
 

@@ -1,21 +1,9 @@
-$input-padding-y:                       .875rem;
-$input-padding-x:                       .75rem;
-$input-line-height:                     1.125;
-
-$input-padding-y-sm:                    $input-btn-padding-y-sm !default;
-$input-padding-x-sm:                    $input-btn-padding-x-sm !default;
-$input-line-height-sm:                  $input-btn-line-height-sm !default;
-
-$input-padding-y-lg:                    $input-btn-padding-y-lg !default;
-$input-padding-x-lg:                    $input-btn-padding-x-lg !default;
-$input-line-height-lg:                  $input-btn-line-height-lg !default;
-
-$input-bg:                              $gray-lighter !default;
-$input-disabled-bg:                     $gray-disable-dark !default;
+$input-bg:                              $white;
+$input-disabled-bg:                     $gray-disable-dark;
 
 $input-color:                           $gray-darker;
-$input-border-color:                    $gray-lighter;
-$input-border-color-hover:              darken($gray-lighter, 10%);
+$input-border-color:                    darken($gray-lighter, 10%);
+$input-border-color-hover:              $gray-dark;
 $input-border-width:                    $input-btn-border-width !default;
 $input-box-shadow:                      inset 0 1px 1px rgba($black, .075) !default;
 
@@ -32,40 +20,20 @@ $input-focus-box-shadow:                $input-btn-focus-box-shadow !default;
 $input-placeholder-color:               $gray-dark !default;
 $input-plaintext-color:                 $body-color !default;
 
-$control-bg:                            $gray-lighter;
-$control-bg-hover:                      darken($gray-lighter, 20%);
+$control-bg:                            $white;
+$control-bg-hover:                      $input-border-color-hover;
 $control-checked-bg:                    $gray-dark;
-$control-disabled-bg:                   $gray-disable-light;
+$control-disabled-bg:                   $gray;
 $control-color:                         $black;
 $control-border-width:                  2px;
-$control-border-color:                  darken($gray-lighter, 10%);
+$control-border-color:                  $input-border-color;
 
 $input-height-border:                   $input-border-width * 2 !default;
 
-$input-height-inner:                    ($font-size-base * $input-btn-line-height) + ($input-btn-padding-y * 2) !default;
-$input-height:                          calc(#{$input-height-inner} + #{$input-height-border}) !default;
-
-$input-height-inner-sm:                 ($font-size-sm * $input-btn-line-height-sm) + ($input-btn-padding-y-sm * 2) !default;
-$input-height-sm:                       calc(#{$input-height-inner-sm} + #{$input-height-border}) !default;
-
-$input-height-inner-lg:                 ($font-size-lg * $input-btn-line-height-lg) + ($input-btn-padding-y-lg * 2) !default;
-$input-height-lg:                       calc(#{$input-height-inner-lg} + #{$input-height-border}) !default;
-
 $input-transition:                      border-color .15s ease-in-out;
 
-$form-text-margin-top:                  .25rem !default;
-
-$form-check-input-gutter:               1.25rem !default;
-$form-check-input-margin-y:             .3rem !default;
-$form-check-input-margin-x:             .25rem !default;
-
-$form-check-inline-margin-x:            .75rem !default;
-$form-check-inline-input-margin-x:      .3125rem !default;
-
-$form-group-margin-bottom:              1rem !default;
 
 // Form validation
-$form-feedback-margin-top:          $form-text-margin-top !default;
 $form-feedback-font-size:           $font-size-sm !default;
 $form-feedback-color:               $white;
 $form-feedback-valid-color:         green;
@@ -78,29 +46,29 @@ $form-feedback-invalid-color:       $red;
 @import "components/_forms/select";
 
 .ui.form {
-  margin-bottom: 40px;
+  margin-bottom: spacer("10x");
   overflow: hidden;
   border: $border-width solid $gray-lighter;
-  background: $white;
+  background: $gray-lighter;
   border-radius: $border-radius-lg;
   .form-body {
-    padding: 0 30px;
+    padding: 0 spacer("8x");
   }
   .field {
-    margin-bottom: 30px;
+    margin-bottom: spacer("6x");
     &:last-child {
-      margin-bottom: 40px;
+      margin-bottom: spacer("10x");
     }
   }
   .form-section {
-    margin-bottom: 30px;
+    margin-bottom: spacer("6x");
     .form_title._subtitle {
       padding: 0;
     }
     &::after {
       content: "";
-      margin: 10px -30px;
-      border-top: $hr-border-width solid $gray-disable-light;
+      margin: spacer("2x") -#{spacer("8x")};
+      border-top: $hr-border-width solid $hr-border-color;
       display: block;
     }
   }
@@ -113,39 +81,41 @@ $form-feedback-invalid-color:       $red;
   }
 
   .form_title {
-    padding: 30px 30px 0;
-    margin-bottom: 30px;
+    padding: spacer("8x") spacer("8x") 0;
+    margin-bottom: spacer("8x");
     h2, h3 {
       margin: 0;
     }
     p {
-      margin: 5px 0 0 0;
+      margin: spacer("1x") 0 0 0;
     }
     &.__inverse {
-      padding: 30px;
+      padding: spacer("8x");
       background: $gray-dark;
       color: $white;
     }
     &._subtitle {
       padding: 0;
-      margin-bottom: 20px;
+      margin-bottom: spacer("6x");
     }
   }
   &.__no-border {
     border: none;
     border-radius: 0;
+    background: transparent;
   }
 }
 
 .title-label {
   font-size: $font-size-content-base;
-  margin-bottom: 15px;
+  margin-bottom: spacer("4x");
 }
 
 .ui.form.survey {
+  background: $white;
   .survey-label{
     font-size: $h3-font-size;
     font-weight: $font-weight-light;
-    margin-bottom: 15px;
+    margin-bottom: spacer("4x");
   }
 }

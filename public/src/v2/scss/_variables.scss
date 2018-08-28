@@ -2,7 +2,7 @@
 //
 // Variables should follow the `$component-state-property-size` formula for
 // consistent naming. Ex: $nav-link-disabled-color and $modal-content-box-shadow-xs.
-
+@import "utils/spacer";
 //
 // Color system
 //
@@ -30,15 +30,6 @@ $colors: (
   "orange":     $orange,
   "teal":       $teal,
   "white":      $white,
-);
-
-$grays: (
-  "100": $gray-lighter,
-  "200": $gray-disable-light,
-  "300": $gray-lighter,
-  "400": $gray-dark,
-  "500": $gray-darker,
-  "600": $gray-disable-dark,
 );
 
 // Themes
@@ -90,14 +81,16 @@ $enable-print-styles:       true !default;
 // You can add more entries to the $spacers map, should you need more variation.
 
 // stylelint-disable
-$spacer: 1rem;
+$spacer: .25rem;
 $spacers: (
   0: 0,
-  1: ($spacer * .25),
-  2: ($spacer * .5),
-  3: $spacer,
-  4: ($spacer * 1.5),
-  5: ($spacer * 3)
+  "1x": ($spacer),
+  "2x": ($spacer * 2),
+  "3x": ($spacer * 3),
+  "4x": ($spacer * 4),
+  "6x": ($spacer * 6),
+  "8x": ($spacer * 8),
+  "10x": ($spacer * 10)
 );
 
 // This variable affects the `.h-*` and `.w-*` classes.
@@ -229,7 +222,7 @@ $h4-font-size:                $font-size-base * 1.25 !default;
 $h5-font-size:                $font-size-base !default;
 $h6-font-size:                $font-size-base !default;
 
-$headings-margin-bottom:      $spacer;
+$headings-margin-bottom:      spacer("4x");
 $headings-font-family:        inherit !default;
 $headings-font-weight:        $font-weight-light;
 $headings-line-height:        1.1 !default;
@@ -251,22 +244,17 @@ $mark-padding:                .2em !default;
 
 $dt-font-weight:              $font-weight-bold !default;
 
-$kbd-box-shadow:              inset 0 -.1rem 0 rgba($black, .25) !default;
-$nested-kbd-font-weight:      $font-weight-bold !default;
-
-$list-inline-padding:         .5rem !default;
-
 $mark-bg:                     #fcf8e3 !default;
 
-$hr-margin-y:                 $spacer !default;
+$hr-margin-y:                 spacer("4x");
 
 
 // Tables
 //
 // Customizes the `.table` component with basic values, each used across all table variations.
 
-$table-cell-padding:          .75rem !default;
-$table-cell-padding-sm:       .3rem !default;
+$table-cell-padding:          spacer("3x");
+$table-cell-padding-sm:       spacer("1x");
 $table-striped-order:         odd !default;
 $table-caption-color:         $text-muted !default;
 
@@ -274,21 +262,11 @@ $table-caption-color:         $text-muted !default;
 //
 // Shared variables that are reassigned to `$input-` and `$btn-` specific variables.
 
-$input-btn-padding-y:         .875rem !default;
-$input-btn-padding-x:         1.5rem !default;
 $input-btn-line-height:       1;
 
 $input-btn-focus-width:       0;
 $input-btn-focus-color:       rgba($component-active-bg, .25);
 $input-btn-focus-box-shadow:  0 0 0 $input-btn-focus-width $input-btn-focus-color;
-
-$input-btn-padding-y-sm:      .750rem !default;
-$input-btn-padding-x-sm:      1rem !default;
-$input-btn-line-height-sm:    1;
-
-$input-btn-padding-y-lg:      1.250rem !default;
-$input-btn-padding-x-lg:      1.5rem !default;
-$input-btn-line-height-lg:    1;
 
 $input-btn-border-width:      $border-width !default;
 
@@ -298,11 +276,11 @@ $btn-border-radius-lg: $border-radius-lg;
 $btn-border-radius-sm: $border-radius-sm;
 
 // Forms
-$label-margin-bottom:                   .5rem !default;
+$label-margin-bottom:               spacer("1x"); //Using in reboot.scss
 
 // Nav
 $nav-divider-color:                 $gray-disable-light !default;
-$nav-divider-margin-y:              ($spacer / 2) !default;
+$nav-divider-margin-y:              spacer("2x") !default;
 
 // Z-index master list
 //
