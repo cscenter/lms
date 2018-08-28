@@ -10,7 +10,7 @@ body{
 
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
-  margin-bottom: $headings-margin-bottom;
+  margin-bottom: spacer("4x");
   font-family: $headings-font-family;
   font-weight: $headings-font-weight;
   line-height: $headings-line-height;
@@ -20,7 +20,7 @@ h1, h2, h3, h4, h5, h6,
 h1,
 .h1 {
   font-size: $h1-font-size;
-  margin-bottom: $spacer*1.5;
+  margin-bottom: spacer("6x");
 }
 
 h2,
@@ -46,7 +46,7 @@ h6, .h6 {
 
 // Blockquotes
 .blockquote {
-  margin-bottom: $spacer;
+  margin-bottom: spacer("4x");
   font-size: $blockquote-font-size;
 }
 
@@ -78,7 +78,7 @@ h4 {
 }
 
 .title_description{
-  margin-bottom: 40px;
+  margin-bottom: spacer("8x");
 }
 
 
@@ -104,12 +104,12 @@ h4 {
   .content-block {
     ol, ul, dl {
       padding: 0;
-      margin: .5rem 0 1.5rem 3.5rem;
+      margin: spacer("2x") 0 spacer("6x") 3.5rem;
     }
     ul {
       list-style-type: none;
       li {
-        margin-bottom: .5rem;
+        margin-bottom: spacer("2x");
       }
       li::before {
         content: "\2014\a0";
@@ -120,7 +120,7 @@ h4 {
     }
     ol {
       li {
-        margin-bottom: .5rem;
+        margin-bottom: spacer("2x");
       }
     }
   }

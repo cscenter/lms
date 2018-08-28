@@ -28,8 +28,8 @@
   position: relative;
   border: 1px solid $border-color;
   border-radius: $border-radius-sm;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: spacer("4x");
+  margin-bottom: spacer("4x");
 
   &::after {
     content: " ";
@@ -52,4 +52,8 @@ aside{
     margin-bottom: 1rem;
     font-size: $font-size-sm;
   }
+}
+
+.responsive-card{
+  float: left; //For old browsers
 }

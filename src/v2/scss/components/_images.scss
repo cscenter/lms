@@ -22,7 +22,7 @@ $figure-caption-color:              $gray-dark;
 }
 
 .figure-img {
-  margin-bottom: ($spacer / 2);
+  margin-bottom: spacer("2x");
   line-height: 1;
 }
 

@@ -17,12 +17,12 @@
     .start-range{
       border-top-right-radius: 0 !important;
       border-bottom-right-radius: 0 !important;
-      border-right:$border-width solid $input-border-color-hover;
+      border-right:$border-width solid $input-border-color;
     }
     .end-range{
       border-top-left-radius: 0 !important;
       border-bottom-left-radius: 0 !important;
-      border-left:none
+      border-left:none;
     }
 
   }
@@ -34,9 +34,9 @@
   outline: none;
   -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
   text-align: left;
-  line-height: $input-line-height;
+  @include inputheight(48px);
   font-family: $font-family-base;
-  padding: $input-padding-y $input-padding-x;
+  padding: spacer("3x") spacer("4x");
   background: $input-bg;
   border: $input-border-width solid $input-border-color;
   color: $input-color;
@@ -211,7 +211,7 @@ flex-direction: row;
 .ui.input textarea {
   margin: 0;
   -webkit-appearance: none;
-  padding: $input-padding-x;
+  padding: spacer("4x");
   background: $input-bg;
   resize: vertical;
   outline: none;

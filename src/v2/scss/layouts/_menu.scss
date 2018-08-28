@@ -1,10 +1,6 @@
-$navbar-padding-y: .25rem;
-
-$nav-link-padding-x: 8px;
-$nav-link-padding-y: 8px;
 $nav-link-line-height: 32px;
 // logo, navbar-toggler, .nav-link and reg button should have the same size
-$nav-link-height: ($nav-link-line-height + $nav-link-padding-y * 2);
+$nav-link-height: ($nav-link-line-height + #{spacer("4x")});
 // Hack to show rows with menu items vertically closer to each other.
 // Remove if in fact it's not a problem
 $nav-link-real-line-height: 24px;
@@ -14,7 +10,7 @@ $nav-link-mobile-padding-x: 16px;
 $navbar-toggler-padding-y: $grid-gutter-width / 2 - 1;  // humburger size is 18px, to fit in 8pt grid, remove px here
 $navbar-toggler-padding-x: $grid-gutter-width / 2;
 $navbar-toggler-font-size: $font-size-lg;
-$navbar-toggler-border-radius: $btn-border-radius;
+$navbar-toggler-border-radius: $border-radius;
 
 @import "hamburger";
 
@@ -45,8 +41,8 @@ $navbar-toggler-border-radius: $btn-border-radius;
 .navbar-logo {
   display: flex; // ie 10 fix
   //align-self: center;
-  padding: $nav-link-padding-y $nav-link-padding-x;
-  margin-left: -$nav-link-padding-x;
+  padding: spacer("2x");
+  margin-left: -#{spacer("2x")};
 
   ._logo-csc {
     height: 24px;
@@ -117,13 +113,13 @@ $navbar-toggler-border-radius: $btn-border-radius;
 
 
   .nav-link {
-    padding: $nav-link-padding-y $nav-link-padding-x;
+    padding: spacer("2x");
   }
 }
 
 .navbar-main {
   @include media-breakpoint-up(lg) {
-    padding: $navbar-padding-y 0;
+    padding: spacer("1x") 0;
   }
 
   .nav-link {
@@ -142,6 +138,10 @@ $navbar-toggler-border-radius: $btn-border-radius;
   width: 100%;
   @include media-breakpoint-up(lg) {
     display: none;
+  }
+
+  .sprite-img._arrow-bottom {
+    fill: $white;
   }
 
   ul {
@@ -209,7 +209,7 @@ $navbar-toggler-border-radius: $btn-border-radius;
       color: $white;
     }
     &:last-child {
-      padding: 10px 20px 30px 20px;
+      padding: spacer("3x") spacer("4x") spacer("8x");
     }
     &._active {
       color: $white;
@@ -230,13 +230,13 @@ $navbar-toggler-border-radius: $btn-border-radius;
   align-items: center;
   font-size: $font-size-base;
   display: none;
-  background-color: $gray-disable-light;
+  background-color: $gray-light;
   @include media-breakpoint-up(lg) {
     display: flex;
   }
 
   .navbar-nav {
-    margin-left: -$nav-link-padding-x;
+    margin-left: -#{spacer("2x")};
   }
 
   .nav-item {
@@ -256,10 +256,10 @@ $navbar-toggler-border-radius: $btn-border-radius;
   }
 }
 
-.menu-btn-reg {
-  padding: ($nav-link-padding-y / 2) $nav-link-padding-x;
-  margin: ($nav-link-padding-y / 2) 0 ($nav-link-padding-y / 2) auto;
-  line-height: $nav-link-line-height - 2 * $btn-border-width;
+.btn.menu-btn-reg {
+  padding: spacer("1x") spacer("2x");
+  margin: spacer("1x") 0 spacer("1x") auto;
+  line-height: $nav-link-line-height - 2 * $input-btn-border-width;
 }
 
 .dropdown-user-menu {
@@ -272,6 +272,8 @@ $navbar-toggler-border-radius: $btn-border-radius;
 
   &.show {
     .btn {
+      box-shadow: none;
+
       .user-menu-img {
         box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
       }
@@ -288,18 +290,18 @@ $navbar-toggler-border-radius: $btn-border-radius;
     color: $white;
     border: 0;
     background-color: rgba(0, 0, 0, 0);
-    padding: $nav-link-padding-y $nav-link-padding-x;
+    padding: spacer("2x");
     line-height: $nav-link-line-height;
-    box-shadow: none;
 
     &:focus {
+      box-shadow: none;
       .user-menu-img {
         box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
       }
     }
 
     span {
-      margin-right: 10px;
+      margin-right: spacer("3x");
       display: none;
       @include media-breakpoint-up(lg) {
         display: inline-block;

@@ -24,9 +24,7 @@ $ ./manage.py runserver 8000
 $ npm run gulp:build
 # Build js with webpack
 npm run prod
-# In ITerm2 you can use `make` command
+# In iTerm2 you can use `make` command
 ```
 
 TODO: browserify-incremental
-
-TODO: replace autoprefixer with postcss?
