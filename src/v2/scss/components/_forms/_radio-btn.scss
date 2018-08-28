@@ -48,7 +48,6 @@
 
 .custom-radiobtn.fill-radiobtn.disabled {
   .fill-control-indicator {
-    opacity: .6;
     background: $control-disabled-bg;
     border: $border-width solid $control-disabled-bg;
     &:hover .fill-control-indicator {
@@ -56,7 +55,14 @@
     }
   }
   .fill-control-description {
-    opacity: .6;
+    color: $control-disabled-bg;
+  }
+  & .fill-control-input:checked ~ .fill-control-description {
+    color: $control-disabled-bg;
+  }
+  & .fill-control-input:checked ~ .fill-control-indicator {
+        background: $control-disabled-bg;
+    border: $border-width solid $control-disabled-bg;
   }
 }
 

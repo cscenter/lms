@@ -7,7 +7,11 @@
 @import "bootstrap/scss/utilities/display";
 @import "utils/mixins";
 @import "utils/misc";
+@import "utils/line-height-calc";
 
+@import "components/sprites"; // Before: menu
+
+@import "layouts/menu";
 @import "layouts/base";
 
 @import "components/forms";
@@ -19,8 +23,6 @@
 @import "components/dropdown";
 @import "components/grid";
 @import "components/tooltips";
-@import "components/sprites"; // Before: menu
-@import "components/menu";  // After: buttons
 @import "components/typography";  // After: reboot
 @import "components/misc";
 @import "components/pagination";

@@ -1,6 +1,6 @@
 // Variables
 $dropdown-min-width: 10rem;
-$dropdown-padding-y: .5rem;
+$dropdown-padding-y: spacer("2x");
 $dropdown-spacer: 0;
 $dropdown-bg: $white;
 $dropdown-border-color: rgba($black, .15);
@@ -17,8 +17,8 @@ $dropdown-link-active-bg: $component-active-bg;
 
 $dropdown-link-disabled-color: $gray-disable-dark;
 
-$dropdown-item-padding-y: .2rem;
-$dropdown-item-padding-x: .8rem;
+$dropdown-item-padding-y: spacer("1x");
+$dropdown-item-padding-x: spacer("3x");
 
 $dropdown-header-color: $gray-disable-dark;
 $dropdown-border-radius: 4px;

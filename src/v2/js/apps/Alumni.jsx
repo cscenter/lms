@@ -13,7 +13,6 @@ import {
 } from "../utils";
 
 
-// TODO: replace with HOC `UserCardFilter`
 class Alumni extends React.Component {
 
     constructor(props) {
@@ -24,8 +23,6 @@ class Alumni extends React.Component {
             ...props.initialState
         };
         this.fetch = _debounce(this.fetch, 300);
-        // FIXME: bind all functions here?
-        // https://github.com/erikras/react-redux-universal-hot-example/issues/1010
     }
 
     handleYearChange = (year) => {
@@ -48,9 +45,9 @@ class Alumni extends React.Component {
 
     componentDidMount() {
         const filterState = this.getFilterState(this.state);
-        console.log("filterState", filterState);
+        console.debug("Alumni: filterState", filterState);
         const newPayload = this.getRequestPayload(filterState);
-        console.log("newPayload", newPayload);
+        console.debug("Alumni: newPayload", newPayload);
         this.fetch(newPayload);
     };
 
@@ -75,8 +72,10 @@ class Alumni extends React.Component {
     }
 
     getRequestPayload(filterState) {
-        console.log(filterState);
         Object.keys(filterState).map((k) => {
+            if (k === "year") {
+                filterState[k] = filterState[k]["value"];
+            }
             // Convert null and undefined to empty string
             filterState[k] = !filterState[k] ? "" : filterState[k];
         });
@@ -84,7 +83,7 @@ class Alumni extends React.Component {
     }
 
     fetch = (payload) => {
-        console.log("fetch", this.props, payload);
+        console.debug("Alumni: fetch", this.props, payload);
         this.serverRequest = $.ajax({
             type: "GET",
             url: this.props.entry_url,
@@ -105,7 +104,6 @@ class Alumni extends React.Component {
         if (this.state.loading) {
             showBodyPreloader();
         }
-        //TODO: prevent rerendering if query < 3 symbols
         const {year, city, area} = this.state;
         const {years, cities, areas} = this.props;
 

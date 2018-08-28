@@ -138,7 +138,7 @@ class Pagination extends React.Component {
 
                 {pager}
 
-                <li className="page-item d-md-none">{`${currentPage}\u00A0из\u00A0${totalPages}`}</li>
+                <li className="page-status d-md-none">{`${currentPage}\u00A0из\u00A0${totalPages}`}</li>
 
                 <li className={`page-item${currentPage === totalPages ? " disabled" : ""}`}>
                     <button className="page-link"
