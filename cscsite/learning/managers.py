@@ -189,7 +189,8 @@ class CourseOfferingQuerySet(models.QuerySet):
                 .defer("description")
                 .select_related("semester")
                 .filter(course=co.course_id,
-                        semester__index__lt=co.semester.index)
+                        semester__index__lte=co.semester.index)
+                .in_city(co.get_city())
                 .exclude(reviews__isnull=True)
                 .exclude(reviews__exact='')
                 .order_by("-semester__index"))

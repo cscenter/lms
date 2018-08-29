@@ -501,3 +501,17 @@ def test_gradefield():
     sa.save()
     sa.refresh_from_db()
     assert str(sa.grade) == '20.5'
+
+
+@pytest.mark.django_db
+def test_course_offering_get_reviews(settings):
+    c1, c2 = CourseFactory.create_batch(2)
+    CourseOfferingFactory(course=c1, city_id='spb', semester__year=2015,
+                          reviews='aaa')
+    CourseOfferingFactory(course=c2, city_id='spb', semester__year=2015,
+                          reviews='zzz')
+    co = CourseOfferingFactory(course=c1, city_id='spb',
+                               semester__year=2016, reviews='bbb')
+    CourseOfferingFactory(course=c1, city_id='nsk', semester__year=2016,
+                          reviews='ccc')
+    assert len(co.get_reviews()) == 2

@@ -453,6 +453,7 @@ class CourseOffering(TimeStampedModel):
         return ts
 
     def get_reviews(self):
+        """Collect reviews from passed courses"""
         return self.__class__.objects.reviews_for_course(self)
 
     def failed_by_student(self, student, enrollment=None) -> bool:
