@@ -51,7 +51,7 @@ class CourseOfferingDetailView(DetailView):
             _ = int(year)
         except ValueError:
             return HttpResponseBadRequest()
-        # Redirect old style links
+        # Redirects old style links
         if "tab" in request.GET:
             url_params = dict(self.kwargs)
             try:
@@ -61,9 +61,9 @@ class CourseOfferingDetailView(DetailView):
             except NoReverseMatch:
                 url = reverse("course_offering_detail", kwargs=url_params)
             return HttpResponseRedirect(url)
-        # Can redirect to login if tab not available for authenticated user
+        # Redirects to login page if tab is not visible to authenticated user
         context = self.get_context_data()
-        # Redirect to club if course was created before center establishment.
+        # Redirects to club if course was created before center establishment.
         co = context[self.context_object_name]
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
             index = get_term_index(CENTER_FOUNDATION_YEAR,
@@ -143,6 +143,7 @@ class CourseOfferingDetailView(DetailView):
                          ((u.is_authenticated and
                            u.status != STUDENT_STATUS.expelled) or
                           is_club_site()))
+        # TODO: Combine exists and visible logic
         tabs = [
             Tab("about", pgettext_lazy("course-tab", "About"),
                 exists=lambda: True,
