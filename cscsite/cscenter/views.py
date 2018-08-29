@@ -242,6 +242,25 @@ class TeachersView(generic.ListView):
         return context
 
 
+class TeachersV2View(TemplateView):
+    template_name = "cscenter/teachers.html"
+
+    def get_context_data(self, **kwargs):
+        app_data = {
+            "state": {
+                "city": self.kwargs.get("city", None),
+            },
+            "props": {
+                "entry_url": reverse("api:teachers"),
+                "cities": [{"label": str(v), "value": k} for k, v
+                           in settings.CITIES.items()],
+            }
+        }
+        return {
+            "app_data": app_data
+        }
+
+
 class AlumniView(generic.ListView):
     filter_by_year = None
     template_name = "users/alumni_list.html"
@@ -397,7 +416,7 @@ class AlumniHonorBoardView(TemplateView):
         return context
 
 
-class AlumniV2View(generic.TemplateView):
+class AlumniV2View(TemplateView):
     template_name = "cscenter/alumni.html"
 
     def get_context_data(self, **kwargs):

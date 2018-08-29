@@ -4,12 +4,11 @@ import { forceCheck } from 'react-lazyload';
 import _debounce from 'lodash-es/debounce';
 import $ from 'jquery';
 
-import FormSelect from 'components/FormSelect';
+import Select from 'components/Select';
 import SearchInput from 'components/SearchInput';
 import UserCardList from 'components/UserCardList';
 
 
-// TODO: replace with HOC `UserCardFilter`
 class App extends React.Component {
 
     constructor(props) {
@@ -17,8 +16,9 @@ class App extends React.Component {
         this.state = {
             "loading": true,
             "items": [],
+            ...props.initialState
         };
-        this.fetch = _debounce(this._fetch, 300);
+        this.fetch = _debounce(this.fetch, 300);
     }
 
     handleSearchInputChange = (value) => {
@@ -75,7 +75,7 @@ class App extends React.Component {
         return payload;
     }
 
-    _fetch = (payload) => {
+    fetch = (payload) => {
         this.serverRequest = $.ajax({
             type: "GET",
             url: this.props.init.entry_url,
@@ -113,7 +113,7 @@ class App extends React.Component {
                         />
                     </div>
                     <div className="col-lg-3">
-                        <FormSelect
+                        <Select
                             onChange={this.handleAreaChange}
                             value={area}
                             name="area"
@@ -124,7 +124,7 @@ class App extends React.Component {
                         />
                     </div>
                     <div className="col-lg-3">
-                        <FormSelect
+                        <Select
                             onChange={this.handleYearChange}
                             value={year}
                             name="year"
@@ -135,7 +135,7 @@ class App extends React.Component {
                         />
                     </div>
                     <div className="col-lg-3">
-                        <FormSelect
+                        <Select
                             onChange={this.handleCityChange}
                             value={city}
                             name="city"
