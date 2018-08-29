@@ -16,11 +16,11 @@ from users.factories import StudentFactory, CuratorFactory, UserFactory, \
 def test_enrolled_on_the_course():
     student = StudentFactory.create()
     co = CourseOfferingFactory()
-    assert student.enrollment_in_the_course(co.pk) is None
+    assert student.get_enrollment(co.pk) is None
     enrollment = EnrollmentFactory(student=student, course_offering=co)
-    assert student.enrollment_in_the_course(co.pk) is not None
+    assert student.get_enrollment(co.pk) is not None
     curator = CuratorFactory()
-    assert curator.enrollment_in_the_course(co.pk) is None
+    assert curator.get_enrollment(co.pk) is None
 
 
 @pytest.mark.django_db

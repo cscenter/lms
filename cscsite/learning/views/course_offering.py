@@ -13,7 +13,7 @@ from django.urls import reverse, NoReverseMatch
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
 from rest_framework.generics import ListAPIView
-from vanilla import DeleteView, UpdateView, CreateView
+from vanilla import DeleteView, UpdateView, CreateView, DetailView
 
 from api.permissions import CuratorAccessPermission
 from core.exceptions import Redirect
@@ -39,14 +39,13 @@ __all__ = ['CourseOfferingDetailView', 'CourseOfferingEditView',
 logger = logging.getLogger(__name__)
 
 
-class CourseOfferingDetailView(generic.DetailView):
+class CourseOfferingDetailView(DetailView):
     model = CourseOffering
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
     default_tab = "about"
 
     def get(self, request, *args, **kwargs):
-        # Validate GET-params
         try:
             year, _ = self.kwargs['semester_slug'].split("-", 1)
             _ = int(year)
@@ -62,9 +61,8 @@ class CourseOfferingDetailView(generic.DetailView):
             except NoReverseMatch:
                 url = reverse("course_offering_detail", kwargs=url_params)
             return HttpResponseRedirect(url)
-        self.object = self.get_object()
         # Can redirect to login if tab not available for authenticated user
-        context = self.get_context_data(object=self.object)
+        context = self.get_context_data()
         # Redirect to club if course was created before center establishment.
         co = context[self.context_object_name]
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
@@ -75,95 +73,68 @@ class CourseOfferingDetailView(generic.DetailView):
                 return HttpResponseRedirect(url)
         return self.render_to_response(context)
 
-    def get_object(self, queryset=None):
-        return get_object_or_404(self.get_queryset())
-
-    def get_queryset(self):
-        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        return (CourseOffering.objects
-                .in_city(self.request.city_code)
-                .filter(semester__type=semester_type,
-                        semester__year=year,
-                        course__slug=self.kwargs['course_slug'])
-                .select_related('course', 'semester')
-                .prefetch_related(
-                    Prefetch(
-                        'courseofferingteacher_set',
-                        queryset=(CourseOfferingTeacher
-                                  .objects
-                                  .select_related("teacher")
-                                  .prefetch_related("teacher__groups")),
-                        to_attr='course_teachers'
-                    ),
-                ))
-
     def get_context_data(self, *args, **kwargs):
-        co = self.object
-        user = self.request.user
-        student_enrollment = user.enrollment_in_the_course(co.pk)
-        is_enrolled = student_enrollment is not None
-        co_failed_by_student = co.failed_by_student(
-            user, enrollment=student_enrollment)
-        # `.course_teachers` attached in queryset
-        teachers_ids = (co.teacher_id for co in co.course_teachers)
-        is_actual_teacher = user.pk in teachers_ids
-        assignments = self.get_assignments(is_actual_teacher, is_enrolled,
-                                           co_failed_by_student)
-        course_reviews = co.enrollment_is_open and list(
-            CourseOffering.objects
-                .defer("description")
-                .select_related("semester")
-                .filter(course=co.course_id,
-                        semester__index__lt=co.semester.index)
-                .exclude(reviews__isnull=True)
-                .exclude(reviews__exact='')
-                .order_by("-semester__index"))
-        teachers_by_role = CourseOfferingTeacher.grouped(co.course_teachers)
+        co = self.get_object()
+        request_user = self.request.user
+        request_user_enrollment = request_user.get_enrollment(co.pk)
+        co_failed_by_student = (request_user_enrollment and
+                                co.failed_by_student(request_user,
+                                                     request_user_enrollment))
+        teachers_by_role = co.get_grouped_teachers()
         # Aggregate teachers contacts
         contacts = [ct for g in teachers_by_role.values() for ct in g
                     if len(ct.teacher.private_contacts.strip()) > 0]
-        # Override timezone to CS Center students for online course
+        # For correspondence course try to override timezone
         tz_override = None
-        if not is_actual_teacher and co.is_correspondence and user.city_code:
-            tz_override = settings.TIME_ZONES[user.city_id]
+        if (not co.is_actual_teacher(request_user) and co.is_correspondence
+                and request_user.city_code):
+            tz_override = settings.TIME_ZONES[request_user.city_id]
         # TODO: set default value if `tz_override` is None
-        # Course available for enrollment based on student city
         context = {
             'course_offering': co,
             'user_city': get_user_city_code(self.request),
             'tz_override': tz_override,
-            'co_failed_by_student': co_failed_by_student,
-            'is_enrolled': is_enrolled,
-            'is_actual_teacher': is_actual_teacher,
-            'assignments': assignments,
-            'news': co.courseofferingnews_set.all(),
-            'classes': self.get_classes(co),
-            'course_reviews': course_reviews,
             'teachers': teachers_by_role,
+            'co_failed_by_student': co_failed_by_student,
+            # TODO: replace with request_user_enrollment
+            'is_enrolled': request_user_enrollment is not None,
+            'is_actual_teacher': co.is_actual_teacher(request_user),
+            'course_reviews': co.enrollment_is_open and co.get_reviews(),
             'contacts': contacts,
+            'classes': self.get_classes(co),
+            'assignments': self.get_assignments(co, request_user_enrollment),
+            'news': co.courseofferingnews_set.all(),
         }
-        # Tab name should be already validated in url pattern.
-        active_tab_name = self.kwargs.get('tab', self.default_tab)
-        pane = self.make_tabbed_pane(context)
-        active_tab = pane[active_tab_name]
-        if not active_tab.exist():
-            raise Http404
-        elif not active_tab.visible:
-            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
-        context["tabs"] = pane
-        context["active_tab"] = active_tab_name
+        context["tabs"] = self.make_tabbed_pane(context)
         return context
 
+    def get_object(self):
+        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
+        qs = (CourseOffering.objects
+              .filter(semester__type=semester_type,
+                      semester__year=year,
+                      course__slug=self.kwargs['course_slug'])
+              .in_city(self.request.city_code)
+              .select_related('course', 'semester')
+              .prefetch_related(
+                    Prefetch(
+                        'courseofferingteacher_set',
+                        queryset=(CourseOfferingTeacher.objects
+                                  .select_related("teacher")
+                                  .prefetch_related("teacher__groups")))))
+        return get_object_or_404(qs)
+
     def make_tabbed_pane(self, c):
-        """Generate tabs list based on context"""
+        """Tabs visibility depends on context"""
         pane = TabbedPane()
         u = self.request.user
-        co = self.object
+        co = c['course_offering']
 
         def get_news_cnt():
             return (CourseOfferingNewsNotification.unread
                     .filter(course_offering_news__course_offering=co, user=u)
                     .count())
+
         unread_news_cnt = ((c.get("is_enrolled") or c.get('is_actual_teacher'))
                            and c.get("news") and get_news_cnt())
         can_view_assignments = (u.is_student or u.is_graduate or u.is_curator or
@@ -174,27 +145,36 @@ class CourseOfferingDetailView(generic.DetailView):
                           is_club_site()))
         tabs = [
             Tab("about", pgettext_lazy("course-tab", "About"),
-                exist=lambda: True, visible=True),
+                exists=lambda: True,
+                visible=True),
             Tab("contacts", pgettext_lazy("course-tab", "Contacts"),
-                exist=lambda: c['contacts'],
-                visible=(c['is_enrolled'] or u.is_curator) and c['contacts']),
-            # Note: reviews `exist` until enrollment is open
+                exists=lambda: len(c['contacts']) > 0,
+                visible=c['is_enrolled'] or u.is_curator),
+            # Note: reviews `exists` until enrollment is open
             Tab("reviews", pgettext_lazy("course-tab", "Reviews"),
-                exist=lambda: c['course_reviews'],
-                visible=(u.is_student or u.is_curator) and c['course_reviews']),
+                exists=lambda: len(c['course_reviews']) > 0,
+                visible=u.is_student or u.is_curator),
             Tab("classes", pgettext_lazy("course-tab", "Classes"),
-                exist=lambda: c['classes'],
-                visible=c['classes']),
+                exists=lambda: len(c['classes']) > 0,
+                visible=True),
             Tab("assignments", pgettext_lazy("course-tab", "Assignments"),
-                exist=lambda: c['assignments'],
-                visible=can_view_assignments and c['assignments']),
+                exists=lambda: len(c['assignments']) > 0,
+                visible=can_view_assignments),
             Tab("news", pgettext_lazy("course-tab", "News"),
-                exist=lambda: c['news'],
-                visible=can_view_news and c['news'],
+                exists=lambda: len(c['news']) > 0,
+                visible=can_view_news,
                 unread_cnt=unread_news_cnt)
         ]
         for t in tabs:
             pane.add(t)
+        # Tab name have to be validated by url() pattern.
+        show_tab = self.kwargs.get('tab', self.default_tab)
+        tab_to_show = pane[show_tab]
+        if not tab_to_show.exists():
+            raise Http404
+        elif not tab_to_show.visible:
+            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
+        pane.set_active_tab(tab_to_show)
         return pane
 
     @staticmethod
@@ -242,54 +222,40 @@ class CourseOfferingDetailView(generic.DetailView):
             classes.append(cc)
         return classes
 
-    def get_assignments(self, is_actual_teacher: bool, is_enrolled: bool,
-                        co_failed_by_student: bool) -> List[Assignment]:
+    def get_assignments(self, co: CourseOffering,
+                        request_user_enrollment) -> List[Assignment]:
         """
-        Build text-only list of course assignments or with links based on user
-        enrollment.
-        If course completed and student was enrolled on it - show links to
-        passed assignments only.
+        For enrolled students show links to there submissions. If course
+        is completed and student was enrolled in - show links to
+        successfully passed assignments only.
+        For course teachers (among all terms) show links to assignment details.
+        For others show text only.
         """
-        user = self.request.user
-        assignments_qs = (self.object.assignment_set
-                          .only("title", "course_offering_id", "is_online",
-                                "deadline_at")
-                          .prefetch_related("assignmentattachment_set")
-                          .order_by('deadline_at', 'title'))
-        # Prefetch progress on assignments for authenticated student
-        if is_enrolled:
-            assignments_qs = assignments_qs.prefetch_related(
-                Prefetch(
-                    "studentassignment_set",
-                    queryset=(StudentAssignment.objects
-                            .filter(student=user)
-                            .only("pk", "assignment_id", "grade")
-                            .annotate(student_comments_cnt=Count(Case(
-                                When(assignmentcomment__author_id=user.pk,
-                                     then=Value(1)),
-                                output_field=IntegerField())))
-                            .order_by("pk"))  # optimize by setting order
-                )
-            )
-        assignments = assignments_qs.all()
+        request_user = self.request.user
+        co_failed_by_student = (request_user_enrollment and
+                                co.failed_by_student(request_user,
+                                                     request_user_enrollment))
+        assignments = co.assignment_set.list()
+        if request_user_enrollment is not None:
+            assignments = assignments.with_progress(request_user)
+        assignments = assignments.all()  # enable query caching
         for a in assignments:
             to_details = None
-            if is_actual_teacher or user.is_curator:
+            if co.is_actual_teacher(request_user) or request_user.is_curator:
                 to_details = reverse("assignment_detail_teacher", args=[a.pk])
-            elif is_enrolled:
-                a_s = a.studentassignment_set.first()
-                if a_s is not None:
+            elif request_user_enrollment is not None:
+                student_progress = a.studentassignment_set.first()
+                if student_progress is not None:
                     # Hide link if student didn't try to solve assignment
-                    # in completed course. No comments and grade => no attempt
+                    # in completed course.
                     if (co_failed_by_student and
-                            not a_s.student_comments_cnt and
-                            (a_s.grade is None or a_s.grade == 0)):
+                            not student_progress.student_comments_cnt and
+                            (student_progress.grade is None or student_progress.grade == 0)):
                         continue
-                    to_details = a_s.get_student_url()
+                    to_details = student_progress.get_student_url()
                 else:
-                    logger.error("can't find StudentAssignment for "
-                                 "student ID {0}, assignment ID {1}"
-                                 .format(user.pk, a.pk))
+                    logger.info(f"no StudentAssignment for student ID "
+                                f"{request_user.pk}, assignment ID {a.pk}")
             setattr(a, 'magic_link', to_details)
         return assignments
 

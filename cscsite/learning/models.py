@@ -4,6 +4,7 @@ import datetime
 import logging
 import os.path
 import time
+from typing import Optional
 
 import pytz
 from bitfield import BitField
@@ -32,7 +33,7 @@ from core.db.models import GradeField
 from learning.managers import StudyProgramQuerySet, \
     CourseOfferingDefaultManager, EnrollmentDefaultManager, \
     EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet, \
-    StudentAssignmentManager
+    StudentAssignmentManager, AssignmentManager
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
@@ -429,16 +430,39 @@ class CourseOffering(TimeStampedModel):
             self.grading_type = grading_type
             self.save()
 
-    def failed_by_student(self, student, **kwargs) -> bool:
-        if (self.is_open or not self.is_completed or
-                student.is_anonymous or student.is_curator):
+    def is_actual_teacher(self, teacher):
+        return teacher.pk in (co.teacher_id for co in
+                              self.courseofferingteacher_set.all())
+
+    def get_grouped_teachers(self):
+        """
+        Returns teachers grouped by role.
+
+        A bit complicated to implement this logic on query level without
+        ORM hacking.
+        """
+        # TODO: replace with sql logic after drop sqlite compatibility
+        ts = {'lecturers': [], 'others': []}
+
+        def __cmp__(ct):
+            return -ct.is_lecturer, ct.teacher.last_name
+
+        for t in sorted(self.courseofferingteacher_set.all(), key=__cmp__):
+            slot = ts['lecturers'] if t.is_lecturer else ts['others']
+            slot.append(t)
+        return ts
+
+    def get_reviews(self):
+        return self.__class__.objects.reviews_for_course(self)
+
+    def failed_by_student(self, student, enrollment=None) -> bool:
+        if self.is_open or not self.is_completed:
             return False
         # The course is completed, check that student didn't fail it.
         bad_grades = [Enrollment.GRADES.unsatisfactory,
                       Enrollment.GRADES.not_graded]
-        if "enrollment" in kwargs:
-            e = kwargs["enrollment"]
-            return e.grade in bad_grades if e else False
+        if enrollment:
+            return enrollment.grade in bad_grades
         return (Enrollment.active
                 .filter(student_id=student.pk,
                         course_offering_id=self.pk,
@@ -446,7 +470,6 @@ class CourseOffering(TimeStampedModel):
                 .exists())
 
 
-@python_2_unicode_compatible
 class CourseOfferingTeacher(models.Model):
     # XXX: limit choices on admin form level due to bug https://code.djangoproject.com/ticket/11707
     teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -493,7 +516,6 @@ class CourseOfferingTeacher(models.Model):
         return ts
 
 
-@python_2_unicode_compatible
 class CourseOfferingNews(TimeStampedModel):
     course_offering = models.ForeignKey(
         CourseOffering,
@@ -844,7 +866,6 @@ class CourseClassAttachment(TimeStampedModel, object):
         return os.path.basename(self.material.name)
 
 
-@python_2_unicode_compatible
 class Assignment(TimeStampedModel):
     course_offering = models.ForeignKey(
         CourseOffering,
@@ -858,7 +879,6 @@ class Assignment(TimeStampedModel):
     deadline_at = models.DateTimeField(_("Assignment|deadline"))
     is_online = models.BooleanField(_("Assignment|can be passed online"),
                                     default=True)
-    # FIXME: rename this to "name"
     title = models.CharField(_("Asssignment|name"),
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
@@ -882,6 +902,8 @@ class Assignment(TimeStampedModel):
         blank=True)
 
     tracker = FieldTracker(fields=['deadline_at'])
+
+    objects = AssignmentManager()
 
     class Meta:
         ordering = ["created", "course_offering"]
@@ -965,7 +987,6 @@ def assignmentattach_upload_to(instance, filename):
         instance.assignment_id, filename))
 
 
-@python_2_unicode_compatible
 class AssignmentAttachment(TimeStampedModel, object):
     assignment = models.ForeignKey(
         Assignment,
@@ -1006,7 +1027,6 @@ class AssignmentAttachment(TimeStampedModel, object):
         })
 
 
-@python_2_unicode_compatible
 class StudentAssignment(TimeStampedModel):
     STATES = Choices(('not_submitted', _("Assignment|not submitted")),
                      ('not_checked', _("Assignment|not checked")),
@@ -1033,8 +1053,7 @@ class StudentAssignment(TimeStampedModel):
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("StudentAssignment|student"),
-        on_delete=models.CASCADE,
-        limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.STUDENT_CENTER})
+        on_delete=models.CASCADE)
     grade = GradeField(
         verbose_name=_("Grade"),
         null=True,
