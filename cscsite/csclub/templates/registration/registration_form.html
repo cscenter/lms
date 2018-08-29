@@ -8,11 +8,7 @@
 
 {% block content %}
     <h1>{% trans 'Registration' %}</h1>
-    <form method="post" action="">
-        {% csrf_token %}
-        {% crispy form %}
-        <input type="submit" class="btn btn-default" value="{% trans 'Submit' %}" />
-    </form>
+    {% crispy form %}
 {% endblock %}
 
 
