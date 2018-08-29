@@ -3,12 +3,38 @@ from typing import List
 from django.apps import apps
 from django.conf import settings
 from django.db import models
-from django.db.models import query, Prefetch, Q
+from django.db.models import query, Prefetch, Q, Count, Case, When, Value, \
+    IntegerField
 
 from core.utils import is_club_site
 from learning.calendar import get_bounds_for_calendar_month
 from learning.settings import SEMESTER_TYPES, CENTER_FOUNDATION_YEAR
 from learning.utils import get_term_index
+
+
+class AssignmentQuerySet(query.QuerySet):
+    def list(self):
+        return (self
+                .only("title", "course_offering_id", "is_online", "deadline_at")
+                .prefetch_related("assignmentattachment_set")
+                .order_by('deadline_at', 'title'))
+
+    def with_progress(self, student):
+        """Prefetch progress on assignments for student"""
+        from learning.models import StudentAssignment
+        qs = (StudentAssignment.objects
+              .only("pk", "assignment_id", "grade")
+              .filter(student=student)
+              .annotate(student_comments_cnt=Count(
+                Case(When(assignmentcomment__author_id=student.pk,
+                          then=Value(1)),
+                     output_field=IntegerField())))
+              .order_by("pk"))  # optimize by overriding default order
+        return self.prefetch_related(
+            Prefetch("studentassignment_set", queryset=qs))
+
+
+AssignmentManager = models.Manager.from_queryset(AssignmentQuerySet)
 
 
 class StudentAssignmentQuerySet(query.QuerySet):
@@ -157,6 +183,16 @@ class CourseOfferingQuerySet(models.QuerySet):
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',
                           'course__name'))
+
+    def reviews_for_course(self, co):
+        return (self
+                .defer("description")
+                .select_related("semester")
+                .filter(course=co.course_id,
+                        semester__index__lt=co.semester.index)
+                .exclude(reviews__isnull=True)
+                .exclude(reviews__exact='')
+                .order_by("-semester__index"))
 
 
 class _CourseOfferingDefaultManager(models.Manager):

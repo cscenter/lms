@@ -576,11 +576,12 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
             user_groups.add(self.group.STUDENT_CLUB)
         return user_groups
 
-    def enrollment_in_the_course(self, course_offering_id) -> Optional[Enrollment]:
-        enrollment_qs = Enrollment.active.filter(
-            student=self, course_offering_id=course_offering_id)
+    def get_enrollment(self, course_offering_id) -> Optional[Enrollment]:
         if self.is_student or self.is_graduate:
-            return enrollment_qs.first()
+            return (Enrollment.active
+                    .filter(student=self,
+                            course_offering_id=course_offering_id)
+                    .first())
         return None
 
     # TODO: move to Project manager?
@@ -778,5 +779,5 @@ class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
     def __str__(self):
         return 'NotAuthenticatedUser'
 
-    def enrollment_in_the_course(self, course_offering_id: int) -> Optional[Enrollment]:
+    def get_enrollment(self, course_offering_id: int) -> Optional[Enrollment]:
         return None
