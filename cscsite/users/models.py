@@ -1,4 +1,5 @@
 import base64
+import functools
 import logging
 from random import choice
 from string import ascii_lowercase, digits
@@ -8,6 +9,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import prefetch_related_objects
 from django.urls import reverse
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
@@ -577,11 +579,20 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         return user_groups
 
     def get_enrollment(self, course_offering_id) -> Optional[Enrollment]:
+        """
+        Query enrollment from db on first call and cache the result. Cache
+        won't be refreshed if enrollment was deleted or changed after call.
+        """
         if self.is_student or self.is_graduate:
-            return (Enrollment.active
-                    .filter(student=self,
-                            course_offering_id=course_offering_id)
-                    .first())
+            cache_key = f"_student_enrollment_{course_offering_id}"
+            if not hasattr(self, cache_key):
+                e = (Enrollment.active
+                     .filter(student=self,
+                             course_offering_id=course_offering_id)
+                     .order_by()
+                     .first())
+                setattr(self, cache_key, e)
+            return getattr(self, cache_key)
         return None
 
     # TODO: move to Project manager?

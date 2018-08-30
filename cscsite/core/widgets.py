@@ -1,11 +1,5 @@
-# -*- coding: utf-8 -*-
-
-from collections import OrderedDict, namedtuple
-from typing import NamedTuple, Callable
-
 from django import forms
-from django.utils.translation import ugettext_lazy as _
-from django_filters.widgets import RangeWidget, SuffixedMultiWidget
+from django_filters.widgets import RangeWidget
 
 from core.admin import city_aware_to_naive
 from learning.settings import DATE_FORMAT_RU
@@ -34,42 +28,6 @@ class DateTimeRangeWidget(RangeWidget):
                                           "autocomplete": "off",
                                           "placeholder": "По"}))
         super(RangeWidget, self).__init__(widgets, attrs)
-
-
-class Tab(NamedTuple):
-    target: str
-    name: str
-    exists: Callable = lambda: False
-    visible: bool = False
-    unread_cnt: bool = 0
-
-
-class TabbedPane:
-    def __init__(self):
-        self._tabs = {}
-        self._active_tab = None
-
-    def add(self, tab):
-        if not isinstance(tab, Tab):
-            raise TypeError("Provide an instance of Tab")
-        if not tab.exists:
-            tab.visible = False
-        self._tabs[tab.target] = tab
-
-    def set_active_tab(self, tab):
-        if tab.target not in self._tabs or not self._tabs[tab.target].visible:
-            raise ValueError(f"Can't' set tab {tab} as active")
-        self._active_tab = tab
-
-    @property
-    def active_tab(self):
-        return self._active_tab
-
-    def __iter__(self):
-        return iter(self._tabs.items())
-
-    def __getitem__(self, item):
-        return self._tabs[item]
 
 
 class DateInputAsTextInput(forms.DateInput):
