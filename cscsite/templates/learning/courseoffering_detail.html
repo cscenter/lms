@@ -31,20 +31,18 @@
             {% endif %}
 
             <ul class="nav nav-tabs square" role="tablist" id="course-offering-detail-page__tablist">
-                {% for tab_code, tab in tabs %}
-                    {% if tab.exists and tab.visible %}
-                        <li role="presentation" {% if tab.target == tabs.active_tab.target %}class="active"{% endif %}>
-                            <a role="tab"
-                               aria-expanded="{% if tab.target == tabs.active_tab.target %}true{% else %}false{% endif %}"
-                               aria-controls="course-{{ tab.target }}"
-                               data-toggle="tab"
-                               data-target="#course-{{ tab.target }}"
-                               data-has-unread="{% if tab.unread_cnt > 0 %}true{% else %}false{% endif %}"
-                               href="{{ course_offering.get_absolute_url }}{{ tab.target }}/">
-                                {{ tab.name }}{% if tab.unread_cnt > 0 %} <span class="badge badge-success">+{{ tab.unread_cnt }}</span>{% endif %}
-                            </a>
-                        </li>
-                    {% endif %}
+                {% for tab_code, tab in tabs.items %}
+                    <li role="presentation" {% if tab.target == tabs.active_tab.target %}class="active"{% endif %}>
+                        <a role="tab"
+                           aria-expanded="{% if tab.target == tabs.active_tab.target %}true{% else %}false{% endif %}"
+                           aria-controls="course-{{ tab.target }}"
+                           data-toggle="tab"
+                           data-target="#course-{{ tab.target }}"
+                           data-has-unread="{% if tab.unread_cnt > 0 %}true{% else %}false{% endif %}"
+                           href="{{ course_offering.get_absolute_url }}{{ tab.target }}/">
+                            {{ tab.name }}{% if tab.unread_cnt > 0 %} <span class="badge badge-success">+{{ tab.unread_cnt }}</span>{% endif %}
+                        </a>
+                    </li>
                 {% endfor %}
             </ul>
 
@@ -65,10 +63,10 @@
                 </div>
                 {% endwith %}
 
+                {% if "contacts" in tabs %}
                 {% with tab=tabs.contacts %}
-                {% if tab.exists and tab.visible %}
                     <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-contacts">
-                    {% for course_teacher in contacts %}
+                    {% for course_teacher in tab.content %}
                         {% with user_object=course_teacher.teacher %}
                             <h4>{{ user_object.get_full_name }}</h4>
                             {% markdown 3600 "user_private_contacts" user_object.pk user_object.modified %}
@@ -76,24 +74,24 @@
                         {% endwith %}
                     {% endfor %}
                     </div>
-                {% endif %}
                 {% endwith %}
+                {% endif %}
 
+                {% if "reviews" in tabs %}
                 {% with tab=tabs.reviews %}
-                {% if tab.exists and tab.visible %}
                     <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-reviews">
-                        {% for co in course_reviews %}
+                        {% for co in tab.content %}
                             <h4>{{ co.semester|title }}</h4>
                               {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
                                 {{ co.reviews }}
                               {% endmarkdown %}
                         {% endfor %}
                     </div>
-                {% endif %}
                 {% endwith %}
+                {% endif %}
 
+                {% if "classes" in tabs %}
                 {% with tab=tabs.classes %}
-                {% if tab.exists and tab.visible %}
                     <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-classes">
                       <table class="table timetable" width="100%">
                         <thead>
@@ -104,7 +102,7 @@
                           <th style="width: 110px;">{% trans "Materials" %}</th>
                         </tr>
                         </thead>
-                        {% for class in classes %}
+                        {% for class in tab.content %}
                         <tr>
                             <td>{{ class.date|date:"d E" }}<br><span class="text-muted">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</span></td>
                           <td>
@@ -123,11 +121,11 @@
                         {% endfor %}
                       </table>
                     </div>
-                {% endif %}
                 {% endwith %}
+                {% endif %}
 
+                {% if "assignments" in tabs %}
                 {% with tab=tabs.assignments %}
-                {% if tab.exists and tab.visible %}
                     <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-assignments">
                         <table class="table timetable">
                         <thead>
@@ -138,7 +136,7 @@
                               <th style="width: 110px;">Файлы</th>
                             </tr>
                         </thead>
-                        {% for assignment in assignments %}
+                        {% for assignment in tab.content %}
                             <tr>
                                 <td>
                                     <div class="assignment-deadline">
@@ -157,7 +155,7 @@
                                 <td>{{ assignment.is_online|yesno:_("Yes,No") }}</td>
                                 <td>
                                     {% for attachment in assignment.assignmentattachment_set.all %}
-                                        {% if user.is_curator or is_actual_teacher or is_enrolled %}
+                                        {% if user.is_curator or is_actual_teacher or request_user_enrollment is not None %}
                                             <a href="{{ attachment.file_url }}">{{ attachment.file_ext }}</a>{% if not forloop.last %}, {% endif %}
                                         {% else %}
                                             {{ attachment.file_ext }}{% if not forloop.last %}, {% endif %}
@@ -170,14 +168,13 @@
                         {% endfor %}
                       </table>
                     </div>
-                {% endif %}
                 {% endwith %}
+                {% endif %}
 
+                {% if "news" in tabs %}
                 {% with tab=tabs.news %}
-                    {% if tab.exists and tab.visible %}
                         <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-news">
-                        {% with course_news=news %}
-                        {% for news in course_news %}
+                        {% for news in tab.content %}
                             <div class="panel bg-gray" id="news-{{ news.pk }}">
                                 <div class="panel-body">
                                     {% call_method news "created_local" tz_override as news_created_local %}
@@ -198,10 +195,9 @@
                                 {% endif %}
                             </div>
                         {% endfor %}
-                        {% endwith %}
                         </div>
-                    {% endif %}
                 {% endwith %}
+                {% endif %}
             </div>
     </div>
 
@@ -216,7 +212,7 @@
             {% endif %}
             {% if request.user.is_active_student and course_offering.enrollment_is_open %}
                 {% if course_offering.get_city == user_city or course_offering.is_correspondence %}
-                    {% if is_enrolled %}
+                    {% if request_user_enrollment is not None %}
                         <a href="{{ course_offering.get_unenroll_url }}"
                            class="btn btn-danger btn-block">{% trans "Unenroll from the course" %}
                         </a>
@@ -240,7 +236,7 @@
                 {% endif %}
             {% endif %}
             {% if course_offering.survey_url %}
-                {% if is_enrolled or user.is_curator %}
+                {% if request_user_enrollment is not None or user.is_curator %}
                     <a class=" btn btn-default btn-block btn-success"
                        href="{{ course_offering.survey_url }}"
                        target="_blank">{% trans "Start survey" %}</a>

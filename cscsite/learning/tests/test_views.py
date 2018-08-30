@@ -211,32 +211,32 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         co_other = CourseOfferingFactory.create()
         url = co.get_absolute_url()
         ctx = self.client.get(url).context
-        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(None, ctx['request_user_enrollment'])
         self.assertEqual(False, ctx['is_actual_teacher'])
         self.doLogin(student)
         ctx = self.client.get(url).context
-        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(None, ctx['request_user_enrollment'])
         self.assertEqual(False, ctx['is_actual_teacher'])
         EnrollmentFactory.create(student=student, course_offering=co_other)
         ctx = self.client.get(url).context
-        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(None, ctx['request_user_enrollment'])
         self.assertEqual(False, ctx['is_actual_teacher'])
         EnrollmentFactory.create(student=student, course_offering=co)
         ctx = self.client.get(url).context
-        self.assertEqual(True, ctx['is_enrolled'])
+        self.assertEqual(True, ctx['request_user_enrollment'] is not None)
         self.assertEqual(False, ctx['is_actual_teacher'])
         self.client.logout()
         self.doLogin(teacher)
         ctx = self.client.get(url).context
-        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(None, ctx['request_user_enrollment'])
         self.assertEqual(False, ctx['is_actual_teacher'])
         CourseOfferingTeacherFactory(course_offering=co_other, teacher=teacher)
         ctx = self.client.get(url).context
-        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(None, ctx['request_user_enrollment'])
         self.assertEqual(False, ctx['is_actual_teacher'])
         CourseOfferingTeacherFactory(course_offering=co, teacher=teacher)
         ctx = self.client.get(url).context
-        self.assertEqual(False, ctx['is_enrolled'])
+        self.assertEqual(None, ctx['request_user_enrollment'])
         self.assertEqual(True, ctx['is_actual_teacher'])
 
     def test_assignment_list(self):
@@ -256,7 +256,7 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         a_s.delete()
         with LogCapture(level=logging.INFO) as l:
             self.assertEqual(200, self.client.get(url).status_code)
-            l.check(('learning.views.course_offering',
+            l.check(('learning.widgets',
                      'INFO',
                      f"no StudentAssignment for "
                      f"student ID {student.pk}, assignment ID {a.pk}"))

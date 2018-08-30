@@ -459,7 +459,7 @@ class CourseOffering(TimeStampedModel):
     def failed_by_student(self, student, enrollment=None) -> bool:
         if self.is_open or not self.is_completed:
             return False
-        # The course is completed, check that student didn't fail it.
+        # Checks that student didn't fail the completed course
         bad_grades = [Enrollment.GRADES.unsatisfactory,
                       Enrollment.GRADES.not_graded]
         if enrollment:

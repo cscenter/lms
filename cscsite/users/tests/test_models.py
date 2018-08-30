@@ -18,6 +18,8 @@ def test_enrolled_on_the_course():
     co = CourseOfferingFactory()
     assert student.get_enrollment(co.pk) is None
     enrollment = EnrollmentFactory(student=student, course_offering=co)
+    assert student.get_enrollment(co.pk) is None  # query was cached
+    delattr(student, f"_student_enrollment_{co.pk}")
     assert student.get_enrollment(co.pk) is not None
     curator = CuratorFactory()
     assert curator.get_enrollment(co.pk) is None

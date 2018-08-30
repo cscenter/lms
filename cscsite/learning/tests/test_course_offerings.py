@@ -271,3 +271,11 @@ def test_update_composite_fields(curator, client, mocker):
     # Slides were uploaded on first class
     assert co.materials_slides
     assert not co.materials_files
+
+
+@pytest.mark.django_db
+def test_course_offering_news_permissions(client):
+    news = CourseOfferingNewsFactory(course_offering__city_id='spb')
+    co = news.course_offering
+    response = client.get(co.get_absolute_url())
+    # assert response.context["news"]
