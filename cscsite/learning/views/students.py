@@ -148,6 +148,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, generic.View):
                 and city_code != course_offering.get_city()):
             return HttpResponseForbidden()
         # Reject if capacity limited and no places available
+        # XXX: Race condition
         if course_offering.is_capacity_limited:
             if not course_offering.places_left:
                 msg = _("No places available, sorry")
