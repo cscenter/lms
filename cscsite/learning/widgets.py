@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class Tab:
     target: str = attr.ib()
     name: str = attr.ib()
-    content = attr.ib(default=None)
+    context = attr.ib(default=None)
     has_permissions: Callable = attr.ib(default=lambda: False)
 
 
@@ -54,6 +54,7 @@ class TabbedPane:
 
 
 class CourseOfferingTabbedPane(TabbedPane):
+    """Factory for tabs pane on course offering detail page"""
     all_tabs = {
         "about": pgettext_lazy("course-tab", "About"),
         "contacts": pgettext_lazy("course-tab", "Contacts"),
@@ -68,13 +69,17 @@ class CourseOfferingTabbedPane(TabbedPane):
         self._course_offering = course_offering
 
     def make_tabs(self, request_user, tab_to_show, redirect_to):
+        """
+        Generates tabs to which requested user has permission.
+        If user can't access requested tab raise exception.
+        """
         for target in self.all_tabs:
             tab = self.tab_factory(target)
             if tab.has_permissions(request_user, self._course_offering):
-                content_method_key = f"get_{target}"
-                get_content_method = getattr(self, content_method_key,
+                context_method_key = f"get_{target}"
+                get_context_method = getattr(self, context_method_key,
                                              lambda *args, **kwargs: None)
-                tab.content = get_content_method(request_user)
+                tab.context = get_context_method(request_user)
                 self.add(tab)
             elif target == tab_to_show:
                 raise Redirect(to=redirect_to)
@@ -125,7 +130,7 @@ class CourseOfferingTabbedPane(TabbedPane):
         return self._course_offering.courseofferingnews_set.all()
         # return {
         #     "news": news,
-        #     # FIXME: нужно убрать это из таб нахфигу
+        #     # FIXME: нужно убрать это из таб нафигу и написать тест на unread_cnt, сейчас не ловит ничего
         #     "unread_news_cnt": news and (
         #         CourseOfferingNewsNotification.unread
         #             .filter(course_offering_news__course_offering=co, user=u)
@@ -144,16 +149,16 @@ class CourseOfferingTabbedPane(TabbedPane):
     def get_classes(self, request_user) -> List[CourseClass]:
         """Get course classes with attached materials"""
         classes = []
-        course_classes_qs = (self._course_offering.courseclass_set
-                             .select_related("venue")
-                             .annotate(
-            attachments_cnt=Count('courseclassattachment'))
-                             .annotate(has_attachments=Case(
-            When(attachments_cnt__gt=0, then=Value(True)),
-            default=Value(False),
-            output_field=BooleanField()
-        ))
-                             .order_by("date", "starts_at"))
+        course_classes_qs = (
+            self._course_offering.courseclass_set
+                .select_related("venue")
+                .annotate(attachments_cnt=Count('courseclassattachment'))
+                .annotate(has_attachments=Case(
+                    When(attachments_cnt__gt=0, then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField()
+                ))
+                .order_by("date", "starts_at"))
         for cc in course_classes_qs.iterator():
             class_url = cc.get_absolute_url()
             materials = []
