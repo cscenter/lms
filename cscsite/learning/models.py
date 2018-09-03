@@ -409,7 +409,8 @@ class CourseOffering(TimeStampedModel):
     def places_left(self):
         """Returns how many places left if the number is limited"""
         if self.is_capacity_limited:
-            return max(0, self.capacity - self.enrollment_set.count())
+            active_enrollments = self.enrollment_set(manager="active").count()
+            return max(0, self.capacity - active_enrollments)
         else:
             return float("inf")
 

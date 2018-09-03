@@ -273,6 +273,8 @@ def test_update_composite_fields(curator, client, mocker):
     assert not co.materials_files
 
 
+# TODO: тест для видимости таб из под разных ролей. (прятать табу во вьюхе, если нет содержимого)
+
 @pytest.mark.django_db
 def test_course_offering_news_permissions(client):
     news = CourseOfferingNewsFactory(course_offering__city_id='spb')

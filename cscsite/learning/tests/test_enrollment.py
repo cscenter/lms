@@ -131,6 +131,12 @@ def test_enrollment_capacity(client):
     co.save()
     response = client.get(co_url)
     assert (smart_bytes(_("Places available")) + b": 1") in response.content
+    # Unenroll first student, capacity should increase
+    client.login(s)
+    response = client.post(co.get_unenroll_url(), form)
+    assert Enrollment.active.filter(course_offering=co).count() == 0
+    response = client.get(co_url)
+    assert (smart_bytes(_("Places available")) + b": 2") in response.content
 
 
 @pytest.mark.django_db
