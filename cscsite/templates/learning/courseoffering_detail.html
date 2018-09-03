@@ -32,6 +32,7 @@
 
             <ul class="nav nav-tabs square" role="tablist" id="course-offering-detail-page__tablist">
                 {% for tab_code, tab in tabs.items %}
+                    {% if tab_code == "about" or tab.context %}
                     <li role="presentation" {% if tab.target == tabs.active_tab.target %}class="active"{% endif %}>
                         <a role="tab"
                            aria-expanded="{% if tab.target == tabs.active_tab.target %}true{% else %}false{% endif %}"
@@ -43,6 +44,7 @@
                             {{ tab.name }}{% if tab.unread_cnt > 0 %} <span class="badge badge-success">+{{ tab.unread_cnt }}</span>{% endif %}
                         </a>
                     </li>
+                    {% endif %}
                 {% endfor %}
             </ul>
 
@@ -63,10 +65,10 @@
                 </div>
                 {% endwith %}
 
-                {% if "contacts" in tabs %}
+                {% if "contacts" in tabs and tabs.contacts.context %}
                 {% with tab=tabs.contacts %}
                     <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-contacts">
-                    {% for course_teacher in tab.content %}
+                    {% for course_teacher in tab.context %}
                         {% with user_object=course_teacher.teacher %}
                             <h4>{{ user_object.get_full_name }}</h4>
                             {% markdown 3600 "user_private_contacts" user_object.pk user_object.modified %}
@@ -77,10 +79,10 @@
                 {% endwith %}
                 {% endif %}
 
-                {% if "reviews" in tabs %}
+                {% if "reviews" in tabs and tabs.reviews.context %}
                 {% with tab=tabs.reviews %}
                     <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-reviews">
-                        {% for co in tab.content %}
+                        {% for co in tab.context %}
                             <h4>{{ co.semester|title }}</h4>
                               {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
                                 {{ co.reviews }}
@@ -90,7 +92,7 @@
                 {% endwith %}
                 {% endif %}
 
-                {% if "classes" in tabs %}
+                {% if "classes" in tabs and tabs.classes.context %}
                 {% with tab=tabs.classes %}
                     <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-classes">
                       <table class="table timetable" width="100%">
@@ -102,7 +104,7 @@
                           <th style="width: 110px;">{% trans "Materials" %}</th>
                         </tr>
                         </thead>
-                        {% for class in tab.content %}
+                        {% for class in tab.context %}
                         <tr>
                             <td>{{ class.date|date:"d E" }}<br><span class="text-muted">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</span></td>
                           <td>
@@ -124,7 +126,7 @@
                 {% endwith %}
                 {% endif %}
 
-                {% if "assignments" in tabs %}
+                {% if "assignments" in tabs and tabs.assignments.context %}
                 {% with tab=tabs.assignments %}
                     <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-assignments">
                         <table class="table timetable">
@@ -136,7 +138,7 @@
                               <th style="width: 110px;">Файлы</th>
                             </tr>
                         </thead>
-                        {% for assignment in tab.content %}
+                        {% for assignment in tab.context %}
                             <tr>
                                 <td>
                                     <div class="assignment-deadline">
@@ -171,10 +173,10 @@
                 {% endwith %}
                 {% endif %}
 
-                {% if "news" in tabs %}
+                {% if "news" in tabs and tabs.news.context %}
                 {% with tab=tabs.news %}
                         <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-news">
-                        {% for news in tab.content %}
+                        {% for news in tab.context %}
                             <div class="panel bg-gray" id="news-{{ news.pk }}">
                                 <div class="panel-body">
                                     {% call_method news "created_local" tz_override as news_created_local %}
