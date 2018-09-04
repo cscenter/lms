@@ -115,6 +115,10 @@ server {
         proxy_pass https://logic.pdmi.ras.ru/~kulikov/raa18/raa18.html;
     }
 
+    location /scs/ {
+        return 302 http://52.15.239.252/scs;
+    }
+
     location ~ ^/apple-touch-icon(|-\d+x\d+)(|-precomposed).png {
         return 204;
         log_not_found off;
