@@ -6,18 +6,20 @@ from crispy_forms.bootstrap import StrictButton, Tab, TabHolder, FormActions, \
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Button, Div, HTML, Fieldset
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from core.admin import CityAwareSplitDateTimeField, CityAwareModelForm
+from core.exceptions import Redirect
 from core.forms import GradeField
+from core.utils import is_club_site
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU
 from .models import Course, CourseOffering, CourseOfferingNews, \
-    CourseClass, Venue, Assignment, AssignmentComment
-
+    CourseClass, Venue, Assignment, AssignmentComment, Enrollment
 
 DROP_ATTACHMENT_LINK = """
 <a href="{0}"><i class="fa fa-trash-o"></i>&nbsp;{1}</a>"""
@@ -28,8 +30,47 @@ SUBMIT_BUTTON = Submit('save', _('Save'))
 CANCEL_SAVE_PAIR = Div(CANCEL_BUTTON, SUBMIT_BUTTON, css_class="pull-right")
 
 
-class CourseOfferingPKForm(forms.Form):
-    course_offering_pk = forms.IntegerField(required=True)
+class CourseEnrollmentForm(forms.Form):
+    reason = forms.CharField(
+        label=_("Почему вы выбрали этот курс?"),
+        widget=forms.Textarea(),
+        required=False)
+
+    def __init__(self, request, course_offering, **kwargs):
+        self.course_offering = course_offering
+        self.request = request
+        self._custom_errors = None
+        super().__init__(**kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
+
+    def is_available(self):
+        from learning.views.utils import get_student_city_code
+        if self._custom_errors is not None:
+            return not self._custom_errors
+        self._custom_errors = []
+        if not self.course_offering.enrollment_is_open:
+            error = ValidationError("CourseOffering enrollment should be "
+                                    "active", code="deadline")
+            self._custom_errors.append(error)
+        if is_club_site() and not self.course_offering.is_open:
+            error = ValidationError("Club students can't enroll on center "
+                                    "courses", code="permissions")
+            self._custom_errors.append(error)
+        city_code = get_student_city_code(self.request)
+        if (not self.course_offering.is_correspondence
+                and city_code != self.course_offering.get_city()):
+            error = ValidationError("Students can enroll in on courses only "
+                                    "from their city", code="permissions")
+            self._custom_errors.append(error)
+        # Reject if capacity limited and no places available
+        # XXX: Race condition
+        if self.course_offering.is_capacity_limited:
+            if not self.course_offering.places_left:
+                msg = _("No places available, sorry")
+                messages.error(self.request, msg, extra_tags='timeout')
+                raise Redirect(to=self.course_offering.get_absolute_url())
+        return not self._custom_errors
 
 
 class CourseOfferingEditDescrForm(forms.ModelForm):

@@ -1,8 +1,6 @@
-import django_rq
 from django import forms
 from django.conf import settings
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, \
-    PasswordChangeForm, SetPasswordForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
 from django.urls import reverse
 from django.forms import ValidationError
 from django.utils import translation
@@ -17,7 +15,6 @@ from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
 from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER
 from users import tasks
-from users.settings import GROUPS_IMPORT_TO_GERRIT
 from .models import CSCUser, CSCUserReference
 
 

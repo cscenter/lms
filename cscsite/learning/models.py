@@ -1265,6 +1265,12 @@ class Enrollment(TimeStampedModel):
     is_deleted = models.BooleanField(
         _("The student left the course"),
         default=False)
+    reason_entry = models.TextField(
+        _("Entry reason"),
+        blank=True)
+    reason_leave = models.TextField(
+        _("Leave reason"),
+        blank=True)
 
     class Meta:
         ordering = ["student", "course_offering"]
