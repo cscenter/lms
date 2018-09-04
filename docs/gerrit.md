@@ -161,3 +161,12 @@ spb/python_2018
 
 * `refs/heads/malysh.k.i`
 * `refs/for/refs/heads/malysh.k.i`
+
+После создания проекта он появится на странице https://review.compscicenter.ru/admin/projects. В его описании будут ссылки на клонирование репозитория. 
+Это можно сделать 2мя способами:
+
+* https (username - тот, что используется на сайте, пароль - надо сгенерировать в настройках профиля (раздел HTTP Credentials)
+* ssh (в настройках профиля надо добавить публичный ключ, раздел SSH Keys)  
+
+Права доступа успешно можно редактировать только в старом интерфейсе (в футере справа есть Switch to Old UI)
+Подробно о системе прав в документации https://gerrit-review.googlesource.com/Documentation/access-control.html
