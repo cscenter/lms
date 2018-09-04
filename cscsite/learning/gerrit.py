@@ -44,24 +44,24 @@ def permits_students_read_master(client, project_name, group_uuid):
     return client.create_permissions(project_name, payload)
 
 
-def init_project_for_course(course_offering):
+def init_project_for_course(course_offering, skip_users=False):
     city_code = course_offering.get_city()
     course_name = course_offering.course.slug.replace("-", "_")
     project_name = f"{city_code}/{course_name}_{course_offering.semester.year}"
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,
                           settings.GERRIT_CLIENT_PASSWORD))
-    # Create separated self-owned group for project reviewers
-    # FIXME: Make sure all course teachers have LDAP account
     teachers = (CourseOfferingTeacher.objects
                 .filter(course_offering=course_offering,
                         roles=CourseOfferingTeacher.roles.reviewer)
                 .select_related("teacher"))
+    # Creates separated self-owned group for project reviewers
     reviewers_group = f"{project_name}-reviewers"
-    reviewers_group_members = [t.teacher.email for t in teachers]
+    reviewers_group_members = [t.teacher.ldap_username for t in teachers]
     reviewers_group_res = client.create_group(reviewers_group, {
         "members": reviewers_group_members
     })
+    # FIXME: Make sure all course teachers have LDAP account
     if not reviewers_group_res.created:
         if not reviewers_group_res.already_exists:
             logger.error(f"Error creating reviewers group for {project_name}. "
@@ -124,6 +124,10 @@ def init_project_for_course(course_offering):
     if not res.ok:
         logger.error(f"Couldn't set permissions for group "
                      f"{students_group}. {res.text}")
+
+    if skip_users:
+        return
+
     # For each enrolled student create separated branch
     enrollments = (Enrollment.active
                    .filter(course_offering_id=course_offering.pk)
@@ -131,7 +135,7 @@ def init_project_for_course(course_offering):
     for e in enrollments:
         student = e.student
         # Check student group exists
-        student_group = student.email
+        student_group = student.ldap_username
         group_res = client.create_single_user_group(student_group)
         if not group_res.created:
             if not group_res.already_exists:

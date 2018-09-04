@@ -129,6 +129,11 @@ class Gerrit:
     def get_group_members(self, group_id):
         return self._request("GET", f"groups/{quote_plus(group_id)}/members/")
 
+    def create_group_member(self, group_id, account_id):
+        logger.debug(f"Add member {account_id} to the group {group_id}")
+        uri = f"groups/{quote_plus(group_id)}/members/{quote_plus(account_id)}"
+        return self._request("PUT", uri)
+
     def create_group_members(self, group_id, members: list):
         logger.debug(f"Add members {members} to group {group_id}")
         uri = f"groups/{quote_plus(group_id)}/members.add"
@@ -204,5 +209,6 @@ class Gerrit:
             **payload
         })
 
-
-
+    def get_account(self, account_id):
+        account_uri = f"accounts/{quote_plus(account_id)}"
+        return self._request("GET", account_uri)
