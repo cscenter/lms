@@ -448,6 +448,15 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         h = f"{ldap_hasher_code}{iterations}${ab64_salt.decode('utf-8')}${hash}"
         return h.encode("utf-8")
 
+    @property
+    def ldap_username(self):
+        """
+        Portable Filename Character Set (according to POSIX.1-2017) is used for
+        username since @ in username can be misleading when you connected
+        over ssh. `foo@localhost.ru@domain.ltd` really looks weird.
+        """
+        return self.email.replace("@", ".")
+
     def __str__(self):
         return smart_text(self.get_full_name(True))
 

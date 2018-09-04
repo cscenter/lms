@@ -21,7 +21,7 @@ def get_ldap_username(user: CSCUser):
 
 def user_to_ldif(user: CSCUser, redirect_to=None):
     out = redirect_to or io.StringIO()
-    uid = get_ldap_username(user)
+    uid = user.ldap_username
     dn = f"uid={uid},ou=users,{settings.LDAP_DB_SUFFIX}"
     password_hash = user.password_hash_ldap or make_password(password=None)
     entry = {
