@@ -219,21 +219,15 @@
                            class="btn btn-danger btn-block">{% trans "Unenroll from the course" %}
                         </a>
                     {% else %}
-                        <form method="post" class="btn-block"
-                              action="{{ course_offering.get_enroll_url }}">
-                            {% csrf_token %}
-                            <input type="hidden" name="course_offering_pk" value="{{ course_offering.pk }}">
-                            <button type="submit"
-                                    {% if course_offering.is_capacity_limited and course_offering.places_left == 0 %}disabled{% endif %}
-                                    class="btn btn-primary btn-block">
-                                {% trans "Enroll in the course" %}
-                                {% if course_offering.is_capacity_limited and course_offering.places_left > 0 %}
-                                    <br><small>{% trans "Places available" %}: {{ course_offering.places_left }}</small>
-                                {% elif course_offering.is_capacity_limited %}
-                                    <br><small>{% trans "No places available" %}</small>
-                                {% endif %}
-                            </button>
-                        </form>
+                        <a href="{{ course_offering.get_enroll_url }}"
+                           class="btn btn-primary btn-block{% if course_offering.is_capacity_limited and course_offering.places_left == 0 %} disabled{% endif %}">
+                            {% trans "Enroll in the course" %}
+                            {% if course_offering.is_capacity_limited and course_offering.places_left > 0 %}
+                                <br><small>{% trans "Places available" %}: {{ course_offering.places_left }}</small>
+                            {% elif course_offering.is_capacity_limited %}
+                                <br><small>{% trans "No places available" %}</small>
+                            {% endif %}
+                        </a>
                     {% endif %}
                 {% endif %}
             {% endif %}

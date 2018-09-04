@@ -1,9 +1,6 @@
 import logging
 from typing import Optional
 
-from django.contrib import messages
-
-from core.exceptions import Redirect
 from core.utils import is_club_site
 from learning.models import CourseOffering
 from learning.utils import CityCode, semester_slug_re

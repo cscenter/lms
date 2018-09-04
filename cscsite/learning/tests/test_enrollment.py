@@ -141,23 +141,23 @@ def test_enrollment_capacity(client):
 
 @pytest.mark.django_db
 def test_enrollment(client):
-    student = StudentCenterFactory.create(city_id='spb')
-    client.login(student)
+    student1, student2 = StudentCenterFactory.create_batch(2, city_id='spb')
+    client.login(student1)
     today = timezone.now()
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    co = CourseOfferingFactory.create(semester=current_semester)
+    co = CourseOfferingFactory.create(semester=current_semester, city_id='spb')
     url = co.get_enroll_url()
     form = {'course_offering_pk': co.pk}
     response = client.post(url, form)
     assert response.status_code == 302
     assert 1 == (Enrollment.active
-                      .filter(student=student, course_offering=co)
+                      .filter(student=student1, course_offering=co)
                       .count())
     as_ = AssignmentFactory.create_batch(3, course_offering=co)
-    assert set((student.pk, a.pk) for a in as_) == set(StudentAssignment.objects
-                          .filter(student=student)
+    assert set((student1.pk, a.pk) for a in as_) == set(StudentAssignment.objects
+                          .filter(student=student1)
                           .values_list('student', 'assignment'))
     co_other = CourseOfferingFactory.create(semester=current_semester)
     form.update({'back': 'course_list_student'})
@@ -165,6 +165,7 @@ def test_enrollment(client):
     response = client.post(url, form)
     assert response.status_code == 302
     # assert response.url == reverse('course_list_student')
+    assert co.enrollment_set.count() == 1
     # Try to enroll to old CO
     old_semester = SemesterFactory.create(year=2010)
     old_co = CourseOfferingFactory.create(semester=old_semester)
@@ -172,16 +173,18 @@ def test_enrollment(client):
     url = old_co.get_enroll_url()
     assert client.post(url, form).status_code == 403
     # If course offering has limited capacity and we reach it - reject request
+    url = co.get_enroll_url()
     co.capacity = 1
     co.save()
-    student2 = StudentCenterFactory.create(city_id='spb')
     client.login(student2)
     form = {'course_offering_pk': co.pk}
-    client.post(url, form, follow=True)
+    response = client.post(url, form)
+    assert response.status_code == 302
+    # Add 1 available place
     assert co.enrollment_set.count() == 1
     co.capacity = 2
     co.save()
-    client.post(url, form, follow=True)
+    response = client.post(url, form, follow=True)
     assert co.enrollment_set.count() == 2
 
 
@@ -267,7 +270,8 @@ def test_enrollment_in_other_city(client):
     client.login(student_spb)
     response = client.get(co_spb.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
-    buttons = html.find("div", {"class": "o-buttons-vertical"}).find_all('button')
+    buttons = (html.find("div", {"class": "o-buttons-vertical"})
+               .find_all(attrs={'class': 'btn'}))
     assert any("Enroll in" in s.text for s in buttons)
     for user in [student_nsk, student]:
         client.login(user)
@@ -312,7 +316,8 @@ def test_enrollment_is_enrollment_open(client):
     client.login(student_spb)
     response = client.get(co_spb.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
-    buttons = html.find("div", {"class": "o-buttons-vertical"}).find_all('button')
+    buttons = (html.find("div", {"class": "o-buttons-vertical"})
+               .find_all(attrs={'class': 'btn'}))
     assert any("Enroll in" in s.text for s in buttons)
     default_completed_at = co_spb.completed_at
     co_spb.completed_at = today.date()
