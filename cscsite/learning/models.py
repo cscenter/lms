@@ -1289,13 +1289,13 @@ class Enrollment(TimeStampedModel):
     def save(self, *args, **kwargs):
         created = self.pk is None
         super().save(*args, **kwargs)
+        # TODO: Call on changing `is_deleted` flag only
         self._populate_assignments_for_new_enrolled_student(created)
 
     def _populate_assignments_for_new_enrolled_student(self, created):
         if self.is_deleted:
             return
-        assignments = self.course_offering.assignment_set.all()
-        for a in assignments:
+        for a in self.course_offering.assignment_set.all():
             StudentAssignment.objects.get_or_create(assignment=a,
                                                     student_id=self.student_id)
 

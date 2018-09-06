@@ -93,6 +93,7 @@ class CourseOfferingTabbedPane(TabbedPane):
         return Tab(target=target, name=cls.all_tabs[target],
                    has_permissions=has_permissions)
 
+    # FIXME: move can_view_* to permissions.py
     @staticmethod
     def can_view_about(request_user, co):
         return True
