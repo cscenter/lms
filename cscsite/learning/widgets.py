@@ -2,14 +2,14 @@ from typing import Callable, List
 import logging
 
 import attr
-from django.db.models import BooleanField, Case, Count, Value, When
+from django.db.models import BooleanField, Case, Count, Value, When, Subquery
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
-from learning.models import CourseOfferingNewsNotification, CourseOffering, \
-    Assignment, CourseClass
+from learning.models import Assignment, CourseClass, CourseOfferingTeacher, \
+    CourseOffering
 from learning.settings import STUDENT_STATUS
 
 
@@ -21,7 +21,7 @@ class Tab:
     target: str = attr.ib()
     name: str = attr.ib()
     context = attr.ib(default=None)
-    has_permissions: Callable = attr.ib(default=lambda: False)
+    has_permissions: Callable = attr.ib(default=lambda u, co: False)
 
 
 class TabbedPane:
@@ -93,7 +93,7 @@ class CourseOfferingTabbedPane(TabbedPane):
         return Tab(target=target, name=cls.all_tabs[target],
                    has_permissions=has_permissions)
 
-    # FIXME: move can_view_* to permissions.py
+    # FIXME: move can_view_* to permissions.py and add tests
     @staticmethod
     def can_view_about(request_user, co):
         return True
@@ -119,13 +119,27 @@ class CourseOfferingTabbedPane(TabbedPane):
 
     @staticmethod
     def can_view_news(request_user, co):
-        if is_club_site():
+        if is_club_site() or request_user.is_curator:
             return True
+        if co.is_actual_teacher(request_user):
+            return True
+        if (not request_user.is_authenticated or
+                request_user.status == STUDENT_STATUS.expelled):
+            return False
         request_user_enrollment = request_user.get_enrollment(co.pk)
-        co_failed_by_student = (request_user_enrollment and
-            co.failed_by_student(request_user, request_user_enrollment))
-        return (not co_failed_by_student and
-            request_user.is_authenticated and request_user.status != STUDENT_STATUS.expelled)
+        if (request_user_enrollment and not
+                co.failed_by_student(request_user, request_user_enrollment)):
+            return True
+        # Teachers from the same course permits to view the news
+        offerings_ids = (CourseOffering.objects
+                         .filter(course__slug=co.course.slug)
+                         # Note: can't reset default ordering in a Subquery
+                         .order_by("pk")
+                         .values("pk"))
+        teachers = (CourseOfferingTeacher.objects
+                    .filter(course_offering__in=Subquery(offerings_ids))
+                    .values_list('teacher_id', flat=True))
+        return request_user.is_teacher and request_user.pk in teachers
 
     def get_news(self, request_user):
         return self._course_offering.courseofferingnews_set.all()

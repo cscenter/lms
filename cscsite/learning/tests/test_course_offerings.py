@@ -13,8 +13,8 @@ from django.utils import timezone, formats
 
 from learning.factories import CourseFactory, SemesterFactory, \
     CourseOfferingFactory, CourseOfferingNewsFactory, AssignmentFactory, \
-    CourseOfferingTeacherFactory, CourseClassFactory
-from learning.models import Semester
+    CourseOfferingTeacherFactory, CourseClassFactory, EnrollmentFactory
+from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import TeacherCenterFactory, StudentCenterFactory
@@ -275,9 +275,51 @@ def test_update_composite_fields(curator, client, mocker):
 
 # TODO: тест для видимости таб из под разных ролей. (прятать табу во вьюхе, если нет содержимого)
 
+# FIXME: эти тесты надо добавить на уровне модели после переноса can_view_* в permissions.py
 @pytest.mark.django_db
-def test_course_offering_news_permissions(client):
-    news = CourseOfferingNewsFactory(course_offering__city_id='spb')
+def test_course_offering_news_tab_permissions(client):
+    current_semester = SemesterFactory.create_current()
+    prev_term = SemesterFactory.create_prev(current_semester)
+    news = CourseOfferingNewsFactory(course_offering__city_id='spb',
+                                     course_offering__semester=current_semester)
     co = news.course_offering
+    news_prev = CourseOfferingNewsFactory(course_offering__city_id='spb',
+                                          course_offering__course=co.course,
+                                          course_offering__semester=prev_term)
+    co_prev = news_prev.course_offering
     response = client.get(co.get_absolute_url())
-    # assert response.context["news"]
+    assert "news" not in response.context['tabs']
+    # By default student can't see the news until enroll in the course
+    student_spb = StudentCenterFactory(city_id='spb')
+    client.login(student_spb)
+    response = client.get(co.get_absolute_url())
+    assert "news" not in response.context['tabs']
+    response = client.get(co_prev.get_absolute_url())
+    assert "news" not in response.context['tabs']
+    e_current = EnrollmentFactory(course_offering=co, student=student_spb)
+    response = client.get(co.get_absolute_url())
+    assert "news" in response.context['tabs']
+    # Prev courses should be successfully passed to see the news
+    e_prev = EnrollmentFactory(course_offering=co_prev, student=student_spb)
+    response = client.get(co_prev.get_absolute_url())
+    assert "news" not in response.context['tabs']
+    e_prev.grade = Enrollment.GRADES.good
+    e_prev.save()
+    response = client.get(co_prev.get_absolute_url())
+    assert "news" in response.context['tabs']
+    # Teacher from the same course can view news from other offerings
+    teacher = TeacherCenterFactory()
+    client.login(teacher)
+    response = client.get(co_prev.get_absolute_url())
+    assert "news" not in response.context['tabs']
+    response = client.get(co.get_absolute_url())
+    assert "news" not in response.context['tabs']
+    CourseOfferingTeacherFactory(course_offering=co_prev, teacher=teacher)
+    response = client.get(co_prev.get_absolute_url())
+    assert "news" in response.context['tabs']
+    response = client.get(co.get_absolute_url())
+    assert "news" in response.context['tabs']
+    co_other = CourseOfferingFactory(semester=current_semester)
+    response = client.get(co_other.get_absolute_url())
+    assert "news" not in response.context['tabs']
+

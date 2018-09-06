@@ -52,6 +52,12 @@ class SemesterFactory(factory.DjangoModelFactory):
         year, next_term = get_term_by_index(term.index + 1)
         return cls.create(year=year, type=next_term)
 
+    @classmethod
+    def create_prev(cls, term):
+        """Get or create term model which following this one"""
+        year, prev_term = get_term_by_index(term.index - 1)
+        return cls.create(year=year, type=prev_term)
+
 
 class CourseOfferingFactory(factory.DjangoModelFactory):
     class Meta:
