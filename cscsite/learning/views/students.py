@@ -2,11 +2,12 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.db.models import F, Value, TextField
-from django.db.models.functions import Cast, Concat
+from django.db.models.functions import Cast, Concat, Trim
 from django.http import HttpResponseForbidden, HttpResponseRedirect, Http404
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import CreateView, ListView, TemplateView, FormView
@@ -187,7 +188,8 @@ class CourseOfferingEnrollView(StudentOnlyMixin, FormView):
 
 
 class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
-    template_name = "learning/simple_delete_confirmation.html"
+    template_name = "learning/courses/enrollment_leave.html"
+    context_object_name = "enrollment"
 
     def __init__(self, *args, **kwargs):
         self._course_offering = None
@@ -209,19 +211,20 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
             raise PermissionDenied
         return enrollment
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['confirmation_text'] = (
-            _("Are you sure you want to unenroll "
-              "from \"%(course)s\"?")
-            % {'course': self.object.course_offering})
-        context['confirmation_button_text'] = _("Unenroll")
-        return context
-
     def delete(self, request, *args, **kwargs):
         enrollment = self.get_object()
-        Enrollment.objects.filter(pk=enrollment.pk,
-                                  is_deleted=False).update(is_deleted=True)
+        update_fields = {"is_deleted": True}
+        reason_leave = request.POST.get("reason", "").strip()
+        if reason_leave:
+            today = now().strftime(DATE_FORMAT_RU)
+            if enrollment.reason_leave:
+                update_fields["reason_leave"] = Concat(
+                    F('reason_leave'),
+                    Value(f'\n------\n{today}\n{reason_leave}'),
+                    output_field=TextField())
+            else:
+                update_fields["reason_leave"] = f'{today}\n{reason_leave}'
+        Enrollment.active.filter(pk=enrollment.pk).update(**update_fields)
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):

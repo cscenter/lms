@@ -5,12 +5,14 @@ from bs4 import BeautifulSoup
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
+from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 from learning.factories import SemesterFactory, CourseOfferingFactory, \
     AssignmentFactory, EnrollmentFactory, CourseOfferingNewsFactory
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseOfferingNewsNotification
+from learning.settings import DATE_FORMAT_RU
 from learning.tests.utils import assert_redirects
 from learning.utils import now_local
 from users.factories import StudentCenterFactory, StudentClubFactory
@@ -212,6 +214,40 @@ def test_enrollment_reason(client):
     assert 'bar' in Enrollment.active.first().reason_entry
 
 
+@pytest.mark.django_db
+def test_enrollment_leave_reason(client):
+    student = StudentCenterFactory(city_id='spb')
+    client.login(student)
+    today = timezone.now()
+    current_semester = SemesterFactory.create_current()
+    current_semester.enrollment_end_at = today.date()
+    current_semester.save()
+    co = CourseOfferingFactory.create(semester=current_semester, city_id='spb')
+    form = {'course_offering_pk': co.pk}
+    client.post(co.get_enroll_url(), form)
+    assert Enrollment.active.count() == 1
+    assert Enrollment.objects.first().reason_entry == ''
+    form['reason'] = 'foo'
+    client.post(co.get_unenroll_url(), form)
+    assert Enrollment.active.count() == 0
+    today = now().strftime(DATE_FORMAT_RU)
+    e = Enrollment.objects.first()
+    assert today in e.reason_leave
+    assert 'foo' in e.reason_leave
+    # Enroll for the second time and leave with another reason
+    client.post(co.get_enroll_url(), form)
+    assert Enrollment.active.count() == 1
+    form['reason'] = 'bar'
+    client.post(co.get_unenroll_url(), form)
+    assert Enrollment.active.count() == 0
+    e = Enrollment.objects.first()
+    assert 'foo' in e.reason_leave
+    assert 'bar' in e.reason_leave
+    co_other = CourseOfferingFactory.create(semester=current_semester)
+    client.post(co_other.get_enroll_url(), {})
+    e_other = Enrollment.active.filter(course_offering=co_other).first()
+    assert not e_other.reason_entry
+    assert not e_other.reason_leave
 
 
 @pytest.mark.django_db
