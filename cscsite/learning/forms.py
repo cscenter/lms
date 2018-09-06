@@ -64,7 +64,7 @@ class CourseEnrollmentForm(forms.Form):
                                     "from their city", code="permissions")
             self._custom_errors.append(error)
         # Reject if capacity limited and no places available
-        # XXX: Race condition
+        # XXX: Race condition. Should be placed in save method
         if self.course_offering.is_capacity_limited:
             if not self.course_offering.places_left:
                 msg = _("No places available, sorry")

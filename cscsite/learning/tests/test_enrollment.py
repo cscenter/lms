@@ -189,6 +189,32 @@ def test_enrollment(client):
 
 
 @pytest.mark.django_db
+def test_enrollment_reason(client):
+    student = StudentCenterFactory(city_id='spb')
+    client.login(student)
+    today = timezone.now()
+    current_semester = SemesterFactory.create_current()
+    current_semester.enrollment_end_at = today.date()
+    current_semester.save()
+    co = CourseOfferingFactory.create(semester=current_semester, city_id='spb')
+    form = {'course_offering_pk': co.pk, 'reason': 'foo'}
+    client.post(co.get_enroll_url(), form)
+    assert Enrollment.active.count() == 1
+    assert Enrollment.objects.first().reason_entry == 'foo'
+    client.post(co.get_unenroll_url(), form)
+    assert Enrollment.active.count() == 0
+    assert Enrollment.objects.first().reason_entry == 'foo'
+    # Enroll for the second time, first entry reason should be saved
+    form['reason'] = 'bar'
+    client.post(co.get_enroll_url(), form)
+    assert Enrollment.active.count() == 1
+    assert 'foo' in Enrollment.active.first().reason_entry
+    assert 'bar' in Enrollment.active.first().reason_entry
+
+
+
+
+@pytest.mark.django_db
 def test_assignments(client):
     """Create assignments for active enrollments only"""
     ss = StudentCenterFactory.create_batch(3)

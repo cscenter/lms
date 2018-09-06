@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.db.models import F, Value, TextField
+from django.db.models.functions import Cast, Concat
 from django.http import HttpResponseForbidden, HttpResponseRedirect, Http404
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect
@@ -15,6 +17,7 @@ from learning import utils
 from learning.forms import CourseEnrollmentForm
 from learning.models import Useful, Internship, StudentAssignment, Semester, \
     Enrollment, CourseOffering
+from learning.settings import DATE_FORMAT_RU
 from learning.viewmixins import StudentCenterAndVolunteerOnlyMixin, \
     ParticipantOnlyMixin, StudentOnlyMixin
 from learning.views import AssignmentProgressBaseView
@@ -163,11 +166,20 @@ class CourseOfferingEnrollView(StudentOnlyMixin, FormView):
                    course_offering=course_offering)
 
     def form_valid(self, form):
-        Enrollment.objects.update_or_create(
+        enrollment, _ = Enrollment.objects.update_or_create(
             student=form.request.user,
             course_offering=form.course_offering,
-            defaults={'is_deleted': False,
-                      'reason_entry': form.cleaned_data["reason"]})
+            defaults={'is_deleted': False})
+        reason = form.cleaned_data["reason"].strip()
+        if reason:
+            if enrollment.reason_entry:
+                today = enrollment.modified.strftime(DATE_FORMAT_RU)
+                reason = Concat(F('reason_entry'),
+                                Value(f'\n------\n{today}\n{reason}'),
+                                output_field=TextField())
+            (Enrollment.objects
+             .filter(pk=enrollment.pk)
+             .update(reason_entry=reason))
         if self.request.POST.get('back') == 'course_list_student':
             return redirect('course_list_student')
         else:
@@ -184,7 +196,7 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
     def get_object(self, _=None):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
         enrollment = get_object_or_404(
-            Enrollment.objects
+            Enrollment.active
             .filter(
                 student=self.request.user,
                 course_offering__city_id=self.request.city_code,
