@@ -39,9 +39,9 @@
                            aria-controls="course-{{ tab.target }}"
                            data-toggle="tab"
                            data-target="#course-{{ tab.target }}"
-                           data-has-unread="{% if tab.unread_cnt > 0 %}true{% else %}false{% endif %}"
+                           {% if tab_code == "news" %}data-has-unread="{% if unread_news > 0 %}true{% else %}false{% endif %}"{% endif %}
                            href="{{ course_offering.get_absolute_url }}{{ tab.target }}/">
-                            {{ tab.name }}{% if tab.unread_cnt > 0 %} <span class="badge badge-success">+{{ tab.unread_cnt }}</span>{% endif %}
+                            {{ tab.name }}{% if tab_code == "news" and unread_news > 0 %} <span class="badge badge-success">+{{ unread_news }}</span>{% endif %}
                         </a>
                     </li>
                     {% endif %}

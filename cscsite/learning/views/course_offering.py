@@ -83,14 +83,24 @@ class CourseOfferingDetailView(DetailView):
                 and request_user.city_code):
             tz_override = settings.TIME_ZONES[request_user.city_id]
         # TODO: set default value if `tz_override` is None
+        request_user_enrollment = request_user.get_enrollment(co.pk)
+        is_actual_teacher = co.is_actual_teacher(request_user)
+        # Attach unread notifications count if request user in mailing list
+        unread_news = None
+        if request_user_enrollment or is_actual_teacher:
+            unread_news = (CourseOfferingNewsNotification.unread
+                           .filter(course_offering_news__course_offering=co,
+                                   user=request_user)
+                           .count())
         context = {
             'course_offering': co,
             'user_city': get_user_city_code(self.request),
             'tz_override': tz_override,
             'teachers': teachers_by_role,
-            'request_user_enrollment': request_user.get_enrollment(co.pk),
+            'request_user_enrollment': request_user_enrollment,
             # TODO: move to user method
-            'is_actual_teacher': co.is_actual_teacher(request_user),
+            'is_actual_teacher': is_actual_teacher,
+            'unread_news': unread_news,
             'tabs': self.make_tabbed_pane(co)
         }
         return context
