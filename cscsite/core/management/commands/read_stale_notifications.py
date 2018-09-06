@@ -11,8 +11,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         current_term = Semester.get_current()
-        AssignmentNotification.objects.filter(
-            created__lt=current_term.starts_at, is_unread=True).update(is_unread=False)
-        CourseOfferingNewsNotification.objects.filter(
-            created__lt=current_term.starts_at, is_unread=True).update(is_unread=False)
-        print("done")
+        updated = (AssignmentNotification.objects
+                   .filter(created__lt=current_term.starts_at, is_unread=True)
+                   .update(is_unread=False))
+        msg = f"{updated} AssignmentNotifications are marked as read"
+        self.stdout.write(msg)
+        updated = (CourseOfferingNewsNotification.objects
+                   .filter(created__lt=current_term.starts_at, is_unread=True)
+                   .update(is_unread=False))
+        msg = f"{updated} CourseOfferingNewsNotifications are marked as read"
+        self.stdout.write(msg)
