@@ -149,7 +149,7 @@
                                 </td>
                                 <td>
                                     {% if assignment.magic_link %}
-                                        <a  href="{{ assignment.magic_link }}">{{ assignment.title }}</a>
+                                        <a href="{{ assignment.magic_link }}">{{ assignment.title }}</a>
                                     {% else %}
                                         <div>{{ assignment.title }}</div>
                                     {% endif %}
@@ -157,7 +157,7 @@
                                 <td>{{ assignment.is_online|yesno:_("Yes,No") }}</td>
                                 <td>
                                     {% for attachment in assignment.assignmentattachment_set.all %}
-                                        {% if user.is_curator or is_actual_teacher or request_user_enrollment is not None %}
+                                        {% if assignment.magic_link %}
                                             <a href="{{ attachment.file_url }}">{{ attachment.file_ext }}</a>{% if not forloop.last %}, {% endif %}
                                         {% else %}
                                             {{ attachment.file_ext }}{% if not forloop.last %}, {% endif %}

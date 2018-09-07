@@ -353,6 +353,10 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         city_code = getattr(self, "city_id", None)
         return city_code if city_code else None
 
+    @property
+    def is_expelled(self):
+        return self.status == STUDENT_STATUS.expelled
+
     @staticmethod
     def create_student_from_applicant(applicant):
         """

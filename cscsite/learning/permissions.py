@@ -1,3 +1,6 @@
+from enum import Enum, auto
+from typing import Optional
+
 from core.utils import is_club_site
 from learning.settings import STUDENT_STATUS
 
@@ -15,6 +18,10 @@ class LearningPermissionsMixin(object):
         return (self.is_student_center or
                 self.is_student_club or
                 self.is_volunteer)
+
+    @property
+    def is_expelled(self):
+        return None
 
     @property
     def is_student_center(self):
@@ -73,3 +80,34 @@ class LearningPermissionsMixin(object):
     @property
     def is_project_reviewer(self):
         return self.group.PROJECT_REVIEWER in self._cached_groups
+
+
+class CourseRole(Enum):
+    STUDENT = auto()  # Enrolled active student who didn't fail the course
+    TEACHER = auto()  # Any teacher from the same course
+    CURATOR = auto()
+
+
+def access_role(*, co, request_user) -> Optional[CourseRole]:
+    """
+    Some course data (e.g. assignments, news) are private and accessible
+    depending on the user role: curator, course teacher or
+    enrolled active student. This roles do not overlap in the same course.
+
+    Returns request user role in target course session,
+    `None` is user has no access.
+    """
+    if not request_user.is_authenticated or request_user.is_expelled:
+        return None
+    if request_user.is_curator:
+        return CourseRole.CURATOR
+    enrollment = request_user.get_enrollment(co.pk)
+    if enrollment and not co.failed_by_student(request_user, enrollment):
+        return CourseRole.STUDENT
+    # Teachers from the same course permits to view the news
+    all_course_teachers = (co.courseofferingteacher_set.field.model.objects
+                           .for_course(co.course.slug)
+                           .values_list('teacher_id', flat=True))
+    if request_user.is_teacher and request_user.pk in all_course_teachers:
+        return CourseRole.TEACHER
+    return None

@@ -10,6 +10,7 @@ from django.forms import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone, formats
+from django.utils.encoding import smart_bytes
 
 from learning.factories import CourseFactory, SemesterFactory, \
     CourseOfferingFactory, CourseOfferingNewsFactory, AssignmentFactory, \
@@ -323,3 +324,29 @@ def test_course_offering_news_tab_permissions(client):
     response = client.get(co_other.get_absolute_url())
     assert "news" not in response.context['tabs']
 
+
+@pytest.mark.django_db
+def test_course_offering_assignments_tab_permissions(client):
+    current_semester = SemesterFactory.create_current()
+    prev_term = SemesterFactory.create_prev(current_semester)
+    course = CourseFactory()
+    a = AssignmentFactory(course_offering__semester=prev_term,
+                          course_offering__course=course)
+    co_prev = a.course_offering
+    co = CourseOfferingFactory(course=course, semester=current_semester)
+    teacher = TeacherCenterFactory()
+    CourseOfferingTeacherFactory(teacher=teacher, course_offering=co)
+    # Unauthenticated user can't see tab at all
+    response = client.get(co_prev.get_absolute_url())
+    assert "assignments" not in response.context['tabs']
+    # Teacher can see links to assignments from other course sessions
+    client.login(teacher)
+    response = client.get(co_prev.get_absolute_url())
+    assert "assignments" in response.context['tabs']
+    assert smart_bytes(a.get_teacher_url()) in response.content
+    student = StudentCenterFactory()
+    client.login(student)
+    response = client.get(co_prev.get_absolute_url())
+    assert "assignments" in response.context['tabs']
+    assert len(response.context['tabs']['assignments'].context) == 1
+    assert smart_bytes(a.get_teacher_url()) not in response.content

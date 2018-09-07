@@ -33,7 +33,7 @@ from core.db.models import GradeField
 from learning.managers import StudyProgramQuerySet, \
     CourseOfferingDefaultManager, EnrollmentDefaultManager, \
     EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet, \
-    StudentAssignmentManager, AssignmentManager
+    StudentAssignmentManager, AssignmentManager, CourseOfferingTeacherManager
 from learning.micawber_providers import get_oembed_html
 from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
@@ -489,6 +489,8 @@ class CourseOfferingTeacher(models.Model):
         verbose_name = _("Course Offering teacher")
         verbose_name_plural = _("Course Offering teachers")
         unique_together = [['teacher', 'course_offering']]
+
+    objects = CourseOfferingTeacherManager()
 
     def __str__(self):
         return "{0} [{1}]".format(smart_text(self.teacher),

@@ -43,6 +43,7 @@ from learning.models import Course, CourseClass, CourseOffering, Venue, \
     CourseClassAttachment, AssignmentNotification, \
     Semester, NonCourseEvent, \
     OnlineCourse, InternationalSchool, CourseOfferingTeacher
+from learning.permissions import access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR, SEMESTER_TYPES
 from learning.utils import get_current_term_pair, get_term_index, now_local, \
@@ -837,24 +838,21 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
                                 'course_offering__semester')
                 .prefetch_related('assignmentattachment_set'))
 
-    def get_context_data(self, *args, **kwargs):
-        context = (super(AssignmentTeacherDetailView, self)
-                   .get_context_data(*args, **kwargs))
-
-        is_actual_teacher = (
-            self.request.user in (self.object.course_offering.teachers.all()))
-        if not is_actual_teacher and (not self.request.user.is_authenticated
-                                      or not self.request.user.is_curator):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role = access_role(co=self.object.course_offering,
+                           request_user=self.request.user)
+        if role not in [CourseRole.CURATOR, CourseRole.TEACHER]:
             raise PermissionDenied
-        context['a_s_list'] = \
-            (StudentAssignment.objects
-             .filter(assignment__pk=self.object.pk)
-             .select_related('assignment',
-                             'assignment__course_offering',
-                             'assignment__course_offering__course',
-                             'assignment__course_offering__semester',
-                             'student')
-             .prefetch_related('student__groups'))
+        context['a_s_list'] = (
+            StudentAssignment.objects
+            .filter(assignment__pk=self.object.pk)
+            .select_related('assignment',
+                            'assignment__course_offering',
+                            'assignment__course_offering__course',
+                            'assignment__course_offering__semester',
+                            'student')
+            .prefetch_related('student__groups'))
         return context
 
 
@@ -921,7 +919,7 @@ class AssignmentProgressBaseView(AccessMixin):
         co = sa.assignment.course_offering
         tz_override = co.get_city_timezone()
         # For online courses format datetime in student timezone
-        # Note, that this view available for actual teachers, curators and
+        # Note, that this view available for teachers, curators and
         # enrolled students only
         if co.is_correspondence and (user.is_student_center or user.is_volunteer):
             tz_override = settings.TIME_ZONES[user.city_id]
@@ -948,13 +946,14 @@ class AssignmentProgressBaseView(AccessMixin):
 class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
                                          CreateView):
     user_type = 'teacher'
-
+    # FIXME: combine has_permissions_*
     def has_permissions_coarse(self, user):
         return user.is_curator or user.is_teacher
 
     def has_permissions_precise(self, user):
         co = self.student_assignment.assignment.course_offering
-        return user.is_curator or user in co.teachers.all()
+        role = access_role(co=co, request_user=user)
+        return role in [CourseRole.TEACHER, CourseRole.CURATOR]
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
@@ -1188,27 +1187,9 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
 
         user = request.user
         if attachment_type == ASSIGNMENT_TASK_ATTACHMENT:
-            qs = AssignmentAttachment.objects.filter(pk=pk)
-            assignment_attachment = get_object_or_404(qs)
-            # To task attachments have access curators, course teachers and
-            # non-expelled students enrolled on the course.
-            if not user.is_curator:
-                is_current_student = None
-                is_current_teacher = None
-                assignment_id = assignment_attachment.assignment_id
-                if user.is_active_student:
-                    is_current_student = (StudentAssignment.objects
-                                          .filter(student_id=user.pk,
-                                                  assignment_id=assignment_id)
-                                          .exists())
-                if not is_current_student and user.is_teacher:
-                    qs = (CourseOfferingTeacher.objects
-                          .filter(teacher_id=user.pk,
-                                  course_offering__assignment__id=assignment_id))
-                    is_current_teacher = qs.exists()
-                if not is_current_student and not is_current_teacher:
-                    return HttpResponseForbidden()
-            file_field = assignment_attachment.attachment
+            file_field = self.get_task_attachment(pk)
+            if file_field is None:
+                return HttpResponseForbidden()
         elif attachment_type == ASSIGNMENT_COMMENT_ATTACHMENT:
             qs = AssignmentComment.objects.filter(pk=pk)
             if not user.is_teacher and not user.is_curator:
@@ -1248,3 +1229,19 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
             file_name)
         response['X-Accel-Redirect'] = file_url
         return response
+
+    def get_task_attachment(self, attachment_id):
+        """
+        Curators, all course teachers and non-expelled enrolled students
+        can download attachments.
+        """
+        qs = (AssignmentAttachment.objects
+              .filter(pk=attachment_id)
+              .select_related("assignment", "assignment__course_offering"))
+        assignment_attachment = get_object_or_404(qs)
+        role = access_role(co=assignment_attachment.assignment.course_offering,
+                           request_user=self.request.user)
+        # User doesn't have private access to the task
+        if isinstance(role, CourseRole):
+            return assignment_attachment.attachment
+        return None
