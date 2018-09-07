@@ -9,7 +9,8 @@ from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from core.exceptions import Redirect
 from core.utils import is_club_site
 from learning.models import Assignment, CourseClass, CourseOfferingTeacher, \
-    CourseOffering
+    CourseOffering, Course
+from learning.permissions import access_role, CourseRole
 from learning.settings import STUDENT_STATUS
 
 
@@ -73,13 +74,14 @@ class CourseOfferingTabbedPane(TabbedPane):
         Generates tabs to which requested user has permission.
         If user can't access requested tab raise exception.
         """
+        role = access_role(co=self._course_offering, request_user=request_user)
         for target in self.all_tabs:
             tab = self.tab_factory(target)
-            if tab.has_permissions(request_user, self._course_offering):
+            if tab.has_permissions(request_user, self._course_offering, role):
                 context_method_key = f"get_{target}"
                 get_context_method = getattr(self, context_method_key,
-                                             lambda *args, **kwargs: None)
-                tab.context = get_context_method(request_user)
+                                             lambda *args: None)
+                tab.context = get_context_method(request_user, role)
                 self.add(tab)
             elif target == tab_to_show:
                 raise Redirect(to=redirect_to)
@@ -89,79 +91,54 @@ class CourseOfferingTabbedPane(TabbedPane):
         if target not in cls.all_tabs:
             raise ValueError(f"Tab with target {target} is not supported")
         has_permissions_key = f"can_view_{target}"
-        has_permissions = getattr(cls, has_permissions_key, lambda u, co: False)
+        has_permissions = getattr(cls, has_permissions_key,
+                                  lambda **kwargs: False)
         return Tab(target=target, name=cls.all_tabs[target],
                    has_permissions=has_permissions)
 
     # FIXME: move can_view_* to permissions.py and add tests
     @staticmethod
-    def can_view_about(request_user, co):
+    def can_view_about(*args):
         return True
 
     @staticmethod
-    def can_view_contacts(request_user, co):
+    def can_view_contacts(request_user, co, request_user_role):
         return request_user.get_enrollment(co.pk) or request_user.is_curator
 
     @staticmethod
-    def can_view_reviews(request_user, co):
+    def can_view_reviews(request_user, co, request_user_role):
         return co.enrollment_is_open and (
                 request_user.is_student or request_user.is_curator)
 
     @staticmethod
-    def can_view_classes(request_user, co):
+    def can_view_classes(request_user, co, request_user_role):
         return True
 
     @staticmethod
-    def can_view_assignments(request_user, co):
+    def can_view_assignments(request_user, co, request_user_role):
         return (request_user.is_student or request_user.is_graduate or
                 request_user.is_curator or request_user.is_teacher or
                 request_user.get_enrollment(co.pk))
 
     @staticmethod
-    def can_view_news(request_user, co):
-        if is_club_site() or request_user.is_curator:
+    def can_view_news(request_user, co, request_user_role):
+        if is_club_site():
             return True
-        if co.is_actual_teacher(request_user):
-            return True
-        if (not request_user.is_authenticated or
-                request_user.status == STUDENT_STATUS.expelled):
-            return False
-        request_user_enrollment = request_user.get_enrollment(co.pk)
-        if (request_user_enrollment and not
-                co.failed_by_student(request_user, request_user_enrollment)):
-            return True
-        # Teachers from the same course permits to view the news
-        offerings_ids = (CourseOffering.objects
-                         .filter(course__slug=co.course.slug)
-                         # Note: can't reset default ordering in a Subquery
-                         .order_by("pk")
-                         .values("pk"))
-        teachers = (CourseOfferingTeacher.objects
-                    .filter(course_offering__in=Subquery(offerings_ids))
-                    .values_list('teacher_id', flat=True))
-        return request_user.is_teacher and request_user.pk in teachers
+        return request_user_role is not None
 
-    def get_news(self, request_user):
+    def get_news(self, request_user, request_user_role):
         return self._course_offering.courseofferingnews_set.all()
-        # return {
-        #     "news": news,
-        #     # FIXME: нужно убрать это из таб нафигу и написать тест на unread_cnt, сейчас не ловит ничего
-        #     "unread_news_cnt": news and (
-        #         CourseOfferingNewsNotification.unread
-        #             .filter(course_offering_news__course_offering=co, user=u)
-        #             .count())
-        # }
 
-    def get_reviews(self, request_user):
+    def get_reviews(self, request_user, request_user_role):
         return (self._course_offering.enrollment_is_open and
                 self._course_offering.get_reviews())
 
-    def get_contacts(self, request_user):
+    def get_contacts(self, request_user, request_user_role):
         teachers_by_role = self._course_offering.get_grouped_teachers()
         return [ct for g in teachers_by_role.values() for ct in g
                 if len(ct.teacher.private_contacts.strip()) > 0]
 
-    def get_classes(self, request_user) -> List[CourseClass]:
+    def get_classes(self, request_user, request_user_role) -> List[CourseClass]:
         """Get course classes with attached materials"""
         classes = []
         course_classes_qs = (
@@ -206,39 +183,28 @@ class CourseOfferingTabbedPane(TabbedPane):
             classes.append(cc)
         return classes
 
-    def get_assignments(self, request_user) -> List[Assignment]:
+    def get_assignments(self, request_user,
+                        request_user_role) -> List[Assignment]:
         """
-        For enrolled students show links to there submissions. If course
-        is completed and student was enrolled in - show links to
-        successfully passed assignments only.
-        For course teachers (among all terms) show links to assignment details.
-        For others show text only.
+        For enrolled students show links to there submissions.
+        Course teachers (among all terms) see links to assignment details.
+        Others can see only assignment names.
         """
         co = self._course_offering
-        request_user_enrollment = request_user.get_enrollment(co.pk)
-        co_failed_by_student = (request_user_enrollment and
-                                co.failed_by_student(request_user,
-                                                     request_user_enrollment))
         assignments = co.assignment_set.list()
-        if request_user_enrollment is not None:
+        if request_user_role == CourseRole.STUDENT:
             assignments = assignments.with_progress(request_user)
         assignments = assignments.all()  # enable query caching
         for a in assignments:
             to_details = None
-            if co.is_actual_teacher(request_user) or request_user.is_curator:
-                to_details = reverse("assignment_detail_teacher", args=[a.pk])
-            elif request_user_enrollment is not None:
-                student_progress = a.studentassignment_set.first()
-                if student_progress is not None:
-                    # Hide link if student didn't try to solve assignment
-                    # in completed course.
-                    if (co_failed_by_student and
-                            not student_progress.student_comments_cnt and
-                            (student_progress.grade is None or student_progress.grade == 0)):
-                        continue
-                    to_details = student_progress.get_student_url()
+            if request_user_role == CourseRole.STUDENT:
+                assignment_progress = a.studentassignment_set.first()
+                if assignment_progress is not None:
+                    to_details = assignment_progress.get_student_url()
                 else:
                     logger.info(f"no StudentAssignment for student ID "
                                 f"{request_user.pk}, assignment ID {a.pk}")
+            elif request_user_role in [CourseRole.TEACHER, CourseRole.CURATOR]:
+                to_details = reverse("assignment_detail_teacher", args=[a.pk])
             setattr(a, 'magic_link', to_details)
         return assignments

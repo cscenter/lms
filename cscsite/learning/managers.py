@@ -4,12 +4,26 @@ from django.apps import apps
 from django.conf import settings
 from django.db import models
 from django.db.models import query, Prefetch, Q, Count, Case, When, Value, \
-    IntegerField
+    IntegerField, Subquery
 
 from core.utils import is_club_site
 from learning.calendar import get_bounds_for_calendar_month
 from learning.settings import SEMESTER_TYPES, CENTER_FOUNDATION_YEAR
 from learning.utils import get_term_index
+
+
+class CourseOfferingTeacherQuerySet(query.QuerySet):
+    def for_course(self, course_slug):
+        offerings_ids = (self.model.course_offering.field.related_model.objects
+                         .filter(course__slug=course_slug)
+                         # Note: can't reset default ordering in a Subquery
+                         .order_by("pk")
+                         .values("pk"))
+        return self.filter(course_offering__in=Subquery(offerings_ids))
+
+
+CourseOfferingTeacherManager = models.Manager.from_queryset(
+    CourseOfferingTeacherQuerySet)
 
 
 class AssignmentQuerySet(query.QuerySet):

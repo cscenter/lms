@@ -827,7 +827,8 @@ def test_studentassignment_submission_grade(client):
 @pytest.mark.django_db
 def test_assignment_attachment_permissions(curator, client, tmpdir):
     teacher = TeacherCenterFactory()
-    co = CourseOfferingFactory.create(teachers=[teacher])
+    term = SemesterFactory.create_current()
+    co = CourseOfferingFactory.create(semester=term, teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
@@ -845,41 +846,41 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     a_attachment = AssignmentAttachment.objects.first()
     assert a_attachment.attachment.read() == b"content"
     client.logout()
-    attachment_url = a_attachment.file_url()
-    response = client.get(attachment_url)
+    task_attachment_url = a_attachment.file_url()
+    response = client.get(task_attachment_url)
     assert response.status_code == 302  # LoginRequiredMixin
     student_spb = StudentCenterFactory(city_id='spb')
     client.login(student_spb)
-    response = client.get(attachment_url)
+    response = client.get(task_attachment_url)
     assert response.status_code == 403  # not enrolled in
     EnrollmentFactory(student=student_spb, course_offering=co)
-    response = client.get(attachment_url)
+    response = client.get(task_attachment_url)
     assert response.status_code == 200
     student_spb.status = STUDENT_STATUS.expelled
     student_spb.save()
-    response = client.get(attachment_url)
+    response = client.get(task_attachment_url)
     assert response.status_code == 403  # expelled
     # Should be the same for volunteer
     volunteer_spb = VolunteerFactory(city_id='spb')
-    response = client.get(attachment_url)
+    response = client.get(task_attachment_url)
     assert response.status_code == 403
     client.login(volunteer_spb)
     EnrollmentFactory(student=volunteer_spb, course_offering=co)
-    response = client.get(attachment_url)
+    response = client.get(task_attachment_url)
     assert response.status_code == 200
     # Check not actual teacher access
     other_teacher = TeacherCenterFactory()
     client.login(other_teacher)
-    response = client.get(attachment_url)
-    assert response.status_code == 403  # not an actual teacher
+    response = client.get(task_attachment_url)
+    assert response.status_code == 403  # not a course teacher (among all terms)
     client.login(teacher)
-    response = client.get(attachment_url)
+    response = client.get(task_attachment_url)
     assert response.status_code == 200
     client.login(curator)
-    response = client.get(attachment_url)
+    response = client.get(task_attachment_url)
     assert response.status_code == 200
     project_reviewer = ProjectReviewerFactory()
     # Reviewers and others have no access
     client.login(project_reviewer)
-    response = client.get(attachment_url)
+    response = client.get(task_attachment_url)
     assert response.status_code == 403
