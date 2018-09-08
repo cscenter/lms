@@ -2,7 +2,7 @@
 
 [![Build Status](https://magnum.travis-ci.com/cscenter/site.svg?token=FeohhsTsZzQVU5xBDk5L&branch=master)](https://magnum.travis-ci.com/cscenter/site)
 
-Production stack: AWS, ubuntu 16.04 LTS, nginx, uwsgi, python3.6, Django 2.0.x, postgresql 9.6, redis (for queue), rq workers managed by `systemd`
+Production stack: AWS, ubuntu 16.04 LTS, nginx, uwsgi, python3.6, Django 2.1.x, postgresql 9.6, redis (for queue), rq workers managed by `systemd`
 
 Section | Description
 --- | ---
