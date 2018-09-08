@@ -272,7 +272,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     def test_user_detail_view(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = CSCUser.objects.create_user(user_data)
+        user = CSCUser.objects.create_user(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context['profile_user'], user)
