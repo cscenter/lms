@@ -3,11 +3,11 @@
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/reboot";
 @import "bootstrap/scss/transitions";
-@import "bootstrap/scss/utilities/spacing";
 @import "bootstrap/scss/utilities/display";
 @import "utils/mixins";
+@import "utils/functions";
+@import "utils/spacing";
 @import "utils/misc";
-@import "utils/line-height-calc";
 
 @import "components/sprites"; // Before: menu
 

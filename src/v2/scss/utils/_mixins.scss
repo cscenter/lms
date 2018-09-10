@@ -24,6 +24,18 @@
 }
 
 
+@function calculateRem($size) {
+  $remSize: ($size / 16px);
+  @return #{$remSize}rem;
+}
+
+// FIXME: добавить описание, где и зачем это всё нужно?
+@function calculateLineHeight($input-height-px){
+  $lineHeight: calc(#{calculateRem($input-height-px)} - #{spacer("3x")}*2 - #{calculateRem($border-width)}*2);
+  @return #{$lineHeight};
+}
+
+
 // Calculate line height for user's input height
 @mixin inputheight($input-height-px) {
   line-height: calculateLineHeight($input-height-px);

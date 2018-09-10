@@ -82,30 +82,83 @@
 //3-screen about-csc
 
 .about-csc {
-
+  text-align: center;
   @include append-hr-to-container;
-
-  @include media-breakpoint-down(md) {
-    text-align: center;
-    align-items: center;
-  }
-
-  h2 {
-    margin-bottom: 1rem;
-  }
-
-  h4 {
-    text-transform: uppercase;
-  }
-
-  .btn {
-    margin-bottom: 2rem;
-  }
-
-  .img-fluid {
-    @include media-breakpoint-down(lg) {
-      margin-bottom: 1rem;
+  .about-csc_content{
+    position: relative;
+    @include media-breakpoint-up(lg) {
+      margin-bottom: -4rem;
     }
+  }
+  .about-csc__description {
+    color: $black;
+    margin-top: 2rem;
+
+    @include media-breakpoint-up(lg) {
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      margin: 0;
+      color: $white;
+      &:before {
+        content: "";
+        position: absolute;
+        background-image: linear-gradient(0deg, rgba(29, 29, 29, 0.00) 0%, rgba(29, 29, 29, 0.8) 100%);
+        width: 100%;
+        height: 360px;
+      }
+      p {
+        z-index: $zindex-fixed;
+        padding: 0 120px;
+      }
+      h1{
+        z-index: $zindex-fixed;
+        margin-top: 3rem;
+      }
+    }
+
+    .img-fluid {
+      width: 100%; //For IE
+    }
+  }
+  .about-csc_btn {
+    margin-bottom: 2rem;
+    @include media-breakpoint-up(lg) {
+      position: relative;
+      bottom: 7rem;
+    }
+  }
+}
+
+.about-csc__organizers {
+  border-top: $hr-border-width solid $hr-border-color;
+  padding-top: spacer("8x");
+  @include media-breakpoint-up(lg) {
+    border-top: none;
+    padding-top: 0;
+  }
+  .sprite-img {
+    opacity: .8;
+    filter: grayscale(100%);
+    transition: $transition-base;
+    &:hover {
+      opacity: 1;
+      filter: grayscale(0%);
+    }
+    @include media-breakpoint-up(md) {
+      width: 112px;
+      height: 88px;
+      margin: 0 .5rem;
+    }
+  }
+  h3{
+    margin-bottom: .5rem;
+  }
+  p{
+    font-size: $font-size-sm;
   }
 }
 
@@ -158,8 +211,7 @@
   }
 
   h2 {
-    text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
   }
 
   .btn {

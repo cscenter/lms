@@ -11,7 +11,7 @@
     padding: spacer("3x") spacer("4x");
     background: $input-bg;
     border: $input-border-width solid $input-border-color;
-    color: $input-color;
+    color:transparent;
     border-radius: $input-border-radius;
     &:hover {
       transition: $input-transition;

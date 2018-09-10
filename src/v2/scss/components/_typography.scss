@@ -26,6 +26,7 @@ h1,
 h2,
 .h2 {
   font-size: $h2-font-size;
+  margin-bottom: spacer("6x");
 }
 
 h3, .h3 {

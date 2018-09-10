@@ -2,7 +2,15 @@
 //
 // Variables should follow the `$component-state-property-size` formula for
 // consistent naming. Ex: $nav-link-disabled-color and $modal-content-box-shadow-xs.
-@import "utils/spacer";
+
+@function spacer($key, $spacers: $spacers) {
+  @if map-has-key($spacers, $key) {
+    @return map-get($spacers, $key);
+  }
+
+  @error "Unknown `#{$key}` in $spacers.";
+}
+
 //
 // Color system
 //
