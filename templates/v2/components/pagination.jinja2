@@ -119,17 +119,34 @@
         </div>
     </div>
     <div class="container page-content">
-        <div class="row">
-            <div class="col">
-                <h2 class="text-center">Mobile view</h2>
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination mobile-view content-center">
-                        <li class="page-item disabled"><a class="page-link" href="#">{{ macros.svg_inline('arrow-left') }}</a></li>
-                        <li class="page-item disabled"><p class="page-status" href="#">1 из 10</p></li>
-                        <li class="page-item page-item_next"><a class="page-link" href="#">{{ macros.svg_inline('arrow-right', 'bg-dark') }}</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
+        <h2 class="text-center">Mobile view</h2>
+        <ul class="pagination">
+            <li class="page-item disabled">
+                <button class="page-link">
+                    {{ macros.svg_inline('arrow-left') }}
+                </button>
+            </li>
+            <li class="page-item d-none d-md-block active">
+                <button class="page-link">1</button>
+            </li>
+            <li class="page-item d-none d-md-block">
+                <button class="page-link">2</button>
+            </li>
+            <li class="page-item d-none d-md-block">
+                <button class="page-link">3</button>
+            </li>
+            <li class="page-item d-none d-md-block">
+                <button class="page-link">4</button>
+            </li>
+            <li class="page-item d-none d-md-block">
+                <button class="page-link">5</button>
+            </li>
+            <li class="page-status d-md-none">1&nbsp;из&nbsp;5</li>
+            <li class="page-item">
+                <button class="page-link">
+                    {{ macros.svg_inline('arrow-right') }}
+                </button>
+            </li>
+        </ul>
     </div>
 {% endblock content %}

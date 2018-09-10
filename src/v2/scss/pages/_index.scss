@@ -83,13 +83,25 @@
 
 .about-csc {
   text-align: center;
-  @include append-hr-to-container;
-  .about-csc_content{
+  @include append-hr-to-container();
+
+  .about-csc__cover {
     position: relative;
-    @include media-breakpoint-up(lg) {
-      margin-bottom: -4rem;
+    padding-top: 52.5%;
+
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
   }
+
+  .img-fluid {
+    width: 100%; // For IE
+  }
+
   .about-csc__description {
     color: $black;
     margin-top: 2rem;
@@ -110,25 +122,26 @@
         width: 100%;
         height: 360px;
       }
+
       p {
-        z-index: $zindex-fixed;
+        z-index: $zindex-cover;
         padding: 0 120px;
       }
-      h1{
-        z-index: $zindex-fixed;
+
+      h1 {
+        z-index: $zindex-cover;
         margin-top: 3rem;
       }
-    }
-
-    .img-fluid {
-      width: 100%; //For IE
     }
   }
   .about-csc_btn {
     margin-bottom: 2rem;
     @include media-breakpoint-up(lg) {
-      position: relative;
-      bottom: 7rem;
+      position: absolute;
+      bottom: 3rem;
+      margin: 0;
+      left: 50%;
+      transform: translateX(-50%);
     }
   }
 }
@@ -138,8 +151,8 @@
   padding-top: spacer("8x");
   @include media-breakpoint-up(lg) {
     border-top: none;
-    padding-top: 0;
   }
+
   .sprite-img {
     opacity: .8;
     filter: grayscale(100%);
@@ -154,10 +167,12 @@
       margin: 0 .5rem;
     }
   }
-  h3{
+
+  h3 {
     margin-bottom: .5rem;
   }
-  p{
+
+  p {
     font-size: $font-size-sm;
   }
 }
