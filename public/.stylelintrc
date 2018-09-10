@@ -12,7 +12,7 @@
     "at-rule-semicolon-space-before": "never",
     "block-closing-brace-empty-line-before": null,
     "block-closing-brace-newline-after": null,
-    "block-opening-brace-space-before": null,
+    "block-opening-brace-space-before": "always",
     "color-named": "never",
     "declaration-block-semicolon-newline-after": "always-multi-line",
     "declaration-block-semicolon-newline-before": "never-multi-line",

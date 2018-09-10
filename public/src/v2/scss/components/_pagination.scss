@@ -98,17 +98,17 @@ $pagination-disabled-border-color: $gray-lighter;
         opacity: .6;
       }
     }
-
-    .page-status,
-    .ellipsis {
-      position: relative;
-      display: block;
-      padding: spacer("1x") spacer("3x");
-      margin-left: -$pagination-border-width;
-      line-height: $line-height-base;
-      color: $pagination-color;
-      background-color: $pagination-bg;
-      border: $pagination-border-width solid $pagination-border-color;
-    }
+  }
+  
+  .page-status,
+  .ellipsis {
+    position: relative;
+    display: block;
+    padding: spacer("1x") spacer("3x");
+    margin-left: -$pagination-border-width;
+    line-height: $line-height-base;
+    color: $pagination-color;
+    background-color: $pagination-bg;
+    border: $pagination-border-width solid $pagination-border-color;
   }
 }

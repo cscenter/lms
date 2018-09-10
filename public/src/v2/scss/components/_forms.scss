@@ -1,5 +1,6 @@
 $input-bg:                              $white;
 $input-disabled-bg:                     $gray-disable-dark;
+$input-line-height:                     calculate-input-line-height(48px, spacer("3x"));
 
 $input-color:                           $gray-darker;
 $input-border-color:                    darken($gray-lighter, 10%);
@@ -39,11 +40,11 @@ $form-feedback-color:               $white;
 $form-feedback-valid-color:         green;
 $form-feedback-invalid-color:       $red;
 
-@import "components/_forms/file-input";
-@import "components/_forms/inputs";
-@import "components/_forms/checkbox";
-@import "components/_forms/radio-btn";
-@import "components/_forms/select";
+@import "_forms/file-input";
+@import "_forms/inputs";
+@import "_forms/checkbox";
+@import "_forms/radio-btn";
+@import "_forms/select";
 
 .ui.form {
   margin-bottom: spacer("10x");

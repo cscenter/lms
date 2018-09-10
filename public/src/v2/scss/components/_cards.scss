@@ -46,13 +46,7 @@
   }
 }
 
-aside{
-  .card{
-    margin-bottom: 1rem;
-    font-size: $font-size-sm;
-  }
-}
-
-.responsive-card{
-  float: left; //For old browsers
+.card.card-sm {
+  margin-bottom: 1rem;
+  font-size: $font-size-sm;
 }
