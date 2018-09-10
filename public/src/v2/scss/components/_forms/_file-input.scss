@@ -47,6 +47,7 @@
       z-index: 3;
       @include inputheight(48px);
       display: block;
+      line-height: 1;
       color: $white;
       padding: spacer("3x") spacer("6x");
       background: $gray-dark;
