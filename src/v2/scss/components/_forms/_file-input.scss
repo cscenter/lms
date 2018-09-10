@@ -9,7 +9,7 @@
       opacity: 0;
       font-size: $font-size-base;
       padding: spacer("3x") spacer("4x");
-      @include inputheight(48px);
+      line-height: $input-line-height;
 
       &:focus ~ .custom-file-label {
         border-color: $input-border-color-hover;
@@ -32,7 +32,7 @@
     left: 0;
     z-index: 1;
     font-size: $font-size-content-base;
-    @include inputheight(48px);
+    line-height: $input-line-height;
     font-weight: $font-weight-base;
     padding: spacer("3x") spacer("4x");
     color: $input-placeholder-color;
@@ -45,7 +45,7 @@
       right: -1px;
       bottom: -1px;
       z-index: 3;
-      @include inputheight(48px);
+      line-height: $input-line-height;
       display: block;
       line-height: 1;
       color: $white;

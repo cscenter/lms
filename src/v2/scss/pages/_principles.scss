@@ -1,0 +1,46 @@
+.ui.form.principles {
+  text-align: center;
+  padding-bottom: spacer("10x");
+  h1 {
+    margin-bottom: 66px;
+  }
+  .rule {
+    position: relative;
+    margin-top: 60px;
+    font-size: $font-size-lg;
+
+    &:before {
+      content: "";
+      display: block;
+      position: absolute;
+      top: -30px;
+      width: 100%;
+      height: 1px;
+      background: $gray-light;
+    }
+
+    &:after {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      top: -36px;
+      left: calc(50% - 6px);
+      width: 12px;
+      height: 12px;
+      transform: rotate(45deg);
+      background-color: $gray-light;
+      //border: 3px solid white;
+      outline: 4px solid white;
+    }
+  }
+  .form_title.__image {
+    height: 200px;
+    width: 100%;
+    background-image: url("/media/pages/principles/principles.jpg");
+    background-size: cover;
+    background-position: 50% 50%;
+    @include media-breakpoint-up(lg) {
+      height: 300px;
+    }
+  }
+}
