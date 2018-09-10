@@ -120,11 +120,16 @@
 
 .ui.action.input{
 flex-direction: row;
+  position: relative;
 }
 
 .ui.action.input > .btn,
 .ui.action.input > .btn {
   display: flex;
+  position: absolute;
+  right: 0;
+  top:0;
+  bottom: 0;
   align-items: center;
   flex: 0 0 auto;
   color: $white;
@@ -188,8 +193,9 @@ flex-direction: row;
 //Loading
 
 .ui.loading.loading.input > i.icon {
-  position: relative;
-  right: 2rem;
+  position: absolute;
+  right: 1.5rem;
+  top: 1rem;
   content: '';
   animation-iteration-count: infinite;
   border-radius: 50%;

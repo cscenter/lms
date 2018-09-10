@@ -33,8 +33,10 @@
         <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
         <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём
             направлениям: Computer Science, Data Science, Software Engineering.</p>
-        <a href="#offline-courses" class="btn btn--big btn--green _m-wide">Смотреть программы</a>
-        <a class="btn btn--big btn--white _m-wide" href="#">Узнать о центре</a>
+        <div class="cover__btns">
+            <a href="#offline-courses" class="btn btn--big btn--green _m-wide">Смотреть программы</a>
+            <a class="btn btn--big btn--white _m-wide" href="#">Узнать о центре</a>
+        </div>
     </div>
 </div>
 
@@ -78,29 +80,42 @@
 
 <div class="about-csc">
     <div class="container">
-        <h2>О центре</h2>
-        <div class="row">
-            <div class="col-lg-8">
-                <img src="{{ static("v2/img/pages/index/cscenter_meetup.jpg") }}" class="img-fluid" alt="Computer Science Center Meetup">
-            </div>
-            <div class="col-lg-4 about-csc__description">
+        <div class="about-csc_content">
+            <img src="{{ static("v2/img/pages/index/cscenter_meetup.jpg") }}" class="img-fluid"
+                 alt="Computer Science Center Meetup">
+            <div class="about-csc__description">
+                <h1>О центре</h1>
                 <p>
-                    Computer Science Center — объединённая инициатива Школы анализа данных, Computer Science клуба и
-                    JetBrains. Мы существуем, чтобы дать возможность талантливым студентам и выпускникам развиваться
-                    в интересном им направлении.
+                    Computer Science Center&nbsp;&mdash; объединённая инициатива Школы анализа данных, Computer Science
+                    клуба и&nbsp;JetBrains. Мы&nbsp;существуем, чтобы дать возможность талантливым студентам и&nbsp;выпускникам
+                    развиваться в&nbsp;интересном им&nbsp;направлении.
                 </p>
-                <a class="btn btn--small btn--outline_gray" href="/about/">Подробнее</a>
-
-                <h4>Организаторы</h4>
-                <div class="supported-by">
-                    <a target="_blank" rel="noopener" href="https://jetbrains.ru/students" title="JetBrains">{{ macros.svg_inline('logo-jetbrains') }}</a>
-                    <a target="_blank" rel="noopener" href="https://yandexdataschool.ru/" title="Яндекс ШАД">{{ macros.svg_inline('logo-shad') }}</a>
-                    <a target="_blank" rel="noopener" href="http://239.ru/" title="ФМЛ №239">{{ macros.svg_inline('logo-fml239') }}</a>
-                    <a target="_blank" rel="noopener" href="https://compsciclub.ru/" title="Computer Science Club">{{ macros.svg_inline('logo-csclub') }}</a>
+            </div>
+            <a class="btn btn--big btn--green about-csc_btn" href="/about/">Подробнее</a>
+        </div>
+        <div class="about-csc__organizers">
+            <div class="row content-center">
+                <div class="col-lg-8">
+                    <h3>Организаторы</h3>
+                    <p>Computer Science Center – это совместная инициатива Computer Science клуба при ПОМИ РАН,
+                        компании
+                        JetBrains и Школы анализа данных Яндекса.
+                    </p>
+                </div>
+                <div class="col-12">
+                    <a target="_blank" rel="noopener" href="https://jetbrains.ru/students"
+                       title="JetBrains">{{ macros.svg_inline('logo-jetbrains') }}</a>
+                    <a target="_blank" rel="noopener" href="https://yandexdataschool.ru/"
+                       title="Яндекс ШАД">{{ macros.svg_inline('logo-shad') }}</a>
+                    <a target="_blank" rel="noopener" href="http://239.ru/"
+                       title="ФМЛ №239">{{ macros.svg_inline('logo-fml239') }}</a>
+                    <a target="_blank" rel="noopener" href="https://compsciclub.ru/"
+                       title="Computer Science Club">{{ macros.svg_inline('logo-csclub') }}</a>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
 <div class="csc-online-education">

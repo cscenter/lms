@@ -26,6 +26,7 @@ $btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, bord
   vertical-align: middle;
   user-select: none;
   border: $btn-border-width solid transparent;
+  overflow: hidden;
   &:focus,
   &.focus {
     outline: 0;
@@ -103,6 +104,30 @@ $btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, bord
 
   &:focus {
     background-color: darken($teal, 3%);
+  }
+}
+
+.btn-animation {
+  height: 28px;
+  position: relative;
+  top: 0;
+  transition: $transition-base;
+
+  span {
+    width: 100%;
+    display: block;
+    text-align: center;
+  }
+
+  img {
+    padding: 10px;
+  }
+  &:hover {
+    top: -40px;
+
+    img {
+      transform: scale(1.5);
+    }
   }
 }
 
