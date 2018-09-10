@@ -124,7 +124,8 @@ class CourseOfferingTabbedPane(TabbedPane):
     def can_view_news(request_user, co, request_user_role):
         if is_club_site():
             return True
-        return request_user_role is not None
+        return (request_user_role is not None and
+                request_user_role != CourseRole.STUDENT_RESTRICT)
 
     def get_news(self, request_user, request_user_role):
         return self._course_offering.courseofferingnews_set.all()
@@ -192,14 +193,21 @@ class CourseOfferingTabbedPane(TabbedPane):
         """
         co = self._course_offering
         assignments = co.assignment_set.list()
-        if request_user_role == CourseRole.STUDENT:
+        student_roles = [CourseRole.STUDENT_REGULAR,
+                         CourseRole.STUDENT_RESTRICT]
+        if request_user_role in student_roles:
             assignments = assignments.with_progress(request_user)
         assignments = assignments.all()  # enable query caching
         for a in assignments:
             to_details = None
-            if request_user_role == CourseRole.STUDENT:
+            if request_user_role in student_roles:
                 assignment_progress = a.studentassignment_set.first()
                 if assignment_progress is not None:
+                    if request_user_role == CourseRole.STUDENT_RESTRICT:
+                        # Hide the link if student didn't send any comment on
+                        # assignment (first comment is considered as a solution)
+                        if not assignment_progress.student_comments_cnt:
+                            continue
                     to_details = assignment_progress.get_student_url()
                 else:
                     logger.info(f"no StudentAssignment for student ID "

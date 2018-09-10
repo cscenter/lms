@@ -83,7 +83,10 @@ class LearningPermissionsMixin(object):
 
 
 class CourseRole(Enum):
-    STUDENT = auto()  # Enrolled active student who didn't fail the course
+    STUDENT_REGULAR = auto()  # Enrolled active student
+    # For enrolled students restrict access in two cases:
+    # student failed the course or was expelled from the center
+    STUDENT_RESTRICT = auto()
     TEACHER = auto()  # Any teacher from the same course
     CURATOR = auto()
 
@@ -92,18 +95,23 @@ def access_role(*, co, request_user) -> Optional[CourseRole]:
     """
     Some course data (e.g. assignments, news) are private and accessible
     depending on the user role: curator, course teacher or
-    enrolled active student. This roles do not overlap in the same course.
+    enrolled student. This roles do not overlap in the same course.
 
     Returns request user role in target course session,
-    `None` is user has no access.
+    `None` is user has no access at all.
+
+    FIXME: enrolled students who was expelled have no access at all right now
     """
     if not request_user.is_authenticated or request_user.is_expelled:
         return None
     if request_user.is_curator:
         return CourseRole.CURATOR
     enrollment = request_user.get_enrollment(co.pk)
-    if enrollment and not co.failed_by_student(request_user, enrollment):
-        return CourseRole.STUDENT
+    if enrollment:
+        if not co.failed_by_student(request_user, enrollment):
+            return CourseRole.STUDENT_REGULAR
+        else:
+            return CourseRole.STUDENT_RESTRICT
     # Teachers from the same course permits to view the news
     all_course_teachers = (co.courseofferingteacher_set.field.model.objects
                            .for_course(co.course.slug)

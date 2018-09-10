@@ -1233,7 +1233,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
     def get_task_attachment(self, attachment_id):
         """
         Curators, all course teachers and non-expelled enrolled students
-        can download attachments.
+        can download task attachments.
         """
         qs = (AssignmentAttachment.objects
               .filter(pk=attachment_id)
@@ -1242,6 +1242,6 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         role = access_role(co=assignment_attachment.assignment.course_offering,
                            request_user=self.request.user)
         # User doesn't have private access to the task
-        if isinstance(role, CourseRole):
+        if role is not None and role != CourseRole.STUDENT_RESTRICT:
             return assignment_attachment.attachment
         return None
