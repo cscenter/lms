@@ -246,14 +246,20 @@ class TeachersV2View(TemplateView):
     template_name = "cscenter/teachers.html"
 
     def get_context_data(self, **kwargs):
+        # Get terms in last 3 academic years.
+        year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
+        term_index = get_term_index_academic_year_starts(year, term_type)
+        term_index -= 2 * TERMS_IN_ACADEMIC_YEAR
         app_data = {
             "state": {
                 "city": self.kwargs.get("city", None),
             },
             "props": {
                 "entry_url": reverse("api:teachers"),
+                "courses_url": reverse("api:courses"),
                 "cities": [{"label": str(v), "value": k} for k, v
                            in settings.CITIES.items()],
+                "term_index": term_index,
             }
         }
         return {

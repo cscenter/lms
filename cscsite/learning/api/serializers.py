@@ -7,6 +7,7 @@ from django.utils.http import urlquote
 from rest_framework import serializers
 
 from core.utils import render_markdown
+from learning.models import Course, CourseOffering
 from users.models import CSCUser
 
 
@@ -41,6 +42,53 @@ class PhotoSerializerField(serializers.Field):
             return None
 
 
+class CourseSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="course_id")
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CourseOffering
+        fields = ('id', 'name')
+
+    def get_name(self, obj):
+        return obj.course.name
+
+
+class TeacherCourseListingField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.course_offering.course_id
+
+
+class TeacherSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk")
+    name = serializers.SerializerMethodField()
+    sex = serializers.SerializerMethodField()
+    photo = PhotoSerializerField("176x246")
+    city = serializers.CharField(source="city_id")
+    courses = TeacherCourseListingField(
+        many=True, read_only=True, source="courseofferingteacher_set")
+    # Duplicates are acceptable
+    last_session = serializers.SerializerMethodField(
+        help_text="The latest term index when the teacher read the course")
+
+    class Meta:
+        model = CSCUser
+        fields = ('id', 'name', 'sex', 'workplace', 'city', 'photo',
+                  'courses', 'last_session')
+
+    def get_name(self, obj):
+        return obj.get_full_name()
+
+    def get_last_session(self, obj):
+        last = 0
+        for t in obj.courseofferingteacher_set.all():
+            last = max(last, t.course_offering.semester.index)
+        return last
+
+    def get_sex(self, obj: CSCUser):
+        return "m" if obj.gender == obj.GENDER_MALE else "w"
+
+
 class AlumniSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     name = serializers.SerializerMethodField()
@@ -59,7 +107,7 @@ class AlumniSerializer(serializers.ModelSerializer):
         return f"{obj.first_name} {obj.last_name}"
 
     def get_sex(self, obj: CSCUser):
-        return "m" if obj.gender == obj.GENDER_MALE else "f"
+        return "b" if obj.gender == obj.GENDER_MALE else "g"
 
 
 class TestimonialSerializer(serializers.ModelSerializer):

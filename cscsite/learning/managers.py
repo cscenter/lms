@@ -177,12 +177,15 @@ class CourseOfferingQuerySet(models.QuerySet):
     def for_teacher(self, user):
         return self.filter(teachers=user)
 
-    def get_offerings_base_queryset(self):
-        """Returns list of available courses for CS Center"""
-        CSCUser = apps.get_model('users', 'CSCUser')
+    def from_center_foundation(self):
         Semester = apps.get_model('learning', 'Semester')
         center_foundation_term_index = get_term_index(CENTER_FOUNDATION_YEAR,
                                                       Semester.TYPES.autumn)
+        return self.filter(semester__index__gte=center_foundation_term_index)
+
+    def get_offerings_base_queryset(self):
+        """Returns list of available courses for CS Center"""
+        CSCUser = apps.get_model('users', 'CSCUser')
         prefetch_teachers = Prefetch(
             'teachers',
             queryset=CSCUser.objects.only("id", "first_name", "last_name",
@@ -193,7 +196,7 @@ class CourseOfferingQuerySet(models.QuerySet):
                       "materials_video", "materials_slides", "materials_files",
                       "course__name", "course__slug",
                       "semester__year", "semester__index", "semester__type")
-                .filter(semester__index__gte=center_foundation_term_index)
+                .from_center_foundation()
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',
                           'course__name'))
