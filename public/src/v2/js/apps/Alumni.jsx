@@ -1,5 +1,4 @@
 import React, {Fragment} from 'react';
-import { forceCheck } from 'react-lazyload';
 
 import _debounce from 'lodash-es/debounce';
 import $ from 'jquery';
@@ -61,7 +60,6 @@ class Alumni extends React.Component {
             const newPayload = this.getRequestPayload(filterState);
             this.fetch(newPayload);
         } else {
-            forceCheck();
             hideBodyPreloader();
         }
     };
@@ -97,7 +95,6 @@ class Alumni extends React.Component {
         }).fail(() => {
             showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
         });
-
     };
 
     render() {

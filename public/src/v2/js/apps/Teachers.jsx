@@ -5,8 +5,14 @@ import _debounce from 'lodash-es/debounce';
 import $ from 'jquery';
 
 import Select from 'components/Select';
+import SelectLazy from "components/SelectLazy";
 import SearchInput from 'components/SearchInput';
 import UserCardList from 'components/UserCardList';
+import {
+    hideBodyPreloader,
+    showBodyPreloader,
+    showErrorNotification
+} from "utils";
 
 
 class App extends React.Component {
@@ -16,26 +22,18 @@ class App extends React.Component {
         this.state = {
             "loading": true,
             "items": [],
+            "query": "",
+            "course": null,
+            "recentOnly": true,
             ...props.initialState
         };
         this.fetch = _debounce(this.fetch, 300);
+        this.CourseSelect = React.createRef();
     }
 
     handleSearchInputChange = (value) => {
         this.setState({
             query: value,
-        });
-    };
-
-    handleYearChange = (year) => {
-        this.setState({
-            year: year
-        });
-    };
-
-    handleAreaChange = (areaCode) => {
-        this.setState({
-            area: areaCode
         });
     };
 
@@ -45,93 +43,125 @@ class App extends React.Component {
         });
     };
 
+    handleCourseChange = (course) => {
+        this.setState({
+            course: course
+        });
+    };
+
+    handleRecentCheckboxChange = () => {
+        this.setState({
+            recentOnly: !this.state.recentOnly
+        });
+    };
+
     componentDidMount = () => {
-        // Set initial state and fetch data
-        // TODO: move to constructor?
-        this.setState(this.props.init.state);
+        const filterState = this.getFilterState(this.state);
+        console.debug("Teachers: filterState", filterState);
+        const newPayload = this.getRequestPayload(filterState);
+        console.debug("Teachers: newPayload", newPayload);
+        this.fetch(newPayload);
     };
 
     componentWillUnmount = function () {
         this.serverRequest.abort();
     };
 
-    componentDidUpdate = (prevProps, prevState) => {
-        if (prevState.items.length === 0) {
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.loading) {
             const filterState = this.getFilterState(this.state);
             const newPayload = this.getRequestPayload(filterState);
-            this._fetch(newPayload);
+            this.fetch(newPayload);
         } else {
-            forceCheck();
+            hideBodyPreloader();
         }
     };
 
     getFilterState(state) {
-        let {year, city, query} = state;
-        return {year, city, query};
+        let {query, city, course} = state;
+        let filterState = {query, city, course};
+        Object.keys(filterState).map((k) => {
+            if (k === "course" && filterState[k] !== null) {
+                filterState[k] = filterState[k]["value"];
+            }
+            // Convert null and undefined to empty string
+            filterState[k] = !filterState[k] ? "" : filterState[k];
+        });
+        return filterState;
     }
 
     getRequestPayload(filterState) {
-        let {query, ...payload} = filterState;
-        return payload;
+        let {course} = filterState;
+        return {course};
     }
 
     fetch = (payload) => {
+        console.debug("Teachers: fetch", this.props, payload);
         this.serverRequest = $.ajax({
             type: "GET",
-            url: this.props.init.entry_url,
-            dataType: "json"
-        }).done((result) => {
+            url: this.props.entry_url,
+            dataType: "json",
+            data: payload
+        }).done((data) => {
+            data.forEach((item) => {
+               item.courses = new Set(item.courses);
+            });
             this.setState({
                 loading: false,
-                items: result.data,
+                items: data,
             });
+            this.CourseSelect.current.setState({isLoading: false});
+        }).fail(() => {
+            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
         });
+    };
 
+    handleLoadCourseOptions(select, callback) {
+        console.debug("Teachers: load course list options");
+        $.ajax({
+            type: "GET",
+            url: select.props.entry_url,
+            dataType: "json"
+        }).done((data) => {
+            let options = [];
+            data.forEach((item) => {
+               options.push({value: item.id, label: item.name});
+            });
+            select.setState({
+                optionsLoaded: true,
+                options,
+                isLoading: false
+            })
+        }).fail(() => {
+            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
+        });
     };
 
     render() {
+        if (this.state.loading) {
+            showBodyPreloader();
+        }
         //TODO: prevent rerendering if query < 3 symbols
-        const {year, city, query, area} = this.state;
-        const {years, cities, areas} = this.props.init.options;
-
+        const {query, city, course, recentOnly} = this.state;
+        const {term_index, cities} = this.props;
         let filteredItems = this.state.items.filter(function(item) {
             let cityCondition = (city !== null) ? item.city === city.value : true;
-            let areaCondition = (area !== null) ? item.areas.includes(area.value) : true;
-            let yearCondition = (year !== null) ? item.year === year.value : true;
-            return  cityCondition &&  areaCondition && yearCondition &&
-                    item.name.toLowerCase().search(query.toLowerCase()) !== -1;
+            let courseCondition = (course !== null) ? item.courses.has(course.value) : true;
+            let activityCondition = recentOnly ? item.last_session >= term_index: true;
+            return cityCondition && courseCondition && activityCondition &&
+                   item.name.toLowerCase().search(query.toLowerCase()) !== -1;
         });
 
         return (
-            <div className={this.state.loading ? "_loading" : ""}>
+            <Fragment>
+                <h1>Преподаватели</h1>
                 <div className="row mb-4">
-                    <div className="col-lg-3">
+                    <div className="col-lg-3 mb-4">
                         <SearchInput
                             onChange={this.handleSearchInputChange}
                             placeholder="Поиск"
                             value={query}
-                        />
-                    </div>
-                    <div className="col-lg-3">
-                        <Select
-                            onChange={this.handleAreaChange}
-                            value={area}
-                            name="area"
-                            placeholder="Направление"
-                            isClearable={true}
-                            options={areas}
-                            key="area"
-                        />
-                    </div>
-                    <div className="col-lg-3">
-                        <Select
-                            onChange={this.handleYearChange}
-                            value={year}
-                            name="year"
-                            isClearable={true}
-                            placeholder="Год выпуска"
-                            options={years}
-                            key="year"
+                            icon="search"
                         />
                     </div>
                     <div className="col-lg-3">
@@ -145,9 +175,40 @@ class App extends React.Component {
                             key="city"
                         />
                     </div>
+                    <div className="col-lg-3">
+                        <SelectLazy
+                            onChange={this.handleCourseChange}
+                            value={course}
+                            name="course"
+                            isClearable={true}
+                            placeholder="Предмет"
+                            key="course"
+                            handleLoadOptions={this.handleLoadCourseOptions}
+                            entry_url={this.props.courses_url}
+                            ref={this.CourseSelect}
+                        />
+                    </div>
+                    <div className="col-lg-3">
+                        <div className="ui checkbox-group">
+                            <label className="custom-checkbox fill-checkbox">
+                                <input type="checkbox"
+                                       className="fill-control-input"
+                                       checked={!this.state.recentOnly}
+                                       onChange={this.handleRecentCheckboxChange}
+                                       value=""
+                                />
+                                <span className="fill-control-indicator" />
+                                <span className="fill-control-description">Ранее преподавали</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
-                <UserCardList users={filteredItems} />
-            </div>
+                {
+                    filteredItems.length > 0 ?
+                        <UserCardList users={filteredItems} />
+                        : "Выберите другие параметры фильтрации."
+                }
+            </Fragment>
         );
     }
 }

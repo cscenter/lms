@@ -1,5 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Icon from "./Icon";
+
+function InputIcon(props) {
+    const icon = props.icon;
+    if (icon !== null) {
+        return (
+            <i className={`_${icon} icon`}>
+                <Icon id={icon}/>
+            </i>
+        );
+    }
+
+    return null;
+}
 
 class SearchInput extends React.Component {
     static defaultProps = {
@@ -11,15 +25,19 @@ class SearchInput extends React.Component {
     };
 
     render() {
+        const {icon} = this.props;
+        const iconClass = icon !== null ? "icon" : "";
         return (
-            <input
-                name="query"
-                type="text"
-                className="form-control"
-                autoComplete="off"
-                {...this.props}
-                onChange={this.handleChange}
-            />
+            <div className={`ui ${iconClass} input`}>
+                <input
+                    name="query"
+                    type="text"
+                    autoComplete="off"
+                    {...this.props}
+                    onChange={this.handleChange}
+                />
+                <InputIcon icon={icon}/>
+            </div>
         );
     }
 }
