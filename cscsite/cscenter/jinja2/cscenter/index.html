@@ -2,8 +2,11 @@
 
 {% set menu_theme="__transparent-theme" %}
 
-{% block sprites %}{% include "sprites/index.svg" without context %}{% endblock sprites %}
-
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/index.svg") }}");
+    </script>
+{% endblock sprites %}
 
 {% block before_navbar_container %}<div class="cover cover-index-page">{% endblock before_navbar_container %}
 {% block after_navbar_container %}
@@ -56,7 +59,7 @@
     <div class="about-csc">
         <div class="container">
             <div class="about-csc__cover">
-                <img src="{{ static("v2/img/pages/index/cscenter_meetup.jpg") }}" class="img-fluid" alt="Computer Science Center Meetup">
+                <img data-src="{{ static("v2/img/pages/index/cscenter_meetup.jpg") }}" class="img-fluid" alt="Computer Science Center Meetup">
                 <div class="about-csc__description">
                     <h1>О центре</h1>
                     <p>
