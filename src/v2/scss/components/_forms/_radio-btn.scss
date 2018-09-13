@@ -72,6 +72,18 @@
   max-width: 100%;
 }
 
+.radiobtn-group.inline {
+  display: inline-flex;
+  flex-flow: row;
+  max-width: 100%;
+  height: $input-outerheight;
+  align-items: center;
+
+  .custom-radiobtn {
+    margin: 0 20px 0 0;
+  }
+}
+
 .custom-radiobtn.fill-radiobtn, .custom-radiobtn.fill-radiobtn.disabled {
   .fill-control-input {
     &:checked ~ .fill-control-indicator:after {

@@ -1,8 +1,8 @@
-import Select from 'react-select';
+import SelectBase from 'react-select';
 import PropTypes from 'prop-types';
 import React from 'react';
 
-class FormSelect extends React.Component {
+class Select extends React.Component {
 
     handleChange = (e) => {
         this.props.onChange(e);
@@ -10,7 +10,7 @@ class FormSelect extends React.Component {
 
     render() {
         return (
-            <Select
+            <SelectBase
                 name={this.props.name}
                 value={this.props.value}
                 clearable={false}
@@ -25,9 +25,9 @@ class FormSelect extends React.Component {
     }
 }
 
-FormSelect.propTypes = {
+Select.propTypes = {
     onChange: PropTypes.func.isRequired,
     options: PropTypes.array.isRequired
 };
 
-export default FormSelect;
+export default Select;

@@ -41,3 +41,27 @@ class AlumniView(TemplateView):
         return {
             "app_data": app_data
         }
+
+
+class TeachersView(TemplateView):
+    template_name = "v2/pages/teachers.jinja2"
+
+    def get_context_data(self, **kwargs):
+        app_data = {
+            "state": {
+                "query": self.kwargs.get("area", ""),
+                "city": self.kwargs.get("city", None),
+            },
+            "props": {
+                "entry_url": '/ajax/teachers.json',
+                "courses_url": '/ajax/courses.json',
+                "cities": [
+                    {"label": 'Санкт-Петербург', "value": 'spb'},
+                    {"label": 'Новосибирск', "value": 'nsk'}
+                ],
+                "term_index": 34
+            }
+        }
+        return {
+            "app_data": app_data
+        }

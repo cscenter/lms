@@ -77,8 +77,8 @@ $(function () {
     });
 
     // Notifications
-    if (window.__CSC_NOTIFICATIONS__ !== undefined) {
-        window.__CSC_NOTIFICATIONS__.forEach((item) => {
+    if (window.__CSC__.notifications !== undefined) {
+        window.__CSC__.notifications.forEach((item) => {
             const {text, ...props} = item;
             if (props.type === "error") {
                 showErrorNotification(text, props);
@@ -94,9 +94,8 @@ $(function () {
         import(/* webpackChunkName: "honorBoard" */ 'apps/honorBoard')
             .then(module => { module.launch(); })
             .catch(error => showComponentError(error));
-    } else {
-
     }
+
     let reactApps = document.querySelectorAll('.__react-root');
     if (reactApps.length > 0) {
         import(/* webpackChunkName: "react" */ 'react_app')
@@ -105,7 +104,27 @@ $(function () {
             })
             .catch(error => showComponentError(error));
     }
+
+    // Append svg sprites
+    window.__CSC__.sprites.forEach((url) => {
+        $.ajax({
+            type: "GET",
+            url: url,
+            dataType: "text",
+        }).then((svgDefs) => {
+            $(".svg-inline").append(svgDefs);
+        });
+    });
+
+    // Replace data-src
+    loadLazyImages();
 });
 
 
-
+function loadLazyImages() {
+    const attribute = 'data-src';
+    const matches = document.querySelectorAll('img[' + attribute + ']');
+    for (let i = 0, n = matches.length; i < n; i++) {
+      matches[i].setAttribute('src', matches[i].getAttribute(attribute));
+    }
+}

@@ -7,22 +7,24 @@
   color: $input-color;
   flex-direction: column;
   width: 100%;
-  
-  &.__split-input{
+
+  &.__split-input {
     flex-flow: row;
     flex-wrap: wrap;
-    label{
+    label {
       width: 100%;
     }
-    .start-range{
+
+    .start-range {
       border-top-right-radius: 0 !important;
       border-bottom-right-radius: 0 !important;
-      border-right:$border-width solid $input-border-color;
+      border-right: $border-width solid $input-border-color;
     }
-    .end-range{
+
+    .end-range {
       border-top-left-radius: 0 !important;
       border-bottom-left-radius: 0 !important;
-      border-left:none;
+      border-left: none;
     }
 
   }
@@ -57,6 +59,7 @@
   color: $gray-dark;
   margin: 5px 0 0;
   line-height: $input-btn-line-height;
+
   &.__invalid-feedback {
     color: $error;
   }

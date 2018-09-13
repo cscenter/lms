@@ -1,6 +1,6 @@
 @import "bootstrap/scss/utilities/text"; // TODO: what exactly we use from here right now?
 
-body{
+body {
   font-size: $font-size-content-base;
 }
 
@@ -8,8 +8,18 @@ body{
 // Headings
 //
 
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6 {
   margin-bottom: spacer("4x");
   font-family: $headings-font-family;
   font-weight: $headings-font-weight;
@@ -61,7 +71,6 @@ h6, .h6 {
   }
 }
 
-
 a {
   &.h4 {
     display: inline-block;
@@ -78,10 +87,9 @@ h4 {
   font-weight: $font-weight-normal;
 }
 
-.title_description{
+.title_description {
   margin-bottom: spacer("8x");
 }
-
 
 //TODO: find solution for this
 @include media-breakpoint-down(md) {
