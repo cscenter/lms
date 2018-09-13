@@ -20,7 +20,7 @@ from django.contrib.auth import views as auth_views
 from django.http import JsonResponse, HttpResponse
 from django.views import generic
 
-from core.views import NotyView, AlumniView
+from core.views import NotyView, AlumniView, TeachersView
 
 
 class HtmlView(generic.TemplateView):
@@ -62,5 +62,6 @@ urlpatterns = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + [
     url(r'^ajax/(?P<path_to_json>.*)$', JSONView.as_view(), name='json_data'),
     url(r'^v2/components/noty/$', NotyView.as_view(), name='noty_component'),
     url(r'^v2/pages/alumni/$', AlumniView.as_view(), name='alumni'),
+    url(r'^v2/pages/teachers/$', TeachersView.as_view(), name='teachers'),
     url(r'^(?P<path_to_template>.*)$', HtmlView.as_view(), name='html_pages'),
 ]
