@@ -20,7 +20,6 @@
   svg {
     margin-left: 30px;
     fill: #1d1d1d;
-    height: 96px;
   }
 
   &:hover {
@@ -73,6 +72,10 @@
       text-align: center;
     }
   }
+}
+
+.card-offline-course__icon {
+  height: 96px;
 }
 
 //3-screen about-csc

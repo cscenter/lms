@@ -189,7 +189,7 @@ class App extends React.Component {
                         />
                     </div>
                     <div className="col-lg-3">
-                        <div className="ui checkbox-group">
+                        <div className="ui checkbox-group inline">
                             <label className="custom-checkbox fill-checkbox">
                                 <input type="checkbox"
                                        className="fill-control-input"
