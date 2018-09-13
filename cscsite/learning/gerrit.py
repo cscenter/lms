@@ -47,7 +47,10 @@ def permits_students_read_master(client, project_name, group_uuid):
 def init_project_for_course(course_offering, skip_users=False):
     city_code = course_offering.get_city()
     course_name = course_offering.course.slug.replace("-", "_")
-    project_name = f"{city_code}/{course_name}_{course_offering.semester.year}"
+    if course_offering.is_correspondence:
+        project_name = f"{course_name}_{course_offering.semester.year}"
+    else:
+        project_name = f"{city_code}/{course_name}_{course_offering.semester.year}"
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,
                           settings.GERRIT_CLIENT_PASSWORD))
@@ -71,7 +74,7 @@ def init_project_for_course(course_offering, skip_users=False):
         reviewers_group_res = client.get_group(reviewers_group)
         reviewers_group_uuid = reviewers_group_res.data["id"]
         members_res = client.get_group_members(reviewers_group_uuid)
-        members = {m["email"] for m in members_res.data}
+        members = {m["username"] for m in members_res.data}
         to_delete = members.difference(reviewers_group_members)
         to_add = [m for m in reviewers_group_members if m not in members]
         res = client.create_group_members(reviewers_group_uuid, to_add)
@@ -98,6 +101,7 @@ def init_project_for_course(course_offering, skip_users=False):
     client.create_branch(project_name, "master")
     # Grant reviewers Push, Create Reference and Read Access to all branches
     reviewers_group_uuid = reviewers_group_res.data["id"]
+    # FIXME: права добавляются N-раз
     res = grant_reviewers_access(client, project_name, reviewers_group_uuid)
     if not res.ok:
         logger.error(f"Couldn't set permissions for group "
@@ -147,6 +151,9 @@ def init_project_for_course(course_offering, skip_users=False):
         client.include_group(students_group_uuid, group_res.data['id'])
         # TODO: what if user account not found?
         branch_name = student.get_abbreviated_name_in_latin()
+        if course_offering.is_correspondence:
+            assert student.city_id is not None
+            branch_name = f"{student.city_id}/{branch_name}"
         client.create_branch(project_name, branch_name, {
             "revision": "master"
         })
