@@ -13,10 +13,15 @@
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
     <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
     {%- block stylesheets %} {% endblock stylesheets %}
+    <script type="text/javascript">
+        window.__CSC__ = {
+            notifications: {{ messages(request)|tojson }},
+            sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
+        };
+    </script>
 </head>
 <body {% block body_attrs %}{% endblock body_attrs %}>
     <div class="svg-inline">
-        {% include "sprites/common.svg" without context %}
         {% block sprites %}{% endblock sprites %}
     </div>
 
@@ -59,10 +64,6 @@
         </div>
     </footer>
     {% endblock footer %}
-
-    <script type="text/javascript">
-        window.__CSC_NOTIFICATIONS__ = {{ messages(request)|tojson }};
-    </script>
 
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">

@@ -1,5 +1,13 @@
 {% extends "cscenter/layouts/base.html" %}
 
+{% block title %}Преподаватели CS центра{% endblock title %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
 {% block content %}
     <div class="container page-content">
         <div class="row">
