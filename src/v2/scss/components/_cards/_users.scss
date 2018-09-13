@@ -39,11 +39,21 @@ $user-card-gutter-width: $grid-gutter-width / 2;
   overflow: hidden;
   background: $gray-lighter;
   background-size: cover;
-  &._m {
+
+  &._b {
     background-image: url("/static/v2/img/placeholder/boy.png");
   }
-  &._f {
+
+  &._m {
+    background-image: url("/static/v2/img/placeholder/man.png");
+  }
+
+  &._g {
     background-image: url("/static/v2/img/placeholder/girl.png");
+  }
+
+  &._w {
+    background-image: url("/static/v2/img/placeholder/woman.png");
   }
 
   img {
@@ -53,6 +63,15 @@ $user-card-gutter-width: $grid-gutter-width / 2;
     right: 0;
     bottom: 0;
     width: 100%;
+  }
+}
+
+.user-card__details {
+  @include font-smoothing();
+
+  .workplace {
+    color: $gray-dark;
+    font-size: $font-size-sm;
   }
 }
 

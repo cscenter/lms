@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}Цели и история центра{% endblock title %}</title>
+    <title>{% block title %}{% endblock title %}</title>
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description"
@@ -21,7 +21,6 @@
 
 <body {% block body_attrs %}{% endblock body_attrs %}>
 <div class="svg-inline">
-    {% include "sprites/common.svg" %}
     {% block sprites %}{% endblock sprites %}
 </div>
 
@@ -49,7 +48,10 @@
 </footer>
 {%- endblock footer %}
 <script type="text/javascript">
-    window.__CSC_NOTIFICATIONS__ = {{ messages(request)|tojson }};
+    window.__CSC__ = {
+        notifications: {{ messages(request)|tojson }},
+        sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
+    };
 </script>
 
 {{ render_bundle('common', config='V2') }}

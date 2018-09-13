@@ -22,7 +22,6 @@
 <body>
 
 <div class="svg-inline">
-    {% include "sprites/common.svg" %}
     {% include "sprites/index.svg" %}
 </div>
 
@@ -35,7 +34,7 @@
             направлениям: Computer Science, Data Science, Software Engineering.</p>
         <div class="cover__btns">
             <a href="#offline-courses" class="btn btn--big btn--green _m-wide">Смотреть программы</a>
-            <a class="btn btn--big btn--white _m-wide" href="#">Узнать о центре</a>
+            <a class="btn btn--big btn--white _m-wide" href="/v2/pages/about/">Узнать о центре</a>
         </div>
     </div>
 </div>
@@ -81,7 +80,7 @@
 <div class="about-csc">
     <div class="container">
         <div class="about-csc__cover">
-            <img src="{{ static("v2/img/pages/index/cscenter_meetup.jpg") }}" class="img-fluid" alt="Computer Science Center Meetup">
+            <img data-src="{{ static("v2/img/pages/index/cscenter_meetup.jpg") }}" class="img-fluid" alt="Computer Science Center Meetup">
             <div class="about-csc__description">
                 <h1>О центре</h1>
                 <p>
@@ -367,6 +366,14 @@
         </div>
     </div>
 </footer>
+
+<script type="text/javascript">
+    window.__CSC__ = {
+        notifications: {{ messages(request)|tojson }},
+        sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
+    };
+</script>
+
 {{ render_bundle('common', config='V2') }}
 {{ render_bundle('main', config='V2') }}
 

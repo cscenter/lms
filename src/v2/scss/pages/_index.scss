@@ -17,10 +17,6 @@
   padding: spacer("6x") spacer("2x") spacer("8x");
   border-radius: 0;
 
-  .card-offline-course__icon {
-    height: 96px;
-  }
-
   svg {
     margin-left: 30px;
     fill: #1d1d1d;
@@ -90,6 +86,7 @@
     padding-top: 52.5%;
 
     img {
+      background: $gray-darker;
       position: absolute;
       top: 0;
       left: 0;

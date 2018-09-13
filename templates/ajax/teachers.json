@@ -1,0 +1,57 @@
+[
+    {
+      "id": 1,
+      "name": "Иван Иванович Иванов",
+      "profile_url": "/users/1/",
+      "photo": "/media/user_card.jpg",
+      "workplace": "ИТМО",
+      "courses": [1,2,3],
+      "last_session": 6,
+      "sex": "m",
+      "city": "spb"
+    },
+    {
+      "id": 2,
+      "name": "Алексей Алексеевич Алексеев",
+      "profile_url": "/users/2/",
+      "photo": "/media/user_card.jpg",
+      "workplace": "Jetbrains",
+      "courses": [1,2,3],
+      "last_session": 10,
+      "sex": "m",
+      "city": "spb"
+    },
+    {
+      "id": 3,
+      "name": "Иван Иванов2",
+      "profile_url": "/users/1/",
+      "photo": "/media/user_card.jpg",
+      "workplace": "CSC",
+      "courses": [1,2],
+      "last_session": 1,
+      "sex": "m",
+      "city": "spb"
+    },
+    {
+      "id": 4,
+      "name": "Анна Ивановна Герасимова",
+      "profile_url": "/users/2/",
+      "photo": null,
+      "workplace": "Санкт-Петербургский государственный университет имени Ленина",
+      "courses": [2],
+      "last_session": 42,
+      "sex": "w",
+      "city": "nsk"
+    },
+    {
+      "id": 5,
+      "name": "test user2",
+      "profile_url": "/users/2/",
+      "photo": null,
+      "workplace": "Homeless",
+      "courses": [3],
+      "last_session": 42,
+      "sex": "m",
+      "city": "nsk"
+    }
+]

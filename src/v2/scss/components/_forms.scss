@@ -1,6 +1,7 @@
 $input-bg:                              $white;
 $input-disabled-bg:                     $gray-disable-dark;
-$input-line-height:                     calculate-input-line-height(48px, spacer("3x"));
+$input-outerheight:                     48px;
+$input-line-height:                     calculate-input-line-height($input-outerheight, spacer("3x"));
 
 $input-color:                           $gray-darker;
 $input-border-color:                    darken($gray-lighter, 10%);
