@@ -160,10 +160,10 @@ DEBUG_TOOLBAR_CONFIG = {
 LDAP_CLIENT_URI = "ldap://review.compscicenter.ru:389"
 LDAP_DB_SUFFIX = "dc=review,dc=compscicenter,dc=ru"
 LDAP_CLIENT_USERNAME = "admin"
-LDAP_CLIENT_PASSWORD = "superStrongPassword"
+LDAP_CLIENT_PASSWORD = "C7G92?V6;c3M4.]e}k(Us33]"
 LDAP_TLS_TRUSTED_CA_CERT_FILE = "/Users/jetbrains/Downloads/tmp/trustedCA.crt"
 LDAP_SYNC_PASSWORD = True
 
 GERRIT_API_URI = "https://review.compscicenter.ru/a/"
 GERRIT_CLIENT_USERNAME = "admin"
-GERRIT_CLIENT_PASSWORD = "OOR4UvAgcPSHl37mWvjHeCioB6W1r/lzQvs6+CU3Wg"
+GERRIT_CLIENT_PASSWORD = "LEMz8tbPrxyBABArv+U2h2Zi32h8v13h7h2ZFzFOow"
