@@ -126,3 +126,10 @@ POST_OFFICE = {
         'LOG_LEVEL': 1
     }
 }
+
+LDAP_CLIENT_URI = "ldap://review.compscicenter.ru:389"
+LDAP_DB_SUFFIX = "dc=review,dc=compscicenter,dc=ru"
+LDAP_CLIENT_USERNAME = "admin"
+LDAP_CLIENT_PASSWORD = "***REMOVED***"
+LDAP_TLS_TRUSTED_CA_CERT_FILE = str(APP_DIR / "LDAPTrustedCA.crt")
+LDAP_SYNC_PASSWORD = True

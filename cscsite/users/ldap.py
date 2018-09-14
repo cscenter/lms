@@ -44,5 +44,6 @@ def user_to_ldif(user: CSCUser, redirect_to=None):
 def export(path):
     """Generates users data in LDIF"""
     with open(path, 'w') as f:
+        # FIXME: remove duplicates
         for u in CSCUser.objects.filter(groups__in=GROUPS_IMPORT_TO_GERRIT):
             user_to_ldif(u, f)
