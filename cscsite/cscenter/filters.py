@@ -16,6 +16,8 @@ def validate_semester_slug(value):
     if not match:
         raise ValidationError("Semester slug should be YEAR-TERM_TYPE format")
     term_year = int(match.group("term_year"))
+    if term_year < CENTER_FOUNDATION_YEAR:
+        raise ValidationError("Wrong semester year")
     term_type = match.group("term_type")
     # More strict rules for term types
     if term_type not in [Semester.TYPES.autumn, Semester.TYPES.spring]:
