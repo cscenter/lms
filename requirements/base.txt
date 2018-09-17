@@ -72,7 +72,9 @@ django-storages==1.5.2
 django-dbbackup==3.1.3
 
 # Import/Export
-django-import-export==1.0.1
+# Downgrade with Django 2.1.1
+# django-import-export==1.0.1
+git+https://github.com/django-import-export/django-import-export.git@54232db4a511cc5f0b085c6bb192c3619f27e452
 tablib==0.11.4
 
 # Redis-based task manager
