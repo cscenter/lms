@@ -170,3 +170,7 @@ spb/python_2018
 
 Права доступа успешно можно редактировать только в старом интерфейсе (в футере справа есть Switch to Old UI)
 Подробно о системе прав в документации https://gerrit-review.googlesource.com/Documentation/access-control.html
+
+
+
+TODO: 1 коммит на домашку, иначе diff размазывается и проверять сложно
