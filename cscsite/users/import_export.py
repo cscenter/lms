@@ -67,71 +67,72 @@ class SHADCourseRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
         skip_unchanged = True
 
 
-class UserCourseWidget(widgets.Widget):
+class UserCourseWidget(widgets.IntegerWidget):
     MAPPING = {v.lower(): k for k, v in CSCUser.COURSES._display_map.items()}
 
-    def clean(self, value):
+    def clean(self, value, row=None, *args, **kwargs):
+        if self.is_empty(value):
+            return None
         # Replace non-breaking space and tabs with common white space
-        value  = value.replace(u'\xa0', u' ')
+        value = value.replace(u'\xa0', u' ')
         if value in self.MAPPING:
             return self.MAPPING[value]
-        raise ValueError('UserCourseWidget: undefinded value ' + unicode(value))
+        raise ValueError(f'Course should be one of {self.MAPPING}')
 
-    def render(self, value):
-        return value
+    def render(self, value, obj=None):
+        return CSCUser.COURSES[value]
 
 
 class UserEmailWidget(widgets.Widget):
-    def clean(self, value):
-        # Check email and username are unique
+    def clean(self, value, row=None, *args, **kwargs):
+        # Check email is unique
         if '@' not in value:
-            raise ValueError('Wrong email?')
-        username = value.split('@')[0]
-        if CSCUser.objects.filter(Q(email=value) | Q(username=username)).count():
-            raise ValueError('UserEmailWidget: not inique email or username ')
-        return value
+            raise ValueError('Wrong email')
+        return value.strip()
 
-    def render(self, value):
+    def render(self, value, obj=None):
         return value
 
 
 class UserGenderWidget(widgets.Widget):
-    def clean(self, value):
-        if "м" in value:
-            value = "M"
-        if "ж" in value:
-            value = "F"
-        if value not in ["M", "F"]:
-            value = ""
+    def clean(self, value, row=None, *args, **kwargs):
+        value = value.strip().lower()
+        if value in ["м", "m", "male"]:
+            return "M"
+        elif value in ["ж", "f", "female"]:
+            return "F"
+        raise ValueError('UserGenderWidget: supported values ["m", "f"]')
+
+    def render(self, value, obj=None):
+        if value == "M":
+            return "мужской"
+        elif value == "F":
+            return "женский"
         return value
 
-    def render(self, value):
-        return value
 
-
-class CSCUserRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
-    uni_year_at_enrollment = fields.Field(column_name='uni_year_at_enrollment',
-                                          attribute='uni_year_at_enrollment',
-                                          widget=UserCourseWidget())
-    email = fields.Field(column_name='email', attribute='email',
+class CSCUserRecordResource(resources.ModelResource):
+    course = fields.Field(column_name='course',
+                          attribute='uni_year_at_enrollment',
+                          widget=UserCourseWidget())
+    email = fields.Field(column_name='email',
+                         attribute='email',
                          widget=UserEmailWidget())
-
-    gender = fields.Field(column_name='gender', attribute='gender',
+    gender = fields.Field(column_name='gender',
+                          attribute='gender',
                           widget=UserGenderWidget())
 
     class Meta:
         model = CSCUser
         fields = (
-            'id', 'username', 'first_name', 'patronymic', 'last_name',
-            'email', 'university', 'uni_year_at_enrollment', 'phone',
-            'yandex_id', 'stepic_id', 'gender', 'note',
+            'email', 'username', 'last_name', 'first_name', 'patronymic',
+            'gender', 'phone', 'university', 'course',
+            'yandex_id', 'stepic_id', 'note',
         )
         skip_unchanged = True
-        import_id_fields = ['id', 'email']
+        import_id_fields = ['email']
 
-    def before_save_instance(self, instance, dry_run):
+    def before_save_instance(self, instance, using_transactions, dry_run):
         if not instance.username:
             instance.username = instance.email.split('@')[0]
-        raw_password = ''.join(random.SystemRandom().choice(
-            string.ascii_uppercase + string.digits) for _ in range(10))
-        instance.set_password(raw_password)
+        instance.set_password(raw_password=None)

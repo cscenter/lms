@@ -185,7 +185,7 @@ class SHADCourseRecordResourceAdmin(ImportExportMixin, admin.ModelAdmin):
 
 class CSCUserRecordResourceAdmin(ImportMixin, CSCUserAdmin):
     resource_class = CSCUserRecordResource
-    pass
+    import_template_name = 'admin/import_export/import_users.html'
 
 
 admin.site.register(CSCUser, CSCUserRecordResourceAdmin)
