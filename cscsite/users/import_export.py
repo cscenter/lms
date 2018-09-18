@@ -113,6 +113,17 @@ class UserGenderWidget(widgets.CharWidget):
         return value
 
 
+class GroupManyToManyWidget(widgets.ManyToManyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            return self.model.objects.filter(pk=CSCUser.group.VOLUNTEER)
+        return super(GroupManyToManyWidget, self).clean(value, row, *args, **kwargs)
+
+    def render(self, value, obj=None):
+        ids = [obj.name for obj in value.all()]
+        return self.separator.join(ids)
+
+
 class CSCUserRecordResource(resources.ModelResource):
     course = fields.Field(column_name='course',
                           attribute='uni_year_at_enrollment',
@@ -123,21 +134,28 @@ class CSCUserRecordResource(resources.ModelResource):
     gender = fields.Field(column_name='gender',
                           attribute='gender',
                           widget=UserGenderWidget())
+    groups = fields.Field(column_name='groups',
+                          attribute='groups',
+                          widget=GroupManyToManyWidget(Group))
 
     class Meta:
         model = CSCUser
         fields = (
             'email', 'username', 'last_name', 'first_name', 'patronymic',
             'gender', 'city', 'phone', 'university', 'course',
-            'yandex_id', 'stepic_id', 'comment'
+            'yandex_id', 'stepic_id', 'comment', 'groups'
         )
         export_order = fields
-        skip_unchanged = True
+        # m2m relationships won't be processed if imported fields
+        # weren't changed
+        skip_unchanged = False
         import_id_fields = ['email']
 
     def before_import_row(self, row, **kwargs):
         if not row.get('city'):
-            raise ValidationError("Column `city` is mandatory")
+            raise ValidationError("Value for `city` column is mandatory")
+        if 'groups' not in row:
+            raise ValidationError("Column `groups` is mandatory")
 
     def before_save_instance(self, instance, using_transactions, dry_run):
         if not instance.username:
