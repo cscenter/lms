@@ -3,6 +3,8 @@
 import string
 import random
 
+from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from import_export import resources, fields, widgets
 
@@ -83,7 +85,7 @@ class UserCourseWidget(widgets.IntegerWidget):
         return CSCUser.COURSES[value]
 
 
-class UserEmailWidget(widgets.Widget):
+class UserEmailWidget(widgets.CharWidget):
     def clean(self, value, row=None, *args, **kwargs):
         # Check email is unique
         if '@' not in value:
@@ -94,7 +96,7 @@ class UserEmailWidget(widgets.Widget):
         return value
 
 
-class UserGenderWidget(widgets.Widget):
+class UserGenderWidget(widgets.CharWidget):
     def clean(self, value, row=None, *args, **kwargs):
         value = value.strip().lower()
         if value in ["м", "m", "male"]:
@@ -105,9 +107,9 @@ class UserGenderWidget(widgets.Widget):
 
     def render(self, value, obj=None):
         if value == "M":
-            return "мужской"
+            return "муж"
         elif value == "F":
-            return "женский"
+            return "жен"
         return value
 
 
@@ -126,11 +128,16 @@ class CSCUserRecordResource(resources.ModelResource):
         model = CSCUser
         fields = (
             'email', 'username', 'last_name', 'first_name', 'patronymic',
-            'gender', 'phone', 'university', 'course',
-            'yandex_id', 'stepic_id', 'note',
+            'gender', 'city', 'phone', 'university', 'course',
+            'yandex_id', 'stepic_id', 'comment'
         )
+        export_order = fields
         skip_unchanged = True
         import_id_fields = ['email']
+
+    def before_import_row(self, row, **kwargs):
+        if not row.get('city'):
+            raise ValidationError("Column `city` is mandatory")
 
     def before_save_instance(self, instance, using_transactions, dry_run):
         if not instance.username:
