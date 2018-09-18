@@ -5,6 +5,7 @@ from django.conf import settings
 
 from api.providers.gerrit import Gerrit
 from learning.models import CourseOfferingTeacher, Enrollment
+from users.models import CSCUser
 
 logger = logging.getLogger(__name__)
 
@@ -44,16 +45,19 @@ def permits_students_read_master(client, project_name, group_uuid):
     return client.create_permissions(project_name, payload)
 
 
-def init_project_for_course(course_offering, skip_users=False):
+def get_project_name(course_offering):
     city_code = course_offering.get_city()
     course_name = course_offering.course.slug.replace("-", "_")
     if course_offering.is_correspondence:
-        project_name = f"{course_name}_{course_offering.semester.year}"
-    else:
-        project_name = f"{city_code}/{course_name}_{course_offering.semester.year}"
+        return f"{course_name}_{course_offering.semester.year}"
+    return f"{city_code}/{course_name}_{course_offering.semester.year}"
+
+
+def init_project_for_course(course_offering, skip_users=False):
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,
                           settings.GERRIT_CLIENT_PASSWORD))
+    project_name = get_project_name(course_offering)
     teachers = (CourseOfferingTeacher.objects
                 .filter(course_offering=course_offering,
                         roles=CourseOfferingTeacher.roles.reviewer)
@@ -122,9 +126,9 @@ def init_project_for_course(course_offering, skip_users=False):
             return
         students_group_res = client.get_group(students_group)
     # Common access rules for reading master branch
-    students_group_uuid = students_group_res.data['id']
+    project_students_group_uuid = students_group_res.data['id']
     res = permits_students_read_master(client, project_name,
-                                       students_group_uuid)
+                                       project_students_group_uuid)
     if not res.ok:
         logger.error(f"Couldn't set permissions for group "
                      f"{students_group}. {res.text}")
@@ -137,27 +141,68 @@ def init_project_for_course(course_offering, skip_users=False):
                    .filter(course_offering_id=course_offering.pk)
                    .select_related("student"))
     for e in enrollments:
-        student = e.student
-        # Check student group exists
-        student_group = student.ldap_username
-        group_res = client.create_single_user_group(student_group)
-        if not group_res.created:
-            if not group_res.already_exists:
-                logger.error(f"Error creating student group {student_group}. "
-                             f"{group_res.text}. Skip")
-                continue
-            group_res = client.get_group(student_group)
-        # Permits students read master branch
-        client.include_group(students_group_uuid, group_res.data['id'])
-        # TODO: what if user account not found?
-        branch_name = student.get_abbreviated_name_in_latin()
-        if course_offering.is_correspondence:
-            assert student.city_id is not None
-            branch_name = f"{student.city_id}/{branch_name}"
-        client.create_branch(project_name, branch_name, {
-            "revision": "master"
-        })
-        # TODO: show errors
-        client.create_student_permissions(project_name, branch_name,
-                                          group_res.data["id"])
+        add_student_to_project(client, e.student, project_name,
+                               project_students_group_uuid, course_offering)
     # TODO: What to do with notifications?
+
+
+def add_student_to_project(client: Gerrit, student: CSCUser, project_name,
+                           project_students_group_uuid, course_offering):
+    # Make sure student group exists
+    student_group_uuid = create_user_group(client, student)
+    if not student_group_uuid:
+        return
+    # Permits students read master branch
+    client.include_group(project_students_group_uuid, student_group_uuid)
+    branch_name = student.get_abbreviated_name_in_latin()
+    if course_offering.is_correspondence:
+        assert student.city_id is not None
+        branch_name = f"{student.city_id}/{branch_name}"
+    client.create_branch(project_name, branch_name, {
+        "revision": "master"
+    })
+    # TODO: show errors
+    # FIXME: Duplicates on repeated call
+    client.create_student_permissions(project_name, branch_name,
+                                      student_group_uuid)
+
+
+def create_user_group(client: Gerrit, user: CSCUser):
+    user_group = user.ldap_username
+    group_res = client.create_single_user_group(user_group)
+    if not group_res.created:
+        if not group_res.already_exists:
+            # TODO: raise error?
+            logger.error(f"Error creating student group {user_group}. "
+                         f"{group_res.text}. Skip")
+            return
+        group_res = client.get_group(user_group)
+    return group_res.data['id']
+
+
+def add_users_to_project_by_email(course_offering, emails):
+    client = Gerrit(settings.GERRIT_API_URI,
+                    auth=(settings.GERRIT_CLIENT_USERNAME,
+                          settings.GERRIT_CLIENT_PASSWORD))
+    # Check project exists
+    project_name = get_project_name(course_offering)
+    project_res = client.get_project(project_name)
+    if not project_res.ok:
+        logger.error(f"Project {project_name} not found")
+        return
+    # Get project students group uuid
+    students_group = f"{project_name}-students"
+    students_group_res = client.get_group(students_group)
+    if not students_group_res.ok:
+        logger.error(f"Students project group {students_group} not found")
+        return
+    project_students_group_uuid = students_group_res.data['id']
+    # Try to add each student from the email list to the project
+    enrollments = (Enrollment.active
+                   .filter(course_offering_id=course_offering.pk,
+                           student__email__in=emails)
+                   .select_related("student"))
+    for e in enrollments:
+        print(e.student)
+        add_student_to_project(client, e.student, project_name,
+                               project_students_group_uuid, course_offering)
