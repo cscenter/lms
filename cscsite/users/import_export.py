@@ -3,12 +3,14 @@
 import string
 import random
 
+import tablib
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from import_export import resources, fields, widgets
 
 from learning.settings import GRADES, SEMESTER_TYPES
+from learning.utils import now_local
 from .models import CSCUser, SHADCourseRecord
 
 
@@ -117,7 +119,7 @@ class GroupManyToManyWidget(widgets.ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
             return self.model.objects.filter(pk=CSCUser.group.VOLUNTEER)
-        return super(GroupManyToManyWidget, self).clean(value, row, *args, **kwargs)
+        return super().clean(value, row, *args, **kwargs)
 
     def render(self, value, obj=None):
         ids = [obj.name for obj in value.all()]
@@ -141,9 +143,9 @@ class CSCUserRecordResource(resources.ModelResource):
     class Meta:
         model = CSCUser
         fields = (
-            'email', 'username', 'last_name', 'first_name', 'patronymic',
-            'gender', 'city', 'phone', 'university', 'course',
-            'yandex_id', 'stepic_id', 'comment', 'groups'
+            'email', 'username', 'status', 'last_name', 'first_name',
+            'patronymic', 'gender', 'city', 'phone', 'university', 'course',
+            'comment', 'groups', 'yandex_id', 'stepic_id', 'github_id'
         )
         export_order = fields
         # m2m relationships won't be processed if imported fields
@@ -151,13 +153,23 @@ class CSCUserRecordResource(resources.ModelResource):
         skip_unchanged = False
         import_id_fields = ['email']
 
+    def __init__(self):
+        super().__init__()
+        self.fields['status'].readonly = True
+
+    def before_import(self, dataset: tablib.Dataset, using_transactions,
+                      dry_run, **kwargs):
+        if 'groups' not in dataset.headers:
+            dataset.append_col(lambda row: '', header='groups')
+
     def before_import_row(self, row, **kwargs):
         if not row.get('city'):
             raise ValidationError("Value for `city` column is mandatory")
-        if 'groups' not in row:
-            raise ValidationError("Column `groups` is mandatory")
 
     def before_save_instance(self, instance, using_transactions, dry_run):
         if not instance.username:
             instance.username = instance.email.split('@')[0]
+        if not instance.enrollment_year:
+            instance.enrollment_year = now_local(instance.city_id).year
+        instance.status = ''
         instance.set_password(raw_password=None)
