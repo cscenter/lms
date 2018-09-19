@@ -13,7 +13,7 @@ from modeltranslation.admin import TranslationAdmin
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField
 from core.compat import Django21BitFieldCheckboxSelectMultiple
-from core.widgets import AdminRichTextAreaWidget
+from core.widgets import AdminRichTextAreaWidget, AdminRelatedDropdownFilter
 from core.models import RelatedSpecMixin
 from core.utils import admin_datetime, is_club_site
 from learning.models import InternshipCategory
@@ -278,7 +278,11 @@ class EnrollmentAdmin(admin.ModelAdmin):
     }
     list_display = ['student', 'course_offering', 'is_deleted', 'grade',
                     'grade_changed_local']
-    list_filter = ['course_offering__semester']
+    ordering = ['-pk']
+    list_filter = [
+        'course_offering__city_id',
+        ('course_offering__semester', AdminRelatedDropdownFilter)
+    ]
     search_fields = ['course_offering__course__name']
     exclude = ['grade_changed']
     raw_id_fields = ["student", "course_offering"]
