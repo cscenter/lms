@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+{% load static %}
+{% load core_tags %}
+{% load userpreview from custom_thumbnail %}
+
+{% block body_attrs %} data-init-section="lazy-img"{% endblock body_attrs %}
+
+{% block content %}
+    <style type="text/css">
+        .c-student-faces {
+            padding: 0;
+            overflow: hidden;
+        }
+        @media print {
+            a[href]:after {
+                content: none !important;
+            }
+            .c-student-faces .student figcaption {
+                opacity: 1;
+                position: relative;
+            }
+        }
+    </style>
+    <div class="container">
+        <h2 class="hidden-print">{{ co }}</h2>
+        {% if enrollments %}
+            <div class="c-student-faces">
+            {% for enrollment in enrollments %}
+                {% with student=enrollment.student %}
+                <div class="student">
+                    <a href="{{ student.get_absolute_url }}">
+                    {% userpreview student "170x238" as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                    {% enduserpreview %}
+                        <figcaption {% if student.status == "expelled" %}class="expelled"{% endif %}>{{ student.last_name }} {{ student.first_name }}</figcaption>
+                    </a>
+                </div>
+                {% endwith %}
+            {% endfor %}
+            </div>
+
+        {% else %}
+            <div class="empty">¯\_(ツ)_/¯</div>
+        {% endif %}
+    </div>
+{% endblock content %}
