@@ -111,6 +111,7 @@ server {
         add_header Cache-Control public,max-age=2592000;
     }
 
+    {% if main_domain == "compsciclub.ru" -%}
     location = /en/raa18/ {
         proxy_pass https://logic.pdmi.ras.ru/~kulikov/raa18/raa18.html;
     }
@@ -118,6 +119,11 @@ server {
     location /scs/ {
         return 302 http://52.15.239.252/scs;
     }
+
+    location = /algorithms {
+        return 302 http://learningalgorithms.tilda.ws/;
+    }
+    {% endif -%}
 
     location ~ ^/apple-touch-icon(|-\d+x\d+)(|-precomposed).png {
         return 204;
