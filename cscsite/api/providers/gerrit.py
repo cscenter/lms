@@ -212,3 +212,14 @@ class Gerrit:
     def get_account(self, account_id):
         account_uri = f"accounts/{quote_plus(account_id)}"
         return self._request("GET", account_uri)
+
+    def get_account_external_ids(self, account_id):
+        # TODO: needs Access Database capability?
+        account_uri = f"accounts/{quote_plus(account_id)}/external.ids"
+        return self._request("GET", account_uri)
+
+    def set_account_name(self, account_id, new_name):
+        account_uri = f"accounts/{quote_plus(account_id)}/name"
+        return self._request("PUT", account_uri, json={
+            "name": new_name
+        })

@@ -158,6 +158,7 @@ def add_student_to_project(client: Gerrit, student: CSCUser, project_name,
     if course_offering.is_correspondence:
         assert student.city_id is not None
         branch_name = f"{student.city_id}/{branch_name}"
+    # FIXME: What if already exists?
     client.create_branch(project_name, branch_name, {
         "revision": "master"
     })
