@@ -30,7 +30,8 @@ from learning.views.gradebook import GradeBookTeacherView, \
     AssignmentGradesImportByYandexLoginView
 from learning.views.course_offering import CourseOfferingEditView, \
     CourseOfferingNewsCreateView, CourseOfferingNewsUpdateView, \
-    CourseOfferingNewsDeleteView, CourseOfferingNewsUnreadNotificationsView
+    CourseOfferingNewsDeleteView, CourseOfferingNewsUnreadNotificationsView, \
+    CourseOfferingStudentsView
 from learning.views.students import StudentAssignmentStudentDetailView, \
     StudentAssignmentListView, CourseOfferingEnrollView, \
     CourseOfferingUnenrollView
@@ -53,6 +54,9 @@ course_offering_patterns = url(
         url(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$",
             CourseOfferingDetailView.as_view(),
             name="course_offering_detail_with_active_tab"),
+        url(r"^students/$",
+            CourseOfferingStudentsView.as_view(),
+            name="course_offering_students"),
         url(r"^edit$", CourseOfferingEditView.as_view(),
             name="course_offering_update"),
         # Enroll/Unenroll

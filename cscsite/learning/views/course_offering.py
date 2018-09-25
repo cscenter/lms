@@ -13,7 +13,7 @@ from django.urls import reverse, NoReverseMatch
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 from django.views import generic
 from rest_framework.generics import ListAPIView
-from vanilla import DeleteView, UpdateView, CreateView, DetailView
+from vanilla import DeleteView, UpdateView, CreateView, DetailView, TemplateView
 
 from api.permissions import CuratorAccessPermission
 from core.exceptions import Redirect
@@ -30,6 +30,7 @@ from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, \
 from learning.utils import get_term_index
 from learning.viewmixins import TeacherOnlyMixin
 from learning.views.utils import get_co_from_query_params, get_user_city_code
+from users.models import CSCUser
 
 __all__ = ['CourseOfferingDetailView', 'CourseOfferingEditView',
            'CourseOfferingNewsCreateView', 'CourseOfferingNewsUpdateView',
@@ -46,6 +47,7 @@ class CourseOfferingDetailView(DetailView):
     default_tab = "about"
 
     def get(self, request, *args, **kwargs):
+        # FIXME: separate `semester_slug` on route url lvl?
         try:
             year, _ = self.kwargs['semester_slug'].split("-", 1)
             _ = int(year)
@@ -131,6 +133,35 @@ class CourseOfferingDetailView(DetailView):
             raise Http404
         pane.set_active_tab(pane[show_tab])
         return pane
+
+
+class CourseOfferingStudentsView(TeacherOnlyMixin, TemplateView):
+    # raise_exception = True
+    template_name = "learning/courseoffering_students.html"
+
+    def get(self, request, *args, **kwargs):
+        try:
+            year, _ = self.kwargs['semester_slug'].split("-", 1)
+            _ = int(year)
+        except ValueError:
+            raise Http404
+        return super().get(request, *args, **kwargs)
+
+    def handle_no_permission(self, request):
+        raise Http404
+
+    def get_context_data(self, **kwargs):
+        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
+        co = get_object_or_404(CourseOffering.objects
+                               .filter(semester__type=semester_type,
+                                       semester__year=year,
+                                       course__slug=self.kwargs['course_slug'])
+                               .in_city(self.request.city_code))
+        return {
+            "co": co,
+            "enrollments": (co.enrollment_set(manager="active")
+                            .select_related("student"))
+        }
 
 
 # FIXME: Do I need ProtectedFormMixin?
