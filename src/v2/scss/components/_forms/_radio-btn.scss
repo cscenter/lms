@@ -2,10 +2,11 @@
   display: flex;
   align-items: flex-start;
   margin: 0 0 15px 0;
-  &.fill-radiobtn {
 
+  &.fill-radiobtn {
+    cursor: pointer;
     &:hover .fill-control-indicator {
-       border: $control-border-width solid $control-bg-hover;
+      border: $control-border-width solid $control-bg-hover;
     }
     &:hover .fill-control-description {
       color: $input-color;
@@ -13,10 +14,9 @@
 
     .fill-control-indicator {
       position: absolute;
-      width: 24px;
-      height: 24px;
+      width: $control-size;
+      height: $control-size;
       border-radius: 50%;
-      transition: .3s;
       background-color: $control-bg;
       border: $control-border-width solid $control-border-color;
     }
@@ -25,7 +25,7 @@
       display: none;
       &:checked ~ .fill-control-indicator {
         background-color: $control-checked-bg;
-        border:$border-width solid $control-checked-bg;
+        border: $border-width solid $control-checked-bg;
       }
       &:checked ~ .fill-control-description {
         color: $input-color;
@@ -47,6 +47,8 @@
 }
 
 .custom-radiobtn.fill-radiobtn.disabled {
+  cursor: default;
+
   .fill-control-indicator {
     background: $control-disabled-bg;
     border: $border-width solid $control-disabled-bg;
@@ -54,6 +56,7 @@
       border: $border-width solid $control-disabled-bg;
     }
   }
+
   .fill-control-description {
     color: $control-disabled-bg;
   }
@@ -61,7 +64,7 @@
     color: $control-disabled-bg;
   }
   & .fill-control-input:checked ~ .fill-control-indicator {
-        background: $control-disabled-bg;
+    background: $control-disabled-bg;
     border: $border-width solid $control-disabled-bg;
   }
 }
@@ -73,14 +76,22 @@
 }
 
 .radiobtn-group.inline {
-  display: inline-flex;
-  flex-flow: row;
-  max-width: 100%;
-  height: $input-outerheight;
-  align-items: center;
+  height: auto;
+  padding: calc(#{$input-outerheight - $control-size} / 2) 0;
+  flex-flow: column;
+  flex-wrap: wrap;
+  @include media-breakpoint-up(md) {
+    flex-wrap: wrap;
+    height: $input-outerheight;
+    flex-flow: row;
+    max-width: 100%;
+  }
 
   .custom-radiobtn {
-    margin: 0 20px 0 0;
+    margin: 0 0 spacer("4x") 0;
+    @include media-breakpoint-up(md) {
+      margin: 0 20px 0 0;
+    }
   }
 }
 

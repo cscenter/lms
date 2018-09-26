@@ -124,7 +124,18 @@ $(function () {
 function loadLazyImages() {
     const attribute = 'data-src';
     const matches = document.querySelectorAll('img[' + attribute + ']');
-    for (let i = 0, n = matches.length; i < n; i++) {
-      matches[i].setAttribute('src', matches[i].getAttribute(attribute));
+    if (matches.length > 0) {
+        let srcsetIsSupported = "srcset" in matches[0];
+        for (let i = 0, n = matches.length; i < n; i++) {
+            if (srcsetIsSupported) {
+                let srcset = matches[i].getAttribute("data-srcset");
+                if (srcset !== null) {
+                    matches[i].setAttribute('srcset', srcset);
+                }
+            }
+            // Fallback to src
+            matches[i].setAttribute('src', matches[i].getAttribute(attribute));
+        }
+
     }
 }
