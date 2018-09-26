@@ -30,3 +30,18 @@ $figure-caption-color:              $gray-dark;
   font-size: $figure-caption-font-size;
   color: $figure-caption-color;
 }
+
+.lazy-wrapper {
+  position: relative;
+  padding-top: 52.5%;
+  background: $gray-darker;
+
+  img {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}

@@ -14,6 +14,13 @@
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
 
     {% block stylesheets %} {% endblock stylesheets %}
+
+    <script type="text/javascript">
+        window.__CSC__ = {
+            notifications: {{ messages(request)|tojson }},
+            sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
+        };
+    </script>
 </head>
 
 {% import "v2/_macros.jinja2" as macros %}
@@ -47,12 +54,6 @@
     </div>
 </footer>
 {%- endblock footer %}
-<script type="text/javascript">
-    window.__CSC__ = {
-        notifications: {{ messages(request)|tojson }},
-        sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
-    };
-</script>
 
 {{ render_bundle('common', config='V2') }}
 {{ render_bundle('main', config='V2') }}

@@ -14,6 +14,12 @@
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
 
     {% block stylesheets %} {% endblock stylesheets %}
+    <script type="text/javascript">
+        window.__CSC__ = {
+            notifications: {{ messages(request)|tojson }},
+            sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
+        };
+    </script>
 </head>
 
 {% import "v2/_macros.jinja2" as macros %}
@@ -80,7 +86,13 @@
 <div class="about-csc">
     <div class="container">
         <div class="about-csc__cover">
-            <img data-src="{{ static("v2/img/pages/index/cscenter_meetup.jpg") }}" class="img-fluid" alt="Computer Science Center Meetup">
+            <div class="lazy-wrapper">
+                <img src="" data-src="{{ static("v2/img/pages/index/cscenter_meetup-1136.jpg") }}"
+                     data-srcset="{{ static("v2/img/pages/index/cscenter_meetup-1056.jpg") }} 1056w,
+                             {{ static("v2/img/pages/index/cscenter_meetup-1408.jpg") }} 1408w,
+                             {{ static("v2/img/pages/index/cscenter_meetup-1136@2x.jpg") }} 2272w"
+                     alt="">
+            </div>
             <div class="about-csc__description">
                 <h1>О центре</h1>
                 <p>
@@ -367,12 +379,6 @@
     </div>
 </footer>
 
-<script type="text/javascript">
-    window.__CSC__ = {
-        notifications: {{ messages(request)|tojson }},
-        sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
-    };
-</script>
 
 {{ render_bundle('common', config='V2') }}
 {{ render_bundle('main', config='V2') }}
