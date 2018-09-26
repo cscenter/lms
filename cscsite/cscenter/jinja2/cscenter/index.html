@@ -59,7 +59,13 @@
     <div class="about-csc">
         <div class="container">
             <div class="about-csc__cover">
-                <img data-src="{{ static("v2/img/pages/index/cscenter_meetup.jpg") }}" class="img-fluid" alt="Computer Science Center Meetup">
+                <div class="lazy-wrapper">
+                    <img data-src="{{ static("v2/img/pages/index/cscenter_meetup-1136.jpg") }}"
+                         data-srcset="{{ static("v2/img/pages/index/cscenter_meetup-1056.jpg") }} 1056w,
+                                      {{ static("v2/img/pages/index/cscenter_meetup-1408.jpg") }} 1408w,
+                                      {{ static("v2/img/pages/index/cscenter_meetup-1136@2x.jpg") }} 2272w"
+                         alt="">
+                </div>
                 <div class="about-csc__description">
                     <h1>О центре</h1>
                     <p>
