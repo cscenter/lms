@@ -7,6 +7,7 @@
 // FIXME: class name is too generic, since css below hardcoded for 6 columns on desktop, rename it to more appropriate name
 .responsive-card {
   color: $gray-darker;
+  float: left; //For old browsers
   //position: relative;
   @include make-col-ready();
 

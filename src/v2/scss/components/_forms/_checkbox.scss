@@ -4,10 +4,10 @@
   margin: 0 0 spacer("4x") 0;
 
   &.fill-checkbox {
+    cursor: pointer;
     &:hover .fill-control-indicator {
       border: $control-border-width solid $control-bg-hover;
     }
-
     &:hover .fill-control-description {
       color: $input-color;
     }
@@ -16,8 +16,8 @@
       display: none;
       &:checked ~ .fill-control-indicator {
         background-color: $control-checked-bg;
-        border-color: $control-checked-bg;
-        background-size: 140%;
+        border: none;
+        background-size: 135%;
       }
       &:checked ~ .fill-control-description {
         color: $input-color;
@@ -27,12 +27,13 @@
     .fill-control-indicator {
       display: inline-block;
       position: absolute;
-      width: 24px;
-      height: 24px;
+      width: $control-size;
+      height: $control-size;
       border: $control-border-width solid $control-border-color;
       border-radius: $border-radius;
-      transition: .2s;
-      background: url("/static/v2/img/icons/checkmark.svg") no-repeat center;
+      background-size: 0;
+      background: url("/static/v2/img/icons/checkmark.svg") center no-repeat;
+      background-color: $control-bg;
     }
 
     .fill-control-description {
@@ -68,32 +69,44 @@
 }
 
 .checkbox-group.inline {
-  display: inline-flex;
-  flex-flow: row;
-  max-width: 100%;
-  height: $input-outerheight;
-  align-items: center;
+  height: auto;
+  padding: calc(#{$input-outerheight - $control-size} / 2) 0;
+  flex-flow: column;
+  flex-wrap: wrap;
+  @include media-breakpoint-up(md) {
+    flex-wrap: wrap;
+    height: $input-outerheight;
+    flex-flow: row;
+    max-width: 100%;
+  }
 
   .custom-checkbox {
-    margin: 0 20px 0 0;
+    margin: 0 0 spacer("4x") 0;
+    @include media-breakpoint-up(md) {
+      margin: 0 20px 0 0;
+    }
   }
 }
 
 .custom-checkbox.fill-checkbox.disabled {
+
   .fill-control-indicator {
     background: $control-disabled-bg;
   }
+
   .fill-control-description {
     color: $control-disabled-bg;
   }
 }
 
 .custom-checkbox.fill-checkbox.disabled {
+  cursor: default;
 
   .fill-control-input {
     &:checked ~ .fill-control-indicator {
       background: $control-disabled-bg url("/static/v2/img/icons/checkmark.svg") center no-repeat;
-      border: $border-width solid $control-disabled-bg;
+      border: none;
+      background-size: 135%;
     }
     &:checked ~ .fill-control-description {
       color: $control-disabled-bg;
