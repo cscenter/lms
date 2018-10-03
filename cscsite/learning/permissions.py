@@ -15,9 +15,9 @@ class LearningPermissionsMixin(object):
 
     @property
     def is_student(self):
-        return (self.is_student_center or
-                self.is_student_club or
-                self.is_volunteer)
+        if is_club_site():
+            return self.is_student_club
+        return self.is_student_center or self.is_volunteer
 
     @property
     def is_expelled(self):

@@ -754,15 +754,11 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     html = BeautifulSoup(response.content, "html.parser")
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
-    # Make student as club participant only who hasn't city code in most cases
+    # Club students has no access to the page on center site
     student.groups.remove(PARTICIPANT_GROUPS.VOLUNTEER)
     student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
     response = client.get(url_learning_assignments)
-    assert response.context['tz_override'] is None
-    html = BeautifulSoup(response.content, "html.parser")
-    # Shows local time for nsk course
-    assert any(year_part in s.text and "22:00" in s.text for s in
-               html.find_all('div', {'class': 'assignment-date'}))
+    assert response.status_code == 302
 
 
 @pytest.mark.django_db

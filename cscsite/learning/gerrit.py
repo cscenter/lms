@@ -94,6 +94,7 @@ def init_project_for_course(course_offering, skip_users=False):
             Страница курса: \
             https://compscicenter.ru{course_offering.get_absolute_url()}
         """).strip()
+    # FIXME: how to set `Create a new change for every commit not in the target branch` to False? Mb for all projects
     project_res = client.create_project(project_name, {
         "description": project_description,
         "owners": [reviewers_group]
