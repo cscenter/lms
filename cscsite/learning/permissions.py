@@ -106,16 +106,19 @@ def access_role(*, co, request_user) -> Optional[CourseRole]:
         return None
     if request_user.is_curator:
         return CourseRole.CURATOR
+    role = None
     enrollment = request_user.get_enrollment(co.pk)
     if enrollment:
         if not co.failed_by_student(request_user, enrollment):
-            return CourseRole.STUDENT_REGULAR
+            role = CourseRole.STUDENT_REGULAR
         else:
-            return CourseRole.STUDENT_RESTRICT
+            role = CourseRole.STUDENT_RESTRICT
     # Teachers from the same course permits to view the news
     all_course_teachers = (co.courseofferingteacher_set.field.model.objects
                            .for_course(co.course.slug)
                            .values_list('teacher_id', flat=True))
     if request_user.is_teacher and request_user.pk in all_course_teachers:
-        return CourseRole.TEACHER
-    return None
+        # Override student role if teacher accidentally enrolled on
+        # his own course
+        role = CourseRole.TEACHER
+    return role
