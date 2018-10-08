@@ -46,9 +46,9 @@ export function launch() {
                                     [...selected].filter( i => expected.has(i))
                                 );
                                 if (intersection.size > 0) {
-                                    row.classList.remove("d-none");
+                                    row.classList.remove("hidden");
                                 } else {
-                                    row.classList.add("d-none");
+                                    row.classList.add("hidden");
                                 }
                             })
                         }
