@@ -135,21 +135,6 @@ $form-feedback-invalid-color: $red;
   }
 }
 
-.animation {
-  opacity: 1;
-  margin-top: 0;
-  max-height: 800px;
-  transition: max-height .25s ease-in, margin-top .25s ease-in, opacity .25s ease-in;
-
-  &.hidden {
-    max-height: 30px;
-    overflow: hidden;
-    transition: max-height .15s ease-out, margin-top .15s ease-out, opacity .15s ease-out;
-    margin-top: -40px;
-    opacity: 0;
-  }
-}
-
 .input.free-answer {
   margin-top: spacer("2x");
 }
