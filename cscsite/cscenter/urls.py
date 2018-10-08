@@ -80,6 +80,8 @@ urlpatterns = [
 
     url(r'^stats/', include("stats.urls")),
 
+    url(r'^surveys/', include("surveys.urls")),
+
     url(r'^library/', include("library.urls")),
     url(r'^faq/$', cscenter_views.QAListView.as_view(), name='faq'),
     url(r'^testimonials/$', cscenter_views.TestimonialsListView.as_view(),

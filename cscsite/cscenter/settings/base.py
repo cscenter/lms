@@ -28,6 +28,7 @@ INSTALLED_APPS += [
     'staff',
     'admission_test',  # TODO: remove after testing
     'django_jinja',
+    'surveys',
 ]
 
 CACHES = {
@@ -56,6 +57,7 @@ TEMPLATES = [
             django.__path__[0] + '/forms/jinja2',
             str(APP_DIR / "jinja2"),
             str(PROJECT_DIR / "core" / "jinja2"),
+            str(PROJECT_DIR / "surveys" / "jinja2"),
             # svg inline support
             str(PROJECT_DIR / "assets" / "v2" / "dist" / "img"),
         ],
@@ -67,6 +69,7 @@ TEMPLATES = [
             # django-jinja decorator
             "filters": {
                 "markdown": "core.jinja2_filters.markdown",
+                "as_survey": "surveys.jinja2_filters.render_form",
             },
             "globals": {
                 "crispy": "core.jinja2_filters.crispy",
@@ -104,6 +107,7 @@ TEMPLATES = [
         'DIRS': [
             str(APP_DIR / "templates"),
             str(PROJECT_DIR / "admission_test" / "templates"),
+            str(PROJECT_DIR / "surveys" / "jinja2"),
             str(PROJECT_DIR / "learning" / "admission" / "templates"),
             str(PROJECT_DIR / "staff" / "templates"),
             str(PROJECT_DIR / "templates"),
