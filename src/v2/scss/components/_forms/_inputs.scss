@@ -52,7 +52,7 @@
   }
 }
 
-.input-hint {
+.help-text {
   display: block;
   width: 100%;
   font-size: $font-size-extra-sm;
@@ -60,7 +60,7 @@
   margin: 5px 0 0;
   line-height: $input-btn-line-height;
 
-  &.__invalid-feedback {
+  &.error {
     color: $error;
   }
 }
@@ -111,7 +111,10 @@
 
 //Error
 
-.ui.input.error > input {
+.ui.input.error > input,
+.ui.input.error > textarea,
+.ui.radiobtn-group.error .custom-radiobtn.fill-radiobtn:not(.disabled) > .fill-control-indicator,
+.ui.checkbox-group.error .custom-checkbox.fill-checkbox:not(.disabled) > .fill-control-indicator{
   background-color: $form-feedback-color;
   border-color: $form-feedback-invalid-color;
   &:hover{

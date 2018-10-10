@@ -1,0 +1,23 @@
+.ui.option {
+  &.radio {
+    .control__input {
+      &:checked ~ .control__indicator::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: $white;
+      }
+    }
+
+    .control__indicator {
+      border-radius: 50%;
+    }
+  }
+}
