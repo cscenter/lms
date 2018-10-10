@@ -41,11 +41,10 @@ $form-feedback-color: $white;
 $form-feedback-valid-color: green;
 $form-feedback-invalid-color: $red;
 
+@import "_forms/options";
 @import "_forms/file-input";
 @import "_forms/inputs";
-@import "_forms/checkbox";
-@import "_forms/radio-btn";
-@import "_forms/select";
+@import "_forms/select"; // FIXME: move to options?
 
 .ui.form {
   margin-bottom: spacer("10x");
@@ -55,7 +54,7 @@ $form-feedback-invalid-color: $red;
   border-radius: $border-radius-lg;
 
   .form-body {
-    padding: 0 spacer("8x");
+    padding: 0 spacer("6x");
   }
 
   .field {

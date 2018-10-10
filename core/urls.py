@@ -27,7 +27,7 @@ class HtmlView(generic.TemplateView):
     def get_template_names(self):
         path_to_template = self.kwargs.get('path_to_template', '')[:-1]
         if not path_to_template:
-            path_to_template = "v1/pages/index"
+            path_to_template = "v2/pages/index"
         return [f"{path_to_template}.jinja2",
                 f"{path_to_template}/index.jinja2"]
 

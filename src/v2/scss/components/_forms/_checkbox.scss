@@ -1,115 +1,18 @@
-.custom-checkbox {
-  display: flex;
-  align-items: flex-start;
-  margin: 0 0 spacer("4x") 0;
-
-  &.fill-checkbox {
-    cursor: pointer;
-    &:hover .fill-control-indicator {
-      border: $control-border-width solid $control-bg-hover;
-    }
-    &:hover .fill-control-description {
-      color: $input-color;
-    }
-
-    .fill-control-input {
-      display: none;
-      &:checked ~ .fill-control-indicator {
-        background-color: $control-checked-bg;
-        border: none;
+.ui.option {
+  &.checkbox {
+    .control__input {
+      &:checked ~ .control__indicator {
+        background: $control-checked-bg url("/static/v2/img/icons/checkmark.svg") no-repeat center;
         background-size: 135%;
       }
-      &:checked ~ .fill-control-description {
-        color: $input-color;
+    }
+
+    &.disabled {
+      .control__input {
+        &:checked ~ .control__indicator {
+          background: $control-disabled-bg url("/static/v2/img/icons/checkmark.svg") no-repeat center;
+        }
       }
-    }
-
-    .fill-control-indicator {
-      display: inline-block;
-      position: absolute;
-      width: $control-size;
-      height: $control-size;
-      border: $control-border-width solid $control-border-color;
-      border-radius: $border-radius;
-      background-size: 0;
-      background: url("/static/v2/img/icons/checkmark.svg") center no-repeat;
-      background-color: $control-bg;
-    }
-
-    .fill-control-description {
-      margin: 0 0 0 spacer("8x");
-      display: inline-block;
-      line-height: 1.375;
-      font-size: $font-size-content-base;
-      color: $control-color;
-
-      &.__user-agreement {
-        font-size: $font-size-extra-sm;
-      }
-    }
-  }
-  &:last-child {
-    margin-bottom: 0;
-  }
-  &.disabled {
-
-    .fill-control-indicator {
-      border: $border-width solid $control-disabled-bg;
-    }
-    &:hover .fill-control-indicator {
-      border: $border-width solid $control-disabled-bg;
-    }
-  }
-}
-
-.checkbox-group {
-  display: inline-flex;
-  flex-flow: column;
-  max-width: 100%;
-}
-
-.checkbox-group.inline {
-  height: auto;
-  padding: calc(#{$input-outerheight - $control-size} / 2) 0;
-  flex-flow: column;
-  flex-wrap: wrap;
-  @include media-breakpoint-up(md) {
-    flex-wrap: wrap;
-    height: $input-outerheight;
-    flex-flow: row;
-    width: 100%;
-  }
-
-  .custom-checkbox {
-    margin: 0 0 spacer("4x") 0;
-    @include media-breakpoint-up(md) {
-      margin: 0 20px 0 0;
-    }
-  }
-}
-
-.custom-checkbox.fill-checkbox.disabled {
-
-  .fill-control-indicator {
-    background: $control-disabled-bg;
-  }
-
-  .fill-control-description {
-    color: $control-disabled-bg;
-  }
-}
-
-.custom-checkbox.fill-checkbox.disabled {
-  cursor: default;
-
-  .fill-control-input {
-    &:checked ~ .fill-control-indicator {
-      background: $control-disabled-bg url("/static/v2/img/icons/checkmark.svg") center no-repeat;
-      border: none;
-      background-size: 135%;
-    }
-    &:checked ~ .fill-control-description {
-      color: $control-disabled-bg;
     }
   }
 }
