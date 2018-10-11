@@ -248,6 +248,7 @@ class CourseOffering(TimeStampedModel):
         blank=True)
     survey_url = models.URLField(_("Survey URL"), blank=True,
                                  help_text=_("Link to Survey"))
+    online_course_url = models.URLField(_("Online Course URL"), blank=True)
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
         default=False)
