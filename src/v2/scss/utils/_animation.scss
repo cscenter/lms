@@ -4,6 +4,7 @@
   transition: max-height .25s ease-in, margin-top .25s ease-in, opacity .25s ease-in;
 
   &.hidden {
+    margin: 0;
     max-height: 0;
     overflow: hidden;
     transition: max-height .15s ease-out, margin-top .15s ease-out, opacity .15s ease-out;
