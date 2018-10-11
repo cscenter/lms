@@ -1,0 +1,28 @@
+{% extends "cscenter/layouts/base.html" %}
+
+{% block title %}{{ form.form_instance.title }}{% endblock title %}
+
+{% block body_attrs %}class="_dark" data-init-sections="surveys"{% endblock body_attrs %}
+
+{% block content %}
+ <div class="container page-content">
+        <div class="row content-center">
+            <div class="col-lg-8">
+                <form action="" class="ui form survey" method="post">
+                    {% csrf_token %}
+                    <div class="form_title __inverse"><h2>{{ form.form_instance.title|safe }}</h2></div>
+                    <div class="form-body">
+                        {{ form.non_field_errors() }}
+                        {% if form.form_instance.description %}{{ form.form_instance.description }}{% endif %}
+                        {{ form|as_survey }}
+                        <div class="row">
+                            <div class="field col-lg-auto">
+                                <button type="submit" class="btn btn--green _m-wide">Отправить</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

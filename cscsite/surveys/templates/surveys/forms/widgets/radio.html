@@ -1,0 +1,15 @@
+{% with id=widget.attrs.id %}
+<div class="grouped">
+    {% if field.label %}<label {% if id %}for="{{ id }}"{% endif %} class="title-label survey-label">{{ field.label }}</label>{% endif %}
+    <div class="choices"{% if id %} id="{{ id }}"{% endif %}>
+        {% for group, options, index in widget.optgroups %}
+            {% for option in options %}
+                {% include option.template_name with widget=option field=field %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+</div>
+{% if errors %}
+    <p class="help-text error">{% if field.error_message %}{{ error_message }}{% else %}{% for error in errors %}{{ error }}{% endfor %}{% endif %}</p>
+{% endif %}
+{% endwith %}
