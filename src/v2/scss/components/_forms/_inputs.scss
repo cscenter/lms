@@ -67,16 +67,7 @@
 
 
 //Placeholder
-
-.ui.input > input::-webkit-input-placeholder {
-  color: $input-placeholder-color;
-}
-
-.ui.input > input::-moz-placeholder {
-  color: $input-placeholder-color;
-}
-
-.ui.input > input:-ms-input-placeholder {
+.ui.input > input::placeholder {
   color: $input-placeholder-color;
 }
 
@@ -113,19 +104,19 @@
 
 .ui.input.error > input,
 .ui.input.error > textarea,
-.ui.radiobtn-group.error .custom-radiobtn.fill-radiobtn:not(.disabled) > .fill-control-indicator,
-.ui.checkbox-group.error .custom-checkbox.fill-checkbox:not(.disabled) > .fill-control-indicator{
+.grouped.error .ui.option.radio:not(.disabled) > .control__indicator,
+.grouped.error .ui.option.checkbox:not(.disabled) > .control__indicator {
   background-color: $form-feedback-color;
   border-color: $form-feedback-invalid-color;
-  &:hover{
+  &:hover {
     border-color: $form-feedback-invalid-color;
   }
 }
 
 //Action
 
-.ui.action.input{
-flex-direction: row;
+.ui.action.input {
+  flex-direction: row;
   position: relative;
 }
 
