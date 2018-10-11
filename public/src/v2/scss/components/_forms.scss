@@ -62,6 +62,10 @@ $form-feedback-invalid-color: $red;
     &:last-child {
       margin-bottom: spacer("10x");
     }
+
+    &.hidden {
+      margin-bottom: 0;
+    }
   }
 
   .form-section {
@@ -129,7 +133,7 @@ $form-feedback-invalid-color: $red;
 
   .survey-label {
     font-size: $h3-font-size;
-    font-weight: $font-weight-light;
+    font-weight: $font-weight-normal;
     margin-bottom: spacer("4x");
   }
 }
