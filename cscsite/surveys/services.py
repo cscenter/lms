@@ -2,10 +2,12 @@ from learning.models import CourseOffering, CourseClass
 from surveys.constants import FormTemplates
 from surveys.models import Form, FieldChoice
 
+OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
+
 
 def course_form_builder(course_offering: CourseOffering, survey_type):
     co = course_offering
-    form = Form(title=f'Опрос по курсу "{co}"', slug=survey_type)
+    form = Form(title=f'Опрос по курсу «{co}»', slug=survey_type)
     form.save()
 
     templates = [FormTemplates.COMMON]
@@ -30,6 +32,10 @@ def course_form_builder(course_offering: CourseOffering, survey_type):
     for form_template in form_templates:
         fields = form_template.fields.all()
         for field in fields:
+            # Crunch: For correspondence course hide questions about
+            # offline lectures
+            if co.is_correspondence and field.name in OFFLINE_COURSES_Q:
+                continue
             source_field_choices = list(field.choices.all())
             # Mutate original field
             field.pk = None
