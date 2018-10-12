@@ -95,6 +95,7 @@ class AbstractField(models.Model):
         editable=False,
         default=now)
     label = models.CharField(_("Label"), max_length=255)
+    show_label = models.BooleanField(_("Show Label"), default=True)
     input_name = models.CharField(_("Input Name"), max_length=255, blank=True)
     order = models.IntegerField(_("Order"), null=True, blank=True)
     description = models.TextField(
@@ -328,7 +329,8 @@ class Field(AbstractField):
         if self.field_type == FieldType.CHECKBOX_MULTIPLE_WITH_NOTE:
             checkboxes, note = value
             values = [(v, True) for v in checkboxes]
-            values.append((note, False))
+            if note:
+                values.append((note, False))
         elif isinstance(value, list):
             values = [(v.strip(), True) for v in value]
         else:

@@ -1,5 +1,5 @@
 <div class="ui input{% if errors %} error{% endif %}">
-    <label class="survey-label" for="{{ widget.attrs.id }}">{{ field.label|safe }}</label>
+    {% if field.db_field.show_label %}<label class="survey-label" for="{{ widget.attrs.id }}">{{ field.label|safe }}</label>{% endif %}
     <textarea name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>{% if widget.value %}{{ widget.value }}{% endif %}</textarea>
 {% if field.help_text %}<div class="help-text">{{ field.help_text|safe }}</div>{% endif %}
 {% if errors %}<div class="help-text error">{% if field.error_message %}{{ error_message }}{% else %}{% for error in errors %}{{ error }}{% endfor %}{% endif %}</div>{% endif %}
