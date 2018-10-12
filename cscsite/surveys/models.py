@@ -112,7 +112,7 @@ class AbstractField(models.Model):
         blank=True,
         null=True)
     css_class = models.CharField(
-        verbose_name=_("Widget classes"),
+        verbose_name=_("CSS classes"),
         max_length=255,
         blank=True)
     visibility = models.SmallIntegerField(
