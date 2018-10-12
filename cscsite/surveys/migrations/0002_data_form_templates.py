@@ -87,11 +87,11 @@ TEMPLATES = {
         },
         {
             "id": 4,
-            "label": "Возможно, некоторые темы остались непонятными. Отметьте занятия, на которых что-то осталось неясно, и напишите подробнее в поле для ответа.",
+            "label": "Возможно, некоторые темы остались непонятными. Отметьте занятия, на которых что-то осталось неясно, и напишите подробнее в поле для ответа",
             "order": 400,
             "required": False,
             "field_type": FieldType.CHECKBOX_MULTIPLE_WITH_NOTE,
-            "visibility": FieldVisibility.HIDDEN,
+            "visibility": FieldVisibility.VISIBLE,
             "free_answer": True,
             "conditional_logic": [
                 {
@@ -105,18 +105,7 @@ TEMPLATES = {
                             "value": 'lecture'
                         }
                     ]
-                },
-                {
-                    "action_type": "show",
-                    "scope": "field",
-                    "rules": [
-                        {
-                            "operator": "any",
-                            "field_name": "lectures_assessment",
-                            "value": [1]
-                        }
-                    ]
-                },
+                }
             ]
         },
         {
@@ -146,7 +135,7 @@ TEMPLATES = {
             "label": "Вам понятно, как выставляется оценка по этому курсу?",
             "order": 600,
             "required": True,
-            "field_type": FieldType.CHECKBOX_MULTIPLE,
+            "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
             "choices": [
                 {
@@ -197,6 +186,7 @@ TEMPLATES = {
             "required": False,
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
+            "input_name": "attendance_frequency",
             "choices": [
                 {
                     "label": "На занятия хожу по максимуму",
@@ -229,6 +219,7 @@ TEMPLATES = {
             "required": False,
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
+            "input_name": "attendance_frequency",
             "choices": [
                 {
                     "label": "На занятия хожу по максимуму",
@@ -299,7 +290,7 @@ TEMPLATES = {
         {
             "id": 13,
             "label": "Участие в семинарах помогает выполнять домашние задания?",
-            "order": 800,
+            "order": 1000,
             "required": False,
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
@@ -318,7 +309,7 @@ TEMPLATES = {
         {
             "id": 14,
             "label": "Какими материалами вы пользуетесь для выполнения заданий?",
-            "order": 900,
+            "order": 1100,
             "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.HIDDEN,
@@ -341,13 +332,13 @@ TEMPLATES = {
         {
             "id": 15,
             "label": "Оцените, пожалуйста, сколько часов в неделю вы тратите на выполнение домашних заданий",
-            "order": 1000,
+            "order": 1200,
             "required": False,
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
             "choices": [
                 {
-                    "label": "1-3 часов в неделю",
+                    "label": "1-3 часа в неделю",
                     "value": 1
                 },
                 {
@@ -367,7 +358,7 @@ TEMPLATES = {
         {
             "id": 16,
             "label": "Задания соответствуют прочитанному материалу?",
-            "order": 1100,
+            "order": 1300,
             "required": False,
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
@@ -397,7 +388,7 @@ TEMPLATES = {
         {
             "id": 17,
             "label": "Вас устраивает скорость проверки домашних заданий?",
-            "order": 1200,
+            "order": 1400,
             "required": False,
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
@@ -416,7 +407,7 @@ TEMPLATES = {
         {
             "id": 18,
             "label": "Поясните свой ответ",
-            "order": 1300,
+            "order": 1500,
             "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.HIDDEN,
@@ -439,7 +430,7 @@ TEMPLATES = {
         {
             "id": 19,
             "label": "Что вы думаете про совмещение с онлайн-курсом?",
-            "order": 1400,
+            "order": 1600,
             "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.VISIBLE,

@@ -323,6 +323,8 @@ class Field(AbstractField):
         return None
 
     def prepare_field_value(self, value) -> List[Tuple[str, bool]]:
+        if not value:
+            return []
         if self.field_type == FieldType.CHECKBOX_MULTIPLE_WITH_NOTE:
             checkboxes, note = value
             values = [(v, True) for v in checkboxes]

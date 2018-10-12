@@ -1,9 +1,10 @@
 from collections import defaultdict
 
 from django import forms
+from django.db.models import Prefetch
 
 from surveys.constants import FIELD_CLASSES, FieldType
-from surveys.models import FieldEntry, FormSubmission, Form, Field
+from surveys.models import FieldEntry, FormSubmission, Form, Field, FieldChoice
 
 
 class FormBuilder(forms.ModelForm):
@@ -16,9 +17,10 @@ class FormBuilder(forms.ModelForm):
     def __init__(self, form_instance: Form, *args, **kwargs):
         """Creates form field for each db_field of the given Form instance."""
         self.form_instance = form_instance
+        p = Prefetch("choices", queryset=FieldChoice.objects.order_by("pk"))
         self.db_fields = (form_instance.fields.visible()
                           .order_by("order")
-                          .prefetch_related("choices"))
+                          .prefetch_related(p))
 
         # If a FormSubmission instance is given to edit, stores it's field
         # values for using as initial data.
