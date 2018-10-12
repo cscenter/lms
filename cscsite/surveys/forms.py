@@ -25,7 +25,6 @@ class FormBuilder(forms.ModelForm):
         # If a FormSubmission instance is given to edit, stores it's field
         # values for using as initial data.
         field_entries = defaultdict(list)
-        kwargs["instance"] = FormSubmission.objects.get(pk=1)
         if kwargs.get("instance"):
             for field_entry in kwargs["instance"].entries.all():
                 field_entries[field_entry.field_id].append(field_entry)
