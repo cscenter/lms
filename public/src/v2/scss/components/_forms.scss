@@ -54,7 +54,7 @@ $form-feedback-invalid-color: $red;
   border-radius: $border-radius-lg;
 
   .form-body {
-    padding: 0 spacer("6x");
+    padding: 0 spacer("8x");
   }
 
   .field {
@@ -130,6 +130,19 @@ $form-feedback-invalid-color: $red;
 
 .ui.form.survey {
   background: $white;
+
+  .form_title {
+    text-align: center;
+    margin-bottom: spacer("10x");
+
+    h1 {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .form-body .field {
+    margin-bottom: spacer("10x");
+  }
 
   .survey-label {
     font-size: $h3-font-size;
