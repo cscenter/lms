@@ -142,6 +142,10 @@ $form-feedback-invalid-color: $red;
 
   .form-body .field {
     margin-bottom: spacer("10x");
+
+    &._additional {
+      margin-top: -#{spacer("6x")};
+    }
   }
 
   .survey-label {
