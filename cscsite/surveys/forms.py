@@ -4,7 +4,8 @@ from django import forms
 from django.db.models import Prefetch
 
 from surveys.constants import FIELD_CLASSES, FieldType
-from surveys.models import FieldEntry, FormSubmission, Form, Field, FieldChoice
+from surveys.models import FieldEntry, FormSubmission, Form, Field, FieldChoice, \
+    CourseOfferingSurvey
 
 
 class FormBuilder(forms.ModelForm):
@@ -14,11 +15,11 @@ class FormBuilder(forms.ModelForm):
         model = FormSubmission
         exclude = ("form", "created")
 
-    def __init__(self, form_instance: Form, *args, **kwargs):
+    def __init__(self, survey: CourseOfferingSurvey, *args, **kwargs):
         """Creates form field for each db_field of the given Form instance."""
-        self.form_instance = form_instance
+        self.survey = survey
         p = Prefetch("choices", queryset=FieldChoice.objects.order_by("order"))
-        self.db_fields = (form_instance.fields.visible()
+        self.db_fields = (survey.form.fields.visible()
                           .order_by("order")
                           .prefetch_related(p))
 
@@ -118,7 +119,7 @@ class FormBuilder(forms.ModelForm):
         related FieldEntry instances for each form field.
         """
         submission = super().save(commit=False)
-        submission.form = self.form_instance
+        submission.form = self.survey.form
         submission.save()
         entry_fields = []
         for db_field in self.db_fields:
@@ -128,7 +129,7 @@ class FormBuilder(forms.ModelForm):
             for value, is_choice in values:
                 data = {
                     "submission": submission,
-                    "form_id": self.form_instance.id,
+                    "form_id": self.survey.form_id,
                     "field_id": db_field.id,
                     "value": value,
                     "is_choice": is_choice
