@@ -1,6 +1,7 @@
+$navbar-mobile-height: 48px;
 $nav-link-line-height: 32px;
-$nav-link-padding-x:spacer("2x");
-$nav-link-padding-y:spacer("2x");
+$nav-link-padding-x: spacer("2x");
+$nav-link-padding-y: spacer("2x");
 // logo, navbar-toggler, .nav-link and reg button should have the same size
 $nav-link-height: ($nav-link-line-height + #{$nav-link-padding-y} * 2);
 // Hack to show rows with menu items vertically closer to each other.
@@ -32,28 +33,28 @@ $navbar-toggler-border-radius: $border-radius;
 
   > .container {
     display: flex;
-    align-items: start;
+    align-items: center;
     flex-wrap: wrap;
+    height: $navbar-mobile-height;
     @include media-breakpoint-up(lg) {
+      align-items: start;
       flex-wrap: nowrap;
+      height: auto;
     }
   }
 }
 
 .navbar-logo {
   display: flex; // ie 10 fix
-  //align-self: center;
   padding: $nav-link-padding-y $nav-link-padding-x;
   margin-left: -$nav-link-padding-x;
 
   ._logo-csc {
     height: 24px;
     width: 72px;
-    margin: (($nav-link-line-height - 24px) / 2) 0;
     @include media-breakpoint-up(lg) {
         height: 32px;
         width: 88px;
-        margin: 0;
     }
   }
 }
@@ -62,7 +63,6 @@ $navbar-toggler-border-radius: $border-radius;
 .navbar-toggler {
   display: flex;
   align-self: center;
-
   padding: $navbar-toggler-padding-y $navbar-toggler-padding-x;
   margin-left: -$navbar-toggler-padding-x;
   background-color: transparent; // remove default button style
@@ -113,7 +113,6 @@ $navbar-toggler-border-radius: $border-radius;
   list-style: none;
   width: 100%; // ie 10 fix
 
-
   .nav-link {
     padding: $nav-link-padding-y $nav-link-padding-x;
   }
@@ -152,7 +151,6 @@ $navbar-toggler-border-radius: $border-radius;
     padding: 0;
     margin: 0 auto;
     min-height: 100vh;
-
     background-color: $gray-darker;
 
     @include media-breakpoint-up(lg) {
@@ -292,8 +290,12 @@ $navbar-toggler-border-radius: $border-radius;
     color: $white;
     border: 0;
     background-color: rgba(0, 0, 0, 0);
-    padding: $nav-link-padding-y $nav-link-padding-x;
-    line-height: $nav-link-line-height;
+    padding: 0 $nav-link-padding-x;
+
+    @include media-breakpoint-up(lg) {
+      padding: $nav-link-padding-y $nav-link-padding-x;
+      line-height: $nav-link-line-height;
+    }
 
     &:focus {
       box-shadow: none;
