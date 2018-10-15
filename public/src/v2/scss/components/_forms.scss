@@ -101,7 +101,7 @@ $form-feedback-invalid-color: $red;
     }
 
     p {
-      margin: spacer("1x") 0 0 0;
+      margin: 0 0 spacer("2x") 0;
     }
 
     &.__inverse {
@@ -136,7 +136,7 @@ $form-feedback-invalid-color: $red;
     margin-bottom: spacer("10x");
 
     h1 {
-      margin-bottom: 1rem;
+      margin-bottom: 0;
     }
   }
 
@@ -149,9 +149,9 @@ $form-feedback-invalid-color: $red;
   }
 
   .survey-label {
-    font-size: $h3-font-size;
     font-weight: $font-weight-normal;
     margin-bottom: spacer("4x");
+    @extend .h3;
   }
 }
 

@@ -6,12 +6,28 @@
 
 .page-content {
   padding-top: 80px;
-  padding-bottom: 2rem;
+  padding-bottom: spacer("8x");
   @include media-breakpoint-up(lg) {
     padding-top: 40px;
   }
+
+  &._survey {
+    @include media-breakpoint-down(xs) {
+      max-width: 100%;
+      padding: $navbar-mobile-height 0 spacer("8x");
+
+      .survey {
+        border: none;
+        border-radius: 0;
+
+        .form-body {
+          padding: 0 spacer("4x");
+        }
+      }
+    }
+  }
 }
 
-.content-center{
+.content-center {
   justify-content: center;
 }
