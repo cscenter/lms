@@ -105,6 +105,9 @@ class FormBuilder(forms.ModelForm):
             if db_field.required:
                 css_class += " required"
             new_field.widget.attrs["class"] = css_class
+            # Crutch
+            if not db_field.show_label and db_field.field_type == FieldType.TEXTAREA:
+                new_field.widget.attrs['rows'] = 6
             placeholder = db_field.get_placeholder()
             if placeholder:
                 new_field.widget.attrs["placeholder"] = placeholder

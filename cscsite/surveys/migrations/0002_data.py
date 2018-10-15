@@ -13,7 +13,6 @@ TEMPLATES = {
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
             "input_name": "is_new_course",
-            "css_class": "mb-4",
             "choices": [
                 {
                     "label": "Да, всё слышу впервые",
@@ -43,6 +42,7 @@ TEMPLATES = {
             "placeholder": "Расскажите, где вы изучали эту тему раньше?",
             "visibility": FieldVisibility.HIDDEN,
             "input_name": "where_did_you_learn",
+            "css_class": "_additional",
             "conditional_logic": [
                 {
                     "action_type": "show",
@@ -252,7 +252,6 @@ TEMPLATES = {
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
             "input_name": "practice_lecture_compliance",
-            "css_class": "mb-4",
             "choices": [
                 {
                     "label": "Да, практические занятия направлены на закрепление материала с лекций",
@@ -277,6 +276,7 @@ TEMPLATES = {
             "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.HIDDEN,
+            "css_class": "_additional",
             "conditional_logic": [
                 {
                     "action_type": "show",
@@ -301,7 +301,6 @@ TEMPLATES = {
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
             "input_name": "seminar_participation_benefit",
-            "css_class": "mb-4",
             "choices": [
                 {
                     "label": "Да, практические занятия помогают справиться с домашними заданиями",
@@ -322,6 +321,7 @@ TEMPLATES = {
             "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.HIDDEN,
+            "css_class": "_additional",
             "conditional_logic": [
                 {
                     "action_type": "show",
@@ -402,7 +402,6 @@ TEMPLATES = {
             "field_type": FieldType.RADIO_MULTIPLE,
             "visibility": FieldVisibility.VISIBLE,
             "input_name": "speed_check_hw",
-            "css_class": "mb-4",
             "choices": [
                 {
                     "label": "Да, вполне",
@@ -423,6 +422,7 @@ TEMPLATES = {
             "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.HIDDEN,
+            "css_class": "_additional",
             "conditional_logic": [
                 {
                     "action_type": "show",
