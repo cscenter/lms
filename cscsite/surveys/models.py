@@ -261,6 +261,10 @@ class CourseOfferingSurvey(models.Model):
         }
         return city_aware_reverse('surveys:form_detail', kwargs=kwargs)
 
+    @property
+    def title(self):
+        return str(self.course_offering)
+
 
 class Field(AbstractField):
     form = models.ForeignKey(Form,

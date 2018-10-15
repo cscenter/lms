@@ -17,13 +17,15 @@ class CourseSurveyDetailView(FormView):
     def get_form(self, form_class=None):
         """Return an instance of the form to be used in this view."""
         survey = get_object_or_404(
-            CourseOfferingSurvey.objects.select_related("form"),
+            CourseOfferingSurvey.objects
+                .select_related("form", "course_offering",
+                                "course_offering__course"),
             course_offering__course__slug=self.kwargs['course_slug'],
             course_offering__city_id=self.request.city_code,
             course_offering__semester__year=self.kwargs['semester_year'],
             course_offering__semester__type=self.kwargs['semester_type'],
             form__slug=self.kwargs["slug"])
-        return FormBuilder(survey.form, **self.get_form_kwargs())
+        return FormBuilder(survey, **self.get_form_kwargs())
 
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
