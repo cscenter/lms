@@ -17,7 +17,7 @@ class FormBuilder(forms.ModelForm):
     def __init__(self, form_instance: Form, *args, **kwargs):
         """Creates form field for each db_field of the given Form instance."""
         self.form_instance = form_instance
-        p = Prefetch("choices", queryset=FieldChoice.objects.order_by("pk"))
+        p = Prefetch("choices", queryset=FieldChoice.objects.order_by("order"))
         self.db_fields = (form_instance.fields.visible()
                           .order_by("order")
                           .prefetch_related(p))
