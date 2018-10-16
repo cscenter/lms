@@ -10,10 +10,11 @@ from django.db.transaction import atomic
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from post_office import mail
 from post_office.models import EmailTemplate
 
 from core.utils import city_aware_reverse
-from learning.models import CourseOffering
+from learning.models import CourseOffering, Enrollment
 from surveys.constants import FIELD_TYPES, FIELD_MAX_LENGTH, \
     MULTIPLE_CHOICE_FIELD_TYPES, FieldType, FieldVisibility, STATUS_PUBLISHED, \
     STATUSES, FIELD_WIDGETS
@@ -217,6 +218,36 @@ class AbstractFieldEntry(models.Model):
 class Form(AbstractForm):
     is_template = models.BooleanField(_("Template"), default=False)
 
+    @transaction.atomic
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+        if self.status == STATUS_PUBLISHED and hasattr(self, "survey"):
+            survey = self.survey
+            if survey.email_template_id and not survey.students_notified:
+                self._create_survey_notifications(survey)
+                survey.students_notified = True
+                survey.save(update_fields=["students_notified"])
+
+    def _create_survey_notifications(self, survey):
+        co = survey.course_offering
+        context = {
+            "COURSE_NAME": str(co),
+            "SURVEY_URL": f"https://compscicenter.ru{survey.get_absolute_url()}"
+        }
+        active_enrollments = (Enrollment.active
+                              .filter(course_offering=co.pk)
+                              .select_related("student"))
+        for e in active_enrollments.iterator():
+            mail.send(
+                [e.student.email],
+                sender="CS центр <info@compscicenter.ru>",
+                template=survey.email_template,
+                context=context,
+                render_on_delivery=True,
+                backend='ses',
+            )
+
 
 class CourseOfferingSurvey(models.Model):
     MIDDLE = 'middle'
@@ -242,6 +273,7 @@ class CourseOfferingSurvey(models.Model):
         help_text=_("Students will receive notification based on this "
                     "template after form publication"),
         null=True, blank=True)
+    students_notified = models.BooleanField(editable=False, default=False)
 
     class Meta:
         verbose_name = _("Course Survey")
