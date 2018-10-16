@@ -109,7 +109,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='CourseOfferingSurvey',
             fields=[
-                ('form', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='course_form', serialize=False, to='surveys.Form')),
+                ('form', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, related_name='survey', serialize=False, to='surveys.Form')),
                 ('type', models.CharField(choices=[('middle', 'Middle'), ('final', 'Final')], max_length=20, verbose_name='Type')),
                 ('course_offering', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='surveys', to='learning.CourseOffering')),
             ],

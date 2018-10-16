@@ -27,7 +27,7 @@ class FormAdmin(admin.ModelAdmin):
 
 
 class CourseOfferingSurveyAdmin(admin.ModelAdmin):
-    list_display = ["pk", "course_offering", "get_slug", "get_form_link"]
+    list_display = ["pk", "course_offering", "get_city", "get_slug", "get_form_link"]
     list_filter = (
         'course_offering__city',
         ('course_offering__semester', AdminRelatedDropdownFilter),
@@ -37,7 +37,7 @@ class CourseOfferingSurveyAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['form', 'type']
+            return ['course_offering', 'type']
         return []
 
     def get_slug(self, obj):
@@ -55,6 +55,17 @@ class CourseOfferingSurveyAdmin(admin.ModelAdmin):
         return (qs.select_related("course_offering",
                                   "course_offering__course",
                                   "form"))
+
+    def get_deleted_objects(self, objs, request):
+        """
+        Hook for customizing the delete process for the delete view and the
+        "delete selected" action.
+        """
+        try:
+            obj = objs[0]
+        except IndexError:
+            return [], {}, set(), []
+        return super().get_deleted_objects([obj.form], request)
 
 
 class FieldChoiceAdminInline(admin.TabularInline):
