@@ -201,7 +201,7 @@ class AbstractFormSubmission(models.Model):
 class AbstractFieldEntry(models.Model):
     """A single field value for a submitted form."""
     field_id = models.IntegerField()
-    value = models.CharField(max_length=FIELD_MAX_LENGTH, null=True)
+    value = models.TextField(null=True)
     is_choice = models.BooleanField(_("Is Choice"), default=False)
     meta = JSONField(_("Meta"), null=True, blank=True)
 
