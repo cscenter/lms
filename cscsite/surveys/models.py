@@ -225,7 +225,7 @@ class CourseOfferingSurvey(models.Model):
         (FINAL, _("Final")),
     )
     form = models.OneToOneField(Form,
-                                related_name="course_form",
+                                related_name="survey",
                                 primary_key=True,
                                 on_delete=models.CASCADE)
     type = models.CharField(
@@ -240,6 +240,19 @@ class CourseOfferingSurvey(models.Model):
         verbose_name = _("Course Survey")
         verbose_name_plural = _("Course Surveys")
         unique_together = [('course_offering', 'type')]
+
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+    get_city.short_description = _("City")
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.course_offering.field.name
 
     @transaction.atomic
     def save(self, *args, **kwargs):
