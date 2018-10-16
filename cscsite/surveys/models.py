@@ -332,6 +332,10 @@ class CourseOfferingSurvey(models.Model):
     def title(self):
         return str(self.course_offering)
 
+    @property
+    def is_published(self):
+        return self.form.status == STATUS_PUBLISHED
+
     def get_email_template(self):
         return f"survey-{self.type}"
 

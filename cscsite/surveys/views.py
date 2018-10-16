@@ -1,11 +1,11 @@
-from django.conf import settings
+from django.http import Http404
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from django.utils import timezone
 from django.views.generic import FormView
 
 from surveys.forms import FormBuilder
-from surveys.models import Form, CourseOfferingSurvey
+from surveys.models import CourseOfferingSurvey
 
 
 class CourseSurveyDetailView(FormView):
@@ -19,12 +19,15 @@ class CourseSurveyDetailView(FormView):
         survey = get_object_or_404(
             CourseOfferingSurvey.objects
                 .select_related("form", "course_offering",
-                                "course_offering__course"),
+                                "course_offering__course",
+                                "course_offering__semester"),
             course_offering__course__slug=self.kwargs['course_slug'],
             course_offering__city_id=self.request.city_code,
             course_offering__semester__year=self.kwargs['semester_year'],
             course_offering__semester__type=self.kwargs['semester_type'],
             form__slug=self.kwargs["slug"])
+        if not survey.is_published and not self.request.user.is_curator:
+            raise Http404
         return FormBuilder(survey, **self.get_form_kwargs())
 
     def form_valid(self, form):
