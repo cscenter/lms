@@ -10,6 +10,7 @@ from django.db.transaction import atomic
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from post_office.models import EmailTemplate
 
 from core.utils import city_aware_reverse
 from learning.models import CourseOffering
@@ -235,16 +236,29 @@ class CourseOfferingSurvey(models.Model):
     course_offering = models.ForeignKey(CourseOffering,
                                         related_name="surveys",
                                         on_delete=models.CASCADE)
+    email_template = models.ForeignKey(
+        EmailTemplate,
+        on_delete=models.CASCADE,
+        help_text=_("Students will receive notification based on this "
+                    "template after form publication"),
+        null=True, blank=True)
 
     class Meta:
         verbose_name = _("Course Survey")
         verbose_name_plural = _("Course Surveys")
         unique_together = [('course_offering', 'type')]
 
+    def __str__(self):
+        city = self.course_offering.city
+        return f"{self.course_offering}, {city} [{self.type}]"
+
     def get_city(self):
+        return self.course_offering.city
+    get_city.short_description = _("City")
+
+    def get_city_code(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
-    get_city.short_description = _("City")
 
     def get_city_timezone(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
@@ -259,9 +273,17 @@ class CourseOfferingSurvey(models.Model):
         from surveys.services import course_form_builder
 
         created = self.pk is None
-        if created and self.form_id is None:
-            new_form = course_form_builder(self.course_offering, self.type)
-            self.form_id = new_form.pk
+        if created:
+            if self.form_id is None:
+                new_form = course_form_builder(self)
+                self.form_id = new_form.pk
+            if self.email_template is None:
+                try:
+                    template_name = self.get_email_template()
+                    template = EmailTemplate.objects.get(name=template_name)
+                    self.email_template_id = template.pk
+                except EmailTemplate.DoesNotExist:
+                    pass
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
@@ -277,6 +299,9 @@ class CourseOfferingSurvey(models.Model):
     @property
     def title(self):
         return str(self.course_offering)
+
+    def get_email_template(self):
+        return f"survey-{self.type}"
 
 
 class Field(AbstractField):
