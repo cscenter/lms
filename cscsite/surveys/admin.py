@@ -76,15 +76,8 @@ class CourseOfferingSurveyAdmin(admin.ModelAdmin):
                                   "form"))
 
     def get_deleted_objects(self, objs, request):
-        """
-        Hook for customizing the delete process for the delete view and the
-        "delete selected" action.
-        """
-        try:
-            obj = objs[0]
-        except IndexError:
-            return [], {}, set(), []
-        return super().get_deleted_objects([obj.form], request)
+        objs_ = [o.form for o in objs]
+        return super().get_deleted_objects(objs_, request)
 
 
 class FieldChoiceAdminInline(admin.TabularInline):
