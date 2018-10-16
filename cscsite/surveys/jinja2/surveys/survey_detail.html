@@ -8,6 +8,9 @@
  <div class="container page-content _survey">
         <div class="row content-center no-gutters">
             <div class="col-lg-8">
+                {% if request.user.is_curator and not form.survey.is_published %}
+                    Предварительный просмотр. Опрос ещё не опубликован.
+                {% endif %}
                 <form action="" class="ui form survey" method="post">
                     {% csrf_token %}
                     <div class="form_title __inverse">
