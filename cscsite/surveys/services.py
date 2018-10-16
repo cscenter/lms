@@ -1,7 +1,7 @@
 from post_office.models import EmailTemplate
 
 from learning.models import CourseOffering, CourseClass
-from surveys.constants import FormTemplates, STATUS_DRAFT
+from surveys.constants import FormTemplates, STATUS_DRAFT, STATUS_TEMPLATE
 from surveys.models import Form, FieldChoice, CourseOfferingSurvey
 
 OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
@@ -34,7 +34,8 @@ def course_form_builder(survey: CourseOfferingSurvey):
     if co.online_course_url:
         templates.append(FormTemplates.ONLINE_COURSE)
 
-    form_templates = Form.objects.filter(is_template=True, slug__in=templates)
+    form_templates = Form.objects.filter(status=STATUS_TEMPLATE,
+                                         slug__in=templates)
     for form_template in form_templates:
         fields = form_template.fields.all()
         for field in fields:
@@ -46,7 +47,6 @@ def course_form_builder(survey: CourseOfferingSurvey):
             # Mutate original field
             field.pk = None
             field.form_id = form.pk
-            field.is_template = False
             field.save()
 
             next_index = 1

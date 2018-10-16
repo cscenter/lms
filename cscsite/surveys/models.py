@@ -31,7 +31,6 @@ class FormManager(models.Manager):
             Q(publish_at__lte=now_local) | Q(publish_at__isnull=True),
             Q(expire_at__gte=now_local) | Q(expire_at__isnull=True),
             Q(status=STATUS_PUBLISHED),
-            Q(is_template=False),
         ]
         return self.filter(*filters)
 
@@ -216,8 +215,6 @@ class AbstractFieldEntry(models.Model):
 
 
 class Form(AbstractForm):
-    is_template = models.BooleanField(_("Template"), default=False)
-
     @transaction.atomic
     def save(self, *args, **kwargs):
         created = self.pk is None

@@ -3,7 +3,7 @@ from textwrap import dedent
 from django.db import migrations, connection
 
 from surveys.constants import FormTemplates, FieldType, FieldVisibility, \
-    STATUS_DRAFT
+    STATUS_DRAFT, STATUS_TEMPLATE
 
 TEMPLATES = {
     FormTemplates.COMMON: [
@@ -460,7 +460,7 @@ def create_course_survey_templates(apps, schema_editor):
 
     for form_template, fields in TEMPLATES.items():
         form, _ = Form.objects.get_or_create(
-            is_template=True,
+            status=STATUS_TEMPLATE,
             slug=form_template,
             defaults={"status": STATUS_DRAFT, "title": form_template})
         for field in fields:
