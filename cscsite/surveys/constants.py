@@ -9,9 +9,11 @@ from surveys.fields import SurveyChoiceField, SurveyMultipleChoiceField, \
 
 STATUS_DRAFT = 0
 STATUS_PUBLISHED = 1
+STATUS_TEMPLATE = 2
 STATUSES = (
     (STATUS_DRAFT, _("Draft")),
-    (STATUS_PUBLISHED, _("Published"))
+    (STATUS_PUBLISHED, _("Published")),
+    (STATUS_TEMPLATE, _("Template")),
 )
 
 
@@ -113,6 +115,7 @@ COURSE_FORM_TEMPLATES = [
     FormTemplates.VIDEO_SEMINAR,
     FormTemplates.VIDEO_NO_SEMINAR,
     FormTemplates.SEMINAR,
+    FormTemplates.SEMINAR_HOMEWORK,
     FormTemplates.HOMEWORK,
     FormTemplates.ONLINE_COURSE,
 ]

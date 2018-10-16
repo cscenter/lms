@@ -19,7 +19,7 @@ class FormFieldAdmin(admin.StackedInline):
 
 class FormAdmin(admin.ModelAdmin):
     list_display = ["title", "status", "publish_at", "expire_at"]
-    list_filter = ("status", "is_template")
+    list_filter = ("status",)
     search_fields = ("title",)
     radio_fields = {"status": admin.HORIZONTAL}
     inlines = [FormFieldAdmin]
@@ -35,8 +35,8 @@ class FormAdmin(admin.ModelAdmin):
 
 
 class CourseOfferingSurveyAdmin(admin.ModelAdmin):
-    list_display = ["pk", "course_offering", "get_city", "type",
-                    "get_form_link", "get_form_status"]
+    list_display = ["course_offering", "get_city", "type",
+                    "get_form_status"]
     list_filter = (
         'course_offering__city',
         ('course_offering__semester', AdminRelatedDropdownFilter),
@@ -62,7 +62,9 @@ class CourseOfferingSurveyAdmin(admin.ModelAdmin):
     get_form_link.sa = True
 
     def get_form_status(self, obj):
-        return obj.form.get_status_display()
+        form_url = reverse("admin:surveys_form_change", args=[obj.form_id])
+        url = f"<a href='{form_url}'>Редактировать форму</a>"
+        return mark_safe(f"{obj.form.get_status_display()} | {url}")
     get_form_status.short_description = _("Status")
 
     def get_queryset(self, request):
@@ -92,7 +94,7 @@ class FieldChoiceAdminInline(admin.TabularInline):
 
 class FieldAdmin(admin.ModelAdmin):
     list_display = ["label", "field_type", "form", "order"]
-    list_filter = ("form__is_template",)
+    list_filter = ("form__status",)
     search_fields = ("form__title", "label")
     raw_id_fields = ("form",)
     inlines = [FieldChoiceAdminInline]
