@@ -28,7 +28,7 @@ INSTALLED_APPS += [
     'staff',
     'admission_test',  # TODO: remove after testing
     'django_jinja',
-    'surveys',
+    'surveys.apps.SurveysConfig',
 ]
 
 CACHES = {
@@ -140,6 +140,7 @@ LOCALE_PATHS += [
     str(APP_DIR / "locale"),
     str(PROJECT_DIR / "learning" / "projects" / "locale"),
     str(PROJECT_DIR / "learning" / "admission" / "locale"),
+    str(PROJECT_DIR / "surveys" / "locale"),
 ]
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'chf0ao=8=ihflu_ln2&z+jke)*cx=k0e3mzuq+pc+x+6@vxrj7'

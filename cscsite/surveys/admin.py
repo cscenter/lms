@@ -35,7 +35,7 @@ class FormAdmin(admin.ModelAdmin):
 
 
 class CourseOfferingSurveyAdmin(admin.ModelAdmin):
-    list_display = ["pk", "course_offering", "get_city", "get_slug",
+    list_display = ["pk", "course_offering", "get_city", "type",
                     "get_form_link", "get_form_status"]
     list_filter = (
         'course_offering__city',
@@ -54,10 +54,6 @@ class CourseOfferingSurveyAdmin(admin.ModelAdmin):
         if obj is None:
             fields = [f for f in fields if f != "email_template"]
         return fields
-
-    def get_slug(self, obj):
-        return obj.form.slug
-    get_slug.short_description = _("Type")
 
     def get_form_link(self, obj):
         http_url = reverse("admin:surveys_form_change", args=[obj.form_id])
@@ -132,5 +128,5 @@ admin.site.register(Form, FormAdmin)
 admin.site.register(CourseOfferingSurvey, CourseOfferingSurveyAdmin)
 admin.site.register(Field, FieldAdmin)
 admin.site.register(FieldChoice, FieldChoiceAdmin)
-admin.site.register(FormSubmission, FormSubmissionAdmin)
-admin.site.register(FieldEntry, FieldEntryAdmin)
+# admin.site.register(FormSubmission, FormSubmissionAdmin)
+# admin.site.register(FieldEntry, FieldEntryAdmin)
