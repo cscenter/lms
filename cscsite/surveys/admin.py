@@ -122,6 +122,6 @@ class FieldEntryAdmin(admin.ModelAdmin):
 admin.site.register(Form, FormAdmin)
 admin.site.register(CourseOfferingSurvey, CourseOfferingSurveyAdmin)
 admin.site.register(Field, FieldAdmin)
-admin.site.register(FieldChoice, FieldChoiceAdmin)
+# admin.site.register(FieldChoice, FieldChoiceAdmin)
 # admin.site.register(FormSubmission, FormSubmissionAdmin)
 # admin.site.register(FieldEntry, FieldEntryAdmin)
