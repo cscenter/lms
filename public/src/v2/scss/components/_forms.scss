@@ -152,6 +152,11 @@ $form-feedback-invalid-color: $red;
     font-weight: $font-weight-normal;
     margin-bottom: spacer("4x");
     @extend .h3;
+
+    .asterisk {
+      font-weight: $font-weight-light;
+      color: $red;
+    }
   }
 }
 
