@@ -1,3 +1,5 @@
+from textwrap import dedent
+
 from django.db import migrations, connection
 
 from surveys.constants import FormTemplates, FieldType, FieldVisibility, \
@@ -167,7 +169,7 @@ TEMPLATES = {
             "id": 7,
             "label": "Дополнительные комментарии",
             "order": 70000,
-            "required": True,
+            "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.VISIBLE,
         },
@@ -483,12 +485,53 @@ def create_course_survey_templates(apps, schema_editor):
         """)
 
 
-class Migration(migrations.Migration):
+def create_survey_email_templates(apps, schema_editor):
+    templates = [
+        {
+            "name": "survey-middle",
+            "subject": "Курс «{{ COURSE_NAME }}» - промежуточный опрос",
+            "description": "Уведомление студентам курса о публикации опроса",
+            "content": dedent("""\
+                Добрый день! 
 
+                На сайте появился промежуточный опрос по курсу «{{ COURSE_NAME }}»: {{ SURVEY_URL }}. Пожалуйста, ответьте на вопросы максимально подробно в течение недели. Ваши ответы помогут кураторам выяснить проблемы и решить их уже в этом семестре. 
+
+                Доступ к ответам есть только у кураторов. Если вы не подпишетесь, мы не узнаем, кто именно заполнил анкету. 
+
+                Спасибо!
+
+                Кураторы центра
+            """)
+        },
+        {
+            "name": "survey-final",
+            "subject": "Курс «{{ COURSE_NAME }}» - финальный опрос",
+            "description": "Уведомление студентам курса о публикации опроса",
+            "content": dedent("""\
+                Добрый день! 
+
+                На сайте появился финальный опрос по курсу «{{ COURSE_NAME }}»: {{ SURVEY_URL }}. Пожалуйста, ответьте на вопросы максимально подробно в течение недели. Ваши ответы помогут кураторам выяснить проблемы и решить их уже в этом семестре. 
+
+                Доступ к ответам есть только у кураторов. Если вы не подпишетесь, мы не узнаем, кто именно заполнил анкету. 
+
+                Спасибо!
+
+                Кураторы центра
+            """)
+        }
+    ]
+    for template in templates:
+        EmailTemplate = apps.get_model('post_office', 'EmailTemplate')
+        EmailTemplate.objects.get_or_create(name=template["name"],
+                                            defaults=template)
+
+
+class Migration(migrations.Migration):
     dependencies = [
         ('surveys', '0001_initial'),
     ]
 
     operations = [
         migrations.RunPython(create_course_survey_templates),
+        migrations.RunPython(create_survey_email_templates),
     ]

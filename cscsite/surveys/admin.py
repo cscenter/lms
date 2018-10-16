@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from core.widgets import AdminRelatedDropdownFilter
+from surveys.constants import STATUS_PUBLISHED
 from surveys.models import Form, Field, FieldChoice, FormSubmission, FieldEntry, \
     CourseOfferingSurvey
 
@@ -13,6 +14,7 @@ class FormFieldAdmin(admin.StackedInline):
     model = Field
     exclude = ("description",)
     extra = 0
+    classes = ['collapse']
 
 
 class FormAdmin(admin.ModelAdmin):
@@ -25,14 +27,21 @@ class FormAdmin(admin.ModelAdmin):
         "slug": ("title",)
     }
 
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = []
+        if obj and obj.status == STATUS_PUBLISHED:
+            readonly_fields.append("status")
+        return readonly_fields
+
 
 class CourseOfferingSurveyAdmin(admin.ModelAdmin):
-    list_display = ["pk", "course_offering", "get_city", "get_slug", "get_form_link"]
+    list_display = ["pk", "course_offering", "get_city", "get_slug",
+                    "get_form_link", "get_form_status"]
     list_filter = (
         'course_offering__city',
         ('course_offering__semester', AdminRelatedDropdownFilter),
     )
-    raw_id_fields = ["course_offering"]
+    raw_id_fields = ["course_offering", "email_template"]
     exclude = ("form",)
 
     def get_readonly_fields(self, request, obj=None):
@@ -40,19 +49,31 @@ class CourseOfferingSurveyAdmin(admin.ModelAdmin):
             return ['course_offering', 'type']
         return []
 
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields = [f for f in fields if f != "email_template"]
+        return fields
+
     def get_slug(self, obj):
         return obj.form.slug
     get_slug.short_description = _("Type")
 
     def get_form_link(self, obj):
         http_url = reverse("admin:surveys_form_change", args=[obj.form_id])
-        return mark_safe(f"<a href='{http_url}'>{obj.form.title}</a>")
+        return mark_safe(f"<a href='{http_url}'>{obj.form_id}</a>")
     get_form_link.short_description = _("Form")
     get_form_link.sa = True
+
+    def get_form_status(self, obj):
+        return obj.form.get_status_display()
+    get_form_status.short_description = _("Status")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return (qs.select_related("course_offering",
+                                  "course_offering__city",
+                                  "course_offering__semester",
                                   "course_offering__course",
                                   "form"))
 

@@ -1,13 +1,19 @@
+from post_office.models import EmailTemplate
+
 from learning.models import CourseOffering, CourseClass
-from surveys.constants import FormTemplates
-from surveys.models import Form, FieldChoice
+from surveys.constants import FormTemplates, STATUS_DRAFT
+from surveys.models import Form, FieldChoice, CourseOfferingSurvey
 
 OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
 
 
-def course_form_builder(course_offering: CourseOffering, survey_type):
-    co = course_offering
-    form = Form(title=f'Опрос по курсу «{co}»', slug=survey_type)
+def course_form_builder(survey: CourseOfferingSurvey):
+    co = survey.course_offering
+    if survey.type in [CourseOfferingSurvey.MIDDLE]:
+        pass
+    form = Form(title=f'Опрос по курсу «{co}»',
+                status=STATUS_DRAFT,
+                slug=survey.type)
     form.save()
 
     templates = [FormTemplates.COMMON]
