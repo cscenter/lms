@@ -30,14 +30,18 @@ h6,
 h1,
 .h1 {
   font-size: $h1-font-size;
-  font-weight: $font-weight-light;
+  @include media-breakpoint-up(sm) {
+    font-weight: $font-weight-light;
+  }
   margin-bottom: spacer("6x");
 }
 
 h2,
 .h2 {
   font-size: $h2-font-size;
-  font-weight: $font-weight-light;
+  @include media-breakpoint-up(sm) {
+    font-weight: $font-weight-light;
+  }
   margin-bottom: spacer("6x");
 }
 
@@ -93,15 +97,15 @@ h1 {
   html {
 
     h1, .h1 {
-      font-size: 2.4rem;
+      font-size: 1.75rem;
     }
 
     h2, .h2 {
-      font-size: 2rem;
+      font-size: 1.5rem;
     }
 
     h3, .h3 {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
     }
 
     h4, .h4 {
