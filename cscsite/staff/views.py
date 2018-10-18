@@ -40,6 +40,8 @@ from learning.utils import get_current_term_pair, get_term_index, get_term_by_in
 from learning.viewmixins import CuratorOnlyMixin
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams
+from surveys.models import CourseOfferingSurvey
+from surveys.reports import SurveySubmissionsReport
 from users.models import CSCUser, CSCUserStatusLog
 from users.filters import UserFilter
 
@@ -623,3 +625,20 @@ class SyllabusView(CuratorOnlyMixin, generic.TemplateView):
                                             key=lambda sp: sp.city_id):
             grouped[city_id] = list(g)
         return grouped
+
+
+class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
+    FORMATS = ["csv", "xlsx"]
+
+    def get(self, request, survey_pk, output_format, *args, **kwargs):
+        if output_format not in self.FORMATS:
+            return HttpResponseBadRequest(f"Supported formats {self.FORMATS}")
+        query = (CourseOfferingSurvey.objects
+                 .filter(pk=survey_pk)
+                 .select_related("form",
+                                 "course_offering",
+                                 "course_offering__course",
+                                 "course_offering__semester"))
+        survey = get_object_or_404(query)
+        report = SurveySubmissionsReport(survey)
+        return getattr(report, f"output_{output_format}")()

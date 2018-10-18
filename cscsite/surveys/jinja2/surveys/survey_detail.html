@@ -9,7 +9,8 @@
         <div class="row content-center no-gutters">
             <div class="col-lg-8">
                 {% if request.user.is_curator and not form.survey.is_published %}
-                    Предварительный просмотр. Опрос ещё не опубликован. <a href="{{ url("admin:surveys_form_change", form.survey.form_id) }}">Редактировать форму</a>
+                    Предварительный просмотр. Опрос ещё не опубликован.<br>
+                    <a target="_blank" class="btn btn--green mb-2" href="{{ url("admin:surveys_form_change", form.survey.form_id) }}">Редактировать форму</a>
                 {% endif %}
                 <form action="" class="ui form survey" method="post">
                     {% csrf_token %}

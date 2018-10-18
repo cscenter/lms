@@ -36,7 +36,7 @@ class FormAdmin(admin.ModelAdmin):
 
 class CourseOfferingSurveyAdmin(admin.ModelAdmin):
     list_display = ["course_offering", "get_city", "type",
-                    "get_form_status"]
+                    "get_form_actions", "get_survey_actions"]
     list_filter = (
         'course_offering__city',
         ('course_offering__semester', AdminRelatedDropdownFilter),
@@ -55,17 +55,17 @@ class CourseOfferingSurveyAdmin(admin.ModelAdmin):
             fields = [f for f in fields if f != "email_template"]
         return fields
 
-    def get_form_link(self, obj):
-        http_url = reverse("admin:surveys_form_change", args=[obj.form_id])
-        return mark_safe(f"<a href='{http_url}'>{obj.form_id}</a>")
-    get_form_link.short_description = _("Form")
-    get_form_link.sa = True
-
-    def get_form_status(self, obj):
+    def get_form_actions(self, obj):
         form_url = reverse("admin:surveys_form_change", args=[obj.form_id])
         url = f"<a href='{form_url}'>Редактировать форму</a>"
         return mark_safe(f"{obj.form.get_status_display()} | {url}")
-    get_form_status.short_description = _("Status")
+    get_form_actions.short_description = _("Status")
+
+    def get_survey_actions(self, obj):
+        csv_url = reverse("staff:exports_report_survey_submissions",
+                          args=[obj.pk, "csv"])
+        return mark_safe(f"<a target='_blank' href='{csv_url}'>CSV</a>")
+    get_survey_actions.short_description = _("Export")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
