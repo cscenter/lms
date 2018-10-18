@@ -238,7 +238,7 @@ class Form(AbstractForm):
         for e in active_enrollments.iterator():
             mail.send(
                 [e.student.email],
-                sender="CS центр <info@compscicenter.ru>",
+                sender="noreply@compscicenter.ru",
                 template=survey.email_template,
                 context=context,
                 render_on_delivery=True,
