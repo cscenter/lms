@@ -501,7 +501,8 @@ def create_survey_email_templates(apps, schema_editor):
                 Спасибо!
 
                 Кураторы центра
-            """)
+                
+                Это письмо отправлено автоматически и не требует ответа.""")
         },
         {
             "name": "survey-final",
@@ -517,7 +518,8 @@ def create_survey_email_templates(apps, schema_editor):
                 Спасибо!
 
                 Кураторы центра
-            """)
+                
+                Это письмо отправлено автоматически и не требует ответа.""")
         }
     ]
     for template in templates:
