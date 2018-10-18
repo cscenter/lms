@@ -1,12 +1,12 @@
 import json
 from datetime import datetime
-from typing import Optional, Tuple, Any, List
+from typing import Optional, Tuple, List, Dict
 
 from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
-from django.db.transaction import atomic
+from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -15,9 +15,9 @@ from post_office.models import EmailTemplate
 
 from core.utils import city_aware_reverse
 from learning.models import CourseOffering, Enrollment
-from surveys.constants import FIELD_TYPES, FIELD_MAX_LENGTH, \
-    MULTIPLE_CHOICE_FIELD_TYPES, FieldType, FieldVisibility, STATUS_PUBLISHED, \
-    STATUSES, FIELD_WIDGETS
+from surveys.constants import FIELD_TYPES, MULTIPLE_CHOICE_FIELD_TYPES, \
+    FieldType, FieldVisibility, STATUS_PUBLISHED, \
+    STATUSES, FIELD_WIDGETS, STATUS_DRAFT, CHOICE_FIELD_TYPES
 
 
 class FormManager(models.Manager):
@@ -47,7 +47,7 @@ class AbstractForm(models.Model):
     status = models.SmallIntegerField(
         verbose_name=_("Status"),
         choices=STATUSES,
-        default=STATUS_PUBLISHED)
+        default=STATUS_DRAFT)
     publish_at = models.DateTimeField(
         verbose_name=_("Published from"),
         help_text=_("With published selected, won't be shown until this time."),
@@ -325,6 +325,10 @@ class CourseOfferingSurvey(models.Model):
         }
         return city_aware_reverse('surveys:form_detail', kwargs=kwargs)
 
+    def get_report_url(self, output_format: str):
+        return reverse("staff:exports_report_survey_submissions",
+                       args=[self.pk, output_format])
+
     @property
     def title(self):
         return str(self.course_offering)
@@ -349,9 +353,12 @@ class Field(AbstractField):
     def get_widget(self):
         return FIELD_WIDGETS.get(self.field_type)
 
+    def has_choices(self):
+        return self.field_type in CHOICE_FIELD_TYPES
+
     @cached_property
     def field_choices(self) -> Optional[List]:
-        if self.field_type in MULTIPLE_CHOICE_FIELD_TYPES:
+        if self.has_choices():
             choices = []
             for field_choice in self.choices.all():
                 choices.append((field_choice.value, field_choice.label))
@@ -363,6 +370,10 @@ class Field(AbstractField):
                 choices.insert(0, ("", text))
             return choices
 
+    @cached_property
+    def field_choices_dict(self) -> Optional[Dict]:
+        return {v: l for v, l in self.field_choices}
+
     @property
     def error_messages(self) -> Optional[dict]:
         # FIXME: кажется, что в таком виде не особо нужен error_message
@@ -372,25 +383,25 @@ class Field(AbstractField):
             }
 
     def get_placeholder(self):
-        if self.field_type in MULTIPLE_CHOICE_FIELD_TYPES:
+        if self.has_choices():
             return None
         return self.placeholder
 
-    def to_field_value(self, entries: List[AbstractFieldEntry]):
+    def to_python_value(self, entries: List[AbstractFieldEntry]):
         """
         Converts entry values to the python format compatible with related
         form field.
         """
         if self.field_type in MULTIPLE_CHOICE_FIELD_TYPES:
             if self.field_type == FieldType.CHECKBOX_MULTIPLE_WITH_NOTE:
-                choices = []
+                selected_choices = []
                 note = ""
                 for e in entries:
                     if e.is_choice:
-                        choices.append(e.value)
+                        selected_choices.append(e.value)
                     else:
                         note = e.value
-                value = [choices, note]
+                value = [selected_choices, note]
             else:
                 value = [e.value for e in entries]
             return value
@@ -398,19 +409,47 @@ class Field(AbstractField):
             return entries[0].value
         return None
 
-    def prepare_field_value(self, value) -> List[Tuple[str, bool]]:
-        if not value:
+    def to_db_value(self, python_value) -> List[Tuple[str, bool]]:
+        """
+        Converts form field value to the format convenient for storage
+        in the DB.
+        """
+        if not python_value:
             return []
         if self.field_type == FieldType.CHECKBOX_MULTIPLE_WITH_NOTE:
-            checkboxes, note = value
+            checkboxes, note = python_value
             values = [(v, True) for v in checkboxes]
             if note:
                 values.append((note, False))
-        elif isinstance(value, list):
-            values = [(v.strip(), True) for v in value]
+        elif isinstance(python_value, list):
+            values = [(v.strip(), True) for v in python_value]
         else:
-            values = [(value, False)]
+            values = [(python_value, self.has_choices())]
         return values
+
+    def to_export_value(self, entries: List[AbstractFieldEntry]) -> List[str]:
+        """
+        Converts field entries to human readable format, for fields with
+        multiple answers order depends on `.field_choices` elements order.
+        """
+        if not entries:
+            return []
+        if self.has_choices():
+            choices = set()
+            note = None  # Expected only 1 note per field
+            for e in entries:
+                if e.is_choice:
+                    choices.add(e.value)
+                else:
+                    note = e.value
+            # Entries could be unsorted, but choices should
+            value = [self.field_choices_dict[v] for v in self.field_choices_dict
+                     if v in choices]
+            if note:
+                value.append(note)
+            return value
+        else:
+            return [entries[0].value]
 
     def clean(self):
         if self.conditional_logic is not None:
@@ -439,7 +478,7 @@ class FieldChoice(AbstractFieldChoice):
         related_name="choices",
         on_delete=models.CASCADE,
         limit_choices_to={
-            "field_type__in": MULTIPLE_CHOICE_FIELD_TYPES
+            "field_type__in": CHOICE_FIELD_TYPES
         })
 
     def save(self, *args, **kwargs):

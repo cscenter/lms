@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import factory
+from post_office.models import EmailTemplate
 
 from .models import University, City
 
@@ -19,3 +20,9 @@ class UniversityFactory(factory.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "University name %03d" % n)
     city = factory.SubFactory(CityFactory)
+
+
+class EmailTemplateFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = EmailTemplate
+        django_get_or_create = ["name"]

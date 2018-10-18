@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from django import forms
+from django.db import transaction
 from django.db.models import Prefetch
 
 from surveys.constants import FIELD_CLASSES, FieldType
@@ -52,7 +53,7 @@ class FormBuilder(forms.ModelForm):
             # response), then use the instance's value for the field.
             if db_field.id in field_entries:
                 entries = field_entries[db_field.id]
-                initial_val = db_field.to_field_value(entries)
+                initial_val = db_field.to_python_value(entries)
             else:
                 # An explicit "initial" dict has been provided
                 initial_val = initial.get(field_key)
@@ -100,9 +101,7 @@ class FormBuilder(forms.ModelForm):
             if new_field.is_hidden:
                 new_field.required = False
             self.fields[field_key] = new_field
-            # Add identifying CSS classes to the db_field
-            # FIXME: удалить? никак не используется сейчас вроде
-            css_class = field_class.__name__.lower()
+            css_class = ""
             if db_field.required:
                 css_class += " required"
             new_field.widget.attrs["class"] = css_class
@@ -113,6 +112,7 @@ class FormBuilder(forms.ModelForm):
             if placeholder:
                 new_field.widget.attrs["placeholder"] = placeholder
 
+    @transaction.atomic
     def save(self, **kwargs):
         """
         Get/create a FormEntry instance and assign submitted values to
@@ -125,7 +125,7 @@ class FormBuilder(forms.ModelForm):
         for db_field in self.db_fields:
             field_key = db_field.name
             cleaned_value = self.cleaned_data[field_key]
-            values = db_field.prepare_field_value(cleaned_value)
+            values = db_field.to_db_value(cleaned_value)
             for value, is_choice in values:
                 data = {
                     "submission": submission,
