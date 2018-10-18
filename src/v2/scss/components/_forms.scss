@@ -88,8 +88,11 @@ $form-feedback-invalid-color: $red;
   }
 
   .form_title {
-    padding: spacer("8x") spacer("8x") 0;
+    padding: spacer("8x") spacer("4x") 0;
     margin-bottom: spacer("8x");
+    @include media-breakpoint-up(sm) {
+      padding: spacer("8x") spacer("8x") 0;
+    }
 
     h2,
     h3 {
@@ -101,9 +104,12 @@ $form-feedback-invalid-color: $red;
     }
 
     &.__inverse {
-      padding: spacer("8x");
+      padding: spacer("8x") spacer("4x");
       background: $gray-dark;
       color: $white;
+      @include media-breakpoint-up(sm) {
+        padding: spacer("8x");
+      }
     }
 
     &._subtitle {
