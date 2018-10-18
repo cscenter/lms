@@ -73,15 +73,15 @@ class IndexView(TemplateView):
         courses = [
             OnlineCourseTuple('Алгоритмы и эффективные вычисления',
                               'https://code.stepik.org/algo/',
-                              staticfiles_storage.url('v2/img/pages/index/online_programs/algo.png'),
+                              staticfiles_storage.url('v2/img/pages/index/online_programs/algo.jpg'),
                               'Онлайн-программа'),
             OnlineCourseTuple('Математика для разработчика',
                               'https://code.stepik.org/math/',
-                              staticfiles_storage.url('v2/img/pages/index/online_programs/math.png'),
+                              staticfiles_storage.url('v2/img/pages/index/online_programs/math.jpg'),
                               'Онлайн-программа'),
             OnlineCourseTuple('Разработка на C++, Java и Haskell',
                               'https://code.stepik.org/dev/',
-                              staticfiles_storage.url('v2/img/pages/index/online_programs/dev.png'),
+                              staticfiles_storage.url('v2/img/pages/index/online_programs/dev.jpg'),
                               'Онлайн-программа')
         ]
         today = now().date()
