@@ -47,8 +47,7 @@ def curator(user_factory):
 @pytest.fixture(scope="session", autouse=True)
 def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
                                                        django_db_blocker):
-    """Django data migrations with py.test due to tests runs with --nomigrations
-    """
+    """Ensure that data missed in django's migrations still exists"""
     with django_db_blocker.unblock():
         # Create user groups
         for group_id, group_name in PARTICIPANT_GROUPS:

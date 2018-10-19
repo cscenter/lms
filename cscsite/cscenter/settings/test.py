@@ -16,26 +16,25 @@ COVERAGE_MODULE_EXCLUDES = ['tests$', 'settings$', 'urls$', 'locale$',
                             'migrations', '^sorl', '__pycache__']
 COVERAGE_PATH_EXCLUDES = [r'.svn', r'fixtures', r'node_modules']
 
-# In-memory test database
-
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": ":memory:",
-        "USER": "",
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "travis_ci_test",
+        "USER": "postgres",
         "PASSWORD": "",
-        "HOST": "",
+        "HOST": "localhost",
         "PORT": ""
-        }
     }
+}
 
+
+ALLOWED_HOSTS = [".compscicenter.ru", ".compsciclub.ru"]
 # This makes tests almost 2x faster; we don't need strong security and DEBUG
 # during tests
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
 ]
 DEBUG = False
-ALLOWED_HOSTS = [".compscicenter.ru", ".compsciclub.ru"]
 for template in TEMPLATES:
     template['OPTIONS']['debug'] = DEBUG
 
