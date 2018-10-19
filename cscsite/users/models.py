@@ -54,17 +54,13 @@ GITHUB_ID_VALIDATOR = RegexValidator(regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*$")
 # TODO: Add tests. Looks Buggy
 class MonitorStatusField(models.ForeignKey):
     """
-    Monitor another field of the model and logging changes.
+    Logging changes of another model field, stores link to the last change.
     Reset monitoring field value by log cls after log entry was added to DB.
 
-    How it works:
-        Save db state after model init or synced with db.
-        When monitored field changed (depends on prev value and `when` attrs
-        update monitoring field value, add log entry
     Args:
         logging_model (cls):
             Model responsible for logging.
-        monitor (string):
+        monitored (string):
             Monitored field name
         when (iter):
             If monitored field get values from `when` attribute, monitoring
@@ -87,28 +83,28 @@ class MonitorStatusField(models.ForeignKey):
 
     def contribute_to_class(self, cls, name, **kwargs):
         # Add attribute to model instance after initialization
-        self.monitored_attrname = '_monitored_%s' % name
+        self._monitored_attrname = '_monitored_%s' % name
         models.signals.post_init.connect(self._save_initial, sender=cls)
         super().contribute_to_class(cls, name, **kwargs)
-
-    def get_monitored_value(self, instance):
-        return getattr(instance, self.monitored)
 
     def _save_initial(self, sender, instance, **kwargs):
         if self.monitored in instance.get_deferred_fields():
             return
-        setattr(instance, self.monitored_attrname,
+        setattr(instance, self._monitored_attrname,
                 self.get_monitored_value(instance))
 
+    def get_monitored_value(self, instance):
+        return getattr(instance, self.monitored)
+
     def pre_save(self, model_instance, add):
-        monitored_prev = getattr(model_instance, self.monitored_attrname)
+        monitored_prev = getattr(model_instance, self._monitored_attrname)
         monitored_current = self.get_monitored_value(model_instance)
         if monitored_prev != monitored_current:
             if self.when is None or monitored_current in self.when:
                 log_model = self.create_log_entry(model_instance, add)
                 setattr(model_instance, self.attname, log_model.pk)
                 self._save_initial(model_instance.__class__, model_instance)
-        return super(MonitorStatusField, self).pre_save(model_instance, add)
+        return super().pre_save(model_instance, add)
 
     def create_log_entry(self, instance, new_model):
         if new_model:
