@@ -462,7 +462,7 @@ def create_course_survey_templates(apps, schema_editor):
         form, _ = Form.objects.get_or_create(
             status=STATUS_TEMPLATE,
             slug=form_template,
-            defaults={"status": STATUS_DRAFT, "title": form_template})
+            defaults={"title": form_template})
         for field in fields:
             choices = []
             if "choices" in field:

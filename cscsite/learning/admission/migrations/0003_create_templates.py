@@ -16,7 +16,7 @@ def forward(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('admission', '0035_auto_20180705_1532'),
+        ('admission', '0002_auto_20181019_1339'),
         ('post_office', '0006_attachment_mimetype'),
     ]
 
