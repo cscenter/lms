@@ -6,7 +6,7 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: run club run_flame migrate msg msgcompile static freeze pip dumpdata loaddata coverage test_travis test clean cmd refresh sync deploy check_defined
+.PHONY: run club run_flame migrate msg msgcompile static freeze pip dumpdata loaddata clean cmd refresh sync deploy check_defined
 
 run:
 	python -W once manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
@@ -45,15 +45,6 @@ dumpdata:
 loaddata:
 	$(call check_defined, src)
 	python manage.py loaddata $(DJANGO_POSTFIX) $(src)
-
-coverage:
-	python manage.py test core index news users learning --settings=$(PROJECT).settings.test
-
-test_travis: clean
-	python manage.py test core index news users learning --settings=$(PROJECT).settings.test_travis
-
-test: clean
-	python manage.py test core index news users learning --settings=$(PROJECT).settings.test
 
 clean:
 	find . -name "*.pyc" -print0 -delete

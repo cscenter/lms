@@ -6,11 +6,11 @@ addons:
   postgresql: '9.6'
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
-  - python manage.py migrate --noinput --settings=cscenter.settings.test_travis
+  - python manage.py migrate --noinput --settings=cscenter.settings.test
 env:
-  - DJANGO=2.1.1
+  - DJANGO=2.1.2
 install:
   - pip install -q Django==$DJANGO
   - pip install -r requirements/test.txt
 script:
-  - py.test --ds=cscenter.settings.test_travis
+  - pytest --create-db
