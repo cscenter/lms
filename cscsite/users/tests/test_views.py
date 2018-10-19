@@ -27,7 +27,7 @@ from users.admin import CSCUserCreationForm, CSCUserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
     CSCUserReferenceFactory, TeacherCenterFactory, StudentClubFactory, \
     StudentFactory, StudentCenterFactory
-from users.models import CSCUser
+from users.models import CSCUser, CSCUserReference
 
 
 class CustomSemesterFactory(SemesterFactory):
@@ -549,7 +549,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         self.assertIsNone(list_header)
 
     def test_create_reference(self):
-        """Check FIO substitues in signature input field
+        """Check FIO substitute in signature input field
            Check redirect to reference detail after form submit
         """
         curator = UserFactory.create(is_superuser=True, is_staff=True)
@@ -564,13 +564,14 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
         student = StudentCenterFactory()
         reference = CSCUserReferenceFactory.build(student=student)
-        expected_reference_id = 1
         form_url = reverse('user_reference_add', args=[student.id])
         form_data = model_to_dict(reference)
         response = self.client.post(form_url, form_data)
+        assert CSCUserReference.objects.count() == 1
+        ref = CSCUserReference.objects.first()
         self.assertRedirects(response,
             reverse('user_reference_detail',
-                    args=[student.id, expected_reference_id])
+                    args=[student.id, ref.pk])
         )
 
     def test_reference_detail(self):

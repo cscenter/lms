@@ -1,12 +1,8 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 import pytest
 from django.core.exceptions import ValidationError
 
 from learning.factories import CourseOfferingFactory, EnrollmentFactory, \
-    CourseFactory, SemesterFactory
+    SemesterFactory
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from users.factories import StudentFactory, CuratorFactory, UserFactory, \
     StudentCenterFactory
@@ -63,6 +59,7 @@ def test_cached_groups(settings):
 
 @pytest.mark.django_db
 def test_permissions(client):
+    current_semester = SemesterFactory.create_current()
     # Unauthenticated user
     response = client.get("/")
     request_user = response.wsgi_request.user
