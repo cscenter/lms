@@ -1,18 +1,15 @@
-from typing import Callable, List
 import logging
+from typing import Callable, List
 
 import attr
-from django.db.models import BooleanField, Case, Count, Value, When, Subquery
+from django.db.models import BooleanField, Case, Count, Value, When
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
-from learning.models import Assignment, CourseClass, CourseOfferingTeacher, \
-    CourseOffering, Course
+from learning.models import Assignment, CourseClass
 from learning.permissions import access_role, CourseRole
-from learning.settings import STUDENT_STATUS
-
 
 logger = logging.getLogger(__name__)
 

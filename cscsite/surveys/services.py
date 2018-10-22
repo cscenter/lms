@@ -1,6 +1,8 @@
+from django.db.models import Q
 from post_office.models import EmailTemplate
 
 from learning.models import CourseOffering, CourseClass
+from learning.utils import now_local
 from surveys.constants import FormTemplates, STATUS_DRAFT, STATUS_TEMPLATE
 from surveys.models import Form, FieldChoice, CourseOfferingSurvey
 
@@ -34,6 +36,7 @@ def course_form_builder(survey: CourseOfferingSurvey):
     if co.online_course_url:
         templates.append(FormTemplates.ONLINE_COURSE)
 
+    today_local = now_local(co.get_city())
     form_templates = Form.objects.filter(status=STATUS_TEMPLATE,
                                          slug__in=templates)
     for form_template in form_templates:
@@ -57,16 +60,22 @@ def course_form_builder(survey: CourseOfferingSurvey):
                 next_index += 1
             # Populate choices based on conditional logic
             if field.conditional_logic:
+                passed_lectures = (Q(date__lt=today_local.date()) |
+                                   Q(date__exact=today_local.date(),
+                                     ends_at__lt=today_local.time()))
                 for l in field.conditional_logic:
                     if (l.get('scope') == 'choices'
                             and l.get('action_type') == 'create'):
                         for rule in l.get("rules", []):
                             if rule.get('source') == "CourseClass":
-                                filters = {"course_offering": co}
+                                filters = {
+                                    "course_offering": co,
+                                    "date__lte": today_local.date()
+                                }
                                 if rule["value"] == "lecture":
                                     filters["type"] = CourseClass.TYPES.lecture
                                 classes = (CourseClass.objects
-                                           .filter(**filters)
+                                           .filter(passed_lectures, **filters)
                                            .order_by("date", "starts_at"))
                                 for i, c in enumerate(classes, start=next_index):
                                     choice = FieldChoice(value=i, label=c.name,
