@@ -1,11 +1,16 @@
+import datetime
+
 import pytest
 
-from surveys.constants import FieldType, STATUS_PUBLISHED
+from learning.factories import CourseOfferingFactory, CourseClassFactory
+from surveys.constants import FieldType, STATUS_PUBLISHED, FieldVisibility, \
+    STATUS_TEMPLATE
 from surveys.factories import CourseOfferingSurveyFactory, FieldFactory, \
-    FieldEntryFactory, FieldChoiceFactory
+    FieldEntryFactory, FieldChoiceFactory, FormFactory
 from surveys.forms import FormBuilder
-from surveys.models import FormSubmission, FieldEntry
+from surveys.models import FormSubmission, FieldEntry, Field
 from surveys.reports import SurveySubmissionsReport
+from surveys.services import course_form_builder
 
 
 @pytest.mark.django_db
@@ -189,3 +194,40 @@ def test_report_survey(client):
     assert choice2.label in field1_val
     assert "note" in field1_val
     assert radio_choice.label in field2_val
+
+
+@pytest.mark.django_db
+def test_conditional_logic_prefill_class(mocker):
+    # Fix year and term
+    mocked_timezone = mocker.patch('django.utils.timezone.now')
+    today_fixed = datetime.datetime(2018, month=3, day=8, hour=13, minute=0,
+                                    tzinfo=datetime.timezone.utc)
+    mocked_timezone.return_value = today_fixed
+    co = CourseOfferingFactory.create(city_id='spb')
+    past = today_fixed - datetime.timedelta(days=3)
+    future = today_fixed + datetime.timedelta(days=3)
+    class1 = CourseClassFactory(course_offering=co, date=past)
+    # Don't forget to set local time for `ends_at` (+3)
+    class2 = CourseClassFactory(course_offering=co, date=today_fixed,
+                                ends_at=datetime.time(hour=12, minute=0))
+    seminar1 = CourseClassFactory(course_offering=co, date=today_fixed,
+                                  ends_at=datetime.time(hour=12, minute=0),
+                                  type='seminar')
+    # This one ends later than `current` moment
+    class3 = CourseClassFactory(course_offering=co, date=today_fixed,
+                                ends_at=datetime.time(hour=21, minute=0))
+    class4 = CourseClassFactory(course_offering=co, date=future)
+    survey = CourseOfferingSurveyFactory(course_offering=co, form_id=None)
+    assert hasattr(survey, "form")
+    assert survey.form.fields.count() > 0
+    # Field that should be prefilled with passed lectures
+    field = (Field.objects
+             .filter(
+                form_id=survey.form_id,
+                label__icontains="Возможно, некоторые темы остались"))
+    assert field.count() == 1
+    lectures = [c.label for c in field.first().choices.all()]
+    assert len(lectures) == 2
+    assert class1.name in lectures
+    assert class2.name in lectures
+    assert class3.name not in lectures
