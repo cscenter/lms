@@ -3,14 +3,12 @@ import datetime
 import pytest
 
 from learning.factories import CourseOfferingFactory, CourseClassFactory
-from surveys.constants import FieldType, STATUS_PUBLISHED, FieldVisibility, \
-    STATUS_TEMPLATE
+from surveys.constants import FieldType, STATUS_PUBLISHED
 from surveys.factories import CourseOfferingSurveyFactory, FieldFactory, \
-    FieldEntryFactory, FieldChoiceFactory, FormFactory
+    FieldEntryFactory, FieldChoiceFactory
 from surveys.forms import FormBuilder
 from surveys.models import FormSubmission, FieldEntry, Field
-from surveys.reports import SurveySubmissionsReport
-from surveys.services import course_form_builder
+from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 
 
 @pytest.mark.django_db
@@ -231,3 +229,26 @@ def test_conditional_logic_prefill_class(mocker):
     assert class1.name in lectures
     assert class2.name in lectures
     assert class3.name not in lectures
+
+
+@pytest.mark.django_db
+def test_submission_stats():
+    field_checkboxes_with_note = FieldFactory(
+        field_type=FieldType.CHECKBOX_MULTIPLE_WITH_NOTE,
+        label="Field 1", order=20, choices=[])
+    choices = FieldChoiceFactory.create_batch(3,
+        field=field_checkboxes_with_note)
+    choice1, choice2, *_ = choices
+    field_radio = FieldFactory(
+        field_type=FieldType.RADIO_MULTIPLE,
+        label="Field 2", order=10, choices=[])
+    radio_choice, *_ = FieldChoiceFactory.create_batch(3, field=field_radio)
+    survey1, survey2 = CourseOfferingSurveyFactory.create_batch(2)
+    survey1.form.fields.add(field_checkboxes_with_note)
+    survey1.form.fields.add(field_radio)
+    survey1.form.status = STATUS_PUBLISHED
+    survey1.form.save()
+    report = SurveySubmissionsStats(survey1)
+    stats = report.calculate()
+    assert stats["total_submissions"] == 0
+    assert len(stats["fields"]) == 2
