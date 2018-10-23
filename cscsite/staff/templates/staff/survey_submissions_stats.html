@@ -6,19 +6,25 @@
 
 {% block content %}
 <div class="container">
-    <h2 class="content-title">{{ survey.course_offering }}</h2>
-    <h3 class="mb-20">{{ survey.course_offering.city }} / {{ survey.get_type_display }} опрос</h3>
+    <h2 class="content-title">{{ survey.course_offering }}<br><small>{{ survey.course_offering.city }} / {{ survey.get_type_display }} опрос</small></h2>
     <div>Всего отзывов: {{ total_submissions }}</div>
-    {% for field, values in data.items %}
+    {% for field, stats in data.items %}
         <h4>{{ field.label }}{% if field.required %}<span class="asterisk">*</span>{% endif %}</h4>
-        {% if field.field_type == field.TYPES.RADIO_MULTIPLE %}
-            {% for value, answers, percantage in values %}
-                {{ value }} &mdash; {{ answers}} [{{ percantage }}]<br>
+        {% if field.field_type == field.TYPES.RADIO_MULTIPLE or field.field_type == field.TYPES.CHECKBOX_MULTIPLE or field.field_type == field.TYPES.CHECKBOX_MULTIPLE_WITH_NOTE %}
+            {% for item in stats.choices %}
+                {{ item.value }} &mdash; {{ item.answers}}/{{ item.total }} [{{ item.percentage }}%]<br>
             {% endfor %}
-        {% else %}
-            {% if values %}
+            {% if stats.notes %}
                 <ul>
-                    {% for v in values %}
+                    {% for note, choices in stats.notes %}
+                    <li>{{ note|linebreaksbr }}{% if choices %} ({{ choices }}){% endif %}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% else %}
+            {% if stats %}
+                <ul>
+                    {% for v in stats %}
                     <li>{{ v|linebreaksbr }}</li>
                     {% endfor %}
                 </ul>
