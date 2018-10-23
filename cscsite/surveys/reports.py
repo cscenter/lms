@@ -4,12 +4,12 @@ from itertools import groupby
 from operator import attrgetter
 from typing import NamedTuple
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.utils import formats
 
 from core.reports import ReportFileOutput
-from surveys.constants import FieldType
-from surveys.models import CourseOfferingSurvey, Field, FieldChoice
+from surveys.constants import FieldType, CHOICE_FIELD_TYPES
+from surveys.models import CourseOfferingSurvey, Field, FieldChoice, FieldEntry
 
 
 class SurveySubmissionsReport(ReportFileOutput):
@@ -55,7 +55,13 @@ class SurveySubmissionsReport(ReportFileOutput):
 class PollOptionResult(NamedTuple):
     value: str
     answers: int
-    percentage: str
+    total: int
+
+    @property
+    def percentage(self):
+        if self.total:
+            return "%.0f" % (100.0 * self.answers / self.total)
+        return 0
 
 
 class SurveySubmissionsStats:
@@ -70,43 +76,69 @@ class SurveySubmissionsStats:
 
     def calculate(self):
         total_submissions = self.survey.form.submissions.count()
+        # Count unique submissions per field
+        q = (
+            FieldEntry.objects
+            .filter(form_id=self.survey.form_id)
+            .values('field_id')
+            .annotate(num_answers=Count('submission_id', distinct=True))
+        )
+        answers_per_field = {f['field_id']: f['num_answers'] for f in q}
         field_stats = {f: None for f in self.db_fields.values()}
-        form_entries = self.survey.form.entries.all()
-        for entry in form_entries:
-            db_field = self.db_fields[entry.field_id]
-            if db_field.field_type in [FieldType.TEXT, FieldType.TEXTAREA]:
-                if field_stats[db_field] is None:
-                    field_stats[db_field] = []
-                field_stats[db_field].append(entry.value)
-            elif db_field.field_type == FieldType.RADIO_MULTIPLE:
-                if field_stats[db_field] is None:
-                    field_stats[db_field] = Counter()
-                field_stats[db_field].update((entry.value,))
-            elif db_field.field_type == FieldType.CHECKBOX_MULTIPLE:
-                pass
-            elif db_field.field_type == FieldType.CHECKBOX_MULTIPLE_WITH_NOTE:
-                pass
-            else:
-                raise ValueError(f"Field type {db_field.field_type} is "
-                                 f"not supported")
 
-        for db_field, values in field_stats.items():
-            if db_field.field_type == FieldType.RADIO_MULTIPLE:
+        form_entries = self.survey.form.entries.order_by("submission_id")
+        grouped_by_submission = groupby(form_entries.iterator(),
+                                        key=attrgetter("submission_id"))
+        for submission_id, submission_entries in grouped_by_submission:
+            field_entries = defaultdict(list)
+            for e in submission_entries:
+                field_entries[e.field_id].append(e)
+            for entries in field_entries.values():
+                for entry in entries:
+                    db_field = self.db_fields[entry.field_id]
+                    if db_field.field_type in [FieldType.TEXT,
+                                               FieldType.TEXTAREA]:
+                        if field_stats[db_field] is None:
+                            field_stats[db_field] = []
+                        field_stats[db_field].append(entry.value)
+                    elif db_field.field_type in CHOICE_FIELD_TYPES:
+                        if field_stats[db_field] is None:
+                            field_stats[db_field] = {
+                                "choices": Counter(),
+                                "notes": []
+                            }
+                        stats = field_stats[db_field]
+                        if entry.is_choice:
+                            stats["choices"].update((entry.value,))
+                        else:
+                            chs = db_field.field_choices_dict
+                            choices = ", ".join(chs[e.value] for
+                                                e in entries if e.is_choice)
+                            stats["notes"].append((entry.value, choices))
+                    else:
+                        raise ValueError(f"Field type {db_field.field_type} is "
+                                         f"not supported")
+
+        # Show options starting with the most popular
+        for db_field, stats in field_stats.items():
+            if db_field.field_type in CHOICE_FIELD_TYPES:
                 new_values = []
                 selected_options = set()
-                for value, answers in values.most_common():
+                # Total answers for the question
+                total = answers_per_field.get(db_field.pk, 0)
+                for value, answers in stats["choices"].most_common():
                     selected_options.add(value)
                     label = db_field.field_choices_dict[value]
-                    new_option = PollOptionResult(
-                        label, answers,
-                        '%.2f%%' % (100.0 * answers / total_submissions)
-                    )
+                    new_option = PollOptionResult(label, answers, total)
                     new_values.append(new_option)
                 # Append non-selected options
                 for value, label in db_field.field_choices:
                     if value not in selected_options:
-                        new_values.append(PollOptionResult(label, 0, '0%'))
-                field_stats[db_field] = new_values
+                        new_values.append(PollOptionResult(label, 0, total))
+                field_stats[db_field] = {
+                    "choices": new_values,
+                    "notes": stats["notes"]
+                }
         return {
             "total_submissions": total_submissions,
             "fields": field_stats
