@@ -5,10 +5,11 @@ import pytest
 from learning.factories import CourseOfferingFactory, CourseClassFactory
 from surveys.constants import FieldType, STATUS_PUBLISHED
 from surveys.factories import CourseOfferingSurveyFactory, FieldFactory, \
-    FieldEntryFactory, FieldChoiceFactory
+    FieldEntryFactory, FieldChoiceFactory, FormSubmissionFactory
 from surveys.forms import FormBuilder
 from surveys.models import FormSubmission, FieldEntry, Field
-from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
+from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats, \
+    PollOptionResult
 
 
 @pytest.mark.django_db
@@ -233,16 +234,18 @@ def test_conditional_logic_prefill_class(mocker):
 
 @pytest.mark.django_db
 def test_submission_stats():
-    field_checkboxes_with_note = FieldFactory(
-        field_type=FieldType.CHECKBOX_MULTIPLE_WITH_NOTE,
-        label="Field 1", order=20, choices=[])
-    choices = FieldChoiceFactory.create_batch(3,
-        field=field_checkboxes_with_note)
-    choice1, choice2, *_ = choices
     field_radio = FieldFactory(
         field_type=FieldType.RADIO_MULTIPLE,
         label="Field 2", order=10, choices=[])
-    radio_choice, *_ = FieldChoiceFactory.create_batch(3, field=field_radio)
+    radio_choices = FieldChoiceFactory.create_batch(
+        3, field=field_radio)
+    radio_choice, radio_choice2, *_ = radio_choices
+    field_checkboxes_with_note = FieldFactory(
+        field_type=FieldType.CHECKBOX_MULTIPLE_WITH_NOTE,
+        label="Field 1", order=20, choices=[])
+    choices = FieldChoiceFactory.create_batch(
+        3, field=field_checkboxes_with_note)
+    checkbox1, checkbox2, checkbox3 = choices
     survey1, survey2 = CourseOfferingSurveyFactory.create_batch(2)
     survey1.form.fields.add(field_checkboxes_with_note)
     survey1.form.fields.add(field_radio)
@@ -251,4 +254,68 @@ def test_submission_stats():
     report = SurveySubmissionsStats(survey1)
     stats = report.calculate()
     assert stats["total_submissions"] == 0
-    assert len(stats["fields"]) == 2
+    assert len(stats["fields"]) == survey1.form.fields.count()
+    submission1 = FormSubmissionFactory(form=survey1.form, entries=[])
+    # Add entries for radio buttons type field
+    FieldEntryFactory(form=survey1.form, submission=submission1,
+                      field_id=field_radio.pk, value=radio_choice.value,
+                      is_choice=True)
+    stats = report.calculate()
+    assert stats["total_submissions"] == 1
+    assert len(stats["fields"]) == survey1.form.fields.count()
+    radio_stats = stats["fields"][field_radio]
+    assert isinstance(radio_stats, dict)
+    assert len(radio_stats) == 2
+    assert "choices" in radio_stats
+    assert "notes" in radio_stats
+    assert len(radio_stats["notes"]) == 0
+    assert len(radio_stats["choices"]) == len(radio_choices)
+    assert all(isinstance(c, PollOptionResult) for c in radio_stats["choices"])
+    stats_choice1, stats_choice2, stats_choice3 = radio_stats["choices"]
+    assert stats_choice1.value == radio_choice.label
+    assert stats_choice1.total == 1
+    assert stats_choice1.answers == 1
+    assert stats_choice1.percentage == '100'
+    assert stats_choice2.value == radio_choice2.label
+    assert stats_choice2.total == 1
+    assert stats_choice2.answers == 0
+    assert stats_choice2.percentage == '0'
+    assert stats_choice3.total == 1
+    assert stats_choice3.answers == 0
+    # Add answers for checkboxes with note type field
+    submission2 = FormSubmissionFactory(form=survey1.form, entries=[])
+    FieldEntryFactory(form=survey1.form, submission=submission1,
+                      field_id=field_checkboxes_with_note.pk,
+                      value=checkbox2.value,
+                      is_choice=True)
+    FieldEntryFactory(form=survey1.form, submission=submission2,
+                      field_id=field_checkboxes_with_note.pk,
+                      value=checkbox2.value,
+                      is_choice=True)
+    FieldEntryFactory(form=survey1.form, submission=submission2,
+                      field_id=field_checkboxes_with_note.pk,
+                      value=checkbox1.value,
+                      is_choice=True)
+    FieldEntryFactory(form=survey1.form, submission=submission1,
+                      field_id=field_checkboxes_with_note.pk,
+                      value='note',
+                      is_choice=False)
+    stats = report.calculate()
+    assert stats["total_submissions"] == 2
+    assert len(stats["fields"]) == survey1.form.fields.count()
+    checkboxes_stats = stats["fields"][field_checkboxes_with_note]
+    assert isinstance(checkboxes_stats, dict)
+    assert len(checkboxes_stats["notes"]) == 1
+    assert ("note", checkbox2.label) == checkboxes_stats["notes"][0]
+    stats_choice1, stats_choice2, stats_choice3 = checkboxes_stats["choices"]
+    assert stats_choice1.value == checkbox2.label
+    assert stats_choice1.total == 2
+    assert stats_choice1.answers == 2
+    assert stats_choice1.percentage == '100'
+    assert stats_choice2.value == checkbox1.label
+    assert stats_choice2.total == 2
+    assert stats_choice2.answers == 1
+    assert stats_choice2.percentage == '50'
+    assert stats_choice3.total == 2
+    assert stats_choice3.answers == 0
+    assert stats_choice3.percentage == '0'

@@ -75,7 +75,7 @@ class FormSubmissionFactory(factory.DjangoModelFactory):
         if not create:
             return
 
-        if extracted:
+        if isinstance(extracted, list):
             for entry in extracted:
                 self.entries.add(entry)
         else:
