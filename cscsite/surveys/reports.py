@@ -84,7 +84,15 @@ class SurveySubmissionsStats:
             .annotate(num_answers=Count('submission_id', distinct=True))
         )
         answers_per_field = {f['field_id']: f['num_answers'] for f in q}
-        field_stats = {f: None for f in self.db_fields.values()}
+        # Initialize field_stats dict
+
+        def field_stats_factory(field: Field):
+            if field.field_type in CHOICE_FIELD_TYPES:
+                return {"choices": Counter(), "notes": []}
+            return []
+
+        field_stats = {f: field_stats_factory(f) for f in
+                       self.db_fields.values()}
 
         form_entries = self.survey.form.entries.order_by("submission_id")
         grouped_by_submission = groupby(form_entries.iterator(),
@@ -98,21 +106,14 @@ class SurveySubmissionsStats:
                     db_field = self.db_fields[entry.field_id]
                     if db_field.field_type in [FieldType.TEXT,
                                                FieldType.TEXTAREA]:
-                        if field_stats[db_field] is None:
-                            field_stats[db_field] = []
                         field_stats[db_field].append(entry.value)
                     elif db_field.field_type in CHOICE_FIELD_TYPES:
-                        if field_stats[db_field] is None:
-                            field_stats[db_field] = {
-                                "choices": Counter(),
-                                "notes": []
-                            }
                         stats = field_stats[db_field]
                         if entry.is_choice:
                             stats["choices"].update((entry.value,))
                         else:
-                            chs = db_field.field_choices_dict
-                            choices = ", ".join(chs[e.value] for
+                            fcd = db_field.field_choices_dict
+                            choices = ", ".join(fcd[e.value] for
                                                 e in entries if e.is_choice)
                             stats["notes"].append((entry.value, choices))
                     else:
@@ -126,7 +127,8 @@ class SurveySubmissionsStats:
                 selected_options = set()
                 # Total answers for the question
                 total = answers_per_field.get(db_field.pk, 0)
-                for value, answers in stats["choices"].most_common():
+                choices_stats = stats.get("choices", Counter())
+                for value, answers in choices_stats.most_common():
                     selected_options.add(value)
                     label = db_field.field_choices_dict[value]
                     new_option = PollOptionResult(label, answers, total)
@@ -135,10 +137,7 @@ class SurveySubmissionsStats:
                 for value, label in db_field.field_choices:
                     if value not in selected_options:
                         new_values.append(PollOptionResult(label, 0, total))
-                field_stats[db_field] = {
-                    "choices": new_values,
-                    "notes": stats["notes"]
-                }
+                field_stats[db_field]["choices"] = new_values
         return {
             "total_submissions": total_submissions,
             "fields": field_stats
