@@ -1,7 +1,6 @@
 from django.db.models import Q
-from post_office.models import EmailTemplate
 
-from learning.models import CourseOffering, CourseClass
+from learning.models import CourseClass
 from learning.utils import now_local
 from surveys.constants import FormTemplates, STATUS_DRAFT, STATUS_TEMPLATE
 from surveys.models import Form, FieldChoice, CourseOfferingSurvey

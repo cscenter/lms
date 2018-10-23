@@ -2,31 +2,28 @@
 
 from __future__ import absolute_import, unicode_literals
 
-from collections import OrderedDict, defaultdict
-
 import itertools
+from collections import OrderedDict, defaultdict
 from typing import NamedTuple
 
-from braces.views import JSONResponseMixin
 from django.conf import settings
 from django.contrib import messages
 from django.core.management import CommandError
 from django.core.management import call_command
-from django.urls import reverse
 from django.db.models import Count, Prefetch
-from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.http import HttpResponseRedirect
-from django.http.response import HttpResponseNotFound, HttpResponseForbidden
+from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
-from django.views import generic
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
+from django.views import generic
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
-from vanilla import TemplateView, ListView
+from vanilla import TemplateView
 
 from api.permissions import CuratorAccessPermission
-from core.models import City
 from core.templatetags.core_tags import tex
 from learning.admission.models import Campaign, Interview
 from learning.admission.reports import AdmissionReport
@@ -36,14 +33,15 @@ from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
     GRADES, CENTER_FOUNDATION_YEAR
-from learning.utils import get_current_term_pair, get_term_index, get_term_by_index
+from learning.utils import get_current_term_pair, get_term_index, \
+    get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams
 from surveys.models import CourseOfferingSurvey
-from surveys.reports import SurveySubmissionsReport
-from users.models import CSCUser, CSCUserStatusLog
+from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import UserFilter
+from users.models import CSCUser, CSCUserStatusLog
 
 
 class StudentOffsetPagination(LimitOffsetPagination):
@@ -642,3 +640,24 @@ class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
         survey = get_object_or_404(query)
         report = SurveySubmissionsReport(survey)
         return getattr(report, f"output_{output_format}")()
+
+
+class SurveySubmissionsStatsView(CuratorOnlyMixin, TemplateView):
+    template_name = "staff/survey_submissions_stats.html"
+
+    def get_context_data(self, **kwargs):
+        survey_pk = self.kwargs["survey_pk"]
+        query = (CourseOfferingSurvey.objects
+                 .filter(pk=survey_pk)
+                 .select_related("form",
+                                 "course_offering",
+                                 "course_offering__course",
+                                 "course_offering__semester"))
+        survey = get_object_or_404(query)
+        report = SurveySubmissionsStats(survey)
+        stats = report.calculate()
+        return {
+            "survey": survey,
+            "total_submissions": stats["total_submissions"],
+            "data": stats["fields"]
+        }

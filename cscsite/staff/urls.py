@@ -10,7 +10,8 @@ from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, 
     ProgressReportForSemesterView, TotalStatisticsView, AdmissionReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
     CourseParticipantsIntersectionView, SyllabusView, \
-    WillGraduateStatsReportView, SurveySubmissionsReportView
+    WillGraduateStatsReportView, SurveySubmissionsReportView, \
+    SurveySubmissionsStatsView
 
 urlpatterns = [
     url(r'^syllabus/$', SyllabusView.as_view(), name='syllabus'),
@@ -70,6 +71,9 @@ urlpatterns = [
         url(r'^reports/surveys/(?P<survey_pk>\d+)/(?P<output_format>csv|xlsx)/$',
             SurveySubmissionsReportView.as_view(),
             name='exports_report_survey_submissions'),
+        url(r'^reports/surveys/(?P<survey_pk>\d+)/txt/$',
+            SurveySubmissionsStatsView.as_view(),
+            name='exports_report_survey_submissions_stats'),
         url(r'^sheet/xlsx/$',
             ProgressReportFullView.as_view(output_format="xlsx"),
             name='exports_sheet_all_students_xlsx'),

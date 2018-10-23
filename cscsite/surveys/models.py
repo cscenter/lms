@@ -91,6 +91,7 @@ class AbstractField(models.Model):
         (HIDDEN, _("Hidden")),
         (VISIBLE, _("Visible")),
     )
+    TYPES = FieldType
     created = models.DateTimeField(
         verbose_name=_("created"),
         editable=False,
