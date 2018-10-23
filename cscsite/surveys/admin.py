@@ -64,7 +64,11 @@ class CourseOfferingSurveyAdmin(admin.ModelAdmin):
     def get_survey_actions(self, obj):
         csv_url = reverse("staff:exports_report_survey_submissions",
                           args=[obj.pk, "csv"])
-        return mark_safe(f"<a target='_blank' href='{csv_url}'>CSV</a>")
+        csv_link = f"<a target='_blank' href='{csv_url}'>CSV</a>"
+        txt_url = reverse("staff:exports_report_survey_submissions_stats",
+                          args=[obj.pk])
+        txt_link = f"<a target='_blank' href='{txt_url}'>TXT</a>"
+        return mark_safe(f"{csv_link} | {txt_link}")
     get_survey_actions.short_description = _("Export")
 
     def get_queryset(self, request):

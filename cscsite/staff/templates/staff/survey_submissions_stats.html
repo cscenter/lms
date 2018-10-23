@@ -9,8 +9,8 @@
     <h2 class="content-title">{{ survey.course_offering }}<br><small>{{ survey.course_offering.city }} / {{ survey.get_type_display }} опрос</small></h2>
     <div>Всего отзывов: {{ total_submissions }}</div>
     {% for field, stats in data.items %}
-        <h4>{{ field.label }}{% if field.required %}<span class="asterisk">*</span>{% endif %}</h4>
         {% if field.field_type == field.TYPES.RADIO_MULTIPLE or field.field_type == field.TYPES.CHECKBOX_MULTIPLE or field.field_type == field.TYPES.CHECKBOX_MULTIPLE_WITH_NOTE %}
+            <h4>{{ field.label }}{% if field.required %}<span class="asterisk">*</span>{% endif %}</h4>
             {% for item in stats.choices %}
                 {{ item.value }} &mdash; {{ item.answers}}/{{ item.total }} [{{ item.percentage }}%]<br>
             {% endfor %}
@@ -23,13 +23,12 @@
             {% endif %}
         {% else %}
             {% if stats %}
+                <h4>{{ field.label }}{% if field.required %}<span class="asterisk">*</span>{% endif %}</h4>
                 <ul>
                     {% for v in stats %}
                     <li>{{ v|linebreaksbr }}</li>
                     {% endfor %}
                 </ul>
-            {% else %}
-                Нет ответов.
             {% endif %}
 
         {% endif %}
