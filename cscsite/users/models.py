@@ -132,7 +132,7 @@ class MonitorStatusField(models.ForeignKey):
         return name, path, args, kwargs
 
 
-class CSCUserStatusLog(models.Model):
+class UserStatusLog(models.Model):
     created = models.DateField(_("created"), default=now)
     semester = models.ForeignKey(
         "learning.Semester",
@@ -293,13 +293,13 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         max_length=15,
         blank=True)
     status_last_change = MonitorStatusField(
-        CSCUserStatusLog,
+        UserStatusLog,
         verbose_name=_("Status changed"),
         blank=True,
         null=True,
         editable=False,
         monitored='status',
-        logging_model=CSCUserStatusLog,
+        logging_model=UserStatusLog,
         on_delete=models.CASCADE)
 
     areas_of_study = models.ManyToManyField(
