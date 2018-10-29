@@ -162,7 +162,7 @@ class UserStatusLog(models.Model):
             self.student.get_full_name(True), self.semester))
 
 
-class CSCUser(LearningPermissionsMixin, AbstractUser):
+class User(LearningPermissionsMixin, AbstractUser):
 
     group = PARTICIPANT_GROUPS
 
@@ -283,7 +283,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Author of last edit"),
         on_delete=models.PROTECT,
-        related_name='cscuser_commented',
+        related_name='user_commented',
         blank=True,
         null=True)
     status = models.CharField(
@@ -361,24 +361,24 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         """
         from learning.admission.models import Applicant
         try:
-            user = CSCUser.objects.get(email=applicant.email)
-        except CSCUser.DoesNotExist:
+            user = User.objects.get(email=applicant.email)
+        except User.DoesNotExist:
             username = applicant.email.split("@", maxsplit=1)[0]
-            if CSCUser.objects.filter(username=username).exists():
-                username = CSCUser.generate_random_username(attempts=5)
+            if User.objects.filter(username=username).exists():
+                username = User.generate_random_username(attempts=5)
             if not username:
                 raise RuntimeError(
                     "Всё плохо. Имя {} уже занято. Cлучайное имя сгенерировать "
                     "не удалось".format(username))
-            random_password = CSCUser.objects.make_random_password()
-            user = CSCUser.objects.create_user(username=username,
-                                               email=applicant.email,
-                                               password=random_password)
+            random_password = User.objects.make_random_password()
+            user = User.objects.create_user(username=username,
+                                            email=applicant.email,
+                                            password=random_password)
         groups = []
         if applicant.status == Applicant.VOLUNTEER:
-            groups.append(CSCUser.group.VOLUNTEER)
+            groups.append(User.group.VOLUNTEER)
         else:
-            groups.append(CSCUser.group.STUDENT_CENTER)
+            groups.append(User.group.STUDENT_CENTER)
         user.groups.add(*groups)
         # Migrate data from application form to user profile
         same_attrs = [
@@ -421,11 +421,11 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
                  range(0, len(username), split)])
 
         try:
-            CSCUser.objects.get(username=username)
-            return CSCUser.generate_random_username(
+            User.objects.get(username=username)
+            return User.generate_random_username(
                 length=length, chars=chars, split=split, delimiter=delimiter,
                 attempts=attempts - 1)
-        except CSCUser.DoesNotExist:
+        except User.DoesNotExist:
             return username
 
     @property
@@ -552,9 +552,9 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
         thumbnail = get_thumbnail(path_to_img, geometry, **options)
         if not thumbnail or isinstance(thumbnail, DummyImageFile):
             if use_stub:
-                if not self.is_teacher and self.gender == CSCUser.GENDER_MALE:
+                if not self.is_teacher and self.gender == User.GENDER_MALE:
                     factory = BoyStubImage
-                elif not self.is_teacher and self.gender == CSCUser.GENDER_FEMALE:
+                elif not self.is_teacher and self.gender == User.GENDER_FEMALE:
                     factory = GirlStubImage
                 else:
                     factory = BaseStubImage
@@ -727,7 +727,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
 @python_2_unicode_compatible
 class OnlineCourseRecord(TimeStampedModel):
     student = models.ForeignKey(
-        CSCUser,
+        User,
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
     name = models.CharField(_("Course|name"), max_length=255)
@@ -745,7 +745,7 @@ class OnlineCourseRecord(TimeStampedModel):
 class SHADCourseRecord(TimeStampedModel):
     GRADES = GRADES
     student = models.ForeignKey(
-        CSCUser,
+        User,
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
     name = models.CharField(_("Course|name"), max_length=255)
@@ -778,7 +778,7 @@ class UserReference(TimeStampedModel):
     note = models.TextField(_("Reference|note"), blank=True)
 
     student = models.ForeignKey(
-        CSCUser,
+        User,
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
 

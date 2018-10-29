@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from learning.projects.models import Project, ProjectStudent
 from learning.settings import PARTICIPANT_GROUPS, GRADES
-from users.models import CSCUser
+from users.models import User
 
 EMPTY_CHOICE = ('', _('Any'))
 BOOLEAN_CHOICES = (
@@ -36,12 +36,12 @@ class ProjectsFilter(django_filters.FilterSet):
 
     students = django_filters.ModelChoiceFilter(
         label=_("Student"),
-        queryset=(CSCUser.objects
-            .filter(
+        queryset=(User.objects
+                  .filter(
                 groups__in=[PARTICIPANT_GROUPS.STUDENT_CENTER,
                             PARTICIPANT_GROUPS.GRADUATE_CENTER])
-            .distinct()
-            .all())
+                  .distinct()
+                  .all())
     )
 
     supervisor = django_filters.CharFilter(lookup_expr='icontains',

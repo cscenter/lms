@@ -10,21 +10,21 @@ from import_export.admin import ImportExportMixin, ImportMixin
 from core.widgets import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
 from learning.settings import PARTICIPANT_GROUPS
-from .models import CSCUser, UserReference, \
+from .models import User, UserReference, \
     OnlineCourseRecord, SHADCourseRecord, UserStatusLog
 from .import_export import SHADCourseRecordResource, UserRecordResource
 
 
 class UserCreationForm(_UserCreationForm):
     class Meta:
-        model = CSCUser
+        model = User
         fields = ('username', 'email')
 
 
 class UserChangeForm(_UserChangeForm):
     class Meta:
         fields = '__all__'
-        model = CSCUser
+        model = User
 
     def clean(self):
         """XXX: we can't validate m2m like `groups` in Model.clean() method"""
@@ -174,7 +174,7 @@ class SHADCourseRecordResourceAdmin(ImportExportMixin, admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
-            kwargs["queryset"] = CSCUser.objects.filter(groups__in=[
+            kwargs["queryset"] = User.objects.filter(groups__in=[
                 PARTICIPANT_GROUPS.STUDENT_CENTER,
                 PARTICIPANT_GROUPS.VOLUNTEER]).distinct()
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
@@ -185,6 +185,6 @@ class UserRecordResourceAdmin(ImportMixin, UserAdmin):
     import_template_name = 'admin/import_export/import_users.html'
 
 
-admin.site.register(CSCUser, UserRecordResourceAdmin)
+admin.site.register(User, UserRecordResourceAdmin)
 admin.site.register(UserReference)
 admin.site.register(SHADCourseRecord, SHADCourseRecordResourceAdmin)

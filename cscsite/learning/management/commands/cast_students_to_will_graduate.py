@@ -8,7 +8,7 @@ from django.utils.timezone import now
 
 from learning.models import Enrollment, Semester, OnlineCourse, StudyProgram
 from learning.settings import STUDENT_STATUS
-from users.models import CSCUser, SHADCourseRecord, OnlineCourseRecord
+from users.models import User, SHADCourseRecord, OnlineCourseRecord
 
 
 class Command(BaseCommand):
@@ -28,7 +28,7 @@ Requirements:
         current_term = Semester.get_current()
         # TODO: Restrict programmes by last 4-5 years?
         study_programmes = [sp for sp in StudyProgram.objects.syllabus()]
-        students = (CSCUser.objects
+        students = (User.objects
                     .only("pk", "curriculum_year", "city")
                     # FIXME: move this annotation to manager?
                     .annotate(passed_projects=Count(Case(
@@ -38,11 +38,11 @@ Requirements:
                                      then=Value(None)),
                                 default=F("projectstudent__pk")
                             ), distinct=True))
-                    .filter(groups__in=[CSCUser.group.STUDENT_CENTER],
+                    .filter(groups__in=[User.group.STUDENT_CENTER],
                             curriculum_year__gte=str(current_term.year - 3),
                             passed_projects__gte=3)
-                    .exclude(status__in=[CSCUser.STATUS.will_graduate,
-                                         CSCUser.STATUS.expelled])
+                    .exclude(status__in=[User.STATUS.will_graduate,
+                                         User.STATUS.expelled])
                     .prefetch_related(
                         Prefetch('onlinecourserecord_set',
                                  queryset=(OnlineCourseRecord.objects
@@ -87,6 +87,6 @@ Requirements:
                     if groups_total and groups_satisfied == groups_total:
                         areas.append(program.area.code)
                 if areas:
-                    CSCUser.objects.filter(pk=student.pk).update(
-                        status=CSCUser.STATUS.will_graduate)
+                    User.objects.filter(pk=student.pk).update(
+                        status=User.STATUS.will_graduate)
                     student.areas_of_study.set(areas)

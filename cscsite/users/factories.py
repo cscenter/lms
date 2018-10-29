@@ -4,16 +4,16 @@ import factory
 
 from django.contrib.auth.models import Group
 from learning.settings import PARTICIPANT_GROUPS, GRADES
-from users.models import CSCUser, SHADCourseRecord, UserReference, \
+from users.models import User, SHADCourseRecord, UserReference, \
     OnlineCourseRecord
 
 
 class UserFactory(factory.DjangoModelFactory):
     class Meta:
-        model = CSCUser
+        model = User
 
     username = factory.Sequence(lambda n: "testuser%03d" % n)
-    gender = factory.Iterator([CSCUser.GENDER_MALE, CSCUser.GENDER_FEMALE])
+    gender = factory.Iterator([User.GENDER_MALE, User.GENDER_FEMALE])
     password = "test123foobar@!"
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
@@ -137,7 +137,7 @@ class OnlineCourseRecordFactory(factory.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Online course %03d" % n)
     student = factory.SubFactory(UserFactory,
-                                 groups=[CSCUser.group.STUDENT_CENTER])
+                                 groups=[User.group.STUDENT_CENTER])
 
 
 class SHADCourseRecordFactory(factory.DjangoModelFactory):
@@ -147,7 +147,7 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "SHAD course name %03d" % n)
     teachers = factory.Sequence(lambda n: "SHAD course teachers %03d" % n)
     student = factory.SubFactory(UserFactory,
-                                 groups=[CSCUser.group.STUDENT_CENTER])
+                                 groups=[User.group.STUDENT_CENTER])
     grade = factory.Iterator(list(x[0] for x in GRADES))
     semester = factory.SubFactory('learning.factories.SemesterFactory')
 
@@ -159,4 +159,4 @@ class UserReferenceFactory(factory.DjangoModelFactory):
     signature = "FIO"
     note = ""
     student = factory.SubFactory(UserFactory,
-                                 groups=[CSCUser.group.STUDENT_CENTER])
+                                 groups=[User.group.STUDENT_CENTER])

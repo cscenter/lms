@@ -11,7 +11,7 @@ from learning.models import AreaOfStudy, CourseOfferingTeacher, CourseOffering, 
     Semester
 from learning.settings import CENTER_FOUNDATION_YEAR
 from learning.utils import get_term_index
-from users.models import CSCUser
+from users.models import User
 
 
 class CourseList(ListAPIView):
@@ -37,8 +37,8 @@ class TeacherList(ListAPIView):
 
     def get_queryset(self):
         lecturer = CourseOfferingTeacher.roles.lecturer
-        queryset = (CSCUser.objects
-                    .filter(groups=CSCUser.group.TEACHER_CENTER,
+        queryset = (User.objects
+                    .filter(groups=User.group.TEACHER_CENTER,
                             courseofferingteacher__roles=lecturer)
                     .only("pk", "first_name", "last_name", "patronymic",
                           "cropbox_data", "photo", "city_id", "gender",
@@ -86,8 +86,8 @@ class AlumniList(ListAPIView):
     serializer_class = AlumniSerializer
 
     def get_queryset(self):
-        return (CSCUser.objects
-                .filter(groups__pk=CSCUser.group.GRADUATE_CENTER)
+        return (User.objects
+                .filter(groups__pk=User.group.GRADUATE_CENTER)
                 .prefetch_related("areas_of_study")
                 .only("pk", "first_name", "last_name", "graduation_year",
                       "cropbox_data", "photo", "city_id", "gender")
@@ -120,8 +120,8 @@ class TestimonialList(ListAPIView):
 
     @staticmethod
     def get_base_queryset():
-        return (CSCUser.objects
-                .filter(groups=CSCUser.group.GRADUATE_CENTER)
+        return (User.objects
+                .filter(groups=User.group.GRADUATE_CENTER)
                 .exclude(csc_review=''))
 
     def list(self, request, *args, **kwargs):

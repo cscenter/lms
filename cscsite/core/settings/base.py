@@ -144,7 +144,7 @@ TIME_ZONES = {
     'kzn': pytz.timezone('Europe/Moscow')
 }
 
-AUTH_USER_MODEL = "users.CSCUser"
+AUTH_USER_MODEL = "users.User"
 AUTHENTICATION_BACKENDS = [
     "users.backends.EmailOrUsernameModelBackend",
 ]

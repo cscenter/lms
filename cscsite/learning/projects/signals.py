@@ -97,10 +97,10 @@ def post_save_report(sender, instance, created, *args, **kwargs):
     """ Send notifications to curators by email about new report"""
     if created:
         report = instance
-        CSCUser = get_user_model()
+        User = get_user_model()
         if report.status == report.SENT:
             # Send email to curators
-            recipients = CSCUser.objects.filter(
+            recipients = User.objects.filter(
                 is_superuser=True,
                 is_staff=True,
                 groups=PARTICIPANT_GROUPS.CURATOR_PROJECTS
@@ -144,9 +144,9 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
     """Add notification when report comment has been created."""
     if created:
         Report = apps.get_model('projects', 'Report')
-        CSCUser = get_user_model()
+        User = get_user_model()
         comment = instance
-        curators = (CSCUser.objects
+        curators = (User.objects
                     .filter(
                         is_superuser=True,
                         is_staff=True,

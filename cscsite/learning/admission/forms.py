@@ -22,9 +22,9 @@ from core.widgets import UbereditorWidget
 from learning.admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream, Campaign
 from learning.utils import now_local
-from users.models import CSCUser, GITHUB_ID_VALIDATOR
+from users.models import User, GITHUB_ID_VALIDATOR
 
-COURSES = Choices(('', '', '--------')) + CSCUser.COURSES
+COURSES = Choices(('', '', '--------')) + User.COURSES
 WHERE_DID_YOU_LEARN = (
     ('uni', 'плакат/листовка в университете'),
     ('social_net', 'пост в соц. сетях'),

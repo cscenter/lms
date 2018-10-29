@@ -6,7 +6,7 @@ from django.db.models import Prefetch, Count, query, Q
 from learning.models import CourseOfferingTeacher
 
 
-class CSCUserQuerySet(query.QuerySet):
+class UserQuerySet(query.QuerySet):
     # TODO: Refactor later to remove WHERE IN(ids) due to performance reasons,
     # rename ProgressReport.get_queryset after that. Add tests before
     # Investigate how to use tmp table with JOIN in that case?
@@ -18,7 +18,7 @@ class CSCUserQuerySet(query.QuerySet):
         """Returns list of students with all related courses, shad-courses
            practices and projects, etc"""
 
-        from .models import CSCUser, SHADCourseRecord
+        from .models import User, SHADCourseRecord
         from learning.models import Enrollment, CourseClass, Semester, \
             CourseOffering
         from learning.projects.models import ProjectStudent
@@ -29,9 +29,9 @@ class CSCUserQuerySet(query.QuerySet):
         if isinstance(filters, dict):
             if "groups__in" not in filters:
                 filters["groups__in"] = [
-                    CSCUser.group.STUDENT_CENTER,
-                    CSCUser.group.GRADUATE_CENTER,
-                    CSCUser.group.VOLUNTEER
+                    User.group.STUDENT_CENTER,
+                    User.group.GRADUATE_CENTER,
+                    User.group.VOLUNTEER
                 ]
             q = self.filter(**filters)
             if exclude:
@@ -81,7 +81,7 @@ class CSCUserQuerySet(query.QuerySet):
                     'enrollments__course_offering__teachers',
                     # Note (Zh): Show pure lecturers first (=1),
                     # then teachers with lecturer role (values >1), then others
-                    queryset=CSCUser.objects.extra(
+                    queryset=User.objects.extra(
                         select={
                             'is_lecturer': '"%s"."roles" & %s' %
                             (CourseOfferingTeacher._meta.db_table,
@@ -118,5 +118,5 @@ class CSCUserQuerySet(query.QuerySet):
         )
 
 
-class CustomUserManager(UserManager.from_queryset(CSCUserQuerySet)):
+class CustomUserManager(UserManager.from_queryset(UserQuerySet)):
     use_in_migrations = False

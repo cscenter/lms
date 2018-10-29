@@ -9,7 +9,7 @@ from api.permissions import CuratorAccessPermission
 from learning.models import StudentAssignment, \
     Assignment, Enrollment
 from stats.renderers import ListRenderersMixin
-from users.models import CSCUser
+from users.models import User
 from .pandas_serializers import ParticipantsByYearPandasSerializer, \
     ParticipantsByGroupPandasSerializer
 from .serializers import ParticipantsStatsSerializer, \
@@ -26,12 +26,12 @@ class CourseParticipantsStatsByGroup(ListRenderersMixin, PandasView):
 
     def get_queryset(self):
         STUDENT_GROUPS = [
-            CSCUser.group.STUDENT_CENTER,
-            CSCUser.group.VOLUNTEER,
-            CSCUser.group.GRADUATE_CENTER,
+            User.group.STUDENT_CENTER,
+            User.group.VOLUNTEER,
+            User.group.GRADUATE_CENTER,
         ]
         course_offering_id = self.kwargs['course_session_id']
-        return (CSCUser.objects
+        return (User.objects
                 .only("curriculum_year")
                 .filter(
                     enrollment__is_deleted=False,
@@ -55,7 +55,7 @@ class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
 
     def get_queryset(self):
         course_offering_id = self.kwargs['course_session_id']
-        return (CSCUser.objects
+        return (User.objects
                 .only("curriculum_year")
                 .filter(
                     enrollment__is_deleted=False,

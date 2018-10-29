@@ -67,7 +67,7 @@ from learning.utils import now_local
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from learning.views import get_user_city_code
 from tasks.models import Task
-from users.models import CSCUser
+from users.models import User
 from .tasks import register_in_yandex_contest, import_testing_results
 
 ADMISSION_SETTINGS = apps.get_app_config("admission")
@@ -894,8 +894,8 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
                            extra_tags='timeout')
             return HttpResponseRedirect(reverse("admission:applicants"))
         try:
-            user = CSCUser.create_student_from_applicant(applicant)
-        except CSCUser.MultipleObjectsReturned:
+            user = User.create_student_from_applicant(applicant)
+        except User.MultipleObjectsReturned:
             messages.error(
                 self.request,
                 "Всё плохо. Найдено несколько пользователей "
@@ -908,7 +908,7 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
         # Link applicant and user
         applicant.user = user
         applicant.save()
-        url = reverse("admin:users_cscuser_change", args=[user.pk])
+        url = reverse("admin:users_user_change", args=[user.pk])
         return HttpResponseRedirect(url)
 
 

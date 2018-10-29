@@ -23,7 +23,7 @@ def notify_handler(type, **kwargs):
     from django.contrib.auth.models import Group
     from notifications import types
     from notifications.models import Type, Notification
-    from users.models import CSCUser
+    from users.models import User
 
     if not isinstance(type, types):
         raise ValueError("Notification type must be an instance "
@@ -60,7 +60,7 @@ def notify_handler(type, **kwargs):
     # Check if User or Group
     if isinstance(recipient, Group):
         recipients = recipient.user_set.all()
-    elif isinstance(recipient, CSCUser):
+    elif isinstance(recipient, User):
         recipients = [recipient]
     else:
         recipients = [None]

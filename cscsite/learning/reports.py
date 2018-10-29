@@ -14,12 +14,12 @@ from learning.projects.models import ReportComment, ProjectStudent
 from learning.settings import GRADES, STUDENT_STATUS, DATE_FORMAT_RU, \
     TIME_FORMAT_RU
 from learning.utils import get_grade_index, is_positive_grade
-from users.models import CSCUser, SHADCourseRecord
+from users.models import User, SHADCourseRecord
 
 
 class ProgressReport(ReportFileOutput):
     """
-    Process students info from CSCUser manager for future export in
+    Process students info from User manager for future export in
     CSV of XLSX format. Stores separately headers and data.
     Example:
         report = ProgressReportFull()
@@ -215,9 +215,9 @@ class ProgressReportForDiplomas(ProgressReport):
         Explicitly exclude rows with bad grades (or without) on query level.
         """
         filters = kwargs.pop("filters", {})
-        return CSCUser.objects.students_info(
+        return User.objects.students_info(
             filters={
-                "status": CSCUser.STATUS.will_graduate,
+                "status": User.STATUS.will_graduate,
                 **filters
             },
             exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]
@@ -283,7 +283,7 @@ class ProgressReportForDiplomas(ProgressReport):
 class ProgressReportFull(ProgressReport):
     @staticmethod
     def get_queryset(**kwargs):
-        return (CSCUser.objects
+        return (User.objects
                 .students_info()
                 .select_related("applicant"))
 
@@ -388,11 +388,11 @@ class ProgressReportForSemester(ProgressReport):
     def get_queryset(**kwargs):
         semester = kwargs.pop("semester")
         filters = kwargs.pop("filters", {})
-        return CSCUser.objects.students_info(
+        return User.objects.students_info(
             filters={
                 "groups__in": [
-                    CSCUser.group.STUDENT_CENTER,
-                    CSCUser.group.VOLUNTEER
+                    User.group.STUDENT_CENTER,
+                    User.group.VOLUNTEER
                 ],
                 **filters
             },
@@ -680,8 +680,8 @@ class WillGraduateStatsReport(ReportFileOutput):
             Prefetch('shadcourserecord_set', queryset=shad_courses_queryset),
             'onlinecourserecord_set',
         ]
-        qs = (CSCUser.objects
-              .filter(status=CSCUser.STATUS.will_graduate)
+        qs = (User.objects
+              .filter(status=User.STATUS.will_graduate)
               .prefetch_related(*prefetch_list))
         return qs
 

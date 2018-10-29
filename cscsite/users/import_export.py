@@ -11,7 +11,7 @@ from import_export import resources, fields, widgets
 
 from learning.settings import GRADES, SEMESTER_TYPES
 from learning.utils import now_local
-from .models import CSCUser, SHADCourseRecord
+from .models import User, SHADCourseRecord
 
 
 # Customize widgets
@@ -59,7 +59,7 @@ class ImportWithEmptyIdMixin(object):
 
 class SHADCourseRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
     student_id = fields.Field(column_name='student_id', attribute='student',
-                              widget=widgets.ForeignKeyWidget(CSCUser))
+                              widget=widgets.ForeignKeyWidget(User))
     grade = fields.Field(column_name='grade', attribute='grade',
                          widget=GradeWidget())
     semester = fields.Field(column_name='semester', attribute='semester_id',
@@ -72,7 +72,7 @@ class SHADCourseRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
 
 
 class UserCourseWidget(widgets.IntegerWidget):
-    MAPPING = {v.lower(): k for k, v in CSCUser.COURSES._display_map.items()}
+    MAPPING = {v.lower(): k for k, v in User.COURSES._display_map.items()}
 
     def clean(self, value, row=None, *args, **kwargs):
         if self.is_empty(value):
@@ -84,7 +84,7 @@ class UserCourseWidget(widgets.IntegerWidget):
         raise ValueError(f'Course should be one of {self.MAPPING}')
 
     def render(self, value, obj=None):
-        return CSCUser.COURSES[value]
+        return User.COURSES[value]
 
 
 class UserEmailWidget(widgets.CharWidget):
@@ -118,7 +118,7 @@ class UserGenderWidget(widgets.CharWidget):
 class GroupManyToManyWidget(widgets.ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
-            return self.model.objects.filter(pk=CSCUser.group.VOLUNTEER)
+            return self.model.objects.filter(pk=User.group.VOLUNTEER)
         return super().clean(value, row, *args, **kwargs)
 
     def render(self, value, obj=None):
@@ -141,7 +141,7 @@ class UserRecordResource(resources.ModelResource):
                           widget=GroupManyToManyWidget(Group))
 
     class Meta:
-        model = CSCUser
+        model = User
         fields = (
             'email', 'username', 'status', 'last_name', 'first_name',
             'patronymic', 'gender', 'city', 'phone', 'university', 'course',

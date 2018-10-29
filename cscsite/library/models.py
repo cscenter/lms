@@ -9,7 +9,7 @@ from sorl.thumbnail import ImageField
 from taggit.managers import TaggableManager
 
 from core.models import City
-from users.models import CSCUser
+from users.models import User
 
 
 class Book(models.Model):

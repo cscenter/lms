@@ -5,7 +5,7 @@ from django.conf import settings
 
 from api.providers.gerrit import Gerrit
 from learning.models import CourseOfferingTeacher, Enrollment
-from users.models import CSCUser
+from users.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +147,7 @@ def init_project_for_course(course_offering, skip_users=False):
     # TODO: What to do with notifications?
 
 
-def add_student_to_project(client: Gerrit, student: CSCUser, project_name,
+def add_student_to_project(client: Gerrit, student: User, project_name,
                            project_students_group_uuid, course_offering):
     # Make sure student group exists
     student_group_uuid = create_user_group(client, student)
@@ -169,7 +169,7 @@ def add_student_to_project(client: Gerrit, student: CSCUser, project_name,
                                       student_group_uuid)
 
 
-def create_user_group(client: Gerrit, user: CSCUser):
+def create_user_group(client: Gerrit, user: User):
     user_group = user.ldap_username
     group_res = client.create_single_user_group(user_group)
     if not group_res.created:

@@ -139,9 +139,9 @@
                         <select name="interviewer" class="form-control selectpicker" id="interviewer-filter">
                             <option value="">--------</option>
                             {% for interviewer in interviewers %}
-                                <option value="{{ interviewer.cscuser_id }}"
-                                        {% if data.selected.interviewer_id == interviewer.cscuser_id %}selected="selected"{% endif %}
-                                        >{{ interviewer.cscuser.get_full_name }}</option>
+                                <option value="{{ interviewer.user_id }}"
+                                        {% if data.selected.interviewer_id == interviewer.user_id %}selected="selected"{% endif %}
+                                        >{{ interviewer.user.get_full_name }}</option>
                             {% endfor %}
                         </select>
                     </div>

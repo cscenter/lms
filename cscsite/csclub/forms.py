@@ -8,7 +8,7 @@ from django.contrib.auth.models import Group
 from django.utils.translation import ugettext_lazy as _
 
 from registration.forms import RegistrationFormUniqueEmail
-from users.models import CSCUser
+from users.models import User
 
 
 class RegistrationUniqueEmailAndUsernameForm(RegistrationFormUniqueEmail):
@@ -23,6 +23,6 @@ class RegistrationUniqueEmailAndUsernameForm(RegistrationFormUniqueEmail):
 
     def save(self, commit=True):
         user = super().save(commit)
-        group = Group.objects.get(pk=CSCUser.group.STUDENT_CLUB)
+        group = Group.objects.get(pk=User.group.STUDENT_CLUB)
         user.groups.add(group)
         return user

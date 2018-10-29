@@ -3,7 +3,7 @@ from django_filters.rest_framework import BaseInFilter, NumberFilter, \
     FilterSet, CharFilter, DateTimeFromToRangeFilter
 
 from learning.models import Enrollment
-from users.models import CSCUser, SHADCourseRecord
+from users.models import User, SHADCourseRecord
 
 
 class NumberInFilter(BaseInFilter, NumberFilter):
@@ -16,10 +16,10 @@ class CharInFilter(BaseInFilter, CharFilter):
 
 class UserFilter(FilterSet):
     FILTERING_GROUPS = [
-        CSCUser.group.VOLUNTEER,
-        CSCUser.group.STUDENT_CENTER,
-        CSCUser.group.GRADUATE_CENTER,
-        CSCUser.group.MASTERS_DEGREE,
+        User.group.VOLUNTEER,
+        User.group.STUDENT_CENTER,
+        User.group.GRADUATE_CENTER,
+        User.group.MASTERS_DEGREE,
     ]
 
     ENROLLMENTS_MAX = 12
@@ -36,7 +36,7 @@ class UserFilter(FilterSet):
     cnt_enrollments = CharFilter(method='cnt_enrollments_filter')
 
     class Meta:
-        model = CSCUser
+        model = User
         fields = ["name", "cities", "curriculum_year", "groups", "status",
                   "cnt_enrollments",]
 
@@ -53,9 +53,9 @@ class UserFilter(FilterSet):
             if not groups:
                 groups = self.FILTERING_GROUPS[:]
                 if "studying" in data.get("status", []):
-                    groups.remove(CSCUser.group.GRADUATE_CENTER)
+                    groups.remove(User.group.GRADUATE_CENTER)
             # Special case - show `studying` among graduated
-            only_graduate_selected = (groups == {CSCUser.group.GRADUATE_CENTER})
+            only_graduate_selected = (groups == {User.group.GRADUATE_CENTER})
             if "studying" in data.get("status", []) and only_graduate_selected:
                 self.empty_query = True
             else:
@@ -106,14 +106,14 @@ class UserFilter(FilterSet):
     def status_filter(self, queryset, name, value):
         value_list = value.split(u',')
         value_list = [v for v in value_list if v]
-        if "studying" in value_list and CSCUser.STATUS.expelled in value_list:
+        if "studying" in value_list and User.STATUS.expelled in value_list:
             return queryset
         elif "studying" in value_list:
-            return queryset.exclude(status=CSCUser.STATUS.expelled)
+            return queryset.exclude(status=User.STATUS.expelled)
         for value in value_list:
-            if value not in CSCUser.STATUS:
+            if value not in User.STATUS:
                 raise ValueError(
-                    "CSCUserFilter: unrecognized status_filter choice")
+                    "UserFilter: unrecognized status_filter choice")
         return queryset.filter(status__in=value_list).distinct()
 
     # FIXME: Can I rewrite it with new __search lookup expr?

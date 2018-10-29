@@ -6,7 +6,7 @@ from learning.projects.models import ReportComment, Report
 from notifications.decorators import register
 from notifications.service import NotificationService
 from notifications import types
-from users.models import CSCUser
+from users.models import User
 
 
 @register(notification_type=types.NEW_PROJECT_REPORT)
@@ -15,7 +15,7 @@ class NewReport(NotificationService):
     Student <actor> sent <verb> Report <action_object> on project" <target>
 
     Models:
-        actor - CSCUser
+        actor - User
         action_object - Report
         target - Project
     """
@@ -32,7 +32,7 @@ class NewReport(NotificationService):
     def get_subject(self, notification, **kwargs):
         return self.subject.format(
             notification.actor.get_full_name(),
-            "а" if notification.actor.gender == CSCUser.GENDER_FEMALE else ""
+            "а" if notification.actor.gender == User.GENDER_FEMALE else ""
         )
 
     def get_context(self, notification):
@@ -43,7 +43,7 @@ class NewReport(NotificationService):
         project_url = reverse("projects:project_detail",
                               args=[notification.data["project_pk"]])
         author_declension = ""
-        if notification.actor.gender == CSCUser.GENDER_FEMALE:
+        if notification.actor.gender == User.GENDER_FEMALE:
             author_declension = "a"
         return {
             "author": notification.actor.get_full_name(),
@@ -66,7 +66,7 @@ class NewReportComment(NotificationService):
     "Report for project" <target>
 
     Models:
-        actor - CSCUser
+        actor - User
         action_object - ReportComment
         target - Report
     """
@@ -107,7 +107,7 @@ class NewReportComment(NotificationService):
         project_url = reverse(project_url_name,
                               args=[notification.data["project_pk"]])
         author_declension = ""
-        if notification.actor.gender == CSCUser.GENDER_FEMALE:
+        if notification.actor.gender == User.GENDER_FEMALE:
             author_declension = "a"
         context = {
             "author": notification.actor.get_full_name(),
@@ -132,7 +132,7 @@ class ReportInReviewState(NotificationService):
     to "review". This means project reviewers can see report now and assess it.
 
     Models:
-        actor - CSCUser
+        actor - User
         action_object - <None>
         target - Report
     """
@@ -172,7 +172,7 @@ class ReportCompleted(NotificationService):
     that assessment of project report <target> completed
 
     Models:
-        actor - CSCUser
+        actor - User
         action_object - <None>
         target - Report
     """
@@ -203,7 +203,7 @@ class ReviewCompleted(NotificationService):
     Reviewer <actor> complete <verb> review <action_object> on "Report" <target>
 
     Models:
-        actor - CSCUser
+        actor - User
         action_object - Review
         target - Report
     """
@@ -248,7 +248,7 @@ class ReviewCompleted(NotificationService):
     def get_subject(self, notification, **kwargs):
         reviewer = notification.actor.get_full_name()
         reviewer_declension = ""
-        if notification.actor.gender == CSCUser.GENDER_FEMALE:
+        if notification.actor.gender == User.GENDER_FEMALE:
             reviewer_declension = "a"
         return self.subject.format(reviewer, reviewer_declension)
 
