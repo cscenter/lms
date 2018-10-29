@@ -13,7 +13,7 @@ from import_export.admin import ImportExportMixin, ImportMixin
 from core.widgets import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
 from learning.settings import PARTICIPANT_GROUPS
-from .models import CSCUser, CSCUserReference, \
+from .models import CSCUser, UserReference, \
     OnlineCourseRecord, SHADCourseRecord, CSCUserStatusLog
 from .import_export import SHADCourseRecordResource, CSCUserRecordResource
 
@@ -189,5 +189,5 @@ class CSCUserRecordResourceAdmin(ImportMixin, CSCUserAdmin):
 
 
 admin.site.register(CSCUser, CSCUserRecordResourceAdmin)
-admin.site.register(CSCUserReference)
+admin.site.register(UserReference)
 admin.site.register(SHADCourseRecord, SHADCourseRecordResourceAdmin)
