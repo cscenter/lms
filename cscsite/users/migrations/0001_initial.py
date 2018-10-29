@@ -137,7 +137,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='cscuser',
             name='status_last_change',
-            field=users.models.MonitorStatusField(blank=True, editable=False, logging_model=users.models.CSCUserStatusLog, monitored='status', null=True, on_delete=django.db.models.deletion.CASCADE, to='users.CSCUserStatusLog', verbose_name='Status changed'),
+            field=users.models.MonitorStatusField(blank=True, editable=False, logging_model=users.models.UserStatusLog, monitored='status', null=True, on_delete=django.db.models.deletion.CASCADE, to='users.CSCUserStatusLog', verbose_name='Status changed'),
         ),
         migrations.AddField(
             model_name='cscuser',

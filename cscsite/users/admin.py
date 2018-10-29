@@ -11,7 +11,7 @@ from core.widgets import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
 from learning.settings import PARTICIPANT_GROUPS
 from .models import CSCUser, UserReference, \
-    OnlineCourseRecord, SHADCourseRecord, CSCUserStatusLog
+    OnlineCourseRecord, SHADCourseRecord, UserStatusLog
 from .import_export import SHADCourseRecordResource, UserRecordResource
 
 
@@ -87,8 +87,8 @@ class ForeignKeyCacheMixin(object):
         return formfield
 
 
-class CSCUserStatusLogAdmin(RelatedSpecMixin, admin.TabularInline):
-    model = CSCUserStatusLog
+class UserStatusLogAdmin(RelatedSpecMixin, admin.TabularInline):
+    model = UserStatusLog
     extra = 0
     readonly_fields = ('created', 'status')
     related_spec = {'select': ['semester', 'student']}
@@ -125,7 +125,7 @@ class UserAdmin(UserAdmin):
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
     inlines = [OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
-               CSCUserStatusLogAdmin]
+               UserStatusLogAdmin]
     readonly_fields = ['comment_changed_at', 'comment_last_author',
                        'last_login', 'date_joined']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',

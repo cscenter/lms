@@ -41,7 +41,7 @@ from staff.serializers import UserSearchSerializer, FacesQueryParams
 from surveys.models import CourseOfferingSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import UserFilter
-from users.models import CSCUser, CSCUserStatusLog
+from users.models import CSCUser, UserStatusLog
 
 
 class StudentOffsetPagination(LimitOffsetPagination):
@@ -545,7 +545,7 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
 
         # FIXME: Expressional conditions don't group by items?
         # Stats for expelled students
-        query = (CSCUserStatusLog.objects.values("semester")
+        query = (UserStatusLog.objects.values("semester")
                  .annotate(expelled=Count("student", distinct=True))
                  .filter(status=STUDENT_STATUS.expelled)
                  .order_by("status"))
@@ -555,7 +555,7 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
         # TODO: Investigate how to aggregate stats for expelled and will_graduate in 1 query
 
         # Stats for expelled students
-        query = (CSCUserStatusLog.objects
+        query = (UserStatusLog.objects
                  .values("semester")
                  .annotate(will_graduate=Count("student", distinct=True))
                  .filter(status=STUDENT_STATUS.will_graduate)
