@@ -25,9 +25,9 @@ from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import CSCUserCreationForm, CSCUserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
-    CSCUserReferenceFactory, TeacherCenterFactory, StudentClubFactory, \
+    UserReferenceFactory, TeacherCenterFactory, StudentClubFactory, \
     StudentFactory, StudentCenterFactory
-from users.models import CSCUser, CSCUserReference
+from users.models import CSCUser, UserReference
 
 
 class CustomSemesterFactory(SemesterFactory):
@@ -532,13 +532,13 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         """Check reference list appears on student profile page for curators only"""
         student = StudentCenterFactory()
         EnrollmentFactory.create()
-        CSCUserReferenceFactory.create(student=student)
+        UserReferenceFactory.create(student=student)
         curator = UserFactory.create(is_superuser=True, is_staff=True)
         url = reverse('user_detail', args=[student.pk])
         self.doLogin(curator)
         response = self.client.get(url)
         self.assertEquals(
-            response.context['profile_user'].cscuserreference_set.count(), 1)
+            response.context['profile_user'].userreference_set.count(), 1)
         soup = BeautifulSoup(response.content, "html.parser")
         list_header = soup.find('h4', text=re.compile(_("Student references")))
         self.assertIsNotNone(list_header)
@@ -563,12 +563,12 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         self.assertEquals(sig_input.attrs.get('value'), curator.get_full_name())
 
         student = StudentCenterFactory()
-        reference = CSCUserReferenceFactory.build(student=student)
+        reference = UserReferenceFactory.build(student=student)
         form_url = reverse('user_reference_add', args=[student.id])
         form_data = model_to_dict(reference)
         response = self.client.post(form_url, form_data)
-        assert CSCUserReference.objects.count() == 1
-        ref = CSCUserReference.objects.first()
+        assert UserReference.objects.count() == 1
+        ref = UserReference.objects.first()
         self.assertRedirects(response,
             reverse('user_reference_detail',
                     args=[student.id, ref.pk])
@@ -590,7 +590,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
                 grade='good'
             )
             enrollments.append(e)
-        reference = CSCUserReferenceFactory.create(
+        reference = UserReferenceFactory.create(
             student=student,
             note="TEST",
             signature="SIGNATURE")

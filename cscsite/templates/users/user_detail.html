@@ -171,9 +171,9 @@
 
                     {% if profile_user.is_student or profile_user.is_graduate %}
                         <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
-                        {% if profile_user.cscuserreference_set.count > 0 %}
+                        {% if profile_user.userreference_set.count > 0 %}
                             <ul>
-                                {% for reference in profile_user.cscuserreference_set.all %}
+                                {% for reference in profile_user.userreference_set.all %}
                                     <li>
                                         <a target="_blank" href="{% url 'user_reference_detail' profile_user.id reference.id %}">
                                             {{ reference.created|date:"d.m.Y" }}

@@ -23,8 +23,8 @@ from learning.models import StudentAssignment, \
 from learning.settings import LEARNING_BASE, TEACHING_BASE, GRADES
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
-from .forms import LoginForm, UserProfileForm, CSCUserReferenceCreateForm
-from .models import CSCUser, CSCUserReference
+from .forms import LoginForm, UserProfileForm, UserReferenceCreateForm
+from .models import CSCUser, UserReference
 
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
@@ -168,7 +168,7 @@ class UserDetailView(generic.DetailView):
                               'borrows__stock__book',
                               'onlinecourserecord_set',
                               'areas_of_study',
-                              'cscuserreference_set']
+                              'userreference_set']
         filters = {}
         if not self.request.user.is_curator:
             filters["is_active"] = True
@@ -226,9 +226,9 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
 
 
 class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
-    model = CSCUserReference
+    model = UserReference
     template_name = "users/reference_add.html"
-    form_class = CSCUserReferenceCreateForm
+    form_class = UserReferenceCreateForm
 
     def get_initial(self):
         initial = super(UserReferenceCreateView, self).get_initial()
@@ -248,7 +248,7 @@ class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
 
 
 class UserReferenceDetailView(CuratorOnlyMixin, generic.DetailView):
-    model = CSCUserReference
+    model = UserReference
     template_name = "users/reference_detail.html"
 
     def get_context_data(self, *args, **kwargs):
