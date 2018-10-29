@@ -23,7 +23,7 @@ from learning.factories import SemesterFactory, \
     CourseFactory, AreaOfStudyFactory
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.tests.mixins import MyUtilitiesMixin
-from users.admin import CSCUserCreationForm, CSCUserChangeForm
+from users.admin import UserCreationForm, UserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
     UserReferenceFactory, TeacherCenterFactory, StudentClubFactory, \
     StudentFactory, StudentCenterFactory
@@ -65,15 +65,15 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user_data.update({
             'groups': [user.group.STUDENT_CENTER],
         })
-        form = CSCUserChangeForm(user_data, instance=user)
+        form = UserChangeForm(user_data, instance=user)
         self.assertFalse(form.is_valid())
         self.assertIn('enrollment_year', form.errors.keys())
         user_data.update({'enrollment_year': 2010})
-        form = CSCUserChangeForm(user_data, instance=user)
+        form = UserChangeForm(user_data, instance=user)
         assert not form.is_valid()
         assert 'city' in form.errors.keys()
         user_data.update({'city': 'spb'})
-        form = CSCUserChangeForm(user_data, instance=user)
+        form = UserChangeForm(user_data, instance=user)
         assert form.is_valid()
 
     def test_graduate_should_have_graduation_year(self):
@@ -87,15 +87,15 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user_data.update({
             'groups': [user.group.GRADUATE_CENTER],
         })
-        form = CSCUserChangeForm(user_data, instance=user)
+        form = UserChangeForm(user_data, instance=user)
         assert not form.is_valid()
         self.assertIn('graduation_year', form.errors.keys())
         user_data.update({'graduation_year': 2015})
-        form = CSCUserChangeForm(user_data, instance=user)
+        form = UserChangeForm(user_data, instance=user)
         assert not form.is_valid()
         assert 'city' in form.errors.keys()
         user_data.update({'city': 'spb'})
-        form = CSCUserChangeForm(user_data, instance=user)
+        form = UserChangeForm(user_data, instance=user)
         assert form.is_valid()
 
     def test_full_name_contains_patronymic(self):
@@ -329,14 +329,14 @@ class UserTests(MyUtilitiesMixin, TestCase):
                      'email': user.email,
                      'password1': "test123foobar@!",
                      'password2': "test123foobar@!"}
-        form = CSCUserCreationForm(data=form_data)
+        form = UserCreationForm(data=form_data)
         self.assertFalse(form.is_valid())
         new_user = UserFactory.build()
         form_data.update({
             'username': new_user.username,
             'email': new_user.email
         })
-        form = CSCUserCreationForm(data=form_data)
+        form = UserCreationForm(data=form_data)
         self.assertTrue(form.is_valid())
 
     def test_shads(self):

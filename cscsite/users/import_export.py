@@ -126,7 +126,7 @@ class GroupManyToManyWidget(widgets.ManyToManyWidget):
         return self.separator.join(ids)
 
 
-class CSCUserRecordResource(resources.ModelResource):
+class UserRecordResource(resources.ModelResource):
     course = fields.Field(column_name='course',
                           attribute='uni_year_at_enrollment',
                           widget=UserCourseWidget())
