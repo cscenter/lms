@@ -6,7 +6,7 @@ from django.core.management import BaseCommand
 
 from learning.models import CourseOffering
 from learning.settings import PARTICIPANT_GROUPS
-from users.models import CSCUser
+from users.models import User
 
 
 class Command(BaseCommand):

@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='CSCUser',
+            name='User',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('password', models.CharField(max_length=128, verbose_name='password')),
@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 ('index_redirect', models.CharField(blank=True, choices=[('projects', 'Проекты'), ('admission', 'Набор'), ('learning', 'Обучение'), ('teaching', 'Преподавание'), ('staff', 'Курирование')], max_length=200, verbose_name='Index Redirect Option')),
                 ('areas_of_study', models.ManyToManyField(blank=True, to='learning.AreaOfStudy', verbose_name='StudentInfo|Areas of study')),
                 ('city', models.ForeignKey(blank=True, help_text='CSCUser|city', null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.City', verbose_name='Default city')),
-                ('comment_last_author', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='cscuser_commented', to=settings.AUTH_USER_MODEL, verbose_name='Author of last edit')),
+                ('comment_last_author', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='user_commented', to=settings.AUTH_USER_MODEL, verbose_name='Author of last edit')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
             ],
             options={
@@ -135,12 +135,12 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.AddField(
-            model_name='cscuser',
+            model_name='user',
             name='status_last_change',
             field=users.models.MonitorStatusField(blank=True, editable=False, logging_model=users.models.UserStatusLog, monitored='status', null=True, on_delete=django.db.models.deletion.CASCADE, to='users.CSCUserStatusLog', verbose_name='Status changed'),
         ),
         migrations.AddField(
-            model_name='cscuser',
+            model_name='user',
             name='user_permissions',
             field=models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions'),
         ),

@@ -19,7 +19,7 @@ from core.forms import GradeField
 from learning.models import StudentAssignment, Enrollment, Assignment, \
     CourseOffering
 from learning.settings import GRADES
-from users.models import CSCUser
+from users.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -414,9 +414,9 @@ class GradeBookFormFactory:
 
 
 def _get_user_id(request, **filters):
-    ids = (CSCUser.objects
-           .filter(groups__in=[CSCUser.group.STUDENT_CENTER,
-                               CSCUser.group.VOLUNTEER],
+    ids = (User.objects
+           .filter(groups__in=[User.group.STUDENT_CENTER,
+                               User.group.VOLUNTEER],
                    **filters)
            .values_list('id', flat=True)
            .order_by())

@@ -54,7 +54,7 @@
 
             <h2>{{ profile_user.first_name }} {{ profile_user.patronymic }}<br>{{ profile_user.last_name }}
                 {% if user.is_curator %}
-                    <a href="{% url 'admin:users_cscuser_change' profile_user.pk %}"
+                    <a href="{% url 'admin:users_user_change' profile_user.pk %}"
                        target="_blank"><i class="fa fa-pencil-square-o"></i></a> <a title="Войти под пользователем" class="loginas-user" href="{% url 'loginas-user-login' profile_user.pk %}"><i class="fa fa-ils" aria-hidden="true"></i></a>
                 {% endif %}</h2>
 

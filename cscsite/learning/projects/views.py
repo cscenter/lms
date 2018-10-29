@@ -37,7 +37,7 @@ from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin,
     StudentOnlyMixin
 from notifications import types
 from notifications.signals import notify
-from users.models import CSCUser
+from users.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -521,7 +521,7 @@ class ReportView(FormMixin, generic.DetailView):
 
     def send_notification_to_curators(self, review):
         """Reviewer complete assessment"""
-        curators = (CSCUser.objects.filter(
+        curators = (User.objects.filter(
             is_superuser=True,
             is_staff=True,
             groups=PARTICIPANT_GROUPS.CURATOR_PROJECTS))
@@ -536,7 +536,7 @@ class ReportView(FormMixin, generic.DetailView):
             .values_list("pk", flat=True))
         student = report.project_student.student
         student_declension = ""
-        if student.gender == CSCUser.GENDER_FEMALE:
+        if student.gender == User.GENDER_FEMALE:
             student_declension = "a"
         context = {
             "student_pk": student.pk,

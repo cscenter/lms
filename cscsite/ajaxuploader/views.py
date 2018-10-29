@@ -12,7 +12,7 @@ from ajaxuploader.uploadhandler import MemoryImageUploadHandler, \
     TemporaryImageUploadHandler
 from ajaxuploader.utils import photo_thumbnail_cropbox
 from learning.settings import PROFILE_THUMBNAIL_WIDTH, PROFILE_THUMBNAIL_HEIGHT
-from users.models import CSCUser
+from users.models import User
 
 try:
     import json
@@ -84,8 +84,8 @@ class AjaxProfileImageUploader(generic.base.View):
             user_id = request.POST["user_id"]
             if not request.user.is_curator:
                 user_id = request.user.pk
-            user = CSCUser.objects.get(pk=user_id)
-        except CSCUser.DoesNotExist:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
             return HttpResponseBadRequest("Bad user")
 
         if "crop_data" in request.POST:

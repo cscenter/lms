@@ -185,11 +185,11 @@ class CourseOfferingQuerySet(models.QuerySet):
 
     def get_offerings_base_queryset(self):
         """Returns list of available courses for CS Center"""
-        CSCUser = apps.get_model('users', 'CSCUser')
+        User = apps.get_model('users', 'User')
         prefetch_teachers = Prefetch(
             'teachers',
-            queryset=CSCUser.objects.only("id", "first_name", "last_name",
-                                          "patronymic"))
+            queryset=User.objects.only("id", "first_name", "last_name",
+                                       "patronymic"))
         return (self
                 .select_related('course', 'semester')
                 .only("pk", "city_id", "is_open",

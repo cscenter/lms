@@ -14,7 +14,7 @@ from icalendar.prop import vInline
 from learning.models import CourseClass, StudentAssignment, Assignment, \
     NonCourseEvent
 from learning.views.utils import get_user_city_code
-from users.models import CSCUser
+from users.models import User
 
 
 def generate_vtimezone(tz: pytz.timezone):
@@ -33,7 +33,7 @@ def generate_vtimezone(tz: pytz.timezone):
 
 # TODO: move to manager
 def get_user_for_icalendar(user_id):
-    return get_object_or_404(CSCUser.objects
+    return get_object_or_404(User.objects
                              .filter(pk=user_id)
                              .only("first_name", "last_name",
                                    "patronymic", "pk"))

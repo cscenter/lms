@@ -51,7 +51,7 @@
             <a class="list-group-item" href="{% url 'user_update' profile_user.pk %}"><i class="fa fa-cog"></i> {% trans "Edit" %}</a>
         {% endif %}
         {% if has_curator_permissions %}
-            <a href="{% url 'admin:users_cscuser_change' profile_user.pk %}" target="_blank" class="list-group-item">
+            <a href="{% url 'admin:users_user_change' profile_user.pk %}" target="_blank" class="list-group-item">
                 <i class="fa fa-pencil-square-o"></i> {% trans "Edit in admin" %}
             </a>
         {% endif %}

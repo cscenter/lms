@@ -24,7 +24,7 @@ from learning.settings import LEARNING_BASE, TEACHING_BASE, GRADES
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
 from .forms import LoginForm, UserProfileForm, UserReferenceCreateForm
-from .models import CSCUser, UserReference
+from .models import User, UserReference
 
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
@@ -56,9 +56,9 @@ class LoginView(generic.FormView):
 
         if not redirect_to:
             user_groups = self.request.user.get_cached_groups()
-            if user_groups == {CSCUser.group.STUDENT_CENTER}:
+            if user_groups == {User.group.STUDENT_CENTER}:
                 redirect_to = reverse(LEARNING_BASE)
-            elif user_groups == {CSCUser.group.TEACHER_CENTER}:
+            elif user_groups == {User.group.TEACHER_CENTER}:
                 redirect_to = reverse(TEACHING_BASE)
 
         if not is_safe_url(redirect_to,
@@ -116,7 +116,7 @@ class TeacherDetailView(DetailView):
         co_queryset = (CourseOffering.objects
                        .in_city(**filters)
                        .select_related('semester', 'course'))
-        return (CSCUser.objects
+        return (User.objects
                 .prefetch_related(
                     Prefetch('teaching_set',
                              queryset=co_queryset.all(),
@@ -183,7 +183,7 @@ class UserDetailView(generic.DetailView):
         profile_user = context[self.context_object_name]
         # On Center site show club students to teachers and curators only
         if settings.SITE_ID == settings.CENTER_SITE_ID:
-            if (profile_user.get_cached_groups() == {CSCUser.group.STUDENT_CLUB}
+            if (profile_user.get_cached_groups() == {User.group.STUDENT_CLUB}
                     and not (u.is_teacher or u.is_curator)):
                 raise Http404
 
@@ -217,7 +217,7 @@ class UserDetailView(generic.DetailView):
 
 
 class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
-    model = CSCUser
+    model = User
     template_name = "users/user_edit.html"
     form_class = UserProfileForm
 
@@ -254,7 +254,7 @@ class UserReferenceDetailView(CuratorOnlyMixin, generic.DetailView):
     def get_context_data(self, *args, **kwargs):
         context = (super(UserReferenceDetailView, self)
                    .get_context_data(*args, **kwargs))
-        student_info = (CSCUser.objects
+        student_info = (User.objects
                         .students_info(exclude_grades=[
                             GRADES.unsatisfactory, GRADES.not_graded
                         ])

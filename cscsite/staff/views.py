@@ -41,7 +41,7 @@ from staff.serializers import UserSearchSerializer, FacesQueryParams
 from surveys.models import CourseOfferingSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import UserFilter
-from users.models import CSCUser, UserStatusLog
+from users.models import User, UserStatusLog
 
 
 class StudentOffsetPagination(LimitOffsetPagination):
@@ -56,7 +56,7 @@ class StudentSearchJSONView(ListAPIView):
     filter_class = UserFilter
 
     def get_queryset(self):
-        return (CSCUser.objects
+        return (User.objects
                 .only('username', 'first_name', 'last_name', 'pk'))
 
 
@@ -71,15 +71,15 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                 'spb': 'Санкт-Петербург',
                 'nsk': 'Новосибирск'
             }),
-            'curriculum_years': (CSCUser.objects
+            'curriculum_years': (User.objects
                                  .values_list('curriculum_year',
                                               flat=True)
                                  .filter(curriculum_year__isnull=False)
                                  .order_by('curriculum_year')
                                  .distinct()),
-            'groups': {gid: CSCUser.group[gid] for gid in
+            'groups': {gid: User.group[gid] for gid in
                        UserFilter.FILTERING_GROUPS},
-            "status": {sid: name for sid, name in CSCUser.STATUS},
+            "status": {sid: name for sid, name in User.STATUS},
             "cnt_enrollments": range(UserFilter.ENROLLMENTS_MAX + 1)
         }
         return context
@@ -108,9 +108,9 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, city_code, **kwargs):
         filters = {
             "city_id": city_code,
-            "status": CSCUser.STATUS.will_graduate
+            "status": User.STATUS.will_graduate
         }
-        students = CSCUser.objects.students_info(filters=filters)
+        students = User.objects.students_info(filters=filters)
 
         unique_teachers = set()
         total_hours = 0
@@ -135,7 +135,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             if len(s.areas_of_study.all()) >= 2:
                 finished_two_or_more_programs.add(s)
             by_enrollment_year[s.enrollment_year].add(s)
-            if s.uni_year_at_enrollment == CSCUser.COURSES.BACHELOR_SPECIALITY_1 or (hasattr(s, "applicant") and s.applicant.course == CSCUser.COURSES.BACHELOR_SPECIALITY_1):
+            if s.uni_year_at_enrollment == User.COURSES.BACHELOR_SPECIALITY_1 or (hasattr(s, "applicant") and s.applicant.course == User.COURSES.BACHELOR_SPECIALITY_1):
                 enrolled_on_first_course.add(s)
             # Count most_courses_students
             s.passed_courses = sum(1 for e in s.enrollments if e.grade not in self.BAD_GRADES)
@@ -441,15 +441,15 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         return super(StudentFacesView, self).get_template_names()
 
     def get_queryset(self, city_code, enrollment_year):
-        groups = [CSCUser.group.STUDENT_CENTER, CSCUser.group.VOLUNTEER]
-        qs = (CSCUser.objects
+        groups = [User.group.STUDENT_CENTER, User.group.VOLUNTEER]
+        qs = (User.objects
               .filter(groups__in=groups,
                       city_id=city_code,
                       enrollment_year=enrollment_year)
               .distinct()
               .prefetch_related("groups"))
         if "print" in self.request.GET:
-            qs = qs.exclude(status=CSCUser.STATUS.expelled)
+            qs = qs.exclude(status=User.STATUS.expelled)
         return qs
 
 
@@ -459,10 +459,10 @@ class InterviewerFacesView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(InterviewerFacesView, self).get_context_data(**kwargs)
         users = (Interview.interviewers.through
-                 .objects.only("cscuser_id")
+                 .objects.only("user_id")
                  .distinct()
-                 .values_list("cscuser_id", flat=True))
-        qs = (CSCUser.objects
+                 .values_list("user_id", flat=True))
+        qs = (User.objects
               .filter(id__in=users.all())
               .distinct())
         context['students'] = qs
@@ -526,18 +526,18 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
         end_semester_index = get_term_index(current_year, season)
         semesters = Semester.objects.filter(index__gte=start_semester_index, index__lte=end_semester_index)
         # Ok, additional query for counting acceptances due to no FK on enrollment_year field. Append it to autumn season
-        query = (CSCUser.objects.exclude(enrollment_year__isnull=True)
-                       .values("enrollment_year")
-                       .annotate(acceptances=Count("enrollment_year"))
-                       .order_by("enrollment_year"))
+        query = (User.objects.exclude(enrollment_year__isnull=True)
+                 .values("enrollment_year")
+                 .annotate(acceptances=Count("enrollment_year"))
+                 .order_by("enrollment_year"))
         acceptances = defaultdict(int)
         for row in query:
             acceptances[row["enrollment_year"]] = row["acceptances"]
 
-        query = (CSCUser.objects.exclude(graduation_year__isnull=True)
-                       .values("graduation_year")
-                       .annotate(graduated=Count("graduation_year"))
-                       .order_by("graduation_year"))
+        query = (User.objects.exclude(graduation_year__isnull=True)
+                 .values("graduation_year")
+                 .annotate(graduated=Count("graduation_year"))
+                 .order_by("graduation_year"))
         graduated = defaultdict(int)
         for row in query:
             graduated[row["graduation_year"]] = row["graduated"]

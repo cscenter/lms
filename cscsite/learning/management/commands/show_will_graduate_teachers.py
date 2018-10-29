@@ -4,7 +4,7 @@ from django.core.management import BaseCommand
 
 from learning.models import Enrollment
 from learning.settings import STUDENT_STATUS, GRADES
-from users.models import CSCUser
+from users.models import User
 
 
 class Command(BaseCommand):
@@ -12,8 +12,8 @@ class Command(BaseCommand):
             "with status `will_graduate`")
 
     def handle(self, *args, **options):
-        student_groups = [CSCUser.group.STUDENT_CENTER, CSCUser.group.VOLUNTEER]
-        will_graduate_list = (CSCUser.objects
+        student_groups = [User.group.STUDENT_CENTER, User.group.VOLUNTEER]
+        will_graduate_list = (User.objects
                               .filter(groups__in=student_groups,
                                       status=STUDENT_STATUS.will_graduate)
                               .values_list("pk", flat=True))
@@ -29,7 +29,7 @@ class Command(BaseCommand):
             for co_id in student_courses:
                 co_ids.add(co_id)
 
-        teachers = (CSCUser.objects
+        teachers = (User.objects
                     .filter(courseofferingteacher__course_offering_id__in=co_ids)
                     .only("first_name", "last_name", "patronymic")
                     .distinct())

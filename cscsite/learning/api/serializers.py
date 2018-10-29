@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from core.utils import render_markdown
 from learning.models import Course, CourseOffering
-from users.models import CSCUser
+from users.models import User
 
 
 API_FRAGMENT_KEY_TEMPLATE = 'api.cache.%s.%s'
@@ -72,7 +72,7 @@ class TeacherSerializer(serializers.ModelSerializer):
         help_text="The latest term index when the teacher read the course")
 
     class Meta:
-        model = CSCUser
+        model = User
         fields = ('id', 'name', 'sex', 'workplace', 'city', 'photo',
                   'courses', 'last_session')
 
@@ -85,7 +85,7 @@ class TeacherSerializer(serializers.ModelSerializer):
             last = max(last, t.course_offering.semester.index)
         return last
 
-    def get_sex(self, obj: CSCUser):
+    def get_sex(self, obj: User):
         return "m" if obj.gender == obj.GENDER_MALE else "w"
 
 
@@ -100,13 +100,13 @@ class AlumniSerializer(serializers.ModelSerializer):
                                                source="areas_of_study")
 
     class Meta:
-        model = CSCUser
+        model = User
         fields = ('id', 'name', 'sex', 'year', 'city', 'photo', 'areas')
 
     def get_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
 
-    def get_sex(self, obj: CSCUser):
+    def get_sex(self, obj: User):
         return "b" if obj.gender == obj.GENDER_MALE else "g"
 
 
@@ -120,7 +120,7 @@ class TestimonialSerializer(serializers.ModelSerializer):
     text = serializers.SerializerMethodField()
 
     class Meta:
-        model = CSCUser
+        model = User
         fields = ["id", "author", "photo", "year", "areas", "text"]
 
     def get_author(self, obj):

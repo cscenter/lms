@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
 from learning.models import CourseOfferingNewsNotification
-from users.models import CSCUser
+from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CSCUser
+        model = User
         fields = ('first_name', 'last_name')
 
 

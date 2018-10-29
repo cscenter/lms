@@ -30,7 +30,7 @@ from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, \
 from learning.utils import get_term_index
 from learning.viewmixins import TeacherOnlyMixin
 from learning.views.utils import get_co_from_query_params, get_user_city_code
-from users.models import CSCUser
+from users.models import User
 
 __all__ = ['CourseOfferingDetailView', 'CourseOfferingEditView',
            'CourseOfferingNewsCreateView', 'CourseOfferingNewsUpdateView',

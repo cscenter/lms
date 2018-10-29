@@ -6,11 +6,11 @@ from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_bytes
 
-from users.models import CSCUser
+from users.models import User
 from users.settings import GROUPS_IMPORT_TO_GERRIT
 
 
-def get_ldap_username(user: CSCUser):
+def get_ldap_username(user: User):
     """
     Portable Filename Character Set (according to POSIX.1-2017) is used for
     username since @ in username can be misleading when you connected
@@ -19,7 +19,7 @@ def get_ldap_username(user: CSCUser):
     return user.email.replace("@", ".")
 
 
-def user_to_ldif(user: CSCUser, redirect_to=None):
+def user_to_ldif(user: User, redirect_to=None):
     out = redirect_to or io.StringIO()
     uid = user.ldap_username
     dn = f"uid={uid},ou=users,{settings.LDAP_DB_SUFFIX}"
@@ -45,5 +45,5 @@ def export(path):
     """Generates users data in LDIF"""
     with open(path, 'w') as f:
         # FIXME: remove duplicates
-        for u in CSCUser.objects.filter(groups__in=GROUPS_IMPORT_TO_GERRIT):
+        for u in User.objects.filter(groups__in=GROUPS_IMPORT_TO_GERRIT):
             user_to_ldif(u, f)

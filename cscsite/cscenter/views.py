@@ -40,7 +40,7 @@ from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR
 from learning.utils import get_current_term_pair, get_term_index, \
     get_term_index_academic_year_starts, get_term_by_index
 from stats.views import StudentsDiplomasStats
-from users.models import CSCUser
+from users.models import User
 from .filters import CoursesFilter
 
 
@@ -99,8 +99,8 @@ class IndexView(TemplateView):
         testimonials = cache.get(self.TESTIMONIALS_CACHE_KEY)
         if testimonials is None:
             # TODO: Выбрать только нужные поля
-            s = (CSCUser.objects
-                 .filter(groups=CSCUser.group.GRADUATE_CENTER)
+            s = (User.objects
+                 .filter(groups=User.group.GRADUATE_CENTER)
                  .exclude(csc_review='').exclude(photo='')
                  .prefetch_related("areas_of_study")
                  .order_by('?'))[:4]
@@ -145,7 +145,7 @@ class TeamView(generic.TemplateView):
         users_pk = list(board)
         users_pk.extend(curators.keys())
         users_pk.extend(tech.keys())
-        for u in CSCUser.objects.filter(pk__in=users_pk).all():
+        for u in User.objects.filter(pk__in=users_pk).all():
             if u.pk in board:
                 context["board"][board[u.pk]] = u
             elif u.pk in tech:
@@ -169,8 +169,8 @@ class TestimonialsListView(generic.ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        return (CSCUser.objects
-                .filter(groups=CSCUser.group.GRADUATE_CENTER)
+        return (User.objects
+                .filter(groups=User.group.GRADUATE_CENTER)
                 .exclude(csc_review='').exclude(photo='')
                 .prefetch_related("areas_of_study")
                 .order_by("-graduation_year", "last_name"))
@@ -217,8 +217,8 @@ class TeachersView(generic.ListView):
     context_object_name = "teachers"
 
     def get_queryset(self):
-        qs = (CSCUser.objects
-              .filter(groups=CSCUser.group.TEACHER_CENTER,
+        qs = (User.objects
+              .filter(groups=User.group.TEACHER_CENTER,
                       courseofferingteacher__roles=CourseOfferingTeacher.roles.lecturer)
               .distinct())
         return qs
@@ -331,7 +331,7 @@ class AlumniByYearView(generic.ListView):
         filters = (Q(groups__pk=user_model.group.GRADUATE_CENTER) &
                    Q(graduation_year=year))
         if year == now().year and self.request.user.is_curator:
-            filters = filters | Q(status=CSCUser.STATUS.will_graduate)
+            filters = filters | Q(status=User.STATUS.will_graduate)
         return (user_model.objects
                 .filter(filters)
                 .distinct()
@@ -343,9 +343,9 @@ class AlumniByYearView(generic.ListView):
         context["year"] = year
         testimonials = cache.get('alumni_{}_testimonials'.format(year))
         if testimonials is None:
-            s = (CSCUser.objects
+            s = (User.objects
                  .filter(
-                    groups=CSCUser.group.GRADUATE_CENTER,
+                    groups=User.group.GRADUATE_CENTER,
                     graduation_year=year,
                  )
                  .exclude(csc_review='').exclude(photo='')
@@ -381,7 +381,7 @@ class AlumniHonorBoardView(TemplateView):
         ]
 
     def get_graduates(self, filters):
-        return (CSCUser.objects
+        return (User.objects
                 .filter(**filters)
                 .distinct()
                 .only("pk", "first_name", "last_name", "patronymic", "gender",
@@ -392,18 +392,18 @@ class AlumniHonorBoardView(TemplateView):
         graduation_year = int(self.kwargs['year'])
         preview = self.request.GET.get('preview', False)
         filters = {
-            "groups__pk": CSCUser.group.GRADUATE_CENTER,
+            "groups__pk": User.group.GRADUATE_CENTER,
             "graduation_year": graduation_year
         }
         if preview and self.request.user.is_curator:
-            filters = {"status": CSCUser.STATUS.will_graduate}
+            filters = {"status": User.STATUS.will_graduate}
         graduates = self.get_graduates(filters)
         if not len(graduates):
             raise Http404
         cache_key = f'alumni_{graduation_year}_testimonials'
         testimonials = cache.get(cache_key)
         if testimonials is None:
-            s = (CSCUser.objects
+            s = (User.objects
                  .filter(**filters)
                  .exclude(csc_review='')
                  .prefetch_related("areas_of_study"))
@@ -429,8 +429,8 @@ class AlumniV2View(TemplateView):
         cache_key = 'cscenter_last_graduation_year'
         last_graduation_year = cache.get(cache_key)
         if last_graduation_year is None:
-            from_last_graduation = (CSCUser.objects
-                                    .filter(groups=CSCUser.group.GRADUATE_CENTER)
+            from_last_graduation = (User.objects
+                                    .filter(groups=User.group.GRADUATE_CENTER)
                                     .order_by("-graduation_year")
                                     .only("graduation_year")
                                     .first())

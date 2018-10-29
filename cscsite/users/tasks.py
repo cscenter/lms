@@ -38,13 +38,13 @@ def update_password_in_gerrit(user_id: int):
     """
     from api.providers.ldap import connection
     from users.ldap import get_ldap_username
-    CSCUser = apps.get_model('users', 'CSCUser')
+    User = apps.get_model('users', 'User')
     try:
-        user = CSCUser.objects.get(pk=user_id)
+        user = User.objects.get(pk=user_id)
         if not user.password_hash_ldap:
             logger.error(f"Empty hash for user_id={user_id}")
             return
-    except CSCUser.DoesNotExist:
+    except User.DoesNotExist:
         logger.warning(f"User with id={user_id} not found")
         return
     username = get_ldap_username(user)

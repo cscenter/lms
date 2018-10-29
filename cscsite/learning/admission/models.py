@@ -30,7 +30,7 @@ from learning.models import Venue
 from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR, \
     DATE_FORMAT_RU
 from learning.utils import get_current_term_pair
-from users.models import CSCUser
+from users.models import User
 
 
 WITH_ASSIGNMENTS_TEXT = """
@@ -268,7 +268,7 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|faculty"))
     course = models.CharField(
         _("Course"),
-        choices=CSCUser.COURSES,
+        choices=User.COURSES,
         help_text=_("Applicant|course"),
         max_length=355)
     graduate_work = models.TextField(

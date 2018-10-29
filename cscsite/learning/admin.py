@@ -18,7 +18,7 @@ from core.models import RelatedSpecMixin
 from core.utils import admin_datetime, is_club_site
 from learning.models import InternshipCategory
 from learning.settings import PARTICIPANT_GROUPS
-from users.models import CSCUser
+from users.models import User
 from .models import Course, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
@@ -74,7 +74,7 @@ class CourseOfferingTeacherInline(admin.TabularInline):
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "teacher":
-            kwargs["queryset"] = CSCUser.objects.filter(groups__in=[
+            kwargs["queryset"] = User.objects.filter(groups__in=[
                 PARTICIPANT_GROUPS.TEACHER_CENTER,
                 PARTICIPANT_GROUPS.TEACHER_CLUB]).distinct()
         return super(CourseOfferingTeacherInline, self).formfield_for_foreignkey(db_field, *args, **kwargs)

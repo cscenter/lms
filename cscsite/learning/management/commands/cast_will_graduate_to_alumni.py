@@ -7,7 +7,7 @@ from django.core.management import BaseCommand
 from django.utils.timezone import now
 
 from learning.settings import STUDENT_STATUS
-from users.models import CSCUser
+from users.models import User
 
 
 class Command(BaseCommand):
@@ -16,15 +16,15 @@ class Command(BaseCommand):
             "Also clean status and set graduation year.")
 
     def handle(self, *args, **options):
-        will_graduate_list = CSCUser.objects.filter(groups__in=[
-            CSCUser.group.STUDENT_CENTER,
-            CSCUser.group.VOLUNTEER,
+        will_graduate_list = User.objects.filter(groups__in=[
+            User.group.STUDENT_CENTER,
+            User.group.VOLUNTEER,
         ], status=STUDENT_STATUS.will_graduate)
 
         for user in will_graduate_list:
-            user.groups.remove(CSCUser.group.STUDENT_CENTER)
-            user.groups.remove(CSCUser.group.VOLUNTEER)
-            user.groups.add(CSCUser.group.GRADUATE_CENTER)
+            user.groups.remove(User.group.STUDENT_CENTER)
+            user.groups.remove(User.group.VOLUNTEER)
+            user.groups.add(User.group.GRADUATE_CENTER)
             user.graduation_year = now().year
             user.status = ""
             user.save()

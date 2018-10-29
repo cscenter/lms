@@ -15,7 +15,7 @@ from learning.projects.import_export import ProjectStudentAdminRecordResource
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
     ReportComment
 from learning.settings import PARTICIPANT_GROUPS
-from users.models import CSCUser
+from users.models import User
 
 
 class ReviewersInline(admin.StackedInline):
@@ -42,7 +42,7 @@ class ProjectStudentInline(admin.TabularInline):
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
-            kwargs["queryset"] = CSCUser.objects.filter(groups__in=[
+            kwargs["queryset"] = User.objects.filter(groups__in=[
                 PARTICIPANT_GROUPS.STUDENT_CENTER,
                 PARTICIPANT_GROUPS.GRADUATE_CENTER]).distinct()
         return super(ProjectStudentInline,
@@ -60,7 +60,7 @@ class ProjectAdmin(admin.ModelAdmin):
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "reviewers":
             kwargs["queryset"] = (
-                CSCUser.objects
+                User.objects
                     .filter(Q(groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER) |
                             Q(is_superuser=True, is_staff=True))
                     .distinct())

@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group
 from rest_framework import serializers
 
 from learning.models import StudentAssignment
-from users.models import CSCUser
+from users.models import User
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -32,7 +32,7 @@ class StudentSerializer(serializers.ModelSerializer):
     groups = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
-        model = CSCUser
+        model = User
         fields = ("curriculum_year", "gender", "groups")
 
 

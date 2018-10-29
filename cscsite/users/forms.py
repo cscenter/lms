@@ -15,7 +15,7 @@ from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
 from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER
 from users import tasks
-from .models import CSCUser, UserReference
+from .models import User, UserReference
 
 
 class LoginForm(AuthenticationForm):
@@ -100,7 +100,7 @@ class UserProfileForm(forms.ModelForm):
             del self.fields['csc_review']
 
     class Meta:
-        model = CSCUser
+        model = User
         fields = ['phone', 'workplace', 'note', 'yandex_id', 'github_id',
                   'stepic_id', 'csc_review', 'private_contacts',
                   'first_name', 'last_name', 'patronymic',

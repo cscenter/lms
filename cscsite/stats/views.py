@@ -15,7 +15,7 @@ from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, GRADES
 from learning.utils import get_term_index
 
 from learning.viewmixins import CuratorOnlyMixin
-from users.models import CSCUser
+from users.models import User
 
 
 class StatsIndexView(CuratorOnlyMixin, generic.TemplateView):
@@ -149,9 +149,9 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
         except ValueError:
             selected_interviewer = ''
         interviewers = (Interview.interviewers.through.objects
-                        .distinct("cscuser__last_name", "cscuser_id")
-                        .order_by("cscuser__last_name")
-                        .select_related("cscuser"))
+                        .distinct("user__last_name", "user_id")
+                        .order_by("user__last_name")
+                        .select_related("user"))
         return interviewers, selected_interviewer
 
 
@@ -159,11 +159,11 @@ class StudentsDiplomasStats(APIView):
     http_method_names = ['get']
 
     def get(self, request, graduation_year, format=None):
-        filters = (Q(groups__in=[CSCUser.group.GRADUATE_CENTER]) &
+        filters = (Q(groups__in=[User.group.GRADUATE_CENTER]) &
                    Q(graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
-            filters = filters | Q(status=CSCUser.STATUS.will_graduate)
-        students = CSCUser.objects.students_info(
+            filters = filters | Q(status=User.STATUS.will_graduate)
+        students = User.objects.students_info(
             filters=filters,
             exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]
         )

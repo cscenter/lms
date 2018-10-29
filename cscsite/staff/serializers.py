@@ -2,14 +2,14 @@ from django.conf import settings
 from rest_framework import serializers, fields
 
 from learning.settings import FOUNDATION_YEAR
-from users.models import CSCUser
+from users.models import User
 
 
 class UserSearchSerializer(serializers.ModelSerializer):
     short_name = serializers.SerializerMethodField()
 
     class Meta:
-            model = CSCUser
+            model = User
             fields = ('short_name', 'pk')
 
     def get_short_name(self, user):

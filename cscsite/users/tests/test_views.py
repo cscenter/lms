@@ -27,7 +27,7 @@ from users.admin import UserCreationForm, UserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
     UserReferenceFactory, TeacherCenterFactory, StudentClubFactory, \
     StudentFactory, StudentCenterFactory
-from users.models import CSCUser, UserReference
+from users.models import User, UserReference
 
 
 class CustomSemesterFactory(SemesterFactory):
@@ -41,17 +41,17 @@ class UserTests(MyUtilitiesMixin, TestCase):
         Not so actual for prod db, but we still should check it.
         """
         with translation.override('en'):
-            self.assertEqual(CSCUser.group[CSCUser.group.STUDENT_CENTER],
+            self.assertEqual(User.group[User.group.STUDENT_CENTER],
                              Group.objects.get(pk=1).name)
-            self.assertEqual(CSCUser.group[CSCUser.group.TEACHER_CENTER],
+            self.assertEqual(User.group[User.group.TEACHER_CENTER],
                              Group.objects.get(pk=2).name)
-            self.assertEqual(CSCUser.group[CSCUser.group.GRADUATE_CENTER],
+            self.assertEqual(User.group[User.group.GRADUATE_CENTER],
                              Group.objects.get(pk=3).name)
-            self.assertEqual(CSCUser.group[CSCUser.group.VOLUNTEER],
+            self.assertEqual(User.group[User.group.VOLUNTEER],
                              Group.objects.get(pk=4).name)
-            self.assertEqual(CSCUser.group[CSCUser.group.STUDENT_CLUB],
+            self.assertEqual(User.group[User.group.STUDENT_CLUB],
                              Group.objects.get(pk=5).name)
-            self.assertEqual(CSCUser.group[CSCUser.group.TEACHER_CLUB],
+            self.assertEqual(User.group[User.group.TEACHER_CLUB],
                              Group.objects.get(pk=6).name)
 
     def test_student_should_have_enrollment_year(self):
@@ -102,58 +102,58 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         If "patronymic" is set, get_full_name's result should contain it
         """
-        user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
-                       patronymic=u"Васильевна")
+        user = User(first_name=u"Анна", last_name=u"Иванова",
+                    patronymic=u"Васильевна")
         self.assertEqual(user.get_full_name(), u"Анна Васильевна Иванова")
         self.assertEqual(user.get_full_name(True), u"Иванова Анна Васильевна")
-        user = CSCUser(first_name=u"Анна", last_name=u"Иванова")
+        user = User(first_name=u"Анна", last_name=u"Иванова")
         self.assertEqual(user.get_full_name(), u"Анна Иванова")
 
     def test_abbreviated_name(self):
-        user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
-                       patronymic=u"Васильевна")
+        user = User(first_name=u"Анна", last_name=u"Иванова",
+                    patronymic=u"Васильевна")
         self.assertEqual(user.get_abbreviated_name(),
                          u"А. В. Иванова")
-        user = CSCUser(first_name=u"Анна", last_name=u"Иванова")
+        user = User(first_name=u"Анна", last_name=u"Иванова")
         self.assertEqual(user.get_abbreviated_name(),
                          u"А. Иванова")
 
     def test_short_name(self):
-        user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
-                       patronymic=u"Васильевна")
+        user = User(first_name=u"Анна", last_name=u"Иванова",
+                    patronymic=u"Васильевна")
         self.assertEqual(user.get_short_name(),
                          u"Анна Иванова")
-        user = CSCUser(first_name=u"Анна", last_name=u"Иванова")
+        user = User(first_name=u"Анна", last_name=u"Иванова")
         self.assertEqual(user.get_short_name(),
                          u"Анна Иванова")
 
     def test_to_string(self):
-        user = CSCUser(first_name=u"Анна", last_name=u"Иванова",
-                       patronymic=u"Васильевна")
+        user = User(first_name=u"Анна", last_name=u"Иванова",
+                    patronymic=u"Васильевна")
         self.assertEqual(smart_text(user), user.get_full_name(True))
 
     def test_group_props(self):
         """
         Tests properties based on groups (is_student, is_graduate, is_teacher)
         """
-        user = CSCUser(username="foo", email="foo@localhost.ru")
+        user = User(username="foo", email="foo@localhost.ru")
         user.save()
         self.assertFalse(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
-        user = CSCUser(username="bar", email="bar@localhost.ru")
+        user = User(username="bar", email="bar@localhost.ru")
         user.save()
         user.groups.set([user.group.STUDENT_CENTER])
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
-        user = CSCUser(username="baz", email="baz@localhost.ru")
+        user = User(username="baz", email="baz@localhost.ru")
         user.save()
         user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER])
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
-        user = CSCUser(username="baq", email="baq@localhost.ru")
+        user = User(username="baq", email="baq@localhost.ru")
         user.save()
         user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER,
                          user.group.GRADUATE_CENTER])
@@ -173,7 +173,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     def test_login_works(self):
         good_user_attrs = factory.build(dict, FACTORY_CLASS=UserFactory)
-        good_user = CSCUser.objects.create_user(**good_user_attrs)
+        good_user = User.objects.create_user(**good_user_attrs)
         # graduated students redirected to LOGIN_REDIRECT_URL
         good_user.groups.add(PARTICIPANT_GROUPS.GRADUATE_CENTER)
         self.assertNotIn('_auth_user_id', self.client.session)
@@ -192,7 +192,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
             self.assertRedirects(self.client.get(url),
                                  "{}?next={}".format(settings.LOGIN_URL, url))
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = CSCUser.objects.create_user(**user_data)
+        user = User.objects.create_user(**user_data)
         url = reverse('assignment_list_teacher')
         assertLoginRedirect(url)
         response = self.client.post(reverse('login'), user_data)
@@ -217,7 +217,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     def test_logout_works(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        CSCUser.objects.create_user(**user_data)
+        User.objects.create_user(**user_data)
         login = self.client.login(**user_data)
         self.assertTrue(login)
         self.assertIn('_auth_user_id', self.client.session)
@@ -228,7 +228,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     def test_logout_redirect_works(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        CSCUser.objects.create_user(**user_data)
+        User.objects.create_user(**user_data)
         login = self.client.login(**user_data)
         resp = self.client.get(reverse('logout'),
                                {'next': reverse('course_video_list')})
@@ -239,10 +239,10 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         yandex_id can be exctracted from email if email is on @yandex.ru
         """
-        user = CSCUser.objects.create_user("testuser1", "foo@bar.net",
+        user = User.objects.create_user("testuser1", "foo@bar.net",
                                            "test123foobar@!")
         self.assertFalse(user.yandex_id)
-        user = CSCUser.objects.create_user("testuser2", "foo@yandex.ru",
+        user = User.objects.create_user("testuser2", "foo@yandex.ru",
                                            "test123foobar@!")
         self.assertEqual(user.yandex_id, "foo")
 
@@ -251,7 +251,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         get_short_note should split note on first paragraph
         """
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = CSCUser.objects.create_user(**user_data)
+        user = User.objects.create_user(**user_data)
         user.note = "Some small text"
         self.assertEqual(user.get_short_note(), "Some small text")
         user.note = """Some large text.
@@ -261,7 +261,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     def test_teacher_detail_view(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = CSCUser.objects.create_user(**user_data)
+        user = User.objects.create_user(**user_data)
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 404)
         user.groups.set([user.group.TEACHER_CENTER])
@@ -272,7 +272,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
 
     def test_user_detail_view(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = CSCUser.objects.create_user(**user_data)
+        user = User.objects.create_user(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context['profile_user'], user)
@@ -281,7 +281,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
     def test_user_can_update_profile(self):
         test_note = "The best user in the world"
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = CSCUser.objects.create_user(**user_data)
+        user = User.objects.create_user(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.client.login(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
@@ -304,7 +304,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         """
         test_review = "CSC are the bollocks"
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = CSCUser.objects.create_user(**user_data)
+        user = User.objects.create_user(**user_data)
         self.client.login(**user_data)
         resp = self.client.get(reverse('user_update', args=[user.pk]))
         self.assertNotContains(resp, 'csc_review')
@@ -455,7 +455,7 @@ def test_login_restrictions(client, settings):
     assert settings.SITE_ID == settings.CENTER_SITE_ID
 
     user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-    student = CSCUser.objects.create_user(**user_data)
+    student = User.objects.create_user(**user_data)
     # Try to login without groups at all
     response = client.post(reverse('login'), user_data)
     assert response.status_code == 200
@@ -555,7 +555,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         curator = UserFactory.create(is_superuser=True, is_staff=True)
         self.doLogin(curator)
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = CSCUser.objects.create_user(**user_data)
+        user = User.objects.create_user(**user_data)
         form_url = reverse('user_reference_add', args=[user.id])
         response = self.client.get(form_url)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -611,7 +611,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
 
     def test_club_student_login_on_cscenter_site(self):
         student = UserFactory.create(is_superuser=False, is_staff=False,
-                                     groups=[CSCUser.group.STUDENT_CLUB])
+                                     groups=[User.group.STUDENT_CLUB])
         self.doLogin(student)
         login_data = {
             'username': student.username,
@@ -622,7 +622,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         self.assertFalse(form.is_valid())
         # can't login message in __all__
         self.assertIn("__all__", form.errors)
-        student.groups.set([CSCUser.group.STUDENT_CENTER])
+        student.groups.set([User.group.STUDENT_CENTER])
         student.save()
         response = self.client.post(reverse('login'), login_data)
         self.assertEqual(response.status_code, 302)
