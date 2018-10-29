@@ -319,6 +319,7 @@ class CSCUser(LearningPermissionsMixin, AbstractUser):
     objects = CustomUserManager()
 
     class Meta:
+        db_table = 'users_user'
         ordering = ['last_name', 'first_name']
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
