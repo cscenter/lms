@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import unicode_literals, absolute_import
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django.contrib.auth.forms import UserCreationForm as _UserCreationForm, \
+    UserChangeForm as _UserChangeForm
 from django.db import models as db_models
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -15,23 +12,23 @@ from core.models import RelatedSpecMixin
 from learning.settings import PARTICIPANT_GROUPS
 from .models import CSCUser, UserReference, \
     OnlineCourseRecord, SHADCourseRecord, CSCUserStatusLog
-from .import_export import SHADCourseRecordResource, CSCUserRecordResource
+from .import_export import SHADCourseRecordResource, UserRecordResource
 
 
-class CSCUserCreationForm(UserCreationForm):
+class UserCreationForm(_UserCreationForm):
     class Meta:
         model = CSCUser
         fields = ('username', 'email')
 
 
-class CSCUserChangeForm(UserChangeForm):
+class UserChangeForm(_UserChangeForm):
     class Meta:
         fields = '__all__'
         model = CSCUser
 
     def clean(self):
         """XXX: we can't validate m2m like `groups` in Model.clean() method"""
-        cleaned_data = super(CSCUserChangeForm, self).clean()
+        cleaned_data = super().clean()
         enrollment_year = cleaned_data.get('enrollment_year')
         groups = {x.pk for x in cleaned_data.get('groups', [])}
         if self.instance.group.STUDENT_CENTER in groups:
@@ -116,15 +113,15 @@ class SHADCourseRecordInlineAdmin(admin.StackedInline):
     extra = 0
 
 
-class CSCUserAdmin(UserAdmin):
-    add_form = CSCUserCreationForm
+class UserAdmin(UserAdmin):
+    add_form = UserCreationForm
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
             'fields': ('username', 'email', 'password1', 'password2'),
         }),
     )
-    form = CSCUserChangeForm
+    form = UserChangeForm
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
     inlines = [OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
@@ -169,7 +166,7 @@ class CSCUserAdmin(UserAdmin):
     def save_model(self, request, obj, form, change):
         if "comment" in form.changed_data:
             obj.comment_last_author = request.user
-        super(CSCUserAdmin, self).save_model(request, obj, form, change)
+        super(UserAdmin, self).save_model(request, obj, form, change)
 
 
 class SHADCourseRecordResourceAdmin(ImportExportMixin, admin.ModelAdmin):
@@ -183,11 +180,11 @@ class SHADCourseRecordResourceAdmin(ImportExportMixin, admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
-class CSCUserRecordResourceAdmin(ImportMixin, CSCUserAdmin):
-    resource_class = CSCUserRecordResource
+class UserRecordResourceAdmin(ImportMixin, UserAdmin):
+    resource_class = UserRecordResource
     import_template_name = 'admin/import_export/import_users.html'
 
 
-admin.site.register(CSCUser, CSCUserRecordResourceAdmin)
+admin.site.register(CSCUser, UserRecordResourceAdmin)
 admin.site.register(UserReference)
 admin.site.register(SHADCourseRecord, SHADCourseRecordResourceAdmin)
