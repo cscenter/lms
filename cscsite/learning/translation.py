@@ -1,10 +1,10 @@
 from modeltranslation.translator import register, TranslationOptions
 
 from learning.models import AreaOfStudy
-from .models import Course, CourseOffering
+from .models import MetaCourse, CourseOffering
 
 
-@register(Course)
+@register(MetaCourse)
 class CourseTranslationOptions(TranslationOptions):
     fields = ('name', 'description')
     fallback_values = '-- sorry, no translation provided --'

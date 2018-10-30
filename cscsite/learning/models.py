@@ -4,7 +4,6 @@ import datetime
 import logging
 import os.path
 import time
-from typing import Optional
 
 import pytz
 from bitfield import BitField
@@ -25,17 +24,17 @@ from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel, TimeFramedModel
 from sorl.thumbnail import ImageField
 
+from core.db.models import GradeField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
-from core.utils import hashids, city_aware_reverse, is_club_site
+from core.utils import hashids, city_aware_reverse
 from learning import settings as learn_conf
-from core.db.models import GradeField
 from learning.managers import StudyProgramQuerySet, \
     CourseOfferingDefaultManager, EnrollmentDefaultManager, \
     EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet, \
     StudentAssignmentManager, AssignmentManager, CourseOfferingTeacherManager
 from learning.micawber_providers import get_oembed_html
-from learning.settings import PARTICIPANT_GROUPS, GRADES, SHORT_GRADES, \
+from learning.settings import GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
 from learning.tasks import maybe_upload_slides_yandex
 from learning.utils import get_current_term_index, now_local, \
@@ -46,8 +45,7 @@ from .utils import get_current_term_pair, \
 logger = logging.getLogger(__name__)
 
 
-@python_2_unicode_compatible
-class Course(TimeStampedModel):
+class MetaCourse(TimeStampedModel):
     name = models.CharField(_("Course|name"), max_length=140)
     slug = models.SlugField(
         _("News|slug"),
@@ -211,7 +209,7 @@ class Semester(models.Model):
 class CourseOffering(TimeStampedModel):
     objects = CourseOfferingDefaultManager()
     course = models.ForeignKey(
-        Course,
+        MetaCourse,
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
     grading_type = models.SmallIntegerField(
@@ -1500,7 +1498,7 @@ class StudyProgram(TimeStampedModel):
 
 class StudyProgramCourseGroup(models.Model):
     courses = models.ManyToManyField(
-        Course,
+        MetaCourse,
         verbose_name=_("StudyProgramCourseGroup|courses"),
         help_text=_("Courses will be grouped with boolean OR"))
     study_program = models.ForeignKey(

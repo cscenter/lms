@@ -37,7 +37,7 @@ from learning.calendar import CalendarQueryParams
 from learning.forms import CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     AssignmentModalCommentForm
-from learning.models import Course, CourseClass, CourseOffering, Venue, \
+from learning.models import MetaCourse, CourseClass, CourseOffering, Venue, \
     Enrollment, Assignment, AssignmentAttachment, \
     StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
@@ -404,7 +404,7 @@ class CourseVideoListView(ListView):
 
 
 class CourseDetailView(generic.DetailView):
-    model = Course
+    model = MetaCourse
     template_name = "learning/courses/detail.html"
     context_object_name = 'course'
 
@@ -425,7 +425,7 @@ class CourseDetailView(generic.DetailView):
 
 class CourseUpdateView(CuratorOnlyMixin, ProtectedFormMixin,
                        generic.UpdateView):
-    model = Course
+    model = MetaCourse
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseForm
 

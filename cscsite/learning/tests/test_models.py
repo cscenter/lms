@@ -17,7 +17,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
-from learning.factories import CourseFactory, CourseOfferingFactory, \
+from learning.factories import MetaCourseFactory, CourseOfferingFactory, \
     CourseOfferingNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory, StudentAssignmentFactory, AssignmentCommentFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
@@ -34,8 +34,8 @@ from users.factories import UserFactory, StudentCenterFactory, \
 class CommonTests(TestCase):
     @mock.patch("learning.tasks.maybe_upload_slides_yandex.delay")
     def test_to_strings(self, _):
-        course = CourseFactory.build()
-        self.assertEquals(smart_text(course), course.name)
+        meta_course = MetaCourseFactory.build()
+        self.assertEquals(smart_text(meta_course), meta_course.name)
         semester = Semester(year=2015, type='spring')
         self.assertIn(smart_text(semester.year), smart_text(semester))
         self.assertIn('spring', smart_text(semester))
@@ -149,14 +149,14 @@ class CourseOfferingTests(TestCase):
         old_now = timezone.now
         timezone.now = lambda: (datetime.datetime(some_year, 4, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((CourseOffering(course=CourseFactory(name="Test course"),
+        n_ongoing = sum((CourseOffering(course=MetaCourseFactory(name="Test course"),
                                         semester=semester)
                          .in_current_term)
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = lambda: (datetime.datetime(some_year, 11, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((CourseOffering(course=CourseFactory(name="Test course"),
+        n_ongoing = sum((CourseOffering(course=MetaCourseFactory(name="Test course"),
                                         semester=semester)
                          .in_current_term)
                         for semester in semesters)
@@ -165,8 +165,8 @@ class CourseOfferingTests(TestCase):
 
     def test_completed_at_default(self):
         semester = SemesterFactory(year=2017, type=Semester.TYPES.autumn)
-        course = CourseFactory()
-        co = CourseOfferingFactory.build(course=course, semester=semester)
+        meta_course = MetaCourseFactory()
+        co = CourseOfferingFactory.build(course=meta_course, semester=semester)
         assert not co.completed_at
         co.save()
         next_term_dt = next_term_starts_at(semester.index, co.get_city_timezone())
@@ -505,13 +505,13 @@ def test_gradefield():
 
 @pytest.mark.django_db
 def test_course_offering_get_reviews(settings):
-    c1, c2 = CourseFactory.create_batch(2)
-    CourseOfferingFactory(course=c1, city_id='spb', semester__year=2015,
-                          reviews='aaa')
-    CourseOfferingFactory(course=c2, city_id='spb', semester__year=2015,
-                          reviews='zzz')
-    co = CourseOfferingFactory(course=c1, city_id='spb',
+    meta_course1, meta_course2 = MetaCourseFactory.create_batch(2)
+    CourseOfferingFactory(course=meta_course1, city_id='spb',
+                          semester__year=2015, reviews='aaa')
+    CourseOfferingFactory(course=meta_course2, city_id='spb',
+                          semester__year=2015, reviews='zzz')
+    co = CourseOfferingFactory(course=meta_course1, city_id='spb',
                                semester__year=2016, reviews='bbb')
-    CourseOfferingFactory(course=c1, city_id='nsk', semester__year=2016,
-                          reviews='ccc')
+    CourseOfferingFactory(course=meta_course1, city_id='nsk',
+                          semester__year=2016, reviews='ccc')
     assert len(co.get_reviews()) == 2

@@ -9,7 +9,7 @@ from django.utils.timezone import now
 from factory import CREATE_STRATEGY
 
 from core.models import City
-from learning.models import Course, Semester, CourseOffering, \
+from learning.models import MetaCourse, Semester, CourseOffering, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
@@ -20,9 +20,9 @@ from users.factories import UserFactory, StudentCenterFactory
 from .utils import get_current_term_pair, get_term_by_index
 
 
-class CourseFactory(factory.DjangoModelFactory):
+class MetaCourseFactory(factory.DjangoModelFactory):
     class Meta:
-        model = Course
+        model = MetaCourse
 
     name = factory.Sequence(lambda n: "Test course %03d" % n)
     slug = factory.Sequence(lambda n: "test-course-%03d" % n)
@@ -63,7 +63,7 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseOffering
 
-    course = factory.SubFactory(CourseFactory)
+    course = factory.SubFactory(MetaCourseFactory)
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
 

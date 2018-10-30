@@ -20,7 +20,7 @@ from django.utils.translation import ugettext as _
 
 from learning.factories import SemesterFactory, \
     CourseOfferingFactory, EnrollmentFactory, \
-    CourseFactory, AreaOfStudyFactory
+    MetaCourseFactory, AreaOfStudyFactory
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import UserCreationForm, UserChangeForm
@@ -578,13 +578,13 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         """Check enrollments duplicates, reference fields"""
         student = StudentCenterFactory()
         # add 2 enrollments from 1 course reading exactly
-        course = CourseFactory.create()
+        meta_course = MetaCourseFactory.create()
         semesters = (CustomSemesterFactory.create_batch(2, year=2014))
         enrollments = []
         for s in semesters:
             e = EnrollmentFactory.create(
                 course_offering=CourseOfferingFactory.create(
-                    course=course,
+                    course=meta_course,
                     semester=s),
                 student=student,
                 grade='good'

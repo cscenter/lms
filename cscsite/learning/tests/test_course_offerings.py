@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils import timezone, formats
 from django.utils.encoding import smart_bytes
 
-from learning.factories import CourseFactory, SemesterFactory, \
+from learning.factories import MetaCourseFactory, SemesterFactory, \
     CourseOfferingFactory, CourseOfferingNewsFactory, AssignmentFactory, \
     CourseOfferingTeacherFactory, CourseClassFactory, EnrollmentFactory
 from learning.models import Semester, Enrollment
@@ -36,15 +36,15 @@ class SemesterListTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(0, len(cos))
         # Microoptimization: avoid creating teachers/courses
         u = TeacherCenterFactory()
-        c = CourseFactory.create()
+        mc = MetaCourseFactory.create()
         for semester_type in ['autumn', 'spring']:
             for year in range(2012, 2015):
                 s = SemesterFactory.create(type=semester_type,
                                            year=year)
-                CourseOfferingFactory.create(course=c, semester=s,
+                CourseOfferingFactory.create(course=mc, semester=s,
                                              teachers=[u])
         s = SemesterFactory.create(type='autumn', year=2015)
-        CourseOfferingFactory.create(course=c, semester=s, teachers=[u])
+        CourseOfferingFactory.create(course=mc, semester=s, teachers=[u])
         resp = self.client.get(reverse('course_list'))
         self.assertEqual(4, len(resp.context['semester_list']))
         cos = self.cos_from_semester_list(resp.context['semester_list'])
@@ -329,7 +329,7 @@ def test_course_offering_news_tab_permissions(client):
 def test_course_offering_assignments_tab_permissions(client):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
-    course = CourseFactory()
+    course = MetaCourseFactory()
     a = AssignmentFactory(course_offering__semester=prev_term,
                           course_offering__course=course)
     co_prev = a.course_offering
