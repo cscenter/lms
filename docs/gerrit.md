@@ -4,10 +4,19 @@
 # delete .git folder inside gerrit app folder /data/gerrit/git/
 ssh -p 29418 admin@review.compscicenter.ru gerrit flush-caches --cache projects
 # TODO: run gc?
-
 ```
 
+### Инициализация проекта для курса
 
+Убедиться, что для преподавателей и студентов созданы ldap-аккаунты. Далее
+
+```python
+from learning.models import CourseOffering
+from learning.gerrit import *
+co = CourseOffering.objects.get(pk=1)
+init_project_for_course(co)
+
+```
 
 
 ### Mark PatchSet as Work In Progress
