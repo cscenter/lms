@@ -79,27 +79,27 @@ class RelatedSpec(TestCase):
     def test_to_list(self):
         spec_form = [('student_assignment',
                       [('assignment',
-                        [('course_offering', ['semester', 'course'])]),
+                        [('course_offering', ['semester', 'meta_course'])]),
                        'student'])]
         list_form \
             = ['student_assignment',
                'student_assignment__assignment',
                'student_assignment__assignment__course_offering',
                'student_assignment__assignment__course_offering__semester',
-               'student_assignment__assignment__course_offering__course',
+               'student_assignment__assignment__course_offering__meta_course',
                'student_assignment__student']
         self.assertEqual(list_form, related_spec_to_list(spec_form))
 
         spec_form = [('student_assignment',
                       [('assignment',
-                        [('course_offering', ['semester', 'course'])])]),
+                        [('course_offering', ['semester', 'meta_course'])])]),
                      'student']
         list_form \
             = ['student_assignment',
                'student_assignment__assignment',
                'student_assignment__assignment__course_offering',
                'student_assignment__assignment__course_offering__semester',
-               'student_assignment__assignment__course_offering__course',
+               'student_assignment__assignment__course_offering__meta_course',
                'student']
         self.assertEqual(list_form, related_spec_to_list(spec_form))
 

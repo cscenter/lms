@@ -37,10 +37,10 @@
                                 <p>{{ program.area.description }}</p>
                                 {% if program.course_groups.all %}
                                 <ul style="list-style-type: square;">
-                                    {% for course_groups in program.course_groups.all %}
+                                    {% for meta_course_groups in program.course_groups.all %}
                                         <li>
-                                            {% for course in course_groups.courses.all %}
-                                                <a href="{{ course.get_absolute_url }}">{{ course.name }}</a>{% if not forloop.last %} или {% endif %}
+                                            {% for meta_course in meta_course_groups.courses.all %}
+                                                <a href="{{ meta_course.get_absolute_url }}">{{ meta_course.name }}</a>{% if not forloop.last %} или {% endif %}
                                             {% endfor %}
                                         </li>
                                     {% endfor %}

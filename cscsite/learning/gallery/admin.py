@@ -30,7 +30,7 @@ class ImageAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'course_offering':
             kwargs['queryset'] = (CourseOffering.objects
-                                  .select_related("course", "semester"))
+                                  .select_related("meta_course", "semester"))
         return (super(ImageAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 

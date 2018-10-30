@@ -141,8 +141,8 @@ def test_student_search_enrollments(client, curator):
     s1 = SemesterFactory.create(year=2014, type=SEMESTER_TYPES.spring)
     s2 = SemesterFactory.create(year=2014, type=SEMESTER_TYPES.autumn)
     mc1, mc2 = MetaCourseFactory.create_batch(2)
-    co1 = CourseOfferingFactory.create(course=mc1, semester=s1)
-    co2 = CourseOfferingFactory.create(course=mc1, semester=s2)
+    co1 = CourseOfferingFactory.create(meta_course=mc1, semester=s1)
+    co2 = CourseOfferingFactory.create(meta_course=mc1, semester=s2)
     e1 = EnrollmentFactory.create(student=student, course_offering=co1,
                                   grade=GRADES.good)
     e2 = EnrollmentFactory.create(student=student, course_offering=co2,
@@ -153,7 +153,7 @@ def test_student_search_enrollments(client, curator):
     e2.save()
     response = client.get(ENROLLMENTS_URL.format("1"))
     assert response.json()["count"] == 1
-    co3 = CourseOfferingFactory.create(course=mc2)
+    co3 = CourseOfferingFactory.create(meta_course=mc2)
     EnrollmentFactory.create(student=student, grade=GRADES.good,
                              course_offering=co3)
     response = client.get(ENROLLMENTS_URL.format("2"))

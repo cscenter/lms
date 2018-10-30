@@ -42,7 +42,7 @@ class UserQuerySet(query.QuerySet):
             raise TypeError("students_info: unsupported filters type")
 
         enrollment_qs = (Enrollment.active
-                         .order_by('course_offering__course__name'))
+                         .order_by('course_offering__meta_course__name'))
         shad_qs = SHADCourseRecord.objects.get_queryset()
         if exclude_grades:
             enrollment_qs = enrollment_qs.exclude(grade__in=exclude_grades)
@@ -71,7 +71,7 @@ class UserQuerySet(query.QuerySet):
                 Prefetch(
                     'enrollments__course_offering',
                     queryset=CourseOffering.objects.select_related(
-                        'semester', 'course')
+                        'semester', 'meta_course')
                 ),
                 Prefetch(
                     'enrollments__course_offering__courseclass_set',

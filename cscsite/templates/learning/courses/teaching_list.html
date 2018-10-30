@@ -17,7 +17,7 @@
                                 <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
                                     <td>
                                         {# TODO: replace with get_url_for_tab after migrating to Jinja #}
-                                        <a href="{% if has_unread_news %}{{ course_offering.get_absolute_url }}news/{% else %}{{ course_offering.get_absolute_url }}{% endif %}">{{ course_offering.course.name }}</a>
+                                        <a href="{% if has_unread_news %}{{ course_offering.get_absolute_url }}news/{% else %}{{ course_offering.get_absolute_url }}{% endif %}">{{ course_offering.meta_course.name }}</a>
                                     </td>
                                     <td>{{ course_offering.semester }}</td>
                                     <td>

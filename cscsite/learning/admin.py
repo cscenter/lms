@@ -95,7 +95,8 @@ class CourseOfferingAdminForm(forms.ModelForm):
 
 class CourseOfferingAdmin(TranslationAdmin, admin.ModelAdmin):
     list_filter = ['city', 'semester']
-    list_display = ['course', 'semester', 'is_published_in_video', 'is_open']
+    list_display = ['meta_course', 'semester', 'is_published_in_video',
+                    'is_open']
     inlines = (CourseOfferingTeacherInline,)
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
@@ -116,7 +117,7 @@ class CourseClassAdmin(admin.ModelAdmin):
     save_as = True
     date_hierarchy = 'date'
     list_filter = ['type', 'venue']
-    search_fields = ['course_offering__course__name']
+    search_fields = ['course_offering__meta_course__name']
     list_display = ['id', 'name', 'course_offering', 'date', 'venue', 'type']
     inlines = [CourseClassAttachmentInline]
     formfield_overrides = {
@@ -126,7 +127,7 @@ class CourseClassAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'course_offering':
             kwargs['queryset'] = (CourseOffering.objects
-                                  .select_related("course", "semester"))
+                                  .select_related("meta_course", "semester"))
         return (super(CourseClassAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
@@ -195,7 +196,7 @@ class AssignmentAdmin(admin.ModelAdmin):
     }
     list_display = ['id', 'title', 'course_offering', 'created_local',
                     'deadline_at_local']
-    search_fields = ['course_offering__course__name']
+    search_fields = ['course_offering__meta_course__name']
 
     def get_readonly_fields(self, request, obj=None):
         return ['course_offering'] if obj else []
@@ -203,7 +204,7 @@ class AssignmentAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'course_offering':
             kwargs['queryset'] = (CourseOffering.objects
-                .select_related("course", "semester"))
+                .select_related("meta_course", "semester"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
@@ -252,7 +253,7 @@ class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     related_spec = {
         'select': [
             ('student_assignment', [
-                 ('assignment', [('course_offering', ['semester', 'course'])]),
+                 ('assignment', [('course_offering', ['semester', 'meta_course'])]),
                  'student'
              ]),
             'author'
@@ -283,7 +284,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
         'course_offering__city_id',
         ('course_offering__semester', AdminRelatedDropdownFilter)
     ]
-    search_fields = ['course_offering__course__name']
+    search_fields = ['course_offering__meta_course__name']
     exclude = ['grade_changed']
     raw_id_fields = ["student", "course_offering"]
 
@@ -312,7 +313,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
 class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     list_display = ['student', 'assignment', 'grade', 'grade_changed', 'state']
     related_spec = {'select': [('assignment',
-                                [('course_offering', ['semester', 'course'])]),
+                                [('course_offering', ['semester', 'meta_course'])]),
                                'student']}
     search_fields = ['student__last_name']
     raw_id_fields = ["assignment", "student"]

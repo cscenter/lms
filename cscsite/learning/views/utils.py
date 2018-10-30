@@ -64,7 +64,7 @@ def get_co_from_query_params(query_params, city_code):
     course_slug = query_params.get("course_slug", "")
     qs = CourseOffering.objects.in_city(city_code)
     try:
-        return qs.get(course__slug=course_slug, semester__year=term_year,
+        return qs.get(meta_course__slug=course_slug, semester__year=term_year,
                       semester__type=term_type)
     except qs.model.DoesNotExist:
         return None

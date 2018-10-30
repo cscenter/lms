@@ -52,27 +52,27 @@ class ProgressReport(ReportFileOutput):
                 if self.skip_enrollment(e, s):
                     continue
                 courses_headers[
-                    e.course_offering.course_id] = e.course_offering.course.name
+                    e.course_offering.meta_course_id] = e.course_offering.meta_course.name
                 teachers = [t.get_full_name() for t in
                             e.course_offering.teachers.all()]
                 if honest_grade_system:
                     grade = e.grade_honest
                 else:
                     grade = e.grade_display
-                if e.course_offering.course_id in student_courses:
+                if e.course_offering.meta_course_id in student_courses:
                     # Store the highest grade
                     # TODO: add tests
-                    record = student_courses[e.course_offering.course_id]
+                    record = student_courses[e.course_offering.meta_course_id]
                     new_grade_index = get_grade_index(e.grade)
                     if new_grade_index > get_grade_index(record["grade"]):
-                        student_courses[e.course_offering.course_id] = {
+                        student_courses[e.course_offering.meta_course_id] = {
                             "grade": e.grade,
                             "grade_str": grade.lower(),
                             "teachers": ", ".join(teachers),
                             "is_open": e.course_offering.is_open
                         }
                 else:
-                    student_courses[e.course_offering.course_id] = {
+                    student_courses[e.course_offering.meta_course_id] = {
                         "grade": e.grade,
                         "grade_str": grade.lower(),
                         "teachers": ", ".join(teachers),
@@ -448,7 +448,7 @@ class ProgressReportForSemester(ProgressReport):
         else:
             if enrollment.grade not in self.UNSUCCESSFUL_GRADES:
                 student.success_lt_target_semester.add(
-                    enrollment.course_offering.course_id
+                    enrollment.course_offering.meta_course_id
                 )
             # Show enrollments for target term only
             return True
@@ -671,7 +671,7 @@ class WillGraduateStatsReport(ReportFileOutput):
             .select_related(
                 'course_offering',
                 'course_offering__semester',
-                'course_offering__course',)
+                'course_offering__meta_course',)
             .annotate(classes_total=Count('course_offering__courseclass')))
         shad_courses_queryset = (SHADCourseRecord.objects
                                  .select_related("semester"))

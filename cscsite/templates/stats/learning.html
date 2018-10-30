@@ -48,7 +48,7 @@
             <div class="col-xs-7 form-group">
                 <select name="course_session_id" class="form-control selectpicker" id="course-filter">
                     {% for co in courses|lookup:data.selected.term_id %}
-                        <option {% if data.selected.course_session_id == co.pk %}selected="selected"{% endif %} value="{{ co.pk }}">{{ co.course__name }}</option>
+                        <option {% if data.selected.course_session_id == co.pk %}selected="selected"{% endif %} value="{{ co.pk }}">{{ co.meta_course__name }}</option>
                     {% endfor %}
                 </select>
             </div>

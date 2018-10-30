@@ -30,7 +30,7 @@ def test_current_city_middleware(rf, settings, mocker):
     assert request.city_code == "spb"
     assert settings.DEFAULT_CITY_CODE == "spb"
 
-    co = CourseOfferingFactory(city_id="kzn", course__slug="test")
+    co = CourseOfferingFactory(city_id="kzn", meta_course__slug="test")
     assert co.get_absolute_url() == "/courses/test/kzn/{}/".format(co.semester.slug)
     request.path = co.get_absolute_url()
     # Without `city_aware` url keyword we still should parse sub domain

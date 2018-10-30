@@ -41,10 +41,10 @@ class SemesterListTests(MyUtilitiesMixin, TestCase):
             for year in range(2012, 2015):
                 s = SemesterFactory.create(type=semester_type,
                                            year=year)
-                CourseOfferingFactory.create(course=mc, semester=s,
+                CourseOfferingFactory.create(meta_course=mc, semester=s,
                                              teachers=[u])
         s = SemesterFactory.create(type='autumn', year=2015)
-        CourseOfferingFactory.create(course=mc, semester=s, teachers=[u])
+        CourseOfferingFactory.create(meta_course=mc, semester=s, teachers=[u])
         resp = self.client.get(reverse('course_list'))
         self.assertEqual(4, len(resp.context['semester_list']))
         cos = self.cos_from_semester_list(resp.context['semester_list'])
@@ -63,8 +63,8 @@ class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(reverse('course_list'))
         # Really stupid test, we filter summer courses on /courses/ page
         if s.type != Semester.TYPES.summer:
-            self.assertContains(resp, co.course.name)
-            self.assertNotContains(resp, co_kzn.course.name)
+            self.assertContains(resp, co.meta_course.name)
+            self.assertNotContains(resp, co_kzn.meta_course.name)
         # Note: Club related tests in csclub app
 
     def test_student_list_center_site(self):
@@ -285,7 +285,7 @@ def test_course_offering_news_tab_permissions(client):
                                      course_offering__semester=current_semester)
     co = news.course_offering
     news_prev = CourseOfferingNewsFactory(course_offering__city_id='spb',
-                                          course_offering__course=co.course,
+                                          course_offering__meta_course=co.meta_course,
                                           course_offering__semester=prev_term)
     co_prev = news_prev.course_offering
     response = client.get(co.get_absolute_url())
@@ -329,11 +329,12 @@ def test_course_offering_news_tab_permissions(client):
 def test_course_offering_assignments_tab_permissions(client):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
-    course = MetaCourseFactory()
+    meta_course = MetaCourseFactory()
     a = AssignmentFactory(course_offering__semester=prev_term,
-                          course_offering__course=course)
+                          course_offering__meta_course=meta_course)
     co_prev = a.course_offering
-    co = CourseOfferingFactory(course=course, semester=current_semester)
+    co = CourseOfferingFactory(meta_course=meta_course,
+                               semester=current_semester)
     teacher = TeacherCenterFactory()
     CourseOfferingTeacherFactory(teacher=teacher, course_offering=co)
     # Unauthenticated user can't see tab at all

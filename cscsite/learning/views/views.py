@@ -102,7 +102,7 @@ class TimetableTeacherView(TeacherOnlyMixin, generic.TemplateView):
                 .order_by('date', 'starts_at')
                 .select_related('venue',
                                 'course_offering',
-                                'course_offering__course',
+                                'course_offering__meta_course',
                                 'course_offering__semester'))
 
     def get_context_data(self, year, month, **kwargs):
@@ -150,7 +150,7 @@ class TimetableStudentView(StudentOnlyMixin, generic.TemplateView):
                 .order_by('date', 'starts_at')
                 .select_related('venue',
                                 'course_offering',
-                                'course_offering__course',
+                                'course_offering__meta_course',
                                 'course_offering__semester'))
 
     def get_context_data(self, year, week, **kwargs):
@@ -278,9 +278,9 @@ class CoursesListView(generic.ListView):
 
     def get_queryset(self):
         cos_qs = (CourseOffering.objects
-                  .select_related('course')
+                  .select_related('meta_course')
                   .prefetch_related('teachers')
-                  .order_by('course__name'))
+                  .order_by('meta_course__name'))
         if is_club_site():
             cos_qs = cos_qs.in_city(self.request.city_code)
         else:
@@ -328,9 +328,9 @@ class CourseTeacherListView(TeacherOnlyMixin, generic.ListView):
     def get_queryset(self):
         return (CourseOffering.objects
                 .filter(teachers=self.request.user)
-                .select_related('course', 'semester')
+                .select_related('meta_course', 'semester')
                 .prefetch_related('teachers')
-                .order_by('-semester__index', 'course__name'))
+                .order_by('-semester__index', 'meta_course__name'))
 
 
 class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
@@ -394,7 +394,7 @@ class CourseVideoListView(ListView):
         return (CourseOffering.objects
                 .filter(is_published_in_video=True)
                 .order_by('-semester__year', 'semester__type')
-                .select_related('course', 'semester'))
+                .select_related('meta_course', 'semester'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -411,8 +411,8 @@ class CourseDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         qs = (CourseOffering.objects
-              .select_related("course", "semester", "city")
-              .filter(course=self.object))
+              .select_related("meta_course", "semester", "city")
+              .filter(meta_course=self.object))
         # Separate by city only on compsciclub.ru
         if is_club_site():
             qs = qs.in_city(self.request.city_code)
@@ -440,7 +440,7 @@ class CourseClassDetailView(generic.DetailView):
     def get_queryset(self):
         return (CourseClass.objects
                 .select_related("course_offering",
-                                "course_offering__course",
+                                "course_offering__meta_course",
                                 "course_offering__semester",
                                 "venue")
                 .in_city(self.request.city_code))
@@ -721,7 +721,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         context["course_offerings"] = course_offerings
         context["assignments"] = assignments
         self.query = {
-            "course_slug": query_co.course.slug,
+            "course_slug": query_co.meta_course.slug,
             "term": query_co.semester.slug,
             "assignment": query_assignment,
             "grades": query_grade,
@@ -763,8 +763,8 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         u = self.request.user
         cs = (CourseOffering.objects
               .filter(teachers=u)
-              .select_related("course", "semester")
-              .order_by("semester__index", "course__name"))
+              .select_related("meta_course", "semester")
+              .order_by("semester__index", "meta_course__name"))
         if not cs:
             logger.warning("Teacher {} has no course sessions".format(u))
             self._redirect_to_course_list()
@@ -802,7 +802,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         course_slug = self.request.GET.get("course", "")
         try:
             co = next(c for c in course_offerings if
-                      c.course.slug == course_slug)
+                      c.meta_course.slug == course_slug)
         except StopIteration:
             # TODO: get term and redirect to entry page
             co = course_offerings[0]
@@ -834,7 +834,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
     def get_queryset(self):
         return (self.model.objects
                 .select_related('course_offering',
-                                'course_offering__course',
+                                'course_offering__meta_course',
                                 'course_offering__semester')
                 .prefetch_related('assignmentattachment_set'))
 
@@ -849,7 +849,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
             .filter(assignment__pk=self.object.pk)
             .select_related('assignment',
                             'assignment__course_offering',
-                            'assignment__course_offering__course',
+                            'assignment__course_offering__meta_course',
                             'assignment__course_offering__semester',
                             'student')
             .prefetch_related('student__groups'))
@@ -887,7 +887,7 @@ class AssignmentProgressBaseView(AccessMixin):
                 .select_related('student',
                                 'assignment',
                                 'assignment__course_offering',
-                                'assignment__course_offering__course',
+                                'assignment__course_offering__meta_course',
                                 'assignment__course_offering__semester')
                 .first())
 

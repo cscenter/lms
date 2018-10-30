@@ -131,7 +131,7 @@ def test_passed_courses():
                                     grade=GRADES.good)
                   for co in (co1, co2, co3))
     next_term = SemesterFactory.create_next(co1.semester)
-    co4 = CourseOfferingFactory(course=co1.course, is_open=False,
+    co4 = CourseOfferingFactory(meta_course=co1.meta_course, is_open=False,
                                 semester=next_term)
     e4 = EnrollmentFactory(course_offering=co4,
                            student=student,

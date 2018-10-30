@@ -7,7 +7,7 @@
     <div class="col-xs-8 col-xs-offset-2">
         {% with course_offering=enrollment.course_offering %}
         <h2 class="course-main-title mb-20">
-            {{ course_offering.course.name }}<br>
+            {{ course_offering.meta_course.name }}<br>
             <small>{% if course_offering.is_correspondence %}{% trans "Online Course" %}{% else %}{{ course_offering.city.name }}{% endif %} / {{ course_offering.semester }}</small>
         </h2>
         {% endwith %}

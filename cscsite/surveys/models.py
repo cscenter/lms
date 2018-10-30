@@ -318,7 +318,7 @@ class CourseOfferingSurvey(models.Model):
 
     def get_absolute_url(self):
         kwargs = {
-            "course_slug": self.course_offering.course.slug,
+            "course_slug": self.course_offering.meta_course.slug,
             "semester_type": self.course_offering.semester.type,
             "semester_year": self.course_offering.semester.year,
             "city_code": self.course_offering.get_city(),

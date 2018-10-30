@@ -115,7 +115,7 @@ def access_role(*, co, request_user) -> Optional[CourseRole]:
             role = CourseRole.STUDENT_RESTRICT
     # Teachers from the same course permits to view the news
     all_course_teachers = (co.courseofferingteacher_set.field.model.objects
-                           .for_course(co.course.slug)
+                           .for_course(co.meta_course.slug)
                            .values_list('teacher_id', flat=True))
     if request_user.is_teacher and request_user.pk in all_course_teachers:
         # Override student role if teacher accidentally enrolled on

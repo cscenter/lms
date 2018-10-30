@@ -10,15 +10,15 @@
     {% if user.is_curator %}{% render_bundle "supervising" "js" %}{% endif %}
 {% endblock javascripts %}
 
-{% block title %}{{ course_offering.course.name }}, {{ course_offering.semester }}{% endblock title %}
+{% block title %}{{ course_offering.meta_course.name }}, {{ course_offering.semester }}{% endblock title %}
 
 {% block content %}{% localtime off %}
 <div class="container" id="course-offering-detail-page" data-id="{{ course_offering.pk }}">
     <div class="row">
         <div class="col-xs-9">
             <h2 class="course-main-title">
-            {{ course_offering.course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_courseoffering_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
-              <small>{% if course_offering.is_correspondence %}{% trans "Online Course" %}{% else %}{{ course_offering.city.name }}{% endif %} / {{ course_offering.semester }}, <a href="{% url 'course_detail' course_offering.course.slug %}">посмотреть все семестры</a></small>
+            {{ course_offering.meta_course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_courseoffering_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
+              <small>{% if course_offering.is_correspondence %}{% trans "Online Course" %}{% else %}{{ course_offering.city.name }}{% endif %} / {{ course_offering.semester }}, <a href="{% url 'course_detail' course_offering.meta_course.slug %}">посмотреть все семестры</a></small>
             </h2>
 
             {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
@@ -57,8 +57,8 @@
                         {{ course_offering.description }}
                       {% endmarkdown %}
                     {% else %}
-                      {% markdown 3600 "course" course_offering.course.pk course_offering.course.modified %}
-                        {{ course_offering.course.description }}
+                      {% markdown 3600 "meta_course" course_offering.meta_course.pk course_offering.meta_course.modified %}
+                        {{ course_offering.meta_course.description }}
                       {% endmarkdown %}
                     {% endif %}
                     </div>

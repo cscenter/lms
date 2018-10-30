@@ -51,12 +51,12 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
     def get_name(self, obj):
-        return obj.course.name
+        return obj.meta_course.name
 
 
 class TeacherCourseListingField(serializers.RelatedField):
     def to_representation(self, value):
-        return value.course_offering.course_id
+        return value.course_offering.meta_course_id
 
 
 class TeacherSerializer(serializers.ModelSerializer):

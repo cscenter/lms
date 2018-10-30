@@ -112,9 +112,9 @@ class CourseOfferingDetailView(DetailView):
         qs = (CourseOffering.objects
               .filter(semester__type=semester_type,
                       semester__year=year,
-                      course__slug=self.kwargs['course_slug'])
+                      meta_course__slug=self.kwargs['course_slug'])
               .in_city(self.request.city_code)
-              .select_related('course', 'semester')
+              .select_related('meta_course', 'semester')
               .prefetch_related(
                     Prefetch(
                         'courseofferingteacher_set',
@@ -155,7 +155,7 @@ class CourseOfferingStudentsView(TeacherOnlyMixin, TemplateView):
         co = get_object_or_404(CourseOffering.objects
                                .filter(semester__type=semester_type,
                                        semester__year=year,
-                                       course__slug=self.kwargs['course_slug'])
+                                       meta_course__slug=self.kwargs['course_slug'])
                                .in_city(self.request.city_code))
         return {
             "co": co,
@@ -184,16 +184,16 @@ class CourseOfferingEditView(TeacherOnlyMixin, ProtectedFormMixin,
         return get_object_or_404(
             queryset.filter(semester__type=semester_type,
                             semester__year=year,
-                            course__slug=self.kwargs['course_slug']))
+                            meta_course__slug=self.kwargs['course_slug']))
 
     def get_initial(self):
         """Keep in mind that `initial` overrides values from model dict"""
         initial = super().get_initial()
         # Note: In edit view we always have an object
         if not self.object.description_ru:
-            initial["description_ru"] = self.object.course.description_ru
+            initial["description_ru"] = self.object.meta_course.description_ru
         if not self.object.description_en:
-            initial["description_en"] = self.object.course.description_en
+            initial["description_en"] = self.object.meta_course.description_en
         return initial
 
     def is_form_allowed(self, user, obj):

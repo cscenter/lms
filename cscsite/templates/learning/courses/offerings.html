@@ -23,7 +23,7 @@
             <ul>
             {% for course_offering in semester.courseofferings %}
               <li>
-                <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
+                <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.meta_course.name }}</a>
                 {% if request.site.domain == "compscicenter.ru" and course_offering.is_open and course_offering.teachers.all|length == 1 %}<span class="text-nowrap">{% endif %}({% for teacher in course_offering.teachers.all %}{% if request.site.domain == "compscicenter.ru" and course_offering.is_open and course_offering.teachers.all|length != 1 and forloop.last %}<span class="text-nowrap">{% endif %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;color: #333;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}){% if request.site.domain == "compscicenter.ru" and course_offering.is_open %}&nbsp;<sup class="text-nowrap">Курс CS клуба</sup>{% endif %}
                   {% if request.site.domain == "compscicenter.ru" and course_offering.is_open and course_offering.teachers.all|length == 1 %}</span>{% endif %}
               </li>

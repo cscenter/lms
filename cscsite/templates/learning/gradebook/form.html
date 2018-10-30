@@ -52,7 +52,7 @@
                       {% for cos in co_by_semester %}
                       <li role="presentation" class="dropdown-header">{{ cos.grouper }}</li>
                       {% for co in cos.list %}
-                      <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ co.get_gradebook_url }}">{{ co.course }}</a></li>
+                      <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ co.get_gradebook_url }}">{{ co.meta_course }}</a></li>
                       {% endfor %}
                       {% endfor %}
                     </ul>

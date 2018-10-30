@@ -217,12 +217,12 @@ def test_report_for_target_term(rf):
     # `co_active` headers not in report for passed term
     assert len(progress_report.headers) == (STATIC_HEADERS_CNT +
                                             CENTER_CLUB_COURSES_HEADERS_CNT)
-    assert co_active.course.name not in progress_report.headers
+    assert co_active.meta_course.name not in progress_report.headers
     # Check `not_graded` values included for passed target term
     student1_data_index = 0
     student2_data_index = 1
     assert progress_report.data[student2_data_index].pk == student2.pk
-    course_header_grade = '{}, оценка'.format(co1.course.name)
+    course_header_grade = '{}, оценка'.format(co1.meta_course.name)
     assert course_header_grade in progress_report.headers
     check_value_for_header(progress_report, course_header_grade,
                            student2_data_index, e_old2.grade_display.lower())
@@ -230,7 +230,7 @@ def test_report_for_target_term(rf):
     progress_report = get_progress_report(s)
     assert len(progress_report.headers) == (STATIC_HEADERS_CNT +
                                             CENTER_CLUB_COURSES_HEADERS_CNT)
-    course_header_grade = '{}, оценка'.format(co_active.course.name)
+    course_header_grade = '{}, оценка'.format(co_active.meta_course.name)
     assert progress_report.data[student1_data_index].pk == student1.pk
     check_value_for_header(progress_report, course_header_grade,
                            student1_data_index, e_active.grade_display.lower())
@@ -252,7 +252,7 @@ def test_report_for_target_term(rf):
                                  grade=getattr(GRADES, "pass"))
     progress_report = get_progress_report(prev_s)
     assert progress_report.data[student1_data_index].pk == student1.pk
-    course_header_grade = '{}, оценка'.format(co2.course.name)
+    course_header_grade = '{}, оценка'.format(co2.meta_course.name)
     check_value_for_header(progress_report, course_header_grade,
                            student1_data_index, e.grade_honest.lower())
     # Test `success_total_lt_target_semester` value

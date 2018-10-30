@@ -584,7 +584,7 @@ class UserReferenceTests(MyUtilitiesMixin, TestCase):
         for s in semesters:
             e = EnrollmentFactory.create(
                 course_offering=CourseOfferingFactory.create(
-                    course=meta_course,
+                    meta_course=meta_course,
                     semester=s),
                 student=student,
                 grade='good'

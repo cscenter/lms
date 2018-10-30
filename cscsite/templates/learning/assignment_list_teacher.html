@@ -43,8 +43,8 @@
         <h5>КУРС</h5>
         <div class="list-group inverse">
           {% for co in course_offerings %}
-            <a href="{% url "assignment_list_teacher" %}?term={{ co.semester.slug }}&course={{ co.course.slug }}&grades={{ query.grades }}&comment={{ query.comment }}"
-               data-slug="{{ co.course.slug }}" class="list-group-item{% if co.course.slug == query.course_slug %} active{% endif %}" title="{{ co.course.name }}">{{ co.course.name }}</a>
+            <a href="{% url "assignment_list_teacher" %}?term={{ co.semester.slug }}&course={{ co.meta_course.slug }}&grades={{ query.grades }}&comment={{ query.comment }}"
+               data-slug="{{ co.meta_course.slug }}" class="list-group-item{% if co.meta_course.slug == query.course_slug %} active{% endif %}" title="{{ co.meta_course.name }}">{{ co.meta_course.name }}</a>
           {% endfor %}
         </div>
     {% endif %}

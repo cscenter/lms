@@ -63,7 +63,7 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseOffering
 
-    course = factory.SubFactory(MetaCourseFactory)
+    meta_course = factory.SubFactory(MetaCourseFactory)
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
 

@@ -42,7 +42,7 @@
           </thead>
             {% for course_offering in teacher.course_offerings %}
               <tr>
-                <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a></td>
+                <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.meta_course.name }}</a></td>
                 <td class="nowrap">{{ course_offering.semester }}</td>
               </tr>
             {% endfor %}

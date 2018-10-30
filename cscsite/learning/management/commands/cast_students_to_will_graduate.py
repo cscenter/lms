@@ -58,7 +58,7 @@ Requirements:
                             'enrollment_set',
                             queryset=(Enrollment.active
                                       .select_related("course_offering",
-                                                      "course_offering__course",
+                                                      "course_offering__meta_course",
                                                       "course_offering__semester")
                                       .annotate(classes_total=Count('course_offering__courseclass'))
                                       .order_by()),

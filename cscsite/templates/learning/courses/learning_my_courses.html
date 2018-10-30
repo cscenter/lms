@@ -30,7 +30,7 @@
             {% for course_offering in ongoing_enrolled %}
             <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
                 <td>
-                <a href="{{ course_offering.get_absolute_url }}" class="title">{{ course_offering.course.name }}</a> &nbsp;
+                <a href="{{ course_offering.get_absolute_url }}" class="title">{{ course_offering.meta_course.name }}</a> &nbsp;
                   <span class="badge assignment-status {{ course_offering.grading_type_css_mixin }} {{ course_offering.enrollment.grade }}">{{ course_offering.enrollment.grade_honest }}</span><br>
               {% trans "Professors" %}:
                 {% for teacher in course_offering.teachers.all %}
@@ -52,7 +52,7 @@
             <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
               <td>
                 <a class="title" href="{{ course_offering.get_absolute_url }}">
-                    {{ course_offering.course.name }}</a>{% if request.site.domain == "compscicenter.ru" and course_offering.is_open %}<span>, курс CS клуба</span>{% endif %}<br>
+                    {{ course_offering.meta_course.name }}</a>{% if request.site.domain == "compscicenter.ru" and course_offering.is_open %}<span>, курс CS клуба</span>{% endif %}<br>
               {% trans "Professors" %}:
                 {% for teacher in course_offering.teachers.all %}
                 <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
@@ -92,7 +92,7 @@
             {% for course_offering in archive_enrolled %}
                 <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
                   <td>
-                    <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a>
+                    <a href="{{ course_offering.get_absolute_url }}">{{ course_offering.meta_course.name }}</a>
                   </td>
                   <td><span class="badge assignment-status {{ course_offering.grading_type_css_mixin }} {{ course_offering.enrollment.grade }}">{{ course_offering.enrollment.grade_honest }}</span></td>
                   <td>{{ course_offering.semester }}</td>

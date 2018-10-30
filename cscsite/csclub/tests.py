@@ -28,9 +28,9 @@ class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
         co_kzn = CourseOfferingFactory.create(semester=current_semester,
                                           city="kzn")
         resp = self.client.get(reverse('course_list'))
-        self.assertNotContains(resp, co_center.course.name)
-        self.assertContains(resp, co_spb.course.name)
-        self.assertNotContains(resp, co_kzn.course.name)
+        self.assertNotContains(resp, co_center.meta_course.name)
+        self.assertContains(resp, co_spb.meta_course.name)
+        self.assertNotContains(resp, co_kzn.meta_course.name)
 
     def test_student_list_center_site(self):
         s = UserFactory.create(groups=[PARTICIPANT_GROUPS.STUDENT_CENTER])
