@@ -19,7 +19,7 @@ from core.utils import admin_datetime, is_club_site
 from learning.models import InternshipCategory
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import User
-from .models import Course, Semester, CourseOffering, Venue, \
+from .models import MetaCourse, Semester, CourseOffering, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
@@ -57,7 +57,7 @@ class StudyProgramAdmin(admin.ModelAdmin):
     }
 
 
-class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
+class MetaCourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_display = ['name_ru', 'name_en']
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
@@ -362,7 +362,7 @@ class InternshipAdmin(admin.ModelAdmin):
 
 admin.site.register(AreaOfStudy, AreaOfStudyAdmin)
 admin.site.register(StudyProgram, StudyProgramAdmin)
-admin.site.register(Course, CourseAdmin)
+admin.site.register(MetaCourse, MetaCourseAdmin)
 admin.site.register(OnlineCourse, OnlineCourseAdmin)
 admin.site.register(InternationalSchool, InternationalSchoolAdmin)
 admin.site.register(Semester)

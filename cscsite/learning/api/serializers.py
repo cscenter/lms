@@ -7,7 +7,7 @@ from django.utils.http import urlquote
 from rest_framework import serializers
 
 from core.utils import render_markdown
-from learning.models import Course, CourseOffering
+from learning.models import MetaCourse, CourseOffering
 from users.models import User
 
 

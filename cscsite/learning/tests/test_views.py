@@ -140,29 +140,29 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
 
 class CourseDetailTests(MyUtilitiesMixin, TestCase):
     def test_course_detail(self):
-        c = CourseFactory.create()
+        mc = MetaCourseFactory.create()
         s1 = SemesterFactory(year=2016)
         s2 = SemesterFactory(year=2017)
-        co1 = CourseOfferingFactory(semester=s1, course=c,
+        co1 = CourseOfferingFactory(semester=s1, course=mc,
                                     city=settings.DEFAULT_CITY_CODE)
-        co2 = CourseOfferingFactory(semester=s2, course=c,
+        co2 = CourseOfferingFactory(semester=s2, course=mc,
                                     city=settings.DEFAULT_CITY_CODE)
-        response = self.client.get(c.get_absolute_url())
-        self.assertContains(response, c.name)
-        self.assertContains(response, c.description)
+        response = self.client.get(mc.get_absolute_url())
+        self.assertContains(response, mc.name)
+        self.assertContains(response, mc.description)
         # Course offerings not repeated, used set to compare
         assert {c.pk for c in response.context['offerings']} == {co1.pk, co2.pk}
         co2.city_id = "kzn"
         co2.save()
-        response = self.client.get(c.get_absolute_url())
+        response = self.client.get(mc.get_absolute_url())
         if settings.SITE_ID == settings.CENTER_SITE_ID:
             assert {c.pk for c in response.context['offerings']} == {co1.pk}
 
 
 class CourseUpdateTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
-        c = CourseFactory.create()
-        url = reverse('course_edit', args=[c.slug])
+        mc = MetaCourseFactory.create()
+        url = reverse('course_edit', args=[mc.slug])
         all_test_groups = [
             [],
             [PARTICIPANT_GROUPS.TEACHER_CENTER],
@@ -178,15 +178,15 @@ class CourseUpdateTests(MyUtilitiesMixin, TestCase):
             200, self.client.post(url, {'name': "foobar"}).status_code)
 
     def test_update(self):
-        c = CourseFactory.create()
-        url = reverse('course_edit', args=[c.slug])
+        mc = MetaCourseFactory.create()
+        url = reverse('course_edit', args=[mc.slug])
         self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
-        fields = model_to_dict(c)
+        fields = model_to_dict(mc)
         # Note: Create middleware for lang request support in cscenter app
         # or define locale value explicitly
         fields.update({'name_ru': "foobar"})
         self.assertEqual(302, self.client.post(url, fields).status_code)
-        self.assertEqual("foobar", Course.objects.get(pk=c.pk).name_ru)
+        self.assertEqual("foobar", MetaCourse.objects.get(pk=mc.pk).name_ru)
 
 
 class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):

@@ -18,7 +18,7 @@ from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU
-from .models import Course, CourseOffering, CourseOfferingNews, \
+from .models import MetaCourse, CourseOffering, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, Enrollment
 
 DROP_ATTACHMENT_LINK = """
@@ -160,7 +160,7 @@ class CourseForm(forms.ModelForm):
         return helper
 
     class Meta:
-        model = Course
+        model = MetaCourse
         fields = ['name_ru', 'name_en', 'description_ru', 'description_en']
 
 

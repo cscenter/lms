@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from learning.factories import CourseFactory, CourseOfferingFactory, \
+from learning.factories import MetaCourseFactory, CourseOfferingFactory, \
     SemesterFactory, EnrollmentFactory
 from learning.settings import PARTICIPANT_GROUPS as GROUPS, STUDENT_STATUS, \
     SEMESTER_TYPES, GRADES
@@ -140,9 +140,9 @@ def test_student_search_enrollments(client, curator):
     assert response.json()["count"] == 1
     s1 = SemesterFactory.create(year=2014, type=SEMESTER_TYPES.spring)
     s2 = SemesterFactory.create(year=2014, type=SEMESTER_TYPES.autumn)
-    c1, c2 = CourseFactory.create_batch(2)
-    co1 = CourseOfferingFactory.create(course=c1, semester=s1)
-    co2 = CourseOfferingFactory.create(course=c1, semester=s2)
+    mc1, mc2 = MetaCourseFactory.create_batch(2)
+    co1 = CourseOfferingFactory.create(course=mc1, semester=s1)
+    co2 = CourseOfferingFactory.create(course=mc1, semester=s2)
     e1 = EnrollmentFactory.create(student=student, course_offering=co1,
                                   grade=GRADES.good)
     e2 = EnrollmentFactory.create(student=student, course_offering=co2,
@@ -153,7 +153,7 @@ def test_student_search_enrollments(client, curator):
     e2.save()
     response = client.get(ENROLLMENTS_URL.format("1"))
     assert response.json()["count"] == 1
-    co3 = CourseOfferingFactory.create(course=c2)
+    co3 = CourseOfferingFactory.create(course=mc2)
     EnrollmentFactory.create(student=student, grade=GRADES.good,
                              course_offering=co3)
     response = client.get(ENROLLMENTS_URL.format("2"))
