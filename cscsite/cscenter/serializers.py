@@ -9,7 +9,7 @@ class CourseSerializer(serializers.Serializer):
                      "name": u.get_abbreviated_name()} for u in
                     obj.teachers.all()]
         return {
-            "name": obj.course.name,
+            "name": obj.meta_course.name,
             "url": obj.get_absolute_url(),
             "is_open": obj.is_open,
             "with_video": obj.materials_video,

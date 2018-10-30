@@ -78,7 +78,7 @@ class IndexView(generic.TemplateView):
                 CourseOffering.objects
                 .in_city(self.request.city_code)
                 .filter(is_open=True, semester=featured_term.pk)
-                .select_related('course', 'semester')
+                .select_related('meta_course', 'semester')
                 .prefetch_related(
                     'teachers',
                     Prefetch(
@@ -86,7 +86,7 @@ class IndexView(generic.TemplateView):
                         queryset=courseclass_queryset,
                         to_attr='classes'
                     ))
-                .order_by('completed_at', 'course__name'))
+                .order_by('completed_at', 'meta_course__name'))
             # Sort courses by nearest class
             courses.sort(key=self.cmp_courses_by_nearest_class)
             context['courses'] = courses
@@ -129,7 +129,7 @@ class TeacherDetailView(DetailView):
         co_queryset = (CourseOffering.objects
                        .in_city(self.request.city_code)
                        .filter(is_open=True)
-                       .select_related('semester', 'course'))
+                       .select_related('semester', 'meta_course'))
         return (get_user_model()._default_manager
                 .prefetch_related(
                     Prefetch('teaching_set',
@@ -181,7 +181,7 @@ class ClubClassesFeed(ICalFeed):
                 .select_related('venue',
                                 'course_offering',
                                 'course_offering__semester',
-                                'course_offering__course'))
+                                'course_offering__meta_course'))
 
     def item_guid(self, item):
         return "courseclasses-{}@compsciclub.ru".format(item.pk)

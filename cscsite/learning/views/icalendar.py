@@ -132,7 +132,7 @@ class ICalClassesView(ICalView):
         cc_related = ['venue',
                       'course_offering',
                       'course_offering__semester',
-                      'course_offering__course']
+                      'course_offering__meta_course']
         as_teacher = (CourseClass.objects
                       .filter(course_offering__teachers=user)
                       .select_related(*cc_related))
@@ -193,13 +193,13 @@ class ICalAssignmentsView(ICalView):
                               assignment__deadline_at__gt=timezone.now())
                       .select_related('assignment',
                                       'assignment__course_offering',
-                                      'assignment__course_offering__course',
+                                      'assignment__course_offering__meta_course',
                                       'assignment__course_offering__semester'))
         as_teacher = (Assignment.objects
                       .filter(course_offering__teachers=user,
                               deadline_at__gt=timezone.now())
                       .select_related('course_offering',
-                                      'course_offering__course',
+                                      'course_offering__meta_course',
                                       'course_offering__semester'))
 
         AS_TEACHER_TYPE, AS_STUDENT_TYPE = 'teaching', 'learning'
@@ -216,7 +216,7 @@ class ICalAssignmentsView(ICalView):
             uid = "assignments-{}-{}-{}@{}".format(
                 user.pk, assignment.pk, data_type, self.request.site.domain)
             summary = "{} ({})".format(
-                assignment.title, assignment.course_offering.course.name)
+                assignment.title, assignment.course_offering.meta_course.name)
             categories = 'CSC,ASSIGNMENT,{}'.format(data_type.upper())
             dtstart = assignment.deadline_at
             dtend = assignment.deadline_at + relativedelta(hours=1)

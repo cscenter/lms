@@ -34,7 +34,7 @@
         <tbody>
               {% for course_offering in courses %}
                 <tr>
-                  <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.course.name }}</a></td>
+                  <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.meta_course.name }}</a></td>
                   <td>{% for teacher in course_offering.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
                   <td>
                     {% if course_offering.classes %}

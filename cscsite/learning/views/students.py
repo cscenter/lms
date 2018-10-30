@@ -96,13 +96,13 @@ class StudentAssignmentListView(StudentOnlyMixin, ListView):
                 .filter(student=self.request.user,
                         assignment__course_offering__semester=current_semester)
                 .order_by('assignment__deadline_at',
-                          'assignment__course_offering__course__name',
+                          'assignment__course_offering__meta_course__name',
                           'pk')
                 # FIXME: this prefetch doesn't seem to work properly
                 .prefetch_related('assignmentnotification_set')
                 .select_related('assignment',
                                 'assignment__course_offering',
-                                'assignment__course_offering__course',
+                                'assignment__course_offering__meta_course',
                                 'assignment__course_offering__semester',
                                 'student'))
 
@@ -157,7 +157,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, FormView):
             raise Http404
         course_offering = get_object_or_404(
             CourseOffering.objects
-            .filter(course__slug=course_slug,
+            .filter(meta_course__slug=course_slug,
                     semester__year=semester_year,
                     semester__type=semester_type)
             .in_city(self.request.city_code)
@@ -204,7 +204,7 @@ class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
                 course_offering__city_id=self.request.city_code,
                 course_offering__semester__type=semester_type,
                 course_offering__semester__year=year,
-                course_offering__course__slug=self.kwargs['course_slug'])
+                course_offering__meta_course__slug=self.kwargs['course_slug'])
             .select_related("course_offering", "course_offering__semester"))
         self._course_offering = enrollment.course_offering
         if not enrollment.course_offering.enrollment_is_open:

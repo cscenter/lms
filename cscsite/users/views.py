@@ -115,7 +115,7 @@ class TeacherDetailView(DetailView):
             filters["city_code"] = self.request.city_code
         co_queryset = (CourseOffering.objects
                        .in_city(**filters)
-                       .select_related('semester', 'course'))
+                       .select_related('semester', 'meta_course'))
         return (User.objects
                 .prefetch_related(
                     Prefetch('teaching_set',
@@ -138,7 +138,7 @@ class UserDetailView(generic.DetailView):
         enrollments_queryset = Enrollment.active.select_related(
             'course_offering',
             'course_offering__semester',
-            'course_offering__course'
+            'course_offering__meta_course'
         )
         shad_courses_queryset = (SHADCourseRecord.objects
                                  .select_related("semester"))
@@ -155,7 +155,7 @@ class UserDetailView(generic.DetailView):
             filters["city_code"] = self.request.city_code
         co_queryset = (CourseOffering.objects
                        .in_city(**filters)
-                       .select_related('semester', 'course'))
+                       .select_related('semester', 'meta_course'))
         prefetch_list = [
             Prefetch('teaching_set', queryset=co_queryset.all()),
             Prefetch('shadcourserecord_set', queryset=shad_courses_queryset),
@@ -264,12 +264,12 @@ class UserReferenceDetailView(CuratorOnlyMixin, generic.DetailView):
         for e in student_info.enrollments:
             if e.created > self.object.created:
                 continue
-            course_id = e.course_offering.course_id
-            if course_id in enrollments:
-                if e.grade > enrollments[course_id].grade:
-                    enrollments[course_id] = e
+            meta_course_id = e.course_offering.meta_course_id
+            if meta_course_id in enrollments:
+                if e.grade > enrollments[meta_course_id].grade:
+                    enrollments[meta_course_id] = e
             else:
-                enrollments[course_id] = e
+                enrollments[meta_course_id] = e
         context['user_enrollments'] = enrollments
         context['shads'] = filter(lambda x: x.created < self.object.created,
                                   student_info.shads)

@@ -201,7 +201,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                     excellent_total += 1
                 elif enrollment.grade == GRADES.good:
                     good_total += 1
-                unique_courses.add(enrollment.course_offering.course)
+                unique_courses.add(enrollment.course_offering.meta_course)
                 total_hours += enrollment.course_offering.courseclass_set.count() * 1.5
                 for teacher in enrollment.course_offering.teachers.all():
                     unique_teachers.add(teacher.pk)
@@ -288,7 +288,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             for e in student.enrollments:
                 course = DiplomaCourse(
                     type="course",
-                    name=tex(e.course_offering.course.name),
+                    name=tex(e.course_offering.meta_course.name),
                     teachers=", ".join(t.get_abbreviated_name() for t in
                                        e.course_offering.teachers.all()),
                     final_grade=str(e.grade_honest).lower(),
@@ -477,14 +477,14 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
         current_term_index = get_term_index(year, term)
         all_courses_in_term = (CourseOffering.objects
                                .filter(semester__index=current_term_index)
-                               .select_related("course"))
+                               .select_related("meta_course"))
         # Get participants
         query_courses = self.request.GET.getlist('course_offerings[]', [])
         query_courses = [int(t) for t in query_courses if t]
         results = list(
             CourseOffering.objects
             .filter(pk__in=query_courses)
-            .select_related("course")
+            .select_related("meta_course")
             .prefetch_related(
                 Prefetch("enrollment_set",
                          queryset=(Enrollment.active
@@ -635,7 +635,7 @@ class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
                  .filter(pk=survey_pk)
                  .select_related("form",
                                  "course_offering",
-                                 "course_offering__course",
+                                 "course_offering__meta_course",
                                  "course_offering__semester"))
         survey = get_object_or_404(query)
         report = SurveySubmissionsReport(survey)
@@ -651,7 +651,7 @@ class SurveySubmissionsStatsView(CuratorOnlyMixin, TemplateView):
                  .filter(pk=survey_pk)
                  .select_related("form",
                                  "course_offering",
-                                 "course_offering__course",
+                                 "course_offering__meta_course",
                                  "course_offering__semester"))
         survey = get_object_or_404(query)
         report = SurveySubmissionsStats(survey)

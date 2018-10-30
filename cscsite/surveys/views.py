@@ -19,9 +19,9 @@ class CourseSurveyDetailView(FormView):
         survey = get_object_or_404(
             CourseOfferingSurvey.objects
                 .select_related("form", "course_offering",
-                                "course_offering__course",
+                                "course_offering__meta_course",
                                 "course_offering__semester"),
-            course_offering__course__slug=self.kwargs['course_slug'],
+            course_offering__meta_course__slug=self.kwargs['course_slug'],
             course_offering__city_id=self.request.city_code,
             course_offering__semester__year=self.kwargs['semester_year'],
             course_offering__semester__type=self.kwargs['semester_type'],
@@ -42,7 +42,7 @@ form_detail = CourseSurveyDetailView.as_view()
 def form_success(request, slug, **kwargs):
     co = get_object_or_404(
         CourseOffering.objects.filter(
-            course__slug=kwargs['course_slug'],
+            meta_course__slug=kwargs['course_slug'],
             city_id=request.city_code,
             semester__year=kwargs['semester_year'],
             semester__type=kwargs['semester_type']))

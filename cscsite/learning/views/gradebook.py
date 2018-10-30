@@ -35,8 +35,8 @@ class _GradeBookDispatchView(generic.ListView):
 
     def get_co_queryset(self):
         return (CourseOffering.objects
-                .select_related("course")
-                .order_by("course__name"))
+                .select_related("meta_course")
+                .order_by("meta_course__name"))
 
     def get_queryset(self):
         # FIXME: Is it ok to use 'spb' here?
@@ -109,14 +109,14 @@ def _get_course_offering(get_params, user) -> Optional[CourseOffering]:
     try:
         filter_kwargs = dict(
             city=get_params['city'].lower(),
-            course__slug=get_params['course_slug'],
+            meta_course__slug=get_params['course_slug'],
             semester__type=get_params['semester_type'],
             semester__year=int(get_params['semester_year'])
         )
         if not user.is_curator:
             filter_kwargs["teachers"] = user
         return (CourseOffering.objects
-                .select_related('semester', 'course')
+                .select_related('semester', 'meta_course')
                 .get(**filter_kwargs))
     except (ValueError, KeyError, AttributeError, ObjectDoesNotExist):
         return None
@@ -205,7 +205,7 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
                                 .filter(**filter_kwargs)
                                 .order_by('-semester__index',
                                           '-pk')
-                                .select_related('semester', 'course'))
+                                .select_related('semester', 'meta_course'))
         context['course_offering_list'] = course_offering_list
         context['user_type'] = self.user_type
 

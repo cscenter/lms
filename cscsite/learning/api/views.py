@@ -22,12 +22,12 @@ class CourseList(ListAPIView):
     def get_queryset(self):
         return (CourseOffering.objects
                 .from_center_foundation()
-                .select_related("course")
+                .select_related("meta_course")
                 .exclude(semester__type=Semester.TYPES.summer)
                 .filter(is_open=False)
-                .only("course_id", "course__name", "semester__index")
-                .order_by("course__name")
-                .distinct("course__name"))
+                .only("meta_course_id", "meta_course__name", "semester__index")
+                .order_by("meta_course__name")
+                .distinct("meta_course__name"))
 
 
 class TeacherList(ListAPIView):
@@ -49,7 +49,7 @@ class TeacherList(ListAPIView):
             term_index = get_term_index(CENTER_FOUNDATION_YEAR,
                                         Semester.TYPES.autumn)
             queryset = queryset.filter(
-                courseofferingteacher__course_offering__course_id=course,
+                courseofferingteacher__course_offering__meta_course_id=course,
                 courseofferingteacher__course_offering__semester__index__gte=term_index)
         queryset = queryset.prefetch_related(
             Prefetch(
@@ -58,10 +58,10 @@ class TeacherList(ListAPIView):
                           .select_related("course_offering",
                                           "course_offering__semester")
                           .only("teacher_id",
-                                "course_offering__course_id",
+                                "course_offering__meta_course_id",
                                 "course_offering__semester__index")
-                          .order_by("teacher_id", "course_offering__course__id")
-                          .distinct("teacher_id", "course_offering__course__id"))
+                          .order_by("teacher_id", "course_offering__meta_course__id")
+                          .distinct("teacher_id", "course_offering__meta_course__id"))
             )
 
         )

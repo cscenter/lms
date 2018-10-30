@@ -40,7 +40,7 @@ class CommonTests(TestCase):
         self.assertIn(smart_text(semester.year), smart_text(semester))
         self.assertIn('spring', smart_text(semester))
         co = CourseOfferingFactory.create()
-        self.assertIn(smart_text(co.course), smart_text(co))
+        self.assertIn(smart_text(co.meta_course), smart_text(co))
         self.assertIn(smart_text(co.semester), smart_text(co))
         con = CourseOfferingNewsFactory.create()
         self.assertIn(smart_text(con.title), smart_text(con))
@@ -149,14 +149,14 @@ class CourseOfferingTests(TestCase):
         old_now = timezone.now
         timezone.now = lambda: (datetime.datetime(some_year, 4, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((CourseOffering(course=MetaCourseFactory(name="Test course"),
+        n_ongoing = sum((CourseOffering(meta_course=MetaCourseFactory(name="Test course"),
                                         semester=semester)
                          .in_current_term)
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = lambda: (datetime.datetime(some_year, 11, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((CourseOffering(course=MetaCourseFactory(name="Test course"),
+        n_ongoing = sum((CourseOffering(meta_course=MetaCourseFactory(name="Test course"),
                                         semester=semester)
                          .in_current_term)
                         for semester in semesters)
@@ -166,7 +166,8 @@ class CourseOfferingTests(TestCase):
     def test_completed_at_default(self):
         semester = SemesterFactory(year=2017, type=Semester.TYPES.autumn)
         meta_course = MetaCourseFactory()
-        co = CourseOfferingFactory.build(course=meta_course, semester=semester)
+        co = CourseOfferingFactory.build(meta_course=meta_course,
+                                         semester=semester)
         assert not co.completed_at
         co.save()
         next_term_dt = next_term_starts_at(semester.index, co.get_city_timezone())
@@ -196,7 +197,7 @@ class CourseClassTests(TestCase):
         cc = CourseClassFactory.create()
         fname = cc._slides_file_name(slide_fname)
         co = cc.course_offering
-        self.assertIn(co.course.slug.replace("-", "_"), fname)
+        self.assertIn(co.meta_course.slug.replace("-", "_"), fname)
         self.assertIn(co.semester.slug.replace("-", "_"), fname)
         _, ext = os.path.splitext(slide_fname)
         self.assertIn(ext, fname)
@@ -506,12 +507,12 @@ def test_gradefield():
 @pytest.mark.django_db
 def test_course_offering_get_reviews(settings):
     meta_course1, meta_course2 = MetaCourseFactory.create_batch(2)
-    CourseOfferingFactory(course=meta_course1, city_id='spb',
+    CourseOfferingFactory(meta_course=meta_course1, city_id='spb',
                           semester__year=2015, reviews='aaa')
-    CourseOfferingFactory(course=meta_course2, city_id='spb',
+    CourseOfferingFactory(meta_course=meta_course2, city_id='spb',
                           semester__year=2015, reviews='zzz')
-    co = CourseOfferingFactory(course=meta_course1, city_id='spb',
+    co = CourseOfferingFactory(meta_course=meta_course1, city_id='spb',
                                semester__year=2016, reviews='bbb')
-    CourseOfferingFactory(course=meta_course1, city_id='nsk',
+    CourseOfferingFactory(meta_course=meta_course1, city_id='nsk',
                           semester__year=2016, reviews='ccc')
     assert len(co.get_reviews()) == 2

@@ -208,7 +208,7 @@ class Semester(models.Model):
 
 class CourseOffering(TimeStampedModel):
     objects = CourseOfferingDefaultManager()
-    course = models.ForeignKey(
+    meta_course = models.ForeignKey(
         MetaCourse,
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
@@ -271,13 +271,13 @@ class CourseOffering(TimeStampedModel):
                                 default=settings.LANGUAGE_CODE)
 
     class Meta:
-        ordering = ["-semester", "course__created"]
+        ordering = ["-semester", "meta_course__created"]
         verbose_name = _("Course offering")
         verbose_name_plural = _("Course offerings")
-        unique_together = [('course', 'semester', 'city')]
+        unique_together = [('meta_course', 'semester', 'city')]
 
     def __str__(self):
-        return "{0}, {1}".format(smart_text(self.course),
+        return "{0}, {1}".format(smart_text(self.meta_course),
                                  smart_text(self.semester))
 
     def save(self, *args, **kwargs):
@@ -294,7 +294,7 @@ class CourseOffering(TimeStampedModel):
         patterns.
         """
         return {
-            "course_slug": self.course.slug,
+            "course_slug": self.meta_course.slug,
             "semester_slug": self.semester.slug,
             "city_code": self.get_city()
         }
@@ -340,7 +340,7 @@ class CourseOffering(TimeStampedModel):
         else:
             url_name = "markssheet_teacher"
         return reverse(url_name, kwargs={
-            "course_slug": self.course.slug,
+            "course_slug": self.meta_course.slug,
             "city": self.get_city(),
             "semester_type": self.semester.type,
             "semester_year": self.semester.year,
@@ -348,7 +348,7 @@ class CourseOffering(TimeStampedModel):
     # TODO: Replace with `get_gradebook_url` after migrating to jinja2
     def get_gradebook_csv_url(self):
         return reverse("markssheet_teacher_csv", kwargs={
-            "course_slug": self.course.slug,
+            "course_slug": self.meta_course.slug,
             "city": self.get_city(),
             "semester_type": self.semester.type,
             "semester_year": self.semester.year,
@@ -556,7 +556,7 @@ class CourseOfferingNews(TimeStampedModel):
 
     def get_update_url(self):
         return city_aware_reverse('course_offering_news_update', kwargs={
-            "course_slug": self.course_offering.course.slug,
+            "course_slug": self.course_offering.meta_course.slug,
             "semester_slug": self.course_offering.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
@@ -564,7 +564,7 @@ class CourseOfferingNews(TimeStampedModel):
 
     def get_stats_url(self):
         return city_aware_reverse('course_offering_news_unread', kwargs={
-            "course_slug": self.course_offering.course.slug,
+            "course_slug": self.course_offering.meta_course.slug,
             "semester_slug": self.course_offering.semester.slug,
             "city_code": self.get_city(),
             "news_pk": self.pk
@@ -572,7 +572,7 @@ class CourseOfferingNews(TimeStampedModel):
 
     def get_delete_url(self):
         return city_aware_reverse('course_offering_news_delete', kwargs={
-            "course_slug": self.course_offering.course.slug,
+            "course_slug": self.course_offering.meta_course.slug,
             "semester_slug": self.course_offering.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
@@ -667,7 +667,7 @@ def courseclass_slides_file_name(self, filename):
     _, ext = os.path.splitext(filename)
     timestamp = self.date.strftime("%Y_%m_%d")
     course_offering = ("{0}_{1}"
-                       .format(self.course_offering.course.slug,
+                       .format(self.course_offering.meta_course.slug,
                                self.course_offering.semester.slug)
                        .replace("-", "_"))
     filename = ("{0}_{1}{2}"
@@ -743,14 +743,14 @@ class CourseClass(TimeStampedModel):
     def get_absolute_url(self):
         return city_aware_reverse('class_detail', kwargs={
            "city_code": self.get_city(),
-           "course_slug": self.course_offering.course.slug,
+           "course_slug": self.course_offering.meta_course.slug,
            "semester_slug": self.course_offering.semester.slug,
            "pk": self.pk
         })
 
     def get_update_url(self):
         return city_aware_reverse('course_class_update', kwargs={
-            "course_slug": self.course_offering.course.slug,
+            "course_slug": self.course_offering.meta_course.slug,
             "semester_slug": self.course_offering.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
@@ -758,7 +758,7 @@ class CourseClass(TimeStampedModel):
 
     def get_delete_url(self):
         return city_aware_reverse('course_class_delete', kwargs={
-            "course_slug": self.course_offering.course.slug,
+            "course_slug": self.course_offering.meta_course.slug,
             "semester_slug": self.course_offering.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
@@ -857,7 +857,7 @@ class CourseClassAttachment(TimeStampedModel, object):
 
     def get_delete_url(self):
         return city_aware_reverse('course_class_attachment_delete', kwargs={
-            "course_slug": self.course_class.course_offering.course.slug,
+            "course_slug": self.course_class.course_offering.meta_course.slug,
             "semester_slug": self.course_class.course_offering.semester.slug,
             "city_code": self.get_city(),
             "class_pk": self.course_class.pk,
@@ -945,7 +945,7 @@ class Assignment(TimeStampedModel):
 
     def get_update_url(self):
         return city_aware_reverse('assignment_update', kwargs={
-            "course_slug": self.course_offering.course.slug,
+            "course_slug": self.course_offering.meta_course.slug,
             "semester_slug": self.course_offering.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
@@ -953,7 +953,7 @@ class Assignment(TimeStampedModel):
 
     def get_delete_url(self):
         return city_aware_reverse('assignment_delete', kwargs={
-            "course_slug": self.course_offering.course.slug,
+            "course_slug": self.course_offering.meta_course.slug,
             "semester_slug": self.course_offering.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
@@ -1022,7 +1022,7 @@ class AssignmentAttachment(TimeStampedModel, object):
 
     def get_delete_url(self):
         return city_aware_reverse('assignment_attachment_delete', kwargs={
-            "course_slug": self.assignment.course_offering.course.slug,
+            "course_slug": self.assignment.course_offering.meta_course.slug,
             "semester_slug": self.assignment.course_offering.semester.slug,
             "assignment_pk": self.assignment.pk,
             "pk": self.pk,

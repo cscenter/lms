@@ -128,7 +128,7 @@ class Command(BaseCommand):
                 'student_assignment',
                 'student_assignment__assignment',
                 'student_assignment__assignment__course_offering',
-                'student_assignment__assignment__course_offering__course',
+                'student_assignment__assignment__course_offering__meta_course',
                 'student_assignment__student')
         )
 
@@ -150,7 +150,7 @@ class Command(BaseCommand):
                 'assignment_text': smart_text(a_s.assignment.text),
                 'student_name': smart_text(a_s.student),
                 'deadline_at': a_s.assignment.deadline_at_local(tz=tz_override),
-                'course_name': smart_text(a_s.assignment.course_offering.course)
+                'course_name': smart_text(a_s.assignment.course_offering.meta_course)
             }
             if notification.is_about_creation:
                 name = 'new_assignment'
@@ -174,7 +174,7 @@ class Command(BaseCommand):
                    'user__groups',
                    'course_offering_news',
                    'course_offering_news__course_offering',
-                   'course_offering_news__course_offering__course',
+                   'course_offering_news__course_offering__meta_course',
                    'course_offering_news__course_offering__semester'))
 
         for notification in notifications_courseoffering_news:
@@ -185,13 +185,13 @@ class Command(BaseCommand):
                 'courseoffering_link':
                     base_url + course_offering.get_absolute_url(),
                 'courseoffering_name':
-                    smart_text(course_offering.course),
+                    smart_text(course_offering.meta_course),
                 'courseoffering_news_name':
                     notification.course_offering_news.title,
                 'courseoffering_news_text':
                     notification.course_offering_news.text,
                 'course_name':
-                    smart_text(course_offering.course)
+                    smart_text(course_offering.meta_course)
             }
 
             notify(notification, name, context, self.stdout)

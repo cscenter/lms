@@ -655,7 +655,7 @@ class User(LearningPermissionsMixin, AbstractUser):
             in_current_term = e.course_offering.semester_id == current_term.pk
             if in_current_term:
                 in_current_term_total += 1
-                in_current_term_courses.add(e.course_offering.course_id)
+                in_current_term_courses.add(e.course_offering.meta_course_id)
             if e.course_offering.is_open:
                 # See queryset in `cast_students_to_will_graduate`
                 if hasattr(e, "classes_total"):
@@ -664,7 +664,7 @@ class User(LearningPermissionsMixin, AbstractUser):
                     classes_total = (e.course_offering.courseclass_set.count())
                 contribution = 0.5 if classes_total < 6 else 1
                 if is_positive_grade(e.grade):
-                    club_courses.add(e.course_offering.course_id)
+                    club_courses.add(e.course_offering.meta_course_id)
                     club_adjusted += contribution
                     in_current_term_passed += int(in_current_term)
                 elif in_current_term:
@@ -677,7 +677,7 @@ class User(LearningPermissionsMixin, AbstractUser):
                     failed_total += 1
             else:
                 if is_positive_grade(e.grade):
-                    center_courses.add(e.course_offering.course_id)
+                    center_courses.add(e.course_offering.meta_course_id)
                     in_current_term_passed += int(in_current_term)
                 elif in_current_term:
                     if is_negative_grade(e.grade):

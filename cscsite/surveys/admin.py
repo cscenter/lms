@@ -76,7 +76,7 @@ class CourseOfferingSurveyAdmin(admin.ModelAdmin):
         return (qs.select_related("course_offering",
                                   "course_offering__city",
                                   "course_offering__semester",
-                                  "course_offering__course",
+                                  "course_offering__meta_course",
                                   "form"))
 
     def get_deleted_objects(self, objs, request):

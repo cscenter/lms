@@ -42,8 +42,8 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
         courses_grouped = itertools.groupby(
             CourseOffering.objects
                 .filter(is_open=False)
-                .values("pk", "semester_id", "course__name")
-                .order_by("-semester_id", "course__name"),
+                .values("pk", "semester_id", "meta_course__name")
+                .order_by("-semester_id", "meta_course__name"),
             key=lambda x: x["semester_id"])
         courses = {term_id: list(cs) for term_id, cs in courses_grouped}
         # Find selected course and term
@@ -183,7 +183,7 @@ class StudentsDiplomasStats(APIView):
                     excellent_total += 1
                 elif enrollment.grade == GRADES.good:
                     good_total += 1
-                unique_courses.add(enrollment.course_offering.course)
+                unique_courses.add(enrollment.course_offering.meta_course)
                 hours += enrollment.course_offering.courseclass_set.count() * 1.5
                 for teacher in enrollment.course_offering.teachers.all():
                     unique_teachers.add(teacher.pk)

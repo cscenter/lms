@@ -49,7 +49,7 @@ class SurveySubmissionsReport(ReportFileOutput):
     def get_filename(self):
         today = formats.date_format(datetime.now(), "SHORT_DATE_FORMAT")
         co = self.survey.course_offering
-        return f"survey_{co.city_id}_{co.course.slug}_{co.semester.slug}_{today}"
+        return f"survey_{co.city_id}_{co.meta_course.slug}_{co.semester.slug}_{today}"
 
 
 class PollOptionResult(NamedTuple):

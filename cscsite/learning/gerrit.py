@@ -47,7 +47,7 @@ def permits_students_read_master(client, project_name, group_uuid):
 
 def get_project_name(course_offering):
     city_code = course_offering.get_city()
-    course_name = course_offering.course.slug.replace("-", "_")
+    course_name = course_offering.meta_course.slug.replace("-", "_")
     if course_offering.is_correspondence:
         return f"{course_name}_{course_offering.semester.year}"
     return f"{city_code}/{course_name}_{course_offering.semester.year}"

@@ -143,9 +143,9 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         mc = MetaCourseFactory.create()
         s1 = SemesterFactory(year=2016)
         s2 = SemesterFactory(year=2017)
-        co1 = CourseOfferingFactory(semester=s1, course=mc,
+        co1 = CourseOfferingFactory(semester=s1, meta_course=mc,
                                     city=settings.DEFAULT_CITY_CODE)
-        co2 = CourseOfferingFactory(semester=s2, course=mc,
+        co2 = CourseOfferingFactory(semester=s2, meta_course=mc,
                                     city=settings.DEFAULT_CITY_CODE)
         response = self.client.get(mc.get_absolute_url())
         self.assertContains(response, mc.name)

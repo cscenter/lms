@@ -118,7 +118,7 @@ class CourseOfferingNewsForm(forms.ModelForm):
         self.helper.layout = Layout(
             Div('title', 'text'),
             CANCEL_SAVE_PAIR)
-        super(CourseOfferingNewsForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         if course_offering:
             self.instance.course_offering = course_offering
 
@@ -254,7 +254,7 @@ class CourseClassForm(forms.ModelForm):
                 CANCEL_SAVE_PAIR
             )
         )
-        super(CourseClassForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
             city_id=course_offering.city_id)
         self.instance.course_offering = course_offering

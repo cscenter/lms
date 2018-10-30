@@ -15,7 +15,7 @@ from learning.utils import get_term_index
 class CourseOfferingTeacherQuerySet(query.QuerySet):
     def for_course(self, course_slug):
         offerings_ids = (self.model.course_offering.field.related_model.objects
-                         .filter(course__slug=course_slug)
+                         .filter(meta_course__slug=course_slug)
                          # Note: can't reset default ordering in a Subquery
                          .order_by("pk")
                          .values("pk"))
@@ -55,12 +55,12 @@ class StudentAssignmentQuerySet(query.QuerySet):
     def for_user(self, user):
         related = ['assignment',
                    'assignment__course_offering',
-                   'assignment__course_offering__course',
+                   'assignment__course_offering__meta_course',
                    'assignment__course_offering__semester']
         return (self
                 .filter(student=user)
                 .select_related(*related)
-                .order_by('assignment__course_offering__course__name',
+                .order_by('assignment__course_offering__meta_course__name',
                           'assignment__deadline_at',
                           'assignment__title'))
 
@@ -101,7 +101,7 @@ class CourseClassQuerySet(query.QuerySet):
         q = (self
              .select_related('venue',
                              'course_offering',
-                             'course_offering__course',
+                             'course_offering__meta_course',
                              'course_offering__semester')
              .order_by('date', 'starts_at'))
         # Hide summer classes on compsciclub.ru if user not enrolled in
@@ -191,21 +191,21 @@ class CourseOfferingQuerySet(models.QuerySet):
             queryset=User.objects.only("id", "first_name", "last_name",
                                        "patronymic"))
         return (self
-                .select_related('course', 'semester')
+                .select_related('meta_course', 'semester')
                 .only("pk", "city_id", "is_open",
                       "materials_video", "materials_slides", "materials_files",
-                      "course__name", "course__slug",
+                      "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type")
                 .from_center_foundation()
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',
-                          'course__name'))
+                          'meta_course__name'))
 
     def reviews_for_course(self, co):
         return (self
                 .defer("description")
                 .select_related("semester")
-                .filter(course=co.course_id,
+                .filter(meta_course_id=co.meta_course_id,
                         semester__index__lte=co.semester.index)
                 .in_city(co.get_city())
                 .exclude(reviews__isnull=True)

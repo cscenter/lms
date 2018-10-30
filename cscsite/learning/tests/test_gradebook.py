@@ -36,7 +36,7 @@ def test__get_course_offering(client, curator):
     assert co is None
     filters = {
         "city": 42,  # Attribute error
-        "course_slug": course_offering.course.slug,
+        "course_slug": course_offering.meta_course.slug,
         "semester_type": course_offering.semester.type,
         "semester_year": course_offering.semester.year,
     }
