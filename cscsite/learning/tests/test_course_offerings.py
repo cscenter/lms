@@ -14,7 +14,7 @@ from django.utils.encoding import smart_bytes
 
 from learning.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory, CourseNewsFactory, AssignmentFactory, \
-    CourseOfferingTeacherFactory, CourseClassFactory, EnrollmentFactory
+    CourseTeacherFactory, CourseClassFactory, EnrollmentFactory
 from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
@@ -201,7 +201,7 @@ def test_course_offering_is_correspondence(settings, client):
     assert response.status_code == 200
     assert response.context["tz_override"] == settings.TIME_ZONES['spb']
     # Actual teacher of the course
-    CourseOfferingTeacherFactory(course_offering=co, teacher=teacher_nsk)
+    CourseTeacherFactory(course_offering=co, teacher=teacher_nsk)
     client.login(teacher_nsk)
     response = client.get(url)
     assert response.status_code == 200
@@ -240,7 +240,7 @@ def test_course_offering_assignment_timezone(settings, client):
     assert response.context["tz_override"] == settings.TIME_ZONES['nsk']
     # Don't override timezone if current authenticated user is actual teacher of
     # the course
-    CourseOfferingTeacherFactory(course_offering=co, teacher=teacher_nsk)
+    CourseTeacherFactory(course_offering=co, teacher=teacher_nsk)
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] is None
@@ -315,7 +315,7 @@ def test_course_offering_news_tab_permissions(client):
     assert "news" not in response.context['tabs']
     response = client.get(co.get_absolute_url())
     assert "news" not in response.context['tabs']
-    CourseOfferingTeacherFactory(course_offering=co_prev, teacher=teacher)
+    CourseTeacherFactory(course_offering=co_prev, teacher=teacher)
     response = client.get(co_prev.get_absolute_url())
     assert "news" in response.context['tabs']
     response = client.get(co.get_absolute_url())
@@ -336,7 +336,7 @@ def test_course_offering_assignments_tab_permissions(client):
     co = CourseFactory(meta_course=meta_course,
                        semester=current_semester)
     teacher = TeacherCenterFactory()
-    CourseOfferingTeacherFactory(teacher=teacher, course_offering=co)
+    CourseTeacherFactory(teacher=teacher, course_offering=co)
     # Unauthenticated user can't see tab at all
     response = client.get(co_prev.get_absolute_url())
     assert "assignments" not in response.context['tabs']

@@ -3,7 +3,7 @@ from __future__ import unicode_literals, absolute_import
 from django.contrib.auth.models import UserManager
 from django.db.models import Prefetch, Count, query, Q
 
-from learning.models import CourseOfferingTeacher
+from learning.models import CourseTeacher
 
 
 class UserQuerySet(query.QuerySet):
@@ -84,11 +84,11 @@ class UserQuerySet(query.QuerySet):
                     queryset=User.objects.extra(
                         select={
                             'is_lecturer': '"%s"."roles" & %s' %
-                            (CourseOfferingTeacher._meta.db_table,
-                             int(CourseOfferingTeacher.roles.lecturer))
+                            (CourseTeacher._meta.db_table,
+                             int(CourseTeacher.roles.lecturer))
                         },
                         order_by=["-is_lecturer",
-                                  "%s.roles" % CourseOfferingTeacher._meta.db_table,
+                                  "%s.roles" % CourseTeacher._meta.db_table,
                                   "last_name",
                                   "first_name"]
                     )

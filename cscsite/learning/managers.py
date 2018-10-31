@@ -12,7 +12,7 @@ from learning.settings import SEMESTER_TYPES, CENTER_FOUNDATION_YEAR
 from learning.utils import get_term_index
 
 
-class CourseOfferingTeacherQuerySet(query.QuerySet):
+class CourseTeacherQuerySet(query.QuerySet):
     def for_course(self, course_slug):
         offerings_ids = (self.model.course_offering.field.related_model.objects
                          .filter(meta_course__slug=course_slug)
@@ -22,8 +22,7 @@ class CourseOfferingTeacherQuerySet(query.QuerySet):
         return self.filter(course_offering__in=Subquery(offerings_ids))
 
 
-CourseOfferingTeacherManager = models.Manager.from_queryset(
-    CourseOfferingTeacherQuerySet)
+CourseTeacherManager = models.Manager.from_queryset(CourseTeacherQuerySet)
 
 
 class AssignmentQuerySet(query.QuerySet):

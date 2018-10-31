@@ -21,7 +21,7 @@ from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
 from learning.widgets import Tab, TabbedPane, CourseOfferingTabbedPane
 from learning.forms import CourseEditDescrForm, CourseNewsForm
-from learning.models import Course, CourseOfferingTeacher, \
+from learning.models import Course, CourseTeacher, \
     CourseOfferingNewsNotification, CourseClass, Assignment, StudentAssignment, \
     CourseOfferingNews
 from learning.serializers import CourseOfferingNewsNotificationSerializer
@@ -117,8 +117,8 @@ class CourseOfferingDetailView(DetailView):
               .select_related('meta_course', 'semester')
               .prefetch_related(
                     Prefetch(
-                        'courseofferingteacher_set',
-                        queryset=(CourseOfferingTeacher.objects
+                        'course_teachers',
+                        queryset=(CourseTeacher.objects
                                   .select_related("teacher")
                                   .prefetch_related("teacher__groups")))))
         return get_object_or_404(qs)

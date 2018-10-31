@@ -34,7 +34,7 @@ from cscenter.serializers import CoursesSerializer
 from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
     PublicRouteException
 from learning.api.views import TestimonialList
-from learning.models import Course, CourseOfferingTeacher, \
+from learning.models import Course, CourseTeacher, \
     OnlineCourse, AreaOfStudy, StudyProgram, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR
 from learning.utils import get_current_term_pair, get_term_index, \
@@ -219,7 +219,7 @@ class TeachersView(generic.ListView):
     def get_queryset(self):
         qs = (User.objects
               .filter(groups=User.group.TEACHER_CENTER,
-                      courseofferingteacher__roles=CourseOfferingTeacher.roles.lecturer)
+                      courseteacher__roles=CourseTeacher.roles.lecturer)
               .distinct())
         return qs
 
