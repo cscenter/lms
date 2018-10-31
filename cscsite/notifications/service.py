@@ -102,7 +102,7 @@ class NotificationService:
         if isinstance(notification, AssignmentNotification):
             co = notification.student_assignment.assignment.course_offering
         elif isinstance(notification, CourseNewsNotification):
-            co = notification.course_offering_news.course_offering
+            co = notification.course_offering_news.course
         else:
             raise NotImplementedError()
         if receiver.is_student_club or (receiver.is_teacher_club and

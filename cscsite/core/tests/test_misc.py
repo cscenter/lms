@@ -65,12 +65,12 @@ class NotifyCommandTest(TestCase):
         out = OutputIO()
         mail.outbox = []
         conn = CourseNewsNotificationFactory.create()
-        course_offering = conn.course_offering_news.course_offering
+        course = conn.course_offering_news.course
         management.call_command("notify", stdout=out)
         self.assertEqual(1, len(mail.outbox))
         conn.refresh_from_db()
         assert conn.is_notified
-        self.assertIn(course_offering.get_absolute_url(),
+        self.assertIn(course.get_absolute_url(),
                       mail.outbox[0].body)
         self.assertIn("sending notification for", out.getvalue())
 

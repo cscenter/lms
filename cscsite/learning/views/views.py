@@ -579,7 +579,7 @@ class CourseClassDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
     template_name = "learning/simple_delete_confirmation.html"
     success_url = reverse_lazy('timetable_teacher')
 
-    def is_form_allowed(self, user, obj):
+    def is_form_allowed(self, user, obj: CourseClass):
         return user.is_curator or user in obj.course_offering.teachers.all()
 
 
@@ -1076,7 +1076,7 @@ class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):
     def get_success_url(self):
         return reverse('assignment_list_teacher')
 
-    def is_form_allowed(self, user, obj):
+    def is_form_allowed(self, user, obj: Assignment):
         return user.is_curator or user in obj.course_offering.teachers.all()
 
 
