@@ -99,9 +99,9 @@ class CourseClassQuerySet(query.QuerySet):
     def for_calendar(self, user):
         q = (self
              .select_related('venue',
-                             'course_offering',
-                             'course_offering__meta_course',
-                             'course_offering__semester')
+                             'course',
+                             'course__meta_course',
+                             'course__semester')
              .order_by('date', 'starts_at'))
         # Hide summer classes on compsciclub.ru if user not enrolled in
         # FIXME: Performance issue.
@@ -109,37 +109,37 @@ class CourseClassQuerySet(query.QuerySet):
             # XXX: On join enrollment table we get a lot of duplicates.
             # Clean them with right `.order` and `.distinct()`!
             summer_classes_enrolled_in = Q(
-                course_offering__is_open=True,
-                course_offering__semester__type=SEMESTER_TYPES.summer,
-                course_offering__enrollment__student_id=user.pk,
-                course_offering__enrollment__is_deleted=False)
-            others = (Q(course_offering__is_open=True) &
-                      ~Q(course_offering__semester__type=SEMESTER_TYPES.summer))
+                course__is_open=True,
+                course__semester__type=SEMESTER_TYPES.summer,
+                course__enrollment__student_id=user.pk,
+                course__enrollment__is_deleted=False)
+            others = (Q(course__is_open=True) &
+                      ~Q(course__semester__type=SEMESTER_TYPES.summer))
             q = q.filter(others)
         return q
 
     def in_city(self, city_code):
-        return self.filter(Q(course_offering__city_id=city_code,
-                             course_offering__is_correspondence=False) |
-                           Q(course_offering__is_correspondence=True))
+        return self.filter(Q(course__city_id=city_code,
+                             course__is_correspondence=False) |
+                           Q(course__is_correspondence=True))
 
     def in_cities(self, city_codes: List[str]):
-        return self.filter(course_offering__city_id__in=city_codes)
+        return self.filter(course__city_id__in=city_codes)
 
     def in_month(self, year, month):
         date_start, date_end = get_bounds_for_calendar_month(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
 
     def open_only(self):
-        return self.filter(course_offering__is_open=True)
+        return self.filter(course__is_open=True)
 
     def for_student(self, user):
         """More strict than in `.for_calendar`. Let DB optimize it later."""
-        return self.filter(course_offering__enrollment__student_id=user.pk,
-                           course_offering__enrollment__is_deleted=False)
+        return self.filter(course__enrollment__student_id=user.pk,
+                           course__enrollment__is_deleted=False)
 
     def for_teacher(self, user):
-        return self.filter(course_offering__teachers=user)
+        return self.filter(course__teachers=user)
 
 
 class NonCourseEventQuerySet(query.QuerySet):

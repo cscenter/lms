@@ -98,12 +98,12 @@ class TimetableTeacherView(TeacherOnlyMixin, generic.TemplateView):
         return (CourseClass.objects
                 .filter(date__month=month,
                         date__year=year,
-                        course_offering__teachers=self.request.user)
+                        course__teachers=self.request.user)
                 .order_by('date', 'starts_at')
                 .select_related('venue',
-                                'course_offering',
-                                'course_offering__meta_course',
-                                'course_offering__semester'))
+                                'course',
+                                'course__meta_course',
+                                'course__semester'))
 
     def get_context_data(self, year, month, **kwargs):
         chosen_month_date = datetime.date(year=year, month=month, day=1)
@@ -145,13 +145,13 @@ class TimetableStudentView(StudentOnlyMixin, generic.TemplateView):
     def get_queryset(self, start, end):
         return (CourseClass.objects
                 .filter(date__range=[start, end],
-                        course_offering__enrollment__student_id=self.request.user.pk,
-                        course_offering__enrollment__is_deleted=False)
+                        course__enrollment__student_id=self.request.user.pk,
+                        course__enrollment__is_deleted=False)
                 .order_by('date', 'starts_at')
                 .select_related('venue',
-                                'course_offering',
-                                'course_offering__meta_course',
-                                'course_offering__semester'))
+                                'course',
+                                'course__meta_course',
+                                'course__semester'))
 
     def get_context_data(self, year, week, **kwargs):
         start = utils.iso_to_gregorian(year, week, 1)
@@ -439,9 +439,9 @@ class CourseClassDetailView(generic.DetailView):
 
     def get_queryset(self):
         return (CourseClass.objects
-                .select_related("course_offering",
-                                "course_offering__meta_course",
-                                "course_offering__semester",
+                .select_related("course",
+                                "course__meta_course",
+                                "course__semester",
                                 "venue")
                 .in_city(self.request.city_code))
 
@@ -450,7 +450,7 @@ class CourseClassDetailView(generic.DetailView):
         context['is_actual_teacher'] = (
             self.request.user.is_authenticated and
             self.request.user in (self.object
-                                  .course_offering
+                                  .course
                                   .teachers.all()))
         context['attachments'] = self.object.courseclassattachment_set.all()
         return context
@@ -461,23 +461,23 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin):
     form_class = CourseClassForm
     template_name = "learning/forms/course_class.html"
 
-    def get_course_offering(self):
+    def get_course(self):
         return get_co_from_query_params(self.kwargs, self.request.city_code)
 
     def get_form(self, **kwargs):
         form_class = self.get_form_class()
-        co = kwargs.get("course_offering", self.get_course_offering())
-        if not co:
-            raise Http404('Course offering not found')
-        if not self.is_form_allowed(self.request.user, co):
+        course = kwargs.get("course", self.get_course())
+        if not course:
+            raise Http404('Course not found')
+        if not self.is_form_allowed(self.request.user, course):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
-        kwargs["course_offering"] = co
+        kwargs["course"] = course
         kwargs["initial"] = self.get_initial(**kwargs)
         return form_class(**kwargs)
 
     @staticmethod
-    def is_form_allowed(user, course_offering):
-        return user.is_curator or user in course_offering.teachers.all()
+    def is_form_allowed(user, course):
+        return user.is_curator or user in course.teachers.all()
 
     def get_initial(self, **kwargs):
         return None
@@ -497,11 +497,11 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin):
         if return_url == 'timetable':
             return reverse('timetable_teacher')
         if return_url == 'course_offering':
-            return self.object.course_offering.get_absolute_url()
+            return self.object.course.get_absolute_url()
         if return_url == 'calendar':
             return reverse('calendar_teacher')
         elif "_addanother" in self.request.POST:
-            return self.object.course_offering.get_create_class_url()
+            return self.object.course.get_create_class_url()
         else:
             return super().get_success_url()
 
@@ -510,9 +510,9 @@ class CourseClassCreateView(CourseClassCreateUpdateMixin, CreateView):
 
     def get_initial(self, **kwargs):
         # TODO: Add tests for initial data after discussion
-        course_offering = kwargs["course_offering"]
+        course = kwargs["course"]
         previous_class = (CourseClass.objects
-                          .filter(course_offering=course_offering.pk)
+                          .filter(course=course.pk)
                           .defer("description")
                           .order_by("-date", "starts_at")
                           .first())
@@ -535,11 +535,10 @@ class CourseClassCreateView(CourseClassCreateUpdateMixin, CreateView):
     def post(self, request, *args, **kwargs):
         """Teachers can't add new classes if course already completed"""
         is_curator = self.request.user.is_curator
-        co = self.get_course_offering()
+        co = self.get_course()
         if not co or (not is_curator and co.is_completed):
             return HttpResponseForbidden()
-        form = self.get_form(data=request.POST, files=request.FILES,
-                             course_offering=co)
+        form = self.get_form(data=request.POST, files=request.FILES, course=co)
         if form.is_valid():
             return self.form_valid(form)
         return self.form_invalid(form)
@@ -560,7 +559,7 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
 
     def is_form_allowed(self, user, obj):
         return (user.is_curator or
-                user in obj.course_class.course_offering.teachers.all())
+                user in obj.course_class.course.teachers.all())
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -580,7 +579,7 @@ class CourseClassDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
     success_url = reverse_lazy('timetable_teacher')
 
     def is_form_allowed(self, user, obj: CourseClass):
-        return user.is_curator or user in obj.course_offering.teachers.all()
+        return user.is_curator or user in obj.course.teachers.all()
 
 
 class VenueListView(generic.ListView):
@@ -688,12 +687,12 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         8. Set filters by resulting assignment, grade and last comment.
         """
         filters = {}
-        teacher_all_course_offerings = self._get_all_teacher_course_offerings()
-        all_terms = set(c.semester for c in teacher_all_course_offerings)
+        teacher_all_courses = self._get_all_teacher_course_offerings()
+        all_terms = set(c.semester for c in teacher_all_courses)
         all_terms = sorted(all_terms, key=lambda t: -t.index)
         # Try to get course offerings for requested term
         query_term_index = self._get_requested_term_index(all_terms)
-        course_offerings = [c for c in teacher_all_course_offerings
+        course_offerings = [c for c in teacher_all_courses
                             if c.semester.index == query_term_index]
         # Try to get assignments for requested course_offering
         query_co = self._get_requested_course_offering(course_offerings)

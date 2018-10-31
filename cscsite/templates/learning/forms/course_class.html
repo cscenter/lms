@@ -26,7 +26,7 @@
             <li class="active">Редактирование занятия</li>
         {% endif %}
         </ol>
-        {% if not form.instance.pk and form.instance.course_offering.is_completed and not user.is_curator %}
+        {% if not form.instance.pk and form.instance.course.is_completed and not user.is_curator %}
             <div class="alert alert-block alert-warning">
                 Курс завершён. Если по какой-то причине вам необходимо добавить новое занятие - обратитесь, пожалуйста, к кураторам.
             </div>

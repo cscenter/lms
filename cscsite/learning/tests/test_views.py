@@ -72,7 +72,7 @@ class TimetableTeacherTests(GroupSecurityCheckMixin,
         self.assertEqual(0, len(self.client.get(reverse('timetable_teacher'))
                                 .context['object_list']))
         today_date = (datetime.datetime.now().replace(tzinfo=timezone.utc))
-        CourseClassFactory.create_batch(3, course_offering__teachers=[teacher],
+        CourseClassFactory.create_batch(3, course__teachers=[teacher],
                                         date=today_date)
         resp = self.client.get(reverse('timetable_teacher'))
         self.assertEqual(3, len(resp.context['object_list']))
@@ -84,7 +84,7 @@ class TimetableTeacherTests(GroupSecurityCheckMixin,
         self.assertEqual(0, len(self.client.get(next_month_url)
                                 .context['object_list']))
         next_month_date = today_date + relativedelta(months=1)
-        CourseClassFactory.create_batch(2, course_offering__teachers=[teacher],
+        CourseClassFactory.create_batch(2, course__teachers=[teacher],
                                         date=next_month_date)
         self.assertEqual(2, len(self.client.get(next_month_url)
                                 .context['object_list']))
@@ -104,7 +104,7 @@ class TimetableStudentTests(GroupSecurityCheckMixin,
         self.assertEqual(0, len(self.client.get(reverse('timetable_student'))
                                 .context['object_list']))
         today_date = (datetime.datetime.now().replace(tzinfo=timezone.utc))
-        CourseClassFactory.create_batch(3, course_offering=co, date=today_date)
+        CourseClassFactory.create_batch(3, course=co, date=today_date)
         resp = self.client.get(reverse('timetable_student'))
         self.assertEqual(3, len(resp.context['object_list']))
         next_week_qstr = ("?year={0}&week={1}"
@@ -115,8 +115,7 @@ class TimetableStudentTests(GroupSecurityCheckMixin,
         self.assertEqual(0, len(self.client.get(next_week_url)
                                 .context['object_list']))
         next_week_date = today_date + relativedelta(weeks=1)
-        CourseClassFactory.create_batch(2, course_offering=co,
-                                        date=next_week_date)
+        CourseClassFactory.create_batch(2, course=co, date=next_week_date)
         self.assertEqual(2, len(self.client.get(next_week_url)
                                 .context['object_list']))
 
@@ -373,11 +372,11 @@ class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
         self.doLogin(teacher)
         self.assertEqual(False, self.client.get(url)
                          .context['is_actual_teacher'])
-        CourseTeacherFactory(course=cc_other.course_offering,
+        CourseTeacherFactory(course=cc_other.course,
                              teacher=teacher)
         self.assertEqual(False, self.client.get(url)
                          .context['is_actual_teacher'])
-        CourseTeacherFactory(course=cc.course_offering,
+        CourseTeacherFactory(course=cc.course,
                              teacher=teacher)
         self.assertEqual(True, self.client.get(url)
                          .context['is_actual_teacher'])
@@ -412,17 +411,15 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         del form['slides']
         url = co.get_create_class_url()
         self.doLogin(teacher)
-        # should save with course_offering = co
+        # should save with course = co
         self.assertEqual(302, self.client.post(url, form).status_code)
-        self.assertEqual(1, (CourseClass.objects
-                             .filter(course_offering=co).count()))
+        self.assertEqual(1, CourseClass.objects.filter(course=co).count())
         self.assertEqual(0, (CourseClass.objects
-                             .filter(course_offering=co_other).count()))
+                             .filter(course=co_other).count()))
         self.assertEqual(0, (CourseClass.objects
-                             .filter(course_offering=form['course_offering']).count()))
-        self.assertEqual(CourseClass.objects.get(course_offering=co).name,
-                         form['name'])
-        form.update({'course_offering': co.pk})
+                             .filter(course=form['course']).count()))
+        self.assertEqual(CourseClass.objects.get(course=co).name, form['name'])
+        form.update({'course': co.pk})
         self.assertEqual(302, self.client.post(url, form).status_code)
 
     def test_create_and_add(self):
@@ -438,25 +435,22 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         del form['slides']
         self.doLogin(teacher)
         url = co.get_create_class_url()
-        # should save with course_offering = co
+        # should save with course = co
         response = self.client.post(url, form)
         expected_url = co.get_create_class_url()
         self.assertEqual(302, response.status_code)
         self.assertRedirects(response, expected_url)
-        self.assertEqual(1, (CourseClass.objects
-                             .filter(course_offering=co).count()))
+        self.assertEqual(1, CourseClass.objects.filter(course=co).count())
         self.assertEqual(0, (CourseClass.objects
-                             .filter(course_offering=co_other).count()))
+                             .filter(course=co_other).count()))
         self.assertEqual(0, (CourseClass.objects
-                             .filter(course_offering=form['course_offering']).count()))
-        self.assertEqual(CourseClass.objects.get(course_offering=co).name,
-                         form['name'])
-        form.update({'course_offering': co.pk})
+                             .filter(course=form['course']).count()))
+        self.assertEqual(CourseClass.objects.get(course=co).name, form['name'])
+        form.update({'course': co.pk})
         self.assertEqual(302, self.client.post(url, form).status_code)
         del form['_addanother']
         response = self.client.post(url, form)
-        self.assertEqual(3, (CourseClass.objects
-                             .filter(course_offering=co).count()))
+        self.assertEqual(3, CourseClass.objects.filter(course=co).count())
         last_added_class = CourseClass.objects.order_by("-id").first()
         self.assertRedirects(response, last_added_class.get_absolute_url())
 
@@ -465,7 +459,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                                   teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course_offering=co)
+        cc = CourseClassFactory.create(course=co)
         url = cc.get_update_url()
         self.doLogin(teacher)
         form = model_to_dict(cc)
@@ -482,7 +476,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                                   teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course_offering=co)
+        cc = CourseClassFactory.create(course=co)
         url = cc.get_update_url()
         self.doLogin(teacher)
         form = model_to_dict(cc)
@@ -502,7 +496,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                                   teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course_offering=co)
+        cc = CourseClassFactory.create(course=co)
         url = cc.get_delete_url()
         self.assertLoginRedirect(url)
         self.assertPOSTLoginRedirect(url, {})
@@ -516,7 +510,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         teacher = TeacherCenterFactory()
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseFactory.create(teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course_offering=co)
+        cc = CourseClassFactory.create(course=co)
         base_url = cc.get_update_url()
         self.doLogin(teacher)
         form = model_to_dict(cc)
@@ -534,7 +528,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                                   teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course_offering=co)
+        cc = CourseClassFactory.create(course=co)
         cca1 = CourseClassAttachmentFactory.create(
             course_class=cc, material__filename="foobar1.pdf")
         cca2 = CourseClassAttachmentFactory.create(
@@ -557,7 +551,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                                   teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course_offering=co)
+        cc = CourseClassFactory.create(course=co)
         f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
         f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")
         self.doLogin(teacher)

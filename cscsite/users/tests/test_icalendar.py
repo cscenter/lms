@@ -27,11 +27,11 @@ def test_classes(client):
     assert "Занятия CSC" == cal['X-WR-CALNAME']
     # Create some content
     ccs_teaching = (CourseClassFactory
-                    .create_batch(2, course_offering__teachers=[user]))
+                    .create_batch(2, course__teachers=[user]))
     co_learning = CourseFactory.create()
     EnrollmentFactory.create(student=user, course_offering=co_learning)
     ccs_learning = (CourseClassFactory
-                    .create_batch(3, course_offering=co_learning))
+                    .create_batch(3, course=co_learning))
     ccs_other = CourseClassFactory.create_batch(5)
     response = client.get(reverse('user_ical_classes', args=[user.pk]))
     cal = Calendar.from_ical(response.content)

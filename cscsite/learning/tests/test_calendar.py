@@ -43,11 +43,11 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
                            .replace(day=15, tzinfo=timezone.utc))
         own_classes = (
             CourseClassFactory
-            .create_batch(3, course_offering__teachers=[teacher],
+            .create_batch(3, course__teachers=[teacher],
                           date=this_month_date))
         others_classes = (
             CourseClassFactory
-            .create_batch(5, course_offering__teachers=[other_teacher],
+            .create_batch(5, course__teachers=[other_teacher],
                           date=this_month_date))
         venue = VenueFactory(city_id=teacher.city_id)
         events = (
@@ -73,7 +73,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         next_month_date = this_month_date + relativedelta(months=1)
         next_month_classes = (
             CourseClassFactory
-            .create_batch(2, course_offering__teachers=[teacher],
+            .create_batch(2, course__teachers=[teacher],
                           date=next_month_date))
         classes = flatten_calendar_month_events(
             self.client.get(next_month_url).context['events'])
@@ -99,10 +99,10 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
                                     tzinfo=timezone.utc))
         own_classes = (
             CourseClassFactory
-            .create_batch(3, course_offering=co, date=this_month_date))
+            .create_batch(3, course=co, date=this_month_date))
         others_classes = (
             CourseClassFactory
-            .create_batch(5, course_offering=co_other, date=this_month_date))
+            .create_batch(5, course=co_other, date=this_month_date))
         # student should see only his own classes
         resp = self.client.get(reverse(self.url_name))
         classes = flatten_calendar_month_events(resp.context['events'])
@@ -123,7 +123,7 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         next_month_date = this_month_date + relativedelta(months=1)
         next_month_classes = (
             CourseClassFactory
-            .create_batch(2, course_offering=co, date=next_month_date))
+            .create_batch(2, course=co, date=next_month_date))
         classes = flatten_calendar_month_events(
             self.client.get(next_month_url).context['events'])
         self.assertSameObjects(next_month_classes, classes)
@@ -155,7 +155,7 @@ def test_correspondence_courses_calendar(client):
     client.login(student)
     this_month_date = datetime.datetime.utcnow()
     CourseClassFactory.create_batch(
-            3, course_offering__is_correspondence=True, date=this_month_date)
+            3, course__is_correspondence=True, date=this_month_date)
     classes = flatten_calendar_month_events(
         client.get(reverse("calendar_full_student")).context['events'])
     assert len(classes) == 3

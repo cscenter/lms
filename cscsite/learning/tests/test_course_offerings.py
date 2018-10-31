@@ -138,7 +138,7 @@ def test_course_news(settings, admin_client):
 
 
 @pytest.mark.django_db
-def test_course_offering_assignment_deadline_l10n(settings, client):
+def test_course_assignment_deadline_l10n(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherCenterFactory()
@@ -160,7 +160,7 @@ def test_course_offering_assignment_deadline_l10n(settings, client):
 
 
 @pytest.mark.django_db
-def test_course_offering_is_correspondence(settings, client):
+def test_course_is_correspondence(settings, client):
     """Test how `tz_override` works with different user roles"""
     # 12 january 2017 23:59 (local time)
     deadline_at = datetime.datetime(TEST_YEAR, 1, 12, 23, 59, 0, 0,
@@ -216,7 +216,7 @@ def test_course_offering_is_correspondence(settings, client):
 
 
 @pytest.mark.django_db
-def test_course_offering_assignment_timezone(settings, client):
+def test_course_assignment_timezone(settings, client):
     """
     Teacher of the course always must see timezone of course offering,
     even if he is also learning in CS Center.
@@ -252,7 +252,7 @@ def test_update_composite_fields(curator, client, mocker):
     teacher = TeacherCenterFactory()
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher])
-    cc1 = CourseClassFactory.create(course_offering=co, video_url="")
+    cc1 = CourseClassFactory.create(course=co, video_url="")
     co.refresh_from_db()
     assert not co.materials_video
     assert not co.materials_slides
@@ -266,7 +266,7 @@ def test_update_composite_fields(curator, client, mocker):
     assert not co.materials_video
     assert co.materials_slides
     assert not co.materials_files
-    cc2 = CourseClassFactory.create(course_offering=co, video_url="youtuuube")
+    cc2 = CourseClassFactory.create(course=co, video_url="youtuuube")
     co.refresh_from_db()
     assert co.materials_video
     # Slides were uploaded on first class
@@ -278,7 +278,7 @@ def test_update_composite_fields(curator, client, mocker):
 
 # FIXME: эти тесты надо добавить на уровне модели после переноса can_view_* в permissions.py
 @pytest.mark.django_db
-def test_course_offering_news_tab_permissions(client):
+def test_course_news_tab_permissions(client):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
     news: CourseNews = CourseNewsFactory(course__city_id='spb',
@@ -326,7 +326,7 @@ def test_course_offering_news_tab_permissions(client):
 
 
 @pytest.mark.django_db
-def test_course_offering_assignments_tab_permissions(client):
+def test_course_assignments_tab_permissions(client):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
     meta_course = MetaCourseFactory()

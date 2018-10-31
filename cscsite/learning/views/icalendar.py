@@ -130,15 +130,15 @@ class ICalClassesView(ICalView):
         tz = self.get_timezone()
         user = self.context["user"]
         cc_related = ['venue',
-                      'course_offering',
-                      'course_offering__semester',
-                      'course_offering__meta_course']
+                      'course',
+                      'course__semester',
+                      'course__meta_course']
         as_teacher = (CourseClass.objects
-                      .filter(course_offering__teachers=user)
+                      .filter(course__teachers=user)
                       .select_related(*cc_related))
         as_student = (CourseClass.objects
-                      .filter(course_offering__enrollment__student_id=user.pk,
-                              course_offering__enrollment__is_deleted=False)
+                      .filter(course__enrollment__student_id=user.pk,
+                              course__enrollment__is_deleted=False)
                       .select_related(*cc_related))
 
         AS_TEACHER_TYPE, AS_STUDENT_TYPE = 'teaching', 'learning'

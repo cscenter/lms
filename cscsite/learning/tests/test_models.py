@@ -180,8 +180,7 @@ def test_course_offering_composite_fields():
     assert not co.materials_files
     assert not co.materials_slides
     assert not co.materials_video
-    cc = CourseClassFactory(course_offering=co,
-                            video_url="https://link/to/youtube")
+    cc = CourseClassFactory(course=co, video_url="https://link/to/youtube")
     co.refresh_from_db()
     assert not co.materials_files
     assert not co.materials_slides

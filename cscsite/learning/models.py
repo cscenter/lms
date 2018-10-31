@@ -150,7 +150,7 @@ class Semester(models.Model):
         """
         Term start point in datetime format.
 
-        Now helps to validate class date range in `CourseClassForm`
+        Helps to validate class date range in `CourseClassForm`
         """
         return get_term_start(self.year, self.type, pytz.UTC)
 
@@ -670,24 +670,20 @@ class Venue(models.Model):
 def courseclass_slides_file_name(self, filename):
     _, ext = os.path.splitext(filename)
     timestamp = self.date.strftime("%Y_%m_%d")
-    course_offering = ("{0}_{1}"
-                       .format(self.course_offering.meta_course.slug,
-                               self.course_offering.semester.slug)
+    course = ("{0}_{1}".format(self.course.meta_course.slug,
+                               self.course.semester.slug)
                        .replace("-", "_"))
-    filename = ("{0}_{1}{2}"
-                .format(timestamp,
-                        course_offering,
-                        ext))
-    return os.path.join('slides', course_offering, filename)
+    filename = ("{0}_{1}{2}".format(timestamp, course, ext))
+    return os.path.join('slides', course, filename)
 
 
 class CourseClass(TimeStampedModel):
     TYPES = Choices(('lecture', _("Lecture")),
                     ('seminar', _("Seminar")))
 
-    course_offering = models.ForeignKey(
+    course = models.ForeignKey(
         Course,
-        verbose_name=_("Course offering"),
+        verbose_name=_("Course"),
         on_delete=models.PROTECT)
     venue = models.ForeignKey(
         Venue,
@@ -718,7 +714,7 @@ class CourseClass(TimeStampedModel):
     ends_at = models.TimeField(_("Ends at"))
 
     class Meta:
-        ordering = ["-date", "course_offering", "-starts_at"]
+        ordering = ["-date", "course", "-starts_at"]
         verbose_name = _("Class")
         verbose_name_plural = _("Classes")
 
@@ -741,28 +737,28 @@ class CourseClass(TimeStampedModel):
 
     @property
     def city_aware_field_name(self):
-        return self.__class__.course_offering.field.name
+        return self.__class__.course.field.name
 
     def get_absolute_url(self):
         return city_aware_reverse('class_detail', kwargs={
            "city_code": self.get_city(),
-           "course_slug": self.course_offering.meta_course.slug,
-           "semester_slug": self.course_offering.semester.slug,
+           "course_slug": self.course.meta_course.slug,
+           "semester_slug": self.course.semester.slug,
            "pk": self.pk
         })
 
     def get_update_url(self):
         return city_aware_reverse('course_class_update', kwargs={
-            "course_slug": self.course_offering.meta_course.slug,
-            "semester_slug": self.course_offering.semester.slug,
+            "course_slug": self.course.meta_course.slug,
+            "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
         })
 
     def get_delete_url(self):
         return city_aware_reverse('course_class_delete', kwargs={
-            "course_slug": self.course_offering.meta_course.slug,
-            "semester_slug": self.course_offering.semester.slug,
+            "course_slug": self.course.meta_course.slug,
+            "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
         })
@@ -792,7 +788,7 @@ class CourseClass(TimeStampedModel):
             update_fields["materials_files"] = True
         if update_fields:
             (Course.objects
-             .filter(pk=self.course_offering_id)
+             .filter(pk=self.course_id)
              .update(**update_fields))
 
     def clean(self):
@@ -859,8 +855,8 @@ class CourseClassAttachment(TimeStampedModel, object):
 
     def get_delete_url(self):
         return city_aware_reverse('course_class_attachment_delete', kwargs={
-            "course_slug": self.course_class.course_offering.meta_course.slug,
-            "semester_slug": self.course_class.course_offering.semester.slug,
+            "course_slug": self.course_class.course.meta_course.slug,
+            "semester_slug": self.course_class.course.semester.slug,
             "city_code": self.get_city(),
             "class_pk": self.course_class.pk,
             "pk": self.pk

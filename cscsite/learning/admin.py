@@ -117,8 +117,8 @@ class CourseClassAdmin(admin.ModelAdmin):
     save_as = True
     date_hierarchy = 'date'
     list_filter = ['type', 'venue']
-    search_fields = ['course_offering__meta_course__name']
-    list_display = ['id', 'name', 'course_offering', 'date', 'venue', 'type']
+    search_fields = ['course__meta_course__name']
+    list_display = ['id', 'name', 'course', 'date', 'venue', 'type']
     inlines = [CourseClassAttachmentInline]
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
@@ -128,8 +128,7 @@ class CourseClassAdmin(admin.ModelAdmin):
         if db_field.name == 'course_offering':
             kwargs['queryset'] = (Course.objects
                                   .select_related("meta_course", "semester"))
-        return (super(CourseClassAdmin, self)
-                .formfield_for_foreignkey(db_field, request, **kwargs))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class CourseNewsAdmin(admin.ModelAdmin):

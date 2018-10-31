@@ -176,12 +176,12 @@ class ClubClassesFeed(ICalFeed):
 
     def items(self):
         return (CourseClass.objects
-                .filter(course_offering__is_open=True,
-                        course_offering__city__code="spb")
+                .filter(course__is_open=True,
+                        course__city__code="spb")
                 .select_related('venue',
-                                'course_offering',
-                                'course_offering__semester',
-                                'course_offering__meta_course'))
+                                'course',
+                                'course__semester',
+                                'course__meta_course'))
 
     def item_guid(self, item):
         return "courseclasses-{}@compsciclub.ru".format(item.pk)
