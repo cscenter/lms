@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.core.management import BaseCommand
 
-from learning.models import CourseOffering
+from learning.models import Course
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import User
 
@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         teachers = {}
-        cos = CourseOffering.objects.prefetch_related("teachers")
+        cos = Course.objects.prefetch_related("teachers")
         for co in cos:
             for teacher in co.teachers.all():
                 if not teacher.pk in teachers:

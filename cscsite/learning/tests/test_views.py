@@ -99,7 +99,7 @@ class TimetableStudentTests(GroupSecurityCheckMixin,
     def test_student_timetable(self):
         student = StudentCenterFactory()
         self.doLogin(student)
-        co = CourseOfferingFactory.create()
+        co = CourseFactory.create()
         e = EnrollmentFactory.create(course_offering=co, student=student)
         self.assertEqual(0, len(self.client.get(reverse('timetable_student'))
                                 .context['object_list']))
@@ -123,9 +123,9 @@ class TimetableStudentTests(GroupSecurityCheckMixin,
 
 @pytest.mark.django_db
 def test_video_list(client):
-    CourseOfferingFactory.create_batch(2, is_published_in_video=False)
-    with_video = CourseOfferingFactory.create_batch(5,
-                                                    is_published_in_video=True)
+    CourseFactory.create_batch(2, is_published_in_video=False)
+    with_video = CourseFactory.create_batch(5,
+                                            is_published_in_video=True)
     response = client.get(reverse('course_video_list'))
     co_to_show = response.context['object_list']
     assert len(co_to_show) == 5
@@ -143,10 +143,10 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         mc = MetaCourseFactory.create()
         s1 = SemesterFactory(year=2016)
         s2 = SemesterFactory(year=2017)
-        co1 = CourseOfferingFactory(semester=s1, meta_course=mc,
-                                    city=settings.DEFAULT_CITY_CODE)
-        co2 = CourseOfferingFactory(semester=s2, meta_course=mc,
-                                    city=settings.DEFAULT_CITY_CODE)
+        co1 = CourseFactory(semester=s1, meta_course=mc,
+                            city=settings.DEFAULT_CITY_CODE)
+        co2 = CourseFactory(semester=s2, meta_course=mc,
+                            city=settings.DEFAULT_CITY_CODE)
         response = self.client.get(mc.get_absolute_url())
         self.assertContains(response, mc.name)
         self.assertContains(response, mc.description)
@@ -191,7 +191,7 @@ class CourseUpdateTests(MyUtilitiesMixin, TestCase):
 
 class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
     def test_basic_get(self):
-        co = CourseOfferingFactory.create()
+        co = CourseFactory.create()
         assert 200 == self.client.get(co.get_absolute_url()).status_code
         url = city_aware_reverse('course_offering_detail', kwargs={
             "course_slug": "space-odyssey",
@@ -207,8 +207,8 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         """
         student = StudentCenterFactory()
         teacher = TeacherCenterFactory()
-        co = CourseOfferingFactory.create()
-        co_other = CourseOfferingFactory.create()
+        co = CourseFactory.create()
+        co_other = CourseFactory.create()
         url = co.get_absolute_url()
         ctx = self.client.get(url).context
         self.assertEqual(None, ctx['request_user_enrollment'])
@@ -243,8 +243,8 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory()
         teacher = TeacherCenterFactory()
         next_day = now() + datetime.timedelta(days=1)
-        co = CourseOfferingFactory.create(teachers=[teacher],
-                                          completed_at=next_day)
+        co = CourseFactory.create(teachers=[teacher],
+                                  completed_at=next_day)
         url = co.get_absolute_url()
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
@@ -271,7 +271,7 @@ class CourseOfferingEditDescrTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         teacher_other = TeacherCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher])
+        co = CourseFactory.create(teachers=[teacher])
         url = co.get_update_url()
         self.assertLoginRedirect(url)
         self.doLogin(teacher_other)
@@ -285,10 +285,10 @@ class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
     def setUp(self):
         self.teacher = TeacherCenterFactory()
         self.teacher_other = TeacherCenterFactory()
-        self.co = CourseOfferingFactory.create(teachers=[self.teacher])
+        self.co = CourseFactory.create(teachers=[self.teacher])
         self.url = self.co.get_create_news_url()
         self.n_dict = factory.build(dict,
-                                    FACTORY_CLASS=CourseOfferingNewsFactory)
+                                    FACTORY_CLASS=CourseNewsFactory)
         self.n_dict.update({'course_offering': self.co})
 
     def test_security(self):
@@ -315,9 +315,9 @@ class CourseOfferingNewsUpdateTests(MyUtilitiesMixin, TestCase):
     def setUp(self):
         self.teacher = TeacherCenterFactory()
         self.teacher_other = TeacherCenterFactory()
-        self.co = CourseOfferingFactory.create(teachers=[self.teacher])
-        self.con = CourseOfferingNewsFactory.create(course_offering=self.co,
-                                                    author=self.teacher)
+        self.co = CourseFactory.create(teachers=[self.teacher])
+        self.con = CourseNewsFactory.create(course_offering=self.co,
+                                            author=self.teacher)
         self.url = self.con.get_update_url()
         self.con_dict = model_to_dict(self.con)
         self.con_dict.update({'text': "foobar text"})
@@ -343,9 +343,9 @@ class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
     def setUp(self):
         self.teacher = TeacherCenterFactory()
         self.teacher_other = TeacherCenterFactory()
-        self.co = CourseOfferingFactory.create(teachers=[self.teacher])
-        self.con = CourseOfferingNewsFactory.create(course_offering=self.co,
-                                                    author=self.teacher)
+        self.co = CourseFactory.create(teachers=[self.teacher])
+        self.con = CourseNewsFactory.create(course_offering=self.co,
+                                            author=self.teacher)
         self.url = self.con.get_delete_url()
 
     def test_security(self):
@@ -393,7 +393,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
                                  MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher])
+        co = CourseFactory.create(teachers=[teacher])
         form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
         form.update({'venue': VenueFactory.create().pk})
         url = co.get_create_class_url()
@@ -403,10 +403,10 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_create(self):
         teacher = TeacherCenterFactory()
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                          teachers=[teacher], semester=s)
-        co_other = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                                semester=s)
+        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                  teachers=[teacher], semester=s)
+        co_other = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                        semester=s)
         form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
         venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
         form.update({'venue': venue.pk})
@@ -429,10 +429,10 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_create_and_add(self):
         teacher = TeacherCenterFactory()
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                          teachers=[teacher], semester=s)
-        co_other = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                                semester=s)
+        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                  teachers=[teacher], semester=s)
+        co_other = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                        semester=s)
         form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
         venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
         form.update({'venue': venue.pk, '_addanother': True})
@@ -464,8 +464,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_update(self):
         teacher = TeacherCenterFactory()
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                          teachers=[teacher], semester=s)
+        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                  teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         url = cc.get_update_url()
         self.doLogin(teacher)
@@ -481,8 +481,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_update_and_add(self):
         teacher = TeacherCenterFactory()
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                          teachers=[teacher], semester=s)
+        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                  teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         url = cc.get_update_url()
         self.doLogin(teacher)
@@ -501,8 +501,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_delete(self):
         teacher = TeacherCenterFactory()
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                          teachers=[teacher], semester=s)
+        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                  teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         url = cc.get_delete_url()
         self.assertLoginRedirect(url)
@@ -516,7 +516,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_back_variable(self):
         teacher = TeacherCenterFactory()
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(teachers=[teacher], semester=s)
+        co = CourseFactory.create(teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         base_url = cc.get_update_url()
         self.doLogin(teacher)
@@ -533,8 +533,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_attachment_links(self):
         teacher = TeacherCenterFactory()
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                          teachers=[teacher], semester=s)
+        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                  teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         cca1 = CourseClassAttachmentFactory.create(
             course_class=cc, material__filename="foobar1.pdf")
@@ -556,8 +556,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
     def test_attachments(self):
         teacher = TeacherCenterFactory()
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                          teachers=[teacher], semester=s)
+        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                                  teachers=[teacher], semester=s)
         cc = CourseClassFactory.create(course_offering=co)
         f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
         f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")
@@ -610,8 +610,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory(city_id='spb')
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory(city_id='spb', semester=s,
-                                   teachers=[teacher])
+        co = CourseFactory(city_id='spb', semester=s,
+                           teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -649,8 +649,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentFactory(city_id='spb')
         past_year = datetime.datetime.now().year - 3
         past_semester = SemesterFactory.create(year=past_year)
-        co = CourseOfferingFactory(city_id='spb', teachers=[teacher],
-                                   semester=past_semester)
+        co = CourseFactory(city_id='spb', teachers=[teacher],
+                           semester=past_semester)
         enrollment = EnrollmentFactory(student=student, course_offering=co,
                                        grade=GRADES.unsatisfactory)
         a = AssignmentFactory(course_offering=co)
@@ -704,7 +704,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
     def test_assignment_contents(self):
         student = StudentCenterFactory(city_id='spb')
         semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory.create(city_id='spb', semester=semester)
+        co = CourseFactory.create(city_id='spb', semester=semester)
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -718,8 +718,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory(city_id='spb')
         teacher = TeacherCenterFactory()
         semester = SemesterFactory.create_current()
-        co = CourseOfferingFactory(city_id='spb', teachers=[teacher],
-                                   semester=semester)
+        co = CourseFactory(city_id='spb', teachers=[teacher],
+                           semester=semester)
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -736,7 +736,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
     def test_comment(self):
         student = StudentCenterFactory(city_id='spb')
         # Create open reading to make sure student has access to CO
-        co = CourseOfferingFactory(city_id='spb', is_open=True)
+        co = CourseFactory(city_id='spb', is_open=True)
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -760,7 +760,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher])
+        co = CourseFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -807,7 +807,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
     def test_comment(self):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher])
+        co = CourseFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
@@ -829,7 +829,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
     def test_grading(self):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher])
+        co = CourseFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course_offering=co)
         a = AssignmentFactory.create(course_offering=co,
                                      grade_max=13)
@@ -854,8 +854,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
     def test_next_unchecked(self):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher])
-        co_other = CourseOfferingFactory.create()
+        co = CourseFactory.create(teachers=[teacher])
+        co_other = CourseFactory.create()
         EnrollmentFactory.create(student=student, course_offering=co)
         EnrollmentFactory.create(student=student, course_offering=co_other)
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
@@ -902,7 +902,7 @@ def test_course_class_form(client, curator, settings):
     settings.LANGUAGE_CODE = 'ru'
     teacher = TeacherCenterFactory()
     semester = SemesterFactory.create_current()
-    co = CourseOfferingFactory(semester=semester, teachers=[teacher])
+    co = CourseFactory(semester=semester, teachers=[teacher])
     course_class_add_url = co.get_create_class_url()
     response = client.get(course_class_add_url)
     assert response.status_code == 302
@@ -959,12 +959,12 @@ def test_student_courses_list(client, settings):
     assert len(response.context['archive_enrolled']) == 0
     now_year, now_season = get_current_term_pair(student_spb.city_id)
     current_term_spb = SemesterFactory.create(year=now_year, type=now_season)
-    cos = CourseOfferingFactory.create_batch(4, semester=current_term_spb,
-                                             city_id='spb', is_open=False)
+    cos = CourseFactory.create_batch(4, semester=current_term_spb,
+                                     city_id='spb', is_open=False)
     cos_available = cos[:2]
     cos_enrolled = cos[2:]
     prev_year = now_year - 1
-    cos_archived = CourseOfferingFactory.create_batch(
+    cos_archived = CourseFactory.create_batch(
         3, semester__year=prev_year, is_open=False)
     for co in cos_enrolled:
         EnrollmentFactory.create(student=student_spb, course_offering=co)
@@ -980,8 +980,8 @@ def test_student_courses_list(client, settings):
     # Add co from other city
     now_year, now_season = get_current_term_pair('nsk')
     current_term_nsk = SemesterFactory.create(year=now_year, type=now_season)
-    co_nsk = CourseOfferingFactory.create(semester=current_term_nsk,
-                                          city_id='nsk', is_open=False)
+    co_nsk = CourseFactory.create(semester=current_term_nsk,
+                                  city_id='nsk', is_open=False)
     response = client.get(url)
     assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
     assert len(cos_available) == len(response.context['ongoing_rest'])
@@ -989,16 +989,16 @@ def test_student_courses_list(client, settings):
     # Test for student from nsk
     student_nsk = StudentCenterFactory(city_id='nsk')
     client.login(student_nsk)
-    CourseOfferingFactory.create(semester__year=prev_year, city_id='nsk',
-                                 is_open=False)
+    CourseFactory.create(semester__year=prev_year, city_id='nsk',
+                         is_open=False)
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 1
     assert set(response.context['ongoing_rest']) == {co_nsk}
     assert len(response.context['archive_enrolled']) == 0
     # Add open reading, it should be available on compscicenter.ru
-    co_open = CourseOfferingFactory.create(semester=current_term_nsk,
-                                           city_id='nsk', is_open=True)
+    co_open = CourseFactory.create(semester=current_term_nsk,
+                                   city_id='nsk', is_open=True)
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 2
@@ -1029,12 +1029,12 @@ def test_student_courses_list_csclub(client, settings, mocker):
         city_code=settings.DEFAULT_CITY_CODE)
     assert current_term.type == "spring"
     settings.SITE_ID = settings.CENTER_SITE_ID
-    co = CourseOfferingFactory.create(semester__type=now_season,
-                                      semester__year=now_year, city_id='nsk',
-                                      is_open=False)
+    co = CourseFactory.create(semester__type=now_season,
+                              semester__year=now_year, city_id='nsk',
+                              is_open=False)
     settings.SITE_ID = settings.CLUB_SITE_ID
     # compsciclub.ru can't see center courses with default manager
-    assert CourseOffering.objects.count() == 0
+    assert Course.objects.count() == 0
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 0
@@ -1043,7 +1043,7 @@ def test_student_courses_list_csclub(client, settings, mocker):
     co.is_open = True
     co.save()
     settings.SITE_ID = settings.CLUB_SITE_ID
-    assert CourseOffering.objects.count() == 1
+    assert Course.objects.count() == 1
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 0
@@ -1060,10 +1060,10 @@ def test_student_courses_list_csclub(client, settings, mocker):
     co.semester = summer_semester
     co.save()
     settings.SITE_ID = settings.CENTER_SITE_ID
-    co_active = CourseOfferingFactory.create(semester__type=now_season,
-                                             semester__year=now_year,
-                                             city_id='spb',
-                                             is_open=True)
+    co_active = CourseFactory.create(semester__type=now_season,
+                                     semester__year=now_year,
+                                     city_id='spb',
+                                     is_open=True)
     settings.SITE_ID = settings.CLUB_SITE_ID
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0

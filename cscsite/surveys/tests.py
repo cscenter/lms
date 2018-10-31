@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from learning.factories import CourseOfferingFactory, CourseClassFactory
+from learning.factories import CourseFactory, CourseClassFactory
 from surveys.constants import FieldType, STATUS_PUBLISHED
 from surveys.factories import CourseOfferingSurveyFactory, FieldFactory, \
     FieldEntryFactory, FieldChoiceFactory, FormSubmissionFactory
@@ -202,7 +202,7 @@ def test_conditional_logic_prefill_class(mocker):
     today_fixed = datetime.datetime(2018, month=3, day=8, hour=13, minute=0,
                                     tzinfo=datetime.timezone.utc)
     mocked_timezone.return_value = today_fixed
-    co = CourseOfferingFactory.create(city_id='spb')
+    co = CourseFactory.create(city_id='spb')
     past = today_fixed - datetime.timedelta(days=3)
     future = today_fixed + datetime.timedelta(days=3)
     class1 = CourseClassFactory(course_offering=co, date=past)

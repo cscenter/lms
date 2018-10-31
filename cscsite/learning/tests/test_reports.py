@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from django.utils.encoding import smart_bytes
 
-from learning.factories import SemesterFactory, CourseOfferingFactory, \
+from learning.factories import SemesterFactory, CourseFactory, \
     EnrollmentFactory
 from learning.projects.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
@@ -38,8 +38,8 @@ def test_report_common(rf):
                                   request=rf.request())
     teacher = TeacherCenterFactory.create()
     s = SemesterFactory.create_current()
-    co1, co2, co3 = CourseOfferingFactory.create_batch(3, semester=s,
-                                                       teachers=[teacher])
+    co1, co2, co3 = CourseFactory.create_batch(3, semester=s,
+                                               teachers=[teacher])
     student1, student2, student3 = StudentCenterFactory.create_batch(3)
     EnrollmentFactory.create(student=student1, course_offering=co1,
                              grade=GRADES.good)
@@ -133,8 +133,8 @@ def test_report_full(rf):
     teacher = TeacherCenterFactory.create()
     students = StudentCenterFactory.create_batch(3)
     s = SemesterFactory.create_current()
-    co1, co2 = CourseOfferingFactory.create_batch(2, semester=s,
-                                                  teachers=[teacher])
+    co1, co2 = CourseFactory.create_batch(2, semester=s,
+                                          teachers=[teacher])
     student1, student2, student3 = students
     student1.status = STUDENT_STATUS.will_graduate
     student1.save()
@@ -191,9 +191,9 @@ def test_report_for_target_term(rf):
     s = SemesterFactory.create_current()
     prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
     prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
-    co_active = CourseOfferingFactory.create(semester=s, teachers=[teacher])
-    co1, co2, co3 = CourseOfferingFactory.create_batch(3, semester=prev_s,
-                                                       teachers=[teacher])
+    co_active = CourseFactory.create(semester=s, teachers=[teacher])
+    co1, co2, co3 = CourseFactory.create_batch(3, semester=prev_s,
+                                               teachers=[teacher])
     student1, student2, student3 = StudentCenterFactory.create_batch(3)
     e_active = EnrollmentFactory.create(student=student1,
                                         course_offering=co_active,
@@ -301,8 +301,8 @@ def test_report_diplomas_csv(rf):
     s = SemesterFactory.create_current()
     prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
     prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
-    co_prev1 = CourseOfferingFactory.create(semester=prev_s, teachers=[teacher])
-    co1 = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+    co_prev1 = CourseFactory.create(semester=prev_s, teachers=[teacher])
+    co1 = CourseFactory.create(semester=s, teachers=[teacher])
     student1.status = STUDENT_STATUS.will_graduate
     student1.save()
     e_s1_co1 = EnrollmentFactory.create(student=student1, course_offering=co1,
@@ -323,7 +323,7 @@ def test_report_diplomas_csv(rf):
     assert len(progress_report.data) == 2
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Enroll student2 to new course without any grade
-    co2 = CourseOfferingFactory.create(semester=s, teachers=[teacher])
+    co2 = CourseFactory.create(semester=s, teachers=[teacher])
     e_s2_co2 = EnrollmentFactory.create(student=student2, course_offering=co2)
     progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2

@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
 
-from learning.models import CourseOffering
+from learning.models import Course
 from .models import Album, Image
 
 
@@ -29,7 +29,7 @@ class ImageAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'course_offering':
-            kwargs['queryset'] = (CourseOffering.objects
+            kwargs['queryset'] = (Course.objects
                                   .select_related("meta_course", "semester"))
         return (super(ImageAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))

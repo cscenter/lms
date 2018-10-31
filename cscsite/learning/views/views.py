@@ -37,7 +37,7 @@ from learning.calendar import CalendarQueryParams
 from learning.forms import CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
     AssignmentModalCommentForm
-from learning.models import MetaCourse, CourseClass, CourseOffering, Venue, \
+from learning.models import MetaCourse, CourseClass, Course, Venue, \
     Enrollment, Assignment, AssignmentAttachment, \
     StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
@@ -228,7 +228,7 @@ class CalendarTeacherFullView(TeacherOnlyMixin, CalendarGenericView):
         # Collect all cities where authenticated teacher has sessions
         terms_in_month = get_terms_for_calendar_month(year, month)
         term_indexes = [get_term_index(*term) for term in terms_in_month]
-        cities = list(CourseOffering.objects
+        cities = list(Course.objects
                       .filter(semester__index__in=term_indexes)
                       .for_teacher(self.request.user)
                       .values_list("city_id", flat=True)
@@ -277,7 +277,7 @@ class CoursesListView(generic.ListView):
     template_name = "learning/courses/offerings.html"
 
     def get_queryset(self):
-        cos_qs = (CourseOffering.objects
+        cos_qs = (Course.objects
                   .select_related('meta_course')
                   .prefetch_related('teachers')
                   .order_by('meta_course__name'))
@@ -321,12 +321,12 @@ class CoursesListView(generic.ListView):
 
 
 class CourseTeacherListView(TeacherOnlyMixin, generic.ListView):
-    model = CourseOffering
+    model = Course
     context_object_name = 'course_list'
     template_name = "learning/courses/teaching_list.html"
 
     def get_queryset(self):
-        return (CourseOffering.objects
+        return (Course.objects
                 .filter(teachers=self.request.user)
                 .select_related('meta_course', 'semester')
                 .prefetch_related('teachers')
@@ -334,7 +334,7 @@ class CourseTeacherListView(TeacherOnlyMixin, generic.ListView):
 
 
 class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
-    model = CourseOffering
+    model = Course
     context_object_name = 'course_list'
     template_name = "learning/courses/learning_my_courses.html"
 
@@ -356,7 +356,7 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         # Hide summer courses on CS Club site until student enrolled in
         if is_club_site():
             in_current_term &= ~Q(semester__type=SEMESTER_TYPES.summer)
-        course_offerings = (CourseOffering.objects
+        course_offerings = (Course.objects
                             .get_offerings_base_queryset()
                             .in_city(city_code)
                             .filter(in_current_term | enrolled_in))
@@ -386,12 +386,12 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
 
 
 class CourseVideoListView(ListView):
-    model = CourseOffering
+    model = Course
     template_name = "learning/courses_video_list.html"
     context_object_name = 'course_list'
 
     def get_queryset(self):
-        return (CourseOffering.objects
+        return (Course.objects
                 .filter(is_published_in_video=True)
                 .order_by('-semester__year', 'semester__type')
                 .select_related('meta_course', 'semester'))
@@ -410,7 +410,7 @@ class CourseDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = (CourseOffering.objects
+        qs = (Course.objects
               .select_related("meta_course", "semester", "city")
               .filter(meta_course=self.object))
         # Separate by city only on compsciclub.ru
@@ -761,7 +761,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
     def _get_all_teacher_course_offerings(self):
         """Returns all course offerings for authenticated user"""
         u = self.request.user
-        cs = (CourseOffering.objects
+        cs = (Course.objects
               .filter(teachers=u)
               .select_related("meta_course", "semester")
               .order_by("semester__index", "meta_course__name"))

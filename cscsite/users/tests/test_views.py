@@ -13,7 +13,7 @@ from django.utils import translation
 from django.utils.encoding import smart_text, force_text, smart_bytes
 
 from learning.factories import SemesterFactory, \
-    CourseOfferingFactory, AreaOfStudyFactory
+    CourseFactory, AreaOfStudyFactory
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import UserCreationForm, UserChangeForm
@@ -200,7 +200,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         # Teacher has no course offering and redirects to courses list
         self.assertEqual(resp.status_code, 302)
         # Now he has one
-        CourseOfferingFactory.create(teachers=[user])
+        CourseFactory.create(teachers=[user])
         resp = self.client.get(reverse('assignment_list_teacher'))
         self.assertEqual(resp.status_code, 200)
 

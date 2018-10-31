@@ -18,7 +18,7 @@ from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU
-from .models import MetaCourse, CourseOffering, CourseOfferingNews, \
+from .models import MetaCourse, Course, CourseOfferingNews, \
     CourseClass, Venue, Assignment, AssignmentComment, Enrollment
 
 DROP_ATTACHMENT_LINK = """
@@ -50,8 +50,8 @@ class CourseEnrollmentForm(forms.Form):
             return not self._custom_errors
         self._custom_errors = []
         if not self.course_offering.enrollment_is_open:
-            error = ValidationError("CourseOffering enrollment should be "
-                                    "active", code="deadline")
+            error = ValidationError("Course enrollment should be active",
+                                    code="deadline")
             self._custom_errors.append(error)
         if is_club_site() and not self.course_offering.is_open:
             error = ValidationError("Club students can't enroll on center "
@@ -73,7 +73,7 @@ class CourseEnrollmentForm(forms.Form):
         return not self._custom_errors
 
 
-class CourseOfferingEditDescrForm(forms.ModelForm):
+class CourseEditDescrForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -92,7 +92,7 @@ class CourseOfferingEditDescrForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
     class Meta:
-        model = CourseOffering
+        model = Course
         fields = ['description_ru', 'description_en']
         widgets = {
             'description_ru': UbereditorWidget,
@@ -100,7 +100,7 @@ class CourseOfferingEditDescrForm(forms.ModelForm):
         }
 
 
-class CourseOfferingNewsForm(forms.ModelForm):
+class CourseNewsForm(forms.ModelForm):
     title = forms.CharField(
         label=_("Title"),
         required=True,
@@ -113,14 +113,14 @@ class CourseOfferingNewsForm(forms.ModelForm):
         widget=UbereditorWidget)
 
     def __init__(self, *args, **kwargs):
-        course_offering = kwargs.pop('course_offering', None)
+        course = kwargs.pop('course_offering', None)
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div('title', 'text'),
             CANCEL_SAVE_PAIR)
         super().__init__(*args, **kwargs)
-        if course_offering:
-            self.instance.course_offering = course_offering
+        if course:
+            self.instance.course_offering = course
 
     class Meta:
         model = CourseOfferingNews

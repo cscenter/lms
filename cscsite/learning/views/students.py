@@ -17,7 +17,7 @@ from core.utils import is_club_site
 from learning import utils
 from learning.forms import CourseEnrollmentForm
 from learning.models import Useful, Internship, StudentAssignment, Semester, \
-    Enrollment, CourseOffering
+    Enrollment, Course
 from learning.settings import DATE_FORMAT_RU
 from learning.viewmixins import StudentCenterAndVolunteerOnlyMixin, \
     ParticipantOnlyMixin, StudentOnlyMixin
@@ -156,7 +156,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, FormView):
         except ValueError:
             raise Http404
         course_offering = get_object_or_404(
-            CourseOffering.objects
+            Course.objects
             .filter(meta_course__slug=course_slug,
                     semester__year=semester_year,
                     semester__type=semester_type)

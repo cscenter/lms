@@ -13,7 +13,7 @@ from django.utils import timezone, formats
 from django.utils.encoding import smart_bytes
 
 from learning.factories import MetaCourseFactory, SemesterFactory, \
-    CourseOfferingFactory, CourseOfferingNewsFactory, AssignmentFactory, \
+    CourseFactory, CourseNewsFactory, AssignmentFactory, \
     CourseOfferingTeacherFactory, CourseClassFactory, EnrollmentFactory
 from learning.models import Semester, Enrollment
 from learning.settings import PARTICIPANT_GROUPS
@@ -41,10 +41,10 @@ class SemesterListTests(MyUtilitiesMixin, TestCase):
             for year in range(2012, 2015):
                 s = SemesterFactory.create(type=semester_type,
                                            year=year)
-                CourseOfferingFactory.create(meta_course=mc, semester=s,
-                                             teachers=[u])
+                CourseFactory.create(meta_course=mc, semester=s,
+                                     teachers=[u])
         s = SemesterFactory.create(type='autumn', year=2015)
-        CourseOfferingFactory.create(meta_course=mc, semester=s, teachers=[u])
+        CourseFactory.create(meta_course=mc, semester=s, teachers=[u])
         resp = self.client.get(reverse('course_list'))
         self.assertEqual(4, len(resp.context['semester_list']))
         cos = self.cos_from_semester_list(resp.context['semester_list'])
@@ -56,10 +56,10 @@ class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
     def test_list_center_site(self):
         """Center students can see club CO only from SPB"""
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(semester=s,
-                                          city=settings.DEFAULT_CITY_CODE)
-        co_kzn = CourseOfferingFactory.create(semester=s,
-                                              city="kzn")
+        co = CourseFactory.create(semester=s,
+                                  city=settings.DEFAULT_CITY_CODE)
+        co_kzn = CourseFactory.create(semester=s,
+                                      city="kzn")
         resp = self.client.get(reverse('course_list'))
         # Really stupid test, we filter summer courses on /courses/ page
         if s.type != Semester.TYPES.summer:
@@ -71,9 +71,9 @@ class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory(city_id=settings.DEFAULT_CITY_CODE)
         self.doLogin(student)
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseOfferingFactory.create(semester=s,
-                                          city=settings.DEFAULT_CITY_CODE)
-        co_kzn = CourseOfferingFactory.create(semester=s, city="kzn")
+        co = CourseFactory.create(semester=s,
+                                  city=settings.DEFAULT_CITY_CODE)
+        co_kzn = CourseFactory.create(semester=s, city="kzn")
         response = self.client.get(reverse('course_list_student'))
         self.assertEqual(len(response.context['ongoing_rest']), 1)
 
@@ -94,7 +94,7 @@ NSK_OFFSET = get_timezone_gmt_offset(settings.TIME_ZONES['nsk'])
 
 @pytest.mark.django_db
 def test_news_get_city_timezone(settings):
-    news = CourseOfferingNewsFactory(course_offering__city_id='nsk')
+    news = CourseNewsFactory(course_offering__city_id='nsk')
     assert news.get_city_timezone() == settings.TIME_ZONES['nsk']
     news.course_offering.city_id = 'spb'
     news.course_offering.save()
@@ -105,8 +105,8 @@ def test_news_get_city_timezone(settings):
 @pytest.mark.django_db
 def test_course_offering_news(settings, admin_client):
     settings.LANGUAGE_CODE = 'ru'
-    news = CourseOfferingNewsFactory(course_offering__city_id='spb',
-                                     created=datetime.datetime(TEST_YEAR, 1, 13,
+    news = CourseNewsFactory(course_offering__city_id='spb',
+                             created=datetime.datetime(TEST_YEAR, 1, 13,
                                                                20, 0, 0, 0,
                                                                tzinfo=pytz.UTC))
     co = news.course_offering
@@ -250,8 +250,8 @@ def test_course_offering_assignment_timezone(settings, client):
 def test_update_composite_fields(curator, client, mocker):
     mocker.patch("learning.tasks.maybe_upload_slides_yandex.delay")
     teacher = TeacherCenterFactory()
-    co = CourseOfferingFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                      teachers=[teacher])
+    co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
+                              teachers=[teacher])
     cc1 = CourseClassFactory.create(course_offering=co, video_url="")
     co.refresh_from_db()
     assert not co.materials_video
@@ -281,12 +281,12 @@ def test_update_composite_fields(curator, client, mocker):
 def test_course_offering_news_tab_permissions(client):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
-    news = CourseOfferingNewsFactory(course_offering__city_id='spb',
-                                     course_offering__semester=current_semester)
+    news = CourseNewsFactory(course_offering__city_id='spb',
+                             course_offering__semester=current_semester)
     co = news.course_offering
-    news_prev = CourseOfferingNewsFactory(course_offering__city_id='spb',
-                                          course_offering__meta_course=co.meta_course,
-                                          course_offering__semester=prev_term)
+    news_prev = CourseNewsFactory(course_offering__city_id='spb',
+                                  course_offering__meta_course=co.meta_course,
+                                  course_offering__semester=prev_term)
     co_prev = news_prev.course_offering
     response = client.get(co.get_absolute_url())
     assert "news" not in response.context['tabs']
@@ -320,7 +320,7 @@ def test_course_offering_news_tab_permissions(client):
     assert "news" in response.context['tabs']
     response = client.get(co.get_absolute_url())
     assert "news" in response.context['tabs']
-    co_other = CourseOfferingFactory(semester=current_semester)
+    co_other = CourseFactory(semester=current_semester)
     response = client.get(co_other.get_absolute_url())
     assert "news" not in response.context['tabs']
 
@@ -333,8 +333,8 @@ def test_course_offering_assignments_tab_permissions(client):
     a = AssignmentFactory(course_offering__semester=prev_term,
                           course_offering__meta_course=meta_course)
     co_prev = a.course_offering
-    co = CourseOfferingFactory(meta_course=meta_course,
-                               semester=current_semester)
+    co = CourseFactory(meta_course=meta_course,
+                       semester=current_semester)
     teacher = TeacherCenterFactory()
     CourseOfferingTeacherFactory(teacher=teacher, course_offering=co)
     # Unauthenticated user can't see tab at all

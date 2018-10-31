@@ -26,7 +26,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory()
         teacher1 = TeacherCenterFactory()
         teacher2 = TeacherCenterFactory()
-        co = CourseOfferingFactory.create(teachers=[teacher1, teacher2])
+        co = CourseFactory.create(teachers=[teacher1, teacher2])
         EnrollmentFactory.create(student=student, course_offering=co,
                                  grade=GRADES.good)
         # Notify_teachers m2m populated only from view action
@@ -107,7 +107,7 @@ def test_notification_teachers_list_for_assignment(client):
     student = StudentCenterFactory()
     t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
     # Course offering with 4 teachers whom notify_by_default flag set to True
-    co = CourseOfferingFactory.create(teachers=[t1, t2, t3, t4])
+    co = CourseFactory.create(teachers=[t1, t2, t3, t4])
     co_teacher1 = CourseOfferingTeacher.objects.get(course_offering=co, teacher=t1)
     co_teacher1.notify_by_default = False
     co_teacher1.save()
@@ -163,7 +163,7 @@ def test_notify_teachers_assignment_admin_form(client, curator):
     teachers if list is not specified manually"""
     from django.contrib.admin.sites import AdminSite
     t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
-    co = CourseOfferingFactory.create(teachers=[t1, t2, t3, t4])
+    co = CourseFactory.create(teachers=[t1, t2, t3, t4])
     ma = AssignmentAdmin(Assignment, AdminSite())
     client.login(curator)
     a = AssignmentFactory.build()
@@ -193,7 +193,7 @@ def test_notify_teachers_assignment_admin_form(client, curator):
 
 @pytest.mark.django_db
 def test_new_assignment_notifications(settings):
-    co = CourseOfferingFactory()
+    co = CourseFactory()
     enrollments = EnrollmentFactory.create_batch(5, course_offering=co)
     assignment = AssignmentFactory(course_offering=co)
     assert AssignmentNotification.objects.count() == 5
@@ -245,7 +245,7 @@ def test_new_assignment_timezone(settings):
 
 @pytest.mark.django_db
 def test_create_deadline_change_notification(settings):
-    co = CourseOfferingFactory(city_id='spb')
+    co = CourseFactory(city_id='spb')
     e1, e2 = EnrollmentFactory.create_batch(2, course_offering=co)
     s1 = e1.student
     s1.status = STUDENT_STATUS.expelled

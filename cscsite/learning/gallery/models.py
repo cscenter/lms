@@ -15,7 +15,7 @@ from mptt.models import MPTTModel
 from sorl.thumbnail import ImageField, get_thumbnail
 from sorl.thumbnail.helpers import ThumbnailError
 
-from learning.models import Semester, CourseOffering
+from learning.models import Semester, Course
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ class Image(models.Model):
                              related_name='images',
                              on_delete=models.CASCADE)
     course_offering = models.ForeignKey(
-        CourseOffering,
+        Course,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT,
         blank=True,

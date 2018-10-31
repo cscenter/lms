@@ -14,7 +14,7 @@ from post_office import mail
 from post_office.models import EmailTemplate
 
 from core.utils import city_aware_reverse
-from learning.models import CourseOffering, Enrollment
+from learning.models import Course, Enrollment
 from surveys.constants import FIELD_TYPES, MULTIPLE_CHOICE_FIELD_TYPES, \
     FieldType, FieldVisibility, STATUS_PUBLISHED, \
     STATUSES, FIELD_WIDGETS, STATUS_DRAFT, CHOICE_FIELD_TYPES
@@ -262,7 +262,7 @@ class CourseOfferingSurvey(models.Model):
         verbose_name=_("Type"),
         max_length=20,
         choices=TYPES)
-    course_offering = models.ForeignKey(CourseOffering,
+    course_offering = models.ForeignKey(Course,
                                         related_name="surveys",
                                         on_delete=models.CASCADE)
     email_template = models.ForeignKey(

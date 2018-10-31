@@ -17,7 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 from learning.forms import AssignmentGradeForm
 from core.forms import GradeField
 from learning.models import StudentAssignment, Enrollment, Assignment, \
-    CourseOffering
+    Course
 from learning.settings import GRADES
 from users.models import User
 
@@ -139,7 +139,7 @@ class GradeBookData:
         return static_headers + [a.title for a in self.assignments.values()]
 
 
-def gradebook_data(course_offering: CourseOffering) -> GradeBookData:
+def gradebook_data(course_offering: Course) -> GradeBookData:
     """
     Returns:
         students = OrderedDict(

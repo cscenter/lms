@@ -17,7 +17,7 @@ from core.exceptions import Redirect
 from learning import utils
 from learning.gradebook import GradeBookFormFactory, gradebook_data, \
     AssignmentGradesImport
-from learning.models import Semester, CourseOffering, Assignment
+from learning.models import Semester, Course, Assignment
 from learning.settings import SEMESTER_AUTUMN_SPRING_INDEX_OFFSET
 from learning.utils import get_current_term_pair, get_term_index
 from learning.viewmixins import CuratorOnlyMixin, TeacherOnlyMixin
@@ -34,7 +34,7 @@ class _GradeBookDispatchView(generic.ListView):
     model = Semester
 
     def get_co_queryset(self):
-        return (CourseOffering.objects
+        return (Course.objects
                 .select_related("meta_course")
                 .order_by("meta_course__name"))
 
@@ -105,7 +105,7 @@ class GradeBookTeacherDispatchView(TeacherOnlyMixin, _GradeBookDispatchView):
         return context
 
 
-def _get_course_offering(get_params, user) -> Optional[CourseOffering]:
+def _get_course_offering(get_params, user) -> Optional[Course]:
     try:
         filter_kwargs = dict(
             city=get_params['city'].lower(),
@@ -115,7 +115,7 @@ def _get_course_offering(get_params, user) -> Optional[CourseOffering]:
         )
         if not user.is_curator:
             filter_kwargs["teachers"] = user
-        return (CourseOffering.objects
+        return (Course.objects
                 .select_related('semester', 'meta_course')
                 .get(**filter_kwargs))
     except (ValueError, KeyError, AttributeError, ObjectDoesNotExist):
@@ -201,7 +201,7 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
         filter_kwargs = {}
         if not self.request.user.is_curator:
             filter_kwargs["teachers"] = self.request.user
-        course_offering_list = (CourseOffering.objects
+        course_offering_list = (Course.objects
                                 .filter(**filter_kwargs)
                                 .order_by('-semester__index',
                                           '-pk')

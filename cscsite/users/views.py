@@ -19,7 +19,7 @@ from vanilla import DetailView
 from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from learning.models import StudentAssignment, \
-    CourseOffering, Semester, Enrollment, StudyProgram
+    Course, Semester, Enrollment, StudyProgram
 from learning.settings import LEARNING_BASE, TEACHING_BASE, GRADES
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
@@ -113,7 +113,7 @@ class TeacherDetailView(DetailView):
         filters = {"city_code": settings.CENTER_BRANCHES_CITY_CODES}
         if is_club_site():
             filters["city_code"] = self.request.city_code
-        co_queryset = (CourseOffering.objects
+        co_queryset = (Course.objects
                        .in_city(**filters)
                        .select_related('semester', 'meta_course'))
         return (User.objects
@@ -153,7 +153,7 @@ class UserDetailView(generic.DetailView):
         filters = {"city_code": settings.CENTER_BRANCHES_CITY_CODES}
         if is_club_site():
             filters["city_code"] = self.request.city_code
-        co_queryset = (CourseOffering.objects
+        co_queryset = (Course.objects
                        .in_city(**filters)
                        .select_related('semester', 'meta_course'))
         prefetch_list = [

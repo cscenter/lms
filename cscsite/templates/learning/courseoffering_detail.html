@@ -17,7 +17,7 @@
     <div class="row">
         <div class="col-xs-9">
             <h2 class="course-main-title">
-            {{ course_offering.meta_course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_courseoffering_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
+            {{ course_offering.meta_course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_course_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
               <small>{% if course_offering.is_correspondence %}{% trans "Online Course" %}{% else %}{{ course_offering.city.name }}{% endif %} / {{ course_offering.semester }}, <a href="{% url 'course_detail' course_offering.meta_course.slug %}">посмотреть все семестры</a></small>
             </h2>
 

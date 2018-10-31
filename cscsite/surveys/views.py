@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import FormView
 
-from learning.models import CourseOffering
+from learning.models import Course
 from surveys.forms import FormBuilder
 from surveys.models import CourseOfferingSurvey
 
@@ -41,7 +41,7 @@ form_detail = CourseSurveyDetailView.as_view()
 
 def form_success(request, slug, **kwargs):
     co = get_object_or_404(
-        CourseOffering.objects.filter(
+        Course.objects.filter(
             meta_course__slug=kwargs['course_slug'],
             city_id=request.city_code,
             semester__year=kwargs['semester_year'],

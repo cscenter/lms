@@ -30,11 +30,11 @@ from vanilla import TemplateView, ListView
 
 from core.exceptions import Redirect
 from core.models import Faq
-from cscenter.serializers import CourseOfferingSerializer
+from cscenter.serializers import CoursesSerializer
 from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
     PublicRouteException
 from learning.api.views import TestimonialList
-from learning.models import CourseOffering, CourseOfferingTeacher, \
+from learning.models import Course, CourseOfferingTeacher, \
     OnlineCourse, AreaOfStudy, StudyProgram, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR
 from learning.utils import get_current_term_pair, get_term_index, \
@@ -231,7 +231,7 @@ class TeachersView(generic.ListView):
         term_index = get_term_index_academic_year_starts(year, term_type)
         term_index -= 2 * TERMS_IN_ACADEMIC_YEAR
         active_lecturers = Counter(
-            CourseOffering.objects
+            Course.objects
             .filter(semester__index__gte=term_index)
             .values_list("teachers__pk", flat=True)
         )
@@ -489,7 +489,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
     template_name = "learning/courses/offerings.html"
 
     def get_queryset(self):
-        return (CourseOffering.objects
+        return (Course.objects
                 .get_offerings_base_queryset()
                 .exclude(semester__type=Semester.TYPES.summer))
 
@@ -511,7 +511,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
             active_year = active_academic_year
         active_slug = "{}-{}".format(active_year, active_type)
         active_city = filterset.data['city']
-        serializer = CourseOfferingSerializer(courses)
+        serializer = CoursesSerializer(courses)
         courses = serializer.data
         context = {
             "TERM_TYPES": term_options,

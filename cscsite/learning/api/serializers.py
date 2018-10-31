@@ -7,7 +7,7 @@ from django.utils.http import urlquote
 from rest_framework import serializers
 
 from core.utils import render_markdown
-from learning.models import MetaCourse, CourseOffering
+from learning.models import MetaCourse, Course
 from users.models import User
 
 
@@ -47,7 +47,7 @@ class CourseSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
 
     class Meta:
-        model = CourseOffering
+        model = Course
         fields = ('id', 'name')
 
     def get_name(self, obj):
