@@ -3,14 +3,14 @@ from django.db.models import Q
 from learning.models import CourseClass
 from learning.utils import now_local
 from surveys.constants import FormTemplates, STATUS_DRAFT, STATUS_TEMPLATE
-from surveys.models import Form, FieldChoice, CourseOfferingSurvey
+from surveys.models import Form, FieldChoice, CourseSurvey
 
 OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
 
 
-def course_form_builder(survey: CourseOfferingSurvey):
+def course_form_builder(survey: CourseSurvey):
     co = survey.course_offering
-    if survey.type in [CourseOfferingSurvey.MIDDLE]:
+    if survey.type in [CourseSurvey.MIDDLE]:
         pass
     form = Form(title=f'Опрос по курсу «{co}»',
                 status=STATUS_DRAFT,

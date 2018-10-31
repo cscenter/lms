@@ -6,7 +6,7 @@ import factory
 from core.factories import EmailTemplateFactory
 from learning.factories import CourseFactory
 from surveys.constants import FieldType
-from surveys.models import CourseOfferingSurvey, Form, Field, FormSubmission, \
+from surveys.models import CourseSurvey, Form, Field, FormSubmission, \
     FieldEntry, FieldChoice
 
 
@@ -52,12 +52,12 @@ class FieldChoiceFactory(factory.DjangoModelFactory):
 
 class CourseSurveyFactory(factory.DjangoModelFactory):
     class Meta:
-        model = CourseOfferingSurvey
+        model = CourseSurvey
 
     form = factory.SubFactory(FormFactory)
     course_offering = factory.SubFactory(CourseFactory)
     type = factory.Iterator([
-        c for c, n in CourseOfferingSurvey._meta.get_field('type').choices
+        c for c, n in CourseSurvey._meta.get_field('type').choices
     ])
     email_template = factory.SubFactory(
         EmailTemplateFactory,

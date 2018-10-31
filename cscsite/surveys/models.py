@@ -247,7 +247,7 @@ class Form(AbstractForm):
             )
 
 
-class CourseOfferingSurvey(models.Model):
+class CourseSurvey(models.Model):
     MIDDLE = 'middle'
     FINAL = 'final'
     TYPES = (
