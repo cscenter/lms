@@ -9,7 +9,7 @@
                 <h2>{{ course.name }}</h2>
                 {% if user.is_curator %}
                     <div class="btn-toolbar">
-                        <a href="{% url 'course_edit' course.slug %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+                        <a href="{% url 'meta_course_edit' course.slug %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
                     </div>
                 {% endif %}
                 <hr>

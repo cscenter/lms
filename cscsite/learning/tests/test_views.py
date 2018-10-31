@@ -162,7 +162,7 @@ class MetaCourseDetailTests(MyUtilitiesMixin, TestCase):
 class MetaCourseUpdateTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         mc = MetaCourseFactory.create()
-        url = reverse('course_edit', args=[mc.slug])
+        url = reverse('meta_course_edit', args=[mc.slug])
         all_test_groups = [
             [],
             [PARTICIPANT_GROUPS.TEACHER_CENTER],
@@ -179,7 +179,7 @@ class MetaCourseUpdateTests(MyUtilitiesMixin, TestCase):
 
     def test_update(self):
         mc = MetaCourseFactory.create()
-        url = reverse('course_edit', args=[mc.slug])
+        url = reverse('meta_course_edit', args=[mc.slug])
         self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
         fields = model_to_dict(mc)
         # Note: Create middleware for lang request support in cscenter app
