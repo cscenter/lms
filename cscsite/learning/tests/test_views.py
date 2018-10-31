@@ -267,7 +267,7 @@ class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
                             reverse('assignment_detail_teacher', args=[a.pk]))
 
 
-class CourseOfferingEditDescrTests(MyUtilitiesMixin, TestCase):
+class CourseEditDescrTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         teacher_other = TeacherCenterFactory()
@@ -281,7 +281,7 @@ class CourseOfferingEditDescrTests(MyUtilitiesMixin, TestCase):
         self.assertStatusCode(200, url, make_reverse=False)
 
 
-class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
+class CourseNewsCreateTests(MyUtilitiesMixin, TestCase):
     def setUp(self):
         self.teacher = TeacherCenterFactory()
         self.teacher_other = TeacherCenterFactory()
@@ -307,11 +307,11 @@ class CourseOfferingNewsCreateTests(MyUtilitiesMixin, TestCase):
             self.client.post(self.url, self.n_dict), co_url)
         resp = self.client.get(co_url)
         self.assertContains(resp, self.n_dict['text'])
-        con = resp.context['course_offering'].courseofferingnews_set.all()[0]
+        con = resp.context['course_offering'].coursenews_set.all()[0]
         self.assertEqual(con.author, self.teacher)
 
 
-class CourseOfferingNewsUpdateTests(MyUtilitiesMixin, TestCase):
+class CourseNewsUpdateTests(MyUtilitiesMixin, TestCase):
     def setUp(self):
         self.teacher = TeacherCenterFactory()
         self.teacher_other = TeacherCenterFactory()
@@ -339,7 +339,7 @@ class CourseOfferingNewsUpdateTests(MyUtilitiesMixin, TestCase):
         self.assertContains(self.client.get(co_url), self.con_dict['text'])
 
 
-class CourseOfferingNewsDeleteTests(MyUtilitiesMixin, TestCase):
+class CourseNewsDeleteTests(MyUtilitiesMixin, TestCase):
     def setUp(self):
         self.teacher = TeacherCenterFactory()
         self.teacher_other = TeacherCenterFactory()

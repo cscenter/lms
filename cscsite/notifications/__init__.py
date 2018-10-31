@@ -69,17 +69,17 @@ Lets enumerate all existing notifications for the moment:
     Teacher <actor> added new "Assignment" <action_object> on
         CourseOffering <target>
             action_object - Assignment
-            target - CourseOffering
+            target - Course
     6. ASSIGNMENT_DEADLINE_UPDATED
     Deadline has been changed <verb> on "Assignment" <action_object>
         for CourseOffering <target>
             action_object - Assignment
-            target - CourseOffering
+            target - Course
     7. NEW_ASSIGNMENT_NEWS
     Teacher <actor> published <verb> news <action_object> on
         Course Offering <target>
-            action_object  - CourseOfferingNews
-            target - CourseOffering
+            action_object  - CourseNews
+            target - Course
     8. NEW_ASSIGNMENT_SUBMISSION
     Student <actor> added <verb> submission <action_object> for
         Assignment <target>

@@ -522,7 +522,7 @@ class CourseTeacher(models.Model):
         return ts
 
 
-class CourseOfferingNews(TimeStampedModel):
+class CourseNews(TimeStampedModel):
     course_offering = models.ForeignKey(
         Course,
         verbose_name=_("Course offering"),
@@ -1400,7 +1400,7 @@ class CourseOfferingNewsNotification(TimeStampedModel):
         verbose_name=_("User"),
         on_delete=models.CASCADE)
     course_offering_news = models.ForeignKey(
-        CourseOfferingNews,
+        CourseNews,
         verbose_name=_("Course offering news"),
         on_delete=models.CASCADE)
     is_unread = models.BooleanField(_("Unread"),

@@ -20,7 +20,7 @@ from learning.models import InternshipCategory
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import User
 from .models import MetaCourse, Semester, Course, Venue, \
-    CourseClass, CourseClassAttachment, CourseOfferingNews, \
+    CourseClass, CourseClassAttachment, CourseNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
     CourseTeacher, InternationalSchool, Useful, Internship, AreaOfStudy, \
@@ -132,7 +132,7 @@ class CourseClassAdmin(admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
-class CourseOfferingNewsAdmin(admin.ModelAdmin):
+class CourseNewsAdmin(admin.ModelAdmin):
     date_hierarchy = 'created'
     list_display = ['title', 'course_offering', 'created_local']
     raw_id_fields = ["course_offering", "author"]
@@ -371,7 +371,7 @@ admin.site.register(Course, CourseAdmin)
 admin.site.register(Venue, VenueAdmin)
 admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseClassAttachment, CourseClassAttachmentAdmin)
-admin.site.register(CourseOfferingNews, CourseOfferingNewsAdmin)
+admin.site.register(CourseNews, CourseNewsAdmin)
 admin.site.register(Assignment, AssignmentAdmin)
 admin.site.register(AssignmentAttachment, AssignmentAttachmentAdmin)
 admin.site.register(StudentAssignment, StudentAssignmentAdmin)
