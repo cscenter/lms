@@ -137,8 +137,8 @@ class TeacherDetailView(DetailView):
                              to_attr='course_offerings'),
                     Prefetch('images',
                              queryset=Image.objects.select_related(
-                                 "course_offering",
-                                 "course_offering__semester"))
+                                 "course",
+                                 "course__semester"))
                     ))
 
     def get_context_data(self, **kwargs):

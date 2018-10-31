@@ -36,7 +36,7 @@ from learning.views.students import StudentAssignmentStudentDetailView, \
     StudentAssignmentListView, CourseEnrollView, \
     CourseUnenrollView
 
-course_patterns = url(
+meta_course_patterns = url(
     r"^courses/", include([
         url(r"^(?P<slug>[-\w]+)/$", MetaCourseDetailView.as_view(),
             name="course_detail"),
@@ -45,7 +45,7 @@ course_patterns = url(
     ]))
 
 # TODO: dynamically generate city_code regex part
-course_offering_patterns = url(
+course_patterns = url(
     r"^courses/(?P<course_slug>[-\w]+)/(?P<city_code>nsk|kzn|spb|)(?P<city_delimiter>/?)(?P<semester_slug>[-\w]+)/", include([
         # TODO: Ещё раз проверить, что во всех вьюхах учитывается city_code
         # Course offering
@@ -199,9 +199,9 @@ urlpatterns = [
 
     venues_patterns,
 
-    course_patterns,
+    meta_course_patterns,
 
-    course_offering_patterns,
+    course_patterns,
 
     student_section_patterns,
 
