@@ -185,6 +185,11 @@ class UserRecordResourceAdmin(ImportMixin, UserAdmin):
     import_template_name = 'admin/import_export/import_users.html'
 
 
+class EnrollmentCertificateAdmin(admin.ModelAdmin):
+    list_display = ["student", "created"]
+    raw_id_fields = ["student"]
+
+
 admin.site.register(User, UserRecordResourceAdmin)
-admin.site.register(EnrollmentCertificate)
+admin.site.register(EnrollmentCertificate, EnrollmentCertificateAdmin)
 admin.site.register(SHADCourseRecord, SHADCourseRecordResourceAdmin)
