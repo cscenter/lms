@@ -9,11 +9,11 @@ from django.utils import formats
 
 from core.reports import ReportFileOutput
 from surveys.constants import FieldType, CHOICE_FIELD_TYPES
-from surveys.models import CourseOfferingSurvey, Field, FieldChoice, FieldEntry
+from surveys.models import CourseSurvey, Field, FieldChoice, FieldEntry
 
 
 class SurveySubmissionsReport(ReportFileOutput):
-    def __init__(self, survey: CourseOfferingSurvey):
+    def __init__(self, survey: CourseSurvey):
         self.survey = survey
         p = Prefetch("choices", queryset=FieldChoice.objects.order_by("order"))
         fields = (Field.objects
@@ -65,7 +65,7 @@ class PollOptionResult(NamedTuple):
 
 
 class SurveySubmissionsStats:
-    def __init__(self, survey: CourseOfferingSurvey):
+    def __init__(self, survey: CourseSurvey):
         self.survey = survey
         p = Prefetch("choices", queryset=FieldChoice.objects.order_by("order"))
         fields = (Field.objects

@@ -5,7 +5,7 @@ from django.views.generic import FormView
 
 from learning.models import Course
 from surveys.forms import FormBuilder
-from surveys.models import CourseOfferingSurvey
+from surveys.models import CourseSurvey
 
 
 class CourseSurveyDetailView(FormView):
@@ -17,7 +17,7 @@ class CourseSurveyDetailView(FormView):
     def get_form(self, form_class=None):
         """Return an instance of the form to be used in this view."""
         survey = get_object_or_404(
-            CourseOfferingSurvey.objects
+            CourseSurvey.objects
                 .select_related("form", "course_offering",
                                 "course_offering__meta_course",
                                 "course_offering__semester"),

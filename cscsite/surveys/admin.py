@@ -7,7 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from core.widgets import AdminRelatedDropdownFilter
 from surveys.constants import STATUS_PUBLISHED
 from surveys.models import Form, Field, FieldChoice, FormSubmission, FieldEntry, \
-    CourseOfferingSurvey
+    CourseSurvey
 
 
 class FormFieldAdmin(admin.StackedInline):
@@ -124,7 +124,7 @@ class FieldEntryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Form, FormAdmin)
-admin.site.register(CourseOfferingSurvey, CourseSurveyAdmin)
+admin.site.register(CourseSurvey, CourseSurveyAdmin)
 admin.site.register(Field, FieldAdmin)
 # admin.site.register(FieldChoice, FieldChoiceAdmin)
 # admin.site.register(FormSubmission, FormSubmissionAdmin)

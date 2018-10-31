@@ -6,7 +6,7 @@ from django.db.models import Prefetch
 
 from surveys.constants import FIELD_CLASSES, FieldType
 from surveys.models import FieldEntry, FormSubmission, Form, Field, FieldChoice, \
-    CourseOfferingSurvey
+    CourseSurvey
 
 
 class FormBuilder(forms.ModelForm):
@@ -16,7 +16,7 @@ class FormBuilder(forms.ModelForm):
         model = FormSubmission
         exclude = ("form", "created")
 
-    def __init__(self, survey: CourseOfferingSurvey, *args, **kwargs):
+    def __init__(self, survey: CourseSurvey, *args, **kwargs):
         """Creates form field for each db_field of the given Form instance."""
         self.survey = survey
         p = Prefetch("choices", queryset=FieldChoice.objects.order_by("order"))
