@@ -19,7 +19,7 @@ from users.views import LoginView, LogoutView, \
 from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
     ICalEventsView
 from learning.views import InternationalSchoolsListView, CoursesListView
-from learning.urls import course_patterns, course_offering_patterns, \
+from learning.urls import meta_course_patterns, course_patterns, \
     student_section_patterns, teaching_section_patterns, venues_patterns
 from core.views import MarkdownRenderView
 from csclub.views import CalendarClubScheduleView, IndexView, TeachersView, \
@@ -32,8 +32,8 @@ urlpatterns = i18n_patterns(
     url(r'^commenting-the-right-way/$', MarkdownHowToHelpView.as_view(),
         name='commenting_the_right_way'),
     url(r"^courses/$", CoursesListView.as_view(), name="course_list"),
+    meta_course_patterns,
     course_patterns,
-    course_offering_patterns,
 
     url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(),
         name="profile_update_image"),

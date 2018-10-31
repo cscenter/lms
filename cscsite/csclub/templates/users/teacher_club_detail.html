@@ -12,7 +12,7 @@
         <div class="gallery">
         {% for image in teacher.images.all %}
             {% thumbnail image.image "300x200" crop="center" as im %}
-                <a href="{{ image.image.url }}" title="{{ image.title }}{% if image.course_offering %} | {{ image.course_offering.semester }}{% endif %}">
+                <a href="{{ image.image.url }}" title="{{ image.title }}{% if image.course_id %} | {{ image.course.semester }}{% endif %}">
                     <img  alt="{{ image.title }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                 </a>
             {% endthumbnail %}

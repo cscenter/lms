@@ -28,11 +28,10 @@ class ImageAdmin(admin.ModelAdmin):
     list_filter = ('album', )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'course_offering':
+        if db_field.name == 'course':
             kwargs['queryset'] = (Course.objects
                                   .select_related("meta_course", "semester"))
-        return (super(ImageAdmin, self)
-                .formfield_for_foreignkey(db_field, request, **kwargs))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def width(self, obj):
         try:

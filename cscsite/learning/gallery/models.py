@@ -23,9 +23,9 @@ logger = logging.getLogger(__name__)
 def gen_path_to_image(self, filename):
     if self.album:
         slug = self.album.slug
-    elif self.course_offering:
-        slug = "{}_{}".format(self.course_offering.semester.year,
-                              self.course_offering.semester.type)
+    elif self.course:
+        slug = "{}_{}".format(self.course.semester.year,
+                              self.course.semester.type)
     else:
         slug = "misc"
     return os.path.join('gallery',
@@ -33,7 +33,6 @@ def gen_path_to_image(self, filename):
                         filename)
 
 
-@python_2_unicode_compatible
 class Image(models.Model):
     title = models.CharField(verbose_name=_('Title'), max_length=255,
                              blank=True, null=True)
@@ -47,7 +46,7 @@ class Image(models.Model):
                              null=True, blank=True,
                              related_name='images',
                              on_delete=models.CASCADE)
-    course_offering = models.ForeignKey(
+    course = models.ForeignKey(
         Course,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT,
@@ -64,7 +63,6 @@ class Image(models.Model):
         return '%s' % self.id
 
 
-@python_2_unicode_compatible
 class Album(MPTTModel):
     name = models.CharField(verbose_name=_('Name'), max_length=100,
                             blank=False, null=False)
