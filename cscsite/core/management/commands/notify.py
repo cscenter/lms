@@ -36,9 +36,9 @@ EMAILS = {
         'title': "Студент оставил комментарий к решению задания",
         'template': "emails/new_comment_for_teacher.html"
     },
-    'new_courseoffering_news': {
+    'new_course_news': {
         'title': "Добавлена новость к курсу",
-        'template': "emails/new_courseoffering_news.html"
+        'template': "emails/new_course_news.html"
     },
     'deadline_changed': {
         'title': "Изменился срок сдачи домашнего задания",
@@ -166,7 +166,7 @@ class Command(BaseCommand):
 
             notify(notification, name, context, self.stdout)
 
-        notifications_courseoffering_news \
+        notifications_course_news \
             = (CourseNewsNotification.objects
                .filter(is_unread=True, is_notified=False)
                .select_related("user")
@@ -177,21 +177,15 @@ class Command(BaseCommand):
                    'course_offering_news__course_offering__meta_course',
                    'course_offering_news__course_offering__semester'))
 
-        for notification in notifications_courseoffering_news:
+        for notification in notifications_course_news:
             base_url = get_base_url(notification)
             course_offering = notification.course_offering_news.course_offering
-            name = 'new_courseoffering_news'
+            name = 'new_course_news'
             context = {
-                'courseoffering_link':
-                    base_url + course_offering.get_absolute_url(),
-                'courseoffering_name':
-                    smart_text(course_offering.meta_course),
-                'courseoffering_news_name':
-                    notification.course_offering_news.title,
-                'courseoffering_news_text':
-                    notification.course_offering_news.text,
-                'course_name':
-                    smart_text(course_offering.meta_course)
+                'course_link': base_url + course_offering.get_absolute_url(),
+                'course_name': smart_text(course_offering.meta_course),
+                'course_news_name': notification.course_offering_news.title,
+                'course_news_text': notification.course_offering_news.text,
             }
 
             notify(notification, name, context, self.stdout)
