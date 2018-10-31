@@ -108,7 +108,7 @@ def test_notification_teachers_list_for_assignment(client):
     t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
     # Course offering with 4 teachers whom notify_by_default flag set to True
     co = CourseFactory.create(teachers=[t1, t2, t3, t4])
-    co_teacher1 = CourseOfferingTeacher.objects.get(course_offering=co, teacher=t1)
+    co_teacher1 = CourseTeacher.objects.get(course_offering=co, teacher=t1)
     co_teacher1.notify_by_default = False
     co_teacher1.save()
     EnrollmentFactory.create(student=student, course_offering=co,
@@ -182,7 +182,7 @@ def test_notify_teachers_assignment_admin_form(client, curator):
     assert (Assignment.objects.count() == 1)
     assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
     # Manually select teachers from list
-    co_t1, co_t2, co_t3, co_t4 = CourseOfferingTeacher.objects.filter(course_offering=co).all()
+    co_t1, co_t2, co_t3, co_t4 = CourseTeacher.objects.filter(course_offering=co).all()
     post_data['notify_teachers'] = [co_t1.pk, co_t2.pk]
     response = client.post(reverse('admin:learning_assignment_add'), post_data)
     assert (Assignment.objects.count() == 2)

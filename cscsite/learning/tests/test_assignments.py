@@ -17,7 +17,7 @@ from django.utils.translation import ugettext as _
 from core.admin import get_admin_url
 from learning.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory, \
-    StudentAssignmentFactory, CourseOfferingTeacherFactory
+    StudentAssignmentFactory, CourseTeacherFactory
 from learning.models import StudentAssignment, Assignment, Course, \
     AssignmentAttachment
 from learning.settings import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS, \
@@ -793,8 +793,8 @@ def test_studentassignment_submission_grade(client):
     """
     sa = StudentAssignmentFactory()
     teacher = TeacherCenterFactory.create()
-    CourseOfferingTeacherFactory(course_offering=sa.assignment.course_offering,
-                                 teacher=teacher)
+    CourseTeacherFactory(course_offering=sa.assignment.course_offering,
+                         teacher=teacher)
     sa.assignment.grade_min = 1
     sa.assignment.grade_max = 10
     sa.assignment.save()

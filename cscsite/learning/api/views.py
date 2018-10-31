@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from api.pagination import StandardPagination
 from learning.api.serializers import AlumniSerializer, TestimonialSerializer, \
     TeacherSerializer, CourseSerializer
-from learning.models import AreaOfStudy, CourseOfferingTeacher, Course, \
+from learning.models import AreaOfStudy, CourseTeacher, Course, \
     Semester
 from learning.settings import CENTER_FOUNDATION_YEAR
 from learning.utils import get_term_index
@@ -36,10 +36,10 @@ class TeacherList(ListAPIView):
     serializer_class = TeacherSerializer
 
     def get_queryset(self):
-        lecturer = CourseOfferingTeacher.roles.lecturer
+        lecturer = CourseTeacher.roles.lecturer
         queryset = (User.objects
                     .filter(groups=User.group.TEACHER_CENTER,
-                            courseofferingteacher__roles=lecturer)
+                            courseteacher__roles=lecturer)
                     .only("pk", "first_name", "last_name", "patronymic",
                           "cropbox_data", "photo", "city_id", "gender",
                           "workplace")
@@ -49,12 +49,12 @@ class TeacherList(ListAPIView):
             term_index = get_term_index(CENTER_FOUNDATION_YEAR,
                                         Semester.TYPES.autumn)
             queryset = queryset.filter(
-                courseofferingteacher__course_offering__meta_course_id=course,
-                courseofferingteacher__course_offering__semester__index__gte=term_index)
+                courseteacher__course_offering__meta_course_id=course,
+                courseteacher__course_offering__semester__index__gte=term_index)
         queryset = queryset.prefetch_related(
             Prefetch(
-                "courseofferingteacher_set",
-                queryset=(CourseOfferingTeacher.objects
+                "course_teachers",
+                queryset=(CourseTeacher.objects
                           .select_related("course_offering",
                                           "course_offering__semester")
                           .only("teacher_id",

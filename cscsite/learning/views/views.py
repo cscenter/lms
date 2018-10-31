@@ -42,7 +42,7 @@ from learning.models import MetaCourse, CourseClass, Course, Venue, \
     StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     Semester, NonCourseEvent, \
-    OnlineCourse, InternationalSchool, CourseOfferingTeacher
+    OnlineCourse, InternationalSchool, CourseTeacher
 from learning.permissions import access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR, SEMESTER_TYPES
@@ -1059,7 +1059,7 @@ class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
         self.object = form.save()
         # Set up notifications recipients setting
         course_offering = self.object.course_offering
-        co_teachers = course_offering.courseofferingteacher_set.all()
+        co_teachers = course_offering.course_teachers.all()
         notify_teachers = [t.pk for t in co_teachers if t.notify_by_default]
         self.object.notify_teachers.add(*notify_teachers)
 

@@ -66,7 +66,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     photo = PhotoSerializerField("176x246")
     city = serializers.CharField(source="city_id")
     courses = TeacherCourseListingField(
-        many=True, read_only=True, source="courseofferingteacher_set")
+        many=True, read_only=True, source="course_teachers")
     # Duplicates are acceptable
     last_session = serializers.SerializerMethodField(
         help_text="The latest term index when the teacher read the course")
@@ -81,7 +81,7 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     def get_last_session(self, obj):
         last = 0
-        for t in obj.courseofferingteacher_set.all():
+        for t in obj.course_teachers.all():
             last = max(last, t.course_offering.semester.index)
         return last
 

@@ -23,7 +23,7 @@ from .models import MetaCourse, Semester, Course, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
-    CourseOfferingTeacher, InternationalSchool, Useful, Internship, AreaOfStudy, \
+    CourseTeacher, InternationalSchool, Useful, Internship, AreaOfStudy, \
     StudyProgram, StudyProgramCourseGroup
 
 
@@ -64,8 +64,8 @@ class MetaCourseAdmin(TranslationAdmin, admin.ModelAdmin):
     }
 
 
-class CourseOfferingTeacherInline(admin.TabularInline):
-    model = CourseOfferingTeacher
+class CourseTeacherInline(admin.TabularInline):
+    model = CourseTeacher
     extra = 0
     min_num = 1
     formfield_overrides = {
@@ -77,7 +77,7 @@ class CourseOfferingTeacherInline(admin.TabularInline):
             kwargs["queryset"] = User.objects.filter(groups__in=[
                 PARTICIPANT_GROUPS.TEACHER_CENTER,
                 PARTICIPANT_GROUPS.TEACHER_CLUB]).distinct()
-        return super(CourseOfferingTeacherInline, self).formfield_for_foreignkey(db_field, *args, **kwargs)
+        return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
 class CourseAdminForm(forms.ModelForm):
@@ -97,7 +97,7 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_filter = ['city', 'semester']
     list_display = ['meta_course', 'semester', 'is_published_in_video',
                     'is_open']
-    inlines = (CourseOfferingTeacherInline,)
+    inlines = (CourseTeacherInline,)
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
@@ -174,7 +174,7 @@ class AssignmentAdminForm(CityAwareModelForm):
                 and 'notify_teachers' in cleaned_data
                 and cleaned_data['notify_teachers']):
             co = cleaned_data['course_offering']
-            co_teachers = [t.pk for t in co.courseofferingteacher_set.all()]
+            co_teachers = [t.pk for t in co.course_teachers.all()]
             if any(t.pk not in co_teachers for t in cleaned_data['notify_teachers']):
                 self.add_error('notify_teachers', ValidationError(
                         _("Assignment|Please, double check teachers list. Some "
@@ -209,12 +209,12 @@ class AssignmentAdmin(admin.ModelAdmin):
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "notify_teachers":
-            qs = (CourseOfferingTeacher.objects
+            qs = (CourseTeacher.objects
                   .select_related("teacher", "course_offering"))
             try:
                 assignment_pk = request.resolver_match.args[0]
                 a = (Assignment.objects
-                     .prefetch_related("course_offering__courseofferingteacher_set")
+                     .prefetch_related("course_offering__course_teachers")
                      .get(pk=assignment_pk))
                 teachers = [t.pk for t in a.course_offering.teachers.all()]
                 qs = qs.filter(teacher__in=teachers,
@@ -227,7 +227,7 @@ class AssignmentAdmin(admin.ModelAdmin):
 
     def save_related(self, request, form, formsets, change):
         if not change and not form.cleaned_data['notify_teachers']:
-            co_teachers = form.cleaned_data['course_offering'].courseofferingteacher_set.all()
+            co_teachers = form.cleaned_data['course_offering'].course_teachers.all()
             form.cleaned_data['notify_teachers'] = [t.pk for t in co_teachers if t.notify_by_default]
         return super().save_related(request, form, formsets, change)
 

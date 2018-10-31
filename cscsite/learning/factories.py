@@ -13,7 +13,7 @@ from learning.models import MetaCourse, Semester, Course, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
-    CourseOfferingNewsNotification, NonCourseEvent, CourseOfferingTeacher, \
+    CourseOfferingNewsNotification, NonCourseEvent, CourseTeacher, \
     AreaOfStudy
 from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
 from users.factories import UserFactory, StudentCenterFactory
@@ -84,18 +84,18 @@ class CourseFactory(factory.DjangoModelFactory):
             return
         if extracted:
             for teacher in extracted:
-                CourseOfferingTeacher(course_offering=self,
-                                      teacher=teacher,
-                                      notify_by_default=True).save()
+                CourseTeacher(course_offering=self,
+                              teacher=teacher,
+                              notify_by_default=True).save()
 
 
-class CourseOfferingTeacherFactory(factory.DjangoModelFactory):
+class CourseTeacherFactory(factory.DjangoModelFactory):
     class Meta:
-        model = CourseOfferingTeacher
+        model = CourseTeacher
 
     teacher = factory.SubFactory(UserFactory)
     course_offering = factory.SubFactory(CourseFactory)
-    roles = CourseOfferingTeacher.roles.lecturer
+    roles = CourseTeacher.roles.lecturer
 
 
 class CourseNewsFactory(factory.DjangoModelFactory):
@@ -186,7 +186,7 @@ class AssignmentFactory(factory.DjangoModelFactory):
             for co_teacher in extracted:
                 self.notify_teachers.add(co_teacher)
         else:
-            ts = self.course_offering.courseofferingteacher_set.all()
+            ts = self.course_offering.course_teachers.all()
             for t in ts:
                 self.notify_teachers.add(t)
 

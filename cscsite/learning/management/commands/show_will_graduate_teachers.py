@@ -30,7 +30,7 @@ class Command(BaseCommand):
                 co_ids.add(co_id)
 
         teachers = (User.objects
-                    .filter(courseofferingteacher__course_offering_id__in=co_ids)
+                    .filter(courseteacher__course_offering_id__in=co_ids)
                     .only("first_name", "last_name", "patronymic")
                     .distinct())
         for teacher in teachers:

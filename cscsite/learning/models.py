@@ -32,7 +32,7 @@ from learning import settings as learn_conf
 from learning.managers import StudyProgramQuerySet, \
     CourseOfferingDefaultManager, EnrollmentDefaultManager, \
     EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet, \
-    StudentAssignmentManager, AssignmentManager, CourseOfferingTeacherManager
+    StudentAssignmentManager, AssignmentManager, CourseTeacherManager
 from learning.micawber_providers import get_oembed_html
 from learning.settings import GRADES, SHORT_GRADES, \
     SEMESTER_TYPES, GRADING_TYPES
@@ -224,7 +224,7 @@ class Course(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Course|teachers"),
         related_name='teaching_set',
-        through='CourseOfferingTeacher')
+        through='learning.CourseTeacher')
     semester = models.ForeignKey(
         Semester,
         verbose_name=_("Semester"),
@@ -432,7 +432,7 @@ class Course(TimeStampedModel):
 
     def is_actual_teacher(self, teacher):
         return teacher.pk in (co.teacher_id for co in
-                              self.courseofferingteacher_set.all())
+                              self.course_teachers.all())
 
     def get_grouped_teachers(self):
         """
@@ -447,7 +447,7 @@ class Course(TimeStampedModel):
         def __cmp__(ct):
             return -ct.is_lecturer, ct.teacher.last_name
 
-        for t in sorted(self.courseofferingteacher_set.all(), key=__cmp__):
+        for t in sorted(self.course_teachers.all(), key=__cmp__):
             slot = ts['lecturers'] if t.is_lecturer else ts['others']
             slot.append(t)
         return ts
@@ -471,10 +471,13 @@ class Course(TimeStampedModel):
                 .exists())
 
 
-class CourseOfferingTeacher(models.Model):
+class CourseTeacher(models.Model):
     # XXX: limit choices on admin form level due to bug https://code.djangoproject.com/ticket/11707
     teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    course_offering = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course_offering = models.ForeignKey(
+        Course,
+        related_name="course_teachers",
+        on_delete=models.CASCADE)
     roles = BitField(flags=(
         ('lecturer', _('Lecturer')),
         ('reviewer', _('Reviewer')),
@@ -489,7 +492,7 @@ class CourseOfferingTeacher(models.Model):
         verbose_name_plural = _("Course Offering teachers")
         unique_together = [['teacher', 'course_offering']]
 
-    objects = CourseOfferingTeacherManager()
+    objects = CourseTeacherManager()
 
     def __str__(self):
         return "{0} [{1}]".format(smart_text(self.teacher),
@@ -594,7 +597,7 @@ class CourseOfferingNews(TimeStampedModel):
             notifications.append(
                 CourseOfferingNewsNotification(user_id=e.student_id,
                                                course_offering_news_id=self.pk))
-        teachers = CourseOfferingTeacher.objects.filter(course_offering=co_id)
+        teachers = CourseTeacher.objects.filter(course_offering=co_id)
         for co_t in teachers.iterator():
             notifications.append(
                 CourseOfferingNewsNotification(user_id=co_t.teacher_id,
@@ -898,7 +901,7 @@ class Assignment(TimeStampedModel):
     # XXX: No ability to add default values with `post_save` signal in one place
     # We do it separately in admin form and AssignmentCreateView
     notify_teachers = models.ManyToManyField(
-        CourseOfferingTeacher,
+        CourseTeacher,
         verbose_name=_("Assignment|notify_settings"),
         help_text=_(
             "Leave blank if you want populate teachers from course offering settings"),

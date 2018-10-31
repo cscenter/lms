@@ -4,7 +4,7 @@ import textwrap
 from django.conf import settings
 
 from api.providers.gerrit import Gerrit
-from learning.models import CourseOfferingTeacher, Enrollment
+from learning.models import CourseTeacher, Enrollment
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -58,9 +58,9 @@ def init_project_for_course(course_offering, skip_users=False):
                     auth=(settings.GERRIT_CLIENT_USERNAME,
                           settings.GERRIT_CLIENT_PASSWORD))
     project_name = get_project_name(course_offering)
-    teachers = (CourseOfferingTeacher.objects
+    teachers = (CourseTeacher.objects
                 .filter(course_offering=course_offering,
-                        roles=CourseOfferingTeacher.roles.reviewer)
+                        roles=CourseTeacher.roles.reviewer)
                 .select_related("teacher"))
     # Creates separated self-owned group for project reviewers
     reviewers_group = f"{project_name}-reviewers"
