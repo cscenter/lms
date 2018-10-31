@@ -210,7 +210,7 @@ class AssignmentAdmin(admin.ModelAdmin):
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "notify_teachers":
             qs = (CourseTeacher.objects
-                  .select_related("teacher", "course_offering"))
+                  .select_related("teacher", "course"))
             try:
                 assignment_pk = request.resolver_match.args[0]
                 a = (Assignment.objects
@@ -221,9 +221,8 @@ class AssignmentAdmin(admin.ModelAdmin):
                                course_offering=a.course_offering)
             except IndexError:
                 pass
-            kwargs["queryset"] = qs.order_by("course_offering_id").distinct()
-        return super(AssignmentAdmin, self).formfield_for_manytomany(
-            db_field, request, **kwargs)
+            kwargs["queryset"] = qs.order_by("course_id").distinct()
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def save_related(self, request, form, formsets, change):
         if not change and not form.cleaned_data['notify_teachers']:

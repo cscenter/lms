@@ -793,7 +793,7 @@ def test_studentassignment_submission_grade(client):
     """
     sa = StudentAssignmentFactory()
     teacher = TeacherCenterFactory.create()
-    CourseTeacherFactory(course_offering=sa.assignment.course_offering,
+    CourseTeacherFactory(course=sa.assignment.course_offering,
                          teacher=teacher)
     sa.assignment.grade_min = 1
     sa.assignment.grade_max = 10

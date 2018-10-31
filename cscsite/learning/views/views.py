@@ -1058,8 +1058,8 @@ class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
     def save_form(self, form):
         self.object = form.save()
         # Set up notifications recipients setting
-        course_offering = self.object.course_offering
-        co_teachers = course_offering.course_teachers.all()
+        course = self.object.course_offering
+        co_teachers = course.course_teachers.all()
         notify_teachers = [t.pk for t in co_teachers if t.notify_by_default]
         self.object.notify_teachers.add(*notify_teachers)
 

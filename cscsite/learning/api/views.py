@@ -55,13 +55,13 @@ class TeacherList(ListAPIView):
             Prefetch(
                 "course_teachers",
                 queryset=(CourseTeacher.objects
-                          .select_related("course_offering",
-                                          "course_offering__semester")
+                          .select_related("course",
+                                          "course__semester")
                           .only("teacher_id",
-                                "course_offering__meta_course_id",
-                                "course_offering__semester__index")
-                          .order_by("teacher_id", "course_offering__meta_course__id")
-                          .distinct("teacher_id", "course_offering__meta_course__id"))
+                                "course__meta_course_id",
+                                "course__semester__index")
+                          .order_by("teacher_id", "course__meta_course__id")
+                          .distinct("teacher_id", "course__meta_course__id"))
             )
 
         )
