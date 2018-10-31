@@ -35,18 +35,18 @@ class FormAdmin(admin.ModelAdmin):
 
 
 class CourseSurveyAdmin(admin.ModelAdmin):
-    list_display = ["course_offering", "get_city", "type",
+    list_display = ["course", "get_city", "type",
                     "get_form_actions", "get_survey_actions"]
     list_filter = (
-        'course_offering__city',
-        ('course_offering__semester', AdminRelatedDropdownFilter),
+        'course__city',
+        ('course__semester', AdminRelatedDropdownFilter),
     )
-    raw_id_fields = ["course_offering", "email_template"]
+    raw_id_fields = ["course", "email_template"]
     exclude = ("form",)
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['course_offering', 'type']
+            return ['course', 'type']
         return []
 
     def get_fields(self, request, obj=None):
@@ -73,10 +73,10 @@ class CourseSurveyAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return (qs.select_related("course_offering",
-                                  "course_offering__city",
-                                  "course_offering__semester",
-                                  "course_offering__meta_course",
+        return (qs.select_related("course",
+                                  "course__city",
+                                  "course__semester",
+                                  "course__meta_course",
                                   "form"))
 
     def get_deleted_objects(self, objs, request):

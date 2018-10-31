@@ -18,13 +18,13 @@ class CourseSurveyDetailView(FormView):
         """Return an instance of the form to be used in this view."""
         survey = get_object_or_404(
             CourseSurvey.objects
-                .select_related("form", "course_offering",
-                                "course_offering__meta_course",
-                                "course_offering__semester"),
-            course_offering__meta_course__slug=self.kwargs['course_slug'],
-            course_offering__city_id=self.request.city_code,
-            course_offering__semester__year=self.kwargs['semester_year'],
-            course_offering__semester__type=self.kwargs['semester_type'],
+                .select_related("form", "course",
+                                "course__meta_course",
+                                "course__semester"),
+            course__meta_course__slug=self.kwargs['course_slug'],
+            course__city_id=self.request.city_code,
+            course__semester__year=self.kwargs['semester_year'],
+            course__semester__type=self.kwargs['semester_type'],
             form__slug=self.kwargs["slug"])
         if not survey.is_published and not self.request.user.is_curator:
             raise Http404
@@ -47,5 +47,5 @@ def form_success(request, slug, **kwargs):
             semester__year=kwargs['semester_year'],
             semester__type=kwargs['semester_type']))
     return render(request, 'surveys/survey_success.html', context={
-        "course_offering": co
+        "course": co
     })
