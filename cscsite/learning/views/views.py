@@ -285,7 +285,7 @@ class CoursesListView(generic.ListView):
             cos_qs = cos_qs.in_city(self.request.city_code)
         else:
             cos_qs = cos_qs.in_center_branches()
-        prefetch_cos = Prefetch('courseoffering_set',
+        prefetch_cos = Prefetch('course_set',
                                 queryset=cos_qs,
                                 to_attr='courseofferings')
         q = (Semester.objects.prefetch_related(prefetch_cos))
