@@ -34,7 +34,7 @@ class FormAdmin(admin.ModelAdmin):
         return readonly_fields
 
 
-class CourseOfferingSurveyAdmin(admin.ModelAdmin):
+class CourseSurveyAdmin(admin.ModelAdmin):
     list_display = ["course_offering", "get_city", "type",
                     "get_form_actions", "get_survey_actions"]
     list_filter = (
@@ -124,7 +124,7 @@ class FieldEntryAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Form, FormAdmin)
-admin.site.register(CourseOfferingSurvey, CourseOfferingSurveyAdmin)
+admin.site.register(CourseOfferingSurvey, CourseSurveyAdmin)
 admin.site.register(Field, FieldAdmin)
 # admin.site.register(FieldChoice, FieldChoiceAdmin)
 # admin.site.register(FormSubmission, FormSubmissionAdmin)

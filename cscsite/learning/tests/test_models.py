@@ -129,7 +129,7 @@ def test_semester_cmp():
     assert s2013_summer < s2014_spring
 
 
-class CourseOfferingTests(TestCase):
+class CourseTests(TestCase):
     def test_in_current_term(self):
         """
         In near future only one course should be "ongoing".

@@ -15,7 +15,7 @@ from users.factories import UserFactory
 from learning.tests.mixins import *
 
 
-class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
+class CourseSecurityTests(MyUtilitiesMixin, TestCase):
     def test_list_center_site(self):
         """Сlub students can't see center courses"""
         current_semester = SemesterFactory.create_current()

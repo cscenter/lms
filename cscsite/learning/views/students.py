@@ -128,7 +128,7 @@ class StudentAssignmentListView(StudentOnlyMixin, ListView):
         return context
 
 
-class CourseOfferingEnrollView(StudentOnlyMixin, FormView):
+class CourseEnrollView(StudentOnlyMixin, FormView):
     form_class = CourseEnrollmentForm
     template_name = "learning/courses/enrollment.html"
 
@@ -187,7 +187,7 @@ class CourseOfferingEnrollView(StudentOnlyMixin, FormView):
             return HttpResponseRedirect(form.course_offering.get_absolute_url())
 
 
-class CourseOfferingUnenrollView(StudentOnlyMixin, generic.DeleteView):
+class CourseUnenrollView(StudentOnlyMixin, generic.DeleteView):
     template_name = "learning/courses/enrollment_leave.html"
     context_object_name = "enrollment"
 

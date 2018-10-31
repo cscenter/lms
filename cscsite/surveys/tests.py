@@ -4,7 +4,7 @@ import pytest
 
 from learning.factories import CourseFactory, CourseClassFactory
 from surveys.constants import FieldType, STATUS_PUBLISHED
-from surveys.factories import CourseOfferingSurveyFactory, FieldFactory, \
+from surveys.factories import CourseSurveyFactory, FieldFactory, \
     FieldEntryFactory, FieldChoiceFactory, FormSubmissionFactory
 from surveys.forms import FormBuilder
 from surveys.models import FormSubmission, FieldEntry, Field
@@ -33,7 +33,7 @@ def test_field_radio_button_to_db_value(rf):
     first_choice = choices[0]
     # For testing `to_db_value` we should generate `cleaned_data`
     entry = FieldEntryFactory(field_id=field.pk, value=first_choice.value)
-    survey = CourseOfferingSurveyFactory()
+    survey = CourseSurveyFactory()
     survey.form.fields.add(field)
     request = rf.request()
     form = FormBuilder(survey, data=request.POST, instance=entry.submission)
@@ -53,7 +53,7 @@ def test_field_text_to_db_value(rf):
     field = FieldFactory(field_type=FieldType.TEXTAREA)
     # For testing `to_db_value` we should generate `cleaned_data`
     entry = FieldEntryFactory(field_id=field.pk, value="value")
-    survey = CourseOfferingSurveyFactory()
+    survey = CourseSurveyFactory()
     survey.form.fields.add(field)
     request = rf.request()
     form = FormBuilder(survey, data=request.POST, instance=entry.submission)
@@ -78,7 +78,7 @@ def test_field_checkbox_to_db_value(rf):
                               is_choice=True)
     FieldEntryFactory(field_id=field.pk, value=choice2.value,
                       submission=entry.submission, is_choice=True)
-    survey = CourseOfferingSurveyFactory()
+    survey = CourseSurveyFactory()
     survey.form.fields.add(field)
     request = rf.request()
     form = FormBuilder(survey, data=request.POST, instance=entry.submission)
@@ -104,7 +104,7 @@ def test_field_checkbox_with_note_to_db_value(rf):
                               is_choice=True)
     FieldEntryFactory(field_id=field.pk, value=choice2.value,
                       submission=entry.submission, is_choice=True)
-    survey = CourseOfferingSurveyFactory()
+    survey = CourseSurveyFactory()
     survey.form.fields.add(field)
     request = rf.request()
     form = FormBuilder(survey, data=request.POST, instance=entry.submission)
@@ -150,7 +150,7 @@ def test_smoke_survey_form_save(client):
         f'{field.name}_0': choice1.value,
         f'{field.name}_1': choice2.value,
     }
-    survey = CourseOfferingSurveyFactory()
+    survey = CourseSurveyFactory()
     survey.form.fields.add(field)
     survey.form.status = STATUS_PUBLISHED
     survey.form.save()
@@ -174,7 +174,7 @@ def test_report_survey(client):
         f'{field1.name}_1': 'note',
         f'{field2.name}': radio_choice.value,
     }
-    survey1, survey2 = CourseOfferingSurveyFactory.create_batch(2)
+    survey1, survey2 = CourseSurveyFactory.create_batch(2)
     survey1.form.fields.add(field1)
     survey1.form.fields.add(field2)
     survey1.form.status = STATUS_PUBLISHED
@@ -216,7 +216,7 @@ def test_conditional_logic_prefill_class(mocker):
     class3 = CourseClassFactory(course_offering=co, date=today_fixed,
                                 ends_at=datetime.time(hour=21, minute=0))
     class4 = CourseClassFactory(course_offering=co, date=future)
-    survey = CourseOfferingSurveyFactory(course_offering=co, form_id=None)
+    survey = CourseSurveyFactory(course_offering=co, form_id=None)
     assert hasattr(survey, "form")
     assert survey.form.fields.count() > 0
     # Field that should be prefilled with passed lectures
@@ -246,7 +246,7 @@ def test_submission_stats():
     choices = FieldChoiceFactory.create_batch(
         3, field=field_checkboxes_with_note)
     checkbox1, checkbox2, checkbox3 = choices
-    survey1, survey2 = CourseOfferingSurveyFactory.create_batch(2)
+    survey1, survey2 = CourseSurveyFactory.create_batch(2)
     survey1.form.fields.add(field_checkboxes_with_note)
     survey1.form.fields.add(field_radio)
     survey1.form.status = STATUS_PUBLISHED

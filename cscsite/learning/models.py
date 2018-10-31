@@ -30,7 +30,7 @@ from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, city_aware_reverse
 from learning import settings as learn_conf
 from learning.managers import StudyProgramQuerySet, \
-    CourseOfferingDefaultManager, EnrollmentDefaultManager, \
+    CourseDefaultManager, EnrollmentDefaultManager, \
     EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet, \
     StudentAssignmentManager, AssignmentManager, CourseTeacherManager
 from learning.micawber_providers import get_oembed_html
@@ -207,7 +207,7 @@ class Semester(models.Model):
 
 
 class Course(TimeStampedModel):
-    objects = CourseOfferingDefaultManager()
+    objects = CourseDefaultManager()
     meta_course = models.ForeignKey(
         MetaCourse,
         verbose_name=_("Course"),
