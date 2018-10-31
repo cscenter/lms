@@ -23,7 +23,7 @@ from learning.widgets import Tab, TabbedPane, CourseOfferingTabbedPane
 from learning.forms import CourseEditDescrForm, CourseNewsForm
 from learning.models import Course, CourseTeacher, \
     CourseOfferingNewsNotification, CourseClass, Assignment, StudentAssignment, \
-    CourseOfferingNews
+    CourseNews
 from learning.serializers import CourseOfferingNewsNotificationSerializer
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, \
     STUDENT_STATUS
@@ -33,8 +33,8 @@ from learning.views.utils import get_co_from_query_params, get_user_city_code
 from users.models import User
 
 __all__ = ['CourseOfferingDetailView', 'CourseOfferingEditView',
-           'CourseOfferingNewsCreateView', 'CourseOfferingNewsUpdateView',
-           'CourseOfferingNewsDeleteView']
+           'CourseNewsCreateView', 'CourseNewsUpdateView',
+           'CourseNewsDeleteView']
 
 
 logger = logging.getLogger(__name__)
@@ -203,8 +203,8 @@ class CourseOfferingEditView(TeacherOnlyMixin, ProtectedFormMixin,
         return Course.objects.in_city(self.request.city_code)
 
 
-class CourseOfferingNewsCreateView(TeacherOnlyMixin, CreateView):
-    model = CourseOfferingNews
+class CourseNewsCreateView(TeacherOnlyMixin, CreateView):
+    model = CourseNews
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseNewsForm
 
@@ -238,9 +238,9 @@ class CourseOfferingNewsCreateView(TeacherOnlyMixin, CreateView):
         return user.is_curator or user in course_offering.teachers.all()
 
 
-class CourseOfferingNewsUpdateView(TeacherOnlyMixin, ProtectedFormMixin,
-                                   UpdateView):
-    model = CourseOfferingNews
+class CourseNewsUpdateView(TeacherOnlyMixin, ProtectedFormMixin,
+                           UpdateView):
+    model = CourseNews
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseNewsForm
 
@@ -251,9 +251,9 @@ class CourseOfferingNewsUpdateView(TeacherOnlyMixin, ProtectedFormMixin,
         return user.is_curator or user in obj.course_offering.teachers.all()
 
 
-class CourseOfferingNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
-                                   DeleteView):
-    model = CourseOfferingNews
+class CourseNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
+                           DeleteView):
+    model = CourseNews
     template_name = "learning/simple_delete_confirmation.html"
 
     def get_success_url(self):
@@ -267,7 +267,7 @@ class CourseOfferingNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
         return user.is_curator or user in obj.course_offering.teachers.all()
 
 
-class CourseOfferingNewsUnreadNotificationsView(ListAPIView):
+class CourseNewsUnreadNotificationsView(ListAPIView):
     permission_classes = [CuratorAccessPermission]
     serializer_class = CourseOfferingNewsNotificationSerializer
 

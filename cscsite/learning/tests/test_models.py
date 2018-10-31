@@ -21,7 +21,7 @@ from learning.factories import MetaCourseFactory, CourseFactory, \
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory, StudentAssignmentFactory, AssignmentCommentFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
-    CourseOfferingNewsNotificationFactory, AssignmentAttachmentFactory, \
+    CourseNewsNotificationFactory, AssignmentAttachmentFactory, \
     SemesterFactory
 from learning.models import Semester, Course, CourseClass, Assignment, \
     StudentAssignment
@@ -69,7 +69,7 @@ class CommonTests(TestCase):
         an = AssignmentNotificationFactory.create()
         self.assertIn(smart_text(an.user.get_full_name()), smart_text(an))
         self.assertIn(smart_text(an.student_assignment), smart_text(an))
-        conn = CourseOfferingNewsNotificationFactory.create()
+        conn = CourseNewsNotificationFactory.create()
         self.assertIn(smart_text(conn.user.get_full_name()), smart_text(conn))
         self.assertIn(smart_text(conn.course_offering_news), smart_text(conn))
 

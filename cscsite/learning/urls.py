@@ -29,8 +29,8 @@ from learning.views.gradebook import GradeBookTeacherView, \
     AssignmentGradesImportByStepikIDView, \
     AssignmentGradesImportByYandexLoginView
 from learning.views.course_offering import CourseOfferingEditView, \
-    CourseOfferingNewsCreateView, CourseOfferingNewsUpdateView, \
-    CourseOfferingNewsDeleteView, CourseOfferingNewsUnreadNotificationsView, \
+    CourseNewsCreateView, CourseNewsUpdateView, \
+    CourseNewsDeleteView, CourseNewsUnreadNotificationsView, \
     CourseOfferingStudentsView
 from learning.views.students import StudentAssignmentStudentDetailView, \
     StudentAssignmentListView, CourseOfferingEnrollView, \
@@ -69,16 +69,16 @@ course_offering_patterns = url(
         # News
         url(r"^news/", include([
             url(r"^add$",
-                CourseOfferingNewsCreateView.as_view(),
+                CourseNewsCreateView.as_view(),
                 name="course_offering_news_create"),
             url(r"^(?P<pk>\d+)/edit$",
-                CourseOfferingNewsUpdateView.as_view(),
+                CourseNewsUpdateView.as_view(),
                 name="course_offering_news_update"),
             url(r"^(?P<pk>\d+)/delete$",
-                CourseOfferingNewsDeleteView.as_view(),
+                CourseNewsDeleteView.as_view(),
                 name="course_offering_news_delete"),
             url(r"^(?P<news_pk>\d+)/stats$",
-                CourseOfferingNewsUnreadNotificationsView.as_view(),
+                CourseNewsUnreadNotificationsView.as_view(),
                 name="course_offering_news_unread"),
         ])),
         # Classes

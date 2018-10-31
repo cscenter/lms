@@ -12,7 +12,7 @@ from core.models import City
 from learning.models import MetaCourse, Semester, Course, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    AssignmentAttachment, CourseOfferingNews, \
+    AssignmentAttachment, CourseNews, \
     CourseOfferingNewsNotification, NonCourseEvent, CourseTeacher, \
     AreaOfStudy
 from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
@@ -100,7 +100,7 @@ class CourseTeacherFactory(factory.DjangoModelFactory):
 
 class CourseNewsFactory(factory.DjangoModelFactory):
     class Meta:
-        model = CourseOfferingNews
+        model = CourseNews
 
     course_offering = factory.SubFactory(CourseFactory)
     title = factory.Sequence(lambda n: "Imporant news about testing %03d" % n)
@@ -238,7 +238,7 @@ class AssignmentNotificationFactory(factory.DjangoModelFactory):
     student_assignment = factory.SubFactory(StudentAssignmentFactory)
 
 
-class CourseOfferingNewsNotificationFactory(factory.DjangoModelFactory):
+class CourseNewsNotificationFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseOfferingNewsNotification
 

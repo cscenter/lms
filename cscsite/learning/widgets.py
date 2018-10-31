@@ -125,7 +125,7 @@ class CourseOfferingTabbedPane(TabbedPane):
                 request_user_role != CourseRole.STUDENT_RESTRICT)
 
     def get_news(self, request_user, request_user_role):
-        return self._course_offering.courseofferingnews_set.all()
+        return self._course_offering.coursenews_set.all()
 
     def get_reviews(self, request_user, request_user_role):
         return (self._course_offering.enrollment_is_open and

@@ -17,7 +17,7 @@ from users.factories import UserFactory
 from learning.models import AssignmentNotification, \
     CourseOfferingNewsNotification
 from learning.factories import AssignmentNotificationFactory, \
-    CourseOfferingNewsNotificationFactory, StudentAssignmentFactory
+    CourseNewsNotificationFactory, StudentAssignmentFactory
 
 from core.management.commands.notify import Command, get_base_url
 from core.models import related_spec_to_list, apply_related_spec
@@ -64,7 +64,7 @@ class NotifyCommandTest(TestCase):
 
         out = OutputIO()
         mail.outbox = []
-        conn = CourseOfferingNewsNotificationFactory.create()
+        conn = CourseNewsNotificationFactory.create()
         course_offering = conn.course_offering_news.course_offering
         management.call_command("notify", stdout=out)
         self.assertEqual(1, len(mail.outbox))
