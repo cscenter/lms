@@ -11,7 +11,7 @@ from django.utils.translation import ugettext as _
 from learning.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory, EnrollmentFactory, CourseNewsFactory
 from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, CourseOfferingNewsNotification
+    AssignmentNotification, CourseNewsNotification
 from learning.settings import DATE_FORMAT_RU
 from learning.utils import now_local
 from users.factories import StudentCenterFactory, StudentClubFactory
@@ -275,10 +275,10 @@ def test_assignments(client):
     active_students = Enrollment.active.count()
     assert active_students == 2
     assert AssignmentNotification.objects.count() == active_students
-    CourseOfferingNewsNotification.objects.all().delete()
-    assert CourseOfferingNewsNotification.objects.count() == 0
+    CourseNewsNotification.objects.all().delete()
+    assert CourseNewsNotification.objects.count() == 0
     CourseNewsFactory.create(course_offering=co)
-    assert CourseOfferingNewsNotification.objects.count() == active_students
+    assert CourseNewsNotification.objects.count() == active_students
 
 
 @pytest.mark.django_db

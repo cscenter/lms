@@ -16,7 +16,7 @@ from django.utils.encoding import smart_text
 from django.utils.html import strip_tags, linebreaks
 
 from learning.models import AssignmentNotification, \
-    CourseOfferingNewsNotification
+    CourseNewsNotification
 from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER, PARTICIPANT_GROUPS
 from notifications import types as notification_types
 from notifications.models import Type
@@ -67,7 +67,7 @@ def get_base_url(notification):
     receiver = notification.user
     if isinstance(notification, AssignmentNotification):
         co = notification.student_assignment.assignment.course_offering
-    elif isinstance(notification, CourseOfferingNewsNotification):
+    elif isinstance(notification, CourseNewsNotification):
         co = notification.course_offering_news.course_offering
     else:
         raise NotImplementedError()
@@ -167,7 +167,7 @@ class Command(BaseCommand):
             notify(notification, name, context, self.stdout)
 
         notifications_courseoffering_news \
-            = (CourseOfferingNewsNotification.objects
+            = (CourseNewsNotification.objects
                .filter(is_unread=True, is_notified=False)
                .select_related("user")
                .prefetch_related(

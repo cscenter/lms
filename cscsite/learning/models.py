@@ -595,14 +595,14 @@ class CourseNews(TimeStampedModel):
         # Replace cached queryset with .bulk_create() + .iterator()
         for e in active_enrollments.iterator():
             notifications.append(
-                CourseOfferingNewsNotification(user_id=e.student_id,
-                                               course_offering_news_id=self.pk))
+                CourseNewsNotification(user_id=e.student_id,
+                                       course_offering_news_id=self.pk))
         teachers = CourseTeacher.objects.filter(course_offering=co_id)
         for co_t in teachers.iterator():
             notifications.append(
-                CourseOfferingNewsNotification(user_id=co_t.teacher_id,
-                                               course_offering_news_id=self.pk))
-        CourseOfferingNewsNotification.objects.bulk_create(notifications)
+                CourseNewsNotification(user_id=co_t.teacher_id,
+                                       course_offering_news_id=self.pk))
+        CourseNewsNotification.objects.bulk_create(notifications)
 
     def created_local(self, tz=None):
         if not tz:
@@ -610,7 +610,6 @@ class CourseNews(TimeStampedModel):
         return timezone.localtime(self.created, timezone=tz)
 
 
-@python_2_unicode_compatible
 class Venue(models.Model):
     INTERVIEW = 'interview'
     LECTURE = 'lecture'
@@ -680,7 +679,6 @@ def courseclass_slides_file_name(self, filename):
     return os.path.join('slides', course_offering, filename)
 
 
-@python_2_unicode_compatible
 class CourseClass(TimeStampedModel):
     TYPES = Choices(('lecture', _("Lecture")),
                     ('seminar', _("Seminar")))
@@ -824,7 +822,6 @@ class CourseClass(TimeStampedModel):
         return os.path.basename(self.slides.name)
 
 
-@python_2_unicode_compatible
 class CourseClassAttachment(TimeStampedModel, object):
     course_class = models.ForeignKey(
         CourseClass,
@@ -1185,7 +1182,6 @@ def assignmentcomment_upload_to(instance, filename):
                     filename))
 
 
-@python_2_unicode_compatible
 class AssignmentComment(TimeStampedModel):
     student_assignment = models.ForeignKey(
         'StudentAssignment',
@@ -1393,8 +1389,7 @@ class AssignmentNotification(TimeStampedModel):
         return timezone.localtime(self.created, timezone=tz)
 
 
-@python_2_unicode_compatible
-class CourseOfferingNewsNotification(TimeStampedModel):
+class CourseNewsNotification(TimeStampedModel):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("User"),
@@ -1422,7 +1417,6 @@ class CourseOfferingNewsNotification(TimeStampedModel):
                         smart_text(self.course_offering_news)))
 
 
-@python_2_unicode_compatible
 class NonCourseEvent(TimeStampedModel):
     objects = NonCourseEventQuerySet.as_manager()
     venue = models.ForeignKey(
@@ -1461,7 +1455,6 @@ class NonCourseEvent(TimeStampedModel):
         return reverse('non_course_event_detail', args=[self.pk])
 
 
-@python_2_unicode_compatible
 class AreaOfStudy(models.Model):
     code = models.CharField(_("PK|Code"), max_length=2, primary_key=True)
     name = models.CharField(_("AreaOfStudy|Name"), max_length=255)
@@ -1516,7 +1509,6 @@ class StudyProgramCourseGroup(models.Model):
 
 
 # TODO: rename to MoocCourse
-@python_2_unicode_compatible
 class OnlineCourse(TimeStampedModel, TimeFramedModel):
     name = models.CharField(_("Course|name"), max_length=255)
     teachers = models.TextField(
@@ -1557,7 +1549,6 @@ class OnlineCourse(TimeStampedModel, TimeFramedModel):
         return None
 
 
-@python_2_unicode_compatible
 class InternationalSchool(TimeStampedModel):
     name = models.CharField(_("InternationalSchool|name"), max_length=255)
     link = models.URLField(
@@ -1581,7 +1572,6 @@ class InternationalSchool(TimeStampedModel):
         return smart_text(self.name)
 
 
-@python_2_unicode_compatible
 class Useful(models.Model):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))

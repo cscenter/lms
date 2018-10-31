@@ -1,3 +1,4 @@
+import abc
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 
@@ -13,7 +14,7 @@ from django.utils.html import linebreaks, strip_tags
 logger = logging.getLogger("notifications.handlers")
 
 
-class NotificationService(object):
+class NotificationService:
     """
     Base class which knows how to add notification to db and notify recipient
     later.
@@ -22,7 +23,7 @@ class NotificationService(object):
 
     SITE_CENTER_URL = "https://compscicenter.ru"
 
-    @abstractproperty
+    @abc.abstractmethod
     def template(self):
         pass
 
@@ -32,7 +33,7 @@ class NotificationService(object):
             return get_template(self.template)
         return None
 
-    @abstractproperty
+    @abc.abstractmethod
     def subject(self):
         pass
 
@@ -100,7 +101,7 @@ class NotificationService(object):
         receiver = notification.user
         if isinstance(notification, AssignmentNotification):
             co = notification.student_assignment.assignment.course_offering
-        elif isinstance(notification, CourseOfferingNewsNotification):
+        elif isinstance(notification, CourseNewsNotification):
             co = notification.course_offering_news.course_offering
         else:
             raise NotImplementedError()
