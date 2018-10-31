@@ -773,14 +773,16 @@ class SHADCourseRecord(TimeStampedModel):
         return smart_text("{} [{}]".format(self.name, self.student_id))
 
 
-class UserReference(TimeStampedModel):
+# TODO: move to learning app?
+class EnrollmentCertificate(TimeStampedModel):
     signature = models.CharField(_("Reference|signature"), max_length=255)
     note = models.TextField(_("Reference|note"), blank=True)
 
     student = models.ForeignKey(
         User,
         verbose_name=_("Student"),
-        on_delete=models.CASCADE)
+        on_delete=models.CASCADE,
+        related_name="enrollment_certificates")
 
     class Meta:
         ordering = ["signature"]

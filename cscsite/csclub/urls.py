@@ -14,7 +14,8 @@ from users.forms import UserPasswordResetForm
 from users.tasks import subject_template_name, email_template_name, \
     html_email_template_name
 from users.views import LoginView, LogoutView, \
-    UserDetailView, UserUpdateView, UserReferenceCreateView, UserReferenceDetailView
+    UserDetailView, UserUpdateView, EnrollmentCertificateCreateView, \
+    EnrollmentCertificateDetailView
 from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
     ICalEventsView
 from learning.views import InternationalSchoolsListView, CoursesListView
@@ -93,10 +94,10 @@ urlpatterns += [
 
     # Common for club and center, but not related to learning app
     url(r'^users/(?P<pk>\d+)/reference/add$',
-        UserReferenceCreateView.as_view(),
+        EnrollmentCertificateCreateView.as_view(),
         name='user_reference_add'),
     url(r'^users/(?P<user_id>\d+)/reference/(?P<pk>\d+)$',
-        UserReferenceDetailView.as_view(),
+        EnrollmentCertificateDetailView.as_view(),
         name='user_reference_detail'),
     url(r'^users/(?P<pk>\d+)/csc_classes.ics', ICalClassesView.as_view(),
         name='user_ical_classes'),

@@ -23,8 +23,8 @@ from learning.models import StudentAssignment, \
 from learning.settings import LEARNING_BASE, TEACHING_BASE, GRADES
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
-from .forms import LoginForm, UserProfileForm, UserReferenceCreateForm
-from .models import User, UserReference
+from .forms import LoginForm, UserProfileForm, EnrollmentCertificateCreateForm
+from .models import User, EnrollmentCertificate
 
 
 # inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
@@ -168,7 +168,7 @@ class UserDetailView(generic.DetailView):
                               'borrows__stock__book',
                               'onlinecourserecord_set',
                               'areas_of_study',
-                              'userreference_set']
+                              'enrollment_certificates']
         filters = {}
         if not self.request.user.is_curator:
             filters["is_active"] = True
@@ -225,19 +225,19 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         return obj.pk == user.pk or user.is_curator
 
 
-class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
-    model = UserReference
+class EnrollmentCertificateCreateView(ProtectedFormMixin, generic.CreateView):
+    model = EnrollmentCertificate
     template_name = "users/reference_add.html"
-    form_class = UserReferenceCreateForm
+    form_class = EnrollmentCertificateCreateForm
 
     def get_initial(self):
-        initial = super(UserReferenceCreateView, self).get_initial()
+        initial = super(EnrollmentCertificateCreateView, self).get_initial()
         initial['signature'] = self.request.user.get_full_name()
         return initial
 
     def form_valid(self, form):
         form.instance.student_id = self.kwargs['pk']
-        return super(UserReferenceCreateView, self).form_valid(form)
+        return super(EnrollmentCertificateCreateView, self).form_valid(form)
 
     def get_success_url(self):
         return reverse('user_reference_detail',
@@ -247,13 +247,12 @@ class UserReferenceCreateView(ProtectedFormMixin, generic.CreateView):
         return user.is_curator
 
 
-class UserReferenceDetailView(CuratorOnlyMixin, generic.DetailView):
-    model = UserReference
+class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
+    model = EnrollmentCertificate
     template_name = "users/reference_detail.html"
 
     def get_context_data(self, *args, **kwargs):
-        context = (super(UserReferenceDetailView, self)
-                   .get_context_data(*args, **kwargs))
+        context = super().get_context_data(*args, **kwargs)
         student_info = (User.objects
                         .students_info(exclude_grades=[
                             GRADES.unsatisfactory, GRADES.not_graded

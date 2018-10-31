@@ -368,14 +368,14 @@
     {% endif %}
     {% endif %}
 
-    {% if has_curator_permissions and  profile_user.userreference_set.count > 0 %}
+    {% if has_curator_permissions and  profile_user.enrollment_certificates.count > 0 %}
     {% if profile_user.is_student or profile_user.is_graduate %}
         <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
           <ul>
-            {% for reference in profile_user.userreference_set.all %}
+            {% for enrollment_certificate in profile_user.enrollment_certificates.all %}
             <li>
-              <a href="{% url 'user_reference_detail' profile_user.id reference.id %}">
-                {{ reference.created|date:"d.m.Y" }}
+              <a href="{% url 'user_reference_detail' profile_user.id enrollment_certificate.id %}">
+                {{ enrollment_certificate.created|date:"d.m.Y" }}
               </a>
             </li>
             {% endfor %}

@@ -4,7 +4,7 @@ import factory
 
 from django.contrib.auth.models import Group
 from learning.settings import PARTICIPANT_GROUPS, GRADES
-from users.models import User, SHADCourseRecord, UserReference, \
+from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord
 
 
@@ -152,9 +152,9 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     semester = factory.SubFactory('learning.factories.SemesterFactory')
 
 
-class UserReferenceFactory(factory.DjangoModelFactory):
+class EnrollmentCertificateFactory(factory.DjangoModelFactory):
     class Meta:
-        model = UserReference
+        model = EnrollmentCertificate
 
     signature = "FIO"
     note = ""

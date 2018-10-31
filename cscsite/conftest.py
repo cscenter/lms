@@ -39,6 +39,22 @@ def user_factory():
     return UserFactory
 
 
+@pytest.fixture(scope="session")
+def assert_redirect():
+    """Uses Django's SimpleTestCase.assertRedirects as comparing tool"""
+    from django.test import SimpleTestCase
+
+    _STS = SimpleTestCase()
+
+    def wrapper(*args, **kwargs):
+        return _STS.assertRedirects(*args, **kwargs)
+
+    return wrapper
+
+
+
+
+
 @pytest.fixture(scope="function")
 def curator(user_factory):
     return user_factory.create(is_superuser=True, is_staff=True)
