@@ -20,7 +20,7 @@ class UserQuerySet(query.QuerySet):
 
         from .models import User, SHADCourseRecord
         from learning.models import Enrollment, CourseClass, Semester, \
-            CourseOffering
+            Course
         from learning.projects.models import ProjectStudent
 
         # Note: At the same time student must be only in one of these groups
@@ -70,7 +70,7 @@ class UserQuerySet(query.QuerySet):
                 ),
                 Prefetch(
                     'enrollments__course_offering',
-                    queryset=CourseOffering.objects.select_related(
+                    queryset=Course.objects.select_related(
                         'semester', 'meta_course')
                 ),
                 Prefetch(

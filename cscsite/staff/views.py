@@ -27,7 +27,7 @@ from api.permissions import CuratorAccessPermission
 from core.templatetags.core_tags import tex
 from learning.admission.models import Campaign, Interview
 from learning.admission.reports import AdmissionReport
-from learning.models import Semester, CourseOffering, StudyProgram, \
+from learning.models import Semester, Course, StudyProgram, \
     StudyProgramCourseGroup, Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
@@ -475,14 +475,14 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
     def get_context_data(self, **kwargs):
         year, term = get_current_term_pair('spb')
         current_term_index = get_term_index(year, term)
-        all_courses_in_term = (CourseOffering.objects
+        all_courses_in_term = (Course.objects
                                .filter(semester__index=current_term_index)
                                .select_related("meta_course"))
         # Get participants
         query_courses = self.request.GET.getlist('course_offerings[]', [])
         query_courses = [int(t) for t in query_courses if t]
         results = list(
-            CourseOffering.objects
+            Course.objects
             .filter(pk__in=query_courses)
             .select_related("meta_course")
             .prefetch_related(

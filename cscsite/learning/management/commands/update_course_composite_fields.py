@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.core.management import BaseCommand
 
-from learning.models import Semester, CourseOffering, CourseClass, \
+from learning.models import Semester, Course, CourseClass, \
     CourseClassAttachment
 
 
@@ -13,7 +13,7 @@ class Command(BaseCommand):
             "from `materials_*`")
 
     def handle(self, *args, **options):
-        for co in CourseOffering.objects.only('pk', 'materials_slides',
+        for co in Course.objects.only('pk', 'materials_slides',
                                               'materials_video',
                                               'materials_files').all():
             has_class_slides = False
@@ -32,7 +32,7 @@ class Command(BaseCommand):
             if (co.materials_slides != has_class_slides or
                     co.materials_video != has_class_video or
                     co.materials_files != has_class_materials_files):
-                CourseOffering.objects.filter(pk=co.pk).update(
+                Course.objects.filter(pk=co.pk).update(
                     materials_slides=has_class_slides,
                     materials_video=has_class_video,
                     materials_files=has_class_materials_files

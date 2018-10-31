@@ -1,7 +1,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from learning.factories import CourseOfferingFactory, EnrollmentFactory, \
+from learning.factories import CourseFactory, EnrollmentFactory, \
     SemesterFactory
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from users.factories import StudentFactory, CuratorFactory, UserFactory, \
@@ -11,7 +11,7 @@ from users.factories import StudentFactory, CuratorFactory, UserFactory, \
 @pytest.mark.django_db
 def test_enrolled_on_the_course():
     student = StudentFactory.create()
-    co = CourseOfferingFactory()
+    co = CourseFactory()
     assert student.get_enrollment(co.pk) is None
     enrollment = EnrollmentFactory(student=student, course_offering=co)
     assert student.get_enrollment(co.pk) is None  # query was cached
@@ -124,15 +124,15 @@ def test_permissions(client):
 def test_passed_courses():
     """Make sure courses not counted twice in passed courses stat"""
     student = StudentFactory()
-    co1, co2, co3 = CourseOfferingFactory.create_batch(3)
+    co1, co2, co3 = CourseFactory.create_batch(3)
     # enrollments 1 and 4 for the same course but from different terms
     e1, e2, e3 = (EnrollmentFactory(course_offering=co,
                                     student=student,
                                     grade=GRADES.good)
                   for co in (co1, co2, co3))
     next_term = SemesterFactory.create_next(co1.semester)
-    co4 = CourseOfferingFactory(meta_course=co1.meta_course, is_open=False,
-                                semester=next_term)
+    co4 = CourseFactory(meta_course=co1.meta_course, is_open=False,
+                        semester=next_term)
     e4 = EnrollmentFactory(course_offering=co4,
                            student=student,
                            grade=GRADES.good)

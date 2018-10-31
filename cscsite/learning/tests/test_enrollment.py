@@ -8,8 +8,8 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from learning.factories import SemesterFactory, CourseOfferingFactory, \
-    AssignmentFactory, EnrollmentFactory, CourseOfferingNewsFactory
+from learning.factories import SemesterFactory, CourseFactory, \
+    AssignmentFactory, EnrollmentFactory, CourseNewsFactory
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseOfferingNewsNotification
 from learning.settings import DATE_FORMAT_RU
@@ -27,7 +27,7 @@ def test_enrollment_for_club_students(client):
     tomorrow = now_local('spb') + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(city_code='spb',
                                           enrollment_end_at=tomorrow.date())
-    co = CourseOfferingFactory.create(city='spb', semester=term, is_open=False)
+    co = CourseFactory.create(city='spb', semester=term, is_open=False)
     assert co.enrollment_is_open
     student_center = StudentCenterFactory(city_id='spb')
     student_club = StudentClubFactory(city_id='spb')
@@ -48,7 +48,7 @@ def test_unenrollment(client, assert_redirect):
     assert s.city_id is not None
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    co = CourseOfferingFactory.create(semester=current_semester, city='spb')
+    co = CourseFactory.create(semester=current_semester, city='spb')
     as_ = AssignmentFactory.create_batch(3, course_offering=co)
     form = {'course_offering_pk': co.pk}
     # Enrollment already closed
@@ -108,9 +108,9 @@ def test_enrollment_capacity(client):
     s = StudentCenterFactory(city_id='spb')
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    co = CourseOfferingFactory.create(city_id='spb',
-                                      semester=current_semester,
-                                      is_open=True)
+    co = CourseFactory.create(city_id='spb',
+                              semester=current_semester,
+                              is_open=True)
     co_url = co.get_absolute_url()
     response = client.get(co_url)
     assert smart_bytes(_("Places available")) not in response.content
@@ -148,7 +148,7 @@ def test_enrollment(client):
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    co = CourseOfferingFactory.create(semester=current_semester, city_id='spb')
+    co = CourseFactory.create(semester=current_semester, city_id='spb')
     url = co.get_enroll_url()
     form = {'course_offering_pk': co.pk}
     response = client.post(url, form)
@@ -160,7 +160,7 @@ def test_enrollment(client):
     assert set((student1.pk, a.pk) for a in as_) == set(StudentAssignment.objects
                           .filter(student=student1)
                           .values_list('student', 'assignment'))
-    co_other = CourseOfferingFactory.create(semester=current_semester)
+    co_other = CourseFactory.create(semester=current_semester)
     form.update({'back': 'course_list_student'})
     url = co_other.get_enroll_url()
     response = client.post(url, form)
@@ -169,7 +169,7 @@ def test_enrollment(client):
     assert co.enrollment_set.count() == 1
     # Try to enroll to old CO
     old_semester = SemesterFactory.create(year=2010)
-    old_co = CourseOfferingFactory.create(semester=old_semester)
+    old_co = CourseFactory.create(semester=old_semester)
     form = {'course_offering_pk': old_co.pk}
     url = old_co.get_enroll_url()
     assert client.post(url, form).status_code == 403
@@ -197,7 +197,7 @@ def test_enrollment_reason(client):
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    co = CourseOfferingFactory.create(semester=current_semester, city_id='spb')
+    co = CourseFactory.create(semester=current_semester, city_id='spb')
     form = {'course_offering_pk': co.pk, 'reason': 'foo'}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
@@ -221,7 +221,7 @@ def test_enrollment_leave_reason(client):
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    co = CourseOfferingFactory.create(semester=current_semester, city_id='spb')
+    co = CourseFactory.create(semester=current_semester, city_id='spb')
     form = {'course_offering_pk': co.pk}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
@@ -242,7 +242,7 @@ def test_enrollment_leave_reason(client):
     e = Enrollment.objects.first()
     assert 'foo' in e.reason_leave
     assert 'bar' in e.reason_leave
-    co_other = CourseOfferingFactory.create(semester=current_semester)
+    co_other = CourseFactory.create(semester=current_semester)
     client.post(co_other.get_enroll_url(), {})
     e_other = Enrollment.active.filter(course_offering=co_other).first()
     assert not e_other.reason_entry
@@ -254,7 +254,7 @@ def test_assignments(client):
     """Create assignments for active enrollments only"""
     ss = StudentCenterFactory.create_batch(3)
     current_semester = SemesterFactory.create_current()
-    co = CourseOfferingFactory.create(semester=current_semester)
+    co = CourseFactory.create(semester=current_semester)
     for student in ss:
         enrollment = EnrollmentFactory.create(student=student,
                                               course_offering=co)
@@ -277,7 +277,7 @@ def test_assignments(client):
     assert AssignmentNotification.objects.count() == active_students
     CourseOfferingNewsNotification.objects.all().delete()
     assert CourseOfferingNewsNotification.objects.count() == 0
-    CourseOfferingNewsFactory.create(course_offering=co)
+    CourseNewsFactory.create(course_offering=co)
     assert CourseOfferingNewsNotification.objects.count() == active_students
 
 
@@ -307,7 +307,7 @@ def test_reenrollment(client):
 def test_enrollment_in_other_city(client):
     tomorrow = now_local('spb') + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    co_spb = CourseOfferingFactory(city='spb', semester=term, is_open=False)
+    co_spb = CourseFactory(city='spb', semester=term, is_open=False)
     assert co_spb.enrollment_is_open
     student_spb = StudentCenterFactory(city_id='spb')
     student_nsk = StudentCenterFactory(city_id='nsk')
@@ -345,10 +345,10 @@ def test_correspondence_courses(client):
     """Make sure students from any city can enroll in online course"""
     tomorrow = now_local('spb') + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    co_spb = CourseOfferingFactory(city_id='spb',
-                                   semester=term,
-                                   is_open=False,
-                                   is_correspondence=True)
+    co_spb = CourseFactory(city_id='spb',
+                           semester=term,
+                           is_open=False,
+                           is_correspondence=True)
     assert co_spb.enrollment_is_open
     student_spb = StudentCenterFactory(city_id='spb')
     student_nsk = StudentCenterFactory(city_id='nsk')
@@ -370,8 +370,8 @@ def test_enrollment_is_enrollment_open(client):
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(city_code='spb',
                                           enrollment_end_at=today.date())
-    co_spb = CourseOfferingFactory(city='spb', semester=term, is_open=False,
-                                   completed_at=tomorrow.date())
+    co_spb = CourseFactory(city='spb', semester=term, is_open=False,
+                           completed_at=tomorrow.date())
     assert co_spb.enrollment_is_open
     student_spb = StudentCenterFactory(city_id='spb')
     client.login(student_spb)

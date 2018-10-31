@@ -17,13 +17,13 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
-from learning.factories import MetaCourseFactory, CourseOfferingFactory, \
-    CourseOfferingNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
+from learning.factories import MetaCourseFactory, CourseFactory, \
+    CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory, StudentAssignmentFactory, AssignmentCommentFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
     CourseOfferingNewsNotificationFactory, AssignmentAttachmentFactory, \
     SemesterFactory
-from learning.models import Semester, CourseOffering, CourseClass, Assignment, \
+from learning.models import Semester, Course, CourseClass, Assignment, \
     StudentAssignment
 from learning.settings import SEMESTER_TYPES
 from learning.utils import get_term_start, next_term_starts_at
@@ -39,10 +39,10 @@ class CommonTests(TestCase):
         semester = Semester(year=2015, type='spring')
         self.assertIn(smart_text(semester.year), smart_text(semester))
         self.assertIn('spring', smart_text(semester))
-        co = CourseOfferingFactory.create()
+        co = CourseFactory.create()
         self.assertIn(smart_text(co.meta_course), smart_text(co))
         self.assertIn(smart_text(co.semester), smart_text(co))
-        con = CourseOfferingNewsFactory.create()
+        con = CourseNewsFactory.create()
         self.assertIn(smart_text(con.title), smart_text(con))
         self.assertIn(smart_text(con.course_offering), smart_text(con))
         cc = CourseClassFactory.create()
@@ -149,15 +149,15 @@ class CourseOfferingTests(TestCase):
         old_now = timezone.now
         timezone.now = lambda: (datetime.datetime(some_year, 4, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((CourseOffering(meta_course=MetaCourseFactory(name="Test course"),
-                                        semester=semester)
+        n_ongoing = sum((Course(meta_course=MetaCourseFactory(name="Test course"),
+                                semester=semester)
                          .in_current_term)
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = lambda: (datetime.datetime(some_year, 11, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((CourseOffering(meta_course=MetaCourseFactory(name="Test course"),
-                                        semester=semester)
+        n_ongoing = sum((Course(meta_course=MetaCourseFactory(name="Test course"),
+                                semester=semester)
                          .in_current_term)
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
@@ -166,8 +166,8 @@ class CourseOfferingTests(TestCase):
     def test_completed_at_default(self):
         semester = SemesterFactory(year=2017, type=Semester.TYPES.autumn)
         meta_course = MetaCourseFactory()
-        co = CourseOfferingFactory.build(meta_course=meta_course,
-                                         semester=semester)
+        co = CourseFactory.build(meta_course=meta_course,
+                                 semester=semester)
         assert not co.completed_at
         co.save()
         next_term_dt = next_term_starts_at(semester.index, co.get_city_timezone())
@@ -176,7 +176,7 @@ class CourseOfferingTests(TestCase):
 
 @pytest.mark.django_db
 def test_course_offering_composite_fields():
-    co = CourseOfferingFactory()
+    co = CourseFactory()
     assert not co.materials_files
     assert not co.materials_slides
     assert not co.materials_video
@@ -231,8 +231,8 @@ class CourseClassTests(TestCase):
 
 class AssignmentTest(TestCase):
     def test_clean(self):
-        co1 = CourseOfferingFactory.create()
-        co2 = CourseOfferingFactory.create()
+        co1 = CourseFactory.create()
+        co2 = CourseFactory.create()
         a = AssignmentFactory.create(course_offering=co1)
         a_copy = Assignment.objects.filter(pk=a.pk).get()
         a_copy.course_offering = co2
@@ -458,8 +458,8 @@ def test_course_offering_enrollment_is_open(settings, mocker):
     assert term.year == year
     term_start_dt = get_term_start(year, term_type, pytz.UTC)
     assert term.enrollment_start_at == term_start_dt.date()
-    co_spb = CourseOfferingFactory.create(semester=term, city_id='spb',
-                                          is_open=False)
+    co_spb = CourseFactory.create(semester=term, city_id='spb',
+                                  is_open=False)
     # We are inside enrollment period right now
     assert co_spb.enrollment_is_open
     # `completed_at` has more priority than term settings
@@ -507,12 +507,12 @@ def test_gradefield():
 @pytest.mark.django_db
 def test_course_offering_get_reviews(settings):
     meta_course1, meta_course2 = MetaCourseFactory.create_batch(2)
-    CourseOfferingFactory(meta_course=meta_course1, city_id='spb',
-                          semester__year=2015, reviews='aaa')
-    CourseOfferingFactory(meta_course=meta_course2, city_id='spb',
-                          semester__year=2015, reviews='zzz')
-    co = CourseOfferingFactory(meta_course=meta_course1, city_id='spb',
-                               semester__year=2016, reviews='bbb')
-    CourseOfferingFactory(meta_course=meta_course1, city_id='nsk',
-                          semester__year=2016, reviews='ccc')
+    CourseFactory(meta_course=meta_course1, city_id='spb',
+                  semester__year=2015, reviews='aaa')
+    CourseFactory(meta_course=meta_course2, city_id='spb',
+                  semester__year=2015, reviews='zzz')
+    co = CourseFactory(meta_course=meta_course1, city_id='spb',
+                       semester__year=2016, reviews='bbb')
+    CourseFactory(meta_course=meta_course1, city_id='nsk',
+                  semester__year=2016, reviews='ccc')
     assert len(co.get_reviews()) == 2

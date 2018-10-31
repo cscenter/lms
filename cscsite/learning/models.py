@@ -206,7 +206,7 @@ class Semester(models.Model):
             return self.year - 1
 
 
-class CourseOffering(TimeStampedModel):
+class Course(TimeStampedModel):
     objects = CourseOfferingDefaultManager()
     meta_course = models.ForeignKey(
         MetaCourse,
@@ -474,7 +474,7 @@ class CourseOffering(TimeStampedModel):
 class CourseOfferingTeacher(models.Model):
     # XXX: limit choices on admin form level due to bug https://code.djangoproject.com/ticket/11707
     teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    course_offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE)
+    course_offering = models.ForeignKey(Course, on_delete=models.CASCADE)
     roles = BitField(flags=(
         ('lecturer', _('Lecturer')),
         ('reviewer', _('Reviewer')),
@@ -521,7 +521,7 @@ class CourseOfferingTeacher(models.Model):
 
 class CourseOfferingNews(TimeStampedModel):
     course_offering = models.ForeignKey(
-        CourseOffering,
+        Course,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     title = models.CharField(_("CourseNews|title"), max_length=140)
@@ -683,7 +683,7 @@ class CourseClass(TimeStampedModel):
                     ('seminar', _("Seminar")))
 
     course_offering = models.ForeignKey(
-        CourseOffering,
+        Course,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     venue = models.ForeignKey(
@@ -788,7 +788,7 @@ class CourseClass(TimeStampedModel):
         if self.courseclassattachment_set.exists():
             update_fields["materials_files"] = True
         if update_fields:
-            (CourseOffering.objects
+            (Course.objects
              .filter(pk=self.course_offering_id)
              .update(**update_fields))
 
@@ -871,7 +871,7 @@ class CourseClassAttachment(TimeStampedModel, object):
 
 class Assignment(TimeStampedModel):
     course_offering = models.ForeignKey(
-        CourseOffering,
+        Course,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     assigned_to = models.ManyToManyField(
@@ -1253,7 +1253,7 @@ class Enrollment(TimeStampedModel):
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
     course_offering = models.ForeignKey(
-        CourseOffering,
+        Course,
         verbose_name=_("Course offering"),
         on_delete=models.CASCADE)
     grade = StatusField(

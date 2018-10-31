@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from learning.factories import CourseClassFactory, NonCourseEventFactory, \
-    CourseOfferingFactory, EnrollmentFactory, VenueFactory
+    CourseFactory, EnrollmentFactory, VenueFactory
 from learning.settings import PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
@@ -88,8 +88,8 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
     def test_student_calendar(self):
         student = StudentCenterFactory(city_id='spb')
         self.doLogin(student)
-        co = CourseOfferingFactory.create()
-        co_other = CourseOfferingFactory.create()
+        co = CourseFactory.create()
+        co_other = CourseFactory.create()
         e = EnrollmentFactory.create(course_offering=co, student=student)
         classes = flatten_calendar_month_events(
             self.client.get(reverse(self.url_name)).context['events'])

@@ -4,7 +4,7 @@ from random import randint
 import factory
 
 from core.factories import EmailTemplateFactory
-from learning.factories import CourseOfferingFactory
+from learning.factories import CourseFactory
 from surveys.constants import FieldType
 from surveys.models import CourseOfferingSurvey, Form, Field, FormSubmission, \
     FieldEntry, FieldChoice
@@ -55,7 +55,7 @@ class CourseOfferingSurveyFactory(factory.DjangoModelFactory):
         model = CourseOfferingSurvey
 
     form = factory.SubFactory(FormFactory)
-    course_offering = factory.SubFactory(CourseOfferingFactory)
+    course_offering = factory.SubFactory(CourseFactory)
     type = factory.Iterator([
         c for c, n in CourseOfferingSurvey._meta.get_field('type').choices
     ])

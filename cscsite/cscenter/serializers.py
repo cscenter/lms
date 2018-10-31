@@ -19,7 +19,8 @@ class CourseSerializer(serializers.Serializer):
         }
 
 
-class CourseOfferingSerializer(serializers.Serializer):
+# FIXME: inline
+class CoursesSerializer(serializers.Serializer):
     def to_representation(self, obj):
         by_year = OrderedDict()
         # Group courses by (year, term_type)

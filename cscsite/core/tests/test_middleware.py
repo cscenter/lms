@@ -4,7 +4,7 @@ from django.contrib.sites.models import Site
 from django.http.response import Http404
 
 from core.middleware import CurrentCityMiddleware
-from learning.factories import CourseOfferingFactory
+from learning.factories import CourseFactory
 
 
 @pytest.mark.django_db
@@ -30,7 +30,7 @@ def test_current_city_middleware(rf, settings, mocker):
     assert request.city_code == "spb"
     assert settings.DEFAULT_CITY_CODE == "spb"
 
-    co = CourseOfferingFactory(city_id="kzn", meta_course__slug="test")
+    co = CourseFactory(city_id="kzn", meta_course__slug="test")
     assert co.get_absolute_url() == "/courses/test/kzn/{}/".format(co.semester.slug)
     request.path = co.get_absolute_url()
     # Without `city_aware` url keyword we still should parse sub domain

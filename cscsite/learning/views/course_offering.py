@@ -20,8 +20,8 @@ from core.exceptions import Redirect
 from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
 from learning.widgets import Tab, TabbedPane, CourseOfferingTabbedPane
-from learning.forms import CourseOfferingEditDescrForm, CourseOfferingNewsForm
-from learning.models import CourseOffering, CourseOfferingTeacher, \
+from learning.forms import CourseEditDescrForm, CourseNewsForm
+from learning.models import Course, CourseOfferingTeacher, \
     CourseOfferingNewsNotification, CourseClass, Assignment, StudentAssignment, \
     CourseOfferingNews
 from learning.serializers import CourseOfferingNewsNotificationSerializer
@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 class CourseOfferingDetailView(DetailView):
-    model = CourseOffering
+    model = Course
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
     default_tab = "about"
@@ -109,7 +109,7 @@ class CourseOfferingDetailView(DetailView):
 
     def get_object(self):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        qs = (CourseOffering.objects
+        qs = (Course.objects
               .filter(semester__type=semester_type,
                       semester__year=year,
                       meta_course__slug=self.kwargs['course_slug'])
@@ -152,7 +152,7 @@ class CourseOfferingStudentsView(TeacherOnlyMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        co = get_object_or_404(CourseOffering.objects
+        co = get_object_or_404(Course.objects
                                .filter(semester__type=semester_type,
                                        semester__year=year,
                                        meta_course__slug=self.kwargs['course_slug'])
@@ -167,9 +167,9 @@ class CourseOfferingStudentsView(TeacherOnlyMixin, TemplateView):
 # FIXME: Do I need ProtectedFormMixin?
 class CourseOfferingEditView(TeacherOnlyMixin, ProtectedFormMixin,
                              generic.UpdateView):
-    model = CourseOffering
+    model = Course
     template_name = "learning/simple_crispy_form.html"
-    form_class = CourseOfferingEditDescrForm
+    form_class = CourseEditDescrForm
 
     def get_object(self, queryset=None):
         try:
@@ -200,13 +200,13 @@ class CourseOfferingEditView(TeacherOnlyMixin, ProtectedFormMixin,
         return user.is_curator or user in obj.teachers.all()
 
     def get_queryset(self):
-        return CourseOffering.objects.in_city(self.request.city_code)
+        return Course.objects.in_city(self.request.city_code)
 
 
 class CourseOfferingNewsCreateView(TeacherOnlyMixin, CreateView):
     model = CourseOfferingNews
     template_name = "learning/simple_crispy_form.html"
-    form_class = CourseOfferingNewsForm
+    form_class = CourseNewsForm
 
     def get_form(self, **kwargs):
         form_class = self.get_form_class()
@@ -242,7 +242,7 @@ class CourseOfferingNewsUpdateView(TeacherOnlyMixin, ProtectedFormMixin,
                                    UpdateView):
     model = CourseOfferingNews
     template_name = "learning/simple_crispy_form.html"
-    form_class = CourseOfferingNewsForm
+    form_class = CourseNewsForm
 
     def get_success_url(self):
         return self.object.course_offering.get_url_for_tab("news")

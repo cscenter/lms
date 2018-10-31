@@ -18,7 +18,7 @@ from vanilla import DetailView
 from core.settings.base import TIME_ZONES
 from csclub import tasks
 from learning.gallery.models import Image
-from learning.models import CourseOffering, Semester, \
+from learning.models import Course, Semester, \
     CourseClass
 from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR
 from learning.utils import get_current_term_pair, now_local
@@ -75,7 +75,7 @@ class IndexView(generic.TemplateView):
                                                .filter(date__gte=today)
                                                .order_by('date', 'starts_at'))
             courses = list(
-                CourseOffering.objects
+                Course.objects
                 .in_city(self.request.city_code)
                 .filter(is_open=True, semester=featured_term.pk)
                 .select_related('meta_course', 'semester')
@@ -109,12 +109,12 @@ class TeachersView(generic.ListView):
     @property
     def get_queryset(self):
         user_model = get_user_model()
-        lecturers = list(CourseOffering
-            .objects
-            .filter(is_open=True,
+        lecturers = list(Course
+                         .objects
+                         .filter(is_open=True,
                     city__pk=self.request.city_code)
-            .distinct()
-            .values_list("teachers__pk", flat=True))
+                         .distinct()
+                         .values_list("teachers__pk", flat=True))
         return (user_model.objects
                 .filter(groups=user_model.group.TEACHER_CLUB,
                         courseofferingteacher__teacher_id__in=lecturers)
@@ -126,7 +126,7 @@ class TeacherDetailView(DetailView):
     context_object_name = 'teacher'
 
     def get_queryset(self):
-        co_queryset = (CourseOffering.objects
+        co_queryset = (Course.objects
                        .in_city(self.request.city_code)
                        .filter(is_open=True)
                        .select_related('semester', 'meta_course'))

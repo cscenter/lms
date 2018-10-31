@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from learning.admission.models import Campaign, Interview, Comment, Applicant
-from learning.models import Semester, CourseOffering
+from learning.models import Semester, Course
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, GRADES
 from learning.utils import get_term_index
 
@@ -40,7 +40,7 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
         # на клиент и сразу не грузить весь список курсов
         # Courses grouped by term
         courses_grouped = itertools.groupby(
-            CourseOffering.objects
+            Course.objects
                 .filter(is_open=False)
                 .values("pk", "semester_id", "meta_course__name")
                 .order_by("-semester_id", "meta_course__name"),

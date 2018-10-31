@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from core.utils import is_club_site
-from learning.models import CourseOffering
+from learning.models import Course
 from learning.utils import CityCode, semester_slug_re
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ def get_co_from_query_params(query_params, city_code):
         return None
     term_year, term_type = match.group("term_year"), match.group("term_type")
     course_slug = query_params.get("course_slug", "")
-    qs = CourseOffering.objects.in_city(city_code)
+    qs = Course.objects.in_city(city_code)
     try:
         return qs.get(meta_course__slug=course_slug, semester__year=term_year,
                       semester__type=term_type)

@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils.translation import ugettext as _
 
 from learning.factories import SemesterFactory, \
-    CourseOfferingFactory, EnrollmentFactory, \
+    CourseFactory, EnrollmentFactory, \
     MetaCourseFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import UserFactory, EnrollmentCertificateFactory, \
@@ -92,7 +92,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, TestCase):
         enrollments = []
         for s in semesters:
             e = EnrollmentFactory.create(
-                course_offering=CourseOfferingFactory.create(
+                course_offering=CourseFactory.create(
                     meta_course=meta_course,
                     semester=s),
                 student=student,

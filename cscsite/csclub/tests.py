@@ -19,14 +19,14 @@ class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
     def test_list_center_site(self):
         """Сlub students can't see center courses"""
         current_semester = SemesterFactory.create_current()
-        co_center = CourseOfferingFactory(semester=current_semester,
-                                          is_open=False,
-                                          city=settings.DEFAULT_CITY_CODE)
-        co_spb = CourseOfferingFactory(semester=current_semester,
-                                       is_open=True,
-                                       city=settings.DEFAULT_CITY_CODE)
-        co_kzn = CourseOfferingFactory.create(semester=current_semester,
-                                          city="kzn")
+        co_center = CourseFactory(semester=current_semester,
+                                  is_open=False,
+                                  city=settings.DEFAULT_CITY_CODE)
+        co_spb = CourseFactory(semester=current_semester,
+                               is_open=True,
+                               city=settings.DEFAULT_CITY_CODE)
+        co_kzn = CourseFactory.create(semester=current_semester,
+                                      city="kzn")
         resp = self.client.get(reverse('course_list'))
         self.assertNotContains(resp, co_center.meta_course.name)
         self.assertContains(resp, co_spb.meta_course.name)
@@ -36,14 +36,14 @@ class CourseOfferingSecurityTests(MyUtilitiesMixin, TestCase):
         s = UserFactory.create(groups=[PARTICIPANT_GROUPS.STUDENT_CENTER])
         self.doLogin(s)
         current_semester = SemesterFactory.create_current()
-        co_center = CourseOfferingFactory(semester=current_semester,
-                                          is_open=False,
-                                          city=settings.DEFAULT_CITY_CODE)
-        co_spb = CourseOfferingFactory(semester=current_semester,
-                                       is_open=True,
-                                       city=settings.DEFAULT_CITY_CODE)
-        co_kzn = CourseOfferingFactory.create(semester=current_semester,
-                                          city="kzn")
+        co_center = CourseFactory(semester=current_semester,
+                                  is_open=False,
+                                  city=settings.DEFAULT_CITY_CODE)
+        co_spb = CourseFactory(semester=current_semester,
+                               is_open=True,
+                               city=settings.DEFAULT_CITY_CODE)
+        co_kzn = CourseFactory.create(semester=current_semester,
+                                      city="kzn")
         resp = self.client.get(reverse('course_list_student'))
         self.assertEqual(len(resp.context['ongoing_rest']), 1)
 

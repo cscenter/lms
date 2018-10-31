@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from api.pagination import StandardPagination
 from learning.api.serializers import AlumniSerializer, TestimonialSerializer, \
     TeacherSerializer, CourseSerializer
-from learning.models import AreaOfStudy, CourseOfferingTeacher, CourseOffering, \
+from learning.models import AreaOfStudy, CourseOfferingTeacher, Course, \
     Semester
 from learning.settings import CENTER_FOUNDATION_YEAR
 from learning.utils import get_term_index
@@ -20,7 +20,7 @@ class CourseList(ListAPIView):
     serializer_class = CourseSerializer
 
     def get_queryset(self):
-        return (CourseOffering.objects
+        return (Course.objects
                 .from_center_foundation()
                 .select_related("meta_course")
                 .exclude(semester__type=Semester.TYPES.summer)

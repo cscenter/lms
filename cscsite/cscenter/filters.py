@@ -5,7 +5,7 @@ from django.http import QueryDict
 from django_filters import FilterSet, Filter, ChoiceFilter
 from django.utils.translation import ugettext_lazy as _
 
-from learning.models import CourseOffering, Semester
+from learning.models import Course, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR
 from learning.utils import semester_slug_re, get_term_index
 from learning.views.utils import get_user_city_code
@@ -71,7 +71,7 @@ class CoursesFilter(FilterSet):
     semester = SemesterSlugFilter(method='semester_slug_filter')
 
     class Meta:
-        model = CourseOffering
+        model = Course
         fields = ['city', 'semester']
 
     def __init__(self, data=None, queryset=None, request=None, **kwargs):

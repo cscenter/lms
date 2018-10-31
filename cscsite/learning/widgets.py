@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
-from learning.models import Assignment, CourseClass, CourseOffering
+from learning.models import Assignment, CourseClass, Course
 from learning.permissions import access_role, CourseRole
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class CourseOfferingTabbedPane(TabbedPane):
         "news": pgettext_lazy("course-tab", "News"),
     }
 
-    def __init__(self, course_offering: CourseOffering):
+    def __init__(self, course_offering: Course):
         super().__init__()
         self._course_offering = course_offering
 

@@ -19,7 +19,7 @@ from core.utils import admin_datetime, is_club_site
 from learning.models import InternshipCategory
 from learning.settings import PARTICIPANT_GROUPS
 from users.models import User
-from .models import MetaCourse, Semester, CourseOffering, Venue, \
+from .models import MetaCourse, Semester, Course, Venue, \
     CourseClass, CourseClassAttachment, CourseOfferingNews, \
     Assignment, AssignmentAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
@@ -80,9 +80,9 @@ class CourseOfferingTeacherInline(admin.TabularInline):
         return super(CourseOfferingTeacherInline, self).formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
-class CourseOfferingAdminForm(forms.ModelForm):
+class CourseAdminForm(forms.ModelForm):
     class Meta:
-        model = CourseOffering
+        model = Course
         fields = '__all__'
 
     def clean_is_open(self):
@@ -93,7 +93,7 @@ class CourseOfferingAdminForm(forms.ModelForm):
         return is_open
 
 
-class CourseOfferingAdmin(TranslationAdmin, admin.ModelAdmin):
+class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_filter = ['city', 'semester']
     list_display = ['meta_course', 'semester', 'is_published_in_video',
                     'is_open']
@@ -101,7 +101,7 @@ class CourseOfferingAdmin(TranslationAdmin, admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
-    form = CourseOfferingAdminForm
+    form = CourseAdminForm
 
 
 class CourseClassAttachmentAdmin(admin.ModelAdmin):
@@ -126,7 +126,7 @@ class CourseClassAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'course_offering':
-            kwargs['queryset'] = (CourseOffering.objects
+            kwargs['queryset'] = (Course.objects
                                   .select_related("meta_course", "semester"))
         return (super(CourseClassAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
@@ -203,8 +203,8 @@ class AssignmentAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'course_offering':
-            kwargs['queryset'] = (CourseOffering.objects
-                .select_related("meta_course", "semester"))
+            kwargs['queryset'] = (Course.objects
+                                  .select_related("meta_course", "semester"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
@@ -367,7 +367,7 @@ admin.site.register(MetaCourse, MetaCourseAdmin)
 admin.site.register(OnlineCourse, OnlineCourseAdmin)
 admin.site.register(InternationalSchool, InternationalSchoolAdmin)
 admin.site.register(Semester)
-admin.site.register(CourseOffering, CourseOfferingAdmin)
+admin.site.register(Course, CourseAdmin)
 admin.site.register(Venue, VenueAdmin)
 admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseClassAttachment, CourseClassAttachmentAdmin)

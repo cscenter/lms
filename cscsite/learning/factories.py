@@ -9,7 +9,7 @@ from django.utils.timezone import now
 from factory import CREATE_STRATEGY
 
 from core.models import City
-from learning.models import MetaCourse, Semester, CourseOffering, \
+from learning.models import MetaCourse, Semester, Course, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseOfferingNews, \
@@ -59,9 +59,9 @@ class SemesterFactory(factory.DjangoModelFactory):
         return cls.create(year=year, type=prev_term)
 
 
-class CourseOfferingFactory(factory.DjangoModelFactory):
+class CourseFactory(factory.DjangoModelFactory):
     class Meta:
-        model = CourseOffering
+        model = Course
 
     meta_course = factory.SubFactory(MetaCourseFactory)
     semester = factory.SubFactory(SemesterFactory)
@@ -77,8 +77,6 @@ class CourseOfferingFactory(factory.DjangoModelFactory):
                 self.city = extracted
             else:
                 self.city = City.objects.get(pk=extracted)
-
-    # TODO: create course offering for current semester by default
 
     @factory.post_generation
     def teachers(self, create, extracted, **kwargs):
@@ -96,15 +94,15 @@ class CourseOfferingTeacherFactory(factory.DjangoModelFactory):
         model = CourseOfferingTeacher
 
     teacher = factory.SubFactory(UserFactory)
-    course_offering = factory.SubFactory(CourseOfferingFactory)
+    course_offering = factory.SubFactory(CourseFactory)
     roles = CourseOfferingTeacher.roles.lecturer
 
 
-class CourseOfferingNewsFactory(factory.DjangoModelFactory):
+class CourseNewsFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseOfferingNews
 
-    course_offering = factory.SubFactory(CourseOfferingFactory)
+    course_offering = factory.SubFactory(CourseFactory)
     title = factory.Sequence(lambda n: "Imporant news about testing %03d" % n)
     author = factory.SubFactory(UserFactory, groups=['Teacher [CENTER]'])
     text = factory.Sequence(lambda n: ("Suddenly it turned out that testing "
@@ -132,7 +130,7 @@ class CourseClassFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseClass
 
-    course_offering = factory.SubFactory(CourseOfferingFactory)
+    course_offering = factory.SubFactory(CourseFactory)
     venue = factory.SubFactory(
         VenueFactory,
         city=factory.SelfAttribute('..course_offering.city'))
@@ -171,7 +169,7 @@ class AssignmentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Assignment
 
-    course_offering = factory.SubFactory(CourseOfferingFactory)
+    course_offering = factory.SubFactory(CourseFactory)
     deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
                    + datetime.timedelta(days=1))
     is_online = True
@@ -229,7 +227,7 @@ class EnrollmentFactory(factory.DjangoModelFactory):
 
     student = factory.SubFactory(UserFactory,
                                  groups=[PARTICIPANT_GROUPS.STUDENT_CENTER])
-    course_offering = factory.SubFactory(CourseOfferingFactory)
+    course_offering = factory.SubFactory(CourseFactory)
 
 
 class AssignmentNotificationFactory(factory.DjangoModelFactory):
@@ -245,7 +243,7 @@ class CourseOfferingNewsNotificationFactory(factory.DjangoModelFactory):
         model = CourseOfferingNewsNotification
 
     user = factory.SubFactory(UserFactory)
-    course_offering_news = factory.SubFactory(CourseOfferingNewsFactory)
+    course_offering_news = factory.SubFactory(CourseNewsFactory)
 
 
 class NonCourseEventFactory(factory.DjangoModelFactory):

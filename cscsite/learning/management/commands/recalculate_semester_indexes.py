@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.core.management import BaseCommand
 
-from learning.models import Semester, CourseOffering
+from learning.models import Semester, Course
 from learning.settings import FOUNDATION_YEAR, SEMESTER_TYPES, \
     TERMS_INDEX_START
 

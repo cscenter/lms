@@ -5,7 +5,7 @@ from django.urls import reverse
 from icalendar import Calendar, Event
 
 from core.models import City
-from learning.factories import CourseClassFactory, CourseOfferingFactory, \
+from learning.factories import CourseClassFactory, CourseFactory, \
     EnrollmentFactory, AssignmentFactory, NonCourseEventFactory, VenueFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import UserFactory, StudentFactory
@@ -28,7 +28,7 @@ def test_classes(client):
     # Create some content
     ccs_teaching = (CourseClassFactory
                     .create_batch(2, course_offering__teachers=[user]))
-    co_learning = CourseOfferingFactory.create()
+    co_learning = CourseFactory.create()
     EnrollmentFactory.create(student=user, course_offering=co_learning)
     ccs_learning = (CourseClassFactory
                     .create_batch(3, course_offering=co_learning))
@@ -55,7 +55,7 @@ def test_assignments(client):
     # Create some content
     as_teaching = (AssignmentFactory
                    .create_batch(2, course_offering__teachers=[user]))
-    co_learning = CourseOfferingFactory.create()
+    co_learning = CourseFactory.create()
     EnrollmentFactory.create(student=user, course_offering=co_learning)
     as_learning = (AssignmentFactory
                    .create_batch(3, course_offering=co_learning))
