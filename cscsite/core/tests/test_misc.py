@@ -15,7 +15,7 @@ from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory
 
 from learning.models import AssignmentNotification, \
-    CourseOfferingNewsNotification
+    CourseNewsNotification
 from learning.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory, StudentAssignmentFactory
 

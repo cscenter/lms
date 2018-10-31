@@ -13,7 +13,7 @@ from learning.models import MetaCourse, Semester, Course, \
     Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     AssignmentAttachment, CourseNews, \
-    CourseOfferingNewsNotification, NonCourseEvent, CourseTeacher, \
+    CourseNewsNotification, NonCourseEvent, CourseTeacher, \
     AreaOfStudy
 from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
 from users.factories import UserFactory, StudentCenterFactory
@@ -240,7 +240,7 @@ class AssignmentNotificationFactory(factory.DjangoModelFactory):
 
 class CourseNewsNotificationFactory(factory.DjangoModelFactory):
     class Meta:
-        model = CourseOfferingNewsNotification
+        model = CourseNewsNotification
 
     user = factory.SubFactory(UserFactory)
     course_offering_news = factory.SubFactory(CourseNewsFactory)

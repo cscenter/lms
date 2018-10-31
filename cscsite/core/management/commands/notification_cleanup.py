@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 
 
 from learning.models import AssignmentNotification, \
-    CourseOfferingNewsNotification
+    CourseNewsNotification
 
 
 def report(s):
@@ -23,9 +23,8 @@ class Command(BaseCommand):
         report("{0} AssignmentNotifications to delete".format(objects.count()))
         objects.delete()
         report("done")
-        objects = (CourseOfferingNewsNotification.objects
+        objects = (CourseNewsNotification.objects
                    .filter(is_unread=False))
-        report("{0} CourseOfferingNewsNotifications to delete"
-               .format(objects.count()))
+        report(f"{objects.count()} CourseNewsNotifications to delete")
         objects.delete()
         report("done")

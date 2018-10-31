@@ -1,11 +1,11 @@
 from django.conf.urls import url
 
-from .views import CourseOfferingNewsNotificationUpdate
+from .views import CourseNewsNotificationUpdate
 
 app_name = 'notifications'
 
 urlpatterns = [
     url(r'^course-offerings/news/$',
-        CourseOfferingNewsNotificationUpdate.as_view(),
+        CourseNewsNotificationUpdate.as_view(),
         name='course_offerings__news'),
 ]

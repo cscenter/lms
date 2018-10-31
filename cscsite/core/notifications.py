@@ -71,7 +71,7 @@ class UnreadNotificationsCacheMiddleware(object):
                  .filter(is_unread=True)
                  .select_related('student_assignment')),
                 (request.user
-                 .courseofferingnewsnotification_set
+                 .coursenewsnotification_set
                  .filter(is_unread=True)
                  .select_related('course_offering_news',
                                  'course_offering_news__course_offering')))

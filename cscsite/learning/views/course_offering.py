@@ -19,7 +19,7 @@ from core.utils import get_club_domain
 from core.views import ProtectedFormMixin
 from learning.forms import CourseEditDescrForm, CourseNewsForm
 from learning.models import Course, CourseTeacher, \
-    CourseOfferingNewsNotification, CourseNews
+    CourseNewsNotification, CourseNews
 from learning.serializers import CourseNewsNotificationSerializer
 from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
 from learning.utils import get_term_index
@@ -85,7 +85,7 @@ class CourseDetailView(DetailView):
         # Attach unread notifications count if request user in mailing list
         unread_news = None
         if request_user_enrollment or is_actual_teacher:
-            unread_news = (CourseOfferingNewsNotification.unread
+            unread_news = (CourseNewsNotification.unread
                            .filter(course_offering_news__course_offering=co,
                                    user=request_user)
                            .count())
@@ -267,7 +267,7 @@ class CourseNewsUnreadNotificationsView(ListAPIView):
     serializer_class = CourseNewsNotificationSerializer
 
     def get_queryset(self):
-        return (CourseOfferingNewsNotification.unread
+        return (CourseNewsNotification.unread
                 .filter(course_offering_news_id=self.kwargs.get('news_pk'))
                 .select_related("user")
                 .order_by("user__last_name"))
