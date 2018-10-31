@@ -48,7 +48,7 @@ class SurveySubmissionsReport(ReportFileOutput):
 
     def get_filename(self):
         today = formats.date_format(datetime.now(), "SHORT_DATE_FORMAT")
-        co = self.survey.course_offering
+        co = self.survey.course
         return f"survey_{co.city_id}_{co.meta_course.slug}_{co.semester.slug}_{today}"
 
 

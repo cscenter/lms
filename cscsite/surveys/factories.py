@@ -55,7 +55,7 @@ class CourseSurveyFactory(factory.DjangoModelFactory):
         model = CourseSurvey
 
     form = factory.SubFactory(FormFactory)
-    course_offering = factory.SubFactory(CourseFactory)
+    course = factory.SubFactory(CourseFactory)
     type = factory.Iterator([
         c for c, n in CourseSurvey._meta.get_field('type').choices
     ])

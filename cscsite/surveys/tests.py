@@ -216,7 +216,7 @@ def test_conditional_logic_prefill_class(mocker):
     class3 = CourseClassFactory(course_offering=co, date=today_fixed,
                                 ends_at=datetime.time(hour=21, minute=0))
     class4 = CourseClassFactory(course_offering=co, date=future)
-    survey = CourseSurveyFactory(course_offering=co, form_id=None)
+    survey = CourseSurveyFactory(course=co, form_id=None)
     assert hasattr(survey, "form")
     assert survey.form.fields.count() > 0
     # Field that should be prefilled with passed lectures

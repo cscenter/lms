@@ -9,7 +9,7 @@ OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
 
 
 def course_form_builder(survey: CourseSurvey):
-    co = survey.course_offering
+    co = survey.course
     if survey.type in [CourseSurvey.MIDDLE]:
         pass
     form = Form(title=f'Опрос по курсу «{co}»',

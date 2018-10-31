@@ -228,13 +228,13 @@ class Form(AbstractForm):
                 survey.save(update_fields=["students_notified"])
 
     def _create_survey_notifications(self, survey):
-        co = survey.course_offering
+        course = survey.course
         context = {
-            "COURSE_NAME": str(co),
+            "COURSE_NAME": str(course),
             "SURVEY_URL": f"https://compscicenter.ru{survey.get_absolute_url()}"
         }
         active_enrollments = (Enrollment.active
-                              .filter(course_offering=co.pk)
+                              .filter(course_offering=course.pk)
                               .select_related("student"))
         for e in active_enrollments.iterator():
             mail.send(
@@ -262,9 +262,9 @@ class CourseSurvey(models.Model):
         verbose_name=_("Type"),
         max_length=20,
         choices=TYPES)
-    course_offering = models.ForeignKey(Course,
-                                        related_name="surveys",
-                                        on_delete=models.CASCADE)
+    course = models.ForeignKey(Course,
+                               related_name="surveys",
+                               on_delete=models.CASCADE)
     email_template = models.ForeignKey(
         EmailTemplate,
         on_delete=models.CASCADE,
@@ -276,14 +276,14 @@ class CourseSurvey(models.Model):
     class Meta:
         verbose_name = _("Course Survey")
         verbose_name_plural = _("Course Surveys")
-        unique_together = [('course_offering', 'type')]
+        unique_together = [('course', 'type')]
 
     def __str__(self):
-        city = self.course_offering.city
-        return f"{self.course_offering}, {city} [{self.type}]"
+        city = self.course.city
+        return f"{self.course}, {city} [{self.type}]"
 
     def get_city(self):
-        return self.course_offering.city
+        return self.course.city
     get_city.short_description = _("City")
 
     def get_city_code(self):
@@ -296,7 +296,7 @@ class CourseSurvey(models.Model):
 
     @property
     def city_aware_field_name(self):
-        return self.__class__.course_offering.field.name
+        return self.__class__.course.field.name
 
     @transaction.atomic
     def save(self, *args, **kwargs):
@@ -318,10 +318,10 @@ class CourseSurvey(models.Model):
 
     def get_absolute_url(self):
         kwargs = {
-            "course_slug": self.course_offering.meta_course.slug,
-            "semester_type": self.course_offering.semester.type,
-            "semester_year": self.course_offering.semester.year,
-            "city_code": self.course_offering.get_city(),
+            "course_slug": self.course.meta_course.slug,
+            "semester_type": self.course.semester.type,
+            "semester_year": self.course.semester.year,
+            "city_code": self.course.get_city(),
             "slug": self.form.slug
         }
         return city_aware_reverse('surveys:form_detail', kwargs=kwargs)
@@ -332,7 +332,7 @@ class CourseSurvey(models.Model):
 
     @property
     def title(self):
-        return str(self.course_offering)
+        return str(self.course)
 
     @property
     def is_published(self):

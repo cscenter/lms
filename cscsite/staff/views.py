@@ -634,9 +634,9 @@ class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
         query = (CourseSurvey.objects
                  .filter(pk=survey_pk)
                  .select_related("form",
-                                 "course_offering",
-                                 "course_offering__meta_course",
-                                 "course_offering__semester"))
+                                 "course",
+                                 "course__meta_course",
+                                 "course__semester"))
         survey = get_object_or_404(query)
         report = SurveySubmissionsReport(survey)
         return getattr(report, f"output_{output_format}")()
@@ -650,9 +650,9 @@ class SurveySubmissionsStatsView(CuratorOnlyMixin, TemplateView):
         query = (CourseSurvey.objects
                  .filter(pk=survey_pk)
                  .select_related("form",
-                                 "course_offering",
-                                 "course_offering__meta_course",
-                                 "course_offering__semester"))
+                                 "course",
+                                 "course__meta_course",
+                                 "course__semester"))
         survey = get_object_or_404(query)
         report = SurveySubmissionsStats(survey)
         stats = report.calculate()
