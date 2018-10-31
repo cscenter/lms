@@ -51,7 +51,7 @@ class _GradeBookDispatchView(generic.ListView):
                 .exclude(type=Semester.TYPES.summer)
                 .prefetch_related(
                     Prefetch(
-                        "courseoffering_set",
+                        "course_set",
                         queryset=self.get_co_queryset(),
                         to_attr="courseofferings"
                     )))
