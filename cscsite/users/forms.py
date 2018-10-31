@@ -15,7 +15,7 @@ from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
 from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER
 from users import tasks
-from .models import User, UserReference
+from .models import User, EnrollmentCertificate
 
 
 class LoginForm(AuthenticationForm):
@@ -130,7 +130,7 @@ class UserProfileForm(forms.ModelForm):
         return csc_review.strip()
 
 
-class UserReferenceCreateForm(forms.ModelForm):
+class EnrollmentCertificateCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -143,7 +143,7 @@ class UserReferenceCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
     class Meta:
-        model = UserReference
+        model = EnrollmentCertificate
         fields = ['signature', 'note']
 
 

@@ -10,7 +10,7 @@ from import_export.admin import ImportExportMixin, ImportMixin
 from core.widgets import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
 from learning.settings import PARTICIPANT_GROUPS
-from .models import User, UserReference, \
+from .models import User, EnrollmentCertificate, \
     OnlineCourseRecord, SHADCourseRecord, UserStatusLog
 from .import_export import SHADCourseRecordResource, UserRecordResource
 
@@ -186,5 +186,5 @@ class UserRecordResourceAdmin(ImportMixin, UserAdmin):
 
 
 admin.site.register(User, UserRecordResourceAdmin)
-admin.site.register(UserReference)
+admin.site.register(EnrollmentCertificate)
 admin.site.register(SHADCourseRecord, SHADCourseRecordResourceAdmin)

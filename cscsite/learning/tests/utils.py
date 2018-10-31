@@ -8,6 +8,7 @@ _STS = SimpleTestCase()
 
 
 def assert_redirects(*args, **kwargs):
+    # Deprecated. Use pytest fixture instead
     _STS.assertRedirects(*args, **kwargs)
 
 

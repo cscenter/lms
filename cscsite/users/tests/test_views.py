@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals
-
 import copy
-import re
 import unittest
 
 import factory
@@ -16,22 +11,16 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import translation
 from django.utils.encoding import smart_text, force_text, smart_bytes
-from django.utils.translation import ugettext as _
 
 from learning.factories import SemesterFactory, \
-    CourseOfferingFactory, EnrollmentFactory, \
-    MetaCourseFactory, AreaOfStudyFactory
+    CourseOfferingFactory, AreaOfStudyFactory
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
 from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import UserCreationForm, UserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
-    UserReferenceFactory, TeacherCenterFactory, StudentClubFactory, \
+    TeacherCenterFactory, StudentClubFactory, \
     StudentFactory, StudentCenterFactory
-from users.models import User, UserReference
-
-
-class CustomSemesterFactory(SemesterFactory):
-    type = factory.Iterator(['spring', 'autumn'])
+from users.models import User
 
 
 class UserTests(MyUtilitiesMixin, TestCase):
@@ -507,122 +496,3 @@ def test_login_restrictions(client, settings):
     assert response.wsgi_request.user.is_authenticated
     # Just to make sure we have no super user permissions
     assert not response.wsgi_request.user.is_curator
-
-
-class UserReferenceTests(MyUtilitiesMixin, TestCase):
-    def test_user_detail_view(self):
-        """Show reference-add button only to curators (superusers)"""
-        # check user page without curator credentials
-        student = UserFactory.create(groups=['Student [CENTER]'], enrollment_year=2011)
-        self.doLogin(student)
-        url = reverse('user_detail', args=[student.pk])
-        response = self.client.get(url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        button = soup.find('a', text=_("Create reference"))
-        self.assertIsNone(button)
-        # check with curator credentials
-        curator = UserFactory.create(is_superuser=True, is_staff=True)
-        self.doLogin(curator)
-        response = self.client.get(url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        button = soup.find(string=re.compile(_("Create reference")))
-        self.assertIsNotNone(button)
-
-    def test_user_detail_reference_list_view(self):
-        """Check reference list appears on student profile page for curators only"""
-        student = StudentCenterFactory()
-        EnrollmentFactory.create()
-        UserReferenceFactory.create(student=student)
-        curator = UserFactory.create(is_superuser=True, is_staff=True)
-        url = reverse('user_detail', args=[student.pk])
-        self.doLogin(curator)
-        response = self.client.get(url)
-        self.assertEquals(
-            response.context['profile_user'].userreference_set.count(), 1)
-        soup = BeautifulSoup(response.content, "html.parser")
-        list_header = soup.find('h4', text=re.compile(_("Student references")))
-        self.assertIsNotNone(list_header)
-        self.doLogin(student)
-        response = self.client.get(url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        list_header = soup.find('h4', text=_("Student references"))
-        self.assertIsNone(list_header)
-
-    def test_create_reference(self):
-        """Check FIO substitute in signature input field
-           Check redirect to reference detail after form submit
-        """
-        curator = UserFactory.create(is_superuser=True, is_staff=True)
-        self.doLogin(curator)
-        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = User.objects.create_user(**user_data)
-        form_url = reverse('user_reference_add', args=[user.id])
-        response = self.client.get(form_url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        sig_input = soup.find(id="id_signature")
-        self.assertEquals(sig_input.attrs.get('value'), curator.get_full_name())
-
-        student = StudentCenterFactory()
-        reference = UserReferenceFactory.build(student=student)
-        form_url = reverse('user_reference_add', args=[student.id])
-        form_data = model_to_dict(reference)
-        response = self.client.post(form_url, form_data)
-        assert UserReference.objects.count() == 1
-        ref = UserReference.objects.first()
-        self.assertRedirects(response,
-            reverse('user_reference_detail',
-                    args=[student.id, ref.pk])
-        )
-
-    def test_reference_detail(self):
-        """Check enrollments duplicates, reference fields"""
-        student = StudentCenterFactory()
-        # add 2 enrollments from 1 course reading exactly
-        meta_course = MetaCourseFactory.create()
-        semesters = (CustomSemesterFactory.create_batch(2, year=2014))
-        enrollments = []
-        for s in semesters:
-            e = EnrollmentFactory.create(
-                course_offering=CourseOfferingFactory.create(
-                    meta_course=meta_course,
-                    semester=s),
-                student=student,
-                grade='good'
-            )
-            enrollments.append(e)
-        reference = UserReferenceFactory.create(
-            student=student,
-            note="TEST",
-            signature="SIGNATURE")
-        url = reverse('user_reference_detail',
-                             args=[student.id, reference.id])
-        self.doLogin(student)
-        self.assertLoginRedirect(url)
-        curator = UserFactory.create(is_superuser=True, is_staff=True)
-        self.doLogin(curator)
-        response  = self.client.get(url)
-        self.assertEqual(response.context['object'].note, "TEST")
-        soup = BeautifulSoup(response.content, "html.parser")
-        sig_text = soup.find(text=re.compile('SIGNATURE'))
-        self.assertIsNotNone(sig_text)
-        es = soup.find(id='reference-page-body').findAll('li')
-        expected_enrollments_count = 1
-        self.assertEquals(len(es), expected_enrollments_count)
-
-    def test_club_student_login_on_cscenter_site(self):
-        student = UserFactory.create(is_superuser=False, is_staff=False,
-                                     groups=[User.group.STUDENT_CLUB])
-        self.doLogin(student)
-        login_data = {
-            'username': student.username,
-            'password': student.raw_password
-        }
-        response = self.client.post(reverse('login'), login_data)
-        form = response.context['form']
-        self.assertFalse(form.is_valid())
-        # can't login message in __all__
-        self.assertIn("__all__", form.errors)
-        student.groups.set([User.group.STUDENT_CENTER])
-        student.save()
-        response = self.client.post(reverse('login'), login_data)
-        self.assertEqual(response.status_code, 302)

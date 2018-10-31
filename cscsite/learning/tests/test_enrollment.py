@@ -13,7 +13,6 @@ from learning.factories import SemesterFactory, CourseOfferingFactory, \
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseOfferingNewsNotification
 from learning.settings import DATE_FORMAT_RU
-from learning.tests.utils import assert_redirects
 from learning.utils import now_local
 from users.factories import StudentCenterFactory, StudentClubFactory
 
@@ -44,7 +43,7 @@ def test_enrollment_for_club_students(client):
 
 
 @pytest.mark.django_db
-def test_unenrollment(client):
+def test_unenrollment(client, assert_redirect):
     s = StudentCenterFactory.create(city_id='spb')
     assert s.city_id is not None
     client.login(s)
@@ -92,8 +91,8 @@ def test_unenrollment(client):
     assert len(response.context['archive_enrolled']) == 0
     # Check `back` url on unenroll action
     url = co.get_unenroll_url() + "?back=course_list_student"
-    assert_redirects(client.post(url, form),
-                     reverse('course_list_student'))
+    assert_redirect(client.post(url, form),
+                    reverse('course_list_student'))
     assert set(a_ss) == set(StudentAssignment.objects
                                   .filter(student=s,
                                           assignment__course_offering=co))

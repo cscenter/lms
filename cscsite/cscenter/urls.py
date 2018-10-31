@@ -16,7 +16,7 @@ from users.tasks import html_email_template_name, email_template_name, \
     subject_template_name
 
 from users.views import LoginView, LogoutView, TeacherDetailView, \
-    UserDetailView, UserUpdateView, UserReferenceCreateView, UserReferenceDetailView
+    UserDetailView, UserUpdateView, EnrollmentCertificateCreateView, EnrollmentCertificateDetailView
 from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
     ICalEventsView
 
@@ -51,10 +51,10 @@ urlpatterns = [
     url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
         name='user_detail'),
     url(r'^users/(?P<pk>\d+)/reference/add$',
-        UserReferenceCreateView.as_view(),
+        EnrollmentCertificateCreateView.as_view(),
         name='user_reference_add'),
     url(r'^users/(?P<user_id>\d+)/reference/(?P<pk>\d+)$',
-        UserReferenceDetailView.as_view(),
+        EnrollmentCertificateDetailView.as_view(),
         name='user_reference_detail'),
     url(r'^users/(?P<pk>\d+)/csc_classes.ics', ICalClassesView.as_view(),
         name='user_ical_classes'),
