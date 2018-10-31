@@ -161,7 +161,7 @@ class NonCourseEventQuerySet(query.QuerySet):
         return self.filter(date__gte=date_start, date__lte=date_end)
 
 
-class CourseOfferingQuerySet(models.QuerySet):
+class CourseQuerySet(models.QuerySet):
     def in_city(self, city_code):
         _q = {"is_correspondence": False}
         if isinstance(city_code, (list, tuple)):
@@ -212,7 +212,7 @@ class CourseOfferingQuerySet(models.QuerySet):
                 .order_by("-semester__index"))
 
 
-class _CourseOfferingDefaultManager(models.Manager):
+class _CourseDefaultManager(models.Manager):
     """On compsciclub.ru always restrict selection by open reading"""
     def get_queryset(self):
         # TODO: add test
@@ -222,8 +222,7 @@ class _CourseOfferingDefaultManager(models.Manager):
             return super().get_queryset()
 
 
-CourseOfferingDefaultManager = _CourseOfferingDefaultManager.from_queryset(
-    CourseOfferingQuerySet)
+CourseDefaultManager = _CourseDefaultManager.from_queryset(CourseQuerySet)
 
 
 class _EnrollmentDefaultManager(models.Manager):

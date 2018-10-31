@@ -138,7 +138,7 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
     groups_allowed = [PARTICIPANT_GROUPS.TEACHER_CENTER]
 
 
-class CourseDetailTests(MyUtilitiesMixin, TestCase):
+class MetaCourseDetailTests(MyUtilitiesMixin, TestCase):
     def test_course_detail(self):
         mc = MetaCourseFactory.create()
         s1 = SemesterFactory(year=2016)
@@ -159,7 +159,7 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
             assert {c.pk for c in response.context['offerings']} == {co1.pk}
 
 
-class CourseUpdateTests(MyUtilitiesMixin, TestCase):
+class MetaCourseUpdateTests(MyUtilitiesMixin, TestCase):
     def test_security(self):
         mc = MetaCourseFactory.create()
         url = reverse('course_edit', args=[mc.slug])
@@ -189,7 +189,7 @@ class CourseUpdateTests(MyUtilitiesMixin, TestCase):
         self.assertEqual("foobar", MetaCourse.objects.get(pk=mc.pk).name_ru)
 
 
-class CourseOfferingDetailTests(MyUtilitiesMixin, TestCase):
+class CourseDetailTests(MyUtilitiesMixin, TestCase):
     def test_basic_get(self):
         co = CourseFactory.create()
         assert 200 == self.client.get(co.get_absolute_url()).status_code

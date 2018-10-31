@@ -50,7 +50,7 @@ class FieldChoiceFactory(factory.DjangoModelFactory):
     label = factory.Sequence(lambda n: "Choice %03d" % n)
 
 
-class CourseOfferingSurveyFactory(factory.DjangoModelFactory):
+class CourseSurveyFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseOfferingSurvey
 

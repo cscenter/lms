@@ -1,38 +1,33 @@
 import logging
-from typing import List
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.db import transaction, IntegrityError
-from django.db.models import Q, Prefetch, When, Value, Case, \
-    IntegerField, BooleanField, Count
+from django.db.models import Prefetch
 from django.http import HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, NoReverseMatch
-from django.utils.translation import ugettext_lazy as _, pgettext_lazy
+from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from rest_framework.generics import ListAPIView
 from vanilla import DeleteView, UpdateView, CreateView, DetailView, TemplateView
 
 from api.permissions import CuratorAccessPermission
 from core.exceptions import Redirect
-from core.utils import get_club_domain, is_club_site
+from core.utils import get_club_domain
 from core.views import ProtectedFormMixin
-from learning.widgets import Tab, TabbedPane, CourseOfferingTabbedPane
 from learning.forms import CourseEditDescrForm, CourseNewsForm
 from learning.models import Course, CourseTeacher, \
-    CourseOfferingNewsNotification, CourseClass, Assignment, StudentAssignment, \
-    CourseNews
-from learning.serializers import CourseOfferingNewsNotificationSerializer
-from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, \
-    STUDENT_STATUS
+    CourseOfferingNewsNotification, CourseNews
+from learning.serializers import CourseNewsNotificationSerializer
+from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES
 from learning.utils import get_term_index
 from learning.viewmixins import TeacherOnlyMixin
 from learning.views.utils import get_co_from_query_params, get_user_city_code
-from users.models import User
+from learning.widgets import CourseTabbedPane
 
-__all__ = ['CourseOfferingDetailView', 'CourseOfferingEditView',
+__all__ = ['CourseDetailView', 'CourseEditView',
            'CourseNewsCreateView', 'CourseNewsUpdateView',
            'CourseNewsDeleteView']
 
@@ -40,7 +35,7 @@ __all__ = ['CourseOfferingDetailView', 'CourseOfferingEditView',
 logger = logging.getLogger(__name__)
 
 
-class CourseOfferingDetailView(DetailView):
+class CourseDetailView(DetailView):
     model = Course
     context_object_name = 'course_offering'
     template_name = "learning/courseoffering_detail.html"
@@ -123,8 +118,8 @@ class CourseOfferingDetailView(DetailView):
                                   .prefetch_related("teacher__groups")))))
         return get_object_or_404(qs)
 
-    def make_tabbed_pane(self, course_offering):
-        pane = CourseOfferingTabbedPane(course_offering)
+    def make_tabbed_pane(self, course: Course):
+        pane = CourseTabbedPane(course)
         # Tab name have to be validated by url() pattern.
         show_tab = self.kwargs.get('tab', self.default_tab)
         login_page = redirect_to_login(self.request.get_full_path())
@@ -135,7 +130,7 @@ class CourseOfferingDetailView(DetailView):
         return pane
 
 
-class CourseOfferingStudentsView(TeacherOnlyMixin, TemplateView):
+class CourseStudentsView(TeacherOnlyMixin, TemplateView):
     # raise_exception = True
     template_name = "learning/courseoffering_students.html"
 
@@ -165,8 +160,8 @@ class CourseOfferingStudentsView(TeacherOnlyMixin, TemplateView):
 
 
 # FIXME: Do I need ProtectedFormMixin?
-class CourseOfferingEditView(TeacherOnlyMixin, ProtectedFormMixin,
-                             generic.UpdateView):
+class CourseEditView(TeacherOnlyMixin, ProtectedFormMixin,
+                     generic.UpdateView):
     model = Course
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseEditDescrForm
@@ -269,7 +264,7 @@ class CourseNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
 
 class CourseNewsUnreadNotificationsView(ListAPIView):
     permission_classes = [CuratorAccessPermission]
-    serializer_class = CourseOfferingNewsNotificationSerializer
+    serializer_class = CourseNewsNotificationSerializer
 
     def get_queryset(self):
         return (CourseOfferingNewsNotification.unread

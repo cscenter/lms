@@ -51,7 +51,7 @@ class TabbedPane:
         return self._tabs[item]
 
 
-class CourseOfferingTabbedPane(TabbedPane):
+class CourseTabbedPane(TabbedPane):
     """Factory for tabs pane on course offering detail page"""
     all_tabs = {
         "about": pgettext_lazy("course-tab", "About"),

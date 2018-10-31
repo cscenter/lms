@@ -66,7 +66,7 @@ __all__ = [
     'TimetableTeacherView', 'TimetableStudentView', 'CalendarStudentFullView',
     'CalendarStudentView', 'CalendarTeacherFullView', 'CalendarTeacherView',
     'CoursesListView', 'CourseTeacherListView', 'CourseStudentListView',
-    'CourseVideoListView', 'CourseDetailView', 'CourseUpdateView',
+    'CourseVideoListView', 'MetaCourseDetailView', 'MetaCourseUpdateView',
     'CourseClassDetailView', 'CourseClassCreateView', 'CourseClassUpdateView',
     'CourseClassAttachmentDeleteView', 'CourseClassDeleteView',
      'VenueListView', 'VenueDetailView', 'AssignmentTeacherListView',
@@ -403,7 +403,7 @@ class CourseVideoListView(ListView):
         return context
 
 
-class CourseDetailView(generic.DetailView):
+class MetaCourseDetailView(generic.DetailView):
     model = MetaCourse
     template_name = "learning/courses/detail.html"
     context_object_name = 'course'
@@ -423,8 +423,8 @@ class CourseDetailView(generic.DetailView):
         return context
 
 
-class CourseUpdateView(CuratorOnlyMixin, ProtectedFormMixin,
-                       generic.UpdateView):
+class MetaCourseUpdateView(CuratorOnlyMixin, ProtectedFormMixin,
+                           generic.UpdateView):
     model = MetaCourse
     template_name = "learning/simple_crispy_form.html"
     form_class = CourseForm

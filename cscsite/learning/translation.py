@@ -5,13 +5,13 @@ from .models import MetaCourse, Course
 
 
 @register(MetaCourse)
-class CourseTranslationOptions(TranslationOptions):
+class MetaCourseTranslationOptions(TranslationOptions):
     fields = ('name', 'description')
     fallback_values = '-- sorry, no translation provided --'
 
 
 @register(Course)
-class CourseOfferingTranslationOptions(TranslationOptions):
+class CourseTranslationOptions(TranslationOptions):
     fields = ('description',)
 
 

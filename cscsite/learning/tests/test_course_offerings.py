@@ -51,7 +51,7 @@ class SemesterListTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(7, len(cos))
 
 
-class CourseOfferingMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
+class CourseMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
     @pytest.mark.skip("Doesnt work if term is summer!")
     def test_list_center_site(self):
         """Center students can see club CO only from SPB"""
@@ -103,7 +103,7 @@ def test_news_get_city_timezone(settings):
 
 
 @pytest.mark.django_db
-def test_course_offering_news(settings, admin_client):
+def test_course_news(settings, admin_client):
     settings.LANGUAGE_CODE = 'ru'
     news = CourseNewsFactory(course_offering__city_id='spb',
                              created=datetime.datetime(TEST_YEAR, 1, 13,

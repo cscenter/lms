@@ -10,8 +10,8 @@ from .views import \
     CourseVideoListView, \
     CourseTeacherListView, \
     CourseStudentListView, \
-    CoursesListView, CourseDetailView, CourseUpdateView, \
-    CourseOfferingDetailView, \
+    MetaCourseDetailView, MetaCourseUpdateView, \
+    CourseDetailView, \
     CourseClassDetailView, \
     CourseClassCreateView, \
     CourseClassUpdateView, \
@@ -28,19 +28,19 @@ from learning.views.gradebook import GradeBookTeacherView, \
     GradeBookTeacherDispatchView, GradeBookTeacherCSVView, \
     AssignmentGradesImportByStepikIDView, \
     AssignmentGradesImportByYandexLoginView
-from learning.views.course_offering import CourseOfferingEditView, \
+from learning.views.course_offering import CourseEditView, \
     CourseNewsCreateView, CourseNewsUpdateView, \
     CourseNewsDeleteView, CourseNewsUnreadNotificationsView, \
-    CourseOfferingStudentsView
+    CourseStudentsView
 from learning.views.students import StudentAssignmentStudentDetailView, \
-    StudentAssignmentListView, CourseOfferingEnrollView, \
-    CourseOfferingUnenrollView
+    StudentAssignmentListView, CourseEnrollView, \
+    CourseUnenrollView
 
 course_patterns = url(
     r"^courses/", include([
-        url(r"^(?P<slug>[-\w]+)/$", CourseDetailView.as_view(),
+        url(r"^(?P<slug>[-\w]+)/$", MetaCourseDetailView.as_view(),
             name="course_detail"),
-        url(r"^(?P<slug>[-\w]+)/edit$", CourseUpdateView.as_view(),
+        url(r"^(?P<slug>[-\w]+)/edit$", MetaCourseUpdateView.as_view(),
             name="course_edit"),
     ]))
 
@@ -49,22 +49,22 @@ course_offering_patterns = url(
     r"^courses/(?P<course_slug>[-\w]+)/(?P<city_code>nsk|kzn|spb|)(?P<city_delimiter>/?)(?P<semester_slug>[-\w]+)/", include([
         # TODO: Ещё раз проверить, что во всех вьюхах учитывается city_code
         # Course offering
-        url(r"^$", CourseOfferingDetailView.as_view(),
+        url(r"^$", CourseDetailView.as_view(),
             name="course_offering_detail"),
         url(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$",
-            CourseOfferingDetailView.as_view(),
+            CourseDetailView.as_view(),
             name="course_offering_detail_with_active_tab"),
         url(r"^students/$",
-            CourseOfferingStudentsView.as_view(),
+            CourseStudentsView.as_view(),
             name="course_offering_students"),
-        url(r"^edit$", CourseOfferingEditView.as_view(),
+        url(r"^edit$", CourseEditView.as_view(),
             name="course_offering_update"),
         # Enroll/Unenroll
         url(r"^enroll$",
-            CourseOfferingEnrollView.as_view(),
+            CourseEnrollView.as_view(),
             name="course_offering_enroll"),
         url(r"^unenroll$",
-            CourseOfferingUnenrollView.as_view(),
+            CourseUnenrollView.as_view(),
             name="course_offering_unenroll"),
         # News
         url(r"^news/", include([

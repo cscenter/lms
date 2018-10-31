@@ -10,7 +10,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('first_name', 'last_name')
 
 
-class CourseOfferingNewsNotificationSerializer(serializers.ModelSerializer):
+class CourseNewsNotificationSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
     class Meta:
