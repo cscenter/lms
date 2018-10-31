@@ -14,12 +14,12 @@ from learning.utils import get_term_index
 
 class CourseTeacherQuerySet(query.QuerySet):
     def for_course(self, course_slug):
-        offerings_ids = (self.model.course_offering.field.related_model.objects
+        course_pks = (self.model.course.field.related_model.objects
                          .filter(meta_course__slug=course_slug)
                          # Note: can't reset default ordering in a Subquery
                          .order_by("pk")
                          .values("pk"))
-        return self.filter(course_offering__in=Subquery(offerings_ids))
+        return self.filter(course__in=Subquery(course_pks))
 
 
 CourseTeacherManager = models.Manager.from_queryset(CourseTeacherQuerySet)

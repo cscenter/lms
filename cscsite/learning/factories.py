@@ -84,7 +84,7 @@ class CourseFactory(factory.DjangoModelFactory):
             return
         if extracted:
             for teacher in extracted:
-                CourseTeacher(course_offering=self,
+                CourseTeacher(course=self,
                               teacher=teacher,
                               notify_by_default=True).save()
 
@@ -94,7 +94,7 @@ class CourseTeacherFactory(factory.DjangoModelFactory):
         model = CourseTeacher
 
     teacher = factory.SubFactory(UserFactory)
-    course_offering = factory.SubFactory(CourseFactory)
+    course = factory.SubFactory(CourseFactory)
     roles = CourseTeacher.roles.lecturer
 
 

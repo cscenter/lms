@@ -53,13 +53,13 @@ def get_project_name(course_offering):
     return f"{city_code}/{course_name}_{course_offering.semester.year}"
 
 
-def init_project_for_course(course_offering, skip_users=False):
+def init_project_for_course(course, skip_users=False):
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,
                           settings.GERRIT_CLIENT_PASSWORD))
-    project_name = get_project_name(course_offering)
+    project_name = get_project_name(course)
     teachers = (CourseTeacher.objects
-                .filter(course_offering=course_offering,
+                .filter(course=course,
                         roles=CourseTeacher.roles.reviewer)
                 .select_related("teacher"))
     # Creates separated self-owned group for project reviewers
@@ -92,7 +92,7 @@ def init_project_for_course(course_offering, skip_users=False):
                            f"{reviewers_group_uuid}. {res.text}")
     project_description = textwrap.dedent(f"""\
             Страница курса: \
-            https://compscicenter.ru{course_offering.get_absolute_url()}
+            https://compscicenter.ru{course.get_absolute_url()}
         """).strip()
     # FIXME: how to set `Create a new change for every commit not in the target branch` to False? Mb for all projects
     project_res = client.create_project(project_name, {
@@ -139,11 +139,11 @@ def init_project_for_course(course_offering, skip_users=False):
 
     # For each enrolled student create separated branch
     enrollments = (Enrollment.active
-                   .filter(course_offering_id=course_offering.pk)
+                   .filter(course_offering_id=course.pk)
                    .select_related("student"))
     for e in enrollments:
         add_student_to_project(client, e.student, project_name,
-                               project_students_group_uuid, course_offering)
+                               project_students_group_uuid, course)
     # TODO: What to do with notifications?
 
 

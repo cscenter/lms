@@ -473,8 +473,10 @@ class Course(TimeStampedModel):
 
 class CourseTeacher(models.Model):
     # XXX: limit choices on admin form level due to bug https://code.djangoproject.com/ticket/11707
-    teacher = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    course_offering = models.ForeignKey(
+    teacher = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE)
+    course = models.ForeignKey(
         Course,
         related_name="course_teachers",
         on_delete=models.CASCADE)
@@ -488,15 +490,15 @@ class CourseTeacher(models.Model):
         default=False)
 
     class Meta:
-        verbose_name = _("Course Offering teacher")
-        verbose_name_plural = _("Course Offering teachers")
-        unique_together = [['teacher', 'course_offering']]
+        verbose_name = _("Course Teacher")
+        verbose_name_plural = _("Course Teachers")
+        unique_together = [['teacher', 'course']]
 
     objects = CourseTeacherManager()
 
     def __str__(self):
         return "{0} [{1}]".format(smart_text(self.teacher),
-                                  smart_text(self.course_offering_id))
+                                  smart_text(self.course_id))
 
     @property
     def is_lecturer(self):
@@ -597,7 +599,7 @@ class CourseNews(TimeStampedModel):
             notifications.append(
                 CourseNewsNotification(user_id=e.student_id,
                                        course_offering_news_id=self.pk))
-        teachers = CourseTeacher.objects.filter(course_offering=co_id)
+        teachers = CourseTeacher.objects.filter(course_id=co_id)
         for co_t in teachers.iterator():
             notifications.append(
                 CourseNewsNotification(user_id=co_t.teacher_id,
