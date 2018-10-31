@@ -525,9 +525,9 @@ class CourseTeacher(models.Model):
 
 
 class CourseNews(TimeStampedModel):
-    course_offering = models.ForeignKey(
+    course = models.ForeignKey(
         Course,
-        verbose_name=_("Course offering"),
+        verbose_name=_("Course"),
         on_delete=models.PROTECT)
     title = models.CharField(_("CourseNews|title"), max_length=140)
     author = models.ForeignKey(
@@ -545,7 +545,7 @@ class CourseNews(TimeStampedModel):
 
     def __str__(self):
         return "{0} ({1})".format(smart_text(self.title),
-                                  smart_text(self.course_offering))
+                                  smart_text(self.course))
 
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
@@ -557,28 +557,28 @@ class CourseNews(TimeStampedModel):
 
     @property
     def city_aware_field_name(self):
-        return self.__class__.course_offering.field.name
+        return self.__class__.course.field.name
 
     def get_update_url(self):
         return city_aware_reverse('course_offering_news_update', kwargs={
-            "course_slug": self.course_offering.meta_course.slug,
-            "semester_slug": self.course_offering.semester.slug,
+            "course_slug": self.course.meta_course.slug,
+            "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
         })
 
     def get_stats_url(self):
         return city_aware_reverse('course_offering_news_unread', kwargs={
-            "course_slug": self.course_offering.meta_course.slug,
-            "semester_slug": self.course_offering.semester.slug,
+            "course_slug": self.course.meta_course.slug,
+            "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
             "news_pk": self.pk
         })
 
     def get_delete_url(self):
         return city_aware_reverse('course_offering_news_delete', kwargs={
-            "course_slug": self.course_offering.meta_course.slug,
-            "semester_slug": self.course_offering.semester.slug,
+            "course_slug": self.course.meta_course.slug,
+            "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
         })
@@ -591,7 +591,7 @@ class CourseNews(TimeStampedModel):
     def _create_notifications(self, created):
         if not created:
             return
-        co_id = self.course_offering_id
+        co_id = self.course_id
         notifications = []
         active_enrollments = Enrollment.active.filter(course_offering_id=co_id)
         # Replace cached queryset with .bulk_create() + .iterator()

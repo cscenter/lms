@@ -277,7 +277,7 @@ def test_assignments(client):
     assert AssignmentNotification.objects.count() == active_students
     CourseNewsNotification.objects.all().delete()
     assert CourseNewsNotification.objects.count() == 0
-    CourseNewsFactory.create(course_offering=co)
+    CourseNewsFactory.create(course=co)
     assert CourseNewsNotification.objects.count() == active_students
 
 

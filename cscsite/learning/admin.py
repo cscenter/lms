@@ -134,8 +134,8 @@ class CourseClassAdmin(admin.ModelAdmin):
 
 class CourseNewsAdmin(admin.ModelAdmin):
     date_hierarchy = 'created'
-    list_display = ['title', 'course_offering', 'created_local']
-    raw_id_fields = ["course_offering", "author"]
+    list_display = ['title', 'course', 'created_local']
+    raw_id_fields = ["course", "author"]
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }

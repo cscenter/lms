@@ -16,7 +16,7 @@ from learning.models import MetaCourse, Semester, Course, \
     CourseNewsNotification, NonCourseEvent, CourseTeacher, \
     AreaOfStudy
 from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
-from users.factories import UserFactory, StudentCenterFactory
+from users.factories import UserFactory, StudentCenterFactory, StudentFactory
 from .utils import get_current_term_pair, get_term_by_index
 
 
@@ -102,9 +102,9 @@ class CourseNewsFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseNews
 
-    course_offering = factory.SubFactory(CourseFactory)
-    title = factory.Sequence(lambda n: "Imporant news about testing %03d" % n)
-    author = factory.SubFactory(UserFactory, groups=['Teacher [CENTER]'])
+    course = factory.SubFactory(CourseFactory)
+    title = factory.Sequence(lambda n: "Important news about testing %03d" % n)
+    author = factory.SubFactory(StudentFactory)
     text = factory.Sequence(lambda n: ("Suddenly it turned out that testing "
                                        "(%03d) can be useful!" % n))
 

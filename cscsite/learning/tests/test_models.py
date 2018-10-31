@@ -24,7 +24,7 @@ from learning.factories import MetaCourseFactory, CourseFactory, \
     CourseNewsNotificationFactory, AssignmentAttachmentFactory, \
     SemesterFactory
 from learning.models import Semester, Course, CourseClass, Assignment, \
-    StudentAssignment
+    StudentAssignment, CourseNews
 from learning.settings import SEMESTER_TYPES
 from learning.utils import get_term_start, next_term_starts_at
 from users.factories import UserFactory, StudentCenterFactory, \
@@ -42,9 +42,9 @@ class CommonTests(TestCase):
         co = CourseFactory.create()
         self.assertIn(smart_text(co.meta_course), smart_text(co))
         self.assertIn(smart_text(co.semester), smart_text(co))
-        con = CourseNewsFactory.create()
+        con: CourseNews = CourseNewsFactory.create()
         self.assertIn(smart_text(con.title), smart_text(con))
-        self.assertIn(smart_text(con.course_offering), smart_text(con))
+        self.assertIn(smart_text(con.course), smart_text(con))
         cc = CourseClassFactory.create()
         self.assertIn(cc.name, smart_text(cc))
         cca = (CourseClassAttachmentFactory

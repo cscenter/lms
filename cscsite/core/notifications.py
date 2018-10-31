@@ -48,7 +48,7 @@ class UnreadNotificationsCache(object):
 
     @cached_property
     def courseoffering_news(self):
-        return {obj.course_offering_news.course_offering: obj
+        return {obj.course_offering_news.course: obj
                 for obj in self.coursenews_qs.all()}
 
 
@@ -74,7 +74,7 @@ class UnreadNotificationsCacheMiddleware(object):
                  .coursenewsnotification_set
                  .filter(is_unread=True)
                  .select_related('course_offering_news',
-                                 'course_offering_news__course_offering')))
+                                 'course_offering_news__course')))
             _thread_locals.unread_notifications_cache = cache
             setattr(request, 'unread_notifications_cache', cache)
 

@@ -113,14 +113,14 @@ class CourseNewsForm(forms.ModelForm):
         widget=UbereditorWidget)
 
     def __init__(self, *args, **kwargs):
-        course = kwargs.pop('course_offering', None)
+        course = kwargs.pop('course', None)
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div('title', 'text'),
             CANCEL_SAVE_PAIR)
         super().__init__(*args, **kwargs)
         if course:
-            self.instance.course_offering = course
+            self.instance.course = course
 
     class Meta:
         model = CourseNews

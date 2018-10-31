@@ -86,7 +86,7 @@ class CourseDetailView(DetailView):
         unread_news = None
         if request_user_enrollment or is_actual_teacher:
             unread_news = (CourseNewsNotification.unread
-                           .filter(course_offering_news__course_offering=co,
+                           .filter(course_offering_news__course=co,
                                    user=request_user)
                            .count())
         context = {
@@ -207,10 +207,10 @@ class CourseNewsCreateView(TeacherOnlyMixin, CreateView):
         form_class = self.get_form_class()
         co = get_co_from_query_params(self.kwargs, self.request.city_code)
         if not co:
-            raise Http404('Course offering not found')
+            raise Http404('Course not found')
         if not self.is_form_allowed(self.request.user, co):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
-        kwargs["course_offering"] = co
+        kwargs["course"] = co
         return form_class(**kwargs)
 
     def form_valid(self, form):
@@ -227,10 +227,10 @@ class CourseNewsCreateView(TeacherOnlyMixin, CreateView):
         return redirect(self.get_success_url())
 
     def get_success_url(self):
-        return self.object.course_offering.get_url_for_tab("news")
+        return self.object.course.get_url_for_tab("news")
 
-    def is_form_allowed(self, user, course_offering):
-        return user.is_curator or user in course_offering.teachers.all()
+    def is_form_allowed(self, user, course: Course):
+        return user.is_curator or user in course.teachers.all()
 
 
 class CourseNewsUpdateView(TeacherOnlyMixin, ProtectedFormMixin,
@@ -240,10 +240,10 @@ class CourseNewsUpdateView(TeacherOnlyMixin, ProtectedFormMixin,
     form_class = CourseNewsForm
 
     def get_success_url(self):
-        return self.object.course_offering.get_url_for_tab("news")
+        return self.object.course.get_url_for_tab("news")
 
-    def is_form_allowed(self, user, obj):
-        return user.is_curator or user in obj.course_offering.teachers.all()
+    def is_form_allowed(self, user, obj: CourseNews):
+        return user.is_curator or user in obj.course.teachers.all()
 
 
 class CourseNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
@@ -256,10 +256,10 @@ class CourseNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
         Since we don't check was it the last deleted news or not - redirect to
         default active tab.
         """
-        return self.object.course_offering.get_absolute_url()
+        return self.object.course.get_absolute_url()
 
-    def is_form_allowed(self, user, obj):
-        return user.is_curator or user in obj.course_offering.teachers.all()
+    def is_form_allowed(self, user, obj: CourseNews):
+        return user.is_curator or user in obj.course.teachers.all()
 
 
 class CourseNewsUnreadNotificationsView(ListAPIView):

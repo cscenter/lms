@@ -13,7 +13,7 @@ class CourseNewsNotificationUpdate(generic.View):
         if not request.user.is_authenticated or not course_offering:
             raise PermissionDenied
         updated = (CourseNewsNotification.unread
-                   .filter(course_offering_news__course_offering=co,
+                   .filter(course_offering_news__course=co,
                            user_id=self.request.user.pk)
                    .update(is_unread=False))
         return JsonResponse({"updated": bool(updated)})

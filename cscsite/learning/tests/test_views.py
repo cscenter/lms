@@ -287,9 +287,8 @@ class CourseNewsCreateTests(MyUtilitiesMixin, TestCase):
         self.teacher_other = TeacherCenterFactory()
         self.co = CourseFactory.create(teachers=[self.teacher])
         self.url = self.co.get_create_news_url()
-        self.n_dict = factory.build(dict,
-                                    FACTORY_CLASS=CourseNewsFactory)
-        self.n_dict.update({'course_offering': self.co})
+        self.n_dict = factory.build(dict, FACTORY_CLASS=CourseNewsFactory)
+        self.n_dict.update({'course': self.co})
 
     def test_security(self):
         self.assertPOSTLoginRedirect(self.url, self.n_dict)
@@ -316,7 +315,7 @@ class CourseNewsUpdateTests(MyUtilitiesMixin, TestCase):
         self.teacher = TeacherCenterFactory()
         self.teacher_other = TeacherCenterFactory()
         self.co = CourseFactory.create(teachers=[self.teacher])
-        self.con = CourseNewsFactory.create(course_offering=self.co,
+        self.con = CourseNewsFactory.create(course=self.co,
                                             author=self.teacher)
         self.url = self.con.get_update_url()
         self.con_dict = model_to_dict(self.con)
@@ -344,7 +343,7 @@ class CourseNewsDeleteTests(MyUtilitiesMixin, TestCase):
         self.teacher = TeacherCenterFactory()
         self.teacher_other = TeacherCenterFactory()
         self.co = CourseFactory.create(teachers=[self.teacher])
-        self.con = CourseNewsFactory.create(course_offering=self.co,
+        self.con = CourseNewsFactory.create(course=self.co,
                                             author=self.teacher)
         self.url = self.con.get_delete_url()
 

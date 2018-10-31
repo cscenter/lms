@@ -15,7 +15,7 @@ from django.utils.encoding import smart_bytes
 from learning.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory, CourseNewsFactory, AssignmentFactory, \
     CourseTeacherFactory, CourseClassFactory, EnrollmentFactory
-from learning.models import Semester, Enrollment
+from learning.models import Semester, Enrollment, CourseNews
 from learning.settings import PARTICIPANT_GROUPS
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import TeacherCenterFactory, StudentCenterFactory
@@ -94,10 +94,10 @@ NSK_OFFSET = get_timezone_gmt_offset(settings.TIME_ZONES['nsk'])
 
 @pytest.mark.django_db
 def test_news_get_city_timezone(settings):
-    news = CourseNewsFactory(course_offering__city_id='nsk')
+    news = CourseNewsFactory(course__city_id='nsk')
     assert news.get_city_timezone() == settings.TIME_ZONES['nsk']
-    news.course_offering.city_id = 'spb'
-    news.course_offering.save()
+    news.course.city_id = 'spb'
+    news.course.save()
     news.refresh_from_db()
     assert news.get_city_timezone() == settings.TIME_ZONES['spb']
 
@@ -105,11 +105,11 @@ def test_news_get_city_timezone(settings):
 @pytest.mark.django_db
 def test_course_news(settings, admin_client):
     settings.LANGUAGE_CODE = 'ru'
-    news = CourseNewsFactory(course_offering__city_id='spb',
-                             created=datetime.datetime(TEST_YEAR, 1, 13,
-                                                               20, 0, 0, 0,
-                                                               tzinfo=pytz.UTC))
-    co = news.course_offering
+    news = CourseNewsFactory(
+        course__city_id='spb',
+        created=datetime.datetime(TEST_YEAR, 1, 13, 20, 0, 0, 0,
+                                  tzinfo=pytz.UTC))
+    co = news.course
     date_in_utc = news.created
     localized = date_in_utc.astimezone(settings.TIME_ZONES['spb'])
     assert localized.utcoffset() == datetime.timedelta(
@@ -281,13 +281,13 @@ def test_update_composite_fields(curator, client, mocker):
 def test_course_offering_news_tab_permissions(client):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
-    news = CourseNewsFactory(course_offering__city_id='spb',
-                             course_offering__semester=current_semester)
-    co = news.course_offering
-    news_prev = CourseNewsFactory(course_offering__city_id='spb',
-                                  course_offering__meta_course=co.meta_course,
-                                  course_offering__semester=prev_term)
-    co_prev = news_prev.course_offering
+    news: CourseNews = CourseNewsFactory(course__city_id='spb',
+                                         course__semester=current_semester)
+    co = news.course
+    news_prev: CourseNews = CourseNewsFactory(course__city_id='spb',
+                                              course__meta_course=co.meta_course,
+                                              course__semester=prev_term)
+    co_prev = news_prev.course
     response = client.get(co.get_absolute_url())
     assert "news" not in response.context['tabs']
     # By default student can't see the news until enroll in the course

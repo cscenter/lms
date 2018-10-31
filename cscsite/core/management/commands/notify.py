@@ -68,7 +68,7 @@ def get_base_url(notification):
     if isinstance(notification, AssignmentNotification):
         co = notification.student_assignment.assignment.course_offering
     elif isinstance(notification, CourseNewsNotification):
-        co = notification.course_offering_news.course_offering
+        co = notification.course_offering_news.course
     else:
         raise NotImplementedError()
     user_groups = {g.pk for g in receiver.groups.all()}
@@ -173,17 +173,17 @@ class Command(BaseCommand):
                .prefetch_related(
                    'user__groups',
                    'course_offering_news',
-                   'course_offering_news__course_offering',
-                   'course_offering_news__course_offering__meta_course',
-                   'course_offering_news__course_offering__semester'))
+                   'course_offering_news__course',
+                   'course_offering_news__course__meta_course',
+                   'course_offering_news__course__semester'))
 
         for notification in notifications_course_news:
             base_url = get_base_url(notification)
-            course_offering = notification.course_offering_news.course_offering
+            course = notification.course_offering_news.course
             name = 'new_course_news'
             context = {
-                'course_link': base_url + course_offering.get_absolute_url(),
-                'course_name': smart_text(course_offering.meta_course),
+                'course_link': base_url + course.get_absolute_url(),
+                'course_name': smart_text(course.meta_course),
                 'course_news_name': notification.course_offering_news.title,
                 'course_news_text': notification.course_offering_news.text,
             }
