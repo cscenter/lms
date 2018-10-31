@@ -27,6 +27,9 @@ MIDDLEWARE = [
 INSTALLED_APPS += [
     'captcha',
     'registration',
+    # FIXME: Workaround to fix migrations. Squash them, then remove 2 apps below
+    'post_office',
+    'surveys.apps.SurveysConfig',
 ]
 
 CACHES = {
