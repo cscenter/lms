@@ -130,10 +130,10 @@ class CourseClassFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseClass
 
-    course_offering = factory.SubFactory(CourseFactory)
+    course = factory.SubFactory(CourseFactory)
     venue = factory.SubFactory(
         VenueFactory,
-        city=factory.SelfAttribute('..course_offering.city'))
+        city=factory.SelfAttribute('..course.city'))
     type = 'lecture'
     name = factory.Sequence(lambda n: "Test class %03d" % n)
     description = factory.Sequence(

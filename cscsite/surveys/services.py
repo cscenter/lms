@@ -9,33 +9,33 @@ OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
 
 
 def course_form_builder(survey: CourseSurvey):
-    co = survey.course
+    course = survey.course
     if survey.type in [CourseSurvey.MIDDLE]:
         pass
-    form = Form(title=f'Опрос по курсу «{co}»',
+    form = Form(title=f'Опрос по курсу «{course}»',
                 status=STATUS_DRAFT,
                 slug=survey.type)
     form.save()
 
     templates = [FormTemplates.COMMON]
     seminar_type = CourseClass.TYPES.seminar
-    has_seminars = co.courseclass_set.filter(type=seminar_type).exists()
-    has_assignments = co.assignment_set.exists()
+    has_seminars = course.courseclass_set.filter(type=seminar_type).exists()
+    has_assignments = course.assignment_set.exists()
     if has_seminars:
         templates.append(FormTemplates.SEMINAR)
     if has_assignments:
         templates.append(FormTemplates.HOMEWORK)
     if has_seminars and has_assignments:
         templates.append(FormTemplates.SEMINAR_HOMEWORK)
-    if co.has_classes_with_video:
+    if course.has_classes_with_video:
         if has_seminars:
             templates.append(FormTemplates.VIDEO_SEMINAR)
         else:
             templates.append(FormTemplates.VIDEO_NO_SEMINAR)
-    if co.online_course_url:
+    if course.online_course_url:
         templates.append(FormTemplates.ONLINE_COURSE)
 
-    today_local = now_local(co.get_city())
+    today_local = now_local(course.get_city())
     form_templates = Form.objects.filter(status=STATUS_TEMPLATE,
                                          slug__in=templates)
     for form_template in form_templates:
@@ -43,7 +43,7 @@ def course_form_builder(survey: CourseSurvey):
         for field in fields:
             # Crunch: For correspondence course hide questions about
             # offline lectures
-            if co.is_correspondence and field.name in OFFLINE_COURSES_Q:
+            if course.is_correspondence and field.name in OFFLINE_COURSES_Q:
                 continue
             source_field_choices = list(field.choices.all())
             # Mutate original field
@@ -68,7 +68,7 @@ def course_form_builder(survey: CourseSurvey):
                         for rule in l.get("rules", []):
                             if rule.get('source') == "CourseClass":
                                 filters = {
-                                    "course_offering": co,
+                                    "course": course,
                                     "date__lte": today_local.date()
                                 }
                                 if rule["value"] == "lecture":

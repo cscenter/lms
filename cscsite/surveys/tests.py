@@ -205,17 +205,17 @@ def test_conditional_logic_prefill_class(mocker):
     co = CourseFactory.create(city_id='spb')
     past = today_fixed - datetime.timedelta(days=3)
     future = today_fixed + datetime.timedelta(days=3)
-    class1 = CourseClassFactory(course_offering=co, date=past)
+    class1 = CourseClassFactory(course=co, date=past)
     # Don't forget to set local time for `ends_at` (+3)
-    class2 = CourseClassFactory(course_offering=co, date=today_fixed,
+    class2 = CourseClassFactory(course=co, date=today_fixed,
                                 ends_at=datetime.time(hour=12, minute=0))
-    seminar1 = CourseClassFactory(course_offering=co, date=today_fixed,
+    seminar1 = CourseClassFactory(course=co, date=today_fixed,
                                   ends_at=datetime.time(hour=12, minute=0),
                                   type='seminar')
     # This one ends later than `current` moment
-    class3 = CourseClassFactory(course_offering=co, date=today_fixed,
+    class3 = CourseClassFactory(course=co, date=today_fixed,
                                 ends_at=datetime.time(hour=21, minute=0))
-    class4 = CourseClassFactory(course_offering=co, date=future)
+    class4 = CourseClassFactory(course=co, date=future)
     survey = CourseSurveyFactory(course=co, form_id=None)
     assert hasattr(survey, "form")
     assert survey.form.fields.count() > 0

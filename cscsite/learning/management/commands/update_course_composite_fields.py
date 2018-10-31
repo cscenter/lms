@@ -14,20 +14,20 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for co in Course.objects.only('pk', 'materials_slides',
-                                              'materials_video',
-                                              'materials_files').all():
+                                      'materials_video',
+                                      'materials_files').all():
             has_class_slides = False
             has_class_materials_files = False
             has_class_video = False
             for course_class in co.courseclass_set.only('slides',
                                                         'video_url',
-                                                        'course_offering_id').all():
+                                                        'course_id').all():
                 if course_class.slides:
                     has_class_slides = True
                 if course_class.video_url.strip() != "":
                     has_class_video = True
             if (CourseClassAttachment.objects
-                    .filter(course_class__course_offering_id=co.pk).exists()):
+                    .filter(course_class__course_id=co.pk).exists()):
                 has_class_materials_files = True
             if (co.materials_slides != has_class_slides or
                     co.materials_video != has_class_video or

@@ -211,8 +211,8 @@ class CourseClassForm(forms.ModelForm):
                                     attrs={'autocomplete': 'off'}))
 
     def __init__(self, *args, **kwargs):
-        course_offering = kwargs.pop('course_offering', None)
-        assert course_offering is not None
+        course = kwargs.pop('course', None)
+        assert course is not None
         if "instance" in kwargs:
             remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
                 "".join("<li>{}</li>".format(
@@ -256,8 +256,8 @@ class CourseClassForm(forms.ModelForm):
         )
         super().__init__(*args, **kwargs)
         self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
-            city_id=course_offering.city_id)
-        self.instance.course_offering = course_offering
+            city_id=course.city_id)
+        self.instance.course = course
 
     class Meta:
         model = CourseClass
@@ -267,11 +267,11 @@ class CourseClassForm(forms.ModelForm):
 
     def clean_date(self):
         date = self.cleaned_data['date']
-        # this should be checked because 'course_offering' can be invalid
-        if 'course_offering' in self.cleaned_data:
-            course_offering = self.cleaned_data['course_offering']
-            semester_start = course_offering.semester.starts_at.date()
-            semester_end = course_offering.semester.ends_at.date()
+        # Validate this since 'course' could be invalid
+        if 'course' in self.cleaned_data:
+            course = self.cleaned_data['course']
+            semester_start = course.semester.starts_at.date()
+            semester_end = course.semester.ends_at.date()
             assert semester_start <= semester_end
             if not semester_start <= date <= semester_end:
                 raise ValidationError(
