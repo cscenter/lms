@@ -41,7 +41,7 @@ course_patterns = url(
         url(r"^(?P<slug>[-\w]+)/$", MetaCourseDetailView.as_view(),
             name="course_detail"),
         url(r"^(?P<slug>[-\w]+)/edit$", MetaCourseUpdateView.as_view(),
-            name="course_edit"),
+            name="meta_course_edit"),
     ]))
 
 # TODO: dynamically generate city_code regex part
