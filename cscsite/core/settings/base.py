@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'slides',
     'dbbackup',
 
-    'users',
+    'users.apps.UsersConfig',
     'core',
     'htmlpages',
     'learning',

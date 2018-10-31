@@ -10,6 +10,7 @@ from django.contrib import admin
 from django.contrib.admin import widgets
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils import timezone
 from django.urls import reverse, NoReverseMatch
@@ -21,8 +22,9 @@ from modeltranslation.admin import TranslationAdmin
 
 from .models import City, Faq, FaqCategory, University
 
-# Remove groups app from django admin
+# Hide applications in the admin
 admin.site.unregister(Group)
+admin.site.unregister(Site)
 
 
 def get_admin_url(instance_or_qs):
