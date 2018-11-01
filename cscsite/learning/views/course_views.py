@@ -29,7 +29,8 @@ from learning.widgets import CourseTabbedPane
 
 __all__ = ['CourseDetailView', 'CourseEditView',
            'CourseNewsCreateView', 'CourseNewsUpdateView',
-           'CourseNewsDeleteView']
+           'CourseNewsDeleteView', 'CourseNewsUnreadNotificationsView',
+           'CourseStudentsView']
 
 
 logger = logging.getLogger(__name__)
