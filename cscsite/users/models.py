@@ -588,7 +588,7 @@ class User(LearningPermissionsMixin, AbstractUser):
             user_groups.add(self.group.STUDENT_CLUB)
         return user_groups
 
-    def get_enrollment(self, course_id) -> Optional[Enrollment]:
+    def get_enrollment(self, course_id: int) -> Optional[Enrollment]:
         """
         Query enrollment from db on first call and cache the result. Cache
         won't be refreshed if enrollment was deleted or changed after call.
@@ -801,5 +801,5 @@ class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
     def __str__(self):
         return 'NotAuthenticatedUser'
 
-    def get_enrollment(self, course_offering_id: int) -> Optional[Enrollment]:
+    def get_enrollment(self, course_id: int) -> Optional[Enrollment]:
         return None

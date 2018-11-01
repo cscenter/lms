@@ -31,7 +31,7 @@ def test_enrollment_for_club_students(client):
     assert co.enrollment_is_open
     student_center = StudentCenterFactory(city_id='spb')
     student_club = StudentClubFactory(city_id='spb')
-    form = {'course_offering_pk': co.pk}
+    form = {'course_pk': co.pk}
     client.login(student_center)
     response = client.post(co.get_enroll_url(), form)
     assert response.status_code == 302
@@ -49,8 +49,8 @@ def test_unenrollment(client, assert_redirect):
     client.login(s)
     current_semester = SemesterFactory.create_current()
     co = CourseFactory.create(semester=current_semester, city='spb')
-    as_ = AssignmentFactory.create_batch(3, course_offering=co)
-    form = {'course_offering_pk': co.pk}
+    as_ = AssignmentFactory.create_batch(3, course=co)
+    form = {'course_pk': co.pk}
     # Enrollment already closed
     today = timezone.now()
     current_semester.enrollment_end_at = (today - datetime.timedelta(days=1)).date()
@@ -76,7 +76,7 @@ def test_unenrollment(client, assert_redirect):
     assert enrollment.is_deleted
     # Make sure student progress won't been deleted
     a_ss = (StudentAssignment.objects.filter(student=s,
-                                             assignment__course_offering=co))
+                                             assignment__course=co))
     assert len(a_ss) == 3
     # On re-enroll use old record
     client.post(co.get_enroll_url(), form)
@@ -95,7 +95,7 @@ def test_unenrollment(client, assert_redirect):
                     reverse('course_list_student'))
     assert set(a_ss) == set(StudentAssignment.objects
                                   .filter(student=s,
-                                          assignment__course_offering=co))
+                                          assignment__course=co))
     # Check courses on student courses page are empty
     response = client.get(reverse("course_list_student"))
     assert len(response.context['ongoing_rest']) == 1
@@ -119,7 +119,7 @@ def test_enrollment_capacity(client):
     co.save()
     response = client.get(co_url)
     assert smart_bytes(_("Places available")) in response.content
-    form = {'course_offering_pk': co.pk}
+    form = {'course_pk': co.pk}
     client.post(co.get_enroll_url(), form)
     assert 1 == Enrollment.active.filter(student=s, course=co).count()
     # Capacity reached, show to second student nothing
@@ -149,11 +149,11 @@ def test_enrollment(client):
     current_semester.save()
     co = CourseFactory.create(semester=current_semester, city_id='spb')
     url = co.get_enroll_url()
-    form = {'course_offering_pk': co.pk}
+    form = {'course_pk': co.pk}
     response = client.post(url, form)
     assert response.status_code == 302
     assert 1 == Enrollment.active.filter(student=student1, course=co).count()
-    as_ = AssignmentFactory.create_batch(3, course_offering=co)
+    as_ = AssignmentFactory.create_batch(3, course=co)
     assert set((student1.pk, a.pk) for a in as_) == set(StudentAssignment.objects
                           .filter(student=student1)
                           .values_list('student', 'assignment'))
@@ -167,7 +167,7 @@ def test_enrollment(client):
     # Try to enroll to old CO
     old_semester = SemesterFactory.create(year=2010)
     old_co = CourseFactory.create(semester=old_semester)
-    form = {'course_offering_pk': old_co.pk}
+    form = {'course_pk': old_co.pk}
     url = old_co.get_enroll_url()
     assert client.post(url, form).status_code == 403
     # If course offering has limited capacity and we reach it - reject request
@@ -175,7 +175,7 @@ def test_enrollment(client):
     co.capacity = 1
     co.save()
     client.login(student2)
-    form = {'course_offering_pk': co.pk}
+    form = {'course_pk': co.pk}
     response = client.post(url, form)
     assert response.status_code == 302
     # Add 1 available place
@@ -195,7 +195,7 @@ def test_enrollment_reason(client):
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
     co = CourseFactory.create(semester=current_semester, city_id='spb')
-    form = {'course_offering_pk': co.pk, 'reason': 'foo'}
+    form = {'course_pk': co.pk, 'reason': 'foo'}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
     assert Enrollment.objects.first().reason_entry == 'foo'
@@ -219,7 +219,7 @@ def test_enrollment_leave_reason(client):
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
     co = CourseFactory.create(semester=current_semester, city_id='spb')
-    form = {'course_offering_pk': co.pk}
+    form = {'course_pk': co.pk}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
     assert Enrollment.objects.first().reason_entry == ''
@@ -256,11 +256,11 @@ def test_assignments(client):
         enrollment = EnrollmentFactory.create(student=student, course=co)
     assert Enrollment.objects.count() == 3
     assert StudentAssignment.objects.count() == 0
-    assignment = AssignmentFactory.create(course_offering=co)
+    assignment = AssignmentFactory.create(course=co)
     assert StudentAssignment.objects.count() == 3
     enrollment.is_deleted = True
     enrollment.save()
-    assignment = AssignmentFactory.create(course_offering=co)
+    assignment = AssignmentFactory.create(course=co)
     assert StudentAssignment.objects.count() == 5
     assert StudentAssignment.objects.filter(student=enrollment.student,
                                             assignment=assignment).count() == 0
@@ -281,18 +281,18 @@ def test_assignments(client):
 def test_reenrollment(client):
     """Create assignments for student if they left the course and come back"""
     s = StudentCenterFactory(city_id='spb')
-    assignment = AssignmentFactory(course_offering__is_open=True,
-                                   course_offering__city_id='spb')
-    co = assignment.course_offering
+    assignment = AssignmentFactory(course__is_open=True,
+                                   course__city_id='spb')
+    co = assignment.course
     e = EnrollmentFactory(student=s, course=co)
     assert not e.is_deleted
     assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
     e.is_deleted = True
     e.save()
-    assignment2 = AssignmentFactory(course_offering=co)
+    assignment2 = AssignmentFactory(course=co)
     assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
     client.login(s)
-    form = {'course_offering_pk': co.pk}
+    form = {'course_pk': co.pk}
     response = client.post(co.get_enroll_url(), form, follow=True)
     assert response.status_code == 200
     e.refresh_from_db()
@@ -307,7 +307,7 @@ def test_enrollment_in_other_city(client):
     assert co_spb.enrollment_is_open
     student_spb = StudentCenterFactory(city_id='spb')
     student_nsk = StudentCenterFactory(city_id='nsk')
-    form = {'course_offering_pk': co_spb.pk}
+    form = {'course_pk': co_spb.pk}
     client.login(student_spb)
     response = client.post(co_spb.get_enroll_url(), form)
     assert response.status_code == 302
@@ -348,7 +348,7 @@ def test_correspondence_courses(client):
     assert co_spb.enrollment_is_open
     student_spb = StudentCenterFactory(city_id='spb')
     student_nsk = StudentCenterFactory(city_id='nsk')
-    form = {'course_offering_pk': co_spb.pk}
+    form = {'course_pk': co_spb.pk}
     client.login(student_spb)
     response = client.post(co_spb.get_enroll_url(), form)
     assert response.status_code == 302

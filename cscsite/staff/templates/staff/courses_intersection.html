@@ -32,9 +32,9 @@
                         <form action="">
                             <div class="col-xs-10">
                                 <select class="form-control" name="course_offerings[]" multiple size="2" style="display: none;">
-                                    {% for co in course_offerings %}
-                                        <option value="{{ co.pk }}"
-                                                {% if co.pk in query.course_offerings %}selected="selected"{% endif %}>{{ co.meta_course.name }}</option>
+                                    {% for course in course_offerings %}
+                                        <option value="{{ course.pk }}"
+                                                {% if course.pk in query.course_offerings %}selected="selected"{% endif %}>{{ course.meta_course.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

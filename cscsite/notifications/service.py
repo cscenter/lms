@@ -100,7 +100,7 @@ class NotificationService:
         notification = kwargs.pop("notification")
         receiver = notification.user
         if isinstance(notification, AssignmentNotification):
-            co = notification.student_assignment.assignment.course_offering
+            co = notification.student_assignment.assignment.course
         elif isinstance(notification, CourseNewsNotification):
             co = notification.course_offering_news.course
         else:

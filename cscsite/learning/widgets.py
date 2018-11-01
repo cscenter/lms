@@ -62,19 +62,19 @@ class CourseTabbedPane(TabbedPane):
         "news": pgettext_lazy("course-tab", "News"),
     }
 
-    def __init__(self, course_offering: Course):
+    def __init__(self, course: Course):
         super().__init__()
-        self._course_offering = course_offering
+        self._course = course
 
     def make_tabs(self, request_user, tab_to_show, redirect_to):
         """
         Generates tabs to which requested user has permission.
         If user can't access requested tab raise exception.
         """
-        role = access_role(co=self._course_offering, request_user=request_user)
+        role = access_role(course=self._course, request_user=request_user)
         for target in self.all_tabs:
             tab = self.tab_factory(target)
-            if tab.has_permissions(request_user, self._course_offering, role):
+            if tab.has_permissions(request_user, self._course, role):
                 context_method_key = f"get_{target}"
                 get_context_method = getattr(self, context_method_key,
                                              lambda *args: None)
@@ -125,14 +125,14 @@ class CourseTabbedPane(TabbedPane):
                 request_user_role != CourseRole.STUDENT_RESTRICT)
 
     def get_news(self, request_user, request_user_role):
-        return self._course_offering.coursenews_set.all()
+        return self._course.coursenews_set.all()
 
     def get_reviews(self, request_user, request_user_role):
-        return (self._course_offering.enrollment_is_open and
-                self._course_offering.get_reviews())
+        return (self._course.enrollment_is_open and
+                self._course.get_reviews())
 
     def get_contacts(self, request_user, request_user_role):
-        teachers_by_role = self._course_offering.get_grouped_teachers()
+        teachers_by_role = self._course.get_grouped_teachers()
         return [ct for g in teachers_by_role.values() for ct in g
                 if len(ct.teacher.private_contacts.strip()) > 0]
 
@@ -140,7 +140,7 @@ class CourseTabbedPane(TabbedPane):
         """Get course classes with attached materials"""
         classes = []
         course_classes_qs = (
-            self._course_offering.courseclass_set
+            self._course.courseclass_set
                 .select_related("venue")
                 .annotate(attachments_cnt=Count('courseclassattachment'))
                 .annotate(has_attachments=Case(
@@ -188,7 +188,7 @@ class CourseTabbedPane(TabbedPane):
         Course teachers (among all terms) see links to assignment details.
         Others can see only assignment names.
         """
-        co = self._course_offering
+        co = self._course
         assignments = co.assignment_set.list()
         student_roles = [CourseRole.STUDENT_REGULAR,
                          CourseRole.STUDENT_RESTRICT]

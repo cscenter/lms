@@ -167,7 +167,7 @@ def test_notify_teachers_assignment_admin_form(client, curator):
     a = AssignmentFactory.build()
     # Send data with empty notify_teachers list
     post_data = {
-        'course_offering': co.pk,
+        'course': co.pk,
         'title': a.title,
         'is_online': 1,
         'text': a.text,
@@ -193,28 +193,28 @@ def test_notify_teachers_assignment_admin_form(client, curator):
 def test_new_assignment_notifications(settings):
     co = CourseFactory()
     enrollments = EnrollmentFactory.create_batch(5, course=co)
-    assignment = AssignmentFactory(course_offering=co)
+    assignment = AssignmentFactory(course=co)
     assert AssignmentNotification.objects.count() == 5
     enrollment = enrollments[0]
     enrollment.is_deleted = True
     enrollment.save()
     AssignmentNotification.objects.all().delete()
     assert AssignmentNotification.objects.count() == 0
-    assignment = AssignmentFactory(course_offering=co)
+    assignment = AssignmentFactory(course=co)
     assert AssignmentNotification.objects.count() == 4
     # Don't create new assignment for expelled students
     student = enrollments[1].student
     student.status = STUDENT_STATUS.expelled
     student.save()
     AssignmentNotification.objects.all().delete()
-    assignment = AssignmentFactory(course_offering=co)
+    assignment = AssignmentFactory(course=co)
     assert AssignmentNotification.objects.count() == 3
 
 
 @pytest.mark.django_db
 def test_new_assignment_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
-    sa = StudentAssignmentFactory(assignment__course_offering__city_id='spb')
+    sa = StudentAssignmentFactory(assignment__course__city_id='spb')
     assignment = sa.assignment
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
     assignment.deadline_at = dt
@@ -230,8 +230,8 @@ def test_new_assignment_timezone(settings):
     assert len(mail.outbox) == 1
     assert dt_str in mail.outbox[0].body
     # Test with another timezone
-    sa.assignment.course_offering.city_id = 'nsk'
-    sa.assignment.course_offering.save()
+    sa.assignment.course.city_id = 'nsk'
+    sa.assignment.course.save()
     AssignmentNotificationFactory(is_about_creation=True, user=sa.student,
                                   student_assignment=sa)
     out = StringIO()
@@ -248,7 +248,7 @@ def test_create_deadline_change_notification(settings):
     s1 = e1.student
     s1.status = STUDENT_STATUS.expelled
     s1.save()
-    a = AssignmentFactory(course_offering=co)
+    a = AssignmentFactory(course=co)
     assert AssignmentNotification.objects.count() == 1
     # Expellee has no StudentAssignment model
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
@@ -260,7 +260,7 @@ def test_create_deadline_change_notification(settings):
 @pytest.mark.django_db
 def test_deadline_changed_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
-    sa = StudentAssignmentFactory(assignment__course_offering__city_id='spb')
+    sa = StudentAssignmentFactory(assignment__course__city_id='spb')
     assignment = sa.assignment
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
     assignment.deadline_at = dt
@@ -276,8 +276,8 @@ def test_deadline_changed_timezone(settings):
     assert len(mail.outbox) == 1
     assert dt_str in mail.outbox[0].body
     # Test with other timezone
-    sa.assignment.course_offering.city_id = 'nsk'
-    sa.assignment.course_offering.save()
+    sa.assignment.course.city_id = 'nsk'
+    sa.assignment.course.save()
     AssignmentNotificationFactory(is_about_deadline=True, user=sa.student,
                                   student_assignment=sa)
     out = StringIO()

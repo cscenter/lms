@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 class CourseDetailView(DetailView):
     model = Course
-    context_object_name = 'course_offering'
+    context_object_name = 'course'
     template_name = "learning/courseoffering_detail.html"
     default_tab = "about"
 
@@ -53,10 +53,10 @@ class CourseDetailView(DetailView):
             url_params = dict(self.kwargs)
             try:
                 tab_name = request.GET["tab"]
-                url = reverse("course_offering_detail_with_active_tab",
+                url = reverse("course_detail_with_active_tab",
                               kwargs={**url_params, "tab": tab_name})
             except NoReverseMatch:
-                url = reverse("course_offering_detail", kwargs=url_params)
+                url = reverse("course_detail", kwargs=url_params)
             return HttpResponseRedirect(url)
         # Redirects to login page if tab is not visible to authenticated user
         context = self.get_context_data()
@@ -90,7 +90,7 @@ class CourseDetailView(DetailView):
                                    user=request_user)
                            .count())
         context = {
-            'course_offering': co,
+            'course': co,
             'user_city': get_user_city_code(self.request),
             'tz_override': tz_override,
             'teachers': teachers_by_role,

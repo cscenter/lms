@@ -51,15 +51,15 @@ class RelatedSpecMixin(object):
         ExampleModelAdmin(admin.ModelAdmin):
             related_spec = {'select': [
                                 ('assignment',
-                                [('course_offering', ['semester', 'meta_course'])]),
+                                [('course', ['semester', 'meta_course'])]),
                                'student']}
 
         `related_spec` will be translated to:
 
             .select_related('assignment', 
-                            'assignment__course_offering', 
-                            'assignment__course_offering__semester', 
-                            'assignment__course_offering__meta_course',
+                            'assignment__course',
+                            'assignment__course__semester',
+                            'assignment__course__meta_course',
                             'student')
     """
     def get_queryset(self, request):

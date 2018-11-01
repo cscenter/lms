@@ -28,7 +28,7 @@ CourseTeacherManager = models.Manager.from_queryset(CourseTeacherQuerySet)
 class AssignmentQuerySet(query.QuerySet):
     def list(self):
         return (self
-                .only("title", "course_offering_id", "is_online", "deadline_at")
+                .only("title", "course_id", "is_online", "deadline_at")
                 .prefetch_related("assignmentattachment_set")
                 .order_by('deadline_at', 'title'))
 
@@ -53,18 +53,18 @@ AssignmentManager = models.Manager.from_queryset(AssignmentQuerySet)
 class StudentAssignmentQuerySet(query.QuerySet):
     def for_user(self, user):
         related = ['assignment',
-                   'assignment__course_offering',
-                   'assignment__course_offering__meta_course',
-                   'assignment__course_offering__semester']
+                   'assignment__course',
+                   'assignment__course__meta_course',
+                   'assignment__course__semester']
         return (self
                 .filter(student=user)
                 .select_related(*related)
-                .order_by('assignment__course_offering__meta_course__name',
+                .order_by('assignment__course__meta_course__name',
                           'assignment__deadline_at',
                           'assignment__title'))
 
     def in_term(self, term):
-        return self.filter(assignment__course_offering__semester_id=term.id)
+        return self.filter(assignment__course__semester_id=term.id)
 
 
 class _StudentAssignmentDefaultManager(models.Manager):
@@ -72,7 +72,7 @@ class _StudentAssignmentDefaultManager(models.Manager):
     def get_queryset(self):
         if is_club_site():
             return super().get_queryset().filter(
-                assignment__course_offering__is_open=True)
+                assignment__course__is_open=True)
         else:
             return super().get_queryset()
 

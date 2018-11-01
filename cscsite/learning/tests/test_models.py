@@ -53,7 +53,7 @@ class CommonTests(TestCase):
         self.assertIn("pdf", smart_text(cca))
         a = AssignmentFactory.create()
         self.assertIn(a.title, smart_text(a))
-        self.assertIn(smart_text(a.course_offering), smart_text(a))
+        self.assertIn(smart_text(a.course), smart_text(a))
         as_ = StudentAssignmentFactory.create()
         self.assertIn(smart_text(as_.student.get_full_name()), smart_text(as_))
         self.assertIn(smart_text(as_.assignment), smart_text(as_))
@@ -175,7 +175,7 @@ class CourseTests(TestCase):
 
 
 @pytest.mark.django_db
-def test_course_offering_composite_fields():
+def test_course_composite_fields():
     co = CourseFactory()
     assert not co.materials_files
     assert not co.materials_slides
@@ -195,7 +195,7 @@ class CourseClassTests(TestCase):
         slide_fname = "foobar.pdf"
         cc = CourseClassFactory.create()
         fname = cc._slides_file_name(slide_fname)
-        co = cc.course_offering
+        co = cc.course
         self.assertIn(co.meta_course.slug.replace("-", "_"), fname)
         self.assertIn(co.semester.slug.replace("-", "_"), fname)
         _, ext = os.path.splitext(slide_fname)
@@ -232,11 +232,11 @@ class AssignmentTest(TestCase):
     def test_clean(self):
         co1 = CourseFactory.create()
         co2 = CourseFactory.create()
-        a = AssignmentFactory.create(course_offering=co1)
+        a = AssignmentFactory.create(course=co1)
         a_copy = Assignment.objects.filter(pk=a.pk).get()
-        a_copy.course_offering = co2
+        a_copy.course = co2
         self.assertRaises(ValidationError, a_copy.clean)
-        a_copy.course_offering = co1
+        a_copy.course = co1
         a_copy.save()
         a_copy.grade_min = a.grade_max + 1
         self.assertRaises(ValidationError, a_copy.clean)
@@ -278,7 +278,7 @@ class StudentAssignmentTests(TestCase):
         u_teacher = TeacherCenterFactory()
         as_ = StudentAssignmentFactory(
             student=u_student,
-            assignment__course_offering__teachers=[u_teacher],
+            assignment__course__teachers=[u_teacher],
             assignment__is_online=True)
         # teacher comments first
         self.assertFalse(as_.submission_is_received)
@@ -293,7 +293,7 @@ class StudentAssignmentTests(TestCase):
         # student comments first
         as_ = StudentAssignmentFactory(
             student=u_student,
-            assignment__course_offering__teachers=[u_teacher],
+            assignment__course__teachers=[u_teacher],
             assignment__is_online=True)
         as_.refresh_from_db()
         self.assertFalse(as_.submission_is_received)
@@ -308,7 +308,7 @@ class StudentAssignmentTests(TestCase):
         # assignment is offline
         as_ = StudentAssignmentFactory(
             student=u_student,
-            assignment__course_offering__teachers=[u_teacher],
+            assignment__course__teachers=[u_teacher],
             assignment__is_online=False)
         as_.refresh_from_db()
         self.assertFalse(as_.submission_is_received)
@@ -443,7 +443,7 @@ def test_semester_enrollment_period(mocker):
 
 
 @pytest.mark.django_db
-def test_course_offering_enrollment_is_open(settings, mocker):
+def test_course_enrollment_is_open(settings, mocker):
     settings.ENROLLMENT_DURATION = 45
     year = 2016
     term_type = SEMESTER_TYPES.autumn
@@ -504,7 +504,7 @@ def test_gradefield():
 
 
 @pytest.mark.django_db
-def test_course_offering_get_reviews(settings):
+def test_course_get_reviews(settings):
     meta_course1, meta_course2 = MetaCourseFactory.create_batch(2)
     CourseFactory(meta_course=meta_course1, city_id='spb',
                   semester__year=2015, reviews='aaa')

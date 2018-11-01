@@ -91,7 +91,7 @@ class CourseRole(Enum):
     CURATOR = auto()
 
 
-def access_role(*, co, request_user) -> Optional[CourseRole]:
+def access_role(*, course, request_user) -> Optional[CourseRole]:
     """
     Some course data (e.g. assignments, news) are private and accessible
     depending on the user role: curator, course teacher or
@@ -107,15 +107,15 @@ def access_role(*, co, request_user) -> Optional[CourseRole]:
     if request_user.is_curator:
         return CourseRole.CURATOR
     role = None
-    enrollment = request_user.get_enrollment(co.pk)
+    enrollment = request_user.get_enrollment(course.pk)
     if enrollment:
-        if not co.failed_by_student(request_user, enrollment):
+        if not course.failed_by_student(request_user, enrollment):
             role = CourseRole.STUDENT_REGULAR
         else:
             role = CourseRole.STUDENT_RESTRICT
     # Teachers from the same course permits to view the news
-    all_course_teachers = (co.course_teachers.field.model.objects
-                           .for_course(co.meta_course.slug)
+    all_course_teachers = (course.course_teachers.field.model.objects
+                           .for_course(course.meta_course.slug)
                            .values_list('teacher_id', flat=True))
     if request_user.is_teacher and request_user.pk in all_course_teachers:
         # Override student role if teacher accidentally enrolled on

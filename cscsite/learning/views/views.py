@@ -361,17 +361,17 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
                             .filter(in_current_term | enrolled_in))
         # 2. And split them by type.
         ongoing_enrolled, ongoing_rest, archive_enrolled = [], [], []
-        for co in course_offerings:
-            if co.semester.index == current_term_index:
-                if co.pk in student_enrolled_in:
+        for course in course_offerings:
+            if course.semester.index == current_term_index:
+                if course.pk in student_enrolled_in:
                     # TODO: add `enrollments` to context and get grades explicitly in tmpl
-                    co.enrollment = student_enrolled_in[co.pk]
-                    ongoing_enrolled.append(co)
+                    course.enrollment = student_enrolled_in[course.pk]
+                    ongoing_enrolled.append(course)
                 else:
-                    ongoing_rest.append(co)
+                    ongoing_rest.append(course)
             else:
-                co.enrollment = student_enrolled_in[co.pk]
-                archive_enrolled.append(co)
+                course.enrollment = student_enrolled_in[course.pk]
+                archive_enrolled.append(course)
         context = {
             "ongoing_rest": ongoing_rest,
             "ongoing_enrolled": ongoing_enrolled,
@@ -495,7 +495,7 @@ class CourseClassCreateUpdateMixin(TeacherOnlyMixin):
         return_url = self.request.GET.get('back')
         if return_url == 'timetable':
             return reverse('timetable_teacher')
-        if return_url == 'course_offering':
+        if return_url == 'course':
             return self.object.course.get_absolute_url()
         if return_url == 'calendar':
             return reverse('calendar_teacher')
@@ -628,7 +628,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
                   "student__first_name",
                   "student__last_name",
                   "assignment__id",
-                  "assignment__course_offering_id",
+                  "assignment__course_id",
                   "assignment__is_online",
                   "assignment__grade_min",
                   "assignment__grade_max",)
@@ -642,7 +642,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         }
         filters = self.prepare_queryset_filters(context)
         if "assignment" in filters:
-            course_id = filters["assignment"].course_offering_id
+            course_id = filters["assignment"].course_id
             # TODO: select `deleted` instead?
             # TODO: move to separated method and return set
             qs = (Enrollment.active
@@ -686,21 +686,21 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         8. Set filters by resulting assignment, grade and last comment.
         """
         filters = {}
-        teacher_all_courses = self._get_all_teacher_course_offerings()
+        teacher_all_courses = self._get_all_teacher_courses()
         all_terms = set(c.semester for c in teacher_all_courses)
         all_terms = sorted(all_terms, key=lambda t: -t.index)
         # Try to get course offerings for requested term
         query_term_index = self._get_requested_term_index(all_terms)
         course_offerings = [c for c in teacher_all_courses
                             if c.semester.index == query_term_index]
-        # Try to get assignments for requested course_offering
-        query_co = self._get_requested_course_offering(course_offerings)
-        # FIXME: attach course offering or pass it to deadline_at_local
+        # Try to get assignments for requested course
+        query_co = self._get_requested_course(course_offerings)
+        # FIXME: attach course or pass it to deadline_at_local
         assignments = list(
             Assignment.objects
             .filter(notify_teachers__teacher=self.request.user,
-                    course_offering=query_co)
-            .only("pk", "deadline_at", "title", "course_offering_id")
+                    course=query_co)
+            .only("pk", "deadline_at", "title", "course_id")
             .order_by("-deadline_at"))
         query_assignment = self._get_requested_assignment(assignments)
         if query_assignment:
@@ -756,15 +756,15 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
             filter_value = self.model.LAST_COMMENT_NOBODY
         return query_value, filter_name, filter_value
 
-    def _get_all_teacher_course_offerings(self):
-        """Returns all course offerings for authenticated user"""
+    def _get_all_teacher_courses(self):
+        """Returns all courses for authenticated teacher"""
         u = self.request.user
         cs = (Course.objects
               .filter(teachers=u)
               .select_related("meta_course", "semester")
               .order_by("semester__index", "meta_course__name"))
         if not cs:
-            logger.warning("Teacher {} has no course sessions".format(u))
+            logger.warning(f"Teacher {u} has not conducted any course")
             self._redirect_to_course_list()
         return cs
 
@@ -794,16 +794,15 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
             raise Redirect(to=reverse("assignment_list_teacher"))
         return term.index
 
-    def _get_requested_course_offering(self, course_offerings):
-        assert len(course_offerings) > 0
-        """Get requested course_offering by GET-param `course`"""
+    def _get_requested_course(self, courses):
+        assert len(courses) > 0
+        """Get requested course by GET-param `course`"""
         course_slug = self.request.GET.get("course", "")
         try:
-            co = next(c for c in course_offerings if
-                      c.meta_course.slug == course_slug)
+            co = next(c for c in courses if c.meta_course.slug == course_slug)
         except StopIteration:
             # TODO: get term and redirect to entry page
-            co = course_offerings[0]
+            co = courses[0]
         return co
 
     def _get_requested_assignment(self, assignments):
@@ -830,15 +829,15 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
     context_object_name = 'assignment'
 
     def get_queryset(self):
-        return (self.model.objects
-                .select_related('course_offering',
-                                'course_offering__meta_course',
-                                'course_offering__semester')
+        return (Assignment.objects
+                .select_related('course',
+                                'course__meta_course',
+                                'course__semester')
                 .prefetch_related('assignmentattachment_set'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        role = access_role(co=self.object.course_offering,
+        role = access_role(course=self.object.course,
                            request_user=self.request.user)
         if role not in [CourseRole.CURATOR, CourseRole.TEACHER]:
             raise PermissionDenied
@@ -846,9 +845,9 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
             StudentAssignment.objects
             .filter(assignment__pk=self.object.pk)
             .select_related('assignment',
-                            'assignment__course_offering',
-                            'assignment__course_offering__meta_course',
-                            'assignment__course_offering__semester',
+                            'assignment__course',
+                            'assignment__course__meta_course',
+                            'assignment__course__semester',
                             'student')
             .prefetch_related('student__groups'))
         return context
@@ -884,9 +883,9 @@ class AssignmentProgressBaseView(AccessMixin):
                 .filter(pk=self.kwargs['pk'])
                 .select_related('student',
                                 'assignment',
-                                'assignment__course_offering',
-                                'assignment__course_offering__meta_course',
-                                'assignment__course_offering__semester')
+                                'assignment__course',
+                                'assignment__course__meta_course',
+                                'assignment__course__semester')
                 .first())
 
     @staticmethod
@@ -897,7 +896,7 @@ class AssignmentProgressBaseView(AccessMixin):
                                                .order_by('created')))
         prefetch_related_objects([student_assignment],
                                  prefetch_comments,
-                                 'assignment__course_offering__teachers',
+                                 'assignment__course__teachers',
                                  'assignment__assignmentattachment_set')
 
     def get_context_data(self, form, **kwargs):
@@ -914,7 +913,7 @@ class AssignmentProgressBaseView(AccessMixin):
         cs_after_deadline = (c for c in sa.assignmentcomment_set.all() if
                              c.created >= deadline_at)
         first_comment_after_deadline = next(cs_after_deadline, None)
-        co = sa.assignment.course_offering
+        co = sa.assignment.course
         tz_override = co.get_city_timezone()
         # For online courses format datetime in student timezone
         # Note, that this view available for teachers, curators and
@@ -927,7 +926,7 @@ class AssignmentProgressBaseView(AccessMixin):
             'form': form,
             'timezone': tz_override,
             'first_comment_after_deadline': first_comment_after_deadline,
-            'one_teacher': sa.assignment.course_offering.teachers.count() == 1,
+            'one_teacher': sa.assignment.course.teachers.count() == 1,
             'hashes_json': comment_persistence.get_hashes_json()
         }
         return context
@@ -949,20 +948,20 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
         return user.is_curator or user.is_teacher
 
     def has_permissions_precise(self, user):
-        co = self.student_assignment.assignment.course_offering
-        role = access_role(co=co, request_user=user)
+        co = self.student_assignment.assignment.course
+        role = access_role(course=co, request_user=user)
         return role in [CourseRole.TEACHER, CourseRole.CURATOR]
 
     def get_context_data(self, form, **kwargs):
         context = super().get_context_data(form, **kwargs)
         a_s = self.student_assignment
-        co = a_s.assignment.course_offering
+        co = a_s.assignment.course
         # Get next unchecked assignment
         base = (StudentAssignment.objects
                 .filter(grade__isnull=True,
                         first_submission_at__isnull=False,
-                        assignment__course_offering=co,
-                        assignment__course_offering__teachers=self.request.user)
+                        assignment__course=co,
+                        assignment__course__teachers=self.request.user)
                 .order_by('assignment__deadline_at', 'pk')
                 .only('pk'))
         next_a_s = (base.filter(pk__gt=a_s.pk).first() or
@@ -985,7 +984,7 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
             # logic. A little drawback is that teachers still can leave
             # comments under other's teachers assignments, but can not grade,
             # so it's acceptable, IMO.
-            teachers = a_s.assignment.course_offering.teachers.all()
+            teachers = a_s.assignment.course.teachers.all()
             if request.user not in teachers:
                 raise PermissionDenied
 
@@ -1018,22 +1017,21 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin):
     form_class = AssignmentForm
     template_name = "learning/assignment_form.html"
 
-    def get_course_offering(self):
+    def get_course(self):
         return get_co_from_query_params(self.kwargs, self.request.city_code)
 
     def get_form(self, **kwargs):
-        form_class = self.get_form_class()
-        co = self.get_course_offering()
-        if not co:
-            raise Http404('Course offering not found')
-        if not self.is_form_allowed(self.request.user, co):
+        course = self.get_course()
+        if not course:
+            raise Http404('Course not found')
+        if not self.is_form_allowed(self.request.user, course):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
-        kwargs["course_offering"] = co
-        return form_class(**kwargs)
+        kwargs["course"] = course
+        return AssignmentForm(**kwargs)
 
     @staticmethod
-    def is_form_allowed(user, course_offering):
-        return user.is_curator or user in course_offering.teachers.all()
+    def is_form_allowed(user, course: Course):
+        return user.is_curator or user in course.teachers.all()
 
     def get_success_url(self):
         return reverse('assignment_detail_teacher', args=[self.object.pk])
@@ -1056,7 +1054,7 @@ class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
     def save_form(self, form):
         self.object = form.save()
         # Set up notifications recipients setting
-        course = self.object.course_offering
+        course = self.object.course
         co_teachers = course.course_teachers.all()
         notify_teachers = [t.pk for t in co_teachers if t.notify_by_default]
         self.object.notify_teachers.add(*notify_teachers)
@@ -1075,7 +1073,7 @@ class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):
         return reverse('assignment_list_teacher')
 
     def is_form_allowed(self, user, obj: Assignment):
-        return user.is_curator or user in obj.course_offering.teachers.all()
+        return user.is_curator or user in obj.course.teachers.all()
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
@@ -1125,7 +1123,7 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
 
     def is_form_allowed(self, user, obj):
         return (user.is_curator or
-                user in obj.assignment.course_offering.teachers.all())
+                user in obj.assignment.course.teachers.all())
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -1235,9 +1233,9 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         """
         qs = (AssignmentAttachment.objects
               .filter(pk=attachment_id)
-              .select_related("assignment", "assignment__course_offering"))
+              .select_related("assignment", "assignment__course"))
         assignment_attachment = get_object_or_404(qs)
-        role = access_role(co=assignment_attachment.assignment.course_offering,
+        role = access_role(course=assignment_attachment.assignment.course,
                            request_user=self.request.user)
         # User doesn't have private access to the task
         if role is not None and role != CourseRole.STUDENT_RESTRICT:

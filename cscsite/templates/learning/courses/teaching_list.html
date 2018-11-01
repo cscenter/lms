@@ -12,23 +12,23 @@
                             <th width="30%">{% trans "Professors" %}</th>
                             <th width="15%"></th>
                         </tr>
-                        {% for course_offering in course_list %}
-                            {% with has_unread_news=course_offering.has_unread %}
-                                <tr class="{{ course_offering.has_unread|yesno:"unread,noop" }}">
+                        {% for course in course_list %}
+                            {% with has_unread_news=course.has_unread %}
+                                <tr class="{{ course.has_unread|yesno:"unread,noop" }}">
                                     <td>
                                         {# TODO: replace with get_url_for_tab after migrating to Jinja #}
-                                        <a href="{% if has_unread_news %}{{ course_offering.get_absolute_url }}news/{% else %}{{ course_offering.get_absolute_url }}{% endif %}">{{ course_offering.meta_course.name }}</a>
+                                        <a href="{% if has_unread_news %}{{ course.get_absolute_url }}news/{% else %}{{ course.get_absolute_url }}{% endif %}">{{ course.meta_course.name }}</a>
                                     </td>
-                                    <td>{{ course_offering.semester }}</td>
+                                    <td>{{ course.semester }}</td>
                                     <td>
                                         <ul class="list-unstyled margin-bottom-0">
-                                            {% for teacher in course_offering.teachers.all %}
+                                            {% for teacher in course.teachers.all %}
                                                 <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
                                             {% endfor %}
                                         </ul>
                                     </td>
                                     <td>
-                                        <a href="{{ course_offering.get_create_news_url }}">{% trans "Add news" %}</a>
+                                        <a href="{{ course.get_create_news_url }}">{% trans "Add news" %}</a>
                                     </td>
                                 </tr>
                             {% endwith %}

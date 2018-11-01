@@ -403,8 +403,8 @@ class AssignmentForm(CityAwareModelForm):
         initial=5)
 
     def __init__(self, *args, **kwargs):
-        course_offering = kwargs.pop('course_offering', None)
-        assert course_offering is not None
+        course = kwargs.pop('course', None)
+        assert course is not None
         if "instance" in kwargs:
             instance = kwargs["instance"]
             remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
@@ -435,8 +435,8 @@ class AssignmentForm(CityAwareModelForm):
                 css_class="form-group"
             ),
             CANCEL_SAVE_PAIR)
-        super(AssignmentForm, self).__init__(*args, **kwargs)
-        self.instance.course_offering = course_offering
+        super().__init__(*args, **kwargs)
+        self.instance.course = course
 
     class Meta:
         model = Assignment

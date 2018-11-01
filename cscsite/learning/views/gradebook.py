@@ -199,12 +199,12 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
         filter_kwargs = {}
         if not self.request.user.is_curator:
             filter_kwargs["teachers"] = self.request.user
-        course_offering_list = (Course.objects
-                                .filter(**filter_kwargs)
-                                .order_by('-semester__index',
-                                          '-pk')
-                                .select_related('semester', 'meta_course'))
-        context['course_offering_list'] = course_offering_list
+        courses = (Course.objects
+                   .filter(**filter_kwargs)
+                   .order_by('-semester__index',
+                             '-pk')
+                   .select_related('semester', 'meta_course'))
+        context['course_offering_list'] = courses
         context['user_type'] = self.user_type
 
         return context
@@ -214,11 +214,11 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        course_offering = _get_course(self.kwargs, request.user)
-        if course_offering is None:
-            raise Http404('Course offering not found')
+        course = _get_course(self.kwargs, request.user)
+        if course is None:
+            raise Http404('Course not found')
 
-        data = gradebook_data(course_offering)
+        data = gradebook_data(course)
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename = "{}-{}-{}.csv".format(kwargs['course_slug'],
                                          kwargs['semester_year'],
@@ -249,23 +249,24 @@ class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
             return HttpResponseBadRequest()
         filters = {
             "pk": assignment_id,
-            "course_offering_id": course_id,
+            "course_id": course_id,
             "is_online": False
         }
         if not request.user.is_curator:
-            filters['course_offering__teachers__id'] = request.user.pk
+            filters['course__teachers__id'] = request.user.pk
         try:
             assignment = (Assignment.objects
-                          .select_related("course_offering")
+                          .select_related("course")
                           .get(**filters))
+        except Assignment.DoesNotExist:
+            return HttpResponseForbidden()
+        try:
             total, success = self.import_grades_for_assignment(assignment)
             messages.info(self.request,
                           _("Successfully imported {} results").format(success))
         except ValidationError as e:
             messages.error(self.request, e.message)
-        except Assignment.DoesNotExist:
-            return HttpResponseForbidden()
-        url = assignment.course_offering.get_gradebook_url()
+        url = assignment.course.get_gradebook_url()
         return HttpResponseRedirect(url)
 
     def import_grades_for_assignment(self, assignment):

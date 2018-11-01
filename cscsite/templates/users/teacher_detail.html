@@ -40,10 +40,10 @@
               <th>{% trans "Semester" %}</th>
             </tr>
           </thead>
-            {% for course_offering in teacher.course_offerings %}
+            {% for course in teacher.course_offerings %}
               <tr>
-                <td><a href="{{ course_offering.get_absolute_url }}">{{ course_offering.meta_course.name }}</a></td>
-                <td class="nowrap">{{ course_offering.semester }}</td>
+                <td><a href="{{ course.get_absolute_url }}">{{ course.meta_course.name }}</a></td>
+                <td class="nowrap">{{ course.semester }}</td>
               </tr>
             {% endfor %}
           </tr>

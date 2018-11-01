@@ -49,8 +49,8 @@ class TeacherList(ListAPIView):
             term_index = get_term_index(CENTER_FOUNDATION_YEAR,
                                         Semester.TYPES.autumn)
             queryset = queryset.filter(
-                courseteacher__course_offering__meta_course_id=course,
-                courseteacher__course_offering__semester__index__gte=term_index)
+                courseteacher__course__meta_course_id=course,
+                courseteacher__course__semester__index__gte=term_index)
         queryset = queryset.prefetch_related(
             Prefetch(
                 "course_teachers",

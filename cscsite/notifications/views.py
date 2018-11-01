@@ -9,11 +9,11 @@ class CourseNewsNotificationUpdate(generic.View):
     http_method_names = ["post", "put"]
 
     def post(self, request, *args, **kwargs):
-        course_offering = co = request.POST.get("co")
-        if not request.user.is_authenticated or not course_offering:
+        course = request.POST.get("co")
+        if not request.user.is_authenticated or not course:
             raise PermissionDenied
         updated = (CourseNewsNotification.unread
-                   .filter(course_offering_news__course=co,
+                   .filter(course_offering_news__course=course,
                            user_id=self.request.user.pk)
                    .update(is_unread=False))
         return JsonResponse({"updated": bool(updated)})

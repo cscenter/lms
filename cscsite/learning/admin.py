@@ -169,10 +169,10 @@ class AssignmentAdminForm(CityAwareModelForm):
     def clean(self):
         cleaned_data = super().clean()
         # We can select teachers only from related course offering
-        if ('course_offering' in cleaned_data
+        if ('course' in cleaned_data
                 and 'notify_teachers' in cleaned_data
                 and cleaned_data['notify_teachers']):
-            co = cleaned_data['course_offering']
+            co = cleaned_data['course']
             co_teachers = [t.pk for t in co.course_teachers.all()]
             if any(t.pk not in co_teachers for t in cleaned_data['notify_teachers']):
                 self.add_error('notify_teachers', ValidationError(
@@ -193,15 +193,15 @@ class AssignmentAdmin(admin.ModelAdmin):
             'form_class': CityAwareSplitDateTimeField
         },
     }
-    list_display = ['id', 'title', 'course_offering', 'created_local',
+    list_display = ['id', 'title', 'course', 'created_local',
                     'deadline_at_local']
-    search_fields = ['course_offering__meta_course__name']
+    search_fields = ['course__meta_course__name']
 
     def get_readonly_fields(self, request, obj=None):
-        return ['course_offering'] if obj else []
+        return ['course'] if obj else []
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'course_offering':
+        if db_field.name == 'course':
             kwargs['queryset'] = (Course.objects
                                   .select_related("meta_course", "semester"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -213,11 +213,11 @@ class AssignmentAdmin(admin.ModelAdmin):
             try:
                 assignment_pk = request.resolver_match.args[0]
                 a = (Assignment.objects
-                     .prefetch_related("course_offering__course_teachers")
+                     .prefetch_related("course__course_teachers")
                      .get(pk=assignment_pk))
-                teachers = [t.pk for t in a.course_offering.teachers.all()]
+                teachers = [t.pk for t in a.course.teachers.all()]
                 qs = qs.filter(teacher__in=teachers,
-                               course_offering=a.course_offering)
+                               course=a.course)
             except IndexError:
                 pass
             kwargs["queryset"] = qs.order_by("course_id").distinct()
@@ -225,7 +225,7 @@ class AssignmentAdmin(admin.ModelAdmin):
 
     def save_related(self, request, form, formsets, change):
         if not change and not form.cleaned_data['notify_teachers']:
-            co_teachers = form.cleaned_data['course_offering'].course_teachers.all()
+            co_teachers = form.cleaned_data['course'].course_teachers.all()
             form.cleaned_data['notify_teachers'] = [t.pk for t in co_teachers if t.notify_by_default]
         return super().save_related(request, form, formsets, change)
 
@@ -251,7 +251,7 @@ class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     related_spec = {
         'select': [
             ('student_assignment', [
-                 ('assignment', [('course_offering', ['semester', 'meta_course'])]),
+                 ('assignment', [('course', ['semester', 'meta_course'])]),
                  'student'
              ]),
             'author'
@@ -310,7 +310,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
 class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     list_display = ['student', 'assignment', 'grade', 'grade_changed', 'state']
     related_spec = {'select': [('assignment',
-                                [('course_offering', ['semester', 'meta_course'])]),
+                                [('course', ['semester', 'meta_course'])]),
                                'student']}
     search_fields = ['student__last_name']
     raw_id_fields = ["assignment", "student"]

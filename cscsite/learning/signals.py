@@ -13,7 +13,7 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
                                                   *args, **kwargs):
     if not created:
         return
-    course = instance.course_offering
+    course = instance.course
     # Skip those who already been expelled
     active_students = (Enrollment.active
                        .filter(course=course)
@@ -40,8 +40,7 @@ def create_deadline_change_notification(sender, instance, created,
     if created:
         return
     if 'deadline_at' in instance.tracker.changed():
-        active_enrollments = Enrollment.active.filter(
-            course=instance.course_offering)
+        active_enrollments = Enrollment.active.filter(course=instance.course)
         for e in active_enrollments:
             try:
                 sa = (StudentAssignment.objects

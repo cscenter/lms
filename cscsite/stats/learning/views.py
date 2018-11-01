@@ -76,9 +76,9 @@ class AssignmentsStats(ReadOnlyModelViewSet):
                            .values_list("student_id", flat=True))
         assignments = (Assignment
                        .objects
-                       .only("pk", "title", "course_offering_id", "deadline_at",
+                       .only("pk", "title", "course_id", "deadline_at",
                              "grade_min", "grade_max", "is_online")
-                       .filter(course_offering_id=course_id)
+                       .filter(course_id=course_id)
                        .prefetch_related(
             Prefetch(
                 "assigned_to",
@@ -90,7 +90,7 @@ class AssignmentsStats(ReadOnlyModelViewSet):
                           .only("pk", "assignment_id", "grade",
                                 "student_id", "first_submission_at",
                                 "student__gender", "student__curriculum_year",
-                                "assignment__course_offering_id",
+                                "assignment__course_id",
                                 "assignment__grade_max",
                                 "assignment__grade_min",
                                 "assignment__is_online")
