@@ -25,7 +25,7 @@ from learning.factories import MetaCourseFactory, CourseFactory, \
     SemesterFactory
 from learning.models import Semester, Course, CourseClass, Assignment, \
     StudentAssignment, CourseNews
-from learning.settings import SEMESTER_TYPES
+from learning.settings import SEMESTER_TYPES, AssignmentStates
 from learning.utils import get_term_start, next_term_starts_at
 from users.factories import UserFactory, StudentCenterFactory, \
     TeacherCenterFactory
@@ -327,24 +327,24 @@ class StudentAssignmentTests(TestCase):
         )
         ctx = {'student': student, 'assignment': a_online}
         a_s = StudentAssignment(grade=0, **ctx)
-        self.assertEqual(a_s.state, 'unsatisfactory')
+        self.assertEqual(a_s.state.value, AssignmentStates.unsatisfactory)
         a_s = StudentAssignment(grade=4, **ctx)
-        self.assertEqual(a_s.state, 'unsatisfactory')
+        self.assertEqual(a_s.state.value, AssignmentStates.unsatisfactory)
         a_s = StudentAssignment(grade=5, **ctx)
-        self.assertEqual(a_s.state, 'pass')
+        self.assertEqual(a_s.state.value, AssignmentStates.credit)
         a_s = StudentAssignment(grade=8, **ctx)
-        self.assertEqual(a_s.state, 'good')
+        self.assertEqual(a_s.state.value, AssignmentStates.good)
         a_s = StudentAssignment(grade=10, **ctx)
-        self.assertEqual(a_s.state, 'excellent')
+        self.assertEqual(a_s.state.value, AssignmentStates.excellent)
         a_s = StudentAssignment(**ctx)
-        self.assertEqual(a_s.state, 'not_submitted')
+        self.assertEqual(a_s.state.value, AssignmentStates.not_submitted)
         a_offline = AssignmentFactory.create(
             grade_min=5, grade_max=10, is_online=False,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx['assignment'] = a_offline
         a_s = StudentAssignment(**ctx)
-        self.assertEqual(a_s.state, 'not_checked')
+        self.assertEqual(a_s.state.value, AssignmentStates.not_checked)
 
     def test_state_display(self):
         as_ = StudentAssignmentFactory(grade=30,
@@ -352,7 +352,8 @@ class StudentAssignmentTests(TestCase):
         self.assertIn(smart_text(as_.assignment.grade_max), as_.state_display)
         self.assertIn(smart_text(as_.grade), as_.state_display)
         as_ = StudentAssignmentFactory(assignment__grade_max=50)
-        self.assertEqual(as_.STATES['not_submitted'], as_.state_display)
+        self.assertEqual(AssignmentStates.labels.not_submitted,
+                         as_.state_display)
 
     def test_state_short(self):
         as_ = StudentAssignmentFactory(grade=30,
@@ -360,7 +361,8 @@ class StudentAssignmentTests(TestCase):
         self.assertIn(smart_text(as_.assignment.grade_max), as_.state_short)
         self.assertIn(smart_text(as_.grade), as_.state_short)
         as_ = StudentAssignmentFactory(assignment__grade_max=50)
-        self.assertEqual(as_.SHORT_STATES['not_submitted'], as_.state_short)
+        state = AssignmentStates.get_choice(AssignmentStates.not_submitted)
+        self.assertEqual(state.abbr, as_.state_short)
 
 
 class AssignmentCommentTests(TestCase):

@@ -128,7 +128,7 @@
                 {% if user_type == 'teacher' and is_actual_teacher %}
                 {% crispy grade_form %}
                 {% else %}
-                <span class="nowrap badge assignment-status {{ a_s.state|to_css }}">{{ a_s.state_display }}</span>
+                <span class="nowrap badge assignment-status {{ a_s.state.css_class }}">{{ a_s.state_display }}</span>
                 {% endif %}
 
                 {% if not is_actual_teacher %}

@@ -143,16 +143,17 @@ def get_terms_for_calendar_month(year: int, month: int) -> List[TermTuple]:
         return [start_term]
 
 
-def get_grade_index(grade):
+def grade_to_mark(grade):
     """
-    Returns grade index for easier grades comparison.
+    Converts grade to the mark analog for easier grades comparison.
+
     Assume unsatisfactory > not_graded.
     """
     if grade == GRADES.not_graded:
         return 0
     elif grade == GRADES.unsatisfactory:
         return 1
-    elif grade == getattr(GRADES, "pass"):
+    elif grade == GRADES.credit:
         return 2
     elif grade == GRADES.good:
         return 3

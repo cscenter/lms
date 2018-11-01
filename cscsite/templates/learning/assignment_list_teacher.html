@@ -107,7 +107,7 @@
 {#                    {% if not s_a.has_unread %}<a href="#" style="color:#777;" class="mark-as-unread pull-right"><i class="fa fa-eye-slash" aria-hidden="true"></i></a>{% endif %}#}
                 </td>
                 <td>
-                    <span class="assignment-status {{ s_a.state|to_css }}">{{ s_a.state_short }}</span>
+                    <span class="assignment-status {{ s_a.state.css_class }}">{{ s_a.state_short }}</span>
                 </td>
             </tr>
         {% endfor %}

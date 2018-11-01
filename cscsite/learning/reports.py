@@ -13,7 +13,7 @@ from learning.models import AssignmentComment, Semester, Enrollment
 from learning.projects.models import ReportComment, ProjectStudent
 from learning.settings import GRADES, STUDENT_STATUS, DATE_FORMAT_RU, \
     TIME_FORMAT_RU
-from learning.utils import get_grade_index, is_positive_grade
+from learning.utils import grade_to_mark, is_positive_grade
 from users.models import User, SHADCourseRecord
 
 
@@ -62,8 +62,8 @@ class ProgressReport(ReportFileOutput):
                     # Store the highest grade
                     # TODO: add tests
                     record = student_courses[e.course.meta_course_id]
-                    new_grade_index = get_grade_index(e.grade)
-                    if new_grade_index > get_grade_index(record["grade"]):
+                    new_grade_index = grade_to_mark(e.grade)
+                    if new_grade_index > grade_to_mark(record["grade"]):
                         student_courses[e.course.meta_course_id] = {
                             "grade": e.grade,
                             "grade_str": grade.lower(),

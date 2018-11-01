@@ -246,7 +246,7 @@ def test_report_for_target_term(rf):
                            student1_data_index, shad.name)
     # Check honest grade system
     e = EnrollmentFactory.create(student=student1, course=co2,
-                                 grade=getattr(GRADES, "pass"))
+                                 grade=GRADES.credit)
     progress_report = get_progress_report(prev_s)
     assert progress_report.data[student1_data_index].pk == student1.pk
     course_header_grade = '{}, оценка'.format(co2.meta_course.name)
@@ -334,7 +334,7 @@ def test_report_diplomas_csv(rf):
     progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 4
     # Grade should be printed with `default` grading type style
-    e_s1_co1.grade = getattr(GRADES, "pass")
+    e_s1_co1.grade = GRADES.credit
     e_s1_co1.save()
     co1.grading_type = GRADING_TYPES.binary
     co1.save()
