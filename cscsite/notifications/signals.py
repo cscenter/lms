@@ -53,7 +53,7 @@ def notify_handler(type, **kwargs):
     public = bool(kwargs.pop('public', True))
     description = kwargs.pop('description', None)
     timestamp = kwargs.pop('timestamp', timezone.now())
-    level = kwargs.pop('level', Notification.LEVELS.info)
+    level = kwargs.pop('level', Notification.LevelTypes.info)
     data = kwargs.pop('data', None)
     verb = kwargs.pop('verb', None)
 
