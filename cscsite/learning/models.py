@@ -18,6 +18,7 @@ from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from djchoices import DjangoChoices, ChoiceItem
 from model_utils import Choices, FieldTracker
 from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
@@ -678,8 +679,9 @@ def courseclass_slides_file_name(self, filename):
 
 
 class CourseClass(TimeStampedModel):
-    TYPES = Choices(('lecture', _("Lecture")),
-                    ('seminar', _("Seminar")))
+    class ClassTypes(DjangoChoices):
+        lecture = ChoiceItem('lecture', _("Lecture"))
+        seminar = ChoiceItem('seminar', _("Seminar"))
 
     course = models.ForeignKey(
         Course,
@@ -689,9 +691,10 @@ class CourseClass(TimeStampedModel):
         Venue,
         verbose_name=_("CourseClass|Venue"),
         on_delete=models.PROTECT)
-    type = StatusField(
+    type = models.CharField(
         _("Type"),
-        choices_name='TYPES')
+        max_length=100,
+        choices=ClassTypes.choices)
     name = models.CharField(_("CourseClass|Name"), max_length=255)
     description = models.TextField(
         _("Description"),

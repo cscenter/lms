@@ -171,7 +171,7 @@ class CourseClassForm(forms.ModelForm):
         empty_label=None)
     type = forms.ChoiceField(
         label=_("Type"),
-        choices=CourseClass.TYPES)
+        choices=CourseClass.ClassTypes.choices)
     name = forms.CharField(
         label=_("CourseClass|Name"),
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))
