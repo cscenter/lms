@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals, print_function
-
 from django.conf import settings
 
 # this urls will be used to redirect from '/learning/' and '/teaching/'
 from django.utils.translation import ugettext_lazy as _
+from djchoices import DjangoChoices, C
 from model_utils import Choices
 
 LEARNING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_student')
@@ -16,11 +15,9 @@ DATE_FORMAT_RU = "%d.%m.%Y"
 TIME_FORMAT_RU = "%H:%M"
 
 # Assignment types constances
-# TODO: Mb should move to core settings for hashids?
 ASSIGNMENT_TASK_ATTACHMENT = 0
 ASSIGNMENT_COMMENT_ATTACHMENT = 1
 
-# TODO: Move to users.settings?
 PARTICIPANT_GROUPS = getattr(settings, 'PARTICIPANT_GROUPS', Choices(
     (1, 'STUDENT_CENTER', _('Student [CENTER]')),
     (2, 'TEACHER_CENTER', _('Teacher [CENTER]')),
@@ -56,29 +53,45 @@ GRADING_TYPES = getattr(
             (1, 'binary', _("Binary"))))  # (un)satisfy, if graded
 
 GRADES = getattr(settings, 'GRADES',
-                 Choices(('not_graded', _("Not graded")),
-                         ('unsatisfactory', _("Enrollment|Unsatisfactory")),
-                         ('pass', _("Enrollment|Pass")),
-                         ('good', _("Good")),
-                         ('excellent', _("Excellent"))))
+                 Choices(('not_graded', 'not_graded', _("Not graded")),
+                         ('unsatisfactory', 'unsatisfactory', _("Enrollment|Unsatisfactory")),
+                         ('pass', 'credit', _("Enrollment|Pass")),
+                         ('good', 'good', _("Good")),
+                         ('excellent', 'excellent', _("Excellent"))))
 
 POSITIVE_GRADES = {
-    getattr(GRADES, "pass"),
-    getattr(GRADES, "good"),
-    getattr(GRADES, "excellent"),
+    GRADES.credit,
+    GRADES.good,
+    GRADES.excellent,
 }
 
 SHORT_GRADES = getattr(settings, 'SHORT_GRADES',
-                       Choices(('not_graded', "—"),
-                               ('unsatisfactory', "н"),
-                               ('pass', "з"),
-                               ('good', "4"),
-                               ('excellent', "5")))
+                       Choices(('not_graded', 'not_graded', "—"),
+                               ('unsatisfactory', 'unsatisfactory', "н"),
+                               ('pass', 'pass', "з"),
+                               ('good', 'good', "4"),
+                               ('excellent', 'excellent', "5")))
 
 SEMESTER_TYPES = getattr(settings, 'SEMESTER_TYPES',
                          Choices(('spring', _("spring")),
                                  ('summer', _("summer")),
                                  ('autumn', _("autumn"))))
+
+
+class AssignmentStates(DjangoChoices):
+    not_submitted = C("not_submitted", _("Assignment|not submitted"),
+                      abbr="—", css_class="not-submitted")
+    not_checked = C("not_checked", _("Assignment|not checked"),
+                    abbr="…", css_class="not-checked")
+    unsatisfactory = C("unsatisfactory", _("Assignment|unsatisfactory"),
+                       abbr="2", css_class="unsatisfactory")
+    credit = C("pass", _("Assignment|pass"),
+               abbr="3", css_class="pass")
+    good = C("good", _("Assignment|good"),
+             abbr="4", css_class="good")
+    excellent = C("excellent", _("Assignment|excellent"),
+                  abbr="5", css_class="excellent")
+
 
 TERMS_IN_ACADEMIC_YEAR = len(SEMESTER_TYPES)
 

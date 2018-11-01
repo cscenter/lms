@@ -58,12 +58,12 @@ class Command(BaseCommand):
             elif total_score >= current_term.projects_grade_good:
                 final_grade = GRADES.good
             elif total_score >= current_term.projects_grade_pass:
-                final_grade = getattr(GRADES, "pass")
+                final_grade = GRADES.credit
             else:
                 final_grade = GRADES.unsatisfactory
             # For external project we have binary grading policy.
             if is_external and total_score >= current_term.projects_grade_pass:
-                final_grade = getattr(GRADES, "pass")
+                final_grade = GRADES.credit
 
             result = ProjectStudent.objects.filter(pk=ps.pk).update(
                 final_grade=final_grade)

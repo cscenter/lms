@@ -129,7 +129,7 @@ class ProjectStudent(models.Model):
             return final_grade
         # XXX: Assume all projects >= spring 2016 have id > magic number
         MAGIC_ID = 357
-        if (self.final_grade == getattr(GRADES, "pass") and
+        if (self.final_grade == GRADES.credit and
                 self.project_id > MAGIC_ID and
                 not self.project.is_external and
                 self.project.semester.type != Semester.TYPES.summer):

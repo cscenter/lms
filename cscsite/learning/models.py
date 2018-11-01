@@ -35,7 +35,7 @@ from learning.managers import StudyProgramQuerySet, \
     StudentAssignmentManager, AssignmentManager, CourseTeacherManager
 from learning.micawber_providers import get_oembed_html
 from learning.settings import GRADES, SHORT_GRADES, \
-    SEMESTER_TYPES, GRADING_TYPES
+    SEMESTER_TYPES, GRADING_TYPES, AssignmentStates
 from learning.tasks import maybe_upload_slides_yandex
 from learning.utils import get_current_term_index, now_local, \
     next_term_starts_at
@@ -1027,18 +1027,6 @@ class AssignmentAttachment(TimeStampedModel, object):
 
 
 class StudentAssignment(TimeStampedModel):
-    STATES = Choices(('not_submitted', _("Assignment|not submitted")),
-                     ('not_checked', _("Assignment|not checked")),
-                     ('unsatisfactory', _("Assignment|unsatisfactory")),
-                     ('pass', _("Assignment|pass")),
-                     ('good', _("Assignment|good")),
-                     ('excellent', _("Assignment|excellent")))
-    SHORT_STATES = Choices(('not_submitted', "—"),
-                           ('not_checked', "…"),
-                           ('unsatisfactory', "2"),
-                           ('pass', "3"),
-                           ('good', "4"),
-                           ('excellent', "5"))
     LAST_COMMENT_NOBODY = 0
     LAST_COMMENT_STUDENT = 1
     LAST_COMMENT_TEACHER = 2
@@ -1117,29 +1105,25 @@ class StudentAssignment(TimeStampedModel):
 
     @cached_property
     def state(self):
+        grade = self.grade
         grade_min = self.assignment.grade_min
         grade_max = self.assignment.grade_max
-        return self.calculate_state(self.grade, self.assignment.is_online,
-                                    self.submission_is_received, grade_min, grade_max)
-
-    @staticmethod
-    def calculate_state(grade, is_online, submission_is_received, grade_min,
-                        grade_max):
         grade_range = grade_max - grade_min
         if grade is None:
-            if not is_online or submission_is_received:
-                return 'not_checked'
+            if not self.assignment.is_online or self.submission_is_received:
+                state = AssignmentStates.not_checked
             else:
-                return 'not_submitted'
+                state = AssignmentStates.not_submitted
         else:
             if grade < grade_min or grade == 0:
-                return 'unsatisfactory'
+                state = AssignmentStates.unsatisfactory
             elif grade < grade_min + 0.4 * grade_range:
-                return 'pass'
+                state = AssignmentStates.credit
             elif grade < grade_min + 0.8 * grade_range:
-                return 'good'
+                state = AssignmentStates.good
             else:
-                return 'excellent'
+                state = AssignmentStates.excellent
+        return AssignmentStates.get_choice(state)
 
     @property
     def submission_is_received(self):
@@ -1152,11 +1136,11 @@ class StudentAssignment(TimeStampedModel):
     @property
     def state_display(self):
         if self.grade is not None:
-            return "{0} ({1}/{2})".format(self.STATES[self.state],
+            return "{0} ({1}/{2})".format(self.state.label,
                                           self.grade,
                                           self.assignment.grade_max)
         else:
-            return self.STATES[self.state]
+            return self.state.label
 
     @property
     def state_short(self):
@@ -1164,7 +1148,7 @@ class StudentAssignment(TimeStampedModel):
             return "{0}/{1}".format(self.grade,
                                     self.assignment.grade_max)
         else:
-            return self.SHORT_STATES[self.state]
+            return self.state.abbr
 
 
 ## NOTE(Dmitry): this is needed because of
@@ -1320,7 +1304,7 @@ class Enrollment(TimeStampedModel):
     def grade_honest(self):
         """Show `satisfactory` instead of `pass` for default grading type"""
         if (self.course.grading_type == GRADING_TYPES.default and
-                self.grade == getattr(GRADES, 'pass')):
+                self.grade == GRADES.credit):
             return _("Satisfactory")
         return GRADES[self.grade]
 

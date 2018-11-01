@@ -88,13 +88,13 @@ def test_gradebook_recalculate_grading_type(client):
     for key in form:
         if not key.startswith("initial-"):
             form["initial-" + key] = GRADES.good
-            form[key] = getattr(GRADES, 'pass')
+            form[key] = GRADES.credit
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.binary
     e = Enrollment.objects.get(student=student, course=co)
-    assert e.grade == getattr(GRADES, "pass")
+    assert e.grade == GRADES.credit
     response = client.get(user_detail_url)
     assert smart_bytes("/enrollment|pass/") in response.content
     assert smart_bytes("/satisfactory/") not in response.content
