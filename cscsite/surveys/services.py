@@ -18,7 +18,7 @@ def course_form_builder(survey: CourseSurvey):
     form.save()
 
     templates = [FormTemplates.COMMON]
-    seminar_type = CourseClass.TYPES.seminar
+    seminar_type = CourseClass.ClassTypes.seminar
     has_seminars = course.courseclass_set.filter(type=seminar_type).exists()
     has_assignments = course.assignment_set.exists()
     if has_seminars:
@@ -72,7 +72,7 @@ def course_form_builder(survey: CourseSurvey):
                                     "date__lte": today_local.date()
                                 }
                                 if rule["value"] == "lecture":
-                                    filters["type"] = CourseClass.TYPES.lecture
+                                    filters["type"] = CourseClass.ClassTypes.lecture
                                 classes = (CourseClass.objects
                                            .filter(passed_lectures, **filters)
                                            .order_by("date", "starts_at"))
