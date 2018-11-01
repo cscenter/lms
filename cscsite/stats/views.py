@@ -47,33 +47,33 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
             key=lambda x: x["semester_id"])
         courses = {term_id: list(cs) for term_id, cs in courses_grouped}
         # Find selected course and term
-        course_session_id = self.request.GET.get("course_session_id")
+        course_id = self.request.GET.get("course_session_id")
         try:
-            course_session_id = int(course_session_id)
+            course_id = int(course_id)
         except TypeError:
             max_term_id = max(courses.keys())
-            course_session_id = courses[max_term_id][0]["pk"]
+            course_id = courses[max_term_id][0]["pk"]
         term_id = None
         for group in courses.values():
             for co in group:
-                if co["pk"] == course_session_id:
+                if co["pk"] == course_id:
                     term_id = co["semester_id"]
                     break
         if not term_id:
             # Replace with appropriate error
-            raise Exception("{}".format(course_session_id))
+            raise Exception("{}".format(course_id))
 
         context["courses"] = courses
         context["data"] = {
             "selected": {
                 "term_id": term_id,
-                "course_session_id": course_session_id,
+                "course_session_id": course_id,
             },
         }
 
         context["json_data"] = json.dumps({
             "courses": courses,
-            "course_session_id": course_session_id,
+            "course_session_id": course_id,
         })
         return context
 
@@ -183,9 +183,9 @@ class StudentsDiplomasStats(APIView):
                     excellent_total += 1
                 elif enrollment.grade == GRADES.good:
                     good_total += 1
-                unique_courses.add(enrollment.course_offering.meta_course)
-                hours += enrollment.course_offering.courseclass_set.count() * 1.5
-                for teacher in enrollment.course_offering.teachers.all():
+                unique_courses.add(enrollment.course.meta_course)
+                hours += enrollment.course.courseclass_set.count() * 1.5
+                for teacher in enrollment.course.teachers.all():
                     unique_teachers.add(teacher.pk)
         stats = {
             "total": len(students),

@@ -69,7 +69,7 @@ def test_unenrollment(client, assert_redirect):
     enrollment = Enrollment.objects.first()
     assert not enrollment.is_deleted
     client.post(co.get_unenroll_url(), form)
-    assert Enrollment.active.filter(student=s, course_offering=co).count() == 0
+    assert Enrollment.active.filter(student=s, course=co).count() == 0
     assert Enrollment.objects.count() == 1
     enrollment = Enrollment.objects.first()
     enrollment_id = enrollment.pk
@@ -121,8 +121,7 @@ def test_enrollment_capacity(client):
     assert smart_bytes(_("Places available")) in response.content
     form = {'course_offering_pk': co.pk}
     client.post(co.get_enroll_url(), form)
-    assert 1 == (Enrollment.active.filter(student=s, course_offering=co)
-                 .count())
+    assert 1 == Enrollment.active.filter(student=s, course=co).count()
     # Capacity reached, show to second student nothing
     s2 = StudentCenterFactory(city_id='spb')
     client.login(s2)
@@ -135,7 +134,7 @@ def test_enrollment_capacity(client):
     # Unenroll first student, capacity should increase
     client.login(s)
     response = client.post(co.get_unenroll_url(), form)
-    assert Enrollment.active.filter(course_offering=co).count() == 0
+    assert Enrollment.active.filter(course=co).count() == 0
     response = client.get(co_url)
     assert (smart_bytes(_("Places available")) + b": 2") in response.content
 
@@ -153,9 +152,7 @@ def test_enrollment(client):
     form = {'course_offering_pk': co.pk}
     response = client.post(url, form)
     assert response.status_code == 302
-    assert 1 == (Enrollment.active
-                      .filter(student=student1, course_offering=co)
-                      .count())
+    assert 1 == Enrollment.active.filter(student=student1, course=co).count()
     as_ = AssignmentFactory.create_batch(3, course_offering=co)
     assert set((student1.pk, a.pk) for a in as_) == set(StudentAssignment.objects
                           .filter(student=student1)
@@ -244,7 +241,7 @@ def test_enrollment_leave_reason(client):
     assert 'bar' in e.reason_leave
     co_other = CourseFactory.create(semester=current_semester)
     client.post(co_other.get_enroll_url(), {})
-    e_other = Enrollment.active.filter(course_offering=co_other).first()
+    e_other = Enrollment.active.filter(course=co_other).first()
     assert not e_other.reason_entry
     assert not e_other.reason_leave
 
@@ -256,8 +253,7 @@ def test_assignments(client):
     current_semester = SemesterFactory.create_current()
     co = CourseFactory.create(semester=current_semester)
     for student in ss:
-        enrollment = EnrollmentFactory.create(student=student,
-                                              course_offering=co)
+        enrollment = EnrollmentFactory.create(student=student, course=co)
     assert Enrollment.objects.count() == 3
     assert StudentAssignment.objects.count() == 0
     assignment = AssignmentFactory.create(course_offering=co)
@@ -288,7 +284,7 @@ def test_reenrollment(client):
     assignment = AssignmentFactory(course_offering__is_open=True,
                                    course_offering__city_id='spb')
     co = assignment.course_offering
-    e = EnrollmentFactory(student=s, course_offering=co)
+    e = EnrollmentFactory(student=s, course=co)
     assert not e.is_deleted
     assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
     e.is_deleted = True

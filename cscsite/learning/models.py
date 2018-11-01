@@ -421,7 +421,7 @@ class Course(TimeStampedModel):
 
     def recalculate_grading_type(self):
         es = (Enrollment.active
-              .filter(course_offering=self)
+              .filter(course=self)
               .values_list("grade", flat=True))
         grading_type = GRADING_TYPES.default
         if not any(g for g in es if g in [GRADES.good, GRADES.excellent]):
@@ -466,7 +466,7 @@ class Course(TimeStampedModel):
             return enrollment.grade in bad_grades
         return (Enrollment.active
                 .filter(student_id=student.pk,
-                        course_offering_id=self.pk,
+                        course_id=self.pk,
                         grade__in=bad_grades)
                 .exists())
 
@@ -593,7 +593,7 @@ class CourseNews(TimeStampedModel):
             return
         co_id = self.course_id
         notifications = []
-        active_enrollments = Enrollment.active.filter(course_offering_id=co_id)
+        active_enrollments = Enrollment.active.filter(course_id=co_id)
         # Replace cached queryset with .bulk_create() + .iterator()
         for e in active_enrollments.iterator():
             notifications.append(
@@ -1249,7 +1249,7 @@ class Enrollment(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
-    course_offering = models.ForeignKey(
+    course = models.ForeignKey(
         Course,
         verbose_name=_("Course offering"),
         on_delete=models.CASCADE)
@@ -1271,13 +1271,13 @@ class Enrollment(TimeStampedModel):
         blank=True)
 
     class Meta:
-        ordering = ["student", "course_offering"]
-        unique_together = [('student', 'course_offering')]
+        ordering = ["student", "course"]
+        unique_together = [('student', 'course')]
         verbose_name = _("Enrollment")
         verbose_name_plural = _("Enrollments")
 
     def __str__(self):
-        return "{0} - {1}".format(smart_text(self.course_offering),
+        return "{0} - {1}".format(smart_text(self.course),
                                   smart_text(self.student.get_full_name()))
 
     def clean(self):
@@ -1293,7 +1293,7 @@ class Enrollment(TimeStampedModel):
     def _populate_assignments_for_new_enrolled_student(self, created):
         if self.is_deleted:
             return
-        for a in self.course_offering.assignment_set.all():
+        for a in self.course.assignment_set.all():
             StudentAssignment.objects.get_or_create(assignment=a,
                                                     student_id=self.student_id)
 
@@ -1307,7 +1307,7 @@ class Enrollment(TimeStampedModel):
 
     @property
     def city_aware_field_name(self):
-        return self.__class__.course_offering.field.name
+        return self.__class__.course.field.name
 
     def grade_changed_local(self, tz=None):
         if not tz:
@@ -1321,7 +1321,7 @@ class Enrollment(TimeStampedModel):
     @property
     def grade_honest(self):
         """Show `satisfactory` instead of `pass` for default grading type"""
-        if (self.course_offering.grading_type == GRADING_TYPES.default and
+        if (self.course.grading_type == GRADING_TYPES.default and
                 self.grade == getattr(GRADES, 'pass')):
             return _("Satisfactory")
         return GRADES[self.grade]

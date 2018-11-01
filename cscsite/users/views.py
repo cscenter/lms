@@ -136,9 +136,9 @@ class UserDetailView(generic.DetailView):
 
     def get_queryset(self, *args, **kwargs):
         enrollments_queryset = Enrollment.active.select_related(
-            'course_offering',
-            'course_offering__semester',
-            'course_offering__meta_course'
+            'course',
+            'course__semester',
+            'course__meta_course'
         )
         shad_courses_queryset = (SHADCourseRecord.objects
                                  .select_related("semester"))
@@ -149,7 +149,7 @@ class UserDetailView(generic.DetailView):
                 grade__in=['not_graded', 'unsatisfactory'])
         elif self.request.user.is_curator:
             enrollments_queryset = enrollments_queryset.annotate(
-                classes_total=Count('course_offering__courseclass'))
+                classes_total=Count('course__courseclass'))
         filters = {"city_code": settings.CENTER_BRANCHES_CITY_CODES}
         if is_club_site():
             filters["city_code"] = self.request.city_code
@@ -263,7 +263,7 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
         for e in student_info.enrollments:
             if e.created > self.object.created:
                 continue
-            meta_course_id = e.course_offering.meta_course_id
+            meta_course_id = e.course.meta_course_id
             if meta_course_id in enrollments:
                 if e.grade > enrollments[meta_course_id].grade:
                     enrollments[meta_course_id] = e

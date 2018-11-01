@@ -234,7 +234,7 @@ class Form(AbstractForm):
             "SURVEY_URL": f"https://compscicenter.ru{survey.get_absolute_url()}"
         }
         active_enrollments = (Enrollment.active
-                              .filter(course_offering=course.pk)
+                              .filter(course=course.pk)
                               .select_related("student"))
         for e in active_enrollments.iterator():
             mail.send(

@@ -16,7 +16,7 @@
             <ol>
                 {% for course_id, enrollment in user_enrollments.items %}
                     <li>
-                        {{ enrollment.course_offering }}
+                        {{ enrollment.course }}
                       ({{ enrollment.grade_honest|lower }})
                     </li>
                 {% endfor %}

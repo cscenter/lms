@@ -105,7 +105,7 @@ class GradeBookTeacherDispatchView(TeacherOnlyMixin, _GradeBookDispatchView):
         return context
 
 
-def _get_course_offering(get_params, user) -> Optional[Course]:
+def _get_course(get_params, user) -> Optional[Course]:
     try:
         filter_kwargs = dict(
             city=get_params['city'].lower(),
@@ -131,7 +131,7 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.data = None
-        self.course_offering = None
+        self.course = None
         self.is_for_staff = kwargs.get('is_for_staff', False)
 
     def get_form(self, data=None, files=None, **kwargs):
@@ -143,12 +143,11 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
         return cls(data=data, files=files, **kwargs)
 
     def get_form_class(self):
-        if self.course_offering is None:
-            self.course_offering = _get_course_offering(self.kwargs,
-                                                        self.request.user)
-        if self.course_offering is None:
+        if self.course is None:
+            self.course = _get_course(self.kwargs, self.request.user)
+        if self.course is None:
             raise Http404('Course offering not found')
-        self.data = gradebook_data(self.course_offering)
+        self.data = gradebook_data(self.course)
         return GradeBookFormFactory.build_form_class(self.data)
 
     def form_valid(self, form):
@@ -161,7 +160,7 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
             messages.warning(self.request, msg)
             # Replace form data with actual db values and user input
             # for conflict fields
-            self.data = gradebook_data(self.course_offering)
+            self.data = gradebook_data(self.course)
             current_data = GradeBookFormFactory.transform_to_initial(self.data)
             data = form.data.copy()
             for k, v in current_data.items():
@@ -175,8 +174,7 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
         messages.success(self.request,
                          _('Gradebook successfully saved.'),
                          extra_tags='timeout')
-        return self.data.course_offering.get_gradebook_url(
-            for_curator=self.is_for_staff)
+        return self.data.course.get_gradebook_url(for_curator=self.is_for_staff)
 
     def form_invalid(self, form):
         """
@@ -216,7 +214,7 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, *args, **kwargs):
-        course_offering = _get_course_offering(self.kwargs, request.user)
+        course_offering = _get_course(self.kwargs, request.user)
         if course_offering is None:
             raise Http404('Course offering not found')
 
@@ -243,7 +241,7 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin, generic.base.View):
 
 
 class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
-    def post(self, request, course_offering_pk, *args, **kwargs):
+    def post(self, request, course_id, *args, **kwargs):
         try:
             assignment_id = int(request.POST['assignment'])
             csv_file = request.FILES['csv_file']
@@ -251,7 +249,7 @@ class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
             return HttpResponseBadRequest()
         filters = {
             "pk": assignment_id,
-            "course_offering_id": course_offering_pk,
+            "course_offering_id": course_id,
             "is_online": False
         }
         if not request.user.is_curator:

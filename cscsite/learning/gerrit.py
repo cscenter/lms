@@ -4,7 +4,7 @@ import textwrap
 from django.conf import settings
 
 from api.providers.gerrit import Gerrit
-from learning.models import CourseTeacher, Enrollment
+from learning.models import CourseTeacher, Enrollment, Course
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -45,12 +45,12 @@ def permits_students_read_master(client, project_name, group_uuid):
     return client.create_permissions(project_name, payload)
 
 
-def get_project_name(course_offering):
-    city_code = course_offering.get_city()
-    course_name = course_offering.meta_course.slug.replace("-", "_")
-    if course_offering.is_correspondence:
-        return f"{course_name}_{course_offering.semester.year}"
-    return f"{city_code}/{course_name}_{course_offering.semester.year}"
+def get_project_name(course):
+    city_code = course.get_city()
+    course_name = course.meta_course.slug.replace("-", "_")
+    if course.is_correspondence:
+        return f"{course_name}_{course.semester.year}"
+    return f"{city_code}/{course_name}_{course.semester.year}"
 
 
 def init_project_for_course(course, skip_users=False):
@@ -139,7 +139,7 @@ def init_project_for_course(course, skip_users=False):
 
     # For each enrolled student create separated branch
     enrollments = (Enrollment.active
-                   .filter(course_offering_id=course.pk)
+                   .filter(course_id=course.pk)
                    .select_related("student"))
     for e in enrollments:
         add_student_to_project(client, e.student, project_name,
@@ -182,12 +182,12 @@ def create_user_group(client: Gerrit, user: User):
     return group_res.data['id']
 
 
-def add_users_to_project_by_email(course_offering, emails):
+def add_users_to_project_by_email(course: Course, emails):
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,
                           settings.GERRIT_CLIENT_PASSWORD))
     # Check project exists
-    project_name = get_project_name(course_offering)
+    project_name = get_project_name(course)
     project_res = client.get_project(project_name)
     if not project_res.ok:
         logger.error(f"Project {project_name} not found")
@@ -201,10 +201,10 @@ def add_users_to_project_by_email(course_offering, emails):
     project_students_group_uuid = students_group_res.data['id']
     # Try to add each student from the email list to the project
     enrollments = (Enrollment.active
-                   .filter(course_offering_id=course_offering.pk,
+                   .filter(course_id=course.pk,
                            student__email__in=emails)
                    .select_related("student"))
     for e in enrollments:
         print(e.student)
         add_student_to_project(client, e.student, project_name,
-                               project_students_group_uuid, course_offering)
+                               project_students_group_uuid, course)

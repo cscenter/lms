@@ -100,7 +100,7 @@ class TimetableStudentTests(GroupSecurityCheckMixin,
         student = StudentCenterFactory()
         self.doLogin(student)
         co = CourseFactory.create()
-        e = EnrollmentFactory.create(course_offering=co, student=student)
+        e = EnrollmentFactory.create(course=co, student=student)
         self.assertEqual(0, len(self.client.get(reverse('timetable_student'))
                                 .context['object_list']))
         today_date = (datetime.datetime.now().replace(tzinfo=timezone.utc))
@@ -216,11 +216,11 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         ctx = self.client.get(url).context
         self.assertEqual(None, ctx['request_user_enrollment'])
         self.assertEqual(False, ctx['is_actual_teacher'])
-        EnrollmentFactory.create(student=student, course_offering=co_other)
+        EnrollmentFactory.create(student=student, course=co_other)
         ctx = self.client.get(url).context
         self.assertEqual(None, ctx['request_user_enrollment'])
         self.assertEqual(False, ctx['is_actual_teacher'])
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         ctx = self.client.get(url).context
         self.assertEqual(True, ctx['request_user_enrollment'] is not None)
         self.assertEqual(False, ctx['is_actual_teacher'])
@@ -245,7 +245,7 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseFactory.create(teachers=[teacher],
                                   completed_at=next_day)
         url = co.get_absolute_url()
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course_offering=co)
         self.assertNotContains(self.client.get(url), a.title)
         self.doLogin(student)
@@ -605,7 +605,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseFactory(city_id='spb', semester=s,
                            teachers=[teacher])
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
@@ -644,7 +644,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         past_semester = SemesterFactory.create(year=past_year)
         co = CourseFactory(city_id='spb', teachers=[teacher],
                            semester=past_semester)
-        enrollment = EnrollmentFactory(student=student, course_offering=co,
+        enrollment = EnrollmentFactory(student=student, course=co,
                                        grade=GRADES.unsatisfactory)
         a = AssignmentFactory(course_offering=co)
         s_a = StudentAssignment.objects.get(student=student, assignment=a)
@@ -698,7 +698,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory(city_id='spb')
         semester = SemesterFactory.create_current()
         co = CourseFactory.create(city_id='spb', semester=semester)
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
@@ -713,7 +713,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         semester = SemesterFactory.create_current()
         co = CourseFactory(city_id='spb', teachers=[teacher],
                            semester=semester)
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
@@ -730,7 +730,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory(city_id='spb')
         # Create open reading to make sure student has access to CO
         co = CourseFactory(city_id='spb', is_open=True)
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
@@ -754,7 +754,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
@@ -801,7 +801,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course_offering=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
@@ -823,7 +823,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course_offering=co,
                                      grade_max=13)
         a_s = (StudentAssignment.objects
@@ -849,8 +849,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
         co_other = CourseFactory.create()
-        EnrollmentFactory.create(student=student, course_offering=co)
-        EnrollmentFactory.create(student=student, course_offering=co_other)
+        EnrollmentFactory.create(student=student, course=co)
+        EnrollmentFactory.create(student=student, course=co_other)
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
         a_other = AssignmentFactory.create(course_offering=co_other)
         a_s1 = (StudentAssignment.objects
@@ -960,9 +960,9 @@ def test_student_courses_list(client, settings):
     cos_archived = CourseFactory.create_batch(
         3, semester__year=prev_year, is_open=False)
     for co in cos_enrolled:
-        EnrollmentFactory.create(student=student_spb, course_offering=co)
+        EnrollmentFactory.create(student=student_spb, course=co)
     for co in cos_archived:
-        EnrollmentFactory.create(student=student_spb, course_offering=co)
+        EnrollmentFactory.create(student=student_spb, course=co)
     response = client.get(url)
     assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
     assert set(cos_enrolled) == set(response.context['ongoing_enrolled'])
@@ -1064,7 +1064,7 @@ def test_student_courses_list_csclub(client, settings, mocker):
     assert set(response.context['ongoing_rest']) == {co_active}
     assert len(response.context['archive_enrolled']) == 0
     # But student can see them in list if they already enrolled
-    EnrollmentFactory.create(student=student, course_offering=co)
+    EnrollmentFactory.create(student=student, course=co)
     response = client.get(url)
     assert len(response.context['ongoing_rest']) == 1
     assert len(response.context['archive_enrolled']) == 1

@@ -29,7 +29,7 @@ def test_classes(client):
     ccs_teaching = (CourseClassFactory
                     .create_batch(2, course__teachers=[user]))
     co_learning = CourseFactory.create()
-    EnrollmentFactory.create(student=user, course_offering=co_learning)
+    EnrollmentFactory.create(student=user, course=co_learning)
     ccs_learning = (CourseClassFactory
                     .create_batch(3, course=co_learning))
     ccs_other = CourseClassFactory.create_batch(5)
@@ -56,7 +56,7 @@ def test_assignments(client):
     as_teaching = (AssignmentFactory
                    .create_batch(2, course_offering__teachers=[user]))
     co_learning = CourseFactory.create()
-    EnrollmentFactory.create(student=user, course_offering=co_learning)
+    EnrollmentFactory.create(student=user, course=co_learning)
     as_learning = (AssignmentFactory
                    .create_batch(3, course_offering=co_learning))
     as_other = AssignmentFactory.create_batch(5)

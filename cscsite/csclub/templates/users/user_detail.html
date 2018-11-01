@@ -94,7 +94,7 @@
             <ul>
             {% for enrollment in profile_user.enrollment_set.all %}
             <li>
-              <a href="{{ enrollment.course_offering.get_absolute_url }}">{{ enrollment.course_offering }}</a> ({{ enrollment.grade_honest|lower }})
+              <a href="{{ enrollment.course.get_absolute_url }}">{{ enrollment.course }}</a> ({{ enrollment.grade_honest|lower }})
             </li>
             {% endfor %}
             </ul>

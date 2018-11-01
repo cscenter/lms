@@ -13,7 +13,7 @@ def test_enrolled_on_the_course():
     student = StudentFactory.create()
     co = CourseFactory()
     assert student.get_enrollment(co.pk) is None
-    enrollment = EnrollmentFactory(student=student, course_offering=co)
+    enrollment = EnrollmentFactory(student=student, course=co)
     assert student.get_enrollment(co.pk) is None  # query was cached
     delattr(student, f"_student_enrollment_{co.pk}")
     assert student.get_enrollment(co.pk) is not None
@@ -126,16 +126,14 @@ def test_passed_courses():
     student = StudentFactory()
     co1, co2, co3 = CourseFactory.create_batch(3)
     # enrollments 1 and 4 for the same course but from different terms
-    e1, e2, e3 = (EnrollmentFactory(course_offering=co,
+    e1, e2, e3 = (EnrollmentFactory(course=co,
                                     student=student,
                                     grade=GRADES.good)
                   for co in (co1, co2, co3))
     next_term = SemesterFactory.create_next(co1.semester)
     co4 = CourseFactory(meta_course=co1.meta_course, is_open=False,
                         semester=next_term)
-    e4 = EnrollmentFactory(course_offering=co4,
-                           student=student,
-                           grade=GRADES.good)
+    e4 = EnrollmentFactory(course=co4, student=student, grade=GRADES.good)
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 3
     e4.grade = GRADES.unsatisfactory

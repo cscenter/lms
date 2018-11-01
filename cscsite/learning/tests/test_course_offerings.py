@@ -297,11 +297,11 @@ def test_course_news_tab_permissions(client):
     assert "news" not in response.context['tabs']
     response = client.get(co_prev.get_absolute_url())
     assert "news" not in response.context['tabs']
-    e_current = EnrollmentFactory(course_offering=co, student=student_spb)
+    e_current = EnrollmentFactory(course=co, student=student_spb)
     response = client.get(co.get_absolute_url())
     assert "news" in response.context['tabs']
     # Prev courses should be successfully passed to see the news
-    e_prev = EnrollmentFactory(course_offering=co_prev, student=student_spb)
+    e_prev = EnrollmentFactory(course=co_prev, student=student_spb)
     response = client.get(co_prev.get_absolute_url())
     assert "news" not in response.context['tabs']
     e_prev.grade = Enrollment.GRADES.good

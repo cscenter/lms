@@ -588,17 +588,17 @@ class User(LearningPermissionsMixin, AbstractUser):
             user_groups.add(self.group.STUDENT_CLUB)
         return user_groups
 
-    def get_enrollment(self, course_offering_id) -> Optional[Enrollment]:
+    def get_enrollment(self, course_id) -> Optional[Enrollment]:
         """
         Query enrollment from db on first call and cache the result. Cache
         won't be refreshed if enrollment was deleted or changed after call.
         """
         if self.is_student or self.is_graduate:
-            cache_key = f"_student_enrollment_{course_offering_id}"
+            cache_key = f"_student_enrollment_{course_id}"
             if not hasattr(self, cache_key):
                 e = (Enrollment.active
                      .filter(student=self,
-                             course_offering_id=course_offering_id)
+                             course_id=course_id)
                      .order_by()
                      .first())
                 setattr(self, cache_key, e)
@@ -636,8 +636,8 @@ class User(LearningPermissionsMixin, AbstractUser):
         requested term.
         Additional DB queries may occur:
             * enrollment_set
-            * enrollment_set__course_offering (for each enrollment)
-            * enrollment_set__course_offering__courseclasses (for each course)
+            * enrollment_set__course (for each enrollment)
+            * enrollment_set__course__courseclasses (for each course)
             * onlinecourserecord_set
             * shadcourserecord_set
         """
@@ -652,19 +652,19 @@ class User(LearningPermissionsMixin, AbstractUser):
         in_current_term_in_progress = 0  # Center and club courses
         # FIXME: add test for `is_deleted=False`. Check all incomings for `enrollment_set`
         for e in self.enrollment_set.filter(is_deleted=False).all():
-            in_current_term = e.course_offering.semester_id == current_term.pk
+            in_current_term = e.course.semester_id == current_term.pk
             if in_current_term:
                 in_current_term_total += 1
-                in_current_term_courses.add(e.course_offering.meta_course_id)
-            if e.course_offering.is_open:
+                in_current_term_courses.add(e.course.meta_course_id)
+            if e.course.is_open:
                 # See queryset in `cast_students_to_will_graduate`
                 if hasattr(e, "classes_total"):
                     classes_total = e.classes_total
                 else:
-                    classes_total = (e.course_offering.courseclass_set.count())
+                    classes_total = (e.course.courseclass_set.count())
                 contribution = 0.5 if classes_total < 6 else 1
                 if is_positive_grade(e.grade):
-                    club_courses.add(e.course_offering.meta_course_id)
+                    club_courses.add(e.course.meta_course_id)
                     club_adjusted += contribution
                     in_current_term_passed += int(in_current_term)
                 elif in_current_term:
@@ -677,7 +677,7 @@ class User(LearningPermissionsMixin, AbstractUser):
                     failed_total += 1
             else:
                 if is_positive_grade(e.grade):
-                    center_courses.add(e.course_offering.meta_course_id)
+                    center_courses.add(e.course.meta_course_id)
                     in_current_term_passed += int(in_current_term)
                 elif in_current_term:
                     if is_negative_grade(e.grade):

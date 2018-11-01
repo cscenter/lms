@@ -57,10 +57,10 @@ Requirements:
                         Prefetch(
                             'enrollment_set',
                             queryset=(Enrollment.active
-                                      .select_related("course_offering",
-                                                      "course_offering__meta_course",
-                                                      "course_offering__semester")
-                                      .annotate(classes_total=Count('course_offering__courseclass'))
+                                      .select_related("course",
+                                                      "course__meta_course",
+                                                      "course__semester")
+                                      .annotate(classes_total=Count('course__courseclass'))
                                       .order_by()),
                         ))
                     .order_by())
