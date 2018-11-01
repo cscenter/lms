@@ -343,11 +343,10 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         # Student enrollments
         student_enrollments = (Enrollment.active
                                .filter(student_id=self.request.user)
-                               .select_related("course_offering")
-                               .only('id', 'grade', 'course_offering_id',
-                                     'course_offering__grading_type'))
-        student_enrolled_in = {e.course_offering_id: e for e in
-                               student_enrollments}
+                               .select_related("course")
+                               .only('id', 'grade', 'course_id',
+                                     'course__grading_type'))
+        student_enrolled_in = {e.course_id: e for e in student_enrollments}
         # 1. Union courses from current term and which student enrolled in
         current_year, current_term = get_current_term_pair(city_code)
         current_term_index = get_term_index(current_year, current_term)
@@ -643,11 +642,11 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         }
         filters = self.prepare_queryset_filters(context)
         if "assignment" in filters:
-            course_offering_id = filters["assignment"].course_offering_id
+            course_id = filters["assignment"].course_offering_id
             # TODO: select `deleted` instead?
             # TODO: move to separated method and return set
             qs = (Enrollment.active
-                  .filter(course_offering_id=course_offering_id)
+                  .filter(course_id=course_id)
                   .values_list("student_id", flat=True))
             context["enrollments"] = set(qs)
         context["student_assignment_list"] = self.get_queryset(filters)

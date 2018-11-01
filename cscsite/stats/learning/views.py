@@ -25,21 +25,21 @@ class CourseParticipantsStatsByGroup(ListRenderersMixin, PandasView):
     pandas_serializer_class = ParticipantsByGroupPandasSerializer
 
     def get_queryset(self):
-        STUDENT_GROUPS = [
+        groups = [
             User.group.STUDENT_CENTER,
             User.group.VOLUNTEER,
             User.group.GRADUATE_CENTER,
         ]
-        course_offering_id = self.kwargs['course_session_id']
+        course_id = self.kwargs['course_id']
         return (User.objects
                 .only("curriculum_year")
                 .filter(
                     enrollment__is_deleted=False,
-                    enrollment__course_offering_id=course_offering_id)
+                    enrollment__course_id=course_id)
                 .prefetch_related(
                     Prefetch(
                         "groups",
-                        queryset=Group.objects.filter(pk__in=STUDENT_GROUPS)
+                        queryset=Group.objects.filter(pk__in=groups)
                     )
                 )
                 .order_by())
@@ -54,12 +54,12 @@ class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
     pandas_serializer_class = ParticipantsByYearPandasSerializer
 
     def get_queryset(self):
-        course_offering_id = self.kwargs['course_session_id']
+        course_id = self.kwargs['course_id']
         return (User.objects
                 .only("curriculum_year")
                 .filter(
                     enrollment__is_deleted=False,
-                    enrollment__course_offering_id=course_offering_id)
+                    enrollment__course_id=course_id)
                 .prefetch_related("groups")
                 .order_by())
 
@@ -70,15 +70,15 @@ class AssignmentsStats(ReadOnlyModelViewSet):
     """
     permission_classes = [CuratorAccessPermission]
 
-    def list(self, request, course_session_id, *args, **kwargs):
-        active_students = (Enrollment.active.filter(
-                course_offering_id=course_session_id)
-            .values_list("student_id", flat=True))
+    def list(self, request, course_id, *args, **kwargs):
+        active_students = (Enrollment.active
+                           .filter(course_id=course_id)
+                           .values_list("student_id", flat=True))
         assignments = (Assignment
                        .objects
                        .only("pk", "title", "course_offering_id", "deadline_at",
                              "grade_min", "grade_max", "is_online")
-                       .filter(course_offering_id=course_session_id)
+                       .filter(course_offering_id=course_id)
                        .prefetch_related(
             Prefetch(
                 "assigned_to",
@@ -108,12 +108,12 @@ class EnrollmentsStats(APIView):
     http_method_names = ['get']
     permission_classes = [CuratorAccessPermission]
 
-    def get(self, request, course_session_id, format=None):
+    def get(self, request, course_id, format=None):
         enrollments = (Enrollment.active
                        .only("pk", "grade", "student_id", "student__gender",
                              "student__curriculum_year")
                        .select_related("student")
-                       .filter(course_offering_id=course_session_id)
+                       .filter(course_id=course_id)
                        .order_by())
 
         serializer = EnrollmentsStatsSerializer(enrollments, many=True)

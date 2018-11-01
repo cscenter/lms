@@ -92,7 +92,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, TestCase):
         enrollments = []
         for s in semesters:
             e = EnrollmentFactory.create(
-                course_offering=CourseFactory.create(
+                course=CourseFactory.create(
                     meta_course=meta_course,
                     semester=s),
                 student=student,

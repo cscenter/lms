@@ -90,7 +90,7 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         self.doLogin(student)
         co = CourseFactory.create()
         co_other = CourseFactory.create()
-        e = EnrollmentFactory.create(course_offering=co, student=student)
+        e = EnrollmentFactory.create(course=co, student=student)
         classes = flatten_calendar_month_events(
             self.client.get(reverse(self.url_name)).context['events'])
         self.assertEqual(0, len(classes))

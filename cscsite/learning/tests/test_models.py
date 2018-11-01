@@ -64,7 +64,7 @@ class CommonTests(TestCase):
                                  .student.get_full_name()),
                       smart_text(ac))
         e = EnrollmentFactory.create()
-        self.assertIn(smart_text(e.course_offering), smart_text(e))
+        self.assertIn(smart_text(e.course), smart_text(e))
         self.assertIn(smart_text(e.student.get_full_name()), smart_text(e))
         an = AssignmentNotificationFactory.create()
         self.assertIn(smart_text(an.user.get_full_name()), smart_text(an))

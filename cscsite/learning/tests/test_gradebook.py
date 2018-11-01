@@ -19,7 +19,7 @@ from learning.settings import GRADING_TYPES, GRADES, PARTICIPANT_GROUPS, \
     STUDENT_STATUS
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.utils import assert_login_redirect
-from learning.views.gradebook import _get_course_offering
+from learning.views.gradebook import _get_course
 from users.factories import TeacherCenterFactory, StudentCenterFactory, \
     UserFactory
 
@@ -32,7 +32,7 @@ def test__get_course_offering(client, curator):
     teacher1, teacher2 = TeacherCenterFactory.create_batch(2)
     course_offering = CourseFactory.create(teachers=[teacher1])
     filters = {}
-    co = _get_course_offering(filters, teacher1)  # KeyError
+    co = _get_course(filters, teacher1)  # KeyError
     assert co is None
     filters = {
         "city": 42,  # Attribute error
@@ -40,14 +40,14 @@ def test__get_course_offering(client, curator):
         "semester_type": course_offering.semester.type,
         "semester_year": course_offering.semester.year,
     }
-    co = _get_course_offering(filters, teacher1)  # Attribute error
+    co = _get_course(filters, teacher1)  # Attribute error
     assert co is None
     filters["city"] = course_offering.city_id
-    co = _get_course_offering(filters, teacher1)
+    co = _get_course(filters, teacher1)
     assert co == course_offering
-    co = _get_course_offering(filters, teacher2)
+    co = _get_course(filters, teacher2)
     assert co is None
-    co = _get_course_offering(filters, curator)
+    co = _get_course(filters, curator)
     assert co == course_offering
 
 
@@ -71,7 +71,7 @@ def test_gradebook_recalculate_grading_type(client):
     assert co.grading_type == GRADING_TYPES.default
     form = {}
     for s in students:
-        enrollment = EnrollmentFactory.create(student=s, course_offering=co)
+        enrollment = EnrollmentFactory.create(student=s, course=co)
         field = BaseGradebookForm.FINAL_GRADE_PREFIX + str(enrollment.pk)
         form["initial-" + field] = GRADES.not_graded
         form[field] = GRADES.good
@@ -93,7 +93,7 @@ def test_gradebook_recalculate_grading_type(client):
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GRADING_TYPES.binary
-    e = Enrollment.objects.get(student=student, course_offering=co)
+    e = Enrollment.objects.get(student=student, course=co)
     assert e.grade == getattr(GRADES, "pass")
     response = client.get(user_detail_url)
     assert smart_bytes("/enrollment|pass/") in response.content
@@ -129,7 +129,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         url = co.get_gradebook_url(format="csv")
         self.assertLoginRedirect(url)
         test_groups = [
@@ -151,7 +151,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         co = CourseFactory.create(teachers=[teacher])
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
         for s in [student1, student2]:
-            EnrollmentFactory.create(student=s, course_offering=co)
+            EnrollmentFactory.create(student=s, course=co)
         url = co.get_gradebook_url(format="csv")
         combos = [(a, s, grade + 1)
                   for ((a, s), grade)
@@ -180,8 +180,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         co = CourseFactory.create(teachers=[teacher])
         for student in students:
-            EnrollmentFactory.create(student=student,
-                                     course_offering=co)
+            EnrollmentFactory.create(student=student, course=co)
         as_online = AssignmentFactory.create_batch(2, course_offering=co)
         as_offline = AssignmentFactory.create_batch(3, course_offering=co,
                                                     is_online=False)
@@ -210,8 +209,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         students = StudentCenterFactory.create_batch(2)
         co = CourseFactory.create(teachers=[teacher])
         for student in students:
-            EnrollmentFactory.create(student=student,
-                                     course_offering=co)
+            EnrollmentFactory.create(student=student, course=co)
         a1, a2 = AssignmentFactory.create_batch(2, course_offering=co,
                                                 is_online=False)
         url = co.get_gradebook_url()
@@ -222,7 +220,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             [2, 3, 4, 5])
         for submission, grade in pairs:
             enrollment = Enrollment.active.get(student=submission.student,
-                                               course_offering=co)
+                                               course=co)
             field_name = BaseGradebookForm.GRADE_PREFIX + str(submission.pk)
             form[field_name] = grade
             field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(enrollment.pk)
@@ -236,14 +234,14 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         for student in students:
             self.assertEqual('good', (Enrollment.active
                                       .get(student=student,
-                                           course_offering=co)
+                                           course=co)
                                       .grade))
 
 
 @pytest.mark.django_db
 def test_gradebook_data():
     co = CourseFactory()
-    e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course_offering=co)
+    e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course=co)
     a1, a2, a3 = AssignmentFactory.create_batch(3, course_offering=co,
                                                 grade_min=1, grade_max=10)
     data = gradebook_data(co)
@@ -317,7 +315,7 @@ def test_empty_gradebook_data():
     assert len(data.assignments) == 0
     assert len(data.students) == 0
     assert len(data.submissions) == 0
-    e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course_offering=co)
+    e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course=co)
     data = gradebook_data(co)
     assert len(data.assignments) == 0
     assert len(data.students) == 5
@@ -334,14 +332,14 @@ def test_empty_gradebook_view(client):
     co1 = CourseFactory.create(teachers=[teacher])
     co2 = CourseFactory.create(teachers=[teacher])
     for student in students:
-        EnrollmentFactory.create(student=student, course_offering=co1)
-        EnrollmentFactory.create(student=student, course_offering=co2)
+        EnrollmentFactory.create(student=student, course=co1)
+        EnrollmentFactory.create(student=student, course=co2)
     client.login(teacher)
     response = client.get(co1.get_gradebook_url())
     for student in students:
         name = "{} {}.".format(student.last_name, student.first_name[0])
         assert smart_bytes(name) in response.content
-        enrollment = Enrollment.active.get(student=student, course_offering=co1)
+        enrollment = Enrollment.active.get(student=student, course=co1)
         field = 'final_grade_{}'.format(enrollment.pk)
         assert field in response.context['form'].fields
     assert len(students) == len(response.context['form'].fields)
@@ -357,7 +355,7 @@ def test_total_score(client):
     client.login(teacher)
     co = CourseFactory.create(teachers=[teacher])
     student = StudentCenterFactory()
-    EnrollmentFactory.create(student=student, course_offering=co)
+    EnrollmentFactory.create(student=student, course=co)
     assignments_count = 2
     assignments = AssignmentFactory.create_batch(assignments_count,
                                                  course_offering=co)
@@ -381,7 +379,7 @@ def test_security(client, settings):
     student = StudentCenterFactory()
     co = CourseFactory.create(teachers=[teacher])
     a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
-    EnrollmentFactory.create(student=student, course_offering=co)
+    EnrollmentFactory.create(student=student, course=co)
     url = co.get_gradebook_url()
     assert_login_redirect(client, settings, url)
     test_groups = [
@@ -408,7 +406,7 @@ def test_save_gradebook_form(client):
     a1, a2 = AssignmentFactory.create_batch(2, course_offering=co,
                                             is_online=False,
                                             grade_min=10, grade_max=20)
-    e1, e2 = EnrollmentFactory.create_batch(2, course_offering=co,
+    e1, e2 = EnrollmentFactory.create_batch(2, course=co,
                                             grade=GRADES.excellent)
     # We have 2 enrollments with `excellent` final grades. Change one of them.
     field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e1.pk)
@@ -465,7 +463,7 @@ def test_save_gradebook_l10n(client):
     client.login(teacher)
     student = StudentCenterFactory()
     co = CourseFactory.create(teachers=[teacher])
-    EnrollmentFactory.create(student=student, course_offering=co)
+    EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory(course_offering=co, is_online=False,
                           grade_min=10, grade_max=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
@@ -491,7 +489,7 @@ def test_save_gradebook_less_than_passing_score(client):
     client.login(teacher)
     student = StudentCenterFactory()
     co = CourseFactory.create(teachers=[teacher])
-    e = EnrollmentFactory.create(student=student, course_offering=co)
+    e = EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory(course_offering=co, is_online=False,
                           grade_min=10, grade_max=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
@@ -511,7 +509,7 @@ def test_gradebook_view_form_invalid(client):
     client.login(teacher)
     student = StudentCenterFactory()
     co = CourseFactory.create(teachers=[teacher])
-    e = EnrollmentFactory.create(student=student, course_offering=co,
+    e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GRADES.excellent)
     a = AssignmentFactory(course_offering=co, is_online=False,
                           grade_min=10, grade_max=40)
@@ -541,7 +539,7 @@ def test_gradebook_view_form_conflict(client):
     client.login(teacher1)
     co = CourseFactory.create(teachers=[teacher1, teacher2])
     student = StudentCenterFactory()
-    e = EnrollmentFactory.create(student=student, course_offering=co,
+    e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GRADES.not_graded)
     a = AssignmentFactory(course_offering=co, is_online=False,
                           grade_min=10, grade_max=40)
@@ -619,7 +617,7 @@ def test_gradebook_import_assignments_from_csv_security(client):
     teacher = TeacherCenterFactory()
     co = CourseFactory.create(teachers=[teacher])
     student_spb = StudentCenterFactory(city_id='spb')
-    EnrollmentFactory.create(student=student_spb, course_offering=co)
+    EnrollmentFactory.create(student=student_spb, course=co)
     assignments = AssignmentFactory.create_batch(3, course_offering=co,
                                                  is_online=False)
     teacher2 = TeacherCenterFactory()
@@ -649,7 +647,7 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
     student = StudentCenterFactory()
     student.stepic_id = 20
     student.save()
-    EnrollmentFactory.create(student=student, course_offering=co)
+    EnrollmentFactory.create(student=student, course=co)
     assignments = AssignmentFactory.create_batch(3, course_offering=co)
     assignment = assignments[0]
     for expected_grade in [13, Decimal('13.42'), '12.34', '"34,56"']:
@@ -677,7 +675,7 @@ def test_gradebook_import_assignments_from_csv(client, tmpdir):
     student3 = StudentCenterFactory(city_id='spb', yandex_id='custom_one',
                                     stepic_id='3')
     for s in [student1, student2, student3]:
-        EnrollmentFactory.create(student=s, course_offering=co)
+        EnrollmentFactory.create(student=s, course=co)
     assignment = AssignmentFactory.create(course_offering=co, is_online=False,
                                           grade_max=50)
     # Generate csv file with missing header `login`

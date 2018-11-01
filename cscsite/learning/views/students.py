@@ -109,9 +109,9 @@ class StudentAssignmentListView(StudentOnlyMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         enrolled_in = (Enrollment.active
-                       .filter(course_offering__semester=self.current_semester,
+                       .filter(course__semester=self.current_semester,
                                student=self.request.user)
-                       .values_list("course_offering", flat=True))
+                       .values_list("course", flat=True))
         open_, archive = utils.split_on_condition(
             context['assignment_list'],
             lambda sa: sa.assignment.is_open and
@@ -149,13 +149,12 @@ class CourseEnrollView(StudentOnlyMixin, FormView):
         return self.form_invalid(form)
 
     def get_form(self, data=None, files=None, **kwargs):
-        cls = self.get_form_class()
         course_slug = kwargs["course_slug"]
         try:
             semester_year, semester_type = kwargs["semester_slug"].split("-", 1)
         except ValueError:
             raise Http404
-        course_offering = get_object_or_404(
+        course = get_object_or_404(
             Course.objects
             .filter(meta_course__slug=course_slug,
                     semester__year=semester_year,
@@ -163,13 +162,13 @@ class CourseEnrollView(StudentOnlyMixin, FormView):
             .in_city(self.request.city_code)
             .select_related("semester")
         )
-        return cls(data=data, files=files, request=self.request,
-                   course_offering=course_offering)
+        return CourseEnrollmentForm(data=data, files=files,
+                                    request=self.request, course=course)
 
     def form_valid(self, form):
         enrollment, _ = Enrollment.objects.update_or_create(
             student=form.request.user,
-            course_offering=form.course_offering,
+            course=form.course,
             defaults={'is_deleted': False})
         reason = form.cleaned_data["reason"].strip()
         if reason:
@@ -184,7 +183,7 @@ class CourseEnrollView(StudentOnlyMixin, FormView):
         if self.request.POST.get('back') == 'course_list_student':
             return redirect('course_list_student')
         else:
-            return HttpResponseRedirect(form.course_offering.get_absolute_url())
+            return HttpResponseRedirect(form.course.get_absolute_url())
 
 
 class CourseUnenrollView(StudentOnlyMixin, generic.DeleteView):
@@ -192,7 +191,7 @@ class CourseUnenrollView(StudentOnlyMixin, generic.DeleteView):
     context_object_name = "enrollment"
 
     def __init__(self, *args, **kwargs):
-        self._course_offering = None
+        self._course = None
         super().__init__(*args, **kwargs)
 
     def get_object(self, _=None):
@@ -201,13 +200,13 @@ class CourseUnenrollView(StudentOnlyMixin, generic.DeleteView):
             Enrollment.active
             .filter(
                 student=self.request.user,
-                course_offering__city_id=self.request.city_code,
-                course_offering__semester__type=semester_type,
-                course_offering__semester__year=year,
-                course_offering__meta_course__slug=self.kwargs['course_slug'])
-            .select_related("course_offering", "course_offering__semester"))
-        self._course_offering = enrollment.course_offering
-        if not enrollment.course_offering.enrollment_is_open:
+                course__city_id=self.request.city_code,
+                course__semester__type=semester_type,
+                course__semester__year=year,
+                course__meta_course__slug=self.kwargs['course_slug'])
+            .select_related("course", "course__semester"))
+        self._course = enrollment.course
+        if not self._course.enrollment_is_open:
             raise PermissionDenied
         return enrollment
 
@@ -231,4 +230,4 @@ class CourseUnenrollView(StudentOnlyMixin, generic.DeleteView):
         if self.request.GET.get('back') == 'course_list_student':
             return reverse('course_list_student')
         else:
-            return self._course_offering.get_absolute_url()
+            return self._course.get_absolute_url()

@@ -42,7 +42,7 @@ class UserQuerySet(query.QuerySet):
             raise TypeError("students_info: unsupported filters type")
 
         enrollment_qs = (Enrollment.active
-                         .order_by('course_offering__meta_course__name'))
+                         .order_by('course__meta_course__name'))
         shad_qs = SHADCourseRecord.objects.get_queryset()
         if exclude_grades:
             enrollment_qs = enrollment_qs.exclude(grade__in=exclude_grades)
@@ -51,7 +51,7 @@ class UserQuerySet(query.QuerySet):
         if isinstance(semester, Semester):
             semester_upper_bound = semester.index
             enrollment_qs = enrollment_qs.filter(
-                course_offering__semester__index__lte=semester_upper_bound)
+                course__semester__index__lte=semester_upper_bound)
             shad_qs = shad_qs.filter(
                 semester__index__lte=semester_upper_bound
             )
@@ -69,16 +69,16 @@ class UserQuerySet(query.QuerySet):
                     to_attr='enrollments'
                 ),
                 Prefetch(
-                    'enrollments__course_offering',
+                    'enrollments__course',
                     queryset=Course.objects.select_related(
                         'semester', 'meta_course')
                 ),
                 Prefetch(
-                    'enrollments__course_offering__courseclass_set',
+                    'enrollments__course__courseclass_set',
                     queryset=CourseClass.objects.annotate(Count('pk')),
                 ),
                 Prefetch(
-                    'enrollments__course_offering__teachers',
+                    'enrollments__course__teachers',
                     # Note (Zh): Show pure lecturers first (=1),
                     # then teachers with lecturer role (values >1), then others
                     queryset=User.objects.extra(

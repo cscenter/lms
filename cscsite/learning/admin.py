@@ -125,7 +125,7 @@ class CourseClassAdmin(admin.ModelAdmin):
     }
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'course_offering':
+        if db_field.name == 'course':
             kwargs['queryset'] = (Course.objects
                                   .select_related("meta_course", "semester"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -275,21 +275,20 @@ class EnrollmentAdmin(admin.ModelAdmin):
             'form_class': CityAwareSplitDateTimeField
         }
     }
-    list_display = ['student', 'course_offering', 'is_deleted', 'grade',
+    list_display = ['student', 'course', 'is_deleted', 'grade',
                     'grade_changed_local']
     ordering = ['-pk']
     list_filter = [
-        'course_offering__city_id',
-        ('course_offering__semester', AdminRelatedDropdownFilter)
+        'course__city_id',
+        ('course__semester', AdminRelatedDropdownFilter)
     ]
-    search_fields = ['course_offering__meta_course__name']
+    search_fields = ['course__meta_course__name']
     exclude = ['grade_changed']
-    raw_id_fields = ["student", "course_offering"]
+    raw_id_fields = ["student", "course"]
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['student', 'course_offering', 'grade_changed_local',
-                    'modified']
+            return ['student', 'course', 'grade_changed_local', 'modified']
         else:
             return ['grade_changed_local', 'modified']
 

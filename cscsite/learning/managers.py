@@ -229,7 +229,7 @@ class _EnrollmentDefaultManager(models.Manager):
     """On compsciclub.ru always restrict selection by open reading"""
     def get_queryset(self):
         if is_club_site():
-            return super().get_queryset().filter(course_offering__is_open=True)
+            return super().get_queryset().filter(course__is_open=True)
         else:
             return super().get_queryset()
 
@@ -237,7 +237,7 @@ class _EnrollmentDefaultManager(models.Manager):
 class _EnrollmentActiveManager(models.Manager):
     def get_queryset(self):
         if is_club_site():
-            return super().get_queryset().filter(course_offering__is_open=True,
+            return super().get_queryset().filter(course__is_open=True,
                                                  is_deleted=False)
         else:
             return super().get_queryset().filter(is_deleted=False)

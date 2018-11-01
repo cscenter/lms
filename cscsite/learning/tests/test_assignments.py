@@ -51,7 +51,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         self.assertEquals(0, len(resp.context['assignment_list_open']))
         self.assertEquals(0, len(resp.context['assignment_list_archive']))
         # enroll at course offering, assignments are shown
-        EnrollmentFactory.create(student=u, course_offering=co)
+        EnrollmentFactory.create(student=u, course=co)
         resp = self.client.get(reverse(self.url_name))
         self.assertEquals(2, len(resp.context['assignment_list_open']))
         self.assertEquals(0, len(resp.context['assignment_list_archive']))
@@ -98,7 +98,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         as1 = AssignmentFactory.create_batch(2, course_offering=co)
         self.doLogin(u)
         # enroll at course offering, assignments are shown
-        EnrollmentFactory.create(student=u, course_offering=co)
+        EnrollmentFactory.create(student=u, course=co)
         resp = self.client.get(reverse(self.url_name))
         self.assertEquals(2, len(resp.context['assignment_list_open']))
         self.assertEquals(0, len(resp.context['assignment_list_archive']))
@@ -120,7 +120,7 @@ def test_security_assignmentstudent_detail(client, settings):
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
     co = CourseFactory(teachers=[teacher], semester=past_semester)
-    enrollment = EnrollmentFactory(student=student, course_offering=co,
+    enrollment = EnrollmentFactory(student=student, course=co,
                                    grade=GRADES.unsatisfactory)
     a = AssignmentFactory(course_offering=co)
     a_s = StudentAssignment.objects.get(student=student, assignment=a)
@@ -140,7 +140,7 @@ def test_security_courseoffering_detail(client):
     student = StudentFactory()
     past_year = datetime.datetime.now().year - 3
     co = CourseFactory(teachers=[teacher], semester__year=past_year)
-    enrollment = EnrollmentFactory(student=student, course_offering=co,
+    enrollment = EnrollmentFactory(student=student, course=co,
                                    grade=GRADES.unsatisfactory)
     a = AssignmentFactory(course_offering=co)
     co.refresh_from_db()
@@ -172,7 +172,7 @@ def test_assignment_contents(client):
     # if assignment `notify_teachers` field not specified.
     # Problem can be related to pytest, django tests or factory-boy
     co = CourseFactory.create(teachers=[teacher])
-    EnrollmentFactory.create(student=student, course_offering=co)
+    EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory.create(course_offering=co)
     a_s = (StudentAssignment.objects
            .filter(assignment=a, student=student)
@@ -190,7 +190,7 @@ def test_studentassignment_last_comment_from():
     s = SemesterFactory.create(year=now_year, type=now_season)
     co = CourseFactory.create(city_id='spb', semester=s,
                               teachers=[teacher])
-    EnrollmentFactory.create(student=student, course_offering=co)
+    EnrollmentFactory.create(student=student, course=co)
     assignment = AssignmentFactory.create(course_offering=co)
     sa = StudentAssignment.objects.get(assignment=assignment)
     # Nobody comments yet
@@ -209,7 +209,7 @@ def test_studentassignment_first_submission_at(curator):
     teacher = TeacherCenterFactory.create()
     student = StudentCenterFactory.create()
     co = CourseFactory.create(teachers=[teacher])
-    EnrollmentFactory.create(student=student, course_offering=co)
+    EnrollmentFactory.create(student=student, course=co)
     assignment = AssignmentFactory.create(course_offering=co)
     sa = StudentAssignment.objects.get(assignment=assignment)
     assert sa.first_submission_at is None
@@ -301,8 +301,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         co = CourseFactory.create(teachers=[teacher])
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         for student in students:
-            EnrollmentFactory.create(student=student,
-                                     course_offering=co)
+            EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course_offering=co)
         form = model_to_dict(a)
         deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
@@ -368,7 +367,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
         resp = self.client.get(url)
         self.assertEquals(a, resp.context['assignment'])
         self.assertEquals(0, len(resp.context['a_s_list']))
-        EnrollmentFactory.create(student=student, course_offering=co)
+        EnrollmentFactory.create(student=student, course=co)
         a_s = StudentAssignment.objects.get(student=student, assignment=a)
         resp = self.client.get(url)
         self.assertEquals(a, resp.context['assignment'])
@@ -420,7 +419,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         co = CourseFactory.create(city='spb', semester=s,
                                   teachers=[teacher])
         for student1 in students:
-            EnrollmentFactory.create(student=student1, course_offering=co)
+            EnrollmentFactory.create(student=student1, course=co)
         assignment = AssignmentFactory.create(course_offering=co)
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE)
         # TODO: add wrong term type and check redirect.
@@ -850,7 +849,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     client.login(student_spb)
     response = client.get(task_attachment_url)
     assert response.status_code == 403  # not enrolled in
-    EnrollmentFactory(student=student_spb, course_offering=co)
+    EnrollmentFactory(student=student_spb, course=co)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
     student_spb.status = STUDENT_STATUS.expelled
@@ -862,7 +861,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     response = client.get(task_attachment_url)
     assert response.status_code == 403
     client.login(volunteer_spb)
-    EnrollmentFactory(student=volunteer_spb, course_offering=co)
+    EnrollmentFactory(student=volunteer_spb, course=co)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
     # Check not actual teacher access

@@ -227,7 +227,7 @@ class EnrollmentFactory(factory.DjangoModelFactory):
 
     student = factory.SubFactory(UserFactory,
                                  groups=[PARTICIPANT_GROUPS.STUDENT_CENTER])
-    course_offering = factory.SubFactory(CourseFactory)
+    course = factory.SubFactory(CourseFactory)
 
 
 class AssignmentNotificationFactory(factory.DjangoModelFactory):

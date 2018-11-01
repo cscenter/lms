@@ -149,7 +149,8 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                     most_courses_students.add(s)
                 elif s.passed_courses > most_courses_student.passed_courses:
                     most_courses_students = {s}
-            s.pass_open_courses = sum(e.course_offering.is_open for e in s.enrollments if e.grade not in self.BAD_GRADES)
+            s.pass_open_courses = sum(e.course.is_open for e in s.enrollments
+                                      if e.grade not in self.BAD_GRADES)
             if not most_open_courses_students:
                 most_open_courses_students.add(s)
             else:
@@ -190,20 +191,20 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                 courses_by_term[c.semester_id] += 1
             for enrollment in s.enrollments:
                 # Skip summer courses
-                if enrollment.course_offering.semester.type == SEMESTER_TYPES.summer:
+                if enrollment.course.semester.type == SEMESTER_TYPES.summer:
                     continue
                 if enrollment.grade in self.BAD_GRADES:
                     failed_courses += 1
                     continue
-                courses_by_term[enrollment.course_offering.semester_id] += 1
+                courses_by_term[enrollment.course.semester_id] += 1
                 total_passed_courses += 1
                 if enrollment.grade == GRADES.excellent:
                     excellent_total += 1
                 elif enrollment.grade == GRADES.good:
                     good_total += 1
-                unique_courses.add(enrollment.course_offering.meta_course)
-                total_hours += enrollment.course_offering.courseclass_set.count() * 1.5
-                for teacher in enrollment.course_offering.teachers.all():
+                unique_courses.add(enrollment.course.meta_course)
+                total_hours += enrollment.course.courseclass_set.count() * 1.5
+                for teacher in enrollment.course.teachers.all():
                     unique_teachers.add(teacher.pk)
 
             s.failed_courses = failed_courses
@@ -288,11 +289,11 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             for e in student.enrollments:
                 course = DiplomaCourse(
                     type="course",
-                    name=tex(e.course_offering.meta_course.name),
+                    name=tex(e.course.meta_course.name),
                     teachers=", ".join(t.get_abbreviated_name() for t in
-                                       e.course_offering.teachers.all()),
+                                       e.course.teachers.all()),
                     final_grade=str(e.grade_honest).lower(),
-                    class_count=e.course_offering.courseclass_set.count() * 2
+                    class_count=e.course.courseclass_set.count() * 2
                 )
                 courses.append(course)
             for c in student.shads:
@@ -490,7 +491,7 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
                          queryset=(Enrollment.active
                                    .select_related("student")
                                    .only("pk",
-                                         "course_offering_id",
+                                         "course_id",
                                          "student_id",
                                          "student__username",
                                          "student__first_name",

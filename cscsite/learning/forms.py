@@ -36,8 +36,8 @@ class CourseEnrollmentForm(forms.Form):
         widget=forms.Textarea(),
         required=False)
 
-    def __init__(self, request, course_offering, **kwargs):
-        self.course_offering = course_offering
+    def __init__(self, request, course: Course, **kwargs):
+        self.course = course
         self.request = request
         self._custom_errors = None
         super().__init__(**kwargs)
@@ -49,27 +49,27 @@ class CourseEnrollmentForm(forms.Form):
         if self._custom_errors is not None:
             return not self._custom_errors
         self._custom_errors = []
-        if not self.course_offering.enrollment_is_open:
+        if not self.course.enrollment_is_open:
             error = ValidationError("Course enrollment should be active",
                                     code="deadline")
             self._custom_errors.append(error)
-        if is_club_site() and not self.course_offering.is_open:
+        if is_club_site() and not self.course.is_open:
             error = ValidationError("Club students can't enroll on center "
                                     "courses", code="permissions")
             self._custom_errors.append(error)
         city_code = get_student_city_code(self.request)
-        if (not self.course_offering.is_correspondence
-                and city_code != self.course_offering.get_city()):
+        if (not self.course.is_correspondence
+                and city_code != self.course.get_city()):
             error = ValidationError("Students can enroll in on courses only "
                                     "from their city", code="permissions")
             self._custom_errors.append(error)
         # Reject if capacity limited and no places available
         # XXX: Race condition. Should be placed in save method
-        if self.course_offering.is_capacity_limited:
-            if not self.course_offering.places_left:
+        if self.course.is_capacity_limited:
+            if not self.course.places_left:
                 msg = _("No places available, sorry")
                 messages.error(self.request, msg, extra_tags='timeout')
-                raise Redirect(to=self.course_offering.get_absolute_url())
+                raise Redirect(to=self.course.get_absolute_url())
         return not self._custom_errors
 
 

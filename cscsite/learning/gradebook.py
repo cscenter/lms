@@ -111,13 +111,13 @@ class GradeBookData:
     # Magic "100" constant - width of assignment column
     ASSIGNMENT_COLUMN_WIDTH = 100
 
-    def __init__(self, course_offering, students, assignments, submissions):
+    def __init__(self, course: Course, students, assignments, submissions):
         """
         X-axis of submissions ndarray is students data.
         We make some assertions on that, but still can fail in case
         of NxN array.
         """
-        self.course_offering = course_offering
+        self.course = course
         assert submissions.shape == (len(students), len(assignments))
         self.students = students
         self.assignments = assignments
@@ -139,7 +139,7 @@ class GradeBookData:
         return static_headers + [a.title for a in self.assignments.values()]
 
 
-def gradebook_data(course_offering: Course) -> GradeBookData:
+def gradebook_data(course: Course) -> GradeBookData:
     """
     Returns:
         students = OrderedDict(
@@ -180,7 +180,7 @@ def gradebook_data(course_offering: Course) -> GradeBookData:
     """
     enrolled_students = OrderedDict()
     _enrollments_qs = (Enrollment.active
-                       .filter(course_offering=course_offering)
+                       .filter(course=course)
                        .select_related("student")
                        .order_by("student__last_name", "student_id"))
     for index, e in enumerate(_enrollments_qs.iterator()):
@@ -189,7 +189,7 @@ def gradebook_data(course_offering: Course) -> GradeBookData:
     assignments = OrderedDict()
     assignments_id_to_index = {}
     _assignments_qs = (Assignment.objects
-                       .filter(course_offering_id=course_offering.pk)
+                       .filter(course_offering_id=course.pk)
                        .only("pk",
                              "title",
                              # Assignment constructor caches course id
@@ -205,7 +205,7 @@ def gradebook_data(course_offering: Course) -> GradeBookData:
                            dtype=object)
     _student_assignments_qs = (
         StudentAssignment.objects
-        .filter(assignment__course_offering_id=course_offering.pk)
+        .filter(assignment__course_offering_id=course.pk)
         .only("pk",
               "grade",
               "first_submission_at",  # needs to calculate progress status
@@ -226,7 +226,7 @@ def gradebook_data(course_offering: Course) -> GradeBookData:
                           if s is not None and s.score is not None)
         setattr(enrolled_students[student_id], "total_score", total_score)
 
-    return GradeBookData(course_offering=course_offering,
+    return GradeBookData(course=course,
                          students=enrolled_students,
                          assignments=assignments,
                          submissions=submissions)
@@ -392,7 +392,7 @@ class GradeBookFormFactory:
         for s in gradebook.students.values():
             k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(s.enrollment_id)
             fields[k] = EnrollmentFinalGrade(s)
-        cls_dict["_course_offering"] = gradebook.course_offering
+        cls_dict["_course_offering"] = gradebook.course
         return type("GradebookForm", (BaseGradebookForm,), cls_dict)
 
     @classmethod
@@ -509,7 +509,7 @@ class AssignmentGradesImport:
         logger.debug(msg)
 
         qs = (Enrollment.active
-              .filter(course_offering_id=self.assignment.course_offering_id)
+              .filter(course_id=self.assignment.course_offering_id)
               .only("student_id",
                     f"student__{self.lookup_field}"))
         active_students = {}

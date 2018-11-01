@@ -85,7 +85,7 @@ class UserFilter(FilterSet):
                 When(Q(enrollment__grade=Enrollment.GRADES.not_graded) |
                      Q(enrollment__grade=Enrollment.GRADES.unsatisfactory),
                      then=Value(None)),
-                default=F("enrollment__course_offering__meta_course_id")
+                default=F("enrollment__course__meta_course_id")
             ), distinct=True) +
             Count(Case(
                 When(Q(shadcourserecord__grade=SHADCourseRecord.GRADES.not_graded) |
