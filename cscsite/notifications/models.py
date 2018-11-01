@@ -1,13 +1,12 @@
 from django.conf import settings
+from django.contrib.auth.models import Group
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.utils import timezone
 from django.db import models
-from model_utils import Choices
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from djchoices import DjangoChoices, ChoiceItem
 from jsonfield.fields import JSONField
-
-from django.contrib.auth.models import Group
 
 
 class NotificationQuerySet(models.query.QuerySet):
@@ -122,8 +121,15 @@ class Notification(models.Model):
     """
 
     # Note: not used at all
-    LEVELS = Choices('success', 'info', 'warning', 'error')
-    level = models.CharField(choices=LEVELS, default=LEVELS.info, max_length=20)
+    class LevelTypes(DjangoChoices):
+        success = ChoiceItem()
+        info = ChoiceItem()
+        warning = ChoiceItem()
+        error = ChoiceItem()
+
+    level = models.CharField(choices=LevelTypes.choices,
+                             default=LevelTypes.info,
+                             max_length=20)
 
     type = models.ForeignKey(Type, related_name="+", on_delete=models.CASCADE)
 
