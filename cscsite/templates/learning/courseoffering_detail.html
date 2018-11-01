@@ -10,15 +10,15 @@
     {% if user.is_curator %}{% render_bundle "supervising" "js" %}{% endif %}
 {% endblock javascripts %}
 
-{% block title %}{{ course_offering.meta_course.name }}, {{ course_offering.semester }}{% endblock title %}
+{% block title %}{{ course.meta_course.name }}, {{ course.semester }}{% endblock title %}
 
 {% block content %}{% localtime off %}
-<div class="container" id="course-offering-detail-page" data-id="{{ course_offering.pk }}">
+<div class="container" id="course-offering-detail-page" data-id="{{ course.pk }}">
     <div class="row">
         <div class="col-xs-9">
             <h2 class="course-main-title">
-            {{ course_offering.meta_course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_course_change" course_offering.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
-              <small>{% if course_offering.is_correspondence %}{% trans "Online Course" %}{% else %}{{ course_offering.city.name }}{% endif %} / {{ course_offering.semester }}, <a href="{% url 'course_detail' course_offering.meta_course.slug %}">посмотреть все семестры</a></small>
+            {{ course.meta_course.name }}{% if request.user.is_curator %} <a href="{% url "admin:learning_course_change" course.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
+              <small>{% if course.is_correspondence %}{% trans "Online Course" %}{% else %}{{ course.city.name }}{% endif %} / {{ course.semester }}, <a href="{% url 'meta_course_detail' course.meta_course.slug %}">посмотреть все семестры</a></small>
             </h2>
 
             {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
@@ -40,7 +40,7 @@
                            data-toggle="tab"
                            data-target="#course-{{ tab.target }}"
                            {% if tab_code == "news" %}data-has-unread="{% if unread_news > 0 %}true{% else %}false{% endif %}"{% endif %}
-                           href="{{ course_offering.get_absolute_url }}{{ tab.target }}/">
+                           href="{{ course.get_absolute_url }}{{ tab.target }}/">
                             {{ tab.name }}{% if tab_code == "news" and unread_news > 0 %} <span class="badge badge-success">+{{ unread_news }}</span>{% endif %}
                         </a>
                     </li>
@@ -52,13 +52,13 @@
                 {% with tab=tabs.about %}
                 <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-about">
                     <div class="ubertext course-description">
-                    {% if course_offering.description %}
-                      {% markdown 3600 "course_offering_description" course_offering.pk course_offering.modified %}
-                        {{ course_offering.description }}
+                    {% if course.description %}
+                      {% markdown 3600 "course_description" course.pk course.modified %}
+                        {{ course.description }}
                       {% endmarkdown %}
                     {% else %}
-                      {% markdown 3600 "meta_course" course_offering.meta_course.pk course_offering.meta_course.modified %}
-                        {{ course_offering.meta_course.description }}
+                      {% markdown 3600 "meta_course" course.meta_course.pk course.meta_course.modified %}
+                        {{ course.meta_course.description }}
                       {% endmarkdown %}
                     {% endif %}
                     </div>
@@ -84,7 +84,7 @@
                     <div class="tab-pane {% if tab.target == tabs.active_tab.target %}active{% endif %}" role="tabpanel" id="course-reviews">
                         {% for co in tab.context %}
                             <h4>{{ co.semester|title }}</h4>
-                              {% markdown 3600 "course_offering_reviews" co.pk co.modified %}
+                              {% markdown 3600 "course_reviews" co.pk co.modified %}
                                 {{ co.reviews }}
                               {% endmarkdown %}
                         {% endfor %}
@@ -207,34 +207,34 @@
     {% if user.is_authenticated %}
         <div class="o-buttons-vertical">
             {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-              <a href="{{ course_offering.get_create_assignment_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add assignment" %}</a>
-              <a href="{{ course_offering.get_create_news_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add news" %}</a>
-              <a href="{{ course_offering.get_create_class_url }}" class="btn btn-primary btn-outline btn-block">{% trans 'Add class' %}</a>
-              <a href="{{ course_offering.get_update_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Edit description" %}</a>
+              <a href="{{ course.get_create_assignment_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add assignment" %}</a>
+              <a href="{{ course.get_create_news_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add news" %}</a>
+              <a href="{{ course.get_create_class_url }}" class="btn btn-primary btn-outline btn-block">{% trans 'Add class' %}</a>
+              <a href="{{ course.get_update_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Edit description" %}</a>
             {% endif %}
-            {% if request.user.is_active_student and course_offering.enrollment_is_open %}
-                {% if course_offering.get_city == user_city or course_offering.is_correspondence %}
+            {% if request.user.is_active_student and course.enrollment_is_open %}
+                {% if course.get_city == user_city or course.is_correspondence %}
                     {% if request_user_enrollment is not None %}
-                        <a href="{{ course_offering.get_unenroll_url }}"
+                        <a href="{{ course.get_unenroll_url }}"
                            class="btn btn-danger btn-block">{% trans "Unenroll from the course" %}
                         </a>
                     {% else %}
-                        <a href="{{ course_offering.get_enroll_url }}"
-                           class="btn btn-primary btn-block{% if course_offering.is_capacity_limited and course_offering.places_left == 0 %} disabled{% endif %}">
+                        <a href="{{ course.get_enroll_url }}"
+                           class="btn btn-primary btn-block{% if course.is_capacity_limited and course.places_left == 0 %} disabled{% endif %}">
                             {% trans "Enroll in the course" %}
-                            {% if course_offering.is_capacity_limited and course_offering.places_left > 0 %}
-                                <br><small>{% trans "Places available" %}: {{ course_offering.places_left }}</small>
-                            {% elif course_offering.is_capacity_limited %}
+                            {% if course.is_capacity_limited and course.places_left > 0 %}
+                                <br><small>{% trans "Places available" %}: {{ course.places_left }}</small>
+                            {% elif course.is_capacity_limited %}
                                 <br><small>{% trans "No places available" %}</small>
                             {% endif %}
                         </a>
                     {% endif %}
                 {% endif %}
             {% endif %}
-            {% if course_offering.survey_url %}
+            {% if course.survey_url %}
                 {% if request_user_enrollment is not None or user.is_curator %}
                     <a class=" btn btn-default btn-block btn-success"
-                       href="{{ course_offering.survey_url }}"
+                       href="{{ course.survey_url }}"
                        target="_blank">{% trans "Start survey" %}</a>
                 {% endif %}
             {% endif %}
@@ -261,7 +261,7 @@
         </div>
         {% if teachers.others %}
             <div class="o-users-vlist">
-                <h4 class="text-center">{% if course_offering.is_completed %}Помогали{% else %}Помогают{% endif %} с заданиями</h4>
+                <h4 class="text-center">{% if course.is_completed %}Помогали{% else %}Помогают{% endif %} с заданиями</h4>
                 <ul class="list-unstyled">
                     {% for course_teacher in teachers.others %}
                         {% with teacher=course_teacher.teacher %}

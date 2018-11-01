@@ -54,15 +54,15 @@ def test_assignments(client):
     assert "Задания CSC" == cal['X-WR-CALNAME']
     # Create some content
     as_teaching = (AssignmentFactory
-                   .create_batch(2, course_offering__teachers=[user]))
+                   .create_batch(2, course__teachers=[user]))
     co_learning = CourseFactory.create()
     EnrollmentFactory.create(student=user, course=co_learning)
     as_learning = (AssignmentFactory
-                   .create_batch(3, course_offering=co_learning))
+                   .create_batch(3, course=co_learning))
     as_other = AssignmentFactory.create_batch(5)
     resp = client.get(reverse('user_ical_assignments', args=[user.pk]))
     cal = Calendar.from_ical(resp.content)
-    assert {f"{a.title} ({a.course_offering.meta_course.name})" for a in
+    assert {f"{a.title} ({a.course.meta_course.name})" for a in
             chain(as_teaching, as_learning)} == {
         evt['SUMMARY'] for evt in cal.subcomponents if isinstance(evt, Event)}
 

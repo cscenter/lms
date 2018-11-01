@@ -263,7 +263,7 @@
             <tr>
               <td>
                 {% if a_s.hacky_co_change %}
-                  <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>
+                  <a href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>
                 {% else %}
                   <span style="color: #CCC">—〃—</span>
                 {% endif %}

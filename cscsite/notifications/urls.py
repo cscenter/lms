@@ -7,5 +7,5 @@ app_name = 'notifications'
 urlpatterns = [
     url(r'^course-offerings/news/$',
         CourseNewsNotificationUpdate.as_view(),
-        name='course_offerings__news'),
+        name='course__news'),
 ]

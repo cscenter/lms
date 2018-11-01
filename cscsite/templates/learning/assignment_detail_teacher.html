@@ -13,7 +13,7 @@
       <h2>
         <a href="{% url 'assignment_list_teacher' %}"><span class="fa fa-angle-left"></span></a>
         {{ assignment.title }}<br>
-          <small><a href="{{ assignment.course_offering.get_absolute_url }}">{{ assignment.course_offering }}</a></small>
+          <small><a href="{{ assignment.course.get_absolute_url }}">{{ assignment.course }}</a></small>
       </h2>
       <div class="btn-toolbar">
         <a href="{{ assignment.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>

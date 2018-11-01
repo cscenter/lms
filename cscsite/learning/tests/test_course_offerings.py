@@ -143,9 +143,9 @@ def test_course_assignment_deadline_l10n(settings, client):
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherCenterFactory()
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course_offering__city_id='spb',
-                                   course_offering__teachers=[teacher])
-    co = assignment.course_offering
+                                   course__city_id='spb',
+                                   course__teachers=[teacher])
+    co = assignment.course
     client.login(teacher)
     response = client.get(co.get_url_for_tab('assignments'))
     html = BeautifulSoup(response.content, "html.parser")
@@ -166,12 +166,12 @@ def test_course_is_correspondence(settings, client):
     deadline_at = datetime.datetime(TEST_YEAR, 1, 12, 23, 59, 0, 0,
                                     tzinfo=pytz.UTC)
     assignment = AssignmentFactory(deadline_at=deadline_at,
-                                   course_offering__city_id='spb',
-                                   course_offering__is_correspondence=False)
+                                   course__city_id='spb',
+                                   course__is_correspondence=False)
     teacher_nsk = TeacherCenterFactory(city_id='nsk')
     student_spb = StudentCenterFactory(city_id='spb')
     student_nsk = StudentCenterFactory(city_id='nsk')
-    co = assignment.course_offering
+    co = assignment.course
     # Unauthenticated user doesn't see tab
     url = co.get_url_for_tab("assignments")
     response = client.get(url)
@@ -226,9 +226,9 @@ def test_course_assignment_timezone(settings, client):
     deadline_at = datetime.datetime(TEST_YEAR, 1, 12, 23, 59, 0, 0,
                                     tzinfo=pytz.UTC)
     assignment = AssignmentFactory(deadline_at=deadline_at,
-                                   course_offering__city_id='spb',
-                                   course_offering__is_correspondence=True)
-    co = assignment.course_offering
+                                   course__city_id='spb',
+                                   course__is_correspondence=True)
+    co = assignment.course
     client.login(teacher_nsk)
     url = co.get_url_for_tab("assignments")
     response = client.get(url)
@@ -330,9 +330,9 @@ def test_course_assignments_tab_permissions(client):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
     meta_course = MetaCourseFactory()
-    a = AssignmentFactory(course_offering__semester=prev_term,
-                          course_offering__meta_course=meta_course)
-    co_prev = a.course_offering
+    a = AssignmentFactory(course__semester=prev_term,
+                          course__meta_course=meta_course)
+    co_prev = a.course
     co = CourseFactory(meta_course=meta_course,
                        semester=current_semester)
     teacher = TeacherCenterFactory()

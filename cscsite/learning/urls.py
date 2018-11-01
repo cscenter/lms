@@ -39,7 +39,7 @@ from learning.views.students import StudentAssignmentStudentDetailView, \
 meta_course_patterns = url(
     r"^courses/", include([
         url(r"^(?P<slug>[-\w]+)/$", MetaCourseDetailView.as_view(),
-            name="course_detail"),
+            name="meta_course_detail"),
         url(r"^(?P<slug>[-\w]+)/edit$", MetaCourseUpdateView.as_view(),
             name="meta_course_edit"),
     ]))
@@ -50,36 +50,36 @@ course_patterns = url(
         # TODO: Ещё раз проверить, что во всех вьюхах учитывается city_code
         # Course offering
         url(r"^$", CourseDetailView.as_view(),
-            name="course_offering_detail"),
+            name="course_detail"),
         url(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$",
             CourseDetailView.as_view(),
-            name="course_offering_detail_with_active_tab"),
+            name="course_detail_with_active_tab"),
         url(r"^students/$",
             CourseStudentsView.as_view(),
-            name="course_offering_students"),
+            name="course_students"),
         url(r"^edit$", CourseEditView.as_view(),
-            name="course_offering_update"),
+            name="course_update"),
         # Enroll/Unenroll
         url(r"^enroll$",
             CourseEnrollView.as_view(),
-            name="course_offering_enroll"),
+            name="course_enroll"),
         url(r"^unenroll$",
             CourseUnenrollView.as_view(),
-            name="course_offering_unenroll"),
+            name="course_leave"),
         # News
         url(r"^news/", include([
             url(r"^add$",
                 CourseNewsCreateView.as_view(),
-                name="course_offering_news_create"),
+                name="course_news_create"),
             url(r"^(?P<pk>\d+)/edit$",
                 CourseNewsUpdateView.as_view(),
-                name="course_offering_news_update"),
+                name="course_news_update"),
             url(r"^(?P<pk>\d+)/delete$",
                 CourseNewsDeleteView.as_view(),
-                name="course_offering_news_delete"),
+                name="course_news_delete"),
             url(r"^(?P<news_pk>\d+)/stats$",
                 CourseNewsUnreadNotificationsView.as_view(),
-                name="course_offering_news_unread"),
+                name="course_news_unread"),
         ])),
         # Classes
         url(r"^classes/", include([

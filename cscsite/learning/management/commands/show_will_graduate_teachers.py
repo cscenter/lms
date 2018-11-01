@@ -18,19 +18,19 @@ class Command(BaseCommand):
                                       status=STUDENT_STATUS.will_graduate)
                               .values_list("pk", flat=True))
 
-        # Collect course offering ids among all students
-        co_ids = set()
+        # Collect unique courses among all students
+        courses = set()
         for student_id in will_graduate_list:
             student_courses = (Enrollment.active
                                .filter(student_id=student_id)
                                .exclude(grade__in=[GRADES.unsatisfactory,
                                                    GRADES.not_graded])
-                               .values_list("course_offering_id", flat=True))
+                               .values_list("course_id", flat=True))
             for co_id in student_courses:
-                co_ids.add(co_id)
+                courses.add(co_id)
 
         teachers = (User.objects
-                    .filter(courseteacher__course_offering_id__in=co_ids)
+                    .filter(courseteacher__course_id__in=courses)
                     .only("first_name", "last_name", "patronymic")
                     .distinct())
         for teacher in teachers:

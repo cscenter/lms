@@ -169,7 +169,7 @@ class AssignmentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Assignment
 
-    course_offering = factory.SubFactory(CourseFactory)
+    course = factory.SubFactory(CourseFactory)
     deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
                    + datetime.timedelta(days=1))
     is_online = True
@@ -186,7 +186,7 @@ class AssignmentFactory(factory.DjangoModelFactory):
             for co_teacher in extracted:
                 self.notify_teachers.add(co_teacher)
         else:
-            ts = self.course_offering.course_teachers.all()
+            ts = self.course.course_teachers.all()
             for t in ts:
                 self.notify_teachers.add(t)
 

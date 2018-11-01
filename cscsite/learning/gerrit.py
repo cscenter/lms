@@ -148,7 +148,7 @@ def init_project_for_course(course, skip_users=False):
 
 
 def add_student_to_project(client: Gerrit, student: User, project_name,
-                           project_students_group_uuid, course_offering):
+                           project_students_group_uuid, course: Course):
     # Make sure student group exists
     student_group_uuid = create_user_group(client, student)
     if not student_group_uuid:
@@ -156,7 +156,7 @@ def add_student_to_project(client: Gerrit, student: User, project_name,
     # Permits students read master branch
     client.include_group(project_students_group_uuid, student_group_uuid)
     branch_name = student.get_abbreviated_name_in_latin()
-    if course_offering.is_correspondence:
+    if course.is_correspondence:
         assert student.city_id is not None
         branch_name = f"{student.city_id}/{branch_name}"
     # FIXME: What if already exists?

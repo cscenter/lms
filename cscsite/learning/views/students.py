@@ -60,12 +60,12 @@ class StudentAssignmentStudentDetailView(AssignmentProgressBaseView,
     def has_permissions_precise(self, user):
         sa = self.student_assignment
         # Redirect actual course teacher to teaching/ section
-        if user in sa.assignment.course_offering.teachers.all():
+        if user in sa.assignment.course.teachers.all():
             raise Redirect(to=sa.get_teacher_url())
         # If student failed course, deny access when he has no submissions
         # or positive grade
         if sa.student == user:
-            co = sa.assignment.course_offering
+            co = sa.assignment.course
             if co.failed_by_student(self.request.user):
                 if not sa.has_comments(user) and not sa.grade:
                     return False
@@ -94,16 +94,16 @@ class StudentAssignmentListView(StudentOnlyMixin, ListView):
         self.current_semester = current_semester
         return (StudentAssignment.objects
                 .filter(student=self.request.user,
-                        assignment__course_offering__semester=current_semester)
+                        assignment__course__semester=current_semester)
                 .order_by('assignment__deadline_at',
-                          'assignment__course_offering__meta_course__name',
+                          'assignment__course__meta_course__name',
                           'pk')
                 # FIXME: this prefetch doesn't seem to work properly
                 .prefetch_related('assignmentnotification_set')
                 .select_related('assignment',
-                                'assignment__course_offering',
-                                'assignment__course_offering__meta_course',
-                                'assignment__course_offering__semester',
+                                'assignment__course',
+                                'assignment__course__meta_course',
+                                'assignment__course__semester',
                                 'student'))
 
     def get_context_data(self, **kwargs):
@@ -115,7 +115,7 @@ class StudentAssignmentListView(StudentOnlyMixin, ListView):
         open_, archive = utils.split_on_condition(
             context['assignment_list'],
             lambda sa: sa.assignment.is_open and
-                       sa.assignment.course_offering_id in enrolled_in)
+                       sa.assignment.course_id in enrolled_in)
         archive.reverse()
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive

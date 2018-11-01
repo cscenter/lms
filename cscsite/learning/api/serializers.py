@@ -56,7 +56,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
 class TeacherCourseListingField(serializers.RelatedField):
     def to_representation(self, value):
-        return value.course_offering.meta_course_id
+        return value.course.meta_course_id
 
 
 class TeacherSerializer(serializers.ModelSerializer):
@@ -82,7 +82,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     def get_last_session(self, obj):
         last = 0
         for t in obj.course_teachers.all():
-            last = max(last, t.course_offering.semester.index)
+            last = max(last, t.course.semester.index)
         return last
 
     def get_sex(self, obj: User):

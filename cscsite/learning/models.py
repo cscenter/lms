@@ -67,7 +67,7 @@ class MetaCourse(TimeStampedModel):
         return smart_text(self.name)
 
     def get_absolute_url(self):
-        return reverse('course_detail', args=[self.slug])
+        return reverse('meta_course_detail', args=[self.slug])
 
 
 class Semester(models.Model):
@@ -300,12 +300,12 @@ class Course(TimeStampedModel):
         }
 
     def get_absolute_url(self):
-        return city_aware_reverse('course_offering_detail',
+        return city_aware_reverse('course_detail',
                                   kwargs=self._get_url_kwargs())
 
     def get_url_for_tab(self, active_tab):
         kwargs = {**self._get_url_kwargs(), "tab": active_tab}
-        return city_aware_reverse("course_offering_detail_with_active_tab",
+        return city_aware_reverse("course_detail_with_active_tab",
                                   kwargs=kwargs)
 
     def get_create_assignment_url(self):
@@ -313,7 +313,7 @@ class Course(TimeStampedModel):
                                   kwargs=self._get_url_kwargs())
 
     def get_create_news_url(self):
-        return city_aware_reverse("course_offering_news_create",
+        return city_aware_reverse("course_news_create",
                                   kwargs=self._get_url_kwargs())
 
     def get_create_class_url(self):
@@ -321,15 +321,15 @@ class Course(TimeStampedModel):
                                   kwargs=self._get_url_kwargs())
 
     def get_update_url(self):
-        return city_aware_reverse("course_offering_update",
+        return city_aware_reverse("course_update",
                                   kwargs=self._get_url_kwargs())
 
     def get_enroll_url(self):
-        return city_aware_reverse('course_offering_enroll',
+        return city_aware_reverse('course_enroll',
                                   kwargs=self._get_url_kwargs())
 
     def get_unenroll_url(self):
-        return city_aware_reverse('course_offering_unenroll',
+        return city_aware_reverse('course_leave',
                                   kwargs=self._get_url_kwargs())
 
     def get_gradebook_url(self, for_curator=False, format=None):
@@ -560,7 +560,7 @@ class CourseNews(TimeStampedModel):
         return self.__class__.course.field.name
 
     def get_update_url(self):
-        return city_aware_reverse('course_offering_news_update', kwargs={
+        return city_aware_reverse('course_news_update', kwargs={
             "course_slug": self.course.meta_course.slug,
             "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
@@ -568,7 +568,7 @@ class CourseNews(TimeStampedModel):
         })
 
     def get_stats_url(self):
-        return city_aware_reverse('course_offering_news_unread', kwargs={
+        return city_aware_reverse('course_news_unread', kwargs={
             "course_slug": self.course.meta_course.slug,
             "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
@@ -576,7 +576,7 @@ class CourseNews(TimeStampedModel):
         })
 
     def get_delete_url(self):
-        return city_aware_reverse('course_offering_news_delete', kwargs={
+        return city_aware_reverse('course_news_delete', kwargs={
             "course_slug": self.course.meta_course.slug,
             "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
@@ -868,7 +868,7 @@ class CourseClassAttachment(TimeStampedModel, object):
 
 
 class Assignment(TimeStampedModel):
-    course_offering = models.ForeignKey(
+    course = models.ForeignKey(
         Course,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
@@ -907,14 +907,14 @@ class Assignment(TimeStampedModel):
     objects = AssignmentManager()
 
     class Meta:
-        ordering = ["created", "course_offering"]
+        ordering = ["created", "course"]
         verbose_name = _("Assignment")
         verbose_name_plural = _("Assignments")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.pk:
-            self._original_course_offering_id = self.course_offering_id
+            self._original_course_id = self.course_id
 
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
@@ -926,7 +926,7 @@ class Assignment(TimeStampedModel):
 
     @property
     def city_aware_field_name(self):
-        return self.__class__.course_offering.field.name
+        return self.__class__.course.field.name
 
     def deadline_at_local(self, tz=None):
         if not tz:
@@ -943,32 +943,30 @@ class Assignment(TimeStampedModel):
 
     def get_update_url(self):
         return city_aware_reverse('assignment_update', kwargs={
-            "course_slug": self.course_offering.meta_course.slug,
-            "semester_slug": self.course_offering.semester.slug,
+            "course_slug": self.course.meta_course.slug,
+            "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
         })
 
     def get_delete_url(self):
         return city_aware_reverse('assignment_delete', kwargs={
-            "course_slug": self.course_offering.meta_course.slug,
-            "semester_slug": self.course_offering.semester.slug,
+            "course_slug": self.course.meta_course.slug,
+            "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
             "pk": self.pk
         })
 
     def clean(self):
-        if (self.pk and
-                    self._original_course_offering_id != self.course_offering_id):
-            raise ValidationError(_("Course offering modification "
-                                    "is not allowed"))
+        if self.pk and self._original_course_id != self.course_id:
+            raise ValidationError(_("Course modification is not allowed"))
         if self.grade_min > self.grade_max:
-            raise ValidationError(_("Mininum grade should be lesser than "
+            raise ValidationError(_("Minimum grade should be lesser than "
                                     "(or equal to) maximum one"))
 
     def __str__(self):
         return "{0} ({1})".format(smart_text(self.title),
-                                  smart_text(self.course_offering))
+                                  smart_text(self.course))
 
     def has_unread(self):
         cache = get_unread_notifications_cache()
@@ -1020,11 +1018,11 @@ class AssignmentAttachment(TimeStampedModel, object):
 
     def get_delete_url(self):
         return city_aware_reverse('assignment_attachment_delete', kwargs={
-            "course_slug": self.assignment.course_offering.meta_course.slug,
-            "semester_slug": self.assignment.course_offering.semester.slug,
+            "course_slug": self.assignment.course.meta_course.slug,
+            "semester_slug": self.assignment.course.semester.slug,
             "assignment_pk": self.assignment.pk,
             "pk": self.pk,
-            "city_code": self.assignment.course_offering.get_city(),
+            "city_code": self.assignment.course.get_city(),
         })
 
 
@@ -1439,7 +1437,7 @@ class NonCourseEvent(TimeStampedModel):
         return "{}".format(smart_text(self.name))
 
     def clean(self):
-        super(NonCourseEvent, self).clean()
+        super().clean()
         # ends_at should be later than starts_at
         if self.starts_at >= self.ends_at:
             raise ValidationError(_("Event should end after it's start"))

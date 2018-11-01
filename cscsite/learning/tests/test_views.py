@@ -138,7 +138,7 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
 
 
 class MetaCourseDetailTests(MyUtilitiesMixin, TestCase):
-    def test_course_detail(self):
+    def test_meta_course_detail(self):
         mc = MetaCourseFactory.create()
         s1 = SemesterFactory(year=2016)
         s2 = SemesterFactory(year=2017)
@@ -192,7 +192,7 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
     def test_basic_get(self):
         co = CourseFactory.create()
         assert 200 == self.client.get(co.get_absolute_url()).status_code
-        url = city_aware_reverse('course_offering_detail', kwargs={
+        url = city_aware_reverse('course_detail', kwargs={
             "course_slug": "space-odyssey",
             "semester_slug": "2010",
             "city_code": ""
@@ -246,7 +246,7 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
                                   completed_at=next_day)
         url = co.get_absolute_url()
         EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         self.assertNotContains(self.client.get(url), a.title)
         self.doLogin(student)
         self.assertContains(self.client.get(url), a.title)
@@ -305,7 +305,7 @@ class CourseNewsCreateTests(MyUtilitiesMixin, TestCase):
             self.client.post(self.url, self.n_dict), co_url)
         resp = self.client.get(co_url)
         self.assertContains(resp, self.n_dict['text'])
-        con = resp.context['course_offering'].coursenews_set.all()[0]
+        con = resp.context['course'].coursenews_set.all()[0]
         self.assertEqual(con.author, self.teacher)
 
 
@@ -518,7 +518,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         form['name'] += " foobar"
         self.assertRedirects(self.client.post(base_url, form),
                              cc.get_absolute_url())
-        url = ("{}?back=course_offering"
+        url = ("{}?back=course"
                .format(base_url))
         self.assertRedirects(self.client.post(url, form),
                              co.get_absolute_url())
@@ -606,7 +606,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseFactory(city_id='spb', semester=s,
                            teachers=[teacher])
         EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
@@ -646,7 +646,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
                            semester=past_semester)
         enrollment = EnrollmentFactory(student=student, course=co,
                                        grade=GRADES.unsatisfactory)
-        a = AssignmentFactory(course_offering=co)
+        a = AssignmentFactory(course=co)
         s_a = StudentAssignment.objects.get(student=student, assignment=a)
         assert s_a.grade is None
         self.doLogin(student)
@@ -699,7 +699,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         semester = SemesterFactory.create_current()
         co = CourseFactory.create(city_id='spb', semester=semester)
         EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
@@ -714,7 +714,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseFactory(city_id='spb', teachers=[teacher],
                            semester=semester)
         EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
@@ -731,7 +731,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         # Create open reading to make sure student has access to CO
         co = CourseFactory(city_id='spb', is_open=True)
         EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
@@ -755,7 +755,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
@@ -802,7 +802,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
@@ -824,7 +824,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course_offering=co,
+        a = AssignmentFactory.create(course=co,
                                      grade_max=13)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
@@ -851,8 +851,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         co_other = CourseFactory.create()
         EnrollmentFactory.create(student=student, course=co)
         EnrollmentFactory.create(student=student, course=co_other)
-        a1, a2 = AssignmentFactory.create_batch(2, course_offering=co)
-        a_other = AssignmentFactory.create(course_offering=co_other)
+        a1, a2 = AssignmentFactory.create_batch(2, course=co)
+        a_other = AssignmentFactory.create(course=co_other)
         a_s1 = (StudentAssignment.objects
                 .filter(assignment=a1, student=student)
                 .get())

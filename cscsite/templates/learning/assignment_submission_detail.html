@@ -40,11 +40,11 @@
         {% if user_type == 'student' %}
         <a href="{% url 'assignment_list_student' %}"><span class="fa fa-angle-left"></span></a>
         {{ a_s.assignment.title }} <br>
-            <a class="small" href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>
+            <a class="small" href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>
         {% else %}
         <a href="{% url 'assignment_detail_teacher' a_s.assignment.pk %}"><span class="fa fa-angle-left"></span></a>
         {{ a_s.student.get_short_name }} <br>
-        <small>{{ a_s.assignment.title }} (<a href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>)</small>
+        <small>{{ a_s.assignment.title }} (<a href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>)</small>
         {% endif %}
       </h2>
       {% if user.is_curator or user_type == 'teacher' and is_actual_teacher %}
@@ -138,7 +138,7 @@
                       <h5 class="assignment">{% trans "Professors" %}</h5>
                       {% endif %}
                       <ul class="list-unstyled">
-                        {% for teacher in a_s.assignment.course_offering.teachers.all %}
+                        {% for teacher in a_s.assignment.course.teachers.all %}
                         <li>
                           <a href="{% url 'teacher_detail' teacher.pk %}">
                             {{ teacher.get_full_name }}

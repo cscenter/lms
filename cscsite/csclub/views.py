@@ -41,7 +41,7 @@ class AsyncEmailRegistrationView(RegistrationView):
 
 
 class CalendarClubScheduleView(CalendarGenericView):
-    """Shows all classes from open course offerings."""
+    """Shows all classes from public courses."""
     calendar_type = "public_full"
     template_name = "learning/calendar.html"
 

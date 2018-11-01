@@ -66,7 +66,7 @@ def get_base_url(notification):
     """
     receiver = notification.user
     if isinstance(notification, AssignmentNotification):
-        co = notification.student_assignment.assignment.course_offering
+        co = notification.student_assignment.assignment.course
     elif isinstance(notification, CourseNewsNotification):
         co = notification.course_offering_news.course
     else:
@@ -127,8 +127,8 @@ class Command(BaseCommand):
                 "user__groups",
                 'student_assignment',
                 'student_assignment__assignment',
-                'student_assignment__assignment__course_offering',
-                'student_assignment__assignment__course_offering__meta_course',
+                'student_assignment__assignment__course',
+                'student_assignment__assignment__course__meta_course',
                 'student_assignment__student')
         )
 
@@ -138,7 +138,7 @@ class Command(BaseCommand):
             tz_override = None
             u = notification.user
             # Override timezone to enrolled students if course is online
-            if a_s.assignment.course_offering.is_correspondence and (
+            if a_s.assignment.course.is_correspondence and (
                     u.is_student_center or u.is_volunteer):
                 tz_override = settings.TIME_ZONES[notification.user.city_code]
             context = {
@@ -150,7 +150,7 @@ class Command(BaseCommand):
                 'assignment_text': smart_text(a_s.assignment.text),
                 'student_name': smart_text(a_s.student),
                 'deadline_at': a_s.assignment.deadline_at_local(tz=tz_override),
-                'course_name': smart_text(a_s.assignment.course_offering.meta_course)
+                'course_name': smart_text(a_s.assignment.course.meta_course)
             }
             if notification.is_about_creation:
                 name = 'new_assignment'

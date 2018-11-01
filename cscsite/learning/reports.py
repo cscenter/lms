@@ -607,7 +607,7 @@ class WillGraduateStatsReport(ReportFileOutput):
             # Collect all unique terms among practices, center, shad and
             # club courses
             all_enrollments_terms = enrollments_qs.values_list(
-                "course_offering__semester_id",
+                "course__semester_id",
                 flat=True)
             semesters = {v for v in all_enrollments_terms}
             all_shad_terms = (SHADCourseRecord.objects
@@ -624,7 +624,7 @@ class WillGraduateStatsReport(ReportFileOutput):
             max_in_term_semester_id = 0
             for semester_id in semesters:
                 enrollments_in_term_qs = enrollments_qs.filter(
-                    course_offering__semester_id=semester_id).all()
+                    course__semester_id=semester_id).all()
                 in_term = sum(int(is_positive_grade(e.grade)) for e in
                               enrollments_in_term_qs)
                 projects_in_term_qs = ProjectStudent.objects.filter(

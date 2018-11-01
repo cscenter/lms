@@ -189,11 +189,11 @@ def gradebook_data(course: Course) -> GradeBookData:
     assignments = OrderedDict()
     assignments_id_to_index = {}
     _assignments_qs = (Assignment.objects
-                       .filter(course_offering_id=course.pk)
+                       .filter(course_id=course.pk)
                        .only("pk",
                              "title",
                              # Assignment constructor caches course id
-                             "course_offering_id",
+                             "course_id",
                              "is_online",
                              "grade_max",
                              "grade_min")
@@ -205,7 +205,7 @@ def gradebook_data(course: Course) -> GradeBookData:
                            dtype=object)
     _student_assignments_qs = (
         StudentAssignment.objects
-        .filter(assignment__course_offering_id=course.pk)
+        .filter(assignment__course_id=course.pk)
         .only("pk",
               "grade",
               "first_submission_at",  # needs to calculate progress status
@@ -297,7 +297,7 @@ class BaseGradebookForm(forms.Form):
                 else:
                     final_grade_updated = True
         if final_grade_updated:
-            self._course_offering.recalculate_grading_type()
+            self._course.recalculate_grading_type()
         self._conflicts = bool(errors)
         return errors
 
@@ -392,7 +392,7 @@ class GradeBookFormFactory:
         for s in gradebook.students.values():
             k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(s.enrollment_id)
             fields[k] = EnrollmentFinalGrade(s)
-        cls_dict["_course_offering"] = gradebook.course
+        cls_dict["_course"] = gradebook.course
         return type("GradebookForm", (BaseGradebookForm,), cls_dict)
 
     @classmethod
@@ -509,7 +509,7 @@ class AssignmentGradesImport:
         logger.debug(msg)
 
         qs = (Enrollment.active
-              .filter(course_id=self.assignment.course_offering_id)
+              .filter(course_id=self.assignment.course_id)
               .only("student_id",
                     f"student__{self.lookup_field}"))
         active_students = {}

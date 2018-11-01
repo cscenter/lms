@@ -44,7 +44,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseFactory.create(semester=s)
-        as1 = AssignmentFactory.create_batch(2, course_offering=co)
+        as1 = AssignmentFactory.create_batch(2, course=co)
         self.doLogin(u)
         # no assignments yet
         resp = self.client.get(reverse(self.url_name))
@@ -56,7 +56,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         self.assertEquals(2, len(resp.context['assignment_list_open']))
         self.assertEquals(0, len(resp.context['assignment_list_archive']))
         # add a few assignments, they should show up
-        as2 = AssignmentFactory.create_batch(3, course_offering=co)
+        as2 = AssignmentFactory.create_batch(3, course=co)
         resp = self.client.get(reverse(self.url_name))
         self.assertSameObjects([(StudentAssignment.objects
                                  .get(assignment=a, student=u))
@@ -65,7 +65,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         # Add few old assignments from current semester with expired deadline
         deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
                        - datetime.timedelta(days=1))
-        as_olds = AssignmentFactory.create_batch(2, course_offering=co,
+        as_olds = AssignmentFactory.create_batch(2, course=co,
                                              deadline_at=deadline_at)
         resp = self.client.get(reverse(self.url_name))
         for a in as1 + as2 + as_olds:
@@ -82,11 +82,11 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         # Now add assignment from old semester
         old_s = SemesterFactory.create(year=now_year - 1, type=now_season)
         old_co = CourseFactory.create(semester=old_s)
-        as_past = AssignmentFactory(course_offering=old_co)
+        as_past = AssignmentFactory(course=old_co)
         resp = self.client.get(reverse(self.url_name))
         self.assertNotIn(as_past, resp.context['assignment_list_archive'])
 
-    def test_assignments_from_unenrolled_course_offering(self):
+    def test_assignments_from_unenrolled_course(self):
         """Move to archive active assignments from course offerings
         which student already leave
         """
@@ -95,7 +95,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         s = SemesterFactory.create(year=now_year, type=now_season)
         # Create open co to pass enrollment limit
         co = CourseFactory.create(semester=s, is_open=True)
-        as1 = AssignmentFactory.create_batch(2, course_offering=co)
+        as1 = AssignmentFactory.create_batch(2, course=co)
         self.doLogin(u)
         # enroll at course offering, assignments are shown
         EnrollmentFactory.create(student=u, course=co)
@@ -103,7 +103,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         self.assertEquals(2, len(resp.context['assignment_list_open']))
         self.assertEquals(0, len(resp.context['assignment_list_archive']))
         # Now unenroll from the course
-        form = {'course_offering_pk': co.pk}
+        form = {'course_pk': co.pk}
         response = self.client.post(co.get_unenroll_url(), form)
         resp = self.client.get(reverse(self.url_name))
         self.assertEquals(0, len(resp.context['assignment_list_open']))
@@ -122,7 +122,7 @@ def test_security_assignmentstudent_detail(client, settings):
     co = CourseFactory(teachers=[teacher], semester=past_semester)
     enrollment = EnrollmentFactory(student=student, course=co,
                                    grade=GRADES.unsatisfactory)
-    a = AssignmentFactory(course_offering=co)
+    a = AssignmentFactory(course=co)
     a_s = StudentAssignment.objects.get(student=student, assignment=a)
     url = a_s.get_student_url()
     client.login(student)
@@ -142,7 +142,7 @@ def test_security_courseoffering_detail(client):
     co = CourseFactory(teachers=[teacher], semester__year=past_year)
     enrollment = EnrollmentFactory(student=student, course=co,
                                    grade=GRADES.unsatisfactory)
-    a = AssignmentFactory(course_offering=co)
+    a = AssignmentFactory(course=co)
     co.refresh_from_db()
     assert co.failed_by_student(student)
     client.login(student)
@@ -173,7 +173,7 @@ def test_assignment_contents(client):
     # Problem can be related to pytest, django tests or factory-boy
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
-    a = AssignmentFactory.create(course_offering=co)
+    a = AssignmentFactory.create(course=co)
     a_s = (StudentAssignment.objects
            .filter(assignment=a, student=student)
            .get())
@@ -191,7 +191,7 @@ def test_studentassignment_last_comment_from():
     co = CourseFactory.create(city_id='spb', semester=s,
                               teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
-    assignment = AssignmentFactory.create(course_offering=co)
+    assignment = AssignmentFactory.create(course=co)
     sa = StudentAssignment.objects.get(assignment=assignment)
     # Nobody comments yet
     assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_NOBODY
@@ -210,7 +210,7 @@ def test_studentassignment_first_submission_at(curator):
     student = StudentCenterFactory.create()
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
-    assignment = AssignmentFactory.create(course_offering=co)
+    assignment = AssignmentFactory.create(course=co)
     sa = StudentAssignment.objects.get(assignment=assignment)
     assert sa.first_submission_at is None
     AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
@@ -238,7 +238,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         teacher = TeacherCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
         form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
-        form.update({'course_offering': co.pk,
+        form.update({'course': co.pk,
                      'attached_file': None})
         url = co.get_create_assignment_url()
         self.assertLoginRedirect(url)
@@ -287,7 +287,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
         deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
         deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
-        form.update({'course_offering': co.pk,
+        form.update({'course': co.pk,
                      'attached_file': None,
                      'deadline_at_0': deadline_date,
                      'deadline_at_1': deadline_time})
@@ -302,12 +302,12 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
         for student in students:
             EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         form = model_to_dict(a)
         deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
         deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
         form.update({'title': a.title + " foo42bar",
-                     'course_offering': co.pk,
+                     'course': co.pk,
                      'attached_file': None,
                      'deadline_at_0': deadline_date,
                      'deadline_at_1': deadline_time})
@@ -323,7 +323,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
     def test_delete(self):
         teacher = TeacherCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         url = a.get_delete_url()
         list_url = reverse('assignment_list_teacher')
         self.doLogin(teacher)
@@ -336,7 +336,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
 class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
-        a = AssignmentFactory.create(course_offering__teachers=[teacher])
+        a = AssignmentFactory.create(course__teachers=[teacher])
         url = reverse('assignment_detail_teacher', args=[a.pk])
         self.assertLoginRedirect(url)
         test_groups = [
@@ -361,7 +361,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseFactory.create(city='spb', semester=s,
                                   teachers=[teacher])
-        a = AssignmentFactory.create(course_offering=co)
+        a = AssignmentFactory.create(course=co)
         self.doLogin(teacher)
         url = reverse('assignment_detail_teacher', args=[a.pk])
         resp = self.client.get(url)
@@ -410,7 +410,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         s = SemesterFactory.create(year=now_year, type=now_season)
         # some other teacher's course offering
         co_other = CourseFactory.create(city='spb', semester=s)
-        AssignmentFactory.create_batch(2, course_offering=co_other)
+        AssignmentFactory.create_batch(2, course=co_other)
         self.doLogin(teacher)
         # no course offerings yet, return 302
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE)
@@ -420,7 +420,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
                                   teachers=[teacher])
         for student1 in students:
             EnrollmentFactory.create(student=student1, course=co)
-        assignment = AssignmentFactory.create(course_offering=co)
+        assignment = AssignmentFactory.create(course=co)
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE)
         # TODO: add wrong term type and check redirect.
         # By default we show all submissions without grades
@@ -511,7 +511,7 @@ def test_assignment_admin_view(settings, admin_client):
     co_in_spb = CourseFactory(city_id='spb')
     co_in_nsk = CourseFactory(city_id='nsk')
     form_data = {
-        "course_offering": "",
+        "course": "",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00:00",
         "title": "title",
@@ -529,7 +529,7 @@ def test_assignment_admin_view(settings, admin_client):
     time_input = widget.find('input', {"name": 'deadline_at_1'})
     assert time_input.get('value') == '00:00:00'
     # Send valid data
-    form_data["course_offering"] = co_in_spb.pk
+    form_data["course"] = co_in_spb.pk
     response = admin_client.post(add_url, form_data, follow=True)
     assert response.status_code == 200
     message = list(response.context['messages'])[0]
@@ -554,9 +554,9 @@ def test_assignment_admin_view(settings, admin_client):
     response = admin_client.post(change_url, form_data)
     assert response.status_code == 302
     assignment.refresh_from_db()
-    assert assignment.course_offering_id == co_in_spb.pk
+    assert assignment.course_id == co_in_spb.pk
     # But do it manually to test widget
-    assignment.course_offering = co_in_nsk
+    assignment.course = co_in_nsk
     assignment.save()
     form_data["deadline_at_1"] = "00:00:00"
     response = admin_client.post(change_url, form_data)
@@ -568,8 +568,8 @@ def test_assignment_admin_view(settings, admin_client):
     assert time_input.get('value') == '00:00:00'
     assert assignment.deadline_at.hour == 17  # UTC +7 in nsk
     assert assignment.deadline_at.minute == 0
-    # Update course_offering and deadline time
-    assignment.course_offering = co_in_spb
+    # Update course and deadline time
+    assignment.course = co_in_spb
     assignment.save()
     form_data["deadline_at_1"] = "06:00:00"
     response = admin_client.post(change_url, form_data)
@@ -584,7 +584,7 @@ def test_assignment_admin_view(settings, admin_client):
     assert assignment.deadline_at.minute == 0
     # Update course offering and deadline, but choose values when
     # UTC time shouldn't change
-    assignment.course_offering = co_in_nsk
+    assignment.course = co_in_nsk
     assignment.save()
     form_data["deadline_at_1"] = "10:00:00"
     response = admin_client.post(change_url, form_data)
@@ -597,7 +597,7 @@ def test_assignment_admin_view(settings, admin_client):
     assert time_input.get('value') == '10:00:00'
     assert assignment.deadline_at.hour == 3
     assert assignment.deadline_at.minute == 0
-    assert assignment.course_offering_id == co_in_nsk.pk
+    assert assignment.course_id == co_in_nsk.pk
 
 
 @pytest.mark.django_db
@@ -623,7 +623,7 @@ def test_assignment_public_form_for_teachers(settings, client):
     assert assignment.deadline_at.day == 28
     assert assignment.deadline_at.hour == 21
     assert assignment.deadline_at.minute == 0
-    assert assignment.course_offering_id == co_in_spb.pk
+    assert assignment.course_id == co_in_spb.pk
     tz_diff = datetime.timedelta(hours=3)  # UTC+3 for msk timezone
     assert assignment.deadline_at_local().utcoffset() == tz_diff
     # Check widget shows local time
@@ -641,7 +641,7 @@ def test_assignment_public_form_for_teachers(settings, client):
     assert response.status_code == 200
     assert Assignment.objects.count() == 2
     assignment_last = Assignment.objects.order_by("pk").last()
-    assert assignment_last.course_offering_id == co_in_nsk.pk
+    assert assignment_last.course_id == co_in_nsk.pk
     tz_diff = datetime.timedelta(hours=7)  # UTC+7 for nsk timezone
     assert assignment_last.deadline_at_local().utcoffset() == tz_diff
     assert assignment_last.deadline_at.hour == 17
@@ -653,8 +653,8 @@ def test_assignment_deadline_display_for_teacher(settings, client):
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherCenterFactory()
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course_offering__city_id='spb',
-                                   course_offering__teachers=[teacher])
+                                   course__city_id='spb',
+                                   course__teachers=[teacher])
     url_for_teacher = reverse("assignment_detail_teacher",
                               kwargs={"pk": assignment.pk})
     client.login(teacher)
@@ -688,9 +688,9 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     # assignments page since course offering semester set to current
     current_term = SemesterFactory.create_current()
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course_offering__city_id='spb',
-                                   course_offering__is_correspondence=False,
-                                   course_offering__semester_id=current_term.pk)
+                                   course__city_id='spb',
+                                   course__is_correspondence=False,
+                                   course__semester_id=current_term.pk)
     sa = StudentAssignmentFactory(assignment=assignment, student__city_id='spb')
     student = sa.student
     client.login(student)
@@ -728,9 +728,9 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     # center students
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     assignment_nsk = AssignmentFactory(deadline_at=dt,
-                                       course_offering__city_id='nsk',
-                                       course_offering__is_correspondence=True,
-                                       course_offering__semester=current_term)
+                                       course__city_id='nsk',
+                                       course__is_correspondence=True,
+                                       course__semester=current_term)
     StudentAssignmentFactory(assignment=assignment_nsk, student=student)
     client.login(student)
     response = client.get(url_learning_assignments)
@@ -765,7 +765,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
 def test_first_comment_after_deadline(client):
     dt = datetime.datetime(2017, 1, 1, 23, 58, 0, 0, tzinfo=pytz.UTC)
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course_offering__city_id='spb')
+                                   course__city_id='spb')
     sa = StudentAssignmentFactory(assignment=assignment, student__city_id='spb')
     student = sa.student
     comment = AssignmentCommentFactory.create(student_assignment=sa,
@@ -792,7 +792,7 @@ def test_studentassignment_submission_grade(client):
     """
     sa = StudentAssignmentFactory()
     teacher = TeacherCenterFactory.create()
-    CourseTeacherFactory(course=sa.assignment.course_offering,
+    CourseTeacherFactory(course=sa.assignment.course,
                          teacher=teacher)
     sa.assignment.grade_min = 1
     sa.assignment.grade_max = 10
@@ -830,7 +830,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     tmp_file = tmpdir.mkdir("attachment").join("attachment.txt")
     tmp_file.write("content")
-    form.update({'course_offering': co.pk,
+    form.update({'course': co.pk,
                  'attachments': tmp_file.open(),
                  'deadline_at_0': deadline_date,
                  'deadline_at_1': deadline_time})

@@ -316,13 +316,13 @@
                                     <th>{% trans "Assignment" %}</th>
                                     <th>{% trans "Grade" %}</th>
                                 </tr>
-                                {% regroup assignments by assignment.course_offering_id as student_assignments_by_course %}
+                                {% regroup assignments by assignment.course_id as student_assignments_by_course %}
                                 {% for student_assignments in student_assignments_by_course %}
                                     {% for a_s in student_assignments.list %}
                                         <tr>
                                             <td>
                                                 {% if forloop.first %}
-                                                    <a href="{{ a_s.assignment.course_offering.get_absolute_url }}">{{ a_s.assignment.course_offering }}</a>
+                                                    <a href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>
                                                 {% else %}
                                                     <span style="color: #CCC">—〃—</span>
                                                 {% endif %}
