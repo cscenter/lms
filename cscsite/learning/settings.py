@@ -46,9 +46,7 @@ STUDENT_STATUS = getattr(settings, 'STUDENT_STATUS',
                                  ('reinstated', _("StudentInfo|Reinstalled")),
                                  ('will_graduate', _("StudentInfo|Will graduate"))))
 
-GRADING_TYPES = getattr(
-    settings,
-    'GRADE_TYPES',
+GRADING_TYPES = getattr(settings, 'GRADE_TYPES',
     Choices((0, 'default', _("Default")),  # 4 state, if graded
             (1, 'binary', _("Binary"))))  # (un)satisfy, if graded
 
