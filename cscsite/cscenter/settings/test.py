@@ -40,21 +40,9 @@ for template in TEMPLATES:
 
 MEDIA_ROOT = '/tmp/django_test_media/'
 
-
-class DisableMigrations(object):
-    def __contains__(self, item):
-        return True
-
-    def __getitem__(self, item):
-        return "notmigrations"
-
-
-# disable migration in tests; it's a hack until Django 1.8 with --keepdb
-# MIGRATION_MODULES = DisableMigrations()
 MIGRATION_MODULES = {}
 
 LANGUAGE_CODE = 'en'
-
 
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
