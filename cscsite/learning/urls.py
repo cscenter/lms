@@ -28,7 +28,7 @@ from learning.views.gradebook import GradeBookTeacherView, \
     GradeBookTeacherDispatchView, GradeBookTeacherCSVView, \
     AssignmentGradesImportByStepikIDView, \
     AssignmentGradesImportByYandexLoginView
-from learning.views.course_offering import CourseEditView, \
+from learning.views.course_views import CourseEditView, \
     CourseNewsCreateView, CourseNewsUpdateView, \
     CourseNewsDeleteView, CourseNewsUnreadNotificationsView, \
     CourseStudentsView

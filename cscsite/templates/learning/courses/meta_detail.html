@@ -6,10 +6,10 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-12 h2-and-buttons">
-                <h2>{{ course.name }}</h2>
+                <h2>{{ meta_course.name }}</h2>
                 {% if user.is_curator %}
                     <div class="btn-toolbar">
-                        <a href="{% url 'meta_course_edit' course.slug %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+                        <a href="{% url 'meta_course_edit' meta_course.slug %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
                     </div>
                 {% endif %}
                 <hr>
@@ -18,27 +18,26 @@
         <div class="row">
             <div class="col-xs-12">
                 <div class="ubertext">
-                    {% markdown 3600 "course_description" course.pk course.modified %}
-                        {{ course.description }}
+                    {% markdown 3600 "course_description" meta_course.pk meta_course.modified %}
+                        {{ meta_course.description }}
                     {% endmarkdown %}
                 </div>
-                <h4>{% trans 'Course offerings' %}</h4>
-                {% if offerings %}
+                <h4>{% trans 'Course Offerings' %}</h4>
+                {% if courses %}
                     <table class="table" width="100%">
                         <tr class="active">
                             <th>{% trans "Semester" %}</th>
                             {% if show_city %}<th width="20%">{% trans "City" %}</th>{% endif %}
                         </tr>
-                        {% for offering in offerings %}
+                        {% for course in courses %}
                             <tr>
                                 <td>
-                                    <a href="{{ offering.get_absolute_url }}">{{ offering.semester }}</a> {% if offering.is_correspondence %}<span class="text-muted">{% trans "Online Course" %}</span>{% endif %}
+                                    <a href="{{ course.get_absolute_url }}">{{ course.semester }}</a> {% if course.is_correspondence %}<span class="text-muted">{% trans "Online Course" %}</span>{% endif %}
                                 </td>
-                                {% if show_city %}<td>{{ offering.city }}</td>{% endif %}
+                                {% if show_city %}<td>{{ course.city }}</td>{% endif %}
                             </tr>
                         {% endfor %}
                     </table>
-                    </ul>
                 {% else %}
                     Прочтений данного курса пока не было.
                 {% endif %}

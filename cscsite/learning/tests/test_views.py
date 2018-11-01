@@ -150,12 +150,12 @@ class MetaCourseDetailTests(MyUtilitiesMixin, TestCase):
         self.assertContains(response, mc.name)
         self.assertContains(response, mc.description)
         # Course offerings not repeated, used set to compare
-        assert {c.pk for c in response.context['offerings']} == {co1.pk, co2.pk}
+        assert {c.pk for c in response.context['courses']} == {co1.pk, co2.pk}
         co2.city_id = "kzn"
         co2.save()
         response = self.client.get(mc.get_absolute_url())
         if settings.SITE_ID == settings.CENTER_SITE_ID:
-            assert {c.pk for c in response.context['offerings']} == {co1.pk}
+            assert {c.pk for c in response.context['courses']} == {co1.pk}
 
 
 class MetaCourseUpdateTests(MyUtilitiesMixin, TestCase):

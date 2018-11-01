@@ -404,20 +404,20 @@ class CourseVideoListView(ListView):
 
 class MetaCourseDetailView(generic.DetailView):
     model = MetaCourse
-    template_name = "learning/courses/detail.html"
-    context_object_name = 'course'
+    template_name = "learning/courses/meta_detail.html"
+    context_object_name = 'meta_course'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = (Course.objects
-              .select_related("meta_course", "semester", "city")
-              .filter(meta_course=self.object))
+        courses = (Course.objects
+                   .select_related("meta_course", "semester", "city")
+                   .filter(meta_course=self.object))
         # Separate by city only on compsciclub.ru
         if is_club_site():
-            qs = qs.in_city(self.request.city_code)
+            courses = courses.in_city(self.request.city_code)
         else:
-            qs = qs.in_center_branches()
-        context['offerings'] = qs
+            courses = courses.in_center_branches()
+        context['courses'] = courses
         context["show_city"] = not is_club_site()
         return context
 
