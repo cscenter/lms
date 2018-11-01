@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
 
-import os
 import math
+import os
 
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
-from django.urls import reverse
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q
-from django.utils.encoding import python_2_unicode_compatible, smart_text
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.translation import ugettext_lazy as _
-from model_utils import Choices
+from djchoices import DjangoChoices, ChoiceItem
 from model_utils.models import TimeStampedModel
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.utils import hashids
 from learning.models import Semester
 from learning.settings import GRADES, PARTICIPANT_GROUPS
-from learning.utils import get_current_term_pair, get_term_index, \
-    get_current_term_index, now_local
+from learning.utils import get_current_term_index, now_local
 
 # Calculate mean scores for these fields when review has been completed
 REVIEW_SCORE_FIELDS = [
@@ -125,7 +124,7 @@ class ProjectStudent(models.Model):
         """
         final_grade = GRADES[self.final_grade]
         # For research work grade type is binary at most
-        if self.project.project_type == Project.PROJECT_TYPES.research:
+        if self.project.project_type == Project.ProjectTypes.research:
             return final_grade
         # XXX: Assume all projects >= spring 2016 have id > magic number
         MAGIC_ID = 357
@@ -148,8 +147,10 @@ def project_presentation_files(self, filename):
 @python_2_unicode_compatible
 class Project(TimeStampedModel):
     GRADES = GRADES
-    PROJECT_TYPES = Choices(('practice', _("StudentProject|Practice")),
-                            ('research', _("StudentProject|Research")))
+
+    class ProjectTypes(DjangoChoices):
+        practice = ChoiceItem('practice', _("StudentProject|Practice"))
+        research = ChoiceItem('research', _("StudentProject|Research"))
 
     name = models.CharField(_("StudentProject|Name"), max_length=255)
     description = models.TextField(
@@ -188,7 +189,7 @@ class Project(TimeStampedModel):
         on_delete=models.CASCADE,
         verbose_name=_("Semester"))
     project_type = models.CharField(
-        choices=PROJECT_TYPES,
+        choices=ProjectTypes.choices,
         verbose_name=_("StudentProject|Type"),
         max_length=10)
     presentation = models.FileField(
