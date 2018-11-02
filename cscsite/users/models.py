@@ -708,7 +708,6 @@ class User(LearningPermissionsMixin, AbstractUser):
         }
 
 
-@python_2_unicode_compatible
 class OnlineCourseRecord(TimeStampedModel):
     student = models.ForeignKey(
         User,
@@ -725,7 +724,6 @@ class OnlineCourseRecord(TimeStampedModel):
         return smart_text(self.name)
 
 
-@python_2_unicode_compatible
 class SHADCourseRecord(TimeStampedModel):
     GRADES = GRADES
     student = models.ForeignKey(

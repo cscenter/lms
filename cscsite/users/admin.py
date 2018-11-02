@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ImportMixin
 
 from core.models import RelatedSpecMixin
-from core.widgets import AdminRichTextAreaWidget
+from core.widgets import AdminRichTextAreaWidget, AdminRelatedDropdownFilter
 from learning.settings import PARTICIPANT_GROUPS
 from .import_export import UserRecordResource
 from .models import User, EnrollmentCertificate, \
@@ -170,6 +170,12 @@ class UserAdmin(UserAdmin):
 
 
 class SHADCourseRecordAdmin(admin.ModelAdmin):
+    list_display = ["name", "student", "grade"]
+    list_filter = [
+        "student__city",
+        ("semester", AdminRelatedDropdownFilter)
+    ]
+
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = User.objects.filter(groups__in=[
