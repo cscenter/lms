@@ -6,6 +6,8 @@ import requests
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
+# TODO: refactoring based on this article https://medium.com/@hakibenita/working-with-apis-the-pythonic-way-484784ed1ce0 (see exceptions part)
+
 logger = logging.getLogger(__name__)
 
 GERRIT_MAGIC_JSON_PREFIX = b")]}\'\n"

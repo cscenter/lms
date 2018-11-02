@@ -9,22 +9,21 @@ from django import forms
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.forms import SelectMultiple
 from django.forms.models import ModelForm
-from django_filters.conf import settings as filters_settings
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from model_utils import Choices
+from django_filters.conf import settings as filters_settings
 
 from core.models import University
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
 from learning.admission.models import Interview, Comment, Applicant, \
-    InterviewAssignment, InterviewSlot, InterviewStream, Campaign
+    InterviewAssignment, InterviewSlot, InterviewStream
+from learning.settings import AcademicDegreeYears
 from learning.utils import now_local
-from users.models import User, GITHUB_ID_VALIDATOR
+from users.models import GITHUB_ID_VALIDATOR
 
-COURSES = Choices(('', '', '--------')) + User.COURSES
+DEGREE_YEAR_CHOICES = ('', '', '--------') + AcademicDegreeYears.choices
 WHERE_DID_YOU_LEARN = (
     ('uni', 'плакат/листовка в университете'),
     ('social_net', 'пост в соц. сетях'),
@@ -142,7 +141,7 @@ class ApplicationFormStep2(forms.ModelForm):
         widget=forms.RadioSelect
     )
     course = forms.ChoiceField(label='Курс, на котором вы учитесь',
-                               choices=COURSES)
+                               choices=DEGREE_YEAR_CHOICES)
     where_did_you_learn = forms.MultipleChoiceField(
         label='Откуда вы узнали о CS центре?',
         choices=WHERE_DID_YOU_LEARN,

@@ -32,7 +32,7 @@ from learning.models import Semester, Course, StudyProgram, \
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
-    GRADES, CENTER_FOUNDATION_YEAR
+    GRADES, CENTER_FOUNDATION_YEAR, AcademicDegreeYears
 from learning.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
@@ -135,7 +135,8 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             if len(s.areas_of_study.all()) >= 2:
                 finished_two_or_more_programs.add(s)
             by_enrollment_year[s.enrollment_year].add(s)
-            if s.uni_year_at_enrollment == User.COURSES.BACHELOR_SPECIALITY_1 or (hasattr(s, "applicant") and s.applicant.course == User.COURSES.BACHELOR_SPECIALITY_1):
+            degree_year = AcademicDegreeYears.BACHELOR_SPECIALITY_1
+            if s.uni_year_at_enrollment == degree_year:
                 enrolled_on_first_course.add(s)
             # Count most_courses_students
             s.passed_courses = sum(1 for e in s.enrollments if e.grade not in self.BAD_GRADES)

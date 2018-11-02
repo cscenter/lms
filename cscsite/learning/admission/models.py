@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import datetime
 import uuid
 from collections import OrderedDict
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models import query, Q
-from django.urls import reverse
-from django.core.validators import RegexValidator, MinValueValidator, \
+from django.core.validators import MinValueValidator, \
     MaxValueValidator
 from django.db import models, transaction
+from django.db.models import query, Q
+from django.urls import reverse
 from django.utils import timezone, numberformat
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
-from jsonfield import JSONField
 from django.utils.translation import ugettext_lazy as _
+from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
 from post_office import mail
@@ -25,13 +24,11 @@ from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
 from core.db.models import GradeField
-from core.models import City, University, LATEX_MARKDOWN_HTML_ENABLED
+from core.models import City, University
 from learning.models import Venue
 from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR, \
-    DATE_FORMAT_RU
-from learning.utils import get_current_term_pair
+    AcademicDegreeYears
 from users.models import User
-
 
 WITH_ASSIGNMENTS_TEXT = """
 Сперва мы предложим Вам решить несколько задач в течение получаса, а само 
@@ -268,7 +265,7 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|faculty"))
     course = models.CharField(
         _("Course"),
-        choices=User.COURSES,
+        choices=AcademicDegreeYears.choices,
         help_text=_("Applicant|course"),
         max_length=355)
     graduate_work = models.TextField(

@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from import_export import resources, fields, widgets
 
-from learning.settings import GRADES, SEMESTER_TYPES
+from learning.settings import GRADES, SEMESTER_TYPES, AcademicDegreeYears
 from learning.utils import now_local
 from .models import User, SHADCourseRecord
 
@@ -72,19 +72,20 @@ class SHADCourseRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
 
 
 class UserCourseWidget(widgets.IntegerWidget):
-    MAPPING = {v.lower(): k for k, v in User.COURSES._display_map.items()}
-
-    def clean(self, value, row=None, *args, **kwargs):
-        if self.is_empty(value):
+    def clean(self, label, row=None, *args, **kwargs):
+        if self.is_empty(label):
             return None
+        # Key values depend on activated language, aggregate at runtime
+        # TODO: seems translation should works even with class attribute. Write test to prove it
+        mapping = {v.lower(): k for k, v in AcademicDegreeYears.values.items()}
         # Replace non-breaking space and tabs with common white space
-        value = value.replace(u'\xa0', u' ')
-        if value in self.MAPPING:
-            return self.MAPPING[value]
-        raise ValueError(f'Course should be one of {self.MAPPING}')
+        label = label.replace(u'\xa0', u' ')
+        if label in mapping:
+            return mapping[label]
+        raise ValueError(f'Course should be one of {mapping}')
 
     def render(self, value, obj=None):
-        return User.COURSES[value]
+        return AcademicDegreeYears.values[value]
 
 
 class UserEmailWidget(widgets.CharWidget):
