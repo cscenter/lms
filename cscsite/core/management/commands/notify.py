@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import logging
 from datetime import datetime
 
 from django.apps import apps
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-from django.core.management.base import BaseCommand, CommandError
-from django.urls import reverse
+from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
 from django.utils import translation
 from django.utils.encoding import smart_text
@@ -17,9 +14,8 @@ from django.utils.html import strip_tags, linebreaks
 
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
-from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER, PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from notifications import types as notification_types
-from notifications.models import Type
 
 logger = logging.getLogger(__name__)
 
@@ -52,10 +48,10 @@ EMAILS = {
 
 # Student and teacher groups which can access center site.
 LEARNING_PARTICIPANTS_CENTER = {
-    PARTICIPANT_GROUPS.STUDENT_CENTER,
-    PARTICIPANT_GROUPS.VOLUNTEER,
-    PARTICIPANT_GROUPS.GRADUATE_CENTER,
-    PARTICIPANT_GROUPS.TEACHER_CENTER,
+    AcademicRoles.STUDENT_CENTER,
+    AcademicRoles.VOLUNTEER,
+    AcademicRoles.GRADUATE_CENTER,
+    AcademicRoles.TEACHER_CENTER,
 }
 
 

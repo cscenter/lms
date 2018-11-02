@@ -8,11 +8,11 @@ from django.utils import timezone
 
 from learning.factories import CourseClassFactory, NonCourseEventFactory, \
     CourseFactory, EnrollmentFactory, VenueFactory
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import flatten_calendar_month_events
-from users.factories import UserFactory, StudentCenterFactory, \
+from users.factories import StudentCenterFactory, \
     TeacherCenterFactory
 
 
@@ -30,7 +30,7 @@ from users.factories import UserFactory, StudentCenterFactory, \
 class CalendarTeacherTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, TestCase):
     url_name = 'calendar_teacher'
-    groups_allowed = [PARTICIPANT_GROUPS.TEACHER_CENTER]
+    groups_allowed = [AcademicRoles.TEACHER_CENTER]
 
     def test_teacher_calendar(self):
         teacher = TeacherCenterFactory(city_id='spb')
@@ -83,7 +83,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
 class CalendarStudentTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, TestCase):
     url_name = 'calendar_student'
-    groups_allowed = [PARTICIPANT_GROUPS.STUDENT_CENTER]
+    groups_allowed = [AcademicRoles.STUDENT_CENTER]
 
     def test_student_calendar(self):
         student = StudentCenterFactory(city_id='spb')

@@ -1,8 +1,8 @@
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 
 GROUPS_IMPORT_TO_GERRIT = [
-    PARTICIPANT_GROUPS.STUDENT_CENTER,
-    PARTICIPANT_GROUPS.VOLUNTEER,
-    PARTICIPANT_GROUPS.TEACHER_CENTER,
-    PARTICIPANT_GROUPS.GRADUATE_CENTER
+    AcademicRoles.STUDENT_CENTER,
+    AcademicRoles.VOLUNTEER,
+    AcademicRoles.TEACHER_CENTER,
+    AcademicRoles.GRADUATE_CENTER
 ]

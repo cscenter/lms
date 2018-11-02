@@ -16,7 +16,7 @@ from learning.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory, CourseNewsFactory, AssignmentFactory, \
     CourseTeacherFactory, CourseClassFactory, EnrollmentFactory
 from learning.models import Semester, Enrollment, CourseNews
-from learning.settings import PARTICIPANT_GROUPS, SemesterTypes
+from learning.settings import AcademicRoles, SemesterTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 
@@ -234,7 +234,7 @@ def test_course_assignment_timezone(settings, client):
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] == settings.TIME_ZONES['nsk']
-    teacher_nsk.groups.add(PARTICIPANT_GROUPS.STUDENT_CENTER)
+    teacher_nsk.groups.add(AcademicRoles.STUDENT_CENTER)
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] == settings.TIME_ZONES['nsk']

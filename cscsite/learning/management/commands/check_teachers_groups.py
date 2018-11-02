@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from django.core.management import BaseCommand
 
 from learning.models import Course
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from users.models import User
 
 
@@ -35,12 +35,12 @@ class Command(BaseCommand):
         # Ok, try to update teacher groups, looks as hell, but it works
         for teacher in teachers:
             if teachers[teacher]["state"] == self.BOTH:
-                teachers[teacher]["obj"].groups.add(PARTICIPANT_GROUPS.TEACHER_CENTER)
-                teachers[teacher]["obj"].groups.add(PARTICIPANT_GROUPS.TEACHER_CLUB)
+                teachers[teacher]["obj"].groups.add(AcademicRoles.TEACHER_CENTER)
+                teachers[teacher]["obj"].groups.add(AcademicRoles.TEACHER_CLUB)
             elif teachers[teacher]["state"] == self.CLUB_ONLY:
-                teachers[teacher]["obj"].groups.add(PARTICIPANT_GROUPS.TEACHER_CLUB)
-                teachers[teacher]["obj"].groups.remove(PARTICIPANT_GROUPS.TEACHER_CENTER)
+                teachers[teacher]["obj"].groups.add(AcademicRoles.TEACHER_CLUB)
+                teachers[teacher]["obj"].groups.remove(AcademicRoles.TEACHER_CENTER)
             elif teachers[teacher]["state"] == self.CENTER_ONLY:
-                teachers[teacher]["obj"].groups.add(PARTICIPANT_GROUPS.TEACHER_CENTER)
-                teachers[teacher]["obj"].groups.remove(PARTICIPANT_GROUPS.TEACHER_CLUB)
+                teachers[teacher]["obj"].groups.add(AcademicRoles.TEACHER_CENTER)
+                teachers[teacher]["obj"].groups.remove(AcademicRoles.TEACHER_CLUB)
 

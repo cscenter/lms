@@ -38,7 +38,7 @@ Requirements:
                                      then=Value(None)),
                                 default=F("projectstudent__pk")
                             ), distinct=True))
-                    .filter(groups__in=[User.group.STUDENT_CENTER],
+                    .filter(groups__in=[User.roles.STUDENT_CENTER],
                             curriculum_year__gte=str(current_term.year - 3),
                             passed_projects__gte=3)
                     .exclude(status__in=[User.STATUS.will_graduate,

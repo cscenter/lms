@@ -13,7 +13,7 @@ from learning.models import MetaCourse, Semester, Course, \
     AssignmentAttachment, CourseNews, \
     CourseNewsNotification, NonCourseEvent, CourseTeacher, \
     AreaOfStudy
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from users.factories import UserFactory, StudentCenterFactory, StudentFactory
 from .utils import get_current_term_pair, get_term_by_index
 
@@ -224,7 +224,7 @@ class EnrollmentFactory(factory.DjangoModelFactory):
         model = Enrollment
 
     student = factory.SubFactory(UserFactory,
-                                 groups=[PARTICIPANT_GROUPS.STUDENT_CENTER])
+                                 groups=[AcademicRoles.STUDENT_CENTER])
     course = factory.SubFactory(CourseFactory)
 
 

@@ -6,7 +6,6 @@ import pytest
 import pytz
 from bs4 import BeautifulSoup
 from django.forms import model_to_dict
-
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone, formats
@@ -18,10 +17,9 @@ from core.admin import get_admin_url
 from learning.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory, \
     StudentAssignmentFactory, CourseTeacherFactory
-from learning.models import StudentAssignment, Assignment, Course, \
-    AssignmentAttachment
-from learning.settings import GRADES, PARTICIPANT_GROUPS, STUDENT_STATUS, \
-    DATE_FORMAT_RU, TIME_FORMAT_RU
+from learning.models import StudentAssignment, Assignment, AssignmentAttachment
+from learning.settings import GRADES, STUDENT_STATUS, \
+    DATE_FORMAT_RU, TIME_FORMAT_RU, AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect
@@ -37,7 +35,7 @@ from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
 class StudentAssignmentListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_student'
-    groups_allowed = [PARTICIPANT_GROUPS.STUDENT_CENTER]
+    groups_allowed = [AcademicRoles.STUDENT_CENTER]
 
     def test_list(self):
         u = StudentCenterFactory()
@@ -245,7 +243,7 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         self.assertPOSTLoginRedirect(url, form)
         test_groups = [
             [],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -258,8 +256,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         self.assertPOSTLoginRedirect(url, form)
         test_groups = [
             [],
-            [PARTICIPANT_GROUPS.TEACHER_CENTER],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
+            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -271,8 +269,8 @@ class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
         self.assertPOSTLoginRedirect(url, form)
         test_groups = [
             [],
-            [PARTICIPANT_GROUPS.TEACHER_CENTER],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
+            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -341,12 +339,12 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
         self.assertLoginRedirect(url)
         test_groups = [
             [],
-            [PARTICIPANT_GROUPS.TEACHER_CENTER],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
+            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
-            if groups == [PARTICIPANT_GROUPS.TEACHER_CENTER]:
+            if groups == [AcademicRoles.TEACHER_CENTER]:
                 self.assertEquals(403, self.client.get(url).status_code)
             else:
                 self.assertLoginRedirect(url)
@@ -376,7 +374,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
 
 class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
     url_name = 'assignment_list_teacher'
-    groups_allowed = [PARTICIPANT_GROUPS.TEACHER_CENTER]
+    groups_allowed = [AcademicRoles.TEACHER_CENTER]
 
     def test_group_security(self):
         """Custom logic instead of GroupSecurityCheckMixin.
@@ -384,9 +382,9 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         self.assertLoginRedirect(reverse(self.url_name))
         all_test_groups = [
             [],
-            [PARTICIPANT_GROUPS.TEACHER_CENTER],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
-            [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
+            [AcademicRoles.GRADUATE_CENTER]
         ]
         for groups in all_test_groups:
             user = UserFactory.create(groups=groups, city_id='spb')
@@ -747,16 +745,16 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Make student as a volunteer, should be the same
-    student.groups.remove(PARTICIPANT_GROUPS.STUDENT_CENTER)
-    student.groups.add(PARTICIPANT_GROUPS.VOLUNTEER)
+    student.groups.remove(AcademicRoles.STUDENT_CENTER)
+    student.groups.add(AcademicRoles.VOLUNTEER)
     response = client.get(url_learning_assignments)
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Club students has no access to the page on center site
-    student.groups.remove(PARTICIPANT_GROUPS.VOLUNTEER)
-    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
+    student.groups.remove(AcademicRoles.VOLUNTEER)
+    student.groups.add(AcademicRoles.STUDENT_CLUB)
     response = client.get(url_learning_assignments)
     assert response.status_code == 302
 

@@ -26,7 +26,7 @@ from post_office.utils import get_email_template
 from core.db.models import GradeField
 from core.models import City, University
 from learning.models import Venue
-from learning.settings import PARTICIPANT_GROUPS, CENTER_FOUNDATION_YEAR, \
+from learning.settings import AcademicRoles, CENTER_FOUNDATION_YEAR, \
     AcademicDegreeYears
 from users.models import User
 
@@ -669,7 +669,7 @@ class Interview(TimeStampedModel):
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
-        limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.INTERVIEWER})
+        limit_choices_to={'groups__pk': AcademicRoles.INTERVIEWER})
 
     assignments = models.ManyToManyField(
         'InterviewAssignment',
@@ -810,7 +810,7 @@ class InterviewStream(TimeStampedModel):
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
-        limit_choices_to={'groups__pk': PARTICIPANT_GROUPS.INTERVIEWER})
+        limit_choices_to={'groups__pk': AcademicRoles.INTERVIEWER})
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("Campaign"),

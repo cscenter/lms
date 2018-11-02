@@ -38,7 +38,7 @@ class TeacherList(ListAPIView):
     def get_queryset(self):
         lecturer = CourseTeacher.roles.lecturer
         queryset = (User.objects
-                    .filter(groups=User.group.TEACHER_CENTER,
+                    .filter(groups=User.roles.TEACHER_CENTER,
                             courseteacher__roles=lecturer)
                     .only("pk", "first_name", "last_name", "patronymic",
                           "cropbox_data", "photo", "city_id", "gender",
@@ -87,7 +87,7 @@ class AlumniList(ListAPIView):
 
     def get_queryset(self):
         return (User.objects
-                .filter(groups__pk=User.group.GRADUATE_CENTER)
+                .filter(groups__pk=User.roles.GRADUATE_CENTER)
                 .prefetch_related("areas_of_study")
                 .only("pk", "first_name", "last_name", "graduation_year",
                       "cropbox_data", "photo", "city_id", "gender")
@@ -121,7 +121,7 @@ class TestimonialList(ListAPIView):
     @staticmethod
     def get_base_queryset():
         return (User.objects
-                .filter(groups=User.group.GRADUATE_CENTER)
+                .filter(groups=User.roles.GRADUATE_CENTER)
                 .exclude(csc_review=''))
 
     def list(self, request, *args, **kwargs):

@@ -29,9 +29,9 @@ class UserQuerySet(query.QuerySet):
         if isinstance(filters, dict):
             if "groups__in" not in filters:
                 filters["groups__in"] = [
-                    User.group.STUDENT_CENTER,
-                    User.group.GRADUATE_CENTER,
-                    User.group.VOLUNTEER
+                    User.roles.STUDENT_CENTER,
+                    User.roles.GRADUATE_CENTER,
+                    User.roles.VOLUNTEER
                 ]
             q = self.filter(**filters)
             if exclude:

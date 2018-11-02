@@ -18,27 +18,28 @@ TIME_FORMAT_RU = "%H:%M"
 ASSIGNMENT_TASK_ATTACHMENT = 0
 ASSIGNMENT_COMMENT_ATTACHMENT = 1
 
-PARTICIPANT_GROUPS = getattr(settings, 'PARTICIPANT_GROUPS', Choices(
-    (1, 'STUDENT_CENTER', _('Student [CENTER]')),
-    (2, 'TEACHER_CENTER', _('Teacher [CENTER]')),
-    (3, 'GRADUATE_CENTER', _('Graduate')),
-    (4, 'VOLUNTEER', _('Volunteer')),
-    (5, 'STUDENT_CLUB', _('Student [CLUB]')),
-    (6, 'TEACHER_CLUB', _('Teacher [CLUB]')),
-    (7, 'INTERVIEWER', _('Interviewer [Admission]')),
-    (8, 'MASTERS_DEGREE', _('Studying for a master degree')),
-    (9, 'PROJECT_REVIEWER', _('Project reviewer')),
-    (10, 'CURATOR_PROJECTS', _('Curator of projects')),
-))
+
+class AcademicRoles(DjangoChoices):
+    STUDENT_CENTER = C(1, _('Student [CENTER]'))
+    TEACHER_CENTER = C(2, _('Teacher [CENTER]'))
+    GRADUATE_CENTER = C(3, _('Graduate'))
+    VOLUNTEER = C(4, _('Volunteer'))
+    STUDENT_CLUB = C(5, _('Student [CLUB]'))
+    TEACHER_CLUB = C(6, _('Teacher [CLUB]'))
+    INTERVIEWER = C(7, _('Interviewer [Admission]'))
+    MASTERS_DEGREE = C(8, _('Studying for a master degree'))
+    PROJECT_REVIEWER = C(9, _('Project reviewer'))
+    CURATOR_PROJECTS = C(10, _('Curator of projects'))
+
 
 GROUPS_HAS_ACCESS_TO_CENTER = (
-    PARTICIPANT_GROUPS.STUDENT_CENTER,
-    PARTICIPANT_GROUPS.VOLUNTEER,
-    PARTICIPANT_GROUPS.TEACHER_CENTER,
-    PARTICIPANT_GROUPS.GRADUATE_CENTER,
-    PARTICIPANT_GROUPS.INTERVIEWER,
+    AcademicRoles.STUDENT_CENTER,
+    AcademicRoles.VOLUNTEER,
+    AcademicRoles.TEACHER_CENTER,
+    AcademicRoles.GRADUATE_CENTER,
+    AcademicRoles.INTERVIEWER,
     # MASTERS_DEGREE should be always set with one of the student group
-    PARTICIPANT_GROUPS.PROJECT_REVIEWER,
+    AcademicRoles.PROJECT_REVIEWER,
 )
 
 STUDENT_STATUS = getattr(settings, 'STUDENT_STATUS',

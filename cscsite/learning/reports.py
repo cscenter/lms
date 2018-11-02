@@ -390,8 +390,8 @@ class ProgressReportForSemester(ProgressReport):
         return User.objects.students_info(
             filters={
                 "groups__in": [
-                    User.group.STUDENT_CENTER,
-                    User.group.VOLUNTEER
+                    User.roles.STUDENT_CENTER,
+                    User.roles.VOLUNTEER
                 ],
                 **filters
             },

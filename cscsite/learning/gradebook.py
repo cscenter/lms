@@ -415,8 +415,8 @@ class GradeBookFormFactory:
 
 def _get_user_id(request, **filters):
     ids = (User.objects
-           .filter(groups__in=[User.group.STUDENT_CENTER,
-                               User.group.VOLUNTEER],
+           .filter(groups__in=[User.roles.STUDENT_CENTER,
+                               User.roles.VOLUNTEER],
                    **filters)
            .values_list('id', flat=True)
            .order_by())

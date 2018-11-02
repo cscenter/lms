@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin as _UserAdmin
 from django.contrib.auth.forms import UserCreationForm as _UserCreationForm, \
     UserChangeForm as _UserChangeForm
 from django.db import models as db_models
@@ -9,7 +9,7 @@ from import_export.admin import ImportMixin
 
 from core.models import RelatedSpecMixin
 from core.widgets import AdminRichTextAreaWidget, AdminRelatedDropdownFilter
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from .import_export import UserRecordResource
 from .models import User, EnrollmentCertificate, \
     OnlineCourseRecord, SHADCourseRecord, UserStatusLog
@@ -31,37 +31,34 @@ class UserChangeForm(_UserChangeForm):
         cleaned_data = super().clean()
         enrollment_year = cleaned_data.get('enrollment_year')
         groups = {x.pk for x in cleaned_data.get('groups', [])}
-        if self.instance.group.STUDENT_CENTER in groups:
+        u: User = self.instance
+        if u.roles.STUDENT_CENTER in groups:
             if enrollment_year is None:
                 self.add_error('enrollment_year', ValidationError(
                     _("Enrollment year should be provided for students")))
-        if groups.intersection({PARTICIPANT_GROUPS.STUDENT_CENTER,
-                                PARTICIPANT_GROUPS.VOLUNTEER,
-                                PARTICIPANT_GROUPS.GRADUATE_CENTER}):
+        if groups.intersection({AcademicRoles.STUDENT_CENTER,
+                                AcademicRoles.VOLUNTEER,
+                                AcademicRoles.GRADUATE_CENTER}):
             if not cleaned_data.get('city', ''):
                 self.add_error('city', ValidationError(
                     _("Provide city for student")))
 
-        if self.instance.group.VOLUNTEER in groups \
-           and enrollment_year is None:
+        if u.roles.VOLUNTEER in groups and enrollment_year is None:
             self.add_error('enrollment_year', ValidationError(
                 _("CSCUser|enrollment year should be provided for volunteers")))
 
         graduation_year = cleaned_data.get('graduation_year')
-        if self.instance.group.GRADUATE_CENTER in groups \
-           and graduation_year is None:
+        if u.roles.GRADUATE_CENTER in groups and graduation_year is None:
             self.add_error('graduation_year', ValidationError(
                 _("CSCUser|graduation year should be provided for graduates")))
 
-        if self.instance.group.VOLUNTEER in groups \
-                and self.instance.group.STUDENT_CENTER in groups:
-            self.add_error('groups', ValidationError(
-                _("User can't be simultaneously in volunteer and student group")))
+        if u.roles.VOLUNTEER in groups and u.roles.STUDENT_CENTER in groups:
+            msg = _("User can't be volunteer and student at the same time")
+            self.add_error('groups', ValidationError(msg))
 
-        if self.instance.group.GRADUATE_CENTER in groups \
-                and self.instance.group.STUDENT_CENTER in groups:
-            self.add_error('groups', ValidationError(
-                _("User can't be simultaneously in graduate and student group")))
+        if u.roles.GRADUATE_CENTER in groups and u.roles.STUDENT_CENTER in groups:
+            msg = _("User can't be graduated and student at the same time")
+            self.add_error('groups', ValidationError(msg))
 
 
 class ForeignKeyCacheMixin(object):
@@ -113,7 +110,7 @@ class SHADCourseRecordInlineAdmin(admin.StackedInline):
     extra = 0
 
 
-class UserAdmin(UserAdmin):
+class UserAdmin(_UserAdmin):
     add_form = UserCreationForm
     add_fieldsets = (
         (None, {
@@ -166,7 +163,7 @@ class UserAdmin(UserAdmin):
     def save_model(self, request, obj, form, change):
         if "comment" in form.changed_data:
             obj.comment_last_author = request.user
-        super(UserAdmin, self).save_model(request, obj, form, change)
+        super().save_model(request, obj, form, change)
 
 
 class SHADCourseRecordAdmin(admin.ModelAdmin):
@@ -179,8 +176,8 @@ class SHADCourseRecordAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = User.objects.filter(groups__in=[
-                PARTICIPANT_GROUPS.STUDENT_CENTER,
-                PARTICIPANT_GROUPS.VOLUNTEER]).distinct()
+                AcademicRoles.STUDENT_CENTER,
+                AcademicRoles.VOLUNTEER]).distinct()
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 

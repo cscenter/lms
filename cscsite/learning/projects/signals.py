@@ -8,7 +8,7 @@ from django.dispatch import receiver
 
 from learning.projects.models import ProjectStudent, Report, Project, Review, \
     ReportComment
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from notifications import types
 from notifications.signals import notify
 
@@ -103,7 +103,7 @@ def post_save_report(sender, instance, created, *args, **kwargs):
             recipients = User.objects.filter(
                 is_superuser=True,
                 is_staff=True,
-                groups=PARTICIPANT_GROUPS.CURATOR_PROJECTS
+                groups=AcademicRoles.CURATOR_PROJECTS
             )
             # TODO: test database hitting
             project = report.project_student.project
@@ -150,7 +150,7 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
                     .filter(
                         is_superuser=True,
                         is_staff=True,
-                        groups=PARTICIPANT_GROUPS.CURATOR_PROJECTS)
+                        groups=AcademicRoles.CURATOR_PROJECTS)
                     .exclude(pk=comment.author.pk))
         # Make dict to avoid duplicates
         recipients = {c.pk: c for c in curators}

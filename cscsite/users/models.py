@@ -29,8 +29,8 @@ from core.utils import is_club_site, en_to_ru_mapping
 from cscenter.utils import PublicRoute
 from learning.models import Semester, Enrollment
 from learning.permissions import LearningPermissionsMixin
-from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES, \
-    AcademicDegreeYears
+from learning.settings import STUDENT_STATUS, GRADES, \
+    AcademicDegreeYears, AcademicRoles
 from learning.utils import is_positive_grade, is_negative_grade
 from users.settings import GROUPS_IMPORT_TO_GERRIT
 from users.tasks import update_password_in_gerrit
@@ -162,7 +162,7 @@ class UserStatusLog(models.Model):
 
 class User(LearningPermissionsMixin, AbstractUser):
 
-    group = PARTICIPANT_GROUPS
+    roles = AcademicRoles
 
     STATUS = STUDENT_STATUS
 
@@ -360,9 +360,9 @@ class User(LearningPermissionsMixin, AbstractUser):
                                             password=random_password)
         groups = []
         if applicant.status == Applicant.VOLUNTEER:
-            groups.append(User.group.VOLUNTEER)
+            groups.append(User.roles.VOLUNTEER)
         else:
-            groups.append(User.group.STUDENT_CENTER)
+            groups.append(User.roles.STUDENT_CENTER)
         user.groups.add(*groups)
         # Migrate data from application form to user profile
         same_attrs = [
@@ -564,12 +564,12 @@ class User(LearningPermissionsMixin, AbstractUser):
         except (AttributeError, KeyError):
             user_groups = set(self.groups.values_list("pk", flat=True))
         # Add club group on club site to center students
-        center_student = (self.group.STUDENT_CENTER in user_groups or
-                          self.group.VOLUNTEER in user_groups or
-                          self.group.GRADUATE_CENTER in user_groups)
-        if (center_student and self.group.STUDENT_CLUB not in user_groups
+        center_student = (self.roles.STUDENT_CENTER in user_groups or
+                          self.roles.VOLUNTEER in user_groups or
+                          self.roles.GRADUATE_CENTER in user_groups)
+        if (center_student and self.roles.STUDENT_CLUB not in user_groups
                 and is_club_site()):
-            user_groups.add(self.group.STUDENT_CLUB)
+            user_groups.add(self.roles.STUDENT_CLUB)
         return user_groups
 
     def get_enrollment(self, course_id: int) -> Optional[Enrollment]:
@@ -776,7 +776,7 @@ class EnrollmentCertificate(TimeStampedModel):
 
 
 class NotAuthenticatedUser(LearningPermissionsMixin, AnonymousUser):
-    group = PARTICIPANT_GROUPS
+    group = AcademicRoles
     city_code = None
     index_redirect = None
 

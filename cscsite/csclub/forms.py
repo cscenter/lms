@@ -23,6 +23,6 @@ class RegistrationUniqueEmailAndUsernameForm(RegistrationFormUniqueEmail):
 
     def save(self, commit=True):
         user = super().save(commit)
-        group = Group.objects.get(pk=User.group.STUDENT_CLUB)
+        group = Group.objects.get(pk=User.roles.STUDENT_CLUB)
         user.groups.add(group)
         return user

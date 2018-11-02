@@ -1,19 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, absolute_import
-
 import pytest
-from django.forms import model_to_dict
 from django.urls import reverse
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
 from learning.factories import SemesterFactory
 from learning.projects.factories import ProjectFactory, ReportFactory, \
-    ReviewFactory, ReportReviewFormFactory
-from learning.projects.forms import ReportReviewForm
-from learning.projects.models import Report, ProjectStudent, Review
-from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS
+    ReportReviewFormFactory
+from learning.projects.models import Report, ProjectStudent
+from learning.settings import GRADES, STUDENT_STATUS, AcademicRoles
 from learning.utils import get_current_term_pair
 from notifications.models import Notification
 from users.factories import StudentCenterFactory, ProjectReviewerFactory, \
@@ -70,7 +66,7 @@ def test_project_reviewer_only_mixin_security(client, curator):
     client.login(student)
     response = client.get(URL_REPORTS)
     assert response.status_code == 302
-    reviewer = UserFactory.create(groups=[PARTICIPANT_GROUPS.PROJECT_REVIEWER])
+    reviewer = UserFactory.create(groups=[AcademicRoles.PROJECT_REVIEWER])
     client.login(reviewer)
     response = client.get(URL_REPORTS)
     assert response.status_code == 200
@@ -107,7 +103,7 @@ def test_reviewer_list(client, curator):
     # With ?show=available filter show projects from current term to reviewers
     response = client.get(URL_PROJECTS)
     assert len(response.context["projects"]) == 1
-    curator.groups.add(PARTICIPANT_GROUPS.PROJECT_REVIEWER)
+    curator.groups.add(AcademicRoles.PROJECT_REVIEWER)
     client.login(curator)
     # Redirects to list with all reports
     response = client.get(URL_REPORTS, follow=True)
@@ -225,7 +221,7 @@ def test_project_detail_student_participant(client):
 def test_project_detail_student_participant_notifications(client, curator):
     """Test notifications are added to the queue after report has been sent"""
     from datetime import timedelta
-    curator.groups.add(PARTICIPANT_GROUPS.CURATOR_PROJECTS)
+    curator.groups.add(AcademicRoles.CURATOR_PROJECTS)
     curator.save()
     # This curator not in reviewers group and doesn't receive notifications
     curator2 = UserFactory(is_superuser=True, is_staff=True)
@@ -356,7 +352,7 @@ def test_reportpage_update_permissions():
 
 @pytest.mark.django_db
 def test_reportpage_notifications(client, curator):
-    curator.groups.add(PARTICIPANT_GROUPS.CURATOR_PROJECTS)
+    curator.groups.add(AcademicRoles.CURATOR_PROJECTS)
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
     client.login(reviewer1)
@@ -457,7 +453,7 @@ def test_reportpage_summarize_notifications(client, curator):
     from learning.viewmixins import CuratorOnlyMixin
     from learning.projects.views import ReportCuratorSummarizeView
     assert issubclass(ReportCuratorSummarizeView, CuratorOnlyMixin)
-    curator.groups.add(PARTICIPANT_GROUPS.PROJECT_REVIEWER)
+    curator.groups.add(AcademicRoles.PROJECT_REVIEWER)
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
     client.login(reviewer1)

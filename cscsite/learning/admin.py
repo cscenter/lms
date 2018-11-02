@@ -13,11 +13,11 @@ from modeltranslation.admin import TranslationAdmin
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField
 from core.compat import Django21BitFieldCheckboxSelectMultiple
-from core.widgets import AdminRichTextAreaWidget, AdminRelatedDropdownFilter
 from core.models import RelatedSpecMixin
 from core.utils import admin_datetime, is_club_site
+from core.widgets import AdminRichTextAreaWidget, AdminRelatedDropdownFilter
 from learning.models import InternshipCategory
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from users.models import User
 from .models import MetaCourse, Semester, Course, Venue, \
     CourseClass, CourseClassAttachment, CourseNews, \
@@ -75,8 +75,8 @@ class CourseTeacherInline(admin.TabularInline):
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "teacher":
             kwargs["queryset"] = User.objects.filter(groups__in=[
-                PARTICIPANT_GROUPS.TEACHER_CENTER,
-                PARTICIPANT_GROUPS.TEACHER_CLUB]).distinct()
+                AcademicRoles.TEACHER_CENTER,
+                AcademicRoles.TEACHER_CLUB]).distinct()
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
@@ -301,8 +301,8 @@ class EnrollmentAdmin(admin.ModelAdmin):
         if db_field.name == 'student':
             kwargs['queryset'] = (get_user_model().objects
                                   .filter(groups__in=[
-                                        PARTICIPANT_GROUPS.STUDENT_CENTER,
-                                        PARTICIPANT_GROUPS.VOLUNTEER]))
+                                        AcademicRoles.STUDENT_CENTER,
+                                        AcademicRoles.VOLUNTEER]))
         return (super(EnrollmentAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 

@@ -3,7 +3,7 @@
 import factory
 
 from django.contrib.auth.models import Group
-from learning.settings import PARTICIPANT_GROUPS, GRADES
+from learning.settings import GRADES, AcademicRoles
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord
 
@@ -62,8 +62,8 @@ class StudentFactory(UserFactory):
         if not create:
             return
 
-        groups = extracted or [PARTICIPANT_GROUPS.STUDENT_CENTER,
-                               PARTICIPANT_GROUPS.STUDENT_CLUB]
+        groups = extracted or [AcademicRoles.STUDENT_CENTER,
+                               AcademicRoles.STUDENT_CLUB]
         for group in groups:
             self.groups.add(group)
 
@@ -76,7 +76,7 @@ class StudentCenterFactory(UserFactory):
     def groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [PARTICIPANT_GROUPS.STUDENT_CENTER]
+        groups = extracted or [AcademicRoles.STUDENT_CENTER]
         for group in groups:
             self.groups.add(group)
 
@@ -86,7 +86,7 @@ class StudentClubFactory(UserFactory):
     def groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [PARTICIPANT_GROUPS.STUDENT_CLUB]
+        groups = extracted or [AcademicRoles.STUDENT_CLUB]
         for group in groups:
             self.groups.add(group)
 
@@ -96,7 +96,7 @@ class TeacherCenterFactory(UserFactory):
     def groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [PARTICIPANT_GROUPS.TEACHER_CENTER]
+        groups = extracted or [AcademicRoles.TEACHER_CENTER]
         for group in groups:
             self.groups.add(group)
 
@@ -106,7 +106,7 @@ class VolunteerFactory(UserFactory):
     def groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [PARTICIPANT_GROUPS.VOLUNTEER]
+        groups = extracted or [AcademicRoles.VOLUNTEER]
         for group in groups:
             self.groups.add(group)
 
@@ -116,7 +116,7 @@ class GraduateFactory(UserFactory):
     def groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+        groups = extracted or [AcademicRoles.GRADUATE_CENTER]
         for group in groups:
             self.groups.add(group)
 
@@ -126,7 +126,7 @@ class ProjectReviewerFactory(UserFactory):
     def groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [PARTICIPANT_GROUPS.PROJECT_REVIEWER]
+        groups = extracted or [AcademicRoles.PROJECT_REVIEWER]
         for group in groups:
             self.groups.add(group)
 
@@ -137,7 +137,7 @@ class OnlineCourseRecordFactory(factory.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Online course %03d" % n)
     student = factory.SubFactory(UserFactory,
-                                 groups=[User.group.STUDENT_CENTER])
+                                 groups=[User.roles.STUDENT_CENTER])
 
 
 class SHADCourseRecordFactory(factory.DjangoModelFactory):
@@ -147,7 +147,7 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "SHAD course name %03d" % n)
     teachers = factory.Sequence(lambda n: "SHAD course teachers %03d" % n)
     student = factory.SubFactory(UserFactory,
-                                 groups=[User.group.STUDENT_CENTER])
+                                 groups=[User.roles.STUDENT_CENTER])
     grade = factory.Iterator(list(x[0] for x in GRADES))
     semester = factory.SubFactory('learning.factories.SemesterFactory')
 
@@ -159,4 +159,4 @@ class EnrollmentCertificateFactory(factory.DjangoModelFactory):
     signature = "FIO"
     note = ""
     student = factory.SubFactory(UserFactory,
-                                 groups=[User.group.STUDENT_CENTER])
+                                 groups=[User.roles.STUDENT_CENTER])
