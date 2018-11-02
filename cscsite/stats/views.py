@@ -4,16 +4,14 @@ from collections import OrderedDict
 
 from django.db.models import Q
 from django.utils.timezone import now
-
 from django.views import generic
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from learning.admission.models import Campaign, Interview, Comment, Applicant
+from learning.admission.models import Campaign, Interview, Comment
 from learning.models import Semester, Course
-from learning.settings import CENTER_FOUNDATION_YEAR, SEMESTER_TYPES, GRADES
+from learning.settings import CENTER_FOUNDATION_YEAR, GRADES, SemesterTypes
 from learning.utils import get_term_index
-
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import User
 
@@ -29,7 +27,7 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
         context = super(StatsLearningView, self).get_context_data(**kwargs)
         # Terms grouped by year
         term_start = get_term_index(CENTER_FOUNDATION_YEAR,
-                                    SEMESTER_TYPES.autumn)
+                                    SemesterTypes.autumn)
         terms_grouped = itertools.groupby(
             Semester.objects.only("pk", "type", "year")
                     .filter(index__gte=term_start)

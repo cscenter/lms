@@ -72,10 +72,11 @@ SHORT_GRADES = getattr(settings, 'SHORT_GRADES',
                                ('good', 'good', "4"),
                                ('excellent', 'excellent', "5")))
 
-SEMESTER_TYPES = getattr(settings, 'SEMESTER_TYPES',
-                         Choices(('spring', _("spring")),
-                                 ('summer', _("summer")),
-                                 ('autumn', _("autumn"))))
+
+class SemesterTypes(DjangoChoices):
+    spring = C('spring', _("spring"))
+    summer = C('summer', _("summer"))
+    autumn = C('autumn', _("autumn"))
 
 
 class AssignmentStates(DjangoChoices):
@@ -105,7 +106,7 @@ class AcademicDegreeYears(DjangoChoices):
     GRADUATE = C("9", _('graduate'))
 
 
-TERMS_IN_ACADEMIC_YEAR = len(SEMESTER_TYPES)
+TERMS_IN_ACADEMIC_YEAR = len(SemesterTypes.choices)
 
 # don't know what will happen if we change this when there are models in DB
 AUTUMN_TERM_START = '1 sep'

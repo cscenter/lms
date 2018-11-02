@@ -4,13 +4,13 @@ import django_rq
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
-from django.db.models import Prefetch, Q
-from django.http import JsonResponse, Http404, HttpResponseRedirect
-from django.utils.timezone import now, get_current_timezone
+from django.db.models import Prefetch
+from django.http import Http404
+from django.shortcuts import redirect
+from django.utils.timezone import now
 from django.views import generic
 # TODO: (XXX) Dont' forget to remove it after old.* termination.
 from django.views.decorators.csrf import requires_csrf_token
-from django.shortcuts import redirect
 from django_ical.views import ICalFeed
 from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
@@ -18,10 +18,9 @@ from vanilla import DetailView
 from core.settings.base import TIME_ZONES
 from csclub import tasks
 from learning.gallery.models import Image
-from learning.models import Course, Semester, \
-    CourseClass
-from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR
-from learning.utils import get_current_term_pair, now_local
+from learning.models import Course, Semester, CourseClass
+from learning.settings import SemesterTypes
+from learning.utils import get_current_term_pair
 from learning.views.generic import CalendarGenericView
 
 
@@ -65,8 +64,8 @@ class IndexView(generic.TemplateView):
         try:
             # All club courses in MSK timezone
             year, term_type = get_current_term_pair('spb')
-            if term_type == SEMESTER_TYPES.summer:
-                term_type = SEMESTER_TYPES.autumn
+            if term_type == SemesterTypes.summer:
+                term_type = SemesterTypes.autumn
             featured_term = Semester.objects.get(year=year, type=term_type)
             context['featured_term'] = featured_term
             today = now().date()

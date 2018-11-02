@@ -5,8 +5,6 @@ import datetime
 
 import factory
 from django.utils import timezone
-from django.utils.timezone import now
-from factory import CREATE_STRATEGY
 
 from core.models import City
 from learning.models import MetaCourse, Semester, Course, \
@@ -15,7 +13,7 @@ from learning.models import MetaCourse, Semester, Course, \
     AssignmentAttachment, CourseNews, \
     CourseNewsNotification, NonCourseEvent, CourseTeacher, \
     AreaOfStudy
-from learning.settings import PARTICIPANT_GROUPS, SEMESTER_TYPES
+from learning.settings import PARTICIPANT_GROUPS
 from users.factories import UserFactory, StudentCenterFactory, StudentFactory
 from .utils import get_current_term_pair, get_term_by_index
 

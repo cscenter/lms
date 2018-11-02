@@ -8,7 +8,7 @@ from django.db.models import query, Prefetch, Q, Count, Case, When, Value, \
 
 from core.utils import is_club_site
 from learning.calendar import get_bounds_for_calendar_month
-from learning.settings import SEMESTER_TYPES, CENTER_FOUNDATION_YEAR
+from learning.settings import CENTER_FOUNDATION_YEAR, SemesterTypes
 from learning.utils import get_term_index
 
 
@@ -110,11 +110,11 @@ class CourseClassQuerySet(query.QuerySet):
             # Clean them with right `.order` and `.distinct()`!
             summer_classes_enrolled_in = Q(
                 course__is_open=True,
-                course__semester__type=SEMESTER_TYPES.summer,
+                course__semester__type=SemesterTypes.summer,
                 course__enrollment__student_id=user.pk,
                 course__enrollment__is_deleted=False)
             others = (Q(course__is_open=True) &
-                      ~Q(course__semester__type=SEMESTER_TYPES.summer))
+                      ~Q(course__semester__type=SemesterTypes.summer))
             q = q.filter(others)
         return q
 

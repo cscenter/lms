@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
 
-import os
 import datetime
-
-import unittest
+import os
 from decimal import Decimal
 from unittest import mock
 
 import pytest
 import pytz
-from django.utils.timezone import now
-from mock import patch
-
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.encoding import smart_text
+from mock import patch
 
 from learning.factories import MetaCourseFactory, CourseFactory, \
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
@@ -23,9 +18,9 @@ from learning.factories import MetaCourseFactory, CourseFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
     CourseNewsNotificationFactory, AssignmentAttachmentFactory, \
     SemesterFactory
-from learning.models import Semester, Course, CourseClass, Assignment, \
+from learning.models import Semester, Course, Assignment, \
     StudentAssignment, CourseNews
-from learning.settings import SEMESTER_TYPES, AssignmentStates
+from learning.settings import AssignmentStates, SemesterTypes
 from learning.utils import get_term_start, next_term_starts_at
 from users.factories import UserFactory, StudentCenterFactory, \
     TeacherCenterFactory
@@ -164,7 +159,7 @@ class CourseTests(TestCase):
         timezone.now = old_now
 
     def test_completed_at_default(self):
-        semester = SemesterFactory(year=2017, type=Semester.TYPES.autumn)
+        semester = SemesterFactory(year=2017, type=SemesterTypes.autumn)
         meta_course = MetaCourseFactory()
         co = CourseFactory.build(meta_course=meta_course,
                                  semester=semester)
@@ -394,7 +389,7 @@ class AssignmentNotificationTests(TestCase):
 @pytest.mark.django_db
 def test_semester_enrollment_period(mocker):
     year = 2016
-    term_type = SEMESTER_TYPES.autumn
+    term_type = SemesterTypes.autumn
     # Fix year and term
     mocked_timezone = mocker.patch('django.utils.timezone.now')
     now_fixed = datetime.datetime(year, month=9, day=8, tzinfo=pytz.UTC)
@@ -448,7 +443,7 @@ def test_semester_enrollment_period(mocker):
 def test_course_enrollment_is_open(settings, mocker):
     settings.ENROLLMENT_DURATION = 45
     year = 2016
-    term_type = SEMESTER_TYPES.autumn
+    term_type = SemesterTypes.autumn
     # timezone.now() should return some date from autumn 2016
     # but less than settings.ENROLLMENT_DURATION
     mocked_timezone = mocker.patch('django.utils.timezone.now')

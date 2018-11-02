@@ -5,14 +5,14 @@ from django.contrib.auth.forms import UserCreationForm as _UserCreationForm, \
 from django.db import models as db_models
 from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
-from import_export.admin import ImportExportMixin, ImportMixin
+from import_export.admin import ImportMixin
 
-from core.widgets import AdminRichTextAreaWidget
 from core.models import RelatedSpecMixin
+from core.widgets import AdminRichTextAreaWidget
 from learning.settings import PARTICIPANT_GROUPS
+from .import_export import UserRecordResource
 from .models import User, EnrollmentCertificate, \
     OnlineCourseRecord, SHADCourseRecord, UserStatusLog
-from .import_export import SHADCourseRecordResource, UserRecordResource
 
 
 class UserCreationForm(_UserCreationForm):
@@ -169,9 +169,7 @@ class UserAdmin(UserAdmin):
         super(UserAdmin, self).save_model(request, obj, form, change)
 
 
-class SHADCourseRecordResourceAdmin(ImportExportMixin, admin.ModelAdmin):
-    resource_class = SHADCourseRecordResource
-
+class SHADCourseRecordAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = User.objects.filter(groups__in=[
@@ -192,4 +190,4 @@ class EnrollmentCertificateAdmin(admin.ModelAdmin):
 
 admin.site.register(User, UserRecordResourceAdmin)
 admin.site.register(EnrollmentCertificate, EnrollmentCertificateAdmin)
-admin.site.register(SHADCourseRecord, SHADCourseRecordResourceAdmin)
+admin.site.register(SHADCourseRecord, SHADCourseRecordAdmin)

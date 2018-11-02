@@ -1,5 +1,4 @@
 import base64
-import functools
 import logging
 from random import choice
 from string import ascii_lowercase, digits
@@ -9,19 +8,16 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import prefetch_related_objects
-from django.urls import reverse
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_text, python_2_unicode_compatible
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from djchoices import DjangoChoices
 from jsonfield import JSONField
-from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField, get_thumbnail
@@ -32,10 +28,10 @@ from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.utils import is_club_site, en_to_ru_mapping
 from cscenter.utils import PublicRoute
 from learning.models import Semester, Enrollment
+from learning.permissions import LearningPermissionsMixin
 from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES, \
     AcademicDegreeYears
 from learning.utils import is_positive_grade, is_negative_grade
-from learning.permissions import LearningPermissionsMixin
 from users.settings import GROUPS_IMPORT_TO_GERRIT
 from users.tasks import update_password_in_gerrit
 from users.thumbnails import BoyStubImage, GirlStubImage, BaseStubImage

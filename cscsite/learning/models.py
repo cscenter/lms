@@ -14,12 +14,12 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.encoding import smart_text, python_2_unicode_compatible
+from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, ChoiceItem
-from model_utils import Choices, FieldTracker
+from model_utils import FieldTracker
 from model_utils.fields import MonitorField, StatusField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel, TimeFramedModel
@@ -36,7 +36,7 @@ from learning.managers import StudyProgramQuerySet, \
     StudentAssignmentManager, AssignmentManager, CourseTeacherManager
 from learning.micawber_providers import get_oembed_html
 from learning.settings import GRADES, SHORT_GRADES, \
-    SEMESTER_TYPES, AssignmentStates, GradingTypes
+    AssignmentStates, GradingTypes, SemesterTypes
 from learning.tasks import maybe_upload_slides_yandex
 from learning.utils import get_current_term_index, now_local, \
     next_term_starts_at
@@ -72,13 +72,14 @@ class MetaCourse(TimeStampedModel):
 
 
 class Semester(models.Model):
-    TYPES = SEMESTER_TYPES
+    TYPES = SemesterTypes
 
     year = models.PositiveSmallIntegerField(
         _("Year"),
         validators=[MinValueValidator(1990)])
-    type = StatusField(verbose_name=_("Semester|type"),
-                       choices_name='TYPES')
+    type = models.CharField(max_length=100,
+                            verbose_name=_("Semester|type"),
+                            choices=TYPES.choices)
     enrollment_start_at = models.DateField(
         _("Enrollment start at"),
         blank=True,
@@ -134,7 +135,7 @@ class Semester(models.Model):
         unique_together = ("year", "type")
 
     def __str__(self):
-        return "{0} {1}".format(self.TYPES[self.type], self.year)
+        return "{0} {1}".format(self.TYPES.labels[self.type], self.year)
 
     def __cmp__(self, other):
         return self.index - other.index
@@ -201,7 +202,7 @@ class Semester(models.Model):
 
     def get_academic_year(self):
         """Academic year starts from autumn term"""
-        if self.type == SEMESTER_TYPES.autumn:
+        if self.type == SemesterTypes.autumn:
             return self.year
         else:
             return self.year - 1
