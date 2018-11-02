@@ -19,6 +19,7 @@ from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from djchoices import DjangoChoices
 from jsonfield import JSONField
 from model_utils import Choices
 from model_utils.fields import MonitorField, StatusField, AutoLastModifiedField
@@ -31,7 +32,8 @@ from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.utils import is_club_site, en_to_ru_mapping
 from cscenter.utils import PublicRoute
 from learning.models import Semester, Enrollment
-from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
+from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES, \
+    AcademicDegreeYears
 from learning.utils import is_positive_grade, is_negative_grade
 from learning.permissions import LearningPermissionsMixin
 from users.settings import GROUPS_IMPORT_TO_GERRIT
@@ -168,20 +170,6 @@ class User(LearningPermissionsMixin, AbstractUser):
 
     STATUS = STUDENT_STATUS
 
-    # TODO: django migrations can't automatically change CharField to Integer
-    # Investigate how to do it manually with migrations only, then replace first param with int
-    COURSES = Choices(
-        ("1", 'BACHELOR_SPECIALITY_1', _('1 course bachelor, speciality')),
-        ("2", 'BACHELOR_SPECIALITY_2', _('2 course bachelor, speciality')),
-        ("3", 'BACHELOR_SPECIALITY_3', _('3 course bachelor, speciality')),
-        ("4", 'BACHELOR_SPECIALITY_4', _('4 course bachelor, speciality')),
-        ("5", 'SPECIALITY_5', _('last course speciality')),
-        ("6", 'MASTER_1', _('1 course magistracy')),
-        ("7", 'MASTER_2', _('2 course magistracy')),
-        ("8", 'POSTGRADUATE', _('postgraduate')),
-        ("9", 'GRADUATE', _('graduate')),
-    )
-
     GENDER_MALE = 'M'
     GENDER_FEMALE = 'F'
     GENDER_CHOICES = (
@@ -267,7 +255,7 @@ class User(LearningPermissionsMixin, AbstractUser):
         blank=True)
     uni_year_at_enrollment = models.CharField(
         _("StudentInfo|University year"),
-        choices=COURSES,
+        choices=AcademicDegreeYears.choices,
         max_length=2,
         help_text=_("at enrollment"),
         null=True,
