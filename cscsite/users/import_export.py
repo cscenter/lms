@@ -1,77 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import string
-import random
-
 import tablib
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from import_export import resources, fields, widgets
 
-from learning.settings import GRADES, SEMESTER_TYPES, AcademicDegreeYears
+from learning.settings import AcademicDegreeYears
 from learning.utils import now_local
-from .models import User, SHADCourseRecord
+from .models import User
 
 
-# Customize widgets
-class GradeWidget(widgets.Widget):
-    MAPPING = {v.lower(): k for k, v in GRADES._display_map.items()}
-
-    def clean(self, value, row=None, *args, **kwargs):
-        if value in self.MAPPING:
-            return self.MAPPING[value]
-        raise NotImplementedError(f'Undefinded GradeWidget MAPPING '
-                                  f'value {value}')
-
-    def render(self, value, obj=None):
-        for k, v in self.MAPPING.items():
-            if value == v:
-                return k
-
-
-class SemesterWidget(widgets.Widget):
-    MAPPING = {v.lower(): k for k, v in SEMESTER_TYPES._display_map.items()}
-
-    def clean(self, value, row=None, *args, **kwargs):
-        from learning.models import Semester
-        data = value.split()
-        if len(data) != 2:
-            raise NotImplementedError('Undefinded SemesterWidget value')
-        type, year = data
-        if type in self.MAPPING:
-            type = self.MAPPING[type]
-        return Semester.objects.get(type=type, year=year).pk
-
-    def render(self, value, obj=None):
-        # TODO: not implemented for export
-        return value
-
-
-class ImportWithEmptyIdMixin(object):
-    def get_instance(self, instance_loader, row):
-        """Allow import when id column not specified"""
-        import_ids = self.get_import_id_fields()
-        if set(import_ids).issubset(row.keys()):
-            return instance_loader.get_instance(row)
-        return False
-
-
-class SHADCourseRecordResource(ImportWithEmptyIdMixin, resources.ModelResource):
-    student_id = fields.Field(column_name='student_id', attribute='student',
-                              widget=widgets.ForeignKeyWidget(User))
-    grade = fields.Field(column_name='grade', attribute='grade',
-                         widget=GradeWidget())
-    semester = fields.Field(column_name='semester', attribute='semester_id',
-                            widget=SemesterWidget())
-
-    class Meta:
-        model = SHADCourseRecord
-        fields = ('id', 'student_id', 'name', 'teachers', 'semester', 'grade')
-        skip_unchanged = True
-
-
-class UserCourseWidget(widgets.IntegerWidget):
+class AcademicDegreeYearWidget(widgets.IntegerWidget):
     def clean(self, label, row=None, *args, **kwargs):
         if self.is_empty(label):
             return None
@@ -130,7 +69,7 @@ class GroupManyToManyWidget(widgets.ManyToManyWidget):
 class UserRecordResource(resources.ModelResource):
     course = fields.Field(column_name='course',
                           attribute='uni_year_at_enrollment',
-                          widget=UserCourseWidget())
+                          widget=AcademicDegreeYearWidget())
     email = fields.Field(column_name='email',
                          attribute='email',
                          widget=UserEmailWidget())

@@ -16,7 +16,7 @@ from learning.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory, CourseNewsFactory, AssignmentFactory, \
     CourseTeacherFactory, CourseClassFactory, EnrollmentFactory
 from learning.models import Semester, Enrollment, CourseNews
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import PARTICIPANT_GROUPS, SemesterTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 
@@ -62,7 +62,7 @@ class CourseMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
                                       city="kzn")
         resp = self.client.get(reverse('course_list'))
         # Really stupid test, we filter summer courses on /courses/ page
-        if s.type != Semester.TYPES.summer:
+        if s.type != SemesterTypes.summer:
             self.assertContains(resp, co.meta_course.name)
             self.assertNotContains(resp, co_kzn.meta_course.name)
         # Note: Club related tests in csclub app

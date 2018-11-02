@@ -4,7 +4,7 @@ from django.urls import reverse
 from learning.factories import MetaCourseFactory, CourseFactory, \
     SemesterFactory, EnrollmentFactory
 from learning.settings import PARTICIPANT_GROUPS as GROUPS, STUDENT_STATUS, \
-    SEMESTER_TYPES, GRADES
+    GRADES, SemesterTypes
 from users.factories import StudentCenterFactory, StudentClubFactory, \
     UserFactory, VolunteerFactory, GraduateFactory
 
@@ -138,8 +138,8 @@ def test_student_search_enrollments(client, curator):
     assert response.json()["count"] == 0
     response = client.get(ENROLLMENTS_URL.format("0,2"))
     assert response.json()["count"] == 1
-    s1 = SemesterFactory.create(year=2014, type=SEMESTER_TYPES.spring)
-    s2 = SemesterFactory.create(year=2014, type=SEMESTER_TYPES.autumn)
+    s1 = SemesterFactory.create(year=2014, type=SemesterTypes.spring)
+    s2 = SemesterFactory.create(year=2014, type=SemesterTypes.autumn)
     mc1, mc2 = MetaCourseFactory.create_batch(2)
     co1 = CourseFactory.create(meta_course=mc1, semester=s1)
     co2 = CourseFactory.create(meta_course=mc1, semester=s2)

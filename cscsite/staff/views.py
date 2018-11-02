@@ -31,8 +31,8 @@ from learning.models import Semester, Course, StudyProgram, \
     StudyProgramCourseGroup, Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
-from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, SEMESTER_TYPES, \
-    GRADES, CENTER_FOUNDATION_YEAR, AcademicDegreeYears
+from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, GRADES, \
+    CENTER_FOUNDATION_YEAR, AcademicDegreeYears, SemesterTypes
 from learning.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
@@ -165,7 +165,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             projects_in_first_two_years_of_learning = 0
             internal_projects_in_first_two_years_of_learning = 0
             enrollment_term_index = get_term_index(s.enrollment_year,
-                                                   SEMESTER_TYPES.autumn)
+                                                   SemesterTypes.autumn)
             for ps in s.projects_through:
                 if ps.final_grade in self.BAD_GRADES or ps.project.canceled:
                     continue
@@ -192,7 +192,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                 courses_by_term[c.semester_id] += 1
             for enrollment in s.enrollments:
                 # Skip summer courses
-                if enrollment.course.semester.type == SEMESTER_TYPES.summer:
+                if enrollment.course.semester.type == SemesterTypes.summer:
                     continue
                 if enrollment.grade in self.BAD_GRADES:
                     failed_courses += 1
@@ -353,10 +353,10 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
         try:
             term_year = int(self.kwargs['term_year'])
             if term_year < FOUNDATION_YEAR:
-                raise ValueError("ProgressReportBySemester: Wrong year format")
+                raise ValueError("ProgressReportForSemester: Wrong year format")
             term_type = self.kwargs['term_type']
-            if term_type not in SEMESTER_TYPES:
-                raise ValueError("ProgressReportBySemester: Wrong term format")
+            if term_type not in SemesterTypes.values:
+                raise ValueError("ProgressReportForSemester: Wrong term format")
             filters = {"year": term_year, "type": term_type}
             semester = get_object_or_404(Semester, **filters)
         except (KeyError, ValueError):

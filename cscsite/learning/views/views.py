@@ -3,7 +3,6 @@ import logging
 import os
 import posixpath
 from collections import OrderedDict
-from time import localtime
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -42,10 +41,10 @@ from learning.models import MetaCourse, CourseClass, Course, Venue, \
     StudentAssignment, AssignmentComment, \
     CourseClassAttachment, AssignmentNotification, \
     Semester, NonCourseEvent, \
-    OnlineCourse, InternationalSchool, CourseTeacher
+    OnlineCourse, InternationalSchool
 from learning.permissions import access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
-    ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR, SEMESTER_TYPES
+    ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR, SemesterTypes
 from learning.utils import get_current_term_pair, get_term_index, now_local, \
     get_terms_for_calendar_month, grouper
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
@@ -354,7 +353,7 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         enrolled_in = Q(id__in=list(student_enrolled_in))
         # Hide summer courses on CS Club site until student enrolled in
         if is_club_site():
-            in_current_term &= ~Q(semester__type=SEMESTER_TYPES.summer)
+            in_current_term &= ~Q(semester__type=SemesterTypes.summer)
         course_offerings = (Course.objects
                             .get_offerings_base_queryset()
                             .in_city(city_code)
@@ -378,7 +377,7 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
             "archive_enrolled": archive_enrolled,
             # FIXME: what about custom template tag for this?
             # TODO: Add util method
-            "current_term": "{} {}".format(SEMESTER_TYPES[current_term],
+            "current_term": "{} {}".format(SemesterTypes.labels[current_term],
                                            current_year).capitalize()
         }
         return context
@@ -784,7 +783,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
             year = int(year)
             if year < FOUNDATION_YEAR:  # invalid GET-param value
                 raise ValidationError("Wrong year value")
-            if term_type not in SEMESTER_TYPES:
+            if term_type not in SemesterTypes.values:
                 raise ValidationError("Wrong term type")
             term = next((t for t in all_terms if
                          t.type == term_type and t.year == year), None)

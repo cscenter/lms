@@ -3,9 +3,10 @@ import pytest
 import pytz
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import patch, MagicMock
+from mock import patch
 
-from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR)
+from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR,
+                               SemesterTypes)
 from learning.utils import split_on_condition, get_term_index, \
     get_term_index_academic_year_starts
 from ..factories import *
@@ -32,25 +33,25 @@ class UtilTests(TestCase):
 
 
 def test_get_term_index():
-    cnt = len(SEMESTER_TYPES)
+    cnt = len(SemesterTypes.choices)
     with pytest.raises(ValueError) as e:
-        get_term_index(FOUNDATION_YEAR - 1, SEMESTER_TYPES.spring)
+        get_term_index(FOUNDATION_YEAR - 1, SemesterTypes.spring)
     assert "target year < FOUNDATION_YEAR" in str(e.value)
     with pytest.raises(ValueError) as e:
         get_term_index(FOUNDATION_YEAR, "sprEng")
     assert "unknown term type" in str(e.value)
     assert get_term_index(FOUNDATION_YEAR,
-                          SEMESTER_TYPES.spring) == TERMS_INDEX_START
+                          SemesterTypes.spring) == TERMS_INDEX_START
     assert get_term_index(FOUNDATION_YEAR,
-                          SEMESTER_TYPES.summer) == TERMS_INDEX_START + 1
+                          SemesterTypes.summer) == TERMS_INDEX_START + 1
     assert get_term_index(FOUNDATION_YEAR,
-                          SEMESTER_TYPES.autumn) == TERMS_INDEX_START + 2
+                          SemesterTypes.autumn) == TERMS_INDEX_START + 2
     assert get_term_index(FOUNDATION_YEAR + 1,
-                          SEMESTER_TYPES.spring) == TERMS_INDEX_START + cnt
+                          SemesterTypes.spring) == TERMS_INDEX_START + cnt
     assert get_term_index(FOUNDATION_YEAR + 1,
-                          SEMESTER_TYPES.summer) == TERMS_INDEX_START + cnt + 1
+                          SemesterTypes.summer) == TERMS_INDEX_START + cnt + 1
     assert get_term_index(FOUNDATION_YEAR + 7,
-                          SEMESTER_TYPES.spring) == TERMS_INDEX_START + cnt * 7
+                          SemesterTypes.spring) == TERMS_INDEX_START + cnt * 7
 
 
 def test_get_term_by_index():
@@ -65,10 +66,12 @@ def test_get_term_by_index():
     assert term == "summer"
     _, term = get_term_by_index(TERMS_INDEX_START + 2)
     assert term == "autumn"
-    year, term = get_term_by_index(TERMS_INDEX_START + len(SEMESTER_TYPES))
+    year, term = get_term_by_index(TERMS_INDEX_START +
+                                   len(SemesterTypes.choices))
     assert year == FOUNDATION_YEAR + 1
     assert term == "spring"
-    year, term = get_term_by_index(TERMS_INDEX_START + 2 * len(SEMESTER_TYPES))
+    year, term = get_term_by_index(TERMS_INDEX_START +
+                                   2 * len(SemesterTypes.choices))
     assert year == FOUNDATION_YEAR + 2
     assert term == "spring"
 
@@ -77,12 +80,12 @@ def test_get_term_index_academic_year_starts():
     # Indexing starts from 1 of foundation year spring.
     with pytest.raises(ValueError):
         get_term_index_academic_year_starts(FOUNDATION_YEAR,
-                                            SEMESTER_TYPES.spring)
+                                            SemesterTypes.spring)
     assert 3 == get_term_index_academic_year_starts(FOUNDATION_YEAR,
-                                                    SEMESTER_TYPES.autumn)
+                                                    SemesterTypes.autumn)
     assert 3 == get_term_index_academic_year_starts(FOUNDATION_YEAR + 1,
-                                                    SEMESTER_TYPES.spring)
+                                                    SemesterTypes.spring)
     assert 6 == get_term_index_academic_year_starts(FOUNDATION_YEAR + 1,
-                                                    SEMESTER_TYPES.autumn)
+                                                    SemesterTypes.autumn)
     assert 6 == get_term_index_academic_year_starts(FOUNDATION_YEAR + 2,
-                                                    SEMESTER_TYPES.summer)
+                                                    SemesterTypes.summer)

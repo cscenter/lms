@@ -4,9 +4,8 @@ from __future__ import unicode_literals
 
 from django.core.management import BaseCommand
 
-from learning.models import Semester, Course
-from learning.settings import FOUNDATION_YEAR, SEMESTER_TYPES, \
-    TERMS_INDEX_START
+from learning.models import Semester
+from learning.settings import FOUNDATION_YEAR, TERMS_INDEX_START, SemesterTypes
 
 
 class Command(BaseCommand):
@@ -20,6 +19,6 @@ class Command(BaseCommand):
         max_year = max_year.year
         index = TERMS_INDEX_START
         for year in range(FOUNDATION_YEAR, max_year + 1):
-            for semester_type, _ in SEMESTER_TYPES:
-                Semester.objects.filter(year=year, type=semester_type).update(index=index)
+            for term_type in SemesterTypes.values:
+                Semester.objects.filter(year=year, type=term_type).update(index=index)
                 index += 1

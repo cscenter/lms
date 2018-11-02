@@ -9,16 +9,16 @@ from django.conf import settings
 from django.utils import timezone
 from six.moves import zip_longest
 
-from learning.settings import SEMESTER_TYPES, FOUNDATION_YEAR, \
+from learning.settings import FOUNDATION_YEAR, \
     TERMS_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
-    SPRING_TERM_START, GRADES, POSITIVE_GRADES
+    SPRING_TERM_START, GRADES, POSITIVE_GRADES, SemesterTypes
 
 CityCode = NewType('CityCode', str)
 Timezone = NewType('Timezone', datetime.tzinfo)
 
 TermTuple = namedtuple('TermTuple', ['year', 'type'])
 
-term_types = "|".join(slug for slug, _ in SEMESTER_TYPES)
+term_types = "|".join(slug for slug, _ in SemesterTypes.choices)
 semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
                               term_types + ")$")
 
@@ -44,11 +44,11 @@ def date_to_term_pair(date):
     summer_term_start = _convert(year, SUMMER_TERM_START, date.tzinfo)
 
     if spring_term_start <= date < summer_term_start:
-        current_term = SEMESTER_TYPES.spring
+        current_term = SemesterTypes.spring
     elif summer_term_start <= date < autumn_term_start:
-        current_term = SEMESTER_TYPES.summer
+        current_term = SemesterTypes.summer
     else:
-        current_term = SEMESTER_TYPES.autumn
+        current_term = SemesterTypes.autumn
         # Fix year inaccuracy, when spring semester starts later than 1 jan
         if date.month <= spring_term_start.month:
             year -= 1
@@ -63,11 +63,11 @@ def convert_term_parts_to_datetime(year, term_start,
 
 def get_term_start(year, term_type, tz: Timezone) -> datetime.datetime:
     """Returns term start point in datetime format."""
-    if term_type == SEMESTER_TYPES.spring:
+    if term_type == SemesterTypes.spring:
         term_start_str = SPRING_TERM_START
-    elif term_type == SEMESTER_TYPES.summer:
+    elif term_type == SemesterTypes.summer:
         term_start_str = SUMMER_TERM_START
-    elif term_type == SEMESTER_TYPES.autumn:
+    elif term_type == SemesterTypes.autumn:
         term_start_str = AUTUMN_TERM_START
     else:
         raise ValueError("get_term_start: unknown term type")
@@ -86,13 +86,13 @@ def get_term_index(target_year, target_term_type):
     """Calculate consecutive term number from spring term of FOUNDATION_YEAR"""
     if target_year < FOUNDATION_YEAR:
         raise ValueError("get_term_index: target year < FOUNDATION_YEAR")
-    if target_term_type not in SEMESTER_TYPES:
+    if target_term_type not in SemesterTypes.values:
         raise ValueError("get_term_index: unknown term type %s" %
                          target_term_type)
-    terms_in_year = len(SEMESTER_TYPES)
+    terms_in_year = len(SemesterTypes.choices)
     year_portion = (target_year - FOUNDATION_YEAR) * terms_in_year
     term_portion = TERMS_INDEX_START
-    for index, (t, _) in enumerate(SEMESTER_TYPES):
+    for index, (t, _) in enumerate(SemesterTypes.choices):
         if t == target_term_type:
             term_portion += index
     return year_portion + term_portion
@@ -109,19 +109,19 @@ def get_term_index_academic_year_starts(year: int, term_type):
     Academic year starts from autumn. Term should be greater than
     autumn of `FOUNDATION_YEAR`.
     """
-    if term_type != SEMESTER_TYPES.autumn:
+    if term_type != SemesterTypes.autumn:
         year -= 1
-    return get_term_index(year, SEMESTER_TYPES.autumn)
+    return get_term_index(year, SemesterTypes.autumn)
 
 
 def get_term_by_index(term_index):
     """Inverse func for `get_term_index`"""
     assert term_index >= TERMS_INDEX_START
-    terms_in_year = len(SEMESTER_TYPES)
+    terms_in_year = len(SemesterTypes.choices)
     term_index -= TERMS_INDEX_START
     year = int(FOUNDATION_YEAR + term_index / terms_in_year)
     term = term_index % terms_in_year
-    for index, (t, _) in enumerate(SEMESTER_TYPES):
+    for index, (t, _) in enumerate(SemesterTypes.choices):
         if index == term:
             term = t
     assert not isinstance(term, int)

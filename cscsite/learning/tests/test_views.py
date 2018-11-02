@@ -12,14 +12,15 @@ from django.forms.models import model_to_dict
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.encoding import smart_text, smart_bytes
+from django.utils.timezone import now
 from testfixtures import LogCapture
 
 from core.utils import city_aware_reverse
 from learning.forms import CourseClassForm
 from learning.settings import GRADES, STUDENT_STATUS
 from learning.tests.utils import check_url_security
-from users.factories import TeacherCenterFactory, StudentFactory, \
-    StudentCenterFactory, StudentClubFactory, GraduateFactory
+from users.factories import TeacherCenterFactory, StudentClubFactory, \
+    GraduateFactory
 from .mixins import *
 from ..factories import *
 
@@ -29,8 +30,6 @@ from ..factories import *
 # редактирования описания ПРОЧТЕНИЯ подставляется описание из курса. И описание прочтения, если оно уже есть.
 # TODO: test redirects on course offering page if tab exists but user has no access
 # TODO: test assignment deadline
-
-
 
 
 class GroupSecurityCheckMixin(MyUtilitiesMixin):
