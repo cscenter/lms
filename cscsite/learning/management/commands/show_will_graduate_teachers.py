@@ -12,7 +12,7 @@ class Command(BaseCommand):
             "with status `will_graduate`")
 
     def handle(self, *args, **options):
-        student_groups = [User.group.STUDENT_CENTER, User.group.VOLUNTEER]
+        student_groups = [User.roles.STUDENT_CENTER, User.roles.VOLUNTEER]
         will_graduate_list = (User.objects
                               .filter(groups__in=student_groups,
                                       status=STUDENT_STATUS.will_graduate)

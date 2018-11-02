@@ -10,7 +10,7 @@ from django.test.client import Client
 from pytest_django.lazy_django import skip_if_no_django
 
 from core.models import City
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from users.factories import UserFactory
 
 CENTER_SITE_ID = settings.CENTER_SITE_ID
@@ -66,7 +66,7 @@ def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
     """Ensure that data missed in django's migrations still exists"""
     with django_db_blocker.unblock():
         # Create user groups
-        for group_id, group_name in PARTICIPANT_GROUPS:
+        for group_id, group_name in AcademicRoles.values.items():
             Group.objects.update_or_create(
                 pk=group_id,
                 defaults={

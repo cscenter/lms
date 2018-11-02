@@ -120,7 +120,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, TestCase):
 
     def test_club_student_login_on_cscenter_site(self):
         student = UserFactory.create(is_superuser=False, is_staff=False,
-                                     groups=[User.group.STUDENT_CLUB])
+                                     groups=[User.roles.STUDENT_CLUB])
         self.doLogin(student)
         login_data = {
             'username': student.username,
@@ -131,7 +131,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, TestCase):
         self.assertFalse(form.is_valid())
         # can't login message in __all__
         self.assertIn("__all__", form.errors)
-        student.groups.set([User.group.STUDENT_CENTER])
+        student.groups.set([User.roles.STUDENT_CENTER])
         student.save()
         response = self.client.post(reverse('login'), login_data)
         self.assertEqual(response.status_code, 302)

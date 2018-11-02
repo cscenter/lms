@@ -56,9 +56,9 @@ class LoginView(generic.FormView):
 
         if not redirect_to:
             user_groups = self.request.user.get_cached_groups()
-            if user_groups == {User.group.STUDENT_CENTER}:
+            if user_groups == {User.roles.STUDENT_CENTER}:
                 redirect_to = reverse(LEARNING_BASE)
-            elif user_groups == {User.group.TEACHER_CENTER}:
+            elif user_groups == {User.roles.TEACHER_CENTER}:
                 redirect_to = reverse(TEACHING_BASE)
 
         if not is_safe_url(redirect_to,
@@ -183,7 +183,7 @@ class UserDetailView(generic.DetailView):
         profile_user = context[self.context_object_name]
         # On Center site show club students to teachers and curators only
         if settings.SITE_ID == settings.CENTER_SITE_ID:
-            if (profile_user.get_cached_groups() == {User.group.STUDENT_CLUB}
+            if (profile_user.get_cached_groups() == {User.roles.STUDENT_CLUB}
                     and not (u.is_teacher or u.is_curator)):
                 raise Http404
 

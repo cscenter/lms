@@ -1,26 +1,20 @@
 # -*- coding: utf-8 -*-
 
-import pytest
-import six
-
 from io import StringIO as OutputIO
+
+import pytest
+from django.core import mail, management
+from django.test import TestCase
+from django.urls import reverse
 from mock import Mock
 
-from django.core import mail, management
-
-from django.urls import reverse
-from django.test import TestCase
-
-from learning.settings import PARTICIPANT_GROUPS
-from users.factories import UserFactory
-
-from learning.models import AssignmentNotification, \
-    CourseNewsNotification
-from learning.factories import AssignmentNotificationFactory, \
-    CourseNewsNotificationFactory, StudentAssignmentFactory
-
-from core.management.commands.notify import Command, get_base_url
+from core.management.commands.notify import get_base_url
 from core.models import related_spec_to_list, apply_related_spec
+from learning.factories import AssignmentNotificationFactory, \
+    CourseNewsNotificationFactory
+from learning.models import AssignmentNotification
+from learning.settings import AcademicRoles
+from users.factories import UserFactory
 
 
 # courtesy of SO http://stackoverflow.com/a/1305682/275084
@@ -137,20 +131,20 @@ def test_middleware_center_site(client, settings):
 @pytest.mark.django_db
 def test_get_base_url():
     """Site domain in notifications depends on recipient user groups"""
-    user = UserFactory(groups=[PARTICIPANT_GROUPS.STUDENT_CENTER])
+    user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER])
     notification = AssignmentNotificationFactory(user=user)
     assert get_base_url(notification) == "https://compscicenter.ru"
-    user = UserFactory(groups=[PARTICIPANT_GROUPS.STUDENT_CENTER,
-                               PARTICIPANT_GROUPS.STUDENT_CLUB])
+    user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
+                               AcademicRoles.STUDENT_CLUB])
     notification = AssignmentNotificationFactory(user=user)
     assert get_base_url(notification) == "https://compscicenter.ru"
-    notification.user = UserFactory(groups=[PARTICIPANT_GROUPS.STUDENT_CLUB])
+    notification.user = UserFactory(groups=[AcademicRoles.STUDENT_CLUB])
     assert get_base_url(notification) == "http://compsciclub.ru"
-    notification.user = UserFactory(groups=[PARTICIPANT_GROUPS.STUDENT_CENTER,
-                                            PARTICIPANT_GROUPS.TEACHER_CLUB])
+    notification.user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
+                                            AcademicRoles.TEACHER_CLUB])
     assert get_base_url(notification) == "https://compscicenter.ru"
-    notification.user = UserFactory(groups=[PARTICIPANT_GROUPS.TEACHER_CLUB])
+    notification.user = UserFactory(groups=[AcademicRoles.TEACHER_CLUB])
     assert get_base_url(notification) == "http://compsciclub.ru"
-    notification.user = UserFactory(groups=[PARTICIPANT_GROUPS.TEACHER_CLUB,
-                                            PARTICIPANT_GROUPS.GRADUATE_CENTER])
+    notification.user = UserFactory(groups=[AcademicRoles.TEACHER_CLUB,
+                                            AcademicRoles.GRADUATE_CENTER])
     assert get_base_url(notification) == "https://compscicenter.ru"

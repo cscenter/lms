@@ -14,7 +14,7 @@ from django.utils.encoding import smart_text, force_text, smart_bytes
 
 from learning.factories import SemesterFactory, \
     CourseFactory, AreaOfStudyFactory
-from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
+from learning.settings import AcademicRoles, STUDENT_STATUS, GRADES
 from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import UserCreationForm, UserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
@@ -30,17 +30,17 @@ class UserTests(MyUtilitiesMixin, TestCase):
         Not so actual for prod db, but we still should check it.
         """
         with translation.override('en'):
-            self.assertEqual(User.group[User.group.STUDENT_CENTER],
+            self.assertEqual(User.roles.values[User.roles.STUDENT_CENTER],
                              Group.objects.get(pk=1).name)
-            self.assertEqual(User.group[User.group.TEACHER_CENTER],
+            self.assertEqual(User.roles.values[User.roles.TEACHER_CENTER],
                              Group.objects.get(pk=2).name)
-            self.assertEqual(User.group[User.group.GRADUATE_CENTER],
+            self.assertEqual(User.roles.values[User.roles.GRADUATE_CENTER],
                              Group.objects.get(pk=3).name)
-            self.assertEqual(User.group[User.group.VOLUNTEER],
+            self.assertEqual(User.roles.values[User.roles.VOLUNTEER],
                              Group.objects.get(pk=4).name)
-            self.assertEqual(User.group[User.group.STUDENT_CLUB],
+            self.assertEqual(User.roles.values[User.roles.STUDENT_CLUB],
                              Group.objects.get(pk=5).name)
-            self.assertEqual(User.group[User.group.TEACHER_CLUB],
+            self.assertEqual(User.roles.values[User.roles.TEACHER_CLUB],
                              Group.objects.get(pk=6).name)
 
     def test_student_should_have_enrollment_year(self):
@@ -52,7 +52,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = UserFactory()
         user_data = model_to_dict(user)
         user_data.update({
-            'groups': [user.group.STUDENT_CENTER],
+            'groups': [user.roles.STUDENT_CENTER],
         })
         form = UserChangeForm(user_data, instance=user)
         self.assertFalse(form.is_valid())
@@ -74,7 +74,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = UserFactory()
         user_data = model_to_dict(user)
         user_data.update({
-            'groups': [user.group.GRADUATE_CENTER],
+            'groups': [user.roles.GRADUATE_CENTER],
         })
         form = UserChangeForm(user_data, instance=user)
         assert not form.is_valid()
@@ -132,20 +132,20 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertFalse(user.is_graduate)
         user = User(username="bar", email="bar@localhost.ru")
         user.save()
-        user.groups.set([user.group.STUDENT_CENTER])
+        user.groups.set([user.roles.STUDENT_CENTER])
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = User(username="baz", email="baz@localhost.ru")
         user.save()
-        user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER])
+        user.groups.set([user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER])
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = User(username="baq", email="baq@localhost.ru")
         user.save()
-        user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER,
-                         user.group.GRADUATE_CENTER])
+        user.groups.set([user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER,
+                         user.roles.GRADUATE_CENTER])
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertTrue(user.is_graduate)
@@ -164,7 +164,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         good_user_attrs = factory.build(dict, FACTORY_CLASS=UserFactory)
         good_user = User.objects.create_user(**good_user_attrs)
         # graduated students redirected to LOGIN_REDIRECT_URL
-        good_user.groups.add(PARTICIPANT_GROUPS.GRADUATE_CENTER)
+        good_user.groups.add(AcademicRoles.GRADUATE_CENTER)
         self.assertNotIn('_auth_user_id', self.client.session)
         bad_user = copy.copy(good_user_attrs)
         bad_user['password'] = "BAD"
@@ -187,14 +187,14 @@ class UserTests(MyUtilitiesMixin, TestCase):
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 200
         assertLoginRedirect(url)
-        user.groups.set([user.group.STUDENT_CENTER])
+        user.groups.set([user.roles.STUDENT_CENTER])
         user.city_id = 'spb'
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
         resp = self.client.get(reverse('assignment_list_teacher'))
         assertLoginRedirect(url)
-        user.groups.set([user.group.STUDENT_CENTER, user.group.TEACHER_CENTER])
+        user.groups.set([user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER])
         user.save()
         resp = self.client.get(reverse('assignment_list_teacher'))
         # Teacher has no course offering and redirects to courses list
@@ -253,7 +253,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user = User.objects.create_user(**user_data)
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 404)
-        user.groups.set([user.group.TEACHER_CENTER])
+        user.groups.set([user.roles.TEACHER_CENTER])
         user.save()
         resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
         self.assertEqual(resp.status_code, 200)
@@ -297,7 +297,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.client.login(**user_data)
         resp = self.client.get(reverse('user_update', args=[user.pk]))
         self.assertNotContains(resp, 'csc_review')
-        user.groups.set([user.group.GRADUATE_CENTER])
+        user.groups.set([user.roles.GRADUATE_CENTER])
         user.graduation_year = 2014
         user.save()
         resp = self.client.get(reverse('user_update', args=[user.pk]))
@@ -412,7 +412,7 @@ def test_expelled(client, settings):
 
 @pytest.mark.django_db
 def test_alumni(client):
-    graduated = UserFactory(groups=[PARTICIPANT_GROUPS.GRADUATE_CENTER])
+    graduated = UserFactory(groups=[AcademicRoles.GRADUATE_CENTER])
     student_center = StudentCenterFactory()
     url_list_all = reverse('alumni')
     response = client.get(url_list_all)
@@ -450,48 +450,48 @@ def test_login_restrictions(client, settings):
     assert response.status_code == 200
     assert len(response.context["form"].errors) > 0
     # Login as center student
-    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CENTER)
+    student.groups.add(AcademicRoles.STUDENT_CENTER)
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as center and club student simultaneously
-    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
+    student.groups.add(AcademicRoles.STUDENT_CLUB)
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as volunteer
-    student.groups.set([PARTICIPANT_GROUPS.VOLUNTEER])
+    student.groups.set([AcademicRoles.VOLUNTEER])
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as volunteer and club students simultaneously
-    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
+    student.groups.add(AcademicRoles.STUDENT_CLUB)
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as graduate only
-    student.groups.set([PARTICIPANT_GROUPS.GRADUATE_CENTER])
+    student.groups.set([AcademicRoles.GRADUATE_CENTER])
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # graduate and club
-    student.groups.add(PARTICIPANT_GROUPS.STUDENT_CLUB)
+    student.groups.add(AcademicRoles.STUDENT_CLUB)
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Only club gtfo
-    student.groups.set([PARTICIPANT_GROUPS.STUDENT_CLUB])
+    student.groups.set([AcademicRoles.STUDENT_CLUB])
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
     assert not response.wsgi_request.user.is_authenticated
     # Club teacher
-    student.groups.add(PARTICIPANT_GROUPS.TEACHER_CLUB)
+    student.groups.add(AcademicRoles.TEACHER_CLUB)
     response = client.post(reverse('login'), user_data, follow=True)
     assert not response.wsgi_request.user.is_authenticated
     # Center teacher
-    student.groups.add(PARTICIPANT_GROUPS.TEACHER_CENTER)
+    student.groups.add(AcademicRoles.TEACHER_CENTER)
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     # Just to make sure we have no super user permissions

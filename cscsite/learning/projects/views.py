@@ -31,7 +31,7 @@ from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportCuratorAssessmentForm, StudentResultsModelForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from learning.utils import get_current_term_index
 from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin, \
     StudentOnlyMixin
@@ -524,7 +524,7 @@ class ReportView(FormMixin, generic.DetailView):
         curators = (User.objects.filter(
             is_superuser=True,
             is_staff=True,
-            groups=PARTICIPANT_GROUPS.CURATOR_PROJECTS))
+            groups=AcademicRoles.CURATOR_PROJECTS))
         report = (Report.objects
                   .select_related("project_student",
                                   "project_student__project",

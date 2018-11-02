@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from learning.factories import CourseFactory, EnrollmentFactory, \
     SemesterFactory
-from learning.settings import PARTICIPANT_GROUPS, STUDENT_STATUS, GRADES
+from learning.settings import AcademicRoles, STUDENT_STATUS, GRADES
 from users.factories import StudentFactory, CuratorFactory, UserFactory, \
     StudentCenterFactory
 
@@ -34,27 +34,27 @@ def test_user_city_code(client, settings):
 @pytest.mark.django_db
 def test_cached_groups(settings):
     user = UserFactory.create()
-    user.groups.add(PARTICIPANT_GROUPS.STUDENT_CENTER,
-                    PARTICIPANT_GROUPS.TEACHER_CENTER)
-    assert set(user._cached_groups) == {PARTICIPANT_GROUPS.STUDENT_CENTER,
-                                        PARTICIPANT_GROUPS.TEACHER_CENTER}
+    user.groups.add(AcademicRoles.STUDENT_CENTER,
+                    AcademicRoles.TEACHER_CENTER)
+    assert set(user._cached_groups) == {AcademicRoles.STUDENT_CENTER,
+                                        AcademicRoles.TEACHER_CENTER}
     user.status = STUDENT_STATUS.expelled
-    user.groups.add(PARTICIPANT_GROUPS.VOLUNTEER)
+    user.groups.add(AcademicRoles.VOLUNTEER)
     # Invalidate property cache
     del user._cached_groups
     # Nothing change!
-    assert user._cached_groups == {PARTICIPANT_GROUPS.TEACHER_CENTER,
-                                   PARTICIPANT_GROUPS.STUDENT_CENTER,
-                                   PARTICIPANT_GROUPS.VOLUNTEER}
+    assert user._cached_groups == {AcademicRoles.TEACHER_CENTER,
+                                   AcademicRoles.STUDENT_CENTER,
+                                   AcademicRoles.VOLUNTEER}
     # Add student club group for center students on club site
     user.groups.clear()
     del user._cached_groups
-    user.groups.add(PARTICIPANT_GROUPS.STUDENT_CENTER)
+    user.groups.add(AcademicRoles.STUDENT_CENTER)
     user.status = ''
     user.save()
     settings.SITE_ID = settings.CLUB_SITE_ID
-    assert set(user._cached_groups) == {PARTICIPANT_GROUPS.STUDENT_CENTER,
-                                        PARTICIPANT_GROUPS.STUDENT_CLUB}
+    assert set(user._cached_groups) == {AcademicRoles.STUDENT_CENTER,
+                                        AcademicRoles.STUDENT_CLUB}
 
 
 @pytest.mark.django_db

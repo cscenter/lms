@@ -77,7 +77,7 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                                  .filter(curriculum_year__isnull=False)
                                  .order_by('curriculum_year')
                                  .distinct()),
-            'groups': {gid: User.group[gid] for gid in
+            'groups': {gid: User.roles.values[gid] for gid in
                        UserFilter.FILTERING_GROUPS},
             "status": {sid: name for sid, name in User.STATUS},
             "cnt_enrollments": range(UserFilter.ENROLLMENTS_MAX + 1)
@@ -443,7 +443,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         return super(StudentFacesView, self).get_template_names()
 
     def get_queryset(self, city_code, enrollment_year):
-        groups = [User.group.STUDENT_CENTER, User.group.VOLUNTEER]
+        groups = [User.roles.STUDENT_CENTER, User.roles.VOLUNTEER]
         qs = (User.objects
               .filter(groups__in=groups,
                       city_id=city_code,

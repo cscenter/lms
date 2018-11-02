@@ -14,8 +14,8 @@ from users.models import User
 
 @pytest.mark.django_db
 def test_classes(client):
-    user = UserFactory(groups=[User.group.STUDENT_CENTER,
-                               User.group.TEACHER_CENTER],
+    user = UserFactory(groups=[User.roles.STUDENT_CENTER,
+                               User.roles.TEACHER_CENTER],
                        city_id='spb')
     client.login(user)
     fname = 'csc_classes.ics'
@@ -41,8 +41,8 @@ def test_classes(client):
 
 @pytest.mark.django_db
 def test_assignments(client):
-    user = UserFactory(groups=[User.group.STUDENT_CENTER,
-                               User.group.TEACHER_CENTER],
+    user = UserFactory(groups=[User.roles.STUDENT_CENTER,
+                               User.roles.TEACHER_CENTER],
                        city_id='spb')
     client.login(user)
     fname = 'csc_assignments.ics'

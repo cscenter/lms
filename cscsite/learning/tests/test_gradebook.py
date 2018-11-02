@@ -1,6 +1,7 @@
 import datetime
 from decimal import Decimal
 from io import StringIO, BytesIO
+
 import pytest
 import pytz
 import unicodecsv
@@ -15,8 +16,8 @@ from learning.factories import SemesterFactory, CourseFactory, \
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory, AssignmentGradesImport
 from learning.models import StudentAssignment, Enrollment
-from learning.settings import GRADES, PARTICIPANT_GROUPS, \
-    STUDENT_STATUS, GradingTypes
+from learning.settings import GRADES, STUDENT_STATUS, GradingTypes, \
+    AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.utils import assert_login_redirect
 from learning.views.gradebook import _get_course
@@ -134,7 +135,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         self.assertLoginRedirect(url)
         test_groups = [
             [],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
@@ -384,7 +385,7 @@ def test_security(client, settings):
     assert_login_redirect(client, settings, url)
     test_groups = [
         [],
-        [PARTICIPANT_GROUPS.STUDENT_CENTER],
+        [AcademicRoles.STUDENT_CENTER],
     ]
     for groups in test_groups:
         client.login(UserFactory.create(groups=groups))

@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from users.factories import UserFactory
 
 # Workaround to use Django's assertRedirects()
@@ -27,9 +27,9 @@ def check_url_security(client, settings, groups_allowed, url):
                      "{}?next={}".format(settings.LOGIN_URL, url))
     all_test_groups = [
         [],
-        [PARTICIPANT_GROUPS.TEACHER_CENTER],
-        [PARTICIPANT_GROUPS.STUDENT_CENTER],
-        [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+        [AcademicRoles.TEACHER_CENTER],
+        [AcademicRoles.STUDENT_CENTER],
+        [AcademicRoles.GRADUATE_CENTER]
     ]
     for groups in all_test_groups:
         client.login(UserFactory.create(groups=groups, city_id='spb'))

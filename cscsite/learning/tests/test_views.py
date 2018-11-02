@@ -17,7 +17,7 @@ from testfixtures import LogCapture
 
 from core.utils import city_aware_reverse
 from learning.forms import CourseClassForm
-from learning.settings import GRADES, STUDENT_STATUS
+from learning.settings import GRADES, STUDENT_STATUS, AcademicRoles
 from learning.tests.utils import check_url_security
 from users.factories import TeacherCenterFactory, StudentClubFactory, \
     GraduateFactory
@@ -44,9 +44,9 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
         self.assertLoginRedirect(reverse(self.url_name))
         all_test_groups = [
             [],
-            [PARTICIPANT_GROUPS.TEACHER_CENTER],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
-            [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
+            [AcademicRoles.GRADUATE_CENTER]
         ]
         for groups in all_test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -62,7 +62,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
 class TimetableTeacherTests(GroupSecurityCheckMixin,
                             MyUtilitiesMixin, TestCase):
     url_name = 'timetable_teacher'
-    groups_allowed = [PARTICIPANT_GROUPS.TEACHER_CENTER]
+    groups_allowed = [AcademicRoles.TEACHER_CENTER]
 
     @pytest.mark.skip("Buggy in the end of the month. WTF!")
     def test_teacher_timetable(self):
@@ -93,7 +93,7 @@ class TimetableTeacherTests(GroupSecurityCheckMixin,
 class TimetableStudentTests(GroupSecurityCheckMixin,
                             MyUtilitiesMixin, TestCase):
     url_name = 'timetable_student'
-    groups_allowed = [PARTICIPANT_GROUPS.STUDENT_CENTER]
+    groups_allowed = [AcademicRoles.STUDENT_CENTER]
 
     def test_student_timetable(self):
         student = StudentCenterFactory()
@@ -133,7 +133,7 @@ def test_video_list(client):
 class CourseListTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
     url_name = 'course_list_teacher'
-    groups_allowed = [PARTICIPANT_GROUPS.TEACHER_CENTER]
+    groups_allowed = [AcademicRoles.TEACHER_CENTER]
 
 
 class MetaCourseDetailTests(MyUtilitiesMixin, TestCase):
@@ -163,9 +163,9 @@ class MetaCourseUpdateTests(MyUtilitiesMixin, TestCase):
         url = reverse('meta_course_edit', args=[mc.slug])
         all_test_groups = [
             [],
-            [PARTICIPANT_GROUPS.TEACHER_CENTER],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
-            [PARTICIPANT_GROUPS.GRADUATE_CENTER]
+            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
+            [AcademicRoles.GRADUATE_CENTER]
         ]
         for groups in all_test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -614,8 +614,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         self.assertLoginRedirect(url)
         test_groups = [
             [],
-            [PARTICIPANT_GROUPS.TEACHER_CENTER],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
+            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -628,7 +628,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         assert self.client.get(url).status_code == 200
         # Change student to graduate, make sure they have access to HW
         student.groups.clear()
-        student.groups.add(PARTICIPANT_GROUPS.GRADUATE_CENTER)
+        student.groups.add(AcademicRoles.GRADUATE_CENTER)
         student.save()
         self.assertEquals(200, self.client.get(url).status_code)
 
@@ -764,12 +764,12 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         # Test GET
         test_groups = [
             [],
-            [PARTICIPANT_GROUPS.TEACHER_CENTER],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER],
+            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.STUDENT_CENTER],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == [PARTICIPANT_GROUPS.TEACHER_CENTER]:
+            if groups == [AcademicRoles.TEACHER_CENTER]:
                 self.assertLoginRedirect(url)
             else:
                 assert self.client.get(url).status_code == 302
@@ -785,12 +785,12 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         grade_dict = {'grading_form': True, 'grade': 3}
         test_groups = [
             [],
-            [PARTICIPANT_GROUPS.TEACHER_CENTER],
-            [PARTICIPANT_GROUPS.STUDENT_CENTER]
+            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.STUDENT_CENTER]
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == [PARTICIPANT_GROUPS.TEACHER_CENTER]:
+            if groups == [AcademicRoles.TEACHER_CENTER]:
                 self.assertPOSTLoginRedirect(url, grade_dict)
             else:
                 assert self.client.get(url).status_code == 302
@@ -940,7 +940,7 @@ def test_course_class_form(client, curator, settings):
 def test_student_courses_list(client, settings):
     url = reverse('course_list_student')
     check_url_security(client, settings,
-                       groups_allowed=[PARTICIPANT_GROUPS.STUDENT_CENTER],
+                       groups_allowed=[AcademicRoles.STUDENT_CENTER],
                        url=url)
     student_spb = StudentCenterFactory(city_id='spb')
     client.login(student_spb)

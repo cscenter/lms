@@ -19,7 +19,7 @@ from model_utils.models import TimeStampedModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.utils import hashids
 from learning.models import Semester
-from learning.settings import GRADES, PARTICIPANT_GROUPS
+from learning.settings import GRADES, AcademicRoles
 from learning.utils import get_current_term_index, now_local
 
 # Calculate mean scores for these fields when review has been completed
@@ -166,7 +166,7 @@ class Project(TimeStampedModel):
         verbose_name=_("Reviewers"),
         related_name='project_reviewers',
         blank=True,
-        limit_choices_to=(Q(groups=PARTICIPANT_GROUPS.PROJECT_REVIEWER) |
+        limit_choices_to=(Q(groups=AcademicRoles.PROJECT_REVIEWER) |
                           Q(is_superuser=True))
     )
     supervisor = models.CharField(

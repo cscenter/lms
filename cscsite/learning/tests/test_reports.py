@@ -9,7 +9,7 @@ from learning.factories import SemesterFactory, CourseFactory, \
 from learning.projects.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
-from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS, \
+from learning.settings import GRADES, STUDENT_STATUS, AcademicRoles, \
     GradingTypes
 from learning.utils import get_term_by_index
 from users.factories import SHADCourseRecordFactory, OnlineCourseRecordFactory, \
@@ -203,7 +203,7 @@ def test_report_for_target_term(rf):
     assert len(progress_report.data) == 3
     # Graduated students not included in report
     student3.groups.clear()
-    student3.groups.add(PARTICIPANT_GROUPS.GRADUATE_CENTER)
+    student3.groups.add(AcademicRoles.GRADUATE_CENTER)
     progress_report = get_progress_report(prev_s)
     assert len(progress_report.data) == 2
     STATIC_HEADERS_CNT = len(progress_report.static_headers)

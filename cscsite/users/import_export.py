@@ -58,7 +58,7 @@ class UserGenderWidget(widgets.CharWidget):
 class GroupManyToManyWidget(widgets.ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
-            return self.model.objects.filter(pk=User.group.VOLUNTEER)
+            return self.model.objects.filter(pk=User.roles.VOLUNTEER)
         return super().clean(value, row, *args, **kwargs)
 
     def render(self, value, obj=None):

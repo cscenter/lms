@@ -1,22 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
-import datetime
 from distutils.util import strtobool
 
 import django_filters
-from crispy_forms.bootstrap import FormActions, PrependedText
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row
-from django.db.models import Case, Count, F, When, Value, Sum, IntegerField, \
-    BooleanField
+from django.db.models import Case, Count, F, When, Value, Sum, IntegerField
 from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from learning.projects.models import Project, ProjectStudent
-from learning.settings import PARTICIPANT_GROUPS, GRADES
+from learning.settings import AcademicRoles, GRADES
 from users.models import User
 
 EMPTY_CHOICE = ('', _('Any'))
@@ -38,8 +33,8 @@ class ProjectsFilter(django_filters.FilterSet):
         label=_("Student"),
         queryset=(User.objects
                   .filter(
-                groups__in=[PARTICIPANT_GROUPS.STUDENT_CENTER,
-                            PARTICIPANT_GROUPS.GRADUATE_CENTER])
+                groups__in=[AcademicRoles.STUDENT_CENTER,
+                            AcademicRoles.GRADUATE_CENTER])
                   .distinct()
                   .all())
     )

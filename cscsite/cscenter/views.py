@@ -100,7 +100,7 @@ class IndexView(TemplateView):
         if testimonials is None:
             # TODO: Выбрать только нужные поля
             s = (User.objects
-                 .filter(groups=User.group.GRADUATE_CENTER)
+                 .filter(groups=User.roles.GRADUATE_CENTER)
                  .exclude(csc_review='').exclude(photo='')
                  .prefetch_related("areas_of_study")
                  .order_by('?'))[:4]
@@ -170,7 +170,7 @@ class TestimonialsListView(generic.ListView):
 
     def get_queryset(self):
         return (User.objects
-                .filter(groups=User.group.GRADUATE_CENTER)
+                .filter(groups=User.roles.GRADUATE_CENTER)
                 .exclude(csc_review='').exclude(photo='')
                 .prefetch_related("areas_of_study")
                 .order_by("-graduation_year", "last_name"))
@@ -218,7 +218,7 @@ class TeachersView(generic.ListView):
 
     def get_queryset(self):
         qs = (User.objects
-              .filter(groups=User.group.TEACHER_CENTER,
+              .filter(groups=User.roles.TEACHER_CENTER,
                       courseteacher__roles=CourseTeacher.roles.lecturer)
               .distinct())
         return qs
@@ -286,22 +286,20 @@ class AlumniView(generic.ListView):
         return super(AlumniView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
-        user_model = get_user_model()
-        graduate_pk = user_model.group.GRADUATE_CENTER
         params = {
-            "groups__pk": graduate_pk
+            "groups__pk": User.roles.GRADUATE_CENTER
         }
         if self.filter_by_year is not None:
             params["graduation_year"] = self.filter_by_year
         code = self.kwargs.get("area_of_study_code", False)
         if code:
             params["areas_of_study"] = code
-        return (user_model.objects
+        return (User.objects
                 .filter(**params)
                 .order_by("-graduation_year", "last_name", "first_name"))
 
     def get_context_data(self, **kwargs):
-        context = super(AlumniView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         code = self.kwargs.get("area_of_study_code", False)
         context["selected_area_of_study"] = code
         context["areas_of_study"] = self.areas_of_study
@@ -326,13 +324,12 @@ class AlumniByYearView(generic.ListView):
         return super(AlumniByYearView, self).get(request, *args, **kwargs)
 
     def get_queryset(self):
-        user_model = get_user_model()
         year = int(self.kwargs['year'])
-        filters = (Q(groups__pk=user_model.group.GRADUATE_CENTER) &
+        filters = (Q(groups__pk=User.roles.GRADUATE_CENTER) &
                    Q(graduation_year=year))
         if year == now().year and self.request.user.is_curator:
             filters = filters | Q(status=User.STATUS.will_graduate)
-        return (user_model.objects
+        return (User.objects
                 .filter(filters)
                 .distinct()
                 .order_by("-graduation_year", "last_name", "first_name"))
@@ -345,7 +342,7 @@ class AlumniByYearView(generic.ListView):
         if testimonials is None:
             s = (User.objects
                  .filter(
-                    groups=User.group.GRADUATE_CENTER,
+                    groups=User.roles.GRADUATE_CENTER,
                     graduation_year=year,
                  )
                  .exclude(csc_review='').exclude(photo='')
@@ -392,7 +389,7 @@ class AlumniHonorBoardView(TemplateView):
         graduation_year = int(self.kwargs['year'])
         preview = self.request.GET.get('preview', False)
         filters = {
-            "groups__pk": User.group.GRADUATE_CENTER,
+            "groups__pk": User.roles.GRADUATE_CENTER,
             "graduation_year": graduation_year
         }
         if preview and self.request.user.is_curator:
@@ -430,7 +427,7 @@ class AlumniV2View(TemplateView):
         last_graduation_year = cache.get(cache_key)
         if last_graduation_year is None:
             from_last_graduation = (User.objects
-                                    .filter(groups=User.group.GRADUATE_CENTER)
+                                    .filter(groups=User.roles.GRADUATE_CENTER)
                                     .order_by("-graduation_year")
                                     .only("graduation_year")
                                     .first())

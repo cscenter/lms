@@ -16,10 +16,10 @@ class CharInFilter(BaseInFilter, CharFilter):
 
 class UserFilter(FilterSet):
     FILTERING_GROUPS = [
-        User.group.VOLUNTEER,
-        User.group.STUDENT_CENTER,
-        User.group.GRADUATE_CENTER,
-        User.group.MASTERS_DEGREE,
+        User.roles.VOLUNTEER,
+        User.roles.STUDENT_CENTER,
+        User.roles.GRADUATE_CENTER,
+        User.roles.MASTERS_DEGREE,
     ]
 
     ENROLLMENTS_MAX = 12
@@ -53,9 +53,9 @@ class UserFilter(FilterSet):
             if not groups:
                 groups = self.FILTERING_GROUPS[:]
                 if "studying" in data.get("status", []):
-                    groups.remove(User.group.GRADUATE_CENTER)
+                    groups.remove(User.roles.GRADUATE_CENTER)
             # Special case - show `studying` among graduated
-            only_graduate_selected = (groups == {User.group.GRADUATE_CENTER})
+            only_graduate_selected = (groups == {User.roles.GRADUATE_CENTER})
             if "studying" in data.get("status", []) and only_graduate_selected:
                 self.empty_query = True
             else:

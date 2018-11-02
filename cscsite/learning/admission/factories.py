@@ -16,7 +16,7 @@ from learning.admission.models import Campaign, Applicant, Contest, Test, \
     InterviewSlot, InterviewStream, InterviewInvitation
 from learning.admission.signals import post_save_interview
 from learning.factories import VenueFactory
-from learning.settings import PARTICIPANT_GROUPS
+from learning.settings import AcademicRoles
 from users.factories import UserFactory
 
 
@@ -94,7 +94,7 @@ class InterviewerFactory(UserFactory):
         if not create:
             return
 
-        groups = extracted or [PARTICIPANT_GROUPS.INTERVIEWER]
+        groups = extracted or [AcademicRoles.INTERVIEWER]
         for group in groups:
             self.groups.add(group)
 

@@ -22,6 +22,7 @@ from learning.models import Course, Semester, CourseClass
 from learning.settings import SemesterTypes
 from learning.utils import get_current_term_pair
 from learning.views.generic import CalendarGenericView
+from users.models import User
 
 
 class AsyncEmailRegistrationView(RegistrationView):
@@ -107,15 +108,14 @@ class TeachersView(generic.ListView):
 
     @property
     def get_queryset(self):
-        user_model = get_user_model()
         lecturers = list(Course
                          .objects
                          .filter(is_open=True,
-                    city__pk=self.request.city_code)
+                                 city__pk=self.request.city_code)
                          .distinct()
                          .values_list("teachers__pk", flat=True))
-        return (user_model.objects
-                .filter(groups=user_model.group.TEACHER_CLUB,
+        return (User.objects
+                .filter(groups=User.roles.TEACHER_CLUB,
                         courseteacher__teacher_id__in=lecturers)
                 .distinct)
 
