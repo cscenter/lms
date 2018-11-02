@@ -15,8 +15,8 @@ from learning.factories import SemesterFactory, CourseFactory, \
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory, AssignmentGradesImport
 from learning.models import StudentAssignment, Enrollment
-from learning.settings import GRADING_TYPES, GRADES, PARTICIPANT_GROUPS, \
-    STUDENT_STATUS
+from learning.settings import GRADES, PARTICIPANT_GROUPS, \
+    STUDENT_STATUS, GradingTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.utils import assert_login_redirect
 from learning.views.gradebook import _get_course
@@ -57,7 +57,7 @@ def test_gradebook_recalculate_grading_type(client):
     students = StudentCenterFactory.create_batch(2)
     s = SemesterFactory.create_current()
     co = CourseFactory.create(semester=s, teachers=[teacher])
-    assert co.grading_type == GRADING_TYPES.default
+    assert co.grading_type == GradingTypes.default
     assignments = AssignmentFactory.create_batch(2,
                                                  course=co,
                                                  is_online=False,
@@ -68,7 +68,7 @@ def test_gradebook_recalculate_grading_type(client):
     response = client.post(url, {}, follow=True)
     assert response.status_code == 200
     co.refresh_from_db()
-    assert co.grading_type == GRADING_TYPES.default
+    assert co.grading_type == GradingTypes.default
     form = {}
     for s in students:
         enrollment = EnrollmentFactory.create(student=s, course=co)
@@ -79,7 +79,7 @@ def test_gradebook_recalculate_grading_type(client):
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
     co.refresh_from_db()
-    assert co.grading_type == GRADING_TYPES.default
+    assert co.grading_type == GradingTypes.default
     student = students[0]
 
     user_detail_url = student.get_absolute_url()
@@ -92,7 +92,7 @@ def test_gradebook_recalculate_grading_type(client):
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
     co.refresh_from_db()
-    assert co.grading_type == GRADING_TYPES.binary
+    assert co.grading_type == GradingTypes.binary
     e = Enrollment.objects.get(student=student, course=co)
     assert e.grade == GRADES.credit
     response = client.get(user_detail_url)
@@ -114,9 +114,9 @@ def test_gradebook_recalculate_grading_type(client):
     co.refresh_from_db()
     submission.refresh_from_db()
     assert submission.grade == 2
-    assert co.grading_type == GRADING_TYPES.binary
+    assert co.grading_type == GradingTypes.binary
     # Manually set default grading type and check that grade repr changed
-    co.grading_type = GRADING_TYPES.default
+    co.grading_type = GradingTypes.default
     co.save()
     response = client.get(user_detail_url)
     assert smart_bytes("/enrollment|pass/") not in response.content

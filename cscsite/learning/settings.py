@@ -46,9 +46,11 @@ STUDENT_STATUS = getattr(settings, 'STUDENT_STATUS',
                                  ('reinstated', _("StudentInfo|Reinstalled")),
                                  ('will_graduate', _("StudentInfo|Will graduate"))))
 
-GRADING_TYPES = getattr(settings, 'GRADE_TYPES',
-    Choices((0, 'default', _("Default")),  # 4 state, if graded
-            (1, 'binary', _("Binary"))))  # (un)satisfy, if graded
+
+class GradingTypes(DjangoChoices):
+    default = C(0, _("Default"), css_class="")
+    binary = C(1, _("Binary"), css_class="__binary")
+
 
 GRADES = getattr(settings, 'GRADES',
                  Choices(('not_graded', 'not_graded', _("Not graded")),

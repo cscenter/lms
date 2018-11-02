@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, absolute_import
-
 import pytest
 from django.urls import reverse
-
 from django.utils.encoding import smart_bytes
 
 from learning.factories import SemesterFactory, CourseFactory, \
@@ -12,8 +9,8 @@ from learning.factories import SemesterFactory, CourseFactory, \
 from learning.projects.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
-from learning.settings import GRADES, STUDENT_STATUS, GRADING_TYPES, \
-    PARTICIPANT_GROUPS
+from learning.settings import GRADES, STUDENT_STATUS, PARTICIPANT_GROUPS, \
+    GradingTypes
 from learning.utils import get_term_by_index
 from users.factories import SHADCourseRecordFactory, OnlineCourseRecordFactory, \
     TeacherCenterFactory, StudentCenterFactory
@@ -336,7 +333,7 @@ def test_report_diplomas_csv(rf):
     # Grade should be printed with `default` grading type style
     e_s1_co1.grade = GRADES.credit
     e_s1_co1.save()
-    co1.grading_type = GRADING_TYPES.binary
+    co1.grading_type = GradingTypes.binary
     co1.save()
     progress_report = ProgressReportForDiplomas(request=request)
     assert progress_report.data[0].pk == student1.pk

@@ -36,7 +36,7 @@ from learning.managers import StudyProgramQuerySet, \
     StudentAssignmentManager, AssignmentManager, CourseTeacherManager
 from learning.micawber_providers import get_oembed_html
 from learning.settings import GRADES, SHORT_GRADES, \
-    SEMESTER_TYPES, GRADING_TYPES, AssignmentStates
+    SEMESTER_TYPES, AssignmentStates, GradingTypes
 from learning.tasks import maybe_upload_slides_yandex
 from learning.utils import get_current_term_index, now_local, \
     next_term_starts_at
@@ -215,8 +215,8 @@ class Course(TimeStampedModel):
         on_delete=models.PROTECT)
     grading_type = models.SmallIntegerField(
         verbose_name=_("CourseOffering|grading_type"),
-        choices=GRADING_TYPES,
-        default=GRADING_TYPES.default)
+        choices=GradingTypes.choices,
+        default=GradingTypes.default)
     capacity = models.PositiveSmallIntegerField(
         verbose_name=_("CourseOffering|capacity"),
         default=0,
@@ -415,18 +415,16 @@ class Course(TimeStampedModel):
             return float("inf")
 
     @property
-    def grading_type_css_mixin(self):
-        if self.grading_type == GRADING_TYPES.binary:
-            return "__binary"
-        return ""
+    def grading_type_choice(self):
+        return GradingTypes.get_choice(self.grading_type)
 
     def recalculate_grading_type(self):
         es = (Enrollment.active
               .filter(course=self)
               .values_list("grade", flat=True))
-        grading_type = GRADING_TYPES.default
+        grading_type = GradingTypes.default
         if not any(g for g in es if g in [GRADES.good, GRADES.excellent]):
-            grading_type = GRADING_TYPES.binary
+            grading_type = GradingTypes.binary
         if self.grading_type != grading_type:
             self.grading_type = grading_type
             self.save()
@@ -1306,7 +1304,7 @@ class Enrollment(TimeStampedModel):
     @property
     def grade_honest(self):
         """Show `satisfactory` instead of `pass` for default grading type"""
-        if (self.course.grading_type == GRADING_TYPES.default and
+        if (self.course.grading_type == GradingTypes.default and
                 self.grade == GRADES.credit):
             return _("Satisfactory")
         return GRADES[self.grade]
