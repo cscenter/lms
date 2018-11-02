@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 
 from learning.factories import CourseFactory, EnrollmentFactory, \
     SemesterFactory
-from learning.settings import AcademicRoles, STUDENT_STATUS, GRADES
+from learning.settings import AcademicRoles, GRADES, \
+    StudentStatuses
 from users.factories import StudentFactory, CuratorFactory, UserFactory, \
     StudentCenterFactory
 
@@ -38,7 +39,7 @@ def test_cached_groups(settings):
                     AcademicRoles.TEACHER_CENTER)
     assert set(user._cached_groups) == {AcademicRoles.STUDENT_CENTER,
                                         AcademicRoles.TEACHER_CENTER}
-    user.status = STUDENT_STATUS.expelled
+    user.status = StudentStatuses.expelled
     user.groups.add(AcademicRoles.VOLUNTEER)
     # Invalidate property cache
     del user._cached_groups
@@ -99,7 +100,7 @@ def test_permissions(client):
     assert not request_user.is_interviewer
     assert not request_user.is_project_reviewer
     # Expelled student
-    student.status = STUDENT_STATUS.expelled
+    student.status = StudentStatuses.expelled
     student.save()
     response = client.get("/")
     request_user = response.wsgi_request.user

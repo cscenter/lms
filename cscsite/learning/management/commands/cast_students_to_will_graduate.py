@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from django.core.management import BaseCommand
 from django.db.models import Count, Prefetch, Value, When, Q, F, Case
-from django.utils.timezone import now
 
-from learning.models import Enrollment, Semester, OnlineCourse, StudyProgram
-from learning.settings import STUDENT_STATUS
+from learning.models import Enrollment, Semester, StudyProgram
+from learning.settings import StudentStatuses
 from users.models import User, SHADCourseRecord, OnlineCourseRecord
 
 
@@ -41,8 +38,8 @@ Requirements:
                     .filter(groups__in=[User.roles.STUDENT_CENTER],
                             curriculum_year__gte=str(current_term.year - 3),
                             passed_projects__gte=3)
-                    .exclude(status__in=[User.STATUS.will_graduate,
-                                         User.STATUS.expelled])
+                    .exclude(status__in=[StudentStatuses.will_graduate,
+                                         StudentStatuses.expelled])
                     .prefetch_related(
                         Prefetch('onlinecourserecord_set',
                                  queryset=(OnlineCourseRecord.objects
@@ -88,5 +85,5 @@ Requirements:
                         areas.append(program.area.code)
                 if areas:
                     User.objects.filter(pk=student.pk).update(
-                        status=User.STATUS.will_graduate)
+                        status=StudentStatuses.will_graduate)
                     student.areas_of_study.set(areas)

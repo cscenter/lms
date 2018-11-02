@@ -31,8 +31,8 @@ from learning.models import Semester, Course, StudyProgram, \
     StudyProgramCourseGroup, Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
-from learning.settings import STUDENT_STATUS, FOUNDATION_YEAR, GRADES, \
-    CENTER_FOUNDATION_YEAR, AcademicDegreeYears, SemesterTypes
+from learning.settings import FOUNDATION_YEAR, GRADES, \
+    CENTER_FOUNDATION_YEAR, AcademicDegreeYears, SemesterTypes, StudentStatuses
 from learning.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
@@ -79,7 +79,7 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                                  .distinct()),
             'groups': {gid: User.roles.values[gid] for gid in
                        UserFilter.FILTERING_GROUPS},
-            "status": {sid: name for sid, name in User.STATUS},
+            "status": StudentStatuses.values,
             "cnt_enrollments": range(UserFilter.ENROLLMENTS_MAX + 1)
         }
         return context
@@ -108,7 +108,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, city_code, **kwargs):
         filters = {
             "city_id": city_code,
-            "status": User.STATUS.will_graduate
+            "status": StudentStatuses.will_graduate
         }
         students = User.objects.students_info(filters=filters)
 
@@ -451,7 +451,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
               .distinct()
               .prefetch_related("groups"))
         if "print" in self.request.GET:
-            qs = qs.exclude(status=User.STATUS.expelled)
+            qs = qs.exclude(status=StudentStatuses.expelled)
         return qs
 
 
@@ -549,7 +549,7 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
         # Stats for expelled students
         query = (UserStatusLog.objects.values("semester")
                  .annotate(expelled=Count("student", distinct=True))
-                 .filter(status=STUDENT_STATUS.expelled)
+                 .filter(status=StudentStatuses.expelled)
                  .order_by("status"))
         expelled = defaultdict(int)
         for row in query:
@@ -560,7 +560,7 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
         query = (UserStatusLog.objects
                  .values("semester")
                  .annotate(will_graduate=Count("student", distinct=True))
-                 .filter(status=STUDENT_STATUS.will_graduate)
+                 .filter(status=StudentStatuses.will_graduate)
                  .order_by("status"))
         will_graduate = defaultdict(int)
         for row in query:

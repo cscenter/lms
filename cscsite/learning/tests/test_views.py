@@ -17,7 +17,7 @@ from testfixtures import LogCapture
 
 from core.utils import city_aware_reverse
 from learning.forms import CourseClassForm
-from learning.settings import GRADES, STUDENT_STATUS, AcademicRoles
+from learning.settings import GRADES, StudentStatuses
 from learning.tests.utils import check_url_security
 from users.factories import TeacherCenterFactory, StudentClubFactory, \
     GraduateFactory
@@ -667,7 +667,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         assert not co.failed_by_student(student)
         assert response.status_code == 200
         # The same behavior should be for expelled student
-        student.status = STUDENT_STATUS.expelled
+        student.status = StudentStatuses.expelled
         student.save()
         self.doLogin(student)
         response = self.client.get(url)
@@ -687,7 +687,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         response = self.client.get(url)
         assert response.status_code == 200
         # The same if student not expelled
-        student.status = STUDENT_STATUS.will_graduate
+        student.status = StudentStatuses.will_graduate
         student.save()
         self.doLogin(student)
         response = self.client.get(url)

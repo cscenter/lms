@@ -3,8 +3,8 @@ from django.urls import reverse
 
 from learning.factories import MetaCourseFactory, CourseFactory, \
     SemesterFactory, EnrollmentFactory
-from learning.settings import AcademicRoles, STUDENT_STATUS, \
-    GRADES, SemesterTypes
+from learning.settings import AcademicRoles, GRADES, SemesterTypes, \
+    StudentStatuses
 from users.factories import StudentCenterFactory, StudentClubFactory, \
     UserFactory, VolunteerFactory, GraduateFactory
 
@@ -24,7 +24,7 @@ def test_student_search(client, curator):
                          last_name='Иванов',
                          first_name='Иван')
     StudentCenterFactory(enrollment_year=2012,
-                         status=STUDENT_STATUS.expelled,
+                         status=StudentStatuses.expelled,
                          last_name='Иванов',
                          first_name='Иван')
     StudentClubFactory(enrollment_year=2011,
@@ -71,26 +71,26 @@ def test_student_search(client, curator):
         )
     ))
     assert response.json()["count"] == 3
-    volunteer.status = STUDENT_STATUS.expelled
+    volunteer.status = StudentStatuses.expelled
     volunteer.save()
     response = client.get("{}?{}".format(
         SEARCH_URL,
         "curriculum_year=2011&groups[]={}&groups[]={}&status={}".format(
             AcademicRoles.STUDENT_CENTER,
             AcademicRoles.VOLUNTEER,
-            STUDENT_STATUS.expelled
+            StudentStatuses.expelled
         )
     ))
     assert response.json()["count"] == 1
-    student.status = STUDENT_STATUS.reinstated
+    student.status = StudentStatuses.reinstated
     student.save()
     response = client.get("{}?{}".format(
         SEARCH_URL,
         "curriculum_year=2011&groups[]={}&groups[]={}&status={},{}".format(
             AcademicRoles.STUDENT_CENTER,
             AcademicRoles.VOLUNTEER,
-            STUDENT_STATUS.expelled,
-            STUDENT_STATUS.reinstated
+            StudentStatuses.expelled,
+            StudentStatuses.reinstated
         )
     ))
     assert response.json()["count"] == 2
@@ -99,8 +99,8 @@ def test_student_search(client, curator):
         "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
             AcademicRoles.STUDENT_CENTER,
             AcademicRoles.VOLUNTEER,
-            STUDENT_STATUS.expelled,
-            STUDENT_STATUS.reinstated,
+            StudentStatuses.expelled,
+            StudentStatuses.reinstated,
             "cnt_enrollments=2"
         )
     ))
@@ -111,8 +111,8 @@ def test_student_search(client, curator):
         "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
             AcademicRoles.STUDENT_CENTER,
             AcademicRoles.VOLUNTEER,
-            STUDENT_STATUS.expelled,
-            STUDENT_STATUS.reinstated,
+            StudentStatuses.expelled,
+            StudentStatuses.reinstated,
             "cnt_enrollments=0,2"
         )
     ))

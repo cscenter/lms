@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 
 from learning.admission.models import Campaign, Interview, Comment
 from learning.models import Semester, Course
-from learning.settings import CENTER_FOUNDATION_YEAR, GRADES, SemesterTypes
+from learning.settings import CENTER_FOUNDATION_YEAR, GRADES, SemesterTypes, \
+    StudentStatuses
 from learning.utils import get_term_index
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import User
@@ -160,7 +161,7 @@ class StudentsDiplomasStats(APIView):
         filters = (Q(groups__in=[User.roles.GRADUATE_CENTER]) &
                    Q(graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
-            filters = filters | Q(status=User.STATUS.will_graduate)
+            filters = filters | Q(status=StudentStatuses.will_graduate)
         students = User.objects.students_info(
             filters=filters,
             exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]

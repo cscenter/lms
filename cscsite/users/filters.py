@@ -3,6 +3,7 @@ from django_filters.rest_framework import BaseInFilter, NumberFilter, \
     FilterSet, CharFilter, DateTimeFromToRangeFilter
 
 from learning.models import Enrollment
+from learning.settings import StudentStatuses
 from users.models import User, SHADCourseRecord
 
 
@@ -106,12 +107,12 @@ class UserFilter(FilterSet):
     def status_filter(self, queryset, name, value):
         value_list = value.split(u',')
         value_list = [v for v in value_list if v]
-        if "studying" in value_list and User.STATUS.expelled in value_list:
+        if "studying" in value_list and StudentStatuses.expelled in value_list:
             return queryset
         elif "studying" in value_list:
-            return queryset.exclude(status=User.STATUS.expelled)
+            return queryset.exclude(status=StudentStatuses.expelled)
         for value in value_list:
-            if value not in User.STATUS:
+            if value not in StudentStatuses.values:
                 raise ValueError(
                     "UserFilter: unrecognized status_filter choice")
         return queryset.filter(status__in=value_list).distinct()

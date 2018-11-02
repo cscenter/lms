@@ -12,7 +12,7 @@ from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.encoding import smart_text, python_2_unicode_compatible
+from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
 from django.utils.timezone import now
@@ -29,8 +29,8 @@ from core.utils import is_club_site, en_to_ru_mapping
 from cscenter.utils import PublicRoute
 from learning.models import Semester, Enrollment
 from learning.permissions import LearningPermissionsMixin
-from learning.settings import STUDENT_STATUS, GRADES, \
-    AcademicDegreeYears, AcademicRoles
+from learning.settings import GRADES, \
+    AcademicDegreeYears, AcademicRoles, StudentStatuses
 from learning.utils import is_positive_grade, is_negative_grade
 from users.settings import GROUPS_IMPORT_TO_GERRIT
 from users.tasks import update_password_in_gerrit
@@ -137,7 +137,7 @@ class UserStatusLog(models.Model):
         verbose_name=_("Semester"),
         on_delete=models.CASCADE)
     status = models.CharField(
-        choices=STUDENT_STATUS,
+        choices=StudentStatuses.choices,
         verbose_name=_("Status"),
         max_length=15)
     student = models.ForeignKey(
@@ -163,8 +163,6 @@ class UserStatusLog(models.Model):
 class User(LearningPermissionsMixin, AbstractUser):
 
     roles = AcademicRoles
-
-    STATUS = STUDENT_STATUS
 
     GENDER_MALE = 'M'
     GENDER_FEMALE = 'F'
@@ -271,7 +269,7 @@ class User(LearningPermissionsMixin, AbstractUser):
         blank=True,
         null=True)
     status = models.CharField(
-        choices=STATUS,
+        choices=StudentStatuses.choices,
         verbose_name=_("Status"),
         help_text=_("Status|HelpText"),
         max_length=15,
@@ -336,7 +334,7 @@ class User(LearningPermissionsMixin, AbstractUser):
 
     @property
     def is_expelled(self):
-        return self.status == STUDENT_STATUS.expelled
+        return self.status == StudentStatuses.expelled
 
     @staticmethod
     def create_student_from_applicant(applicant):

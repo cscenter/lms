@@ -2,9 +2,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.timezone import now
 
-from learning.settings import STUDENT_STATUS
 from learning.models import AssignmentComment, AssignmentNotification, \
     Assignment, StudentAssignment, Enrollment
+from learning.settings import StudentStatuses
 
 
 # TODO: send notification to other teachers
@@ -17,7 +17,7 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
     # Skip those who already been expelled
     active_students = (Enrollment.active
                        .filter(course=course)
-                       .exclude(student__status=STUDENT_STATUS.expelled)
+                       .exclude(student__status=StudentStatuses.expelled)
                        .values_list("student_id", flat=True))
     for student_id in active_students:
         a_s = StudentAssignment.objects.create(assignment=instance,

@@ -9,7 +9,8 @@ from learning.factories import SemesterFactory
 from learning.projects.factories import ProjectFactory, ReportFactory, \
     ReportReviewFormFactory
 from learning.projects.models import Report, ProjectStudent
-from learning.settings import GRADES, STUDENT_STATUS, AcademicRoles
+from learning.settings import GRADES, AcademicRoles, \
+    StudentStatuses
 from learning.utils import get_current_term_pair
 from notifications.models import Notification
 from users.factories import StudentCenterFactory, ProjectReviewerFactory, \
@@ -46,7 +47,7 @@ def test_user_detail(client):
 @pytest.mark.django_db
 def test_staff_diplomas_view(curator, client):
     student = StudentCenterFactory(enrollment_year='2013',
-                                     status=STUDENT_STATUS.will_graduate)
+                                   status=StudentStatuses.will_graduate)
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
     sp = p.projectstudent_set.all()[0]

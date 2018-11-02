@@ -16,8 +16,8 @@ from learning.factories import SemesterFactory, CourseFactory, \
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory, AssignmentGradesImport
 from learning.models import StudentAssignment, Enrollment
-from learning.settings import GRADES, STUDENT_STATUS, GradingTypes, \
-    AcademicRoles
+from learning.settings import GRADES, GradingTypes, \
+    AcademicRoles, StudentStatuses
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.utils import assert_login_redirect
 from learning.views.gradebook import _get_course
@@ -294,7 +294,7 @@ def test_gradebook_data():
     assert data.students[e4.student_id].total_score == 0
     assert data.students[e5.student_id].total_score == 0
     # Check grid with expelled students
-    e5.student.status = STUDENT_STATUS.expelled
+    e5.student.status = StudentStatuses.expelled
     e5.student.save()
     a_new = AssignmentFactory(course=co, grade_min=3, grade_max=7)
     data = gradebook_data(co)
