@@ -42,10 +42,11 @@ GROUPS_HAS_ACCESS_TO_CENTER = (
     AcademicRoles.PROJECT_REVIEWER,
 )
 
-STUDENT_STATUS = getattr(settings, 'STUDENT_STATUS',
-                         Choices(('expelled', _("StudentInfo|Expelled")),
-                                 ('reinstated', _("StudentInfo|Reinstalled")),
-                                 ('will_graduate', _("StudentInfo|Will graduate"))))
+
+class StudentStatuses(DjangoChoices):
+    expelled = C('expelled', _("StudentInfo|Expelled"))
+    reinstated = C('reinstated', _("StudentInfo|Reinstalled"))
+    will_graduate = C('will_graduate', _("StudentInfo|Will graduate"))
 
 
 class GradingTypes(DjangoChoices):

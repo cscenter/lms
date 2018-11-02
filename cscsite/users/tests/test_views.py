@@ -12,9 +12,9 @@ from django.urls import reverse
 from django.utils import translation
 from django.utils.encoding import smart_text, force_text, smart_bytes
 
-from learning.factories import SemesterFactory, \
-    CourseFactory, AreaOfStudyFactory
-from learning.settings import AcademicRoles, STUDENT_STATUS, GRADES
+from learning.factories import CourseFactory, AreaOfStudyFactory
+from learning.settings import AcademicRoles, GRADES, \
+    StudentStatuses
 from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import UserCreationForm, UserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
@@ -396,7 +396,7 @@ def test_club_students_profiles_on_cscenter_site(client):
 def test_expelled(client, settings):
     """Center students and volunteers can't access student section
     if there status equal expelled"""
-    student = StudentCenterFactory(status=STUDENT_STATUS.expelled,
+    student = StudentCenterFactory(status=StudentStatuses.expelled,
                                    city_id=settings.DEFAULT_CITY_CODE)
     client.login(student)
     url = reverse('course_list_student')

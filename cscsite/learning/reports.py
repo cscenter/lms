@@ -11,8 +11,8 @@ from django.utils import formats
 from core.reports import ReportFileOutput
 from learning.models import AssignmentComment, Semester, Enrollment
 from learning.projects.models import ReportComment, ProjectStudent
-from learning.settings import GRADES, STUDENT_STATUS, DATE_FORMAT_RU, \
-    TIME_FORMAT_RU
+from learning.settings import GRADES, DATE_FORMAT_RU, \
+    TIME_FORMAT_RU, StudentStatuses
 from learning.utils import grade_to_mark, is_positive_grade
 from users.models import User, SHADCourseRecord
 
@@ -216,7 +216,7 @@ class ProgressReportForDiplomas(ProgressReport):
         filters = kwargs.pop("filters", {})
         return User.objects.students_info(
             filters={
-                "status": User.STATUS.will_graduate,
+                "status": StudentStatuses.will_graduate,
                 **filters
             },
             exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]
@@ -396,7 +396,7 @@ class ProgressReportForSemester(ProgressReport):
                 **filters
             },
             exclude={
-                "status": STUDENT_STATUS.expelled
+                "status": StudentStatuses.expelled
             },
             semester=semester,
         )
@@ -680,7 +680,7 @@ class WillGraduateStatsReport(ReportFileOutput):
             'onlinecourserecord_set',
         ]
         qs = (User.objects
-              .filter(status=User.STATUS.will_graduate)
+              .filter(status=StudentStatuses.will_graduate)
               .prefetch_related(*prefetch_list))
         return qs
 

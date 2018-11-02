@@ -3,7 +3,7 @@
 from django.core.management import BaseCommand
 
 from learning.models import Enrollment
-from learning.settings import STUDENT_STATUS, GRADES
+from learning.settings import GRADES, StudentStatuses
 from users.models import User
 
 
@@ -15,7 +15,7 @@ class Command(BaseCommand):
         student_groups = [User.roles.STUDENT_CENTER, User.roles.VOLUNTEER]
         will_graduate_list = (User.objects
                               .filter(groups__in=student_groups,
-                                      status=STUDENT_STATUS.will_graduate)
+                                      status=StudentStatuses.will_graduate)
                               .values_list("pk", flat=True))
 
         # Collect unique courses among all students

@@ -18,8 +18,8 @@ from learning.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory, \
     StudentAssignmentFactory, CourseTeacherFactory
 from learning.models import StudentAssignment, Assignment, AssignmentAttachment
-from learning.settings import GRADES, STUDENT_STATUS, \
-    DATE_FORMAT_RU, TIME_FORMAT_RU, AcademicRoles
+from learning.settings import GRADES, DATE_FORMAT_RU, TIME_FORMAT_RU, \
+    AcademicRoles, StudentStatuses
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect
@@ -850,7 +850,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     EnrollmentFactory(student=student_spb, course=co)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
-    student_spb.status = STUDENT_STATUS.expelled
+    student_spb.status = StudentStatuses.expelled
     student_spb.save()
     response = client.get(task_attachment_url)
     assert response.status_code == 403  # expelled

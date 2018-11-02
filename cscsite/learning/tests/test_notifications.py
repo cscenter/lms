@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
 
 from io import StringIO
 
 import pytest
 import pytz
-
 from django.core import mail, management
 from django.test import TestCase
 
 from learning.admin import AssignmentAdmin
-from learning.settings import GRADES, STUDENT_STATUS, DATE_FORMAT_RU
-from users.factories import TeacherCenterFactory, StudentCenterFactory
-from ..factories import *
+from learning.settings import GRADES, DATE_FORMAT_RU, \
+    StudentStatuses
+from users.factories import TeacherCenterFactory
 from .mixins import *
+from ..factories import *
 
 
 class NotificationTests(MyUtilitiesMixin, TestCase):
@@ -204,7 +203,7 @@ def test_new_assignment_notifications(settings):
     assert AssignmentNotification.objects.count() == 4
     # Don't create new assignment for expelled students
     student = enrollments[1].student
-    student.status = STUDENT_STATUS.expelled
+    student.status = StudentStatuses.expelled
     student.save()
     AssignmentNotification.objects.all().delete()
     assignment = AssignmentFactory(course=co)
@@ -246,7 +245,7 @@ def test_create_deadline_change_notification(settings):
     co = CourseFactory(city_id='spb')
     e1, e2 = EnrollmentFactory.create_batch(2, course=co)
     s1 = e1.student
-    s1.status = STUDENT_STATUS.expelled
+    s1.status = StudentStatuses.expelled
     s1.save()
     a = AssignmentFactory(course=co)
     assert AssignmentNotification.objects.count() == 1

@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from django.core.cache import cache
 from django.core.management import BaseCommand
 from django.utils.timezone import now
 
-from learning.settings import STUDENT_STATUS
+from learning.settings import StudentStatuses
 from users.models import User
 
 
@@ -19,7 +17,7 @@ class Command(BaseCommand):
         will_graduate_list = User.objects.filter(groups__in=[
             User.roles.STUDENT_CENTER,
             User.roles.VOLUNTEER,
-        ], status=STUDENT_STATUS.will_graduate)
+        ], status=StudentStatuses.will_graduate)
 
         for user in will_graduate_list:
             user.groups.remove(User.roles.STUDENT_CENTER)

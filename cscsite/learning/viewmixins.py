@@ -1,6 +1,6 @@
 from braces.views import UserPassesTestMixin
 
-from learning.settings import STUDENT_STATUS
+from learning.settings import StudentStatuses
 
 
 class ParticipantOnlyMixin(UserPassesTestMixin):
@@ -46,7 +46,7 @@ class StudentCenterAndVolunteerOnlyMixin(UserPassesTestMixin):
 
     def test_func(self, user):
         is_active_student = ((user.is_student_center or user.is_volunteer) and
-                             user.status != STUDENT_STATUS.expelled)
+                             user.status != StudentStatuses.expelled)
         return is_active_student or user.is_curator
 
 

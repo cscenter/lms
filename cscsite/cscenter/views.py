@@ -36,7 +36,8 @@ from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
 from learning.api.views import TestimonialList
 from learning.models import Course, CourseTeacher, \
     OnlineCourse, AreaOfStudy, StudyProgram, Semester
-from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR
+from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR, \
+    StudentStatuses
 from learning.utils import get_current_term_pair, get_term_index, \
     get_term_index_academic_year_starts, get_term_by_index
 from stats.views import StudentsDiplomasStats
@@ -328,7 +329,7 @@ class AlumniByYearView(generic.ListView):
         filters = (Q(groups__pk=User.roles.GRADUATE_CENTER) &
                    Q(graduation_year=year))
         if year == now().year and self.request.user.is_curator:
-            filters = filters | Q(status=User.STATUS.will_graduate)
+            filters = filters | Q(status=StudentStatuses.will_graduate)
         return (User.objects
                 .filter(filters)
                 .distinct()
@@ -393,7 +394,7 @@ class AlumniHonorBoardView(TemplateView):
             "graduation_year": graduation_year
         }
         if preview and self.request.user.is_curator:
-            filters = {"status": User.STATUS.will_graduate}
+            filters = {"status": StudentStatuses.will_graduate}
         graduates = self.get_graduates(filters)
         if not len(graduates):
             raise Http404

@@ -2,7 +2,7 @@ from enum import Enum, auto
 from typing import Optional
 
 from core.utils import is_club_site
-from learning.settings import STUDENT_STATUS, AcademicRoles
+from learning.settings import AcademicRoles, StudentStatuses
 
 
 class LearningPermissionsMixin:
@@ -35,7 +35,7 @@ class LearningPermissionsMixin:
     def is_active_student(self):
         if is_club_site():
             return self.is_student_club
-        return self.is_student and self.status != STUDENT_STATUS.expelled
+        return self.is_student and self.status != StudentStatuses.expelled
 
     @property
     def is_teacher(self):
