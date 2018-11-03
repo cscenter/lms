@@ -28,7 +28,7 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
         context = super(StatsLearningView, self).get_context_data(**kwargs)
         # Terms grouped by year
         term_start = get_term_index(CENTER_FOUNDATION_YEAR,
-                                    SemesterTypes.autumn)
+                                    SemesterTypes.AUTUMN)
         terms_grouped = itertools.groupby(
             Semester.objects.only("pk", "type", "year")
                     .filter(index__gte=term_start)
@@ -161,7 +161,7 @@ class StudentsDiplomasStats(APIView):
         filters = (Q(groups__in=[User.roles.GRADUATE_CENTER]) &
                    Q(graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
-            filters = filters | Q(status=StudentStatuses.will_graduate)
+            filters = filters | Q(status=StudentStatuses.WILL_GRADUATE)
         students = User.objects.students_info(
             filters=filters,
             exclude_grades=[GradeTypes.unsatisfactory, GradeTypes.not_graded]

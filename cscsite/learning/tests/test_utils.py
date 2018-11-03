@@ -35,23 +35,23 @@ class UtilTests(TestCase):
 def test_get_term_index():
     cnt = len(SemesterTypes.choices)
     with pytest.raises(ValueError) as e:
-        get_term_index(FOUNDATION_YEAR - 1, SemesterTypes.spring)
+        get_term_index(FOUNDATION_YEAR - 1, SemesterTypes.SPRING)
     assert "target year < FOUNDATION_YEAR" in str(e.value)
     with pytest.raises(ValueError) as e:
         get_term_index(FOUNDATION_YEAR, "sprEng")
     assert "unknown term type" in str(e.value)
     assert get_term_index(FOUNDATION_YEAR,
-                          SemesterTypes.spring) == TERMS_INDEX_START
+                          SemesterTypes.SPRING) == TERMS_INDEX_START
     assert get_term_index(FOUNDATION_YEAR,
-                          SemesterTypes.summer) == TERMS_INDEX_START + 1
+                          SemesterTypes.SUMMER) == TERMS_INDEX_START + 1
     assert get_term_index(FOUNDATION_YEAR,
-                          SemesterTypes.autumn) == TERMS_INDEX_START + 2
+                          SemesterTypes.AUTUMN) == TERMS_INDEX_START + 2
     assert get_term_index(FOUNDATION_YEAR + 1,
-                          SemesterTypes.spring) == TERMS_INDEX_START + cnt
+                          SemesterTypes.SPRING) == TERMS_INDEX_START + cnt
     assert get_term_index(FOUNDATION_YEAR + 1,
-                          SemesterTypes.summer) == TERMS_INDEX_START + cnt + 1
+                          SemesterTypes.SUMMER) == TERMS_INDEX_START + cnt + 1
     assert get_term_index(FOUNDATION_YEAR + 7,
-                          SemesterTypes.spring) == TERMS_INDEX_START + cnt * 7
+                          SemesterTypes.SPRING) == TERMS_INDEX_START + cnt * 7
 
 
 def test_get_term_by_index():
@@ -80,12 +80,12 @@ def test_get_term_index_academic_year_starts():
     # Indexing starts from 1 of foundation year spring.
     with pytest.raises(ValueError):
         get_term_index_academic_year_starts(FOUNDATION_YEAR,
-                                            SemesterTypes.spring)
+                                            SemesterTypes.SPRING)
     assert 3 == get_term_index_academic_year_starts(FOUNDATION_YEAR,
-                                                    SemesterTypes.autumn)
+                                                    SemesterTypes.AUTUMN)
     assert 3 == get_term_index_academic_year_starts(FOUNDATION_YEAR + 1,
-                                                    SemesterTypes.spring)
+                                                    SemesterTypes.SPRING)
     assert 6 == get_term_index_academic_year_starts(FOUNDATION_YEAR + 1,
-                                                    SemesterTypes.autumn)
+                                                    SemesterTypes.AUTUMN)
     assert 6 == get_term_index_academic_year_starts(FOUNDATION_YEAR + 2,
-                                                    SemesterTypes.summer)
+                                                    SemesterTypes.SUMMER)

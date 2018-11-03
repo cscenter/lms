@@ -35,7 +35,7 @@ class LearningPermissionsMixin:
     def is_active_student(self):
         if is_club_site():
             return self.is_student_club
-        return self.is_student and self.status != StudentStatuses.expelled
+        return self.is_student and self.status != StudentStatuses.EXPELLED
 
     @property
     def is_teacher(self):

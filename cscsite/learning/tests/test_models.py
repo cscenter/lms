@@ -159,7 +159,7 @@ class CourseTests(TestCase):
         timezone.now = old_now
 
     def test_completed_at_default(self):
-        semester = SemesterFactory(year=2017, type=SemesterTypes.autumn)
+        semester = SemesterFactory(year=2017, type=SemesterTypes.AUTUMN)
         meta_course = MetaCourseFactory()
         co = CourseFactory.build(meta_course=meta_course,
                                  semester=semester)
@@ -322,24 +322,24 @@ class StudentAssignmentTests(TestCase):
         )
         ctx = {'student': student, 'assignment': a_online}
         a_s = StudentAssignment(grade=0, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.unsatisfactory)
+        self.assertEqual(a_s.state.value, AssignmentStates.UNSATISFACTORY)
         a_s = StudentAssignment(grade=4, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.unsatisfactory)
+        self.assertEqual(a_s.state.value, AssignmentStates.UNSATISFACTORY)
         a_s = StudentAssignment(grade=5, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.credit)
+        self.assertEqual(a_s.state.value, AssignmentStates.CREDIT)
         a_s = StudentAssignment(grade=8, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.good)
+        self.assertEqual(a_s.state.value, AssignmentStates.GOOD)
         a_s = StudentAssignment(grade=10, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.excellent)
+        self.assertEqual(a_s.state.value, AssignmentStates.EXCELLENT)
         a_s = StudentAssignment(**ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.not_submitted)
+        self.assertEqual(a_s.state.value, AssignmentStates.NOT_SUBMITTED)
         a_offline = AssignmentFactory.create(
             grade_min=5, grade_max=10, is_online=False,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx['assignment'] = a_offline
         a_s = StudentAssignment(**ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.not_checked)
+        self.assertEqual(a_s.state.value, AssignmentStates.NOT_CHECKED)
 
     def test_state_display(self):
         as_ = StudentAssignmentFactory(grade=30,
@@ -347,7 +347,7 @@ class StudentAssignmentTests(TestCase):
         self.assertIn(smart_text(as_.assignment.grade_max), as_.state_display)
         self.assertIn(smart_text(as_.grade), as_.state_display)
         as_ = StudentAssignmentFactory(assignment__grade_max=50)
-        self.assertEqual(AssignmentStates.labels.not_submitted,
+        self.assertEqual(AssignmentStates.labels.NOT_SUBMITTED,
                          as_.state_display)
 
     def test_state_short(self):
@@ -356,7 +356,7 @@ class StudentAssignmentTests(TestCase):
         self.assertIn(smart_text(as_.assignment.grade_max), as_.state_short)
         self.assertIn(smart_text(as_.grade), as_.state_short)
         as_ = StudentAssignmentFactory(assignment__grade_max=50)
-        state = AssignmentStates.get_choice(AssignmentStates.not_submitted)
+        state = AssignmentStates.get_choice(AssignmentStates.NOT_SUBMITTED)
         self.assertEqual(state.abbr, as_.state_short)
 
 
@@ -389,7 +389,7 @@ class AssignmentNotificationTests(TestCase):
 @pytest.mark.django_db
 def test_semester_enrollment_period(mocker):
     year = 2016
-    term_type = SemesterTypes.autumn
+    term_type = SemesterTypes.AUTUMN
     # Fix year and term
     mocked_timezone = mocker.patch('django.utils.timezone.now')
     now_fixed = datetime.datetime(year, month=9, day=8, tzinfo=pytz.UTC)
@@ -443,7 +443,7 @@ def test_semester_enrollment_period(mocker):
 def test_course_enrollment_is_open(settings, mocker):
     settings.ENROLLMENT_DURATION = 45
     year = 2016
-    term_type = SemesterTypes.autumn
+    term_type = SemesterTypes.AUTUMN
     # timezone.now() should return some date from autumn 2016
     # but less than settings.ENROLLMENT_DURATION
     mocked_timezone = mocker.patch('django.utils.timezone.now')

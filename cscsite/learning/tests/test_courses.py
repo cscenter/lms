@@ -62,7 +62,7 @@ class CourseMultiSiteSecurityTests(MyUtilitiesMixin, TestCase):
                                       city="kzn")
         resp = self.client.get(reverse('course_list'))
         # Really stupid test, we filter summer courses on /courses/ page
-        if s.type != SemesterTypes.summer:
+        if s.type != SemesterTypes.SUMMER:
             self.assertContains(resp, co.meta_course.name)
             self.assertNotContains(resp, co_kzn.meta_course.name)
         # Note: Club related tests in csclub app

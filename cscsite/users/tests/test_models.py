@@ -38,7 +38,7 @@ def test_cached_groups(settings):
                     AcademicRoles.TEACHER_CENTER)
     assert set(user._cached_groups) == {AcademicRoles.STUDENT_CENTER,
                                         AcademicRoles.TEACHER_CENTER}
-    user.status = StudentStatuses.expelled
+    user.status = StudentStatuses.EXPELLED
     user.groups.add(AcademicRoles.VOLUNTEER)
     # Invalidate property cache
     del user._cached_groups
@@ -99,7 +99,7 @@ def test_permissions(client):
     assert not request_user.is_interviewer
     assert not request_user.is_project_reviewer
     # Expelled student
-    student.status = StudentStatuses.expelled
+    student.status = StudentStatuses.EXPELLED
     student.save()
     response = client.get("/")
     request_user = response.wsgi_request.user

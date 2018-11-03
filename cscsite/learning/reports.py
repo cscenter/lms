@@ -216,7 +216,7 @@ class ProgressReportForDiplomas(ProgressReport):
         filters = kwargs.pop("filters", {})
         return User.objects.students_info(
             filters={
-                "status": StudentStatuses.will_graduate,
+                "status": StudentStatuses.WILL_GRADUATE,
                 **filters
             },
             exclude_grades=[GradeTypes.unsatisfactory, GradeTypes.not_graded]
@@ -396,7 +396,7 @@ class ProgressReportForSemester(ProgressReport):
                 **filters
             },
             exclude={
-                "status": StudentStatuses.expelled
+                "status": StudentStatuses.EXPELLED
             },
             semester=semester,
         )
@@ -680,7 +680,7 @@ class WillGraduateStatsReport(ReportFileOutput):
             'onlinecourserecord_set',
         ]
         qs = (User.objects
-              .filter(status=StudentStatuses.will_graduate)
+              .filter(status=StudentStatuses.WILL_GRADUATE)
               .prefetch_related(*prefetch_list))
         return qs
 

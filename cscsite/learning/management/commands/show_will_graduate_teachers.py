@@ -15,7 +15,7 @@ class Command(BaseCommand):
         student_groups = [User.roles.STUDENT_CENTER, User.roles.VOLUNTEER]
         will_graduate_list = (User.objects
                               .filter(groups__in=student_groups,
-                                      status=StudentStatuses.will_graduate)
+                                      status=StudentStatuses.WILL_GRADUATE)
                               .values_list("pk", flat=True))
 
         # Collect unique courses among all students

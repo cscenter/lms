@@ -395,7 +395,7 @@ def test_club_students_profiles_on_cscenter_site(client):
 def test_expelled(client, settings):
     """Center students and volunteers can't access student section
     if there status equal expelled"""
-    student = StudentCenterFactory(status=StudentStatuses.expelled,
+    student = StudentCenterFactory(status=StudentStatuses.EXPELLED,
                                    city_id=settings.DEFAULT_CITY_CODE)
     client.login(student)
     url = reverse('course_list_student')

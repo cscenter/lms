@@ -202,7 +202,7 @@ def test_new_assignment_notifications(settings):
     assert AssignmentNotification.objects.count() == 4
     # Don't create new assignment for expelled students
     student = enrollments[1].student
-    student.status = StudentStatuses.expelled
+    student.status = StudentStatuses.EXPELLED
     student.save()
     AssignmentNotification.objects.all().delete()
     assignment = AssignmentFactory(course=co)
@@ -244,7 +244,7 @@ def test_create_deadline_change_notification(settings):
     co = CourseFactory(city_id='spb')
     e1, e2 = EnrollmentFactory.create_batch(2, course=co)
     s1 = e1.student
-    s1.status = StudentStatuses.expelled
+    s1.status = StudentStatuses.EXPELLED
     s1.save()
     a = AssignmentFactory(course=co)
     assert AssignmentNotification.objects.count() == 1

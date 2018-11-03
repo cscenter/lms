@@ -46,7 +46,7 @@ class StudentCenterAndVolunteerOnlyMixin(UserPassesTestMixin):
 
     def test_func(self, user):
         is_active_student = ((user.is_student_center or user.is_volunteer) and
-                             user.status != StudentStatuses.expelled)
+                             user.status != StudentStatuses.EXPELLED)
         return is_active_student or user.is_curator
 
 

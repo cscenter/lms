@@ -46,7 +46,7 @@ def test_user_detail(client):
 @pytest.mark.django_db
 def test_staff_diplomas_view(curator, client):
     student = StudentCenterFactory(enrollment_year='2013',
-                                   status=StudentStatuses.will_graduate)
+                                   status=StudentStatuses.WILL_GRADUATE)
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
     sp = p.projectstudent_set.all()[0]

@@ -106,10 +106,10 @@ class UserFilter(FilterSet):
     def status_filter(self, queryset, name, value):
         value_list = value.split(u',')
         value_list = [v for v in value_list if v]
-        if "studying" in value_list and StudentStatuses.expelled in value_list:
+        if "studying" in value_list and StudentStatuses.EXPELLED in value_list:
             return queryset
         elif "studying" in value_list:
-            return queryset.exclude(status=StudentStatuses.expelled)
+            return queryset.exclude(status=StudentStatuses.EXPELLED)
         for value in value_list:
             if value not in StudentStatuses.values:
                 raise ValueError(

@@ -17,7 +17,7 @@ class Command(BaseCommand):
         will_graduate_list = User.objects.filter(groups__in=[
             User.roles.STUDENT_CENTER,
             User.roles.VOLUNTEER,
-        ], status=StudentStatuses.will_graduate)
+        ], status=StudentStatuses.WILL_GRADUATE)
 
         for user in will_graduate_list:
             user.groups.remove(User.roles.STUDENT_CENTER)

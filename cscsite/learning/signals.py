@@ -17,7 +17,7 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
     # Skip those who already been expelled
     active_students = (Enrollment.active
                        .filter(course=course)
-                       .exclude(student__status=StudentStatuses.expelled)
+                       .exclude(student__status=StudentStatuses.EXPELLED)
                        .values_list("student_id", flat=True))
     for student_id in active_students:
         a_s = StudentAssignment.objects.create(assignment=instance,

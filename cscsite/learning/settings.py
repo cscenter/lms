@@ -4,7 +4,6 @@ from django.conf import settings
 
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
-from model_utils import Choices
 
 # this urls will be used to redirect from '/learning/' and '/teaching/'
 LEARNING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_student')
@@ -42,10 +41,22 @@ class AcademicRoles(DjangoChoices):
     }
 
 
+class AcademicDegreeYears(DjangoChoices):
+    BACHELOR_SPECIALITY_1 = C("1", _('1 course bachelor, speciality'))
+    BACHELOR_SPECIALITY_2 = C("2", _('2 course bachelor, speciality'))
+    BACHELOR_SPECIALITY_3 = C("3", _('3 course bachelor, speciality'))
+    BACHELOR_SPECIALITY_4 = C("4", _('4 course bachelor, speciality'))
+    SPECIALITY_5 = C("5", _('last course speciality'))
+    MASTER_1 = C("6", _('1 course magistracy'))
+    MASTER_2 = C("7", _('2 course magistracy'))
+    POSTGRADUATE = C("8", _('postgraduate'))
+    GRADUATE = C("9", _('graduate'))
+
+
 class StudentStatuses(DjangoChoices):
-    expelled = C('expelled', _("StudentInfo|Expelled"))
-    reinstated = C('reinstated', _("StudentInfo|Reinstalled"))
-    will_graduate = C('will_graduate', _("StudentInfo|Will graduate"))
+    EXPELLED = C('expelled', _("StudentInfo|Expelled"))
+    REINSTATED = C('reinstated', _("StudentInfo|Reinstalled"))
+    WILL_GRADUATE = C('will_graduate', _("StudentInfo|Will graduate"))
 
 
 class GradingSystems(DjangoChoices):
@@ -69,46 +80,35 @@ class GradeTypes(DjangoChoices):
     satisfactory_grades = {credit.value, good.value, excellent.value}
 
 
+# FIXME: AssignmentStates точно деталь реализации (перенести или забить уже?), которая не шарится с другими приложениями, что насчет semestertypes и classtypes?
 class SemesterTypes(DjangoChoices):
     """
     For ordering use the first term in the year as a starting point.
     Term order values must be consecutive numbers.
     """
-    spring = C('spring', _("spring"), order=1)
-    summer = C('summer', _("summer"), order=2)
-    autumn = C('autumn', _("autumn"), order=3)
+    SPRING = C('spring', _("spring"), order=1)
+    SUMMER = C('summer', _("summer"), order=2)
+    AUTUMN = C('autumn', _("autumn"), order=3)
 
 
 class ClassTypes(DjangoChoices):
-    lecture = C('lecture', _("Lecture"))
-    seminar = C('seminar', _("Seminar"))
+    LECTURE = C('lecture', _("Lecture"))
+    SEMINAR = C('seminar', _("Seminar"))
 
 
 class AssignmentStates(DjangoChoices):
-    not_submitted = C("not_submitted", _("Assignment|not submitted"),
+    NOT_SUBMITTED = C("not_submitted", _("Assignment|not submitted"),
                       abbr="—", css_class="not-submitted")
-    not_checked = C("not_checked", _("Assignment|not checked"),
+    NOT_CHECKED = C("not_checked", _("Assignment|not checked"),
                     abbr="…", css_class="not-checked")
-    unsatisfactory = C("unsatisfactory", _("Assignment|unsatisfactory"),
+    UNSATISFACTORY = C("unsatisfactory", _("Assignment|unsatisfactory"),
                        abbr="2", css_class="unsatisfactory")
-    credit = C("pass", _("Assignment|pass"),
+    CREDIT = C("pass", _("Assignment|pass"),
                abbr="3", css_class="pass")
-    good = C("good", _("Assignment|good"),
+    GOOD = C("good", _("Assignment|good"),
              abbr="4", css_class="good")
-    excellent = C("excellent", _("Assignment|excellent"),
+    EXCELLENT = C("excellent", _("Assignment|excellent"),
                   abbr="5", css_class="excellent")
-
-
-class AcademicDegreeYears(DjangoChoices):
-    BACHELOR_SPECIALITY_1 = C("1", _('1 course bachelor, speciality'))
-    BACHELOR_SPECIALITY_2 = C("2", _('2 course bachelor, speciality'))
-    BACHELOR_SPECIALITY_3 = C("3", _('3 course bachelor, speciality'))
-    BACHELOR_SPECIALITY_4 = C("4", _('4 course bachelor, speciality'))
-    SPECIALITY_5 = C("5", _('last course speciality'))
-    MASTER_1 = C("6", _('1 course magistracy'))
-    MASTER_2 = C("7", _('2 course magistracy'))
-    POSTGRADUATE = C("8", _('postgraduate'))
-    GRADUATE = C("9", _('graduate'))
 
 
 AUTUMN_TERM_START = '1 sep'

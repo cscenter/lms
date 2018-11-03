@@ -850,7 +850,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     EnrollmentFactory(student=student_spb, course=co)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
-    student_spb.status = StudentStatuses.expelled
+    student_spb.status = StudentStatuses.EXPELLED
     student_spb.save()
     response = client.get(task_attachment_url)
     assert response.status_code == 403  # expelled

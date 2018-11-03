@@ -65,7 +65,7 @@ class CourseDetailView(DetailView):
         co = context[self.context_object_name]
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
             index = get_term_index(CENTER_FOUNDATION_YEAR,
-                                   SemesterTypes.autumn)
+                                   SemesterTypes.AUTUMN)
             if co.semester.index < index:
                 url = get_club_domain(co.city.code) + co.get_absolute_url()
                 return HttpResponseRedirect(url)

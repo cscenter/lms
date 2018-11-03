@@ -107,7 +107,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, city_code, **kwargs):
         filters = {
             "city_id": city_code,
-            "status": StudentStatuses.will_graduate
+            "status": StudentStatuses.WILL_GRADUATE
         }
         students = User.objects.students_info(filters=filters)
 
@@ -164,7 +164,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             projects_in_first_two_years_of_learning = 0
             internal_projects_in_first_two_years_of_learning = 0
             enrollment_term_index = get_term_index(s.enrollment_year,
-                                                   SemesterTypes.autumn)
+                                                   SemesterTypes.AUTUMN)
             for ps in s.projects_through:
                 if ps.final_grade in self.BAD_GRADES or ps.project.canceled:
                     continue
@@ -191,7 +191,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                 courses_by_term[c.semester_id] += 1
             for enrollment in s.enrollments:
                 # Skip summer courses
-                if enrollment.course.semester.type == SemesterTypes.summer:
+                if enrollment.course.semester.type == SemesterTypes.SUMMER:
                     continue
                 if enrollment.grade in self.BAD_GRADES:
                     failed_courses += 1
@@ -450,7 +450,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
               .distinct()
               .prefetch_related("groups"))
         if "print" in self.request.GET:
-            qs = qs.exclude(status=StudentStatuses.expelled)
+            qs = qs.exclude(status=StudentStatuses.EXPELLED)
         return qs
 
 
@@ -523,9 +523,10 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
 
     def get(self, request, *args, **kwargs):
         current_year, season = get_current_term_pair('spb')
-        start_semester_index = get_term_index(2011, Semester.TYPES.autumn)
+        start_semester_index = get_term_index(2011, SemesterTypes.AUTUMN)
         end_semester_index = get_term_index(current_year, season)
-        semesters = Semester.objects.filter(index__gte=start_semester_index, index__lte=end_semester_index)
+        semesters = Semester.objects.filter(index__gte=start_semester_index,
+                                            index__lte=end_semester_index)
         # Ok, additional query for counting acceptances due to no FK on enrollment_year field. Append it to autumn season
         query = (User.objects.exclude(enrollment_year__isnull=True)
                  .values("enrollment_year")
@@ -548,7 +549,7 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
         # Stats for expelled students
         query = (UserStatusLog.objects.values("semester")
                  .annotate(expelled=Count("student", distinct=True))
-                 .filter(status=StudentStatuses.expelled)
+                 .filter(status=StudentStatuses.EXPELLED)
                  .order_by("status"))
         expelled = defaultdict(int)
         for row in query:
@@ -559,7 +560,7 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
         query = (UserStatusLog.objects
                  .values("semester")
                  .annotate(will_graduate=Count("student", distinct=True))
-                 .filter(status=StudentStatuses.will_graduate)
+                 .filter(status=StudentStatuses.WILL_GRADUATE)
                  .order_by("status"))
         will_graduate = defaultdict(int)
         for row in query:
@@ -568,9 +569,9 @@ class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
         statistics = OrderedDict()
         for semester in semesters:
             acceptances_cnt, graduated_cnt = 0, 0
-            if semester.type == Semester.TYPES.autumn:
+            if semester.type == SemesterTypes.AUTUMN:
                 acceptances_cnt = acceptances[semester.year]
-            elif semester.type == Semester.TYPES.spring:
+            elif semester.type == SemesterTypes.SPRING:
                 graduated_cnt = graduated[semester.year]
             statistics[semester.pk] = {
                 "semester": semester,

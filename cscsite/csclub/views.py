@@ -65,8 +65,8 @@ class IndexView(generic.TemplateView):
         try:
             # All club courses in MSK timezone
             year, term_type = get_current_term_pair('spb')
-            if term_type == SemesterTypes.summer:
-                term_type = SemesterTypes.autumn
+            if term_type == SemesterTypes.SUMMER:
+                term_type = SemesterTypes.AUTUMN
             featured_term = Semester.objects.get(year=year, type=term_type)
             context['featured_term'] = featured_term
             today = now().date()

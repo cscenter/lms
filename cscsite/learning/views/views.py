@@ -292,21 +292,21 @@ class CoursesListView(generic.ListView):
         if not is_club_site():
             q = (q.filter(year__gte=2011)
                 .exclude(type=Case(
-                    When(year=2011, then=Value(Semester.TYPES.spring)),
+                    When(year=2011, then=Value(SemesterTypes.SPRING)),
                     default=Value(""))))
         return q
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         semester_list = [s for s in context["semester_list"]
-                         if s.type != Semester.TYPES.summer]
+                         if s.type != SemesterTypes.SUMMER]
         if not semester_list:
             context["semester_list"] = semester_list
             return context
         # Check if we only have the fall semester for the ongoing year.
         current = semester_list[0]
-        if current.type == Semester.TYPES.autumn:
-            semester = Semester(type=Semester.TYPES.spring,
+        if current.type == SemesterTypes.AUTUMN:
+            semester = Semester(type=SemesterTypes.SPRING,
                                 year=current.year + 1)
             semester.courseofferings = []
             semester_list.insert(0, semester)
@@ -353,7 +353,7 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
         enrolled_in = Q(id__in=list(student_enrolled_in))
         # Hide summer courses on CS Club site until student enrolled in
         if is_club_site():
-            in_current_term &= ~Q(semester__type=SemesterTypes.summer)
+            in_current_term &= ~Q(semester__type=SemesterTypes.SUMMER)
         course_offerings = (Course.objects
                             .get_offerings_base_queryset()
                             .in_city(city_code)
@@ -377,7 +377,7 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
             "archive_enrolled": archive_enrolled,
             # FIXME: what about custom template tag for this?
             # TODO: Add util method
-            "current_term": "{} {}".format(SemesterTypes.labels[current_term],
+            "current_term": "{} {}".format(SemesterTypes.values[current_term],
                                            current_year).capitalize()
         }
         return context
