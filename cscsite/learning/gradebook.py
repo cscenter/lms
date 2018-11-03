@@ -1,11 +1,9 @@
 import logging
+from collections import OrderedDict, namedtuple
 from typing import List
 
 import numpy as np
 import unicodecsv
-from collections import OrderedDict, namedtuple
-from math import ceil
-
 from django import forms
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured, ValidationError
@@ -14,11 +12,11 @@ from django.forms import BoundField
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
-from learning.forms import AssignmentGradeForm
 from core.forms import GradeField
+from learning.forms import AssignmentGradeForm
 from learning.models import StudentAssignment, Enrollment, Assignment, \
     Course
-from learning.settings import GRADES
+from learning.settings import GradeTypes
 from users.models import User
 
 logger = logging.getLogger(__name__)
@@ -74,7 +72,7 @@ class StudentMeta:
 
     @property
     def final_grade_display(self):
-        return GRADES[self.final_grade]
+        return GradeTypes.values[self.final_grade]
 
 
 class SubmissionData:
@@ -350,7 +348,7 @@ class EnrollmentFinalGrade(forms.ChoiceField):
         widget = forms.Select(attrs={
             'initial': student.final_grade
         })
-        super().__init__(choices=GRADES,
+        super().__init__(choices=GradeTypes.choices,
                          required=False,
                          show_hidden_initial=True,
                          widget=widget)

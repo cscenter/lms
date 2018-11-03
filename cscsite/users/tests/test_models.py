@@ -3,8 +3,7 @@ from django.core.exceptions import ValidationError
 
 from learning.factories import CourseFactory, EnrollmentFactory, \
     SemesterFactory
-from learning.settings import AcademicRoles, GRADES, \
-    StudentStatuses
+from learning.settings import AcademicRoles, StudentStatuses, GradeTypes
 from users.factories import StudentFactory, CuratorFactory, UserFactory, \
     StudentCenterFactory
 
@@ -129,19 +128,19 @@ def test_passed_courses():
     # enrollments 1 and 4 for the same course but from different terms
     e1, e2, e3 = (EnrollmentFactory(course=co,
                                     student=student,
-                                    grade=GRADES.good)
+                                    grade=GradeTypes.good)
                   for co in (co1, co2, co3))
     next_term = SemesterFactory.create_next(co1.semester)
     co4 = CourseFactory(meta_course=co1.meta_course, is_open=False,
                         semester=next_term)
-    e4 = EnrollmentFactory(course=co4, student=student, grade=GRADES.good)
+    e4 = EnrollmentFactory(course=co4, student=student, grade=GradeTypes.good)
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 3
-    e4.grade = GRADES.unsatisfactory
+    e4.grade = GradeTypes.unsatisfactory
     e4.save()
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 3
-    e2.grade = GRADES.unsatisfactory
+    e2.grade = GradeTypes.unsatisfactory
     e2.save()
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 2

@@ -18,7 +18,7 @@ from django.utils.text import normalize_newlines
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
-from model_utils.fields import MonitorField, StatusField, AutoLastModifiedField
+from model_utils.fields import MonitorField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField, get_thumbnail
 from sorl.thumbnail.images import DummyImageFile
@@ -29,9 +29,9 @@ from core.utils import is_club_site, en_to_ru_mapping
 from cscenter.utils import PublicRoute
 from learning.models import Semester, Enrollment
 from learning.permissions import LearningPermissionsMixin
-from learning.settings import GRADES, \
-    AcademicDegreeYears, AcademicRoles, StudentStatuses
-from learning.utils import is_positive_grade, is_negative_grade
+from learning.settings import AcademicDegreeYears, AcademicRoles, \
+    StudentStatuses, GradeTypes
+from learning.utils import is_negative_grade
 from users.settings import GROUPS_IMPORT_TO_GERRIT
 from users.tasks import update_password_in_gerrit
 from users.thumbnails import BoyStubImage, GirlStubImage, BaseStubImage
@@ -645,7 +645,7 @@ class User(LearningPermissionsMixin, AbstractUser):
                 else:
                     classes_total = (e.course.courseclass_set.count())
                 contribution = 0.5 if classes_total < 6 else 1
-                if is_positive_grade(e.grade):
+                if e.grade in GradeTypes.satisfactory_grades:
                     club_courses.add(e.course.meta_course_id)
                     club_adjusted += contribution
                     in_current_term_passed += int(in_current_term)
@@ -658,7 +658,7 @@ class User(LearningPermissionsMixin, AbstractUser):
                 else:
                     failed_total += 1
             else:
-                if is_positive_grade(e.grade):
+                if e.grade in GradeTypes.satisfactory_grades:
                     center_courses.add(e.course.meta_course_id)
                     in_current_term_passed += int(in_current_term)
                 elif in_current_term:
@@ -672,14 +672,14 @@ class User(LearningPermissionsMixin, AbstractUser):
         online_total = len(self.onlinecourserecord_set.all())
         shad_total = 0
         for c in self.shadcourserecord_set.all():
-            if is_positive_grade(c.grade):
+            if c.grade in GradeTypes.satisfactory_grades:
                 shad_total += 1
             if c.semester_id == current_term.pk:
                 in_current_term_total += 1
                 if is_negative_grade(c.grade):
                     failed_total += 1
             # `not graded` == failed for passed terms
-            elif not is_positive_grade(c.grade):
+            elif c.grade not in GradeTypes.satisfactory_grades:
                 failed_total += 1
 
         return {
@@ -723,7 +723,7 @@ class OnlineCourseRecord(TimeStampedModel):
 
 
 class SHADCourseRecord(TimeStampedModel):
-    GRADES = GRADES
+    GRADES = GradeTypes
     student = models.ForeignKey(
         User,
         verbose_name=_("Student"),
@@ -735,10 +735,11 @@ class SHADCourseRecord(TimeStampedModel):
         verbose_name=_("Semester"),
         on_delete=models.PROTECT)
 
-    grade = StatusField(
+    grade = models.CharField(
+        max_length=100,
         verbose_name=_("Enrollment|grade"),
-        choices_name='GRADES',
-        default='not_graded')
+        choices=GradeTypes.choices,
+        default=GradeTypes.not_graded)
 
     class Meta:
         ordering = ["name"]
@@ -747,7 +748,7 @@ class SHADCourseRecord(TimeStampedModel):
 
     @property
     def grade_display(self):
-        return GRADES[self.grade]
+        return self.GRADES.values[self.grade]
 
     def __str__(self):
         return smart_text("{} [{}]".format(self.name, self.student_id))

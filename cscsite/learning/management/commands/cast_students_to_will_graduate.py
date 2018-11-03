@@ -4,6 +4,7 @@ from django.core.management import BaseCommand
 from django.db.models import Count, Prefetch, Value, When, Q, F, Case
 
 from learning.models import Enrollment, Semester, StudyProgram
+from learning.projects.models import ProjectStudent
 from learning.settings import StudentStatuses
 from users.models import User, SHADCourseRecord, OnlineCourseRecord
 
@@ -29,9 +30,9 @@ Requirements:
                     .only("pk", "curriculum_year", "city")
                     # FIXME: move this annotation to manager?
                     .annotate(passed_projects=Count(Case(
-                                When(Q(projectstudent__final_grade=Enrollment.GRADES.not_graded) & ~Q(projectstudent__project__semester_id=current_term.pk),
+                                When(Q(projectstudent__final_grade=ProjectStudent.GRADES.not_graded) & ~Q(projectstudent__project__semester_id=current_term.pk),
                                      then=Value(None)),
-                                When(Q(projectstudent__final_grade=Enrollment.GRADES.unsatisfactory),
+                                When(Q(projectstudent__final_grade=ProjectStudent.GRADES.unsatisfactory),
                                      then=Value(None)),
                                 default=F("projectstudent__pk")
                             ), distinct=True))

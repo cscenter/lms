@@ -17,7 +17,7 @@ from core.utils import is_club_site
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
-from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU
+from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU, ClassTypes
 from .models import MetaCourse, Course, CourseNews, \
     CourseClass, Venue, Assignment, AssignmentComment, Enrollment
 
@@ -171,7 +171,7 @@ class CourseClassForm(forms.ModelForm):
         empty_label=None)
     type = forms.ChoiceField(
         label=_("Type"),
-        choices=CourseClass.ClassTypes.choices)
+        choices=ClassTypes.choices)
     name = forms.CharField(
         label=_("CourseClass|Name"),
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))

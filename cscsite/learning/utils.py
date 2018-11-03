@@ -11,7 +11,7 @@ from six.moves import zip_longest
 
 from learning.settings import FOUNDATION_YEAR, \
     TERMS_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
-    SPRING_TERM_START, GRADES, POSITIVE_GRADES, SemesterTypes
+    SPRING_TERM_START, SemesterTypes, GradeTypes
 
 CityCode = NewType('CityCode', str)
 Timezone = NewType('Timezone', datetime.tzinfo)
@@ -149,25 +149,21 @@ def grade_to_mark(grade):
 
     Assume unsatisfactory > not_graded.
     """
-    if grade == GRADES.not_graded:
+    if grade == GradeTypes.not_graded:
         return 0
-    elif grade == GRADES.unsatisfactory:
+    elif grade == GradeTypes.unsatisfactory:
         return 1
-    elif grade == GRADES.credit:
+    elif grade == GradeTypes.credit:
         return 2
-    elif grade == GRADES.good:
+    elif grade == GradeTypes.good:
         return 3
-    elif grade == GRADES.excellent:
+    elif grade == GradeTypes.excellent:
         return 4
     raise ValueError("Unknown grade type")
 
 
-def is_positive_grade(grade):
-    return grade in POSITIVE_GRADES
-
-
 def is_negative_grade(grade):
-    return grade == GRADES.unsatisfactory
+    return grade == GradeTypes.unsatisfactory
 
 
 def split_on_condition(iterable, predicate):

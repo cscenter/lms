@@ -2,11 +2,11 @@
 
 from django.conf import settings
 
-# this urls will be used to redirect from '/learning/' and '/teaching/'
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
 from model_utils import Choices
 
+# this urls will be used to redirect from '/learning/' and '/teaching/'
 LEARNING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_student')
 TEACHING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_teacher')
 
@@ -14,7 +14,7 @@ TEACHING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_teacher')
 DATE_FORMAT_RU = "%d.%m.%Y"
 TIME_FORMAT_RU = "%H:%M"
 
-# Assignment types constances
+# Assignment types constants
 ASSIGNMENT_TASK_ATTACHMENT = 0
 ASSIGNMENT_COMMENT_ATTACHMENT = 1
 
@@ -27,20 +27,19 @@ class AcademicRoles(DjangoChoices):
     STUDENT_CLUB = C(5, _('Student [CLUB]'))
     TEACHER_CLUB = C(6, _('Teacher [CLUB]'))
     INTERVIEWER = C(7, _('Interviewer [Admission]'))
+    # Should be always set with one of the student group
     MASTERS_DEGREE = C(8, _('Studying for a master degree'))
     PROJECT_REVIEWER = C(9, _('Project reviewer'))
     CURATOR_PROJECTS = C(10, _('Curator of projects'))
 
-
-GROUPS_HAS_ACCESS_TO_CENTER = (
-    AcademicRoles.STUDENT_CENTER,
-    AcademicRoles.VOLUNTEER,
-    AcademicRoles.TEACHER_CENTER,
-    AcademicRoles.GRADUATE_CENTER,
-    AcademicRoles.INTERVIEWER,
-    # MASTERS_DEGREE should be always set with one of the student group
-    AcademicRoles.PROJECT_REVIEWER,
-)
+    has_access_to_cscenter = {
+        STUDENT_CENTER.value,
+        VOLUNTEER.value,
+        TEACHER_CENTER.value,
+        GRADUATE_CENTER.value,
+        INTERVIEWER.value,
+        PROJECT_REVIEWER.value
+    }
 
 
 class StudentStatuses(DjangoChoices):
@@ -49,36 +48,40 @@ class StudentStatuses(DjangoChoices):
     will_graduate = C('will_graduate', _("StudentInfo|Will graduate"))
 
 
-class GradingTypes(DjangoChoices):
-    default = C(0, _("Default"), css_class="")
-    binary = C(1, _("Binary"), css_class="__binary")
+class GradingSystems(DjangoChoices):
+    BASE = C(0, _("Default"), css_class="")
+    BINARY = C(1, _("Binary"), css_class="__binary")
 
 
-GRADES = getattr(settings, 'GRADES',
-                 Choices(('not_graded', 'not_graded', _("Not graded")),
-                         ('unsatisfactory', 'unsatisfactory', _("Enrollment|Unsatisfactory")),
-                         ('pass', 'credit', _("Enrollment|Pass")),
-                         ('good', 'good', _("Good")),
-                         ('excellent', 'excellent', _("Excellent"))))
+class GradeTypes(DjangoChoices):
+    """
+    Used as a grade choices for models:
+        * Enrollment
+        * SHADCourseRecord
+        * ProjectStudent
+    """
+    not_graded = C('not_graded', _("Not graded"))
+    unsatisfactory = C('unsatisfactory', _("Enrollment|Unsatisfactory"))
+    credit = C('pass', _("Enrollment|Pass"))
+    good = C('good', _("Good"))
+    excellent = C('excellent', _("Excellent"))
 
-POSITIVE_GRADES = {
-    GRADES.credit,
-    GRADES.good,
-    GRADES.excellent,
-}
-
-SHORT_GRADES = getattr(settings, 'SHORT_GRADES',
-                       Choices(('not_graded', 'not_graded', "—"),
-                               ('unsatisfactory', 'unsatisfactory', "н"),
-                               ('pass', 'pass', "з"),
-                               ('good', 'good', "4"),
-                               ('excellent', 'excellent', "5")))
+    satisfactory_grades = {credit.value, good.value, excellent.value}
 
 
 class SemesterTypes(DjangoChoices):
-    spring = C('spring', _("spring"))
-    summer = C('summer', _("summer"))
-    autumn = C('autumn', _("autumn"))
+    """
+    For ordering use the first term in the year as a starting point.
+    Term order values must be consecutive numbers.
+    """
+    spring = C('spring', _("spring"), order=1)
+    summer = C('summer', _("summer"), order=2)
+    autumn = C('autumn', _("autumn"), order=3)
+
+
+class ClassTypes(DjangoChoices):
+    lecture = C('lecture', _("Lecture"))
+    seminar = C('seminar', _("Seminar"))
 
 
 class AssignmentStates(DjangoChoices):
@@ -108,12 +111,8 @@ class AcademicDegreeYears(DjangoChoices):
     GRADUATE = C("9", _('graduate'))
 
 
-TERMS_IN_ACADEMIC_YEAR = len(SemesterTypes.choices)
-
-# don't know what will happen if we change this when there are models in DB
 AUTUMN_TERM_START = '1 sep'
-# XXX: spring semester must be later than 1 jan
-SPRING_TERM_START = '20 jan'
+SPRING_TERM_START = '20 jan'  # XXX: spring term must be later than 1 jan
 SUMMER_TERM_START = '1 jul'
 
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)  # after semester starts, in days
@@ -121,12 +120,6 @@ ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)  # after seme
 # Presume foundation year starts from spring term
 FOUNDATION_YEAR = getattr(settings, 'FOUNDATION_YEAR', 2007)
 CENTER_FOUNDATION_YEAR = getattr(settings, 'CENTER_FOUNDATION_YEAR', 2011)
-# Used for semester index calculation
-TERMS_INDEX_START = getattr(settings, 'TERMS_INDEX_START', 1)
 
-SEMESTER_AUTUMN_SPRING_INDEX_OFFSET = getattr(settings,
-                                            'SEMESTER_AUTUMN_SPRING_INDEX_DIFF',
-                                              1)
-
-PROFILE_THUMBNAIL_WIDTH = getattr(settings, 'PROFILE_THUMBNAIL_WIDTH',  170)
-PROFILE_THUMBNAIL_HEIGHT = getattr(settings, 'PROFILE_THUMBNAIL_HEIGHT',  238)
+# Helps to sort the terms in chronological order
+TERMS_INDEX_START = 1

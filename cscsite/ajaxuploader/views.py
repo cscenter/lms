@@ -11,7 +11,7 @@ from sorl.thumbnail.images import DummyImageFile
 from ajaxuploader.uploadhandler import MemoryImageUploadHandler, \
     TemporaryImageUploadHandler
 from ajaxuploader.utils import photo_thumbnail_cropbox
-from learning.settings import PROFILE_THUMBNAIL_WIDTH, PROFILE_THUMBNAIL_HEIGHT
+from users.settings import PROFILE_THUMBNAIL_WIDTH, PROFILE_THUMBNAIL_HEIGHT
 from users.models import User
 
 try:

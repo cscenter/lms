@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import factory
-
 from django.contrib.auth.models import Group
-from learning.settings import GRADES, AcademicRoles
+
+from learning.settings import AcademicRoles, GradeTypes
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord
 
@@ -148,7 +148,7 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     teachers = factory.Sequence(lambda n: "SHAD course teachers %03d" % n)
     student = factory.SubFactory(UserFactory,
                                  groups=[User.roles.STUDENT_CENTER])
-    grade = factory.Iterator(list(x[0] for x in GRADES))
+    grade = factory.Iterator(list(GradeTypes.values))
     semester = factory.SubFactory('learning.factories.SemesterFactory')
 
 

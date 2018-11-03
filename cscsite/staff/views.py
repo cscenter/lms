@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import itertools
 from collections import OrderedDict, defaultdict
 from typing import NamedTuple
@@ -31,8 +29,9 @@ from learning.models import Semester, Course, StudyProgram, \
     StudyProgramCourseGroup, Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
-from learning.settings import FOUNDATION_YEAR, GRADES, \
-    CENTER_FOUNDATION_YEAR, AcademicDegreeYears, SemesterTypes, StudentStatuses
+from learning.settings import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR, \
+    AcademicDegreeYears, SemesterTypes, StudentStatuses, \
+    GradeTypes
 from learning.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
@@ -103,7 +102,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
 
 class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
-    BAD_GRADES = [GRADES.unsatisfactory, GRADES.not_graded]
+    BAD_GRADES = [GradeTypes.unsatisfactory, GradeTypes.not_graded]
 
     def get_context_data(self, city_code, **kwargs):
         filters = {
@@ -199,9 +198,9 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                     continue
                 courses_by_term[enrollment.course.semester_id] += 1
                 total_passed_courses += 1
-                if enrollment.grade == GRADES.excellent:
+                if enrollment.grade == GradeTypes.excellent:
                     excellent_total += 1
-                elif enrollment.grade == GRADES.good:
+                elif enrollment.grade == GradeTypes.good:
                     good_total += 1
                 unique_courses.add(enrollment.course.meta_course)
                 total_hours += enrollment.course.courseclass_set.count() * 1.5
@@ -280,8 +279,8 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
         def is_project_active(ps):
             return (not ps.project.is_external and
                     not ps.project.canceled and
-                    ps.final_grade != GRADES.not_graded and
-                    ps.final_grade != GRADES.unsatisfactory)
+                    ps.final_grade != GradeTypes.not_graded and
+                    ps.final_grade != GradeTypes.unsatisfactory)
 
         for student in students:
             student.projects_through = list(filter(is_project_active,

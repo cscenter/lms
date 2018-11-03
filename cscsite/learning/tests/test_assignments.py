@@ -18,8 +18,8 @@ from learning.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory, \
     StudentAssignmentFactory, CourseTeacherFactory
 from learning.models import StudentAssignment, Assignment, AssignmentAttachment
-from learning.settings import GRADES, DATE_FORMAT_RU, TIME_FORMAT_RU, \
-    AcademicRoles, StudentStatuses
+from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU, \
+    AcademicRoles, StudentStatuses, GradeTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect
@@ -119,7 +119,7 @@ def test_security_assignmentstudent_detail(client, settings):
     past_semester = SemesterFactory.create(year=past_year)
     co = CourseFactory(teachers=[teacher], semester=past_semester)
     enrollment = EnrollmentFactory(student=student, course=co,
-                                   grade=GRADES.unsatisfactory)
+                                   grade=GradeTypes.unsatisfactory)
     a = AssignmentFactory(course=co)
     a_s = StudentAssignment.objects.get(student=student, assignment=a)
     url = a_s.get_student_url()
@@ -139,7 +139,7 @@ def test_security_courseoffering_detail(client):
     past_year = datetime.datetime.now().year - 3
     co = CourseFactory(teachers=[teacher], semester__year=past_year)
     enrollment = EnrollmentFactory(student=student, course=co,
-                                   grade=GRADES.unsatisfactory)
+                                   grade=GradeTypes.unsatisfactory)
     a = AssignmentFactory(course=co)
     co.refresh_from_db()
     assert co.failed_by_student(student)
@@ -149,7 +149,7 @@ def test_security_courseoffering_detail(client):
     soup = BeautifulSoup(response.content, "html.parser")
     assert soup.find(text=_("News")) is None
     # Change student co mark
-    enrollment.grade = GRADES.excellent
+    enrollment.grade = GradeTypes.excellent
     enrollment.save()
     response = client.get(url)
     assert not co.failed_by_student(student)

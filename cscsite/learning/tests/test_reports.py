@@ -9,8 +9,8 @@ from learning.factories import SemesterFactory, CourseFactory, \
 from learning.projects.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
-from learning.settings import GRADES, AcademicRoles, \
-    GradingTypes, StudentStatuses
+from learning.settings import AcademicRoles, \
+    GradingSystems, StudentStatuses, GradeTypes
 from learning.utils import get_term_by_index
 from users.factories import SHADCourseRecordFactory, OnlineCourseRecordFactory, \
     TeacherCenterFactory, StudentCenterFactory
@@ -38,15 +38,14 @@ def test_report_common(rf):
     co1, co2, co3 = CourseFactory.create_batch(3, semester=s,
                                                teachers=[teacher])
     student1, student2, student3 = StudentCenterFactory.create_batch(3)
-    EnrollmentFactory.create(student=student1, course=co1, grade=GRADES.good)
-    EnrollmentFactory.create(student=student2, course=co1, grade=GRADES.good)
-    EnrollmentFactory.create(student=student2, course=co2,
-                             grade=GRADES.not_graded)
-    shad1 = SHADCourseRecordFactory.create(student=student1, grade=GRADES.good)
-    shad2 = SHADCourseRecordFactory.create(student=student2, grade=GRADES.good)
+    EnrollmentFactory(student=student1, course=co1, grade=GradeTypes.good)
+    EnrollmentFactory(student=student2, course=co1, grade=GradeTypes.good)
+    EnrollmentFactory(student=student2, course=co2, grade=GradeTypes.not_graded)
+    shad1 = SHADCourseRecordFactory(student=student1, grade=GradeTypes.good)
+    shad2 = SHADCourseRecordFactory(student=student2, grade=GradeTypes.good)
     p = ProjectFactory.create(students=[student1], semester=s)
     ps = p.projectstudent_set.all()[0]  # 1 student attached
-    ps.final_grade = GRADES.excellent
+    ps.final_grade = GradeTypes.excellent
     ps.save()
     progress_report = get_progress_report()
     assert len(progress_report.courses_headers) == 2
@@ -94,10 +93,10 @@ def test_report_common(rf):
                                semester=s)
     for ps in p2.projectstudent_set.all():
         if ps.student == student1:
-            ps.final_grade = GRADES.excellent
+            ps.final_grade = GradeTypes.excellent
             ps.save()
         elif ps.student == student2:
-            ps.final_grade = GRADES.good
+            ps.final_grade = GradeTypes.good
             ps.save()
     progress_report = get_progress_report()
     assert progress_report.projects_max == 2
@@ -107,12 +106,12 @@ def test_report_common(rf):
     check_value_for_header(progress_report, 'Проект 2, название',
                            student1_row_index, p2.name)
     check_value_for_header(progress_report, 'Проект 2, оценка',
-                           student1_row_index, GRADES.excellent.title())
+                           student1_row_index, GradeTypes.excellent.title())
     # It's first project for student2
     check_value_for_header(progress_report, 'Проект 1, название',
                            student2_row_index, p2.name)
     check_value_for_header(progress_report, 'Проект 1, оценка',
-                           student2_row_index, GRADES.good.title())
+                           student2_row_index, GradeTypes.good.title())
 
 
 @pytest.mark.django_db
@@ -133,13 +132,13 @@ def test_report_full(rf):
     student1, student2, student3 = students
     student1.status = StudentStatuses.will_graduate
     student1.save()
-    EnrollmentFactory.create(student=student1, course=co1, grade=GRADES.good)
+    EnrollmentFactory.create(student=student1, course=co1, grade=GradeTypes.good)
     progress_report = get_progress_report()
     STATIC_HEADERS_CNT = len(progress_report.static_headers)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Without grade included too
     EnrollmentFactory.create(student=student2, course=co2,
-                             grade=GRADES.not_graded)
+                             grade=GradeTypes.not_graded)
     progress_report = get_progress_report()
     assert len(progress_report.courses_headers) == 2
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 4
@@ -148,11 +147,11 @@ def test_report_full(rf):
     progress_report = get_progress_report()
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 5
     EnrollmentFactory.create(student=student1, course=co2,
-                             grade=GRADES.good)
+                             grade=GradeTypes.good)
     EnrollmentFactory.create(student=student2, course=co1,
-                             grade=GRADES.good)
+                             grade=GradeTypes.good)
     EnrollmentFactory.create(student=student3, course=co1,
-                             grade=GRADES.unsatisfactory)
+                             grade=GradeTypes.unsatisfactory)
     progress_report = get_progress_report()
     total_passed_header = 'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего'
     assert total_passed_header in progress_report.headers
@@ -161,13 +160,13 @@ def test_report_full(rf):
     # 2 co and 1 online course
     check_value_for_header(progress_report, total_passed_header, 0, 2 + 1)
     assert progress_report.data[1].pk == student2.pk
-    SHADCourseRecordFactory.create(student=student2, grade=GRADES.not_graded)
+    SHADCourseRecordFactory.create(student=student2, grade=GradeTypes.not_graded)
     # skip `not_graded` course and shad course for student2 in stat column
     check_value_for_header(progress_report, total_passed_header, 1, 1)
     assert progress_report.data[2].pk == student3.pk
     check_value_for_header(progress_report, total_passed_header, 2, 0)
     # Add well graded shad course to student1
-    SHADCourseRecordFactory.create(student=student1, grade=GRADES.good)
+    SHADCourseRecordFactory.create(student=student1, grade=GradeTypes.good)
     # 2 co, 1 online course and 1 shad course
     progress_report = get_progress_report()
     check_value_for_header(progress_report, total_passed_header, 0, 2 + 1 + 1)
@@ -191,14 +190,14 @@ def test_report_for_target_term(rf):
     student1, student2, student3 = StudentCenterFactory.create_batch(3)
     e_active = EnrollmentFactory.create(student=student1,
                                         course=co_active,
-                                        grade=GRADES.excellent)
+                                        grade=GradeTypes.excellent)
     e_active2 = EnrollmentFactory.create(student=student2,
                                          course=co_active,
-                                         grade=GRADES.not_graded)
+                                         grade=GradeTypes.not_graded)
     e_old1 = EnrollmentFactory.create(student=student1, course=co1,
-                                      grade=GRADES.good)
+                                      grade=GradeTypes.good)
     e_old2 = EnrollmentFactory.create(student=student2, course=co1,
-                                      grade=GRADES.not_graded)
+                                      grade=GradeTypes.not_graded)
     progress_report = get_progress_report(prev_s)
     assert len(progress_report.data) == 3
     # Graduated students not included in report
@@ -232,7 +231,7 @@ def test_report_for_target_term(rf):
     check_value_for_header(progress_report, course_header_grade,
                            student2_data_index, e_active2.grade_display.lower())
     # Shad and online courses from prev semester not included in report
-    shad = SHADCourseRecordFactory.create(student=student1, grade=GRADES.good,
+    shad = SHADCourseRecordFactory.create(student=student1, grade=GradeTypes.good,
                                           semester=prev_s)
     shad_header = 'ШАД, курс 1, название'
     progress_report = get_progress_report(s)
@@ -243,7 +242,7 @@ def test_report_for_target_term(rf):
                            student1_data_index, shad.name)
     # Check honest grade system
     e = EnrollmentFactory.create(student=student1, course=co2,
-                                 grade=GRADES.credit)
+                                 grade=GradeTypes.credit)
     progress_report = get_progress_report(prev_s)
     assert progress_report.data[student1_data_index].pk == student1.pk
     course_header_grade = '{}, оценка'.format(co2.meta_course.name)
@@ -274,7 +273,7 @@ def test_report_for_target_term(rf):
     # Add not_graded shad course for current semester. We show it for
     # target semester, but it's not counted in stats
     SHADCourseRecordFactory.create(student=student1,
-                                   grade=GRADES.not_graded,
+                                   grade=GradeTypes.not_graded,
                                    semester=s)
     progress_report = get_progress_report(s)
     assert progress_report.shads_max == 1
@@ -300,8 +299,8 @@ def test_report_diplomas_csv(rf):
     student1.status = StudentStatuses.will_graduate
     student1.save()
     e_s1_co1 = EnrollmentFactory.create(student=student1, course=co1,
-                                        grade=GRADES.good)
-    EnrollmentFactory.create(student=student2, course=co1, grade=GRADES.good)
+                                        grade=GradeTypes.good)
+    EnrollmentFactory.create(student=student2, course=co1, grade=GradeTypes.good)
     # Will graduate only student1 now
     progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.data) == 1
@@ -321,19 +320,19 @@ def test_report_diplomas_csv(rf):
     progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Now change grade to unsatisfied and check again
-    e_s2_co2.grade = GRADES.unsatisfactory
+    e_s2_co2.grade = GradeTypes.unsatisfactory
     e_s2_co2.save()
     progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Set success grade value
-    e_s2_co2.grade = GRADES.good
+    e_s2_co2.grade = GradeTypes.good
     e_s2_co2.save()
     progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 4
     # Grade should be printed with `default` grading type style
-    e_s1_co1.grade = GRADES.credit
+    e_s1_co1.grade = GradeTypes.credit
     e_s1_co1.save()
-    co1.grading_type = GradingTypes.binary
+    co1.grading_type = GradingSystems.BINARY
     co1.save()
     progress_report = ProgressReportForDiplomas(request=request)
     assert progress_report.data[0].pk == student1.pk
@@ -341,13 +340,13 @@ def test_report_diplomas_csv(rf):
     assert smart_bytes("satisfactory") not in grade_values
     # Add enrollment for previous term. It should be appeared if grade OK
     EnrollmentFactory.create(student=student1, course=co_prev1,
-                             grade=GRADES.good)
+                             grade=GradeTypes.good)
     progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 6
     # Add shad course
-    SHADCourseRecordFactory.create(student=student1, grade=GRADES.good)
+    SHADCourseRecordFactory(student=student1, grade=GradeTypes.good)
     # This one shouldn't be in report due to grade value
-    SHADCourseRecordFactory.create(student=student1, grade=GRADES.not_graded)
+    SHADCourseRecordFactory(student=student1, grade=GradeTypes.not_graded)
     progress_report = ProgressReportForDiplomas(request=request)
     # +3 headers for 1 shad course
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 9

@@ -20,7 +20,7 @@ from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from learning.models import StudentAssignment, \
     Course, Semester, Enrollment, StudyProgram
-from learning.settings import LEARNING_BASE, TEACHING_BASE, GRADES
+from learning.settings import LEARNING_BASE, TEACHING_BASE, GradeTypes
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
 from .forms import LoginForm, UserProfileForm, EnrollmentCertificateCreateForm
@@ -255,7 +255,7 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
         context = super().get_context_data(*args, **kwargs)
         student_info = (User.objects
                         .students_info(exclude_grades=[
-                            GRADES.unsatisfactory, GRADES.not_graded
+                            GradeTypes.unsatisfactory, GradeTypes.not_graded
                         ])
                         .get(pk=self.object.student.pk))
         enrollments = OrderedDict()

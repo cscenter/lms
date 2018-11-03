@@ -3,7 +3,7 @@
 from django.core.management import BaseCommand
 
 from learning.models import Enrollment
-from learning.settings import GRADES, StudentStatuses
+from learning.settings import StudentStatuses, GradeTypes
 from users.models import User
 
 
@@ -23,8 +23,8 @@ class Command(BaseCommand):
         for student_id in will_graduate_list:
             student_courses = (Enrollment.active
                                .filter(student_id=student_id)
-                               .exclude(grade__in=[GRADES.unsatisfactory,
-                                                   GRADES.not_graded])
+                               .exclude(grade__in=[GradeTypes.unsatisfactory,
+                                                   GradeTypes.not_graded])
                                .values_list("course_id", flat=True))
             for co_id in student_courses:
                 courses.add(co_id)
