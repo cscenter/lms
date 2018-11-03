@@ -18,9 +18,8 @@ from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from djchoices import DjangoChoices, ChoiceItem
 from model_utils import FieldTracker
-from model_utils.fields import MonitorField, StatusField
+from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel, TimeFramedModel
 from sorl.thumbnail import ImageField
@@ -35,8 +34,8 @@ from learning.managers import StudyProgramQuerySet, \
     EnrollmentActiveManager, NonCourseEventQuerySet, CourseClassQuerySet, \
     StudentAssignmentManager, AssignmentManager, CourseTeacherManager
 from learning.micawber_providers import get_oembed_html
-from learning.settings import GRADES, SHORT_GRADES, \
-    AssignmentStates, GradingTypes, SemesterTypes
+from learning.settings import AssignmentStates, GradingSystems, \
+    SemesterTypes, GradeTypes, ClassTypes
 from learning.tasks import maybe_upload_slides_yandex
 from learning.utils import get_current_term_index, now_local, \
     next_term_starts_at
@@ -216,8 +215,8 @@ class Course(TimeStampedModel):
         on_delete=models.PROTECT)
     grading_type = models.SmallIntegerField(
         verbose_name=_("CourseOffering|grading_type"),
-        choices=GradingTypes.choices,
-        default=GradingTypes.default)
+        choices=GradingSystems.choices,
+        default=GradingSystems.BASE)
     capacity = models.PositiveSmallIntegerField(
         verbose_name=_("CourseOffering|capacity"),
         default=0,
@@ -417,15 +416,16 @@ class Course(TimeStampedModel):
 
     @property
     def grading_type_choice(self):
-        return GradingTypes.get_choice(self.grading_type)
+        return GradingSystems.get_choice(self.grading_type)
 
     def recalculate_grading_type(self):
         es = (Enrollment.active
               .filter(course=self)
               .values_list("grade", flat=True))
-        grading_type = GradingTypes.default
-        if not any(g for g in es if g in [GRADES.good, GRADES.excellent]):
-            grading_type = GradingTypes.binary
+        grading_type = GradingSystems.BASE
+        if not any(g for g in es
+                   if g in [GradeTypes.good, GradeTypes.excellent]):
+            grading_type = GradingSystems.BINARY
         if self.grading_type != grading_type:
             self.grading_type = grading_type
             self.save()
@@ -678,10 +678,6 @@ def courseclass_slides_file_name(self, filename):
 
 
 class CourseClass(TimeStampedModel):
-    class ClassTypes(DjangoChoices):
-        lecture = ChoiceItem('lecture', _("Lecture"))
-        seminar = ChoiceItem('seminar', _("Seminar"))
-
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course"),
@@ -1225,7 +1221,7 @@ class AssignmentComment(TimeStampedModel):
 
 
 class Enrollment(TimeStampedModel):
-    GRADES = GRADES
+    GRADES = GradeTypes
     objects = EnrollmentDefaultManager()
     active = EnrollmentActiveManager()
 
@@ -1237,10 +1233,11 @@ class Enrollment(TimeStampedModel):
         Course,
         verbose_name=_("Course offering"),
         on_delete=models.CASCADE)
-    grade = StatusField(
+    grade = models.CharField(
         verbose_name=_("Enrollment|grade"),
-        choices_name='GRADES',
-        default='not_graded')
+        max_length=100,
+        choices=GradeTypes.choices,
+        default=GradeTypes.not_graded)
     grade_changed = MonitorField(
         verbose_name=_("Enrollment|grade changed"),
         monitor='grade')
@@ -1300,19 +1297,15 @@ class Enrollment(TimeStampedModel):
 
     @property
     def grade_display(self):
-        return GRADES[self.grade]
+        return self.GRADES.values[self.grade]
 
     @property
     def grade_honest(self):
         """Show `satisfactory` instead of `pass` for default grading type"""
-        if (self.course.grading_type == GradingTypes.default and
-                self.grade == GRADES.credit):
+        if (self.course.grading_type == GradingSystems.BASE and
+                self.grade == self.GRADES.credit):
             return _("Satisfactory")
-        return GRADES[self.grade]
-
-    @property
-    def grade_short(self):
-        return SHORT_GRADES[self.grade]
+        return self.GRADES.values[self.grade]
 
 
 class AssignmentNotification(TimeStampedModel):

@@ -36,8 +36,8 @@ from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
 from learning.api.views import TestimonialList
 from learning.models import Course, CourseTeacher, \
     OnlineCourse, AreaOfStudy, StudyProgram, Semester
-from learning.settings import CENTER_FOUNDATION_YEAR, TERMS_IN_ACADEMIC_YEAR, \
-    StudentStatuses
+from learning.settings import CENTER_FOUNDATION_YEAR, StudentStatuses, \
+    SemesterTypes
 from learning.utils import get_current_term_pair, get_term_index, \
     get_term_index_academic_year_starts, get_term_by_index
 from stats.views import StudentsDiplomasStats
@@ -230,7 +230,7 @@ class TeachersView(generic.ListView):
         # course in this period or will in the future.
         year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
         term_index = get_term_index_academic_year_starts(year, term_type)
-        term_index -= 2 * TERMS_IN_ACADEMIC_YEAR
+        term_index -= 2 * len(SemesterTypes.choices)
         active_lecturers = Counter(
             Course.objects
             .filter(semester__index__gte=term_index)
@@ -250,7 +250,7 @@ class TeachersV2View(TemplateView):
         # Get terms in last 3 academic years.
         year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
         term_index = get_term_index_academic_year_starts(year, term_type)
-        term_index -= 2 * TERMS_IN_ACADEMIC_YEAR
+        term_index -= 2 * len(SemesterTypes.choices)
         app_data = {
             "state": {
                 "city": self.kwargs.get("city", None),

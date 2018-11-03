@@ -17,7 +17,7 @@ from testfixtures import LogCapture
 
 from core.utils import city_aware_reverse
 from learning.forms import CourseClassForm
-from learning.settings import GRADES, StudentStatuses
+from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.utils import check_url_security
 from users.factories import TeacherCenterFactory, StudentClubFactory, \
     GraduateFactory
@@ -644,7 +644,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseFactory(city_id='spb', teachers=[teacher],
                            semester=past_semester)
         enrollment = EnrollmentFactory(student=student, course=co,
-                                       grade=GRADES.unsatisfactory)
+                                       grade=GradeTypes.unsatisfactory)
         a = AssignmentFactory(course=co)
         s_a = StudentAssignment.objects.get(student=student, assignment=a)
         assert s_a.grade is None
@@ -661,7 +661,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         assert co.failed_by_student(student)
         # Course completed, but not failed, user can see all assignments
         ac.delete()
-        enrollment.grade = GRADES.good
+        enrollment.grade = GradeTypes.good
         enrollment.save()
         response = self.client.get(url)
         assert not co.failed_by_student(student)
@@ -672,7 +672,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         self.doLogin(student)
         response = self.client.get(url)
         assert response.status_code == 200
-        enrollment.grade = GRADES.unsatisfactory
+        enrollment.grade = GradeTypes.unsatisfactory
         enrollment.save()
         response = self.client.get(url)
         self.assertLoginRedirect(url)

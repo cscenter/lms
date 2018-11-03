@@ -1,10 +1,9 @@
 from django.db.models import Count, Case, When, Q, Value, F
 from django_filters.rest_framework import BaseInFilter, NumberFilter, \
-    FilterSet, CharFilter, DateTimeFromToRangeFilter
+    FilterSet, CharFilter
 
-from learning.models import Enrollment
-from learning.settings import StudentStatuses
-from users.models import User, SHADCourseRecord
+from learning.settings import StudentStatuses, GradeTypes
+from users.models import User
 
 
 class NumberInFilter(BaseInFilter, NumberFilter):
@@ -83,14 +82,14 @@ class UserFilter(FilterSet):
             courses_cnt=
             # Remove unsuccessful grades, then distinctly count by pk
             Count(Case(
-                When(Q(enrollment__grade=Enrollment.GRADES.not_graded) |
-                     Q(enrollment__grade=Enrollment.GRADES.unsatisfactory),
+                When(Q(enrollment__grade=GradeTypes.not_graded) |
+                     Q(enrollment__grade=GradeTypes.unsatisfactory),
                      then=Value(None)),
                 default=F("enrollment__course__meta_course_id")
             ), distinct=True) +
             Count(Case(
-                When(Q(shadcourserecord__grade=SHADCourseRecord.GRADES.not_graded) |
-                     Q(shadcourserecord__grade=SHADCourseRecord.GRADES.unsatisfactory),
+                When(Q(shadcourserecord__grade=GradeTypes.not_graded) |
+                     Q(shadcourserecord__grade=GradeTypes.unsatisfactory),
                      then=Value(None)),
                 default=F("shadcourserecord")
             ), distinct=True) +

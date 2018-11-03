@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 
 from learning.admission.models import Campaign, Interview, Comment
 from learning.models import Semester, Course
-from learning.settings import CENTER_FOUNDATION_YEAR, GRADES, SemesterTypes, \
-    StudentStatuses
+from learning.settings import CENTER_FOUNDATION_YEAR, SemesterTypes, \
+    StudentStatuses, GradeTypes
 from learning.utils import get_term_index
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import User
@@ -164,7 +164,7 @@ class StudentsDiplomasStats(APIView):
             filters = filters | Q(status=StudentStatuses.will_graduate)
         students = User.objects.students_info(
             filters=filters,
-            exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]
+            exclude_grades=[GradeTypes.unsatisfactory, GradeTypes.not_graded]
         )
         unique_teachers = set()
         hours = 0
@@ -178,9 +178,9 @@ class StudentsDiplomasStats(APIView):
                 unique_projects.add(ps.project_id)
             for enrollment in s.enrollments:
                 enrollments_total += 1
-                if enrollment.grade == GRADES.excellent:
+                if enrollment.grade == GradeTypes.excellent:
                     excellent_total += 1
-                elif enrollment.grade == GRADES.good:
+                elif enrollment.grade == GradeTypes.good:
                     good_total += 1
                 unique_courses.add(enrollment.course.meta_course)
                 hours += enrollment.course.courseclass_set.count() * 1.5

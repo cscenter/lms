@@ -11,9 +11,9 @@ from django.utils import formats
 from core.reports import ReportFileOutput
 from learning.models import AssignmentComment, Semester, Enrollment
 from learning.projects.models import ReportComment, ProjectStudent
-from learning.settings import GRADES, DATE_FORMAT_RU, \
-    TIME_FORMAT_RU, StudentStatuses
-from learning.utils import grade_to_mark, is_positive_grade
+from learning.settings import DATE_FORMAT_RU, \
+    TIME_FORMAT_RU, StudentStatuses, GradeTypes
+from learning.utils import grade_to_mark
 from users.models import User, SHADCourseRecord
 
 
@@ -160,7 +160,7 @@ class ProgressReport(ReportFileOutput):
             grade = course.grade
         else:  # Club or Center course
             grade = course["grade"]
-        return is_positive_grade(grade)
+        return grade in GradeTypes.satisfactory_grades
 
     def _export_row_append_courses(self, row, student):
         for course_id in self.courses_headers:
@@ -219,7 +219,7 @@ class ProgressReportForDiplomas(ProgressReport):
                 "status": StudentStatuses.will_graduate,
                 **filters
             },
-            exclude_grades=[GRADES.unsatisfactory, GRADES.not_graded]
+            exclude_grades=[GradeTypes.unsatisfactory, GradeTypes.not_graded]
         )
 
     @property
@@ -269,13 +269,13 @@ class ProgressReportForDiplomas(ProgressReport):
         shad = 0
         online = len(student.online_courses)
         for c in student.courses.values():
-            if is_positive_grade(c['grade']):
+            if c['grade'] in GradeTypes.satisfactory_grades:
                 if c['is_open']:
                     club += 1
                 else:
                     center += 1
         for c in student.shads:
-            shad += int(is_positive_grade(c.grade))
+            shad += int(c.grade in GradeTypes.satisfactory_grades)
         return center + club + shad + online
 
 
@@ -374,7 +374,7 @@ class ProgressReportForSemester(ProgressReport):
     passed and additionally shad- and online-courses if target term is current.
     """
 
-    UNSUCCESSFUL_GRADES = [GRADES.not_graded, GRADES.unsatisfactory]
+    UNSUCCESSFUL_GRADES = [GradeTypes.not_graded, GradeTypes.unsatisfactory]
 
     def __init__(self, term, honest_grade_system=False, request=None,
                  qs_filters=None):
@@ -625,16 +625,16 @@ class WillGraduateStatsReport(ReportFileOutput):
             for semester_id in semesters:
                 enrollments_in_term_qs = enrollments_qs.filter(
                     course__semester_id=semester_id).all()
-                in_term = sum(int(is_positive_grade(e.grade)) for e in
+                in_term = sum(int(e.grade in GradeTypes.satisfactory_grades) for e in
                               enrollments_in_term_qs)
                 projects_in_term_qs = ProjectStudent.objects.filter(
                     project__semester_id=semester_id,
                     student_id=student.pk).all()
-                in_term += sum(int(is_positive_grade(p.final_grade)) for p in
+                in_term += sum(int(p.final_grade in GradeTypes.satisfactory_grades) for p in
                                projects_in_term_qs)
                 shad_courses_in_term_qs = SHADCourseRecord.objects.filter(
                     student_id=student.pk, semester_id=semester_id).all()
-                in_term += sum(int(is_positive_grade(c.grade)) for c in
+                in_term += sum(int(c.grade in GradeTypes.satisfactory_grades) for c in
                                shad_courses_in_term_qs)
                 if in_term > max_in_term:
                     max_in_term = in_term
@@ -643,12 +643,12 @@ class WillGraduateStatsReport(ReportFileOutput):
             projects_qs = ProjectStudent.objects.filter(
                 project__semester__type="autumn", student_id=student.pk).all()
             projects_in_autumn = sum(
-                int(is_positive_grade(p.final_grade)) for p in projects_qs)
+                int(p.final_grade in GradeTypes.satisfactory_grades) for p in projects_qs)
             # 7. Сколько проектов сдано весной?
             projects_qs = ProjectStudent.objects.filter(
                 project__semester__type="spring", student_id=student.pk).all()
             projects_in_spring = sum(
-                int(is_positive_grade(p.final_grade)) for p in projects_qs)
+                int(p.final_grade in GradeTypes.satisfactory_grades) for p in projects_qs)
             row = [
                 student.city.name,
                 student.get_abbreviated_short_name(),

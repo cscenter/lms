@@ -8,7 +8,7 @@ from django.dispatch import receiver
 
 from learning.projects.models import ProjectStudent, Report, Project, Review, \
     ReportComment
-from learning.settings import AcademicRoles
+from learning.settings import AcademicRoles, GradeTypes
 from notifications import types
 from notifications.signals import notify
 
@@ -53,7 +53,7 @@ def post_save_project_student(sender, instance, *args, **kwargs):
         except ObjectDoesNotExist:
             pass
         # Or has any positive/neutral grade
-        if ps.final_grade != ProjectStudent.GRADES.unsatisfactory:
+        if ps.final_grade != GradeTypes.unsatisfactory:
             all_left_project = False
             break
     Project.objects.filter(pk=project_id).update(canceled=all_left_project)

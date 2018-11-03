@@ -19,7 +19,7 @@ from model_utils.models import TimeStampedModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.utils import hashids
 from learning.models import Semester
-from learning.settings import GRADES, AcademicRoles
+from learning.settings import AcademicRoles, GradeTypes
 from learning.utils import get_current_term_index, now_local
 
 # Calculate mean scores for these fields when review has been completed
@@ -38,10 +38,9 @@ CURATOR_SCORE_FIELDS = [
 ]
 
 
-@python_2_unicode_compatible
 class ProjectStudent(models.Model):
     """Intermediate model for project students"""
-    GRADES = GRADES
+    GRADES = GradeTypes
     student = models.ForeignKey(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE)
     project = models.ForeignKey('Project', on_delete=models.CASCADE)
@@ -62,7 +61,7 @@ class ProjectStudent(models.Model):
         null=True)
     final_grade = models.CharField(
         verbose_name=_("Final grade"),
-        choices=GRADES,
+        choices=GRADES.choices,
         max_length=15,
         default=GRADES.not_graded)
 
@@ -111,7 +110,7 @@ class ProjectStudent(models.Model):
         return acc
 
     def has_final_grade(self):
-        return self.final_grade != ProjectStudent.GRADES.not_graded
+        return self.final_grade != self.GRADES.not_graded
 
     def final_grade_display(self):
         """
@@ -122,18 +121,18 @@ class ProjectStudent(models.Model):
 
         May hit db to get project and semester instances
         """
-        final_grade = GRADES[self.final_grade]
+        label = self.GRADES.values[self.final_grade]
         # For research work grade type is binary at most
         if self.project.project_type == Project.ProjectTypes.research:
-            return final_grade
+            return label
         # XXX: Assume all projects >= spring 2016 have id > magic number
         MAGIC_ID = 357
-        if (self.final_grade == GRADES.credit and
+        if (self.final_grade == self.GRADES.credit and
                 self.project_id > MAGIC_ID and
                 not self.project.is_external and
                 self.project.semester.type != Semester.TYPES.summer):
-            final_grade = _("Assignment|pass")
-        return final_grade
+            label = _("Assignment|pass")
+        return label
 
 
 def project_presentation_files(self, filename):
@@ -144,10 +143,7 @@ def project_presentation_files(self, filename):
                         filename)
 
 
-@python_2_unicode_compatible
 class Project(TimeStampedModel):
-    GRADES = GRADES
-
     class ProjectTypes(DjangoChoices):
         practice = ChoiceItem('practice', _("StudentProject|Practice"))
         research = ChoiceItem('research', _("StudentProject|Research"))

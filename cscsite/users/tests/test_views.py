@@ -13,8 +13,7 @@ from django.utils import translation
 from django.utils.encoding import smart_text, force_text, smart_bytes
 
 from learning.factories import CourseFactory, AreaOfStudyFactory
-from learning.settings import AcademicRoles, GRADES, \
-    StudentStatuses
+from learning.settings import AcademicRoles, StudentStatuses, GradeTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import UserCreationForm, UserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
@@ -333,12 +332,12 @@ class UserTests(MyUtilitiesMixin, TestCase):
         Students should have "shad courses" on profile page
         """
         student = StudentCenterFactory()
-        sc = SHADCourseRecordFactory(student=student, grade=GRADES.good)
+        sc = SHADCourseRecordFactory(student=student, grade=GradeTypes.good)
         response = self.client.get(student.get_absolute_url())
         assert smart_bytes(sc.name) in response.content
         assert smart_bytes(sc.teachers) in response.content
         # Bad grades should be visible for authenticated users only
-        sc.grade = GRADES.unsatisfactory
+        sc.grade = GradeTypes.unsatisfactory
         sc.save()
         response = self.client.get(student.get_absolute_url())
         assert smart_bytes(sc.name) not in response.content

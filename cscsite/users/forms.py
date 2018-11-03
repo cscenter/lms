@@ -13,7 +13,7 @@ from core.utils import is_club_site
 from core.widgets import UbereditorWidget
 from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
-from learning.settings import GROUPS_HAS_ACCESS_TO_CENTER
+from learning.settings import AcademicRoles
 from users import tasks
 from .models import User, EnrollmentCertificate
 
@@ -52,7 +52,8 @@ class LoginForm(AuthenticationForm):
             if user.is_curator:
                 return is_valid
             user_groups = set(g.pk for g in user.groups.all())
-            if not user_groups.intersection(GROUPS_HAS_ACCESS_TO_CENTER):
+            groups_has_access = AcademicRoles.has_access_to_cscenter
+            if not user_groups.intersection(groups_has_access):
                 is_valid = False
                 no_access_msg = _("You haven't enough access rights to login "
                                   "on this site. Contact curators if you think "

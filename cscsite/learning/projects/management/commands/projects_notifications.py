@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from datetime import timedelta
+
 from django.apps import apps
 from django.core.management import BaseCommand
-from django.urls import reverse
 from django.db import transaction
 from django.utils.timezone import now
 
 from learning.models import Semester
 from learning.projects.models import ProjectStudent
-from learning.settings import GRADES, DATE_FORMAT_RU
+from learning.settings import DATE_FORMAT_RU, GradeTypes
 from notifications import types
 from notifications.models import Notification
 from notifications.signals import notify
@@ -70,7 +68,7 @@ class Command(BaseCommand):
                             .filter(project__semester=term,
                                     project__canceled=False,
                                     report__isnull=True)
-                            .exclude(final_grade=GRADES.unsatisfactory)
+                            .exclude(final_grade=GradeTypes.unsatisfactory)
                             .select_related("student", "project")
                             .distinct()
                             .all())

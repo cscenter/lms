@@ -11,7 +11,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from learning.projects.models import Project, ProjectStudent
-from learning.settings import AcademicRoles, GRADES
+from learning.settings import AcademicRoles, GradeTypes
 from users.models import User
 
 EMPTY_CHOICE = ('', _('Any'))
@@ -42,8 +42,9 @@ class ProjectsFilter(django_filters.FilterSet):
     supervisor = django_filters.CharFilter(lookup_expr='icontains',
                                            label=_("Supervisor"))
 
+    # FIXME: do I really need to define this attribute?
     projectstudent__final_grade = django_filters.ChoiceFilter(
-        choices=Project.GRADES,
+        choices=ProjectStudent._meta.get_field('final_grade').choices,
         lookup_expr='exact',
         label=_("Final grade"))
 
@@ -201,7 +202,7 @@ class ReportFilter(django_filters.ChoiceFilter):
                     .annotate(ps_cnt=Sum(
                         Case(
                             When(Q(projectstudent__report__isnull=True) &
-                                 ~Q(projectstudent__final_grade=GRADES.not_graded),
+                                 ~Q(projectstudent__final_grade=GradeTypes.not_graded),
                                  then=Value(0)
                             ),
                             default=Value(1),
@@ -214,7 +215,7 @@ class ReportFilter(django_filters.ChoiceFilter):
                     .annotate(ps_cnt=Sum(
                         Case(
                             When(Q(projectstudent__report__isnull=True) &
-                                 ~Q(projectstudent__final_grade=GRADES.not_graded),
+                                 ~Q(projectstudent__final_grade=GradeTypes.not_graded),
                                  then=Value(0)
                             ),
                             default=Value(1),

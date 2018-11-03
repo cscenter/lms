@@ -5,7 +5,7 @@ from django.core.management import CommandError
 
 from learning.models import Semester
 from learning.projects.models import ProjectStudent
-from learning.settings import GRADES
+from learning.settings import GradeTypes
 
 
 class Command(BaseCommand):
@@ -18,10 +18,10 @@ class Command(BaseCommand):
         Scheme:
             unsatisfactory [PASS BORDER] pass [GOOD BORDER] good [EXCELLENT BORDER]
         Rules:
-            score >= [EXCELLENT BORDER] -> `GRADES.excellent`
-            [GOOD BORDER] <= score < [EXCELLENT BORDER] -> `GRADES.good`
-            [PASS BORDER] <= score < [GOOD BORDER] -> `GRADES.pass`
-            score < [PASS BORDER] -> `GRADES.unsatisfactory`
+            score >= [EXCELLENT BORDER] -> `GradeTypes.excellent`
+            [GOOD BORDER] <= score < [EXCELLENT BORDER] -> `GradeTypes.good`
+            [PASS BORDER] <= score < [GOOD BORDER] -> `GradeTypes.pass`
+            score < [PASS BORDER] -> `GradeTypes.unsatisfactory`
         """
         current_term = Semester.get_current()
         # Validate term settings
@@ -42,7 +42,7 @@ class Command(BaseCommand):
         students = (ProjectStudent.objects
                     .select_related("report", "project")
                     .filter(project__semester_id=current_term.pk,
-                            final_grade=GRADES.not_graded))
+                            final_grade=GradeTypes.not_graded))
         processed = 0
         for ps in students:
             total_score = ps.total_score
@@ -54,16 +54,16 @@ class Command(BaseCommand):
                 continue
             # Select the appropriate grade
             if total_score >= current_term.projects_grade_excellent:
-                final_grade = GRADES.excellent
+                final_grade = GradeTypes.excellent
             elif total_score >= current_term.projects_grade_good:
-                final_grade = GRADES.good
+                final_grade = GradeTypes.good
             elif total_score >= current_term.projects_grade_pass:
-                final_grade = GRADES.credit
+                final_grade = GradeTypes.credit
             else:
-                final_grade = GRADES.unsatisfactory
+                final_grade = GradeTypes.unsatisfactory
             # For external project we have binary grading policy.
             if is_external and total_score >= current_term.projects_grade_pass:
-                final_grade = GRADES.credit
+                final_grade = GradeTypes.credit
 
             result = ProjectStudent.objects.filter(pk=ps.pk).update(
                 final_grade=final_grade)

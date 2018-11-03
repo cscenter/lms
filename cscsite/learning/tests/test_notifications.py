@@ -8,8 +8,7 @@ from django.core import mail, management
 from django.test import TestCase
 
 from learning.admin import AssignmentAdmin
-from learning.settings import GRADES, DATE_FORMAT_RU, \
-    StudentStatuses
+from learning.settings import DATE_FORMAT_RU, StudentStatuses, GradeTypes
 from users.factories import TeacherCenterFactory
 from .mixins import *
 from ..factories import *
@@ -25,8 +24,8 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         student = StudentCenterFactory()
         teacher1 = TeacherCenterFactory()
         teacher2 = TeacherCenterFactory()
-        co = CourseFactory.create(teachers=[teacher1, teacher2])
-        EnrollmentFactory.create(student=student, course=co, grade=GRADES.good)
+        co = CourseFactory(teachers=[teacher1, teacher2])
+        EnrollmentFactory(student=student, course=co, grade=GradeTypes.good)
         # Notify_teachers m2m populated only from view action
         self.doLogin(teacher1)
         a = AssignmentFactory.build()
@@ -109,7 +108,7 @@ def test_notification_teachers_list_for_assignment(client):
     co_teacher1 = CourseTeacher.objects.get(course=co, teacher=t1)
     co_teacher1.notify_by_default = False
     co_teacher1.save()
-    EnrollmentFactory.create(student=student, course=co, grade=GRADES.good)
+    EnrollmentFactory.create(student=student, course=co, grade=GradeTypes.good)
     # Create first assignment
     client.login(t1)
     a = AssignmentFactory.build()

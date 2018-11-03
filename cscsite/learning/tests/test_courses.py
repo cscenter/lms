@@ -16,7 +16,7 @@ from learning.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory, CourseNewsFactory, AssignmentFactory, \
     CourseTeacherFactory, CourseClassFactory, EnrollmentFactory
 from learning.models import Semester, Enrollment, CourseNews
-from learning.settings import AcademicRoles, SemesterTypes
+from learning.settings import AcademicRoles, SemesterTypes, GradeTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 
@@ -304,7 +304,7 @@ def test_course_news_tab_permissions(client):
     e_prev = EnrollmentFactory(course=co_prev, student=student_spb)
     response = client.get(co_prev.get_absolute_url())
     assert "news" not in response.context['tabs']
-    e_prev.grade = Enrollment.GRADES.good
+    e_prev.grade = GradeTypes.good
     e_prev.save()
     response = client.get(co_prev.get_absolute_url())
     assert "news" in response.context['tabs']

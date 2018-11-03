@@ -18,7 +18,7 @@ from learning import utils
 from learning.gradebook import GradeBookFormFactory, gradebook_data, \
     AssignmentGradesImport
 from learning.models import Semester, Course, Assignment
-from learning.settings import SEMESTER_AUTUMN_SPRING_INDEX_OFFSET
+from learning.settings import SemesterTypes
 from learning.utils import get_current_term_pair, get_term_index
 from learning.viewmixins import CuratorOnlyMixin, TeacherOnlyMixin
 
@@ -45,7 +45,11 @@ class _GradeBookDispatchView(generic.ListView):
         # Skip to spring semester
         # FIXME: why?!
         if term_type == Semester.TYPES.autumn:
-            term_index += SEMESTER_AUTUMN_SPRING_INDEX_OFFSET
+            spring_order = SemesterTypes.get_choice(SemesterTypes.spring).order
+            autumn_order = SemesterTypes.get_choice(SemesterTypes.autumn).order
+            # How many terms between spring and autumn
+            spring_autumn_gap = autumn_order - spring_order - 1
+            term_index += spring_autumn_gap
         return (Semester.objects
                 .filter(index__lte=term_index)
                 .exclude(type=Semester.TYPES.summer)

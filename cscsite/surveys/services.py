@@ -1,6 +1,7 @@
 from django.db.models import Q
 
 from learning.models import CourseClass
+from learning.settings import ClassTypes
 from learning.utils import now_local
 from surveys.constants import FormTemplates, STATUS_DRAFT, STATUS_TEMPLATE
 from surveys.models import Form, FieldChoice, CourseSurvey
@@ -18,7 +19,7 @@ def course_form_builder(survey: CourseSurvey):
     form.save()
 
     templates = [FormTemplates.COMMON]
-    seminar_type = CourseClass.ClassTypes.seminar
+    seminar_type = ClassTypes.seminar
     has_seminars = course.courseclass_set.filter(type=seminar_type).exists()
     has_assignments = course.assignment_set.exists()
     if has_seminars:
@@ -72,7 +73,7 @@ def course_form_builder(survey: CourseSurvey):
                                     "date__lte": today_local.date()
                                 }
                                 if rule["value"] == "lecture":
-                                    filters["type"] = CourseClass.ClassTypes.lecture
+                                    filters["type"] = ClassTypes.lecture
                                 classes = (CourseClass.objects
                                            .filter(passed_lectures, **filters)
                                            .order_by("date", "starts_at"))
