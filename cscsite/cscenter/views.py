@@ -329,7 +329,7 @@ class AlumniByYearView(generic.ListView):
         filters = (Q(groups__pk=User.roles.GRADUATE_CENTER) &
                    Q(graduation_year=year))
         if year == now().year and self.request.user.is_curator:
-            filters = filters | Q(status=StudentStatuses.will_graduate)
+            filters = filters | Q(status=StudentStatuses.WILL_GRADUATE)
         return (User.objects
                 .filter(filters)
                 .distinct()
@@ -394,7 +394,7 @@ class AlumniHonorBoardView(TemplateView):
             "graduation_year": graduation_year
         }
         if preview and self.request.user.is_curator:
-            filters = {"status": StudentStatuses.will_graduate}
+            filters = {"status": StudentStatuses.WILL_GRADUATE}
         graduates = self.get_graduates(filters)
         if not len(graduates):
             raise Http404
@@ -489,7 +489,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
     def get_queryset(self):
         return (Course.objects
                 .get_offerings_base_queryset()
-                .exclude(semester__type=Semester.TYPES.summer))
+                .exclude(semester__type=SemesterTypes.SUMMER))
 
     def get_context_data(self, **kwargs):
         filterset_class = self.get_filterset_class()
@@ -497,13 +497,13 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         if not filterset.is_valid():
             raise Redirect(to=reverse("course_list"))
         term_options = {
-            Semester.TYPES.autumn: pgettext_lazy("adjective", "autumn"),
-            Semester.TYPES.spring: pgettext_lazy("adjective", "spring"),
+            SemesterTypes.AUTUMN: pgettext_lazy("adjective", "autumn"),
+            SemesterTypes.SPRING: pgettext_lazy("adjective", "spring"),
         }
         courses = filterset.qs
         terms = group_terms_by_academic_year(courses)
         active_academic_year, active_type = self.get_term(filterset, courses)
-        if active_type == Semester.TYPES.spring:
+        if active_type == SemesterTypes.SPRING:
             active_year = active_academic_year + 1
         else:
             active_year = active_academic_year

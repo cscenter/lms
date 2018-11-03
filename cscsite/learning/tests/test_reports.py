@@ -130,7 +130,7 @@ def test_report_full(rf):
     co1, co2 = CourseFactory.create_batch(2, semester=s,
                                           teachers=[teacher])
     student1, student2, student3 = students
-    student1.status = StudentStatuses.will_graduate
+    student1.status = StudentStatuses.WILL_GRADUATE
     student1.save()
     EnrollmentFactory.create(student=student1, course=co1, grade=GradeTypes.good)
     progress_report = get_progress_report()
@@ -296,7 +296,7 @@ def test_report_diplomas_csv(rf):
     prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
     co_prev1 = CourseFactory.create(semester=prev_s, teachers=[teacher])
     co1 = CourseFactory.create(semester=s, teachers=[teacher])
-    student1.status = StudentStatuses.will_graduate
+    student1.status = StudentStatuses.WILL_GRADUATE
     student1.save()
     e_s1_co1 = EnrollmentFactory.create(student=student1, course=co1,
                                         grade=GradeTypes.good)
@@ -309,7 +309,7 @@ def test_report_diplomas_csv(rf):
     # No we have 1 passed enrollment for student1, so +2 headers except static
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # student2 will graduate too. He enrolled to the same course as student1
-    student2.status = StudentStatuses.will_graduate
+    student2.status = StudentStatuses.WILL_GRADUATE
     student2.save()
     progress_report = ProgressReportForDiplomas(request=request)
     assert len(progress_report.data) == 2
@@ -369,9 +369,9 @@ def test_report_diplomas_csv(rf):
 def test_report_diplomas_by_city(rf):
     stub_request = rf.get("/")
     s1, s2, s3 = StudentCenterFactory.create_batch(3, city_id="spb")
-    s1.status = StudentStatuses.will_graduate
+    s1.status = StudentStatuses.WILL_GRADUATE
     s1.save()
-    s2.status = StudentStatuses.will_graduate
+    s2.status = StudentStatuses.WILL_GRADUATE
     s2.save()
     progress_report = ProgressReportForDiplomas(request=stub_request)
     assert len(progress_report.data) == 2
@@ -383,7 +383,7 @@ def test_report_diplomas_by_city(rf):
         request=stub_request,
         qs_filters={"filters": {"city_id": "nsk"}})
     assert len(progress_report.data) == 0
-    s3.status = StudentStatuses.will_graduate
+    s3.status = StudentStatuses.WILL_GRADUATE
     s3.city_id = "nsk"
     s3.save()
     progress_report = ProgressReportForDiplomas(

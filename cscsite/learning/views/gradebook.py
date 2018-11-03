@@ -44,15 +44,15 @@ class _GradeBookDispatchView(generic.ListView):
         term_index = get_term_index(current_year, term_type)
         # Skip to spring semester
         # FIXME: why?!
-        if term_type == Semester.TYPES.autumn:
-            spring_order = SemesterTypes.get_choice(SemesterTypes.spring).order
-            autumn_order = SemesterTypes.get_choice(SemesterTypes.autumn).order
+        if term_type == SemesterTypes.AUTUMN:
+            spring_order = SemesterTypes.get_choice(SemesterTypes.SPRING).order
+            autumn_order = SemesterTypes.get_choice(SemesterTypes.AUTUMN).order
             # How many terms between spring and autumn
             spring_autumn_gap = autumn_order - spring_order - 1
             term_index += spring_autumn_gap
         return (Semester.objects
                 .filter(index__lte=term_index)
-                .exclude(type=Semester.TYPES.summer)
+                .exclude(type=SemesterTypes.SUMMER)
                 .prefetch_related(
                     Prefetch(
                         "course_set",
@@ -72,8 +72,8 @@ class GradeBookCuratorDispatchView(CuratorOnlyMixin, _GradeBookDispatchView):
         # Add stub spring term if we have only the fall term for the ongoing
         # academic year
         current = semester_list[0]
-        if current.type == Semester.TYPES.autumn:
-            term = Semester(type=Semester.TYPES.spring, year=current.year + 1)
+        if current.type == SemesterTypes.AUTUMN:
+            term = Semester(type=SemesterTypes.SPRING, year=current.year + 1)
             term.courseofferings = []
             semester_list.insert(0, term)
         context["semester_list"] = [(a, s) for s, a in

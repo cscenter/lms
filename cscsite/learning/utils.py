@@ -44,11 +44,11 @@ def date_to_term_pair(date):
     summer_term_start = _convert(year, SUMMER_TERM_START, date.tzinfo)
 
     if spring_term_start <= date < summer_term_start:
-        current_term = SemesterTypes.spring
+        current_term = SemesterTypes.SPRING
     elif summer_term_start <= date < autumn_term_start:
-        current_term = SemesterTypes.summer
+        current_term = SemesterTypes.SUMMER
     else:
-        current_term = SemesterTypes.autumn
+        current_term = SemesterTypes.AUTUMN
         # Fix year inaccuracy, when spring semester starts later than 1 jan
         if date.month <= spring_term_start.month:
             year -= 1
@@ -63,11 +63,11 @@ def convert_term_parts_to_datetime(year, term_start,
 
 def get_term_start(year, term_type, tz: Timezone) -> datetime.datetime:
     """Returns term start point in datetime format."""
-    if term_type == SemesterTypes.spring:
+    if term_type == SemesterTypes.SPRING:
         term_start_str = SPRING_TERM_START
-    elif term_type == SemesterTypes.summer:
+    elif term_type == SemesterTypes.SUMMER:
         term_start_str = SUMMER_TERM_START
-    elif term_type == SemesterTypes.autumn:
+    elif term_type == SemesterTypes.AUTUMN:
         term_start_str = AUTUMN_TERM_START
     else:
         raise ValueError("get_term_start: unknown term type")
@@ -109,9 +109,9 @@ def get_term_index_academic_year_starts(year: int, term_type):
     Academic year starts from autumn. Term should be greater than
     autumn of `FOUNDATION_YEAR`.
     """
-    if term_type != SemesterTypes.autumn:
+    if term_type != SemesterTypes.AUTUMN:
         year -= 1
-    return get_term_index(year, SemesterTypes.autumn)
+    return get_term_index(year, SemesterTypes.AUTUMN)
 
 
 def get_term_by_index(term_index):

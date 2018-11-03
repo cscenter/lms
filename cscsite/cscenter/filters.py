@@ -6,7 +6,7 @@ from django_filters import FilterSet, Filter, ChoiceFilter
 from django.utils.translation import ugettext_lazy as _
 
 from learning.models import Course, Semester
-from learning.settings import CENTER_FOUNDATION_YEAR
+from learning.settings import CENTER_FOUNDATION_YEAR, SemesterTypes
 from learning.utils import semester_slug_re, get_term_index
 from learning.views.utils import get_user_city_code
 
@@ -20,11 +20,11 @@ def validate_semester_slug(value):
         raise ValidationError("Wrong semester year")
     term_type = match.group("term_type")
     # More strict rules for term types
-    if term_type not in [Semester.TYPES.autumn, Semester.TYPES.spring]:
+    if term_type not in [SemesterTypes.AUTUMN, SemesterTypes.SPRING]:
         raise ValidationError("Supported semester types: [autumn, spring]")
     term_index = get_term_index(term_year, term_type)
     first_term_index = get_term_index(CENTER_FOUNDATION_YEAR,
-                                      Semester.TYPES.autumn)
+                                      SemesterTypes.AUTUMN)
     if term_index < first_term_index:
         raise ValidationError("CS Center has no offerings for this period")
 

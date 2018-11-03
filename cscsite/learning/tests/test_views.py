@@ -667,7 +667,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         assert not co.failed_by_student(student)
         assert response.status_code == 200
         # The same behavior should be for expelled student
-        student.status = StudentStatuses.expelled
+        student.status = StudentStatuses.EXPELLED
         student.save()
         self.doLogin(student)
         response = self.client.get(url)
@@ -687,7 +687,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         response = self.client.get(url)
         assert response.status_code == 200
         # The same if student not expelled
-        student.status = StudentStatuses.will_graduate
+        student.status = StudentStatuses.WILL_GRADUATE
         student.save()
         self.doLogin(student)
         response = self.client.get(url)

@@ -71,14 +71,12 @@ class MetaCourse(TimeStampedModel):
 
 
 class Semester(models.Model):
-    TYPES = SemesterTypes
-
     year = models.PositiveSmallIntegerField(
         _("Year"),
         validators=[MinValueValidator(1990)])
     type = models.CharField(max_length=100,
                             verbose_name=_("Semester|type"),
-                            choices=TYPES.choices)
+                            choices=SemesterTypes.choices)
     enrollment_start_at = models.DateField(
         _("Enrollment start at"),
         blank=True,
@@ -134,7 +132,7 @@ class Semester(models.Model):
         unique_together = ("year", "type")
 
     def __str__(self):
-        return "{0} {1}".format(self.TYPES.labels[self.type], self.year)
+        return "{0} {1}".format(SemesterTypes.values[self.type], self.year)
 
     def __cmp__(self, other):
         return self.index - other.index
@@ -201,7 +199,7 @@ class Semester(models.Model):
 
     def get_academic_year(self):
         """Academic year starts from autumn term"""
-        if self.type == SemesterTypes.autumn:
+        if self.type == SemesterTypes.AUTUMN:
             return self.year
         else:
             return self.year - 1
@@ -1109,18 +1107,18 @@ class StudentAssignment(TimeStampedModel):
         grade_range = grade_max - grade_min
         if grade is None:
             if not self.assignment.is_online or self.submission_is_received:
-                state = AssignmentStates.not_checked
+                state = AssignmentStates.NOT_CHECKED
             else:
-                state = AssignmentStates.not_submitted
+                state = AssignmentStates.NOT_SUBMITTED
         else:
             if grade < grade_min or grade == 0:
-                state = AssignmentStates.unsatisfactory
+                state = AssignmentStates.UNSATISFACTORY
             elif grade < grade_min + 0.4 * grade_range:
-                state = AssignmentStates.credit
+                state = AssignmentStates.CREDIT
             elif grade < grade_min + 0.8 * grade_range:
-                state = AssignmentStates.good
+                state = AssignmentStates.GOOD
             else:
-                state = AssignmentStates.excellent
+                state = AssignmentStates.EXCELLENT
         return AssignmentStates.get_choice(state)
 
     @property

@@ -110,11 +110,11 @@ class CourseClassQuerySet(query.QuerySet):
             # Clean them with right `.order` and `.distinct()`!
             summer_classes_enrolled_in = Q(
                 course__is_open=True,
-                course__semester__type=SemesterTypes.summer,
+                course__semester__type=SemesterTypes.SUMMER,
                 course__enrollment__student_id=user.pk,
                 course__enrollment__is_deleted=False)
             others = (Q(course__is_open=True) &
-                      ~Q(course__semester__type=SemesterTypes.summer))
+                      ~Q(course__semester__type=SemesterTypes.SUMMER))
             q = q.filter(others)
         return q
 
@@ -179,7 +179,7 @@ class CourseQuerySet(models.QuerySet):
     def from_center_foundation(self):
         Semester = apps.get_model('learning', 'Semester')
         center_foundation_term_index = get_term_index(CENTER_FOUNDATION_YEAR,
-                                                      Semester.TYPES.autumn)
+                                                      SemesterTypes.AUTUMN)
         return self.filter(semester__index__gte=center_foundation_term_index)
 
     def get_offerings_base_queryset(self):

@@ -39,8 +39,8 @@ Requirements:
                     .filter(groups__in=[User.roles.STUDENT_CENTER],
                             curriculum_year__gte=str(current_term.year - 3),
                             passed_projects__gte=3)
-                    .exclude(status__in=[StudentStatuses.will_graduate,
-                                         StudentStatuses.expelled])
+                    .exclude(status__in=[StudentStatuses.WILL_GRADUATE,
+                                         StudentStatuses.EXPELLED])
                     .prefetch_related(
                         Prefetch('onlinecourserecord_set',
                                  queryset=(OnlineCourseRecord.objects
@@ -86,5 +86,5 @@ Requirements:
                         areas.append(program.area.code)
                 if areas:
                     User.objects.filter(pk=student.pk).update(
-                        status=StudentStatuses.will_graduate)
+                        status=StudentStatuses.WILL_GRADUATE)
                     student.areas_of_study.set(areas)

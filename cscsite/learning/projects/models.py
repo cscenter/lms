@@ -19,7 +19,7 @@ from model_utils.models import TimeStampedModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.utils import hashids
 from learning.models import Semester
-from learning.settings import AcademicRoles, GradeTypes
+from learning.settings import AcademicRoles, GradeTypes, SemesterTypes
 from learning.utils import get_current_term_index, now_local
 
 # Calculate mean scores for these fields when review has been completed
@@ -130,7 +130,7 @@ class ProjectStudent(models.Model):
         if (self.final_grade == self.GRADES.credit and
                 self.project_id > MAGIC_ID and
                 not self.project.is_external and
-                self.project.semester.type != Semester.TYPES.summer):
+                self.project.semester.type != SemesterTypes.SUMMER):
             label = _("Assignment|pass")
         return label
 

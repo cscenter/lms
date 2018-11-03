@@ -334,7 +334,7 @@ class User(LearningPermissionsMixin, AbstractUser):
 
     @property
     def is_expelled(self):
-        return self.status == StudentStatuses.expelled
+        return self.status == StudentStatuses.EXPELLED
 
     @staticmethod
     def create_student_from_applicant(applicant):

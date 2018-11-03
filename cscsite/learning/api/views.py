@@ -9,7 +9,7 @@ from learning.api.serializers import AlumniSerializer, TestimonialSerializer, \
     TeacherSerializer, CourseSerializer
 from learning.models import AreaOfStudy, CourseTeacher, Course, \
     Semester
-from learning.settings import CENTER_FOUNDATION_YEAR
+from learning.settings import CENTER_FOUNDATION_YEAR, SemesterTypes
 from learning.utils import get_term_index
 from users.models import User
 
@@ -23,7 +23,7 @@ class CourseList(ListAPIView):
         return (Course.objects
                 .from_center_foundation()
                 .select_related("meta_course")
-                .exclude(semester__type=Semester.TYPES.summer)
+                .exclude(semester__type=SemesterTypes.SUMMER)
                 .filter(is_open=False)
                 .only("meta_course_id", "meta_course__name", "semester__index")
                 .order_by("meta_course__name")
@@ -47,7 +47,7 @@ class TeacherList(ListAPIView):
         course = self.request.query_params.get('course', None)
         if course:
             term_index = get_term_index(CENTER_FOUNDATION_YEAR,
-                                        Semester.TYPES.autumn)
+                                        SemesterTypes.AUTUMN)
             queryset = queryset.filter(
                 courseteacher__course__meta_course_id=course,
                 courseteacher__course__semester__index__gte=term_index)
