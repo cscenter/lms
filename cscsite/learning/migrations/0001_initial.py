@@ -370,7 +370,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
-                ('grade', core.db.models.GradeField(blank=True, decimal_places=2, max_digits=6, null=True, verbose_name='Grade')),
+                ('grade', core.db.models.ScoreField(blank=True, decimal_places=2, max_digits=6, null=True, verbose_name='Grade')),
                 ('grade_changed', model_utils.fields.MonitorField(default=django.utils.timezone.now, monitor='grade', verbose_name='Assignment|grade changed')),
                 ('first_submission_at', models.DateTimeField(editable=False, null=True, verbose_name='Assignment|first_submission')),
                 ('last_comment_from', models.PositiveSmallIntegerField(default=0, editable=False, help_text='0 - no comments yet, 1 - from student, 2 - from teacher', verbose_name='Last comment from')),

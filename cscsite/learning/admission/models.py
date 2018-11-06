@@ -23,7 +23,7 @@ from post_office import mail
 from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
-from core.db.models import GradeField
+from core.db.models import ScoreField
 from core.models import City, University
 from learning.models import Venue
 from learning.settings import AcademicRoles, CENTER_FOUNDATION_YEAR, \
@@ -592,7 +592,7 @@ class Exam(TimeStampedModel):
         max_length=42,
         blank=True,
         null=True)
-    score = GradeField(
+    score = ScoreField(
         verbose_name=_("Score"),
         # Avoid loading empty values with admin interface
         null=True)

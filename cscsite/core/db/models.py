@@ -4,8 +4,7 @@ from django.db.models import DecimalField
 from core import forms
 
 
-# TODO: rename?
-class GradeField(DecimalField):
+class ScoreField(DecimalField):
     default_validators = [MinValueValidator(0)]
     """Stores positive value with 2 decimal places"""
     def __init__(self, *args, **kwargs):
@@ -23,4 +22,4 @@ class GradeField(DecimalField):
 
     def formfield(self, **kwargs):
         kwargs.setdefault("form_class", forms.GradeField)
-        return super(GradeField, self).formfield(**kwargs)
+        return super().formfield(**kwargs)
