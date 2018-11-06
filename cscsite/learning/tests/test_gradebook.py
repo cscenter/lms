@@ -62,7 +62,7 @@ def test_gradebook_recalculate_grading_type(client):
     assignments = AssignmentFactory.create_batch(2,
                                                  course=co,
                                                  is_online=False,
-                                                 grade_min=10, grade_max=20)
+                                                 passing_score=10, maximum_score=20)
     client.login(teacher)
     url = co.get_gradebook_url()
     # Save empty form first, nothing should been updated
@@ -244,7 +244,7 @@ def test_gradebook_data():
     co = CourseFactory()
     e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course=co)
     a1, a2, a3 = AssignmentFactory.create_batch(3, course=co,
-                                                grade_min=1, grade_max=10)
+                                                passing_score=1, maximum_score=10)
     data = gradebook_data(co)
     assert len(data.assignments) == 3
     assert len(data.students) == 5
@@ -296,7 +296,7 @@ def test_gradebook_data():
     # Check grid with expelled students
     e5.student.status = StudentStatuses.EXPELLED
     e5.student.save()
-    a_new = AssignmentFactory(course=co, grade_min=3, grade_max=7)
+    a_new = AssignmentFactory(course=co, passing_score=3, maximum_score=7)
     data = gradebook_data(co)
     s5_index = 4
     new_a_index = 3
@@ -406,7 +406,7 @@ def test_save_gradebook_form(client):
     co = CourseFactory.create(teachers=[teacher])
     a1, a2 = AssignmentFactory.create_batch(2, course=co,
                                             is_online=False,
-                                            grade_min=10, grade_max=20)
+                                            passing_score=10, maximum_score=20)
     e1, e2 = EnrollmentFactory.create_batch(2, course=co,
                                             grade=GradeTypes.excellent)
     # We have 2 enrollments with `excellent` final grades. Change one of them.
@@ -466,7 +466,7 @@ def test_save_gradebook_l10n(client):
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory(course=co, is_online=False,
-                          grade_min=10, grade_max=40)
+                          passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
     data = gradebook_data(co)
@@ -482,9 +482,8 @@ def test_save_gradebook_l10n(client):
 @pytest.mark.django_db
 def test_save_gradebook_less_than_passing_score(client):
     """
-    Make sure form is valid when score is less than `grade_min` since
-    `grade_min` is passing score, but not the lowest possible value.
-    It's easy to mixed `grade_min` with minimal valid value :<
+    Make sure the form is valid when score is less than passing score, but not
+    the lowest possible value.
     """
     teacher = TeacherCenterFactory()
     client.login(teacher)
@@ -492,7 +491,7 @@ def test_save_gradebook_less_than_passing_score(client):
     co = CourseFactory.create(teachers=[teacher])
     e = EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory(course=co, is_online=False,
-                          grade_min=10, grade_max=40)
+                          passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
     form_data = {
@@ -513,7 +512,7 @@ def test_gradebook_view_form_invalid(client):
     e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GradeTypes.excellent)
     a = AssignmentFactory(course=co, is_online=False,
-                          grade_min=10, grade_max=40)
+                          passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     sa.grade = 7
     sa.save()
@@ -543,7 +542,7 @@ def test_gradebook_view_form_conflict(client):
     e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GradeTypes.not_graded)
     a = AssignmentFactory(course=co, is_online=False,
-                          grade_min=10, grade_max=40)
+                          passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a, grade=None)
     final_grade_field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e.pk)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
@@ -678,7 +677,7 @@ def test_gradebook_import_assignments_from_csv(client, tmpdir):
     for s in [student1, student2, student3]:
         EnrollmentFactory.create(student=s, course=co)
     assignment = AssignmentFactory.create(course=co, is_online=False,
-                                          grade_max=50)
+                                          maximum_score=50)
     # Generate csv file with missing header `login`
     tmp_file = tmpdir.mkdir("csv").join("grades_missing_header.csv")
     tmp_file.write("""

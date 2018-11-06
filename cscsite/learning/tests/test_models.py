@@ -233,7 +233,7 @@ class AssignmentTest(TestCase):
         self.assertRaises(ValidationError, a_copy.clean)
         a_copy.course = co1
         a_copy.save()
-        a_copy.grade_min = a.grade_max + 1
+        a_copy.passing_score = a.maximum_score + 1
         self.assertRaises(ValidationError, a_copy.clean)
 
     def test_is_open(self):
@@ -263,9 +263,9 @@ class StudentAssignmentTests(TestCase):
         self.assertRaises(ValidationError, as_.clean)
         as_.student = u1
         as_.save()
-        as_.grade = as_.assignment.grade_max + 1
+        as_.grade = as_.assignment.maximum_score + 1
         self.assertRaises(ValidationError, as_.clean)
-        as_.grade = as_.assignment.grade_max
+        as_.grade = as_.assignment.maximum_score
         as_.save()
 
     def test_submission_is_sent(self):
@@ -317,7 +317,7 @@ class StudentAssignmentTests(TestCase):
         from django.utils import timezone
         student = StudentCenterFactory()
         a_online = AssignmentFactory.create(
-            grade_min=5, grade_max=10, is_online=True,
+            passing_score=5, maximum_score=10, is_online=True,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx = {'student': student, 'assignment': a_online}
@@ -334,7 +334,7 @@ class StudentAssignmentTests(TestCase):
         a_s = StudentAssignment(**ctx)
         self.assertEqual(a_s.state.value, AssignmentStates.NOT_SUBMITTED)
         a_offline = AssignmentFactory.create(
-            grade_min=5, grade_max=10, is_online=False,
+            passing_score=5, maximum_score=10, is_online=False,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx['assignment'] = a_offline
@@ -343,19 +343,19 @@ class StudentAssignmentTests(TestCase):
 
     def test_state_display(self):
         as_ = StudentAssignmentFactory(grade=30,
-                                       assignment__grade_max=50)
-        self.assertIn(smart_text(as_.assignment.grade_max), as_.state_display)
+                                       assignment__maximum_score=50)
+        self.assertIn(smart_text(as_.assignment.maximum_score), as_.state_display)
         self.assertIn(smart_text(as_.grade), as_.state_display)
-        as_ = StudentAssignmentFactory(assignment__grade_max=50)
+        as_ = StudentAssignmentFactory(assignment__maximum_score=50)
         self.assertEqual(AssignmentStates.labels.NOT_SUBMITTED,
                          as_.state_display)
 
     def test_state_short(self):
         as_ = StudentAssignmentFactory(grade=30,
-                                       assignment__grade_max=50)
-        self.assertIn(smart_text(as_.assignment.grade_max), as_.state_short)
+                                       assignment__maximum_score=50)
+        self.assertIn(smart_text(as_.assignment.maximum_score), as_.state_short)
         self.assertIn(smart_text(as_.grade), as_.state_short)
-        as_ = StudentAssignmentFactory(assignment__grade_max=50)
+        as_ = StudentAssignmentFactory(assignment__maximum_score=50)
         state = AssignmentStates.get_choice(AssignmentStates.NOT_SUBMITTED)
         self.assertEqual(state.abbr, as_.state_short)
 
@@ -484,7 +484,7 @@ def test_course_enrollment_is_open(settings, mocker):
 
 @pytest.mark.django_db
 def test_gradefield():
-    sa = StudentAssignmentFactory(assignment__grade_max=50)
+    sa = StudentAssignmentFactory(assignment__maximum_score=50)
     sa.grade = 20
     sa.save()
     sa.refresh_from_db()

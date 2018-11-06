@@ -118,7 +118,7 @@
                             <div class="cell __total_score"></div>
                         {% endif %}
                         {% for assignment in gradebook.assignments.values %}
-                        <div class="cell __assignment __meta">{{ assignment.grade_min }}/{{ assignment.grade_max }}</div>
+                        <div class="cell __assignment __meta">{{ assignment.passing_score }}/{{ assignment.maximum_score }}</div>
                         {% endfor %}
                     </div>
 

@@ -782,7 +782,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         self.assertLoginRedirect(url)
         self.doLogout()
         # Test POST
-        grade_dict = {'grading_form': True, 'grade': 3}
+        grade_dict = {'grading_form': True, 'score': 3}
         test_groups = [
             [],
             [AcademicRoles.TEACHER_CENTER],
@@ -820,17 +820,17 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
 
     def test_grading(self):
         teacher = TeacherCenterFactory()
-        student = StudentCenterFactory()
         co = CourseFactory.create(teachers=[teacher])
+        student = StudentCenterFactory()
         EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course=co,
-                                     grade_max=13)
+        a = AssignmentFactory.create(course=co, maximum_score=13)
         a_s = (StudentAssignment.objects
-               .filter(assignment=a, student=student)
-               .get())
+               .get(assignment=a, student=student))
         url = a_s.get_teacher_url()
-        grade_dict = {'grading_form': True,
-                      'grade': 11}
+        grade_dict = {
+            'grading_form': True,
+            'score': 11
+        }
         self.doLogin(teacher)
         self.assertRedirects(self.client.post(url, grade_dict), url)
         self.assertEqual(11, StudentAssignment.objects.get(pk=a_s.pk).grade)
@@ -838,7 +838,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         self.assertContains(resp, "value=\"11\"")
         self.assertContains(resp, "/{}".format(13))
         # wrong grading value can't be set
-        grade_dict['grade'] = 42
+        grade_dict['score'] = 42
         self.client.post(url, grade_dict)
         self.assertEqual(400, self.client.post(url, grade_dict).status_code)
         self.assertEqual(11, StudentAssignment.objects.get(pk=a_s.pk).grade)

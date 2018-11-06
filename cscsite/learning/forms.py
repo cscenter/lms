@@ -343,32 +343,32 @@ class AssignmentModalCommentForm(forms.ModelForm):
         return cleaned_data
 
 
-class AssignmentGradeForm(forms.Form):
-    grade = GradeField(required=False, label="")
+class AssignmentScoreForm(forms.Form):
+    score = GradeField(required=False, label="")
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(Hidden('grading_form', 'true'),
-                Field('grade', css_class='input-grade'),
-                HTML("/" + str(kwargs.get('grade_max'))),
+                Field('score', css_class='input-grade'),
+                HTML("/" + str(kwargs.get('maximum_score'))),
                 HTML("&nbsp;&nbsp;"),
                 StrictButton('<i class="fa fa-floppy-o"></i>',
                              css_class="btn-primary",
                              type="submit"),
                 css_class="form-inline"))
-        if 'grade_max' in kwargs:
-            self.grade_max = kwargs['grade_max']
-            self.helper['grade'].update_attributes(max=self.grade_max)
-            del kwargs['grade_max']
-        super(AssignmentGradeForm, self).__init__(*args, **kwargs)
+        if 'maximum_score' in kwargs:
+            self.maximum_score = kwargs['maximum_score']
+            self.helper['score'].update_attributes(max=self.maximum_score)
+            del kwargs['maximum_score']
+        super().__init__(*args, **kwargs)
 
     def clean(self):
-        cleaned_data = super(AssignmentGradeForm, self).clean()
-        if cleaned_data.get('grade') and cleaned_data['grade'] > self.grade_max:
-            raise forms.ValidationError(_("Grade can't be larger than "
-                                          "maximum one ({0})")
-                                        .format(self.grade_max))
+        cleaned_data = super().clean()
+        score = cleaned_data.get('score', None)
+        if score and score > self.maximum_score:
+            msg = _("Score can't be larger than maximum one ({0})")
+            raise forms.ValidationError(msg.format(self.maximum_score))
         return cleaned_data
 
 
@@ -395,11 +395,11 @@ class AssignmentForm(CityAwareModelForm):
     is_online = forms.BooleanField(
         label=_("Can be passed online"),
         required=False)
-    grade_min = forms.IntegerField(
-        label=_("Assignment|grade_min"),
+    passing_score = forms.IntegerField(
+        label=_("Passing score"),
         initial=2)
-    grade_max = forms.IntegerField(
-        label=_("Assignment|grade_max"),
+    maximum_score = forms.IntegerField(
+        label=_("Maximum score"),
         initial=5)
 
     def __init__(self, *args, **kwargs):
@@ -426,8 +426,8 @@ class AssignmentForm(CityAwareModelForm):
                     css_class='row'
                 ),
                 Div(
-                    Div('grade_min',
-                        'grade_max',
+                    Div('passing_score',
+                        'maximum_score',
                         css_class="form-inline"),
                     css_class="form-group"
                 ),
@@ -441,5 +441,5 @@ class AssignmentForm(CityAwareModelForm):
     class Meta:
         model = Assignment
         fields = ['title', 'text', 'deadline_at', 'attachments', 'is_online',
-                  'grade_min', 'grade_max']
+                  'passing_score', 'maximum_score']
 
