@@ -52,7 +52,7 @@ class StudentAssignmentsSerializer(serializers.ModelSerializer):
         Let's say user passed assignment if he sent comment or has grade
         """
         return int(obj.grade is not None or
-                   obj.submission_is_received != StudentAssignment.LAST_COMMENT_NOBODY)
+                   obj.submission_is_received != StudentAssignment.CommentAuthorTypes.NOBODY)
 
 
 class AssignmentsStatsSerializer(serializers.Serializer):

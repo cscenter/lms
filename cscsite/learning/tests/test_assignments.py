@@ -191,13 +191,13 @@ def test_studentassignment_last_comment_from():
     assignment = AssignmentFactory.create(course=co)
     sa = StudentAssignment.objects.get(assignment=assignment)
     # Nobody comments yet
-    assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_NOBODY
+    assert sa.last_comment_from == StudentAssignment.CommentAuthorTypes.NOBODY
     AssignmentCommentFactory.create(student_assignment=sa, author=student)
     sa.refresh_from_db()
-    assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_STUDENT
+    assert sa.last_comment_from == StudentAssignment.CommentAuthorTypes.STUDENT
     AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
     sa.refresh_from_db()
-    assert sa.last_comment_from == StudentAssignment.LAST_COMMENT_TEACHER
+    assert sa.last_comment_from == StudentAssignment.CommentAuthorTypes.TEACHER
 
 
 @pytest.mark.django_db
@@ -435,12 +435,12 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         self.assertEquals(0, len(resp.context['student_assignment_list']))
         # Teacher commented on student1 assignment
         student1, student2, student3 = students
-        sa1 = StudentAssignment.objects.get(student=student1,
-                                            assignment=assignment)
+        sa1: StudentAssignment = StudentAssignment.objects.get(
+            student=student1, assignment=assignment)
         sa2 = StudentAssignment.objects.get(student=student2,
                                             assignment=assignment)
         AssignmentCommentFactory.create(student_assignment=sa1, author=teacher)
-        assert sa1.last_comment_from == sa1.LAST_COMMENT_TEACHER
+        assert sa1.last_comment_from == sa1.CommentAuthorTypes.TEACHER
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=any")
         self.assertEquals(3, len(resp.context['student_assignment_list']))
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=student")

@@ -746,13 +746,13 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
             query_value = "any"
         if query_value == "student":
             filter_name = "last_comment_from"
-            filter_value = self.model.LAST_COMMENT_STUDENT
+            filter_value = self.model.CommentAuthorTypes.STUDENT
         elif query_value == "teacher":
             filter_name = "last_comment_from"
-            filter_value = self.model.LAST_COMMENT_TEACHER
+            filter_value = self.model.CommentAuthorTypes.TEACHER
         elif query_value == "empty":
             filter_name = "last_comment_from"
-            filter_value = self.model.LAST_COMMENT_NOBODY
+            filter_value = self.model.CommentAuthorTypes.NOBODY
         return query_value, filter_name, filter_value
 
     def _get_all_teacher_courses(self):

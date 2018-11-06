@@ -18,6 +18,7 @@ from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from djchoices import DjangoChoices, ChoiceItem
 from model_utils import FieldTracker
 from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
@@ -1020,9 +1021,10 @@ class AssignmentAttachment(TimeStampedModel, object):
 
 
 class StudentAssignment(TimeStampedModel):
-    LAST_COMMENT_NOBODY = 0
-    LAST_COMMENT_STUDENT = 1
-    LAST_COMMENT_TEACHER = 2
+    class CommentAuthorTypes(DjangoChoices):
+        NOBODY = ChoiceItem(0)
+        STUDENT = ChoiceItem(1)
+        TEACHER = ChoiceItem(2)
 
     assignment = models.ForeignKey(
         Assignment,
@@ -1043,11 +1045,12 @@ class StudentAssignment(TimeStampedModel):
         _("Assignment|first_submission"),
         null=True,
         editable=False)
+    # TODO: rename
     last_comment_from = models.PositiveSmallIntegerField(
-        verbose_name=_("Last comment from"),
-        help_text=_("0 - no comments yet, 1 - from student, 2 - from teacher"),
+        verbose_name=_("The author type of the latest comment"),
         editable=False,
-        default=LAST_COMMENT_NOBODY)
+        choices=CommentAuthorTypes.choices,
+        default=CommentAuthorTypes.NOBODY)
 
     objects = StudentAssignmentManager()
 
