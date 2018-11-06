@@ -125,7 +125,7 @@ def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
             )
 
         # Create email templates
-        from learning.admission.models import Interview, InterviewInvitation
+        from admission.models import Interview, InterviewInvitation
 
         template_names = [
             Interview.FEEDBACK_TEMPLATE,

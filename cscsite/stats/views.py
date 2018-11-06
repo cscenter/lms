@@ -8,7 +8,7 @@ from django.views import generic
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from learning.admission.models import Campaign, Interview, Comment
+from admission.models import Campaign, Interview, Comment
 from learning.models import Semester, Course
 from learning.settings import CENTER_FOUNDATION_YEAR, SemesterTypes, \
     StudentStatuses, GradeTypes

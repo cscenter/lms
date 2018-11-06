@@ -6,7 +6,7 @@ from rest_pandas import PandasView
 from rest_pandas.serializers import SimpleSerializer, PandasSerializer
 
 from api.permissions import CuratorAccessPermission
-from learning.admission.models import Applicant, Test, Exam
+from admission.models import Applicant, Test, Exam
 from stats.admission.pandas_serializers import \
     CampaignResultsTimelineSerializer, \
     ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
