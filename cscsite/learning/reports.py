@@ -219,7 +219,7 @@ class ProgressReportForDiplomas(ProgressReport):
                 "status": StudentStatuses.WILL_GRADUATE,
                 **filters
             },
-            exclude_grades=[GradeTypes.unsatisfactory, GradeTypes.not_graded]
+            exclude_grades=[GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
         )
 
     @property
@@ -374,7 +374,7 @@ class ProgressReportForSemester(ProgressReport):
     passed and additionally shad- and online-courses if target term is current.
     """
 
-    UNSUCCESSFUL_GRADES = [GradeTypes.not_graded, GradeTypes.unsatisfactory]
+    UNSUCCESSFUL_GRADES = [GradeTypes.NOT_GRADED, GradeTypes.UNSATISFACTORY]
 
     def __init__(self, term, honest_grade_system=False, request=None,
                  qs_filters=None):

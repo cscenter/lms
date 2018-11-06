@@ -149,21 +149,21 @@ def grade_to_mark(grade):
 
     Assume unsatisfactory > not_graded.
     """
-    if grade == GradeTypes.not_graded:
+    if grade == GradeTypes.NOT_GRADED:
         return 0
-    elif grade == GradeTypes.unsatisfactory:
+    elif grade == GradeTypes.UNSATISFACTORY:
         return 1
-    elif grade == GradeTypes.credit:
+    elif grade == GradeTypes.CREDIT:
         return 2
-    elif grade == GradeTypes.good:
+    elif grade == GradeTypes.GOOD:
         return 3
-    elif grade == GradeTypes.excellent:
+    elif grade == GradeTypes.EXCELLENT:
         return 4
     raise ValueError("Unknown grade type")
 
 
 def is_negative_grade(grade):
-    return grade == GradeTypes.unsatisfactory
+    return grade == GradeTypes.UNSATISFACTORY
 
 
 def split_on_condition(iterable, predicate):

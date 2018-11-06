@@ -30,9 +30,9 @@ Requirements:
                     .only("pk", "curriculum_year", "city")
                     # FIXME: move this annotation to manager?
                     .annotate(passed_projects=Count(Case(
-                                When(Q(projectstudent__final_grade=ProjectStudent.GRADES.not_graded) & ~Q(projectstudent__project__semester_id=current_term.pk),
+                                When(Q(projectstudent__final_grade=ProjectStudent.GRADES.NOT_GRADED) & ~Q(projectstudent__project__semester_id=current_term.pk),
                                      then=Value(None)),
-                                When(Q(projectstudent__final_grade=ProjectStudent.GRADES.unsatisfactory),
+                                When(Q(projectstudent__final_grade=ProjectStudent.GRADES.UNSATISFACTORY),
                                      then=Value(None)),
                                 default=F("projectstudent__pk")
                             ), distinct=True))

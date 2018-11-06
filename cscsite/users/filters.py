@@ -82,14 +82,14 @@ class UserFilter(FilterSet):
             courses_cnt=
             # Remove unsuccessful grades, then distinctly count by pk
             Count(Case(
-                When(Q(enrollment__grade=GradeTypes.not_graded) |
-                     Q(enrollment__grade=GradeTypes.unsatisfactory),
+                When(Q(enrollment__grade=GradeTypes.NOT_GRADED) |
+                     Q(enrollment__grade=GradeTypes.UNSATISFACTORY),
                      then=Value(None)),
                 default=F("enrollment__course__meta_course_id")
             ), distinct=True) +
             Count(Case(
-                When(Q(shadcourserecord__grade=GradeTypes.not_graded) |
-                     Q(shadcourserecord__grade=GradeTypes.unsatisfactory),
+                When(Q(shadcourserecord__grade=GradeTypes.NOT_GRADED) |
+                     Q(shadcourserecord__grade=GradeTypes.UNSATISFACTORY),
                      then=Value(None)),
                 default=F("shadcourserecord")
             ), distinct=True) +

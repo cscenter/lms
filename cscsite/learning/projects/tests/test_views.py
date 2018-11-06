@@ -35,7 +35,7 @@ def test_user_detail(client):
                                semester=semester2,
                                description="")
     sp2 = p2.projectstudent_set.all()[0]
-    sp2.final_grade = GradeTypes.good
+    sp2.final_grade = GradeTypes.GOOD
     sp2.save()
     resp = client.get(reverse('user_detail', args=[student.pk]))
     assert smart_bytes(p1.name) in resp.content
@@ -50,7 +50,7 @@ def test_staff_diplomas_view(curator, client):
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
     sp = p.projectstudent_set.all()[0]
-    sp.final_grade = GradeTypes.good
+    sp.final_grade = GradeTypes.GOOD
     sp.save()
     client.login(curator)
     response = client.get(reverse('staff:exports_students_diplomas_tex',

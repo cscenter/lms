@@ -42,7 +42,7 @@ class Command(BaseCommand):
         students = (ProjectStudent.objects
                     .select_related("report", "project")
                     .filter(project__semester_id=current_term.pk,
-                            final_grade=GradeTypes.not_graded))
+                            final_grade=GradeTypes.NOT_GRADED))
         processed = 0
         for ps in students:
             total_score = ps.total_score
@@ -54,16 +54,16 @@ class Command(BaseCommand):
                 continue
             # Select the appropriate grade
             if total_score >= current_term.projects_grade_excellent:
-                final_grade = GradeTypes.excellent
+                final_grade = GradeTypes.EXCELLENT
             elif total_score >= current_term.projects_grade_good:
-                final_grade = GradeTypes.good
+                final_grade = GradeTypes.GOOD
             elif total_score >= current_term.projects_grade_pass:
-                final_grade = GradeTypes.credit
+                final_grade = GradeTypes.CREDIT
             else:
-                final_grade = GradeTypes.unsatisfactory
+                final_grade = GradeTypes.UNSATISFACTORY
             # For external project we have binary grading policy.
             if is_external and total_score >= current_term.projects_grade_pass:
-                final_grade = GradeTypes.credit
+                final_grade = GradeTypes.CREDIT
 
             result = ProjectStudent.objects.filter(pk=ps.pk).update(
                 final_grade=final_grade)

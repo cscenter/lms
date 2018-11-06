@@ -128,19 +128,19 @@ def test_passed_courses():
     # enrollments 1 and 4 for the same course but from different terms
     e1, e2, e3 = (EnrollmentFactory(course=co,
                                     student=student,
-                                    grade=GradeTypes.good)
+                                    grade=GradeTypes.GOOD)
                   for co in (co1, co2, co3))
     next_term = SemesterFactory.create_next(co1.semester)
     co4 = CourseFactory(meta_course=co1.meta_course, is_open=False,
                         semester=next_term)
-    e4 = EnrollmentFactory(course=co4, student=student, grade=GradeTypes.good)
+    e4 = EnrollmentFactory(course=co4, student=student, grade=GradeTypes.GOOD)
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 3
-    e4.grade = GradeTypes.unsatisfactory
+    e4.grade = GradeTypes.UNSATISFACTORY
     e4.save()
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 3
-    e2.grade = GradeTypes.unsatisfactory
+    e2.grade = GradeTypes.UNSATISFACTORY
     e2.save()
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 2

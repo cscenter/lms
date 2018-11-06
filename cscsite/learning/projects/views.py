@@ -154,7 +154,7 @@ class ReportListCuratorView(CuratorOnlyMixin, ReportListViewMixin,
                         all_has_sent_or_review_status = False
                     participants_cnt += 1
                 except (AttributeError, Report.DoesNotExist):
-                    if ps.final_grade == ProjectStudent.GRADES.not_graded:
+                    if ps.final_grade == ProjectStudent.GRADES.NOT_GRADED:
                         participants_cnt += 1
             all_sent_report = (participants_cnt == reports_cnt)
             if (all_sent_report and any_has_sent_status and
@@ -789,7 +789,7 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
                 except ObjectDoesNotExist:
                     # Don't take into stats if student already has
                     # unsatisfactory grade. It means he left project.
-                    if ps.final_grade == ProjectStudent.GRADES.unsatisfactory:
+                    if ps.final_grade == ProjectStudent.GRADES.UNSATISFACTORY:
                         continue
                     all_reports_in_review_state = False
                     break

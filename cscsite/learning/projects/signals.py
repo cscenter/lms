@@ -53,7 +53,7 @@ def post_save_project_student(sender, instance, *args, **kwargs):
         except ObjectDoesNotExist:
             pass
         # Or has any positive/neutral grade
-        if ps.final_grade != GradeTypes.unsatisfactory:
+        if ps.final_grade != GradeTypes.UNSATISFACTORY:
             all_left_project = False
             break
     Project.objects.filter(pk=project_id).update(canceled=all_left_project)

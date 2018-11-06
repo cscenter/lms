@@ -177,7 +177,7 @@ class FinalGradeFilter(django_filters.ChoiceFilter):
     def filter(self, qs, value):
         if value == self.NO:
             return qs.filter(
-                projectstudent__final_grade=ProjectStudent.GRADES.not_graded)
+                projectstudent__final_grade=ProjectStudent.GRADES.NOT_GRADED)
         return qs
 
 
@@ -202,9 +202,9 @@ class ReportFilter(django_filters.ChoiceFilter):
                     .annotate(ps_cnt=Sum(
                         Case(
                             When(Q(projectstudent__report__isnull=True) &
-                                 ~Q(projectstudent__final_grade=GradeTypes.not_graded),
+                                 ~Q(projectstudent__final_grade=GradeTypes.NOT_GRADED),
                                  then=Value(0)
-                            ),
+                                 ),
                             default=Value(1),
                             output_field=IntegerField()
                         )
@@ -215,9 +215,9 @@ class ReportFilter(django_filters.ChoiceFilter):
                     .annotate(ps_cnt=Sum(
                         Case(
                             When(Q(projectstudent__report__isnull=True) &
-                                 ~Q(projectstudent__final_grade=GradeTypes.not_graded),
+                                 ~Q(projectstudent__final_grade=GradeTypes.NOT_GRADED),
                                  then=Value(0)
-                            ),
+                                 ),
                             default=Value(1),
                             output_field=IntegerField()
                         )

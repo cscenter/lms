@@ -207,7 +207,6 @@ class Semester(models.Model):
 
 
 class Course(TimeStampedModel):
-    objects = CourseDefaultManager()
     meta_course = models.ForeignKey(
         MetaCourse,
         verbose_name=_("Course"),
@@ -269,6 +268,8 @@ class Course(TimeStampedModel):
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
+
+    objects = CourseDefaultManager()
 
     class Meta:
         ordering = ["-semester", "meta_course__created"]
@@ -423,7 +424,7 @@ class Course(TimeStampedModel):
               .values_list("grade", flat=True))
         grading_type = GradingSystems.BASE
         if not any(g for g in es
-                   if g in [GradeTypes.good, GradeTypes.excellent]):
+                   if g in [GradeTypes.GOOD, GradeTypes.EXCELLENT]):
             grading_type = GradingSystems.BINARY
         if self.grading_type != grading_type:
             self.grading_type = grading_type
@@ -459,8 +460,8 @@ class Course(TimeStampedModel):
         if self.is_open or not self.is_completed:
             return False
         # Checks that student didn't fail the completed course
-        bad_grades = [Enrollment.GRADES.unsatisfactory,
-                      Enrollment.GRADES.not_graded]
+        bad_grades = [Enrollment.GRADES.UNSATISFACTORY,
+                      Enrollment.GRADES.NOT_GRADED]
         if enrollment:
             return enrollment.grade in bad_grades
         return (Enrollment.active
@@ -1235,7 +1236,7 @@ class Enrollment(TimeStampedModel):
         verbose_name=_("Enrollment|grade"),
         max_length=100,
         choices=GradeTypes.choices,
-        default=GradeTypes.not_graded)
+        default=GradeTypes.NOT_GRADED)
     grade_changed = MonitorField(
         verbose_name=_("Enrollment|grade changed"),
         monitor='grade')
@@ -1301,7 +1302,7 @@ class Enrollment(TimeStampedModel):
     def grade_honest(self):
         """Show `satisfactory` instead of `pass` for default grading type"""
         if (self.course.grading_type == GradingSystems.BASE and
-                self.grade == self.GRADES.credit):
+                self.grade == self.GRADES.CREDIT):
             return _("Satisfactory")
         return self.GRADES.values[self.grade]
 

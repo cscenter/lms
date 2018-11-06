@@ -195,7 +195,7 @@
             <h5>Суммарный балл за отчет</h5>
             {{ report.final_score }}
         {% endif %}
-        {% if report.project_student.final_grade != "not_graded" %}
+        {% if report.project_student.final_grade != report.project_student.GRADES.NOT_GRADED %}
             <h5>Итоговая оценка</h5>
             <span style="white-space: nowrap;" class="badge assignment-status {{ report.project_student.final_grade|to_css }}">
              {{ report.project_student.final_grade_display }}

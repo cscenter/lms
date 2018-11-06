@@ -71,13 +71,13 @@ class GradeTypes(DjangoChoices):
         * SHADCourseRecord
         * ProjectStudent
     """
-    not_graded = C('not_graded', _("Not graded"))
-    unsatisfactory = C('unsatisfactory', _("Enrollment|Unsatisfactory"))
-    credit = C('pass', _("Enrollment|Pass"))
-    good = C('good', _("Good"))
-    excellent = C('excellent', _("Excellent"))
+    NOT_GRADED = C('not_graded', _("Not graded"))
+    UNSATISFACTORY = C('unsatisfactory', _("Enrollment|Unsatisfactory"))
+    CREDIT = C('pass', _("Enrollment|Pass"))
+    GOOD = C('good', _("Good"))
+    EXCELLENT = C('excellent', _("Excellent"))
 
-    satisfactory_grades = {credit.value, good.value, excellent.value}
+    satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value}
 
 
 # FIXME: AssignmentStates точно деталь реализации (перенести или забить уже?), которая не шарится с другими приложениями, что насчет semestertypes и classtypes?

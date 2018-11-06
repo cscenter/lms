@@ -739,7 +739,7 @@ class SHADCourseRecord(TimeStampedModel):
         max_length=100,
         verbose_name=_("Enrollment|grade"),
         choices=GradeTypes.choices,
-        default=GradeTypes.not_graded)
+        default=GradeTypes.NOT_GRADED)
 
     class Meta:
         ordering = ["name"]

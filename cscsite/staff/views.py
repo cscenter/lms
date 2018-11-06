@@ -102,7 +102,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
 
 class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
-    BAD_GRADES = [GradeTypes.unsatisfactory, GradeTypes.not_graded]
+    BAD_GRADES = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
 
     def get_context_data(self, city_code, **kwargs):
         filters = {
@@ -198,9 +198,9 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                     continue
                 courses_by_term[enrollment.course.semester_id] += 1
                 total_passed_courses += 1
-                if enrollment.grade == GradeTypes.excellent:
+                if enrollment.grade == GradeTypes.EXCELLENT:
                     excellent_total += 1
-                elif enrollment.grade == GradeTypes.good:
+                elif enrollment.grade == GradeTypes.GOOD:
                     good_total += 1
                 unique_courses.add(enrollment.course.meta_course)
                 total_hours += enrollment.course.courseclass_set.count() * 1.5
@@ -279,8 +279,8 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
         def is_project_active(ps):
             return (not ps.project.is_external and
                     not ps.project.canceled and
-                    ps.final_grade != GradeTypes.not_graded and
-                    ps.final_grade != GradeTypes.unsatisfactory)
+                    ps.final_grade != GradeTypes.NOT_GRADED and
+                    ps.final_grade != GradeTypes.UNSATISFACTORY)
 
         for student in students:
             student.projects_through = list(filter(is_project_active,
