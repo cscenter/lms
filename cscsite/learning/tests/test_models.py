@@ -483,7 +483,7 @@ def test_course_enrollment_is_open(settings, mocker):
 
 
 @pytest.mark.django_db
-def test_gradefield():
+def test_score_field():
     sa = StudentAssignmentFactory(assignment__maximum_score=50)
     sa.grade = 20
     sa.save()

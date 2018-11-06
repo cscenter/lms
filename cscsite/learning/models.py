@@ -24,7 +24,7 @@ from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel, TimeFramedModel
 from sorl.thumbnail import ImageField
 
-from core.db.models import GradeField
+from core.db.models import ScoreField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
 from core.utils import hashids, city_aware_reverse
@@ -665,11 +665,11 @@ class Venue(models.Model):
         return reverse('venue_detail', args=[self.pk])
 
 
-def courseclass_slides_file_name(self, filename):
+def courseclass_slides_file_name(instance: "CourseClass", filename):
     _, ext = os.path.splitext(filename)
-    timestamp = self.date.strftime("%Y_%m_%d")
-    course = ("{0}_{1}".format(self.course.meta_course.slug,
-                               self.course.semester.slug)
+    timestamp = instance.date.strftime("%Y_%m_%d")
+    course = ("{0}_{1}".format(instance.course.meta_course.slug,
+                               instance.course.semester.slug)
                        .replace("-", "_"))
     filename = ("{0}_{1}{2}".format(timestamp, course, ext))
     return os.path.join('slides', course, filename)
@@ -876,25 +876,23 @@ class Assignment(TimeStampedModel):
     deadline_at = models.DateTimeField(_("Assignment|deadline"))
     is_online = models.BooleanField(_("Assignment|can be passed online"),
                                     default=True)
-    title = models.CharField(_("Asssignment|name"),
+    title = models.CharField(_("Assignment|name"),
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
                             help_text=LATEX_MARKDOWN_HTML_ENABLED)
     passing_score = models.PositiveSmallIntegerField(
-        _("Assignment|passing_score"),
+        _("Passing score"),
         default=2,
         validators=[MaxValueValidator(1000)])
     maximum_score = models.PositiveSmallIntegerField(
         _("Maximum score"),
         default=5,
         validators=[MaxValueValidator(1000)])
-    # XXX: No ability to add default values with `post_save` signal in one place
-    # We do it separately in admin form and AssignmentCreateView
     notify_teachers = models.ManyToManyField(
         CourseTeacher,
         verbose_name=_("Assignment|notify_settings"),
-        help_text=_(
-            "Leave blank if you want populate teachers from course offering settings"),
+        help_text=_("Leave blank if you want to populate list from "
+                    "the course settings"),
         blank=True)
 
     tracker = FieldTracker(fields=['deadline_at'])
@@ -956,7 +954,7 @@ class Assignment(TimeStampedModel):
         if self.pk and self._original_course_id != self.course_id:
             raise ValidationError(_("Course modification is not allowed"))
         if self.passing_score > self.maximum_score:
-            raise ValidationError(_("Passing score should be lesser than "
+            raise ValidationError(_("Passing score should be less than "
                                     "(or equal to) maximum one"))
 
     def __str__(self):
@@ -1036,7 +1034,7 @@ class StudentAssignment(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("StudentAssignment|student"),
         on_delete=models.CASCADE)
-    grade = GradeField(
+    grade = ScoreField(
         verbose_name=_("Grade"),
         null=True,
         blank=True)

@@ -118,7 +118,7 @@ class Migration(migrations.Migration):
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
                 ('details', jsonfield.fields.JSONField(blank=True, null=True, verbose_name='Details')),
                 ('yandex_contest_id', models.CharField(blank=True, help_text='Applicant|yandex_contest_id', max_length=42, null=True, verbose_name='Contest #ID')),
-                ('score', core.db.models.GradeField(decimal_places=2, max_digits=6, null=True, verbose_name='Score')),
+                ('score', core.db.models.ScoreField(decimal_places=2, max_digits=6, null=True, verbose_name='Score')),
             ],
             options={
                 'verbose_name': 'Exam',
