@@ -341,7 +341,7 @@ class User(LearningPermissionsMixin, AbstractUser):
         """
         Create new model or override existent with data from applicant form.
         """
-        from learning.admission.models import Applicant
+        from admission.models import Applicant
         try:
             user = User.objects.get(email=applicant.email)
         except User.DoesNotExist:

@@ -23,8 +23,8 @@ from vanilla import TemplateView
 
 from api.permissions import CuratorAccessPermission
 from core.templatetags.core_tags import tex
-from learning.admission.models import Campaign, Interview
-from learning.admission.reports import AdmissionReport
+from admission.models import Campaign, Interview
+from admission.reports import AdmissionReport
 from learning.models import Semester, Course, StudyProgram, \
     StudyProgramCourseGroup, Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \

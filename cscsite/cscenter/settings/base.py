@@ -23,7 +23,7 @@ MIDDLEWARE = [
     'core.middleware.RedirectMiddleware',
 ]
 INSTALLED_APPS += [
-    'learning.admission.apps.AdmissionConfig',
+    'admission.apps.AdmissionConfig',
     'post_office',
     'staff',
     'admission_test',  # TODO: remove after testing

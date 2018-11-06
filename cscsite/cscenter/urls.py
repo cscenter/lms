@@ -119,7 +119,7 @@ urlpatterns = [
         name='render_markdown'),
     url(r"^courses/$", cscenter_views.CourseOfferingsView.as_view(), name="course_list"),
     url(r'^', include('learning.urls')),
-    url(r'^', include('learning.admission.urls')),
+    url(r'^', include('admission.urls')),
     url(r'^', include('learning.projects.urls')),
     url(r'^narnia/', admin.site.urls),
     url(r'^narnia/', include(loginas_urls)),

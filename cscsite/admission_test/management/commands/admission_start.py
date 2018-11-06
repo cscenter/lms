@@ -6,8 +6,8 @@ from post_office.models import EmailTemplate
 from post_office.utils import get_email_template
 
 from admission_test.models import AdmissionTestApplicant
-from learning.admission.management.commands._utils import CurrentCampaignsMixin
-from learning.admission.models import Applicant
+from admission.management.commands._utils import CurrentCampaignsMixin
+from admission.models import Applicant
 
 
 # TODO: remove duplicates
