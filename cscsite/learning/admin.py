@@ -308,7 +308,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
 
 
 class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
-    list_display = ['student', 'assignment', 'grade', 'grade_changed', 'state']
+    list_display = ['student', 'assignment', 'score', 'score_changed', 'state']
     related_spec = {'select': [('assignment',
                                 [('course', ['semester', 'meta_course'])]),
                                'student']}
@@ -317,9 +317,9 @@ class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['student', 'assignment', 'grade_changed', 'state']
+            return ['student', 'assignment', 'score_changed', 'state']
         else:
-            return ['grade_changed', 'state']
+            return ['score_changed', 'state']
 
 
 class NonCourseEventAdmin(admin.ModelAdmin):

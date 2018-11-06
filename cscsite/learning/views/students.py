@@ -67,7 +67,7 @@ class StudentAssignmentStudentDetailView(AssignmentProgressBaseView,
         if sa.student == user:
             co = sa.assignment.course
             if co.failed_by_student(self.request.user):
-                if not sa.has_comments(user) and not sa.grade:
+                if not sa.has_comments(user) and not sa.score:
                     return False
         return sa.student == user or user.is_curator
 
