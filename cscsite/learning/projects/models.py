@@ -40,6 +40,7 @@ CURATOR_SCORE_FIELDS = [
 
 class ProjectStudent(models.Model):
     """Intermediate model for project students"""
+    # TODO: переименовать `GRADES`, создать ProjectGradeTypes (в settings.py)
     GRADES = GradeTypes
     student = models.ForeignKey(settings.AUTH_USER_MODEL,
                                 on_delete=models.CASCADE)
@@ -63,7 +64,7 @@ class ProjectStudent(models.Model):
         verbose_name=_("Final grade"),
         choices=GRADES.choices,
         max_length=15,
-        default=GRADES.not_graded)
+        default=GRADES.NOT_GRADED)
 
     class Meta:
         verbose_name = _("Project student")
@@ -110,7 +111,7 @@ class ProjectStudent(models.Model):
         return acc
 
     def has_final_grade(self):
-        return self.final_grade != self.GRADES.not_graded
+        return self.final_grade != self.GRADES.NOT_GRADED
 
     def final_grade_display(self):
         """
@@ -127,7 +128,7 @@ class ProjectStudent(models.Model):
             return label
         # XXX: Assume all projects >= spring 2016 have id > magic number
         MAGIC_ID = 357
-        if (self.final_grade == self.GRADES.credit and
+        if (self.final_grade == self.GRADES.CREDIT and
                 self.project_id > MAGIC_ID and
                 not self.project.is_external and
                 self.project.semester.type != SemesterTypes.SUMMER):

@@ -164,7 +164,7 @@ class StudentsDiplomasStats(APIView):
             filters = filters | Q(status=StudentStatuses.WILL_GRADUATE)
         students = User.objects.students_info(
             filters=filters,
-            exclude_grades=[GradeTypes.unsatisfactory, GradeTypes.not_graded]
+            exclude_grades=[GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
         )
         unique_teachers = set()
         hours = 0
@@ -178,9 +178,9 @@ class StudentsDiplomasStats(APIView):
                 unique_projects.add(ps.project_id)
             for enrollment in s.enrollments:
                 enrollments_total += 1
-                if enrollment.grade == GradeTypes.excellent:
+                if enrollment.grade == GradeTypes.EXCELLENT:
                     excellent_total += 1
-                elif enrollment.grade == GradeTypes.good:
+                elif enrollment.grade == GradeTypes.GOOD:
                     good_total += 1
                 unique_courses.add(enrollment.course.meta_course)
                 hours += enrollment.course.courseclass_set.count() * 1.5

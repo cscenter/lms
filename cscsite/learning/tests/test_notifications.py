@@ -25,7 +25,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         teacher1 = TeacherCenterFactory()
         teacher2 = TeacherCenterFactory()
         co = CourseFactory(teachers=[teacher1, teacher2])
-        EnrollmentFactory(student=student, course=co, grade=GradeTypes.good)
+        EnrollmentFactory(student=student, course=co, grade=GradeTypes.GOOD)
         # Notify_teachers m2m populated only from view action
         self.doLogin(teacher1)
         a = AssignmentFactory.build()
@@ -108,7 +108,7 @@ def test_notification_teachers_list_for_assignment(client):
     co_teacher1 = CourseTeacher.objects.get(course=co, teacher=t1)
     co_teacher1.notify_by_default = False
     co_teacher1.save()
-    EnrollmentFactory.create(student=student, course=co, grade=GradeTypes.good)
+    EnrollmentFactory.create(student=student, course=co, grade=GradeTypes.GOOD)
     # Create first assignment
     client.login(t1)
     a = AssignmentFactory.build()

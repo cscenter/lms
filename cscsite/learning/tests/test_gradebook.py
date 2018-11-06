@@ -74,8 +74,8 @@ def test_gradebook_recalculate_grading_type(client):
     for s in students:
         enrollment = EnrollmentFactory.create(student=s, course=co)
         field = BaseGradebookForm.FINAL_GRADE_PREFIX + str(enrollment.pk)
-        form["initial-" + field] = GradeTypes.not_graded
-        form[field] = GradeTypes.good
+        form["initial-" + field] = GradeTypes.NOT_GRADED
+        form[field] = GradeTypes.GOOD
     # Update final grades, still should be `default`
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
@@ -88,14 +88,14 @@ def test_gradebook_recalculate_grading_type(client):
     # will be equal `pass`
     for key in form:
         if not key.startswith("initial-"):
-            form["initial-" + key] = GradeTypes.good
-            form[key] = GradeTypes.credit
+            form["initial-" + key] = GradeTypes.GOOD
+            form[key] = GradeTypes.CREDIT
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
     co.refresh_from_db()
     assert co.grading_type == GradingSystems.BINARY
     e = Enrollment.objects.get(student=student, course=co)
-    assert e.grade == GradeTypes.credit
+    assert e.grade == GradeTypes.CREDIT
     response = client.get(user_detail_url)
     assert smart_bytes("/enrollment|pass/") in response.content
     assert smart_bytes("/satisfactory/") not in response.content
@@ -225,8 +225,8 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
             field_name = BaseGradebookForm.GRADE_PREFIX + str(submission.pk)
             form[field_name] = grade
             field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(enrollment.pk)
-            form["initial-" + field_name] = GradeTypes.not_graded
-            form[field_name] = GradeTypes.good
+            form["initial-" + field_name] = GradeTypes.NOT_GRADED
+            form[field_name] = GradeTypes.GOOD
         self.assertRedirects(self.client.post(url, form), url)
         for a_s, grade in pairs:
             self.assertEqual(grade, (StudentAssignment.objects
@@ -407,12 +407,12 @@ def test_save_gradebook_form(client):
                                             is_online=False,
                                             passing_score=10, maximum_score=20)
     e1, e2 = EnrollmentFactory.create_batch(2, course=co,
-                                            grade=GradeTypes.excellent)
+                                            grade=GradeTypes.EXCELLENT)
     # We have 2 enrollments with `excellent` final grades. Change one of them.
     field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e1.pk)
     form_data = {
-        "initial-" + field_name: GradeTypes.excellent,
-        field_name: GradeTypes.good,
+        "initial-" + field_name: GradeTypes.EXCELLENT,
+        field_name: GradeTypes.GOOD,
         # Empty value should be discarded
         BaseGradebookForm.FINAL_GRADE_PREFIX + str(e2.pk): '',
     }
@@ -428,8 +428,8 @@ def test_save_gradebook_form(client):
     assert not conflicts
     e1.refresh_from_db()
     e2.refresh_from_db()
-    assert e1.grade == GradeTypes.good
-    assert e2.grade == GradeTypes.excellent
+    assert e1.grade == GradeTypes.GOOD
+    assert e2.grade == GradeTypes.EXCELLENT
     # Now change one of submission grade
     sa11 = StudentAssignment.objects.get(student_id=e1.student_id, assignment=a1)
     sa12 = StudentAssignment.objects.get(student_id=e1.student_id, assignment=a2)
@@ -452,8 +452,8 @@ def test_save_gradebook_form(client):
     assert sa11.score == 2
     assert sa12.score is None
     e1.refresh_from_db(), e2.refresh_from_db()
-    assert e1.grade == GradeTypes.good
-    assert e2.grade == GradeTypes.excellent
+    assert e1.grade == GradeTypes.GOOD
+    assert e2.grade == GradeTypes.EXCELLENT
 
 
 @pytest.mark.django_db
@@ -509,7 +509,7 @@ def test_gradebook_view_form_invalid(client):
     student = StudentCenterFactory()
     co = CourseFactory.create(teachers=[teacher])
     e = EnrollmentFactory.create(student=student, course=co,
-                                 grade=GradeTypes.excellent)
+                                 grade=GradeTypes.EXCELLENT)
     a = AssignmentFactory(course=co, is_online=False,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
@@ -521,7 +521,7 @@ def test_gradebook_view_form_invalid(client):
     assert response.status_code == 200
     form = response.context['form']
     assert form[field_name].value() == 7
-    assert form[final_grade_field_name].value() == GradeTypes.excellent
+    assert form[final_grade_field_name].value() == GradeTypes.EXCELLENT
     form_data = {
         field_name: -5  # invalid value
     }
@@ -529,7 +529,7 @@ def test_gradebook_view_form_invalid(client):
     assert response.status_code == 200
     form = response.context['form']
     assert form[field_name].value() == '-5'
-    assert form[final_grade_field_name].value() == GradeTypes.excellent
+    assert form[final_grade_field_name].value() == GradeTypes.EXCELLENT
 
 
 @pytest.mark.django_db
@@ -539,7 +539,7 @@ def test_gradebook_view_form_conflict(client):
     co = CourseFactory.create(teachers=[teacher1, teacher2])
     student = StudentCenterFactory()
     e = EnrollmentFactory.create(student=student, course=co,
-                                 grade=GradeTypes.not_graded)
+                                 grade=GradeTypes.NOT_GRADED)
     a = AssignmentFactory(course=co, is_online=False,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a, score=None)
@@ -549,7 +549,7 @@ def test_gradebook_view_form_conflict(client):
     assert response.status_code == 200
     form = response.context['form']
     assert form[field_name].value() is None
-    assert form[final_grade_field_name].value() == GradeTypes.not_graded
+    assert form[final_grade_field_name].value() == GradeTypes.NOT_GRADED
     form_data = {
         "initial-" + field_name: None,
         field_name: 4
@@ -558,7 +558,7 @@ def test_gradebook_view_form_conflict(client):
     assert response.status_code == 200
     form = response.context['form']
     assert form[field_name].value() == 4
-    assert form[final_grade_field_name].value() == GradeTypes.not_graded
+    assert form[final_grade_field_name].value() == GradeTypes.NOT_GRADED
     sa.refresh_from_db()
     assert sa.score == 4
     # Try to update assignment score with another profile
@@ -571,42 +571,42 @@ def test_gradebook_view_form_conflict(client):
     assert 'warning' in message.tags
     # The same have to be for final grade
     form_data = {
-        "initial-" + final_grade_field_name: GradeTypes.not_graded,
-        final_grade_field_name: GradeTypes.good
+        "initial-" + final_grade_field_name: GradeTypes.NOT_GRADED,
+        final_grade_field_name: GradeTypes.GOOD
     }
     client.login(teacher1)
     response = client.post(co.get_gradebook_url(), form_data, follow=True)
     assert response.status_code == 200
     form = response.context['form']
     assert form[field_name].value() == 4
-    assert form[final_grade_field_name].value() == GradeTypes.good
+    assert form[final_grade_field_name].value() == GradeTypes.GOOD
     sa.refresh_from_db()
     assert sa.score == 4
     e.refresh_from_db()
-    assert e.grade == GradeTypes.good
+    assert e.grade == GradeTypes.GOOD
     client.login(teacher2)
-    form_data[final_grade_field_name] = GradeTypes.excellent
+    form_data[final_grade_field_name] = GradeTypes.EXCELLENT
     response = client.post(co.get_gradebook_url(), form_data)
     assert response.status_code == 200
     assert response.context['form'].conflicts_on_last_save()
     message = list(response.context['messages'])[0]
     assert 'warning' in message.tags
     final_grade_field = response.context['form'][final_grade_field_name]
-    assert final_grade_field.value() == GradeTypes.excellent
+    assert final_grade_field.value() == GradeTypes.EXCELLENT
     # Hidden field should store current value from db
     hidden_input = BeautifulSoup(final_grade_field.as_hidden(), "html.parser")
     assert hidden_input.find('input').get('value') == str(e.grade)
     # Check special case when value was changed during form editing but it's the
     # same as current user input. Do not treat this case as a conflict.
     e.refresh_from_db()
-    assert e.grade == GradeTypes.good
+    assert e.grade == GradeTypes.GOOD
     sa.refresh_from_db()
     assert sa.score == 4
-    form_data[final_grade_field_name] = GradeTypes.good
+    form_data[final_grade_field_name] = GradeTypes.GOOD
     response = client.post(co.get_gradebook_url(), form_data)
     assert response.status_code == 302
     e.refresh_from_db()
-    assert e.grade == GradeTypes.good
+    assert e.grade == GradeTypes.GOOD
     sa.refresh_from_db()
     assert sa.score == 4
 

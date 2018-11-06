@@ -332,12 +332,12 @@ class UserTests(MyUtilitiesMixin, TestCase):
         Students should have "shad courses" on profile page
         """
         student = StudentCenterFactory()
-        sc = SHADCourseRecordFactory(student=student, grade=GradeTypes.good)
+        sc = SHADCourseRecordFactory(student=student, grade=GradeTypes.GOOD)
         response = self.client.get(student.get_absolute_url())
         assert smart_bytes(sc.name) in response.content
         assert smart_bytes(sc.teachers) in response.content
         # Bad grades should be visible for authenticated users only
-        sc.grade = GradeTypes.unsatisfactory
+        sc.grade = GradeTypes.UNSATISFACTORY
         sc.save()
         response = self.client.get(student.get_absolute_url())
         assert smart_bytes(sc.name) not in response.content

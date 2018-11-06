@@ -644,7 +644,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         co = CourseFactory(city_id='spb', teachers=[teacher],
                            semester=past_semester)
         enrollment = EnrollmentFactory(student=student, course=co,
-                                       grade=GradeTypes.unsatisfactory)
+                                       grade=GradeTypes.UNSATISFACTORY)
         a = AssignmentFactory(course=co)
         s_a = StudentAssignment.objects.get(student=student, assignment=a)
         assert s_a.score is None
@@ -661,7 +661,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         assert co.failed_by_student(student)
         # Course completed, but not failed, user can see all assignments
         ac.delete()
-        enrollment.grade = GradeTypes.good
+        enrollment.grade = GradeTypes.GOOD
         enrollment.save()
         response = self.client.get(url)
         assert not co.failed_by_student(student)
@@ -672,7 +672,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         self.doLogin(student)
         response = self.client.get(url)
         assert response.status_code == 200
-        enrollment.grade = GradeTypes.unsatisfactory
+        enrollment.grade = GradeTypes.UNSATISFACTORY
         enrollment.save()
         response = self.client.get(url)
         self.assertLoginRedirect(url)

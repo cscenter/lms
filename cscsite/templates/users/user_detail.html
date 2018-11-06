@@ -381,7 +381,7 @@
                                             <a href="{{ ps.project.get_absolute_url }}">{{ ps.project.name }}, {{ ps.project.semester }}</a> /{% spaceless %}
                                             {% if not ps.project.canceled %}
                                                 {{ ps.final_grade_display|lower }}
-                                            {% elif ps.final_grade == "not_graded" %}
+                                            {% elif ps.final_grade == ps.GRADES.NOT_GRADED %}
                                                 {% trans "Canceled"|lower context "Project" %}
                                             {% else %}
                                                 {{ ps.get_final_grade_display|lower }}

@@ -11,6 +11,7 @@ from django.utils.translation import ugettext as _
 from learning.factories import SemesterFactory, \
     CourseFactory, EnrollmentFactory, \
     MetaCourseFactory
+from learning.settings import GradeTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import UserFactory, EnrollmentCertificateFactory, \
     StudentCenterFactory
@@ -96,7 +97,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, TestCase):
                     meta_course=meta_course,
                     semester=s),
                 student=student,
-                grade='good'
+                grade=GradeTypes.GOOD
             )
             enrollments.append(e)
         reference = EnrollmentCertificateFactory.create(

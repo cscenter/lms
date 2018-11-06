@@ -144,9 +144,11 @@ class UserDetailView(generic.DetailView):
                                  .select_related("semester"))
         if not self.request.user.is_authenticated:
             enrollments_queryset = enrollments_queryset.exclude(
-                grade__in=['not_graded', 'unsatisfactory'])
+                grade__in=[Enrollment.GRADES.NOT_GRADED,
+                           Enrollment.GRADES.UNSATISFACTORY])
             shad_courses_queryset = shad_courses_queryset.exclude(
-                grade__in=['not_graded', 'unsatisfactory'])
+                grade__in=[Enrollment.GRADES.NOT_GRADED,
+                           Enrollment.GRADES.UNSATISFACTORY])
         elif self.request.user.is_curator:
             enrollments_queryset = enrollments_queryset.annotate(
                 classes_total=Count('course__courseclass'))
@@ -255,7 +257,7 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
         context = super().get_context_data(*args, **kwargs)
         student_info = (User.objects
                         .students_info(exclude_grades=[
-                            GradeTypes.unsatisfactory, GradeTypes.not_graded
+                            GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED
                         ])
                         .get(pk=self.object.student.pk))
         enrollments = OrderedDict()

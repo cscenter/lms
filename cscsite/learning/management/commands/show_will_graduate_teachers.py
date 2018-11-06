@@ -23,8 +23,8 @@ class Command(BaseCommand):
         for student_id in will_graduate_list:
             student_courses = (Enrollment.active
                                .filter(student_id=student_id)
-                               .exclude(grade__in=[GradeTypes.unsatisfactory,
-                                                   GradeTypes.not_graded])
+                               .exclude(grade__in=[GradeTypes.UNSATISFACTORY,
+                                                   GradeTypes.NOT_GRADED])
                                .values_list("course_id", flat=True))
             for co_id in student_courses:
                 courses.add(co_id)

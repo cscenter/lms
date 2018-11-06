@@ -68,7 +68,7 @@ class Command(BaseCommand):
                             .filter(project__semester=term,
                                     project__canceled=False,
                                     report__isnull=True)
-                            .exclude(final_grade=GradeTypes.unsatisfactory)
+                            .exclude(final_grade=GradeTypes.UNSATISFACTORY)
                             .select_related("student", "project")
                             .distinct()
                             .all())
