@@ -336,7 +336,8 @@ def test_report_diplomas_csv(rf):
     co1.save()
     progress_report = ProgressReportForDiplomas(request=request)
     assert progress_report.data[0].pk == student1.pk
-    grade_values = [d.get("grade", "") for d in progress_report.data[0].courses.values()]
+    grade_values = [d.get("grade", "") for d
+                    in progress_report.data[0].courses.values()]
     assert smart_bytes("satisfactory") not in grade_values
     # Add enrollment for previous term. It should be appeared if grade OK
     EnrollmentFactory.create(student=student1, course=co_prev1,

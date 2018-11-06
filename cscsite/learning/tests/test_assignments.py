@@ -514,8 +514,8 @@ def test_assignment_admin_view(settings, admin_client):
         "deadline_at_1": "00:00:00",
         "title": "title",
         "text": "text",
-        "grade_min": "3",
-        "grade_max": "5",
+        "passing_score": "3",
+        "maximum_score": "5",
         "_continue": "save_and_continue"
     }
     # Test with empty city aware field
@@ -609,8 +609,8 @@ def test_assignment_public_form_for_teachers(settings, client):
         "text": "text",
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00",
-        "grade_min": "3",
-        "grade_max": "5",
+        "passing_score": "3",
+        "maximum_score": "5",
     }
     add_url = co_in_spb.get_create_assignment_url()
     response = client.post(add_url, form_data, follow=True)
@@ -792,27 +792,27 @@ def test_studentassignment_submission_grade(client):
     teacher = TeacherCenterFactory.create()
     CourseTeacherFactory(course=sa.assignment.course,
                          teacher=teacher)
-    sa.assignment.grade_min = 1
-    sa.assignment.grade_max = 10
+    sa.assignment.passing_score = 1
+    sa.assignment.maximum_score = 10
     sa.assignment.save()
     assert sa.grade is None
     student = sa.student
-    form = {"grade": 0, "grading_form": True}
+    form = {"score": 0, "grading_form": True}
     client.login(teacher)
     response = client.post(sa.get_teacher_url(), form, follow=True)
     assert response.status_code == 200
     sa.refresh_from_db()
     assert sa.grade == 0
-    form = {"grade": "", "grading_form": True}
+    form = {"score": "", "grading_form": True}
     response = client.post(sa.get_teacher_url(), form, follow=True)
     assert response.status_code == 200
     sa.refresh_from_db()
     assert sa.grade is None
-    form = {"grade": "1.22", "grading_form": True}
+    form = {"score": "1.22", "grading_form": True}
     response = client.post(sa.get_teacher_url(), form, follow=True)
     sa.refresh_from_db()
     assert sa.grade == Decimal("1.22")
-    form = {"grade": "2,34", "grading_form": True}
+    form = {"score": "2,34", "grading_form": True}
     response = client.post(sa.get_teacher_url(), form, follow=True)
     sa.refresh_from_db()
     assert sa.grade == Decimal("2.34")

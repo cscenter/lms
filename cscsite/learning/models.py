@@ -880,13 +880,12 @@ class Assignment(TimeStampedModel):
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
                             help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    # Min value to pass assignment
-    grade_min = models.PositiveSmallIntegerField(
-        _("Assignment|grade_min"),
+    passing_score = models.PositiveSmallIntegerField(
+        _("Assignment|passing_score"),
         default=2,
         validators=[MaxValueValidator(1000)])
-    grade_max = models.PositiveSmallIntegerField(
-        _("Assignment|grade_max"),
+    maximum_score = models.PositiveSmallIntegerField(
+        _("Maximum score"),
         default=5,
         validators=[MaxValueValidator(1000)])
     # XXX: No ability to add default values with `post_save` signal in one place
@@ -956,8 +955,8 @@ class Assignment(TimeStampedModel):
     def clean(self):
         if self.pk and self._original_course_id != self.course_id:
             raise ValidationError(_("Course modification is not allowed"))
-        if self.grade_min > self.grade_max:
-            raise ValidationError(_("Minimum grade should be lesser than "
+        if self.passing_score > self.maximum_score:
+            raise ValidationError(_("Passing score should be lesser than "
                                     "(or equal to) maximum one"))
 
     def __str__(self):
@@ -1064,10 +1063,10 @@ class StudentAssignment(TimeStampedModel):
         if not self.student.is_student:
             raise ValidationError(_("Student field should point to "
                                     "an actual student"))
-        if self.grade and self.grade > self.assignment.grade_max:
+        if self.grade and self.grade > self.assignment.maximum_score:
             raise ValidationError(_("Grade can't be larger than maximum "
                                     "one ({0})")
-                                  .format(self.assignment.grade_max))
+                                  .format(self.assignment.maximum_score))
 
     def __str__(self):
         return "{0} - {1}".format(smart_text(self.assignment),
@@ -1102,20 +1101,20 @@ class StudentAssignment(TimeStampedModel):
     @cached_property
     def state(self):
         grade = self.grade
-        grade_min = self.assignment.grade_min
-        grade_max = self.assignment.grade_max
-        grade_range = grade_max - grade_min
+        passing_score = self.assignment.passing_score
+        maximum_score = self.assignment.maximum_score
+        satisfactory_range = maximum_score - passing_score
         if grade is None:
             if not self.assignment.is_online or self.submission_is_received:
                 state = AssignmentStates.NOT_CHECKED
             else:
                 state = AssignmentStates.NOT_SUBMITTED
         else:
-            if grade < grade_min or grade == 0:
+            if grade < passing_score or grade == 0:
                 state = AssignmentStates.UNSATISFACTORY
-            elif grade < grade_min + 0.4 * grade_range:
+            elif grade < passing_score + 0.4 * satisfactory_range:
                 state = AssignmentStates.CREDIT
-            elif grade < grade_min + 0.8 * grade_range:
+            elif grade < passing_score + 0.8 * satisfactory_range:
                 state = AssignmentStates.GOOD
             else:
                 state = AssignmentStates.EXCELLENT
@@ -1134,7 +1133,7 @@ class StudentAssignment(TimeStampedModel):
         if self.grade is not None:
             return "{0} ({1}/{2})".format(self.state.label,
                                           self.grade,
-                                          self.assignment.grade_max)
+                                          self.assignment.maximum_score)
         else:
             return self.state.label
 
@@ -1142,7 +1141,7 @@ class StudentAssignment(TimeStampedModel):
     def state_short(self):
         if self.grade is not None:
             return "{0}/{1}".format(self.grade,
-                                    self.assignment.grade_max)
+                                    self.assignment.maximum_score)
         else:
             return self.state.abbr
 

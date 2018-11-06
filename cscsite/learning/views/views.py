@@ -34,7 +34,7 @@ from core.views import ProtectedFormMixin, LoginRequiredMixin
 from learning import utils
 from learning.calendar import CalendarQueryParams
 from learning.forms import CourseClassForm, CourseForm, \
-    AssignmentCommentForm, AssignmentGradeForm, AssignmentForm, \
+    AssignmentCommentForm, AssignmentScoreForm, AssignmentForm, \
     AssignmentModalCommentForm
 from learning.models import MetaCourse, CourseClass, Course, Venue, \
     Enrollment, Assignment, AssignmentAttachment, \
@@ -629,8 +629,8 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
                   "assignment__id",
                   "assignment__course_id",
                   "assignment__is_online",
-                  "assignment__grade_min",
-                  "assignment__grade_max",)
+                  "assignment__passing_score",
+                  "assignment__maximum_score",)
             .prefetch_related("student__groups",)
             .order_by('student__last_name', 'student__first_name'))
 
@@ -967,17 +967,17 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
                     base.filter(pk__lt=a_s.pk).first())
         context['next_a_s_pk'] = next_a_s.pk if next_a_s else None
         context['is_actual_teacher'] = self.request.user in co.teachers.all()
-        context['grade_form'] = AssignmentGradeForm(
-            initial={'grade': a_s.grade},
-            grade_max=a_s.assignment.grade_max)
+        context['score_form'] = AssignmentScoreForm(
+            initial={'score': a_s.grade},
+            maximum_score=a_s.assignment.maximum_score)
         return context
 
     def post(self, request, *args, **kwargs):
         # TODO: separate to update view
         if 'grading_form' in request.POST:
             a_s = self.student_assignment
-            form = AssignmentGradeForm(request.POST,
-                                       grade_max=a_s.assignment.grade_max)
+            form = AssignmentScoreForm(request.POST,
+                                       maximum_score=a_s.assignment.maximum_score)
 
             # Too hard to use ProtectedFormMixin here, let's just inline it's
             # logic. A little drawback is that teachers still can leave
@@ -988,7 +988,7 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
                 raise PermissionDenied
 
             if form.is_valid():
-                a_s.grade = form.cleaned_data['grade']
+                a_s.grade = form.cleaned_data['score']
                 a_s.save()
                 if a_s.grade is None:
                     messages.info(self.request,

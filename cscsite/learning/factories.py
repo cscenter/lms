@@ -173,8 +173,8 @@ class AssignmentFactory(factory.DjangoModelFactory):
     is_online = True
     title = factory.Sequence(lambda n: "Test assignment %03d" % n)
     text = "This is a text for a test assignment"
-    grade_min = 10
-    grade_max = 80
+    passing_score = 10
+    maximum_score = 80
 
     @factory.post_generation
     def notify_teachers(self, create, extracted, **kwargs):

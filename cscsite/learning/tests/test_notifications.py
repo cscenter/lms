@@ -32,8 +32,8 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         form = {'title': a.title,
                 'is_online': 1,
                 'text': a.text,
-                'grade_min': 0,
-                'grade_max': 5,
+                'passing_score': 0,
+                'maximum_score': 5,
                 'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
                 'deadline_at_1': '00:00'
         }
@@ -116,8 +116,8 @@ def test_notification_teachers_list_for_assignment(client):
         'title': a.title,
         'is_online': 1,
         'text': a.text,
-        'grade_min': 0,
-        'grade_max': 5,
+        'passing_score': 0,
+        'maximum_score': 5,
         'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
         'deadline_at_1': '00:00'
     }
@@ -129,7 +129,7 @@ def test_notification_teachers_list_for_assignment(client):
     assignment = assignments[0]
     assert len(assignment.notify_teachers.all()) == 3
     # Update assignment and check, that notify_teachers list not changed
-    form['grade_max'] = 10
+    form['maximum_score'] = 10
     url = assignment.get_update_url()
     response = client.post(url, form, follow=True)
     assert response.status_code == 200
@@ -169,8 +169,8 @@ def test_notify_teachers_assignment_admin_form(client, curator):
         'title': a.title,
         'is_online': 1,
         'text': a.text,
-        'grade_min': 0,
-        'grade_max': 5,
+        'passing_score': 0,
+        'maximum_score': 5,
         'deadline_at_0': str(a.deadline_at.date()),
         'deadline_at_1': '00:00'
     }

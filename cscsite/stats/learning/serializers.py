@@ -60,8 +60,8 @@ class AssignmentsStatsSerializer(serializers.Serializer):
     is_online = serializers.BooleanField(read_only=True)
     title = serializers.CharField(read_only=True)
     deadline_at = serializers.DateTimeField(label="deadline", read_only=True)
-    grade_min = serializers.IntegerField(read_only=True)
-    grade_max = serializers.IntegerField(read_only=True)
+    passing_score = serializers.IntegerField(read_only=True)
+    maximum_score = serializers.IntegerField(read_only=True)
     assigned_to = StudentAssignmentsSerializer(many=True, read_only=True)
 
     def create(self, validated_data):

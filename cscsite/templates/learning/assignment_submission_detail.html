@@ -126,7 +126,7 @@
 
                 <h5 class="assignment">{% trans "Grade" %}</h5>
                 {% if user_type == 'teacher' and is_actual_teacher %}
-                {% crispy grade_form %}
+                {% crispy score_form %}
                 {% else %}
                 <span class="nowrap badge assignment-status {{ a_s.state.css_class }}">{{ a_s.state_display }}</span>
                 {% endif %}
@@ -153,11 +153,11 @@
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
                 <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:timezone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:timezone|time:"H:i" }}</span>
 
-                <h5 class="assignment">{% trans "Assignment|grade_max" %}</h5>
-                <span class="nowrap">{{ a_s.assignment.grade_max }}</span>
+                <h5 class="assignment">{% trans "Maximum score" %}</h5>
+                <span class="nowrap">{{ a_s.assignment.maximum_score }}</span>
 
-                <h5 class="assignment">{% trans "Assignment|grade_min" %}</h5>
-                <span class="nowrap">{{ a_s.assignment.grade_min }}</span>
+                <h5 class="assignment">{% trans "Passing score" %}</h5>
+                <span class="nowrap">{{ a_s.assignment.passing_score }}</span>
 
                 <h5 class="assignment">{% trans "Assignment created" %}</h5>
                 {{ a_s.assignment.created_local|date:"d E Y" }}

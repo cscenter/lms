@@ -13,7 +13,7 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 
 from core.forms import GradeField
-from learning.forms import AssignmentGradeForm
+from learning.forms import AssignmentScoreForm
 from learning.models import StudentAssignment, Enrollment, Assignment, \
     Course
 from learning.settings import GradeTypes
@@ -155,8 +155,8 @@ def gradebook_data(course: Course) -> GradeBookData:
                 "pk": 1,
                 "title": "HW#1",
                 "is_online": True,
-                "grade_min": 0,
-                "grade_max": 10
+                "passing_score": 0,
+                "maximum_score": 10
             },
             ...
         ),
@@ -193,8 +193,8 @@ def gradebook_data(course: Course) -> GradeBookData:
                              # Assignment constructor caches course id
                              "course_id",
                              "is_online",
-                             "grade_max",
-                             "grade_min")
+                             "maximum_score",
+                             "passing_score")
                        .order_by("deadline_at", "pk"))
     for index, a in enumerate(_assignments_qs.iterator()):
         assignments[a.pk] = a
@@ -322,11 +322,11 @@ class AssignmentScore(GradeField):
         score = submission.score
         widget = forms.TextInput(attrs={
             'class': 'cell __assignment __input',
-            'max': assignment.grade_max,
+            'max': assignment.maximum_score,
             'initial': score if score is not None else ""
         })
         super().__init__(min_value=0,
-                         max_value=assignment.grade_max,
+                         max_value=assignment.maximum_score,
                          required=False,
                          show_hidden_initial=True,
                          widget=widget)
@@ -537,13 +537,13 @@ class AssignmentGradesImport:
     def clean(self, row):
         lookup_field_value = row[self.lookup_field].strip()
         try:
-            grade_field = AssignmentGradeForm.declared_fields['grade']
-            score = grade_field.to_python(row["total"])
+            score_field = AssignmentScoreForm.declared_fields['score']
+            score = score_field.to_python(row["total"])
         except ValidationError:
             msg = _("Can't convert points for user '{}'").format(
                 lookup_field_value)
             raise ValidationError(msg, code='invalid_score_value')
-        if score > self.assignment.grade_max:
+        if score > self.assignment.maximum_score:
             msg = _("Score is greater than max grade for user '{}'").format(
                 lookup_field_value)
             raise ValidationError(msg, code='invalid_score_value')
