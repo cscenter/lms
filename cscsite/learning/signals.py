@@ -71,7 +71,7 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
         return
 
     comment = instance
-    sa = comment.student_assignment
+    sa: StudentAssignment = comment.student_assignment
     notifications = []
     sa_update_dict = {"modified": now()}
     if comment.author_id == sa.student_id:
@@ -90,9 +90,9 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
 
         if is_first_submission:
             sa_update_dict["first_submission_at"] = comment.created
-        sa_update_dict["last_comment_from"] = sa.LAST_COMMENT_STUDENT
+        sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.STUDENT
     else:
-        sa_update_dict["last_comment_from"] = sa.LAST_COMMENT_TEACHER
+        sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.TEACHER
         student_id = comment.student_assignment.student_id
         notifications.append(
             AssignmentNotification(user_id=student_id, student_assignment=sa)
