@@ -647,7 +647,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
                                        grade=GradeTypes.unsatisfactory)
         a = AssignmentFactory(course=co)
         s_a = StudentAssignment.objects.get(student=student, assignment=a)
-        assert s_a.grade is None
+        assert s_a.score is None
         self.doLogin(student)
         url = s_a.get_student_url()
         response = self.client.get(url)
@@ -682,7 +682,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         assert response.status_code == 200
         # Ok, next case - completed course failed, no comments but has grade
         ac.delete()
-        s_a.grade = 1
+        s_a.score = 1
         s_a.save()
         response = self.client.get(url)
         assert response.status_code == 200
@@ -833,7 +833,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         }
         self.doLogin(teacher)
         self.assertRedirects(self.client.post(url, grade_dict), url)
-        self.assertEqual(11, StudentAssignment.objects.get(pk=a_s.pk).grade)
+        self.assertEqual(11, StudentAssignment.objects.get(pk=a_s.pk).score)
         resp = self.client.get(url)
         self.assertContains(resp, "value=\"11\"")
         self.assertContains(resp, "/{}".format(13))
@@ -841,7 +841,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         grade_dict['score'] = 42
         self.client.post(url, grade_dict)
         self.assertEqual(400, self.client.post(url, grade_dict).status_code)
-        self.assertEqual(11, StudentAssignment.objects.get(pk=a_s.pk).grade)
+        self.assertEqual(11, StudentAssignment.objects.get(pk=a_s.pk).score)
 
     def test_next_unchecked(self):
         teacher = TeacherCenterFactory()
@@ -853,14 +853,11 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         a1, a2 = AssignmentFactory.create_batch(2, course=co)
         a_other = AssignmentFactory.create(course=co_other)
         a_s1 = (StudentAssignment.objects
-                .filter(assignment=a1, student=student)
-                .get())
+                .get(assignment=a1, student=student))
         a_s2 = (StudentAssignment.objects
-                .filter(assignment=a2, student=student)
-                .get())
+                .get(assignment=a2, student=student))
         a_s_other = (StudentAssignment.objects
-                     .filter(assignment=a_other, student=student)
-                     .get())
+                     .get(assignment=a_other, student=student))
         url1 = a_s1.get_teacher_url()
         url2 = a_s2.get_teacher_url()
         self.doLogin(teacher)

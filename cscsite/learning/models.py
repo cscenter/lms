@@ -1024,8 +1024,6 @@ class StudentAssignment(TimeStampedModel):
     LAST_COMMENT_STUDENT = 1
     LAST_COMMENT_TEACHER = 2
 
-    objects = StudentAssignmentManager()
-
     assignment = models.ForeignKey(
         Assignment,
         verbose_name=_("StudentAssignment|assignment"),
@@ -1034,13 +1032,13 @@ class StudentAssignment(TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("StudentAssignment|student"),
         on_delete=models.CASCADE)
-    grade = ScoreField(
+    score = ScoreField(
         verbose_name=_("Grade"),
         null=True,
         blank=True)
-    grade_changed = MonitorField(
+    score_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
-        monitor='grade')
+        monitor='score')
     first_submission_at = models.DateTimeField(
         _("Assignment|first_submission"),
         null=True,
@@ -1050,6 +1048,8 @@ class StudentAssignment(TimeStampedModel):
         help_text=_("0 - no comments yet, 1 - from student, 2 - from teacher"),
         editable=False,
         default=LAST_COMMENT_NOBODY)
+
+    objects = StudentAssignmentManager()
 
     class Meta:
         ordering = ["assignment", "student"]
@@ -1061,7 +1061,7 @@ class StudentAssignment(TimeStampedModel):
         if not self.student.is_student:
             raise ValidationError(_("Student field should point to "
                                     "an actual student"))
-        if self.grade and self.grade > self.assignment.maximum_score:
+        if self.score and self.score > self.assignment.maximum_score:
             raise ValidationError(_("Grade can't be larger than maximum "
                                     "one ({0})")
                                   .format(self.assignment.maximum_score))
@@ -1098,21 +1098,21 @@ class StudentAssignment(TimeStampedModel):
 
     @cached_property
     def state(self):
-        grade = self.grade
+        score = self.score
         passing_score = self.assignment.passing_score
         maximum_score = self.assignment.maximum_score
         satisfactory_range = maximum_score - passing_score
-        if grade is None:
+        if score is None:
             if not self.assignment.is_online or self.submission_is_received:
                 state = AssignmentStates.NOT_CHECKED
             else:
                 state = AssignmentStates.NOT_SUBMITTED
         else:
-            if grade < passing_score or grade == 0:
+            if score < passing_score or score == 0:
                 state = AssignmentStates.UNSATISFACTORY
-            elif grade < passing_score + 0.4 * satisfactory_range:
+            elif score < passing_score + 0.4 * satisfactory_range:
                 state = AssignmentStates.CREDIT
-            elif grade < passing_score + 0.8 * satisfactory_range:
+            elif score < passing_score + 0.8 * satisfactory_range:
                 state = AssignmentStates.GOOD
             else:
                 state = AssignmentStates.EXCELLENT
@@ -1128,17 +1128,17 @@ class StudentAssignment(TimeStampedModel):
 
     @property
     def state_display(self):
-        if self.grade is not None:
+        if self.score is not None:
             return "{0} ({1}/{2})".format(self.state.label,
-                                          self.grade,
+                                          self.score,
                                           self.assignment.maximum_score)
         else:
             return self.state.label
 
     @property
     def state_short(self):
-        if self.grade is not None:
-            return "{0}/{1}".format(self.grade,
+        if self.score is not None:
+            return "{0}/{1}".format(self.score,
                                     self.assignment.maximum_score)
         else:
             return self.state.abbr

@@ -173,8 +173,7 @@ def test_assignment_contents(client):
     EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory.create(course=co)
     a_s = (StudentAssignment.objects
-           .filter(assignment=a, student=student)
-           .get())
+           .get(assignment=a, student=student))
     client.login(teacher)
     assert smart_bytes(a.text) in client.get(a_s.get_teacher_url()).content
 
@@ -486,19 +485,19 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE + "?comment=empty")
         self.assertEquals(0, len(resp.context['student_assignment_list']))
         # teacher has set a grade
-        sa3.grade = 3
+        sa3.score = 3
         sa3.save()
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +
-                               "?comment=student&grades=no")
+                               "?comment=student&score=no")
         self.assertEquals(0, len(resp.context['student_assignment_list']))
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +
-                               "?comment=student&grades=all")
+                               "?comment=student&score=any")
         self.assertEquals(1, len(resp.context['student_assignment_list']))
         sa3.refresh_from_db()
-        sa1.grade = 3
+        sa1.score = 3
         sa1.save()
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE +
-                               "?comment=student&grades=yes")
+                               "?comment=student&score=yes")
         self.assertEquals(1, len(resp.context['student_assignment_list']))
 
 
@@ -795,27 +794,27 @@ def test_studentassignment_submission_grade(client):
     sa.assignment.passing_score = 1
     sa.assignment.maximum_score = 10
     sa.assignment.save()
-    assert sa.grade is None
+    assert sa.score is None
     student = sa.student
     form = {"score": 0, "grading_form": True}
     client.login(teacher)
     response = client.post(sa.get_teacher_url(), form, follow=True)
     assert response.status_code == 200
     sa.refresh_from_db()
-    assert sa.grade == 0
+    assert sa.score == 0
     form = {"score": "", "grading_form": True}
     response = client.post(sa.get_teacher_url(), form, follow=True)
     assert response.status_code == 200
     sa.refresh_from_db()
-    assert sa.grade is None
+    assert sa.score is None
     form = {"score": "1.22", "grading_form": True}
     response = client.post(sa.get_teacher_url(), form, follow=True)
     sa.refresh_from_db()
-    assert sa.grade == Decimal("1.22")
+    assert sa.score == Decimal("1.22")
     form = {"score": "2,34", "grading_form": True}
     response = client.post(sa.get_teacher_url(), form, follow=True)
     sa.refresh_from_db()
-    assert sa.grade == Decimal("2.34")
+    assert sa.score == Decimal("2.34")
 
 
 @pytest.mark.django_db

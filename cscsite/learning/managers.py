@@ -36,7 +36,7 @@ class AssignmentQuerySet(query.QuerySet):
         """Prefetch progress on assignments for student"""
         from learning.models import StudentAssignment
         qs = (StudentAssignment.objects
-              .only("pk", "assignment_id", "grade")
+              .only("pk", "assignment_id", "score")
               .filter(student=student)
               .annotate(student_comments_cnt=Count(
                 Case(When(assignmentcomment__author_id=student.pk,

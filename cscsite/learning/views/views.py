@@ -602,11 +602,11 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
     context_object_name = 'student_assignment_list'
     template_name = "learning/assignment_list_teacher.html"
     user_type = 'teacher'
-    # FIXME: rename
-    filter_by_grades = (
-        ("all", _("All")),  # Default
-        ("no", _("Without grades")),
-        ("yes", _("With grades")),
+
+    filter_by_score = (
+        ("any", _("All")),  # Default
+        ("no", _("Without score")),
+        ("yes", _("With grade")),
     )
     filter_by_comments = (
         ("any", _("No matter")),
@@ -622,7 +622,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
             .filter(**filters)
             .select_related("assignment", "student",)
             .only("id",
-                  "grade",
+                  "score",
                   "first_submission_at",
                   "student__first_name",
                   "student__last_name",
@@ -636,7 +636,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = {
-            "filter_by_grades": self.filter_by_grades,
+            "filter_by_score": self.filter_by_score,
             "filter_by_comments": self.filter_by_comments
         }
         filters = self.prepare_queryset_filters(context)
@@ -653,7 +653,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         query_tuple = [
             ('term', self.query["term"]),
             ('course', self.query["course_slug"]),
-            ('grades', self.query["grades"]),
+            ('score', self.query["score"]),
             ('comment', self.query["comment"]),
             ('assignment', ""),  # should be the last one
         ]
@@ -669,7 +669,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         We process GET-query in optimistic way - assume that invalid data 
         comes very rarely.
         Processing order of GET-params:
-            term -> course -> assignment -> grade -> comment
+            term -> course -> assignment -> score -> comment
         If query value invalid -> redirect to entry page.
         Also, we collect data for filter widgets.
 
@@ -682,7 +682,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         list of courses for resulting term (step 4)
         6. Collect assignments for resulting course (used in filter)
         7. Get assignment by `assignment` GET-param or latest from step 6.
-        8. Set filters by resulting assignment, grade and last comment.
+        8. Set filters by resulting assignment, score and last comment.
         """
         filters = {}
         teacher_all_courses = self._get_all_teacher_courses()
@@ -704,8 +704,8 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
         query_assignment = self._get_requested_assignment(assignments)
         if query_assignment:
             filters["assignment"] = query_assignment
-        # Set filter by grade
-        query_grade, filter_name, filter_value = self._get_filter_by_grade()
+        # Set filter by score
+        query_score, filter_name, filter_value = self._get_filter_by_score()
         if filter_name:
             filters[filter_name] = filter_value
         # Set filter by comment
@@ -721,21 +721,21 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
             "course_slug": query_co.meta_course.slug,
             "term": query_co.semester.slug,
             "assignment": query_assignment,
-            "grades": query_grade,
+            "score": query_score,
             "comment": query_comment
         }
         return filters
 
-    def _get_filter_by_grade(self):
+    def _get_filter_by_score(self):
         filter_name, filter_value = None, None
-        query_value = self.request.GET.get("grades", "all")
+        query_value = self.request.GET.get("score", "any")
         # FIXME: validate GET-params in separated method? and redirect?
-        if query_value not in (k for k, v in self.filter_by_grades):
-            query_value = "all"
+        if query_value not in (k for k, v in self.filter_by_score):
+            query_value = "any"
         if query_value == "no":
-            filter_name, filter_value = "grade__isnull", True
+            filter_name, filter_value = "score__isnull", True
         elif query_value == "yes":
-            filter_name, filter_value = "grade__isnull", False
+            filter_name, filter_value = "score__isnull", False
         # FIXME: Может не устанавливать его вообще :<
         return query_value, filter_name, filter_value
 
@@ -957,7 +957,7 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
         co = a_s.assignment.course
         # Get next unchecked assignment
         base = (StudentAssignment.objects
-                .filter(grade__isnull=True,
+                .filter(score__isnull=True,
                         first_submission_at__isnull=False,
                         assignment__course=co,
                         assignment__course__teachers=self.request.user)
@@ -968,7 +968,7 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
         context['next_a_s_pk'] = next_a_s.pk if next_a_s else None
         context['is_actual_teacher'] = self.request.user in co.teachers.all()
         context['score_form'] = AssignmentScoreForm(
-            initial={'score': a_s.grade},
+            initial={'score': a_s.score},
             maximum_score=a_s.assignment.maximum_score)
         return context
 
@@ -988,20 +988,20 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
                 raise PermissionDenied
 
             if form.is_valid():
-                a_s.grade = form.cleaned_data['score']
+                a_s.score = form.cleaned_data['score']
                 a_s.save()
-                if a_s.grade is None:
+                if a_s.score is None:
                     messages.info(self.request,
-                                  _("Grade was deleted"),
+                                  _("Score was deleted"),
                                   extra_tags='timeout')
                 else:
                     messages.success(self.request,
-                                     _("Grade successfully saved"),
+                                     _("Score successfully saved"),
                                      extra_tags='timeout')
                 return redirect(a_s.get_teacher_url())
             else:
                 # not sure if we can do anything more meaningful here.
-                # it shoudn't happen, after all.
+                # it shouldn't happen, after all.
                 return HttpResponseBadRequest(_("Grading form is invalid") +
                                               "{}".format(form.errors))
         else:

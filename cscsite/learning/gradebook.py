@@ -75,34 +75,34 @@ class StudentMeta:
         return GradeTypes.values[self.final_grade]
 
 
-class SubmissionData:
-    def __init__(self, submission: StudentAssignment,
+class StudentProgress:
+    def __init__(self, student_assignment: StudentAssignment,
                  assignment: Assignment):
-        submission.assignment = assignment
-        self._submission = submission
+        student_assignment.assignment = assignment
+        self._student_assignment = student_assignment
 
     @property
     def id(self):
-        return self._submission.id
+        return self._student_assignment.id
 
     @property
     def score(self):
-        return self._submission.grade
+        return self._student_assignment.score
 
     @property
     def assignment_id(self):
-        return self._submission.assignment_id
+        return self._student_assignment.assignment_id
 
     @property
     def assignment(self):
-        return self._submission.assignment
+        return self._student_assignment.assignment
 
     @property
     def student_id(self):
-        return self._submission.student_id
+        return self._student_assignment.student_id
 
     def get_state(self):
-        return self._submission.state_short
+        return self._student_assignment.state_short
 
 
 class GradeBookData:
@@ -205,7 +205,7 @@ def gradebook_data(course: Course) -> GradeBookData:
         StudentAssignment.objects
         .filter(assignment__course_id=course.pk)
         .only("pk",
-              "grade",
+              "score",
               "first_submission_at",  # needs to calculate progress status
               "assignment_id",
               "student_id")
@@ -216,7 +216,7 @@ def gradebook_data(course: Course) -> GradeBookData:
             continue
         student_index = enrolled_students[student_id].index
         assignment_index = assignments_id_to_index[sa.assignment_id]
-        submissions[student_index][assignment_index] = SubmissionData(
+        submissions[student_index][assignment_index] = StudentProgress(
             sa, assignments[sa.assignment_id])
     for student_id in enrolled_students:
         student_index = enrolled_students[student_id].index
@@ -274,8 +274,8 @@ class BaseGradebookForm(forms.Form):
                 # This is not a conflict situation when new value already in db
                 updated = (StudentAssignment.objects
                            .filter(pk=field.student_assignment_id)
-                           .filter(Q(grade=current_value) | Q(grade=new_value))
-                           .update(grade=new_value))
+                           .filter(Q(score=current_value) | Q(score=new_value))
+                           .update(score=new_value))
                 if not updated:
                     ce = ConflictError(field_name=field_name,
                                        unsaved_value=new_value)
@@ -554,7 +554,7 @@ class AssignmentGradesImport:
         updated = (StudentAssignment.objects
                    .filter(assignment__id=assignment_id,
                            student_id=student_id)
-                   .update(grade=score))
+                   .update(score=score))
         if not updated:
             return False
         logger.debug(f"{score} points has written to student {student_id}")

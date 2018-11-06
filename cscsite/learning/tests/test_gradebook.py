@@ -114,7 +114,7 @@ def test_gradebook_recalculate_grading_type(client):
     assert not response.context['form'].is_bound
     co.refresh_from_db()
     submission.refresh_from_db()
-    assert submission.grade == 2
+    assert submission.score == 2
     assert co.grading_type == GradingSystems.BINARY
     # Manually set default grading type and check that grade repr changed
     co.grading_type = GradingSystems.BASE
@@ -160,9 +160,9 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
                           for a in [a1, a2]
                           for s in [student1, student2]],
                          range(4))]
-        for a, s, grade in combos:
+        for a, s, score in combos:
             a_s = StudentAssignment.objects.get(student=s, assignment=a)
-            a_s.grade = grade
+            a_s.score = score
             a_s.save()
         self.doLogin(teacher)
         data = [row for row in unicodecsv.reader(self.client.get(url)) if row]
@@ -231,11 +231,10 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
         for a_s, grade in pairs:
             self.assertEqual(grade, (StudentAssignment.objects
                                      .get(pk=a_s.pk)
-                                     .grade))
+                                     .score))
         for student in students:
             self.assertEqual('good', (Enrollment.active
-                                      .get(student=student,
-                                           course=co)
+                                      .get(student=student, course=co)
                                       .grade))
 
 
@@ -275,7 +274,7 @@ def test_gradebook_data():
                                    e4.student_id, e5.student_id]
     # Check grid values
     sa = StudentAssignment.objects.get(assignment=a2, student_id=e3.student_id)
-    sa.grade = 3
+    sa.score = 3
     sa.save()
     data = gradebook_data(co)
     s3_index = 0
@@ -362,13 +361,13 @@ def test_total_score(client):
                                                  course=co)
     # AssignmentFactory implicitly create StudentAssignment instances
     # with empty grade value.
-    default_grade = 10
+    default_score = 10
     for assignment in assignments:
         a_s = StudentAssignment.objects.get(student=student,
                                             assignment=assignment)
-        a_s.grade = default_grade
+        a_s.score = default_score
         a_s.save()
-    expected_total_score = assignments_count * default_grade
+    expected_total_score = assignments_count * default_score
     response = client.get(co.get_gradebook_url())
     head_student = next(iter(response.context['gradebook'].students.values()))
     assert head_student.total_score == expected_total_score
@@ -450,8 +449,8 @@ def test_save_gradebook_form(client):
     assert form.is_valid()
     form.save()
     sa11.refresh_from_db(), sa12.refresh_from_db()
-    assert sa11.grade == 2
-    assert sa12.grade is None
+    assert sa11.score == 2
+    assert sa12.score is None
     e1.refresh_from_db(), e2.refresh_from_db()
     assert e1.grade == GradeTypes.good
     assert e2.grade == GradeTypes.excellent
@@ -514,7 +513,7 @@ def test_gradebook_view_form_invalid(client):
     a = AssignmentFactory(course=co, is_online=False,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
-    sa.grade = 7
+    sa.score = 7
     sa.save()
     final_grade_field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e.pk)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
@@ -543,7 +542,7 @@ def test_gradebook_view_form_conflict(client):
                                  grade=GradeTypes.not_graded)
     a = AssignmentFactory(course=co, is_online=False,
                           passing_score=10, maximum_score=40)
-    sa = StudentAssignment.objects.get(student=student, assignment=a, grade=None)
+    sa = StudentAssignment.objects.get(student=student, assignment=a, score=None)
     final_grade_field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e.pk)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
     response = client.get(co.get_gradebook_url())
@@ -561,7 +560,7 @@ def test_gradebook_view_form_conflict(client):
     assert form[field_name].value() == 4
     assert form[final_grade_field_name].value() == GradeTypes.not_graded
     sa.refresh_from_db()
-    assert sa.grade == 4
+    assert sa.score == 4
     # Try to update assignment score with another profile
     client.login(teacher2)
     form_data[field_name] = 5
@@ -582,7 +581,7 @@ def test_gradebook_view_form_conflict(client):
     assert form[field_name].value() == 4
     assert form[final_grade_field_name].value() == GradeTypes.good
     sa.refresh_from_db()
-    assert sa.grade == 4
+    assert sa.score == 4
     e.refresh_from_db()
     assert e.grade == GradeTypes.good
     client.login(teacher2)
@@ -602,14 +601,14 @@ def test_gradebook_view_form_conflict(client):
     e.refresh_from_db()
     assert e.grade == GradeTypes.good
     sa.refresh_from_db()
-    assert sa.grade == 4
+    assert sa.score == 4
     form_data[final_grade_field_name] = GradeTypes.good
     response = client.post(co.get_gradebook_url(), form_data)
     assert response.status_code == 302
     e.refresh_from_db()
     assert e.grade == GradeTypes.good
     sa.refresh_from_db()
-    assert sa.grade == 4
+    assert sa.score == 4
 
 
 @pytest.mark.django_db
@@ -650,18 +649,18 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
     EnrollmentFactory.create(student=student, course=co)
     assignments = AssignmentFactory.create_batch(3, course=co)
     assignment = assignments[0]
-    for expected_grade in [13, Decimal('13.42'), '12.34', '"34,56"']:
+    for expected_score in [13, Decimal('13.42'), '12.34', '"34,56"']:
         csv_input = force_bytes("stepic_id,total\n"
                                 "{},{}\n".format(student.stepic_id,
-                                                 expected_grade))
+                                                 expected_score))
         csv_file = BytesIO(csv_input)
         AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
         a_s = StudentAssignment.objects.get(student=student,
                                             assignment=assignment)
-        if hasattr(expected_grade, "replace"):
+        if hasattr(expected_score, "replace"):
             # remove quotes and replace comma
-            expected_grade = expected_grade.replace('"', '').replace(",", ".")
-        assert a_s.grade == Decimal(expected_grade)
+            expected_score = expected_score.replace('"', '').replace(",", ".")
+        assert a_s.score == Decimal(expected_score)
 
 
 @pytest.mark.django_db
@@ -709,9 +708,9 @@ yandex3,3,30
     }
     response = client.post(url_import, form, follow=True)
     assert response.status_code == 200
-    assert StudentAssignment.objects.get(student=student1).grade == 10
-    assert StudentAssignment.objects.get(student=student2).grade == 20
-    assert StudentAssignment.objects.get(student=student3).grade is None
+    assert StudentAssignment.objects.get(student=student1).score == 10
+    assert StudentAssignment.objects.get(student=student2).score == 20
+    assert StudentAssignment.objects.get(student=student3).score is None
     # Try to override grades from csv with stepik ids
     tmp_file = tmpdir.join("csv").join("grades_stepik_ids.csv")
     tmp_file.write("""
@@ -727,6 +726,6 @@ stepic_id,header2,total
     }
     url_import = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
     response = client.post(url_import, form, follow=True)
-    assert StudentAssignment.objects.get(student=student1).grade == 10
-    assert StudentAssignment.objects.get(student=student2).grade == 42
-    assert StudentAssignment.objects.get(student=student3).grade == 1
+    assert StudentAssignment.objects.get(student=student1).score == 10
+    assert StudentAssignment.objects.get(student=student2).score == 42
+    assert StudentAssignment.objects.get(student=student3).score == 1
