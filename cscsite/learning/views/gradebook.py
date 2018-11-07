@@ -17,8 +17,8 @@ from core.exceptions import Redirect
 from learning import utils
 from learning.gradebook import GradeBookFormFactory, gradebook_data, \
     AssignmentGradesImport
-from learning.models import Semester, Course, Assignment
-from learning.settings import SemesterTypes
+from courses.models import Course, Semester, Assignment
+from courses.settings import SemesterTypes
 from learning.utils import get_current_term_pair, get_term_index
 from learning.viewmixins import CuratorOnlyMixin, TeacherOnlyMixin
 

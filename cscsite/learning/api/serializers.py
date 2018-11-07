@@ -7,7 +7,7 @@ from django.utils.http import urlquote
 from rest_framework import serializers
 
 from core.utils import render_markdown
-from learning.models import MetaCourse, Course
+from courses.models import MetaCourse, Course
 from users.models import User
 
 
@@ -43,14 +43,14 @@ class PhotoSerializerField(serializers.Field):
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="course_id")
+    id = serializers.IntegerField(source="meta_course_id")
     name = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
         fields = ('id', 'name')
 
-    def get_name(self, obj):
+    def get_name(self, obj: Course):
         return obj.meta_course.name
 
 
@@ -66,8 +66,9 @@ class TeacherSerializer(serializers.ModelSerializer):
     photo = PhotoSerializerField("176x246")
     city = serializers.CharField(source="city_id")
     courses = TeacherCourseListingField(
-        many=True, read_only=True, source="course_teachers")
+        many=True, read_only=True, source="courseteacher_set")
     # Duplicates are acceptable
+    # TODO: rename
     last_session = serializers.SerializerMethodField(
         help_text="The latest term index when the teacher read the course")
 
@@ -81,7 +82,7 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     def get_last_session(self, obj):
         last = 0
-        for t in obj.course_teachers.all():
+        for t in obj.courseteacher_set.all():
             last = max(last, t.course.semester.index)
         return last
 

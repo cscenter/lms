@@ -174,13 +174,13 @@ def test_notify_teachers_assignment_admin_form(client, curator):
         'deadline_at_0': str(a.deadline_at.date()),
         'deadline_at_1': '00:00'
     }
-    response = client.post(reverse('admin:learning_assignment_add'), post_data)
+    response = client.post(reverse('admin:courses_assignment_add'), post_data)
     assert (Assignment.objects.count() == 1)
     assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
     # Manually select teachers from list
     co_t1, co_t2, co_t3, co_t4 = CourseTeacher.objects.filter(course=co).all()
     post_data['notify_teachers'] = [co_t1.pk, co_t2.pk]
-    response = client.post(reverse('admin:learning_assignment_add'), post_data)
+    response = client.post(reverse('admin:courses_assignment_add'), post_data)
     assert (Assignment.objects.count() == 2)
     assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
     assert len(Assignment.objects.order_by('id').all()[1].notify_teachers.all()) == 2

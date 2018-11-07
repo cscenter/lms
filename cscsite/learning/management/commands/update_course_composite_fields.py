@@ -4,8 +4,7 @@ from __future__ import unicode_literals
 
 from django.core.management import BaseCommand
 
-from learning.models import Semester, Course, CourseClass, \
-    CourseClassAttachment
+from courses.models import Course, Semester, CourseClass, CourseClassAttachment
 
 
 class Command(BaseCommand):

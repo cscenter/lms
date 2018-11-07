@@ -19,12 +19,13 @@ from core.widgets import AdminRichTextAreaWidget, AdminRelatedDropdownFilter
 from learning.models import InternshipCategory
 from learning.settings import AcademicRoles
 from users.models import User
-from .models import MetaCourse, Semester, Course, Venue, \
-    CourseClass, CourseClassAttachment, CourseNews, \
-    Assignment, AssignmentAttachment, StudentAssignment, \
+from .models import StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
-    CourseTeacher, InternationalSchool, Useful, Internship, AreaOfStudy, \
+    InternationalSchool, Useful, Internship, AreaOfStudy, \
     StudyProgram, StudyProgramCourseGroup
+from courses.models import MetaCourse, Course, Semester, CourseTeacher, \
+    CourseNews, Venue, CourseClass, CourseClassAttachment, Assignment, \
+    AssignmentAttachment
 
 
 class AreaOfStudyAdmin(TranslationAdmin, admin.ModelAdmin):

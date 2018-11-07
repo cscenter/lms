@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
-from learning.models import Assignment, CourseClass, Course
+from courses.models import Course, CourseClass, Assignment
 from learning.permissions import access_role, CourseRole
 
 logger = logging.getLogger(__name__)

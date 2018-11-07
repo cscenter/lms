@@ -9,9 +9,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.models import Campaign, Interview, Comment
-from learning.models import Semester, Course
-from learning.settings import CENTER_FOUNDATION_YEAR, SemesterTypes, \
-    StudentStatuses, GradeTypes
+from courses.models import Course, Semester
+from learning.settings import CENTER_FOUNDATION_YEAR, StudentStatuses, GradeTypes
+from courses.settings import SemesterTypes
 from learning.utils import get_term_index
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import User

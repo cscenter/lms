@@ -14,8 +14,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from core.forms import GradeField
 from learning.forms import AssignmentScoreForm
-from learning.models import StudentAssignment, Enrollment, Assignment, \
-    Course
+from learning.models import StudentAssignment, Enrollment
+from courses.models import Course, Assignment
 from learning.settings import GradeTypes
 from users.models import User
 

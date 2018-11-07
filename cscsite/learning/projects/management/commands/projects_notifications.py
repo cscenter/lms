@@ -7,7 +7,7 @@ from django.core.management import BaseCommand
 from django.db import transaction
 from django.utils.timezone import now
 
-from learning.models import Semester
+from courses.models import Semester
 from learning.projects.models import ProjectStudent
 from learning.settings import DATE_FORMAT_RU, GradeTypes
 from notifications import types

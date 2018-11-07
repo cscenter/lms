@@ -36,15 +36,16 @@ from learning.calendar import CalendarQueryParams
 from learning.forms import CourseClassForm, CourseForm, \
     AssignmentCommentForm, AssignmentScoreForm, AssignmentForm, \
     AssignmentModalCommentForm
-from learning.models import MetaCourse, CourseClass, Course, Venue, \
-    Enrollment, Assignment, AssignmentAttachment, \
-    StudentAssignment, AssignmentComment, \
-    CourseClassAttachment, AssignmentNotification, \
-    Semester, NonCourseEvent, \
+from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
+    AssignmentNotification, \
+    NonCourseEvent, \
     OnlineCourse, InternationalSchool
+from courses.models import MetaCourse, Course, Semester, Venue, CourseClass, \
+    CourseClassAttachment, Assignment, AssignmentAttachment
 from learning.permissions import access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
-    ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR, SemesterTypes
+    ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR
+from courses.settings import SemesterTypes
 from learning.utils import get_current_term_pair, get_term_index, now_local, \
     get_terms_for_calendar_month, grouper
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \

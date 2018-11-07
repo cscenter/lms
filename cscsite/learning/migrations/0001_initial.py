@@ -7,6 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
 import learning.models
+import courses.models
 import model_utils.fields
 import sorl.thumbnail.fields
 
@@ -63,7 +64,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
-                ('attachment', models.FileField(upload_to=learning.models.assignmentattach_upload_to)),
+                ('attachment', models.FileField(upload_to=courses.models.assignmentattach_upload_to)),
             ],
             options={
                 'verbose_name': 'Assignment attachment',
@@ -134,7 +135,7 @@ class Migration(migrations.Migration):
                 ('type', model_utils.fields.StatusField(choices=[('lecture', 'Lecture'), ('seminar', 'Seminar')], default='lecture', max_length=100, no_check_for_status=True, verbose_name='Type')),
                 ('name', models.CharField(max_length=255, verbose_name='CourseClass|Name')),
                 ('description', models.TextField(blank=True, help_text='How to style text read <a href="/commenting-the-right-way/" target="_blank">here</a>. Partially HTML is enabled too.', verbose_name='Description')),
-                ('slides', models.FileField(blank=True, upload_to=learning.models.courseclass_slides_file_name, verbose_name='Slides')),
+                ('slides', models.FileField(blank=True, upload_to=courses.models.courseclass_slides_file_name, verbose_name='Slides')),
                 ('slides_url', models.URLField(blank=True, verbose_name='SlideShare URL')),
                 ('video_url', models.URLField(blank=True, help_text='Both YouTube and Yandex Video are supported', verbose_name='Video URL')),
                 ('other_materials', models.TextField(blank=True, help_text='How to style text read <a href="/commenting-the-right-way/" target="_blank">here</a>. Partially HTML is enabled too.', verbose_name='CourseClass|Other materials')),

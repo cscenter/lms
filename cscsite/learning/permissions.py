@@ -84,7 +84,7 @@ class LearningPermissionsMixin:
 
 class CourseRole(Enum):
     STUDENT_REGULAR = auto()  # Enrolled active student
-    # For enrolled students restrict access in two cases:
+    # Restrict access to enrolled students in two cases:
     # student failed the course or was expelled from the center
     STUDENT_RESTRICT = auto()
     TEACHER = auto()  # Any teacher from the same course
@@ -113,12 +113,12 @@ def access_role(*, course, request_user) -> Optional[CourseRole]:
             role = CourseRole.STUDENT_REGULAR
         else:
             role = CourseRole.STUDENT_RESTRICT
-    # Teachers from the same course permits to view the news
+    # Teachers from the same course permits to view the news/assignments/etc
     all_course_teachers = (course.course_teachers.field.model.objects
                            .for_course(course.meta_course.slug)
                            .values_list('teacher_id', flat=True))
     if request_user.is_teacher and request_user.pk in all_course_teachers:
-        # Override student role if teacher accidentally enrolled on
+        # Overrides student role if teacher accidentally enrolled on
         # his own course
         role = CourseRole.TEACHER
     return role

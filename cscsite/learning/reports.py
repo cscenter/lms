@@ -9,7 +9,8 @@ from django.db.models import Q, Prefetch, Count
 from django.utils import formats
 
 from core.reports import ReportFileOutput
-from learning.models import AssignmentComment, Semester, Enrollment
+from learning.models import AssignmentComment, Enrollment
+from courses.models import Semester
 from learning.projects.models import ReportComment, ProjectStudent
 from learning.settings import DATE_FORMAT_RU, \
     TIME_FORMAT_RU, StudentStatuses, GradeTypes

@@ -7,9 +7,10 @@ from rest_framework.response import Response
 from api.pagination import StandardPagination
 from learning.api.serializers import AlumniSerializer, TestimonialSerializer, \
     TeacherSerializer, CourseSerializer
-from learning.models import AreaOfStudy, CourseTeacher, Course, \
-    Semester
-from learning.settings import CENTER_FOUNDATION_YEAR, SemesterTypes
+from learning.models import AreaOfStudy
+from courses.models import Course, Semester, CourseTeacher
+from learning.settings import CENTER_FOUNDATION_YEAR
+from courses.settings import SemesterTypes
 from learning.utils import get_term_index
 from users.models import User
 
@@ -53,7 +54,7 @@ class TeacherList(ListAPIView):
                 courseteacher__course__semester__index__gte=term_index)
         queryset = queryset.prefetch_related(
             Prefetch(
-                "course_teachers",
+                "courseteacher_set",
                 queryset=(CourseTeacher.objects
                           .select_related("course",
                                           "course__semester")

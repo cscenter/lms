@@ -4,7 +4,8 @@ import textwrap
 from django.conf import settings
 
 from api.providers.gerrit import Gerrit
-from learning.models import CourseTeacher, Enrollment, Course
+from learning.models import Enrollment
+from courses.models import Course, CourseTeacher
 from users.models import User
 
 logger = logging.getLogger(__name__)

@@ -24,7 +24,7 @@ from vanilla.model_views import CreateView
 from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
-from learning.models import Semester
+from courses.models import Semester
 from learning.projects.filters import ProjectsFilter, CurrentTermProjectsFilter
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportStatusForm, ReportSummarizeForm, ReportForm, \

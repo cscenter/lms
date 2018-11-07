@@ -1,7 +1,7 @@
 from modeltranslation.translator import register, TranslationOptions
 
 from learning.models import AreaOfStudy
-from .models import MetaCourse, Course
+from courses.models import MetaCourse, Course
 
 
 @register(MetaCourse)

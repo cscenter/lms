@@ -1,4 +1,5 @@
-from learning.models import StudyProgram, Semester
+from learning.models import StudyProgram
+from courses.models import Semester
 
 
 def calculate_areas_for_student(student):

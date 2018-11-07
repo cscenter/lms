@@ -533,6 +533,10 @@ class Migration(migrations.Migration):
         ('surveys', '0001_initial'),
     ]
 
+    run_before = [
+        ('learning', '0005_auto_20181031_1131'),
+    ]
+
     operations = [
         migrations.RunPython(create_course_survey_templates),
         migrations.RunPython(create_survey_email_templates),

@@ -8,7 +8,7 @@ from slides import yandex_disk
 
 @job('default')
 def maybe_upload_slides_yandex(class_pk):
-    CourseClass = apps.get_model('learning', 'CourseClass')
+    CourseClass = apps.get_model('courses', 'CourseClass')
     instance = CourseClass.objects.get(pk=class_pk)
     course = instance.course
     academic_year = course.semester.get_academic_year()

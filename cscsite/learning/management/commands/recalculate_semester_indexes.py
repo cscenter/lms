@@ -2,8 +2,9 @@
 
 from django.core.management import BaseCommand
 
-from learning.models import Semester
-from learning.settings import FOUNDATION_YEAR, TERMS_INDEX_START, SemesterTypes
+from courses.models import Semester
+from learning.settings import FOUNDATION_YEAR
+from courses.settings import SemesterTypes, TERMS_INDEX_START
 
 
 class Command(BaseCommand):

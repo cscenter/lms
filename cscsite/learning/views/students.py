@@ -16,8 +16,8 @@ from core.exceptions import Redirect
 from core.utils import is_club_site
 from learning import utils
 from learning.forms import CourseEnrollmentForm
-from learning.models import Useful, Internship, StudentAssignment, Semester, \
-    Enrollment, Course
+from learning.models import Useful, Internship, StudentAssignment, Enrollment
+from courses.models import Course, Semester
 from learning.settings import DATE_FORMAT_RU
 from learning.viewmixins import StudentCenterAndVolunteerOnlyMixin, \
     ParticipantOnlyMixin, StudentOnlyMixin

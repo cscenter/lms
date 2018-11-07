@@ -3,7 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from django.contrib import admin
 from mptt.admin import MPTTModelAdmin
 
-from learning.models import Course
+from courses.models import Course
 from .models import Album, Image
 
 

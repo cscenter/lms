@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0002_auto_20180730_1437'),
-        ('surveys', '0002_data'),
+        # ('surveys', '0002_data'),
         ('gallery', '0002_image_course_offering'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('learning', '0004_auto_20181030_1352'),

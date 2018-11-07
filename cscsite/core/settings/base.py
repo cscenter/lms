@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'core',
     'htmlpages',
+    'courses.apps.CoursesConfig',
     'learning',
     'library.apps.LibraryConfig',
     'loginas',
@@ -92,7 +93,7 @@ JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['api']
 JS_REVERSE_OUTPUT_PATH = str(PROJECT_DIR / "assets" / "js" / "vendor")
 
 # oEmbed
-MICAWBER_PROVIDERS = "learning.micawber_providers.oembed_providers"
+MICAWBER_PROVIDERS = "courses.micawber_providers.oembed_providers"
 MICAWBER_DEFAULT_SETTINGS = {
     'maxwidth': 599,
     'maxheight': 467,

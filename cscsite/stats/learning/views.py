@@ -7,7 +7,8 @@ from rest_pandas import PandasView
 
 from api.permissions import CuratorAccessPermission
 from learning.models import StudentAssignment, \
-    Assignment, Enrollment
+    Enrollment
+from courses.models import Assignment
 from stats.renderers import ListRenderersMixin
 from users.models import User
 from .pandas_serializers import ParticipantsByYearPandasSerializer, \
@@ -69,36 +70,40 @@ class AssignmentsStats(ReadOnlyModelViewSet):
     Aggregate stats about course offering assignment progress.
     """
     permission_classes = [CuratorAccessPermission]
+    serializer_class = AssignmentsStatsSerializer
 
-    def list(self, request, course_id, *args, **kwargs):
+    def get_queryset(self):
+        course_id = self.kwargs["course_id"]
         active_students = (Enrollment.active
                            .filter(course_id=course_id)
                            .values_list("student_id", flat=True))
-        assignments = (Assignment
-                       .objects
-                       .only("pk", "title", "course_id", "deadline_at",
-                             "passing_score", "maximum_score", "is_online")
-                       .filter(course_id=course_id)
-                       .prefetch_related(
-            Prefetch(
-                "assigned_to",
-                # FIXME: что считать всё-таки сданным. Там где есть оценка?
-                queryset=(StudentAssignment.objects
-                          .filter(student_id__in=active_students)
-                          .select_related("student", "assignment")
-                          .prefetch_related("student__groups")
-                          .only("pk", "assignment_id", "grade",
-                                "student_id", "first_submission_at",
-                                "student__gender", "student__curriculum_year",
-                                "assignment__course_id",
-                                "assignment__maximum_score",
-                                "assignment__passing_score",
-                                "assignment__is_online")
-                          .order_by())
-            ))
-                       .order_by("deadline_at"))
-        serializer = AssignmentsStatsSerializer(assignments, many=True)
-        return Response(serializer.data)
+        return (Assignment.objects
+                .only("pk", "title", "course_id", "deadline_at",
+                      "passing_score", "maximum_score", "is_online")
+                .filter(course_id=course_id)
+                .prefetch_related(
+                    Prefetch(
+                        "studentassignment_set",
+                        # FIXME: добавить smoke test
+                        # FIXME: что считать всё-таки сданным. Там где есть оценка?
+                        queryset=(StudentAssignment.objects
+                                  .filter(student_id__in=active_students)
+                                  .select_related("student", "assignment")
+                                  .prefetch_related("student__groups")
+                                  .only("pk", "assignment_id", "score",
+                                        "student_id", "first_submission_at",
+                                        "student__gender",
+                                        "student__curriculum_year",
+                                        "assignment__course_id",
+                                        "assignment__maximum_score",
+                                        "assignment__passing_score",
+                                        "assignment__is_online")
+                                  .order_by()),
+                        to_attr="students"
+                    ),
+
+                )
+                .order_by("deadline_at"))
 
 
 class EnrollmentsStats(APIView):

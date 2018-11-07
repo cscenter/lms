@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 from django.core.management import BaseCommand
 
-from learning.models import Course
+from courses.models import Course
 from learning.settings import AcademicRoles
 from users.models import User
 

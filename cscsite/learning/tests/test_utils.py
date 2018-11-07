@@ -5,8 +5,8 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from mock import patch
 
-from learning.settings import (TERMS_INDEX_START, FOUNDATION_YEAR,
-                               SemesterTypes)
+from learning.settings import (FOUNDATION_YEAR)
+from courses.settings import SemesterTypes, TERMS_INDEX_START
 from learning.utils import split_on_condition, get_term_index, \
     get_term_index_academic_year_starts
 from ..factories import *

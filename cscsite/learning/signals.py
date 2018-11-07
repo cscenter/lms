@@ -3,7 +3,8 @@ from django.dispatch import receiver
 from django.utils.timezone import now
 
 from learning.models import AssignmentComment, AssignmentNotification, \
-    Assignment, StudentAssignment, Enrollment
+    StudentAssignment, Enrollment
+from courses.models import Assignment
 from learning.settings import StudentStatuses
 
 
