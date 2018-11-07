@@ -10,7 +10,7 @@ from django.core.management import BaseCommand
 from django.core.management import CommandError
 
 from learning import settings
-from learning.models import CourseClass
+from courses.models import CourseClass
 from learning.tasks import maybe_upload_slides_yandex
 
 

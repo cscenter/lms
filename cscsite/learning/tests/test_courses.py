@@ -15,8 +15,10 @@ from django.utils.encoding import smart_bytes
 from learning.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory, CourseNewsFactory, AssignmentFactory, \
     CourseTeacherFactory, CourseClassFactory, EnrollmentFactory
-from learning.models import Semester, Enrollment, CourseNews
-from learning.settings import AcademicRoles, SemesterTypes, GradeTypes
+from learning.models import Enrollment
+from courses.models import Semester, CourseNews
+from learning.settings import AcademicRoles, GradeTypes
+from courses.settings import SemesterTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 

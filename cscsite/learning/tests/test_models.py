@@ -18,9 +18,10 @@ from learning.factories import MetaCourseFactory, CourseFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
     CourseNewsNotificationFactory, AssignmentAttachmentFactory, \
     SemesterFactory
-from learning.models import Semester, Course, Assignment, \
-    StudentAssignment, CourseNews
-from learning.settings import AssignmentStates, SemesterTypes
+from learning.models import StudentAssignment
+from courses.models import Course, Semester, CourseNews, Assignment
+from learning.settings import AssignmentStates
+from courses.settings import SemesterTypes
 from learning.utils import get_term_start, next_term_starts_at
 from users.factories import UserFactory, StudentCenterFactory, \
     TeacherCenterFactory

@@ -15,7 +15,7 @@ from mptt.models import MPTTModel
 from sorl.thumbnail import ImageField, get_thumbnail
 from sorl.thumbnail.helpers import ThumbnailError
 
-from learning.models import Semester, Course
+from courses.models import Course, Semester
 
 logger = logging.getLogger(__name__)
 

@@ -3,8 +3,8 @@ from django.urls import reverse
 
 from learning.factories import MetaCourseFactory, CourseFactory, \
     SemesterFactory, EnrollmentFactory
-from learning.settings import AcademicRoles, SemesterTypes, \
-    StudentStatuses, GradeTypes
+from learning.settings import AcademicRoles, StudentStatuses, GradeTypes
+from courses.settings import SemesterTypes
 from users.factories import StudentCenterFactory, StudentClubFactory, \
     UserFactory, VolunteerFactory, GraduateFactory
 

@@ -81,21 +81,6 @@ class GradeTypes(DjangoChoices):
 
 
 # FIXME: AssignmentStates точно деталь реализации (перенести или забить уже?), которая не шарится с другими приложениями, что насчет semestertypes и classtypes?
-class SemesterTypes(DjangoChoices):
-    """
-    For ordering use the first term in the year as a starting point.
-    Term order values must be consecutive numbers.
-    """
-    SPRING = C('spring', _("spring"), order=1)
-    SUMMER = C('summer', _("summer"), order=2)
-    AUTUMN = C('autumn', _("autumn"), order=3)
-
-
-class ClassTypes(DjangoChoices):
-    LECTURE = C('lecture', _("Lecture"))
-    SEMINAR = C('seminar', _("Seminar"))
-
-
 class AssignmentStates(DjangoChoices):
     NOT_SUBMITTED = C("not_submitted", _("Assignment|not submitted"),
                       abbr="—", css_class="not-submitted")
@@ -111,6 +96,7 @@ class AssignmentStates(DjangoChoices):
                   abbr="5", css_class="excellent")
 
 
+# TODO: Добавить в модель Semester, использовать как дефолтные значения при создании семестра
 AUTUMN_TERM_START = '1 sep'
 SPRING_TERM_START = '20 jan'  # XXX: spring term must be later than 1 jan
 SUMMER_TERM_START = '1 jul'
@@ -120,6 +106,3 @@ ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)  # after seme
 # Presume foundation year starts from spring term
 FOUNDATION_YEAR = getattr(settings, 'FOUNDATION_YEAR', 2007)
 CENTER_FOUNDATION_YEAR = getattr(settings, 'CENTER_FOUNDATION_YEAR', 2011)
-
-# Helps to sort the terms in chronological order
-TERMS_INDEX_START = 1

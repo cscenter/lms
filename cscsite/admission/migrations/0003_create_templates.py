@@ -20,6 +20,10 @@ class Migration(migrations.Migration):
         ('post_office', '0006_attachment_mimetype'),
     ]
 
+    run_before = [
+        ('learning', '0020_auto_20181106_1827'),
+    ]
+
     operations = [
         migrations.RunPython(forward)
     ]

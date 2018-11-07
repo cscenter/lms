@@ -2,7 +2,7 @@ import logging
 from typing import Optional
 
 from core.utils import is_club_site
-from learning.models import Course
+from courses.models import Course
 from learning.utils import CityCode, semester_slug_re
 
 logger = logging.getLogger(__name__)

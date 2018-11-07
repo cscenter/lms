@@ -23,12 +23,6 @@ class ParticipantsStatsSerializer(serializers.Serializer):
 
 
 class StudentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Group
-        fields = ("curriculum_year", "gender")
-
-
-class StudentSerializer(serializers.ModelSerializer):
     groups = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
@@ -38,20 +32,24 @@ class StudentSerializer(serializers.ModelSerializer):
 
 class StudentAssignmentsSerializer(serializers.ModelSerializer):
     sent = serializers.SerializerMethodField()
+    state = serializers.SerializerMethodField()
     first_submission_at = serializers.DateTimeField()
-    grade = serializers.IntegerField()
+    score = serializers.IntegerField()
     student = StudentSerializer(read_only=True)
 
     class Meta:
         model = StudentAssignment
-        fields = ("id", "sent", "first_submission_at", "grade", "student",
+        fields = ("id", "sent", "first_submission_at", "score", "student",
                   "state")
+
+    def get_state(self, obj):
+        return obj.state.value
 
     def get_sent(self, obj):
         """
-        Let's say user passed assignment if he sent comment or has grade
+        Let's say user passed assignment if he sent comment or has score
         """
-        return int(obj.grade is not None or
+        return int(obj.score is not None or
                    obj.submission_is_received != StudentAssignment.CommentAuthorTypes.NOBODY)
 
 
@@ -62,7 +60,7 @@ class AssignmentsStatsSerializer(serializers.Serializer):
     deadline_at = serializers.DateTimeField(label="deadline", read_only=True)
     passing_score = serializers.IntegerField(read_only=True)
     maximum_score = serializers.IntegerField(read_only=True)
-    assigned_to = StudentAssignmentsSerializer(many=True, read_only=True)
+    students = StudentAssignmentsSerializer(many=True, read_only=True)
 
     def create(self, validated_data):
         pass

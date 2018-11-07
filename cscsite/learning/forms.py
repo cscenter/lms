@@ -17,9 +17,11 @@ from core.utils import is_club_site
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
-from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU, ClassTypes
-from .models import MetaCourse, Course, CourseNews, \
-    CourseClass, Venue, Assignment, AssignmentComment, Enrollment
+from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU
+from courses.settings import ClassTypes
+from .models import AssignmentComment, Enrollment
+from courses.models import MetaCourse, Course, CourseNews, Venue, CourseClass, \
+    Assignment
 
 DROP_ATTACHMENT_LINK = """
 <a href="{0}"><i class="fa fa-trash-o"></i>&nbsp;{1}</a>"""

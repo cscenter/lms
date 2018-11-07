@@ -1,7 +1,7 @@
 from django.db.models import Q
 
-from learning.models import CourseClass
-from learning.settings import ClassTypes
+from courses.models import CourseClass
+from courses.settings import ClassTypes
 from learning.utils import now_local
 from surveys.constants import FormTemplates, STATUS_DRAFT, STATUS_TEMPLATE
 from surveys.models import Form, FieldChoice, CourseSurvey

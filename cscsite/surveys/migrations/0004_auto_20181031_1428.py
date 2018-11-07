@@ -10,6 +10,10 @@ class Migration(migrations.Migration):
         ('surveys', '0003_auto_20181031_1355'),
     ]
 
+    run_before = [
+        ('learning', '0020_auto_20181106_1827'),
+    ]
+
     operations = [
         migrations.RenameField(
             model_name='coursesurvey',

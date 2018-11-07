@@ -17,7 +17,8 @@ from core.admin import get_admin_url
 from learning.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory, \
     StudentAssignmentFactory, CourseTeacherFactory
-from learning.models import StudentAssignment, Assignment, AssignmentAttachment
+from learning.models import StudentAssignment
+from courses.models import Assignment, AssignmentAttachment
 from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU, \
     AcademicRoles, StudentStatuses, GradeTypes
 from learning.tests.mixins import MyUtilitiesMixin
@@ -518,7 +519,7 @@ def test_assignment_admin_view(settings, admin_client):
         "_continue": "save_and_continue"
     }
     # Test with empty city aware field
-    add_url = reverse('admin:learning_assignment_add')
+    add_url = reverse('admin:courses_assignment_add')
     response = admin_client.post(add_url, form_data)
     assert response.status_code == 200
     widget_html = response.context['adminform'].form['deadline_at'].as_widget()

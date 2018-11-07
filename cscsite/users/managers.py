@@ -3,7 +3,7 @@ from __future__ import unicode_literals, absolute_import
 from django.contrib.auth.models import UserManager
 from django.db.models import Prefetch, Count, query, Q
 
-from learning.models import CourseTeacher
+from courses.models import CourseTeacher, CourseClass
 
 
 class UserQuerySet(query.QuerySet):
@@ -19,8 +19,9 @@ class UserQuerySet(query.QuerySet):
            practices and projects, etc"""
 
         from .models import User, SHADCourseRecord
-        from learning.models import Enrollment, CourseClass, Semester, \
-            Course
+        from learning.models import Enrollment
+        from courses.models import Semester
+        from courses.models import Course
         from learning.projects.models import ProjectStudent
 
         # Note: At the same time student must be only in one of these groups

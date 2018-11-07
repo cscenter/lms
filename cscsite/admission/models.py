@@ -25,7 +25,7 @@ from post_office.utils import get_email_template
 
 from core.db.models import ScoreField
 from core.models import City, University
-from learning.models import Venue
+from courses.models import Venue
 from learning.settings import AcademicRoles, CENTER_FOUNDATION_YEAR, \
     AcademicDegreeYears
 from users.models import User

@@ -19,7 +19,8 @@ from vanilla import DetailView
 from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from learning.models import StudentAssignment, \
-    Course, Semester, Enrollment, StudyProgram
+    Enrollment, StudyProgram
+from courses.models import Course, Semester
 from learning.settings import LEARNING_BASE, TEACHING_BASE, GradeTypes
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord

@@ -25,13 +25,15 @@ from api.permissions import CuratorAccessPermission
 from core.templatetags.core_tags import tex
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
-from learning.models import Semester, Course, StudyProgram, \
+from learning.models import StudyProgram, \
     StudyProgramCourseGroup, Enrollment
+from courses.models import Course, Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR, \
-    AcademicDegreeYears, SemesterTypes, StudentStatuses, \
+    AcademicDegreeYears, StudentStatuses, \
     GradeTypes
+from courses.settings import SemesterTypes
 from learning.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin

@@ -18,10 +18,11 @@ from core.exceptions import Redirect
 from core.utils import get_club_domain
 from core.views import ProtectedFormMixin
 from learning.forms import CourseEditDescrForm, CourseNewsForm
-from learning.models import Course, CourseTeacher, \
-    CourseNewsNotification, CourseNews
+from learning.models import CourseNewsNotification
+from courses.models import Course, CourseTeacher, CourseNews
 from learning.serializers import CourseNewsNotificationSerializer
-from learning.settings import CENTER_FOUNDATION_YEAR, SemesterTypes
+from learning.settings import CENTER_FOUNDATION_YEAR
+from courses.settings import SemesterTypes
 from learning.utils import get_term_index
 from learning.viewmixins import TeacherOnlyMixin
 from learning.views.utils import get_co_from_query_params, get_user_city_code

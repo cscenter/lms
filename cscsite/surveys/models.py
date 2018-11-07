@@ -14,7 +14,8 @@ from post_office import mail
 from post_office.models import EmailTemplate
 
 from core.utils import city_aware_reverse
-from learning.models import Course, Enrollment
+from learning.models import Enrollment
+from courses.models import Course
 from surveys.constants import FIELD_TYPES, MULTIPLE_CHOICE_FIELD_TYPES, \
     FieldType, FieldVisibility, STATUS_PUBLISHED, \
     STATUSES, FIELD_WIDGETS, STATUS_DRAFT, CHOICE_FIELD_TYPES

@@ -18,8 +18,9 @@ from model_utils.models import TimeStampedModel
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.utils import hashids
-from learning.models import Semester
-from learning.settings import AcademicRoles, GradeTypes, SemesterTypes
+from courses.models import Semester
+from learning.settings import AcademicRoles, GradeTypes
+from courses.settings import SemesterTypes
 from learning.utils import get_current_term_index, now_local
 
 # Calculate mean scores for these fields when review has been completed

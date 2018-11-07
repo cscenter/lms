@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import FormView
 
-from learning.models import Course
+from courses.models import Course
 from surveys.forms import FormBuilder
 from surveys.models import CourseSurvey
 

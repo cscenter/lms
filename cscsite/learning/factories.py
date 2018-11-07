@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals, absolute_import
 
 import datetime
 
@@ -7,14 +6,15 @@ import factory
 from django.utils import timezone
 
 from core.models import City
-from learning.models import MetaCourse, Semester, Course, \
-    Assignment, Venue, CourseClass, CourseClassAttachment, StudentAssignment, \
+from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    AssignmentAttachment, CourseNews, \
-    CourseNewsNotification, NonCourseEvent, CourseTeacher, \
-    AreaOfStudy
+    CourseNewsNotification, NonCourseEvent, AreaOfStudy
+from courses.models import MetaCourse, Course, Semester, CourseTeacher, \
+    CourseNews, Venue, CourseClass, CourseClassAttachment, Assignment, \
+    AssignmentAttachment
 from learning.settings import AcademicRoles
-from users.factories import UserFactory, StudentCenterFactory, StudentFactory
+from users.factories import UserFactory, StudentCenterFactory, StudentFactory, \
+    TeacherCenterFactory
 from .utils import get_current_term_pair, get_term_by_index
 
 
@@ -91,7 +91,7 @@ class CourseTeacherFactory(factory.DjangoModelFactory):
     class Meta:
         model = CourseTeacher
 
-    teacher = factory.SubFactory(UserFactory)
+    teacher = factory.SubFactory(TeacherCenterFactory)
     course = factory.SubFactory(CourseFactory)
     roles = CourseTeacher.roles.lecturer
 

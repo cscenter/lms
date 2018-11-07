@@ -10,8 +10,9 @@ from django.utils import timezone
 from six.moves import zip_longest
 
 from learning.settings import FOUNDATION_YEAR, \
-    TERMS_INDEX_START, AUTUMN_TERM_START, SUMMER_TERM_START, \
-    SPRING_TERM_START, SemesterTypes, GradeTypes
+    AUTUMN_TERM_START, SUMMER_TERM_START, \
+    SPRING_TERM_START, GradeTypes
+from courses.settings import SemesterTypes, TERMS_INDEX_START
 
 CityCode = NewType('CityCode', str)
 Timezone = NewType('Timezone', datetime.tzinfo)

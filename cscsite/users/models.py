@@ -27,7 +27,8 @@ from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.utils import is_club_site, en_to_ru_mapping
 from cscenter.utils import PublicRoute
-from learning.models import Semester, Enrollment
+from learning.models import Enrollment
+from courses.models import Semester
 from learning.permissions import LearningPermissionsMixin
 from learning.settings import AcademicDegreeYears, AcademicRoles, \
     StudentStatuses, GradeTypes
@@ -133,7 +134,7 @@ class MonitorStatusField(models.ForeignKey):
 class UserStatusLog(models.Model):
     created = models.DateField(_("created"), default=now)
     semester = models.ForeignKey(
-        "learning.Semester",
+        "courses.Semester",
         verbose_name=_("Semester"),
         on_delete=models.CASCADE)
     status = models.CharField(
@@ -731,7 +732,7 @@ class SHADCourseRecord(TimeStampedModel):
     name = models.CharField(_("Course|name"), max_length=255)
     teachers = models.CharField(_("Teachers"), max_length=255)
     semester = models.ForeignKey(
-        'learning.Semester',
+        'courses.Semester',
         verbose_name=_("Semester"),
         on_delete=models.PROTECT)
 
