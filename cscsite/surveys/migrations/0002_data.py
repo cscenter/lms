@@ -501,7 +501,7 @@ def create_survey_email_templates(apps, schema_editor):
                 Спасибо!
 
                 Кураторы центра
-                
+
                 Это письмо отправлено автоматически и не требует ответа.""")
         },
         {
@@ -518,7 +518,7 @@ def create_survey_email_templates(apps, schema_editor):
                 Спасибо!
 
                 Кураторы центра
-                
+
                 Это письмо отправлено автоматически и не требует ответа.""")
         }
     ]
@@ -531,10 +531,6 @@ def create_survey_email_templates(apps, schema_editor):
 class Migration(migrations.Migration):
     dependencies = [
         ('surveys', '0001_initial'),
-    ]
-
-    run_before = [
-        ('learning', '0005_auto_20181031_1131'),
     ]
 
     operations = [
