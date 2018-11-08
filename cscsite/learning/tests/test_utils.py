@@ -19,17 +19,17 @@ class UtilTests(TestCase):
         msk_tz = pytz.timezone("Europe/Moscow")
         now_mock.return_value = msk_tz.localize(
             datetime.datetime(2014, 4, 1, 12, 0))
-        self.assertEquals((2014, 'spring'), get_current_term_pair('spb'))
+        self.assertEqual((2014, 'spring'), get_current_term_pair('spb'))
         now_mock.return_value = msk_tz.localize(
             datetime.datetime(2015, 11, 1, 12, 0))
-        self.assertEquals((2015, 'autumn'), get_current_term_pair('spb'))
+        self.assertEqual((2015, 'autumn'), get_current_term_pair('spb'))
 
     def test_split_list(self):
         xs = [1, 2, 3, 4]
-        self.assertEquals(([1, 3], [2, 4]),
+        self.assertEqual(([1, 3], [2, 4]),
                           split_on_condition(xs, lambda x: x % 2 != 0))
-        self.assertEquals((xs, []), split_on_condition(xs, lambda x: True))
-        self.assertEquals(([], xs), split_on_condition(xs, lambda x: False))
+        self.assertEqual((xs, []), split_on_condition(xs, lambda x: True))
+        self.assertEqual(([], xs), split_on_condition(xs, lambda x: False))
 
 
 def test_get_term_index():

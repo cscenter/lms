@@ -59,12 +59,12 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         self.client.post(student_url, student_comment_dict)
         # FIXME(Dmitry): this should not affect this test, fix&remove
         self.client.get(student_url)
-        self.assertEquals(2, (AssignmentNotification.objects
+        self.assertEqual(2, (AssignmentNotification.objects
                               .filter(is_about_passed=True,
                                       is_unread=True,
                                       is_notified=False)
                               .count()))
-        self.assertEquals(0, len(self._get_unread(student_list_url)
+        self.assertEqual(0, len(self._get_unread(student_list_url)
                                  .assignments))
         self.doLogin(teacher1)
         assert len(self._get_unread(teacher_list_url).assignments) == 1
