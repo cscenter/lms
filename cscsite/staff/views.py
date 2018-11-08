@@ -54,7 +54,7 @@ class StudentSearchJSONView(ListAPIView):
     serializer_class = UserSearchSerializer
     pagination_class = StudentOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filter_class = UserFilter
+    filterset_class = UserFilter
 
     def get_queryset(self):
         return (User.objects

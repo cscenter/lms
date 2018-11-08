@@ -466,7 +466,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         form['name'] += " foobar"
         self.assertRedirects(self.client.post(url, form),
                              cc.get_absolute_url())
-        self.assertEquals(form['name'],
+        self.assertEqual(form['name'],
                           self.client.get(cc.get_absolute_url())
                           .context['object'].name)
 
@@ -483,7 +483,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         form['name'] += " foobar"
         self.assertRedirects(self.client.post(url, form),
                              cc.get_absolute_url())
-        self.assertEquals(form['name'],
+        self.assertEqual(form['name'],
                           self.client.get(cc.get_absolute_url())
                           .context['object'].name)
         form.update({'_addanother': True})
@@ -564,7 +564,7 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         response = self.client.get(cc.get_absolute_url())
         spans = (BeautifulSoup(response.content, "html.parser")
                  .find_all('span', class_='assignment-attachment'))
-        self.assertEquals(2, len(spans))
+        self.assertEqual(2, len(spans))
         cca_files = sorted(a.material.path
                            for a in response.context['attachments'])
         # we will delete attachment2.txt
@@ -573,10 +573,10 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         as_ = sorted((span.a.contents[0].strip(),
                       b"".join(self.client.get(span.a['href']).streaming_content))
                      for span in spans)
-        self.assertRegexpMatches(as_[0][0], "attachment1(_[0-9a-zA-Z]+)?.txt")
-        self.assertRegexpMatches(as_[1][0], "attachment2(_[0-9a-zA-Z]+)?.txt")
-        self.assertEquals(as_[0][1], b"attachment1_content")
-        self.assertEquals(as_[1][1], b"attachment2_content")
+        self.assertRegex(as_[0][0], "attachment1(_[0-9a-zA-Z]+)?.txt")
+        self.assertRegex(as_[1][0], "attachment2(_[0-9a-zA-Z]+)?.txt")
+        self.assertEqual(as_[0][1], b"attachment1_content")
+        self.assertEqual(as_[1][1], b"attachment2_content")
         # delete one of the files, check that it's deleted and other isn't
         url = cca_to_delete.get_delete_url()
         # check security just in case
@@ -591,8 +591,8 @@ class CourseClassDetailCRUDTests(MediaServingMixin,
         response = self.client.get(cc.get_absolute_url())
         spans = (BeautifulSoup(response.content, "html.parser")
                  .find_all('span', class_='assignment-attachment'))
-        self.assertEquals(1, len(spans))
-        self.assertRegexpMatches(spans[0].a.contents[0].strip(),
+        self.assertEqual(1, len(spans))
+        self.assertRegex(spans[0].a.contents[0].strip(),
                                  "attachment1(_[0-9a-zA-Z]+)?.txt")
         self.assertFalse(os.path.isfile(cca_files[1]))
 
@@ -630,7 +630,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         student.groups.clear()
         student.groups.add(AcademicRoles.GRADUATE_CENTER)
         student.save()
-        self.assertEquals(200, self.client.get(url).status_code)
+        self.assertEqual(200, self.client.get(url).status_code)
 
     def test_failed_course(self):
         """
@@ -722,7 +722,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         assert self.client.get(url).status_code == 200
         self.doLogin(teacher)
         expected_url = a_s.get_teacher_url()
-        self.assertEquals(302, self.client.get(url).status_code)
+        self.assertEqual(302, self.client.get(url).status_code)
         self.assertRedirects(self.client.get(url), expected_url)
 
     def test_comment(self):
@@ -775,7 +775,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
                 assert self.client.get(url).status_code == 302
             self.doLogout()
         self.doLogin(teacher)
-        self.assertEquals(200, self.client.get(url).status_code)
+        self.assertEqual(200, self.client.get(url).status_code)
         self.doLogout()
         self.doLogin(student)
         assert self.client.get(url).status_code == 302

@@ -140,11 +140,11 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
         self.doLogin(TeacherCenterFactory())
-        self.assertEquals(404, self.client.get(url).status_code)
+        self.assertEqual(404, self.client.get(url).status_code)
         self.doLogin(student)
         self.assertLoginRedirect(url)
         self.doLogin(teacher)
-        self.assertEquals(200, self.client.get(url).status_code)
+        self.assertEqual(200, self.client.get(url).status_code)
 
     def test_csv(self):
         teacher = TeacherCenterFactory()
@@ -166,13 +166,13 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
             a_s.save()
         self.doLogin(teacher)
         data = [row for row in unicodecsv.reader(self.client.get(url)) if row]
-        self.assertEquals(3, len(data))
+        self.assertEqual(3, len(data))
         self.assertIn(a1.title, data[0])
         row_last_names = [row[0] for row in data]
         for a, s, grade in combos:
             row = row_last_names.index(s.last_name)
             col = data[0].index(a.title)
-            self.assertEquals(grade, int(data[row][col]))
+            self.assertEqual(grade, int(data[row][col]))
 
 
 class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):

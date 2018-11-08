@@ -73,7 +73,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, TestCase):
         url = reverse('user_detail', args=[student.pk])
         self.doLogin(curator)
         response = self.client.get(url)
-        self.assertEquals(
+        self.assertEqual(
             response.context['profile_user'].enrollment_certificates.count(), 1)
         soup = BeautifulSoup(response.content, "html.parser")
         list_header = soup.find('h4', text=re.compile(_("Student references")))
@@ -117,7 +117,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, TestCase):
         self.assertIsNotNone(sig_text)
         es = soup.find(id='reference-page-body').findAll('li')
         expected_enrollments_count = 1
-        self.assertEquals(len(es), expected_enrollments_count)
+        self.assertEqual(len(es), expected_enrollments_count)
 
     def test_club_student_login_on_cscenter_site(self):
         student = UserFactory.create(is_superuser=False, is_staff=False,

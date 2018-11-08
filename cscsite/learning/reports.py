@@ -4,7 +4,6 @@ from abc import ABCMeta, abstractmethod
 from collections import OrderedDict, defaultdict
 from datetime import datetime
 
-import six
 from django.db.models import Q, Prefetch, Count
 from django.utils import formats
 
@@ -124,7 +123,7 @@ class ProgressReport(ReportFileOutput):
         return self.static_headers
 
     def _append_courses_headers(self, headers):
-        for course_id, course_name in six.iteritems(self.courses_headers):
+        for course_id, course_name in self.courses_headers.items():
             headers.extend([
                 "{}, оценка".format(course_name),
                 "{}, преподаватели".format(course_name)
@@ -487,7 +486,7 @@ class ProgressReportForSemester(ProgressReport):
         ]
 
     def _append_courses_headers(self, headers):
-        for course_id, course_name in six.iteritems(self.courses_headers):
+        for course_id, course_name in self.courses_headers.items():
             headers.append("{}, оценка".format(course_name))
 
     def generate_headers(self):

@@ -31,7 +31,7 @@ class CommonTests(TestCase):
     @mock.patch("learning.tasks.maybe_upload_slides_yandex.delay")
     def test_to_strings(self, _):
         meta_course = MetaCourseFactory.build()
-        self.assertEquals(smart_text(meta_course), meta_course.name)
+        self.assertEqual(smart_text(meta_course), meta_course.name)
         semester = Semester(year=2015, type='spring')
         self.assertIn(smart_text(semester.year), smart_text(semester))
         self.assertIn('spring', smart_text(semester))
@@ -251,7 +251,7 @@ class AssignmentAttachmentTest(TestCase):
     def test_attached_file_name(self):
         fname = "foobar.pdf"
         aa = AssignmentAttachmentFactory.create(attachment__filename=fname)
-        self.assertRegexpMatches(aa.file_name,
+        self.assertRegex(aa.file_name,
                                  "^foobar(_[0-9a-zA-Z]+)?.pdf$")
 
 
@@ -369,8 +369,8 @@ class AssignmentCommentTests(TestCase):
                       ac.attached_file.name)
         self.assertIn(smart_text(ac.student_assignment.student.pk),
                       ac.attached_file.name)
-        self.assertRegexpMatches(ac.attached_file.name, "/foobar(_[0-9a-zA-Z]+)?.pdf$")
-        self.assertRegexpMatches(ac.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")
+        self.assertRegex(ac.attached_file.name, "/foobar(_[0-9a-zA-Z]+)?.pdf$")
+        self.assertRegex(ac.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")
 
 
 class EnrollmentTests(TestCase):

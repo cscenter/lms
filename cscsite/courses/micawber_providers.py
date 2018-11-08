@@ -30,13 +30,14 @@ class CustomSlideShareProvider(Provider):
 
 # Oembed provider registry
 pr = bootstrap_basic(cache)
+
 # Replace default slideshare providers with customs
-pr.unregister('http://www.slideshare.net/[^\/]+/\S+')
-pr.unregister('http://slidesha\.re/\S*')
-pr.register('http://www.slideshare.net/[^\/]+/\S+',
+pr.unregister('https?://www.slideshare.net/[^\/]+/\S+')
+pr.unregister('https?://slidesha\.re/\S*')
+pr.register('https?://www.slideshare.net/[^\/]+/\S+',
             CustomSlideShareProvider('https://www.slideshare.net/api/oembed/2',
                                      format="jsonp"))
-pr.register('http://slidesha\.re/\S*',
+pr.register('https?://slidesha\.re/\S*',
             CustomSlideShareProvider('https://www.slideshare.net/api/oembed/2',
                                      format="jsonp"))
 

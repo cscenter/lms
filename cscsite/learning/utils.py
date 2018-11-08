@@ -7,7 +7,7 @@ import dateutil.parser as dparser
 import pytz
 from django.conf import settings
 from django.utils import timezone
-from six.moves import zip_longest
+from itertools import zip_longest
 
 from learning.settings import FOUNDATION_YEAR, \
     AUTUMN_TERM_START, SUMMER_TERM_START, \

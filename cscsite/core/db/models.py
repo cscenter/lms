@@ -12,7 +12,7 @@ class ScoreField(DecimalField):
         kwargs.setdefault("decimal_places", 2)
         super().__init__(*args, **kwargs)
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection):
         if value is None:
             return value
         decimal_as_int = value.to_integral_value()
