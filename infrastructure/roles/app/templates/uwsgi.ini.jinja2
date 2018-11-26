@@ -26,6 +26,8 @@ gid             = {{ site_user_group }}
 logto           = /home/{{ site_user }}/site/logs/uwsgi.log
 log-date        = true
 log-maxsize     = 5242880
+logfile-chown   = true
+# Disable request logging, use nginx for that
+disable-logging = true
 {% endif -%}
 wait-for-socket-timeout = 600
-unprivileged-binary-patch-arg = %(virtualenv)/bin/uwsgi --ini {{ site_user }}.ini

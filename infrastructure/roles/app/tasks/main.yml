@@ -79,6 +79,7 @@
     - venv
 
 - include_tasks: systemd.yml
+  when: rq_workers|length > 1
 
 - name: Copy uwsgi config
   template:

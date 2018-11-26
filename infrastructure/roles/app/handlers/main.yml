@@ -1,6 +1,6 @@
 ---
 # Duplicated :< See `system` role
 - name: restart uwsgi
-  service: name=uwsgi state=restarted
+  service: name=uwsgi.service state=restarted
   become: yes
   become_method: sudo

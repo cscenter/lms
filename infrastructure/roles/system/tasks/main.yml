@@ -1,6 +1,8 @@
 ---
 - name: Upgrade all packages to the latest version
-  apt: upgrade=dist
+  apt:
+    upgrade: dist
+    update_cache: yes
 
 - name: set default locale LANG to UTF-8
   lineinfile: dest=/etc/default/locale line='LANG="en_US.utf8"' regexp='^LANG=' state=present insertafter=BOF
@@ -36,44 +38,59 @@
 
 - name: Apt dependencies
   apt:
-    name: "{{ item }}"
+    name:
+      - python-setuptools
+  #    - python-dev
+      - git
+      - ntp
+      - zsh
+      - tmux
+      - htop
+      - build-essential
+      # app dependencies
+      - gettext
+      # regular expressions support
+      - libpcre3-dev
+      - libpcre3
+      - libxml2-dev
+      - libxslt1-dev
+      - libjpeg-dev
+      - libpng-dev
+      - libmagic-dev
+      - libcurl4-gnutls-dev
+      - libgnutls28-dev
+      - "{{ python_pkg }}"
+      - "{{ python_pkg }}-dev"
+      - python-pycurl
+      # LDAP support
+      - ldap-utils
+      - libldap2-dev
+      - libsasl2-dev
+      # - libssl-dev not sure we need this package to install python-ldap with pip
     state: present
-  with_items:
-    - python-setuptools
-#    - python-dev
-    - git
-    - ntp
-    - zsh
-    - tmux
-    - htop
-    - build-essential
-    # app dependencies
-    - gettext
-    # regular expressions support
-    - libpcre3-dev
-    - libpcre3
-    - libxml2-dev
-    - libxslt1-dev
-    - libjpeg-dev
-    - libpng-dev
-    - libmagic-dev
-    - libcurl4-gnutls-dev
-    - libgnutls28-dev
-    - "{{ python_pkg }}"
-    - "{{ python_pkg }}-dev"
-    - python3-pip
-    - python-pycurl
-    # LDAP support
-    - ldap-utils
-    - libldap2-dev
-    - libsasl2-dev
-    # - libssl-dev not sure we need this package to install python-ldap with pip
+
+- name: Get pip{{ python_version }} version
+  command: pip{{ python_version }} --version
+  register: pip_version_output
+  ignore_errors: yes
+
+- name: Download get-pip.py
+  get_url: url=https://bootstrap.pypa.io/get-pip.py
+           dest=/tmp/get-pip.py
+  when: pip_version_output is failed
+
+- name: install pip for {{ python_pkg }}
+  command: "{{ python_pkg }} /tmp/get-pip.py"
+  when: pip_version_output is failed
+
+- name: Install pip for system python3 (will be placed in /usr/bin/pip3)
+  apt: name=python3-pip state=present
 
 - name: install global python 3 dependencies
   pip:
     name: "{{ item.name }}"
     version: "{{ item.version }}"
-    executable: pip3
+    executable: pip{{ python_version }}
   with_items:
     - name: ipython
       version: "5.5.0"

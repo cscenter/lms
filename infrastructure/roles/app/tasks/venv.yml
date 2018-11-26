@@ -8,6 +8,7 @@
   check_mode: true
   register: python_installed
 
+# FIXME: Do I need this step here? Duplicated in `system` role
 - name: Unlock python package for upgrade if it was hold before.
   dpkg_selections:
     name: "{{ python_pkg }}"

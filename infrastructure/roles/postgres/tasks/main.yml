@@ -10,16 +10,15 @@
 - name: Globally install psycopg2 (used to make sure db user exists)
   pip:
     name: "psycopg2-binary"
-    version: "2.7.5"
-    executable: pip3
+    version: "2.7.6.1"
+    executable: /usr/bin/pip3
 
 - name: install Postgres
   apt:
-    name: "{{ item }}"
+    name:
+      - "libpq-dev"
+      - "postgresql-{{ pg_version }}"
     state: present
-  with_items:
-    - libpq-dev
-    - "postgresql-{{ pg_version }}"
 
 - name: Ensure the PostgreSQL service is running
   systemd:

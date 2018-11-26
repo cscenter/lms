@@ -7,6 +7,8 @@
     home: "/home/{{ site_user }}"
     name: "{{ site_user }}"
     state: present
+    # Set primary group
+    group: "{{ site_user_group }}"
     groups: "{{ site_user_group }}"
     append: yes
 
