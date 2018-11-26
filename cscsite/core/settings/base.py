@@ -194,7 +194,7 @@ THUMBNAIL_DUMMY = True
 # Lets store keys in redis and share them between csclub and cscenter sites
 # It's safe while we store images in shared directory
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
-REDIS_PASSWORD = '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN'
+REDIS_PASSWORD = None
 THUMBNAIL_REDIS_HOST = '127.0.0.1'
 THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
 
