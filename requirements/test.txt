@@ -21,9 +21,9 @@ djdt-flamegraph==0.2.12
 coverage==4.5.1
 django-coverage==1.2.4
 
-pytest==3.10.0
+pytest==3.10.1
 pytest-django==3.4.3
 pytest-cov==2.6.0
-pytest-xdist==1.24.0
+pytest-xdist==1.24.1
 pytest-mock==1.10.0
 pytest-pythonpath==0.7.3
