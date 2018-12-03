@@ -33,13 +33,13 @@ class StudentSerializer(serializers.ModelSerializer):
 class StudentAssignmentsSerializer(serializers.ModelSerializer):
     sent = serializers.SerializerMethodField()
     state = serializers.SerializerMethodField()
-    first_submission_at = serializers.DateTimeField()
+    first_student_comment_at = serializers.DateTimeField()
     score = serializers.IntegerField()
     student = StudentSerializer(read_only=True)
 
     class Meta:
         model = StudentAssignment
-        fields = ("id", "sent", "first_submission_at", "score", "student",
+        fields = ("id", "sent", "first_student_comment_at", "score", "student",
                   "state")
 
     def get_state(self, obj):
@@ -49,6 +49,8 @@ class StudentAssignmentsSerializer(serializers.ModelSerializer):
         """
         Let's say user passed assignment if he sent comment or has score
         """
+        # FIXME: rewrite with `submission_is_received`? Check what about
+        #  offline assignments here.
         return int(obj.score is not None or
                    obj.submission_is_received != StudentAssignment.CommentAuthorTypes.NOBODY)
 
