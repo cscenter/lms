@@ -79,17 +79,17 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
         other_comments = (sa.assignmentcomment_set
                           .filter(author_id=comment.author_id)
                           .exclude(pk=comment.pk))
-        is_first_submission = (sa.assignment.is_online and
-                               not other_comments.exists())
+        is_first_comment = not other_comments.exists()
+        is_about_passed = sa.assignment.is_online and is_first_comment
 
         teachers = comment.student_assignment.assignment.notify_teachers.all()
         for t in teachers:
             notifications.append(
                 AssignmentNotification(user_id=t.teacher_id,
                                        student_assignment=sa,
-                                       is_about_passed=is_first_submission))
+                                       is_about_passed=is_about_passed))
 
-        if is_first_submission:
+        if is_first_comment:
             sa_update_dict["first_submission_at"] = comment.created
         sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.STUDENT
     else:
