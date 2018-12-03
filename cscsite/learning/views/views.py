@@ -624,7 +624,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
             .select_related("assignment", "student",)
             .only("id",
                   "score",
-                  "first_submission_at",
+                  "first_student_comment_at",
                   "student__first_name",
                   "student__last_name",
                   "assignment__id",
@@ -959,7 +959,7 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
         # Get next unchecked assignment
         base = (StudentAssignment.objects
                 .filter(score__isnull=True,
-                        first_submission_at__isnull=False,
+                        first_student_comment_at__isnull=False,
                         assignment__course=co,
                         assignment__course__teachers=self.request.user)
                 .order_by('assignment__deadline_at', 'pk')

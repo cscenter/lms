@@ -60,13 +60,13 @@ def create_deadline_change_notification(sender, instance, created,
 @receiver(post_save, sender=AssignmentComment)
 def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
     """
-    * Notify teachers if student leave a comment, otherwise notify student.
-    * Update StudentAssignment model:
-        1. Set `first_submission_at` if it's the first comment from the student.
-        2. Set `last_comment_from` field
-        Note:
-            Can be essential for future signals but it doesn't update
-            model attributes.
+    Notify teachers if student leave a comment, otherwise notify student.
+    Update `first_student_comment_at` and `last_comment_from`
+    StudentAssignment model fields.
+
+    Note:
+        Can be essential for future signals but it doesn't update
+        model attributes.
     """
     if not created:
         return
@@ -90,7 +90,7 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
                                        is_about_passed=is_about_passed))
 
         if is_first_comment:
-            sa_update_dict["first_submission_at"] = comment.created
+            sa_update_dict["first_student_comment_at"] = comment.created
         sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.STUDENT
     else:
         sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.TEACHER

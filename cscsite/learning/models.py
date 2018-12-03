@@ -58,10 +58,8 @@ class StudentAssignment(TimeStampedModel):
     score_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='score')
-    # TODO: rename to `first_comment_at`. Make a decision is it
-    #  a comment or submission later.
-    first_submission_at = models.DateTimeField(
-        _("Assignment|first_submission"),
+    first_student_comment_at = models.DateTimeField(
+        _("First Student Comment At"),
         null=True,
         editable=False)
     # TODO: rename
@@ -146,7 +144,7 @@ class StudentAssignment(TimeStampedModel):
         Submission is a first comment which student sent to the assignment
         marked as `online`.
         """
-        return (self.first_submission_at is not None
+        return (self.first_student_comment_at is not None
                 and self.assignment.is_online)
 
     @property

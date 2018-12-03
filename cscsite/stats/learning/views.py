@@ -91,7 +91,8 @@ class AssignmentsStats(ReadOnlyModelViewSet):
                                   .select_related("student", "assignment")
                                   .prefetch_related("student__groups")
                                   .only("pk", "assignment_id", "score",
-                                        "student_id", "first_submission_at",
+                                        "student_id",
+                                        "first_student_comment_at",
                                         "student__gender",
                                         "student__curriculum_year",
                                         "assignment__course_id",

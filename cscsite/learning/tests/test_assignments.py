@@ -202,33 +202,33 @@ def test_studentassignment_last_comment_from():
 
 
 @pytest.mark.django_db
-def test_studentassignment_first_submission_at(curator):
-    """`first_submission_at` attribute is updated by signal"""
+def test_studentassignment_first_student_comment_at(curator):
+    """`first_student_comment_at` attribute is updated by signal"""
     teacher = TeacherCenterFactory.create()
     student = StudentCenterFactory.create()
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
     assignment = AssignmentFactory.create(course=co)
     sa = StudentAssignment.objects.get(assignment=assignment)
-    assert sa.first_submission_at is None
+    assert sa.first_student_comment_at is None
     AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
     sa.refresh_from_db()
-    assert sa.first_submission_at is None
+    assert sa.first_student_comment_at is None
     AssignmentCommentFactory.create(student_assignment=sa, author=curator)
     sa.refresh_from_db()
-    assert sa.first_submission_at is None
+    assert sa.first_student_comment_at is None
     AssignmentCommentFactory.create(student_assignment=sa, author=student)
     sa.refresh_from_db()
-    assert sa.first_submission_at is not None
-    first_submission_at = sa.first_submission_at
+    assert sa.first_student_comment_at is not None
+    first_student_comment_at = sa.first_student_comment_at
     # Make sure it doesn't changed
     AssignmentCommentFactory.create(student_assignment=sa, author=teacher)
     sa.refresh_from_db()
-    assert sa.first_submission_at == first_submission_at
+    assert sa.first_student_comment_at == first_student_comment_at
     # Second comment from student shouldn't change time
     AssignmentCommentFactory.create(student_assignment=sa, author=student)
     sa.refresh_from_db()
-    assert sa.first_submission_at == first_submission_at
+    assert sa.first_student_comment_at == first_student_comment_at
 
 
 class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
