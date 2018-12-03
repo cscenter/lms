@@ -12,11 +12,11 @@
 - name: rq worker target for easier management via systemctl
   template:
     src: rqworker.target.jinja2
-    dest: "/etc/systemd/system/rqworker_{{ site_user }}.target"
+    dest: "/etc/systemd/system/{{ rq_workers_target_service_name }}.target"
 
 - name: Ensure rqworkers are enabled after reboot
   systemd:
-    name: rqworker_{{ site_user }}.target
+    name: "{{ rq_workers_target_service_name }}.target"
     enabled: yes
 
 - name: Force systemd to reread configs and (re)start services

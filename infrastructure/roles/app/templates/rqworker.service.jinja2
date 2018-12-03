@@ -11,7 +11,7 @@ User={{ site_user }}
 Group={{ site_user_group }}
 KillSignal=SIGTERM
 Restart=always
-Environment=DJANGO_SETTINGS_MODULE={{ site_user }}.settings.{{ app_environment }}
+Environment=DJANGO_SETTINGS_MODULE={{ app_settings }}.settings.{{ app_environment }}
 ExecStart=/home/{{ site_user }}/site/env/bin/python {{ site_root }}/manage.py rqworker {{ worker_name }} --pythonpath='{{ site_root }}/{{ apps_dir_name }}'
 
 [Install]

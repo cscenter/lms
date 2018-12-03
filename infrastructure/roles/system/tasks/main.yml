@@ -132,6 +132,7 @@
   systemd:
     name: uwsgi.service
     enabled: yes
+    state: started
 
 - name: Setup zsh for ec2 user
   include_tasks: zsh.yml

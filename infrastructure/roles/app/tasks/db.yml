@@ -31,6 +31,7 @@
     role_attr_flags: NOSUPERUSER,CREATEDB
     state: present
 
+# TODO: remove?
 - name: Run migrations
   become: yes
   become_user: "{{ site_user }}"

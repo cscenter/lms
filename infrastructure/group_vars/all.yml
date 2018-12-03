@@ -33,6 +33,7 @@ available_sites:
     rq_workers:
       - default
       - high
+    rq_workers_target_service_name: "rqworker_cscenter"
     processes_num: 5
     log_to_file: no
   - site_user: "csclub"
@@ -58,5 +59,6 @@ available_sites:
     certbot_config_dir: "/etc/letsencrypt/live/compsciclub.ru"
     rq_workers:
       - club
+    rq_workers_target_service_name: "rqworker_csclub"
     processes_num: 3
     log_to_file: no
