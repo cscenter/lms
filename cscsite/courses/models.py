@@ -955,22 +955,25 @@ class Assignment(TimeStampedModel):
     def is_open(self):
         return self.deadline_at > timezone.now()
 
-    @property
-    def attached_file_name(self):
-        return os.path.basename(self.attached_file.name)
+    @cached_property
+    def files_root(self):
+        """
+        Returns path relative to MEDIA_ROOT.
+        """
+        bucket = self.course.semester.slug
+        return f'assignments/{bucket}/{self.pk}'
 
 
-def assignmentattach_upload_to(instance, filename):
-    return ("assignment_{0}/attachments/{1}".format(
-        instance.assignment_id, filename))
+def task_attachment_upload_to(instance: "AssignmentAttachment", filename):
+    return f"{instance.assignment.files_root}/attachments/{filename}"
 
 
-class AssignmentAttachment(TimeStampedModel, object):
+class AssignmentAttachment(TimeStampedModel):
     assignment = models.ForeignKey(
         Assignment,
         verbose_name=_("Assignment"),
         on_delete=models.CASCADE)
-    attachment = models.FileField(upload_to=assignmentattach_upload_to)
+    attachment = models.FileField(upload_to=task_attachment_upload_to)
 
     class Meta:
         ordering = ["assignment", "-created"]
