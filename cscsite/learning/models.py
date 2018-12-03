@@ -58,6 +58,8 @@ class StudentAssignment(TimeStampedModel):
     score_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='score')
+    # TODO: rename to `first_comment_at`. Make a decision is it
+    #  a comment or submission later.
     first_submission_at = models.DateTimeField(
         _("Assignment|first_submission"),
         null=True,
@@ -141,10 +143,11 @@ class StudentAssignment(TimeStampedModel):
     @property
     def submission_is_received(self):
         """
-        Returns true if we have submission from student.
-        Makes sense only when assignment can be passed through site.
+        Submission is a first comment which student sent to the assignment
+        marked as `online`.
         """
-        return self.first_submission_at is not None
+        return (self.first_submission_at is not None
+                and self.assignment.is_online)
 
     @property
     def state_display(self):
@@ -164,15 +167,9 @@ class StudentAssignment(TimeStampedModel):
             return self.state.abbr
 
 
-## NOTE(Dmitry): this is needed because of
-## https://docs.djangoproject.com/en/1.7/topics/migrations/#serializing-values
-def assignmentcomment_upload_to(instance, filename):
-    return ("assignment_{0}/user_{1}/{2}/{3}"
-            .format(instance.student_assignment.assignment.pk,
-                    instance.student_assignment.student.pk,
-                    # somewhat protecting against URL enumeration
-                    int(time.time()) % 30,
-                    filename))
+def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):
+    sa = instance.student_assignment
+    return f"{sa.assignment.files_root}/students/{sa.student_id}/{filename}"
 
 
 class AssignmentComment(TimeStampedModel):
@@ -189,7 +186,8 @@ class AssignmentComment(TimeStampedModel):
         verbose_name=_("Author"),
         on_delete=models.CASCADE)
     attached_file = models.FileField(
-        upload_to=assignmentcomment_upload_to,
+        upload_to=task_comment_attachment_upload_to,
+        max_length=150,
         blank=True)
 
     class Meta:
