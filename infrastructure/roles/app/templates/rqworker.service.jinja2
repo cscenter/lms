@@ -3,7 +3,7 @@ Description="Django redis queue worker"
 After=network.target
 Requires=redis.service postgresql.service
 # Propagates restart/stop to this service if event occurred on target unit
-PartOf=rqworker_{{ site_user }}.target
+PartOf={{ rq_workers_target_service_name }}.target
 
 [Service]
 Type=simple
