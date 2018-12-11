@@ -1,6 +1,4 @@
 ---
-# Duplicated :< See `system` role
-- name: restart uwsgi
-  service: name=uwsgi.service state=restarted
-  become: yes
-  become_method: sudo
+- name: uwsgi service needs to be restarted
+  debug: msg=Restart uwsgi event triggered
+  listen: restart_uwsgi

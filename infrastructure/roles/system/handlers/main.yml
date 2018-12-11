@@ -3,6 +3,7 @@
   service: name=uwsgi state=restarted
   become: yes
   become_method: sudo
+  listen: restart_uwsgi
 
 - name: reload uwsgi
   service: name=uwsgi state=reloaded

@@ -74,7 +74,7 @@
 
 - name: Install app dependencies
   include_tasks: venv.yml
-  notify: restart uwsgi
+  notify: restart_uwsgi
   tags:
     - venv
 
@@ -86,7 +86,7 @@
     src: uwsgi.ini.jinja2
     dest: "/etc/uwsgi/vassals/{{ site_user }}.ini"
     owner: "{{ site_user }}"
-  notify: restart uwsgi
+  notify: restart_uwsgi
   tags:
     - uwsgi
 
