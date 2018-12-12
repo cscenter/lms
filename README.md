@@ -22,3 +22,14 @@ Section | Description
     psql -h localhost cscdb csc < 
     ./manage.py changepassword admin
 
+    # Enable sql console logger
+    import logging
+    from core.utils import SQLFormatter
+    sql_console_handler = logging.StreamHandler()
+    sql_console_handler.setLevel(logging.DEBUG)
+    formatter = SQLFormatter('[%(duration).3f] %(statement)s')
+    sql_console_handler.setFormatter(formatter)
+    logger = logging.getLogger('django.db.backends')
+    logger.addHandler(sql_console_handler)
+    # Debug queries
+    logger.removeHandler(sql_console_handler)
