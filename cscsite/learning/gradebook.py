@@ -1,12 +1,14 @@
+import codecs
 import logging
 from collections import OrderedDict, namedtuple
 from typing import List
 
 import numpy as np
-import unicodecsv
+import csv
 from django import forms
 from django.contrib import messages
 from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Q
 from django.forms import BoundField
 from django.utils.encoding import force_text
@@ -430,65 +432,12 @@ def _get_user_id(request, **filters):
 
 
 class AssignmentGradesImport:
-    headers = None
-
-    def __init__(self, request, assignment):
+    def __init__(self, assignment, csv_file: UploadedFile,
+                 lookup_field, request=None):
         self.assignment = assignment
-        self.request = request
-        file = request.FILES['csv_file']
-        self.reader = unicodecsv.DictReader(iter(file))
-        self.total = 0
-        self.success = 0
-        self.errors = []
-        if not self.headers:
-            raise ImproperlyConfigured(
-                "subclasses of ImportGrade must provide headers attribute")
-
-    def import_data(self):
-        if not self.headers_are_valid():
-            messages.error(self.request, "<br>".join(self.errors))
-            return self.import_results()
-
-        for row in self.reader:
-            self.total += 1
-            try:
-                data = self.clean_data(row)
-                res = self.update_score(data)
-                self.success += int(res)
-            except ValidationError as e:
-                logger.debug(e.message)
-        return self.import_results()
-
-    def headers_are_valid(self):
-        headers = self.reader.fieldnames
-        valid = True
-        for header in self.headers:
-            if header not in headers:
-                valid = False
-                self.errors.append(
-                    "ERROR: header `{}` not found".format(header))
-        return valid
-
-    def import_results(self):
-        messages.info(self.request,
-                      _("<b>Import results</b>: {}/{} successes").format(
-                          self.success, self.total))
-        return {'success': self.success, 'total': self.total,
-                'errors': self.errors}
-
-    def clean_data(self, row):
-        raise NotImplementedError(
-            'subclasses of ImportGrade must provide clean_data() method')
-
-    def update_score(self, data):
-        raise NotImplementedError(
-            'subclasses of ImportGrade must provide update_score() method')
-
-
-class AssignmentGradesImport:
-    def __init__(self, assignment, csv_file, lookup_field, request=None):
-        self.assignment = assignment
-        self.reader = unicodecsv.DictReader(iter(csv_file))
+        # Remove BOM by using 'utf-8-sig'
+        f = (bs.decode("utf-8-sig") for bs in csv_file)
+        self.reader = csv.DictReader(f)
         self.lookup_field = lookup_field
 
     def validate_headers(self):
