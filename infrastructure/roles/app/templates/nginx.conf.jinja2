@@ -98,6 +98,11 @@ server {
         expires 6h;
         add_header Cache-Control public,max-age=21600;
 
+        location /media/assignments/ {
+            internal;
+        }
+
+        # TODO: move files to the new `media/assignments/` dir and remove this location matching
         location ~ ^/media/assignment_([0-9]+) {
             internal;
         }
