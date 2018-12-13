@@ -167,7 +167,7 @@ class StudentAssignment(TimeStampedModel):
 
 def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):
     sa = instance.student_assignment
-    return f"{sa.assignment.files_root}/students/{sa.student_id}/{filename}"
+    return f"{sa.assignment.files_root}/user_{sa.student_id}/{filename}"
 
 
 class AssignmentComment(TimeStampedModel):
