@@ -973,7 +973,8 @@ class AssignmentAttachment(TimeStampedModel):
         Assignment,
         verbose_name=_("Assignment"),
         on_delete=models.CASCADE)
-    attachment = models.FileField(upload_to=task_attachment_upload_to)
+    attachment = models.FileField(upload_to=task_attachment_upload_to,
+                                  max_length=150)
 
     class Meta:
         ordering = ["assignment", "-created"]
