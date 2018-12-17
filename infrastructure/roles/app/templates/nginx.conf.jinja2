@@ -101,11 +101,6 @@ server {
         location /media/assignments/ {
             internal;
         }
-
-        # TODO: move files to the new `media/assignments/` dir and remove this location matching
-        location ~ ^/media/assignment_([0-9]+) {
-            internal;
-        }
     }
 
     location /static {
