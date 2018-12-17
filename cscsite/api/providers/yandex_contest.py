@@ -50,12 +50,12 @@ class YandexContestAPIException(Exception):
 
 # TODO: catch read timeout exceptions in api?
 class YandexContestAPI:
+    # FIXME: remove?
     BASE_URL = "https://api.vk.com/method/"
 
     def __init__(self, access_token, refresh_token=None):
         self.access_token = access_token
         self.refresh_token = refresh_token
-
         self.base_headers = {
             "Accept": "application/json",
             "Content-Type": "application/json",
