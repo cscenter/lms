@@ -8,7 +8,7 @@ from django.apps import apps
 from django.conf import settings
 from django_rq import job
 
-from core.yandex_api import YandexDiskRestAPI
+from api.providers.yandex_disk import YandexDiskRestAPI
 
 logger = logging.getLogger(__name__)
 
