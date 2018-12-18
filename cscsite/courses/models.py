@@ -662,7 +662,7 @@ def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
     more than one class of the same type in a day.
 
     Format:
-        courses/<term_slug>/<city>-<course_slug>/slides/<filename>
+        courses/<term_slug>/<city>-<course_slug>/slides/<generated_filename>
 
     Example:
         courses/2018-autumn/spb-data-bases/slides/data_bases_lecture_231217.pdf
@@ -821,12 +821,30 @@ class CourseClass(TimeStampedModel):
         return os.path.basename(self.slides.name)
 
 
-class CourseClassAttachment(TimeStampedModel, object):
+def course_class_attachment_upload_to(instance: "CourseClassAttachment",
+                                      filename) -> str:
+    """
+    Path format: courses/<term_slug>/<city>-<course_slug>/materials/<filename>
+
+    Example:
+        courses/2018-autumn/spb-data-bases/materials/Лекция_1.pdf
+    """
+    course = instance.course_class.course
+    course_slug = course.meta_course.slug
+    filename = filename.replace(" ", "_")
+    # TODO: transliterate?
+    return os.path.join("courses", course.semester.slug,
+                        f"{course.city_id}-{course_slug}",
+                        "materials", filename)
+
+
+class CourseClassAttachment(TimeStampedModel):
     course_class = models.ForeignKey(
         CourseClass,
         verbose_name=_("Class"),
         on_delete=models.CASCADE)
-    material = models.FileField(upload_to="course_class_attachments")
+    material = models.FileField(max_length=200,
+                                upload_to=course_class_attachment_upload_to)
 
     class Meta:
         ordering = ["course_class", "-created"]
