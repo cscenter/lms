@@ -91,7 +91,7 @@ class Migration(migrations.Migration):
                 ('type', models.CharField(choices=[('lecture', 'Lecture'), ('seminar', 'Seminar')], max_length=100, verbose_name='Type')),
                 ('name', models.CharField(max_length=255, verbose_name='CourseClass|Name')),
                 ('description', models.TextField(blank=True, help_text='How to style text read <a href="/commenting-the-right-way/" target="_blank">here</a>. Partially HTML is enabled too.', verbose_name='Description')),
-                ('slides', models.FileField(blank=True, upload_to=courses.models.courseclass_slides_file_name, verbose_name='Slides')),
+                ('slides', models.FileField(blank=True, max_length=200, upload_to=courses.models.course_class_slides_upload_to, verbose_name='Slides')),
                 ('slides_url', models.URLField(blank=True, verbose_name='SlideShare URL')),
                 ('video_url', models.URLField(blank=True, help_text='Both YouTube and Yandex Video are supported', verbose_name='Video URL')),
                 ('other_materials', models.TextField(blank=True, help_text='How to style text read <a href="/commenting-the-right-way/" target="_blank">here</a>. Partially HTML is enabled too.', verbose_name='CourseClass|Other materials')),

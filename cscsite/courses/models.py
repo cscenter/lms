@@ -656,14 +656,27 @@ class CourseNews(TimeStampedModel):
         return timezone.localtime(self.created, timezone=tz)
 
 
-def courseclass_slides_file_name(instance: "CourseClass", filename):
+def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
+    """
+    Generates path to uploaded slides. Filename could have collisions if
+    more than one class of the same type in a day.
+
+    Format:
+        courses/<term_slug>/<city>-<course_slug>/slides/<filename>
+
+    Example:
+        courses/2018-autumn/spb-data-bases/slides/data_bases_lecture_231217.pdf
+    """
+    course = instance.course
+    course_slug = course.meta_course.slug
+    # Generic filename
+    class_date = instance.date.strftime("%d%m%y")
     _, ext = os.path.splitext(filename)
-    timestamp = instance.date.strftime("%Y_%m_%d")
-    course = ("{0}_{1}".format(instance.course.meta_course.slug,
-                               instance.course.semester.slug)
-                       .replace("-", "_"))
-    filename = ("{0}_{1}{2}".format(timestamp, course, ext))
-    return os.path.join('slides', course, filename)
+    course_prefix = course_slug.replace("-", "_")
+    filename = f"{course_prefix}_{instance.type}_{class_date}{ext}".lower()
+    return os.path.join("courses", course.semester.slug,
+                        f"{course.city_id}-{course_slug}",
+                        "slides", filename)
 
 
 class CourseClass(TimeStampedModel):
@@ -687,11 +700,12 @@ class CourseClass(TimeStampedModel):
     slides = models.FileField(
         _("Slides"),
         blank=True,
-        upload_to=courseclass_slides_file_name)
+        max_length=200,
+        upload_to=course_class_slides_upload_to)
     slides_url = models.URLField(_("SlideShare URL"), blank=True)
-    video_url = models.URLField(_("Video URL"), blank=True,
-                                help_text=_(
-                                    "Both YouTube and Yandex Video are supported"))
+    video_url = models.URLField(
+        _("Video URL"), blank=True,
+        help_text=_("Both YouTube and Yandex Video are supported"))
     other_materials = models.TextField(
         _("CourseClass|Other materials"),
         blank=True,
