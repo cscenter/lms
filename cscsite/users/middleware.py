@@ -4,14 +4,14 @@ from django.contrib.auth.models import AnonymousUser
 from django.utils.deprecation import MiddlewareMixin
 from django.utils.functional import SimpleLazyObject
 
-from users.models import NotAuthenticatedUser
+from users.models import ExtendedAnonymousUser
 
 
 def get_user(request):
     if not hasattr(request, '_cached_user'):
         request._cached_user = auth_get_user(request)
         if isinstance(request._cached_user, AnonymousUser):
-            request._cached_user = NotAuthenticatedUser()
+            request._cached_user = ExtendedAnonymousUser()
     return request._cached_user
 
 

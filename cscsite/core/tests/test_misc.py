@@ -9,7 +9,7 @@ from django.urls import reverse
 from mock import Mock
 
 from core.management.commands.notify import get_base_url
-from core.models import related_spec_to_list, apply_related_spec
+from core.admin import related_spec_to_list, apply_related_spec
 from learning.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
 from learning.models import AssignmentNotification

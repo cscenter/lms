@@ -11,9 +11,8 @@ from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
-    CityAwareSplitDateTimeField
+    CityAwareSplitDateTimeField, RelatedSpecMixin
 from core.compat import Django21BitFieldCheckboxSelectMultiple
-from core.models import RelatedSpecMixin
 from core.utils import admin_datetime, is_club_site
 from core.widgets import AdminRichTextAreaWidget, AdminRelatedDropdownFilter
 from learning.models import InternshipCategory

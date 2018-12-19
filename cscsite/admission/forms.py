@@ -21,7 +21,7 @@ from admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream
 from learning.settings import AcademicDegreeYears
 from learning.utils import now_local
-from users.models import GITHUB_ID_VALIDATOR
+from users.models import GITHUB_LOGIN_VALIDATOR
 
 DEGREE_YEAR_CHOICES = ('', '', '--------') + AcademicDegreeYears.choices
 WHERE_DID_YOU_LEARN = (
@@ -51,7 +51,7 @@ class ApplicationFormStep1(forms.ModelForm):
     github_id = forms.CharField(
         label='Логин на GitHub',
         max_length=80,
-        validators=[GITHUB_ID_VALIDATOR],
+        validators=[GITHUB_LOGIN_VALIDATOR],
         required=False,
         help_text='Если ссылка на ваш профиль на GitHub выглядит вот '
                   'так: https://github.com/XXXX, то логин — это XXXX')

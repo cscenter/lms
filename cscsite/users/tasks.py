@@ -48,7 +48,7 @@ def update_password_in_gerrit(user_id: int):
         logger.warning(f"User with id={user_id} not found")
         return
     username = get_ldap_username(user)
-    # TODO: What if connection failed when code review system is not available?
+    # TODO: What if connection fail when code review system is not available?
     with connection() as c:
         changed = c.set_password_hash(username, user.password_hash_ldap)
         if not changed:

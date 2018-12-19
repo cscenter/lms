@@ -3,9 +3,10 @@ import datetime
 import pytest
 import pytz
 
-from courses.settings import SemesterTypes, TERMS_INDEX_START
+from courses.settings import SemesterTypes
 from courses.utils import get_term_index, get_term_by_index, \
-    get_term_index_academic_year_starts, get_current_term_pair
+    get_term_index_academic_year_starts, get_current_term_pair, \
+    TERMS_INDEX_START
 from core.settings.base import FOUNDATION_YEAR
 
 

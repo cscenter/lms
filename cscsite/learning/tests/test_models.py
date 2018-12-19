@@ -20,7 +20,6 @@ from courses.factories import MetaCourseFactory, SemesterFactory, CourseFactory,
     AssignmentFactory, AssignmentAttachmentFactory
 from learning.models import StudentAssignment
 from courses.models import Course, Semester, CourseNews, Assignment
-from learning.settings import AssignmentStates
 from courses.settings import SemesterTypes
 from courses.utils import get_term_start, next_term_starts_at, get_term_index
 from users.factories import UserFactory, StudentCenterFactory, \
@@ -322,24 +321,24 @@ class StudentAssignmentTests(TestCase):
         )
         ctx = {'student': student, 'assignment': a_online}
         a_s = StudentAssignment(score=0, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.UNSATISFACTORY)
+        self.assertEqual(a_s.state.value, a_s.States.UNSATISFACTORY)
         a_s = StudentAssignment(score=4, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.UNSATISFACTORY)
+        self.assertEqual(a_s.state.value, a_s.States.UNSATISFACTORY)
         a_s = StudentAssignment(score=5, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.CREDIT)
+        self.assertEqual(a_s.state.value, a_s.States.CREDIT)
         a_s = StudentAssignment(score=8, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.GOOD)
+        self.assertEqual(a_s.state.value, a_s.States.GOOD)
         a_s = StudentAssignment(score=10, **ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.EXCELLENT)
+        self.assertEqual(a_s.state.value, a_s.States.EXCELLENT)
         a_s = StudentAssignment(**ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.NOT_SUBMITTED)
+        self.assertEqual(a_s.state.value, a_s.States.NOT_SUBMITTED)
         a_offline = AssignmentFactory.create(
             passing_score=5, maximum_score=10, is_online=False,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx['assignment'] = a_offline
         a_s = StudentAssignment(**ctx)
-        self.assertEqual(a_s.state.value, AssignmentStates.NOT_CHECKED)
+        self.assertEqual(a_s.state.value, a_s.States.NOT_CHECKED)
 
     def test_state_display(self):
         as_ = StudentAssignmentFactory(score=30,
@@ -347,7 +346,7 @@ class StudentAssignmentTests(TestCase):
         self.assertIn(smart_text(as_.assignment.maximum_score), as_.state_display)
         self.assertIn(smart_text(as_.score), as_.state_display)
         as_ = StudentAssignmentFactory(assignment__maximum_score=50)
-        self.assertEqual(AssignmentStates.labels.NOT_SUBMITTED,
+        self.assertEqual(StudentAssignment.States.labels.NOT_SUBMITTED,
                          as_.state_display)
 
     def test_state_short(self):
@@ -356,7 +355,7 @@ class StudentAssignmentTests(TestCase):
         self.assertIn(smart_text(as_.assignment.maximum_score), as_.state_short)
         self.assertIn(smart_text(as_.score), as_.state_short)
         as_ = StudentAssignmentFactory(assignment__maximum_score=50)
-        state = AssignmentStates.get_choice(AssignmentStates.NOT_SUBMITTED)
+        state = StudentAssignment.States.get_choice(StudentAssignment.States.NOT_SUBMITTED)
         self.assertEqual(state.abbr, as_.state_short)
 
 

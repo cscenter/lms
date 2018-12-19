@@ -1,17 +1,18 @@
-from django import forms
-from django.conf import settings
-from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm
-from django.urls import reverse
-from django.forms import ValidationError
-from django.utils import translation
-from django.utils.translation import ugettext_lazy as _
+from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div
-from crispy_forms.bootstrap import FormActions
+from django import forms
+from django.conf import settings
+from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, \
+    UserCreationForm as _UserCreationForm, UserChangeForm as _UserChangeForm
+from django.core.exceptions import ValidationError
+from django.urls import reverse
+from django.utils import translation
+from django.utils.translation import ugettext_lazy as _
 
+from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site
 from core.widgets import UbereditorWidget
-from core.models import LATEX_MARKDOWN_ENABLED
 from learning.forms import CANCEL_SAVE_PAIR
 from learning.settings import AcademicRoles
 from users import tasks
@@ -164,3 +165,49 @@ class UserPasswordResetForm(PasswordResetForm):
             to_email=to_email,
             context=ctx,
             language_code=translation.get_language())
+
+
+class UserCreationForm(_UserCreationForm):
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+
+class UserChangeForm(_UserChangeForm):
+    class Meta:
+        fields = '__all__'
+        model = User
+
+    def clean(self):
+        """XXX: we can't validate m2m like `groups` in Model.clean() method"""
+        cleaned_data = super().clean()
+        enrollment_year = cleaned_data.get('enrollment_year')
+        groups = {x.pk for x in cleaned_data.get('groups', [])}
+        u: User = self.instance
+        if u.roles.STUDENT_CENTER in groups:
+            if enrollment_year is None:
+                self.add_error('enrollment_year', ValidationError(
+                    _("Enrollment year should be provided for students")))
+        if groups.intersection({AcademicRoles.STUDENT_CENTER,
+                                AcademicRoles.VOLUNTEER,
+                                AcademicRoles.GRADUATE_CENTER}):
+            if not cleaned_data.get('city', ''):
+                self.add_error('city', ValidationError(
+                    _("Provide city for student")))
+
+        if u.roles.VOLUNTEER in groups and enrollment_year is None:
+            self.add_error('enrollment_year', ValidationError(
+                _("CSCUser|enrollment year should be provided for volunteers")))
+
+        graduation_year = cleaned_data.get('graduation_year')
+        if u.roles.GRADUATE_CENTER in groups and graduation_year is None:
+            self.add_error('graduation_year', ValidationError(
+                _("CSCUser|graduation year should be provided for graduates")))
+
+        if u.roles.VOLUNTEER in groups and u.roles.STUDENT_CENTER in groups:
+            msg = _("User can't be volunteer and student at the same time")
+            self.add_error('groups', ValidationError(msg))
+
+        if u.roles.GRADUATE_CENTER in groups and u.roles.STUDENT_CENTER in groups:
+            msg = _("User can't be graduated and student at the same time")
+            self.add_error('groups', ValidationError(msg))
