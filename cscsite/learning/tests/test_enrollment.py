@@ -8,8 +8,9 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from learning.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory, EnrollmentFactory, CourseNewsFactory
+from learning.factories import EnrollmentFactory
+from courses.factories import SemesterFactory, CourseFactory, CourseNewsFactory, \
+    AssignmentFactory
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseNewsNotification
 from learning.settings import DATE_FORMAT_RU

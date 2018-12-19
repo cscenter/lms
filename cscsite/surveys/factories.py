@@ -4,7 +4,7 @@ from random import randint
 import factory
 
 from core.factories import EmailTemplateFactory
-from learning.factories import CourseFactory
+from courses.factories import CourseFactory
 from surveys.constants import FieldType
 from surveys.models import CourseSurvey, Form, Field, FormSubmission, \
     FieldEntry, FieldChoice

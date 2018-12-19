@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from courses.models import Course, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from learning.utils import semester_slug_re, get_term_index
+from courses.utils import get_term_index, semester_slug_re
 from learning.views.utils import get_user_city_code
 
 

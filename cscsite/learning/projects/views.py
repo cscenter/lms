@@ -32,7 +32,7 @@ from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
 from learning.settings import AcademicRoles
-from learning.utils import get_current_term_index
+from courses.utils import get_current_term_index
 from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin, \
     StudentOnlyMixin
 from notifications import types

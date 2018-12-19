@@ -5,8 +5,9 @@ from django.urls import reverse
 from icalendar import Calendar, Event
 
 from core.models import City
-from learning.factories import CourseClassFactory, CourseFactory, \
-    EnrollmentFactory, AssignmentFactory, NonCourseEventFactory, VenueFactory
+from learning.factories import EnrollmentFactory, NonCourseEventFactory
+from courses.factories import CourseFactory, CourseClassFactory, \
+    AssignmentFactory, VenueFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import UserFactory, StudentFactory
 from users.models import User

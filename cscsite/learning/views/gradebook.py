@@ -19,7 +19,7 @@ from learning.gradebook import GradeBookFormFactory, gradebook_data, \
     AssignmentGradesImport
 from courses.models import Course, Semester, Assignment
 from courses.settings import SemesterTypes
-from learning.utils import get_current_term_pair, get_term_index
+from courses.utils import get_current_term_pair, get_term_index
 from learning.viewmixins import CuratorOnlyMixin, TeacherOnlyMixin
 
 __all__ = [

@@ -18,4 +18,5 @@ class ClassTypes(DjangoChoices):
 
 
 # Helps to sort terms in chronological order
+# FIXME: move to Semester model?
 TERMS_INDEX_START = 1

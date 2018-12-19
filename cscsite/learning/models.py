@@ -457,6 +457,7 @@ class AreaOfStudy(models.Model):
         return smart_text(self.name)
 
 
+# FIXME: move -> cscenter app
 class StudyProgram(TimeStampedModel):
     year = models.PositiveSmallIntegerField(
         _("Year"), validators=[MinValueValidator(1990)])
@@ -478,6 +479,7 @@ class StudyProgram(TimeStampedModel):
     objects = StudyProgramQuerySet.as_manager()
 
 
+# FIXME: move -> cscenter app
 class StudyProgramCourseGroup(models.Model):
     courses = models.ManyToManyField(
         MetaCourse,
@@ -495,6 +497,7 @@ class StudyProgramCourseGroup(models.Model):
 
 
 # TODO: rename to MoocCourse
+# FIXME: move -> online_courses app?
 class OnlineCourse(TimeStampedModel, TimeFramedModel):
     name = models.CharField(_("Course|name"), max_length=255)
     teachers = models.TextField(
@@ -535,6 +538,7 @@ class OnlineCourse(TimeStampedModel, TimeFramedModel):
         return None
 
 
+# FIXME: move -> csclub app
 class InternationalSchool(TimeStampedModel):
     name = models.CharField(_("InternationalSchool|name"), max_length=255)
     link = models.URLField(
@@ -558,6 +562,7 @@ class InternationalSchool(TimeStampedModel):
         return smart_text(self.name)
 
 
+# FIXME: move -> cscenter app
 class Useful(models.Model):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
@@ -575,6 +580,7 @@ class Useful(models.Model):
         return smart_text(self.question)
 
 
+# FIXME: move -> cscenter app
 class InternshipCategory(models.Model):
     name = models.CharField(_("Category name"), max_length=255)
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
@@ -591,6 +597,7 @@ class InternshipCategory(models.Model):
         return smart_text(self.name)
 
 
+# FIXME: move -> cscenter app
 class Internship(TimeStampedModel):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))

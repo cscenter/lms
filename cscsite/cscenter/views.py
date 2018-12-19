@@ -38,7 +38,7 @@ from learning.models import OnlineCourse, AreaOfStudy, StudyProgram
 from courses.models import Course, Semester, CourseTeacher
 from learning.settings import CENTER_FOUNDATION_YEAR, StudentStatuses
 from courses.settings import SemesterTypes
-from learning.utils import get_current_term_pair, get_term_index, \
+from courses.utils import get_current_term_pair, get_term_index, \
     get_term_index_academic_year_starts, get_term_by_index
 from stats.views import StudentsDiplomasStats
 from users.models import User

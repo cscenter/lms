@@ -12,9 +12,10 @@ from django.urls import reverse
 from django.utils import timezone, formats
 from django.utils.encoding import smart_bytes
 
-from learning.factories import MetaCourseFactory, SemesterFactory, \
-    CourseFactory, CourseNewsFactory, AssignmentFactory, \
-    CourseTeacherFactory, CourseClassFactory, EnrollmentFactory
+from learning.factories import EnrollmentFactory
+from courses.factories import MetaCourseFactory, SemesterFactory, CourseFactory, \
+    CourseTeacherFactory, CourseNewsFactory, CourseClassFactory, \
+    AssignmentFactory
 from learning.models import Enrollment
 from courses.models import Semester, CourseNews
 from learning.settings import AcademicRoles, GradeTypes
@@ -250,7 +251,7 @@ def test_course_assignment_timezone(settings, client):
 
 @pytest.mark.django_db
 def test_update_composite_fields(curator, client, mocker):
-    mocker.patch("learning.tasks.maybe_upload_slides_yandex.delay")
+    mocker.patch("courses.tasks.maybe_upload_slides_yandex.delay")
     teacher = TeacherCenterFactory()
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher])

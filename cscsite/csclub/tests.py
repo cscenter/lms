@@ -4,6 +4,7 @@ import unittest
 
 from django.test import TestCase
 
+from courses.factories import SemesterFactory
 from learning.factories import *
 from learning.settings import AcademicRoles
 from learning.tests.mixins import *

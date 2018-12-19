@@ -32,14 +32,15 @@ def to_css(s):
     return s.replace("_", "-")
 
 
+# FIXME: DeprecationWarning: invalid escape sequence
 TEX_SYMBOLS_TO_ESCAPE = {
-    '#': '\#',
-    '$': '\$',
-    '%': '\%',
-    '_': '\_',
-    '&': '\&',
-    '{': '\{',
-    '}': '\}',
+    '#': r'\#',
+    '$': r'\$',
+    '%': r'\%',
+    '_': r'\_',
+    '&': r'\&',
+    '{': r'\{',
+    '}': r'\}',
 }
 
 

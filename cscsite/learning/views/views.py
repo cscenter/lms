@@ -46,8 +46,10 @@ from learning.permissions import access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from learning.utils import get_current_term_pair, get_term_index, now_local, \
-    get_terms_for_calendar_month, grouper
+from learning.utils import now_local, \
+    grouper
+from courses.utils import get_current_term_pair, get_term_index, \
+    get_terms_for_calendar_month
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
 from learning.views.generic import CalendarGenericView

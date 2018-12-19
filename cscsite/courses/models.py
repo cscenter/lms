@@ -19,15 +19,18 @@ from model_utils.models import TimeStampedModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
 from core.utils import city_aware_reverse, hashids
-from courses.managers import CourseTeacherManager, AssignmentManager, \
-    CourseClassQuerySet, CourseDefaultManager
-from courses.micawber_providers import get_oembed_html
-from courses.settings import SemesterTypes, ClassTypes
 from learning.settings import GradingSystems, GradeTypes, ENROLLMENT_DURATION, \
     ASSIGNMENT_TASK_ATTACHMENT
-from learning.tasks import maybe_upload_slides_yandex
-from learning.utils import get_term_index, next_term_starts_at, now_local, \
-    get_current_term_index, get_term_start, get_current_term_pair
+from learning.utils import now_local
+from courses.utils import get_current_term_pair, get_term_start, \
+    next_term_starts_at, get_term_index, get_current_term_index
+
+from .managers import CourseTeacherManager, AssignmentManager, \
+    CourseClassQuerySet, CourseDefaultManager
+from .micawber_providers import get_oembed_html
+from .settings import SemesterTypes, ClassTypes
+from .tasks import maybe_upload_slides_yandex
+
 
 # FIXME: убрать в сигналы те импорты learning, которые возможно
 
@@ -515,7 +518,6 @@ class Course(TimeStampedModel):
 
 
 class CourseTeacher(models.Model):
-    # XXX: limit choices on admin form level due to bug https://code.djangoproject.com/ticket/11707
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE)

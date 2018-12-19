@@ -11,7 +11,7 @@ from learning.models import AreaOfStudy
 from courses.models import Course, Semester, CourseTeacher
 from learning.settings import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from learning.utils import get_term_index
+from courses.utils import get_term_index
 from users.models import User
 
 

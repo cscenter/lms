@@ -101,6 +101,7 @@ AUTUMN_TERM_START = '1 sep'
 SPRING_TERM_START = '20 jan'  # XXX: spring term must be later than 1 jan
 SUMMER_TERM_START = '1 jul'
 
+# FIXME: а вот это точно можно в настройки семестра вынести
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)  # after semester starts, in days
 
 # Presume foundation year starts from spring term

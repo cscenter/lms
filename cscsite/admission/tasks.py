@@ -134,7 +134,7 @@ def import_testing_results(task_id=None):
             # It means we can miss some results during the parsing
             # if someone has improved his position and moved to scoreboard
             # `page` which we are already processed.
-            participants_total = 0
+            scoreboard_total = 0
             updated_total = 0
             while True:
                 try:
@@ -146,10 +146,10 @@ def import_testing_results(task_id=None):
                         titles = [t["name"] for t in json_data["titles"]]
                         contest.details["titles"] = titles
                         contest.save()
-                    total = 0
+                    page_total = 0
                     for row in json_data['rows']:
-                        participants_total += 1
-                        total += 1
+                        scoreboard_total += 1
+                        page_total += 1
                         yandex_login = row['participantInfo']['login']
                         participant_id = row['participantInfo']['id']
                         score_str: str = row['score']
@@ -171,7 +171,7 @@ def import_testing_results(task_id=None):
                                    .filter(participant)
                                    .update(**update_fields))
                         updated_total += updated
-                    if total < paging["page_size"]:
+                    if page_total < paging["page_size"]:
                         break
                     paging["page"] += 1
                     # TODO: handle read timeout?
@@ -183,7 +183,7 @@ def import_testing_results(task_id=None):
                                      f"Method: `standings` "
                                      f"Contest: {contest_id}")
                     break
-            logger.debug(f"Total participants {participants_total}")
+            logger.debug(f"Total participants {scoreboard_total}")
             logger.debug(f"Updated {updated_total}")
         # FIXME: если контест закончился - для всех, кого нет в scoreboard надо проставить соответствующий статус анкете и тесту.
     task.processed_at = timezone.now()

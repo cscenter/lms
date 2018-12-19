@@ -12,7 +12,8 @@ from django.urls import reverse
 from django.utils import translation
 from django.utils.encoding import smart_text, force_text, smart_bytes
 
-from learning.factories import CourseFactory, AreaOfStudyFactory
+from learning.factories import AreaOfStudyFactory
+from courses.factories import CourseFactory
 from learning.settings import AcademicRoles, StudentStatuses, GradeTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from users.admin import UserCreationForm, UserChangeForm

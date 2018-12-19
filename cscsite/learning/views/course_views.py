@@ -23,7 +23,7 @@ from courses.models import Course, CourseTeacher, CourseNews
 from learning.serializers import CourseNewsNotificationSerializer
 from learning.settings import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from learning.utils import get_term_index
+from courses.utils import get_term_index
 from learning.viewmixins import TeacherOnlyMixin
 from learning.views.utils import get_co_from_query_params, get_user_city_code
 from learning.widgets import CourseTabbedPane
