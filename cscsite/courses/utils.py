@@ -10,7 +10,7 @@ from django.utils import timezone
 from courses.settings import SemesterTypes, \
     AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START
 from core.settings.base import FOUNDATION_YEAR
-from learning.utils import Timezone, CityCode, now_local
+from core.timezone import CityCode, Timezone, now_local
 
 # Helps to sort terms in chronological order
 TERMS_INDEX_START = 1

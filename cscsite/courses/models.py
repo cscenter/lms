@@ -21,7 +21,7 @@ from core.notifications import get_unread_notifications_cache
 from core.utils import city_aware_reverse, hashids
 from learning.settings import GradingSystems, GradeTypes, ENROLLMENT_DURATION, \
     ASSIGNMENT_TASK_ATTACHMENT
-from learning.utils import now_local
+from core.timezone import now_local
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
 

@@ -1,3 +1,6 @@
+import datetime
+from typing import NewType, Union
+
 import pytz
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -41,3 +44,13 @@ def naive_to_city_aware(value, instance):
                 code='ambiguous_timezone',
                 params=params) from exc
     return value
+
+
+CityCode = NewType('CityCode', str)
+Timezone = NewType('Timezone', datetime.tzinfo)
+
+
+def now_local(tz_aware: Union[Timezone, CityCode]) -> datetime.datetime:
+    if not isinstance(tz_aware, datetime.tzinfo):
+        tz_aware = settings.TIME_ZONES[tz_aware]
+    return timezone.localtime(timezone.now(), timezone=tz_aware)

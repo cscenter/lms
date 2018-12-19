@@ -21,7 +21,7 @@ from core.utils import hashids
 from courses.models import Semester
 from learning.settings import AcademicRoles, GradeTypes
 from courses.settings import SemesterTypes
-from learning.utils import now_local
+from core.timezone import now_local
 from courses.utils import get_current_term_index
 
 # Calculate mean scores for these fields when review has been completed

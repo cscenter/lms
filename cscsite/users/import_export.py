@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from import_export import resources, fields, widgets
 
 from learning.settings import AcademicDegreeYears
-from learning.utils import now_local
+from core.timezone import now_local
 from .models import User
 
 
