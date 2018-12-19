@@ -12,23 +12,23 @@ from django.test import TestCase
 from django.utils.encoding import smart_text
 from mock import patch
 
-from learning.factories import MetaCourseFactory, CourseFactory, \
-    CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
-    AssignmentFactory, StudentAssignmentFactory, AssignmentCommentFactory, \
+from learning.factories import StudentAssignmentFactory, AssignmentCommentFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
-    CourseNewsNotificationFactory, AssignmentAttachmentFactory, \
-    SemesterFactory
+    CourseNewsNotificationFactory
+from courses.factories import MetaCourseFactory, SemesterFactory, CourseFactory, \
+    CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
+    AssignmentFactory, AssignmentAttachmentFactory
 from learning.models import StudentAssignment
 from courses.models import Course, Semester, CourseNews, Assignment
 from learning.settings import AssignmentStates
 from courses.settings import SemesterTypes
-from learning.utils import get_term_start, next_term_starts_at
+from courses.utils import get_term_start, next_term_starts_at, get_term_index
 from users.factories import UserFactory, StudentCenterFactory, \
     TeacherCenterFactory
 
 
 class CommonTests(TestCase):
-    @mock.patch("learning.tasks.maybe_upload_slides_yandex.delay")
+    @mock.patch("courses.tasks.maybe_upload_slides_yandex.delay")
     def test_to_strings(self, _):
         meta_course = MetaCourseFactory.build()
         self.assertEqual(smart_text(meta_course), meta_course.name)
@@ -110,7 +110,6 @@ def test_semester_starts_ends():
 
 
 def test_semester_cmp():
-    from learning.utils import get_term_index
     index = get_term_index(2013, 'spring')
     s2013_spring = Semester(type='spring', year=2013, index=index)
     index = get_term_index(2013, 'autumn')

@@ -11,8 +11,8 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils.encoding import smart_bytes, force_bytes
 
-from learning.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory, EnrollmentFactory
+from learning.factories import EnrollmentFactory
+from courses.factories import SemesterFactory, CourseFactory, AssignmentFactory
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory, AssignmentGradesImport
 from learning.models import StudentAssignment, Enrollment

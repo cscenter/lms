@@ -1,8 +1,8 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from learning.factories import CourseFactory, EnrollmentFactory, \
-    SemesterFactory
+from learning.factories import EnrollmentFactory
+from courses.factories import SemesterFactory, CourseFactory
 from learning.settings import AcademicRoles, StudentStatuses, GradeTypes
 from users.factories import StudentFactory, CuratorFactory, UserFactory, \
     StudentCenterFactory

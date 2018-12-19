@@ -20,7 +20,7 @@ from csclub import tasks
 from learning.gallery.models import Image
 from courses.models import Course, Semester, CourseClass
 from courses.settings import SemesterTypes
-from learning.utils import get_current_term_pair
+from courses.utils import get_current_term_pair
 from learning.views.generic import CalendarGenericView
 from users.models import User
 

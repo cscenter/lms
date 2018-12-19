@@ -7,11 +7,12 @@ import pytz
 from django.core import mail, management
 from django.test import TestCase
 
+from courses.models import CourseTeacher, Assignment
 from learning.admin import AssignmentAdmin
+from learning.factories import *
 from learning.settings import DATE_FORMAT_RU, StudentStatuses, GradeTypes
 from users.factories import TeacherCenterFactory
 from .mixins import *
-from ..factories import *
 
 
 class NotificationTests(MyUtilitiesMixin, TestCase):

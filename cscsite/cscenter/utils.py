@@ -3,8 +3,7 @@ from enum import Enum
 
 from django.urls import reverse
 
-from learning.utils import get_term_index_academic_year_starts, \
-    get_term_by_index
+from courses.utils import get_term_index_academic_year_starts, get_term_by_index
 
 
 def group_terms_by_academic_year(courses):

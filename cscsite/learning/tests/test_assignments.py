@@ -14,9 +14,10 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 from core.admin import get_admin_url
-from learning.factories import SemesterFactory, CourseFactory, \
-    AssignmentFactory, EnrollmentFactory, AssignmentCommentFactory, \
-    StudentAssignmentFactory, CourseTeacherFactory
+from learning.factories import EnrollmentFactory, AssignmentCommentFactory, \
+    StudentAssignmentFactory
+from courses.factories import SemesterFactory, CourseFactory, \
+    CourseTeacherFactory, AssignmentFactory
 from learning.models import StudentAssignment
 from courses.models import Assignment, AssignmentAttachment
 from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU, \
@@ -24,7 +25,7 @@ from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU, \
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect
-from learning.utils import get_current_term_pair
+from courses.utils import get_current_term_pair
 from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory, VolunteerFactory, ProjectReviewerFactory
 

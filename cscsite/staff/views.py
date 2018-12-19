@@ -34,7 +34,7 @@ from learning.settings import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR, \
     AcademicDegreeYears, StudentStatuses, \
     GradeTypes
 from courses.settings import SemesterTypes
-from learning.utils import get_current_term_pair, get_term_index, \
+from courses.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
 from learning.viewmixins import CuratorOnlyMixin
 from staff.models import Hint

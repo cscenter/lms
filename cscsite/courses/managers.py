@@ -11,7 +11,7 @@ from core.utils import is_club_site
 from learning.calendar import get_bounds_for_calendar_month
 from learning.settings import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from learning.utils import get_term_index
+from courses.utils import get_term_index
 
 
 class CourseTeacherQuerySet(query.QuerySet):

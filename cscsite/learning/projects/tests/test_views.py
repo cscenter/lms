@@ -5,12 +5,12 @@ from django.urls import reverse
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
-from learning.factories import SemesterFactory
+from courses.factories import SemesterFactory
 from learning.projects.factories import ProjectFactory, ReportFactory, \
     ReportReviewFormFactory
 from learning.projects.models import Report, ProjectStudent
 from learning.settings import AcademicRoles, StudentStatuses, GradeTypes
-from learning.utils import get_current_term_pair
+from courses.utils import get_current_term_pair
 from notifications.models import Notification
 from users.factories import StudentCenterFactory, ProjectReviewerFactory, \
     UserFactory, CuratorFactory

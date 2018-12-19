@@ -12,7 +12,7 @@ from admission.models import Campaign, Interview, Comment
 from courses.models import Course, Semester
 from learning.settings import CENTER_FOUNDATION_YEAR, StudentStatuses, GradeTypes
 from courses.settings import SemesterTypes
-from learning.utils import get_term_index
+from courses.utils import get_term_index
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import User
 

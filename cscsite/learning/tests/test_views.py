@@ -16,13 +16,15 @@ from django.utils.timezone import now
 from testfixtures import LogCapture
 
 from core.utils import city_aware_reverse
+from courses.models import MetaCourse, Course, CourseClass
+from courses.utils import get_current_term_pair
+from learning.factories import *
 from learning.forms import CourseClassForm
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.utils import check_url_security
-from users.factories import TeacherCenterFactory, StudentClubFactory, \
-    GraduateFactory
+from users.factories import StudentFactory, StudentClubFactory, \
+    GraduateFactory, TeacherCenterFactory
 from .mixins import *
-from ..factories import *
 
 
 # TODO: Список отображаемых курсов для центра/клуба
@@ -873,7 +875,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
 class NonCourseEventDetailTests(MyUtilitiesMixin, TestCase):
     def basic_test(self):
         evt = NonCourseEventFactory.create()
-        url = cc.get_absolute_url()
+        url = evt.get_absolute_url()
         resp = self.client.get(url)
         self.assertContains(evt.name, resp)
         self.assertContains(evt.venue.get_absolute_url(), resp)

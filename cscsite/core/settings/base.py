@@ -59,7 +59,6 @@ INSTALLED_APPS = [
     'bootstrap3',
     'taggit',
     'micawber.contrib.mcdjango',
-    'slides',
     'dbbackup',
 
     'users.apps.UsersConfig',

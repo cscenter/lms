@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 import datetime
 
 import django_rq
@@ -11,7 +9,7 @@ from django.core.management import CommandError
 
 from learning import settings
 from courses.models import CourseClass
-from learning.tasks import maybe_upload_slides_yandex
+from courses.tasks import maybe_upload_slides_yandex
 
 
 class Command(BaseCommand):
