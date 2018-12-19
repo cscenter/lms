@@ -8,8 +8,10 @@ from users.models import User
 
 
 class Command(BaseCommand):
-    help = ("Show distinct teachers among all students "
-            "with status `will_graduate`")
+    help = """
+    Shows list of teachers who participated in learning students with 
+    `will_graduate` status.
+    """
 
     def handle(self, *args, **options):
         student_groups = [User.roles.STUDENT_CENTER, User.roles.VOLUNTEER]

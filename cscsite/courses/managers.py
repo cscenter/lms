@@ -9,7 +9,7 @@ from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
 
 from core.utils import is_club_site
 from learning.calendar import get_bounds_for_calendar_month
-from learning.settings import CENTER_FOUNDATION_YEAR
+from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
 

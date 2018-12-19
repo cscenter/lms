@@ -29,7 +29,7 @@ THUMBNAIL_DEBUG = False
 
 DEFAULT_CITY_CODE = "spb"
 CENTER_BRANCHES_CITY_CODES = ['spb', 'nsk']
-# Rename if use on club site
+
 CITIES = {
     "spb": _("Saint Petersburg"),
     "nsk": _("Novosibirsk")
@@ -264,3 +264,7 @@ ADMIN_REORDER = [
 ]
 
 DATE_FORMAT = 'j E Y'
+
+# Presume foundation year starts from spring term
+FOUNDATION_YEAR = 2007
+CENTER_FOUNDATION_YEAR = 2011

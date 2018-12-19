@@ -44,7 +44,8 @@ from courses.models import MetaCourse, Course, Semester, Venue, CourseClass, \
     CourseClassAttachment, Assignment, AssignmentAttachment
 from learning.permissions import access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
-    ASSIGNMENT_TASK_ATTACHMENT, FOUNDATION_YEAR
+    ASSIGNMENT_TASK_ATTACHMENT
+from core.settings.base import FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from learning.utils import now_local, \
     grouper

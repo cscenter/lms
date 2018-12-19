@@ -10,7 +10,7 @@ from users.models import User
 
 
 class Command(BaseCommand):
-    help = ("Update teachers groups from data based on course offerings info")
+    help = "Update teachers groups based on data from course info"
 
     CENTER_ONLY = 1
     CLUB_ONLY = 2
@@ -21,7 +21,7 @@ class Command(BaseCommand):
         cos = Course.objects.prefetch_related("teachers")
         for co in cos:
             for teacher in co.teachers.all():
-                if not teacher.pk in teachers:
+                if teacher.pk not in teachers:
                     teachers[teacher.pk] = {
                         "state": self.CLUB_ONLY if co.is_open else self.CENTER_ONLY,
                         "obj": teacher
@@ -43,4 +43,3 @@ class Command(BaseCommand):
             elif teachers[teacher]["state"] == self.CENTER_ONLY:
                 teachers[teacher]["obj"].groups.add(AcademicRoles.TEACHER_CENTER)
                 teachers[teacher]["obj"].groups.remove(AcademicRoles.TEACHER_CLUB)
-

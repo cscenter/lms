@@ -10,7 +10,7 @@ from itertools import chain
 
 from rest_framework import serializers, fields
 
-from learning.settings import FOUNDATION_YEAR
+from core.settings.base import FOUNDATION_YEAR
 from learning.utils import grouper
 
 __all__ = ['get_bounds_for_calendar_month', 'EventsCalendar',
