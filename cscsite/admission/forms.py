@@ -20,7 +20,7 @@ from core.widgets import UbereditorWidget
 from admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream
 from learning.settings import AcademicDegreeYears
-from learning.utils import now_local
+from core.timezone import now_local
 from users.models import GITHUB_LOGIN_VALIDATOR
 
 DEGREE_YEAR_CHOICES = ('', '', '--------') + AcademicDegreeYears.choices

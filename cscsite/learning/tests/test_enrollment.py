@@ -14,7 +14,7 @@ from courses.factories import SemesterFactory, CourseFactory, CourseNewsFactory,
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseNewsNotification
 from learning.settings import DATE_FORMAT_RU
-from learning.utils import now_local
+from core.timezone import now_local
 from users.factories import StudentCenterFactory, StudentClubFactory
 
 

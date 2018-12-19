@@ -33,9 +33,9 @@ from core.utils import hashids, render_markdown, is_club_site
 from core.views import ProtectedFormMixin, LoginRequiredMixin
 from learning import utils
 from learning.calendar import CalendarQueryParams
-from learning.forms import CourseClassForm, CourseForm, \
-    AssignmentCommentForm, AssignmentScoreForm, AssignmentForm, \
+from learning.forms import AssignmentCommentForm, AssignmentScoreForm, \
     AssignmentModalCommentForm
+from courses.forms import CourseForm, CourseClassForm, AssignmentForm
 from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
     AssignmentNotification, \
     NonCourseEvent, \
@@ -47,8 +47,8 @@ from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT
 from core.settings.base import FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from learning.utils import now_local, \
-    grouper
+from learning.utils import grouper
+from core.timezone import now_local
 from courses.utils import get_current_term_pair, get_term_index, \
     get_terms_for_calendar_month
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \

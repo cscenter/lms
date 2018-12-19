@@ -1,20 +1,8 @@
 import datetime
-from typing import Union, NewType
 
-from django.conf import settings
-from django.utils import timezone
 from itertools import zip_longest
 
 from learning.settings import GradeTypes
-
-CityCode = NewType('CityCode', str)
-Timezone = NewType('Timezone', datetime.tzinfo)
-
-
-def now_local(tz_aware: Union[Timezone, CityCode]) -> datetime.datetime:
-    if not isinstance(tz_aware, datetime.tzinfo):
-        tz_aware = settings.TIME_ZONES[tz_aware]
-    return timezone.localtime(timezone.now(), timezone=tz_aware)
 
 
 def grade_to_mark(grade):

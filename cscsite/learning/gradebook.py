@@ -307,7 +307,8 @@ class BaseGradebookForm(forms.Form):
 
 class CustomBoundField(BoundField):
     """
-    Shows value provided to field constructor on rendering hidden widget.
+    Shows `hidden_initial_value` value provided to field constructor
+    on rendering hidden widget.
     """
     def as_hidden(self, attrs=None, **kwargs):
         """
@@ -376,7 +377,7 @@ class GradeBookFormFactory:
         students final grades for provided course.
         Internally each field of the form uses `show_hidden_initial` feature,
         but stores value provided to field constructor
-        (see `CustomBoundField`) instead of value provided to the form.
+        (see `CustomBoundField`) instead of the value provided to the form.
         """
         cls_dict = fields = {}
         for student_submissions in gradebook.submissions:

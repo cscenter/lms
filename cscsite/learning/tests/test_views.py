@@ -19,7 +19,7 @@ from core.utils import city_aware_reverse
 from courses.models import MetaCourse, Course, CourseClass
 from courses.utils import get_current_term_pair
 from learning.factories import *
-from learning.forms import CourseClassForm
+from courses.forms import CourseClassForm
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.utils import check_url_security
 from users.factories import StudentFactory, StudentClubFactory, \

@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from api.utils import make_api_fragment_key
 from core.utils import render_markdown
+from learning.models import CourseNewsNotification
 from users.models import User
 
 
@@ -78,3 +79,16 @@ class TestimonialSerializer(serializers.ModelSerializer):
             fragment_cache.set(cache_key, value, expire_time)
         return value
 
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name')
+
+
+class CourseNewsNotificationSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = CourseNewsNotification
+        fields = ('user', 'is_unread', 'is_notified')

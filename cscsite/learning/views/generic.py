@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.views import generic
 
 from learning.calendar import EventsCalendar, CalendarQueryParams
-from learning.utils import now_local
+from core.timezone import now_local
 
 __all__ = ['CalendarGenericView']
 

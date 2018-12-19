@@ -18,7 +18,7 @@ from admission.factories import ApplicantFactory, InterviewFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
 from admission.forms import InterviewFromStreamForm
 from admission.models import Applicant, Interview, InterviewInvitation
-from learning.utils import now_local
+from core.timezone import now_local
 from users.factories import UserFactory
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)

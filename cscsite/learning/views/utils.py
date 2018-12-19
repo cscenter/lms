@@ -3,7 +3,7 @@ from typing import Optional
 
 from core.utils import is_club_site
 from courses.models import Course
-from learning.utils import CityCode
+from core.timezone import CityCode
 from courses.utils import semester_slug_re
 
 logger = logging.getLogger(__name__)

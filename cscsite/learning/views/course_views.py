@@ -17,10 +17,10 @@ from api.permissions import CuratorAccessPermission
 from core.exceptions import Redirect
 from core.utils import get_club_domain
 from core.views import ProtectedFormMixin
-from learning.forms import CourseEditDescrForm, CourseNewsForm
+from courses.forms import CourseEditDescrForm, CourseNewsForm
 from learning.models import CourseNewsNotification
 from courses.models import Course, CourseTeacher, CourseNews
-from learning.serializers import CourseNewsNotificationSerializer
+from learning.api.serializers import CourseNewsNotificationSerializer
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
