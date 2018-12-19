@@ -1,15 +1,12 @@
 import datetime
 
-import pytz
-
 from django import forms
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin import widgets
 from django.contrib.auth.models import Group
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.urls import reverse, NoReverseMatch
 from django.db.models import Model
@@ -18,11 +15,63 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
+from core.timezone import city_aware_to_naive, naive_to_city_aware
 from .models import City, Faq, FaqCategory, University
 
 # Hide applications in the admin
 admin.site.unregister(Group)
 admin.site.unregister(Site)
+
+
+def related_spec_to_list(spec):
+    list_form = []
+    for subspec in spec:
+        if isinstance(subspec, tuple):
+            parent, children = subspec
+            list_form.append(parent)
+            list_form.extend("{}__{}".format(parent, x)
+                             for x in related_spec_to_list(children))
+        else:
+            list_form.append(subspec)
+
+    return list_form
+
+
+def apply_related_spec(qs, related_spec):
+    if not related_spec:
+        return qs
+    if 'select' in related_spec:
+        qs = qs.select_related(*related_spec_to_list(related_spec['select']))
+    if 'prefetch' in related_spec:
+        qs = qs.prefetch_related(*related_spec_to_list(related_spec['prefetch']))
+    return qs
+
+
+class RelatedSpecMixin:
+    """
+    Extend base queryset with additional values for `select_related` and
+    `prefetch_related`.
+
+    Don't forget to add `related_spec` attribute.
+
+    Example:
+        ExampleModelAdmin(admin.ModelAdmin):
+            related_spec = {'select': [
+                                ('assignment',
+                                [('course', ['semester', 'meta_course'])]),
+                               'student']}
+
+        `related_spec` will be translated to:
+
+            .select_related('assignment',
+                            'assignment__course',
+                            'assignment__course__semester',
+                            'assignment__course__meta_course',
+                            'student')
+    """
+    def get_queryset(self, request):
+        qs = super(RelatedSpecMixin, self).get_queryset(request)
+        return apply_related_spec(qs, self.related_spec)
 
 
 def get_admin_url(instance_or_qs):
@@ -44,8 +93,7 @@ def get_admin_url(instance_or_qs):
             "admin:{0.app_label}_{0.model}_change".format(content_type),
             args=[instance_or_qs.pk])
     else:
-        raise ValueError("Expected model or query, got: {0:r}"
-                         .format(instance_or_qs))
+        raise ValueError(f"Expected model or query, got: {instance_or_qs}")
 
 
 def urlize(instance, text=None):
@@ -118,43 +166,6 @@ admin.site.register(FaqCategory, FaqCategoryAdmin)
 
 # TIMEZONE SUPPORT
 
-def city_aware_to_naive(value, instance):
-    """
-    Convert aware datetime to naive in the timezone of the city for display.
-    """
-    if settings.USE_TZ and value is not None and timezone.is_aware(value):
-        if not hasattr(instance, "get_city_timezone"):
-            raise NotImplementedError("Implement `get_city_timezone` method "
-                                      "for %s model" % str(instance.__class__))
-        city_timezone = instance.get_city_timezone()
-        return timezone.make_naive(value, city_timezone)
-    return value
-
-
-def naive_to_city_aware(value, instance):
-    """
-    When time zone support is enabled, convert naive datetime to aware.
-    """
-    if settings.USE_TZ and value is not None and timezone.is_naive(value):
-        try:
-            city_timezone = instance.get_city_timezone()
-        except ObjectDoesNotExist:
-            # Until city aware field is empty, we can't determine timezone
-            city_timezone = pytz.UTC
-        try:
-            return timezone.make_aware(value, city_timezone)
-        except Exception as exc:
-            msg = _(
-                '%(datetime)s couldn\'t be interpreted in time zone '
-                '%(city_timezone)s; it may be ambiguous or it may not exist.'
-            )
-            params = {'datetime': value, 'city_timezone': city_timezone}
-            raise ValidationError(
-                msg,
-                code='ambiguous_timezone',
-                params=params) from exc
-    return value
-
 
 class CityAwareModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -206,9 +217,11 @@ class CityAwareSplitDateTimeField(forms.SplitDateTimeField):
             # Raise a validation error if time or date is empty
             # (possible if SplitDateTimeField has required=False).
             if data_list[0] in self.empty_values:
-                raise ValidationError(self.error_messages['invalid_date'], code='invalid_date')
+                raise ValidationError(self.error_messages['invalid_date'],
+                                      code='invalid_date')
             if data_list[1] in self.empty_values:
-                raise ValidationError(self.error_messages['invalid_time'], code='invalid_time')
+                raise ValidationError(self.error_messages['invalid_time'],
+                                      code='invalid_time')
             result = datetime.datetime.combine(*data_list)
             city_aware = naive_to_city_aware(result, self.widget.instance)
             return city_aware

@@ -4,9 +4,8 @@ from django.contrib import admin
 from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import meta, urlize
+from core.admin import meta, urlize, RelatedSpecMixin
 from core.widgets import AdminRichTextAreaWidget
-from core.models import RelatedSpecMixin
 from .models import Book, Borrow, Stock
 
 

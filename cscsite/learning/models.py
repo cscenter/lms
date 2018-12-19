@@ -31,8 +31,7 @@ from learning import settings as learn_conf
 from learning.managers import StudyProgramQuerySet, \
     EnrollmentDefaultManager, \
     EnrollmentActiveManager, NonCourseEventQuerySet, StudentAssignmentManager
-from learning.settings import AssignmentStates, GradingSystems, \
-    GradeTypes
+from learning.settings import GradingSystems, GradeTypes
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +41,26 @@ class StudentAssignment(TimeStampedModel):
         NOBODY = ChoiceItem(0)
         STUDENT = ChoiceItem(1)
         TEACHER = ChoiceItem(2)
+
+    class States(DjangoChoices):
+        NOT_SUBMITTED = ChoiceItem(
+            "not_submitted", _("Assignment|not submitted"),
+            abbr="—", css_class="not-submitted")
+        NOT_CHECKED = ChoiceItem(
+            "not_checked", _("Assignment|not checked"),
+            abbr="…", css_class="not-checked")
+        UNSATISFACTORY = ChoiceItem(
+            "unsatisfactory", _("Assignment|unsatisfactory"),
+            abbr="2", css_class="unsatisfactory")
+        CREDIT = ChoiceItem(
+            "pass", _("Assignment|pass"),
+            abbr="3", css_class="pass")
+        GOOD = ChoiceItem(
+            "good", _("Assignment|good"),
+            abbr="4", css_class="good")
+        EXCELLENT = ChoiceItem(
+            "excellent", _("Assignment|excellent"),
+            abbr="5", css_class="excellent")
 
     assignment = models.ForeignKey(
         Assignment,
@@ -124,19 +143,19 @@ class StudentAssignment(TimeStampedModel):
         satisfactory_range = maximum_score - passing_score
         if score is None:
             if not self.assignment.is_online or self.submission_is_received:
-                state = AssignmentStates.NOT_CHECKED
+                state = StudentAssignment.States.NOT_CHECKED
             else:
-                state = AssignmentStates.NOT_SUBMITTED
+                state = StudentAssignment.States.NOT_SUBMITTED
         else:
             if score < passing_score or score == 0:
-                state = AssignmentStates.UNSATISFACTORY
+                state = StudentAssignment.States.UNSATISFACTORY
             elif score < passing_score + 0.4 * satisfactory_range:
-                state = AssignmentStates.CREDIT
+                state = StudentAssignment.States.CREDIT
             elif score < passing_score + 0.8 * satisfactory_range:
-                state = AssignmentStates.GOOD
+                state = StudentAssignment.States.GOOD
             else:
-                state = AssignmentStates.EXCELLENT
-        return AssignmentStates.get_choice(state)
+                state = StudentAssignment.States.EXCELLENT
+        return StudentAssignment.States.get_choice(state)
 
     @property
     def submission_is_received(self):

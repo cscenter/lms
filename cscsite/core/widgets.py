@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.admin import RelatedFieldListFilter
 from django_filters.widgets import RangeWidget
 
-from core.admin import city_aware_to_naive
+from core.timezone import city_aware_to_naive
 from learning.settings import DATE_FORMAT_RU
 
 

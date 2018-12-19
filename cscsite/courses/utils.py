@@ -7,11 +7,13 @@ import pytz
 from dateutil import parser as dparser
 from django.utils import timezone
 
-from courses.settings import SemesterTypes, TERMS_INDEX_START
-from learning.settings import SPRING_TERM_START, AUTUMN_TERM_START, \
-    SUMMER_TERM_START
+from courses.settings import SemesterTypes, \
+    AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START
 from core.settings.base import FOUNDATION_YEAR
 from learning.utils import Timezone, CityCode, now_local
+
+# Helps to sort terms in chronological order
+TERMS_INDEX_START = 1
 
 TermTuple = namedtuple('TermTuple', ['year', 'type'])
 

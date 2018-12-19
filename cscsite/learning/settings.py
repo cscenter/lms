@@ -17,6 +17,9 @@ TIME_FORMAT_RU = "%H:%M"
 ASSIGNMENT_TASK_ATTACHMENT = 0
 ASSIGNMENT_COMMENT_ATTACHMENT = 1
 
+# After semester starts, in days
+ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)
+
 
 class AcademicRoles(DjangoChoices):
     STUDENT_CENTER = C(1, _('Student [CENTER]'))
@@ -78,28 +81,3 @@ class GradeTypes(DjangoChoices):
     EXCELLENT = C('excellent', _("Excellent"))
 
     satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value}
-
-
-# FIXME: AssignmentStates точно деталь реализации (перенести или забить уже?), которая не шарится с другими приложениями, что насчет semestertypes и classtypes?
-class AssignmentStates(DjangoChoices):
-    NOT_SUBMITTED = C("not_submitted", _("Assignment|not submitted"),
-                      abbr="—", css_class="not-submitted")
-    NOT_CHECKED = C("not_checked", _("Assignment|not checked"),
-                    abbr="…", css_class="not-checked")
-    UNSATISFACTORY = C("unsatisfactory", _("Assignment|unsatisfactory"),
-                       abbr="2", css_class="unsatisfactory")
-    CREDIT = C("pass", _("Assignment|pass"),
-               abbr="3", css_class="pass")
-    GOOD = C("good", _("Assignment|good"),
-             abbr="4", css_class="good")
-    EXCELLENT = C("excellent", _("Assignment|excellent"),
-                  abbr="5", css_class="excellent")
-
-
-# TODO: Добавить в модель Semester, использовать как дефолтные значения при создании семестра
-AUTUMN_TERM_START = '1 sep'
-SPRING_TERM_START = '20 jan'  # XXX: spring term must be later than 1 jan
-SUMMER_TERM_START = '1 jul'
-
-# FIXME: а вот это точно можно в настройки семестра вынести
-ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)  # after semester starts, in days

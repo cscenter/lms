@@ -16,5 +16,3 @@ class EmailOrUsernameModelBackend(ModelBackend):
             # Run the default password hasher once to reduce the timing
             # difference between an existing and a non-existing user (#20760).
             user_model().set_password(password)
-
-

@@ -1,87 +1,16 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as _UserAdmin
-from django.contrib.auth.forms import UserCreationForm as _UserCreationForm, \
-    UserChangeForm as _UserChangeForm
 from django.db import models as db_models
-from django.forms import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ImportMixin
 
-from core.models import RelatedSpecMixin
+from core.admin import RelatedSpecMixin
 from core.widgets import AdminRichTextAreaWidget, AdminRelatedDropdownFilter
 from learning.settings import AcademicRoles
+from users.forms import UserCreationForm, UserChangeForm
 from .import_export import UserRecordResource
 from .models import User, EnrollmentCertificate, \
     OnlineCourseRecord, SHADCourseRecord, UserStatusLog
-
-
-class UserCreationForm(_UserCreationForm):
-    class Meta:
-        model = User
-        fields = ('username', 'email')
-
-
-class UserChangeForm(_UserChangeForm):
-    class Meta:
-        fields = '__all__'
-        model = User
-
-    def clean(self):
-        """XXX: we can't validate m2m like `groups` in Model.clean() method"""
-        cleaned_data = super().clean()
-        enrollment_year = cleaned_data.get('enrollment_year')
-        groups = {x.pk for x in cleaned_data.get('groups', [])}
-        u: User = self.instance
-        if u.roles.STUDENT_CENTER in groups:
-            if enrollment_year is None:
-                self.add_error('enrollment_year', ValidationError(
-                    _("Enrollment year should be provided for students")))
-        if groups.intersection({AcademicRoles.STUDENT_CENTER,
-                                AcademicRoles.VOLUNTEER,
-                                AcademicRoles.GRADUATE_CENTER}):
-            if not cleaned_data.get('city', ''):
-                self.add_error('city', ValidationError(
-                    _("Provide city for student")))
-
-        if u.roles.VOLUNTEER in groups and enrollment_year is None:
-            self.add_error('enrollment_year', ValidationError(
-                _("CSCUser|enrollment year should be provided for volunteers")))
-
-        graduation_year = cleaned_data.get('graduation_year')
-        if u.roles.GRADUATE_CENTER in groups and graduation_year is None:
-            self.add_error('graduation_year', ValidationError(
-                _("CSCUser|graduation year should be provided for graduates")))
-
-        if u.roles.VOLUNTEER in groups and u.roles.STUDENT_CENTER in groups:
-            msg = _("User can't be volunteer and student at the same time")
-            self.add_error('groups', ValidationError(msg))
-
-        if u.roles.GRADUATE_CENTER in groups and u.roles.STUDENT_CENTER in groups:
-            msg = _("User can't be graduated and student at the same time")
-            self.add_error('groups', ValidationError(msg))
-
-
-class ForeignKeyCacheMixin(object):
-    """
-    Cache foreignkey choices in the request object to prevent unnecessary queries.
-    """
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        formfield = super(ForeignKeyCacheMixin, self).formfield_for_foreignkey(db_field, request, **kwargs)
-        if db_field.name != 'semester':
-            return formfield
-        cache = getattr(request, 'db_field_cache', {})
-        if cache.get(db_field.name):
-            formfield.choices = cache[db_field.name]
-        else:
-            formfield.choices.field.cache_choices = True
-            formfield.choices.field.choice_cache = [
-                formfield.choices.choice(obj) for obj in
-                formfield.choices.queryset.all()
-            ]
-            request.db_field_cache = cache
-            request.db_field_cache[db_field.name] = formfield.choices
-        return formfield
 
 
 class UserStatusLogAdmin(RelatedSpecMixin, admin.TabularInline):
@@ -90,14 +19,8 @@ class UserStatusLogAdmin(RelatedSpecMixin, admin.TabularInline):
     readonly_fields = ('created', 'status')
     related_spec = {'select': ['semester', 'student']}
 
-    # Uncomment on Django > 2.1.0
-    # https://code.djangoproject.com/ticket/29637
-    # def has_add_permission(self, request):
-    #     return False
-
-
-    # FIXME: formfield_for_foreignkey creates additional queries :<
-    # FIXME: Find out how to prevent of doing it (see ForeignKeyCacheMixin)
+    def has_add_permission(self, request, **kwargs):
+        return False
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):

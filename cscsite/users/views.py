@@ -28,9 +28,6 @@ from .forms import LoginForm, UserProfileForm, EnrollmentCertificateCreateForm
 from .models import User, EnrollmentCertificate
 
 
-# inspired by https://raw2.github.com/concentricsky/django-sky-visitor/
-
-
 class LoginView(generic.FormView):
     redirect_field_name = auth.REDIRECT_FIELD_NAME
     form_class = LoginForm
