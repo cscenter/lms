@@ -30,9 +30,9 @@ from learning.models import StudyProgram, \
 from courses.models import Course, Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
-from learning.settings import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR, \
-    AcademicDegreeYears, StudentStatuses, \
+from learning.settings import AcademicDegreeYears, StudentStatuses, \
     GradeTypes
+from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index, \
     get_term_by_index

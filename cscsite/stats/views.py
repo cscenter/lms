@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 
 from admission.models import Campaign, Interview, Comment
 from courses.models import Course, Semester
-from learning.settings import CENTER_FOUNDATION_YEAR, StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes
+from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
 from learning.viewmixins import CuratorOnlyMixin

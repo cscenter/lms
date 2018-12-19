@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from django.core.management import BaseCommand
 
-from courses.models import Course, Semester, CourseClass, CourseClassAttachment
+from courses.models import Course, CourseClassAttachment
 
 
 class Command(BaseCommand):
-    help = ("Update all CourseOffering model composite fields started "
-            "from `materials_*`")
+    help = "Recalculate `Course` derivable fields starting with `materials_*`"
 
     def handle(self, *args, **options):
         for co in Course.objects.only('pk', 'materials_slides',

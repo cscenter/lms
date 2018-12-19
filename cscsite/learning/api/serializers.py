@@ -1,25 +1,10 @@
-import hashlib
-
 from django.core.cache import caches, InvalidCacheBackendError
-from django.core.cache.utils import make_template_fragment_key
 from django.utils.encoding import force_bytes
-from django.utils.http import urlquote
 from rest_framework import serializers
 
+from api.utils import make_api_fragment_key
 from core.utils import render_markdown
-from courses.models import MetaCourse, Course
 from users.models import User
-
-
-API_FRAGMENT_KEY_TEMPLATE = 'api.cache.%s.%s'
-
-
-def make_api_fragment_key(fragment_name, vary_on=None):
-    if vary_on is None:
-        vary_on = ()
-    key = ':'.join(urlquote(var) for var in vary_on)
-    args = hashlib.md5(force_bytes(key))
-    return API_FRAGMENT_KEY_TEMPLATE % (fragment_name, args.hexdigest())
 
 
 class PhotoSerializerField(serializers.Field):
@@ -34,60 +19,12 @@ class PhotoSerializerField(serializers.Field):
         pass
 
     def to_representation(self, obj):
-        # TODO: get dimensions from map and throw warning if unspecified value passed
+        # TODO: get dimensions from map and throw warning if unspecified value was passed
         image = obj.get_thumbnail(self.photo_dimensions, use_stub=False)
         if image:
             return image.url
         else:
             return None
-
-
-class CourseSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="meta_course_id")
-    name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Course
-        fields = ('id', 'name')
-
-    def get_name(self, obj: Course):
-        return obj.meta_course.name
-
-
-class TeacherCourseListingField(serializers.RelatedField):
-    def to_representation(self, value):
-        return value.course.meta_course_id
-
-
-class TeacherSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="pk")
-    name = serializers.SerializerMethodField()
-    sex = serializers.SerializerMethodField()
-    photo = PhotoSerializerField("176x246")
-    city = serializers.CharField(source="city_id")
-    courses = TeacherCourseListingField(
-        many=True, read_only=True, source="courseteacher_set")
-    # Duplicates are acceptable
-    # TODO: rename
-    last_session = serializers.SerializerMethodField(
-        help_text="The latest term index when the teacher read the course")
-
-    class Meta:
-        model = User
-        fields = ('id', 'name', 'sex', 'workplace', 'city', 'photo',
-                  'courses', 'last_session')
-
-    def get_name(self, obj):
-        return obj.get_full_name()
-
-    def get_last_session(self, obj):
-        last = 0
-        for t in obj.courseteacher_set.all():
-            last = max(last, t.course.semester.index)
-        return last
-
-    def get_sex(self, obj: User):
-        return "m" if obj.gender == obj.GENDER_MALE else "w"
 
 
 class AlumniSerializer(serializers.ModelSerializer):

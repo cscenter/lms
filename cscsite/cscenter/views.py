@@ -36,7 +36,8 @@ from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
 from learning.api.views import TestimonialList
 from learning.models import OnlineCourse, AreaOfStudy, StudyProgram
 from courses.models import Course, Semester, CourseTeacher
-from learning.settings import CENTER_FOUNDATION_YEAR, StudentStatuses
+from learning.settings import StudentStatuses
+from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index, \
     get_term_index_academic_year_starts, get_term_by_index

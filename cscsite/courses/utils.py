@@ -9,7 +9,8 @@ from django.utils import timezone
 
 from courses.settings import SemesterTypes, TERMS_INDEX_START
 from learning.settings import SPRING_TERM_START, AUTUMN_TERM_START, \
-    SUMMER_TERM_START, FOUNDATION_YEAR
+    SUMMER_TERM_START
+from core.settings.base import FOUNDATION_YEAR
 from learning.utils import Timezone, CityCode, now_local
 
 TermTuple = namedtuple('TermTuple', ['year', 'type'])

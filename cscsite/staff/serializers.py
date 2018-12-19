@@ -1,7 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers, fields
 
-from learning.settings import FOUNDATION_YEAR
+from core.settings.base import FOUNDATION_YEAR
 from users.models import User
 
 

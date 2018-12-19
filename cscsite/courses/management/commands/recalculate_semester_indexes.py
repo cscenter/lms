@@ -3,12 +3,12 @@
 from django.core.management import BaseCommand
 
 from courses.models import Semester
-from learning.settings import FOUNDATION_YEAR
+from core.settings.base import FOUNDATION_YEAR
 from courses.settings import SemesterTypes, TERMS_INDEX_START
 
 
 class Command(BaseCommand):
-    help = "Recalculate `Semester.index` values used for ordering and filtering"
+    help = "Recalculate `Semester.index` values used for ordering/filtering"
 
     def handle(self, *args, **options):
         max_year = Semester.objects.order_by("-year").first()

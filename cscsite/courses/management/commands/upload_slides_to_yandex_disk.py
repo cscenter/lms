@@ -7,6 +7,7 @@ import django_rq
 from django.core.management import BaseCommand
 from django.core.management import CommandError
 
+import core.settings.base
 from learning import settings
 from courses.models import CourseClass
 from courses.tasks import maybe_upload_slides_yandex
@@ -14,28 +15,21 @@ from courses.tasks import maybe_upload_slides_yandex
 
 class Command(BaseCommand):
     help = """
-    Try to reupload course class slides stored locally, but missed on
-    yandex disk for passed period beginning.
-
+    Enqueues jobs for uploading course class slides missed on yandex disk.
     """
 
     def add_arguments(self, parser):
-        parser.add_argument('--period_start', type=int,
-                            dest='year_start',
-                            help='Remote path includes folder with academic '
-                                 'years, pass 2015 and slides will be '
-                                 'uploaded to `2015-2016` folder')
+        parser.add_argument('--academic-year', type=int, dest='academic_year')
 
     def handle(self, *args, **options):
-        year_start = options["year_start"]
-        if year_start < settings.FOUNDATION_YEAR:
-            raise CommandError("period should starts from {}".format(
-                settings.FOUNDATION_YEAR))
+        academic_year = options["academic_year"]
+        if academic_year < core.settings.base.FOUNDATION_YEAR:
+            raise CommandError(f"Academic year should be >= {core.settings.base.FOUNDATION_YEAR}")
 
-        qs = (CourseClass.objects
-              .filter(date__gte=datetime.date(year_start, month=9, day=1),
-                      date__lte=datetime.date(year_start + 1, month=9, day=1))
-              .exclude(slides=""))
         queue = django_rq.get_queue('default')
+        qs = (CourseClass.objects
+              .filter(date__gte=datetime.date(academic_year, month=9, day=1),
+                      date__lte=datetime.date(academic_year + 1, month=9, day=1))
+              .exclude(slides=""))
         for course_class in qs:
             queue.enqueue(maybe_upload_slides_yandex, course_class.pk)
