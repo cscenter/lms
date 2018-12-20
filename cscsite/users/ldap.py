@@ -13,7 +13,7 @@ from users.settings import GROUPS_IMPORT_TO_GERRIT
 def get_ldap_username(user: User):
     """
     Portable Filename Character Set (according to POSIX.1-2017) is used for
-    username since @ in username can be misleading when you connected
+    username since @ in username can be misleading when you connect
     over ssh. `foo@localhost.ru@domain.ltd` really looks weird.
     """
     return user.email.replace("@", ".")
@@ -29,7 +29,7 @@ def user_to_ldif(user: User, redirect_to=None):
         'uid': [force_bytes(uid)],
         'employeeNumber': [force_bytes(user.pk)],
         'sn': [force_bytes(user.last_name or user.username)],
-        # CN used as a branch name
+        # CN used as a branch name in git repo
         'cn': [force_bytes(user.get_abbreviated_name_in_latin())],
         'displayName': [force_bytes(user.get_short_name())],
         'mail': [force_bytes(user.email)],

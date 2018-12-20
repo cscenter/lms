@@ -60,8 +60,7 @@ class UserAdmin(_UserAdmin):
         (None, {'fields': ('username', 'email', 'password')}),
         (_('Personal info'), {
             'fields': ['last_name', 'first_name', 'patronymic', 'workplace',
-                       'gender', 'city', 'photo', 'note', 'private_contacts',
-                       'csc_review']}),
+                       'gender', 'city', 'photo', 'note', 'private_contacts']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions']}),
         (_('External services'), {'fields': ['yandex_id', 'stepic_id',
@@ -69,7 +68,8 @@ class UserAdmin(_UserAdmin):
         (_('Student info record'),
          {'fields': ['status', 'enrollment_year',
                      'graduation_year', 'curriculum_year', 'areas_of_study',
-                     'university', 'uni_year_at_enrollment', 'phone']}),
+                     'university', 'uni_year_at_enrollment', 'phone',
+                     'csc_review']}),
         (_("Curator's note"),
          {'fields': ['comment', 'comment_changed_at', 'comment_last_author']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
