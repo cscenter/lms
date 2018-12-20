@@ -128,7 +128,7 @@ class ProjectStudent(models.Model):
         # For research work grade type is binary at most
         if self.project.project_type == Project.ProjectTypes.research:
             return label
-        # XXX: Assume all projects >= spring 2016 have id > magic number
+        # XXX: Assume all projects >= spring 2016 have ids > magic number
         MAGIC_ID = 357
         if (self.final_grade == self.GRADES.CREDIT and
                 self.project_id > MAGIC_ID and

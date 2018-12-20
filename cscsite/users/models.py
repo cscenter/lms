@@ -36,7 +36,8 @@ from learning.utils import is_negative_grade
 from users.fields import MonitorStatusField
 from users.settings import GROUPS_IMPORT_TO_GERRIT
 from users.tasks import update_password_in_gerrit
-from users.thumbnails import BoyStubImage, GirlStubImage, BaseStubImage
+from users.thumbnails import BoyStubImage, GirlStubImage, BaseStubImage, \
+    get_user_thumbnail
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -458,27 +459,8 @@ class User(LearningPermissionsMixin, AbstractUser):
         return ""
 
     def get_thumbnail(self, geometry, use_stub=True, **options):
-        path_to_img = getattr(self, "photo", None)
-        # Default crop settings
-        if "crop" not in options:
-            options["crop"] = "center top"
-        if "cropbox" not in options:
-            options["cropbox"] = self.photo_thumbnail_cropbox()
-        thumbnail = get_thumbnail(path_to_img, geometry, **options)
-        if not thumbnail or isinstance(thumbnail, DummyImageFile):
-            if use_stub:
-                if not self.is_teacher and self.gender == User.GENDER_MALE:
-                    factory = BoyStubImage
-                elif not self.is_teacher and self.gender == User.GENDER_FEMALE:
-                    factory = GirlStubImage
-                else:
-                    factory = BaseStubImage
-                thumbnail = factory(geometry=geometry)
-            else:
-                thumbnail = None
-        return thumbnail
+        return get_user_thumbnail(self, geometry, use_stub, **options)
 
-    # FIXME(Dmitry): this should use model_utils.fields#SplitField
     def get_short_note(self):
         """Returns only the first paragraph from the note."""
         normalized_note = normalize_newlines(self.note)
