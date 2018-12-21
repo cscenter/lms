@@ -8,7 +8,7 @@ from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
     Value, IntegerField
 
 from core.utils import is_club_site
-from learning.calendar import get_bounds_for_calendar_month
+from courses.calendar import get_bounds_for_calendar_month
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
@@ -33,24 +33,6 @@ class AssignmentQuerySet(query.QuerySet):
                 .only("title", "course_id", "is_online", "deadline_at")
                 .prefetch_related("assignmentattachment_set")
                 .order_by('deadline_at', 'title'))
-
-    def with_progress(self, student):
-        """
-        For each assignment prefetch requested student's score and comments
-        count. Later on iterating over assignment we can get this data
-        by calling `studentassignment_set.all()[0]`
-        """
-        from learning.models import StudentAssignment
-        qs = (StudentAssignment.objects
-              .only("pk", "assignment_id", "score")
-              .filter(student=student)
-              .annotate(student_comments_cnt=Count(
-                Case(When(assignmentcomment__author_id=student.pk,
-                          then=Value(1)),
-                     output_field=IntegerField())))
-              .order_by("pk"))  # optimize by overriding default order
-        return self.prefetch_related(
-            Prefetch("studentassignment_set", queryset=qs))
 
 
 AssignmentManager = models.Manager.from_queryset(AssignmentQuerySet)

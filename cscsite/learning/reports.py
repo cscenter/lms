@@ -11,8 +11,8 @@ from core.reports import ReportFileOutput
 from learning.models import AssignmentComment, Enrollment
 from courses.models import Semester
 from learning.projects.models import ReportComment, ProjectStudent
-from learning.settings import DATE_FORMAT_RU, \
-    TIME_FORMAT_RU, StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes
+from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from learning.utils import grade_to_mark
 from users.models import User, SHADCourseRecord
 

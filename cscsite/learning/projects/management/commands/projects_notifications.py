@@ -9,7 +9,8 @@ from django.utils.timezone import now
 
 from courses.models import Semester
 from learning.projects.models import ProjectStudent
-from learning.settings import DATE_FORMAT_RU, GradeTypes
+from learning.settings import GradeTypes
+from core.constants import DATE_FORMAT_RU
 from notifications import types
 from notifications.models import Notification
 from notifications.signals import notify

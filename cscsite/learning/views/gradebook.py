@@ -13,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import FormView
 
+import courses.utils
 from core.exceptions import Redirect
 from learning import utils
 from learning.gradebook import GradeBookFormFactory, gradebook_data
@@ -77,7 +78,7 @@ class GradeBookCuratorDispatchView(CuratorOnlyMixin, _GradeBookDispatchView):
             term.courseofferings = []
             semester_list.insert(0, term)
         context["semester_list"] = [(a, s) for s, a in
-                                    utils.grouper(semester_list, 2)]
+                                    courses.utils.grouper(semester_list, 2)]
         return context
 
 

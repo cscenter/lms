@@ -9,10 +9,6 @@ from djchoices import DjangoChoices, C
 LEARNING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_student')
 TEACHING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_teacher')
 
-# TODO: try to replace with builtin `formats.date_format`
-DATE_FORMAT_RU = "%d.%m.%Y"
-TIME_FORMAT_RU = "%H:%M"
-
 # Assignment types constants
 ASSIGNMENT_TASK_ATTACHMENT = 0
 ASSIGNMENT_COMMENT_ATTACHMENT = 1
@@ -21,6 +17,7 @@ ASSIGNMENT_COMMENT_ATTACHMENT = 1
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)
 
 
+# FIXME: move to users?
 class AcademicRoles(DjangoChoices):
     STUDENT_CENTER = C(1, _('Student [CENTER]'))
     TEACHER_CENTER = C(2, _('Teacher [CENTER]'))
@@ -44,6 +41,7 @@ class AcademicRoles(DjangoChoices):
     }
 
 
+# FIXME: move to users?
 class AcademicDegreeYears(DjangoChoices):
     BACHELOR_SPECIALITY_1 = C("1", _('1 course bachelor, speciality'))
     BACHELOR_SPECIALITY_2 = C("2", _('2 course bachelor, speciality'))

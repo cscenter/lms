@@ -21,8 +21,8 @@ from courses.factories import SemesterFactory, CourseFactory, \
     CourseTeacherFactory, AssignmentFactory
 from learning.models import StudentAssignment
 from courses.models import Assignment, AssignmentAttachment
-from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU, \
-    AcademicRoles, StudentStatuses, GradeTypes
+from learning.settings import AcademicRoles, StudentStatuses, GradeTypes
+from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect

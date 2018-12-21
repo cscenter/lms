@@ -1,4 +1,13 @@
+from crispy_forms.layout import Button, Submit, Div
 from django import forms
+from django.utils.translation import ugettext_lazy as _
+
+
+CANCEL_BUTTON = Button('cancel', _('Cancel'),
+                       onclick='history.go(-1);',
+                       css_class="btn btn-default")
+SUBMIT_BUTTON = Submit('save', _('Save'))
+CANCEL_SAVE_PAIR = Div(CANCEL_BUTTON, SUBMIT_BUTTON, css_class="pull-right")
 
 
 class GradeField(forms.DecimalField):

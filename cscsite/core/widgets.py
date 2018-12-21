@@ -3,7 +3,7 @@ from django.contrib.admin import RelatedFieldListFilter
 from django_filters.widgets import RangeWidget
 
 from core.timezone import city_aware_to_naive
-from learning.settings import DATE_FORMAT_RU
+from core.constants import DATE_FORMAT_RU
 
 
 class UbereditorWidget(forms.Textarea):

@@ -26,7 +26,7 @@ from courses.settings import SemesterTypes
 from courses.utils import get_term_index
 from learning.viewmixins import TeacherOnlyMixin
 from learning.views.utils import get_co_from_query_params, get_user_city_code
-from learning.widgets import CourseTabbedPane
+from learning.tabs import CourseTabbedPane
 
 __all__ = ['CourseDetailView', 'CourseEditView',
            'CourseNewsCreateView', 'CourseNewsUpdateView',

@@ -62,7 +62,7 @@ from admission.serializers import InterviewSlotSerializer
 from admission.services import create_invitation
 from admission.utils import generate_interview_reminder, \
     calculate_time
-from learning.settings import DATE_FORMAT_RU
+from core.constants import DATE_FORMAT_RU
 from core.timezone import now_local
 from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from learning.views import get_user_city_code

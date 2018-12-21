@@ -257,7 +257,7 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         a_s.delete()
         with LogCapture(level=logging.INFO) as l:
             self.assertEqual(200, self.client.get(url).status_code)
-            l.check(('learning.widgets',
+            l.check(('learning.tabs',
                      'INFO',
                      f"no StudentAssignment for "
                      f"student ID {student.pk}, assignment ID {a.pk}"))
