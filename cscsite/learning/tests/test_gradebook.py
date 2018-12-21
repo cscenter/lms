@@ -14,7 +14,8 @@ from django.utils.encoding import smart_bytes, force_bytes
 from learning.factories import EnrollmentFactory
 from courses.factories import SemesterFactory, CourseFactory, AssignmentFactory
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
-    GradeBookFormFactory, AssignmentGradesImport
+    GradeBookFormFactory
+from learning.gradebook.imports import AssignmentGradesImport
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GradingSystems, \
     AcademicRoles, StudentStatuses, GradeTypes
@@ -53,7 +54,7 @@ def test__get_course(client, curator):
 
 
 @pytest.mark.django_db
-def test_gradebook_recalculate_grading_type(client):
+def test_recalculate_course_grading_system(client):
     teacher = TeacherCenterFactory.create()
     students = StudentCenterFactory.create_batch(2)
     s = SemesterFactory.create_current()

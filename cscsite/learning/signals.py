@@ -2,10 +2,30 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.timezone import now
 
+from courses.models import Assignment, CourseNews, CourseTeacher
 from learning.models import AssignmentComment, AssignmentNotification, \
-    StudentAssignment, Enrollment
-from courses.models import Assignment
+    StudentAssignment, Enrollment, CourseNewsNotification
 from learning.settings import StudentStatuses
+
+
+@receiver(post_save, sender=CourseNews)
+def create_notifications_about_course_news(sender, instance: CourseNews,
+                                           created, *args, **kwargs):
+    if not created:
+        return
+    co_id = instance.course_id
+    notifications = []
+    active_enrollments = Enrollment.active.filter(course_id=co_id)
+    for e in active_enrollments.iterator():
+        notifications.append(
+            CourseNewsNotification(user_id=e.student_id,
+                                   course_offering_news_id=instance.pk))
+    teachers = CourseTeacher.objects.filter(course_id=co_id)
+    for co_t in teachers.iterator():
+        notifications.append(
+            CourseNewsNotification(user_id=co_t.teacher_id,
+                                   course_offering_news_id=instance.pk))
+    CourseNewsNotification.objects.bulk_create(notifications)
 
 
 # TODO: send notification to other teachers

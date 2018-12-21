@@ -15,6 +15,7 @@ from vanilla import CreateView, ListView, TemplateView, FormView
 from core.exceptions import Redirect
 from core.utils import is_club_site
 from learning import utils
+from learning.enrollment import course_failed_by_student
 from learning.forms import CourseEnrollmentForm
 from learning.models import Useful, Internship, StudentAssignment, Enrollment
 from courses.models import Course, Semester
@@ -66,7 +67,7 @@ class StudentAssignmentStudentDetailView(AssignmentProgressBaseView,
         # or positive grade
         if sa.student == user:
             co = sa.assignment.course
-            if co.failed_by_student(self.request.user):
+            if course_failed_by_student(co, self.request.user):
                 if not sa.has_comments(user) and not sa.score:
                     return False
         return sa.student == user or user.is_curator

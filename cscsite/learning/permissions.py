@@ -2,6 +2,7 @@ from enum import Enum, auto
 from typing import Optional
 
 from core.utils import is_club_site
+from learning.enrollment import course_failed_by_student
 from learning.settings import AcademicRoles, StudentStatuses
 
 
@@ -109,7 +110,7 @@ def access_role(*, course, request_user) -> Optional[CourseRole]:
     role = None
     enrollment = request_user.get_enrollment(course.pk)
     if enrollment:
-        if not course.failed_by_student(request_user, enrollment):
+        if not course_failed_by_student(course, request_user, enrollment):
             role = CourseRole.STUDENT_REGULAR
         else:
             role = CourseRole.STUDENT_RESTRICT

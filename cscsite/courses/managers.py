@@ -35,7 +35,11 @@ class AssignmentQuerySet(query.QuerySet):
                 .order_by('deadline_at', 'title'))
 
     def with_progress(self, student):
-        """Prefetch progress on assignments for student"""
+        """
+        For each assignment prefetch requested student's score and comments
+        count. Later on iterating over assignment we can get this data
+        by calling `studentassignment_set.all()[0]`
+        """
         from learning.models import StudentAssignment
         qs = (StudentAssignment.objects
               .only("pk", "assignment_id", "score")

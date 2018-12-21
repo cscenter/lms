@@ -14,6 +14,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 from core.admin import get_admin_url
+from learning.enrollment import course_failed_by_student
 from learning.factories import EnrollmentFactory, AssignmentCommentFactory, \
     StudentAssignmentFactory
 from courses.factories import SemesterFactory, CourseFactory, \
@@ -144,7 +145,7 @@ def test_security_courseoffering_detail(client):
                                    grade=GradeTypes.UNSATISFACTORY)
     a = AssignmentFactory(course=co)
     co.refresh_from_db()
-    assert co.failed_by_student(student)
+    assert course_failed_by_student(co, student)
     client.login(student)
     url = co.get_absolute_url()
     response = client.get(url)
@@ -154,12 +155,12 @@ def test_security_courseoffering_detail(client):
     enrollment.grade = GradeTypes.EXCELLENT
     enrollment.save()
     response = client.get(url)
-    assert not co.failed_by_student(student)
+    assert not course_failed_by_student(co, student)
     # Change course offering state to not completed
     co.completed_at = now().date() + datetime.timedelta(days=1)
     co.save()
     response = client.get(url)
-    assert not co.failed_by_student(student)
+    assert not course_failed_by_student(co, student)
 
 
 @pytest.mark.django_db
