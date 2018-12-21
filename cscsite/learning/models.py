@@ -23,7 +23,6 @@ from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
-from core.notifications import get_unread_notifications_cache
 from core.utils import hashids
 from courses.models import MetaCourse, Course, CourseTeacher, CourseNews, Venue, \
     CourseClass, Assignment
@@ -128,6 +127,7 @@ class StudentAssignment(TimeStampedModel):
         return reverse('a_s_detail_student', kwargs={"pk": self.pk})
 
     def has_unread(self):
+        from notifications.middleware import get_unread_notifications_cache
         cache = get_unread_notifications_cache()
         return self.pk in cache.assignments
 

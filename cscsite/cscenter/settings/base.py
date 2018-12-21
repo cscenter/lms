@@ -18,7 +18,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'users.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'core.notifications.UnreadNotificationsCacheMiddleware',
+    'notifications.middleware.UnreadNotificationsCacheMiddleware',
     'learning.middleware.StudentCityMiddleware',
     'core.middleware.RedirectMiddleware',
 ]

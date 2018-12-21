@@ -17,7 +17,6 @@ from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
-from core.notifications import get_unread_notifications_cache
 from core.timezone import now_local
 from core.utils import city_aware_reverse, hashids
 from courses.utils import get_current_term_pair, get_term_start, \
@@ -409,6 +408,7 @@ class Course(TimeStampedModel):
         return self.__class__.city.field.name
 
     def has_unread(self):
+        from notifications.middleware import get_unread_notifications_cache
         cache = get_unread_notifications_cache()
         return self in cache.courseoffering_news
 
@@ -933,6 +933,7 @@ class Assignment(TimeStampedModel):
                                   smart_text(self.course))
 
     def has_unread(self):
+        from notifications.middleware import get_unread_notifications_cache
         cache = get_unread_notifications_cache()
         return self.id in cache.assignment_ids_set
 

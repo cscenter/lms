@@ -19,7 +19,7 @@ MIDDLEWARE = [
     'users.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'core.notifications.UnreadNotificationsCacheMiddleware',  # TODO: move to notifications module
+    'notifications.middleware.UnreadNotificationsCacheMiddleware',
     'core.middleware.CurrentCityMiddleware',
     'core.middleware.RedirectMiddleware',
 ]
