@@ -24,10 +24,10 @@ from .views import \
     AssignmentAttachmentDeleteView, \
     NonCourseEventDetailView, OnlineCoursesListView, \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
-from learning.views.gradebook import GradeBookTeacherView, \
+from learning.gradebook.views import GradeBookTeacherView, \
     GradeBookTeacherDispatchView, GradeBookTeacherCSVView, \
-    AssignmentGradesImportByStepikIDView, \
-    AssignmentGradesImportByYandexLoginView
+    AssignmentScoresImportByStepikIDView, \
+    AssignmentScoresImportByYandexLoginView
 from learning.views.course_views import CourseEditView, \
     CourseNewsCreateView, CourseNewsUpdateView, \
     CourseNewsDeleteView, CourseNewsUnreadNotificationsView, \
@@ -144,23 +144,7 @@ teaching_section_patterns = url(
                 AssignmentCommentUpdateView.as_view(),
                 name='assignment_submission_comment_edit'),
         ])),
-        url(r'^marks/', include([
-            url(r'^$',
-                GradeBookTeacherDispatchView.as_view(),
-                name='markssheet_teacher_dispatch'),
-            url(r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
-                GradeBookTeacherView.as_view(),
-                name='markssheet_teacher'),
-            url(r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/csv/$',
-                GradeBookTeacherCSVView.as_view(),
-                name='markssheet_teacher_csv'),
-            url(r'^(?P<course_id>\d+)/import/stepic$',
-                AssignmentGradesImportByStepikIDView.as_view(),
-                name='markssheet_teacher_csv_import_stepic'),
-            url(r'^(?P<course_id>\d+)/import/yandex$',
-                AssignmentGradesImportByYandexLoginView.as_view(),
-                name='markssheet_teacher_csv_import_yandex'),
-        ])),
+        url(r'^marks/', include('learning.gradebook.urls')),
     ]))
 
 student_section_patterns = url(

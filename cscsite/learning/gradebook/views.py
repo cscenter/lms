@@ -15,19 +15,18 @@ from vanilla import FormView
 
 import courses.utils
 from core.exceptions import Redirect
-from learning import utils
-from learning.gradebook import GradeBookFormFactory, gradebook_data
-from learning.gradebook.imports import AssignmentGradesImport
 from courses.models import Course, Semester, Assignment
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
+from learning.gradebook import GradeBookFormFactory, gradebook_data
+from learning.gradebook.imports import AssignmentGradesImport
 from learning.viewmixins import CuratorOnlyMixin, TeacherOnlyMixin
 
 __all__ = [
     "GradeBookCuratorDispatchView", "GradeBookTeacherDispatchView",
     "GradeBookTeacherView",
-    "GradeBookTeacherCSVView", "AssignmentGradesImportByStepikIDView",
-    "AssignmentGradesImportByYandexLoginView"
+    "GradeBookTeacherCSVView", "AssignmentScoresImportByStepikIDView",
+    "AssignmentScoresImportByYandexLoginView"
 ]
 
 
@@ -245,7 +244,7 @@ class GradeBookTeacherCSVView(TeacherOnlyMixin, generic.base.View):
         return response
 
 
-class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
+class AssignmentGradesImportBaseView(TeacherOnlyMixin, generic.View):
     def post(self, request, course_id, *args, **kwargs):
         try:
             assignment_id = int(request.POST['assignment'])
@@ -278,13 +277,13 @@ class AssignmentGradesImportGenericView(TeacherOnlyMixin, generic.View):
         raise NotImplementedError()
 
 
-class AssignmentGradesImportByStepikIDView(AssignmentGradesImportGenericView):
+class AssignmentScoresImportByStepikIDView(AssignmentGradesImportBaseView):
     def import_grades_for_assignment(self, assignment):
         csv_file = self.request.FILES['csv_file']
         return AssignmentGradesImport(assignment, csv_file, "stepic_id").process()
 
 
-class AssignmentGradesImportByYandexLoginView(AssignmentGradesImportGenericView):
+class AssignmentScoresImportByYandexLoginView(AssignmentGradesImportBaseView):
     def import_grades_for_assignment(self, assignment):
         csv_file = self.request.FILES['csv_file']
         return AssignmentGradesImport(assignment, csv_file, "yandex_id").process()

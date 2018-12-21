@@ -20,8 +20,8 @@
         <div class="row">
             <div class="col-xs-12 h2-and-buttons">
               <h2>
-                {% if request.resolver_match.url_name == 'markssheet_teacher' %}
-                <a href="{% url 'markssheet_teacher_dispatch' %}"><span class="fa fa-angle-left"></span></a>
+                {% if request.resolver_match.url_name == 'gradebook:markssheet_teacher' %}
+                <a href="{% url 'gradebook:markssheet_teacher_dispatch' %}"><span class="fa fa-angle-left"></span></a>
                 {% else %}
                 <a href="{% url 'staff:course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
                 {% endif %}

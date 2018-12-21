@@ -379,9 +379,9 @@ class Course(TimeStampedModel):
         if for_curator:
             url_name = "staff:course_markssheet_staff"
         elif format == "csv":
-            url_name = "markssheet_teacher_csv"
+            url_name = "gradebook:markssheet_teacher_csv"
         else:
-            url_name = "markssheet_teacher"
+            url_name = "gradebook:markssheet_teacher"
         return reverse(url_name, kwargs={
             "course_slug": self.meta_course.slug,
             "city": self.get_city(),
@@ -390,7 +390,7 @@ class Course(TimeStampedModel):
         })
     # TODO: Replace with `get_gradebook_url` after migrating to jinja2
     def get_gradebook_csv_url(self):
-        return reverse("markssheet_teacher_csv", kwargs={
+        return reverse("gradebook:markssheet_teacher_csv", kwargs={
             "course_slug": self.meta_course.slug,
             "city": self.get_city(),
             "semester_type": self.semester.type,
