@@ -21,7 +21,6 @@ from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
@@ -40,7 +39,7 @@ from courses.forms import CourseForm, CourseClassForm, AssignmentForm
 from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
     AssignmentNotification, \
     NonCourseEvent, \
-    OnlineCourse, InternationalSchool
+    InternationalSchool
 from courses.models import MetaCourse, Course, Semester, Venue, CourseClass, \
     CourseClassAttachment, Assignment, AssignmentAttachment
 from learning.permissions import access_role, CourseRole
@@ -76,8 +75,7 @@ __all__ = [
     'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
     'AssignmentCreateView', 'AssignmentUpdateView', 'AssignmentDeleteView',
     'AssignmentCommentUpdateView', 'AssignmentAttachmentDeleteView',
-    'NonCourseEventDetailView', 'OnlineCoursesListView',
-    'InternationalSchoolsListView', 'AssignmentAttachmentDownloadView',
+    'NonCourseEventDetailView', 'InternationalSchoolsListView', 'AssignmentAttachmentDownloadView',
 ]
 
 
@@ -1142,28 +1140,6 @@ class NonCourseEventDetailView(generic.DetailView):
     model = NonCourseEvent
     context_object_name = 'event'
     template_name = "learning/noncourseevent_detail.html"
-
-
-class OnlineCoursesListView(generic.ListView):
-    context_object_name = 'courses'
-    model = OnlineCourse
-
-    def get_context_data(self, **kwargs):
-        context = super(OnlineCoursesListView, self).get_context_data(**kwargs)
-        context["recent_courses"] = filter(
-            lambda c: not c.is_self_paced and (not c.end or c.end > timezone.now()),
-            context[self.context_object_name])
-        context["self_paced_courses"] = sorted(filter(
-            lambda c: c.is_self_paced,
-            context[self.context_object_name]), key=lambda c: c.name)
-        context["archive_courses"] = filter(
-            lambda c: c.end and c.end <= timezone.now() and not c.is_self_paced,
-            context[self.context_object_name]
-        )
-        return context
-
-    def get_queryset(self):
-        return OnlineCourse.objects.order_by("is_self_paced", "-start", "name")
 
 
 class InternationalSchoolsListView(generic.ListView):

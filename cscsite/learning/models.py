@@ -2,7 +2,6 @@
 
 import logging
 import os.path
-import time
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -19,7 +18,6 @@ from djchoices import DjangoChoices, ChoiceItem
 from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel, TimeFramedModel
-from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
@@ -513,48 +511,6 @@ class StudyProgramCourseGroup(models.Model):
     class Meta:
         verbose_name = _("Study Program Course")
         verbose_name_plural = _("Study Program Courses")
-
-
-# TODO: rename to MoocCourse
-# FIXME: move -> online_courses app?
-class OnlineCourse(TimeStampedModel, TimeFramedModel):
-    name = models.CharField(_("Course|name"), max_length=255)
-    teachers = models.TextField(
-        _("Online Course|teachers"),
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    description = models.TextField(
-        _("Online Course|description"),
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    link = models.URLField(
-        _("Online Course|Link"))
-    photo = ImageField(
-        _("Online Course|photo"),
-        upload_to="online_courses/",
-        blank=True)
-    is_au_collaboration = models.BooleanField(
-        _("Collaboration with AY"),
-        default=False)
-    is_self_paced = models.BooleanField(
-        _("Without deadlines"),
-        default=False)
-
-    class Meta:
-        db_table = 'online_courses'
-        ordering = ["name"]
-        verbose_name = _("Online course")
-        verbose_name_plural = _("Online courses")
-
-    def __str__(self):
-        return smart_text(self.name)
-
-    def is_ongoing(self):
-        return self.start and self.start <= timezone.now()
-
-    @property
-    def avatar_url(self):
-        if self.photo:
-            return self.photo.url
-        return None
 
 
 # FIXME: move -> csclub app

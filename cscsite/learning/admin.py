@@ -7,14 +7,14 @@ from modeltranslation.admin import TranslationAdmin
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField, RelatedSpecMixin
+from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from core.filters import AdminRelatedDropdownFilter
 from learning.models import InternshipCategory
 from learning.settings import AcademicRoles
 from .models import StudentAssignment, \
-    AssignmentComment, Enrollment, NonCourseEvent, OnlineCourse, \
-    InternationalSchool, Useful, Internship, AreaOfStudy, \
+    AssignmentComment, Enrollment, NonCourseEvent, InternationalSchool, Useful, \
+    Internship, AreaOfStudy, \
     StudyProgram, StudyProgramCourseGroup
 
 
@@ -136,12 +136,6 @@ class NonCourseEventAdmin(admin.ModelAdmin):
     list_display = ['name', 'date', 'venue']
 
 
-class OnlineCourseAdmin(admin.ModelAdmin):
-    formfield_overrides = {
-        db_models.TextField: {'widget': AdminRichTextAreaWidget},
-    }
-
-
 class InternationalSchoolAdmin(admin.ModelAdmin):
     list_display = ['name', 'deadline', 'has_grants']
     formfield_overrides = {
@@ -168,7 +162,6 @@ class InternshipAdmin(admin.ModelAdmin):
 
 admin.site.register(AreaOfStudy, AreaOfStudyAdmin)
 admin.site.register(StudyProgram, StudyProgramAdmin)
-admin.site.register(OnlineCourse, OnlineCourseAdmin)
 admin.site.register(InternationalSchool, InternationalSchoolAdmin)
 admin.site.register(StudentAssignment, StudentAssignmentAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)

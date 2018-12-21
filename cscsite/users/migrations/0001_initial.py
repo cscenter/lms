@@ -87,8 +87,8 @@ class Migration(migrations.Migration):
                 ('student', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='enrollment_certificates', to=settings.AUTH_USER_MODEL, verbose_name='Student')),
             ],
             options={
-                'verbose_name': 'User reference record',
-                'verbose_name_plural': 'User reference records',
+                'verbose_name': 'Student Reference',
+                'verbose_name_plural': 'Student References',
                 'ordering': ['signature'],
             },
         ),

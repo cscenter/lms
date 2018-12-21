@@ -22,12 +22,8 @@ from .views import \
     AssignmentTeacherDetailView, StudentAssignmentTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
-    NonCourseEventDetailView, OnlineCoursesListView, \
+    NonCourseEventDetailView,  \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
-from learning.gradebook.views import GradeBookTeacherView, \
-    GradeBookTeacherDispatchView, GradeBookTeacherCSVView, \
-    AssignmentScoresImportByStepikIDView, \
-    AssignmentScoresImportByYandexLoginView
 from learning.views.course_views import CourseEditView, \
     CourseNewsCreateView, CourseNewsUpdateView, \
     CourseNewsDeleteView, CourseNewsUnreadNotificationsView, \
@@ -177,8 +173,6 @@ venues_patterns = url(
     ]))
 
 urlpatterns = [
-    url(r'^online/$', OnlineCoursesListView.as_view(),
-        name='onlinecourses_list'),
     url(r'^videos/$', CourseVideoListView.as_view(), name='course_video_list'),
 
     venues_patterns,
