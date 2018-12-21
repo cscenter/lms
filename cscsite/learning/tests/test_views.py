@@ -18,6 +18,7 @@ from testfixtures import LogCapture
 from core.utils import city_aware_reverse
 from courses.models import MetaCourse, Course, CourseClass
 from courses.utils import get_current_term_pair
+from learning.enrollment import course_failed_by_student
 from learning.factories import *
 from courses.forms import CourseClassForm
 from learning.settings import StudentStatuses, GradeTypes
@@ -660,13 +661,13 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
                                              author=student)
         response = self.client.get(url)
         co.refresh_from_db()
-        assert co.failed_by_student(student)
+        assert course_failed_by_student(co, student)
         # Course completed, but not failed, user can see all assignments
         ac.delete()
         enrollment.grade = GradeTypes.GOOD
         enrollment.save()
         response = self.client.get(url)
-        assert not co.failed_by_student(student)
+        assert not course_failed_by_student(co, student)
         assert response.status_code == 200
         # The same behavior should be for expelled student
         student.status = StudentStatuses.EXPELLED

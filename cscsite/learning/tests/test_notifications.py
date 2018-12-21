@@ -9,6 +9,7 @@ from django.test import TestCase
 
 from courses.models import CourseTeacher, Assignment
 from courses.admin import AssignmentAdmin
+from learning.enrollment import course_failed_by_student
 from learning.factories import *
 from learning.settings import DATE_FORMAT_RU, StudentStatuses, GradeTypes
 from users.factories import TeacherCenterFactory
@@ -55,7 +56,7 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
         teacher_comment_dict = {'text': "Test teacher comment without file"}
 
         # Post first comment on assignment
-        assert not co.failed_by_student(student)
+        assert not course_failed_by_student(co, student)
         self.doLogin(student)
         self.client.post(student_url, student_comment_dict)
         # FIXME(Dmitry): this should not affect this test, fix&remove
@@ -136,7 +137,7 @@ def test_notification_teachers_list_for_assignment(client):
     assert response.status_code == 200
     assert len(assignment.notify_teachers.all()) == 3
     # Leave a comment from student
-    assert not co.failed_by_student(student)
+    assert not course_failed_by_student(co, student)
     client.login(student)
     sa = StudentAssignment.objects.get(assignment=assignment, student=student)
     sa_url = sa.get_student_url()

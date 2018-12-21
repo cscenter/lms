@@ -462,19 +462,6 @@ class Course(TimeStampedModel):
     def grading_type_choice(self):
         return GradingSystems.get_choice(self.grading_type)
 
-    def recalculate_grading_type(self):
-        from learning.models import Enrollment
-        es = (Enrollment.active
-              .filter(course=self)
-              .values_list("grade", flat=True))
-        grading_type = GradingSystems.BASE
-        if not any(g for g in es
-                   if g in [GradeTypes.GOOD, GradeTypes.EXCELLENT]):
-            grading_type = GradingSystems.BINARY
-        if self.grading_type != grading_type:
-            self.grading_type = grading_type
-            self.save()
-
     def is_actual_teacher(self, teacher):
         return teacher.pk in (co.teacher_id for co in
                               self.course_teachers.all())
@@ -500,21 +487,6 @@ class Course(TimeStampedModel):
     def get_reviews(self):
         """Collect reviews from passed courses"""
         return self.__class__.objects.reviews_for_course(self)
-
-    def failed_by_student(self, student, enrollment=None) -> bool:
-        from learning.models import Enrollment
-        if self.is_open or not self.is_completed:
-            return False
-        # Checks that student didn't fail the completed course
-        bad_grades = [Enrollment.GRADES.UNSATISFACTORY,
-                      Enrollment.GRADES.NOT_GRADED]
-        if enrollment:
-            return enrollment.grade in bad_grades
-        return (Enrollment.active
-                .filter(student_id=student.pk,
-                        course_id=self.pk,
-                        grade__in=bad_grades)
-                .exists())
 
 
 class CourseTeacher(models.Model):
@@ -631,26 +603,6 @@ class CourseNews(TimeStampedModel):
     def save(self, *args, **kwargs):
         created = self.pk is None
         super().save(*args, **kwargs)
-        self._create_notifications(created)
-
-    def _create_notifications(self, created):
-        from learning.models import Enrollment, CourseNewsNotification
-        if not created:
-            return
-        co_id = self.course_id
-        notifications = []
-        active_enrollments = Enrollment.active.filter(course_id=co_id)
-        # Replace cached queryset with .bulk_create() + .iterator()
-        for e in active_enrollments.iterator():
-            notifications.append(
-                CourseNewsNotification(user_id=e.student_id,
-                                       course_offering_news_id=self.pk))
-        teachers = CourseTeacher.objects.filter(course_id=co_id)
-        for co_t in teachers.iterator():
-            notifications.append(
-                CourseNewsNotification(user_id=co_t.teacher_id,
-                                       course_offering_news_id=self.pk))
-        CourseNewsNotification.objects.bulk_create(notifications)
 
     def created_local(self, tz=None):
         if not tz:

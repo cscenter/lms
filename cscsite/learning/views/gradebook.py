@@ -15,8 +15,8 @@ from vanilla import FormView
 
 from core.exceptions import Redirect
 from learning import utils
-from learning.gradebook import GradeBookFormFactory, gradebook_data, \
-    AssignmentGradesImport
+from learning.gradebook import GradeBookFormFactory, gradebook_data
+from learning.gradebook.imports import AssignmentGradesImport
 from courses.models import Course, Semester, Assignment
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
