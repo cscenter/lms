@@ -11,7 +11,8 @@ from courses.models import CourseTeacher, Assignment
 from courses.admin import AssignmentAdmin
 from learning.enrollment import course_failed_by_student
 from learning.factories import *
-from learning.settings import DATE_FORMAT_RU, StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes
+from core.constants import DATE_FORMAT_RU
 from users.factories import TeacherCenterFactory
 from .mixins import *
 

@@ -1,6 +1,7 @@
 import datetime
 import re
 from collections import namedtuple
+from itertools import zip_longest
 from typing import Union, List
 
 import pytz
@@ -118,7 +119,7 @@ def get_term_by_index(term_index):
 
 
 def get_terms_for_calendar_month(year: int, month: int) -> List[TermTuple]:
-    from learning.calendar import get_bounds_for_calendar_month
+    from courses.calendar import get_bounds_for_calendar_month
     start_date, end_date = get_bounds_for_calendar_month(year, month)
     # Case date to timezone aware datetime, no matter which timezone we choose
     time_part = datetime.time(tzinfo=pytz.UTC)
@@ -135,3 +136,14 @@ def get_terms_for_calendar_month(year: int, month: int) -> List[TermTuple]:
 term_types = "|".join(slug for slug, _ in SemesterTypes.choices)
 semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
                               term_types + ")$")
+
+
+def grouper(iterable, n, fillvalue=None):
+    """
+    Collect data into fixed-length chunks or blocks:
+    Example:
+        In: grouper('ABCDEFG', 3, 'x')
+        Out: ABC DEF Gxx
+    """
+    args = [iter(iterable)] * n
+    return zip_longest(fillvalue=fillvalue, *args)

@@ -13,7 +13,7 @@ from courses.factories import SemesterFactory, CourseFactory, CourseNewsFactory,
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseNewsNotification
-from learning.settings import DATE_FORMAT_RU
+from core.constants import DATE_FORMAT_RU
 from core.timezone import now_local
 from users.factories import StudentCenterFactory, StudentClubFactory
 

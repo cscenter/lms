@@ -18,13 +18,12 @@ from model_utils.models import TimeStampedModel
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.notifications import get_unread_notifications_cache
-from core.utils import city_aware_reverse, hashids
-from learning.settings import GradingSystems, GradeTypes, ENROLLMENT_DURATION, \
-    ASSIGNMENT_TASK_ATTACHMENT
 from core.timezone import now_local
+from core.utils import city_aware_reverse, hashids
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
-
+from learning.settings import GradingSystems, ENROLLMENT_DURATION, \
+    ASSIGNMENT_TASK_ATTACHMENT
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassQuerySet, CourseDefaultManager
 from .micawber_providers import get_oembed_html

@@ -5,7 +5,7 @@ from itertools import groupby
 from django.utils import timezone
 from post_office import mail
 
-from learning.settings import DATE_FORMAT_RU
+from core.constants import DATE_FORMAT_RU
 
 logger = logging.getLogger(__name__)
 

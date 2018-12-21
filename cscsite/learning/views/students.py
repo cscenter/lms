@@ -19,7 +19,7 @@ from learning.enrollment import course_failed_by_student
 from learning.forms import CourseEnrollmentForm
 from learning.models import Useful, Internship, StudentAssignment, Enrollment
 from courses.models import Course, Semester
-from learning.settings import DATE_FORMAT_RU
+from core.constants import DATE_FORMAT_RU
 from learning.viewmixins import StudentCenterAndVolunteerOnlyMixin, \
     ParticipantOnlyMixin, StudentOnlyMixin
 from learning.views import AssignmentProgressBaseView

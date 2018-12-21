@@ -2,7 +2,7 @@ from django import forms
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
-    Button, Div, HTML
+    Div, HTML
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -14,14 +14,6 @@ from core.widgets import UbereditorWidget
 from core.models import LATEX_MARKDOWN_ENABLED
 from .models import AssignmentComment
 from courses.models import Course
-
-DROP_ATTACHMENT_LINK = """\
-<a href="{0}"><i class="fa fa-trash-o"></i>&nbsp;{1}</a>"""
-CANCEL_BUTTON = Button('cancel', _('Cancel'),
-                       onclick='history.go(-1);',
-                       css_class="btn btn-default")
-SUBMIT_BUTTON = Submit('save', _('Save'))
-CANCEL_SAVE_PAIR = Div(CANCEL_BUTTON, SUBMIT_BUTTON, css_class="pull-right")
 
 
 class CourseEnrollmentForm(forms.Form):

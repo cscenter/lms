@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from courses.models import Course
-from learning.api.serializers import PhotoSerializerField
+from users.api.serializers import PhotoSerializerField
 from users.models import User
 
 

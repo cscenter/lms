@@ -2,7 +2,8 @@ import logging
 from typing import Callable, List
 
 import attr
-from django.db.models import BooleanField, Case, Count, Value, When
+from django.db.models import BooleanField, Case, Count, Value, When, \
+    IntegerField, Prefetch
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _, pgettext_lazy
 
@@ -49,6 +50,25 @@ class TabbedPane:
 
     def __getitem__(self, item):
         return self._tabs[item]
+
+
+def _prefetch_scores_for_student(queryset, student):
+    """
+    For each assignment prefetch requested student's score and comments
+    count. Later on iterating over assignment we can get this data
+    by calling `studentassignment_set.all()[0]`
+    """
+    from learning.models import StudentAssignment
+    qs = (StudentAssignment.objects
+          .only("pk", "assignment_id", "score")
+          .filter(student=student)
+          .annotate(student_comments_cnt=Count(
+            Case(When(assignmentcomment__author_id=student.pk,
+                      then=Value(1)),
+                 output_field=IntegerField())))
+          .order_by("pk"))  # optimize by overriding default order
+    return queryset.prefetch_related(
+        Prefetch("studentassignment_set", queryset=qs))
 
 
 class CourseTabbedPane(TabbedPane):
@@ -193,7 +213,7 @@ class CourseTabbedPane(TabbedPane):
         student_roles = [CourseRole.STUDENT_REGULAR,
                          CourseRole.STUDENT_RESTRICT]
         if request_user_role in student_roles:
-            assignments = assignments.with_progress(request_user)
+            assignments = _prefetch_scores_for_student(assignments, request_user)
         assignments = assignments.all()  # enable query caching
         for a in assignments:
             to_details = None

@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site
 from core.widgets import UbereditorWidget
-from learning.forms import CANCEL_SAVE_PAIR
+from core.forms import CANCEL_SAVE_PAIR
 from learning.settings import AcademicRoles
 from users import tasks
 from .models import User, EnrollmentCertificate

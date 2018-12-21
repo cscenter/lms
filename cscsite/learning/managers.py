@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import query, Prefetch
 
 from core.utils import is_club_site
-from learning.calendar import get_bounds_for_calendar_month
+from courses.calendar import get_bounds_for_calendar_month
 
 
 class StudentAssignmentQuerySet(query.QuerySet):

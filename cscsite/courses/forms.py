@@ -13,8 +13,10 @@ from core.widgets import UbereditorWidget, DateInputAsTextInput, \
 from courses.models import Course, CourseNews, MetaCourse, Venue, CourseClass, \
     Assignment
 from courses.settings import ClassTypes
-from learning.forms import CANCEL_SAVE_PAIR, DROP_ATTACHMENT_LINK
-from learning.settings import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.forms import CANCEL_SAVE_PAIR
+from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+
+DROP_ATTACHMENT_LINK = '<a href="{}"><i class="fa fa-trash-o"></i>&nbsp;{}</a>'
 
 
 class CourseEditDescrForm(forms.ModelForm):

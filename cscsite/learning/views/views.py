@@ -27,12 +27,13 @@ from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 from vanilla import CreateView, UpdateView, DeleteView, ListView, TemplateView
 
+import courses.utils
 from core import comment_persistence
 from core.exceptions import Redirect
 from core.utils import hashids, render_markdown, is_club_site
 from core.views import ProtectedFormMixin, LoginRequiredMixin
 from learning import utils
-from learning.calendar import CalendarQueryParams
+from courses.calendar import CalendarQueryParams
 from learning.forms import AssignmentCommentForm, AssignmentScoreForm, \
     AssignmentModalCommentForm
 from courses.forms import CourseForm, CourseClassForm, AssignmentForm
@@ -47,10 +48,9 @@ from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT
 from core.settings.base import FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from learning.utils import grouper
 from core.timezone import now_local
 from courses.utils import get_current_term_pair, get_term_index, \
-    get_terms_for_calendar_month
+    get_terms_for_calendar_month, grouper
 from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
 from learning.views.generic import CalendarGenericView
@@ -316,7 +316,7 @@ class CoursesListView(generic.ListView):
             semester_list.insert(0, semester)
         # Hide empty pairs
         context["semester_list"] = [
-            (a, s) for s, a in utils.grouper(semester_list, 2) if \
+            (a, s) for s, a in courses.utils.grouper(semester_list, 2) if \
             (a and a.courseofferings) or (s and s.courseofferings)
             ]
 
