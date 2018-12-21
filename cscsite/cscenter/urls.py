@@ -118,6 +118,7 @@ urlpatterns = [
     url(r'^tools/markdown/preview/$', MarkdownRenderView.as_view(),
         name='render_markdown'),
     url(r"^courses/$", cscenter_views.CourseOfferingsView.as_view(), name="course_list"),
+    url(r'^', include('online_courses.urls')),
     url(r'^', include('learning.urls')),
     url(r'^', include('admission.urls')),
     url(r'^', include('learning.projects.urls')),

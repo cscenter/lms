@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'core',
     'htmlpages',
+    'online_courses',
     'courses.apps.CoursesConfig',
     'learning',
     'library.apps.LibraryConfig',

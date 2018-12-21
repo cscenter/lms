@@ -1,32 +1,27 @@
 # -*- coding: utf-8 -*-
 
 import itertools
-import json
 import math
 import random
 
-from collections import Counter, OrderedDict
-from datetime import datetime
+from collections import Counter
 
-from django.contrib import messages
 from django.contrib.staticfiles.storage import staticfiles_storage
-from typing import NamedTuple
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
-from django.core.cache import cache, caches, InvalidCacheBackendError
+from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
 from django.http.response import HttpResponseRedirect, HttpResponseNotFound
 from django.urls import reverse
-from django.db.models import Q, Count, Prefetch, Case, When, Value
+from django.db.models import Q
 from django.http import Http404
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _, pgettext_lazy
+from django.utils.translation import pgettext_lazy
 from django.views import generic
-from django_filters.views import FilterView, FilterMixin
+from django_filters.views import FilterMixin
 from rest_framework.renderers import JSONRenderer
-from vanilla import TemplateView, ListView
+from vanilla import TemplateView
 
 from core.exceptions import Redirect
 from core.models import Faq
@@ -34,23 +29,17 @@ from cscenter.serializers import CoursesSerializer
 from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
     PublicRouteException
 from learning.api.views import TestimonialList
-from learning.models import OnlineCourse, AreaOfStudy, StudyProgram
-from courses.models import Course, Semester, CourseTeacher
+from learning.models import AreaOfStudy, StudyProgram
+from courses.models import Course, CourseTeacher
 from learning.settings import StudentStatuses
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from courses.utils import get_current_term_pair, get_term_index, \
+from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index
+from online_courses.models import OnlineCourse, OnlineCourseTuple
 from stats.views import StudentsDiplomasStats
 from users.models import User
 from .filters import CoursesFilter
-
-
-class OnlineCourseTuple(NamedTuple):
-    name: str
-    link: str
-    avatar_url: str
-    tag: str
 
 
 class IndexView(TemplateView):
