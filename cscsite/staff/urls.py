@@ -2,7 +2,8 @@ from django.conf.urls import include, url
 
 
 app_name = 'staff'
-from learning.views.gradebook import GradeBookCuratorDispatchView, \
+# FIXME: guess it's better inherit these views
+from learning.gradebook.views import GradeBookCuratorDispatchView, \
     GradeBookTeacherView
 from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
     ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \

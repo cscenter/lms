@@ -1,0 +1,17 @@
+[run]
+branch = True
+source = cscsite
+
+[report]
+ignore_errors = True
+omit =
+    */migrations/*
+    */__pycache__/*
+    */tests/*
+    */tests.py
+    */urls.py
+    */factories.py
+    */locale/*
+
+[html]
+directory = coverage_html

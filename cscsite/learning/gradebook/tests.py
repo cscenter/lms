@@ -21,7 +21,7 @@ from learning.settings import GradingSystems, \
     AcademicRoles, StudentStatuses, GradeTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.utils import assert_login_redirect
-from learning.views.gradebook import _get_course
+from learning.gradebook.views import _get_course
 from users.factories import TeacherCenterFactory, StudentCenterFactory, \
     UserFactory
 
@@ -622,19 +622,19 @@ def test_gradebook_import_assignments_from_csv_security(client):
                                                  is_online=False)
     teacher2 = TeacherCenterFactory()
     client.login(teacher2)
-    url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
+    url = reverse('gradebook:markssheet_teacher_csv_import_stepic', args=[co.pk])
     response = client.post(url, {'assignment': assignments[0].pk,
                                  'csv_file': StringIO("stub\n")})
     assert response.status_code == 403  # not actual teacher
     # Wrong course offering id
-    url = reverse('markssheet_teacher_csv_import_stepic',
+    url = reverse('gradebook:markssheet_teacher_csv_import_stepic',
                   args=[assignments[0].course_id + 1])
     response = client.post(url, {'assignment': assignments[0].pk,
                                  'csv_file': StringIO("stub\n")})
     assert response.status_code == 403
     # csv_file not provided
     redirect_url = co.get_gradebook_url()
-    url = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
+    url = reverse('gradebook:markssheet_teacher_csv_import_stepic', args=[co.pk])
     response = client.post(url, {'assignment': assignments[0].pk})
     assert response.status_code == 400
 
@@ -689,7 +689,8 @@ header1,header2,total
         'assignment': assignment.pk,
         'csv_file': tmp_file.open()
     }
-    url_import = reverse('markssheet_teacher_csv_import_yandex', args=[co.pk])
+    url_import = reverse('gradebook:markssheet_teacher_csv_import_yandex',
+                         args=[co.pk])
     client.login(teacher)
     response = client.post(url_import, form, follow=True)
     assert response.status_code == 200
@@ -725,7 +726,7 @@ stepic_id,header2,total
         'assignment': assignment.pk,
         'csv_file': tmp_file.open()
     }
-    url_import = reverse('markssheet_teacher_csv_import_stepic', args=[co.pk])
+    url_import = reverse('gradebook:markssheet_teacher_csv_import_stepic', args=[co.pk])
     response = client.post(url_import, form, follow=True)
     assert StudentAssignment.objects.get(student=student1).score == 10
     assert StudentAssignment.objects.get(student=student2).score == 42
