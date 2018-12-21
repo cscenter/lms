@@ -1,5 +1,4 @@
 from django import forms
-from django.contrib.admin import RelatedFieldListFilter
 from django_filters.widgets import RangeWidget
 
 from core.timezone import city_aware_to_naive
@@ -15,10 +14,6 @@ class UbereditorWidget(forms.Textarea):
 
 class AdminRichTextAreaWidget(UbereditorWidget):
     template_name = 'widgets/ubertextarea.html'
-
-
-class AdminRelatedDropdownFilter(RelatedFieldListFilter):
-    template = 'admin/dropdown_listfilter.html'
 
 
 class DateTimeRangeWidget(RangeWidget):

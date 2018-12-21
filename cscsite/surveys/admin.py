@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from core.widgets import AdminRelatedDropdownFilter
+from core.filters import AdminRelatedDropdownFilter
 from surveys.constants import STATUS_PUBLISHED
 from surveys.models import Form, Field, FieldChoice, FormSubmission, FieldEntry, \
     CourseSurvey

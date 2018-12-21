@@ -8,7 +8,8 @@ from modeltranslation.admin import TranslationAdmin
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField, RelatedSpecMixin
 from core.utils import admin_datetime
-from core.widgets import AdminRichTextAreaWidget, AdminRelatedDropdownFilter
+from core.widgets import AdminRichTextAreaWidget
+from core.filters import AdminRelatedDropdownFilter
 from learning.models import InternshipCategory
 from learning.settings import AcademicRoles
 from .models import StudentAssignment, \

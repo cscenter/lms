@@ -1,6 +1,5 @@
 from threading import local
 
-from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.functional import cached_property
 
@@ -18,7 +17,9 @@ def get_unread_notifications_cache():
     return _thread_locals.unread_notifications_cache
 
 
-class UnreadNotificationsCache(object):
+# TODO: move to `.cache` module?
+# FIXME: replace with a redis cache?
+class UnreadNotificationsCache:
     def __init__(self, assignments_qs, coursenews_qs):
         assert assignments_qs is not None
         assert coursenews_qs is not None
@@ -52,7 +53,7 @@ class UnreadNotificationsCache(object):
                 for obj in self.coursenews_qs.all()}
 
 
-class UnreadNotificationsCacheMiddleware(object):
+class UnreadNotificationsCacheMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         global _installed_middleware
