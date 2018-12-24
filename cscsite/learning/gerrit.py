@@ -148,6 +148,7 @@ def init_project_for_course(course, skip_users=False):
     # TODO: What to do with notifications?
 
 
+# FIXME: get project_name from `course`, make group uuid optional
 def add_student_to_project(client: Gerrit, student: User, project_name,
                            project_students_group_uuid, course: Course):
     # Make sure student group exists
