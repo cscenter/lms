@@ -28,11 +28,24 @@ CourseTeacherManager = models.Manager.from_queryset(CourseTeacherQuerySet)
 
 
 class AssignmentQuerySet(query.QuerySet):
-    def list(self):
-        return (self
-                .only("title", "course_id", "is_online", "deadline_at")
-                .prefetch_related("assignmentattachment_set")
-                .order_by('deadline_at', 'title'))
+    def prefetch_student_scores(self, student):
+        """
+        For each assignment prefetch requested student's score and comments
+        count. Later on iterating over assignment we can get this data
+        by calling `studentassignment_set.all()[0]`
+        """
+        StudentAssignment = self.model.studentassignment_set.field.model
+        student_comments = Case(
+            When(assignmentcomment__author_id=student.pk, then=Value(1)),
+            output_field=IntegerField()
+        )
+        qs = (StudentAssignment.objects
+              .only("pk", "assignment_id", "score")
+              .filter(student=student)
+              .annotate(student_comments_cnt=Count(student_comments))
+              .order_by("pk"))  # optimize by overriding default order
+        return self.prefetch_related(
+            Prefetch("studentassignment_set", queryset=qs))
 
 
 AssignmentManager = models.Manager.from_queryset(AssignmentQuerySet)

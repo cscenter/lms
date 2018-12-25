@@ -8,3 +8,5 @@ class LearningConfig(AppConfig):
 
     def ready(self):
         from . import signals
+        # Register tabs
+        from . import tabs

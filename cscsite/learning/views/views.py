@@ -1217,6 +1217,6 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         role = access_role(course=assignment_attachment.assignment.course,
                            request_user=self.request.user)
         # User doesn't have private access to the task
-        if role is not None and role != CourseRole.STUDENT_RESTRICT:
+        if role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT:
             return assignment_attachment.attachment
         return None

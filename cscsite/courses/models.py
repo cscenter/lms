@@ -30,9 +30,6 @@ from .settings import SemesterTypes, ClassTypes
 from .tasks import maybe_upload_slides_yandex
 
 
-# FIXME: убрать в сигналы те импорты learning, которые возможно
-
-
 class Semester(models.Model):
     year = models.PositiveSmallIntegerField(
         _("Year"),

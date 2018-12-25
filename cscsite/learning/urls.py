@@ -11,7 +11,6 @@ from .views import \
     CourseTeacherListView, \
     CourseStudentListView, \
     MetaCourseDetailView, MetaCourseUpdateView, \
-    CourseDetailView, \
     CourseClassDetailView, \
     CourseClassCreateView, \
     CourseClassUpdateView, \
@@ -24,6 +23,7 @@ from .views import \
     AssignmentAttachmentDeleteView, \
     NonCourseEventDetailView,  \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
+from courses.views import CourseDetailView
 from learning.views.course_views import CourseEditView, \
     CourseNewsCreateView, CourseNewsUpdateView, \
     CourseNewsDeleteView, CourseNewsUnreadNotificationsView, \
