@@ -9,16 +9,12 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone, formats
-from django.utils.encoding import smart_bytes
+from django.utils import formats
 
-from learning.factories import EnrollmentFactory
 from courses.factories import MetaCourseFactory, SemesterFactory, CourseFactory, \
     CourseTeacherFactory, CourseNewsFactory, CourseClassFactory, \
     AssignmentFactory
-from learning.models import Enrollment
-from courses.models import Semester, CourseNews
-from learning.settings import AcademicRoles, GradeTypes
+from learning.settings import AcademicRoles
 from courses.settings import SemesterTypes
 from learning.tests.mixins import MyUtilitiesMixin
 from users.factories import TeacherCenterFactory, StudentCenterFactory
@@ -275,82 +271,3 @@ def test_update_composite_fields(curator, client, mocker):
     # Slides were uploaded on first class
     assert co.materials_slides
     assert not co.materials_files
-
-
-# TODO: тест для видимости таб из под разных ролей. (прятать табу во вьюхе, если нет содержимого)
-
-# FIXME: эти тесты надо добавить на уровне модели после переноса can_view_* в permissions.py
-@pytest.mark.django_db
-def test_course_news_tab_permissions(client):
-    current_semester = SemesterFactory.create_current()
-    prev_term = SemesterFactory.create_prev(current_semester)
-    news: CourseNews = CourseNewsFactory(course__city_id='spb',
-                                         course__semester=current_semester)
-    co = news.course
-    news_prev: CourseNews = CourseNewsFactory(course__city_id='spb',
-                                              course__meta_course=co.meta_course,
-                                              course__semester=prev_term)
-    co_prev = news_prev.course
-    response = client.get(co.get_absolute_url())
-    assert "news" not in response.context['tabs']
-    # By default student can't see the news until enroll in the course
-    student_spb = StudentCenterFactory(city_id='spb')
-    client.login(student_spb)
-    response = client.get(co.get_absolute_url())
-    assert "news" not in response.context['tabs']
-    response = client.get(co_prev.get_absolute_url())
-    assert "news" not in response.context['tabs']
-    e_current = EnrollmentFactory(course=co, student=student_spb)
-    response = client.get(co.get_absolute_url())
-    assert "news" in response.context['tabs']
-    # Prev courses should be successfully passed to see the news
-    e_prev = EnrollmentFactory(course=co_prev, student=student_spb)
-    response = client.get(co_prev.get_absolute_url())
-    assert "news" not in response.context['tabs']
-    e_prev.grade = GradeTypes.GOOD
-    e_prev.save()
-    response = client.get(co_prev.get_absolute_url())
-    assert "news" in response.context['tabs']
-    # Teacher from the same course can view news from other offerings
-    teacher = TeacherCenterFactory()
-    client.login(teacher)
-    response = client.get(co_prev.get_absolute_url())
-    assert "news" not in response.context['tabs']
-    response = client.get(co.get_absolute_url())
-    assert "news" not in response.context['tabs']
-    CourseTeacherFactory(course=co_prev, teacher=teacher)
-    response = client.get(co_prev.get_absolute_url())
-    assert "news" in response.context['tabs']
-    response = client.get(co.get_absolute_url())
-    assert "news" in response.context['tabs']
-    co_other = CourseFactory(semester=current_semester)
-    response = client.get(co_other.get_absolute_url())
-    assert "news" not in response.context['tabs']
-
-
-@pytest.mark.django_db
-def test_course_assignments_tab_permissions(client):
-    current_semester = SemesterFactory.create_current()
-    prev_term = SemesterFactory.create_prev(current_semester)
-    meta_course = MetaCourseFactory()
-    a = AssignmentFactory(course__semester=prev_term,
-                          course__meta_course=meta_course)
-    co_prev = a.course
-    co = CourseFactory(meta_course=meta_course,
-                       semester=current_semester)
-    teacher = TeacherCenterFactory()
-    CourseTeacherFactory(teacher=teacher, course=co)
-    # Unauthenticated user can't see tab at all
-    response = client.get(co_prev.get_absolute_url())
-    assert "assignments" not in response.context['tabs']
-    # Teacher can see links to assignments from other course sessions
-    client.login(teacher)
-    response = client.get(co_prev.get_absolute_url())
-    assert "assignments" in response.context['tabs']
-    assert smart_bytes(a.get_teacher_url()) in response.content
-    student = StudentCenterFactory()
-    client.login(student)
-    response = client.get(co_prev.get_absolute_url())
-    assert "assignments" in response.context['tabs']
-    assert len(response.context['tabs']['assignments'].context) == 1
-    assert smart_bytes(a.get_teacher_url()) not in response.content

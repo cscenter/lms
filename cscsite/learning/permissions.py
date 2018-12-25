@@ -84,6 +84,7 @@ class LearningPermissionsMixin:
 
 
 class CourseRole(Enum):
+    NO_ROLE = auto()
     STUDENT_REGULAR = auto()  # Enrolled active student
     # Restrict access to enrolled students in two cases:
     # student failed the course or was expelled from the center
@@ -92,6 +93,7 @@ class CourseRole(Enum):
     CURATOR = auto()
 
 
+# TODO: Надо перейти к философии has_access, а этот метод сделать внутренним
 def access_role(*, course, request_user) -> Optional[CourseRole]:
     """
     Some course data (e.g. assignments, news) are private and accessible
@@ -104,10 +106,10 @@ def access_role(*, course, request_user) -> Optional[CourseRole]:
     FIXME: enrolled students who was expelled have no access at all right now
     """
     if not request_user.is_authenticated or request_user.is_expelled:
-        return None
+        return CourseRole.NO_ROLE
     if request_user.is_curator:
         return CourseRole.CURATOR
-    role = None
+    role = CourseRole.NO_ROLE
     enrollment = request_user.get_enrollment(course.pk)
     if enrollment:
         if not course_failed_by_student(course, request_user, enrollment):
