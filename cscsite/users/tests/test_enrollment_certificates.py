@@ -109,7 +109,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, TestCase):
         self.assertLoginRedirect(url)
         curator = UserFactory.create(is_superuser=True, is_staff=True)
         self.doLogin(curator)
-        response  = self.client.get(url)
+        response = self.client.get(url)
         self.assertEqual(response.context['object'].note, "TEST")
         soup = BeautifulSoup(response.content, "html.parser")
         sig_text = soup.find(text=re.compile('SIGNATURE'))

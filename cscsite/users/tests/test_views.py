@@ -235,18 +235,18 @@ class UserTests(MyUtilitiesMixin, TestCase):
                                            "test123foobar@!")
         self.assertEqual(user.yandex_id, "foo")
 
-    def test_short_note(self):
+    def test_short_bio(self):
         """
-        get_short_note should split note on first paragraph
+        get_short_bio should split bio on first paragraph
         """
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = User.objects.create_user(**user_data)
-        user.note = "Some small text"
-        self.assertEqual(user.get_short_note(), "Some small text")
-        user.note = """Some large text.
+        user.bio = "Some small text"
+        self.assertEqual(user.get_short_bio(), "Some small text")
+        user.bio = """Some large text.
 
         It has several paragraphs, by the way."""
-        self.assertEqual(user.get_short_note(), "Some large text.")
+        self.assertEqual(user.get_short_bio(), "Some large text.")
 
     def test_teacher_detail_view(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
@@ -278,9 +278,9 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertTrue(resp.context['is_editing_allowed'])
         self.assertContains(resp, reverse('user_update', args=[user.pk]))
         resp = self.client.get(reverse('user_update', args=[user.pk]))
-        self.assertContains(resp, 'note')
+        self.assertContains(resp, 'bio')
         resp = self.client.post(reverse('user_update', args=[user.pk]),
-                                {'note': test_note})
+                                {'bio': test_note})
         self.assertRedirects(resp, reverse('user_detail', args=[user.pk]),
                              status_code=302)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))

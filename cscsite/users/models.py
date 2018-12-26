@@ -122,7 +122,7 @@ class User(LearningPermissionsMixin, AbstractUser):
         blank=True,
         null=True
     )
-    note = models.TextField(
+    bio = models.TextField(
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
         blank=True)
@@ -461,11 +461,11 @@ class User(LearningPermissionsMixin, AbstractUser):
     def get_thumbnail(self, geometry, use_stub=True, **options):
         return get_user_thumbnail(self, geometry, use_stub, **options)
 
-    def get_short_note(self):
-        """Returns only the first paragraph from the note."""
-        normalized_note = normalize_newlines(self.note)
-        lf = normalized_note.find("\n")
-        return self.note if lf == -1 else normalized_note[:lf]
+    def get_short_bio(self):
+        """Returns only the first paragraph from the bio."""
+        normalized_bio = normalize_newlines(self.bio)
+        lf = normalized_bio.find("\n")
+        return self.bio if lf == -1 else normalized_bio[:lf]
 
     # TODO: think how to add declension method with ru/en support
 

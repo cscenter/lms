@@ -79,11 +79,11 @@ class UserProfileForm(forms.ModelForm):
 
         self.helper = FormHelper()
         if kwargs['instance'].is_graduate:
-            show_fields = ['phone', 'workplace', 'note', 'csc_review',
+            show_fields = ['phone', 'workplace', 'bio', 'csc_review',
                            'yandex_id', 'github_id', 'stepic_id',
                            'private_contacts']
         else:
-            show_fields = ['phone', 'workplace', 'note',
+            show_fields = ['phone', 'workplace', 'bio',
                            'yandex_id', 'github_id', 'stepic_id',
                            'private_contacts']
 
@@ -103,17 +103,17 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['phone', 'workplace', 'note', 'yandex_id', 'github_id',
+        fields = ['phone', 'workplace', 'bio', 'yandex_id', 'github_id',
                   'stepic_id', 'csc_review', 'private_contacts',
                   'first_name', 'last_name', 'patronymic',
                   'index_redirect']
         widgets = {
-            'note': UbereditorWidget,
+            'bio': UbereditorWidget,
             'csc_review': UbereditorWidget,
             'private_contacts': UbereditorWidget
         }
         help_texts = {
-            'note': "{}. {}".format(
+            'bio': "{}. {}".format(
                 _("Tell something about yourself"),
                 LATEX_MARKDOWN_ENABLED),
             'csc_review': LATEX_MARKDOWN_ENABLED,
