@@ -289,7 +289,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
         default=False)
-    # Derivable fields depends on course class materials only
+
     materials_video = models.BooleanField(default=False, editable=False)
     materials_slides = models.BooleanField(default=False, editable=False)
     materials_files = models.BooleanField(default=False, editable=False)
@@ -313,8 +313,9 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
 
     derivable_fields = ['materials_video', 'materials_slides', 'materials_files']
     prefetch_before_compute_fields = {
-        # TODO: remove default ordering
-        'all': ['courseclass_set']
+        # TODO: remove default ordering for courseclass_set
+        'materials_video': ['courseclass_set'],
+        'materials_slides': ['courseclass_set']
     }
 
     class Meta:
@@ -783,7 +784,8 @@ class CourseClass(TimeStampedModel):
         if self.slides and not self.slides_url:
             maybe_upload_slides_yandex.delay(self.pk)
         self._update_track_fields()
-        course = self.course
+        # TODO: make async
+        course = Course.objects.get(pk=self.course_id)
         course.compute_fields(prefetch=True)
 
     def video_iframe(self):
@@ -837,7 +839,7 @@ class CourseClassAttachment(TimeStampedModel):
         super().save(*args, **kwargs)
         if created:
             course = self.course_class.course
-            course.compute_fields('materials_files', prefetch=True)
+            course.compute_fields('materials_files')
 
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)

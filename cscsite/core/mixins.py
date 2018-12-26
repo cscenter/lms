@@ -8,6 +8,10 @@ logger = logging.getLogger(__name__)
 
 
 class DerivableFieldsMixin:
+    """
+    Before computing any field value make sure that data this field depends on
+    didn't cache (e.g. related queryset could be cached with .prefetch_related)
+    """
     derivable_fields = []
     prefetch_before_compute_fields = {}
 
@@ -20,11 +24,6 @@ class DerivableFieldsMixin:
             if fields:
                 prefetch_fields.update(fields)
 
-        # Special case: prefetch for all derivable fields
-        fields = cls.prefetch_before_compute_fields.get('all')
-        if fields:
-            prefetch_fields.update(fields)
-
         return prefetch_fields
 
     def _call_compute_method(self, method_name):
@@ -34,7 +33,10 @@ class DerivableFieldsMixin:
             logger.warning('Try to compute unknown field %s', method_name)
         return False
 
-    def compute_fields(self, *derivable_fields, prefetch=False):
+    def compute_fields(self, *derivable_fields, prefetch=False) -> bool:
+        """
+        Use async version to avoid caching problem with .prefetch_related
+        """
         if not isinstance(self, models.Model):
             raise TypeError('DerivableFieldsMixin needs a model instance')
 
@@ -61,7 +63,7 @@ class DerivableFieldsMixin:
 
         return False
 
-    def compute_fields_delay(self, *derivable_fields):
+    def compute_fields_async(self, *derivable_fields) -> None:
         if not isinstance(self, models.Model):
             raise TypeError('DerivableFieldsMixin needs a model instance')
 
@@ -69,4 +71,4 @@ class DerivableFieldsMixin:
         derivable_fields = derivable_fields or self.derivable_fields
 
         for field in derivable_fields:
-            compute_model_field.delay(content_type.id, self.id, field)
+            compute_model_field.delay(content_type.id, self.pk, field)
