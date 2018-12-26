@@ -101,7 +101,7 @@ def test_update_derivable_fields(curator, client, mocker):
     assert not co.materials_video
     assert co.materials_slides
     assert not co.materials_files
-    cc2 = CourseClassFactory.create(course=co, video_url="youtuuube")
+    cc2 = CourseClassFactory(course=co, video_url="youtuuube")
     co.refresh_from_db()
     assert co.materials_video
     # Slides were uploaded on first class
