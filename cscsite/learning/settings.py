@@ -5,9 +5,6 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
 
-# this urls will be used to redirect from '/learning/' and '/teaching/'
-LEARNING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_student')
-TEACHING_BASE = getattr(settings, 'LEARNING_BASE', 'assignment_list_teacher')
 
 # Assignment types constants
 ASSIGNMENT_TASK_ATTACHMENT = 0

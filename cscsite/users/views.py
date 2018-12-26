@@ -21,7 +21,7 @@ from core.views import ProtectedFormMixin
 from learning.models import StudentAssignment, \
     Enrollment, StudyProgram
 from courses.models import Course, Semester
-from learning.settings import LEARNING_BASE, TEACHING_BASE, GradeTypes
+from learning.settings import GradeTypes
 from learning.viewmixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
 from .forms import LoginForm, UserProfileForm, EnrollmentCertificateCreateForm
@@ -55,9 +55,9 @@ class LoginView(generic.FormView):
         if not redirect_to:
             user_groups = self.request.user.get_cached_groups()
             if user_groups == {User.roles.STUDENT_CENTER}:
-                redirect_to = reverse(LEARNING_BASE)
+                redirect_to = reverse("assignment_list_student")
             elif user_groups == {User.roles.TEACHER_CENTER}:
-                redirect_to = reverse(TEACHING_BASE)
+                redirect_to = reverse("assignment_list_teacher")
 
         if not is_safe_url(redirect_to,
                            allowed_hosts={self.request.get_host()}):
