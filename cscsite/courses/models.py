@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
 
+from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local
 from core.utils import city_aware_reverse, hashids
@@ -245,7 +246,7 @@ class MetaCourse(TimeStampedModel):
         return reverse('meta_course_detail', args=[self.slug])
 
 
-class Course(TimeStampedModel):
+class Course(TimeStampedModel, DerivableFieldsMixin):
     meta_course = models.ForeignKey(
         MetaCourse,
         verbose_name=_("Course"),
@@ -288,7 +289,7 @@ class Course(TimeStampedModel):
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
         default=False)
-    # Composite fields, depends on course class materials only
+    # Derivable fields depends on course class materials only
     materials_video = models.BooleanField(default=False, editable=False)
     materials_slides = models.BooleanField(default=False, editable=False)
     materials_files = models.BooleanField(default=False, editable=False)
@@ -310,6 +311,12 @@ class Course(TimeStampedModel):
 
     objects = CourseDefaultManager()
 
+    derivable_fields = ['materials_video', 'materials_slides', 'materials_files']
+    prefetch_before_compute_fields = {
+        # TODO: remove default ordering
+        'all': ['courseclass_set']
+    }
+
     class Meta:
         ordering = ["-semester", "meta_course__created"]
         verbose_name = _("Course offering")
@@ -319,6 +326,43 @@ class Course(TimeStampedModel):
     def __str__(self):
         return "{0}, {1}".format(smart_text(self.meta_course),
                                  smart_text(self.semester))
+
+    def _compute_materials_video(self):
+        materials_video = False
+        for course_class in self.courseclass_set.all():
+            if course_class.video_url.strip() != "":
+                materials_video = True
+                break
+
+        if self.materials_video != materials_video:
+            self.materials_video = materials_video
+            return True
+
+        return False
+
+    def _compute_materials_slides(self):
+        materials_slides = False
+        for course_class in self.courseclass_set.all():
+            if course_class.slides:
+                materials_slides = True
+                break
+
+        if self.materials_slides != materials_slides:
+            self.materials_slides = materials_slides
+            return True
+
+        return False
+
+    def _compute_materials_files(self):
+        materials_files = (CourseClassAttachment.objects
+                           .filter(course_class__course_id=self.pk)
+                           .exists())
+
+        if self.materials_files != materials_files:
+            self.materials_files = materials_files
+            return True
+
+        return False
 
     def save(self, *args, **kwargs):
         # Make sure `self.completed_at` always has value
@@ -725,23 +769,6 @@ class CourseClass(TimeStampedModel):
     def _get_track_field(self, field):
         return getattr(self, '_original_{}'.format(field))
 
-    def update_composite_fields(self):
-        """
-        Updates composite fields used on courses list page under the assumption
-        that teacher/curator never deletes materials, only adds.
-        """
-        update_fields = {}
-        if bool(self.slides):
-            update_fields["materials_slides"] = True
-        if self.video_url.strip() != "":
-            update_fields["materials_video"] = True
-        if self.courseclassattachment_set.exists():
-            update_fields["materials_files"] = True
-        if update_fields:
-            (Course.objects
-             .filter(pk=self.course_id)
-             .update(**update_fields))
-
     def clean(self):
         super(CourseClass, self).clean()
         # ends_at should be later than starts_at
@@ -756,7 +783,8 @@ class CourseClass(TimeStampedModel):
         if self.slides and not self.slides_url:
             maybe_upload_slides_yandex.delay(self.pk)
         self._update_track_fields()
-        self.update_composite_fields()
+        course = self.course
+        course.compute_fields(prefetch=True)
 
     def video_iframe(self):
         return get_oembed_html(self.video_url, 'video_oembed',
@@ -808,7 +836,8 @@ class CourseClassAttachment(TimeStampedModel):
         created = self.pk is None
         super().save(*args, **kwargs)
         if created:
-            CourseClass.update_composite_fields(self.course_class)
+            course = self.course_class.course
+            course.compute_fields('materials_files', prefetch=True)
 
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)

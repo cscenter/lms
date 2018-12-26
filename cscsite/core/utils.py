@@ -5,6 +5,7 @@ import bleach
 import hoep as h
 
 from django.conf import settings
+from django.db.models import Max, Min
 from django.urls import reverse
 from django.utils import formats
 from hashids import Hashids
@@ -216,3 +217,24 @@ _en_to_ru_mapping = {
     'я': "ia",
 }
 en_to_ru_mapping = {ord(k): v for k, v in _en_to_ru_mapping.items()}
+
+
+# FIXME: add tests!
+def queryset_iterator(queryset, chunk_size=1000):
+    """
+    Memory efficient iteration over a Django Queryset ordered by the
+    primary key.
+
+    Django normally loads all objects into it's memory when iterating over
+    a queryset (even with .iterator, although in that case it's not Django
+    holding it in it's memory, but your database client)
+
+    Note:
+        Does not support ordered query sets.
+    """
+    queryset = queryset.order_by('pk')
+    limits = queryset.aggregate(min=Min('pk'), max=Max('pk'))
+    if limits['min']:
+        for pk in range(limits['min'], limits['max'] + 1, chunk_size):
+            for row in queryset.filter(pk__gte=pk)[:chunk_size]:
+                yield row
