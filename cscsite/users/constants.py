@@ -14,6 +14,7 @@ class AcademicRoles(DjangoChoices):
     TEACHER_CLUB = C(6, _('Teacher [CLUB]'))
     INTERVIEWER = C(7, _('Interviewer [Admission]'))
     # Should be always set with one of the student group
+    # FIXME: Rename it
     MASTERS_DEGREE = C(8, _('Studying for a master degree'))
     PROJECT_REVIEWER = C(9, _('Project reviewer'))
     CURATOR_PROJECTS = C(10, _('Curator of projects'))

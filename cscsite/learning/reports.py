@@ -10,6 +10,7 @@ from django.utils import formats
 from core.reports import ReportFileOutput
 from learning.models import AssignmentComment, Enrollment
 from courses.models import Semester
+from learning.permissions import has_master_degree
 from learning.projects.models import ReportComment, ProjectStudent
 from learning.settings import StudentStatuses, GradeTypes
 from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
@@ -336,7 +337,7 @@ class ProgressReportFull(ProgressReport):
             student.patronymic,
             student.city_id,
             "+" if student.is_volunteer else "",
-            "+" if student.is_master_student else "",
+            "+" if has_master_degree(student) else "",
             student.email,
             student.phone,
             student.university,
@@ -520,7 +521,7 @@ class ProgressReportForSemester(ProgressReport):
             student.patronymic,
             student.city_id,
             "+" if student.is_volunteer else "",
-            "+" if student.is_master_student else "",
+            "+" if has_master_degree(student) else "",
             student.email,
             student.phone,
             student.university,
