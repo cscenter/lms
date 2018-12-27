@@ -9,8 +9,9 @@ logger = logging.getLogger(__name__)
 
 class DerivableFieldsMixin:
     """
-    Before computing any field value make sure that data this field depends on
-    didn't cache (e.g. related queryset could be cached with .prefetch_related)
+    Before computing derivable field value make sure that any data this
+    field depends on didn't cache (e.g. related queryset could be cached
+    with .prefetch_related)
     """
     derivable_fields = []
     prefetch_before_compute_fields = {}
