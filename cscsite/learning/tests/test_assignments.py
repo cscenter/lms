@@ -692,12 +692,9 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
                                    course__city_id='spb',
                                    course__is_correspondence=False,
                                    course__semester_id=current_term.pk)
-    sa = StudentAssignmentFactory(assignment=assignment, student__city_id='spb')
-    student = sa.student
+    student = StudentCenterFactory(city_id='spb')
+    sa = StudentAssignmentFactory(assignment=assignment, student=student)
     client.login(student)
-    assert student.city_code == 'spb'
-    assert student.is_student_center
-    assert not student.is_student_club
     url_learning_assignments = reverse('assignment_list_student')
     response = client.get(url_learning_assignments)
     html = BeautifulSoup(response.content, "html.parser")

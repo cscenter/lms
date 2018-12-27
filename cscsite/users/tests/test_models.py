@@ -65,8 +65,6 @@ def test_permissions(client):
     response = client.get("/")
     request_user = response.wsgi_request.user
     assert not request_user.is_authenticated
-    assert not request_user.is_student_center
-    assert not request_user.is_student_club
     assert not request_user.is_student
     assert not request_user.is_volunteer
     assert not request_user.is_active_student
@@ -85,8 +83,6 @@ def test_permissions(client):
     response = client.get("/")
     request_user = response.wsgi_request.user
     assert request_user.is_authenticated
-    assert request_user.is_student_center
-    assert not request_user.is_student_club
     assert request_user.is_student
     assert not request_user.is_volunteer
     assert request_user.is_active_student
@@ -105,8 +101,6 @@ def test_permissions(client):
     response = client.get("/")
     request_user = response.wsgi_request.user
     assert request_user.is_authenticated
-    assert request_user.is_student_center
-    assert not request_user.is_student_club
     assert request_user.is_student
     assert not request_user.is_volunteer
     assert not request_user.is_active_student

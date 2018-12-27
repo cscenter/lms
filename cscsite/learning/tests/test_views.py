@@ -1009,10 +1009,8 @@ def test_student_courses_list_csclub(client, settings, mocker):
     now_year, now_season = get_current_term_pair(settings.DEFAULT_CITY_CODE)
     assert now_season == "spring"
     url = reverse('course_list_student')
-    student = StudentClubFactory()
+    student = StudentClubFactory(city_id='spb')
     client.login(student)
-    # We didn't set city_id for student, but it's OK for compsciclub.ru, we
-    # rely on city code from request.city_code
     response = client.get(url)
     assert response.status_code == 200
     # Make sure in tests we fallback to default city which is 'spb'

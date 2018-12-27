@@ -1,5 +1,4 @@
 from enum import Enum, auto
-from typing import Optional
 
 from core.utils import is_club_site
 from learning.enrollment import course_failed_by_student
@@ -18,25 +17,18 @@ class LearningPermissionsMixin:
     @property
     def is_student(self):
         if is_club_site():
-            return self.is_student_club
-        return self.is_student_center or self.is_volunteer
+            return AcademicRoles.STUDENT_CLUB in self._cached_groups
+        student_in_center = AcademicRoles.STUDENT_CENTER in self._cached_groups
+        return student_in_center or self.is_volunteer
 
     @property
     def is_expelled(self):
         return None
 
     @property
-    def is_student_center(self):
-        return AcademicRoles.STUDENT_CENTER in self._cached_groups
-
-    @property
-    def is_student_club(self):
-        return AcademicRoles.STUDENT_CLUB in self._cached_groups
-
-    @property
     def is_active_student(self):
         if is_club_site():
-            return self.is_student_club
+            return self.is_student
         return self.is_student and self.status != StudentStatuses.EXPELLED
 
     @property

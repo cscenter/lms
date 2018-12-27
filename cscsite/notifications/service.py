@@ -11,6 +11,8 @@ from django.template.loader import render_to_string, get_template
 from django.utils.functional import cached_property
 from django.utils.html import linebreaks, strip_tags
 
+from users.constants import AcademicRoles
+
 logger = logging.getLogger("notifications.handlers")
 
 
@@ -105,8 +107,10 @@ class NotificationService:
             co = notification.course_offering_news.course
         else:
             raise NotImplementedError()
-        if receiver.is_student_club or (receiver.is_teacher_club and
-                                        not receiver.is_teacher_center):
+        # FIXME: запоминать, с какого сайта отправлено уведомление
+        in_club = AcademicRoles.STUDENT_CLUB in receiver.get_cached_groups()
+        if in_club or (receiver.is_teacher_club and
+                       not receiver.is_teacher_center):
             if co.get_city() == "spb":
                 return "http://compsciclub.ru"
             else:

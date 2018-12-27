@@ -8,22 +8,21 @@ from courses.models import Semester
 from learning import utils
 from learning.enrollment import course_failed_by_student
 from learning.models import Useful, Internship, StudentAssignment, Enrollment
-from learning.viewmixins import StudentCenterAndVolunteerOnlyMixin, \
-    StudentOnlyMixin
+from learning.viewmixins import StudentOnlyMixin
 from learning.views import AssignmentProgressBaseView
 
 
-class UsefulListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
+class UsefulListView(StudentOnlyMixin, generic.ListView):
     context_object_name = "faq"
     template_name = "useful.html"
 
     def get_queryset(self):
         return (Useful.objects
-                .filter(site=settings.CENTER_SITE_ID)
+                .filter(site=settings.SITE_ID)
                 .order_by("sort"))
 
 
-class InternshipListView(StudentCenterAndVolunteerOnlyMixin, generic.ListView):
+class InternshipListView(StudentOnlyMixin, generic.ListView):
     context_object_name = "faq"
     template_name = "learning/internships.html"
 
@@ -110,7 +109,7 @@ class StudentAssignmentListView(StudentOnlyMixin, ListView):
         user = self.request.user
         # Since this view for students only, check only city settings
         tz_override = None
-        if user.city_code and (user.is_student_center or user.is_volunteer):
+        if user.city_code and (user.is_student or user.is_volunteer):
             tz_override = settings.TIME_ZONES[user.city_code]
         context["tz_override"] = tz_override
         return context
