@@ -29,6 +29,7 @@ INSTALLED_APPS += [
     'admission_test',  # TODO: remove after testing
     'django_jinja',
     'surveys.apps.SurveysConfig',
+    'learning.internships.apps.InternshipsConfig',
 ]
 
 CACHES = {

@@ -30,6 +30,7 @@ class CourseEnrollmentForm(forms.Form):
             return not self._custom_errors
         self._custom_errors = []
         if not self.course.enrollment_is_open:
+            # FIXME: replace validation error with exceptions
             error = ValidationError("Course enrollment should be active",
                                     code="deadline")
             self._custom_errors.append(error)

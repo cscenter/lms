@@ -10,11 +10,10 @@ from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from learning.models import InternshipCategory
 from users.constants import AcademicRoles
 from .models import StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, InternationalSchool, Useful, \
-    Internship, AreaOfStudy, \
+    AreaOfStudy, \
     StudyProgram, StudyProgramCourseGroup
 
 
@@ -148,18 +147,6 @@ class UsefulAdmin(admin.ModelAdmin):
     list_display = ['question', 'sort']
 
 
-class InternshipCategoryAdmin(admin.ModelAdmin):
-    list_filter = ['site']
-    list_display = ['name', 'sort']
-
-
-class InternshipAdmin(admin.ModelAdmin):
-    list_select_related = ['category']
-    list_filter = ['category']
-    list_editable = ['sort']
-    list_display = ['category', 'question', 'sort']
-
-
 admin.site.register(AreaOfStudy, AreaOfStudyAdmin)
 admin.site.register(StudyProgram, StudyProgramAdmin)
 admin.site.register(InternationalSchool, InternationalSchoolAdmin)
@@ -168,5 +155,4 @@ admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(NonCourseEvent, NonCourseEventAdmin)
 admin.site.register(Useful, UsefulAdmin)
-admin.site.register(InternshipCategory, InternshipCategoryAdmin)
-admin.site.register(Internship, InternshipAdmin)
+
