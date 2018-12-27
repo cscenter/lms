@@ -10,7 +10,7 @@ from django.test.client import Client
 from pytest_django.lazy_django import skip_if_no_django
 
 from core.models import City
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from users.factories import UserFactory
 
 CENTER_SITE_ID = settings.CENTER_SITE_ID

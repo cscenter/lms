@@ -11,7 +11,7 @@ from django.utils import formats
 
 from courses.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from users.factories import TeacherCenterFactory
 
 

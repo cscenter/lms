@@ -22,7 +22,7 @@ from courses.factories import SemesterFactory, CourseFactory, \
 from learning.models import StudentAssignment
 from courses.models import Assignment, AssignmentAttachment
 from learning.settings import StudentStatuses, GradeTypes
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin

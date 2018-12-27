@@ -9,7 +9,7 @@ from learning.projects.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import GradingSystems, StudentStatuses, GradeTypes
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from courses.utils import get_term_by_index
 from users.factories import SHADCourseRecordFactory, OnlineCourseRecordFactory, \
     TeacherCenterFactory, StudentCenterFactory

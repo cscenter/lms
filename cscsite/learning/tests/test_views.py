@@ -25,7 +25,7 @@ from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.utils import check_url_security
 from users.factories import StudentFactory, StudentClubFactory, \
     GraduateFactory, TeacherCenterFactory
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from .mixins import *
 
 

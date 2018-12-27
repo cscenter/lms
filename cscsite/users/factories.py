@@ -4,7 +4,7 @@ import factory
 from django.contrib.auth.models import Group
 
 from learning.settings import GradeTypes
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord
 

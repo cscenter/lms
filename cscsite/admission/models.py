@@ -27,7 +27,7 @@ from core.db.models import ScoreField
 from core.models import City, University
 from courses.models import Venue
 from learning.settings import AcademicDegreeYears
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from users.models import User
 

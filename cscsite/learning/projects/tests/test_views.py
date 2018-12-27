@@ -10,7 +10,7 @@ from learning.projects.factories import ProjectFactory, ReportFactory, \
     ReportReviewFormFactory
 from learning.projects.models import Report, ProjectStudent
 from learning.settings import StudentStatuses, GradeTypes
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from courses.utils import get_current_term_pair
 from notifications.models import Notification
 from users.factories import StudentCenterFactory, ProjectReviewerFactory, \

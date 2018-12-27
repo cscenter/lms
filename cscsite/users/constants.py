@@ -18,14 +18,15 @@ class AcademicRoles(DjangoChoices):
     PROJECT_REVIEWER = C(9, _('Project reviewer'))
     CURATOR_PROJECTS = C(10, _('Curator of projects'))
 
-    has_access_to_cscenter = {
-        STUDENT_CENTER.value,
-        VOLUNTEER.value,
-        TEACHER_CENTER.value,
-        GRADUATE_CENTER.value,
-        INTERVIEWER.value,
-        PROJECT_REVIEWER.value
-    }
+
+CSCENTER_ACCESS_ALLOWED = {
+    AcademicRoles.STUDENT_CENTER,
+    AcademicRoles.VOLUNTEER,
+    AcademicRoles.TEACHER_CENTER,
+    AcademicRoles.GRADUATE_CENTER,
+    AcademicRoles.INTERVIEWER,
+    AcademicRoles.PROJECT_REVIEWER
+}
 
 
 GROUPS_IMPORT_TO_GERRIT = [

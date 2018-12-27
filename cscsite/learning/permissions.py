@@ -4,7 +4,7 @@ from typing import Optional
 from core.utils import is_club_site
 from learning.enrollment import course_failed_by_student
 from learning.settings import StudentStatuses
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 
 
 class LearningPermissionsMixin:
@@ -87,15 +87,15 @@ class LearningPermissionsMixin:
 class CourseRole(Enum):
     NO_ROLE = auto()
     STUDENT_REGULAR = auto()  # Enrolled active student
-    # Restrict access to enrolled students in two cases:
-    # student failed the course or was expelled from the center
+    # Restrict access to the course for enrolled students in next cases:
+    #   * student failed the course
+    #   * student was expelled
     STUDENT_RESTRICT = auto()
-    TEACHER = auto()  # Any teacher from the same course
+    TEACHER = auto()  # Any teacher from the same meta course
     CURATOR = auto()
 
 
-# TODO: Надо перейти к философии has_access, а этот метод сделать внутренним
-def access_role(*, course, request_user) -> Optional[CourseRole]:
+def course_access_role(*, course, request_user) -> CourseRole:
     """
     Some course data (e.g. assignments, news) are private and accessible
     depending on the user role: curator, course teacher or
@@ -122,7 +122,7 @@ def access_role(*, course, request_user) -> Optional[CourseRole]:
                            .for_course(course.meta_course.slug)
                            .values_list('teacher_id', flat=True))
     if request_user.is_teacher and request_user.pk in all_course_teachers:
-        # Overrides student role if teacher accidentally enrolled on
+        # Overrides student role if teacher accidentally enrolled in
         # his own course
         role = CourseRole.TEACHER
     return role
