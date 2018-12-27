@@ -1,7 +1,6 @@
 from courses.models import Course
 from learning.models import Enrollment
 
-
 __all__ = ('course_failed_by_student',)
 
 

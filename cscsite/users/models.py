@@ -20,15 +20,14 @@ from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from model_utils.fields import MonitorField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
-from sorl.thumbnail import ImageField, get_thumbnail
-from sorl.thumbnail.images import DummyImageFile
+from sorl.thumbnail import ImageField
 
 from ajaxuploader.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.utils import is_club_site, en_to_ru_mapping
+from courses.models import Semester
 from cscenter.utils import PublicRoute
 from learning.models import Enrollment
-from courses.models import Semester
 from learning.permissions import LearningPermissionsMixin
 from learning.settings import AcademicDegreeYears, AcademicRoles, \
     StudentStatuses, GradeTypes
@@ -36,8 +35,7 @@ from learning.utils import is_negative_grade
 from users.fields import MonitorStatusField
 from users.settings import GROUPS_IMPORT_TO_GERRIT
 from users.tasks import update_password_in_gerrit
-from users.thumbnails import BoyStubImage, GirlStubImage, BaseStubImage, \
-    get_user_thumbnail
+from users.thumbnails import get_user_thumbnail
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.

@@ -28,8 +28,8 @@ from learning.views.course_views import CourseEditView, \
     CourseNewsDeleteView, CourseNewsUnreadNotificationsView, \
     CourseStudentsView
 from learning.views.students import StudentAssignmentStudentDetailView, \
-    StudentAssignmentListView, CourseEnrollView, \
-    CourseUnenrollView
+    StudentAssignmentListView
+from learning.enrollment.views import CourseEnrollView, CourseUnenrollView
 
 meta_course_patterns = url(
     r"^courses/", include([
