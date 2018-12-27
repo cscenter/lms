@@ -919,7 +919,7 @@ class AssignmentProgressBaseView(AccessMixin):
         # For online courses format datetime in student timezone
         # Note, that this view available for teachers, curators and
         # enrolled students only
-        if co.is_correspondence and (user.is_student_center or user.is_volunteer):
+        if co.is_correspondence and (user.is_student or user.is_volunteer):
             tz_override = settings.TIME_ZONES[user.city_id]
         context = {
             'user_type': self.user_type,

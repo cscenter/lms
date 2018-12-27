@@ -135,7 +135,7 @@ class Command(BaseCommand):
             u = notification.user
             # Override timezone to enrolled students if course is online
             if a_s.assignment.course.is_correspondence and (
-                    u.is_student_center or u.is_volunteer):
+                    u.is_student or u.is_volunteer):
                 tz_override = settings.TIME_ZONES[notification.user.city_code]
             context = {
                 'a_s_link_student': base_url + a_s.get_student_url(),

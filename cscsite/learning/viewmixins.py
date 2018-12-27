@@ -41,15 +41,6 @@ class StudentOnlyMixin(UserPassesTestMixin):
         return user.is_active_student or user.is_curator
 
 
-class StudentCenterAndVolunteerOnlyMixin(UserPassesTestMixin):
-    raise_exception = False
-
-    def test_func(self, user):
-        is_active_student = ((user.is_student_center or user.is_volunteer) and
-                             user.status != StudentStatuses.EXPELLED)
-        return is_active_student or user.is_curator
-
-
 class CuratorOnlyMixin(UserPassesTestMixin):
     raise_exception = False
 
