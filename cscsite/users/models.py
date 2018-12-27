@@ -29,11 +29,10 @@ from courses.models import Semester
 from cscenter.utils import PublicRoute
 from learning.models import Enrollment
 from learning.permissions import LearningPermissionsMixin
-from learning.settings import AcademicDegreeYears, AcademicRoles, \
-    StudentStatuses, GradeTypes
+from learning.settings import AcademicDegreeYears, StudentStatuses, GradeTypes
 from learning.utils import is_negative_grade
 from users.fields import MonitorStatusField
-from users.settings import GROUPS_IMPORT_TO_GERRIT
+from users.settings import GROUPS_IMPORT_TO_GERRIT, AcademicRoles
 from users.tasks import update_password_in_gerrit
 from users.thumbnails import get_user_thumbnail
 from .managers import CustomUserManager

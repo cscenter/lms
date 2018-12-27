@@ -11,7 +11,8 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from learning.projects.models import Project, ProjectStudent
-from learning.settings import AcademicRoles, GradeTypes
+from learning.settings import GradeTypes
+from users.settings import AcademicRoles
 from users.models import User
 
 EMPTY_CHOICE = ('', _('Any'))

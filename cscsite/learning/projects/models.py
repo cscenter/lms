@@ -19,7 +19,8 @@ from model_utils.models import TimeStampedModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.utils import hashids
 from courses.models import Semester
-from learning.settings import AcademicRoles, GradeTypes
+from learning.settings import GradeTypes
+from users.settings import AcademicRoles
 from courses.settings import SemesterTypes
 from core.timezone import now_local
 from courses.utils import get_current_term_index

@@ -14,7 +14,8 @@ from django.utils.encoding import smart_text, force_text, smart_bytes
 
 from learning.factories import AreaOfStudyFactory
 from courses.factories import CourseFactory
-from learning.settings import AcademicRoles, StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes
+from users.settings import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from users.forms import UserCreationForm, UserChangeForm
 from users.factories import UserFactory, SHADCourseRecordFactory, \
