@@ -6,7 +6,7 @@ from django.test import TestCase
 
 from courses.factories import SemesterFactory
 from learning.factories import *
-from learning.settings import AcademicRoles
+from users.settings import AcademicRoles
 from learning.tests.mixins import *
 from users.factories import UserFactory
 

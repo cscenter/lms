@@ -18,7 +18,8 @@ from learning.gradebook import gradebook_data, BaseGradebookForm, \
 from learning.gradebook.imports import AssignmentGradesImport
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GradingSystems, \
-    AcademicRoles, StudentStatuses, GradeTypes
+    StudentStatuses, GradeTypes
+from users.settings import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.utils import assert_login_redirect
 from learning.gradebook.views import _get_course

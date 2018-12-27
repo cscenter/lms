@@ -9,7 +9,7 @@ from django.utils import timezone
 from learning.factories import NonCourseEventFactory, \
     EnrollmentFactory
 from courses.factories import CourseFactory, CourseClassFactory, VenueFactory
-from learning.settings import AcademicRoles
+from users.settings import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import flatten_calendar_month_events

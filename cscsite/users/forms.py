@@ -14,7 +14,7 @@ from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site
 from core.widgets import UbereditorWidget
 from core.forms import CANCEL_SAVE_PAIR
-from learning.settings import AcademicRoles
+from users.settings import AcademicRoles
 from users import tasks
 from .models import User, EnrollmentCertificate
 

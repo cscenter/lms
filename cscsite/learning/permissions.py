@@ -3,7 +3,8 @@ from typing import Optional
 
 from core.utils import is_club_site
 from learning.enrollment import course_failed_by_student
-from learning.settings import AcademicRoles, StudentStatuses
+from learning.settings import StudentStatuses
+from users.settings import AcademicRoles
 
 
 class LearningPermissionsMixin:

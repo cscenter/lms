@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from learning.settings import AcademicRoles
+from users.settings import AcademicRoles
 from users.factories import UserFactory
 
 # Workaround to use Django's assertRedirects()

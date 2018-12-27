@@ -3,7 +3,8 @@ from django.core.exceptions import ValidationError
 
 from learning.factories import EnrollmentFactory
 from courses.factories import SemesterFactory, CourseFactory
-from learning.settings import AcademicRoles, StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes
+from users.settings import AcademicRoles
 from users.factories import StudentFactory, CuratorFactory, UserFactory, \
     StudentCenterFactory
 

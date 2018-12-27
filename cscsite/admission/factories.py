@@ -16,7 +16,7 @@ from admission.models import Campaign, Applicant, Contest, Test, \
     InterviewSlot, InterviewStream, InterviewInvitation
 from admission.signals import post_save_interview
 from courses.factories import VenueFactory
-from learning.settings import AcademicRoles
+from users.settings import AcademicRoles
 from users.factories import UserFactory
 
 

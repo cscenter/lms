@@ -13,7 +13,7 @@ from core.admin import related_spec_to_list, apply_related_spec
 from learning.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
 from learning.models import AssignmentNotification
-from learning.settings import AcademicRoles
+from users.settings import AcademicRoles
 from users.factories import UserFactory
 
 
