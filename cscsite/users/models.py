@@ -27,12 +27,11 @@ from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.utils import is_club_site, en_to_ru_mapping
 from courses.models import Semester
 from cscenter.utils import PublicRoute
-from learning.models import Enrollment
 from learning.permissions import LearningPermissionsMixin
 from learning.settings import AcademicDegreeYears, StudentStatuses, GradeTypes
 from learning.utils import is_negative_grade
 from users.fields import MonitorStatusField
-from users.settings import GROUPS_IMPORT_TO_GERRIT, AcademicRoles
+from users.constants import GROUPS_IMPORT_TO_GERRIT, AcademicRoles
 from users.tasks import update_password_in_gerrit
 from users.thumbnails import get_user_thumbnail
 from .managers import CustomUserManager
@@ -87,7 +86,7 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
     def __str__(self):
         return 'ExtendedAnonymousUser'
 
-    def get_enrollment(self, course_id: int) -> Optional[Enrollment]:
+    def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         return None
 
 
@@ -482,11 +481,12 @@ class User(LearningPermissionsMixin, AbstractUser):
             user_groups.add(self.roles.STUDENT_CLUB)
         return user_groups
 
-    def get_enrollment(self, course_id: int) -> Optional[Enrollment]:
+    def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         """
         Query enrollment from db on first call and cache the result. Cache
         won't be refreshed if enrollment was deleted or changed after call.
         """
+        from learning.models import Enrollment
         if self.is_student or self.is_graduate:
             cache_key = f"_student_enrollment_{course_id}"
             if not hasattr(self, cache_key):

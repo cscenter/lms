@@ -9,7 +9,7 @@ from courses.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseNewsNotification, NonCourseEvent, AreaOfStudy
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from users.factories import UserFactory, StudentCenterFactory
 
 

@@ -9,7 +9,7 @@ from django.dispatch import receiver
 from learning.projects.models import ProjectStudent, Report, Project, Review, \
     ReportComment
 from learning.settings import GradeTypes
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from notifications import types
 from notifications.signals import notify
 

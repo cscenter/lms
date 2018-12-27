@@ -11,7 +11,7 @@ from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from learning.models import InternshipCategory
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from .models import StudentAssignment, \
     AssignmentComment, Enrollment, NonCourseEvent, InternationalSchool, Useful, \
     Internship, AreaOfStudy, \

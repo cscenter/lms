@@ -14,7 +14,7 @@ from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseTeacher, Course, CourseClassAttachment, Venue, \
     Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
     AssignmentAttachment
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from users.models import User
 
 

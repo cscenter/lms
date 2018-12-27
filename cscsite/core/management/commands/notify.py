@@ -14,7 +14,7 @@ from django.utils.html import strip_tags, linebreaks
 
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from notifications import types as notification_types
 
 logger = logging.getLogger(__name__)

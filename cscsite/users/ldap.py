@@ -7,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils.encoding import force_bytes
 
 from users.models import User
-from users.settings import GROUPS_IMPORT_TO_GERRIT
+from users.constants import GROUPS_IMPORT_TO_GERRIT
 
 
 def get_ldap_username(user: User):

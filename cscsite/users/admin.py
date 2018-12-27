@@ -7,7 +7,7 @@ from import_export.admin import ImportMixin
 from core.admin import RelatedSpecMixin
 from core.widgets import AdminRichTextAreaWidget
 from core.filters import AdminRelatedDropdownFilter
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from users.forms import UserCreationForm, UserChangeForm
 from .import_export import UserRecordResource
 from .models import User, EnrollmentCertificate, \

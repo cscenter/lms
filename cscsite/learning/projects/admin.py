@@ -14,7 +14,7 @@ from core.admin import meta
 from learning.projects.import_export import ProjectStudentAdminRecordResource
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
     ReportComment
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from users.models import User
 
 

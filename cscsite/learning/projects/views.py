@@ -31,7 +31,7 @@ from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportCuratorAssessmentForm, StudentResultsModelForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
-from users.settings import AcademicRoles
+from users.constants import AcademicRoles
 from courses.utils import get_current_term_index
 from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin, \
     StudentOnlyMixin

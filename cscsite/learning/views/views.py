@@ -42,7 +42,7 @@ from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
     InternationalSchool
 from courses.models import MetaCourse, Course, Semester, Venue, CourseClass, \
     CourseClassAttachment, Assignment, AssignmentAttachment
-from learning.permissions import access_role, CourseRole
+from learning.permissions import course_access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT
 from core.settings.base import FOUNDATION_YEAR
@@ -838,8 +838,8 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        role = access_role(course=self.object.course,
-                           request_user=self.request.user)
+        role = course_access_role(course=self.object.course,
+                                  request_user=self.request.user)
         if role not in [CourseRole.CURATOR, CourseRole.TEACHER]:
             raise PermissionDenied
         context['a_s_list'] = (
@@ -950,7 +950,7 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
 
     def has_permissions_precise(self, user):
         co = self.student_assignment.assignment.course
-        role = access_role(course=co, request_user=user)
+        role = course_access_role(course=co, request_user=user)
         return role in [CourseRole.TEACHER, CourseRole.CURATOR]
 
     def get_context_data(self, form, **kwargs):
@@ -1214,8 +1214,8 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
               .filter(pk=attachment_id)
               .select_related("assignment", "assignment__course"))
         assignment_attachment = get_object_or_404(qs)
-        role = access_role(course=assignment_attachment.assignment.course,
-                           request_user=self.request.user)
+        role = course_access_role(course=assignment_attachment.assignment.course,
+                                  request_user=self.request.user)
         # User doesn't have private access to the task
         if role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT:
             return assignment_attachment.attachment
