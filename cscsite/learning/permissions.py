@@ -52,14 +52,6 @@ class LearningPermissionsMixin:
         return AcademicRoles.VOLUNTEER in self._cached_groups
 
     @property
-    def is_master_student(self):
-        """
-        Studying for a masters degree. Student with this group should be
-        center student or volunteer.
-        """
-        return AcademicRoles.MASTERS_DEGREE in self._cached_groups
-
-    @property
     def is_curator(self):
         return self.is_superuser and self.is_staff
 
@@ -74,6 +66,14 @@ class LearningPermissionsMixin:
     @property
     def is_project_reviewer(self):
         return AcademicRoles.PROJECT_REVIEWER in self._cached_groups
+
+
+def has_master_degree(user):
+    """
+    Emphasis that user is studying for a masters degree.
+    This group doesn't give any access to the site.
+    """
+    return AcademicRoles.MASTERS_DEGREE in user.get_cached_groups()
 
 
 class CourseRole(Enum):

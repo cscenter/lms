@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 from learning.factories import EnrollmentFactory
 from courses.factories import SemesterFactory, CourseFactory
+from learning.permissions import has_master_degree
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
 from users.factories import StudentFactory, CuratorFactory, UserFactory, \
@@ -68,7 +69,7 @@ def test_permissions(client):
     assert not request_user.is_student
     assert not request_user.is_volunteer
     assert not request_user.is_active_student
-    assert not request_user.is_master_student
+    assert not has_master_degree(request_user)
     assert not request_user.is_teacher_center
     assert not request_user.is_teacher_club
     assert not request_user.is_teacher
@@ -86,7 +87,7 @@ def test_permissions(client):
     assert request_user.is_student
     assert not request_user.is_volunteer
     assert request_user.is_active_student
-    assert not request_user.is_master_student
+    assert not has_master_degree(request_user)
     assert not request_user.is_teacher_center
     assert not request_user.is_teacher_club
     assert not request_user.is_teacher
@@ -104,7 +105,7 @@ def test_permissions(client):
     assert request_user.is_student
     assert not request_user.is_volunteer
     assert not request_user.is_active_student
-    assert not request_user.is_master_student
+    assert not has_master_degree(request_user)
     assert not request_user.is_teacher_center
     assert not request_user.is_teacher_club
     assert not request_user.is_teacher
