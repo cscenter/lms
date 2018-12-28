@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-12-24 13:21+0000\n"
-"PO-Revision-Date: 2018-12-24 13:22+0000\n"
+"PO-Revision-Date: 2018-12-28 08:52+0000\n"
 "Last-Translator: b'  <user.1@compscicenter.ru>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -1237,12 +1237,12 @@ msgid "Useful"
 msgstr "Полезное"
 
 #: cscsite/learning/models.py:568 cscsite/learning/models.py:581
-msgid "Internship category"
-msgstr "Стажировка (Категория)"
+msgid "Internship Category"
+msgstr "Категория"
 
 #: cscsite/learning/models.py:569
-msgid "Internship categories"
-msgstr "Стажировка (Категории)"
+msgid "Internship Categories"
+msgstr "Категории"
 
 #: cscsite/learning/models.py:588
 msgid "Internship"

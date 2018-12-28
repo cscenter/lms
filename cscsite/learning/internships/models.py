@@ -16,8 +16,8 @@ class InternshipCategory(models.Model):
     class Meta:
         db_table = "internships_categories"
         ordering = ["sort"]
-        verbose_name = _("Internship category")
-        verbose_name_plural = _("Internship categories")
+        verbose_name = _("Internship Category")
+        verbose_name_plural = _("Internship Categories")
 
     def __str__(self):
         return smart_text(self.name)
