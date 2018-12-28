@@ -38,8 +38,8 @@ from learning.forms import AssignmentCommentForm, AssignmentScoreForm, \
 from courses.forms import CourseForm, CourseClassForm, AssignmentForm
 from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
     AssignmentNotification, \
-    NonCourseEvent, \
-    InternationalSchool
+    NonCourseEvent
+from international_schools.models import InternationalSchool
 from courses.models import MetaCourse, Course, Semester, Venue, CourseClass, \
     CourseClassAttachment, Assignment, AssignmentAttachment
 from learning.permissions import course_access_role, CourseRole

@@ -74,6 +74,8 @@ INSTALLED_APPS = [
     'prettyjson',
     'mptt',
     'tasks',
+    # This is csclub app, but migrations on cscenter will be broken without it
+    'international_schools.apps.Config',
     'learning.gallery.apps.GalleryConfig',
     'learning.projects.apps.ProjectsConfig',
     'notifications.apps.NotificationsConfig',
