@@ -222,6 +222,9 @@ class Venue(models.Model):
 
 
 class MetaCourse(TimeStampedModel):
+    """
+    General data shared between all courses of the same type.
+    """
     name = models.CharField(_("Course|name"), max_length=140)
     slug = models.SlugField(
         _("News|slug"),

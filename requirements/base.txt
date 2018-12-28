@@ -70,6 +70,9 @@ django-dbbackup==3.1.3
 # Import/Export
 django-import-export==1.1.0
 tablib==0.12.1
+# Downgrade openpyxl lib since tablib 0.12.1 doesn't support a newer one
+# and breaks django-import-export xlsx export
+openpyxl==2.4.9
 
 # Redis-based task manager
 rq-scheduler==0.8.3
