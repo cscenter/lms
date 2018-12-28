@@ -10,11 +10,13 @@ from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
+from international_schools.admin import InternationalSchoolAdmin
 from users.constants import AcademicRoles
 from .models import StudentAssignment, \
-    AssignmentComment, Enrollment, NonCourseEvent, InternationalSchool, Useful, \
+    AssignmentComment, Enrollment, NonCourseEvent, Useful, \
     AreaOfStudy, \
     StudyProgram, StudyProgramCourseGroup
+from international_schools.models import InternationalSchool
 
 
 class AreaOfStudyAdmin(TranslationAdmin, admin.ModelAdmin):
@@ -133,13 +135,6 @@ class NonCourseEventAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     list_filter = ['venue']
     list_display = ['name', 'date', 'venue']
-
-
-class InternationalSchoolAdmin(admin.ModelAdmin):
-    list_display = ['name', 'deadline', 'has_grants']
-    formfield_overrides = {
-        db_models.TextField: {'widget': AdminRichTextAreaWidget},
-    }
 
 
 class UsefulAdmin(admin.ModelAdmin):

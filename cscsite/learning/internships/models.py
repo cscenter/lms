@@ -28,7 +28,7 @@ class Internship(TimeStampedModel):
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     category = models.ForeignKey(InternshipCategory,
-                                 verbose_name=_("Internship category"),
+                                 verbose_name=_("Internship Сategory"),
                                  null=True,
                                  blank=True,
                                  on_delete=models.SET_NULL)
