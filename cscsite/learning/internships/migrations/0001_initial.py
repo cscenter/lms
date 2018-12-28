@@ -42,8 +42,8 @@ class Migration(migrations.Migration):
                 ('site', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='sites.Site', verbose_name='Site')),
             ],
             options={
-                'verbose_name': 'Internship category',
-                'verbose_name_plural': 'Internship categories',
+                'verbose_name': 'Internship Сategory',
+                'verbose_name_plural': 'Internship Сategories',
                 'db_table': 'internships_categories',
                 'ordering': ['sort'],
             },
