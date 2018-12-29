@@ -1,6 +1,6 @@
-Django==2.1.3
+Django==2.1.4
 
-requests==2.20.1
+requests==2.21.0
 unicodecsv==0.14.1
 
 # Time zones support
@@ -39,7 +39,7 @@ django-ses==0.8.7
 
 # Amazon services
 boto==2.49.0
-boto3==1.9.41
+boto3==1.9.71
 
 # Excel 2010 support
 xlsxwriter==1.1.2
@@ -49,8 +49,8 @@ xlsxwriter==1.1.2
 webdavclient==1.0.5
 
 # Monitoring
-raven==6.9.0
-newrelic==4.4.1.104
+raven==6.10.0
+newrelic==4.8.0.110
 
 # Localization
 
@@ -76,12 +76,12 @@ openpyxl==2.4.9
 
 # Redis-based task manager
 rq-scheduler==0.8.3
-django-rq==1.2.0
-rq==0.12.0
+django-rq==1.3.0
+rq==0.13.0
 
 # ipython notebook
 nbconvert==5.4.0
-jupyter_client==5.1.0
+jupyter_client==5.2.4
 
 djangorestframework==3.9.0
 rest-pandas==1.0.0
@@ -126,5 +126,5 @@ django-loginas==0.3.3
 git+https://github.com/pacahon/django-treemenus.git
 
 django-webpack-loader==0.5.0
-social-auth-core==1.6.0
-social-auth-app-django==2.1.0
+social-auth-core==2.0.0
+social-auth-app-django==3.1.0
