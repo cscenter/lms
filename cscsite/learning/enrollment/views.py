@@ -12,7 +12,7 @@ from core.constants import DATE_FORMAT_RU
 from courses.models import Course
 from learning.enrollment.forms import CourseEnrollmentForm
 from learning.models import Enrollment
-from learning.viewmixins import StudentOnlyMixin
+from users.mixins import StudentOnlyMixin
 
 
 class CourseEnrollView(StudentOnlyMixin, FormView):

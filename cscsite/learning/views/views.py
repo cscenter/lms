@@ -35,12 +35,12 @@ from learning import utils
 from courses.calendar import CalendarQueryParams
 from learning.forms import AssignmentCommentForm, AssignmentScoreForm, \
     AssignmentModalCommentForm
-from courses.forms import CourseForm, CourseClassForm, AssignmentForm
+from courses.forms import CourseClassForm, AssignmentForm
 from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
     AssignmentNotification, \
     NonCourseEvent
 from international_schools.models import InternationalSchool
-from courses.models import MetaCourse, Course, Semester, Venue, CourseClass, \
+from courses.models import Course, Semester, Venue, CourseClass, \
     CourseClassAttachment, Assignment, AssignmentAttachment
 from learning.permissions import course_access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
@@ -49,12 +49,11 @@ from core.settings.base import FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from core.timezone import now_local
 from courses.utils import get_current_term_pair, get_term_index, \
-    get_terms_for_calendar_month, grouper
-from learning.viewmixins import TeacherOnlyMixin, StudentOnlyMixin, \
-    CuratorOnlyMixin
+    get_terms_for_calendar_month, grouper, get_co_from_query_params
+from users.mixins import TeacherOnlyMixin, StudentOnlyMixin
 from learning.views.generic import CalendarGenericView
 from learning.views.utils import get_teacher_city_code, \
-    get_co_from_query_params, get_student_city_code
+    get_student_city_code
 
 logger = logging.getLogger(__name__)
 
@@ -68,8 +67,7 @@ __all__ = [
     'TimetableTeacherView', 'TimetableStudentView', 'CalendarStudentFullView',
     'CalendarStudentView', 'CalendarTeacherFullView', 'CalendarTeacherView',
     'CoursesListView', 'CourseTeacherListView', 'CourseStudentListView',
-    'CourseVideoListView', 'MetaCourseDetailView', 'MetaCourseUpdateView',
-    'CourseClassDetailView', 'CourseClassCreateView', 'CourseClassUpdateView',
+    'CourseVideoListView', 'CourseClassDetailView', 'CourseClassCreateView', 'CourseClassUpdateView',
     'CourseClassAttachmentDeleteView', 'CourseClassDeleteView',
      'VenueListView', 'VenueDetailView', 'AssignmentTeacherListView',
     'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
@@ -403,36 +401,6 @@ class CourseVideoListView(ListView):
         return context
 
 
-class MetaCourseDetailView(generic.DetailView):
-    model = MetaCourse
-    template_name = "learning/courses/meta_detail.html"
-    context_object_name = 'meta_course'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        courses = (Course.objects
-                   .select_related("meta_course", "semester", "city")
-                   .filter(meta_course=self.object))
-        # Separate by city only on compsciclub.ru
-        if is_club_site():
-            courses = courses.in_city(self.request.city_code)
-        else:
-            courses = courses.in_center_branches()
-        context['courses'] = courses
-        context["show_city"] = not is_club_site()
-        return context
-
-
-class MetaCourseUpdateView(CuratorOnlyMixin, ProtectedFormMixin,
-                           generic.UpdateView):
-    model = MetaCourse
-    template_name = "learning/simple_crispy_form.html"
-    form_class = CourseForm
-
-    def is_form_allowed(self, user, obj):
-        return user.is_authenticated and user.is_curator
-
-
 class CourseClassDetailView(generic.DetailView):
     model = CourseClass
     context_object_name = 'course_class'
@@ -555,7 +523,7 @@ class CourseClassUpdateView(CourseClassCreateUpdateMixin, UpdateView):
 class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
                                       DeleteView):
     model = CourseClassAttachment
-    template_name = "learning/simple_delete_confirmation.html"
+    template_name = "forms/simple_delete_confirmation.html"
 
     def is_form_allowed(self, user, obj):
         return (user.is_curator or
@@ -575,7 +543,7 @@ class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
 class CourseClassDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
                             DeleteView):
     model = CourseClass
-    template_name = "learning/simple_delete_confirmation.html"
+    template_name = "forms/simple_delete_confirmation.html"
     success_url = reverse_lazy('timetable_teacher')
 
     def is_form_allowed(self, user, obj: CourseClass):
@@ -1068,7 +1036,7 @@ class AssignmentUpdateView(AssignmentCreateUpdateMixin, UpdateView):
 
 class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):
     model = Assignment
-    template_name = "learning/simple_delete_confirmation.html"
+    template_name = "forms/simple_delete_confirmation.html"
 
     def get_success_url(self):
         return reverse('assignment_list_teacher')
@@ -1120,7 +1088,7 @@ class AssignmentCommentUpdateView(generic.UpdateView):
 class AssignmentAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
                                      DeleteView):
     model = AssignmentAttachment
-    template_name = "learning/simple_delete_confirmation.html"
+    template_name = "forms/simple_delete_confirmation.html"
 
     def is_form_allowed(self, user, obj):
         return (user.is_curator or

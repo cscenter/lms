@@ -9,7 +9,7 @@ from courses.models import Course, Semester
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index, semester_slug_re
-from learning.views.utils import get_user_city_code
+from users.utils import get_user_city_code
 
 
 def validate_semester_slug(value):

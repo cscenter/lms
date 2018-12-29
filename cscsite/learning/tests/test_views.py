@@ -16,7 +16,7 @@ from django.utils.timezone import now
 from testfixtures import LogCapture
 
 from core.utils import city_aware_reverse
-from courses.models import MetaCourse, Course, CourseClass
+from courses.models import Course, CourseClass
 from courses.utils import get_current_term_pair
 from learning.enrollment import course_failed_by_student
 from learning.factories import *
@@ -138,57 +138,6 @@ class CourseListTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, TestCase):
     url_name = 'course_list_teacher'
     groups_allowed = [AcademicRoles.TEACHER_CENTER]
-
-
-class MetaCourseDetailTests(MyUtilitiesMixin, TestCase):
-    def test_meta_course_detail(self):
-        mc = MetaCourseFactory.create()
-        s1 = SemesterFactory(year=2016)
-        s2 = SemesterFactory(year=2017)
-        co1 = CourseFactory(semester=s1, meta_course=mc,
-                            city=settings.DEFAULT_CITY_CODE)
-        co2 = CourseFactory(semester=s2, meta_course=mc,
-                            city=settings.DEFAULT_CITY_CODE)
-        response = self.client.get(mc.get_absolute_url())
-        self.assertContains(response, mc.name)
-        self.assertContains(response, mc.description)
-        # Course offerings not repeated, used set to compare
-        assert {c.pk for c in response.context['courses']} == {co1.pk, co2.pk}
-        co2.city_id = "kzn"
-        co2.save()
-        response = self.client.get(mc.get_absolute_url())
-        if settings.SITE_ID == settings.CENTER_SITE_ID:
-            assert {c.pk for c in response.context['courses']} == {co1.pk}
-
-
-class MetaCourseUpdateTests(MyUtilitiesMixin, TestCase):
-    def test_security(self):
-        mc = MetaCourseFactory.create()
-        url = reverse('meta_course_edit', args=[mc.slug])
-        all_test_groups = [
-            [],
-            [AcademicRoles.TEACHER_CENTER],
-            [AcademicRoles.STUDENT_CENTER],
-            [AcademicRoles.GRADUATE_CENTER]
-        ]
-        for groups in all_test_groups:
-            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
-            self.assertPOSTLoginRedirect(url, {})
-            self.client.logout()
-        self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
-        self.assertEqual(
-            200, self.client.post(url, {'name': "foobar"}).status_code)
-
-    def test_update(self):
-        mc = MetaCourseFactory.create()
-        url = reverse('meta_course_edit', args=[mc.slug])
-        self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
-        fields = model_to_dict(mc)
-        # Note: Create middleware for lang request support in cscenter app
-        # or define locale value explicitly
-        fields.update({'name_ru': "foobar"})
-        self.assertEqual(302, self.client.post(url, fields).status_code)
-        self.assertEqual("foobar", MetaCourse.objects.get(pk=mc.pk).name_ru)
 
 
 class CourseDetailTests(MyUtilitiesMixin, TestCase):

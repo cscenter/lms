@@ -33,8 +33,8 @@ from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
 from users.constants import AcademicRoles
 from courses.utils import get_current_term_index
-from learning.viewmixins import ProjectReviewerGroupOnlyMixin, CuratorOnlyMixin, \
-    StudentOnlyMixin
+from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
+    CuratorOnlyMixin
 from notifications import types
 from notifications.signals import notify
 from users.models import User

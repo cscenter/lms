@@ -1,7 +1,5 @@
 from braces.views import UserPassesTestMixin
 
-from learning.settings import StudentStatuses
-
 
 class ParticipantOnlyMixin(UserPassesTestMixin):
     """Used on assignment detail page"""

@@ -22,7 +22,7 @@ from learning.models import StudentAssignment, \
     Enrollment, StudyProgram
 from courses.models import Course, Semester
 from learning.settings import GradeTypes
-from learning.viewmixins import CuratorOnlyMixin
+from users.mixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
 from .forms import LoginForm, UserProfileForm, EnrollmentCertificateCreateForm
 from .models import User, EnrollmentCertificate
