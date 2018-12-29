@@ -248,6 +248,9 @@ class MetaCourse(TimeStampedModel):
     def get_absolute_url(self):
         return reverse('meta_course_detail', args=[self.slug])
 
+    def get_update_url(self):
+        return reverse('meta_course_edit', args=[self.slug])
+
 
 class Course(TimeStampedModel, DerivableFieldsMixin):
     meta_course = models.ForeignKey(

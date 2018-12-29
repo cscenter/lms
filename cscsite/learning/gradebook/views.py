@@ -20,7 +20,7 @@ from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook import GradeBookFormFactory, gradebook_data
 from learning.gradebook.imports import AssignmentGradesImport
-from learning.viewmixins import CuratorOnlyMixin, TeacherOnlyMixin
+from users.mixins import TeacherOnlyMixin, CuratorOnlyMixin
 
 __all__ = [
     "GradeBookCuratorDispatchView", "GradeBookTeacherDispatchView",

@@ -36,7 +36,7 @@ from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
-from learning.viewmixins import CuratorOnlyMixin
+from users.mixins import CuratorOnlyMixin
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams
 from surveys.models import CourseSurvey

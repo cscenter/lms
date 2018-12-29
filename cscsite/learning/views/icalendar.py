@@ -13,7 +13,7 @@ from icalendar.prop import vInline
 
 from learning.models import StudentAssignment, NonCourseEvent
 from courses.models import CourseClass, Assignment
-from learning.views.utils import get_user_city_code
+from users.utils import get_user_city_code
 from users.models import User
 
 

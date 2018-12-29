@@ -346,7 +346,7 @@ def test_reportpage_update_permissions():
     """Check report updating restricted to curators only"""
     from learning.projects.views import (ReportUpdateStatusView,
         ReportCuratorAssessmentView)
-    from learning.viewmixins import CuratorOnlyMixin
+    from users.mixins import CuratorOnlyMixin
     assert issubclass(ReportCuratorAssessmentView, CuratorOnlyMixin)
     assert issubclass(ReportUpdateStatusView, CuratorOnlyMixin)
 
@@ -451,7 +451,7 @@ def test_reportpage_notifications(client, curator):
 
 @pytest.mark.django_db
 def test_reportpage_summarize_notifications(client, curator):
-    from learning.viewmixins import CuratorOnlyMixin
+    from users.mixins import CuratorOnlyMixin
     from learning.projects.views import ReportCuratorSummarizeView
     assert issubclass(ReportCuratorSummarizeView, CuratorOnlyMixin)
     curator.groups.add(AcademicRoles.PROJECT_REVIEWER)

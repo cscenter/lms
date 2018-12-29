@@ -14,7 +14,7 @@ from learning.settings import StudentStatuses, GradeTypes
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
-from learning.viewmixins import CuratorOnlyMixin
+from users.mixins import CuratorOnlyMixin
 from users.models import User
 
 

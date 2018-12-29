@@ -64,8 +64,8 @@ from admission.utils import generate_interview_reminder, \
     calculate_time
 from core.constants import DATE_FORMAT_RU
 from core.timezone import now_local
-from learning.viewmixins import InterviewerOnlyMixin, CuratorOnlyMixin
-from learning.views import get_user_city_code
+from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
+from users.utils import get_user_city_code
 from tasks.models import Task
 from users.models import User
 from .tasks import register_in_yandex_contest, import_testing_results

@@ -23,6 +23,20 @@ logger = logging.getLogger(__name__)
 READ_ONLY_COURSE_TAB_ATTRIBUTES = ['type']
 
 
+class InvalidTabException(Exception):
+    """
+    A complaint about invalid tabs.
+    """
+    pass
+
+
+class TabNotFound(Exception):
+    """
+    A complaint about invalid tabs.
+    """
+    pass
+
+
 def validate_keys(expected_keys):
     """
     Returns a function that checks that specified keys are present in a dict.
@@ -37,20 +51,13 @@ def validate_keys(expected_keys):
         if not missing:
             return True
         if raise_error:
-            raise InvalidTabsException(
+            raise InvalidTabException(
                 f"Expected keys '{expected_keys}' are not present "
                 f"in the given dict: {actual_dict}")
         else:
             return False
 
     return check
-
-
-class InvalidTabsException(Exception):
-    """
-    A complaint about invalid tabs.
-    """
-    pass
 
 
 class CourseTabPanel(NamedTuple):
@@ -247,7 +254,7 @@ class CourseTabList:
 
     def set_active_tab(self, tab_type) -> None:
         if tab_type not in self._tabs:
-            raise ValueError(f"Can't' set tab {tab_type} as active")
+            raise TabNotFound(f"Can't' set tab {tab_type} as active")
         for t in self._tabs.values():
             t.is_default = (t == tab_type)
 

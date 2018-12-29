@@ -52,9 +52,6 @@ def assert_redirect():
     return wrapper
 
 
-
-
-
 @pytest.fixture(scope="function")
 def curator(user_factory):
     return user_factory.create(is_superuser=True, is_staff=True)

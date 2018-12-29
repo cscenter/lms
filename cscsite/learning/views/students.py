@@ -9,7 +9,7 @@ from learning import utils
 from learning.enrollment import course_failed_by_student
 from learning.models import Useful, StudentAssignment, Enrollment
 from learning.internships.models import Internship
-from learning.viewmixins import StudentOnlyMixin
+from users.mixins import StudentOnlyMixin
 from learning.views import AssignmentProgressBaseView
 
 
