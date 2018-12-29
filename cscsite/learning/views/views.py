@@ -6,7 +6,6 @@ from collections import OrderedDict
 from typing import Optional
 from urllib.parse import urlencode
 
-import nbconvert
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
@@ -24,6 +23,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
+from nbconvert import HTMLExporter
 from vanilla import CreateView, UpdateView, DeleteView, ListView, TemplateView
 
 import courses.utils
@@ -1186,7 +1186,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
                 if not os.path.exists(converted_path):
                     # TODO: move html_exporter to separated module
                     # TODO: disable warnings 404 for css and ico in media folder for ipynb files?
-                    html_exporter = nbconvert.HTMLExporter()
+                    html_exporter = HTMLExporter()
                     try:
                         nb_node, _ = html_exporter.from_filename(ipynb_src_path)
                         with open(converted_path, 'w') as f:

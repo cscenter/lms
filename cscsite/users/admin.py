@@ -20,7 +20,7 @@ class UserStatusLogAdmin(RelatedSpecMixin, admin.TabularInline):
     readonly_fields = ('created', 'status')
     related_spec = {'select': ['semester', 'student']}
 
-    def has_add_permission(self, request, **kwargs):
+    def has_add_permission(self, request, obj):
         return False
 
 
