@@ -23,10 +23,10 @@
 <div class="container" id="onlinecourses-list">
     {% if recent_courses or self_paced_courses %}
         {% for online_course in recent_courses %}
-            {% include "learning/_onlinecourse_list__row.html" %}
+            {% include "online_courses/_online_course_row.html" %}
         {% endfor %}
         {% for online_course in self_paced_courses %}
-            {% include "learning/_onlinecourse_list__row.html" %}
+            {% include "online_courses/_online_course_row.html" %}
         {% endfor %}
     {% else %}
         <div class="row">
@@ -42,7 +42,7 @@
         <div class="panel-collapse ">
             <div class="collapse" id="onlinecourses-earlier">
             {% for online_course in archive_courses %}
-                {% include "learning/_onlinecourse_list__row.html" %}
+                {% include "online_courses/_online_course_row.html" %}
             {% endfor %}
             </div>
         </div>
