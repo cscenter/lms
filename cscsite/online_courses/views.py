@@ -7,6 +7,7 @@ from online_courses.models import OnlineCourse
 class OnlineCoursesListView(generic.ListView):
     context_object_name = 'courses'
     model = OnlineCourse
+    template_name = "online_courses/online_courses_list.html"
 
     def get_context_data(self, **kwargs):
         context = super(OnlineCoursesListView, self).get_context_data(**kwargs)
