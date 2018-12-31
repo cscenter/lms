@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 import logging
-import os
-import unittest
 
 import pytest
 import pytz
-from bs4 import BeautifulSoup
 from dateutil.relativedelta import relativedelta
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.forms.models import model_to_dict
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils.encoding import smart_text, smart_bytes
+from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from testfixtures import LogCapture
 
 from core.utils import city_aware_reverse
-from courses.models import Course, CourseClass
+from courses.models import Course
 from courses.utils import get_current_term_pair
 from learning.enrollment import course_failed_by_student
 from learning.factories import *
@@ -230,243 +226,6 @@ class CourseEditDescrTests(MyUtilitiesMixin, TestCase):
         self.doLogout()
         self.doLogin(teacher)
         self.assertStatusCode(200, url, make_reverse=False)
-
-
-class CourseClassDetailTests(MyUtilitiesMixin, TestCase):
-    def test_is_actual_teacher(self):
-        teacher = TeacherCenterFactory()
-        cc = CourseClassFactory.create()
-        cc_other = CourseClassFactory.create()
-        url = cc.get_absolute_url()
-        self.assertEqual(False, self.client.get(url)
-                         .context['is_actual_teacher'])
-        self.doLogin(teacher)
-        self.assertEqual(False, self.client.get(url)
-                         .context['is_actual_teacher'])
-        CourseTeacherFactory(course=cc_other.course,
-                             teacher=teacher)
-        self.assertEqual(False, self.client.get(url)
-                         .context['is_actual_teacher'])
-        CourseTeacherFactory(course=cc.course,
-                             teacher=teacher)
-        self.assertEqual(True, self.client.get(url)
-                         .context['is_actual_teacher'])
-
-    @unittest.skip('not implemented yet')
-    def test_show_news_only_to_authorized(self):
-        """ On cscenter site only authorized users can see news """
-        pass
-
-
-class CourseClassDetailCRUDTests(MediaServingMixin,
-                                 MyUtilitiesMixin, TestCase):
-    def test_security(self):
-        teacher = TeacherCenterFactory()
-        co = CourseFactory.create(teachers=[teacher])
-        form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-        form.update({'venue': VenueFactory.create().pk})
-        url = co.get_create_class_url()
-        self.assertLoginRedirect(url)
-        self.assertPOSTLoginRedirect(url, form)
-
-    def test_create(self):
-        teacher = TeacherCenterFactory()
-        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                  teachers=[teacher], semester=s)
-        co_other = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                        semester=s)
-        form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-        venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
-        form.update({'venue': venue.pk})
-        del form['slides']
-        url = co.get_create_class_url()
-        self.doLogin(teacher)
-        # should save with course = co
-        self.assertEqual(302, self.client.post(url, form).status_code)
-        self.assertEqual(1, CourseClass.objects.filter(course=co).count())
-        self.assertEqual(0, (CourseClass.objects
-                             .filter(course=co_other).count()))
-        self.assertEqual(0, (CourseClass.objects
-                             .filter(course=form['course']).count()))
-        self.assertEqual(CourseClass.objects.get(course=co).name, form['name'])
-        form.update({'course': co.pk})
-        self.assertEqual(302, self.client.post(url, form).status_code)
-
-    def test_create_and_add(self):
-        teacher = TeacherCenterFactory()
-        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                  teachers=[teacher], semester=s)
-        co_other = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                        semester=s)
-        form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-        venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
-        form.update({'venue': venue.pk, '_addanother': True})
-        del form['slides']
-        self.doLogin(teacher)
-        url = co.get_create_class_url()
-        # should save with course = co
-        response = self.client.post(url, form)
-        expected_url = co.get_create_class_url()
-        self.assertEqual(302, response.status_code)
-        self.assertRedirects(response, expected_url)
-        self.assertEqual(1, CourseClass.objects.filter(course=co).count())
-        self.assertEqual(0, (CourseClass.objects
-                             .filter(course=co_other).count()))
-        self.assertEqual(0, (CourseClass.objects
-                             .filter(course=form['course']).count()))
-        self.assertEqual(CourseClass.objects.get(course=co).name, form['name'])
-        form.update({'course': co.pk})
-        self.assertEqual(302, self.client.post(url, form).status_code)
-        del form['_addanother']
-        response = self.client.post(url, form)
-        self.assertEqual(3, CourseClass.objects.filter(course=co).count())
-        last_added_class = CourseClass.objects.order_by("-id").first()
-        self.assertRedirects(response, last_added_class.get_absolute_url())
-
-    def test_update(self):
-        teacher = TeacherCenterFactory()
-        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                  teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course=co)
-        url = cc.get_update_url()
-        self.doLogin(teacher)
-        form = model_to_dict(cc)
-        del form['slides']
-        form['name'] += " foobar"
-        self.assertRedirects(self.client.post(url, form),
-                             cc.get_absolute_url())
-        self.assertEqual(form['name'],
-                          self.client.get(cc.get_absolute_url())
-                          .context['object'].name)
-
-    def test_update_and_add(self):
-        teacher = TeacherCenterFactory()
-        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                  teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course=co)
-        url = cc.get_update_url()
-        self.doLogin(teacher)
-        form = model_to_dict(cc)
-        del form['slides']
-        form['name'] += " foobar"
-        self.assertRedirects(self.client.post(url, form),
-                             cc.get_absolute_url())
-        self.assertEqual(form['name'],
-                          self.client.get(cc.get_absolute_url())
-                          .context['object'].name)
-        form.update({'_addanother': True})
-        expected_url = co.get_create_class_url()
-        self.assertRedirects(self.client.post(url, form), expected_url)
-
-    def test_delete(self):
-        teacher = TeacherCenterFactory()
-        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                  teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course=co)
-        url = cc.get_delete_url()
-        self.assertLoginRedirect(url)
-        self.assertPOSTLoginRedirect(url, {})
-        self.doLogin(teacher)
-        self.assertContains(self.client.get(url), smart_text(cc))
-        self.assertRedirects(self.client.post(url),
-                             reverse('timetable_teacher'))
-        self.assertFalse(CourseClass.objects.filter(pk=cc.pk).exists())
-
-    def test_back_variable(self):
-        teacher = TeacherCenterFactory()
-        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseFactory.create(teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course=co)
-        base_url = cc.get_update_url()
-        self.doLogin(teacher)
-        form = model_to_dict(cc)
-        del form['slides']
-        form['name'] += " foobar"
-        self.assertRedirects(self.client.post(base_url, form),
-                             cc.get_absolute_url())
-        url = ("{}?back=course"
-               .format(base_url))
-        self.assertRedirects(self.client.post(url, form),
-                             co.get_absolute_url())
-
-    def test_attachment_links(self):
-        teacher = TeacherCenterFactory()
-        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                  teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course=co)
-        cca1 = CourseClassAttachmentFactory.create(
-            course_class=cc, material__filename="foobar1.pdf")
-        cca2 = CourseClassAttachmentFactory.create(
-            course_class=cc, material__filename="foobar2.zip")
-        resp = self.client.get(cc.get_absolute_url())
-        self.assertContains(resp, cca1.material.url)
-        self.assertContains(resp, cca1.material_file_name)
-        self.assertContains(resp, cca2.material.url)
-        self.assertContains(resp, cca2.material_file_name)
-        self.doLogin(teacher)
-        url = cc.get_update_url()
-        resp = self.client.get(url)
-        self.assertContains(resp, cca1.get_delete_url())
-        self.assertContains(resp, cca1.material_file_name)
-        self.assertContains(resp, cca2.get_delete_url())
-        self.assertContains(resp, cca2.material_file_name)
-
-    def test_attachments(self):
-        teacher = TeacherCenterFactory()
-        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-        co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                  teachers=[teacher], semester=s)
-        cc = CourseClassFactory.create(course=co)
-        f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
-        f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")
-        self.doLogin(teacher)
-        form = model_to_dict(cc)
-        del form['slides']
-        form['attachments'] = [f1, f2]
-        url = cc.get_update_url()
-        self.assertRedirects(self.client.post(url, form),
-                             cc.get_absolute_url())
-        # check that files are available from course class page
-        response = self.client.get(cc.get_absolute_url())
-        spans = (BeautifulSoup(response.content, "html.parser")
-                 .find_all('span', class_='assignment-attachment'))
-        self.assertEqual(2, len(spans))
-        cca_files = sorted(a.material.path
-                           for a in response.context['attachments'])
-        # we will delete attachment2.txt
-        cca_to_delete = [a for a in response.context['attachments']
-                         if a.material.path == cca_files[1]][0]
-        as_ = sorted((span.a.contents[0].strip(),
-                      b"".join(self.client.get(span.a['href']).streaming_content))
-                     for span in spans)
-        self.assertRegex(as_[0][0], "attachment1(_[0-9a-zA-Z]+)?.txt")
-        self.assertRegex(as_[1][0], "attachment2(_[0-9a-zA-Z]+)?.txt")
-        self.assertEqual(as_[0][1], b"attachment1_content")
-        self.assertEqual(as_[1][1], b"attachment2_content")
-        # delete one of the files, check that it's deleted and other isn't
-        url = cca_to_delete.get_delete_url()
-        # check security just in case
-        self.doLogout()
-        self.assertLoginRedirect(url)
-        self.assertPOSTLoginRedirect(url, {})
-        self.doLogin(teacher)
-        self.assertContains(self.client.get(url),
-                            cca_to_delete.material_file_name)
-        self.assertRedirects(self.client.post(url),
-                             cc.get_update_url())
-        response = self.client.get(cc.get_absolute_url())
-        spans = (BeautifulSoup(response.content, "html.parser")
-                 .find_all('span', class_='assignment-attachment'))
-        self.assertEqual(1, len(spans))
-        self.assertRegex(spans[0].a.contents[0].strip(),
-                                 "attachment1(_[0-9a-zA-Z]+)?.txt")
-        self.assertFalse(os.path.isfile(cca_files[1]))
 
 
 class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
@@ -759,7 +518,7 @@ class NonCourseEventDetailTests(MyUtilitiesMixin, TestCase):
 @pytest.mark.django_db
 def test_course_class_form(client, curator, settings):
     """Test form availability based on `is_completed` value"""
-    # XXX: Date widget depends on locale, don't know exactly why
+    # XXX: Date widget depends on locale
     settings.LANGUAGE_CODE = 'ru'
     teacher = TeacherCenterFactory()
     semester = SemesterFactory.create_current()
