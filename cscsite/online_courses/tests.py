@@ -1,6 +1,8 @@
 import pytest
 from django.urls import reverse
 
+# TODO: tests for recent/passed courses
+
 
 @pytest.mark.django_db
 def test_online_courses_list(client):
