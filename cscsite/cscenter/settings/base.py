@@ -23,11 +23,15 @@ MIDDLEWARE = [
     'core.middleware.RedirectMiddleware',
 ]
 INSTALLED_APPS += [
-    'admission.apps.AdmissionConfig',
     'post_office',
+    'django_jinja',
+    'taggit',  # used by library app only
+    'library.apps.LibraryConfig',
+    'learning.projects.apps.ProjectsConfig',
+    'stats.apps.StatisticsConfig',
+    'admission.apps.AdmissionConfig',
     'staff',
     'admission_test',  # TODO: remove after testing
-    'django_jinja',
     'surveys.apps.SurveysConfig',
     'online_courses.apps.Config',
     'learning.internships.apps.InternshipsConfig',

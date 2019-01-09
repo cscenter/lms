@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.sites',
-    'core.storage.StaticFilesConfig',  # custom ignore patterns list
+    'core.storage.StaticFilesConfig',  # custom list of ignore patterns
     'django.contrib.humanize',
 
     'treemenus',
@@ -57,36 +57,31 @@ INSTALLED_APPS = [
     'crispy_forms',
     'formtools',
     'bootstrap3',
-    'taggit',
     'micawber.contrib.mcdjango',
     'dbbackup',
 
-    'users.apps.UsersConfig',
-    'core',
-    'htmlpages',
-    'courses.apps.CoursesConfig',
-    'study_programs.apps.StudyProgramsConfig',
-    'learning',
-    'library.apps.LibraryConfig',
     'loginas',
     'import_export',
     'pipeline',
     'bootstrap_pagination',
     'prettyjson',
     'mptt',
-    'tasks',
-    # This is csclub app, but migrations on cscenter will be broken without it
-    'international_schools.apps.Config',
-    'learning.gallery.apps.GalleryConfig',
-    'learning.projects.apps.ProjectsConfig',
-    'notifications.apps.NotificationsConfig',
-    'rest_framework',
-    'api.apps.APIConfig',
-    'stats.apps.StatisticsConfig',
     'django_rq',
     'django_js_reverse',
     'webpack_loader',
     'django_filters',
+    'rest_framework',  # what about club site?
+
+    'users.apps.UsersConfig',
+    'core',
+    'htmlpages',
+    'courses.apps.CoursesConfig',
+    'study_programs.apps.StudyProgramsConfig',
+    'learning.apps.LearningConfig',
+    'tasks',
+    'learning.gallery.apps.GalleryConfig',
+    'notifications.apps.NotificationsConfig',
+    'api.apps.APIConfig',
 ]
 
 # django-js-reverse settings
