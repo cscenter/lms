@@ -27,6 +27,7 @@ MIDDLEWARE = [
 INSTALLED_APPS += [
     'captcha',
     'registration',
+    'international_schools.apps.Config',
 ]
 
 CACHES = {

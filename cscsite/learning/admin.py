@@ -8,13 +8,8 @@ from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from international_schools.admin import InternationalSchoolAdmin
-from study_programs.admin import AreaOfStudyAdmin, StudyProgramAdmin
 from users.constants import AcademicRoles
-from .models import StudentAssignment, \
-    AssignmentComment, Enrollment, NonCourseEvent, Useful
-from study_programs.models import StudyProgram, AreaOfStudy
-from international_schools.models import InternationalSchool
+from .models import AssignmentComment, Enrollment, NonCourseEvent, Useful
 
 
 class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
@@ -110,9 +105,6 @@ class UsefulAdmin(admin.ModelAdmin):
     list_display = ['question', 'sort']
 
 
-
-admin.site.register(InternationalSchool, InternationalSchoolAdmin)
-admin.site.register(StudentAssignment, StudentAssignmentAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(NonCourseEvent, NonCourseEventAdmin)

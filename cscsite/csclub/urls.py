@@ -18,7 +18,8 @@ from users.views import LoginView, LogoutView, \
     EnrollmentCertificateDetailView
 from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
     ICalEventsView
-from learning.views import InternationalSchoolsListView, CoursesListView
+from learning.views import CoursesListView
+from international_schools.views import InternationalSchoolsListView
 from learning.urls import meta_course_patterns, course_patterns, \
     student_section_patterns, teaching_section_patterns, venues_patterns
 from core.views import MarkdownRenderView

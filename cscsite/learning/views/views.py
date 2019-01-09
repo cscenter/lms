@@ -39,7 +39,6 @@ from courses.forms import CourseClassForm, AssignmentForm
 from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
     AssignmentNotification, \
     NonCourseEvent
-from international_schools.models import InternationalSchool
 from courses.models import Course, Semester, Venue, CourseClass, \
     CourseClassAttachment, Assignment, AssignmentAttachment
 from learning.permissions import course_access_role, CourseRole
@@ -73,7 +72,7 @@ __all__ = [
     'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
     'AssignmentCreateView', 'AssignmentUpdateView', 'AssignmentDeleteView',
     'AssignmentCommentUpdateView', 'AssignmentAttachmentDeleteView',
-    'NonCourseEventDetailView', 'InternationalSchoolsListView', 'AssignmentAttachmentDownloadView',
+    'NonCourseEventDetailView', 'AssignmentAttachmentDownloadView',
 ]
 
 
@@ -1108,15 +1107,6 @@ class NonCourseEventDetailView(generic.DetailView):
     model = NonCourseEvent
     context_object_name = 'event'
     template_name = "learning/noncourseevent_detail.html"
-
-
-class InternationalSchoolsListView(generic.ListView):
-    model = InternationalSchool
-    context_object_name = 'schools'
-    template_name = "learning/international_schools.html"
-
-    def get_queryset(self):
-        return InternationalSchool.objects.order_by("-deadline")
 
 
 class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
