@@ -29,7 +29,7 @@ from cscenter.serializers import CoursesSerializer
 from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
     PublicRouteException
 from learning.api.views import TestimonialList
-from learning.models import AreaOfStudy, StudyProgram
+from study_programs.models import StudyProgram, AreaOfStudy
 from courses.models import Course, CourseTeacher
 from learning.settings import StudentStatuses
 from core.settings.base import CENTER_FOUNDATION_YEAR

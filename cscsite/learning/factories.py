@@ -8,7 +8,8 @@ from django.utils import timezone
 from courses.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    CourseNewsNotification, NonCourseEvent, AreaOfStudy
+    CourseNewsNotification, NonCourseEvent
+from study_programs.models import AreaOfStudy
 from users.constants import AcademicRoles
 from users.factories import UserFactory, StudentCenterFactory
 

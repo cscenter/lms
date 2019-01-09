@@ -1,9 +1,7 @@
-from dal import autocomplete
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
-from modeltranslation.admin import TranslationAdmin
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField, RelatedSpecMixin
@@ -11,42 +9,12 @@ from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from international_schools.admin import InternationalSchoolAdmin
+from study_programs.admin import AreaOfStudyAdmin, StudyProgramAdmin
 from users.constants import AcademicRoles
 from .models import StudentAssignment, \
-    AssignmentComment, Enrollment, NonCourseEvent, Useful, \
-    AreaOfStudy, \
-    StudyProgram, StudyProgramCourseGroup
+    AssignmentComment, Enrollment, NonCourseEvent, Useful
+from study_programs.models import StudyProgram, AreaOfStudy
 from international_schools.models import InternationalSchool
-
-
-class AreaOfStudyAdmin(TranslationAdmin, admin.ModelAdmin):
-    formfield_overrides = {
-        db_models.TextField: {'widget': AdminRichTextAreaWidget},
-    }
-
-
-class StudyProgramCourseGroupInline(admin.TabularInline):
-    model = StudyProgramCourseGroup
-    extra = 0
-    formfield_overrides = {
-        db_models.ManyToManyField: {'widget': autocomplete.Select2Multiple()}
-    }
-
-    def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
-        form = formset.form
-        form.base_fields['courses'].widget.can_add_related = False
-        form.base_fields['courses'].widget.can_change_related = False
-        return formset
-
-
-class StudyProgramAdmin(admin.ModelAdmin):
-    list_filter = ["city", "year"]
-    list_display = ["area", "city", "year"]
-    inlines = [StudyProgramCourseGroupInline]
-    formfield_overrides = {
-        db_models.TextField: {'widget': AdminRichTextAreaWidget},
-    }
 
 
 class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
@@ -142,8 +110,7 @@ class UsefulAdmin(admin.ModelAdmin):
     list_display = ['question', 'sort']
 
 
-admin.site.register(AreaOfStudy, AreaOfStudyAdmin)
-admin.site.register(StudyProgram, StudyProgramAdmin)
+
 admin.site.register(InternationalSchool, InternationalSchoolAdmin)
 admin.site.register(StudentAssignment, StudentAssignmentAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)

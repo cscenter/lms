@@ -25,8 +25,8 @@ from api.permissions import CuratorAccessPermission
 from core.templatetags.core_tags import tex
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
-from learning.models import StudyProgram, \
-    StudyProgramCourseGroup, Enrollment
+from learning.models import Enrollment
+from study_programs.models import StudyProgram, StudyProgramCourseGroup
 from courses.models import Course, Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport

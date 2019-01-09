@@ -1,6 +1,6 @@
 from modeltranslation.translator import register, TranslationOptions
 
-from learning.models import AreaOfStudy
+from study_programs.models import AreaOfStudy
 
 
 @register(AreaOfStudy)
