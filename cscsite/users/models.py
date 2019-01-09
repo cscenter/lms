@@ -215,7 +215,7 @@ class User(LearningPermissionsMixin, AbstractUser):
         on_delete=models.CASCADE)
 
     areas_of_study = models.ManyToManyField(
-        'learning.AreaOfStudy',
+        'study_programs.AreaOfStudy',
         verbose_name=_("StudentInfo|Areas of study"),
         blank=True)
     workplace = models.CharField(

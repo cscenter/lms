@@ -25,30 +25,16 @@ class StudentAssignmentQuerySet(query.QuerySet):
 
 
 class _StudentAssignmentDefaultManager(models.Manager):
-    """On compsciclub.ru always restrict selection by open reading"""
+    """On compsciclub.ru always restrict by open readings"""
     def get_queryset(self):
+        qs = super().get_queryset()
         if is_club_site():
-            return super().get_queryset().filter(
-                assignment__course__is_open=True)
-        else:
-            return super().get_queryset()
+            return qs.filter(assignment__course__is_open=True)
+        return qs
 
 
 StudentAssignmentManager = _StudentAssignmentDefaultManager.from_queryset(
     StudentAssignmentQuerySet)
-
-
-class StudyProgramQuerySet(query.QuerySet):
-    def syllabus(self):
-        from learning.models import StudyProgramCourseGroup
-        return (self.select_related("area")
-                    .prefetch_related(
-                        Prefetch(
-                            'course_groups',
-                            queryset=(StudyProgramCourseGroup
-                                      .objects
-                                      .prefetch_related("courses")),
-                        )))
 
 
 class NonCourseEventQuerySet(query.QuerySet):
@@ -71,7 +57,7 @@ class NonCourseEventQuerySet(query.QuerySet):
 
 
 class _EnrollmentDefaultManager(models.Manager):
-    """On compsciclub.ru always restrict selection by open reading"""
+    """On compsciclub.ru always restrict selection by open readings"""
     def get_queryset(self):
         if is_club_site():
             return super().get_queryset().filter(course__is_open=True)

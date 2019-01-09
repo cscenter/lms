@@ -6,7 +6,6 @@ import os.path
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -25,8 +24,7 @@ from core.utils import hashids
 from courses.models import MetaCourse, Course, CourseTeacher, CourseNews, Venue, \
     CourseClass, Assignment
 from learning import settings as learn_conf
-from learning.managers import StudyProgramQuerySet, \
-    EnrollmentDefaultManager, \
+from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, NonCourseEventQuerySet, StudentAssignmentManager
 from learning.settings import GradingSystems, GradeTypes
 
@@ -456,61 +454,6 @@ class NonCourseEvent(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse('non_course_event_detail', args=[self.pk])
-
-
-class AreaOfStudy(models.Model):
-    code = models.CharField(_("PK|Code"), max_length=2, primary_key=True)
-    name = models.CharField(_("AreaOfStudy|Name"), max_length=255)
-    description = models.TextField(
-        _("AreaOfStudy|description"),
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
-
-    class Meta:
-        ordering = ["name"]
-        verbose_name = _("Area of study")
-        verbose_name_plural = _("Areas of study")
-
-    def __str__(self):
-        return smart_text(self.name)
-
-
-# FIXME: move -> cscenter app
-class StudyProgram(TimeStampedModel):
-    year = models.PositiveSmallIntegerField(
-        _("Year"), validators=[MinValueValidator(1990)])
-    city = models.ForeignKey(City,
-                             verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE,
-                             on_delete=models.CASCADE)
-    area = models.ForeignKey(AreaOfStudy, verbose_name=_("Area of Study"),
-                             on_delete=models.CASCADE)
-    description = models.TextField(
-        _("StudyProgram|description"),
-        help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        blank=True, null=True)
-
-    class Meta:
-        verbose_name = _("Study Program")
-        verbose_name_plural = _("Study Programs")
-
-    objects = StudyProgramQuerySet.as_manager()
-
-
-# FIXME: move -> cscenter app
-class StudyProgramCourseGroup(models.Model):
-    courses = models.ManyToManyField(
-        MetaCourse,
-        verbose_name=_("StudyProgramCourseGroup|courses"),
-        help_text=_("Courses will be grouped with boolean OR"))
-    study_program = models.ForeignKey(
-        'StudyProgram',
-        verbose_name=_("Study Program"),
-        related_name='course_groups',
-        on_delete=models.PROTECT)
-
-    class Meta:
-        verbose_name = _("Study Program Course")
-        verbose_name_plural = _("Study Program Courses")
 
 
 # FIXME: move -> cscenter app

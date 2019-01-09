@@ -1,4 +1,4 @@
-from learning.models import StudyProgram
+from study_programs.models import StudyProgram
 from courses.models import Semester
 
 

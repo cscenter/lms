@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from api.pagination import StandardPagination
 from learning.api.serializers import AlumniSerializer, TestimonialSerializer
-from learning.models import AreaOfStudy
+from study_programs.models import AreaOfStudy
 from users.models import User
 
 

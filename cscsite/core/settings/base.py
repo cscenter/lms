@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'core',
     'htmlpages',
     'courses.apps.CoursesConfig',
+    'study_programs.apps.StudyProgramsConfig',
     'learning',
     'library.apps.LibraryConfig',
     'loginas',
