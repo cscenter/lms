@@ -1,3 +1,4 @@
+import datetime
 import os
 import re
 
@@ -10,9 +11,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.urls import reverse
 from django.utils.encoding import smart_bytes
+from django.utils.timezone import now
 
 from courses.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory, VenueFactory, SemesterFactory, CourseClassAttachmentFactory
+from courses.forms import CourseClassForm
 from courses.models import CourseClass
 from users.factories import TeacherCenterFactory
 
@@ -274,3 +277,52 @@ def test_course_class_attachments(client, assert_redirect,
     assert not os.path.isfile(cca_files[1])
     # Disable Serving media
     cscenter.urls.urlpatterns = _original_urls
+
+
+@pytest.mark.django_db
+def test_course_class_form_available(client, curator, settings):
+    """Test form availability based on `is_completed` value"""
+    # XXX: Date widget depends on locale
+    settings.LANGUAGE_CODE = 'ru'
+    teacher = TeacherCenterFactory()
+    semester = SemesterFactory.create_current()
+    co = CourseFactory(semester=semester, teachers=[teacher])
+    course_class_add_url = co.get_create_class_url()
+    response = client.get(course_class_add_url)
+    assert response.status_code == 302
+    client.login(teacher)
+    response = client.get(course_class_add_url)
+    assert response.status_code == 200
+    # Check form visible
+    assert smart_bytes("submit-id-save") in response.content
+    # Course completed, form invisible for teacher
+    co.completed_at = now().date()
+    co.save()
+    response = client.get(course_class_add_url)
+    assert smart_bytes("Курс завершён") in response.content
+    client.login(curator)
+    response = client.get(course_class_add_url)
+    assert smart_bytes("Курс завершён") not in response.content
+    # Try to send form directly by teacher
+    client.login(teacher)
+    form = {}
+    response = client.post(course_class_add_url, form, follow=True)
+    assert response.status_code == 403
+    # Check we can post form if course is active
+    co.completed_at = now().date() + datetime.timedelta(days=1)
+    co.save()
+    next_day = now() + datetime.timedelta(days=1)
+    venue = VenueFactory(city=co.city)
+    date_format = CourseClassForm.base_fields['date'].widget.format
+    form = {
+        "type": "lecture",
+        "venue": venue.pk,
+        "name": "Test class",
+        "date": next_day.strftime(date_format),
+        "starts_at": "17:20",
+        "ends_at": "18:50"
+    }
+    response = client.post(course_class_add_url, form, follow=True)
+    message = list(response.context['messages'])[0]
+    assert 'success' in message.tags
+    # FIXME: добавить тест на is_form_available и посмотреть, можно ли удалить эту часть, по-моему это лишняя логика

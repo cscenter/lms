@@ -9,11 +9,6 @@ from .views import \
     CourseVideoListView, \
     CourseTeacherListView, \
     CourseStudentListView, \
-    CourseClassDetailView, \
-    CourseClassCreateView, \
-    CourseClassUpdateView, \
-    CourseClassDeleteView, \
-    CourseClassAttachmentDeleteView, \
     VenueListView, VenueDetailView, \
     AssignmentTeacherListView, \
     AssignmentTeacherDetailView, StudentAssignmentTeacherDetailView, \
@@ -23,7 +18,9 @@ from .views import \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
 from courses.views import CourseDetailView, CourseEditView, \
     CourseNewsCreateView, CourseNewsUpdateView, CourseNewsDeleteView, \
-    MetaCourseDetailView, MetaCourseUpdateView
+    MetaCourseDetailView, MetaCourseUpdateView, CourseClassDetailView, \
+    CourseClassCreateView, CourseClassUpdateView, \
+    CourseClassAttachmentDeleteView, CourseClassDeleteView
 from learning.views.course_views import CourseNewsUnreadNotificationsView, \
     CourseStudentsView
 from learning.views.students import StudentAssignmentStudentDetailView, \

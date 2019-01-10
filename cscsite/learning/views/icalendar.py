@@ -1,279 +1,44 @@
-from datetime import datetime, time
-from itertools import chain, repeat
-
-import pytz
-from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from django.views import generic
-from icalendar import vText, vUri, Calendar, Event, Timezone, TimezoneStandard
-from icalendar.prop import vInline
 
-from learning.models import StudentAssignment, NonCourseEvent
-from courses.models import CourseClass, Assignment
-from users.utils import get_user_city_code
+from learning.icalendar import UserClassesICalendar, UserAssignmentsICalendar, \
+    EventsICalendar
 from users.models import User
 
 
-def generate_vtimezone(tz: pytz.timezone):
-    assert tz is not pytz.UTC
-    tzc = Timezone()
-    tzc.add('TZID', tz)
-    tzc.add('X-LIC-LOCATION', tz)
-    std_comp = TimezoneStandard()
-    std_comp.add('TZOFFSETFROM', tz._transition_info[-1][0])
-    std_comp.add('TZOFFSETTO', tz._transition_info[-1][0])
-    std_comp.add('TZNAME', tz._transition_info[-1][2])
-    std_comp.add('DTSTART', datetime.utcfromtimestamp(0))
-    tzc.add_component(std_comp)
-    return tzc
-
-
-# TODO: move to manager
-def get_user_for_icalendar(user_id):
-    return get_object_or_404(User.objects
-                             .filter(pk=user_id)
-                             .only("first_name", "last_name",
-                                   "patronymic", "pk"))
-
-
 # TODO: add secret link for each student?
-class ICalView(generic.base.View):
-    """
-    Base view for student *.ics files
-
-    Make sure, all calendars are visible to all users since you can add
-    calendar by link.
-    """
-    http_method_names = ['get']
+class UserICalendarView(generic.base.View):
+    calendar_class = None
 
     def get(self, request, *args, **kwargs):
-        self.context = self.get_context_data()
-        cal = self.init_calendar()
-        cal = self.add_events(cal)
+        cal = self.calendar_class(*self.get_init_args())
         response = HttpResponse(cal.to_ical(),
                                 content_type="text/calendar; charset=UTF-8")
         response['Content-Disposition'] = "attachment; filename=\"{}\"".format(
-            self.ical_file_name)
+            cal.file_name)
         return response
 
-    def get_context_data(self):
-        return {}
-
-    def get_timezone(self):
-        user = self.context['user']
-        city_code = user.city_code
-        if not city_code:
-            city_code = settings.DEFAULT_CITY_CODE
-        return settings.TIME_ZONES[city_code]
-
-    def init_calendar(self):
-        """
-        On August 2017 we haven't stable library for conversion `pytz.timezone`
-        object to `VTIMEZONE` component.
-        Even http://tzurl.org/ project which provided full (since 1970)
-        VTIMEZONE implementation have bug for Moscow timezone.
-
-        Google calendar doesn't provide "honest" implementation
-        (based on RFC) for `VTIMEZONE` component. Just a stub with current
-        daylight/standard offsets. Also, it has custom `X-WR-TIMEZONE` header
-        with timezone info.
-        The same for Outlook.
-
-        Since we haven't recurrent events in our icalendar's and no
-        daylight/standard transitions for SPB, KZN, NSK, let's manually
-        create VTIMEZONE components like in google calendar. fck t
-        """
-        cal = Calendar()
-        cal.add('prodid', "-//{} Calendar//{}//".format(
-            self.request.site.name, self.request.site.domain))
-        cal.add('version', '2.0')
-        tz = self.get_timezone()
-        tzc = generate_vtimezone(tz)
-        cal.add_component(tzc)
-        cal.add('X-WR-CALNAME', vText(self.ical_name))
-        cal.add('X-WR-TIMEZONE', vText(tz))
-        cal.add('X-WR-CALDESC', vText(self.ical_description))
-        cal.add('calscale', 'gregorian')
-        return cal
-
-    def get_events(self):
-        return []
-
-    def add_events(self, calendar):
-        for event in self.get_events():
-            evt = Event()
-            for k, v in event.items():
-                evt.add(k, v)
-            calendar.add_component(evt)
-        return calendar
+    def get_init_args(self):
+        user_id = self.kwargs['pk']
+        qs = (User.objects
+              .filter(pk=user_id)
+              .only("first_name", "last_name", "patronymic", "pk"))
+        user = get_object_or_404(qs)
+        return [self.request.site, user, self.request.build_absolute_uri]
 
 
-class ICalClassesView(ICalView):
-    ical_file_name = "csc_classes.ics"
-    ical_name = "Занятия CSC"
-
-    def get_context_data(self):
-        return {
-            "user": get_user_for_icalendar(self.kwargs['pk'])
-        }
-
-    @property
-    def ical_description(self):
-        user = self.context["user"]
-        return "Календарь занятий {} ({})".format(
-            self.request.site.name, user.get_full_name())
-
-    def get_events(self):
-        tz = self.get_timezone()
-        user = self.context["user"]
-        cc_related = ['venue',
-                      'course',
-                      'course__semester',
-                      'course__meta_course']
-        as_teacher = (CourseClass.objects
-                      .filter(course__teachers=user)
-                      .select_related(*cc_related))
-        as_student = (CourseClass.objects
-                      .filter(course__enrollment__student_id=user.pk,
-                              course__enrollment__is_deleted=False)
-                      .select_related(*cc_related))
-
-        AS_TEACHER_TYPE, AS_STUDENT_TYPE = 'teaching', 'learning'
-        data = chain(zip(repeat(AS_TEACHER_TYPE), as_teacher),
-                     zip(repeat(AS_STUDENT_TYPE), as_student))
-        for cc_type, cc in data:
-            uid = ("courseclasses-{}-{}@compscicenter.ru"
-                   .format(cc.pk, cc_type))
-            url = self.request.build_absolute_uri(cc.get_absolute_url())
-            if cc.description.strip():
-                description = "{}\n\n{}".format(cc.description, url)
-            else:
-                description = url
-            categories = 'CSC,CLASS,{}'.format(cc_type.upper())
-            dtstart = tz.localize(datetime.combine(cc.date, cc.starts_at))
-            dtend = tz.localize(datetime.combine(cc.date, cc.ends_at))
-            event = {
-                'uid': vText(uid),
-                'url': vUri(url),
-                'summary': vText(cc.name),
-                'description': vText(description),
-                'location': vText(cc.venue.address),
-                'dtstart': dtstart,
-                'dtend': dtend,
-                'dtstamp': timezone.now(),
-                'created': cc.created,
-                'last-modified': cc.modified,
-                'categories': vInline(categories)
-            }
-            yield event
+class ICalClassesView(UserICalendarView):
+    calendar_class = UserClassesICalendar
 
 
-class ICalAssignmentsView(ICalView):
-    ical_file_name = "csc_assignments.ics"
-    ical_name = "Задания CSC"
-
-    def get_context_data(self):
-        return {
-            "user": get_user_for_icalendar(self.kwargs['pk'])
-        }
-
-    @property
-    def ical_description(self):
-        user = self.context["user"]
-        return "Календарь сроков выполнения заданий {} ({})".format(
-            self.request.site.name, user.get_full_name())
-
-    def get_events(self):
-        user = self.context["user"]
-        as_student = (StudentAssignment.objects
-                      .filter(student=user,
-                              assignment__deadline_at__gt=timezone.now())
-                      .select_related('assignment',
-                                      'assignment__course',
-                                      'assignment__course__meta_course',
-                                      'assignment__course__semester'))
-        as_teacher = (Assignment.objects
-                      .filter(course__teachers=user,
-                              deadline_at__gt=timezone.now())
-                      .select_related('course',
-                                      'course__meta_course',
-                                      'course__semester'))
-
-        AS_TEACHER_TYPE, AS_STUDENT_TYPE = 'teaching', 'learning'
-        data = chain(zip(repeat(AS_TEACHER_TYPE), as_teacher),
-                     zip(repeat(AS_STUDENT_TYPE), as_student))
-        for data_type, d in data:
-            if data_type.startswith('t'):  # AS_TEACHER_TYPE
-                assignment = d
-                to_assignment_url = assignment.get_teacher_url()
-            else:  # AS_STUDENT_TYPE
-                assignment = d.assignment
-                to_assignment_url = d.get_student_url()
-            url = self.request.build_absolute_uri(to_assignment_url)
-            uid = "assignments-{}-{}-{}@{}".format(
-                user.pk, assignment.pk, data_type, self.request.site.domain)
-            summary = "{} ({})".format(
-                assignment.title, assignment.course.meta_course.name)
-            categories = 'CSC,ASSIGNMENT,{}'.format(data_type.upper())
-            dtstart = assignment.deadline_at
-            dtend = assignment.deadline_at + relativedelta(hours=1)
-            event = {
-                'uid': vText(uid),
-                'url': vUri(url),
-                'summary': vText(summary),
-                'description': vText(url),
-                'dtstart': dtstart,
-                'dtend': dtend,
-                'dtstamp': timezone.now(),
-                'created': assignment.created,
-                'last-modified': assignment.modified,
-                'categories': vInline(categories)
-            }
-            yield event
+class ICalAssignmentsView(UserICalendarView):
+    calendar_class = UserAssignmentsICalendar
 
 
-class ICalEventsView(ICalView):
-    ical_file_name = "csc_events.ics"
-    ical_name = "События CSC"
+class ICalEventsView(UserICalendarView):
+    calendar_class = EventsICalendar
 
-    @property
-    def ical_description(self):
-        return "Календарь общих событий {}".format(self.request.site.name)
-
-    def get_timezone(self):
-        # FIXME: Should depends on events city? Mb change url?
-        city_code = get_user_city_code(self.request)
-        if not city_code:
-            city_code = settings.DEFAULT_CITY_CODE
-        return settings.TIME_ZONES[city_code]
-
-    def get_events(self):
-        tz = self.get_timezone()
-        qs = (NonCourseEvent.objects
-              .filter(date__gt=timezone.now())
-              .select_related('venue'))
-        for nce in qs:
-            uid = "noncourseevents-{}@compscicenter.ru".format(nce.pk)
-            url = self.request.build_absolute_uri(nce.get_absolute_url())
-            if nce.name.strip():
-                description = "{}\n\n{}".format(nce.name, url)
-            else:
-                description = url
-            dtstart = tz.localize(datetime.combine(nce.date, nce.starts_at))
-            dtend = tz.localize(datetime.combine(nce.date, nce.ends_at))
-            event = {
-                'uid': vText(uid),
-                'url': vUri(url),
-                'summary': vText(nce.name),
-                'description': vText(description),
-                'dtstart': dtstart,
-                'dtend': dtend,
-                'dtstamp': timezone.now(),
-                'created': nce.created,
-                'last-modified': nce.modified,
-                'categories': vInline('CSC,EVENT')
-            }
-            yield event
+    def get_init_args(self):
+        request = self.request
+        return [request.site, request.user, request.build_absolute_uri]
