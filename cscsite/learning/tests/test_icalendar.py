@@ -1,16 +1,28 @@
 from itertools import chain
+
 import pytest
-from django.test import TestCase
 from django.urls import reverse
 from icalendar import Calendar, Event
 
-from core.models import City
-from learning.factories import EnrollmentFactory, NonCourseEventFactory
 from courses.factories import CourseFactory, CourseClassFactory, \
-    AssignmentFactory, VenueFactory
-from learning.tests.mixins import MyUtilitiesMixin
+    AssignmentFactory
+from learning.factories import EnrollmentFactory, NonCourseEventFactory
 from users.factories import UserFactory, StudentFactory
 from users.models import User
+
+
+# TODO: убедиться, что для заданий/занятий учитывается таймзона пользователя из URL календаря, а не залогиненного
+# TODO: для событий - пока залогиненного
+
+
+@pytest.mark.django_db
+def test_smoke(client, curator, settings):
+    """Make sure that any user can view icalendar. We have no secret link now"""
+    student = StudentFactory(city_id='kzn')
+    response = client.get(student.get_classes_icalendar_url())
+    assert response.status_code == 200
+    response = client.get(student.get_assignments_icalendar_url())
+    assert response.status_code == 200
 
 
 @pytest.mark.django_db
@@ -66,20 +78,6 @@ def test_assignments(client):
     assert {f"{a.title} ({a.course.meta_course.name})" for a in
             chain(as_teaching, as_learning)} == {
         evt['SUMMARY'] for evt in cal.subcomponents if isinstance(evt, Event)}
-
-
-# TODO: убедиться, что берётся таймзона пользователя из ссылки, а не залогиненного
-# TODO: для событий - пока залогиненного
-
-
-@pytest.mark.django_db
-def test_smoke(client, curator, settings):
-    """Make sure that any user can view icalendar. We have no secret link now"""
-    student = StudentFactory(city_id='kzn')
-    response = client.get(student.get_classes_icalendar_url())
-    assert response.status_code == 200
-    response = client.get(student.get_assignments_icalendar_url())
-    assert response.status_code == 200
 
 
 @pytest.mark.django_db

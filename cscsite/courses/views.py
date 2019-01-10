@@ -1,13 +1,16 @@
+import datetime
+import os
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.db import transaction, IntegrityError
 from django.db.models import Prefetch
-from django.http import HttpResponseBadRequest, HttpResponseRedirect, Http404
-from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseBadRequest, HttpResponseRedirect, Http404, \
+    HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect
 
-# Create your views here.
-from django.urls import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import DetailView, CreateView, UpdateView, DeleteView
@@ -16,8 +19,10 @@ from core.exceptions import Redirect
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
-from courses.forms import CourseEditDescrForm, CourseNewsForm, CourseForm
-from courses.models import Course, CourseTeacher, CourseNews, MetaCourse
+from courses.forms import CourseEditDescrForm, CourseNewsForm, CourseForm, \
+    CourseClassForm
+from courses.models import Course, CourseTeacher, CourseNews, MetaCourse, \
+    CourseClass, CourseClassAttachment
 from courses.settings import SemesterTypes
 from courses.tabs import CourseInfoTab, get_course_tab_list, TabNotFound
 from courses.utils import get_term_index, get_co_from_query_params
@@ -248,4 +253,156 @@ class CourseNewsDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
         return self.object.course.get_absolute_url()
 
     def is_form_allowed(self, user, obj: CourseNews):
+        return user.is_curator or user in obj.course.teachers.all()
+
+
+class CourseClassDetailView(generic.DetailView):
+    model = CourseClass
+    context_object_name = 'course_class'
+    template_name = "courses/course_class_detail.html"
+
+    def get_queryset(self):
+        return (CourseClass.objects
+                .select_related("course",
+                                "course__meta_course",
+                                "course__semester",
+                                "venue")
+                .in_city(self.request.city_code))
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context['is_actual_teacher'] = (
+            self.request.user.is_authenticated and
+            self.request.user in (self.object
+                                  .course
+                                  .teachers.all()))
+        context['attachments'] = self.object.courseclassattachment_set.all()
+        return context
+
+
+class CourseClassCreateUpdateMixin:
+    def get_course(self):
+        return get_co_from_query_params(self.kwargs, self.request.city_code)
+
+    def get_form(self, **kwargs):
+        course = self.get_course()
+        if not course:
+            raise Http404('Course not found')
+        if not self.is_form_allowed(self.request.user, course):
+            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
+        kwargs["course"] = course
+        kwargs["initial"] = self.get_initial(**kwargs)
+        return CourseClassForm(**kwargs)
+
+    @staticmethod
+    def is_form_allowed(user, course):
+        return user.is_curator or user in course.teachers.all()
+
+    def get_initial(self, **kwargs):
+        return None
+
+    # TODO: add atomic
+    def form_valid(self, form):
+        self.object = form.save()
+        attachments = self.request.FILES.getlist('attachments')
+        if attachments:
+            for attachment in attachments:
+                CourseClassAttachment(course_class=self.object,
+                                      material=attachment).save()
+        return redirect(self.get_success_url())
+
+    def get_success_url(self):
+        return_url = self.request.GET.get('back')
+        if return_url == 'timetable':
+            return reverse('timetable_teacher')
+        if return_url == 'course':
+            return self.object.course.get_absolute_url()
+        if return_url == 'calendar':
+            return reverse('calendar_teacher')
+        elif "_addanother" in self.request.POST:
+            return self.object.course.get_create_class_url()
+        else:
+            return super().get_success_url()
+
+
+class CourseClassCreateView(TeacherOnlyMixin,
+                            CourseClassCreateUpdateMixin, CreateView):
+    model = CourseClass
+    template_name = "courses/course_class_form.html"
+
+    def get_initial(self, **kwargs):
+        # TODO: Add tests for initial data after discussion
+        course = kwargs["course"]
+        previous_class = (CourseClass.objects
+                          .filter(course=course.pk)
+                          .defer("description")
+                          .order_by("-date", "starts_at")
+                          .first())
+        if previous_class is not None:
+            return {
+                "type": previous_class.type,
+                "venue": previous_class.venue,
+                "starts_at": previous_class.starts_at,
+                "ends_at": previous_class.ends_at,
+                "date": previous_class.date + datetime.timedelta(weeks=1)
+            }
+        return None
+
+    def get_success_url(self):
+        msg = _("The class '%s' was successfully created.")
+        messages.success(self.request, msg % self.object.name,
+                         extra_tags='timeout')
+        return super().get_success_url()
+
+    def post(self, request, *args, **kwargs):
+        """Teachers can't add new classes if course already completed"""
+        is_curator = self.request.user.is_curator
+        co = self.get_course()
+        if not co or (not is_curator and co.is_completed):
+            return HttpResponseForbidden()
+        form = self.get_form(data=request.POST, files=request.FILES, course=co)
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
+
+
+class CourseClassUpdateView(TeacherOnlyMixin,
+                            CourseClassCreateUpdateMixin, UpdateView):
+    model = CourseClass
+    template_name = "courses/course_class_form.html"
+
+    def get_success_url(self):
+        msg = _("The class '%s' was successfully updated.")
+        messages.success(self.request, msg % self.object.name,
+                         extra_tags='timeout')
+        return super().get_success_url()
+
+
+class CourseClassAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
+                                      DeleteView):
+    model = CourseClassAttachment
+    template_name = "forms/simple_delete_confirmation.html"
+
+    def is_form_allowed(self, user, obj):
+        return (user.is_curator or
+                user in obj.course_class.course.teachers.all())
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.object.delete()
+        # TODO: move to model method
+        os.remove(self.object.material.path)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return self.object.course_class.get_update_url()
+
+
+class CourseClassDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
+                            DeleteView):
+    model = CourseClass
+    template_name = "forms/simple_delete_confirmation.html"
+    success_url = reverse_lazy('timetable_teacher')
+
+    def is_form_allowed(self, user, obj: CourseClass):
         return user.is_curator or user in obj.course.teachers.all()

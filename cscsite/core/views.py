@@ -19,8 +19,7 @@ def robots(request):
     return render_to_response('robots.txt', content_type="text/plain")
 
 
-# TODO: move mixins to separated module
-class ReadOnlyFieldsMixin(object):
+class ReadOnlyFieldsMixin:
     readonly_fields = ()
 
     def __init__(self, *args, **kwargs):
@@ -42,7 +41,7 @@ class ReadOnlyFieldsMixin(object):
         return cleaned_data
 
 
-class ProtectedFormMixin(object):
+class ProtectedFormMixin:
     def __init__(self, *args, **kwargs):
         self._cached_object = None
         # Note(lebedev): no point in calling 'super' here.
@@ -80,7 +79,6 @@ class ProtectedFormMixin(object):
                     .dispatch(request, *args, **kwargs))
 
 
-@python_2_unicode_compatible
 class MarkdownRenderView(LoginRequiredMixin, generic.base.View):
     http_method_names = ['post']
 
