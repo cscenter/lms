@@ -129,8 +129,8 @@ def get_boundaries(year, month) -> Tuple:
         (datetime.date(2018, 1, 29), datetime.date(2018, 3, 4))
         # First day of the month
         first_day = datetime.date(year=2018, month=2, day=1)
-        # first_day.weekday() is 3 (0-based index), we interested in the
-        first day of this week
+        # We interested in the beginning of the week this day belongs to.
+        # Since first_day.weekday() is 3 (0-based index),
         lower_bound = first_day - datetime.timedelta(days=3)
         datetime.date(year=2018, month=1, day=29)
         # The same way calculate upper bound (the last day of the last
