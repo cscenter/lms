@@ -22,10 +22,7 @@ from users.factories import StudentCenterFactory, \
 
 # TODO: убедиться, что город берётся из настроек для студента (get_student_city_code
 # TODO: для СПБ не показываются события НСК (наоборот будет уже верно)
-# TODO: тестировать CourseClassQuerySet manager
-# TODO: тестировать границы для месяца
-# TODO: тестировать now_local?
-# TODO: тестировать CalendarDay?
+
 
 
 class CalendarTeacherTests(GroupSecurityCheckMixin,

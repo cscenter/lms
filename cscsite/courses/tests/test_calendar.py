@@ -7,6 +7,10 @@ from courses.factories import CourseClassFactory, CourseFactory
 from courses.models import CourseClass
 
 
+# TODO: test CourseClassQuerySet manager
+# TODO: test utils.get_boundaries
+
+
 def test_calendar_event():
     class_date = datetime.date(year=2018, month=2, day=3)
     course_class = CourseClass(
