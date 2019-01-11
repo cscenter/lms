@@ -31,6 +31,94 @@ from learning.settings import GradingSystems, GradeTypes
 logger = logging.getLogger(__name__)
 
 
+class Enrollment(TimeStampedModel):
+    GRADES = GradeTypes
+    objects = EnrollmentDefaultManager()
+    active = EnrollmentActiveManager()
+
+    student = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Student"),
+        on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        Course,
+        verbose_name=_("Course offering"),
+        on_delete=models.CASCADE)
+    grade = models.CharField(
+        verbose_name=_("Enrollment|grade"),
+        max_length=100,
+        choices=GradeTypes.choices,
+        default=GradeTypes.NOT_GRADED)
+    grade_changed = MonitorField(
+        verbose_name=_("Enrollment|grade changed"),
+        monitor='grade')
+    is_deleted = models.BooleanField(
+        _("The student left the course"),
+        default=False)
+    reason_entry = models.TextField(
+        _("Entry reason"),
+        blank=True)
+    reason_leave = models.TextField(
+        _("Leave reason"),
+        blank=True)
+
+    class Meta:
+        ordering = ["student", "course"]
+        unique_together = [('student', 'course')]
+        verbose_name = _("Enrollment")
+        verbose_name_plural = _("Enrollments")
+
+    def __str__(self):
+        return "{0} - {1}".format(smart_text(self.course),
+                                  smart_text(self.student.get_full_name()))
+
+    def clean(self):
+        if not self.student.is_student:
+            raise ValidationError(_("Only students can enroll to courses"))
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+        # TODO: Call on changing `is_deleted` flag only
+        self._populate_assignments_for_new_enrolled_student(created)
+
+    def _populate_assignments_for_new_enrolled_student(self, created):
+        if self.is_deleted:
+            return
+        for a in self.course.assignment_set.all():
+            StudentAssignment.objects.get_or_create(assignment=a,
+                                                    student_id=self.student_id)
+
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.course.field.name
+
+    def grade_changed_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.grade_changed, timezone=tz)
+
+    @property
+    def grade_display(self):
+        return self.GRADES.values[self.grade]
+
+    @property
+    def grade_honest(self):
+        """Show `satisfactory` instead of `pass` for default grading type"""
+        if (self.course.grading_type == GradingSystems.BASE and
+                self.grade == self.GRADES.CREDIT):
+            return _("Satisfactory")
+        return self.GRADES.values[self.grade]
+
+
 class StudentAssignment(TimeStampedModel):
     class CommentAuthorTypes(DjangoChoices):
         NOBODY = ChoiceItem(0)
@@ -244,94 +332,6 @@ class AssignmentComment(TimeStampedModel):
     def is_stale_for_edit(self):
         # Teacher can edit comment during 10 min period only
         return (now() - self.created).total_seconds() > 600
-
-
-class Enrollment(TimeStampedModel):
-    GRADES = GradeTypes
-    objects = EnrollmentDefaultManager()
-    active = EnrollmentActiveManager()
-
-    student = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Student"),
-        on_delete=models.CASCADE)
-    course = models.ForeignKey(
-        Course,
-        verbose_name=_("Course offering"),
-        on_delete=models.CASCADE)
-    grade = models.CharField(
-        verbose_name=_("Enrollment|grade"),
-        max_length=100,
-        choices=GradeTypes.choices,
-        default=GradeTypes.NOT_GRADED)
-    grade_changed = MonitorField(
-        verbose_name=_("Enrollment|grade changed"),
-        monitor='grade')
-    is_deleted = models.BooleanField(
-        _("The student left the course"),
-        default=False)
-    reason_entry = models.TextField(
-        _("Entry reason"),
-        blank=True)
-    reason_leave = models.TextField(
-        _("Leave reason"),
-        blank=True)
-
-    class Meta:
-        ordering = ["student", "course"]
-        unique_together = [('student', 'course')]
-        verbose_name = _("Enrollment")
-        verbose_name_plural = _("Enrollments")
-
-    def __str__(self):
-        return "{0} - {1}".format(smart_text(self.course),
-                                  smart_text(self.student.get_full_name()))
-
-    def clean(self):
-        if not self.student.is_student:
-            raise ValidationError(_("Only students can enroll to courses"))
-
-    def save(self, *args, **kwargs):
-        created = self.pk is None
-        super().save(*args, **kwargs)
-        # TODO: Call on changing `is_deleted` flag only
-        self._populate_assignments_for_new_enrolled_student(created)
-
-    def _populate_assignments_for_new_enrolled_student(self, created):
-        if self.is_deleted:
-            return
-        for a in self.course.assignment_set.all():
-            StudentAssignment.objects.get_or_create(assignment=a,
-                                                    student_id=self.student_id)
-
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.course.field.name
-
-    def grade_changed_local(self, tz=None):
-        if not tz:
-            tz = self.get_city_timezone()
-        return timezone.localtime(self.grade_changed, timezone=tz)
-
-    @property
-    def grade_display(self):
-        return self.GRADES.values[self.grade]
-
-    @property
-    def grade_honest(self):
-        """Show `satisfactory` instead of `pass` for default grading type"""
-        if (self.course.grading_type == GradingSystems.BASE and
-                self.grade == self.GRADES.CREDIT):
-            return _("Satisfactory")
-        return self.GRADES.values[self.grade]
 
 
 class AssignmentNotification(TimeStampedModel):

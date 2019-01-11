@@ -20,7 +20,7 @@ __all__ = ('EventsCalendar', 'MonthEventsCalendar', 'CalendarQueryParams')
 
 @attr.s
 class CalendarWeek:
-    index: int = attr.ib()
+    index: int = attr.ib()  # 1-based
     days: list = attr.ib()
 
 

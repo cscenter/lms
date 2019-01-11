@@ -4,6 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import prefetch_related_objects
 
+from .tasks import compute_model_field
+
 logger = logging.getLogger(__name__)
 
 
