@@ -130,8 +130,8 @@ class CourseClassFactory(factory.DjangoModelFactory):
     slides = factory.django.FileField()
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
             + datetime.timedelta(days=3)).date()
-    starts_at = "13:00"
-    ends_at = "13:45"
+    starts_at = datetime.time(hour=13, minute=0)
+    ends_at = datetime.time(hour=13, minute=45)
 
     @classmethod
     def build(cls, *args, **kwargs):

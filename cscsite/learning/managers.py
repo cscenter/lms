@@ -4,7 +4,7 @@ from django.db import models
 from django.db.models import query, Prefetch
 
 from core.utils import is_club_site
-from courses.calendar import get_bounds_for_calendar_month
+from courses.utils import get_boundaries
 
 
 class StudentAssignmentQuerySet(query.QuerySet):
@@ -42,7 +42,6 @@ class NonCourseEventQuerySet(query.QuerySet):
         if is_club_site():
             return self.none()
         return (self
-                .select_related('venue')
                 .order_by('date', 'starts_at'))
 
     def for_city(self, city_code):
@@ -52,7 +51,7 @@ class NonCourseEventQuerySet(query.QuerySet):
         return self.filter(venue__city_id__in=city_codes)
 
     def in_month(self, year, month):
-        date_start, date_end = get_bounds_for_calendar_month(year, month)
+        date_start, date_end = get_boundaries(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
 
 

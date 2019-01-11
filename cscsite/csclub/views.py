@@ -16,12 +16,13 @@ from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
 
 from core.settings.base import TIME_ZONES
+from courses.calendar import CalendarEvent
 from csclub import tasks
 from learning.gallery.models import Image
 from courses.models import Course, Semester, CourseClass
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair
-from learning.views.generic import CalendarGenericView
+from courses.views.calendar import MonthEventsCalendarView
 from users.models import User
 
 
@@ -40,7 +41,7 @@ class AsyncEmailRegistrationView(RegistrationView):
         return new_user
 
 
-class CalendarClubScheduleView(CalendarGenericView):
+class CalendarClubScheduleView(MonthEventsCalendarView):
     """Shows all classes from public courses."""
     calendar_type = "public_full"
     template_name = "learning/calendar.html"
@@ -51,7 +52,7 @@ class CalendarClubScheduleView(CalendarGenericView):
                    .in_month(year, month)
                    .in_city(self.request.city_code)
                    .open_only())
-        return [classes]
+        return (CalendarEvent(e) for e in classes)
 
     def get_user_city(self):
         return self.request.city_code

@@ -1,16 +1,15 @@
-import datetime
+from typing import Iterable
 
-from dateutil.relativedelta import relativedelta
 from django.http import HttpResponseRedirect
 from django.views import generic
 
-from courses.calendar import EventsCalendar, CalendarQueryParams
 from core.timezone import now_local
+from courses.calendar import CalendarQueryParams, MonthEventsCalendar
 
-__all__ = ['CalendarGenericView']
+__all__ = ('MonthEventsCalendarView',)
 
 
-class CalendarGenericView(generic.TemplateView):
+class MonthEventsCalendarView(generic.TemplateView):
     calendar_type = "full"
     template_name = "learning/calendar.html"
 
@@ -27,20 +26,16 @@ class CalendarGenericView(generic.TemplateView):
         return self.render_to_response(context)
 
     def get_context_data(self, year, month, default_city_code, today, **kwargs):
-        calendar = EventsCalendar()
         events = self.get_events(year, month, user_city_code=default_city_code)
-        calendar.add_events(*events)
-        queried_month = datetime.date(year=year, month=month, day=1)
+        calendar = MonthEventsCalendar(year, month, events)
         context = {
-            "current": queried_month,
-            "prev": queried_month + relativedelta(months=-1),
-            "next": queried_month + relativedelta(months=+1),
+            "today": today,
             "calendar_type": self.calendar_type,
-            "events": calendar.as_matrix(year, month, today)
+            "calendar": calendar
         }
         return context
 
-    def get_events(self, year, month, **kwargs) -> list:
+    def get_events(self, year, month, **kwargs) -> Iterable:
         raise NotImplementedError()
 
     def get_user_city(self):
