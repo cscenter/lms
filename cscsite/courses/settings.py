@@ -7,6 +7,9 @@ SPRING_TERM_START = '20 jan'  # XXX: spring term must be later than 1 jan
 SUMMER_TERM_START = '1 jul'
 
 
+MONDAY_WEEKDAY = 0
+
+
 class SemesterTypes(DjangoChoices):
     """
     For ordering use the first term in a year as starting point.

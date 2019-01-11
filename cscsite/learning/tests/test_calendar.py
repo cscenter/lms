@@ -25,7 +25,7 @@ from users.factories import StudentCenterFactory, \
 # TODO: тестировать CourseClassQuerySet manager
 # TODO: тестировать границы для месяца
 # TODO: тестировать now_local?
-# TODO: тестировать CalendarData
+# TODO: тестировать CalendarDay?
 
 
 class CalendarTeacherTests(GroupSecurityCheckMixin,
@@ -38,7 +38,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         other_teacher = TeacherCenterFactory()
         self.doLogin(teacher)
         classes = flatten_calendar_month_events(
-            self.client.get(reverse(self.url_name)).context['events'])
+            self.client.get(reverse(self.url_name)).context['calendar'])
         assert len(classes) == 0
         this_month_date = (datetime.datetime.now()
                            .replace(day=15, tzinfo=timezone.utc))
@@ -56,20 +56,20 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
             .create_batch(2, date=this_month_date, venue=venue))
         # teacher should see only his own classes and non-course events
         resp = self.client.get(reverse(self.url_name))
-        classes = flatten_calendar_month_events(resp.context['events'])
+        classes = flatten_calendar_month_events(resp.context['calendar'])
         self.assertSameObjects(own_classes + events, classes)
         # but in full calendar all classes should be shown
         classes = flatten_calendar_month_events(
-            self.client.get(reverse('calendar_full_teacher')).context['events'])
+            self.client.get(reverse('calendar_full_teacher')).context['calendar'])
         self.assertSameObjects(own_classes + others_classes + events, classes)
         next_month_qstr = (
             "?year={0}&month={1}"
-            .format(resp.context['next'].year,
-                    str(resp.context['next'].month).zfill(2)))
+            .format(resp.context['calendar'].next_month.year,
+                    str(resp.context['calendar'].next_month.month).zfill(2)))
         next_month_url = reverse(self.url_name) + next_month_qstr
         self.assertContains(resp, next_month_qstr)
         classes = flatten_calendar_month_events(
-            self.client.get(next_month_url).context['events'])
+            self.client.get(next_month_url).context['calendar'])
         self.assertSameObjects([], classes)
         next_month_date = this_month_date + relativedelta(months=1)
         next_month_classes = (
@@ -77,7 +77,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
             .create_batch(2, course__teachers=[teacher],
                           date=next_month_date))
         classes = flatten_calendar_month_events(
-            self.client.get(next_month_url).context['events'])
+            self.client.get(next_month_url).context['calendar'])
         self.assertSameObjects(next_month_classes, classes)
 
 
@@ -93,7 +93,7 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         co_other = CourseFactory.create()
         e = EnrollmentFactory.create(course=co, student=student)
         classes = flatten_calendar_month_events(
-            self.client.get(reverse(self.url_name)).context['events'])
+            self.client.get(reverse(self.url_name)).context['calendar'])
         self.assertEqual(0, len(classes))
         this_month_date = (datetime.datetime.now()
                            .replace(day=15,
@@ -106,27 +106,27 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
             .create_batch(5, course=co_other, date=this_month_date))
         # student should see only his own classes
         resp = self.client.get(reverse(self.url_name))
-        classes = flatten_calendar_month_events(resp.context['events'])
+        classes = flatten_calendar_month_events(resp.context['calendar'])
         self.assertSameObjects(own_classes, classes)
         # but in full calendar all classes should be shown
         classes = flatten_calendar_month_events(
-            self.client.get(reverse('calendar_full_student')).context['events'])
+            self.client.get(reverse('calendar_full_student')).context['calendar'])
         self.assertSameObjects(own_classes + others_classes, classes)
         next_month_qstr = (
             "?year={0}&month={1}"
-            .format(resp.context['next'].year,
-                    str(resp.context['next'].month).zfill(2)))
+            .format(resp.context['calendar'].next_month.year,
+                    str(resp.context['calendar'].next_month.month).zfill(2)))
         next_month_url = reverse(self.url_name) + next_month_qstr
         self.assertContains(resp, next_month_qstr)
         classes = flatten_calendar_month_events(
-            self.client.get(next_month_url).context['events'])
+            self.client.get(next_month_url).context['calendar'])
         self.assertSameObjects([], classes)
         next_month_date = this_month_date + relativedelta(months=1)
         next_month_classes = (
             CourseClassFactory
             .create_batch(2, course=co, date=next_month_date))
         classes = flatten_calendar_month_events(
-            self.client.get(next_month_url).context['events'])
+            self.client.get(next_month_url).context['calendar'])
         self.assertSameObjects(next_month_classes, classes)
 
 
@@ -158,5 +158,5 @@ def test_correspondence_courses_calendar(client):
     CourseClassFactory.create_batch(
             3, course__is_correspondence=True, date=this_month_date)
     classes = flatten_calendar_month_events(
-        client.get(reverse("calendar_full_student")).context['events'])
+        client.get(reverse("calendar_full_student")).context['calendar'])
     assert len(classes) == 3

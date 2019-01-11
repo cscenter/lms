@@ -8,10 +8,9 @@ from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
     Value, IntegerField
 
 from core.utils import is_club_site
-from courses.calendar import get_bounds_for_calendar_month
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from courses.utils import get_term_index
+from courses.utils import get_term_index, get_boundaries
 
 
 class CourseTeacherQuerySet(query.QuerySet):
@@ -55,8 +54,7 @@ class CourseClassQuerySet(query.QuerySet):
     # FIXME: Tests for club part!!!
     def for_calendar(self, user):
         q = (self
-             .select_related('venue',
-                             'course',
+             .select_related('course',
                              'course__meta_course',
                              'course__semester')
              .order_by('date', 'starts_at'))
@@ -84,7 +82,7 @@ class CourseClassQuerySet(query.QuerySet):
         return self.filter(course__city_id__in=city_codes)
 
     def in_month(self, year, month):
-        date_start, date_end = get_bounds_for_calendar_month(year, month)
+        date_start, date_end = get_boundaries(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
 
     def open_only(self):

@@ -1,15 +1,16 @@
 import datetime
 import re
+from calendar import monthrange
 from collections import namedtuple
 from itertools import zip_longest
-from typing import Union, List
+from typing import Union, List, Tuple
 
 import pytz
 from dateutil import parser as dparser
 from django.utils import timezone
 
 from courses.settings import SemesterTypes, \
-    AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START
+    AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START, MONDAY_WEEKDAY
 from core.settings.base import FOUNDATION_YEAR
 from core.timezone import CityCode, Timezone, now_local
 
@@ -118,9 +119,35 @@ def get_term_by_index(term_index):
     return year, term
 
 
+def get_boundaries(year, month) -> Tuple:
+    """
+    Calculates closed day interval out of all complete weeks of the month
+    and returns boundaries of this interval.
+
+    Example:
+        print(get_boundaries(2018, 2))
+        (datetime.date(2018, 1, 29), datetime.date(2018, 3, 4))
+        # First day of the month
+        first_day = datetime.date(year=2018, month=2, day=1)
+        # first_day.weekday() is 3 (0-based index), we interested in the
+        first day of this week
+        lower_bound = first_day - datetime.timedelta(days=3)
+        datetime.date(year=2018, month=1, day=29)
+        # The same way calculate upper bound (the last day of the last
+        # complete week of the month)
+    """
+    day1, days_in_month = monthrange(year, month)
+    date = datetime.date(year, month, 1)
+    # Go back to the beginning of the week
+    days_before = (day1 - MONDAY_WEEKDAY) % 7
+    days_after = (MONDAY_WEEKDAY - day1 - days_in_month) % 7
+    start = date - datetime.timedelta(days=days_before)
+    end = date + datetime.timedelta(days=days_in_month + days_after - 1)
+    return start, end
+
+
 def get_terms_for_calendar_month(year: int, month: int) -> List[TermTuple]:
-    from courses.calendar import get_bounds_for_calendar_month
-    start_date, end_date = get_bounds_for_calendar_month(year, month)
+    start_date, end_date = get_boundaries(year, month)
     # Case date to timezone aware datetime, no matter which timezone we choose
     time_part = datetime.time(tzinfo=pytz.UTC)
     start_aware = datetime.datetime.combine(start_date, time_part)

@@ -5,11 +5,11 @@
 <div class="container" id="calendar-container">
   <div class="row timetable-header-row">
     <div class="col-xs-12 h2-and-buttons">
-      <h2>{{ current|date:"F Y" }}</h2>
+      <h2>{{ calendar.month_label }}</h2>
       <div class="btn-toolbar">
         <div class="btn-group">
-          <a href="?year={{ prev|date:"Y" }}&month={{ prev|date:"m" }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
-          <a href="?year={{ next|date:"Y" }}&month={{ next|date:"m" }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
+          <a href="?year={{ calendar.prev_month|date:"Y" }}&month={{ calendar.prev_month|date:"m" }}" role="button" class="btn btn-default"><i class="fa fa-chevron-left"></i></a>
+          <a href="?year={{ calendar.next_month|date:"Y" }}&month={{ calendar.next_month|date:"m" }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
         </div>
         {% if calendar_type != 'full' and calendar_type != 'public_full' %}
           <div class="btn-group">
@@ -38,34 +38,28 @@
           <th>{% trans "Saturday" %}</th>
           <th>{% trans "Sunday" %}</th>
         </tr>
-        {% for week_num, week in events %}
-        <tr id="week_{{week_num}}">
-          {% for day, events, in_semester, is_today in week %}
-          <td class="{{ in_semester|yesno:'in-semester,not-in-semester' }} {{ is_today|yesno:'today,' }}">
+        {% for week in calendar.weeks %}
+        <tr id="week_{{week.index}}">
+          {% for day in week.days %}
+          <td class="{% if day.date.month == calendar.month %}in-semester{% else %}not-in-semester{% endif %}{% if day.date == today %} today{% endif %}">
             {% if forloop.first %}
-            <div class="week-num-container">
-              <div class="week-num">
-                {% if calendar_type != 'public_full' %}
-                  <a href="{% if calendar_type == 'teacher' %}{% url 'timetable_teacher' %}{% else %}{% url 'timetable_student' %}{% endif %}?year={{ current|date:"Y" }}&week={{ week_num }}">{{ week_num }}</a>
-                {% else %}
-                  {{ week_num }}
-                {% endif %}
-              </div>
-            </div>
+                <div class="week-num-container">
+                  <div class="week-num">
+                    {% if calendar_type != 'public_full' %}
+                      <a href="{% if calendar_type == 'teacher' %}{% url 'timetable_teacher' %}{% else %}{% url 'timetable_student' %}{% endif %}?year={{ calendar.year }}&week={{ week.index }}">{{ week.index }}</a>
+                    {% else %}
+                      {{ week.index }}
+                    {% endif %}
+                  </div>
+                </div>
             {% endif %}
             <div class="cell">
               <div class="day">
-                {{ day|date:"j" }}
+                {{ day.date.day }}
               </div>
-              {% for event in events %}
-              <div class="event {{ event.type }}" title="{{ event.name }}">
-                <a href="{{ event.get_absolute_url }}">{{ event.starts_at|time:"H:i" }}–{{ event.ends_at|time:"H:i" }}
-                  {% if event.type == "noncourse" %}
-                  {{ event.name }}
-                  {% else %}
-                  {{ event.course.meta_course.name }}
-                  {% endif %}
-                </a>
+              {% for event in day.events %}
+              <div class="event {{ event.type }}" title="{{ event.description }}">
+                <a href="{{ event.url }}">{{ event.start }}–{{ event.end }} {{ event.name }}</a>
               </div>
               {% endfor %}
             </div>

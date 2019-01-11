@@ -31,6 +31,8 @@ def generate_vtimezone(tz: pytz.timezone):
 
 class UserEventsICalendar(ABC):
     """
+    Generates iCalendar for requested user. Supports only one time zone.
+
     Timezone should be consistent across all events (although iCalendar
     specification allows multiple VTIMEZONE's). With this assumption we rely on
         * requested user timezone for classes and assignments and on

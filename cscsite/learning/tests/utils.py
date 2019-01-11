@@ -46,6 +46,6 @@ def check_url_security(client, settings, groups_allowed, url):
 
 
 def flatten_calendar_month_events(calendar_month):
-    return [x for _, days in calendar_month
-            for day in days
-            for x in day.events]
+    return [calendar_event.event for week in calendar_month.weeks()
+            for day in week.days
+            for calendar_event in day.events]

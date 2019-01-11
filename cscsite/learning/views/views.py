@@ -3,6 +3,7 @@ import logging
 import os
 import posixpath
 from collections import OrderedDict
+from itertools import chain
 from typing import Optional
 from urllib.parse import urlencode
 
@@ -32,7 +33,7 @@ from core.exceptions import Redirect
 from core.utils import hashids, render_markdown, is_club_site
 from core.views import ProtectedFormMixin, LoginRequiredMixin
 from learning import utils
-from courses.calendar import CalendarQueryParams
+from courses.calendar import CalendarQueryParams, CalendarEvent
 from learning.forms import AssignmentCommentForm, AssignmentScoreForm, \
     AssignmentModalCommentForm
 from courses.forms import AssignmentForm
@@ -50,7 +51,7 @@ from core.timezone import now_local
 from courses.utils import get_current_term_pair, get_term_index, \
     get_terms_for_calendar_month, grouper, get_co_from_query_params
 from users.mixins import TeacherOnlyMixin, StudentOnlyMixin
-from learning.views.generic import CalendarGenericView
+from courses.views.calendar import MonthEventsCalendarView
 from learning.views.utils import get_teacher_city_code, \
     get_student_city_code
 
@@ -172,17 +173,22 @@ class TimetableStudentView(StudentOnlyMixin, generic.TemplateView):
         return context
 
 
-class CalendarStudentFullView(StudentOnlyMixin, CalendarGenericView):
+class CalendarStudentFullView(StudentOnlyMixin, MonthEventsCalendarView):
     """
-    Shows non-course events and classes filtered by authenticated student city.
+    Shows all non-course events and classes in the city of
+    the authenticated student.
     """
     def get_user_city(self):
         return get_student_city_code(self.request)
 
     def get_events(self, year, month, **kwargs):
         student_city_code = kwargs.get('user_city_code')
-        return [self._get_classes(year, month, student_city_code),
-                self._get_non_course_events(year, month, student_city_code)]
+        return chain(
+            (CalendarEvent(e) for e in
+                self._get_classes(year, month, student_city_code)),
+            (CalendarEvent(e) for e in
+                self._get_non_course_events(year, month, student_city_code))
+        )
 
     @staticmethod
     def _get_non_course_events(year, month, student_city_code):
@@ -211,9 +217,11 @@ class CalendarStudentView(CalendarStudentFullView):
         return qs.for_student(self.request.user)
 
 
-class CalendarTeacherFullView(TeacherOnlyMixin, CalendarGenericView):
-    """Shows non-course events and classes filtered by cities where
-    authenticated teacher has course sessions."""
+class CalendarTeacherFullView(TeacherOnlyMixin, MonthEventsCalendarView):
+    """
+    Shows all non-course events and classes filtered by the cities where
+    authorized teacher has taught.
+    """
 
     def get_user_city(self):
         return get_teacher_city_code(self.request)
@@ -221,7 +229,7 @@ class CalendarTeacherFullView(TeacherOnlyMixin, CalendarGenericView):
     def get_teacher_cities(self, year, month):
         if is_club_site():
             return [self.get_user_city()]
-        # Collect all cities where authenticated teacher has sessions
+        # Collect all the cities where authorized teacher taught.
         terms_in_month = get_terms_for_calendar_month(year, month)
         term_indexes = [get_term_index(*term) for term in terms_in_month]
         cities = list(Course.objects
@@ -236,8 +244,11 @@ class CalendarTeacherFullView(TeacherOnlyMixin, CalendarGenericView):
 
     def get_events(self, year, month, **kwargs):
         cities = self.get_teacher_cities(year, month)
-        return [self._get_classes(year, month, cities),
-                self._get_non_course_events(year, month, cities)]
+        return chain(
+            (CalendarEvent(e) for e in self._get_classes(year, month, cities)),
+            (CalendarEvent(e) for e in
+                self._get_non_course_events(year, month, cities))
+        )
 
     @staticmethod
     def _get_non_course_events(year, month, cities):
