@@ -6,11 +6,11 @@
 *.pyc
 *.sqlite3
 cscenter_web.pdf
-cscsite/media/
-cscsite/coverage/
+apps/media/
+apps/coverage/
 .idea/
 csc3/
-cscsite/static/
+apps/static/
 local/
 .cache/
 .pytest_cache/

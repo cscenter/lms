@@ -72,6 +72,7 @@ MARKDOWN_ALLOWED_ATTRS = {
 
 
 def render_markdown(text):
+    """Renders markdown, then sanitizes html based on allowed tags"""
     md_rendered = markdown.render(text)
     return bleach.clean(md_rendered, tags=MARKDOWN_ALLOWED_TAGS,
                         attributes=MARKDOWN_ALLOWED_ATTRS)
