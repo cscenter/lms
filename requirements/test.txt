@@ -1,3 +1,4 @@
+-r base.txt
 
 colour-runner==0.1.1
 pylint-django==2.0.2
