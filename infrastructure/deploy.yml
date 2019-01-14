@@ -15,72 +15,70 @@
       msg: "`site_user` var should be one of [cscenter, csclub]"
     when: site_user != "cscenter" and site_user != "csclub"
 
-  - name: Set variables for better readability
+  - name: Set variables
     set_fact:
-      site_src: "/home/{{ site_user }}/site/repo"
+      repo_dir: "/home/{{ site_user }}/site/repo"
       venv_dir: "/home/{{ site_user }}/site/env"
-      requirements_prev_md5_file: ".requirements_prev_deploy_md5"
-      # Default value if file didn't fetched from remote server
-      requirements_md5: ""
+      cached_pipfile_lock_hash_file: ".cached_pipfile_lock_hash_file"
+      # Default value when fail on fetching from the remote server
+      local_pipfile_lock_hash: ""
 
   - name: Get stuff from git
-    git: repo={{ repo_url }} dest={{ site_src }}
+    git: repo={{ repo_url }} dest={{ repo_dir }}
     become: yes
     become_user: "{{ site_user }}"
 
-  - name: Get file stats for production requirements.txt
-    stat:
-      path: "{{ site_src }}/requirements/{{ item }}.txt"
-      get_checksum: true
-      checksum_algorithm: md5
-    register: requirements_stat
-    with_items:
-      - "base"
-      - "production"
+  - name: Read current Pipfile.lock data into memory
+    slurp:
+      path: '{{ repo_dir }}/Pipfile.lock'
+    register: pipfile_lock_data
 
-  - name: Concat md5 from previous step
+  - name: Get current Pipfile.lock hash
     set_fact:
-      requirements_concatenated_md5: "{{ requirements_stat.results | map(attribute='stat.checksum') | join('') }}"
+      pipfile_lock_hash: "{{ pipfile_lock_data.content | b64decode | from_json | json_query('_meta.hash.sha256') }}"
 
-  - name: Try to fetch file with md5 hash value from the previous deploy
+  - name: Try to fetch file with Pipfile.lock hash value from the previous deploy
     fetch:
-      src: "/home/{{ site_user }}/site/{{ requirements_prev_md5_file }}"
-      dest: "tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
+      src: "/home/{{ site_user }}/site/{{ cached_pipfile_lock_hash_file }}"
+      dest: "tmp/{{ inventory_hostname }}_{{ site_user }}_{{ cached_pipfile_lock_hash_file }}"
       flat: yes
       fail_on_missing: no
     become: yes
     become_user: "{{ site_user }}"
-    register: requirements_prev_md5
 
-  - name: Get stats for fetched file
-    local_action: stat path="tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}"
-    register: local_md5_file
+  - name: Get stats for the fetched file
+    local_action: stat path="tmp/{{ inventory_hostname }}_{{ site_user}}_{{ cached_pipfile_lock_hash_file }}"
+    register: local_pipfile_lock_hash_file
 
-  - name: Try to read requirements md5 value from the previous deploy
+  - name: Try to read hash value from the previous deploy
     set_fact:
-      requirements_md5: "{{ lookup('file', 'tmp/{{ inventory_hostname }}_{{ requirements_prev_md5_file }}') }}"
-    when: local_md5_file.stat.exists == True
+      local_pipfile_lock_hash: "{{ lookup('file', 'tmp/{{ inventory_hostname }}_{{ site_user }}_{{ cached_pipfile_lock_hash_file }}') }}"
+    when: local_pipfile_lock_hash_file.stat.exists == True
 
   - name: Install requirements if they were changed from the previous deploy
-    pip: requirements={{ site_src }}/requirements.txt virtualenv={{ venv_dir }}
+    environment:
+      VIRTUAL_ENV: "{{ venv_dir }}"
+    command: "{{ venv_dir }}/bin/pipenv sync"
+    args:
+      chdir: "{{ repo_dir }}"
     become: yes
     become_user: "{{ site_user }}"
-    when: requirements_concatenated_md5 != requirements_md5
+    when: pipfile_lock_hash != local_pipfile_lock_hash
 
-  - name: Update requirements.txt files summary md5 value
+  - name: Update cache with Pipfile.lock hash value
     copy:
-      content: "{{ requirements_concatenated_md5 }}"
-      dest: "/home/{{ site_user }}/site/{{ requirements_prev_md5_file }}"
+      content: "{{ pipfile_lock_hash }}"
+      dest: "/home/{{ site_user }}/site/{{ cached_pipfile_lock_hash_file }}"
     become: yes
     become_user: "{{ site_user }}"
-    when: requirements_concatenated_md5 != requirements_md5
+    when: pipfile_lock_hash != local_pipfile_lock_hash
 
   - name: Collectstatic
     become: yes
     become_user: "{{ site_user }}"
     django_manage:
       command: "collectstatic --noinput"
-      app_path: "{{ site_src }}"
+      app_path: "{{ repo_dir }}"
       settings: "{{ app_settings }}.settings.{{ app_environment }}"
       virtualenv: "{{ venv_dir }}"
 
@@ -89,7 +87,7 @@
     become_user: "{{ site_user }}"
     django_manage:
       command: "migrate"
-      app_path: "{{ site_src }}"
+      app_path: "{{ repo_dir }}"
       settings: "{{ app_settings }}.settings.{{ app_environment }}"
       virtualenv: "{{ venv_dir }}"
 

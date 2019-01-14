@@ -83,10 +83,10 @@
   command: "{{ python_pkg }} /tmp/get-pip.py"
   when: pip_version_output is failed
 
-- name: Install pip for system python3 (will be placed in /usr/bin/pip3)
+- name: Install pip for SYSTEM python3 (will be placed in /usr/bin/pip3)
   apt: name=python3-pip state=present
 
-- name: install global python 3 dependencies
+- name: install global {{ python_pkg }} dependencies
   pip:
     name: "{{ item.name }}"
     version: "{{ item.version }}"

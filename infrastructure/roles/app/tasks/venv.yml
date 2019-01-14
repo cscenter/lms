@@ -8,13 +8,6 @@
   check_mode: true
   register: python_installed
 
-# FIXME: Do I need this step here? Duplicated in `system` role
-- name: Unlock python package for upgrade if it was hold before.
-  dpkg_selections:
-    name: "{{ python_pkg }}"
-    selection: install
-  when: not python_installed.changed
-
 - name: Get stat about virtualenv directory
   stat:
     path: "/home/{{ site_user }}/site/env/"
@@ -35,13 +28,22 @@
     state: absent
   when: venv_dir.stat.exists and python_venv_version_installed.stdout != python_version_installed.stdout
 
-- name: Install website dependencies
+- name: Install pipenv inside virtual environment
   become: yes
   become_user: "{{ site_user }}"
   pip:
-    requirements: "/home/{{ site_user }}/site/repo/requirements.txt"
+    name: "pipenv"
     virtualenv: "/home/{{ site_user }}/site/env/"
     virtualenv_python: "{{ python_pkg }}"
+
+- name: Install packages from project Pipenv.lock
+    environment:
+      VIRTUAL_ENV: "{{ venv_dir }}"
+    command: "{{ venv_dir }}/bin/pipenv sync"
+    args:
+      chdir: "{{ repo_dir }}"
+    become: yes
+    become_user: "{{ site_user }}"
 
 - name: Prevent python from being upgraded with `apt-get upgrade` (it can broke venv)
   dpkg_selections:
