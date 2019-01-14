@@ -119,6 +119,7 @@ def get_term_by_index(term_index):
     return year, term
 
 
+# TODO: add tests
 def get_boundaries(year, month) -> Tuple:
     """
     Calculates closed day interval out of all complete weeks of the month
