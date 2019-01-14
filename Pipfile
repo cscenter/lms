@@ -1,0 +1,124 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+colour-runner = "==0.1.1"
+pylint-django = "==2.0.5"
+ipython = "==7.2.0"
+Werkzeug = "==0.14.1"
+# Coverage
+coverage = "==4.5.2"
+django-coverage = "==1.2.4"
+# Debug
+ipdb = "==0.11"
+pdbpp = "==0.9.3"
+django-debug-toolbar = "==1.11"
+django-debug-toolbar-template-timings = "==0.9"
+djdt_flamegraph = "==0.2.12"
+django-extensions = "==2.1.4"
+# Fixtures
+testfixtures = "==6.4.3"
+factory_boy = "==2.11.1"
+# Test framework
+pytest = ">=4.0.2"
+pytest-django = ">=3.4.5"
+pytest-cov = ">=2.6.1"
+pytest-xdist = ">=1.26.0"
+pytest-mock = "==1.10.0"
+pytest-pythonpath = "==0.7.3"
+
+[packages]
+# Framework
+pytz = "==2018.9"
+Django = "==2.1.5"
+# DB
+psycopg2-binary = "==2.7.6.1"
+jsonfield = "==2.0.2"
+django-prettyjson = "==0.4.1"
+standardjson = "==0.3.1"
+# Images
+sorl-thumbnail = "==12.4.1"
+python-magic = "==0.4.15"
+Pillow = "==4.1.1"
+# Forms
+django-crispy-forms = "==1.7.2"
+django-formtools = "==2.1"
+# Parsing
+beautifulsoup4 = "==4.7.1"
+# Translation
+django-rosetta = "==0.9.0"
+django-modeltranslation = "==0.13b1"
+# AWS
+boto = "==2.49.0"
+boto3 = "==1.9.78"
+# Mailing
+django-ses = "==0.8.7"
+django-post_office = "==3.1.0"
+# Markdown
+hoep = {editable = true,git = "git://github.com/pacahon/Hoep.git",ref = "0d4c0507dcb34d1b63a099c8b08656b66394bc37"}
+# Monitoring
+raven = "==6.10.0"
+newrelic = "==4.10.0.112"
+# Oauth2
+social-auth-core = "==2.0.0"
+social-auth-app-django = "==3.1.0"
+# Oembed
+micawber = "==0.3.8"
+# Task manager
+rq = "==0.13.0"
+django-rq = "==1.3.0"
+rq-scheduler = ">=0.9"
+# Misc
+requests = "==2.21.0"
+# TODO: remove unicodecsv from the project
+unicodecsv = "==0.14.1"
+django-model-utils = {editable = true,git = "git://github.com/jazzband/django-model-utils.git",ref = "bf1adce0b819b59ca8e5075ca1f45230286a1ae8"}
+bleach = "==3.1.0"
+django-storages = "==1.5.2"
+django-dbbackup = "==3.1.3"
+django-import-export = "==1.1.0"
+tablib = "==0.12.1"
+# Freeze openpyxl lib since tablib 0.12.1 doesn't support a newer one
+# and breaks django-import-export xlsx export
+openpyxl = "==2.5.12"
+nbconvert = "==5.4.0"
+djangorestframework = "==3.9.0"
+rest-pandas = "==1.0.0"
+django-js-reverse = "==0.8.2"
+numpy = "==1.16.0"
+icalendar = "==4.0.3"
+django-ical = "==1.5"
+python-dateutil = "==2.7.5"
+django-jinja = "==2.4.1"
+python-ldap = "==3.1.0"
+attrs = "==18.2.0"
+django-choices = "==1.6.1"
+django-vanilla-views = "==1.0.6"
+django-autocomplete-light = "==3.3.2"
+django-mptt = "==0.9.1"
+django-bootstrap-pagination = "==1.7.0"
+django-bitfield = "==1.9.3"
+django-multiselectfield = "==0.1.8"
+django-filter = "==2.0.0"
+hashids = "==1.2.0"
+django-recaptcha = "==1.4.0"
+django-registration-redux = "==2.5"
+django-fixture-media = "==0.1.4"
+django-annoying = "==0.10.4"
+django-bootstrap3 = "==11.0.0"
+django-extra-views = "==0.9.0"
+django-braces = "==1.13.0"
+django-taggit = "==0.23.0"
+sqlparse = "==0.2.4"
+django-pipeline = "==1.6.14"
+django-loginas = "==0.3.4"
+django-treemenus = {editable = true,git = "https://github.com/pacahon/django-treemenus.git"}
+django-webpack-loader = "==0.6.0"
+XlsxWriter = "==1.1.2"
+jupyter_client = "==5.2.4"
+webdavclient = "==1.0.5"
+
+[requires]
+python_version = "3.6"
