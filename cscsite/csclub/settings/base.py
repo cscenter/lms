@@ -25,6 +25,7 @@ MIDDLEWARE = [
 ]
 
 INSTALLED_APPS += [
+    'csclub',
     'captcha',
     'registration',
     'international_schools.apps.Config',
