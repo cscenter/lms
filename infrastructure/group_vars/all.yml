@@ -14,9 +14,9 @@ available_sites:
     site_user_group: "shared"
     site_root: "/home/cscenter/site/repo"
     media_root: "/shared/media"
-    static_root: "/home/cscenter/site/repo/cscsite/static"
+    static_root: "/home/cscenter/site/repo/apps/static"
     backup_root: "/shared/backup_tmp"
-    apps_dir_name: cscsite
+    apps_dir_name: apps
     app_settings: "cscenter"
     app_environment: production
     repo_url: git@github.com:cscenter/site.git
@@ -40,9 +40,9 @@ available_sites:
     site_user_group: "shared"
     site_root: "/home/csclub/site/repo"
     media_root: "/shared/media"
-    static_root: "/home/csclub/site/repo/cscsite/static"
+    static_root: "/home/csclub/site/repo/apps/static"
     backup_root: "/shared/backup_tmp"
-    apps_dir_name: cscsite
+    apps_dir_name: apps
     app_settings: "csclub"
     app_environment: production
     repo_url: git@github.com:cscenter/site.git

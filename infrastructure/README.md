@@ -137,7 +137,7 @@ TODO:
 TIPS:
 * syncronize dirs on old and new instance:
 ```
-rsync  -hvrP --ignore-existing --exclude "cache/" ubuntu@52.28.124.90:/home/cscweb/site/repo/cscsite/media/ /shared/media/
+rsync  -hvrP --ignore-existing --exclude "cache/" ubuntu@52.28.124.90:/home/cscweb/site/repo/apps/media/ /shared/media/
 ```
 * dump db
 pg_dump -h localhost -U csc cscdb  > cscdb_2408.sql

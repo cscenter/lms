@@ -1,6 +1,6 @@
 [run]
 branch = True
-source = cscsite
+source = apps
 
 [report]
 ignore_errors = True

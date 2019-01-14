@@ -2,7 +2,7 @@
 import os
 import sys
 
-sys.path.append(os.path.abspath("cscsite/"))
+sys.path.append(os.path.abspath("apps/"))
 
 if __name__ == "__main__":
     # On production use --settings to override default behavior
