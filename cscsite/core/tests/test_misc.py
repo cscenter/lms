@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from io import StringIO as OutputIO
+from unittest.mock import Mock
 
 import pytest
 from django.core import mail, management
 from django.test import TestCase
 from django.urls import reverse
-from mock import Mock
 
 from core.management.commands.notify import get_base_url
 from core.admin import related_spec_to_list, apply_related_spec
