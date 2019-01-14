@@ -36,7 +36,7 @@
     virtualenv: "/home/{{ site_user }}/site/env/"
     virtualenv_python: "{{ python_pkg }}"
 
-- name: Install packages from project Pipenv.lock
+- name: Install packages from the project Pipenv.lock
     environment:
       VIRTUAL_ENV: "{{ venv_dir }}"
     command: "{{ venv_dir }}/bin/pipenv sync"
