@@ -11,6 +11,7 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from testfixtures import LogCapture
 
+from core.timezone import now_local
 from core.utils import city_aware_reverse
 from courses.models import Course
 from courses.utils import get_current_term_pair
@@ -187,13 +188,15 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(True, ctx['is_actual_teacher'])
 
     def test_assignment_list(self):
-        student = StudentCenterFactory()
-        teacher = TeacherCenterFactory()
-        next_day = now() + datetime.timedelta(days=1)
+        student = StudentCenterFactory(city_id='spb')
+        teacher = TeacherCenterFactory(city_id='spb')
+        today = now_local(student.city_code).date()
+        next_day = today + datetime.timedelta(days=1)
         co = CourseFactory.create(teachers=[teacher],
+                                  semester=SemesterFactory.create_current(),
                                   completed_at=next_day)
         url = co.get_absolute_url()
-        EnrollmentFactory.create(student=student, course=co)
+        EnrollmentFactory(student=student, course=co)
         a = AssignmentFactory.create(course=co)
         self.assertNotContains(self.client.get(url), a.title)
         self.doLogin(student)

@@ -144,7 +144,7 @@ def test_enrollment_capacity(client):
 def test_enrollment(client):
     student1, student2 = StudentCenterFactory.create_batch(2, city_id='spb')
     client.login(student1)
-    today = timezone.now()
+    today = now_local(student1.city_code)
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
@@ -191,7 +191,7 @@ def test_enrollment(client):
 def test_enrollment_reason(client):
     student = StudentCenterFactory(city_id='spb')
     client.login(student)
-    today = timezone.now()
+    today = now_local(student.city_code)
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
@@ -215,7 +215,7 @@ def test_enrollment_reason(client):
 def test_enrollment_leave_reason(client):
     student = StudentCenterFactory(city_id='spb')
     client.login(student)
-    today = timezone.now()
+    today = now_local(student.city_code)
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
