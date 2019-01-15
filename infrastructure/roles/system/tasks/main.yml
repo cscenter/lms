@@ -4,24 +4,18 @@
     upgrade: dist
     update_cache: yes
 
-- name: set default locale LANG to UTF-8
+- name: Set default locale LANG to UTF-8
   lineinfile: dest=/etc/default/locale line='LANG="en_US.utf8"' regexp='^LANG=' state=present insertafter=BOF
 
-- name: set default locale LC_ALL to UTF-8
+- name: Set default locale LC_ALL to UTF-8
   lineinfile: dest=/etc/environment line='LC_ALL="en_US.utf8"' regexp='^LC_ALL=' state=present insertafter=BOF
 
-- name: check if a reboot is required
+- name: Check if a reboot is required
   stat: path=/var/run/reboot-required get_md5=no
   register: reboot_file
 
-# Reboot issue: https://github.com/ansible/ansible/issues/14413
-- name: reboot the server
-  command: /sbin/reboot removes=/var/run/reboot-required
-  when: reboot_file.stat.exists == true
-
-- name: Wait for server to go offline (because of reboot)
-  local_action: wait_for host="{{ inventory_hostname }}" port=22 state=stopped
-  become: false
+- name: Reboot the server and wait for it to come back up.
+  reboot:
   when: reboot_file.stat.exists == true
 
 - name: Add python PPAs

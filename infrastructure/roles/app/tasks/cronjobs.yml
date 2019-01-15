@@ -7,7 +7,7 @@
     hour: "4"
     minute: "7"
     job: >
-      . /home/{{ site_user }}/site/env/bin/activate &&
+      . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py dbbackup
       --settings={{ app_settings }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
@@ -21,7 +21,7 @@
     user: "{{ site_user }}"
     minute: "*/5"
     job: >
-      . /home/{{ site_user }}/site/env/bin/activate &&
+      . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py notify
       --settings={{ app_settings }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
@@ -37,7 +37,7 @@
     hour: "2"
     minute: "3"
     job: >
-      . /home/{{ site_user }}/site/env/bin/activate &&
+      . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py notification_cleanup
       --settings={{ app_settings }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
@@ -52,7 +52,7 @@
     hour: "1,13"
     minute: "7"
     job: >
-      . /home/{{ site_user }}/site/env/bin/activate &&
+      . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py projects_notifications
       --settings={{ app_settings }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
@@ -67,7 +67,7 @@
     hour: 0
     minute: 7
     job: >
-      . /home/{{ site_user }}/site/env/bin/activate &&
+      . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py clearsessions
       --settings={{ app_settings }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
@@ -81,7 +81,7 @@
     user: "{{ site_user }}"
     minute: "*"
     job: >
-      . /home/{{ site_user }}/site/env/bin/activate &&
+      . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py send_queued_mail
       --settings={{ app_settings }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
@@ -96,7 +96,7 @@
     minute: "7"
     hour: "12,18,23"
     job: >
-      . /home/{{ site_user }}/site/env/bin/activate &&
+      . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py social_crawler
       --settings={{ app_settings }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'

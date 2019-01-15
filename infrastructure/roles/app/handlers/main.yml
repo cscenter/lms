@@ -1,4 +1,5 @@
 ---
 - name: uwsgi service needs to be restarted
-  debug: msg=Restart uwsgi event triggered
+  debug: 
+    msg: Restart uwsgi event triggered
   listen: restart_uwsgi

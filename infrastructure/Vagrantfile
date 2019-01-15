@@ -22,7 +22,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         # Run vagrant up/provision
         web.vm.provision "ansible" do |ansible|
             ansible.verbose = "vv"
-            ansible.skip_tags = ["cronjobs"]
+            ansible.skip_tags = ["cronjobs", "lvm-role"]
             ansible.extra_vars = {
               hosts_override: "test",
               enable_https: false

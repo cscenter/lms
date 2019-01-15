@@ -2,7 +2,7 @@
 # Django-related settings
 chdir           = /home/{{ site_user }}/site/repo/{{ apps_dir_name }}
 module          = {{ app_settings }}.wsgi:application
-virtualenv      = /home/{{ site_user }}/site/env
+virtualenv      = {{ virtualenv_root }}
 pythonpath      = /home/{{ site_user }}/site/repo/{{ apps_dir_name }}
 env             = DJANGO_SETTINGS_MODULE={{ app_settings }}.settings.{{ app_environment }}
 env             = PYTHONIOENCODING=UTF-8

@@ -1,7 +1,10 @@
 ---
-- name: Set vars
+- name: Set vars from config
   set_fact: "{{ item.key }}={{ item.value }}"
   with_dict: "{{ app_config }}"
+
+- set_fact:
+    virtualenv_root: "/home/{{ site_user }}/site/env"
 
 - name: Start processing user = {{ site_user }}
   debug:
@@ -129,7 +132,7 @@
     command: "collectstatic"
     app_path: "/home/{{ site_user }}/site/repo"
     settings: "{{ app_settings }}.settings.{{ app_environment }}"
-    virtualenv: "/home/{{ site_user }}/site/env/"
+    virtualenv: "{{ virtualenv_root }}"
   tags:
     - collectstatic
 

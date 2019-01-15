@@ -39,4 +39,4 @@
     command: "migrate"
     app_path: "/home/{{ site_user }}/site/repo"
     settings: "{{ app_settings }}.settings.{{ app_environment }}"
-    virtualenv: "/home/{{ site_user }}/site/env/"
+    virtualenv: "{{ virtualenv_root }}"

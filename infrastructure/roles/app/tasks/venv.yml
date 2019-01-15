@@ -10,11 +10,11 @@
 
 - name: Get stat about virtualenv directory
   stat:
-    path: "/home/{{ site_user }}/site/env/"
+    path: "{{ virtualenv_root }}"
   register: venv_dir
 
 - name: Get virtualenv python version if venv already exists
-  shell: "/home/{{ site_user }}/site/env/bin/python --version 2>&1"
+  shell: "{{ virtualenv_root }}/bin/python --version 2>&1"
   register: python_venv_version_installed
   when: venv_dir.stat.exists
 
@@ -24,7 +24,7 @@
 
 - name: Remove venv if version has changed
   file:
-    path: "/home/{{ site_user }}/site/env/"
+    path: "{{ virtualenv_root }}"
     state: absent
   when: venv_dir.stat.exists and python_venv_version_installed.stdout != python_version_installed.stdout
 
@@ -33,17 +33,17 @@
   become_user: "{{ site_user }}"
   pip:
     name: "pipenv"
-    virtualenv: "/home/{{ site_user }}/site/env/"
+    virtualenv: "{{ virtualenv_root }}"
     virtualenv_python: "{{ python_pkg }}"
 
-- name: Install packages from the project Pipenv.lock
-    environment:
-      VIRTUAL_ENV: "{{ venv_dir }}"
-    command: "{{ venv_dir }}/bin/pipenv sync"
-    args:
-      chdir: "{{ repo_dir }}"
-    become: yes
-    become_user: "{{ site_user }}"
+- name: Install requirements from the Pipenv.lock
+  environment:
+    VIRTUAL_ENV: "{{ virtualenv_root }}"
+  command: "{{ virtualenv_root }}/bin/pipenv sync"
+  args:
+    chdir: "{{ site_root }}"
+  become: yes
+  become_user: "{{ site_user }}"
 
 - name: Prevent python from being upgraded with `apt-get upgrade` (it can broke venv)
   dpkg_selections:
