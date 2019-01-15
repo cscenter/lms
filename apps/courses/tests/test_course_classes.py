@@ -13,6 +13,7 @@ from django.urls import reverse
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
+from core.timezone import now_local
 from courses.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory, VenueFactory, SemesterFactory, CourseClassAttachmentFactory
 from courses.forms import CourseClassForm
@@ -284,7 +285,7 @@ def test_course_class_form_available(client, curator, settings):
     """Test form availability based on `is_completed` value"""
     # XXX: Date widget depends on locale
     settings.LANGUAGE_CODE = 'ru'
-    teacher = TeacherCenterFactory()
+    teacher = TeacherCenterFactory(city_id='spb')
     semester = SemesterFactory.create_current()
     co = CourseFactory(semester=semester, teachers=[teacher])
     course_class_add_url = co.get_create_class_url()
@@ -309,9 +310,10 @@ def test_course_class_form_available(client, curator, settings):
     response = client.post(course_class_add_url, form, follow=True)
     assert response.status_code == 403
     # Check we can post form if course is active
-    co.completed_at = now().date() + datetime.timedelta(days=1)
+    today = now_local(teacher.city_code).date()
+    next_day = today + datetime.timedelta(days=1)
+    co.completed_at = next_day
     co.save()
-    next_day = now() + datetime.timedelta(days=1)
     venue = VenueFactory(city=co.city)
     date_format = CourseClassForm.base_fields['date'].widget.format
     form = {
