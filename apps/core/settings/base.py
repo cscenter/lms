@@ -82,6 +82,9 @@ INSTALLED_APPS = [
     'learning.gallery.apps.GalleryConfig',
     'notifications.apps.NotificationsConfig',
     'api.apps.APIConfig',
+    # FIXME: quick fix, error on user detail page
+    'taggit',  # used by library app only
+    'library.apps.LibraryConfig',
 ]
 
 # django-js-reverse settings
