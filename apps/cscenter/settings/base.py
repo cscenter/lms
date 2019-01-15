@@ -25,8 +25,6 @@ MIDDLEWARE = [
 INSTALLED_APPS += [
     'post_office',
     'django_jinja',
-    'taggit',  # used by library app only
-    'library.apps.LibraryConfig',
     'learning.projects.apps.ProjectsConfig',
     'stats.apps.StatisticsConfig',
     'admission.apps.AdmissionConfig',
