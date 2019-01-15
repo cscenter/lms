@@ -502,6 +502,8 @@ class User(LearningPermissionsMixin, AbstractUser):
     # TODO: move to Project manager?
     def get_projects_queryset(self):
         """Returns projects through ProjectStudent intermediate model"""
+        if is_club_site():
+            return None
         return (self.projectstudent_set
                 .select_related('project', 'project__semester')
                 .order_by('project__semester__index'))
