@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load bootstrap_pagination %}
 {% load htmlpage_url %}
-{% load thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 {% load markdown from core_tags %}
 
 {% block content %}
@@ -25,9 +25,9 @@
                 </blockquote>
                 <div>
                     {% if student.photo %}
-                        {% thumbnail student.photo "150x150" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
+                        {% user_thumbnail student student.ThumbnailSize.SQUARE as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% endthumbnail %}
+                        {% enduser_thumbnail %}
                     {% endif %}
                     <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span> {% trans "Graduation" %} {{ student.graduation_year }}, {% for a in  student.areas_of_study.all %}{{ a }}{% if not forloop.last %}, {% endif %}{% endfor %}
                 </div>

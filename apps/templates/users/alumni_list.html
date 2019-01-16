@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% load i18n %}
-{% load thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 {% load markdown from core_tags %}
 {% load static %}
 
@@ -29,11 +29,11 @@
                 {% for alumni in alumni_by_year.list %}
                     <div class="alumni">
                         {% if alumni.photo %}
-                            {% thumbnail alumni.photo "170x238" crop="center top" cropbox=alumni.photo_thumbnail_cropbox as im %}
+                            {% user_thumbnail alumni alumni.ThumbnailSize.BASE as im %}
                                 <img {% if firstyear %}src="{{ im.url }}"{% else %}class="lazy" data-original="{{ im.url }}"{% endif %} width="{{ im.width }}" height="{{ im.height }}">
-                            {% endthumbnail %}
+                            {% enduser_thumbnail %}
                         {% else %}
-                            <img width="170" height="238" data-src="holder.js/170x238?text=%3F&fontweight=normal&size=50" />
+                            <img width="170" height="238" data-src="holder.js/{{ alumni.ThumbnailSize.BASE }}?text=%3F&fontweight=normal&size=50" />
                         {% endif %}
                         <a href="{{ alumni.get_absolute_url }}">{{ alumni.first_name }} {{ alumni.last_name }}</a>
                     </div>

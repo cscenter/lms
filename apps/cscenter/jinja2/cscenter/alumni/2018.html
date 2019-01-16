@@ -33,7 +33,7 @@
             {% for user in graduates -%}
                 <a class="user-card" href="{{ user.get_absolute_url() }}" id="user-card-{{ user.pk }}">
                     <div class="user-card__photo">
-                        {% with im = user.get_thumbnail("170x238", use_stub=False) -%}
+                        {% with im = user.get_thumbnail(user.ThumbnailSize.BASE, use_stub=False) -%}
                             {% if im -%}
                                 <img alt="{{ user.get_full_name() }}" src="{{ im.url }}">
                             {%- else -%}

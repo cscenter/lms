@@ -11,7 +11,7 @@ from sorl.thumbnail.images import DummyImageFile
 from ajaxuploader.uploadhandler import MemoryImageUploadHandler, \
     TemporaryImageUploadHandler
 from ajaxuploader.utils import photo_thumbnail_cropbox
-from users.constants import PROFILE_THUMBNAIL_WIDTH, PROFILE_THUMBNAIL_HEIGHT
+from users.constants import BASE_THUMBNAIL_WIDTH, BASE_THUMBNAIL_HEIGHT
 from users.models import User
 
 try:
@@ -61,8 +61,8 @@ class AjaxProfileImageUploader(generic.base.View):
             return False
 
         # Generate thumbnail
-        photo_geometry = "{}x{}".format(PROFILE_THUMBNAIL_WIDTH,
-                                        PROFILE_THUMBNAIL_HEIGHT)
+        photo_geometry = "{}x{}".format(BASE_THUMBNAIL_WIDTH,
+                                        BASE_THUMBNAIL_HEIGHT)
         # FIXME: Check that img stil exist?
         thumbnail = get_thumbnail(user.photo.path, photo_geometry,
                                   crop='center',

@@ -6,7 +6,6 @@ from typing import Optional
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser
-from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
@@ -30,8 +29,9 @@ from cscenter.utils import PublicRoute
 from learning.permissions import LearningPermissionsMixin
 from learning.settings import AcademicDegreeYears, StudentStatuses, GradeTypes
 from learning.utils import is_negative_grade
+from users.constants import GROUPS_IMPORT_TO_GERRIT, AcademicRoles, \
+    BASE_THUMBNAIL_WIDTH, BASE_THUMBNAIL_HEIGHT
 from users.fields import MonitorStatusField
-from users.constants import GROUPS_IMPORT_TO_GERRIT, AcademicRoles
 from users.tasks import update_password_in_gerrit
 from users.thumbnails import get_user_thumbnail
 from .managers import CustomUserManager
@@ -91,6 +91,18 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
 
 
 class User(LearningPermissionsMixin, AbstractUser):
+    class ThumbnailSize:
+        """
+        Base image aspect ratio is `5:7`.
+        """
+        BASE = f'{BASE_THUMBNAIL_WIDTH}x{BASE_THUMBNAIL_HEIGHT}'
+        BASE_PRINT = '250x350'
+        SQUARE = '150x150'
+        SQUARE_SMALL = '60x60'
+        # FIXME: replace?
+        INTERVIEW_LIST = '100x100'
+        # On center site
+        TEACHER_LIST = "220x308"
 
     roles = AcademicRoles
 

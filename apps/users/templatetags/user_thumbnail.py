@@ -11,12 +11,14 @@ register = Library()
 
 class UserThumbnailNode(ThumbnailNodeBase):
     """
-    If picture not found, show empty stub picture based on user groups.
-    May hit db to get user groups in that case, but csc-menu do it right
-    now on each request.
+    Shows empty stub picture if picture not found.
+
+    Note:
+        May hit db to get authorized user groups to resolve what stub image
+        to show, but csc-menu do it on each request.
     """
     child_nodelists = ('nodelist_file', 'nodelist_empty')
-    error_msg = ('Syntax error. Expected: ``userpreview user_obj '
+    error_msg = ('Syntax error. Expected: ``user_thumbnail user_obj '
                  '[key1=val1 key2=val2...] as var``')
 
     def __init__(self, parser, token):
@@ -42,13 +44,12 @@ class UserThumbnailNode(ThumbnailNodeBase):
 
         if bits[-2] == 'as':
             self.as_var = bits[-1]
-            self.nodelist_file = parser.parse(('empty', 'enduserpreview',))
+            self.nodelist_file = parser.parse(('empty', 'enduser_thumbnail',))
             if parser.next_token().contents == 'empty':
-                self.nodelist_empty = parser.parse(('enduserpreview',))
+                self.nodelist_empty = parser.parse(('enduser_thumbnail',))
                 parser.delete_first_token()
 
     def _render(self, context):
-        """Replace DummyImage with csc girl/boy"""
         user = self.user.resolve(context)
         geometry = self.geometry.resolve(context)
         options = {}
@@ -90,5 +91,5 @@ class UserThumbnailNode(ThumbnailNodeBase):
 
 
 @register.tag
-def userpreview(parser, token):
+def user_thumbnail(parser, token):
     return UserThumbnailNode(parser, token)

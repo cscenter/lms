@@ -1,8 +1,8 @@
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
 
-PROFILE_THUMBNAIL_WIDTH = 170
-PROFILE_THUMBNAIL_HEIGHT = 238
+BASE_THUMBNAIL_WIDTH = 170
+BASE_THUMBNAIL_HEIGHT = 238
 
 
 class AcademicRoles(DjangoChoices):

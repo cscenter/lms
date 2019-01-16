@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% load i18n %}
-{% load thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 {% load markdown from core_tags %}
 {% load static %}
 
@@ -18,9 +18,9 @@
                 <div class="student">
                     <a href="{{ alumni.get_absolute_url }}">
                     {% if alumni.photo %}
-                        {% thumbnail alumni.photo "150x150" crop="center top" cropbox=alumni.photo_thumbnail_cropbox as im %}
+                        {% user_thumbnail alumni alumni.ThumbnailSize.SQUARE as im %}
                             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% endthumbnail %}
+                        {% enduser_thumbnail %}
                     {% else %}
                         <img width="150" height="150" data-src="holder.js/150x150?text=%3F&fontweight=normal&size=50" />
                     {% endif %}
@@ -120,9 +120,9 @@
                         </blockquote>
                         <div>
                             {% if student.photo %}
-                            {% thumbnail student.photo "150x150" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
+                            {% user_thumbnail student student.ThumbnailSize.SQUARE as im %}
                             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                            {% endthumbnail %}
+                            {% enduser_thumbnail %}
                             {% endif %}
                             <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span>{% for a in  student.areas_of_study.all %}{{ a }}{% if not forloop.last %}, {% endif %}{% endfor %}
                         </div>

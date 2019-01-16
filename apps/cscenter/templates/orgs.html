@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load i18n %}
-{% load userpreview from custom_thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 
 {% block content %}
     <div id="orgs-page">
@@ -11,9 +11,9 @@
                 <div class="row board-list">
                     <div class="col-xs-4">
                         <div class="text-center">
-                            {% userpreview board.andrey_ivanov "200x200" as im %}
+                            {% user_thumbnail board.andrey_ivanov "200x200" as im %}
                                 <a href="http://www.linkedin.com/in/yaivanov"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
-                            {% enduserpreview %}
+                            {% enduser_thumbnail %}
                             <div class="body text-center">
                                 <a class="name" href="http://www.linkedin.com/in/yaivanov">{{ board.andrey_ivanov.get_short_name }}</a>
                                 <a href="http://jetbrains.ru/">JetBrains</a>
@@ -22,9 +22,9 @@
                     </div>
                     <div class="col-xs-4">
                         <div class="text-center">
-                            {% userpreview board.alexander_kulikov "200x200" as im %}
+                            {% user_thumbnail board.alexander_kulikov "200x200" as im %}
                                 <a href="http://logic.pdmi.ras.ru/~kulikov/"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
-                            {% enduserpreview %}
+                            {% enduser_thumbnail %}
                             <div class="body text-center">
                                 <a class="name" href="http://logic.pdmi.ras.ru/~kulikov/">{{ board.alexander_kulikov.get_short_name }}</a>
                                    <a href="http://www.pdmi.ras.ru/pdmi/index.php">ПОМИ РАН</a>, <a href="http://compsciclub.ru/">CS клуб</a>
@@ -33,9 +33,9 @@
                     </div>
                     <div class="col-xs-4">
                         <div class="text-center">
-                            {% userpreview board.evgeniya_kulikova "200x200" as im %}
+                            {% user_thumbnail board.evgeniya_kulikova "200x200" as im %}
                                 <a href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"></a>
-                            {% enduserpreview %}
+                            {% enduser_thumbnail %}
                             <div class="body text-center">
                                 <a class="name" href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774">{{ board.evgeniya_kulikova.get_short_name }}</a>
                                    <a href="https://yandex.ru/company/">Яндекс</a>
@@ -50,9 +50,9 @@
             <ul class="curators-list">
               <li class="orgs-person">
                 <div class="orgs-preview">
-                    {% userpreview curators.katya_lebedeva "150x210" as im %}
+                    {% user_thumbnail curators.katya_lebedeva curators.katya_lebedeva.ThumbnailSize.BASE as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                    {% enduserpreview %}
+                    {% enduser_thumbnail %}
                 </div>
                 <div class="orgs-info">
                   <h4 class="media-heading">{{ curators.katya_lebedeva.get_short_name }}, <a href="https://yandex.ru/company/">Яндекс</a></h4>
@@ -61,9 +61,9 @@
               </li>
               <li class="orgs-person">
                 <div class="orgs-preview">
-                    {% userpreview curators.kristina_smolnikova "150x210" as im %}
+                    {% user_thumbnail curators.kristina_smolnikova curators.kristina_smolnikova.ThumbnailSize.BASE as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                    {% enduserpreview %}
+                    {% enduser_thumbnail %}
                 </div>
                 <div class="orgs-info">
                   <h4 class="media-heading">{{ curators.kristina_smolnikova.get_short_name }}, <a href="https://jetbrains.ru/">JetBrains</a></h4>
@@ -72,9 +72,9 @@
               </li>
               <li class="orgs-person">
                 <div class="orgs-preview">
-                    {% userpreview curators.katya_artamonova "150x210" as im %}
+                    {% user_thumbnail curators.katya_artamonova curators.katya_artamonova.ThumbnailSize.BASE as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                    {% enduserpreview %}
+                    {% enduser_thumbnail %}
                 </div>
                 <div class="orgs-info">
                   <h4 class="media-heading">{{ curators.katya_artamonova.get_short_name }}, <a href="https://jetbrains.ru/">JetBrains</a></h4>
@@ -83,9 +83,9 @@
               </li>
               <li class="orgs-person">
                 <div class="orgs-preview">
-                    {% userpreview curators.mojina_alina "150x210" as im %}
+                    {% user_thumbnail curators.mojina_alina curators.mojina_alina.ThumbnailSize.BASE as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                    {% enduserpreview %}
+                    {% enduser_thumbnail %}
                 </div>
                 <div class="orgs-info">
                   <h4 class="media-heading">{{ curators.mojina_alina.get_short_name }}, <a href="https://jetbrains.ru/">JetBrains</a></h4>
@@ -94,9 +94,9 @@
               </li>
               <li class="orgs-person">
                 <div class="orgs-preview">
-                    {% userpreview curators.komissarov_alexander "150x210" as im %}
+                    {% user_thumbnail curators.komissarov_alexander curators.komissarov_alexander.ThumbnailSize.BASE as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                    {% enduserpreview %}
+                    {% enduser_thumbnail %}
                 </div>
                 <div class="orgs-info">
                   <h4 class="media-heading">{{ curators.komissarov_alexander.get_short_name }}, <a href="https://yandex.ru/company/">Яндекс</a></h4>
@@ -110,9 +110,9 @@
                 <div class="col-xs-6">
                     <div class="orgs-person">
                         <div class="orgs-preview">
-                            {% userpreview tech.aleksey_belozerov "150x210" as im %}
+                            {% user_thumbnail tech.aleksey_belozerov tech.aleksey_belozerov.ThumbnailSize.BASE as im %}
                                 <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                            {% enduserpreview %}
+                            {% enduser_thumbnail %}
                         </div>
                         <div class="orgs-info">
                           <h4 class="media-heading">{{ tech.aleksey_belozerov.get_short_name }}</h4>
@@ -123,9 +123,9 @@
                 <div class="col-xs-6">
                     <div class="orgs-person">
                         <div class="orgs-preview">
-                            {% userpreview tech.sergey_zherevchuk "150x210" as im %}
+                            {% user_thumbnail tech.sergey_zherevchuk tech.sergey_zherevchuk.ThumbnailSize.BASE as im %}
                                 <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                            {% enduserpreview %}
+                            {% enduser_thumbnail %}
                         </div>
                         <div class="orgs-info">
                           <h4 class="media-heading">{{ tech.sergey_zherevchuk.get_short_name }}</h4>
