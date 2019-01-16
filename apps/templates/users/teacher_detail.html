@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load static %}
-{% load userpreview from custom_thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 {% load markdown from core_tags %}
 
 {% block content %}
@@ -53,11 +53,11 @@
 </div>
 <div class="col-xs-3 profile-sidebar">
     <div class="thumbnail text-center">
-        {% userpreview teacher "170x238" as im %}
+        {% user_thumbnail teacher teacher.ThumbnailSize.BASE as im %}
             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
         {% empty %}
             <img src="{% static "v1/img/center/brain.jpg" %}">
-        {% enduserpreview %}
+        {% enduser_thumbnail %}
     </div>
     {% if user.is_curator %}
         <a class="btn btn-default btn-block" href="{% url "user_detail" teacher.pk %}"><i class="fa fa-user-secret" aria-hidden="true"></i> Профиль </a>

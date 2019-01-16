@@ -2,7 +2,7 @@
 
 {% load i18n %}
 {% load static %}
-{% load thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 {% load markdown from core_tags %}
 
 {% block body_attrs %} data-init-section="lazy-img"{% endblock body_attrs %}
@@ -15,7 +15,7 @@
             <div class="teachers-list-item">{% spaceless %}
                 <a href="{% url 'teacher_detail' user.pk %}">
                     {% if user.photo %}
-                          {% thumbnail user.photo "220x308" crop="center top" cropbox=user.photo_thumbnail_cropbox as im %}
+                          {% user_thumbnail user user.ThumbnailSize.TEACHER_LIST as im %}
                             <img width="{{ im.width }}" height="{{ im.height }}"
                                     {% if forloop.counter < 12 %}
                                         src="{{ im.url }}"
@@ -24,7 +24,7 @@
                                         src="{% if user.gender == "M" %}{% static "v1/img/icons/man.png" %}{% else %}{% static "v1/img/icons/woman.png" %}{% endif %}"
                                         data-original="{{ im.url }}"
                                     {% endif %}>
-                          {% endthumbnail %}
+                          {% enduser_thumbnail %}
                     {% else %}
                         <img src="{% if user.gender == "M" %}{% static "v1/img/icons/man.png" %}{% else %}{% static "v1/img/icons/woman.png" %}{% endif %}" width="220" height="308" alt="">
                     {% endif %}

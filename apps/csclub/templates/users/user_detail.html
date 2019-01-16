@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 {% load core_tags %}
 {% load static %}
 {% load markdown from core_tags %}
@@ -27,10 +27,10 @@
     <div class="thumbnail-inner">
         <div class="thumbnail-img">
             {% if profile_user.photo %}
-                {% thumbnail profile_user.photo "170x238" crop="center" cropbox=profile_user.photo_thumbnail_cropbox as im %}
+                {% user_thumbnail profile_user profile_user.ThumbnailSize.BASE as im %}
                     <img src="{{ im.url }}" width="{{ im.width }}"
                          height="{{ im.height }}">
-                {% endthumbnail %}
+                {% enduser_thumbnail %}
             {% else %}
                 <img src="{% static "v1/img/center/profile_no_photo.png" %}">
             {% endif %}

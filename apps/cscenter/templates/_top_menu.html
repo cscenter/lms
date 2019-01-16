@@ -3,7 +3,7 @@
 {% load lookup startswith from core_tags %}
 {% load csc_menu from csc_menu_tags %}
 {% csc_menu "compscicenter" as menu %}
-{% load userpreview from custom_thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 
 <div class="header">
 <div class="menu lvl1">
@@ -27,11 +27,11 @@
             {% if user.is_authenticated %}
                 <div class="dropdown">
                   <a href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% userpreview user "60x60" use_stab=0 as im %}
+                    {% user_thumbnail user user.ThumbnailSize.SQUARE_SMALL use_stab=0 as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                     {% empty %}
                         <img src="{% if user.gender == "F" %}{% static "v1/img/csc_girl_head.svg" %}{% else %}{% static "v1/img/csc_boy_head.svg" %}{% endif %}" class="_empty">
-                    {% enduserpreview %}
+                    {% enduser_thumbnail %}
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu pull-right" aria-labelledby="user-menu">

@@ -5,7 +5,7 @@
 {% load static %}
 {% load render_bundle from webpack_loader %}
 {% load markdown from core_tags %}
-{% load userpreview from custom_thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 {% block title %}{{ profile_user.get_short_name }} - {% trans "Profile" %} {% trans "on site" %} Computer Science Center{% endblock title %}
 
 
@@ -40,9 +40,9 @@
             <div class="thumbnail text-center">
                 <div class="thumbnail-inner">
                     <div class="thumbnail-img">
-                        {% userpreview profile_user "170x238" as im %}
+                        {% user_thumbnail profile_user profile_user.ThumbnailSize.BASE as im %}
                             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% enduserpreview %}
+                        {% enduser_thumbnail %}
                     </div>
                     {% if profile_user.pk == user.pk or user.is_curator %}
                         <div class="photo-actions">

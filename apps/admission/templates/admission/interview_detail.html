@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load thumbnail %}
 {% load crispy_forms_tags %}
 {% load static %}
 {% load markdown from core_tags %}
 {% load floatdot from core_tags %}
 {% load render_bundle from webpack_loader %}
+{% load user_thumbnail from user_thumbnail %}
 
 {% block title %} Набор {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
 
@@ -106,9 +106,9 @@
                         <div class="media-left">
                             {% with user=comment.interviewer %}
                             {% if user.photo %}
-                                {% thumbnail user.photo "60x60" crop="center top" cropbox=user.photo_thumbnail_cropbox  as im %}
+                                {% user_thumbnail user user.ThumbnailSize.SQUARE_SMALL as im %}
                                     <img alt="{{ user.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                                {% endthumbnail %}
+                                {% enduser_thumbnail %}
                             {% else %}
                                 <div class="square" data-toggle="tooltip" data-placement="top" title="{{ user.get_full_name }}">{{ user.first_name|slice:":1" }}{{ user.last_name|slice:":1" }}</div>
                             {% endif %}

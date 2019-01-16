@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load static %}
-{% load userpreview from custom_thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 
 {% block body_attrs %} data-init-section="lazy-img"{% endblock body_attrs %}
 
@@ -14,9 +14,9 @@
             {% for student in students %}
                 <div class="student">
                     <a href="{{ student.get_absolute_url }}">
-                    {% userpreview student "150x150" as im %}
+                    {% user_thumbnail student student.ThumbnailSize.SQUARE as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                    {% enduserpreview %}
+                    {% enduser_thumbnail %}
                         <figcaption {% if student.status == "expelled" %}class="expelled"{% endif %}>{{ student.last_name }} {{ student.first_name }}</figcaption>
                     </a>
                 </div>

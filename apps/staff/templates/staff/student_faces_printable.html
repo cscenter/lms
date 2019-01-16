@@ -4,7 +4,7 @@
 {% load thumbnail %}
 {% load static %}
 {% load core_tags %}
-{% load userpreview from custom_thumbnail %}
+{% load user_thumbnail from user_thumbnail %}
 
 {% block body_attrs %} data-init-section="lazy-img"{% endblock body_attrs %}
 
@@ -14,9 +14,9 @@
         <page size="A4" class="student-faces-printable">
             {% for student in chunk %}
                 <div class="student">
-                    {% userpreview student "250x350" as im %}
+                    {% user_thumbnail student student.ThumbnailSize.BASE_PRINT as im %}
                         <img src="{{ im.url }}" width="150" height="210">
-                    {% enduserpreview %}
+                    {% enduser_thumbnail %}
                         <figcaption {% if student.status == "expelled" %}class="expelled"{% endif %}>{{ student.last_name }}<br>{{ student.first_name }}</figcaption>
                 </div>
             {% endfor %}

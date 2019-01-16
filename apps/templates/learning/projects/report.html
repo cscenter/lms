@@ -2,11 +2,11 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
 {% load humanize %}
-{% load thumbnail %}
 {% load core_tags %}
 {% load projects_tags %}
 {% load static %}
 {% load tz %}
+{% load user_thumbnail from user_thumbnail %}
 
 {% block hightlight_styles %}
 <link href="{% static "v1/css/vendor/highlight-styles/github.css" %}" rel="stylesheet">
@@ -217,9 +217,9 @@
                 <li>
                     <a href="{{ student.get_absolute_url }}">
                     {% if student.photo %}
-                        {% thumbnail student.photo "60x60" crop="center top" cropbox=student.photo_thumbnail_cropbox as im %}
+                        {% user_thumbnail student student.ThumbnailSize.SQUARE_SMALL as im %}
                             <img alt="{{ student.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% endthumbnail %}
+                        {% enduser_thumbnail %}
                     {% else %}
                         <div class="square-photo-stub" data-toggle="tooltip" data-placement="top" title="{{ student.get_full_name }}">{{ student.first_name|slice:":1" }}{{ student.last_name|slice:":1" }}</div>
                     {% endif %}
@@ -232,9 +232,9 @@
             {% for reviewer in reviewers %}
                 <li>
                     {% if reviewer.photo %}
-                        {% thumbnail reviewer.photo "60x60" crop="center top" cropbox=reviewer.photo_thumbnail_cropbox as im %}
+                        {% user_thumbnail reviewer reviewer.ThumbnailSize.SQUARE_SMALL use_stab=False as im %}
                             <img alt="{{ reviewer.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% endthumbnail %}
+                        {% enduser_thumbnail %}
                     {% else %}
                         <div class="square-photo-stub" data-toggle="tooltip" data-placement="top" title="{{ reviewer.get_full_name }}">{{ reviewer.first_name|slice:":1" }}{{ reviewer.last_name|slice:":1" }}</div>
                     {% endif %}
