@@ -62,7 +62,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         next_month_qstr = (
             "?year={0}&month={1}"
             .format(resp.context['calendar'].next_month.year,
-                    str(resp.context['calendar'].next_month.month).zfill(2)))
+                    str(resp.context['calendar'].next_month.month)))
         next_month_url = reverse(self.url_name) + next_month_qstr
         self.assertContains(resp, next_month_qstr)
         classes = flatten_calendar_month_events(
@@ -112,7 +112,7 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         next_month_qstr = (
             "?year={0}&month={1}"
             .format(resp.context['calendar'].next_month.year,
-                    str(resp.context['calendar'].next_month.month).zfill(2)))
+                    str(resp.context['calendar'].next_month.month)))
         next_month_url = reverse(self.url_name) + next_month_qstr
         self.assertContains(resp, next_month_qstr)
         classes = flatten_calendar_month_events(

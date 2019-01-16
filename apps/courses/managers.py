@@ -73,6 +73,9 @@ class CourseClassQuerySet(query.QuerySet):
             q = q.filter(others)
         return q
 
+    def for_timetable(self, user):
+        return self.for_calendar(user).select_related('venue')
+
     def in_city(self, city_code):
         return self.filter(Q(course__city_id=city_code,
                              course__is_correspondence=False) |

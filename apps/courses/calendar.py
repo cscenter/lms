@@ -15,7 +15,8 @@ from courses.settings import MONDAY_WEEKDAY
 from courses.utils import grouper
 
 
-__all__ = ('EventsCalendar', 'MonthEventsCalendar', 'CalendarQueryParams')
+__all__ = ('EventsCalendar', 'CalendarEvent', 'MonthEventsCalendar',
+           'CalendarQueryParams')
 
 
 @attr.s
@@ -162,6 +163,18 @@ class MonthEventsCalendar(EventsCalendar):
         Each day of the week stores attached events.
         """
         return super().by_week(self.year, self.month)
+
+    def days(self) -> List[CalendarDay]:
+        """Filters out the days which contains any events."""
+        by_days = []
+        cal = Calendar(firstweekday=MONDAY_WEEKDAY)
+        dates = cal.itermonthdates(self.year, self.month)
+        for d in dates:
+            events = self._date_to_events[d]
+            if events:
+                day = CalendarDay(date=d, events=events)
+                by_days.append(day)
+        return by_days
 
 
 class CalendarQueryParams(serializers.Serializer):

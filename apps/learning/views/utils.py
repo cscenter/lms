@@ -1,11 +1,12 @@
 import logging
 
+from core.timezone import CityCode
 from users.utils import get_user_city_code
 
 logger = logging.getLogger(__name__)
 
 
-def get_student_city_code(request) -> str:
+def get_student_city_code(request) -> CityCode:
     """
     Returns city code for authenticated student.
 
@@ -21,7 +22,7 @@ def get_student_city_code(request) -> str:
     return city_code
 
 
-def get_teacher_city_code(request) -> str:
+def get_teacher_city_code(request) -> CityCode:
     """
     Returns city code for authenticated teacher.
 

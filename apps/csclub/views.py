@@ -1,4 +1,5 @@
 import datetime
+from typing import Union
 
 import django_rq
 from django.contrib.auth import get_user_model
@@ -16,6 +17,7 @@ from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
 
 from core.settings.base import TIME_ZONES
+from core.timezone import Timezone, CityCode
 from courses.calendar import CalendarEvent
 from csclub import tasks
 from learning.gallery.models import Image
@@ -54,7 +56,7 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
                    .open_only())
         return (CalendarEvent(e) for e in classes)
 
-    def get_user_city(self):
+    def get_default_timezone(self) -> Union[Timezone, CityCode]:
         return self.request.city_code
 
 

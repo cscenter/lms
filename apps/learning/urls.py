@@ -1,10 +1,11 @@
 from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 
+from learning.studying.views import TimetableView
+from learning.teaching.views import TimetableView as TeacherTimetable
 from learning.views import CalendarTeacherFullView
 from learning.views.views import CalendarStudentFullView
 from .views import \
-    TimetableTeacherView, TimetableStudentView, \
     CalendarTeacherView, CalendarStudentView, \
     CourseVideoListView, \
     CourseTeacherListView, \
@@ -15,7 +16,8 @@ from .views import \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
     NonCourseEventDetailView,  \
-    AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
+    AssignmentAttachmentDownloadView, AssignmentCommentUpdateView, \
+    TimetableStudentView
 from courses.views import CourseDetailView, CourseEditView, \
     CourseNewsCreateView, CourseNewsUpdateView, CourseNewsDeleteView, \
     MetaCourseDetailView, MetaCourseUpdateView, CourseClassDetailView, \
@@ -114,7 +116,7 @@ teaching_section_patterns = url(
             RedirectView.as_view(pattern_name='assignment_list_teacher',
                                  permanent=True),
             name='teaching_base'),
-        url(r'^timetable/$', TimetableTeacherView.as_view(),
+        url(r'^timetable/$', TeacherTimetable.as_view(),
             name='timetable_teacher'),
         url(r'^calendar/$', CalendarTeacherView.as_view(),
             name='calendar_teacher'),
@@ -157,6 +159,8 @@ student_section_patterns = url(
             name='assignment_attachments_download'),
         url(r'^timetable/$', TimetableStudentView.as_view(),
             name='timetable_student'),
+        url(r'^timetable_new/$', TimetableView.as_view(),
+            name='timetable_student_new'),
         url(r'^calendar/$', CalendarStudentView.as_view(),
             name='calendar_student'),
         url(r'^full-calendar/$', CalendarStudentFullView.as_view(),
