@@ -4,7 +4,7 @@ import os
 import posixpath
 from collections import OrderedDict
 from itertools import chain
-from typing import Optional
+from typing import Optional, Union
 from urllib.parse import urlencode
 
 from dateutil.relativedelta import relativedelta
@@ -47,7 +47,7 @@ from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT
 from core.settings.base import FOUNDATION_YEAR
 from courses.settings import SemesterTypes
-from core.timezone import now_local
+from core.timezone import now_local, Timezone, CityCode
 from courses.utils import get_current_term_pair, get_term_index, \
     get_terms_for_calendar_month, grouper, get_co_from_query_params
 from users.mixins import TeacherOnlyMixin, StudentOnlyMixin
@@ -64,7 +64,7 @@ __all__ = [
     # mixins
     'AssignmentProgressBaseView',
     # views
-    'TimetableTeacherView', 'TimetableStudentView', 'CalendarStudentFullView',
+    'CalendarStudentFullView', 'TimetableStudentView',
     'CalendarStudentView', 'CalendarTeacherFullView', 'CalendarTeacherView',
     'CoursesListView', 'CourseTeacherListView', 'CourseStudentListView',
     'CourseVideoListView', 'VenueListView', 'VenueDetailView', 'AssignmentTeacherListView',
@@ -73,49 +73,6 @@ __all__ = [
     'AssignmentCommentUpdateView', 'AssignmentAttachmentDeleteView',
     'NonCourseEventDetailView', 'AssignmentAttachmentDownloadView',
 ]
-
-
-class TimetableTeacherView(TeacherOnlyMixin, generic.TemplateView):
-    user_type = 'teacher'
-    template_name = "learning/timetable_teacher.html"
-
-    def get(self, request, *args, **kwargs):
-        query_params = CalendarQueryParams(data=request.GET)
-        if not query_params.is_valid():
-            return HttpResponseRedirect(request.path)
-        # FIXME: get teacher city code????
-        city_code = request.city_code
-        today = now_local(city_code)
-        year = query_params.validated_data.get('year', today.year)
-        month = query_params.validated_data.get('month', today.month)
-        context = self.get_context_data(year, month, **kwargs)
-        return self.render_to_response(context)
-
-    def get_queryset(self, year, month):
-        return (CourseClass.objects
-                .filter(date__month=month,
-                        date__year=year,
-                        course__teachers=self.request.user)
-                .order_by('date', 'starts_at')
-                .select_related('venue',
-                                'course',
-                                'course__meta_course',
-                                'course__semester'))
-
-    def get_context_data(self, year, month, **kwargs):
-        chosen_month_date = datetime.date(year=year, month=month, day=1)
-        prev_month_date = chosen_month_date + relativedelta(months=-1)
-        next_month_date = chosen_month_date + relativedelta(months=+1)
-        context = {
-            'object_list': self.get_queryset(year, month),
-            'month': month,
-            'year': year,
-            'current_date': chosen_month_date,
-            'prev_date': prev_month_date,
-            'next_date': next_month_date,
-            'user_type': self.user_type
-        }
-        return context
 
 
 class TimetableStudentView(StudentOnlyMixin, generic.TemplateView):
@@ -178,11 +135,11 @@ class CalendarStudentFullView(StudentOnlyMixin, MonthEventsCalendarView):
     Shows all non-course events and classes in the city of
     the authenticated student.
     """
-    def get_user_city(self):
+    def get_default_timezone(self):
         return get_student_city_code(self.request)
 
     def get_events(self, year, month, **kwargs):
-        student_city_code = kwargs.get('user_city_code')
+        student_city_code = self.get_default_timezone()
         return chain(
             (CalendarEvent(e) for e in
                 self._get_classes(year, month, student_city_code)),
@@ -191,17 +148,17 @@ class CalendarStudentFullView(StudentOnlyMixin, MonthEventsCalendarView):
         )
 
     @staticmethod
-    def _get_non_course_events(year, month, student_city_code):
+    def _get_non_course_events(year, month, city_code):
         return (NonCourseEvent.objects
                 .for_calendar()
-                .for_city(student_city_code)
+                .for_city(city_code)
                 .in_month(year, month))
 
-    def _get_classes(self, year, month, student_city_code):
+    def _get_classes(self, year, month, city_code):
         return (CourseClass.objects
                 .for_calendar(self.request.user)
                 .in_month(year, month)
-                .in_city(student_city_code))
+                .in_city(city_code))
 
 
 class CalendarStudentView(CalendarStudentFullView):
@@ -212,8 +169,8 @@ class CalendarStudentView(CalendarStudentFullView):
     calendar_type = "student"
     template_name = "learning/calendar.html"
 
-    def _get_classes(self, year, month, student_city_code):
-        qs = super()._get_classes(year, month, student_city_code)
+    def _get_classes(self, year, month, city_code):
+        qs = super()._get_classes(year, month, city_code)
         return qs.for_student(self.request.user)
 
 
@@ -223,12 +180,13 @@ class CalendarTeacherFullView(TeacherOnlyMixin, MonthEventsCalendarView):
     authorized teacher has taught.
     """
 
-    def get_user_city(self):
+    def get_default_timezone(self) -> Union[Timezone, CityCode]:
         return get_teacher_city_code(self.request)
 
     def get_teacher_cities(self, year, month):
+        default_city = get_teacher_city_code(self.request)
         if is_club_site():
-            return [self.get_user_city()]
+            return [default_city]
         # Collect all the cities where authorized teacher taught.
         terms_in_month = get_terms_for_calendar_month(year, month)
         term_indexes = [get_term_index(*term) for term in terms_in_month]
@@ -239,7 +197,7 @@ class CalendarTeacherFullView(TeacherOnlyMixin, MonthEventsCalendarView):
                       .order_by('city_id')
                       .distinct())
         if not cities:
-            cities = [self.get_user_city()]
+            cities = [default_city]
         return cities
 
     def get_events(self, year, month, **kwargs):
