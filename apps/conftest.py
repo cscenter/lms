@@ -13,30 +13,22 @@ from core.models import City
 from users.constants import AcademicRoles
 from users.factories import UserFactory
 
-CENTER_SITE_ID = settings.CENTER_SITE_ID
-CLUB_SITE_ID = settings.CLUB_SITE_ID
 
-
-class CustomDjangoTestClient(Client):
+class TestClient(Client):
     def login(self, user_model):
         """
         User factory creates model with attached raw password what allows to
         authenticate user later with default backend.
         """
-        return super(CustomDjangoTestClient, self).login(
-            username=user_model.username, password=user_model.raw_password)
+        return super().login(username=user_model.username,
+                             password=user_model.raw_password)
 
 
 @pytest.fixture()
 def client():
     """Customize login method for Django test client."""
     skip_if_no_django()
-    return CustomDjangoTestClient()
-
-
-@pytest.fixture(scope="session")
-def user_factory():
-    return UserFactory
+    return TestClient()
 
 
 @pytest.fixture(scope="session")
@@ -53,14 +45,19 @@ def assert_redirect():
 
 
 @pytest.fixture(scope="function")
-def curator(user_factory):
-    return user_factory.create(is_superuser=True, is_staff=True)
+def curator():
+    return UserFactory.create(is_superuser=True, is_staff=True)
 
 
 @pytest.fixture(scope="session", autouse=True)
-def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
-                                                       django_db_blocker):
-    """Ensure that data missed in django's migrations still exists"""
+def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
+    """
+    Populates test database with missing data required for tests.
+
+    To simplify db management migrations could be recreated from the scratch
+    without already applied data migrations. Restore these data in one place
+    since some tests rely on it.
+    """
     with django_db_blocker.unblock():
         # Create user groups
         for group_id, group_name in AcademicRoles.values.items():
@@ -73,14 +70,14 @@ def replace_django_data_migrations_with_pytest_fixture(django_db_setup,
 
         # Create sites
         Site.objects.update_or_create(
-            id=CENTER_SITE_ID,
+            id=settings.CENTER_SITE_ID,
             defaults={
                 "domain": "compscicenter.ru",
                 "name": "compscicenter.ru"
             }
         )
         Site.objects.update_or_create(
-            id=CLUB_SITE_ID,
+            id=settings.CLUB_SITE_ID,
             defaults={
                 "domain": "compsciclub.ru",
                 "name": "compsciclub.ru"
