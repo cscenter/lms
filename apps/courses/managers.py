@@ -58,8 +58,8 @@ class CourseClassQuerySet(query.QuerySet):
                              'course__meta_course',
                              'course__semester')
              .order_by('date', 'starts_at'))
+        # FIXME: Looks like this logic should be in .for_student method???
         # Hide summer classes on compsciclub.ru if user not enrolled in
-        # FIXME: Performance issue.
         if is_club_site():
             # XXX: On join enrollment table we get a lot of duplicates.
             # Clean them with right `.order` and `.distinct()`!

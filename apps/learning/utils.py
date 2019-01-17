@@ -36,21 +36,10 @@ def split_on_condition(iterable, predicate):
     return true_lst, false_lst
 
 
-# Following two functions are taken from
-# http://stackoverflow.com/a/1700069/275084
-def iso_year_start(iso_year) -> datetime.date:
+def iso_to_gregorian(iso_year, iso_week, iso_week_day) -> datetime.date:
     """
-    The gregorian calendar date of the first day of the given ISO year
+    Gregorian calendar date for the given ISO year, week and
+    day of the week (1-based)
     """
-    fourth_jan = datetime.date(iso_year, 1, 4)
-    delta = datetime.timedelta(fourth_jan.isoweekday() - 1)
-    return fourth_jan - delta
-
-
-def iso_to_gregorian(iso_year, iso_week, iso_day) -> datetime.date:
-    """
-    Gregorian calendar date for the given ISO year, week and day
-    """
-    year_start = iso_year_start(iso_year)
-    return year_start + datetime.timedelta(days=iso_day - 1,
-                                           weeks=iso_week - 1)
+    date_str = f'{iso_year} {iso_week} {iso_week_day}'
+    return datetime.datetime.strptime(date_str, '%G %V %u').date()

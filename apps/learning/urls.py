@@ -6,7 +6,7 @@ from learning.teaching.views import TimetableView as TeacherTimetable
 from learning.views import CalendarTeacherFullView
 from learning.views.views import CalendarStudentFullView
 from .views import \
-    CalendarTeacherView, CalendarStudentView, \
+    CalendarTeacherView, CalendarStudentPersonalView, \
     CourseVideoListView, \
     CourseTeacherListView, \
     CourseStudentListView, \
@@ -16,8 +16,7 @@ from .views import \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
     NonCourseEventDetailView,  \
-    AssignmentAttachmentDownloadView, AssignmentCommentUpdateView, \
-    TimetableStudentView
+    AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
 from courses.views import CourseDetailView, CourseEditView, \
     CourseNewsCreateView, CourseNewsUpdateView, CourseNewsDeleteView, \
     MetaCourseDetailView, MetaCourseUpdateView, CourseClassDetailView, \
@@ -157,11 +156,9 @@ student_section_patterns = url(
         url(r'^attachments/(?P<sid>[-\w]+)/(?P<file_name>.+)$',
             AssignmentAttachmentDownloadView.as_view(),
             name='assignment_attachments_download'),
-        url(r'^timetable/$', TimetableStudentView.as_view(),
+        url(r'^timetable/$', TimetableView.as_view(),
             name='timetable_student'),
-        url(r'^timetable_new/$', TimetableView.as_view(),
-            name='timetable_student_new'),
-        url(r'^calendar/$', CalendarStudentView.as_view(),
+        url(r'^calendar/$', CalendarStudentPersonalView.as_view(),
             name='calendar_student'),
         url(r'^full-calendar/$', CalendarStudentFullView.as_view(),
             name='calendar_full_student'),

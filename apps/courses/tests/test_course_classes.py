@@ -21,16 +21,6 @@ from courses.models import CourseClass
 from users.factories import TeacherCenterFactory
 
 
-@pytest.fixture(scope="function")
-def assert_login_redirect(client, settings, assert_redirect):
-    def wrapper(url, form=None, **kwargs):
-        method_name = kwargs.pop("method", "get")
-        method = getattr(client, method_name)
-        assert_redirect(method(url, form, **kwargs),
-                        "{}?next={}".format(settings.LOGIN_URL, url))
-    return wrapper
-
-
 @pytest.mark.django_db
 def test_course_class_detail_is_actual_teacher(client):
     teacher = TeacherCenterFactory()

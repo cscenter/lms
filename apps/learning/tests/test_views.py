@@ -3,12 +3,8 @@ import logging
 
 import pytest
 import pytz
-from dateutil.relativedelta import relativedelta
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from django.test.utils import override_settings
-from django.utils.encoding import smart_bytes
-from django.utils.timezone import now
 from testfixtures import LogCapture
 
 from core.timezone import now_local
@@ -17,7 +13,6 @@ from courses.models import Course
 from courses.utils import get_current_term_pair
 from learning.enrollment import course_failed_by_student
 from learning.factories import *
-from courses.forms import CourseClassForm
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.utils import check_url_security
 from users.factories import StudentFactory, StudentClubFactory, \
@@ -58,66 +53,6 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
             self.client.logout()
         self.doLogin(UserFactory.create(is_superuser=True, is_staff=True, city_id='spb'))
         self.assertStatusCode(200, self.url_name)
-
-
-class TimetableTeacherTests(GroupSecurityCheckMixin,
-                            MyUtilitiesMixin, TestCase):
-    url_name = 'timetable_teacher'
-    groups_allowed = [AcademicRoles.TEACHER_CENTER]
-
-    @pytest.mark.skip("Buggy in the end of the month. WTF!")
-    def test_teacher_timetable(self):
-        teacher = TeacherCenterFactory()
-        self.doLogin(teacher)
-        self.assertEqual(0, len(self.client.get(reverse('timetable_teacher'))
-                                .context['object_list']))
-        today_date = (datetime.datetime.now().replace(tzinfo=timezone.utc))
-        CourseClassFactory.create_batch(3, course__teachers=[teacher],
-                                        date=today_date)
-        resp = self.client.get(reverse('timetable_teacher'))
-        self.assertEqual(3, len(resp.context['object_list']))
-        next_month_qstr = ("?year={0}&month={1}"
-                           .format(resp.context['next_date'].year,
-                                   resp.context['next_date'].month))
-        next_month_url = reverse('timetable_teacher') + next_month_qstr
-        self.assertContains(resp, next_month_qstr)
-        self.assertEqual(0, len(self.client.get(next_month_url)
-                                .context['object_list']))
-        next_month_date = today_date + relativedelta(months=1)
-        CourseClassFactory.create_batch(2, course__teachers=[teacher],
-                                        date=next_month_date)
-        self.assertEqual(2, len(self.client.get(next_month_url)
-                                .context['object_list']))
-
-
-@override_settings(TIME_ZONE='Etc/UTC')
-class TimetableStudentTests(GroupSecurityCheckMixin,
-                            MyUtilitiesMixin, TestCase):
-    url_name = 'timetable_student'
-    groups_allowed = [AcademicRoles.STUDENT_CENTER]
-
-    def test_student_timetable(self):
-        student = StudentCenterFactory()
-        self.doLogin(student)
-        co = CourseFactory.create()
-        e = EnrollmentFactory.create(course=co, student=student)
-        self.assertEqual(0, len(self.client.get(reverse('timetable_student'))
-                                .context['object_list']))
-        today_date = (datetime.datetime.now().replace(tzinfo=timezone.utc))
-        CourseClassFactory.create_batch(3, course=co, date=today_date)
-        resp = self.client.get(reverse('timetable_student'))
-        self.assertEqual(3, len(resp.context['object_list']))
-        next_week_qstr = ("?year={0}&week={1}"
-                          .format(resp.context['next_year'],
-                                  resp.context['next_week']))
-        next_week_url = reverse('timetable_student') + next_week_qstr
-        self.assertContains(resp, next_week_qstr)
-        self.assertEqual(0, len(self.client.get(next_week_url)
-                                .context['object_list']))
-        next_week_date = today_date + relativedelta(weeks=1)
-        CourseClassFactory.create_batch(2, course=co, date=next_week_date)
-        self.assertEqual(2, len(self.client.get(next_week_url)
-                                .context['object_list']))
 
 
 @pytest.mark.django_db
