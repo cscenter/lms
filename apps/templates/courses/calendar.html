@@ -39,16 +39,16 @@
           <th>{% trans "Sunday" %}</th>
         </tr>
         {% for week in calendar.weeks %}
-        <tr id="week_{{week.index}}">
+        <tr id="week_{{week.iso_number}}">
           {% for day in week.days %}
           <td class="{% if day.date.month == calendar.month %}in-semester{% else %}not-in-semester{% endif %}{% if day.date == today %} today{% endif %}">
             {% if forloop.first %}
                 <div class="week-num-container">
                   <div class="week-num">
                     {% if calendar_type != 'public_full' %}
-                      <a href="{% if calendar_type == 'teacher' %}{% url 'timetable_teacher' %}{% else %}{% url 'timetable_student' %}{% endif %}?year={{ calendar.year }}&week={{ week.index }}">{{ week.index }}</a>
+                      <a href="{% if calendar_type == 'teacher' %}{% url 'timetable_teacher' %}{% else %}{% url 'timetable_student' %}{% endif %}?year={{ calendar.year }}&week={{ week.iso_number }}">{{ week.iso_number }}</a>
                     {% else %}
-                      {{ week.index }}
+                      {{ week.iso_number }}
                     {% endif %}
                   </div>
                 </div>

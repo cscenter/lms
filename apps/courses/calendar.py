@@ -1,34 +1,36 @@
 import datetime
 from calendar import Calendar
 from collections import defaultdict
-from typing import List, Iterable
+from typing import List, Iterable, NewType
 
 import attr
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.formats import date_format, time_format
+from isoweek import Week
 from rest_framework import serializers, fields
 
 from core.settings.base import FOUNDATION_YEAR
 from courses.settings import MONDAY_WEEKDAY
 from courses.utils import grouper
-
+from dateutil.rrule import rrule, DAILY
+from learning.utils import iso_to_gregorian
 
 __all__ = ('EventsCalendar', 'CalendarEvent', 'MonthEventsCalendar',
-           'CalendarQueryParams')
-
-
-@attr.s
-class CalendarWeek:
-    index: int = attr.ib()  # 1-based
-    days: list = attr.ib()
+           'WeekEventsCalendar', 'CalendarQueryParams')
 
 
 @attr.s
 class CalendarDay:
     date: datetime.date = attr.ib()
     events = attr.ib(factory=list)
+
+
+@attr.s
+class CalendarWeek:
+    iso_number: int = attr.ib()  # ISO 8601
+    days: List[CalendarDay] = attr.ib()
 
 
 @attr.s
@@ -118,21 +120,36 @@ class EventsCalendar:
 
     def by_week(self, year, month) -> List[CalendarWeek]:
         """
-        Return a matrix representing a month's calendar.
+        Returns a matrix representing a month's calendar.
         Each row represents a week; week entries are tuple
         (week number, [CalendarDay])
         """
         by_week = []
         cal = Calendar(firstweekday=MONDAY_WEEKDAY)
         dates = cal.itermonthdates(year, month)
-        for week in grouper(dates, 7):
-            week_number = week[0].isocalendar()[1]
+        for full_week in grouper(dates, 7):
+            iso_week_number = full_week[0].isocalendar()[1]
             week_days = []
-            for day in week:
+            for day in full_week:
                 data = CalendarDay(date=day, events=self._date_to_events[day])
                 week_days.append(data)
-            by_week.append(CalendarWeek(index=week_number, days=week_days))
+            by_week.append(CalendarWeek(iso_number=iso_week_number,
+                                        days=week_days))
         return by_week
+
+    def by_day(self, start: datetime.date,
+               end: datetime.date) -> List[CalendarDay]:
+        """
+        Filters out the days in a range [start, end] which contains any event.
+        """
+        by_days = []
+        for dt in rrule(DAILY, dtstart=start, until=end):
+            d = dt.date()
+            events = self._date_to_events[d]
+            if events:
+                day = CalendarDay(date=d, events=events)
+                by_days.append(day)
+        return by_days
 
 
 class MonthEventsCalendar(EventsCalendar):
@@ -165,22 +182,62 @@ class MonthEventsCalendar(EventsCalendar):
         return super().by_week(self.year, self.month)
 
     def days(self) -> List[CalendarDay]:
-        """Filters out the days which contains any events."""
-        by_days = []
+        """Returns attached events in the month grouped by day"""
+        # FIXME: contains days from all full weeks in the month
+        # FIXME: сейчас используется на странице препода (там list view), кажется, в таком случае показывать предыдущие даты не совсем уместно
         cal = Calendar(firstweekday=MONDAY_WEEKDAY)
         dates = cal.itermonthdates(self.year, self.month)
-        for d in dates:
-            events = self._date_to_events[d]
-            if events:
-                day = CalendarDay(date=d, events=events)
-                by_days.append(day)
-        return by_days
+        first = last = next(dates)
+        for last in dates:
+            pass
+        return self.by_day(first, last)
+
+
+ISOWeekNumber = NewType('ISOWeekNumber', int)
+
+
+class WeekEventsCalendar(EventsCalendar):
+    def __init__(self, year: int, week_number: ISOWeekNumber,
+                 events: Iterable[CalendarEvent]):
+        super().__init__()
+        w = Week(year, week_number)
+        self._add_events((e for e in events if
+                          w.monday() <= e.date <= w.sunday()))
+        self.week = w
+
+    @property
+    def week_label(self):
+        monday = self.week.monday()
+        sunday = self.week.sunday()
+        if monday.month == sunday.month:
+            start_format = "d"
+            end_format = "d E Y"
+        else:
+            start_format = "d b"
+            end_format = "d b Y"
+        start = date_format(monday, start_format)
+        end = date_format(sunday, end_format)
+        return f"{start}–{end}"
+
+    @property
+    def prev_week(self) -> Week:
+        """Returns ISO 8601 compatible week object"""
+        return self.week - 1
+
+    @property
+    def next_week(self) -> Week:
+        """Returns ISO 8601 compatible week object"""
+        return self.week + 1
+
+    def days(self) -> List[CalendarDay]:
+        return self.by_day(self.week.monday(), self.week.sunday())
 
 
 class CalendarQueryParams(serializers.Serializer):
     year = fields.IntegerField(required=False, min_value=FOUNDATION_YEAR)
     month = fields.IntegerField(required=False, min_value=1, max_value=12)
-    week = fields.IntegerField(required=False, min_value=1)
+    # ISO week-numbering year has 52 or 53 full weeks
+    week = fields.IntegerField(required=False, min_value=1, max_value=53)
 
     def validate_year(self, value):
         today = timezone.now()

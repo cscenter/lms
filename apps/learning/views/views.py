@@ -7,7 +7,6 @@ from itertools import chain
 from typing import Optional, Union
 from urllib.parse import urlencode
 
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
@@ -30,30 +29,29 @@ from vanilla import CreateView, UpdateView, DeleteView, ListView, TemplateView
 import courses.utils
 from core import comment_persistence
 from core.exceptions import Redirect
+from core.settings.base import FOUNDATION_YEAR
+from core.timezone import Timezone, CityCode
 from core.utils import hashids, render_markdown, is_club_site
 from core.views import ProtectedFormMixin, LoginRequiredMixin
-from learning import utils
-from courses.calendar import CalendarQueryParams, CalendarEvent
+from courses.calendar import CalendarEvent
+from courses.forms import AssignmentForm
+from courses.models import Course, Semester, Venue, CourseClass, \
+    Assignment, AssignmentAttachment
+from courses.settings import SemesterTypes
+from courses.utils import get_current_term_pair, get_term_index, \
+    get_terms_for_calendar_month, grouper, get_co_from_query_params
+from courses.views.calendar import MonthEventsCalendarView
 from learning.forms import AssignmentCommentForm, AssignmentScoreForm, \
     AssignmentModalCommentForm
-from courses.forms import AssignmentForm
 from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
     AssignmentNotification, \
     NonCourseEvent
-from courses.models import Course, Semester, Venue, CourseClass, \
-    Assignment, AssignmentAttachment
 from learning.permissions import course_access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT
-from core.settings.base import FOUNDATION_YEAR
-from courses.settings import SemesterTypes
-from core.timezone import now_local, Timezone, CityCode
-from courses.utils import get_current_term_pair, get_term_index, \
-    get_terms_for_calendar_month, grouper, get_co_from_query_params
-from users.mixins import TeacherOnlyMixin, StudentOnlyMixin
-from courses.views.calendar import MonthEventsCalendarView
 from learning.views.utils import get_teacher_city_code, \
     get_student_city_code
+from users.mixins import TeacherOnlyMixin, StudentOnlyMixin
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +62,8 @@ __all__ = [
     # mixins
     'AssignmentProgressBaseView',
     # views
-    'CalendarStudentFullView', 'TimetableStudentView',
-    'CalendarStudentView', 'CalendarTeacherFullView', 'CalendarTeacherView',
+    'CalendarStudentFullView', 'CalendarStudentPersonalView',
+    'CalendarTeacherFullView', 'CalendarTeacherView',
     'CoursesListView', 'CourseTeacherListView', 'CourseStudentListView',
     'CourseVideoListView', 'VenueListView', 'VenueDetailView', 'AssignmentTeacherListView',
     'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
@@ -73,61 +71,6 @@ __all__ = [
     'AssignmentCommentUpdateView', 'AssignmentAttachmentDeleteView',
     'NonCourseEventDetailView', 'AssignmentAttachmentDownloadView',
 ]
-
-
-class TimetableStudentView(StudentOnlyMixin, generic.TemplateView):
-    model = CourseClass
-    user_type = 'student'
-    template_name = "learning/timetable_student.html"
-
-    def get(self, request, *args, **kwargs):
-        query_params = CalendarQueryParams(data=request.GET)
-        if not query_params.is_valid():
-            return HttpResponseRedirect(request.path)
-        # FIXME: get teacher city code????
-        city_code = request.city_code
-        today = now_local(city_code)
-        # This returns current week number. Beware: the week's number
-        # is as of ISO8601, so 29th of December can be reported as
-        # 1st week of the next year.
-        today_year, today_week, _ = today.isocalendar()
-        year = query_params.validated_data.get('year', today_year)
-        week = query_params.validated_data.get('week', today_week)
-        context = self.get_context_data(year, week, **kwargs)
-        return self.render_to_response(context)
-
-    def get_queryset(self, start, end):
-        return (CourseClass.objects
-                .filter(date__range=[start, end],
-                        course__enrollment__student_id=self.request.user.pk,
-                        course__enrollment__is_deleted=False)
-                .order_by('date', 'starts_at')
-                .select_related('venue',
-                                'course',
-                                'course__meta_course',
-                                'course__semester'))
-
-    def get_context_data(self, year, week, **kwargs):
-        start = utils.iso_to_gregorian(year, week, 1)
-        end = utils.iso_to_gregorian(year, week, 7)
-        next_year, next_week, _ = (start +
-                                   datetime.timedelta(weeks=1)).isocalendar()
-        prev_year, prev_week, _ = (start +
-                                   datetime.timedelta(weeks=-1)).isocalendar()
-        context = {
-            'object_list': self.get_queryset(start, end),
-            'user_type': self.user_type,
-            'week': week,
-            'week_start': start,
-            'week_end': end,
-            'month': start.month,
-            'year': year,
-            'prev_year': prev_year,
-            'prev_week': prev_week,
-            'next_year': next_year,
-            'next_week': next_week,
-        }
-        return context
 
 
 class CalendarStudentFullView(StudentOnlyMixin, MonthEventsCalendarView):
@@ -161,7 +104,7 @@ class CalendarStudentFullView(StudentOnlyMixin, MonthEventsCalendarView):
                 .in_city(city_code))
 
 
-class CalendarStudentView(CalendarStudentFullView):
+class CalendarStudentPersonalView(CalendarStudentFullView):
     """
     Shows non-course events filtered by student city and classes for courses
     on which authenticated student enrolled.

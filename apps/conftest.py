@@ -45,6 +45,16 @@ def assert_redirect():
 
 
 @pytest.fixture(scope="function")
+def assert_login_redirect(client, settings, assert_redirect):
+    def wrapper(url, form=None, **kwargs):
+        method_name = kwargs.pop("method", "get")
+        client_method = getattr(client, method_name)
+        assert_redirect(client_method(url, form, **kwargs),
+                        "{}?next={}".format(settings.LOGIN_URL, url))
+    return wrapper
+
+
+@pytest.fixture(scope="function")
 def curator():
     return UserFactory.create(is_superuser=True, is_staff=True)
 
