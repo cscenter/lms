@@ -30,7 +30,7 @@
     - log_to_file
 
 - name: Create users and groups
-  include_tasks: users.yml
+  import_tasks: users.yml
   tags:
     - users
 
@@ -95,12 +95,12 @@
   when: nginx_status.stat.exists
 
 - name: Install app dependencies
-  include_tasks: venv.yml
+  import_tasks: venv.yml
   notify: restart_uwsgi
   tags:
     - venv
 
-- include_tasks: systemd.yml
+- import_tasks: systemd.yml
   when: rq_workers|length > 0
 
 - name: Copy uwsgi config
@@ -141,7 +141,7 @@
     mode: 0775
 
 - name: Configure db
-  include_tasks: db.yml
+  import_tasks: db.yml
   tags:
     - db
 
@@ -156,7 +156,7 @@
     - collectstatic
 
 - name: Set up cron jobs
-  include_tasks: cronjobs.yml
+  import_tasks: cronjobs.yml
   when: setup_cronjobs
   tags:
     - cronjobs
