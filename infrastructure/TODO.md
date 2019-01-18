@@ -1,3 +1,14 @@
+## Urgent
+
+Make tasks idempotent:
+
+[postgres : Change postgres data storage | Drop cluster if exists
+[system : Get pip3.6 version]
+RUNNING HANDLER [postgres : restart postgres]
+TASK [app : Restart nginx]
+TASK [app : Install requirements] <-- compare Pipenv.lock hash like in deploy.yml
+TASK [app : Ensure db user exists] <-- fix cluster drop and it should be OK after.
+
 ## Critical:
 * Do not delete lambda functions logs on recreation
 * restore db and media/ with playbook
@@ -31,3 +42,9 @@ TODO:
 * Add new instance to known_hosts (on local machine)
 * mv Elastic IP from old instance to new
 * tmux create session https://gist.github.com/henrik/1967800 and save them
+
+
+
+
+# Encrypt sensitive data with a password
+ansible-vault --new-vault-id dev --new-vault-password-file=development encrypt dev_config.yml

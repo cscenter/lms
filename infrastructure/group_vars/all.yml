@@ -1,5 +1,7 @@
 ---
-# Shared between playbooks
+# All variables below could be shared between playbooks
+
+# The target host python path
 ansible_python_interpreter: /usr/bin/python3
 
 aws_ec2_user: ubuntu
@@ -9,58 +11,3 @@ python_version: 3.6
 python_pkg: python{{ python_version }}
 certbot_script: /opt/certbot-auto
 enable_https: yes
-available_sites:
-  "compscicenter.ru":
-    site_user: "cscenter"
-    site_user_group: "shared"
-    site_root: "/home/cscenter/site/repo"
-    media_root: "/shared/media"
-    static_root: "/home/cscenter/site/repo/apps/static"
-    backup_root: "/shared/backup_tmp"
-    apps_dir_name: apps
-    app_settings: "cscenter"
-    app_environment: production
-    repo_url: git@github.com:cscenter/site.git
-    db_name: cscdb
-    db_user: csc
-    db_user_password: FooBar
-    main_domain: "compscicenter.ru"
-    default_server: yes
-    setup_cronjobs: yes
-    certbot_domains:
-      - "compscicenter.ru"
-      - "www.compscicenter.ru"
-    certbot_config_dir: "/etc/letsencrypt/live/compscicenter.ru"
-    rq_workers:
-      - default
-      - high
-    rq_workers_target_service_name: "rqworker_cscenter"
-    processes_num: 5
-    log_to_file: no
-  "compsciclub.ru":
-    site_user: "csclub"
-    site_user_group: "shared"
-    site_root: "/home/csclub/site/repo"
-    media_root: "/shared/media"
-    static_root: "/home/csclub/site/repo/apps/static"
-    backup_root: "/shared/backup_tmp"
-    apps_dir_name: apps
-    app_settings: "csclub"
-    app_environment: production
-    repo_url: git@github.com:cscenter/site.git
-    db_name: cscdb
-    db_user: csc
-    db_user_password: FooBar
-    main_domain: "compsciclub.ru"
-    default_server: no
-    setup_cronjobs: no
-    certbot_domains:
-      - "compsciclub.ru"
-      - "www.compsciclub.ru"
-      - "kzn.compsciclub.ru"
-    certbot_config_dir: "/etc/letsencrypt/live/compsciclub.ru"
-    rq_workers:
-      - club
-    rq_workers_target_service_name: "rqworker_csclub"
-    processes_num: 3
-    log_to_file: no

@@ -1,5 +1,5 @@
 ---
-- name: Ensure user exists
+- name: Ensure db user exists
   become: yes
   become_user: postgres
   postgresql_user: state=present name="{{ db_user }}" password="{{ db_user_password }}"
@@ -31,7 +31,7 @@
     role_attr_flags: NOSUPERUSER,CREATEDB
     state: present
 
-# TODO: remove?
+# TODO: remove? run_once: yes?
 - name: Run migrations
   become: yes
   become_user: "{{ site_user }}"

@@ -33,7 +33,7 @@
   shell: "pg_dropcluster --stop {{ pg_version }} main"
   when: setup_cluster
 
-- name: Change postgres data storage | Drop cluster directory if exists
+- name: Change postgres data storage | Drop target cluster directory if exists
   become: yes
   become_method: sudo
   ignore_errors: yes
@@ -42,7 +42,7 @@
     path: "{{ pg_cluster_dir }}"
   when: setup_cluster
 
-- name: Change postgres data storage | Create cluster
+- name: Change postgres data storage | Create target cluster
   become: yes
   become_method: sudo
   ignore_errors: yes

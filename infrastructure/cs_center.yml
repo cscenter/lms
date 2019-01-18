@@ -1,12 +1,37 @@
-- name: Setup EC2 instance
+- name: Setup application for compscicenter.ru
   hosts: "{{ hosts_override | default(aws_ec2_host) }}"
   user: "{{ aws_ec2_user }}"
   become: yes
   become_user: "{{ aws_ec2_root_user }}"
   tasks:
-
-    - name: Setup application for compscicenter.ru
-      import_role:
+    - import_role:
         name: app
       vars:
-        app_config: "{{ available_sites['compscicenter.ru'] }}"
+        main_domain: "compscicenter.ru"
+        site_user: "cscenter"
+        site_user_group: "shared"
+        app_root: "/home/{{ site_user }}/site"
+        site_root: "{{ app_root }}/repo"
+        virtualenv_root: "{{ app_root }}/env"
+        static_root: "{{ site_root }}/apps/static"
+        media_root: "/shared/media"
+        backup_root: "/shared/backup_tmp"
+        apps_dir_name: apps
+        app_settings: "cscenter"
+        app_environment: production
+        repo_url: git@github.com:cscenter/site.git
+        db_name: cscdb
+        db_user: csc
+        db_user_password: FooBar
+        default_server: yes
+        setup_cronjobs: yes
+        certbot_domains:
+          - "{{ main_domain }}"
+          - "www.compscicenter.ru"
+        certbot_config_dir: "/etc/letsencrypt/live/compscicenter.ru"
+        rq_workers:
+          - default
+          - high
+        rq_workers_target_service_name: "rqworker_cscenter"
+        processes_num: 5
+        log_to_file: no

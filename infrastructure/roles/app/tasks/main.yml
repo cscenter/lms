@@ -1,14 +1,33 @@
 ---
-- name: Set vars from config
-  set_fact: "{{ item.key }}={{ item.value }}"
-  with_dict: "{{ app_config }}"
 
-- set_fact:
-    virtualenv_root: "/home/{{ site_user }}/site/env"
-
-- name: Start processing user = {{ site_user }}
-  debug:
-    msg: "{{ app_config }}"
+- name: Check mandatory variables before doing anything
+  fail:
+    msg: "Variable '{{ item }}' is not defined"
+  when: item not in vars
+  loop:
+    - main_domain
+    - site_user
+    - site_user_group
+    - site_root
+    - virtualenv_root
+    - media_root
+    - static_root
+    - backup_root
+    - apps_dir_name
+    - app_settings
+    - app_environment
+    - repo_url
+    - db_name
+    - db_user
+    - db_user_password
+    - default_server
+    - setup_cronjobs
+    - certbot_domains
+    - certbot_config_dir
+    - rq_workers
+    - rq_workers_target_service_name
+    - processes_num
+    - log_to_file
 
 - name: Create users and groups
   include_tasks: users.yml
