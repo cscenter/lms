@@ -6,9 +6,9 @@ addons:
   postgresql: '9.6'
 install:
   - pip install pipenv
-  - pipenv sync --dev
+  - pipenv sync --dev --verbose
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - python manage.py migrate --noinput --settings=cscenter.settings.test
 script:
-  - pytest --create-db
+  - pytest --create-db --cov=./apps/
