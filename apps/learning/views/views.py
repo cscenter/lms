@@ -62,8 +62,7 @@ __all__ = [
     # mixins
     'AssignmentProgressBaseView',
     # views
-    'CalendarStudentFullView', 'CalendarStudentPersonalView',
-    'CalendarTeacherFullView', 'CalendarTeacherView',
+    'CalendarTeacherFullView', 'CalendarTeacherPersonalView',
     'CoursesListView', 'CourseTeacherListView', 'CourseStudentListView',
     'CourseVideoListView', 'VenueListView', 'VenueDetailView', 'AssignmentTeacherListView',
     'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
@@ -71,50 +70,6 @@ __all__ = [
     'AssignmentCommentUpdateView', 'AssignmentAttachmentDeleteView',
     'NonCourseEventDetailView', 'AssignmentAttachmentDownloadView',
 ]
-
-
-class CalendarStudentFullView(StudentOnlyMixin, MonthEventsCalendarView):
-    """
-    Shows all non-course events and classes in the city of
-    the authenticated student.
-    """
-    def get_default_timezone(self):
-        return get_student_city_code(self.request)
-
-    def get_events(self, year, month, **kwargs):
-        student_city_code = self.get_default_timezone()
-        return chain(
-            (CalendarEvent(e) for e in
-                self._get_classes(year, month, student_city_code)),
-            (CalendarEvent(e) for e in
-                self._get_non_course_events(year, month, student_city_code))
-        )
-
-    @staticmethod
-    def _get_non_course_events(year, month, city_code):
-        return (NonCourseEvent.objects
-                .for_calendar()
-                .for_city(city_code)
-                .in_month(year, month))
-
-    def _get_classes(self, year, month, city_code):
-        return (CourseClass.objects
-                .for_calendar(self.request.user)
-                .in_month(year, month)
-                .in_city(city_code))
-
-
-class CalendarStudentPersonalView(CalendarStudentFullView):
-    """
-    Shows non-course events filtered by student city and classes for courses
-    on which authenticated student enrolled.
-    """
-    calendar_type = "student"
-    template_name = "learning/calendar.html"
-
-    def _get_classes(self, year, month, city_code):
-        qs = super()._get_classes(year, month, city_code)
-        return qs.for_student(self.request.user)
 
 
 class CalendarTeacherFullView(TeacherOnlyMixin, MonthEventsCalendarView):
@@ -165,7 +120,7 @@ class CalendarTeacherFullView(TeacherOnlyMixin, MonthEventsCalendarView):
                 .in_cities(cities))
 
 
-class CalendarTeacherView(CalendarTeacherFullView):
+class CalendarTeacherPersonalView(CalendarTeacherFullView):
     """
     Shows all non-course events and classes for courses in which authenticated
     teacher participated.
@@ -584,7 +539,6 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
 
 class AssignmentProgressBaseView(AccessMixin):
     model = AssignmentComment
-    template_name = "learning/assignment_submission_detail.html"
     form_class = AssignmentCommentForm
 
     def handle_no_permission(self, request):
@@ -672,6 +626,8 @@ class AssignmentProgressBaseView(AccessMixin):
 class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
                                          CreateView):
     user_type = 'teacher'
+    template_name = "learning/assignment_submission_detail.html"
+
     # FIXME: combine has_permissions_*
     def has_permissions_coarse(self, user):
         return user.is_curator or user.is_teacher
