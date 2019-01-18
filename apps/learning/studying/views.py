@@ -1,10 +1,10 @@
-import datetime
 from itertools import chain
 from typing import Iterable
 
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
+from isoweek import Week
 from vanilla import CreateView, ListView
 
 from core.exceptions import Redirect
@@ -16,7 +16,6 @@ from learning.enrollment import course_failed_by_student
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment, \
     NonCourseEvent
-from learning.utils import iso_to_gregorian
 from learning.views import AssignmentProgressBaseView
 from learning.views.utils import get_student_city_code
 from users.mixins import StudentOnlyMixin
@@ -120,10 +119,9 @@ class TimetableView(StudentOnlyMixin, WeekEventsView):
         return (CalendarEvent(e) for e in self._get_classes(iso_year, iso_week))
 
     def _get_classes(self, iso_year, iso_week):
-        week_start = iso_to_gregorian(iso_year, iso_week, iso_week_day=1)
-        week_end = week_start + datetime.timedelta(days=6)
+        w = Week(iso_year, iso_week)
         qs = (CourseClass.objects
-              .filter(date__range=[week_start, week_end])
+              .filter(date__range=[w.monday(), w.sunday()])
               .for_student(self.request.user)
               .for_timetable(self.request.user))
         return qs
