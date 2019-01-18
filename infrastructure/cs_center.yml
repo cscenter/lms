@@ -1,0 +1,12 @@
+- name: Setup EC2 instance
+  hosts: "{{ hosts_override | default(aws_ec2_host) }}"
+  user: "{{ aws_ec2_user }}"
+  become: yes
+  become_user: "{{ aws_ec2_root_user }}"
+  tasks:
+
+    - name: Setup application for compscicenter.ru
+      import_role:
+        name: app
+      vars:
+        app_config: "{{ available_sites['compscicenter.ru'] }}"

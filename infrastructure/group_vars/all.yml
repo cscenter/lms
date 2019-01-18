@@ -10,7 +10,8 @@ python_pkg: python{{ python_version }}
 certbot_script: /opt/certbot-auto
 enable_https: yes
 available_sites:
-  - site_user: "cscenter"
+  "compscicenter.ru":
+    site_user: "cscenter"
     site_user_group: "shared"
     site_root: "/home/cscenter/site/repo"
     media_root: "/shared/media"
@@ -36,7 +37,8 @@ available_sites:
     rq_workers_target_service_name: "rqworker_cscenter"
     processes_num: 5
     log_to_file: no
-  - site_user: "csclub"
+  "compsciclub.ru":
+    site_user: "csclub"
     site_user_group: "shared"
     site_root: "/home/csclub/site/repo"
     media_root: "/shared/media"

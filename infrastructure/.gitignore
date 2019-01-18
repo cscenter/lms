@@ -10,6 +10,7 @@ local/
 *-debug.log
 *-console.log
 
+vendor-roles/
 deploy_ssh_key
 deploy_ssh_key.pub
 *.retry

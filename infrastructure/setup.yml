@@ -10,9 +10,10 @@
         name: system
       tags:
         - system-role
+        - always
 
     - name: LVM support, mount devices
-      include_role:
+      import_role:
         name: lvm
       vars:
         lvm_volumes:
@@ -26,6 +27,7 @@
           mount_opts: "errors=remount-ro,noatime,barrier=0"
       tags:
         - lvm-role
+        - always
 
     - name: Setup postgres service
       import_role:
@@ -34,13 +36,15 @@
         setup_cluster: yes
         pg_cluster_dir: "/shared/db/data"
       tags:
-        - db
+        - postgres-role
+        - always
 
     - name: Setup nginx and certbot services
       import_role:
         name: nginx
       tags:
         - nginx-role
+        - always
 
     - name: Setup Redis service
       import_role:
@@ -55,11 +59,20 @@
         redis_maxmemory: 256mb
         redis_password: 3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN
       tags:
-        redis-role
+        - redis-role
+        - always
 
-    - name: Setup application
-      include_role:
-        name: app
-      loop: "{{ available_sites }}"
-      loop_control:
-        loop_var: app_config
+
+- name: Setup application for compscicenter.ru
+  import_playbook: cs_center.yml
+  tags:
+    - never
+    - app-deployment
+    - compscicenter.ru
+
+- name: Setup application for compsciclub.ru
+  import_playbook: cs_club.yml
+  tags:
+    - never
+    - app-deployment
+    - compsciclub.ru

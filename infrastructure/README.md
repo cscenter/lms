@@ -1,64 +1,39 @@
-EC2 provision based on dynamic inventory - [EC2 external inventory module](http://docs.ansible.com/ansible/intro_dynamic_inventory.html#example-aws-ec2-external-inventory-script)
+## Playbooks
 
-# TODO (critical):
-* Do not delete lambda functions logs on recreation
-* restore db and media/ with playbook
-* Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.
-* Check that `ntpd` works as expected!
-* Remove `unprivileged-binary-patch-arg` from uwsgi ini-file if python3.6 used as system 
-`python3` (now py3.6 for ubuntu 14). Also remove `uwsgi` package from requirements/production.txt in that case.
-* Think how to update python version without breaking site for updating period (now it does by removing current venv. No idea how to properly rename venv :<)
-* Clear, then warm cache (social_crawler, /alumni and so on)
-* Separate nginx configurations
+See `Makefile` how to run ansible playbooks. But read [Before to start](#before-to-start) first.
 
-TODO (important):
-* add `registration` app to cscenter, then remove club worker?
-* restore db from s3
-* `# Redirect from `www.` to domain without `www` <--- check first that main site domain is two level
+#### provison.yml
 
-Requirements
-------------
-  
-* Ansible (>=2.5.x) `pip install ansible`
-* boto3 `pip install boto3` (may not work from virtualenv)
-* aws cli (optional) `pip install awscli`
+Launch EC2 instance with `{{ aws_ec2_host }}` tag:Name (configured AWS security groups, additional EBS volume with LVM support and 
+backup automation using AWS Lambda).
 
-## Prerequisites
-
-Default VPC, subnets and other network settings except security groups
-Manually created:
-* Administrator User (with Access Key)
-* EC2 KeyPair (don't forget to save it in ~/.ssh/)
-* Elastic IP
-* S3 buckets. Look for inspiration in `s3` ansible role
-
-Before start
-------------
-
-* Install all requirements
-* Add admin credentials to environment, boto or awscli settings
-  E.g. `~/.aws/credentials`:
-  ```
-  [Credentials]
-  aws_access_key_id = <your_access_key_here>
-  aws_secret_access_key = <your_secret_key_here>
-  ```
-* Generate EC2 Key Pair and save private key in your `~/.ssh/` directory
-* Add generated EC2 SSH key to your SSH agent (e.g., with ssh-add)
-* Generate github account access key (with read only credentials) and put files under `files/` directory in `app` role (check working example in target directory)
-
-Playbooks
----------
-
-File | Action
----- | ------
-provision.yml | Create security groups. Launch instance. Create additional Volume, attach to new instance. Setup LVM on additional Volume
-setup.yml | Part of provision (but can be used independently). Create app on new instance.
-deploy.yml | Deploy routine
-backup_make.yml | Create backup of media/ folder and db. Should pass `app_user` (cscenter or csclub) and host explicitly (see cmd example below)
+```bash
+make provision
+```
 
 
-## Deploy
+#### setup.yml
+
+Part of the provision (but can be used independently). 
+
+* Install and configure system dependencies.
+    This actions should be idempotent, so you can modify `setup.yml` and rerun playbook as you wish. 
+* Deploys applications to the new instance if `--tags=app-deployment'` provided (application deployment 
+    disabled by default since it has a good change to break application)
+
+```bash
+make setup
+```
+
+
+#### cs_center.yml / cs_club.yml
+
+Application deployment from the scratch, but can be used partially. See `Makefile` for various deploy actions.
+
+
+#### deploy.yml
+
+Minimal incremental application deployment workflow.
 
 * git pull
 * install requirements from requirements.txt
@@ -66,76 +41,36 @@ backup_make.yml | Create backup of media/ folder and db. Should pass `app_user` 
 * Run django `collectstatic` command
 * Touch uwsgi configuration to reload app
 
-Command to run:
-
-    ansible-playbook -i inventory/ec2.py provision.yml -v
-    ansible-playbook -i inventory/ec2.py deploy.yml --extra-vars "site_user=csclub" -v
-
-
-## Create s3 buckets
-
-`ansible-playbook -i hosts backups.yml`
-
-Create users for buckets with appropriate policy configuration.
-If users newly created, you can find access keys for them in `files/backup_user_access_keys.txt` under s3 role directory
-
-TODO:
-* Create S3 buckets for backups
-* Add lifecycle rule for bucket (30 days TTL for now)
-* What about logging for buckets? Crypto?
-* Add cost allocation tags for buckets (http://docs.aws.amazon.com/AmazonS3/latest/UG/CostAllocationTagging.html)
-
-## Make backup
-
-`ansible-playbook -i inventory/ec2.py backup_make.yml --extra-vars "app_user=cscenter"`
-
-app_user = cscenter | csclub
-Don't forget to add ssh-key to ssh agent
-
-## Provision
-
-`ansible-playbook -i hosts provision.yml`
-
-Creates new instance with {{ aws_ec2_host }} name tag.
-
-TODO:
-* Add new instance to known_hosts (on local machine)
-* mv Elastic IP from old instance to new
-* tmux create session https://gist.github.com/henrik/1967800 and save them
-
-
-## Host setup
-```
-# In theory it's idempotent, so you can modify `setup.yml` and rerun playbook as you wish
-ansible-playbook -i inventory/ec2.py setup.yml
+```bash
+make deploy app_user=cscenter
 ```
 
 
+## Before to start
 
-## BACKUP restore
-Explicitly set host and app_user due to high risk of mix up hosts :<
-`ansible-playbook -i inventory/ec2.py backup_restore.yml --extra-vars "app_user=csclub  host=tag_Name_cscweb_new" -vvv`
+* Setup configuration manager
+    ```bash
+    # Python dependencies
+    pip3 install ansible boto3 awscli
+    # Install vendor roles (see `path_roles` in ansible.cfg)
+    ansible-galaxy install -r requirements.yml
+    ```
 
-DB user must be owner `alter database <DB> owner to <db_user>;` and have previligies to createdb and dropdb. `ALTER USER <currentuser> CREATEDB;`
-You can temporary set current user as superuser `alter role <db_user> with superuser;`
-or you can have a problem with error `must be owner of extension plpgsql`
-2. pass parameters to command ./manage.py dbrestore --uncompress --backup-extension="psql.gz" --settings=cscenter.settings.local
-
-Note: Бэкап делается bd и media. У сайта клуба и центра это общие ресурсы, поэтому нет смысла делать бэкапы и того и другого
-
-TODO:
-* Test app write in log
-* Restore dbbackup
-
-## How to replace instance
-1. `ansible-playbook -i hosts provision.yml`
-2. Manually restore db and media/ for cscenter
-3. Change elastic IP
-4. Manually stop old instance
+* Add AWS admin credentials to environment, boto or awscli settings
+    E.g. `~/.aws/credentials`:
+    ```
+    [Credentials]
+    aws_access_key_id = <your_access_key_here>
+    aws_secret_access_key = <your_secret_key_here>
+    ```
+* Generate EC2 Key Pair and save private key in your `~/.ssh/` directory
+* Add generated EC2 SSH key to your SSH agent (e.g., with ssh-add)
+* Generate github account access key (with read only credentials) and put files under `files/` directory in `app` role (check working example in target directory)
 
 
-TIPS:
-* syncronize dirs on old and new instance:
+## TIPS:
+
+* syncronize dirs on an old and new instance:
 ```
 rsync  -hvrP --ignore-existing --exclude "cache/" ubuntu@52.28.124.90:/home/cscweb/site/repo/apps/media/ /shared/media/
 ```
@@ -149,13 +84,6 @@ sudo lvscan
 # Disk stats
 df -h
 ```
-
-
-
-
-# Update cronjobs
-ansible-playbook -i inventory/ec2.py setup.yml --tags="cronjobs"
-
 
 
 # Как пересоздать машину
@@ -198,14 +126,12 @@ FIXME: как избежать downtime'а тут? Копировать серт
 
 
 
-
-
 ```
 AWS_EC2_INSTANCE_TAG := cscsite
 SITE_USER := cscenter
 make provision
-# Make db backup from prev host
-ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) --extra-vars "site_user=$(SITE_USER)" dbbackup.yml -v
+# Make a db backup from the previous host
+ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) --extra-vars "site_user=$(SITE_USER)" backup.yml -v --tags="db"
 # Optional (on new instance)
 sudo vgrename /dev/vg0 /dev/vg_data
 sudo lvrename /dev/vg_data/shared /dev/vg_data/lv_media
