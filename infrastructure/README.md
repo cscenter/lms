@@ -1,51 +1,3 @@
-## Playbooks
-
-See `Makefile` how to run ansible playbooks. But read [Before to start](#before-to-start) first.
-
-#### provison.yml
-
-Launch EC2 instance with `{{ aws_ec2_host }}` tag:Name (configured AWS security groups, additional EBS volume with LVM support and 
-backup automation using AWS Lambda).
-
-```bash
-make provision
-```
-
-
-#### setup.yml
-
-Part of the provision (but can be used independently). 
-
-* Install and configure system dependencies.
-    This actions should be idempotent, so you can modify `setup.yml` and rerun playbook as you wish. 
-* Deploys applications to the new instance if `--tags=app-deployment'` provided (application deployment 
-    disabled by default since it has a good change to break application)
-
-```bash
-make setup
-```
-
-
-#### cs_center.yml / cs_club.yml
-
-Application deployment from the scratch, but can be used partially. See `Makefile` for various deploy actions.
-
-
-#### deploy.yml
-
-Minimal incremental application deployment workflow.
-
-* git pull
-* install requirements from requirements.txt
-* Run django `migrate` command
-* Run django `collectstatic` command
-* Touch uwsgi configuration to reload app
-
-```bash
-make deploy app_user=cscenter
-```
-
-
 ## Before to start
 
 * Setup configuration manager
@@ -66,6 +18,53 @@ make deploy app_user=cscenter
 * Generate EC2 Key Pair and save private key in your `~/.ssh/` directory
 * Add generated EC2 SSH key to your SSH agent (e.g., with ssh-add)
 * Generate github account access key (with read only credentials) and put files under `files/` directory in `app` role (check working example in target directory)
+
+## Playbooks
+
+See `Makefile` how to run ansible playbooks. But read [Before to start](#before-to-start) first.
+
+### provison.yml
+
+Launch EC2 instance with `{{ aws_ec2_host }}` tag:Name (configured AWS security groups, additional EBS volume with LVM support and 
+backup automation using AWS Lambda).
+
+```bash
+make provision
+```
+
+
+### setup.yml
+
+Part of the provision (but can be used independently). 
+
+* Install and configure system dependencies.
+    This actions should be idempotent, so you can modify `setup.yml` and rerun playbook as you wish. 
+* Deploys applications to the new instance if `--tags=app-deployment'` provided (application deployment 
+    disabled by default since it has a good change to break application)
+
+```bash
+make setup
+```
+
+
+### cs_center.yml / cs_club.yml
+
+Application deployment from the scratch, but can be used partially. See `Makefile` for various deploy actions.
+
+
+### deploy.yml
+
+Minimal incremental application deployment workflow.
+
+* git pull
+* install requirements from requirements.txt
+* Run django `migrate` command
+* Run django `collectstatic` command
+* Touch uwsgi configuration to reload app
+
+```bash
+make deploy app_user=cscenter
+```
 
 
 ## TIPS:

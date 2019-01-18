@@ -6,7 +6,7 @@ SS := local
 DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
 
-.PHONY: run club run_flame migrate msg msgcompile static freeze pip dumpdata loaddata clean cmd refresh sync deploy check_defined
+.PHONY: run club run_flame migrate msg msgcompile static dumpdata loaddata clean cmd refresh sync deploy check_defined
 
 run:
 	python -W once manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
@@ -31,12 +31,6 @@ msgcompile:
 
 static:
 	python manage.py collectstatic --noinput $(DJANGO_POSTFIX)
-
-freeze:
-	pip freeze --local > requirements.txt
-
-pip:
-	pip install -r requirements.txt
 
 dumpdata:
 	$(call check_defined, app)
@@ -64,7 +58,7 @@ sync:
 	$(call check_defined, app)
 	$(call check_defined, conf)
 	git pull
-	pip install -r requirements.txt
+	pipenv sync
 	python manage.py migrate --settings=$(app).settings.$(conf)
 	python manage.py collectstatic  --noinput --settings=$(app).settings.$(conf) --ignore src --ignore *.map
 

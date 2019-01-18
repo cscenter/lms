@@ -36,7 +36,7 @@
     virtualenv: "{{ virtualenv_root }}"
     virtualenv_python: "{{ python_pkg }}"
 
-- name: Install requirements from the Pipenv.lock
+- name: Install requirements
   environment:
     VIRTUAL_ENV: "{{ virtualenv_root }}"
   command: "{{ virtualenv_root }}/bin/pipenv sync"
