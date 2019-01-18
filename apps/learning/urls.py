@@ -1,13 +1,13 @@
 from django.conf.urls import include, url
 from django.views.generic.base import RedirectView
 
-from learning.studying.views import TimetableView
+from learning.studying.views import TimetableView, \
+    StudentAssignmentStudentDetailView, StudentAssignmentListView, \
+    CalendarStudentFullView, CalendarStudentPersonalView
 from learning.teaching.views import TimetableView as TeacherTimetable
 from learning.views import CalendarTeacherFullView
-from learning.views.views import CalendarStudentFullView
 from .views import \
-    CalendarTeacherView, CalendarStudentPersonalView, \
-    CourseVideoListView, \
+    CalendarTeacherPersonalView, CourseVideoListView, \
     CourseTeacherListView, \
     CourseStudentListView, \
     VenueListView, VenueDetailView, \
@@ -24,8 +24,6 @@ from courses.views import CourseDetailView, CourseEditView, \
     CourseClassAttachmentDeleteView, CourseClassDeleteView
 from learning.views.course_views import CourseNewsUnreadNotificationsView, \
     CourseStudentsView
-from learning.views.students import StudentAssignmentStudentDetailView, \
-    StudentAssignmentListView
 from learning.enrollment.views import CourseEnrollView, CourseUnenrollView
 
 meta_course_patterns = url(
@@ -117,7 +115,7 @@ teaching_section_patterns = url(
             name='teaching_base'),
         url(r'^timetable/$', TeacherTimetable.as_view(),
             name='timetable_teacher'),
-        url(r'^calendar/$', CalendarTeacherView.as_view(),
+        url(r'^calendar/$', CalendarTeacherPersonalView.as_view(),
             name='calendar_teacher'),
         url(r'^full-calendar/$', CalendarTeacherFullView.as_view(),
             name='calendar_full_teacher'),

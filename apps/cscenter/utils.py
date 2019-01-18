@@ -35,6 +35,7 @@ class PublicRouteException(Exception):
     pass
 
 
+# TODO: remove after migrating to separated public and members parts
 class PublicRoute(Enum):
     """
     Mapping for some public url codes to internal route names.
