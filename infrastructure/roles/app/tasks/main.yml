@@ -62,7 +62,7 @@
 
 - name: Copy nginx config
   template:
-    src: nginx.conf.jinja2
+    src: nginx.conf/{{ main_domain }}.jinja2
     dest: "/etc/nginx/sites-available/{{ site_user }}.conf"
   tags:
     - nginx

@@ -1,14 +1,15 @@
+# {{ ansible_managed }}
 upstream django_{{ site_user }} {
     server unix:///tmp/uwsgi_{{ site_user }}.socket;
 }
 {% if enable_https %}
-# If https is enabled, this server should be default for 80 port
+{# TODO: If https is enabled, this server should be default for 80 port?#}
 server {
     listen 80;
     server_name {{ certbot_domains|join(' ') }};
 
     location /.well-known/acme-challenge/ {
-        alias /home/{{ site_user }}/site/repo/.well-known/acme-challenge/;
+        alias {{ site_root }}/.well-known/acme-challenge/;
     }
 
     location / {
@@ -18,12 +19,12 @@ server {
 
 {%- set main_domain_parts = main_domain.split('.') -%}
 {% if main_domain_parts|length == 2 %}
-# Redirect from `www.` to domain without `www`
+# Redirect from `www.` to the domain without `www`
 server {
     listen 443 ssl;
     server_name www.{{ main_domain }};
 
-    # Make sure to update ansible regexp for uncommenting ssl certificates paths if https enabled.
+    # Make sure to update ansible regexp for uncommenting ssl certificates paths if https is enabled.
     # ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
     # ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
     # Fetch OCSP records from URL in ssl_certificate and cache them
@@ -36,7 +37,7 @@ server {
 {% endif %}
 
 server {
-    listen {% if enable_https %}443 ssl http2{% else %}80{% endif %}{% if main_domain == "compscicenter.ru" %} default_server{% endif %};
+    listen {% if enable_https %}443 ssl http2{% else %}80{% endif %} default_server;
     server_name{% for domain in certbot_domains -%}
         {% if not domain.startswith("www") %} {{ domain }}{% endif %}
     {%- endfor %};
@@ -60,11 +61,8 @@ server {
     ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA';
     ssl_prefer_server_ciphers on;
 
-    # FIXME: Enable hsts for compsciclub.ru after manual testing https!
-    {% if main_domain == "compscicenter.ru" -%}
-    # HSTS (ngx_http_headers_module is required) (15768000 seconds = 6 months)
+    # Enable HSTS, ngx_http_headers_module is required (15768000 seconds = 6 months)
     add_header Strict-Transport-Security max-age=15768000;
-    {% endif %}
 
     # Fetch OCSP records from URL in ssl_certificate and cache them
     ssl_stapling on;
@@ -81,13 +79,11 @@ server {
     error_page 404 =404 @show_404;
 
     location @show_404 {
-        root /home/{{ site_user }}/site/repo/{{ apps_dir_name }}/templates/;
+        root {{ site_root }}/{{ apps_dir_name }}/templates/;
         try_files /errors/404.html =404;
     }
 
-    {% if main_domain == "compscicenter.ru" -%}
     rewrite ^/lectures/$ http://open.compscicenter.ru/ permanent;
-    {% endif %}
 
     location /media/  {
         root /shared;
@@ -115,20 +111,6 @@ server {
         add_header Cache-Control public,max-age=2592000;
     }
 
-    {% if main_domain == "compsciclub.ru" -%}
-    location = /en/raa18/ {
-        proxy_pass https://logic.pdmi.ras.ru/~kulikov/raa18/raa18.html;
-    }
-
-    location /scs/ {
-        return 302 http://52.15.239.252/scs;
-    }
-
-    location = /algorithms {
-        return 302 http://learningalgorithms.tilda.ws/;
-    }
-    {% endif -%}
-
     location ~ ^/apple-touch-icon(|-\d+x\d+)(|-precomposed).png {
         return 204;
         log_not_found off;
@@ -136,17 +118,14 @@ server {
 
     # Django
     location / {
-        {% if main_domain == "compscicenter.ru" -%}
         set $frame_options '';
         if ($http_referer !~ '^https?:\/\/([^\/]+\.)?(compscicenter\.ru|webvisor\.com)\/'){
             set $frame_options 'SAMEORIGIN';
         }
         add_header X-Frame-Options $frame_options;
-        {% endif -%}
         add_header Cache-Control no-cache,no-store,must-revalidate;
 
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
-
         gzip on;
         # Serve 30x statuses with nginx
         uwsgi_intercept_errors on;

@@ -2,25 +2,28 @@
 
 Make tasks idempotent:
 
-[postgres : Change postgres data storage | Drop cluster if exists
+[postgres : Change postgres data storage | Drop cluster if exists <-- run this on production and you will be fucked up
 [system : Get pip3.6 version]
 RUNNING HANDLER [postgres : restart postgres]
 TASK [app : Restart nginx]
 TASK [app : Install requirements] <-- compare Pipenv.lock hash like in deploy.yml
-TASK [app : Ensure db user exists] <-- fix cluster drop and it should be OK after.
+TASK [app : Ensure db user exists] <-- fix cluster drop and it should be OK then.
 
 ## Critical:
+* create db backup and download to the local machine
+* system-zsh, system-ntp roles?
 * Do not delete lambda functions logs on recreation
 * restore db and media/ with playbook
 * Add `AbortIncompleteMultipartUpload` Lifecycle rule to cscenter backup bucket.
 * Think how to update python version without breaking site for updating period (now it does by removing current venv. No idea how to properly rename venv :<)
 * Clear, then warm cache (social_crawler, /alumni and so on)
-* Separate nginx configurations
+* Use macros/include for common nginx configuration parts in nginx.conf/*
+* ALLOWED_HOSTS = ['*'] for vagrant machine (do it after moving sensitive configuration outside of the repo) 
 
 ## important:
 * add `registration` app to cscenter, then remove club worker?
 * restore db from s3
-* `# Redirect from `www.` to domain without `www` <--- check first that main site domain is two level
+
 
 
 ## s3 bucket support
