@@ -5,6 +5,7 @@ from typing import List, Iterable, NewType
 
 import attr
 from dateutil.relativedelta import relativedelta
+from dateutil.rrule import rrule, DAILY
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.formats import date_format, time_format
@@ -14,8 +15,6 @@ from rest_framework import serializers, fields
 from core.settings.base import FOUNDATION_YEAR
 from courses.settings import MONDAY_WEEKDAY
 from courses.utils import grouper
-from dateutil.rrule import rrule, DAILY
-from learning.utils import iso_to_gregorian
 
 __all__ = ('EventsCalendar', 'CalendarEvent', 'MonthEventsCalendar',
            'WeekEventsCalendar', 'CalendarQueryParams')

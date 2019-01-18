@@ -34,12 +34,3 @@ def split_on_condition(iterable, predicate):
         else:
             false_lst.append(x)
     return true_lst, false_lst
-
-
-def iso_to_gregorian(iso_year, iso_week, iso_week_day) -> datetime.date:
-    """
-    Gregorian calendar date for the given ISO year, week and
-    day of the week (1-based)
-    """
-    date_str = f'{iso_year} {iso_week} {iso_week_day}'
-    return datetime.datetime.strptime(date_str, '%G %V %u').date()
