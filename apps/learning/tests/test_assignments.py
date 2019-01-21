@@ -14,7 +14,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 from learning.enrollment import course_failed_by_student
-from learning.factories import EnrollmentFactory, AssignmentCommentFactory, \
+from learning.tests.factories import EnrollmentFactory, AssignmentCommentFactory, \
     StudentAssignmentFactory
 from courses.factories import SemesterFactory, CourseFactory, \
     CourseTeacherFactory, AssignmentFactory

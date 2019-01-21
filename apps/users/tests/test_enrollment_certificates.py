@@ -8,7 +8,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import ugettext as _
 
-from learning.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory
 from courses.factories import MetaCourseFactory, SemesterFactory, CourseFactory
 from learning.settings import GradeTypes
 from learning.tests.mixins import MyUtilitiesMixin

@@ -8,7 +8,7 @@ from courses.models import Semester
 
 
 class Command(BaseCommand):
-    help = "Soft delete for notifications from past terms"
+    help = "Soft delete for notifications from the past terms"
 
     def handle(self, *args, **options):
         current_term = Semester.get_current()

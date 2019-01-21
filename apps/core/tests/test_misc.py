@@ -1,20 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from io import StringIO as OutputIO
 from unittest.mock import Mock
 
 import pytest
-from django.core import mail, management
 from django.test import TestCase
 from django.urls import reverse
 
-from core.management.commands.notify import get_base_url
 from core.admin import related_spec_to_list, apply_related_spec
-from learning.factories import AssignmentNotificationFactory, \
-    CourseNewsNotificationFactory
-from learning.models import AssignmentNotification
-from users.constants import AcademicRoles
-from users.factories import UserFactory
 
 
 # courtesy of SO http://stackoverflow.com/a/1305682/275084
@@ -28,45 +20,6 @@ class FakeObj(object):
             else:
                 attr = FakeObj(val) if isinstance(val, dict) else val
                 setattr(self, key, attr)
-
-
-class NotifyCommandTest(TestCase):
-    def test_notifications(self):
-        out = OutputIO()
-        mail.outbox = []
-        management.call_command("notify", stdout=out)
-        self.assertEqual(0, len(mail.outbox))
-        self.assertEqual(0, len(out.getvalue()))
-
-        out = OutputIO()
-        mail.outbox = []
-        an = AssignmentNotificationFactory.create(is_about_passed=True)
-        management.call_command("notify", stdout=out)
-        self.assertEqual(1, len(mail.outbox))
-        self.assertTrue(AssignmentNotification.objects
-                        .get(pk=an.pk)
-                        .is_notified)
-        self.assertIn(an.student_assignment.get_teacher_url(),
-                      mail.outbox[0].body)
-        self.assertIn("sending notification for", out.getvalue())
-
-        out = OutputIO()
-        mail.outbox = []
-        management.call_command("notify", stdout=out)
-        self.assertEqual(0, len(mail.outbox))
-        self.assertEqual(0, len(out.getvalue()))
-
-        out = OutputIO()
-        mail.outbox = []
-        conn = CourseNewsNotificationFactory.create()
-        course = conn.course_offering_news.course
-        management.call_command("notify", stdout=out)
-        self.assertEqual(1, len(mail.outbox))
-        conn.refresh_from_db()
-        assert conn.is_notified
-        self.assertIn(course.get_absolute_url(),
-                      mail.outbox[0].body)
-        self.assertIn("sending notification for", out.getvalue())
 
 
 class RelatedSpec(TestCase):
@@ -126,25 +79,3 @@ def test_middleware_center_site(client, settings):
     response = client.get(url)
     assert hasattr(response.wsgi_request, 'city_code')
     assert response.wsgi_request.city_code == settings.DEFAULT_CITY_CODE
-
-
-@pytest.mark.django_db
-def test_get_base_url():
-    """Site domain in notifications depends on recipient user groups"""
-    user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER])
-    notification = AssignmentNotificationFactory(user=user)
-    assert get_base_url(notification) == "https://compscicenter.ru"
-    user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
-                               AcademicRoles.STUDENT_CLUB])
-    notification = AssignmentNotificationFactory(user=user)
-    assert get_base_url(notification) == "https://compscicenter.ru"
-    notification.user = UserFactory(groups=[AcademicRoles.STUDENT_CLUB])
-    assert get_base_url(notification) == "http://compsciclub.ru"
-    notification.user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
-                                            AcademicRoles.TEACHER_CLUB])
-    assert get_base_url(notification) == "https://compscicenter.ru"
-    notification.user = UserFactory(groups=[AcademicRoles.TEACHER_CLUB])
-    assert get_base_url(notification) == "http://compsciclub.ru"
-    notification.user = UserFactory(groups=[AcademicRoles.TEACHER_CLUB,
-                                            AcademicRoles.GRADUATE_CENTER])
-    assert get_base_url(notification) == "https://compscicenter.ru"

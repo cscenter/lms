@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from learning.factories import EventFactory, \
+from learning.tests.factories import EventFactory, \
     EnrollmentFactory
 from courses.factories import CourseFactory, CourseClassFactory, VenueFactory
 from users.constants import AcademicRoles

@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils import translation
 from django.utils.encoding import smart_text, force_text, smart_bytes
 
-from learning.factories import AreaOfStudyFactory
+from learning.tests.factories import AreaOfStudyFactory
 from courses.factories import CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles

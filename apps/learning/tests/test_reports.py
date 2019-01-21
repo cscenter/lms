@@ -4,7 +4,7 @@ import pytest
 from django.urls import reverse
 from django.utils.encoding import smart_bytes
 
-from learning.factories import SemesterFactory, CourseFactory, EnrollmentFactory
+from learning.tests.factories import SemesterFactory, CourseFactory, EnrollmentFactory
 from learning.projects.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester

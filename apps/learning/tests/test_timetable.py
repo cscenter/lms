@@ -5,7 +5,7 @@ from django.urls import reverse
 from core.timezone import now_local
 from courses.calendar import WeekEventsCalendar, MonthEventsCalendar
 from courses.factories import CourseClassFactory, CourseFactory
-from learning.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory
 from learning.tests.utils import flatten_calendar_month_events
 from users.factories import TeacherCenterFactory, StudentCenterFactory, \
     CuratorFactory, GraduateFactory, VolunteerFactory
