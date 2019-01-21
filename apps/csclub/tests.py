@@ -7,7 +7,7 @@ from django.test import TestCase
 from learning.tests.factories import *
 from users.constants import AcademicRoles
 from learning.tests.mixins import *
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 
 class CourseSecurityTests(MyUtilitiesMixin, TestCase):

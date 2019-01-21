@@ -6,14 +6,14 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
 from courses.tests.factories import SemesterFactory
-from learning.projects.factories import ProjectFactory, ReportFactory, \
+from learning.projects.tests.factories import ProjectFactory, ReportFactory, \
     ReportReviewFormFactory
 from learning.projects.models import Report, ProjectStudent
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
 from courses.utils import get_current_term_pair
 from notifications.models import Notification
-from users.factories import StudentCenterFactory, ProjectReviewerFactory, \
+from users.tests.factories import StudentCenterFactory, ProjectReviewerFactory, \
     UserFactory, CuratorFactory
 
 URL_REPORTS = reverse("projects:report_list_reviewers")

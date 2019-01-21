@@ -18,7 +18,7 @@ from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from users.forms import UserCreationForm, UserChangeForm
-from users.factories import UserFactory, SHADCourseRecordFactory, \
+from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
     TeacherCenterFactory, StudentClubFactory, \
     StudentFactory, StudentCenterFactory
 from users.models import User

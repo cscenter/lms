@@ -13,7 +13,7 @@ from users.constants import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import flatten_calendar_month_events
-from users.factories import StudentCenterFactory, \
+from users.tests.factories import StudentCenterFactory, \
     TeacherCenterFactory
 
 

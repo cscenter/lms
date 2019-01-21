@@ -16,7 +16,7 @@ from admission.models import Campaign, Applicant, Contest, Test, \
 from admission.signals import post_save_interview
 from courses.tests.factories import VenueFactory
 from users.constants import AcademicRoles
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 
 class FuzzyTime(FuzzyNaiveDateTime):

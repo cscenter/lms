@@ -8,7 +8,7 @@ from learning.tests.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
 from notifications.management.commands.notify import get_base_url
 from users.constants import AcademicRoles
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 
 @pytest.mark.django_db

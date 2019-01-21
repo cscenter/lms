@@ -12,7 +12,7 @@ from django.utils import formats
 from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
 from users.constants import AcademicRoles
-from users.factories import TeacherCenterFactory
+from users.tests.factories import TeacherCenterFactory
 
 
 def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:

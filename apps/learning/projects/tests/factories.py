@@ -6,7 +6,7 @@ from factory.fuzzy import FuzzyInteger, FuzzyChoice
 from courses.tests.factories import SemesterFactory
 from learning.projects.forms import ReportReviewForm
 from learning.projects.models import Project, ProjectStudent, Report, Review
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 
 class ProjectFactory(factory.DjangoModelFactory):

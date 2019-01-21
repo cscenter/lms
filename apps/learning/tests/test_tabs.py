@@ -6,7 +6,7 @@ from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
 from courses.models import CourseNews
 from learning.tests.factories import EnrollmentFactory
 from learning.settings import GradeTypes
-from users.factories import StudentCenterFactory, TeacherCenterFactory
+from users.tests.factories import StudentCenterFactory, TeacherCenterFactory
 
 # TODO: тест для видимости таб из под разных ролей. (прятать табу во вьюхе, если нет содержимого)
 

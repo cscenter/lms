@@ -7,7 +7,7 @@ from django.urls import reverse
 
 from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
     SemesterFactory, CourseFactory
-from users.factories import TeacherCenterFactory, StudentCenterFactory
+from users.tests.factories import TeacherCenterFactory, StudentCenterFactory
 
 
 @pytest.mark.django_db

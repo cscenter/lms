@@ -8,7 +8,7 @@ from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, Venue
 from courses.utils import get_current_term_pair, get_term_by_index
-from users.factories import TeacherCenterFactory, StudentFactory
+from users.tests.factories import TeacherCenterFactory, StudentFactory
 
 __all__ = [
     "MetaCourseFactory", "SemesterFactory", "VenueFactory", "CourseFactory",

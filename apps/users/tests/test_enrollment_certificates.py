@@ -12,7 +12,7 @@ from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory
 from learning.settings import GradeTypes
 from learning.tests.mixins import MyUtilitiesMixin
-from users.factories import UserFactory, EnrollmentCertificateFactory, \
+from users.tests.factories import UserFactory, EnrollmentCertificateFactory, \
     StudentCenterFactory
 from users.models import User, EnrollmentCertificate
 

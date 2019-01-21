@@ -6,7 +6,7 @@ from django.urls import reverse
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory
 from courses.models import MetaCourse
 from users.constants import AcademicRoles
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 
 @pytest.mark.django_db

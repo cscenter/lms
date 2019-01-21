@@ -18,7 +18,7 @@ from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory, VenueFactory, SemesterFactory, CourseClassAttachmentFactory
 from courses.forms import CourseClassForm
 from courses.models import CourseClass
-from users.factories import TeacherCenterFactory
+from users.tests.factories import TeacherCenterFactory
 
 
 @pytest.mark.django_db

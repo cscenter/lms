@@ -5,7 +5,7 @@ from factory.fuzzy import FuzzyInteger, FuzzyDate
 
 from core.factories import CityFactory
 from library.models import Book, Stock, Borrow
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 
 class BookFactory(factory.DjangoModelFactory):

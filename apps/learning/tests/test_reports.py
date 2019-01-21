@@ -5,13 +5,13 @@ from django.urls import reverse
 from django.utils.encoding import smart_bytes
 
 from learning.tests.factories import SemesterFactory, CourseFactory, EnrollmentFactory
-from learning.projects.factories import ProjectFactory
+from learning.projects.tests.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import GradingSystems, StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
 from courses.utils import get_term_by_index
-from users.factories import SHADCourseRecordFactory, OnlineCourseRecordFactory, \
+from users.tests.factories import SHADCourseRecordFactory, OnlineCourseRecordFactory, \
     TeacherCenterFactory, StudentCenterFactory
 
 

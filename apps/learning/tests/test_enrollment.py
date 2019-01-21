@@ -15,7 +15,7 @@ from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseNewsNotification
 from core.constants import DATE_FORMAT_RU
 from core.timezone import now_local
-from users.factories import StudentCenterFactory, StudentClubFactory
+from users.tests.factories import StudentCenterFactory, StudentClubFactory
 
 
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)

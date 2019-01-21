@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from django.urls import reverse
 
 from core.admin import get_admin_url
-from admission.factories import InterviewFactory, \
+from admission.tests.factories import InterviewFactory, \
     InterviewStreamFactory, InterviewInvitationFactory
 from courses.tests.factories import VenueFactory
 

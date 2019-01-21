@@ -3,7 +3,7 @@
 # Copied from learning/tests/test_reports.
 import pytest
 
-from admission.factories import CampaignFactory, ApplicantFactory, \
+from admission.tests.factories import CampaignFactory, ApplicantFactory, \
     CommentFactory, InterviewFactory
 from admission.reports import AdmissionReport
 

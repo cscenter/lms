@@ -2,8 +2,8 @@ import pytest
 from django.urls import reverse
 from django.utils.encoding import smart_bytes
 
-from library.factories import BorrowFactory
-from users.factories import UserFactory, StudentCenterFactory
+from library.tests.factories import BorrowFactory
+from users.tests.factories import UserFactory, StudentCenterFactory
 
 
 # TODO: borrows tests. Например. Убедиться, что нельзя удалить книгу, если её кто-то занял из резерва.

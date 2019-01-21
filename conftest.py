@@ -11,7 +11,7 @@ from pytest_django.lazy_django import skip_if_no_django
 
 from core.models import City
 from users.constants import AcademicRoles
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 
 class TestClient(Client):

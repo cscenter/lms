@@ -27,7 +27,7 @@ from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import assert_login_redirect
 from courses.utils import get_current_term_pair
-from users.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
+from users.tests.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
     StudentCenterFactory, VolunteerFactory, ProjectReviewerFactory
 
 

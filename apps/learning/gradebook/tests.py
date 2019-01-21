@@ -23,7 +23,7 @@ from users.constants import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.utils import assert_login_redirect
 from learning.gradebook.views import _get_course
-from users.factories import TeacherCenterFactory, StudentCenterFactory, \
+from users.tests.factories import TeacherCenterFactory, StudentCenterFactory, \
     UserFactory
 
 
