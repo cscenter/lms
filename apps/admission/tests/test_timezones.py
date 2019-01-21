@@ -7,7 +7,7 @@ from django.urls import reverse
 from core.admin import get_admin_url
 from admission.factories import InterviewFactory, \
     InterviewStreamFactory, InterviewInvitationFactory
-from courses.factories import VenueFactory
+from courses.tests.factories import VenueFactory
 
 
 # FIXME: этот тест нужно переписать на city aware datetime field, изначально тест и был так написан, но потом был удалён invitation.stream

@@ -4,7 +4,7 @@ import pytest
 from django.urls import reverse
 from icalendar import Calendar, Event
 
-from courses.factories import CourseFactory, CourseClassFactory, \
+from courses.tests.factories import CourseFactory, CourseClassFactory, \
     AssignmentFactory
 from learning.tests.factories import EnrollmentFactory, EventFactory
 from users.factories import UserFactory, StudentFactory

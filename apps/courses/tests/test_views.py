@@ -9,7 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils import formats
 
-from courses.factories import CourseFactory, CourseNewsFactory, \
+from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
 from users.constants import AcademicRoles
 from users.factories import TeacherCenterFactory

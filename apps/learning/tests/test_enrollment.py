@@ -9,7 +9,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 from learning.tests.factories import EnrollmentFactory
-from courses.factories import SemesterFactory, CourseFactory, CourseNewsFactory, \
+from courses.tests.factories import SemesterFactory, CourseFactory, CourseNewsFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseNewsNotification

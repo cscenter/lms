@@ -1,7 +1,7 @@
 import pytest
 from django.utils.encoding import smart_bytes
 
-from courses.factories import SemesterFactory, CourseNewsFactory, \
+from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
     CourseTeacherFactory, CourseFactory, MetaCourseFactory, AssignmentFactory
 from courses.models import CourseNews
 from learning.tests.factories import EnrollmentFactory

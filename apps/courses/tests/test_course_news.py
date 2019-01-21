@@ -2,7 +2,7 @@ import factory
 import pytest
 from django.forms import model_to_dict
 
-from courses.factories import CourseFactory, CourseNewsFactory
+from courses.tests.factories import CourseFactory, CourseNewsFactory
 from courses.models import CourseNews
 from users.factories import TeacherCenterFactory
 

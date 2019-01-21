@@ -13,7 +13,7 @@ from django.utils import translation
 from django.utils.encoding import smart_text, force_text, smart_bytes
 
 from learning.tests.factories import AreaOfStudyFactory
-from courses.factories import CourseFactory
+from courses.tests.factories import CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin

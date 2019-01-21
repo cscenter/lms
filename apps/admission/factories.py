@@ -6,8 +6,7 @@ import factory
 import pytz
 from django.db.models.signals import post_save
 from django.utils import timezone
-from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate, \
-    FuzzyDateTime
+from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate
 
 from core.factories import UniversityFactory
 from core.models import City
@@ -15,7 +14,7 @@ from admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment, \
     InterviewSlot, InterviewStream, InterviewInvitation
 from admission.signals import post_save_interview
-from courses.factories import VenueFactory
+from courses.tests.factories import VenueFactory
 from users.constants import AcademicRoles
 from users.factories import UserFactory
 

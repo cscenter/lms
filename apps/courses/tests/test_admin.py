@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from django.urls import reverse
 
 from core.admin import get_admin_url
-from courses.factories import CourseFactory
+from courses.tests.factories import CourseFactory
 from courses.models import Assignment
 
 

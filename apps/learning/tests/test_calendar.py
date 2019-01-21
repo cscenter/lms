@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from learning.tests.factories import EventFactory, \
     EnrollmentFactory
-from courses.factories import CourseFactory, CourseClassFactory, VenueFactory
+from courses.tests.factories import CourseFactory, CourseClassFactory, VenueFactory
 from users.constants import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin

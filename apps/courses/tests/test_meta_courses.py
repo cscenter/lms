@@ -3,7 +3,7 @@ from django.conf import settings
 from django.forms import model_to_dict
 from django.urls import reverse
 
-from courses.factories import MetaCourseFactory, SemesterFactory, CourseFactory
+from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory
 from courses.models import MetaCourse
 from users.constants import AcademicRoles
 from users.factories import UserFactory

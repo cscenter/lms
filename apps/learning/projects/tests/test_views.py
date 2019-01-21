@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
-from courses.factories import SemesterFactory
+from courses.tests.factories import SemesterFactory
 from learning.projects.factories import ProjectFactory, ReportFactory, \
     ReportReviewFormFactory
 from learning.projects.models import Report, ProjectStudent

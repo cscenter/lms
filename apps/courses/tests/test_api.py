@@ -2,7 +2,7 @@ import pytest
 from django.urls import reverse
 
 from courses.models import CourseTeacher
-from courses.factories import SemesterFactory, CourseFactory
+from courses.tests.factories import SemesterFactory, CourseFactory
 from users.factories import TeacherCenterFactory
 
 

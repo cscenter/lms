@@ -13,7 +13,7 @@ from django.utils.encoding import smart_text
 from learning.tests.factories import StudentAssignmentFactory, AssignmentCommentFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
-from courses.factories import MetaCourseFactory, SemesterFactory, CourseFactory, \
+from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory, \
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment
