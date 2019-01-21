@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from learning.factories import NonCourseEventFactory, \
+from learning.factories import EventFactory, \
     EnrollmentFactory
 from courses.factories import CourseFactory, CourseClassFactory, VenueFactory
 from users.constants import AcademicRoles
@@ -48,9 +48,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
             .create_batch(5, course__teachers=[other_teacher],
                           date=this_month_date))
         venue = VenueFactory(city_id=teacher.city_id)
-        events = (
-            NonCourseEventFactory
-            .create_batch(2, date=this_month_date, venue=venue))
+        events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
         # teacher should see only his own classes and non-course events
         resp = self.client.get(reverse(self.url_name))
         classes = flatten_calendar_month_events(resp.context['calendar'])
@@ -125,6 +123,10 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         classes = flatten_calendar_month_events(
             self.client.get(next_month_url).context['calendar'])
         self.assertSameObjects(next_month_classes, classes)
+        venue = VenueFactory(city_id=student.city_id)
+        events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
+        response = self.client.get(reverse(self.url_name))
+        assert response.status_code == 200
 
 
 class CalendarFullSecurityTests(MyUtilitiesMixin, TestCase):

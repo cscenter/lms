@@ -41,11 +41,12 @@ from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index, \
     get_terms_for_calendar_month, grouper, get_co_from_query_params
 from courses.views.calendar import MonthEventsCalendarView
+from learning.calendar import LearningCalendarEvent
 from learning.forms import AssignmentCommentForm, AssignmentScoreForm, \
     AssignmentModalCommentForm
 from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
     AssignmentNotification, \
-    NonCourseEvent
+    Event
 from learning.permissions import course_access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT, \
     ASSIGNMENT_TASK_ATTACHMENT
@@ -68,7 +69,7 @@ __all__ = [
     'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
     'AssignmentCreateView', 'AssignmentUpdateView', 'AssignmentDeleteView',
     'AssignmentCommentUpdateView', 'AssignmentAttachmentDeleteView',
-    'NonCourseEventDetailView', 'AssignmentAttachmentDownloadView',
+    'EventDetailView', 'AssignmentAttachmentDownloadView',
 ]
 
 
@@ -102,13 +103,13 @@ class CalendarTeacherFullView(TeacherOnlyMixin, MonthEventsCalendarView):
         cities = self.get_teacher_cities(year, month)
         return chain(
             (CalendarEvent(e) for e in self._get_classes(year, month, cities)),
-            (CalendarEvent(e) for e in
-                self._get_non_course_events(year, month, cities))
+            (LearningCalendarEvent(e) for e in
+                self._get_events(year, month, cities))
         )
 
     @staticmethod
-    def _get_non_course_events(year, month, cities):
-        return (NonCourseEvent.objects
+    def _get_events(year, month, cities):
+        return (Event.objects
                 .for_calendar()
                 .in_cities(cities)
                 .in_month(year, month))
@@ -820,10 +821,10 @@ class AssignmentAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
         return self.object.assignment.get_update_url()
 
 
-class NonCourseEventDetailView(generic.DetailView):
-    model = NonCourseEvent
+class EventDetailView(generic.DetailView):
+    model = Event
     context_object_name = 'event'
-    template_name = "learning/noncourseevent_detail.html"
+    template_name = "learning/event_detail.html"
 
 
 class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):

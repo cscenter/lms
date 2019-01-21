@@ -8,7 +8,7 @@ from django.utils import timezone
 from courses.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    CourseNewsNotification, NonCourseEvent
+    CourseNewsNotification, Event
 from study_programs.models import AreaOfStudy
 from users.constants import AcademicRoles
 from users.factories import UserFactory, StudentCenterFactory
@@ -69,9 +69,9 @@ class CourseNewsNotificationFactory(factory.DjangoModelFactory):
     course_offering_news = factory.SubFactory(CourseNewsFactory)
 
 
-class NonCourseEventFactory(factory.DjangoModelFactory):
+class EventFactory(factory.DjangoModelFactory):
     class Meta:
-        model = NonCourseEvent
+        model = Event
 
     venue = factory.SubFactory(VenueFactory)
     name = factory.Sequence(lambda n: "Test event %03d" % n)

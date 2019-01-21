@@ -37,7 +37,7 @@ StudentAssignmentManager = _StudentAssignmentDefaultManager.from_queryset(
     StudentAssignmentQuerySet)
 
 
-class NonCourseEventQuerySet(query.QuerySet):
+class EventQuerySet(query.QuerySet):
     def for_calendar(self):
         if is_club_site():
             return self.none()

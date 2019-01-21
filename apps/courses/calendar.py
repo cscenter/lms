@@ -63,12 +63,7 @@ class CalendarEvent:
 
     @property
     def name(self):
-        # Avoid circular import
-        from learning.models import NonCourseEvent
-        if isinstance(self.event, NonCourseEvent):
-            return self.event.name
-        else:
-            return self.event.course.meta_course.name
+        return self.event.course.meta_course.name
 
     @property
     def description(self):

@@ -7,11 +7,12 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.utils import timezone
-from icalendar import vText, vUri, Calendar, Event, Timezone, TimezoneStandard
+from icalendar import vText, vUri, Calendar, Event as ICalendarEvent, \
+    Timezone, TimezoneStandard
 from icalendar.prop import vInline
 
 from courses.models import CourseClass, Assignment
-from learning.models import StudentAssignment, NonCourseEvent
+from learning.models import StudentAssignment, Event
 from users.models import User
 
 
@@ -89,7 +90,7 @@ class UserEventsICalendar(ABC):
         self.cal = cal
         events = events or self.get_events()
         for event in events:
-            evt = Event()
+            evt = ICalendarEvent()
             for k, v in event.items():
                 evt.add(k, v)
             self.cal.add_component(evt)
@@ -225,7 +226,7 @@ class EventsICalendar(UserEventsICalendar):
 
     def get_events(self):
         localize = self.timezone.localize
-        qs = (NonCourseEvent.objects
+        qs = (Event.objects
               .filter(date__gt=timezone.now())
               .select_related('venue'))
         for nce in qs:

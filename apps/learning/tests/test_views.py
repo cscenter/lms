@@ -5,6 +5,7 @@ import pytest
 import pytz
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
 from core.timezone import now_local
@@ -439,16 +440,17 @@ class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
         self.assertEqual(a_s1.pk, self.client.get(url2).context['next_a_s_pk'])
 
 
-class NonCourseEventDetailTests(MyUtilitiesMixin, TestCase):
-    def basic_test(self):
-        evt = NonCourseEventFactory.create()
-        url = evt.get_absolute_url()
-        resp = self.client.get(url)
-        self.assertContains(evt.name, resp)
-        self.assertContains(evt.venue.get_absolute_url(), resp)
-
-
 # Ok, py.test starts here
+
+@pytest.mark.django_db
+def test_events_smoke(client):
+    evt = EventFactory.create()
+    url = evt.get_absolute_url()
+    response = client.get(url)
+    assert response.status_code == 200
+    assert evt.name.encode() in response.content
+    assert smart_bytes(evt.venue.get_absolute_url()) in response.content
+
 
 # TODO: test CourseOffering edit-description page. returned more than one CourseOffering error if we have CO for kzn and spb
 
