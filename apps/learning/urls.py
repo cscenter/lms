@@ -15,7 +15,7 @@ from .views import \
     AssignmentTeacherDetailView, StudentAssignmentTeacherDetailView, \
     AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
     AssignmentAttachmentDeleteView, \
-    NonCourseEventDetailView,  \
+    EventDetailView,  \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
 from courses.views import CourseDetailView, CourseEditView, \
     CourseNewsCreateView, CourseNewsUpdateView, CourseNewsDeleteView, \
@@ -181,6 +181,6 @@ urlpatterns = [
 
     teaching_section_patterns,
 
-    url(r"^events/(?P<pk>\d+)/$", NonCourseEventDetailView.as_view(),
+    url(r"^events/(?P<pk>\d+)/$", EventDetailView.as_view(),
         name="non_course_event_detail"),
 ]

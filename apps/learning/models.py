@@ -25,7 +25,7 @@ from courses.models import MetaCourse, Course, CourseTeacher, CourseNews, Venue,
     CourseClass, Assignment
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
-    EnrollmentActiveManager, NonCourseEventQuerySet, StudentAssignmentManager
+    EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager
 from learning.settings import GradingSystems, GradeTypes
 
 logger = logging.getLogger(__name__)
@@ -418,8 +418,8 @@ class CourseNewsNotification(TimeStampedModel):
                         smart_text(self.course_offering_news)))
 
 
-class NonCourseEvent(TimeStampedModel):
-    objects = NonCourseEventQuerySet.as_manager()
+class Event(TimeStampedModel):
+    objects = EventQuerySet.as_manager()
     venue = models.ForeignKey(
         Venue,
         verbose_name=_("CourseClass|Venue"),

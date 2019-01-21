@@ -12,10 +12,11 @@ from courses.calendar import CalendarEvent
 from courses.models import CourseClass, Semester
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
+from learning.calendar import LearningCalendarEvent
 from learning.enrollment import course_failed_by_student
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment, \
-    NonCourseEvent
+    Event
 from learning.views import AssignmentProgressBaseView
 from learning.views.utils import get_student_city_code
 from users.mixins import StudentOnlyMixin
@@ -140,13 +141,13 @@ class CalendarStudentFullView(StudentOnlyMixin, MonthEventsCalendarView):
         return chain(
             (CalendarEvent(e) for e in
                 self._get_classes(year, month, student_city_code)),
-            (CalendarEvent(e) for e in
-                self._get_non_course_events(year, month, student_city_code))
+            (LearningCalendarEvent(e) for e in
+                self._get_events(year, month, student_city_code))
         )
 
     @staticmethod
-    def _get_non_course_events(year, month, city_code):
-        return (NonCourseEvent.objects
+    def _get_events(year, month, city_code):
+        return (Event.objects
                 .for_calendar()
                 .for_city(city_code)
                 .in_month(year, month))

@@ -6,7 +6,7 @@ from icalendar import Calendar, Event
 
 from courses.factories import CourseFactory, CourseClassFactory, \
     AssignmentFactory
-from learning.factories import EnrollmentFactory, NonCourseEventFactory
+from learning.factories import EnrollmentFactory, EventFactory
 from users.factories import UserFactory, StudentFactory
 from users.models import User
 
@@ -90,7 +90,7 @@ def test_events(client):
     cal = Calendar.from_ical(response.content)
     assert "События CSC" == cal['X-WR-CALNAME']
     # Create some content
-    nces = NonCourseEventFactory.create_batch(3)
+    nces = EventFactory.create_batch(3)
     response = client.get(reverse('ical_events'))
     cal = Calendar.from_ical(response.content)
     assert set(nce.name for nce in nces) == set(evt['SUMMARY']
