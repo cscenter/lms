@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from captcha.fields import ReCaptchaField
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper

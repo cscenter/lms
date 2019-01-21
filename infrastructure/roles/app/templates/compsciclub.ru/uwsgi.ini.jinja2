@@ -1,0 +1,34 @@
+[uwsgi]
+# Django-related settings
+chdir           = {{ repo_root }}/{{ apps_dir_name }}
+module          = {{ site_dir_name }}.wsgi:application
+virtualenv      = {{ virtualenv_root }}
+pythonpath      = %(chdir)
+pythonpath      = {{ repo_root }}
+env             = DJANGO_SETTINGS_MODULE={{ site_dir_name }}.settings.{{ app_environment }}
+env             = PYTHONIOENCODING=UTF-8
+env             = LC_ALL=en_US.UTF-8
+env             = LANG=en_US.UTF-8
+
+# process-related settings
+master          = true
+enable-threads  = true
+processes       = {{ processes_num }}
+socket          = /tmp/uwsgi_{{ site_dir_name }}.socket
+chmod-socket    = 666
+harakiri        = 20
+die-on-term     = true
+vacuum          = true
+stats           = /tmp/uwsgi_{{ site_dir_name }}_stats.socket
+uid             = {{ site_user }}
+gid             = {{ site_user_group }}
+# Logging can be disabled here since we use Sentry as a main logging handler in the app
+{% if log_to_file -%}
+logto           = /home/{{ site_user }}/site/logs/uwsgi.log
+log-date        = true
+log-maxsize     = 5242880
+logfile-chown   = true
+# Disable request logging, use nginx for that
+disable-logging = true
+{% endif -%}
+wait-for-socket-timeout = 600

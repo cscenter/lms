@@ -9,7 +9,7 @@ server {
     server_name {{ certbot_domains|join(' ') }};
 
     location /.well-known/acme-challenge/ {
-        alias {{ site_root }}/.well-known/acme-challenge/;
+        alias {{ repo_root }}/.well-known/acme-challenge/;
     }
 
     location / {
@@ -79,7 +79,7 @@ server {
     error_page 404 =404 @show_404;
 
     location @show_404 {
-        root {{ site_root }}/{{ apps_dir_name }}/templates/;
+        root {{ repo_root }}/{{ apps_dir_name }}/templates/;
         try_files /errors/404.html =404;
     }
 

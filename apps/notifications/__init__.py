@@ -1,7 +1,7 @@
 """
 How to register and send new notification:
     1. Create new notification type in admin. Add notification code to
-    django.conf.settings.NOTIFICATION_TYPES
+    notifications.constants.NOTIFICATION_TYPES
 
     2. Create module `notifications` in your app. Make sure your app added to
     django.conf.settings.INSTALLED_APPS or it won't be visible to registry.
@@ -95,8 +95,9 @@ import os
 import sys
 from enum import Enum
 
-from django.conf import settings
 from django.utils.module_loading import autodiscover_modules
+
+from notifications.constants import NOTIFICATION_TYPES
 
 
 def autodiscover():
@@ -118,4 +119,4 @@ def autodiscover():
 
 DEFAULT_TYPES = ["EMPTY", "LOG"]
 types = Enum(value='NotificationTypes',
-             names=(DEFAULT_TYPES + settings.NOTIFICATION_TYPES))
+             names=(DEFAULT_TYPES + NOTIFICATION_TYPES))

@@ -11,11 +11,12 @@
         site_user: "csclub"
         site_user_group: "shared"
         app_root: "/home/{{ site_user }}/site"
-        site_root: "{{ app_root }}/repo"
+        repo_root: "{{ app_root }}/repo"
         virtualenv_root: "{{ app_root }}/env"
-        static_root: "{{ site_root }}/apps/static"
+        static_root: "{{ repo_root }}/apps/static"
         media_root: "/shared/media"
         backup_root: "/shared/backup_tmp"
+        site_dir_name: "{{ main_domain|replace('.', '_') }}"
         apps_dir_name: apps
         app_settings: "csclub"
         app_environment: production

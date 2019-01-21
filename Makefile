@@ -12,7 +12,7 @@ run:
 	python -W once manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
 
 club:
-	python manage.py runserver --settings=csclub.settings.local 8002
+	python manage.py runserver --settings=compsciclub_ru.settings.local 8002
 
 run_flame:
 	python manage.py runserver_plus --nothreading --noreload --settings=$(PROJECT).settings.local $(PORT)
@@ -27,7 +27,7 @@ msg:
 # Should set apps in LOCALE_PATHS explicitly until patch been released
 msgcompile:
 	python manage.py compilemessages --settings=cscenter.settings.local
-	python manage.py compilemessages --settings=csclub.settings.local
+	python manage.py compilemessages --settings=compsciclub_ru.settings.local
 
 static:
 	python manage.py collectstatic --noinput $(DJANGO_POSTFIX)

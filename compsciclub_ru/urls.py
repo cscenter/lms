@@ -16,14 +16,13 @@ from users.tasks import subject_template_name, email_template_name, \
 from users.views import LoginView, LogoutView, \
     UserDetailView, UserUpdateView, EnrollmentCertificateCreateView, \
     EnrollmentCertificateDetailView
-from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView
+from learning.views.icalendar import ICalClassesView, ICalAssignmentsView
 from learning.views import CoursesListView
 from international_schools.views import InternationalSchoolsListView
 from learning.urls import meta_course_patterns, course_patterns, \
-    student_section_patterns, teaching_section_patterns, venues_patterns
+    venues_patterns
 from core.views import MarkdownRenderView
-from csclub.views import CalendarClubScheduleView, IndexView, TeachersView, \
+from compsciclub_ru.views import CalendarClubScheduleView, IndexView, TeachersView, \
     TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed
 
 admin.autodiscover()
@@ -108,8 +107,9 @@ urlpatterns += [
     url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
         name='user_update'),
 
-    student_section_patterns,
-    teaching_section_patterns,
+    url(r'^teaching/', include('learning.teaching.urls')),
+    url(r'^learning/', include('learning.studying.urls')),
+
     venues_patterns,
 
     url(r'^narnia/', admin.site.urls),
@@ -139,7 +139,6 @@ if settings.DEBUG:
         url(r'^500/$', server_error),
     ]
 
-# Note: htmlpages should be the last one
 urlpatterns += i18n_patterns(
     url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'),
     prefix_default_language=False
@@ -147,4 +146,4 @@ urlpatterns += i18n_patterns(
 
 # XXX: Remove after old.compsciclub.ru termination
 from django.conf.urls import handler404
-handler404 = 'csclub.views.custom_page_not_found'
+handler404 = 'compsciclub_ru.views.custom_page_not_found'

@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 upstream django_{{ site_user }} {
-    server unix:///tmp/uwsgi_{{ site_user }}.socket;
+    server unix:///tmp/uwsgi_{{ site_dir_name }}.socket;
 }
 {% if enable_https %}
 # If https is enabled, this server should be default for 80 port
@@ -9,7 +9,7 @@ server {
     server_name {{ certbot_domains|join(' ') }};
 
     location /.well-known/acme-challenge/ {
-        alias {{ site_root }}/.well-known/acme-challenge/;
+        alias {{ repo_root }}/.well-known/acme-challenge/;
     }
 
     location / {
@@ -80,7 +80,7 @@ server {
     error_page 404 =404 @show_404;
 
     location @show_404 {
-        root {{ site_root }}/{{ apps_dir_name }}/templates/;
+        root {{ repo_root }}/{{ apps_dir_name }}/templates/;
         try_files /errors/404.html =404;
     }
 

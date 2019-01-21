@@ -1,14 +1,15 @@
 """
 CS club app specific settings
 """
+import django
 
 from core.settings.base import *
 
 APP_DIR = Path(__file__).parents[1]
 
 SITE_ID = 2
-ROOT_URLCONF = 'csclub.urls'
-WSGI_APPLICATION = 'csclub.wsgi.application'
+ROOT_URLCONF = 'compsciclub_ru.urls'
+WSGI_APPLICATION = 'compsciclub_ru.wsgi.application'
 
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -25,7 +26,7 @@ MIDDLEWARE = [
 ]
 
 INSTALLED_APPS += [
-    'csclub',
+    'compsciclub_ru',
     'captcha',
     'registration',
     'international_schools.apps.Config',
@@ -93,4 +94,4 @@ RECAPTCHA_USE_SSL = True
 ACCOUNT_ACTIVATION_DAYS = 2
 INCLUDE_REGISTER_URL = False
 INCLUDE_AUTH_URLS = False
-REGISTRATION_FORM = 'csclub.forms.RegistrationUniqueEmailAndUsernameForm'
+REGISTRATION_FORM = 'compsciclub_ru.forms.RegistrationUniqueEmailAndUsernameForm'

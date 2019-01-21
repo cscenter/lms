@@ -1,7 +1,7 @@
 ---
 - name: LetsEncrypt Certbot directory exists
   file:
-    path: "{{ site_root }}/.well-known/acme-challenge"
+    path: "{{ repo_root }}/.well-known/acme-challenge"
     state: directory
     recurse: yes
     owner: "{{ site_user }}"
@@ -14,7 +14,7 @@
     {{ certbot_script }} certonly --webroot
     --noninteractive --agree-tos
     --email {{ admin_email }}
-    -w {{ site_root }}
+    -w {{ repo_root }}
     -d {{ certbot_domains|join(' -d ') }}
   args:
     creates: "{{ certbot_config_dir }}"
@@ -39,7 +39,7 @@
       {{ certbot_script }} certonly --webroot
       --noninteractive --agree-tos --quiet
       --email {{ admin_email }}
-      -w {{ site_root }}
+      -w {{ repo_root }}
       -d {{ certbot_domains|join(' -d ') }}
       --deploy-hook 'service nginx reload'
       --no-self-upgrade

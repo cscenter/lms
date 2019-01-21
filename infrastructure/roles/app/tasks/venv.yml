@@ -41,7 +41,7 @@
     VIRTUAL_ENV: "{{ virtualenv_root }}"
   command: "{{ virtualenv_root }}/bin/pipenv sync"
   args:
-    chdir: "{{ site_root }}"
+    chdir: "{{ repo_root }}"
   become: yes
   become_user: "{{ site_user }}"
 

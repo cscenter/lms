@@ -1,6 +1,7 @@
 """
 CS center app specific settings
 """
+import django
 
 from core.settings.base import *
 

@@ -12,7 +12,7 @@ Group={{ site_user_group }}
 KillSignal=SIGTERM
 Restart=always
 Environment=DJANGO_SETTINGS_MODULE={{ app_settings }}.settings.{{ app_environment }}
-ExecStart={{ virtualenv_root }}/bin/python {{ site_root }}/manage.py rqworker {{ worker_name }} --pythonpath='{{ site_root }}/{{ apps_dir_name }}'
+ExecStart={{ virtualenv_root }}/bin/python {{ repo_root }}/manage.py rqworker {{ worker_name }} --pythonpath='{{ repo_root }}/{{ apps_dir_name }}'
 
 [Install]
 WantedBy=multi-user.target

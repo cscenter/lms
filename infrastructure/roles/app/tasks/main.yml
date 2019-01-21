@@ -8,11 +8,12 @@
     - main_domain
     - site_user
     - site_user_group
-    - site_root
+    - repo_root
     - virtualenv_root
     - media_root
     - static_root
     - backup_root
+    - site_dir_name
     - apps_dir_name
     - app_settings
     - app_environment
@@ -28,6 +29,8 @@
     - rq_workers_target_service_name
     - processes_num
     - log_to_file
+
+# TODO: check uwsgi/nginx configs are exist
 
 - name: Create users and groups
   import_tasks: users.yml
@@ -62,16 +65,16 @@
 
 - name: Copy nginx config
   template:
-    src: nginx.conf/{{ main_domain }}.jinja2
-    dest: "/etc/nginx/sites-available/{{ site_user }}.conf"
+    src: "{{ main_domain }}/nginx.conf.jinja2"
+    dest: "/etc/nginx/sites-available/{{ main_domain }}.conf"
   tags:
     - nginx
   when: nginx_status.stat.exists
 
 - name: Symlink nginx config
   file:
-    src: "/etc/nginx/sites-available/{{ site_user }}.conf"
-    dest: "/etc/nginx/sites-enabled/{{ site_user }}.conf"
+    src: "/etc/nginx/sites-available/{{ main_domain }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ main_domain }}.conf"
     state: link
   tags:
     - nginx
@@ -105,8 +108,8 @@
 
 - name: Copy uwsgi config
   template:
-    src: uwsgi.ini.jinja2
-    dest: "/etc/uwsgi/vassals/{{ site_user }}.ini"
+    src: "{{ main_domain }}/uwsgi.ini.jinja2"
+    dest: "/etc/uwsgi/vassals/{{ main_domain }}.ini"
     owner: "{{ site_user }}"
   notify: restart_uwsgi
   tags:
