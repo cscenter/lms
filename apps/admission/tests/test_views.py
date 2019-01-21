@@ -1,5 +1,3 @@
-import urllib
-
 import pytest
 import datetime
 
@@ -10,16 +8,15 @@ from django.utils import timezone, formats
 from django.utils.timezone import now
 from post_office.models import Email
 
-from core.factories import CityFactory
 from core.models import City
 from core.settings.base import DEFAULT_CITY_CODE
-from admission.factories import ApplicantFactory, InterviewFactory, \
+from admission.tests.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
 from admission.forms import InterviewFromStreamForm
 from admission.models import Applicant, Interview, InterviewInvitation
 from core.timezone import now_local
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
 # TODO: Проверить время отправки напоминания, время/дату собеседования

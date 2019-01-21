@@ -7,7 +7,7 @@ from courses.calendar import WeekEventsCalendar, MonthEventsCalendar
 from courses.tests.factories import CourseClassFactory, CourseFactory
 from learning.tests.factories import EnrollmentFactory
 from learning.tests.utils import flatten_calendar_month_events
-from users.factories import TeacherCenterFactory, StudentCenterFactory, \
+from users.tests.factories import TeacherCenterFactory, StudentCenterFactory, \
     CuratorFactory, GraduateFactory, VolunteerFactory
 
 

@@ -3,10 +3,9 @@ This file demonstrates writing tests using the unittest module. These will pass
 when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
-from django.apps import apps
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 try:
     # Django >= 1.7
@@ -16,17 +15,12 @@ except ImportError:
     from django.test.utils import override_settings
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group
-from django.core.exceptions import ImproperlyConfigured
-from django.urls import reverse
 from django.utils.timezone import utc, localtime
 from django.utils import timezone
 import pytz
-import json
 
 from notifications.signals import notify
 from notifications.models import Notification
-from notifications.utils import id2slug
 
 
 class NotificationTest(TestCase):

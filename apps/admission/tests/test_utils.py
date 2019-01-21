@@ -3,7 +3,7 @@ import datetime
 import pytest
 from post_office.models import Email, STATUS as EMAIL_STATUS
 
-from admission.factories import InterviewFactory, InterviewerFactory, \
+from admission.tests.factories import InterviewFactory, InterviewerFactory, \
     CommentFactory
 from admission.models import Interview
 

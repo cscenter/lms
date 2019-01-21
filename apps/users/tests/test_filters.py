@@ -6,7 +6,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFa
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
 from courses.settings import SemesterTypes
-from users.factories import StudentCenterFactory, StudentClubFactory, \
+from users.tests.factories import StudentCenterFactory, StudentClubFactory, \
     UserFactory, VolunteerFactory, GraduateFactory
 
 SEARCH_URL = reverse('staff:student_search_json')

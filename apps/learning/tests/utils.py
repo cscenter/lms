@@ -1,7 +1,7 @@
 from django.test import SimpleTestCase
 
 from users.constants import AcademicRoles
-from users.factories import UserFactory
+from users.tests.factories import UserFactory
 
 # Workaround to use Django's assertRedirects()
 _STS = SimpleTestCase()

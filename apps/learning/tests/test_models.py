@@ -20,7 +20,7 @@ from learning.models import StudentAssignment
 from courses.models import Semester, CourseNews
 from courses.settings import SemesterTypes
 from courses.utils import get_term_start
-from users.factories import UserFactory, StudentCenterFactory, \
+from users.tests.factories import UserFactory, StudentCenterFactory, \
     TeacherCenterFactory
 
 

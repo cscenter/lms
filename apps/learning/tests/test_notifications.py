@@ -13,7 +13,7 @@ from learning.enrollment import course_failed_by_student
 from learning.tests.factories import *
 from learning.settings import StudentStatuses, GradeTypes
 from core.constants import DATE_FORMAT_RU
-from users.factories import TeacherCenterFactory
+from users.tests.factories import TeacherCenterFactory
 from .mixins import *
 
 

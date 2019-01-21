@@ -4,7 +4,7 @@ from django.forms import model_to_dict
 
 from courses.tests.factories import CourseFactory, CourseNewsFactory
 from courses.models import CourseNews
-from users.factories import TeacherCenterFactory
+from users.tests.factories import TeacherCenterFactory
 
 
 @pytest.mark.django_db

@@ -1,6 +1,6 @@
 import pytest
 
-from admission.factories import CampaignFactory, ContestFactory, \
+from admission.tests.factories import CampaignFactory, ContestFactory, \
     ApplicantFactory
 from admission.models import Contest
 

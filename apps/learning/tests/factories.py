@@ -11,7 +11,7 @@ from learning.models import StudentAssignment, \
     CourseNewsNotification, Event
 from study_programs.models import AreaOfStudy
 from users.constants import AcademicRoles
-from users.factories import UserFactory, StudentCenterFactory
+from users.tests.factories import UserFactory, StudentCenterFactory
 
 
 class AreaOfStudyFactory(factory.DjangoModelFactory):

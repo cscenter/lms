@@ -5,9 +5,9 @@ from __future__ import unicode_literals, absolute_import
 import math
 import pytest
 
-from learning.projects.factories import ReportFactory, ReviewFactory
+from learning.projects.tests.factories import ReportFactory, ReviewFactory
 from learning.projects.models import REVIEW_SCORE_FIELDS, Review
-from users.factories import ProjectReviewerFactory
+from users.tests.factories import ProjectReviewerFactory
 
 
 @pytest.mark.django_db

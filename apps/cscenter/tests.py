@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from users.factories import GraduateFactory
+from users.tests.factories import GraduateFactory
 
 
 @pytest.mark.django_db

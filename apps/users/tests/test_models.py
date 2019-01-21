@@ -6,7 +6,7 @@ from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.permissions import has_master_degree
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
-from users.factories import StudentFactory, CuratorFactory, UserFactory, \
+from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
     StudentCenterFactory
 
 

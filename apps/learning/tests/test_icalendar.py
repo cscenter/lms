@@ -7,7 +7,7 @@ from icalendar import Calendar, Event
 from courses.tests.factories import CourseFactory, CourseClassFactory, \
     AssignmentFactory
 from learning.tests.factories import EnrollmentFactory, EventFactory
-from users.factories import UserFactory, StudentFactory
+from users.tests.factories import UserFactory, StudentFactory
 from users.models import User
 
 

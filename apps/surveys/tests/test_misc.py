@@ -4,7 +4,7 @@ import pytest
 
 from courses.tests.factories import CourseFactory, CourseClassFactory
 from surveys.constants import FieldType, STATUS_PUBLISHED
-from surveys.factories import CourseSurveyFactory, FieldFactory, \
+from surveys.tests.factories import CourseSurveyFactory, FieldFactory, \
     FieldEntryFactory, FieldChoiceFactory, FormSubmissionFactory
 from surveys.forms import FormBuilder
 from surveys.models import FormSubmission, FieldEntry, Field
