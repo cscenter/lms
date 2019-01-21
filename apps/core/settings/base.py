@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 """
 from pathlib import Path
 
-import django
 import pytz
 
 from django.utils.translation import ugettext_lazy as _
@@ -220,24 +219,6 @@ RQ_QUEUES = {
     },
 }
 
-
-NOTIFICATION_TYPES = [
-    "NEW_PROJECT_REPORT",
-    "NEW_PROJECT_REPORT_COMMENT",
-    # All project reports checked by curators
-    "PROJECT_REPORTS_IN_REVIEW_STATE",
-    "PROJECT_REPORTING_STARTED",
-    "PROJECT_REPORTING_ENDED",
-    "PROJECT_REVIEWER_ENROLLED",
-    "PROJECT_REPORT_REVIEW_COMPLETED",
-    "PROJECT_REPORT_COMPLETED",
-    "NEW_ASSIGNMENT",
-    "NEW_ASSIGNMENT_NEWS",
-    "NEW_ASSIGNMENT_SUBMISSION",
-    "ASSIGNMENT_DEADLINE_UPDATED",
-    "NEW_ASSIGNMENT_SUBMISSION_COMMENT",
-]
-
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly'
@@ -258,11 +239,6 @@ WEBPACK_LOADER = {
         'STATS_FILE': str(ROOT_DIR / "public" / "webpack-stats-v2.json"),
     }
 }
-
-
-ADMIN_REORDER = [
-    ('learning', ["AreaOfStudy", "StudyProgram", "StudyProgramCourse"])
-]
 
 DATE_FORMAT = 'j E Y'
 

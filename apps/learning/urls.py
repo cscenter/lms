@@ -1,30 +1,20 @@
 from django.conf.urls import include, url
-from django.views.generic.base import RedirectView
 
-from learning.studying.views import TimetableView, \
-    StudentAssignmentStudentDetailView, StudentAssignmentListView, \
-    CalendarStudentFullView, CalendarStudentPersonalView
-from learning.teaching.views import TimetableView as TeacherTimetable
-from learning.views import CalendarTeacherFullView
-from .views import \
-    CalendarTeacherPersonalView, CourseVideoListView, \
-    CourseTeacherListView, \
-    CourseStudentListView, \
-    VenueListView, VenueDetailView, \
-    AssignmentTeacherListView, \
-    AssignmentTeacherDetailView, StudentAssignmentTeacherDetailView, \
-    AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
-    AssignmentAttachmentDeleteView, \
-    EventDetailView,  \
-    AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
-from courses.views import CourseNewsCreateView, CourseNewsUpdateView, CourseNewsDeleteView, \
+from courses.views import CourseNewsCreateView, CourseNewsUpdateView, \
+    CourseNewsDeleteView, \
     MetaCourseDetailView, MetaCourseUpdateView, CourseClassDetailView, \
     CourseClassCreateView, CourseClassUpdateView, \
     CourseClassAttachmentDeleteView, CourseClassDeleteView
 from courses.views.course import CourseDetailView, CourseEditView
+from learning.enrollment.views import CourseEnrollView, CourseUnenrollView
 from learning.views.course_views import CourseNewsUnreadNotificationsView, \
     CourseStudentsView
-from learning.enrollment.views import CourseEnrollView, CourseUnenrollView
+from .views import \
+    CourseVideoListView, \
+    VenueListView, VenueDetailView, \
+    AssignmentCreateView, AssignmentUpdateView, AssignmentDeleteView, \
+    AssignmentAttachmentDeleteView, \
+    EventDetailView
 
 meta_course_patterns = url(
     r"^courses/", include([
@@ -107,61 +97,6 @@ course_patterns = url(
         ])),
     ]), kwargs={"city_aware": True})
 
-teaching_section_patterns = url(
-    r'^teaching/', include([
-        url(r'^$',
-            RedirectView.as_view(pattern_name='assignment_list_teacher',
-                                 permanent=True),
-            name='teaching_base'),
-        url(r'^timetable/$', TeacherTimetable.as_view(),
-            name='timetable_teacher'),
-        url(r'^calendar/$', CalendarTeacherPersonalView.as_view(),
-            name='calendar_teacher'),
-        url(r'^full-calendar/$', CalendarTeacherFullView.as_view(),
-            name='calendar_full_teacher'),
-        url(r'^courses/$', CourseTeacherListView.as_view(),
-            name='course_list_teacher'),
-        url(r'^assignments/', include([
-            url(r'^$',
-                AssignmentTeacherListView.as_view(),
-                name='assignment_list_teacher'),
-            url(r'^(?P<pk>\d+)/$',
-                AssignmentTeacherDetailView.as_view(),
-                name='assignment_detail_teacher'),
-            url(r'^submissions/(?P<pk>\d+)/$',
-                StudentAssignmentTeacherDetailView.as_view(),
-                name='a_s_detail_teacher'),
-            url(r'^submissions/(?P<submission_pk>\d+)/comment/(?P<comment_pk>\d+)/update/$',
-                AssignmentCommentUpdateView.as_view(),
-                name='assignment_submission_comment_edit'),
-        ])),
-        url(r'^marks/', include('learning.gradebook.urls')),
-    ]))
-
-student_section_patterns = url(
-    r'^learning/', include([
-        url(r'^$',
-            RedirectView.as_view(pattern_name='assignment_list_student',
-                                 permanent=True),
-            name='learning_base'),
-        url(r'^courses/$', CourseStudentListView.as_view(),
-            name='course_list_student'),
-        url(r'^assignments/$', StudentAssignmentListView.as_view(),
-            name='assignment_list_student'),
-        url(r'^assignments/(?P<pk>\d+)/$', StudentAssignmentStudentDetailView.as_view(),
-            name='a_s_detail_student'),
-        # TODO: learning/assignments/attachments/?
-        url(r'^attachments/(?P<sid>[-\w]+)/(?P<file_name>.+)$',
-            AssignmentAttachmentDownloadView.as_view(),
-            name='assignment_attachments_download'),
-        url(r'^timetable/$', TimetableView.as_view(),
-            name='timetable_student'),
-        url(r'^calendar/$', CalendarStudentPersonalView.as_view(),
-            name='calendar_student'),
-        url(r'^full-calendar/$', CalendarStudentFullView.as_view(),
-            name='calendar_full_student'),
-    ]))
-
 venues_patterns = url(
     r'^venues/', include([
         url(r"^$", VenueListView.as_view(), name="venue_list"),
@@ -177,9 +112,9 @@ urlpatterns = [
 
     course_patterns,
 
-    student_section_patterns,
+    url(r'^learning/', include('learning.studying.urls')),
 
-    teaching_section_patterns,
+    url(r'^teaching/', include('learning.teaching.urls')),
 
     url(r"^events/(?P<pk>\d+)/$", EventDetailView.as_view(),
         name="non_course_event_detail"),

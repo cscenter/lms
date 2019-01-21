@@ -19,7 +19,7 @@ from vanilla import DetailView
 from core.settings.base import TIME_ZONES
 from core.timezone import Timezone, CityCode
 from courses.calendar import CalendarEvent
-from csclub import tasks
+from compsciclub_ru import tasks
 from learning.gallery.models import Image
 from courses.models import Course, Semester, CourseClass
 from courses.settings import SemesterTypes
