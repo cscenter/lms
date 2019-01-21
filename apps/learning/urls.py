@@ -17,11 +17,11 @@ from .views import \
     AssignmentAttachmentDeleteView, \
     EventDetailView,  \
     AssignmentAttachmentDownloadView, AssignmentCommentUpdateView
-from courses.views import CourseDetailView, CourseEditView, \
-    CourseNewsCreateView, CourseNewsUpdateView, CourseNewsDeleteView, \
+from courses.views import CourseNewsCreateView, CourseNewsUpdateView, CourseNewsDeleteView, \
     MetaCourseDetailView, MetaCourseUpdateView, CourseClassDetailView, \
     CourseClassCreateView, CourseClassUpdateView, \
     CourseClassAttachmentDeleteView, CourseClassDeleteView
+from courses.views.course import CourseDetailView, CourseEditView
 from learning.views.course_views import CourseNewsUnreadNotificationsView, \
     CourseStudentsView
 from learning.enrollment.views import CourseEnrollView, CourseUnenrollView
