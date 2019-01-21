@@ -112,8 +112,8 @@ def test_update_derivable_fields(curator, client, mocker):
 @pytest.mark.django_db
 def test_course_assignment_timezone(settings, client):
     """
-    Teacher of the course always must see timezone of course offering,
-    even if he is also learning in CS Center.
+    Course teacher always must see the timezone of the course,
+    even if he studying in CS Center.
     """
     teacher_nsk = TeacherCenterFactory(city_id='nsk')
     # 12 january 2017 23:59 (local time)

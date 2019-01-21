@@ -108,7 +108,7 @@ class CourseTab:
     # If there is a single view associated with this tab, this is the name of it
     view_name = None
 
-    # Content associated with tab
+    # Tab panel associated with the tab
     tab_panel = None
 
     def __init__(self, tab_dict):
