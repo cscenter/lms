@@ -133,7 +133,7 @@ LANGUAGES = [
 USE_I18N = True
 USE_L10N = True
 LOCALE_PATHS = [
-    str(PROJECT_DIR / "core" / "locale"),
+    str(ROOT_DIR / "locale"),
 ]
 
 USE_TZ = True

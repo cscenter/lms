@@ -4,7 +4,7 @@ CS club app specific settings
 
 from core.settings.base import *
 
-BASE_DIR = Path(__file__).parents[1]
+APP_DIR = Path(__file__).parents[1]
 
 SITE_ID = 2
 ROOT_URLCONF = 'csclub.urls'
@@ -38,7 +38,7 @@ CACHES = {
 }
 
 LOCALE_PATHS = [
-    str(BASE_DIR / "locale"),
+    str(APP_DIR / "locale"),
 ] + LOCALE_PATHS
 
 TEMPLATES = [
@@ -46,7 +46,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': False,
         'DIRS': [
-            str(BASE_DIR / "templates"),
+            str(APP_DIR / "templates"),
             str(PROJECT_DIR / "templates"),
             django.__path__[0] + '/forms/templates',
         ],
@@ -81,7 +81,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compsciclub.ru'
 
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
-NEWRELIC_CONF = str(BASE_DIR / "newrelic.ini")
+NEWRELIC_CONF = str(APP_DIR / "newrelic.ini")
 NEWRELIC_ENV = 'development'
 
 # Registration and Recaptcha settings

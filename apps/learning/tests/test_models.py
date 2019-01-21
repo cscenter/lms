@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils.encoding import smart_text
 
-from learning.factories import StudentAssignmentFactory, AssignmentCommentFactory, \
+from learning.tests.factories import StudentAssignmentFactory, AssignmentCommentFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
 from courses.factories import MetaCourseFactory, SemesterFactory, CourseFactory, \

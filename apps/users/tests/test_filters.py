@@ -1,7 +1,7 @@
 import pytest
 from django.urls import reverse
 
-from learning.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory
 from courses.factories import MetaCourseFactory, SemesterFactory, CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles

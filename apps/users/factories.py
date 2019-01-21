@@ -150,7 +150,7 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     student = factory.SubFactory(UserFactory,
                                  groups=[User.roles.STUDENT_CENTER])
     grade = factory.Iterator(list(GradeTypes.values))
-    semester = factory.SubFactory('learning.factories.SemesterFactory')
+    semester = factory.SubFactory('learning.tests.factories.SemesterFactory')
 
 
 class EnrollmentCertificateFactory(factory.DjangoModelFactory):

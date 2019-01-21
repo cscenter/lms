@@ -13,7 +13,7 @@ from core.utils import city_aware_reverse
 from courses.models import Course
 from courses.utils import get_current_term_pair
 from learning.enrollment import course_failed_by_student
-from learning.factories import *
+from learning.tests.factories import *
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.utils import check_url_security
 from users.factories import StudentFactory, StudentClubFactory, \

@@ -4,7 +4,7 @@ from django.utils.encoding import smart_bytes
 from courses.factories import SemesterFactory, CourseNewsFactory, \
     CourseTeacherFactory, CourseFactory, MetaCourseFactory, AssignmentFactory
 from courses.models import CourseNews
-from learning.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory
 from learning.settings import GradeTypes
 from users.factories import StudentCenterFactory, TeacherCenterFactory
 
