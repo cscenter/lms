@@ -5,7 +5,7 @@ import pytz
 from django.conf import settings
 from django.urls import reverse
 
-from courses.factories import CourseTeacherFactory, AssignmentFactory, \
+from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
     SemesterFactory, CourseFactory
 from users.factories import TeacherCenterFactory, StudentCenterFactory
 

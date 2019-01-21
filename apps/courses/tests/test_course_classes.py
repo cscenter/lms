@@ -14,7 +14,7 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
 from core.timezone import now_local
-from courses.factories import CourseClassFactory, CourseTeacherFactory, \
+from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory, VenueFactory, SemesterFactory, CourseClassAttachmentFactory
 from courses.forms import CourseClassForm
 from courses.models import CourseClass

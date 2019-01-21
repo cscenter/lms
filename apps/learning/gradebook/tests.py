@@ -12,7 +12,7 @@ from django.urls import reverse
 from django.utils.encoding import smart_bytes, force_bytes
 
 from learning.tests.factories import EnrollmentFactory
-from courses.factories import SemesterFactory, CourseFactory, AssignmentFactory
+from courses.tests.factories import SemesterFactory, CourseFactory, AssignmentFactory
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory
 from learning.gradebook.imports import AssignmentGradesImport

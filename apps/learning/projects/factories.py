@@ -3,10 +3,9 @@ from django.forms import model_to_dict
 from django.urls import reverse
 from factory.fuzzy import FuzzyInteger, FuzzyChoice
 
-from courses.factories import SemesterFactory
+from courses.tests.factories import SemesterFactory
 from learning.projects.forms import ReportReviewForm
-from learning.projects.models import Project, ProjectStudent, Report, Review, \
-    REVIEW_SCORE_FIELDS
+from learning.projects.models import Project, ProjectStudent, Report, Review
 from users.factories import UserFactory
 
 

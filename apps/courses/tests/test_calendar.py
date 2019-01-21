@@ -4,7 +4,7 @@ import pytest
 
 from courses.calendar import MonthEventsCalendar, CalendarEvent, \
     WeekEventsCalendar
-from courses.factories import CourseClassFactory, CourseFactory
+from courses.tests.factories import CourseClassFactory, CourseFactory
 from courses.models import CourseClass
 
 

@@ -4,7 +4,7 @@ from django.contrib.sites.models import Site
 from django.http.response import Http404
 
 from core.middleware import CurrentCityMiddleware
-from courses.factories import CourseFactory
+from courses.tests.factories import CourseFactory
 
 
 @pytest.mark.django_db

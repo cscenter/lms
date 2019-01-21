@@ -1,10 +1,8 @@
-import os
-
 import pytest
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 
-from courses.factories import CourseNewsFactory, SemesterFactory, CourseFactory, \
+from courses.tests.factories import CourseNewsFactory, SemesterFactory, CourseFactory, \
     CourseClassFactory, CourseClassAttachmentFactory, MetaCourseFactory, \
     AssignmentFactory, AssignmentAttachmentFactory
 from courses.models import Semester, Course, Assignment

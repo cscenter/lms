@@ -16,7 +16,7 @@ from django.utils.translation import ugettext as _
 from learning.enrollment import course_failed_by_student
 from learning.tests.factories import EnrollmentFactory, AssignmentCommentFactory, \
     StudentAssignmentFactory
-from courses.factories import SemesterFactory, CourseFactory, \
+from courses.tests.factories import SemesterFactory, CourseFactory, \
     CourseTeacherFactory, AssignmentFactory
 from learning.models import StudentAssignment
 from courses.models import Assignment, AssignmentAttachment

@@ -2,7 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from learning.tests.factories import EnrollmentFactory
-from courses.factories import SemesterFactory, CourseFactory
+from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.permissions import has_master_degree
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles

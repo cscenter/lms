@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from courses.factories import CourseFactory, CourseClassFactory
+from courses.tests.factories import CourseFactory, CourseClassFactory
 from surveys.constants import FieldType, STATUS_PUBLISHED
 from surveys.factories import CourseSurveyFactory, FieldFactory, \
     FieldEntryFactory, FieldChoiceFactory, FormSubmissionFactory
