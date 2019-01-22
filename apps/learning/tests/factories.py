@@ -48,8 +48,7 @@ class EnrollmentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Enrollment
 
-    student = factory.SubFactory(UserFactory,
-                                 groups=[AcademicRoles.STUDENT_CENTER])
+    student = factory.SubFactory(StudentCenterFactory)
     course = factory.SubFactory(CourseFactory)
 
 

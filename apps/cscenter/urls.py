@@ -2,7 +2,7 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
+from django.urls import path, re_path
 from django.views.generic import RedirectView
 from loginas import urls as loginas_urls
 
@@ -11,153 +11,85 @@ from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter import views as cscenter_views
 from htmlpages import views
 from learning.studying.views import UsefulListView, InternshipListView
-from users.forms import UserPasswordResetForm
-from users.tasks import html_email_template_name, email_template_name, \
-    subject_template_name
-
-from users.views import LoginView, LogoutView, TeacherDetailView, \
-    UserDetailView, UserUpdateView, EnrollmentCertificateCreateView, EnrollmentCertificateDetailView
-from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView
+from courses.views import CourseVideoListView
+from users.urls import auth_urls
+from users.views import TeacherDetailView
 
 admin.autodiscover()
 
 urlpatterns = [
-    url(r'^$', cscenter_views.IndexView.as_view(), name='index'),
-    url(r'^open-nsk/$', cscenter_views.OpenNskView.as_view(), name='open_nsk'),
-    url(r'^api/', include('api.urls')),
-    url(r'^robots\.txt$', robots, name='robotstxt'),
+    path('', cscenter_views.IndexView.as_view(), name='index'),
+    path('robots.txt', robots, name='robots_txt'),
+    path('open-nsk/', cscenter_views.OpenNskView.as_view(), name='open_nsk'),
+    path('api/', include('api.urls')),
+    path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
+    path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
     # Redirect from old url `/pages/questions/` to more appropriate
-    url(r'^pages/questions/$',
-        RedirectView.as_view(url='/enrollment/program/',
-                             permanent=True)),
-    url(r'^orgs/$', cscenter_views.TeamView.as_view(), name='orgs'),
-    url(r'^syllabus/$', cscenter_views.SyllabusView.as_view(), name='syllabus'),
-    url(r'^commenting-the-right-way/$', MarkdownHowToHelpView.as_view(),
-        name='commenting_the_right_way'),
-
-    url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(),
-        name="profile_update_image"),
-
-    url(r'^learning/useful/$', UsefulListView.as_view(), name='learning_useful'),
-    url(r'^learning/internships/$', InternshipListView.as_view(),
-        name='learning_internships'),
+    path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
+    path('orgs/', cscenter_views.TeamView.as_view(), name='orgs'),
+    path('syllabus/', cscenter_views.SyllabusView.as_view(), name='syllabus'),
 
 
-    url(r'^teachers/$', cscenter_views.TeachersView.as_view(), name='teachers'),
-    url(r'^teachers2/$', cscenter_views.TeachersV2View.as_view(), name='teachers_v2'),
-    url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
-        name='teacher_detail'),
-    url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
-        name='user_detail'),
-    url(r'^users/(?P<pk>\d+)/reference/add$',
-        EnrollmentCertificateCreateView.as_view(),
-        name='user_reference_add'),
-    url(r'^users/(?P<user_id>\d+)/reference/(?P<pk>\d+)$',
-        EnrollmentCertificateDetailView.as_view(),
-        name='user_reference_detail'),
-    url(r'^users/(?P<pk>\d+)/csc_classes.ics', ICalClassesView.as_view(),
-        name='user_ical_classes'),
-    url(r'^users/(?P<pk>\d+)/csc_assignments.ics',
-        ICalAssignmentsView.as_view(),
-        name='user_ical_assignments'),
-    url(r'^csc_events.ics', ICalEventsView.as_view(),
-        name='ical_events'),
-    url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
-        name='user_update'),
+    path('learning/useful/', UsefulListView.as_view(), name='learning_useful'),
+    path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
+
+
+    path('teachers/', cscenter_views.TeachersView.as_view(), name='teachers'),
+    path('teachers2/', cscenter_views.TeachersV2View.as_view(), name='teachers_v2'),
+    path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
+
+    path('', include(auth_urls)),
+    # FIXME: move under users/ namespace
+    path('profile-update-image/', AjaxProfileImageUploader.as_view(), name="profile_update_image"),
+    path('', include('users.urls')),
+
     # Alumni
-    url(r'^alumni2/$', cscenter_views.AlumniV2View.as_view(), name='alumni_v2'),
-    url(r'^alumni/$', cscenter_views.AlumniView.as_view(), name='alumni'),
-    url(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', cscenter_views.AlumniView.as_view(),
-        name='alumni_by_area_of_study'),
-    url(r'^(?P<year>201[3-7])/$', cscenter_views.AlumniByYearView.as_view(),
-        name='alumni_memory'),
-    url(r'^(?P<year>20[0-9]{2})/$', cscenter_views.AlumniHonorBoardView.as_view(),
-        name='alumni_honor'),
+    path('alumni2/', cscenter_views.AlumniV2View.as_view(), name='alumni_v2'),
+    path('alumni/', cscenter_views.AlumniView.as_view(), name='alumni'),
+    re_path(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', cscenter_views.AlumniView.as_view(), name='alumni_by_area_of_study'),
+    re_path(r'^(?P<year>201[3-7])/$', cscenter_views.AlumniByYearView.as_view(), name='alumni_memory'),
+    re_path(r'^(?P<year>20[0-9]{2})/$', cscenter_views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
 
-    url(r'^notifications/', include("notifications.urls")),
-    url(r'^staff/', include("staff.urls")),
+    path('notifications/', include("notifications.urls")),
+    path('staff/', include("staff.urls")),
+    path('stats/', include("stats.urls")),
+    path('surveys/', include("surveys.urls")),
+    path('library/', include("library.urls")),
+    path('faq/', cscenter_views.QAListView.as_view(), name='faq'),
+    path('testimonials/', cscenter_views.TestimonialsListView.as_view(), name='testimonials'),
+    path('testimonials2/', cscenter_views.TestimonialsListV2View.as_view(), name='testimonials_v2'),
 
-    url(r'^stats/', include("stats.urls")),
-
-    url(r'^surveys/', include("surveys.urls")),
-
-    url(r'^library/', include("library.urls")),
-    url(r'^faq/$', cscenter_views.QAListView.as_view(), name='faq'),
-    url(r'^testimonials/$', cscenter_views.TestimonialsListView.as_view(),
-        name='testimonials'),
-    url(r'^testimonials2/$',
-        cscenter_views.TestimonialsListV2View.as_view(),
-        name='testimonials_v2'),
-
-    url(r'^login/$', LoginView.as_view(), name='login'),
-    url(r'^logout/$', LogoutView.as_view(), name='logout'),
-    url(r'^users/password_change$',
-        auth_views.PasswordChangeView.as_view(),
-        name='password_change'),
-    url(r'^users/password_change/done$',
-        auth_views.PasswordChangeDoneView.as_view(),
-        name='password_change_done'),
-    url(r'^users/password_reset$',
-        auth_views.PasswordResetView.as_view(
-            form_class=UserPasswordResetForm,
-            email_template_name=email_template_name,
-            html_email_template_name=html_email_template_name,
-            subject_template_name=subject_template_name),
-        name='password_reset'),
-    url(r'^users/password_reset/done$',
-        auth_views.PasswordResetDoneView.as_view(),
-        name='password_reset_done'),
-    url(r'^users/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        auth_views.PasswordResetConfirmView.as_view(),
-        name='password_reset_confirm'),
-    url(r'^users/reset/done$',
-        auth_views.PasswordResetCompleteView.as_view(),
-        name='password_reset_complete'),
-
-    url(r'^tools/markdown/preview/$', MarkdownRenderView.as_view(),
-        name='render_markdown'),
-    url(r"^courses/$", cscenter_views.CourseOfferingsView.as_view(), name="course_list"),
-    url(r'^', include('online_courses.urls')),
-    url(r'^', include('learning.urls')),
-    url(r'^', include('admission.urls')),
-    url(r'^', include('learning.projects.urls')),
-    url(r'^narnia/', admin.site.urls),
-    url(r'^narnia/', include(loginas_urls)),
+    path('courses/', cscenter_views.CourseOfferingsView.as_view(), name="course_list"),
+    path('', include('courses.urls')),
+    path('', include('online_courses.urls')),
+    path('videos/', CourseVideoListView.as_view(), name='course_video_list'),
+    path('', include('learning.urls')),
+    path('', include('admission.urls')),
+    path('', include('learning.projects.urls')),
+    path('narnia/', admin.site.urls),
+    path('narnia/', include(loginas_urls)),
     # TODO: remove after testing
-    url(r'^', include('admission_test.urls')),
+    path('', include('admission_test.urls')),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-if 'rosetta' in settings.INSTALLED_APPS:
-    urlpatterns += [url(r'^rosetta/', include('rosetta.urls'))]
-
 if settings.DEBUG:
     import debug_toolbar
-    from django.views.defaults import page_not_found, bad_request, \
-        permission_denied, server_error
+    from django.conf.urls import handler400, handler403, handler404, handler500
     urlpatterns += [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        path('__debug__/', include(debug_toolbar.urls)),
+        path('400/', handler400, kwargs={'exception': Exception("400")}),
+        path('403/', handler403, kwargs={'exception': Exception("403")}),
+        path('404/', handler404, kwargs={'exception': Exception("404")}),
+        path('500/', handler500),
     ]
-
-    # This allows the error pages to be debugged during development, just visit
-    # these url in browser to see how these error pages look like.
-    urlpatterns += [
-        url(r'^400/$', bad_request,
-            kwargs={'exception': Exception("Bad request")}),
-        url(r'^403/$', permission_denied,
-            kwargs={'exception': Exception("Forbidden"),
-                    'template_name': "errors/403.html"}),
-        url(r'^404/$', page_not_found,
-            kwargs={'exception': Exception("Page not Found"),
-                    'template_name': "errors/404.html"}),
-        url(r'^500/$', server_error),
-    ]
+    if 'rosetta' in settings.INSTALLED_APPS:
+        urlpatterns += [path('rosetta/', include('rosetta.urls'))]
 
 # Required `is_staff` only. Mb restrict to `is_superuser`?
 urlpatterns += [
-    url(r'^narnia/django-rq/', include('django_rq.urls')),
+    path('narnia/django-rq/', include('django_rq.urls')),
 ]
 
 # Note: htmlpages should be the last one
-urlpatterns += [url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages')]
+urlpatterns += [re_path(r'^(?P<url>.*/)$', views.flatpage, name='html_pages')]

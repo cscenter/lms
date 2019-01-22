@@ -3,147 +3,77 @@ from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
+from django.urls import path
 from loginas import urls as loginas_urls
 
 from ajaxuploader.views import AjaxProfileImageUploader
-from htmlpages import views
-
-from core.views import MarkdownHowToHelpView, robots
-from users.forms import UserPasswordResetForm
-from users.tasks import subject_template_name, email_template_name, \
-    html_email_template_name
-from users.views import LoginView, LogoutView, \
-    UserDetailView, UserUpdateView, EnrollmentCertificateCreateView, \
-    EnrollmentCertificateDetailView
-from learning.views.icalendar import ICalClassesView, ICalAssignmentsView
-from learning.views import CoursesListView
-from international_schools.views import InternationalSchoolsListView
-from learning.urls import meta_course_patterns, course_patterns, \
-    venues_patterns
-from core.views import MarkdownRenderView
-from compsciclub_ru.views import CalendarClubScheduleView, IndexView, TeachersView, \
+from compsciclub_ru.views import CalendarClubScheduleView, IndexView, \
+    TeachersView, \
     TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed
+from core.views import MarkdownHowToHelpView, robots
+from core.views import MarkdownRenderView
+from htmlpages import views
+from international_schools.views import InternationalSchoolsListView
+from learning.views import CoursesListView
+from users.urls import auth_urls
 
 admin.autodiscover()
 
 urlpatterns = i18n_patterns(
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^commenting-the-right-way/$', MarkdownHowToHelpView.as_view(),
-        name='commenting_the_right_way'),
-    url(r"^courses/$", CoursesListView.as_view(), name="course_list"),
-    meta_course_patterns,
-    course_patterns,
 
-    url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(),
-        name="profile_update_image"),
-    # Schedule
-    url(r"^schedule/$", CalendarClubScheduleView.as_view(),
-        name="public_schedule"),
-    url(r"^schedule/classes.ics$", ClubClassesFeed(),
-        name="public_schedule_classes_ics"),
-    # Registration
-    url(r'^register/$', AsyncEmailRegistrationView.as_view(),
-        name='registration_register'),
-    url(r'^', include('registration.backends.default.urls')),
-    # Teachers/Lecturers
+    path('register/', AsyncEmailRegistrationView.as_view(), name='registration_register'),
+    path('', include('registration.backends.default.urls')),
+    path('', include(auth_urls)),
+
+    path("schedule/", CalendarClubScheduleView.as_view(), name="public_schedule"),
+    path("schedule/classes.ics", ClubClassesFeed(), name="public_schedule_classes_ics"),
+
+    url(r"^courses/$", CoursesListView.as_view(), name="course_list"),
+
+    path('', include('learning.enrollment.urls')),
+    path('', include('courses.urls')),
+
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
-    url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(),
-        name='teacher_detail'),
-    # International schools
-    url(r"^schools/$", InternationalSchoolsListView.as_view(),
-        name="international_schools_list"),
-    # Auth
-    url(r'^login/$', LoginView.as_view(), name='login'),
-    url(r'^users/password_change$',
-        auth_views.PasswordChangeView.as_view(),
-        name='password_change'),
-    url(r'^users/password_change/done$',
-        auth_views.PasswordChangeDoneView.as_view(),
-        name='password_change_done'),
-    url(r'^users/password_reset$',
-        auth_views.PasswordResetView.as_view(
-            form_class=UserPasswordResetForm,
-            email_template_name=email_template_name,
-            html_email_template_name=html_email_template_name,
-            subject_template_name=subject_template_name),
-        name='password_reset'),
-    url(r'^users/password_reset/done$',
-        auth_views.PasswordResetDoneView.as_view(),
-        name='password_reset_done'),
-    url(r'^users/reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',
-        auth_views.PasswordResetConfirmView.as_view(),
-        name='password_reset_confirm'),
-    url(r'^users/reset/done$',
-        auth_views.PasswordResetCompleteView.as_view(),
-        name='password_reset_complete'),
+    url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail'),
+    url(r"^schools/$", InternationalSchoolsListView.as_view(), name="international_schools_list"),
+
+    url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(), name="profile_update_image"),
     prefix_default_language=False
 )
 
 urlpatterns += [
-    url(r'^robots\.txt$', robots, name='robotstxt'),
-    url(r'^logout/$', LogoutView.as_view(permanent=False), name='logout'),
-    url(r'^tools/markdown/preview/$',
-        MarkdownRenderView.as_view(),
-        name='render_markdown'),
+    path('robots.txt', robots, name='robots_txt'),
+    path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
+    path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
 
     url(r'^notifications/', include("notifications.urls")),
 
-    url(r'^users/(?P<pk>\d+)/$', UserDetailView.as_view(),
-        name='user_detail'),
+    path('', include('users.urls')),
 
-    # Common for club and center, but not related to learning app
-    url(r'^users/(?P<pk>\d+)/reference/add$',
-        EnrollmentCertificateCreateView.as_view(),
-        name='user_reference_add'),
-    url(r'^users/(?P<user_id>\d+)/reference/(?P<pk>\d+)$',
-        EnrollmentCertificateDetailView.as_view(),
-        name='user_reference_detail'),
-    url(r'^users/(?P<pk>\d+)/csc_classes.ics', ICalClassesView.as_view(),
-        name='user_ical_classes'),
-    url(r'^users/(?P<pk>\d+)/csc_assignments.ics',
-        ICalAssignmentsView.as_view(),
-        name='user_ical_assignments'),
-    url(r'^users/(?P<pk>\d+)/edit$', UserUpdateView.as_view(),
-        name='user_update'),
+    path('teaching/', include('learning.teaching.urls')),
+    path('learning/', include('learning.studying.urls')),
 
-    url(r'^teaching/', include('learning.teaching.urls')),
-    url(r'^learning/', include('learning.studying.urls')),
-
-    venues_patterns,
-
-    url(r'^narnia/', admin.site.urls),
-    url(r'^narnia/', include(loginas_urls)),
+    path('narnia/', admin.site.urls),
+    path('narnia/', include(loginas_urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-if 'rosetta' in settings.INSTALLED_APPS:
-    urlpatterns += [url(r'^rosetta/', include('rosetta.urls'))]
 
 if settings.DEBUG:
     import debug_toolbar
-    from django.views.defaults import page_not_found, bad_request, \
-        permission_denied, server_error
+    from django.conf.urls import handler400, handler403, handler404, handler500
     urlpatterns += [
-        url(r'^__debug__/', include(debug_toolbar.urls)),
+        path('__debug__/', include(debug_toolbar.urls)),
+        path('400/', handler400, kwargs={'exception': Exception("400")}),
+        path('403/', handler403, kwargs={'exception': Exception("403")}),
+        path('404/', handler404, kwargs={'exception': Exception("404")}),
+        path('500/', handler500),
     ]
-
-    # This allows the error pages to be debugged during development, just visit
-    # these url in browser to see how these error pages look like.
-    urlpatterns += [
-        url(r'^400/$', bad_request,
-            kwargs={'exception': Exception("Page not Found")}),
-        url(r'^403/$', permission_denied,
-            kwargs={'exception': Exception("Page not Found")}),
-        url(r'^404/$', page_not_found,
-            kwargs={'exception': Exception("Page not Found")}),
-        url(r'^500/$', server_error),
-    ]
+    if 'rosetta' in settings.INSTALLED_APPS:
+        urlpatterns += [path('rosetta/', include('rosetta.urls'))]
 
 urlpatterns += i18n_patterns(
     url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'),
     prefix_default_language=False
 )
 
-# XXX: Remove after old.compsciclub.ru termination
-from django.conf.urls import handler404
 handler404 = 'compsciclub_ru.views.custom_page_not_found'

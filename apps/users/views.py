@@ -6,6 +6,7 @@ from collections import OrderedDict
 from braces.views import LoginRequiredMixin
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth import views
 from django.db.models import Prefetch, Count
 from django.http import HttpResponseRedirect, Http404
 from django.urls import reverse
@@ -23,8 +24,11 @@ from learning.models import StudentAssignment, \
 from study_programs.models import StudyProgram
 from courses.models import Course, Semester
 from learning.settings import GradeTypes
+from users.forms import UserPasswordResetForm
 from users.mixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
+from users.tasks import email_template_name, html_email_template_name, \
+    subject_template_name
 from .forms import LoginForm, UserProfileForm, EnrollmentCertificateCreateForm
 from .models import User, EnrollmentCertificate
 
@@ -82,8 +86,7 @@ class LoginView(generic.FormView):
             return self.form_invalid(form)
 
 
-class LogoutView(LoginRequiredMixin,
-                 generic.RedirectView):
+class LogoutView(LoginRequiredMixin, generic.RedirectView):
     redirect_field_name = auth.REDIRECT_FIELD_NAME
 
     def get(self, request, *args, **kwargs):
@@ -250,17 +253,17 @@ class EnrollmentCertificateCreateView(ProtectedFormMixin, generic.CreateView):
 
 class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
     model = EnrollmentCertificate
+    pk_url_kwarg = 'reference_pk'
     template_name = "users/reference_detail.html"
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_context_data(self, **kwargs):
         student_info = (User.objects
                         .students_info(exclude_grades=[
                             GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED
                         ])
                         .get(pk=self.object.student.pk))
         enrollments = OrderedDict()
-        # From duplicated enrollments get one with higher grade
+        # Among enrollments for the same course get one with the highest grade
         for e in student_info.enrollments:
             if e.created > self.object.created:
                 continue
@@ -270,8 +273,17 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
                     enrollments[meta_course_id] = e
             else:
                 enrollments[meta_course_id] = e
-        context['user_enrollments'] = enrollments
-        context['shads'] = filter(lambda x: x.created < self.object.created,
-                                  student_info.shads)
-
+        context = {
+            'object': self.object,
+            'user_enrollments': enrollments,
+            'shads': filter(lambda x: x.created < self.object.created,
+                            student_info.shads)
+        }
         return context
+
+
+pass_reset_view = views.PasswordResetView.as_view(
+    form_class=UserPasswordResetForm,
+    email_template_name=email_template_name,
+    html_email_template_name=html_email_template_name,
+    subject_template_name=subject_template_name)

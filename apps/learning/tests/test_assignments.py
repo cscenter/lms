@@ -5,7 +5,6 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
-from django.forms import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone, formats
@@ -167,11 +166,6 @@ def test_security_course_detail(client):
 def test_assignment_contents(client):
     teacher = TeacherCenterFactory()
     student = StudentCenterFactory()
-    # XXX: Unexpected Segfault when running pytest.
-    # Move this test from ASTeacherDetailTests cls.
-    # No idea why it's happening on login action
-    # if assignment `notify_teachers` field not specified.
-    # Problem can be related to pytest, django tests or factory-boy
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory.create(course=co)
@@ -231,106 +225,6 @@ def test_studentassignment_first_student_comment_at(curator):
     AssignmentCommentFactory.create(student_assignment=sa, author=student)
     sa.refresh_from_db()
     assert sa.first_student_comment_at == first_student_comment_at
-
-
-class AssignmentCRUDTests(MyUtilitiesMixin, TestCase):
-    def test_security(self):
-        teacher = TeacherCenterFactory()
-        co = CourseFactory.create(teachers=[teacher])
-        form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
-        form.update({'course': co.pk,
-                     'attached_file': None})
-        url = co.get_create_assignment_url()
-        self.assertLoginRedirect(url)
-        self.assertPOSTLoginRedirect(url, form)
-        test_groups = [
-            [],
-            [AcademicRoles.STUDENT_CENTER],
-        ]
-        for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
-            self.assertLoginRedirect(url)
-            self.assertPOSTLoginRedirect(url, form)
-            self.doLogout()
-        a = AssignmentFactory.create()
-        url = a.get_update_url()
-        self.assertLoginRedirect(url)
-        self.assertPOSTLoginRedirect(url, form)
-        test_groups = [
-            [],
-            [AcademicRoles.TEACHER_CENTER],
-            [AcademicRoles.STUDENT_CENTER],
-        ]
-        for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
-            self.assertLoginRedirect(url)
-            self.assertPOSTLoginRedirect(url, form)
-            self.doLogout()
-        url = a.get_delete_url()
-        self.assertLoginRedirect(url)
-        self.assertPOSTLoginRedirect(url, form)
-        test_groups = [
-            [],
-            [AcademicRoles.TEACHER_CENTER],
-            [AcademicRoles.STUDENT_CENTER],
-        ]
-        for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
-            self.assertLoginRedirect(url)
-            self.assertPOSTLoginRedirect(url, form)
-            self.doLogout()
-
-    def test_create(self):
-        teacher = TeacherCenterFactory()
-        CourseFactory.create_batch(3, teachers=[teacher])
-        co = CourseFactory.create(teachers=[teacher])
-        form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
-        deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
-        deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
-        form.update({'course': co.pk,
-                     'attached_file': None,
-                     'deadline_at_0': deadline_date,
-                     'deadline_at_1': deadline_time})
-        url = co.get_create_assignment_url()
-        self.doLogin(teacher)
-        self.client.post(url, form)
-        assert Assignment.objects.count() == 1
-
-    def test_update(self):
-        teacher = TeacherCenterFactory()
-        co = CourseFactory.create(teachers=[teacher])
-        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
-        for student in students:
-            EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course=co)
-        form = model_to_dict(a)
-        deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
-        deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
-        form.update({'title': a.title + " foo42bar",
-                     'course': co.pk,
-                     'attached_file': None,
-                     'deadline_at_0': deadline_date,
-                     'deadline_at_1': deadline_time})
-        url = a.get_update_url()
-        list_url = reverse('assignment_list_teacher')
-        self.doLogin(teacher)
-        self.assertNotContains(self.client.get(list_url), form['title'])
-        self.assertRedirects(self.client.post(url, form),
-                             reverse("assignment_detail_teacher", args=[a.pk]))
-        # Show student assignments without comments
-        self.assertContains(self.client.get( list_url + "?status=all"), form['title'])
-
-    def test_delete(self):
-        teacher = TeacherCenterFactory()
-        co = CourseFactory.create(teachers=[teacher])
-        a = AssignmentFactory.create(course=co)
-        url = a.get_delete_url()
-        list_url = reverse('assignment_list_teacher')
-        self.doLogin(teacher)
-        self.assertContains(self.client.get(list_url), a.title)
-        self.assertContains(self.client.get(url), a.title)
-        self.assertRedirects(self.client.post(url), list_url)
-        self.assertNotContains(self.client.get(list_url), a.title)
 
 
 class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):

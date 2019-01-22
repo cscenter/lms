@@ -8,7 +8,7 @@ from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, Venue
 from courses.utils import get_current_term_pair, get_term_by_index
-from users.tests.factories import TeacherCenterFactory, StudentFactory
+from users.tests.factories import TeacherCenterFactory
 
 __all__ = [
     "MetaCourseFactory", "SemesterFactory", "VenueFactory", "CourseFactory",
@@ -110,7 +110,7 @@ class CourseNewsFactory(factory.DjangoModelFactory):
 
     course = factory.SubFactory(CourseFactory)
     title = factory.Sequence(lambda n: "Important news about testing %03d" % n)
-    author = factory.SubFactory(StudentFactory)
+    author = factory.SubFactory(TeacherCenterFactory)
     text = factory.Sequence(lambda n: ("Suddenly it turned out that testing "
                                        "(%03d) can be useful!" % n))
 

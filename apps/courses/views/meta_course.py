@@ -11,6 +11,7 @@ __all__ = ('MetaCourseDetailView', 'MetaCourseUpdateView')
 
 class MetaCourseDetailView(generic.DetailView):
     model = MetaCourse
+    slug_url_kwarg = 'course_slug'
     template_name = "courses/meta_detail.html"
     context_object_name = 'meta_course'
 
@@ -32,6 +33,7 @@ class MetaCourseDetailView(generic.DetailView):
 class MetaCourseUpdateView(CuratorOnlyMixin, ProtectedFormMixin,
                            generic.UpdateView):
     model = MetaCourse
+    slug_url_kwarg = 'course_slug'
     template_name = "courses/simple_crispy_form.html"
     form_class = CourseForm
 
