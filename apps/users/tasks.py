@@ -8,6 +8,7 @@ from django_rq import job
 
 logger = logging.getLogger(__name__)
 
+# FIXME: move to constants
 html_email_template_name = None
 email_template_name = 'emails/password_reset.html'
 subject_template_name = 'registration/password_reset_subject.txt'

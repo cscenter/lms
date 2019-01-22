@@ -16,7 +16,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Q, Prefetch, When, Value, Case, \
     prefetch_related_objects
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
-    HttpResponseRedirect, HttpResponseForbidden
+    HttpResponseForbidden
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -24,7 +24,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 from nbconvert import HTMLExporter
-from vanilla import CreateView, UpdateView, DeleteView, ListView, TemplateView
+from vanilla import CreateView, TemplateView
 
 import courses.utils
 from core import comment_persistence
@@ -32,14 +32,13 @@ from core.exceptions import Redirect
 from core.settings.base import FOUNDATION_YEAR
 from core.timezone import Timezone, CityCode
 from core.utils import hashids, render_markdown, is_club_site
-from core.views import ProtectedFormMixin, LoginRequiredMixin
+from core.views import LoginRequiredMixin
 from courses.calendar import CalendarEvent
-from courses.forms import AssignmentForm
-from courses.models import Course, Semester, Venue, CourseClass, \
+from courses.models import Course, Semester, CourseClass, \
     Assignment, AssignmentAttachment
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index, \
-    get_terms_for_calendar_month, grouper, get_co_from_query_params
+    get_terms_for_calendar_month
 from courses.views.calendar import MonthEventsCalendarView
 from learning.calendar import LearningCalendarEvent
 from learning.forms import AssignmentCommentForm, AssignmentScoreForm, \
@@ -65,11 +64,9 @@ __all__ = [
     # views
     'CalendarTeacherFullView', 'CalendarTeacherPersonalView',
     'CoursesListView', 'CourseTeacherListView', 'CourseStudentListView',
-    'CourseVideoListView', 'VenueListView', 'VenueDetailView', 'AssignmentTeacherListView',
+    'AssignmentTeacherListView',
     'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
-    'AssignmentCreateView', 'AssignmentUpdateView', 'AssignmentDeleteView',
-    'AssignmentCommentUpdateView', 'AssignmentAttachmentDeleteView',
-    'EventDetailView', 'AssignmentAttachmentDownloadView',
+    'AssignmentCommentUpdateView', 'EventDetailView', 'AssignmentAttachmentDownloadView',
 ]
 
 
@@ -246,40 +243,6 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
                                            current_year).capitalize()
         }
         return context
-
-
-class CourseVideoListView(ListView):
-    model = Course
-    template_name = "learning/courses_video_list.html"
-    context_object_name = 'course_list'
-
-    def get_queryset(self):
-        return (Course.objects
-                .filter(is_published_in_video=True)
-                .order_by('-semester__year', 'semester__type')
-                .select_related('meta_course', 'semester'))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        full = context[self.context_object_name]
-        context['course_list_chunks'] = grouper(full, 3)
-        return context
-
-
-class VenueListView(generic.ListView):
-    model = Venue
-    template_name = "learning/venue_list.html"
-
-    def get_queryset(self):
-        return (Venue.objects
-                .filter(sites__pk=settings.SITE_ID)
-                .filter(Q(city_id=self.request.city_code) |
-                        Q(city__isnull=True)))
-
-
-class VenueDetailView(generic.DetailView):
-    model = Venue
-    template_name = "learning/venue_detail.html"
 
 
 # Note: Looks like shit
@@ -698,70 +661,6 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
         return self.student_assignment.get_teacher_url()
 
 
-class AssignmentCreateUpdateMixin(TeacherOnlyMixin):
-    model = Assignment
-    form_class = AssignmentForm
-    template_name = "learning/assignment_form.html"
-
-    def get_course(self):
-        return get_co_from_query_params(self.kwargs, self.request.city_code)
-
-    def get_form(self, **kwargs):
-        course = self.get_course()
-        if not course:
-            raise Http404('Course not found')
-        if not self.is_form_allowed(self.request.user, course):
-            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
-        kwargs["course"] = course
-        return AssignmentForm(**kwargs)
-
-    @staticmethod
-    def is_form_allowed(user, course: Course):
-        return user.is_curator or user in course.teachers.all()
-
-    def get_success_url(self):
-        return reverse('assignment_detail_teacher', args=[self.object.pk])
-
-    # TODO: Add atomic
-    def form_valid(self, form):
-        self.save_form(form)
-        attachments = self.request.FILES.getlist('attachments')
-        if attachments:
-            for attachment in attachments:
-                (AssignmentAttachment.objects
-                 .create(assignment=self.object, attachment=attachment))
-        return redirect(self.get_success_url())
-
-    def save_form(self, form):
-        raise NotImplementedError()
-
-
-class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
-    def save_form(self, form):
-        self.object = form.save()
-        # Set up notifications recipients setting
-        course = self.object.course
-        co_teachers = course.course_teachers.all()
-        notify_teachers = [t.pk for t in co_teachers if t.notify_by_default]
-        self.object.notify_teachers.add(*notify_teachers)
-
-
-class AssignmentUpdateView(AssignmentCreateUpdateMixin, UpdateView):
-    def save_form(self, form):
-        self.object = form.save()
-
-
-class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):
-    model = Assignment
-    template_name = "forms/simple_delete_confirmation.html"
-
-    def get_success_url(self):
-        return reverse('assignment_list_teacher')
-
-    def is_form_allowed(self, user, obj: Assignment):
-        return user.is_curator or user in obj.course.teachers.all()
-
-
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
 # FIXME: replace with vanilla view
 class AssignmentCommentUpdateView(generic.UpdateView):
@@ -800,25 +699,6 @@ class AssignmentCommentUpdateView(generic.UpdateView):
         self.object = self.get_object()
         self.check_permissions(self.object)
         return super(BaseUpdateView, self).post(request, *args, **kwargs)
-
-
-class AssignmentAttachmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
-                                     DeleteView):
-    model = AssignmentAttachment
-    template_name = "forms/simple_delete_confirmation.html"
-
-    def is_form_allowed(self, user, obj):
-        return (user.is_curator or
-                user in obj.assignment.course.teachers.all())
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.object.delete()
-        os.remove(self.object.attachment.path)
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        return self.object.assignment.get_update_url()
 
 
 class EventDetailView(generic.DetailView):
