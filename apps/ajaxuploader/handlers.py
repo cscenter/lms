@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals
+"""
+FIXME: What the heck is going on here? Handlers are look totally broken.
+"""
 
 import logging
 
@@ -13,8 +13,19 @@ from django.core.files.uploadhandler import MemoryFileUploadHandler, \
 logger = logging.getLogger(__name__)
 
 
-class ImageUploadHandlerMixin(object):
-    """Stop upload if mime type not allowed."""
+
+
+
+class FileSizeUploadHandlerMixin:
+    pass
+
+
+
+class MimeTypeUploadHandlerMixin:
+    """
+    Read the file mime type from the file header before uploading
+    the whole file. Stop uploading if mime type is not allowed.
+    """
     FILE_UPLOAD_MAX_SIZE = 5242880  # 5 Mb
 
     ALLOWED_MIME_TYPES = [
@@ -22,6 +33,7 @@ class ImageUploadHandlerMixin(object):
         'image/png'
     ]
 
+    # FIXME: это уже другой mixin, нужно разнести их
     def handle_raw_input(self, input_data, META, content_length, boundary,
                          encoding=None):
         # Check the content-length header to see if we should
@@ -29,26 +41,22 @@ class ImageUploadHandlerMixin(object):
             self.stop_upload = True
         else:
             self.stop_upload = False
-        super(ImageUploadHandlerMixin, self).handle_raw_input(input_data,
-                                                              META,
-                                                              content_length,
-                                                              boundary,
-                                                              encoding)
+        super().handle_raw_input(input_data, META, content_length, boundary,
+                                 encoding)
 
     def new_file(self, *args, **kwargs):
-        # TODO: Maybe should raise custom exception
         if self.stop_upload:
             raise StopUpload
-        super(ImageUploadHandlerMixin, self).new_file(*args, **kwargs)
+        super().new_file(*args, **kwargs)
 
     def receive_data_chunk(self, raw_data, start):
         # On first chunk data try to detect mime type and validate it.
         is_first_chunk = (start == 0)
         if is_first_chunk and not self.is_valid_mime_type(raw_data):
             raise StopUpload
-        return super(ImageUploadHandlerMixin, self).receive_data_chunk(raw_data,
-                                                                       start)
+        return super().receive_data_chunk(raw_data, start)
 
+    # FIXME: and where do you read mime type? idiot
     def is_valid_mime_type(self, chunk):
         try:
             # Lazy open image and read headers
@@ -60,11 +68,11 @@ class ImageUploadHandlerMixin(object):
         return False
 
 
-class MemoryImageUploadHandler(ImageUploadHandlerMixin,
+class MemoryImageUploadHandler(MimeTypeUploadHandlerMixin,
                                MemoryFileUploadHandler):
     pass
 
 
-class TemporaryImageUploadHandler(ImageUploadHandlerMixin,
+class TemporaryImageUploadHandler(MimeTypeUploadHandlerMixin,
                                   TemporaryFileUploadHandler):
     pass

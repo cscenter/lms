@@ -6,14 +6,13 @@ from django.urls import path, re_path
 from django.views.generic import RedirectView
 from loginas import urls as loginas_urls
 
-from ajaxuploader.views import AjaxProfileImageUploader
 from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
 from cscenter import views as cscenter_views
 from htmlpages import views
 from learning.studying.views import UsefulListView, InternshipListView
 from courses.views import CourseVideoListView
 from users.urls import auth_urls
-from users.views import TeacherDetailView
+from users.views import TeacherDetailView, ProfileImageUpdate
 
 admin.autodiscover()
 
@@ -39,8 +38,6 @@ urlpatterns = [
     path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
 
     path('', include(auth_urls)),
-    # FIXME: move under users/ namespace
-    path('profile-update-image/', AjaxProfileImageUploader.as_view(), name="profile_update_image"),
     path('', include('users.urls')),
 
     # Alumni

@@ -14,3 +14,15 @@ def get_user_city_code(request) -> Optional[CityCode]:
     else:
         city_code = getattr(request.user, "city_id", None)
     return city_code if city_code else None
+
+
+def photo_thumbnail_cropbox(data):
+    try:
+        return ",".join(map(str, (
+            data["x"],
+            data["y"],
+            data["x"] + data["width"],
+            data["y"] + data["height"],
+        )))
+    except KeyError:
+        return ""

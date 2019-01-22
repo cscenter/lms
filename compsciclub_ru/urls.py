@@ -6,7 +6,6 @@ from django.contrib import admin
 from django.urls import path
 from loginas import urls as loginas_urls
 
-from ajaxuploader.views import AjaxProfileImageUploader
 from compsciclub_ru.views import CalendarClubScheduleView, IndexView, \
     TeachersView, \
     TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed
@@ -38,7 +37,6 @@ urlpatterns = i18n_patterns(
     url(r'^teachers/(?P<pk>\d+)/$', TeacherDetailView.as_view(), name='teacher_detail'),
     url(r"^schools/$", InternationalSchoolsListView.as_view(), name="international_schools_list"),
 
-    url(r'^profile-update-image/$', AjaxProfileImageUploader.as_view(), name="profile_update_image"),
     prefix_default_language=False
 )
 

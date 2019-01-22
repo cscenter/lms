@@ -21,7 +21,7 @@ from model_utils.fields import MonitorField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from ajaxuploader.utils import photo_thumbnail_cropbox
+from users.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.utils import is_club_site, en_to_ru_mapping
 from courses.models import Semester

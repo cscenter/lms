@@ -7,7 +7,7 @@ from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
     ICalEventsView
 from users.views import LoginView, LogoutView, UserDetailView, UserUpdateView, \
     EnrollmentCertificateCreateView, EnrollmentCertificateDetailView, \
-    pass_reset_view
+    pass_reset_view, ProfileImageUpdate
 
 auth_urls = [
     path('login/', LoginView.as_view(), name='login'),
@@ -25,6 +25,7 @@ auth_urls = [
 urlpatterns = [
     path('users/<int:pk>/', UserDetailView.as_view(), name='user_detail'),
     path('users/<int:pk>/edit/', UserUpdateView.as_view(), name='user_update'),
+    path('users/<int:pk>/profile-update-image/', ProfileImageUpdate.as_view(), name="profile_update_image"),
     # FIXME: disable enrollment certificates on compsciclub.ru
     path('users/<int:pk>/reference/add/', EnrollmentCertificateCreateView.as_view(), name='user_reference_add'),
     path('users/<int:pk>/reference/<int:reference_pk>/', EnrollmentCertificateDetailView.as_view(), name='user_reference_detail'),
