@@ -36,8 +36,7 @@ var photoValidation = {
 };
 
 const xhrOpts = {
-    url: '/profile-update-image/',
-    data: {"user_id": profileAppInit.user_id},
+    url: `/users/${profileAppInit.user_id}/profile-update-image/`,
     headers: {
         'X-CSRFToken': Cookies.get('csrftoken')
     }
