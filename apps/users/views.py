@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import os
 from collections import OrderedDict
 
 from braces.views import LoginRequiredMixin
@@ -8,27 +9,35 @@ from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import views
 from django.db.models import Prefetch, Count
-from django.http import HttpResponseRedirect, Http404
+from django.http import HttpResponseRedirect, Http404, HttpResponseBadRequest, \
+    JsonResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.http import is_safe_url
 from django.views import generic
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
 from vanilla import DetailView
 
+from ajaxuploader.backends import ProfileImageUploadBackend
+from ajaxuploader.handlers import MemoryImageUploadHandler, \
+    TemporaryImageUploadHandler
+from ajaxuploader.signals import file_uploaded
 from core.utils import is_club_site
 from core.views import ProtectedFormMixin
+from courses.models import Course, Semester
 from learning.models import StudentAssignment, \
     Enrollment
-from study_programs.models import StudyProgram
-from courses.models import Course, Semester
 from learning.settings import GradeTypes
+from study_programs.models import StudyProgram
 from users.forms import UserPasswordResetForm
 from users.mixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
 from users.tasks import email_template_name, html_email_template_name, \
     subject_template_name
+from users.thumbnails import get_user_thumbnail
+from users.utils import photo_thumbnail_cropbox
 from .forms import LoginForm, UserProfileForm, EnrollmentCertificateCreateForm
 from .models import User, EnrollmentCertificate
 
@@ -287,3 +296,106 @@ pass_reset_view = views.PasswordResetView.as_view(
     email_template_name=email_template_name,
     html_email_template_name=html_email_template_name,
     subject_template_name=subject_template_name)
+
+
+class ProfileImageUpdate(generic.base.View):
+    """
+    This view validates mime type on uploading file.
+    """
+    backend = ProfileImageUploadBackend
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Modifying upload handlers before accessing `request.POST` or
+        `request.FILES`.
+
+        It doesn’t make sense to change upload handlers after upload handling
+        has already started. Since `request.POST` is accessed by
+        CsrfViewMiddleware, use `csrf_exempt` decorator to allow to
+        change the upload handlers and `csrf_protect` on further view function
+        to enable CSRF-protection.
+        """
+        request.upload_handlers = [MemoryImageUploadHandler(request),
+                                   TemporaryImageUploadHandler(request)]
+        return self._dispatch(request, *args, **kwargs)
+
+    @method_decorator(csrf_protect)
+    def _dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return HttpResponseBadRequest("Bad User")
+
+        user_id = kwargs['pk']
+        if not request.user.is_curator and user_id != request.user.id:
+            return HttpResponseBadRequest("Bad User")
+
+        try:
+            user = User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return HttpResponseBadRequest("Bad User")
+
+        if "crop_data" in request.POST:
+            return self._update_cropbox(request, user)
+        else:
+            return self._update_image(request, user)
+
+    @staticmethod
+    def _update_cropbox(request, user):
+        # TODO: add validation for unbound coords and width=img.width
+        attrs = ("width", "height", "x", "y")
+        try:
+            data = {attr: int(float(request.POST.get(attr))) for attr in attrs}
+        except (KeyError, ValueError):
+            return False
+
+        thumbnail = get_user_thumbnail(user, User.ThumbnailSize.BASE,
+                                       crop='center', use_stub=False,
+                                       cropbox=photo_thumbnail_cropbox(data))
+        if not thumbnail:
+            ret_json = {"success": False, "reason": "Thumbnail generation error"}
+        else:
+            user.cropbox_data = data
+            user.save(update_fields=['cropbox_data'])
+            ret_json = {"success": True, "thumbnail": thumbnail.url}
+        return JsonResponse(ret_json)
+
+    def _update_image(self, request, user):
+        if len(request.FILES) > 1:
+            return HttpResponseBadRequest("Multi upload is not supported")
+
+        if len(request.FILES) == 1:
+            upload = list(request.FILES.values())[0]
+        else:
+            return HttpResponseBadRequest("Bad file format or size")
+
+        try:
+            _, file_ext = os.path.splitext(request.POST['_photo'])
+            filename = f"{user.id}{file_ext}"
+        except KeyError:
+            return HttpResponseBadRequest("Photo not found")
+
+        backend = self.backend()
+        # custom filename handler
+        filename = (backend.update_filename(request, filename) or filename)
+        backend.setup(filename)  # save empty file
+        success = backend.upload(upload, filename, False)
+
+        if success:
+            user.photo.name = filename
+            user.cropbox_data = {}
+            user.save()
+            # Send signals
+            file_uploaded.send(sender=self.__class__, backend=backend,
+                               request=request)
+
+        extra_context = backend.upload_complete(request, filename)
+
+        # TODO: generate default crop settings and return them
+        ret_json = {'success': success, 'filename': filename}
+        if extra_context is not None:
+            ret_json.update(extra_context)
+
+        return JsonResponse(ret_json)
