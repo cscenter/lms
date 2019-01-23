@@ -4,7 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import reverse
 
-import cscenter.urls
+import compscicenter_ru.urls
 
 
 class MyUtilitiesMixin(object):
@@ -34,13 +34,13 @@ class MyUtilitiesMixin(object):
         self.client.logout()
 
 
-class MediaServingMixin(object):
+class MediaServingMixin:
     def setUp(self):
-        self._original_urls = cscenter.urls.urlpatterns
+        self._original_urls = compscicenter_ru.urls.urlpatterns
         with self.settings(DEBUG=True):
             s = static(settings.MEDIA_URL,
                        document_root=settings.MEDIA_ROOT)
-            cscenter.urls.urlpatterns += s
+            compscicenter_ru.urls.urlpatterns += s
 
     def tearDown(self):
-        cscenter.urls.urlpatterns = self._original_urls
+        compscicenter_ru.urls.urlpatterns = self._original_urls

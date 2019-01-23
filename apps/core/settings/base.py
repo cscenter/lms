@@ -1,5 +1,5 @@
 """
-Django settings for both cscenter and csclub projects.
+Django settings shared between projects.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/

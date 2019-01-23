@@ -32,10 +32,10 @@ ALTER DATABASE test_cscdb OWNER TO csc;
 ALTER USER csc with CREATEDB;
 ```
 
-* Load data to database from dump
+* Load sql data from the dump
 ```bash
-# If you want empty database by any reason, don't forget to run migrations
-$ python manage.py migrate --settings=cscenter.settings.local
+# Or simply run migrations to generate an empty database
+$ python manage.py migrate --settings=compscicenter_ru.settings.local
 ```
 * Create virtualenv for the project and activate it
 
@@ -52,7 +52,7 @@ npm install -g node-sass
 ```
 * run dev server 
 ```
-./manage.py runserver --settings=cscenter.settings.local
+./manage.py runserver --settings=compscicenter_ru.settings.local
 # or run make cmd from project root dir
 make
 # or

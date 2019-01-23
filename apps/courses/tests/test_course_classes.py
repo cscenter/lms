@@ -208,12 +208,12 @@ def test_course_class_attachment_links(client, assert_redirect):
 def test_course_class_attachments(client, assert_redirect,
                                   assert_login_redirect):
     # Serving media enabled (TODO: rewrite with setup_module?)
-    import cscenter.urls
-    _original_urls = cscenter.urls.urlpatterns.copy()
+    import compscicenter_ru.urls
+    _original_urls = compscicenter_ru.urls.urlpatterns.copy()
     settings.DEBUG = True
     s = static(settings.MEDIA_URL,
                document_root=settings.MEDIA_ROOT)
-    cscenter.urls.urlpatterns += s
+    compscicenter_ru.urls.urlpatterns += s
     settings.DEBUG = False
 
     teacher = TeacherCenterFactory()
@@ -267,7 +267,7 @@ def test_course_class_attachments(client, assert_redirect,
                     spans[0].a.contents[0].strip())
     assert not os.path.isfile(cca_files[1])
     # Disable Serving media
-    cscenter.urls.urlpatterns = _original_urls
+    compscicenter_ru.urls.urlpatterns = _original_urls
 
 
 @pytest.mark.django_db

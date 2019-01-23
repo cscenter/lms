@@ -25,8 +25,8 @@ from vanilla import TemplateView
 
 from core.exceptions import Redirect
 from core.models import Faq
-from cscenter.serializers import CoursesSerializer
-from cscenter.utils import group_terms_by_academic_year, PublicRoute, \
+from compscicenter_ru.serializers import CoursesSerializer
+from compscicenter_ru.utils import group_terms_by_academic_year, PublicRoute, \
     PublicRouteException
 from learning.api.views import TestimonialList
 from study_programs.models import StudyProgram, AreaOfStudy

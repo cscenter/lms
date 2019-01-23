@@ -8,7 +8,7 @@ https://docs.djangoproject.com/en/1.6/howto/deployment/wsgi/
 """
 
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cscenter.settings.production")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "compscicenter_ru.settings.production")
 
 import newrelic.agent
 from django.conf import settings

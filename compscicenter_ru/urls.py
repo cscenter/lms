@@ -7,8 +7,8 @@ from django.views.generic import RedirectView
 from loginas import urls as loginas_urls
 
 from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
-from cscenter import views as cscenter_views
-from htmlpages import views
+from compscicenter_ru import views
+from htmlpages.views import flatpage
 from learning.studying.views import UsefulListView, InternshipListView
 from courses.views import CourseVideoListView
 from users.urls import auth_urls
@@ -17,45 +17,45 @@ from users.views import TeacherDetailView
 admin.autodiscover()
 
 urlpatterns = [
-    path('', cscenter_views.IndexView.as_view(), name='index'),
+    path('', views.IndexView.as_view(), name='index'),
     path('robots.txt', robots, name='robots_txt'),
-    path('open-nsk/', cscenter_views.OpenNskView.as_view(), name='open_nsk'),
+    path('open-nsk/', views.OpenNskView.as_view(), name='open_nsk'),
     path('api/', include('api.urls')),
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
     # Redirect from an old url `/pages/questions/` to the new one
     # TODO: move to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
-    path('orgs/', cscenter_views.TeamView.as_view(), name='orgs'),
-    path('syllabus/', cscenter_views.SyllabusView.as_view(), name='syllabus'),
+    path('orgs/', views.TeamView.as_view(), name='orgs'),
+    path('syllabus/', views.SyllabusView.as_view(), name='syllabus'),
 
 
     path('learning/useful/', UsefulListView.as_view(), name='learning_useful'),
     path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
 
-    path('teachers2/', cscenter_views.TeachersV2View.as_view(), name='teachers_v2'),
-    path('teachers/', cscenter_views.TeachersView.as_view(), name='teachers'),
+    path('teachers2/', views.TeachersV2View.as_view(), name='teachers_v2'),
+    path('teachers/', views.TeachersView.as_view(), name='teachers'),
     path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
 
     path('', include(auth_urls)),
     path('', include('users.urls')),
 
-    path('alumni2/', cscenter_views.AlumniV2View.as_view(), name='alumni_v2'),
-    path('alumni/', cscenter_views.AlumniView.as_view(), name='alumni'),
-    path('alumni/<str:area_of_study_code>/', cscenter_views.AlumniView.as_view(), name='alumni_by_area_of_study'),
-    re_path(r'^(?P<year>201[3-7])/$', cscenter_views.AlumniByYearView.as_view(), name='alumni_memory'),
-    re_path(r'^(?P<year>20[0-9]{2})/$', cscenter_views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
+    path('alumni2/', views.AlumniV2View.as_view(), name='alumni_v2'),
+    path('alumni/', views.AlumniView.as_view(), name='alumni'),
+    path('alumni/<str:area_of_study_code>/', views.AlumniView.as_view(), name='alumni_by_area_of_study'),
+    re_path(r'^(?P<year>201[3-7])/$', views.AlumniByYearView.as_view(), name='alumni_memory'),
+    re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
 
     path('notifications/', include("notifications.urls")),
     path('staff/', include("staff.urls")),
     path('stats/', include("stats.urls")),
     path('surveys/', include("surveys.urls")),
     path('library/', include("library.urls")),
-    path('faq/', cscenter_views.QAListView.as_view(), name='faq'),
-    path('testimonials2/', cscenter_views.TestimonialsListV2View.as_view(), name='testimonials_v2'),
-    path('testimonials/', cscenter_views.TestimonialsListView.as_view(), name='testimonials'),
+    path('faq/', views.QAListView.as_view(), name='faq'),
+    path('testimonials2/', views.TestimonialsListV2View.as_view(), name='testimonials_v2'),
+    path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
 
-    path('courses/', cscenter_views.CourseOfferingsView.as_view(), name="course_list"),
+    path('courses/', views.CourseOfferingsView.as_view(), name="course_list"),
     path('', include('courses.urls')),
     path('', include('online_courses.urls')),
     path('videos/', CourseVideoListView.as_view(), name='course_video_list'),
@@ -85,4 +85,4 @@ if settings.DEBUG:
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
 
 # Note: htmlpages should be the last one
-urlpatterns += [re_path(r'^(?P<url>.*/)$', views.flatpage, name='html_pages')]
+urlpatterns += [re_path(r'^(?P<url>.*/)$', flatpage, name='html_pages')]

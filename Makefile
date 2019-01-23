@@ -1,10 +1,15 @@
 SHELL := /bin/sh
 
-PROJECT := cscenter
+PROJECTS := compscicenter_ru compsciclub_ru
+PROJECT := compscicenter_ru
 PORT := 8000
-SS := local
-DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SS)
+SETTINGS_ENV := local
+DJANGO_SETTINGS_MODULE = $(PROJECT).settings.$(SETTINGS_ENV)
 DJANGO_POSTFIX := --settings=$(DJANGO_SETTINGS_MODULE)
+
+ifeq ($(filter $(PROJECT),$(PROJECTS)),)
+    $(error A project with name '$(PROJECT)' does not exist. Available projects: $(PROJECTS))
+endif
 
 .PHONY: run club run_flame migrate msg msgcompile static dumpdata loaddata clean cmd refresh sync deploy check_defined
 
@@ -20,13 +25,13 @@ run_flame:
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)
 
-msg:
+msg-translate:
 	python manage.py maketranslation -l ru
 
 # https://code.djangoproject.com/ticket/24159
 # Should set apps in LOCALE_PATHS explicitly until patch been released
-msgcompile:
-	python manage.py compilemessages --settings=cscenter.settings.local
+msg-compile:
+	python manage.py compilemessages --settings=compscicenter_ru.settings.local
 	python manage.py compilemessages --settings=compsciclub_ru.settings.local
 
 static:

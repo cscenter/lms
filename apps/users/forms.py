@@ -47,7 +47,7 @@ class LoginForm(AuthenticationForm):
 
     def is_valid(self):
         is_valid = super(LoginForm, self).is_valid()
-        # Prevent login for club students on cscenter site
+        # Prevent login for club students on compscicenter.ru
         if is_valid and settings.SITE_ID == settings.CENTER_SITE_ID:
             user = self.get_user()
             if user.is_curator:

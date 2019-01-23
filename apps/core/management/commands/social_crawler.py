@@ -9,7 +9,7 @@ from requests import RequestException
 
 from api.providers.instagram import InstagramAPI
 from api.providers.vk import VkOpenAPI, CSCENTER_GROUP_ID, VkAPIException
-from cscenter.views import IndexView
+from compscicenter_ru.views import IndexView
 
 logger = logging.getLogger(__name__)
 
