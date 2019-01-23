@@ -12,7 +12,7 @@ from htmlpages import views
 from learning.studying.views import UsefulListView, InternshipListView
 from courses.views import CourseVideoListView
 from users.urls import auth_urls
-from users.views import TeacherDetailView, ProfileImageUpdate
+from users.views import TeacherDetailView
 
 admin.autodiscover()
 
@@ -23,7 +23,8 @@ urlpatterns = [
     path('api/', include('api.urls')),
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
-    # Redirect from old url `/pages/questions/` to more appropriate
+    # Redirect from an old url `/pages/questions/` to the new one
+    # TODO: move to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
     path('orgs/', cscenter_views.TeamView.as_view(), name='orgs'),
     path('syllabus/', cscenter_views.SyllabusView.as_view(), name='syllabus'),
@@ -32,18 +33,16 @@ urlpatterns = [
     path('learning/useful/', UsefulListView.as_view(), name='learning_useful'),
     path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
 
-
-    path('teachers/', cscenter_views.TeachersView.as_view(), name='teachers'),
     path('teachers2/', cscenter_views.TeachersV2View.as_view(), name='teachers_v2'),
+    path('teachers/', cscenter_views.TeachersView.as_view(), name='teachers'),
     path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
 
     path('', include(auth_urls)),
     path('', include('users.urls')),
 
-    # Alumni
     path('alumni2/', cscenter_views.AlumniV2View.as_view(), name='alumni_v2'),
     path('alumni/', cscenter_views.AlumniView.as_view(), name='alumni'),
-    re_path(r'^alumni/(?P<area_of_study_code>[-\w]+)/$', cscenter_views.AlumniView.as_view(), name='alumni_by_area_of_study'),
+    path('alumni/<str:area_of_study_code>/', cscenter_views.AlumniView.as_view(), name='alumni_by_area_of_study'),
     re_path(r'^(?P<year>201[3-7])/$', cscenter_views.AlumniByYearView.as_view(), name='alumni_memory'),
     re_path(r'^(?P<year>20[0-9]{2})/$', cscenter_views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
 
@@ -53,8 +52,8 @@ urlpatterns = [
     path('surveys/', include("surveys.urls")),
     path('library/', include("library.urls")),
     path('faq/', cscenter_views.QAListView.as_view(), name='faq'),
-    path('testimonials/', cscenter_views.TestimonialsListView.as_view(), name='testimonials'),
     path('testimonials2/', cscenter_views.TestimonialsListV2View.as_view(), name='testimonials_v2'),
+    path('testimonials/', cscenter_views.TestimonialsListView.as_view(), name='testimonials'),
 
     path('courses/', cscenter_views.CourseOfferingsView.as_view(), name="course_list"),
     path('', include('courses.urls')),
@@ -65,6 +64,8 @@ urlpatterns = [
     path('', include('learning.projects.urls')),
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),
+    # Required `is_staff` only. Mb restrict to `is_superuser`?
+    path('narnia/django-rq/', include('django_rq.urls')),
     # TODO: remove after testing
     path('', include('admission_test.urls')),
 
@@ -82,11 +83,6 @@ if settings.DEBUG:
     ]
     if 'rosetta' in settings.INSTALLED_APPS:
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
-
-# Required `is_staff` only. Mb restrict to `is_superuser`?
-urlpatterns += [
-    path('narnia/django-rq/', include('django_rq.urls')),
-]
 
 # Note: htmlpages should be the last one
 urlpatterns += [re_path(r'^(?P<url>.*/)$', views.flatpage, name='html_pages')]
