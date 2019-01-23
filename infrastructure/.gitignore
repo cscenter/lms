@@ -6,7 +6,6 @@
 *.pyc
 .idea/
 local/
-.cache/
 *-debug.log
 *-console.log
 

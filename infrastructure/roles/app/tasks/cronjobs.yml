@@ -9,7 +9,7 @@
     job: >
       . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py dbbackup
-      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --settings={{ site_dir_name }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
       >> /home/{{ site_user }}/site/logs/cscbackup.log
       2>&1
@@ -23,7 +23,7 @@
     job: >
       . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py notify
-      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --settings={{ site_dir_name }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
       >> /home/{{ site_user }}/site/logs/cscnotifier.log
       2>&1
@@ -39,7 +39,7 @@
     job: >
       . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py notification_cleanup
-      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --settings={{ site_dir_name }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
       >> /home/{{ site_user }}/site/logs/cscnotifier.log
       2>&1
@@ -54,7 +54,7 @@
     job: >
       . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py projects_notifications
-      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --settings={{ site_dir_name }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
       >> /home/{{ site_user }}/site/logs/cscnotifier.log
       2>&1
@@ -69,7 +69,7 @@
     job: >
       . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py clearsessions
-      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --settings={{ site_dir_name }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
       >> /home/{{ site_user }}/site/logs/cronjobs.log
       2>&1
@@ -83,7 +83,7 @@
     job: >
       . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py send_queued_mail
-      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --settings={{ site_dir_name }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
       >> /home/{{ site_user }}/site/logs/send_queued_mail.log
       2>&1
@@ -98,7 +98,7 @@
     job: >
       . {{ virtualenv_root }}/bin/activate &&
       /home/{{ site_user }}/site/repo/manage.py social_crawler
-      --settings={{ app_settings }}.settings.{{ app_environment }}
+      --settings={{ site_dir_name }}.settings.{{ app_environment }}
       --pythonpath='/home/{{ site_user }}/site/repo/{{ apps_dir_name }}'
       >> /home/{{ site_user }}/site/logs/cronjobs.log
       2>&1

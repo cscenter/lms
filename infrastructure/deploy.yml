@@ -7,7 +7,7 @@
     aws_ec2_user: ubuntu
     app_environment: production
     site_user: cscenter
-    app_settings: "{{ site_user }}"
+    site_dir_name: "{% if site_user == 'cscenter' %}compscicenter_ru{% else %}compsciclub_ru{% endif %}"
 
   tasks:
   - name: Check site_user value
@@ -17,20 +17,20 @@
 
   - name: Set variables
     set_fact:
-      repo_dir: "/home/{{ site_user }}/site/repo"
-      venv_dir: "/home/{{ site_user }}/site/env"
+      repo_root: "/home/{{ site_user }}/site/repo"
+      virtualenv_root: "/home/{{ site_user }}/site/env"
       cached_pipfile_lock_hash_file: ".cached_pipfile_lock_hash_file"
       # Default value when fail on fetching from the remote server
       local_pipfile_lock_hash: ""
 
   - name: Get stuff from git
-    git: repo={{ repo_url }} dest={{ repo_dir }}
+    git: repo={{ repo_url }} dest={{ repo_root }}
     become: yes
     become_user: "{{ site_user }}"
 
   - name: Read current Pipfile.lock data into memory
     slurp:
-      path: '{{ repo_dir }}/Pipfile.lock'
+      path: '{{ repo_root }}/Pipfile.lock'
     register: pipfile_lock_data
 
   - name: Get current Pipfile.lock hash
@@ -40,27 +40,27 @@
   - name: Try to fetch file with Pipfile.lock hash value from the previous deploy
     fetch:
       src: "/home/{{ site_user }}/site/{{ cached_pipfile_lock_hash_file }}"
-      dest: "tmp/{{ inventory_hostname }}_{{ site_user }}_{{ cached_pipfile_lock_hash_file }}"
+      dest: "cache/{{ inventory_hostname }}_{{ site_user }}_{{ cached_pipfile_lock_hash_file }}"
       flat: yes
       fail_on_missing: no
     become: yes
     become_user: "{{ site_user }}"
 
   - name: Get stats for the fetched file
-    local_action: stat path="tmp/{{ inventory_hostname }}_{{ site_user}}_{{ cached_pipfile_lock_hash_file }}"
+    local_action: stat path="cache/{{ inventory_hostname }}_{{ site_user}}_{{ cached_pipfile_lock_hash_file }}"
     register: local_pipfile_lock_hash_file
 
   - name: Try to read hash value from the previous deploy
     set_fact:
-      local_pipfile_lock_hash: "{{ lookup('file', 'tmp/{{ inventory_hostname }}_{{ site_user }}_{{ cached_pipfile_lock_hash_file }}') }}"
+      local_pipfile_lock_hash: "{{ lookup('file', 'cache/{{ inventory_hostname }}_{{ site_user }}_{{ cached_pipfile_lock_hash_file }}') }}"
     when: local_pipfile_lock_hash_file.stat.exists == True
 
   - name: Install requirements if they were changed from the previous deploy
     environment:
-      VIRTUAL_ENV: "{{ venv_dir }}"
-    command: "{{ venv_dir }}/bin/pipenv sync"
+      VIRTUAL_ENV: "{{ virtualenv_root }}"
+    command: "{{ virtualenv_root }}/bin/pipenv sync"
     args:
-      chdir: "{{ repo_dir }}"
+      chdir: "{{ repo_root }}"
     become: yes
     become_user: "{{ site_user }}"
     when: pipfile_lock_hash != local_pipfile_lock_hash
@@ -78,18 +78,18 @@
     become_user: "{{ site_user }}"
     django_manage:
       command: "collectstatic --noinput"
-      app_path: "{{ repo_dir }}"
-      settings: "{{ app_settings }}.settings.{{ app_environment }}"
-      virtualenv: "{{ venv_dir }}"
+      app_path: "{{ repo_root }}"
+      settings: "{{ site_dir_name }}.settings.{{ app_environment }}"
+      virtualenv: "{{ virtualenv_root }}"
 
   - name: Migrate DB
     become: yes
     become_user: "{{ site_user }}"
     django_manage:
       command: "migrate"
-      app_path: "{{ repo_dir }}"
-      settings: "{{ app_settings }}.settings.{{ app_environment }}"
-      virtualenv: "{{ venv_dir }}"
+      app_path: "{{ repo_root }}"
+      settings: "{{ site_dir_name }}.settings.{{ app_environment }}"
+      virtualenv: "{{ virtualenv_root }}"
 
   - name: Touch config file to reload uwsgi
     file: path=/etc/uwsgi/vassals/{{ site_user }}.ini state=touch

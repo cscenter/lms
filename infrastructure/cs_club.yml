@@ -18,7 +18,6 @@
         backup_root: "/shared/backup_tmp"
         site_dir_name: "{{ main_domain|replace('.', '_') }}"
         apps_dir_name: apps
-        app_settings: "csclub"
         app_environment: production
         repo_url: git@github.com:cscenter/site.git
         db_name: cscdb

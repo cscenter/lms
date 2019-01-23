@@ -6,8 +6,8 @@ import django
 from core.settings.base import *
 
 SITE_ID = 1
-ROOT_URLCONF = 'cscenter.urls'
-WSGI_APPLICATION = 'cscenter.wsgi.application'
+ROOT_URLCONF = 'compscicenter_ru.urls'
+WSGI_APPLICATION = 'compscicenter_ru.wsgi.application'
 
 APP_DIR = Path(__file__).parents[1]
 

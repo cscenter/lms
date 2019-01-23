@@ -25,7 +25,7 @@ from users.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.utils import is_club_site, en_to_ru_mapping
 from courses.models import Semester
-from cscenter.utils import PublicRoute
+from compscicenter_ru.utils import PublicRoute
 from learning.permissions import LearningPermissionsMixin
 from learning.settings import AcademicDegreeYears, StudentStatuses, GradeTypes
 from learning.utils import is_negative_grade

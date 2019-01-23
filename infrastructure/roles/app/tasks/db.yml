@@ -37,6 +37,6 @@
   become_user: "{{ site_user }}"
   django_manage:
     command: "migrate"
-    app_path: "/home/{{ site_user }}/site/repo"
-    settings: "{{ app_settings }}.settings.{{ app_environment }}"
+    app_path: "{{ repo_root }}"
+    settings: "{{ site_dir_name }}.settings.{{ app_environment }}"
     virtualenv: "{{ virtualenv_root }}"

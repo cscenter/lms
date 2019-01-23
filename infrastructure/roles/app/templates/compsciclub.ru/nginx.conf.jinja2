@@ -3,7 +3,6 @@ upstream django_{{ site_user }} {
     server unix:///tmp/uwsgi_{{ site_dir_name }}.socket;
 }
 {% if enable_https %}
-# If https is enabled, this server should be default for 80 port
 server {
     listen 80;
     server_name {{ certbot_domains|join(' ') }};

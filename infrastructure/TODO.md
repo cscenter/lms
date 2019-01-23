@@ -11,6 +11,7 @@ TASK [app : Ensure db user exists] <-- fix cluster drop and it should be OK then
 
 
 Dependencies between roles
+support for `uwsgi.default.ini.jinja2`
 
 
 ## Critical:
@@ -25,7 +26,7 @@ Dependencies between roles
 * ALLOWED_HOSTS = ['*'] for vagrant machine (do it after moving sensitive configuration outside of the repo) 
 
 ## important:
-* add `registration` app to cscenter, then remove club worker?
+* add `registration` app to compscicenter_ru, then remove club worker?
 * restore db from s3
 
 

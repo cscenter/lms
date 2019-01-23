@@ -4,7 +4,7 @@
 
 Add aws credentials to ~/.aws/credentials. Then run:
 
-    make deploy_remote app_user=cscenter
+    make deploy app_user=cscenter
 
 #### Manual
 
