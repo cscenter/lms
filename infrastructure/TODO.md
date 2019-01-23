@@ -9,6 +9,10 @@ TASK [app : Restart nginx]
 TASK [app : Install requirements] <-- compare Pipenv.lock hash like in deploy.yml
 TASK [app : Ensure db user exists] <-- fix cluster drop and it should be OK then.
 
+
+Dependencies between roles
+
+
 ## Critical:
 * create db backup and download to the local machine
 * system-zsh, system-ntp roles?

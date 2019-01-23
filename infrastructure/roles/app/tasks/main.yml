@@ -29,6 +29,8 @@
     - rq_workers_target_service_name
     - processes_num
     - log_to_file
+  tags:
+    - always
 
 # TODO: check uwsgi/nginx configs are exist
 
@@ -69,6 +71,7 @@
     dest: "/etc/nginx/sites-available/{{ main_domain }}.conf"
   tags:
     - nginx
+  register: nginx_config
   when: nginx_status.stat.exists
 
 - name: Symlink nginx config
@@ -80,11 +83,13 @@
     - nginx
   when: nginx_status.stat.exists
 
-- name: Restart nginx
+- name: Reload nginx configuration
   service:
     name: nginx
-    state: restarted
-  when: nginx_status.stat.exists
+    state: reloaded
+  tags:
+    - nginx
+  when: nginx_status.stat.exists and nginx_config.changed
 
 - name: Configure certbot to auto-renew tls certificates
   include: certbot.yml
@@ -95,6 +100,8 @@
 
 - name: Ensure Nginx is started
   service: name=nginx state=started
+  tags:
+    - nginx
   when: nginx_status.stat.exists
 
 - name: Install app dependencies

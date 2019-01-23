@@ -2,6 +2,7 @@ SHELL := /bin/sh
 
 AWS_EC2_INSTANCE_TAG := cscsite
 SITE_USER := cscenter
+PLAYBOOK_NAME := cs_center
 
 .PHONY: deploy provision setup cronjobs
 
@@ -20,5 +21,12 @@ provision:
 setup:
 	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) setup.yml -v --tags="app-deployment"
 
-cronjobs:
-	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) setup.yml --tags="cronjobs"
+# Use `update-app-*` commands after full application setup
+update-app-cronjobs:
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="cronjobs" -v
+
+update-app-nginx-config:
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="nginx" -v
+
+update-app-uwsgi-config:
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="uwsgi" -v
