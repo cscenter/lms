@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 PROJECT_DIR = Path(__file__).parents[2]
 ROOT_DIR = PROJECT_DIR.parent
 
-MEDIA_ROOT = str(PROJECT_DIR / "media")
+MEDIA_ROOT = str(ROOT_DIR / "media")
 MEDIA_URL = "/media/"
 
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
