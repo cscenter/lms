@@ -40,7 +40,7 @@ class CourseNewsTab(CourseTab):
     def is_enabled(cls, course, user=None):
         if is_club_site():
             return True
-        role = course_access_role(course=course, request_user=user)
+        role = course_access_role(course=course, user=user)
         return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
 
     def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
@@ -94,7 +94,7 @@ def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
     Others can see only assignment names.
     """
     if user_role is None:
-        user_role = course_access_role(course=course, request_user=user)
+        user_role = course_access_role(course=course, user=user)
     Assignment = course.assignment_set.field.model
     AssignmentAttachment = Assignment.assignmentattachment_set.field.model
     attachments = Prefetch("assignmentattachment_set",

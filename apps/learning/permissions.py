@@ -87,25 +87,21 @@ class CourseRole(Enum):
     CURATOR = auto()
 
 
-def course_access_role(*, course, request_user) -> CourseRole:
+def course_access_role(*, course, user) -> CourseRole:
     """
     Some course data (e.g. assignments, news) are private and accessible
     depending on the user role: curator, course teacher or
     enrolled student. This roles do not overlap in the same course.
-
-    Returns request user role in target course session,
-    `None` is user has no access at all.
-
-    FIXME: enrolled students who was expelled have no access at all right now
     """
-    if not request_user.is_authenticated or request_user.is_expelled:
+    if not user.is_authenticated:
         return CourseRole.NO_ROLE
-    if request_user.is_curator:
+    if user.is_curator:
         return CourseRole.CURATOR
     role = CourseRole.NO_ROLE
-    enrollment = request_user.get_enrollment(course.pk)
+    enrollment = user.get_enrollment(course.pk)
     if enrollment:
-        if not course_failed_by_student(course, request_user, enrollment):
+        failed = course_failed_by_student(course, user, enrollment)
+        if not failed and not user.is_expelled:
             role = CourseRole.STUDENT_REGULAR
         else:
             role = CourseRole.STUDENT_RESTRICT
@@ -113,7 +109,7 @@ def course_access_role(*, course, request_user) -> CourseRole:
     all_course_teachers = (course.course_teachers.field.model.objects
                            .for_course(course.meta_course.slug)
                            .values_list('teacher_id', flat=True))
-    if request_user.is_teacher and request_user.pk in all_course_teachers:
+    if user.is_teacher and user.pk in all_course_teachers:
         # Overrides student role if teacher accidentally enrolled in
         # his own course
         role = CourseRole.TEACHER

@@ -106,6 +106,8 @@ class User(LearningPermissionsMixin, AbstractUser):
 
     roles = AcademicRoles
 
+    ENROLLMENT_CACHE_KEY = "_student_enrollment_{}"
+
     GENDER_MALE = 'M'
     GENDER_FEMALE = 'F'
     GENDER_CHOICES = (
@@ -500,7 +502,7 @@ class User(LearningPermissionsMixin, AbstractUser):
         """
         from learning.models import Enrollment
         if self.is_student or self.is_graduate:
-            cache_key = f"_student_enrollment_{course_id}"
+            cache_key = self.ENROLLMENT_CACHE_KEY.format(course_id)
             if not hasattr(self, cache_key):
                 e = (Enrollment.active
                      .filter(student=self,
