@@ -24,6 +24,7 @@ MIDDLEWARE = [
     'core.middleware.RedirectMiddleware',
 ]
 INSTALLED_APPS += [
+    'compscicenter_ru',
     'post_office',
     'django_jinja',
     'learning.projects.apps.ProjectsConfig',
