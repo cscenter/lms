@@ -73,19 +73,24 @@ def csc_menu(context, menu_name, root_id=False):
     }
 
 
-def has_permissions(item, user, user_groups, **kwargs):
+def has_permissions(menu_item, user, user_groups, **kwargs):
     """Check user has permissions for view menu item"""
-    if len(item.groups_allowed) > 0:
-        if not user_groups.intersection(item.groups_allowed):
+    if menu_item.extension.unauthenticated and user.is_authenticated:
+        return False
+    if menu_item.extension.protected and not user.is_authenticated:
+        return False
+    if menu_item.extension.staff_only and not user.is_staff:
+        return False
+    if len(menu_item.groups_allowed) > 0:
+        if not user_groups.intersection(menu_item.groups_allowed):
             return False
-        elif user.is_student and not user.is_active_student:
+        restricted_to_students = {
+            user.roles.STUDENT_CENTER,
+            user.roles.VOLUNTEER
+        }
+        if (restricted_to_students.intersection(menu_item.groups_allowed) and
+                not user.is_active_student):
             return False
-    if item.extension.unauthenticated and user.is_authenticated:
-        return False
-    if item.extension.protected and not user.is_authenticated:
-        return False
-    if item.extension.staff_only and not user.is_staff:
-        return False
     return True
 
 
