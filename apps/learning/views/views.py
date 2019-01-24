@@ -486,7 +486,7 @@ class AssignmentTeacherDetailView(TeacherOnlyMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         role = course_access_role(course=self.object.course,
-                                  request_user=self.request.user)
+                                  user=self.request.user)
         if role not in [CourseRole.CURATOR, CourseRole.TEACHER]:
             raise PermissionDenied
         context['a_s_list'] = (
@@ -598,7 +598,7 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
 
     def has_permissions_precise(self, user):
         co = self.student_assignment.assignment.course
-        role = course_access_role(course=co, request_user=user)
+        role = course_access_role(course=co, user=user)
         return role in [CourseRole.TEACHER, CourseRole.CURATOR]
 
     def get_context_data(self, form, **kwargs):
@@ -771,7 +771,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
               .select_related("assignment", "assignment__course"))
         assignment_attachment = get_object_or_404(qs)
         role = course_access_role(course=assignment_attachment.assignment.course,
-                                  request_user=self.request.user)
+                                  user=self.request.user)
         # User doesn't have private access to the task
         if role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT:
             return assignment_attachment.attachment
