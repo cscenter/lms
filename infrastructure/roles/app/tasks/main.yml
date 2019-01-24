@@ -28,6 +28,7 @@
     - rq_workers_target_service_name
     - processes_num
     - log_to_file
+    - enable_https
   tags:
     - always
 
@@ -64,14 +65,17 @@
   tags:
     - nginx
 
+# Note: if `https_enabled` is set to True, this command is idempotent only
+#  in combination with task which uncomment `ssl_certificate` and
+#  `ssl_certificate_key` lines (see in certbot.yml)
 - name: Copy nginx config
   template:
     src: "{{ main_domain }}/nginx.conf.jinja2"
     dest: "/etc/nginx/sites-available/{{ main_domain }}.conf"
+  notify: reload_nginx
+  when: nginx_status.stat.exists
   tags:
     - nginx
-  register: nginx_config
-  when: nginx_status.stat.exists
 
 - name: Symlink nginx config
   file:
@@ -82,20 +86,9 @@
     - nginx
   when: nginx_status.stat.exists
 
-- name: Reload nginx configuration
-  service:
-    name: nginx
-    state: reloaded
-  tags:
-    - nginx
-  when: nginx_status.stat.exists and nginx_config.changed
-
 - name: Configure certbot to auto-renew tls certificates
-  include: certbot.yml
+  import_tasks: certbot.yml
   when: nginx_status.stat.exists and enable_https
-  tags:
-    - certbot
-    - tls
 
 - name: Ensure Nginx is started
   service: name=nginx state=started

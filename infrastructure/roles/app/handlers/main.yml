@@ -3,3 +3,8 @@
   debug: 
     msg: Restart uwsgi event triggered
   listen: restart_uwsgi
+
+- name: nginx service needs to be reloaded
+  debug:
+    msg: Reload nginx event triggered
+  listen: reload_nginx

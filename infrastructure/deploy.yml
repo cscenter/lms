@@ -7,7 +7,8 @@
     aws_ec2_user: ubuntu
     app_environment: production
     site_user: cscenter
-    site_dir_name: "{% if site_user == 'cscenter' %}compscicenter_ru{% else %}compsciclub_ru{% endif %}"
+    main_domain: "{% if site_user == 'cscenter' %}compscicenter.ru{% else %}compsciclub.ru{% endif %}"
+    site_dir_name: "{{ main_domain|replace('.', '_') }}"
 
   tasks:
   - name: Check site_user value
@@ -92,7 +93,7 @@
       virtualenv: "{{ virtualenv_root }}"
 
   - name: Touch config file to reload uwsgi
-    file: path=/etc/uwsgi/vassals/{{ site_user }}.ini state=touch
+    file: path=/etc/uwsgi/vassals/{{ main_domain }}.ini state=touch
     become: yes
     become_method: sudo
 

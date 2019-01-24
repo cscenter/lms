@@ -6,6 +6,9 @@
     recurse: yes
     owner: "{{ site_user }}"
     group: "{{ site_user }}"
+  tags:
+    - certbot
+    - tls
 
 - debug: msg="{{ enable_https }}"
 
@@ -16,6 +19,9 @@
     --email {{ admin_email }}
     -w {{ repo_root }}
     -d {{ certbot_domains|join(' -d ') }}
+  tags:
+    - certbot
+    - tls
   args:
     creates: "{{ certbot_config_dir }}"
 
@@ -23,11 +29,15 @@
 # Note: Make sure nginx configs were copied to `dest` (see `nginx.yml`)
 - name: Uncomment `ssl_certificate` and `ssl_certificate_key`
   replace:
-    dest: "/etc/nginx/sites-available/{{ site_user }}.conf"
+    dest: "/etc/nginx/sites-available/{{ main_domain }}.conf"
     regexp: '^(\s*)# ssl_certificate(.*);$'
     replace: '\1ssl_certificate\2;'
     backup: no
-  notify: reload nginx
+  notify: reload_nginx
+  tags:
+    - certbot
+    - tls
+    - nginx
 
 - meta: flush_handlers
 
@@ -45,3 +55,6 @@
       --no-self-upgrade
     state: present
   when: certbot_auto_renew
+  tags:
+    - certbot
+    - tls

@@ -32,3 +32,5 @@ logfile-chown   = true
 disable-logging = true
 {% endif -%}
 wait-for-socket-timeout = 600
+# Uncomment below if uwsgi python plugin version is different from {{ python_pkg }} version
+# unprivileged-binary-patch-arg = %(virtualenv)/bin/uwsgi --ini {{ main_domain }}.ini

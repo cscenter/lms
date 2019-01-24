@@ -36,7 +36,7 @@
 
 - name: Remove default nginx config
   file: path=/etc/nginx/sites-enabled/default state=absent
-  notify: reload nginx
+  notify: reload_nginx
   tags:
     - nginx
 

@@ -9,3 +9,4 @@
   service: name=nginx state=reloaded
   become: yes
   become_method: sudo
+  listen: reload_nginx
