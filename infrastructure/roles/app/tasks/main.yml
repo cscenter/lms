@@ -134,12 +134,14 @@
   run_once: yes
   when: media_root_stat.stat.exists
 
+# Note: not idempotent
 - name: Ensure directories are {{ media_directory_permissions }}
   command: find {{ media_root }} -type d -exec chmod {{ media_directory_permissions }} {} \;
   become: yes
   run_once: yes
   when: media_root_stat.stat.exists
 
+# Note: not idempotent
 - name: Ensure files are {{ media_file_permissions }}
   command: find {{ media_root }} -type f -exec chmod {{ media_file_permissions }} {} \;
   become: yes

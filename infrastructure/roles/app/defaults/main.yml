@@ -4,5 +4,5 @@ certbot_cert_filename: fullchain.pem
 certbot_privkey_filename: privkey.pem
 certbot_trusted_chain_filename: chain.pem
 # media/ directory permissions. Should be synced with django settings
-media_directory_permissions: 0775
-media_file_permissions: 0664
+media_directory_permissions: "0775"
+media_file_permissions: "0664"
