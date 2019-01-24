@@ -22,11 +22,12 @@ backup-media:
 	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) --extra-vars "site_user=$(SITE_USER)" backup.yml -v --tags="media"
 
 # Use `update-app-*` commands after full application setup
+# --skip-tags="nginx-role" should increase playbook speed by avoiding checking dependent roles, but each command finally have to be idempotent without skipping any tag.
 update-app-cronjobs:
-	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="cronjobs" -v
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="cronjobs" --skip-tags="nginx-role" -v
 
 update-app-nginx-config:
 	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="nginx" --skip-tags="nginx-role" -v
 
 update-app-uwsgi-config:
-	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="uwsgi" -v
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="uwsgi" --skip-tags="nginx-role" -v

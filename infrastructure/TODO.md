@@ -5,8 +5,7 @@ Make tasks idempotent:
 [postgres : Change postgres data storage | Drop cluster if exists <-- run this on production and you will be fucked up
 [system : Get pip3.6 version]
 RUNNING HANDLER [postgres : restart postgres]
-TASK [app : Restart nginx]
-TASK [app : Install requirements] <-- compare Pipenv.lock hash like in deploy.yml
+TASK [app : Install requirements] <-- compare Pipenv.lock hash like in deploy.yml? What if venv was deleted (but cached pipenv.lock is not?)
 TASK [app : Ensure db user exists] <-- fix cluster drop and it should be OK then.
 
 
