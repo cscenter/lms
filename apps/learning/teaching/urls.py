@@ -4,11 +4,9 @@ from django.views.generic.base import RedirectView
 
 from learning.gradebook import views as gv
 from learning.teaching.views import TimetableView as TeacherTimetable, \
-    AssignmentCommentUpdateView
-from learning.views import CalendarTeacherFullView, \
-    CalendarTeacherPersonalView, CourseTeacherListView, \
-    AssignmentTeacherListView, \
-    AssignmentTeacherDetailView, StudentAssignmentTeacherDetailView
+    AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView, \
+    CalendarFullView, CalendarPersonalView, CourseListView
+from learning.views import StudentAssignmentTeacherDetailView
 from learning.api.views import CourseNewsUnreadNotificationsView
 
 COURSE_URI = r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/'
@@ -18,15 +16,15 @@ app_name = 'teaching'
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='assignment_list', permanent=False), name='base'),
     path('timetable/', TeacherTimetable.as_view(), name='timetable'),
-    path('calendar/', CalendarTeacherPersonalView.as_view(), name='calendar'),
-    path('full-calendar/', CalendarTeacherFullView.as_view(), name='calendar_full'),
+    path('calendar/', CalendarPersonalView.as_view(), name='calendar'),
+    path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),
     path('courses/', include([
-        path('', CourseTeacherListView.as_view(), name='course_list'),
+        path('', CourseListView.as_view(), name='course_list'),
         path("news/<int:news_pk>/stats", CourseNewsUnreadNotificationsView.as_view(), name="course_news_unread"),
     ])),
     path('assignments/', include([
-        path('', AssignmentTeacherListView.as_view(), name='assignment_list'),
-        path('<int:pk>/', AssignmentTeacherDetailView.as_view(), name='assignment_detail'),
+        path('', AssignmentListView.as_view(), name='assignment_list'),
+        path('<int:pk>/', AssignmentDetailView.as_view(), name='assignment_detail'),
         path('submissions/<int:pk>/', StudentAssignmentTeacherDetailView.as_view(), name='a_s_detail'),
         # FIXME: move this path to comment model as  `get_comment_update_url`
         path('submissions/<int:submission_pk>/comment/<int:comment_pk>/update/', AssignmentCommentUpdateView.as_view(), name='assignment_submission_comment_edit'),
