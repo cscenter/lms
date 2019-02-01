@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.http.response import Http404, HttpResponseRedirect
-from django.shortcuts import redirect
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
@@ -32,7 +31,7 @@ class CurrentCityMiddleware:
             city_code = view_kwargs["city_code"]
             if not city_code:
                 if use_delimiter and delimiter:
-                    # For default city delimiter must be empty
+                    # For the default city delimiter must be empty
                     raise Http404
                 city_code = settings.DEFAULT_CITY_CODE
             elif city_code not in settings.TIME_ZONES or (use_delimiter and

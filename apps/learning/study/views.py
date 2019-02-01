@@ -1,4 +1,3 @@
-from itertools import chain
 from typing import Iterable
 
 from django.conf import settings
@@ -16,14 +15,40 @@ from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
-from learning.calendar import LearningCalendarEvent
+from learning.calendar import get_month_events
 from learning.enrollment import course_failed_by_student
 from learning.internships.models import Internship
-from learning.models import Useful, StudentAssignment, Enrollment, \
-    Event
+from learning.models import Useful, StudentAssignment, Enrollment
 from learning.views import AssignmentProgressBaseView
-from learning.views.utils import get_student_city_code
 from users.mixins import StudentOnlyMixin
+from users.utils import get_student_city_code
+
+
+class CalendarFullView(StudentOnlyMixin, MonthEventsCalendarView):
+    """
+    Shows all non-course events and classes in the city of
+    the authenticated student.
+    """
+    def get_default_timezone(self):
+        return get_student_city_code(self.request)
+
+    def get_events(self, year, month, **kwargs):
+        student_city_code = self.get_default_timezone()
+        return get_month_events(year, month, [student_city_code])
+
+
+class CalendarPersonalView(CalendarFullView):
+    """
+    Shows non-course events filtered by student city and classes for courses
+    on which authenticated student enrolled.
+    """
+    calendar_type = "student"
+    template_name = "learning/calendar.html"
+
+    def get_events(self, year, month, **kwargs):
+        student_city_code = self.get_default_timezone()
+        return get_month_events(year, month, [student_city_code],
+                                for_student=self.request.user)
 
 
 class StudentAssignmentListView(StudentOnlyMixin, ListView):
@@ -130,50 +155,6 @@ class TimetableView(StudentOnlyMixin, WeekEventsView):
               .for_student(self.request.user)
               .for_timetable(self.request.user))
         return qs
-
-
-class CalendarFullView(StudentOnlyMixin, MonthEventsCalendarView):
-    """
-    Shows all non-course events and classes in the city of
-    the authenticated student.
-    """
-    def get_default_timezone(self):
-        return get_student_city_code(self.request)
-
-    def get_events(self, year, month, **kwargs):
-        student_city_code = self.get_default_timezone()
-        return chain(
-            (CalendarEvent(e) for e in
-                self._get_classes(year, month, student_city_code)),
-            (LearningCalendarEvent(e) for e in
-                self._get_events(year, month, student_city_code))
-        )
-
-    @staticmethod
-    def _get_events(year, month, city_code):
-        return (Event.objects
-                .for_calendar()
-                .for_city(city_code)
-                .in_month(year, month))
-
-    def _get_classes(self, year, month, city_code):
-        return (CourseClass.objects
-                .for_calendar(self.request.user)
-                .in_month(year, month)
-                .in_city(city_code))
-
-
-class CalendarPersonalView(CalendarFullView):
-    """
-    Shows non-course events filtered by student city and classes for courses
-    on which authenticated student enrolled.
-    """
-    calendar_type = "student"
-    template_name = "learning/calendar.html"
-
-    def _get_classes(self, year, month, city_code):
-        qs = super()._get_classes(year, month, city_code)
-        return qs.for_student(self.request.user)
 
 
 class UsefulListView(StudentOnlyMixin, generic.ListView):

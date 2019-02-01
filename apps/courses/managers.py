@@ -52,7 +52,7 @@ AssignmentManager = models.Manager.from_queryset(AssignmentQuerySet)
 
 class CourseClassQuerySet(query.QuerySet):
     # FIXME: Tests for club part!!!
-    def for_calendar(self, user):
+    def for_calendar(self, user=None):
         q = (self
              .select_related('course',
                              'course__meta_course',
@@ -61,6 +61,8 @@ class CourseClassQuerySet(query.QuerySet):
         # FIXME: Looks like this logic should be in .for_student method???
         # Hide summer classes on compsciclub.ru if user not enrolled in
         if is_club_site():
+            assert user is not None
+            # FIXME: если передан юзер, то отфильтровать для него только те, на которые подписан. А если не передан - то вообще все
             # XXX: On join enrollment table we get a lot of duplicates.
             # Clean them with right `.order` and `.distinct()`!
             summer_classes_enrolled_in = Q(

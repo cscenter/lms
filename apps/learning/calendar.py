@@ -14,38 +14,23 @@ class LearningCalendarEvent(CalendarEvent):
         return self.event.name
 
 
-def get_month_events(year, month, cities):
+def get_month_events(year, month, cities, for_teacher=None, for_student=None):
     study_events = (Event.objects
                     .for_calendar()
                     .in_month(year, month)
                     .in_cities(cities))
 
     classes = (CourseClass.objects
-    # FIXME: removed club crutch
+                # FIXME: тут что-то надо сделать с сайтом клуба. Ему нужен user, чтобы отсеять всяких челиков
                .for_calendar()
                .in_month(year, month)
                .in_cities(cities))
+    if for_teacher:
+        classes = classes.for_teacher(for_teacher)
+    elif for_student:
+        classes = classes.for_student(for_student)
 
     return chain(
-        (CalendarEvent(e) for e in classes(year, month, cities)),
-        (LearningCalendarEvent(e) for e in study_events(year, month))
+        (CalendarEvent(e) for e in classes),
+        (LearningCalendarEvent(e) for e in study_events)
     )
-
-
-
-
-"""
-city_code - 'student city code'
-    @staticmethod
-    def _get_events(year, month, city_code):
-        return (Event.objects
-                .for_calendar()
-                .for_city(city_code)
-                .in_month(year, month))
-
-    def _get_classes(self, year, month, city_code):
-        return (CourseClass.objects
-                .for_calendar(self.request.user)
-                .in_month(year, month)
-                .in_city(city_code))
-"""
