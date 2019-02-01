@@ -2,14 +2,18 @@ from itertools import chain
 from typing import Iterable
 
 from django.conf import settings
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from isoweek import Week
 from vanilla import CreateView, ListView
 
 from core.exceptions import Redirect
+from core.utils import is_club_site
 from courses.calendar import CalendarEvent
-from courses.models import CourseClass, Semester
+from courses.models import CourseClass, Semester, Course
+from courses.settings import SemesterTypes
+from courses.utils import get_current_term_pair, get_term_index
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
 from learning.calendar import LearningCalendarEvent
@@ -128,7 +132,7 @@ class TimetableView(StudentOnlyMixin, WeekEventsView):
         return qs
 
 
-class CalendarStudentFullView(StudentOnlyMixin, MonthEventsCalendarView):
+class CalendarFullView(StudentOnlyMixin, MonthEventsCalendarView):
     """
     Shows all non-course events and classes in the city of
     the authenticated student.
@@ -159,7 +163,7 @@ class CalendarStudentFullView(StudentOnlyMixin, MonthEventsCalendarView):
                 .in_city(city_code))
 
 
-class CalendarStudentPersonalView(CalendarStudentFullView):
+class CalendarPersonalView(CalendarFullView):
     """
     Shows non-course events filtered by student city and classes for courses
     on which authenticated student enrolled.
@@ -190,3 +194,53 @@ class InternshipListView(StudentOnlyMixin, generic.ListView):
         return (Internship.objects
                 .order_by("sort"))
 
+
+class CourseListView(StudentOnlyMixin, generic.TemplateView):
+    model = Course
+    context_object_name = 'course_list'
+    template_name = "learning/study/course_list.html"
+
+    def get_context_data(self, **kwargs):
+        city_code = get_student_city_code(self.request)
+        # Student enrollments
+        student_enrollments = (Enrollment.active
+                               .filter(student_id=self.request.user)
+                               .select_related("course")
+                               .only('id', 'grade', 'course_id',
+                                     'course__grading_type'))
+        student_enrolled_in = {e.course_id: e for e in student_enrollments}
+        # 1. Union courses from current term and which student enrolled in
+        current_year, current_term = get_current_term_pair(city_code)
+        current_term_index = get_term_index(current_year, current_term)
+        in_current_term = Q(semester__index=current_term_index)
+        enrolled_in = Q(id__in=list(student_enrolled_in))
+        # Hide summer courses on CS Club site until student enrolled in
+        if is_club_site():
+            in_current_term &= ~Q(semester__type=SemesterTypes.SUMMER)
+        course_offerings = (Course.objects
+                            .get_offerings_base_queryset()
+                            .in_city(city_code)
+                            .filter(in_current_term | enrolled_in))
+        # 2. And split them by type.
+        ongoing_enrolled, ongoing_rest, archive_enrolled = [], [], []
+        for course in course_offerings:
+            if course.semester.index == current_term_index:
+                if course.pk in student_enrolled_in:
+                    # TODO: add `enrollments` to context and get grades explicitly in tmpl
+                    course.enrollment = student_enrolled_in[course.pk]
+                    ongoing_enrolled.append(course)
+                else:
+                    ongoing_rest.append(course)
+            else:
+                course.enrollment = student_enrolled_in[course.pk]
+                archive_enrolled.append(course)
+        context = {
+            "ongoing_rest": ongoing_rest,
+            "ongoing_enrolled": ongoing_enrolled,
+            "archive_enrolled": archive_enrolled,
+            # FIXME: what about custom template tag for this?
+            # TODO: Add util method
+            "current_term": "{} {}".format(SemesterTypes.values[current_term],
+                                           current_year).capitalize()
+        }
+        return context
