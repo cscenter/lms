@@ -3,12 +3,13 @@ from django.urls import path, re_path
 from django.views.generic.base import RedirectView
 
 from learning.gradebook import views as gv
-from learning.teaching.views import TimetableView as TeacherTimetable
+from learning.teaching.views import TimetableView as TeacherTimetable, \
+    AssignmentCommentUpdateView
 from learning.views import CalendarTeacherFullView, \
     CalendarTeacherPersonalView, CourseTeacherListView, \
     AssignmentTeacherListView, \
-    AssignmentTeacherDetailView, StudentAssignmentTeacherDetailView, \
-    AssignmentCommentUpdateView
+    AssignmentTeacherDetailView, StudentAssignmentTeacherDetailView
+from learning.api.views import CourseNewsUnreadNotificationsView
 
 COURSE_URI = r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/'
 
@@ -19,7 +20,10 @@ urlpatterns = [
     path('timetable/', TeacherTimetable.as_view(), name='timetable'),
     path('calendar/', CalendarTeacherPersonalView.as_view(), name='calendar'),
     path('full-calendar/', CalendarTeacherFullView.as_view(), name='calendar_full'),
-    path('courses/', CourseTeacherListView.as_view(), name='course_list'),
+    path('courses/', include([
+        path('', CourseTeacherListView.as_view(), name='course_list'),
+        path("news/<int:news_pk>/stats", CourseNewsUnreadNotificationsView.as_view(), name="course_news_unread"),
+    ])),
     path('assignments/', include([
         path('', AssignmentTeacherListView.as_view(), name='assignment_list'),
         path('<int:pk>/', AssignmentTeacherDetailView.as_view(), name='assignment_detail'),

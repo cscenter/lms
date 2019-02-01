@@ -17,11 +17,9 @@ from django.db.models import Q, Prefetch, When, Value, Case, \
     prefetch_related_objects
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseForbidden
-from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
-from django.views.generic.edit import BaseUpdateView
 from nbconvert import HTMLExporter
 from vanilla import CreateView, TemplateView
 
@@ -31,7 +29,7 @@ from core.exceptions import Redirect
 from core.settings.base import FOUNDATION_YEAR
 from core.timezone import Timezone, CityCode
 from core.urls import reverse
-from core.utils import hashids, render_markdown, is_club_site
+from core.utils import hashids, is_club_site
 from core.views import LoginRequiredMixin
 from courses.calendar import CalendarEvent
 from courses.models import Course, Semester, CourseClass, \
@@ -41,8 +39,7 @@ from courses.utils import get_current_term_pair, get_term_index, \
     get_terms_for_calendar_month
 from courses.views.calendar import MonthEventsCalendarView
 from learning.calendar import LearningCalendarEvent
-from learning.forms import AssignmentCommentForm, AssignmentScoreForm, \
-    AssignmentModalCommentForm
+from learning.forms import AssignmentCommentForm, AssignmentScoreForm
 from learning.models import Enrollment, StudentAssignment, AssignmentComment, \
     AssignmentNotification, \
     Event
@@ -66,7 +63,7 @@ __all__ = [
     'CoursesListView', 'CourseTeacherListView', 'CourseStudentListView',
     'AssignmentTeacherListView',
     'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
-    'AssignmentCommentUpdateView', 'EventDetailView',
+    'EventDetailView',
     'AssignmentAttachmentDownloadView',
     'AssignmentCommentAttachmentDownloadView'
 ]
@@ -661,46 +658,6 @@ class StudentAssignmentTeacherDetailView(AssignmentProgressBaseView,
 
     def get_success_url(self):
         return self.student_assignment.get_teacher_url()
-
-
-# TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
-# FIXME: replace with vanilla view
-class AssignmentCommentUpdateView(generic.UpdateView):
-    model = AssignmentComment
-    pk_url_kwarg = 'comment_pk'
-    context_object_name = "comment"
-    template_name = "learning/_modal_submission_comment.html"
-    form_class = AssignmentModalCommentForm
-
-    def form_valid(self, form):
-        self.object = form.save()
-        html = render_markdown(self.object.text)
-        return JsonResponse({"success": 1,
-                             "id": self.object.pk,
-                             "html": html})
-
-    def form_invalid(self, form):
-        return JsonResponse({"success": 0, "errors": form.errors})
-
-    def check_permissions(self, comment):
-        # Allow view/edit own comments to teachers and all to curators
-        if not self.request.user.is_curator:
-            is_teacher = self.request.user.is_teacher
-            if comment.author_id != self.request.user.pk or not is_teacher:
-                raise PermissionDenied
-            # Check comment not in stale state for edit
-            if comment.is_stale_for_edit():
-                raise PermissionDenied
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.check_permissions(self.object)
-        return super(BaseUpdateView, self).get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.check_permissions(self.object)
-        return super(BaseUpdateView, self).post(request, *args, **kwargs)
 
 
 class AssignmentCommentAttachmentDownloadView(LoginRequiredMixin, generic.View):
