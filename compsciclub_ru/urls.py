@@ -50,7 +50,7 @@ urlpatterns += [
     path('', include('users.urls')),
 
     path('teaching/', include('learning.teaching.urls')),
-    path('learning/', include('learning.studying.urls')),
+    path('learning/', include('learning.study.urls')),
 
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),

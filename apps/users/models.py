@@ -9,7 +9,6 @@ from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -24,6 +23,7 @@ from sorl.thumbnail import ImageField
 from users.utils import photo_thumbnail_cropbox
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.utils import is_club_site, en_to_ru_mapping
+from core.urls import reverse
 from courses.models import Semester
 from compscicenter_ru.utils import PublicRoute
 from learning.permissions import LearningPermissionsMixin
@@ -389,6 +389,9 @@ class User(LearningPermissionsMixin, AbstractUser):
 
     def get_absolute_url(self):
         return reverse('user_detail', args=[self.pk])
+
+    def get_update_profile_url(self):
+        return reverse('user_update', args=[self.pk])
 
     def get_classes_icalendar_url(self):
         # Returns relative path

@@ -164,15 +164,15 @@ class GradeBookFormFactory:
         (see `CustomBoundField`) instead of the value provided to the form.
         """
         cls_dict = fields = {}
-        for student_submissions in gradebook.submissions:
-            for submission in student_submissions:
+        for student_assignments in gradebook.submissions:
+            for sa in student_assignments:
                 # Student have no submissions after withdrawal
-                if not submission:
+                if not sa:
                     continue
-                assignment = submission.assignment
+                assignment = sa.assignment
                 if not assignment.is_online:
-                    k = BaseGradebookForm.GRADE_PREFIX + str(submission.id)
-                    fields[k] = AssignmentScore(assignment, submission)
+                    k = BaseGradebookForm.GRADE_PREFIX + str(sa.id)
+                    fields[k] = AssignmentScore(assignment, sa)
 
         for s in gradebook.students.values():
             k = BaseGradebookForm.FINAL_GRADE_PREFIX + str(s.enrollment_id)

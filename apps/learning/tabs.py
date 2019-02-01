@@ -1,9 +1,7 @@
 import logging
 from typing import List, Optional
 
-from django.db.models import Case, Count, Value, When, \
-    IntegerField, Prefetch
-from django.urls import reverse
+from django.db.models import Prefetch
 from django.utils.translation import ugettext_noop
 
 from core.utils import is_club_site
@@ -123,7 +121,7 @@ def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
                 logger.info(f"no StudentAssignment for student ID "
                             f"{user.pk}, assignment ID {a.pk}")
         elif user_role in [CourseRole.TEACHER, CourseRole.CURATOR]:
-            to_details = reverse("assignment_detail_teacher", args=[a.pk])
+            to_details = a.get_teacher_url()
         setattr(a, 'magic_link', to_details)
     return assignments
 

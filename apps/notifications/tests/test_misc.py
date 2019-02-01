@@ -3,7 +3,7 @@ This file demonstrates writing tests using the unittest module. These will pass
 when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
-from django.test import TestCase
+from core.tests.utils import CSCTestCase
 
 from users.tests.factories import UserFactory
 
@@ -23,7 +23,7 @@ from notifications.signals import notify
 from notifications.models import Notification
 
 
-class NotificationTest(TestCase):
+class NotificationTest(CSCTestCase):
 
     @override_settings(USE_TZ=True)
     @override_settings(TIME_ZONE='Asia/Shanghai')
@@ -43,7 +43,7 @@ class NotificationTest(TestCase):
         # test above was originally.
 
 # FIXME: fuck it, rewrite with pytest
-# class NotificationManagersTest(TestCase):
+# class NotificationManagersTest(CSCTestCase):
 #
 #     def setUp(self):
 #         self.message_count = 10

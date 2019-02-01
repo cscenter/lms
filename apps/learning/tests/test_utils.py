@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-from django.test import TestCase
+from core.tests.utils import CSCTestCase
 
 from learning.utils import split_on_condition
 
 
-class UtilTests(TestCase):
+class UtilTests(CSCTestCase):
     def test_split_list(self):
         xs = [1, 2, 3, 4]
         self.assertEqual(([1, 3], [2, 4]),

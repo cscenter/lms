@@ -10,11 +10,12 @@ from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
 from courses.utils import get_current_term_pair, get_term_by_index
 from users.tests.factories import TeacherCenterFactory
 
-__all__ = [
+__all__ = (
     "MetaCourseFactory", "SemesterFactory", "VenueFactory", "CourseFactory",
     "CourseNewsFactory", "AssignmentFactory", "CourseTeacherFactory",
-    "CourseClassFactory", "CourseClassAttachmentFactory", "AssignmentAttachmentFactory"
-]
+    "CourseClassFactory", "CourseClassAttachmentFactory",
+    "AssignmentAttachmentFactory"
+)
 
 
 class MetaCourseFactory(factory.DjangoModelFactory):

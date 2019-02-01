@@ -1,8 +1,7 @@
 from collections import OrderedDict
 from enum import Enum
 
-from django.urls import reverse
-
+from core.urls import reverse
 from courses.utils import get_term_index_academic_year_starts, get_term_by_index
 
 
@@ -42,8 +41,8 @@ class PublicRoute(Enum):
     """
     PROJECTS = ('projects', 'Проекты', 'projects:report_list_reviewers')
     ADMISSION = ('admission', 'Набор', 'admission:interviews')
-    LEARNING = ('learning', 'Обучение', 'assignment_list_student')
-    TEACHING = ('teaching', 'Преподавание', 'assignment_list_teacher')
+    LEARNING = ('learning', 'Обучение', 'study:assignment_list')
+    TEACHING = ('teaching', 'Преподавание', 'teaching:assignment_list')
     STAFF = ('staff', 'Курирование', 'staff:student_search')
 
     def __init__(self, code, section_name, url_name):

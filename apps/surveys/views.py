@@ -1,8 +1,8 @@
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
 from django.views.generic import FormView
 
+from core.urls import reverse
 from courses.models import Course
 from surveys.forms import FormBuilder
 from surveys.models import CourseSurvey

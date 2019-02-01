@@ -3,16 +3,15 @@ import os
 from django.contrib.auth.views import redirect_to_login
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect
-from django.urls import reverse
 from vanilla import CreateView, UpdateView, DeleteView
 
 from core.exceptions import Redirect
+from core.urls import reverse
 from core.views import ProtectedFormMixin
 from courses.forms import AssignmentForm
 from courses.models import Assignment, Course, AssignmentAttachment
 from courses.utils import get_co_from_query_params
 from users.mixins import TeacherOnlyMixin
-
 
 __all__ = ('AssignmentCreateView', 'AssignmentUpdateView',
            'AssignmentDeleteView', 'AssignmentAttachmentDeleteView')
@@ -76,7 +75,7 @@ class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):
     template_name = "forms/simple_delete_confirmation.html"
 
     def get_success_url(self):
-        return reverse('assignment_list_teacher')
+        return reverse('teaching:assignment_list')
 
     def is_form_allowed(self, user, obj: Assignment):
         return user.is_curator or user in obj.course.teachers.all()

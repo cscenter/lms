@@ -167,3 +167,6 @@ LDAP_SYNC_PASSWORD = True
 GERRIT_API_URI = "https://review.compscicenter.ru/a/"
 GERRIT_CLIENT_USERNAME = "admin"
 GERRIT_CLIENT_PASSWORD = "LEMz8tbPrxyBABArv+U2h2Zi32h8v13h7h2ZFzFOow"
+
+ALLOWED_HOSTS = ["*"]
+SESSION_COOKIE_DOMAIN = ".csc.test"

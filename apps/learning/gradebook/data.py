@@ -86,6 +86,9 @@ class StudentProgress:
     def assignment(self):
         return self._student_assignment.assignment
 
+    def get_teacher_url(self):
+        return self._student_assignment.get_teacher_url()
+
     @property
     def student_id(self):
         return self._student_assignment.student_id

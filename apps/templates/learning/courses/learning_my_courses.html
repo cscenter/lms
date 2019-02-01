@@ -34,13 +34,13 @@
                   <span class="badge assignment-status {{ course.grading_type_choice.css_class }} {{ course.enrollment.grade }}">{{ course.enrollment.grade_honest }}</span><br>
               {% trans "Professors" %}:
                 {% for teacher in course.teachers.all %}
-                <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
+                <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
                 </td>
                 <td>
                     {% if course.survey_url %}<a class=" btn btn-sm btn-block btn-success" href="{{ course.survey_url }}" target="_blank">{% trans "Start survey!" %}</a>{% endif %}
                     {% if course.enrollment_is_open %}
-                    <a href="{{ course.get_unenroll_url }}?back=course_list_student"
+                    <a href="{{ course.get_unenroll_url }}?back=study:course_list"
                        class=" btn btn-sm btn-block btn-warning">{% trans "Leave course" %}
                     </a>
                     {% endif %}
@@ -55,7 +55,7 @@
                     {{ course.meta_course.name }}</a>{% if request.site.domain == "compscicenter.ru" and course.is_open %}<span>, курс CS клуба</span>{% endif %}<br>
               {% trans "Professors" %}:
                 {% for teacher in course.teachers.all %}
-                <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
+                <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
               </td>
               <td>
@@ -64,7 +64,7 @@
                 <form method="post" action="{{ course.get_enroll_url }}">
                 {% csrf_token %}
                 <input type="hidden" name="course_pk" value="{{ course.pk }}">
-                <input type="hidden" name="back" value="course_list_student">
+                <input type="hidden" name="back" value="study:course_list">
                 <button type="submit" class="btn btn-default btn-sm btn-block">
                   {% trans "Enroll" %}
                 </button>

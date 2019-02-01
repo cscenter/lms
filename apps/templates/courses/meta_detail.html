@@ -9,7 +9,7 @@
                 <h2>{{ meta_course.name }}</h2>
                 {% if user.is_curator %}
                     <div class="btn-toolbar">
-                        <a href="{% url 'meta_course_edit' meta_course.slug %}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+                        <a href="{{ meta_course.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
                     </div>
                 {% endif %}
                 <hr>

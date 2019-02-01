@@ -2,10 +2,7 @@
 Django settings shared between projects.
 
 For more information on this file, see
-https://docs.djangoproject.com/en/1.6/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.6/ref/settings/
+https://docs.djangoproject.com/en/2.1/topics/settings/
 """
 from pathlib import Path
 
@@ -36,6 +33,8 @@ CITIES = {
 CLUB_DOMAIN = 'compsciclub.ru'
 CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
+
+PRIVATE_SUBDOMAIN = 'learn'
 
 INSTALLED_APPS = [
     'modeltranslation',  # insert before admin

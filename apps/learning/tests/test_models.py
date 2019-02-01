@@ -7,7 +7,7 @@ from unittest import mock
 import pytest
 import pytz
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from core.tests.utils import CSCTestCase
 from django.utils.encoding import smart_text
 
 from learning.tests.factories import StudentAssignmentFactory, AssignmentCommentFactory, \
@@ -24,7 +24,7 @@ from users.tests.factories import UserFactory, StudentCenterFactory, \
     TeacherCenterFactory
 
 
-class CommonTests(TestCase):
+class CommonTests(CSCTestCase):
     @mock.patch("courses.tasks.maybe_upload_slides_yandex.delay")
     def test_to_strings(self, _):
         meta_course = MetaCourseFactory.build()
@@ -67,7 +67,7 @@ class CommonTests(TestCase):
         self.assertIn(smart_text(conn.course_offering_news), smart_text(conn))
 
 
-class StudentAssignmentTests(TestCase):
+class StudentAssignmentTests(CSCTestCase):
     def test_clean(self):
         u1 = StudentCenterFactory()
         u2 = UserFactory.create(groups=[])
@@ -173,7 +173,7 @@ class StudentAssignmentTests(TestCase):
         self.assertEqual(state.abbr, as_.state_short)
 
 
-class AssignmentCommentTests(TestCase):
+class AssignmentCommentTests(CSCTestCase):
     def test_attached_file(self):
         ac = AssignmentCommentFactory.create(
             attached_file__filename="foobar.pdf")
@@ -185,13 +185,13 @@ class AssignmentCommentTests(TestCase):
         self.assertRegex(ac.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")
 
 
-class EnrollmentTests(TestCase):
+class EnrollmentTests(CSCTestCase):
     def test_clean(self):
         e = EnrollmentFactory.create(student=UserFactory.create())
         self.assertRaises(ValidationError, e.clean)
 
 
-class AssignmentNotificationTests(TestCase):
+class AssignmentNotificationTests(CSCTestCase):
     def test_clean(self):
         an = AssignmentNotificationFactory.create(
             user=StudentCenterFactory(),

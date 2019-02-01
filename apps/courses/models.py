@@ -8,7 +8,6 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -19,7 +18,8 @@ from model_utils.models import TimeStampedModel
 from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local
-from core.utils import city_aware_reverse, hashids
+from core.urls import reverse, city_aware_reverse
+from core.utils import hashids
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
 from learning.settings import GradingSystems, ENROLLMENT_DURATION, \
@@ -427,23 +427,25 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
         if for_curator:
             url_name = "staff:course_markssheet_staff"
         elif format == "csv":
-            url_name = "gradebook:markssheet_teacher_csv"
+            url_name = "teaching:gradebook_csv"
         else:
-            url_name = "gradebook:markssheet_teacher"
-        return reverse(url_name, kwargs={
-            "course_slug": self.meta_course.slug,
-            "city": self.get_city(),
-            "semester_type": self.semester.type,
-            "semester_year": self.semester.year,
-        })
+            url_name = "teaching:gradebook"
+        return reverse(url_name,
+                       kwargs={
+                           "course_slug": self.meta_course.slug,
+                           "city": self.get_city(),
+                           "semester_type": self.semester.type,
+                           "semester_year": self.semester.year,
+                       })
     # TODO: Replace with `get_gradebook_url` after migrating to jinja2
     def get_gradebook_csv_url(self):
-        return reverse("gradebook:markssheet_teacher_csv", kwargs={
-            "course_slug": self.meta_course.slug,
-            "city": self.get_city(),
-            "semester_type": self.semester.type,
-            "semester_year": self.semester.year,
-        })
+        return reverse("teaching:gradebook_csv",
+                       kwargs={
+                           "course_slug": self.meta_course.slug,
+                           "city": self.get_city(),
+                           "semester_type": self.semester.type,
+                           "semester_year": self.semester.year,
+                       })
 
     def get_city(self):
         return self.city_id
@@ -632,7 +634,9 @@ class CourseNews(TimeStampedModel):
         })
 
     def get_stats_url(self):
-        return city_aware_reverse('course_news_unread', kwargs={
+        return city_aware_reverse('course_news_unread',
+                                  subdomain=settings.PRIVATE_SUBDOMAIN,
+                                  kwargs={
             "course_slug": self.course.meta_course.slug,
             "semester_slug": self.course.semester.slug,
             "city_code": self.get_city(),
@@ -937,7 +941,8 @@ class Assignment(TimeStampedModel):
         return timezone.localtime(self.created, timezone=tz)
 
     def get_teacher_url(self):
-        return reverse('assignment_detail_teacher', kwargs={"pk": self.pk})
+        return reverse('teaching:assignment_detail',
+                       kwargs={"pk": self.pk})
 
     def get_update_url(self):
         return city_aware_reverse('assignment_update', kwargs={
@@ -1014,10 +1019,9 @@ class AssignmentAttachment(TimeStampedModel):
         return ext
 
     def file_url(self):
-        return reverse("assignment_attachments_download", kwargs={
-            "sid": hashids.encode(ASSIGNMENT_TASK_ATTACHMENT, self.pk),
-            "file_name": self.file_name
-        })
+        sid = hashids.encode(ASSIGNMENT_TASK_ATTACHMENT, self.pk)
+        return reverse("study:assignment_attachments_download",
+                       kwargs={"sid": sid, "file_name": self.file_name})
 
     def get_delete_url(self):
         return city_aware_reverse('assignment_attachment_delete', kwargs={

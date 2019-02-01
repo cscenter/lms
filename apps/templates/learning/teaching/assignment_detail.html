@@ -11,7 +11,7 @@
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
-        <a href="{% url 'assignment_list_teacher' %}"><span class="fa fa-angle-left"></span></a>
+        <a href="{% url 'teaching:assignment_list' %}"><span class="fa fa-angle-left"></span></a>
         {{ assignment.title }}<br>
           <small><a href="{{ assignment.course.get_absolute_url }}">{{ assignment.course }}</a></small>
       </h2>

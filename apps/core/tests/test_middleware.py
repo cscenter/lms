@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import pytest
 
 from django.contrib.sites.models import Site
@@ -31,7 +33,8 @@ def test_current_city_middleware(rf, settings, mocker):
     assert settings.DEFAULT_CITY_CODE == "spb"
 
     co = CourseFactory(city_id="kzn", meta_course__slug="test")
-    assert co.get_absolute_url() == "/courses/test/kzn/{}/".format(co.semester.slug)
+    parsed_url = urlparse(co.get_absolute_url())
+    assert parsed_url.path == "/courses/test/kzn/{}/".format(co.semester.slug)
     request.path = co.get_absolute_url()
     # Without `city_aware` url keyword we still should parse sub domain
     delattr(request, "city_code")

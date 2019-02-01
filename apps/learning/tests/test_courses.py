@@ -3,8 +3,8 @@ import datetime
 import pytest
 import pytz
 from django.conf import settings
-from django.urls import reverse
 
+from core.urls import reverse
 from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
     SemesterFactory, CourseFactory
 from users.tests.factories import TeacherCenterFactory, StudentCenterFactory
@@ -74,5 +74,5 @@ def test_course_list(client):
     co = CourseFactory.create(semester=s,
                               city=settings.DEFAULT_CITY_CODE)
     co_kzn = CourseFactory.create(semester=s, city="kzn")
-    response = client.get(reverse('course_list_student'))
+    response = client.get(reverse('study:course_list'))
     assert len(response.context['ongoing_rest']) == 1

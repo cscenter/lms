@@ -7,7 +7,6 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -16,13 +15,14 @@ from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, ChoiceItem
 from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
-from model_utils.models import TimeStampedModel, TimeFramedModel
+from model_utils.models import TimeStampedModel
 
 from core.db.models import ScoreField
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
+from core.models import LATEX_MARKDOWN_HTML_ENABLED
+from core.urls import reverse
 from core.utils import hashids
-from courses.models import MetaCourse, Course, CourseTeacher, CourseNews, Venue, \
-    CourseClass, Assignment
+from courses.models import Course, CourseNews, Venue, \
+    Assignment
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager
@@ -205,10 +205,10 @@ class StudentAssignment(TimeStampedModel):
         return self.__class__.assignment.field.name
 
     def get_teacher_url(self):
-        return reverse('a_s_detail_teacher', kwargs={"pk": self.pk})
+        return reverse('teaching:a_s_detail', kwargs={"pk": self.pk})
 
     def get_student_url(self):
-        return reverse('a_s_detail_student', kwargs={"pk": self.pk})
+        return reverse('study:a_s_detail', kwargs={"pk": self.pk})
 
     def has_unread(self):
         from notifications.middleware import get_unread_notifications_cache
@@ -323,7 +323,8 @@ class AssignmentComment(TimeStampedModel):
         return os.path.basename(self.attached_file.name)
 
     def attached_file_url(self):
-        return reverse("assignment_attachments_download", kwargs={
+        return reverse("study:assignment_comment_attachments_download", kwargs={
+            "student_assignment_id": self.student_assignment_id,
             "sid": hashids.encode(learn_conf.ASSIGNMENT_COMMENT_ATTACHMENT,
                                   self.pk),
             "file_name": self.attached_file_name
@@ -453,7 +454,9 @@ class Event(TimeStampedModel):
         return "noncourse"
 
     def get_absolute_url(self):
-        return reverse('non_course_event_detail', args=[self.pk])
+        return reverse('non_course_event_detail',
+                       subdomain=settings.PRIVATE_SUBDOMAIN,
+                       args=[self.pk])
 
 
 # FIXME: move -> cscenter app

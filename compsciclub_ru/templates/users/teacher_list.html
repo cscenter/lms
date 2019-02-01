@@ -13,7 +13,7 @@
         <div class="teachers-list">
             {% for user in object_list %}
             <div class="teachers-list-item">{% spaceless %}
-                <a href="{% url 'teacher_detail' user.pk %}">
+                <a href="{{ user.teacher_profile_url }}">
                     {% if user.photo %}
                           {% user_thumbnail user user.ThumbnailSize.TEACHER_LIST as im %}
                             <img width="{{ im.width }}" height="{{ im.height }}"

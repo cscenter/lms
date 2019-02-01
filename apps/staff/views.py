@@ -13,7 +13,6 @@ from django.http import HttpResponse, HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django_filters.rest_framework import DjangoFilterBackend
@@ -23,6 +22,7 @@ from vanilla import TemplateView
 
 from api.permissions import CuratorAccessPermission
 from core.templatetags.core_tags import tex
+from core.urls import reverse
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
 from learning.models import Enrollment

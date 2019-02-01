@@ -7,24 +7,24 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.models import Group
 from django.forms.models import model_to_dict
-from django.test import TestCase
-from django.urls import reverse
 from django.utils import translation
 from django.utils.encoding import smart_text, force_text, smart_bytes
 
-from learning.tests.factories import AreaOfStudyFactory
+from core.tests.utils import CSCTestCase
+from core.urls import reverse
 from courses.tests.factories import CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
-from users.constants import AcademicRoles
+from learning.tests.factories import AreaOfStudyFactory
 from learning.tests.mixins import MyUtilitiesMixin
+from users.constants import AcademicRoles
 from users.forms import UserCreationForm, UserChangeForm
+from users.models import User
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
     TeacherCenterFactory, StudentClubFactory, \
     StudentFactory, StudentCenterFactory
-from users.models import User
 
 
-class UserTests(MyUtilitiesMixin, TestCase):
+class UserTests(MyUtilitiesMixin, CSCTestCase):
     def test_groups_pks_synced_with_migrations(self):
         """
         We need to be sure, that migrations creates groups with desired pk's.
@@ -178,37 +178,34 @@ class UserTests(MyUtilitiesMixin, TestCase):
         self.assertIn('_auth_user_id', self.client.session)
 
     def test_auth_restriction_works(self):
-        def assertLoginRedirect(url):
-            self.assertRedirects(self.client.get(url),
-                                 "{}?next={}".format(settings.LOGIN_URL, url))
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = User.objects.create_user(**user_data)
-        url = reverse('assignment_list_teacher')
-        assertLoginRedirect(url)
+        url = reverse('teaching:assignment_list')
+        self.assertLoginRedirect(url)
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 200
-        assertLoginRedirect(url)
+        self.assertLoginRedirect(url)
         user.groups.set([user.roles.STUDENT_CENTER])
         user.city_id = 'spb'
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
-        resp = self.client.get(reverse('assignment_list_teacher'))
-        assertLoginRedirect(url)
+        resp = self.client.get(reverse('teaching:assignment_list'))
+        self.assertLoginRedirect(url)
         user.groups.set([user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER])
         user.save()
-        resp = self.client.get(reverse('assignment_list_teacher'))
+        resp = self.client.get(reverse('teaching:assignment_list'))
         # Teacher has no course offering and redirects to courses list
         self.assertEqual(resp.status_code, 302)
         # Now he has one
         CourseFactory.create(teachers=[user])
-        resp = self.client.get(reverse('assignment_list_teacher'))
+        resp = self.client.get(reverse('teaching:assignment_list'))
         self.assertEqual(resp.status_code, 200)
 
     def test_logout_works(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        User.objects.create_user(**user_data)
-        login = self.client.login(**user_data)
+        user = User.objects.create_user(**user_data)
+        login = self.client.login(None, **user_data)
         self.assertTrue(login)
         self.assertIn('_auth_user_id', self.client.session)
         resp = self.client.get(reverse('logout'))
@@ -219,7 +216,7 @@ class UserTests(MyUtilitiesMixin, TestCase):
     def test_logout_redirect_works(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         User.objects.create_user(**user_data)
-        login = self.client.login(**user_data)
+        login = self.client.login(None, **user_data)
         resp = self.client.get(reverse('logout'),
                                {'next': reverse('course_video_list')})
         self.assertRedirects(resp, reverse('course_video_list'),
@@ -252,11 +249,11 @@ class UserTests(MyUtilitiesMixin, TestCase):
     def test_teacher_detail_view(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = User.objects.create_user(**user_data)
-        resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
+        resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 404)
         user.groups.set([user.roles.TEACHER_CENTER])
         user.save()
-        resp = self.client.get(reverse('teacher_detail', args=[user.pk]))
+        resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.context['teacher'], user)
 
@@ -273,14 +270,14 @@ class UserTests(MyUtilitiesMixin, TestCase):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = User.objects.create_user(**user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.client.login(**user_data)
+        self.client.login(None, **user_data)
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertEqual(resp.context['profile_user'], user)
         self.assertTrue(resp.context['is_editing_allowed'])
-        self.assertContains(resp, reverse('user_update', args=[user.pk]))
-        resp = self.client.get(reverse('user_update', args=[user.pk]))
+        self.assertContains(resp, user.get_update_profile_url())
+        resp = self.client.get(user.get_update_profile_url())
         self.assertContains(resp, 'bio')
-        resp = self.client.post(reverse('user_update', args=[user.pk]),
+        resp = self.client.post(user.get_update_profile_url(),
                                 {'bio': test_note})
         self.assertRedirects(resp, reverse('user_detail', args=[user.pk]),
                              status_code=302)
@@ -295,15 +292,15 @@ class UserTests(MyUtilitiesMixin, TestCase):
         test_review = "CSC are the bollocks"
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = User.objects.create_user(**user_data)
-        self.client.login(**user_data)
-        resp = self.client.get(reverse('user_update', args=[user.pk]))
+        self.client.login(None, **user_data)
+        resp = self.client.get(user.get_update_profile_url())
         self.assertNotContains(resp, 'csc_review')
         user.groups.set([user.roles.GRADUATE_CENTER])
         user.graduation_year = 2014
         user.save()
-        resp = self.client.get(reverse('user_update', args=[user.pk]))
+        resp = self.client.get(user.get_update_profile_url())
         self.assertIn(b'csc_review', resp.content)
-        resp = self.client.post(reverse('user_update', args=[user.pk]),
+        resp = self.client.post(user.get_update_profile_url(),
                                 {'csc_review': test_review})
         self.assertRedirects(resp, reverse('user_detail', args=[user.pk]),
                              status_code=302)
@@ -400,7 +397,7 @@ def test_expelled(client, settings):
     student = StudentCenterFactory(status=StudentStatuses.EXPELLED,
                                    city_id=settings.DEFAULT_CITY_CODE)
     client.login(student)
-    url = reverse('course_list_student')
+    url = reverse('study:course_list')
     response = client.get(url)
     assert response.status_code == 302
     assert "login" in response["Location"]

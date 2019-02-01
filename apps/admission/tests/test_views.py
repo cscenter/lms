@@ -1,22 +1,23 @@
-import pytest
 import datetime
 
+import pytest
 from bs4 import BeautifulSoup
 from django.apps import apps
-from django.urls import reverse
 from django.utils import timezone, formats
 from django.utils.timezone import now
 from post_office.models import Email
 
-from core.models import City
-from core.settings.base import DEFAULT_CITY_CODE
+from admission.forms import InterviewFromStreamForm
+from admission.models import Applicant, Interview, InterviewInvitation
 from admission.tests.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
-from admission.forms import InterviewFromStreamForm
-from admission.models import Applicant, Interview, InterviewInvitation
+from core.models import City
+from core.settings.base import DEFAULT_CITY_CODE
 from core.timezone import now_local
+from core.urls import reverse
 from users.tests.factories import UserFactory
+
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
 # TODO: Проверить время отправки напоминания, время/дату собеседования

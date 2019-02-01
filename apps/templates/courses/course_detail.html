@@ -18,7 +18,7 @@
         <div class="col-xs-9">
             <h2 class="course-main-title">
             {{ course.meta_course.name }}{% if request.user.is_curator %} <a href="{% url "admin:courses_course_change" course.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
-              <small>{% if course.is_correspondence %}{% trans "Online Course" %}{% else %}{{ course.city.name }}{% endif %} / {{ course.semester }}, <a href="{% url 'meta_course_detail' course.meta_course.slug %}">посмотреть все семестры</a></small>
+              <small>{% if course.is_correspondence %}{% trans "Online Course" %}{% else %}{{ course.city.name }}{% endif %} / {{ course.semester }}, <a href="{{ course.meta_course.get_absolute_url }}">посмотреть все семестры</a></small>
             </h2>
 
             {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
@@ -110,7 +110,7 @@
                               {{ class.name }}</a><span class="text-muted">, {% if class.type == 'lecture'%}{% trans 'Lecture'|lower %}{% else %}{% trans 'Seminar'|lower %}</span>{% endif %}
                           </td>
                           <td>
-                            <a href="{% url 'venue_detail' class.venue.pk %}">{{ class.venue }}</a>
+                            <a href="{{ class.venue.get_absolute_url }}">{{ class.venue }}</a>
                           </td>
                           <td>
                             {{ class.materials_str|safe }}
@@ -241,7 +241,7 @@
                 {% for course_teacher in teachers.lecturers %}
                     {% with teacher=course_teacher.teacher %}
                     <li>
-                        <a href="{% url 'teacher_detail' teacher.pk %}">
+                        <a href="{{ teacher.teacher_profile_url }}">
                             {% if teacher.photo %}
                                 {% user_thumbnail teacher teacher.ThumbnailSize.BASE as im %}
                                     <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}"><br>
@@ -262,7 +262,7 @@
                     {% for course_teacher in teachers.others %}
                         {% with teacher=course_teacher.teacher %}
                         <li>
-                            <a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a>
+                            <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_full_name }}</a>
                         </li>
                         {% endwith %}
                     {% endfor %}

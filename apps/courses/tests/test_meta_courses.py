@@ -1,7 +1,6 @@
 import pytest
 from django.conf import settings
 from django.forms import model_to_dict
-from django.urls import reverse
 
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory
 from courses.models import MetaCourse
@@ -31,9 +30,9 @@ def test_meta_course_detail(client):
 
 
 @pytest.mark.django_db
-def test_meta_course_update_security(client, assert_redirect):
+def test_meta_course_update_security(client, assert_login_redirect):
     mc = MetaCourseFactory.create()
-    url = reverse('meta_course_edit', args=[mc.slug])
+    url = mc.get_update_url()
     all_test_groups = [
         [],
         [AcademicRoles.TEACHER_CENTER],
@@ -42,8 +41,7 @@ def test_meta_course_update_security(client, assert_redirect):
     ]
     for groups in all_test_groups:
         client.login(UserFactory.create(groups=groups, city_id='spb'))
-        assert_redirect(client.post(url, {}),
-                        "{}?next={}".format(settings.LOGIN_URL, url))
+        assert_login_redirect(url, form={}, method='post')
         client.logout()
     client.login(UserFactory.create(is_superuser=True, is_staff=True))
     assert client.post(url, {'name': "foobar"}).status_code == 200

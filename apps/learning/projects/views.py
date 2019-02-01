@@ -6,12 +6,10 @@ from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
-from django.urls import reverse, reverse_lazy
 from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
 from django.forms import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseForbidden, \
     HttpResponseRedirect
-
 from django.http.response import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
@@ -22,22 +20,33 @@ from extra_views.formsets import BaseModelFormSetView
 from vanilla.model_views import CreateView
 
 from core import comment_persistence
+from core.urls import reverse, reverse_lazy
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from courses.models import Semester
+from courses.utils import get_current_term_index
 from learning.projects.filters import ProjectsFilter, CurrentTermProjectsFilter
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportStatusForm, ReportSummarizeForm, ReportForm, \
     ReportCuratorAssessmentForm, StudentResultsModelForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
-from users.constants import AcademicRoles
-from courses.utils import get_current_term_index
-from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
-    CuratorOnlyMixin
 from notifications import types
 from notifications.signals import notify
+from users.constants import AcademicRoles
+from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
+    CuratorOnlyMixin
 from users.models import User
+
+__all__ = (
+    'ReportListReviewerView', 'ReportListCuratorView', 'CurrentTermProjectsView',
+    'ProjectListView', 'ProjectDetailView', 'ProjectPrevNextView',
+    'ProjectResultsView', 'ProjectPrevNextView', 'ProjectEnrollView',
+    'ReportUpdateStatusView', 'ReportCuratorAssessmentView',
+    'ReportCuratorSummarizeView', 'ReportView', 'ReportAttachmentDownloadView',
+    'StudentProjectsView', 'ProjectDetailView', 'ReportView',
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +61,7 @@ ResultsFormSet = modelformset_factory(
 )
 
 
-class ReportListViewMixin(object):
+class ReportListViewMixin:
     context_object_name = "projects"
     template_name = "learning/projects/reports.html"
 

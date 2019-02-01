@@ -4,17 +4,18 @@ import factory
 import pytest
 from bs4 import BeautifulSoup
 from django.forms.models import model_to_dict
-from django.test import TestCase
-from django.urls import reverse
 from django.utils.translation import ugettext as _
 
-from learning.tests.factories import EnrollmentFactory
-from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory
+from core.tests.utils import CSCTestCase
+from core.urls import reverse
+from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
+    CourseFactory
 from learning.settings import GradeTypes
+from learning.tests.factories import EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
+from users.models import User, EnrollmentCertificate
 from users.tests.factories import UserFactory, EnrollmentCertificateFactory, \
     StudentCenterFactory
-from users.models import User, EnrollmentCertificate
 
 
 @pytest.mark.django_db
@@ -44,7 +45,7 @@ def test_create_reference(client, assert_redirect):
     assert_redirect(response, expected_url)
 
 
-class EnrollmentCertificateTests(MyUtilitiesMixin, TestCase):
+class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
     def test_user_detail_view(self):
         """Show reference-add button only to curators (superusers)"""
         # check user page without curator credentials

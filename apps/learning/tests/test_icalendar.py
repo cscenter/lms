@@ -1,14 +1,14 @@
 from itertools import chain
 
 import pytest
-from django.urls import reverse
 from icalendar import Calendar, Event
 
+from core.urls import reverse
 from courses.tests.factories import CourseFactory, CourseClassFactory, \
     AssignmentFactory
 from learning.tests.factories import EnrollmentFactory, EventFactory
-from users.tests.factories import UserFactory, StudentFactory
 from users.models import User
+from users.tests.factories import UserFactory, StudentFactory
 
 
 # TODO: убедиться, что для заданий/занятий учитывается таймзона пользователя из URL календаря, а не залогиненного

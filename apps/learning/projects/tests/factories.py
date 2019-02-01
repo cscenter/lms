@@ -1,8 +1,8 @@
 import factory
 from django.forms import model_to_dict
-from django.urls import reverse
 from factory.fuzzy import FuzzyInteger, FuzzyChoice
 
+from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.projects.forms import ReportReviewForm
 from learning.projects.models import Project, ProjectStudent, Report, Review

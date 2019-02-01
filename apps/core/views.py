@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
-
 import types
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.http import JsonResponse
 from django.shortcuts import render_to_response
-from django.utils.encoding import smart_text, python_2_unicode_compatible
+from django.utils.encoding import smart_text
 from django.views import generic
 from vanilla import CreateView
 

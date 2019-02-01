@@ -12,8 +12,8 @@
           <a href="?year={{ calendar.next_week.year }}&week={{ calendar.next_week.week }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
         </div>
         <div class="btn-group">
-          <a href="{% url 'timetable_student' %}" role="button" class="btn btn-default active">{% trans 'List' %}</a>
-          <a href="{% url 'calendar_student' %}"  role="button" class="btn btn-default">{% trans 'Calendar' %}</a>
+          <a href="{% url 'study:timetable' %}" role="button" class="btn btn-default active">{% trans 'List' %}</a>
+          <a href="{% url 'study:calendar' %}"  role="button" class="btn btn-default">{% trans 'Calendar' %}</a>
         </div>
       </div>
       <hr>
@@ -50,7 +50,7 @@
                 </a>
               </td>
               <td>
-                <a href="{% url 'venue_detail' class.venue.pk %}">
+                <a href="{{ class.venue.get_absolute_url }}">
                   {{ class.venue }}
                 </a>
               </td>

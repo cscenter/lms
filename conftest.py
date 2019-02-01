@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 import pytest
 from django.conf import settings
 
@@ -5,23 +7,13 @@ from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
+from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase
 from notifications.models import Type
-from django.test.client import Client
 from pytest_django.lazy_django import skip_if_no_django
 
 from core.models import City
 from users.constants import AcademicRoles
 from users.tests.factories import UserFactory
-
-
-class TestClient(Client):
-    def login(self, user_model):
-        """
-        User factory creates model with attached raw password what allows to
-        authenticate user later with default backend.
-        """
-        return super().login(username=user_model.username,
-                             password=user_model.raw_password)
 
 
 @pytest.fixture()
@@ -33,13 +25,11 @@ def client():
 
 @pytest.fixture(scope="session")
 def assert_redirect():
-    """Uses Django's SimpleTestCase.assertRedirects as comparing tool"""
-    from django.test import SimpleTestCase
-
-    _STS = SimpleTestCase()
+    """Uses customized TestCase.assertRedirects as a comparing tool."""
+    _TC = CSCTestCase()
 
     def wrapper(*args, **kwargs):
-        return _STS.assertRedirects(*args, **kwargs)
+        return _TC.assertRedirects(*args, **kwargs)
 
     return wrapper
 
@@ -49,8 +39,11 @@ def assert_login_redirect(client, settings, assert_redirect):
     def wrapper(url, form=None, **kwargs):
         method_name = kwargs.pop("method", "get")
         client_method = getattr(client, method_name)
-        assert_redirect(client_method(url, form, **kwargs),
-                        "{}?next={}".format(settings.LOGIN_URL, url))
+        # Cast `next` value to the relative path since
+        # after successful login we redirect to the same domain.
+        path = urlparse(url).path
+        expected_path = "{}?next={}".format(settings.LOGIN_URL, path)
+        assert_redirect(client_method(url, form, **kwargs), expected_path)
     return wrapper
 
 
@@ -82,8 +75,8 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
         Site.objects.update_or_create(
             id=settings.CENTER_SITE_ID,
             defaults={
-                "domain": "compscicenter.ru",
-                "name": "compscicenter.ru"
+                "domain": TEST_DOMAIN,
+                "name": TEST_DOMAIN
             }
         )
         Site.objects.update_or_create(

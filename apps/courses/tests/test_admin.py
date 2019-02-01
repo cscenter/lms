@@ -1,10 +1,10 @@
 import pytest
 from bs4 import BeautifulSoup
-from django.urls import reverse
 
 from core.admin import get_admin_url
-from courses.tests.factories import CourseFactory
+from core.urls import reverse
 from courses.models import Assignment
+from courses.tests.factories import CourseFactory
 
 
 @pytest.mark.django_db

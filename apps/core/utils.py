@@ -1,12 +1,10 @@
 import datetime
+import hoep as h
 import logging
 
 import bleach
-import hoep as h
-
 from django.conf import settings
 from django.db.models import Max, Min
-from django.urls import reverse
 from django.utils import formats
 from hashids import Hashids
 
@@ -126,17 +124,6 @@ class SQLFormatter(logging.Formatter):
         # Set the record's statement to the formatted query
         record.statement = sql
         return super(SQLFormatter, self).format(record)
-
-
-def city_aware_reverse(viewname, urlconf=None, args=None, kwargs=None,
-                       current_app=None):
-    assert "city_code" in kwargs
-    kwargs["city_delimiter"] = ""
-    if kwargs["city_code"] == settings.DEFAULT_CITY_CODE or is_club_site():
-        kwargs["city_code"] = ""
-    if kwargs["city_code"]:
-        kwargs["city_delimiter"] = "/"
-    return reverse(viewname, urlconf, args, kwargs, current_app)
 
 
 def admin_datetime(dt: datetime.datetime) -> str:

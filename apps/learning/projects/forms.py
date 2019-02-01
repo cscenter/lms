@@ -1,15 +1,13 @@
-from __future__ import absolute_import, unicode_literals
-
 from crispy_forms.bootstrap import FormActions, FieldWithButtons, StrictButton
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Div, HTML
 from django import forms
-from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 
 from core import comment_persistence
+from core.models import LATEX_MARKDOWN_ENABLED
+from core.urls import reverse_lazy
 from core.widgets import UbereditorWidget
-from core.models import LATEX_MARKDOWN_ENABLED, LATEX_MARKDOWN_HTML_ENABLED
 from learning.projects.models import ReportComment, Review, Report, \
     ProjectStudent
 

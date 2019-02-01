@@ -1,7 +1,7 @@
 import pytest
-from django.urls import reverse
 from django.utils.encoding import smart_bytes
 
+from core.urls import reverse
 from library.tests.factories import BorrowFactory
 from users.tests.factories import UserFactory, StudentCenterFactory
 
@@ -41,7 +41,7 @@ def test_city_support(client, curator):
     assert borrow_spb.stock.available_copies == 11
     assert borrow_nsk.stock.available_copies == 41
     client.login(curator)
-    url = reverse('library_book_list')
+    url = reverse('library:book_list')
     response = client.get(url)
     assert len(response.context['stocks']) == 2
     assert smart_bytes("Город") in response.content

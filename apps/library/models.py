@@ -1,7 +1,5 @@
-from __future__ import unicode_literals
 
 from django.conf import settings
-from django.urls import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -9,7 +7,7 @@ from sorl.thumbnail import ImageField
 from taggit.managers import TaggableManager
 
 from core.models import City
-from users.models import User
+from core.urls import reverse
 
 
 class Book(models.Model):
@@ -50,7 +48,9 @@ class Stock(models.Model):
         return "{0.book} \"{0.city}\"".format(self)
 
     def get_absolute_url(self):
-        return reverse("library_book_detail", args=[self.id])
+        return reverse("library:book_detail",
+                       subdomain=settings.PRIVATE_SUBDOMAIN,
+                       args=[self.id])
 
     @property
     def available_copies(self):

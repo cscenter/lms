@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from django.urls import reverse
-
+from core.urls import reverse
 from learning.projects.models import ReportComment, Report
+from notifications import types
 from notifications.decorators import register
 from notifications.service import NotificationService
-from notifications import types
 from users.models import User
 
 

@@ -9,18 +9,18 @@ from django import forms
 from django.core.exceptions import ValidationError, NON_FIELD_ERRORS
 from django.forms import SelectMultiple
 from django.forms.models import ModelForm
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters.conf import settings as filters_settings
 
-from core.models import University
-from core.views import ReadOnlyFieldsMixin
-from core.widgets import UbereditorWidget
 from admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream
-from learning.settings import AcademicDegreeYears
+from core.models import University
 from core.timezone import now_local
+from core.urls import reverse
+from core.views import ReadOnlyFieldsMixin
+from core.widgets import UbereditorWidget
+from learning.settings import AcademicDegreeYears
 from users.models import GITHUB_LOGIN_VALIDATOR
 
 DEGREE_YEAR_CHOICES = ('', '', '--------') + AcademicDegreeYears.choices

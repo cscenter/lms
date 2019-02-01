@@ -2,15 +2,16 @@
 
 import unittest
 
-from django.test import TestCase
+from django.conf import settings
 
-from learning.tests.factories import *
+from core.tests.utils import CSCTestCase
+from core.urls import reverse
+from courses.tests.factories import *
 from users.constants import AcademicRoles
-from learning.tests.mixins import *
 from users.tests.factories import UserFactory
 
 
-class CourseSecurityTests(MyUtilitiesMixin, TestCase):
+class CourseSecurityTests(CSCTestCase):
     def test_list_center_site(self):
         """Сlub students can't see center courses"""
         current_semester = SemesterFactory.create_current()
@@ -29,7 +30,7 @@ class CourseSecurityTests(MyUtilitiesMixin, TestCase):
 
     def test_student_list_center_site(self):
         s = UserFactory.create(groups=[AcademicRoles.STUDENT_CENTER])
-        self.doLogin(s)
+        self.client.login(s)
         current_semester = SemesterFactory.create_current()
         co_center = CourseFactory(semester=current_semester,
                                   is_open=False,
@@ -39,7 +40,7 @@ class CourseSecurityTests(MyUtilitiesMixin, TestCase):
                                city=settings.DEFAULT_CITY_CODE)
         co_kzn = CourseFactory.create(semester=current_semester,
                                       city="kzn")
-        resp = self.client.get(reverse('course_list_student'))
+        resp = self.client.get(reverse('study:course_list'))
         self.assertEqual(len(resp.context['ongoing_rest']), 1)
 
     @unittest.skip('not implemented yet')

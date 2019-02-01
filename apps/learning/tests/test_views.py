@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
+import datetime
 import logging
 
 import pytest
 import pytz
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from core.tests.utils import CSCTestCase
 from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
 from core.timezone import now_local
-from core.utils import city_aware_reverse
+from core.urls import city_aware_reverse, reverse
 from courses.models import Course
+from courses.tests.factories import *
 from courses.utils import get_current_term_pair
 from learning.enrollment import course_failed_by_student
+from learning.models import StudentAssignment
 from learning.tests.factories import *
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.utils import check_url_security
-from users.tests.factories import StudentFactory, StudentClubFactory, \
-    GraduateFactory, TeacherCenterFactory
+from users.tests.factories import *
 from users.constants import AcademicRoles
 from .mixins import *
 
@@ -68,12 +71,12 @@ def test_video_list(client):
 
 
 class CourseListTeacherTests(GroupSecurityCheckMixin,
-                             MyUtilitiesMixin, TestCase):
-    url_name = 'course_list_teacher'
+                             MyUtilitiesMixin, CSCTestCase):
+    url_name = 'teaching:course_list'
     groups_allowed = [AcademicRoles.TEACHER_CENTER]
 
 
-class CourseDetailTests(MyUtilitiesMixin, TestCase):
+class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_basic_get(self):
         co = CourseFactory.create()
         assert 200 == self.client.get(co.get_absolute_url()).status_code
@@ -149,11 +152,10 @@ class CourseDetailTests(MyUtilitiesMixin, TestCase):
         self.client.logout()
         self.doLogin(teacher)
         self.assertContains(self.client.get(url), a.title)
-        self.assertContains(self.client.get(url),
-                            reverse('assignment_detail_teacher', args=[a.pk]))
+        self.assertContains(self.client.get(url), a.get_teacher_url())
 
 
-class CourseEditDescrTests(MyUtilitiesMixin, TestCase):
+class CourseEditDescrTests(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         teacher_other = TeacherCenterFactory()
@@ -167,7 +169,7 @@ class CourseEditDescrTests(MyUtilitiesMixin, TestCase):
         self.assertStatusCode(200, url, make_reverse=False)
 
 
-class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
+class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory(city_id='spb')
@@ -318,7 +320,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, TestCase):
         self.assertContains(resp, 'attachment1')
 
 
-class ASTeacherDetailTests(MyUtilitiesMixin, TestCase):
+class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
@@ -455,13 +457,10 @@ def test_events_smoke(client):
 # TODO: test CourseOffering edit-description page. returned more than one CourseOffering error if we have CO for kzn and spb
 
 
-
-
-
 @pytest.mark.django_db
-def test_student_courses_list(client, settings):
-    url = reverse('course_list_student')
-    check_url_security(client, settings,
+def test_student_courses_list(client, assert_login_redirect):
+    url = reverse('study:course_list')
+    check_url_security(client, assert_login_redirect,
                        groups_allowed=[AcademicRoles.STUDENT_CENTER],
                        url=url)
     student_spb = StudentCenterFactory(city_id='spb')
@@ -521,15 +520,18 @@ def test_student_courses_list(client, settings):
 
 
 @pytest.mark.django_db
+@pytest.mark.urls('compsciclub_ru.urls')
+@pytest.mark.skip('Для этого теста нужно полностью подменять конфиг')
 def test_student_courses_list_csclub(client, settings, mocker):
     settings.SITE_ID = settings.CLUB_SITE_ID
+    settings.SUBDOMAIN_URLCONFS = {None: settings.ROOT_URLCONF}
     # Fix year and term
     mocked_timezone = mocker.patch('django.utils.timezone.now')
     now_fixed = datetime.datetime(2016, month=3, day=8, tzinfo=pytz.utc)
     mocked_timezone.return_value = now_fixed
     now_year, now_season = get_current_term_pair(settings.DEFAULT_CITY_CODE)
     assert now_season == "spring"
-    url = reverse('course_list_student')
+    url = reverse('study:course_list')
     student = StudentClubFactory(city_id='spb')
     client.login(student)
     response = client.get(url)

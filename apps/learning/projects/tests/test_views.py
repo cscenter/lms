@@ -1,24 +1,24 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from django.urls import reverse
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
+from core.urls import reverse_lazy, reverse
 from courses.tests.factories import SemesterFactory
+from courses.utils import get_current_term_pair
+from learning.projects.models import Report, ProjectStudent
 from learning.projects.tests.factories import ProjectFactory, ReportFactory, \
     ReportReviewFormFactory
-from learning.projects.models import Report, ProjectStudent
 from learning.settings import StudentStatuses, GradeTypes
-from users.constants import AcademicRoles
-from courses.utils import get_current_term_pair
 from notifications.models import Notification
+from users.constants import AcademicRoles
 from users.tests.factories import StudentCenterFactory, ProjectReviewerFactory, \
     UserFactory, CuratorFactory
 
-URL_REPORTS = reverse("projects:report_list_reviewers")
-URL_PROJECTS = reverse("projects:current_term_projects")
-URL_ALL_PROJECTS = reverse("projects:all_projects")
+URL_REPORTS = reverse_lazy("projects:report_list_reviewers")
+URL_PROJECTS = reverse_lazy("projects:current_term_projects")
+URL_ALL_PROJECTS = reverse_lazy("projects:all_projects")
 
 
 @pytest.mark.django_db

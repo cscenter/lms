@@ -9,7 +9,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import Q
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.translation import ugettext_lazy as _
@@ -17,6 +16,7 @@ from djchoices import DjangoChoices, ChoiceItem
 from model_utils.models import TimeStampedModel
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
+from core.urls import reverse
 from core.utils import hashids
 from courses.models import Semester
 from learning.settings import GradeTypes
@@ -94,8 +94,8 @@ class ProjectStudent(models.Model):
         return reverse(
             "projects:student_project_report",
             kwargs={
-                "project_pk": self.project.pk,
-                "student_pk": self.student.pk
+                "project_pk": self.project_id,
+                "student_pk": self.student_id
             }
         )
 
@@ -246,7 +246,8 @@ class Project(TimeStampedModel):
         return self.__class__.city.field.name
 
     def get_absolute_url(self):
-        return reverse('projects:project_detail', args=[self.pk])
+        return reverse('projects:project_detail',
+                       args=[self.pk])
 
     def get_is_external_display(self):
         return _("Yes") if self.is_external else _("No")
@@ -475,10 +476,11 @@ class Report(ReviewCriteria):
 
     def get_absolute_url(self):
         """May been inefficient if `project_student` not prefetched """
-        return reverse("projects:project_report", kwargs={
-            "project_pk": self.project_student.project_id,
-            "student_pk": self.project_student.student_id
-        })
+        return reverse("projects:project_report",
+                       kwargs={
+                           "project_pk": self.project_student.project_id,
+                           "student_pk": self.project_student.student_id
+                       })
 
     def review_state(self):
         return self.status == self.REVIEW

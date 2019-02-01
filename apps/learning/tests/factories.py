@@ -10,8 +10,12 @@ from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseNewsNotification, Event
 from study_programs.models import AreaOfStudy
-from users.constants import AcademicRoles
 from users.tests.factories import UserFactory, StudentCenterFactory
+
+__all__ = ('AreaOfStudyFactory', 'StudentAssignmentFactory',
+           'AssignmentCommentFactory', 'EnrollmentFactory',
+           'AssignmentNotificationFactory', 'CourseNewsNotificationFactory',
+           'EventFactory')
 
 
 class AreaOfStudyFactory(factory.DjangoModelFactory):

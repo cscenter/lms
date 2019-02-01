@@ -26,7 +26,7 @@ class StudentAssignmentListView(StudentOnlyMixin, ListView):
     """ Show assignments from current semester only. """
     model = StudentAssignment
     context_object_name = 'assignment_list'
-    template_name = "learning/assignment_list_student.html"
+    template_name = "learning/study/assignment_list.html"
 
     def get_queryset(self):
         current_semester = Semester.get_current()
@@ -109,7 +109,7 @@ class StudentAssignmentStudentDetailView(AssignmentProgressBaseView,
 
 class TimetableView(StudentOnlyMixin, WeekEventsView):
     """Shows classes for courses which authorized student enrolled in"""
-    template_name = "learning/studying/timetable.html"
+    template_name = "learning/study/timetable.html"
 
     def get_default_timezone(self):
         return get_student_city_code(self.request)
@@ -174,7 +174,7 @@ class CalendarStudentPersonalView(CalendarStudentFullView):
 
 class UsefulListView(StudentOnlyMixin, generic.ListView):
     context_object_name = "faq"
-    template_name = "learning/studying/useful.html"
+    template_name = "learning/study/useful.html"
 
     def get_queryset(self):
         return (Useful.objects
@@ -184,7 +184,7 @@ class UsefulListView(StudentOnlyMixin, generic.ListView):
 
 class InternshipListView(StudentOnlyMixin, generic.ListView):
     context_object_name = "faq"
-    template_name = "learning/studying/internships.html"
+    template_name = "learning/study/internships.html"
 
     def get_queryset(self):
         return (Internship.objects

@@ -13,14 +13,10 @@
             <a href="?year={{ calendar.next_month.year }}&month={{ calendar.next_month.month }}" role="button" class="btn btn-default"><i class="fa fa-chevron-right"></i></a>
         </div>
         <div class="btn-group">
-          <a href="{% if user_type == 'teacher' %}
-                   {% url 'timetable_teacher' %}
-                   {% else %}
-                   {% url 'timetable_student' %}
-                   {% endif %}"
+          <a href="{% url 'teaching:timetable' %}"
              role="button"
              class="btn btn-default active">{% trans 'List' %}</a>
-          <a href="{% if user_type == 'teacher' %}{% url 'calendar_teacher' %}{% else %}{% url 'calendar_student' %}{% endif %}?year={{ calendar.year }}&month={{ calendar.month }}"
+          <a href="{% url 'teaching:calendar' %}?year={{ calendar.year }}&month={{ calendar.month }}"
              role="button"
              class="btn btn-default">{% trans 'Calendar' %}</a>
         </div>
@@ -52,7 +48,7 @@
                 <a href="{{ class.course.get_absolute_url }}">{{ class.course.meta_course.name }}</a>
               </td>
               <td>
-                <a href="{% url 'venue_detail' class.venue.pk %}">{{ class.venue }}</a>
+                <a href="{{ class.venue.get_absolute_url }}">{{ class.venue }}</a>
               </td>
               <td>
                 {% if class.type == 'lecture' %}

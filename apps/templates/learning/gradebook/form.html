@@ -5,6 +5,7 @@
 {% load render_bundle from webpack_loader %}
 {% load lookup call_method from core_tags %}
 {% load l10n %}
+{% load override_url %}
 
 
 {% block body_attrs %} data-init-sections="gradebook"{% endblock body_attrs %}
@@ -20,8 +21,8 @@
         <div class="row">
             <div class="col-xs-12 h2-and-buttons">
               <h2>
-                {% if request.resolver_match.url_name == 'gradebook:markssheet_teacher' %}
-                <a href="{% url 'gradebook:markssheet_teacher_dispatch' %}"><span class="fa fa-angle-left"></span></a>
+                {% if request.resolver_match.url_name == 'teaching:gradebook' %}
+                <a href="{% url 'teaching:gradebook_dispatch' %}"><span class="fa fa-angle-left"></span></a>
                 {% else %}
                 <a href="{% url 'staff:course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
                 {% endif %}
@@ -94,14 +95,14 @@
                                 {% if gradebook.assignments %}
                                     <div class="cell __total_score{% if forloop.counter|divisibleby:2 %} even{% endif %}">{{ student.total_score }}</div>
                                 {% endif %}
-                                {% for submission in gradebook.submissions|lookup:student.index %}
-                                    {% if submission %}
-                                        {% if submission.assignment.is_online %}
+                                {% for student_progress in gradebook.submissions|lookup:student.index %}
+                                    {% if student_progress %}
+                                        {% if student_progress.assignment.is_online %}
                                             <div class="cell __assignment __score">
-                                                <a href="{% url 'a_s_detail_teacher' submission.id %}">{{ submission.get_state }}</a>
+                                                <a href="{{ student_progress.get_teacher_url }}">{{ student_progress.get_state }}</a>
                                             </div>
                                         {% else %}
-                                            {% call_method form 'get_assignment_widget' submission.id %}
+                                            {% call_method form 'get_assignment_widget' student_progress.id %}
                                         {% endif %}
                                     {% else %}
                                         <div class="cell __assignment __expelled"></div>

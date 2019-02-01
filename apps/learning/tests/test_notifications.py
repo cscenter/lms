@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
-
+import datetime
 from io import StringIO
 
 import pytest
 import pytz
 from django.core import mail, management
-from django.test import TestCase
+from core.tests.utils import CSCTestCase
+from core.urls import reverse
 
 from courses.models import CourseTeacher, Assignment
 from courses.admin import AssignmentAdmin
+from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.enrollment import course_failed_by_student
+from learning.models import StudentAssignment, AssignmentNotification
 from learning.tests.factories import *
 from learning.settings import StudentStatuses, GradeTypes
 from core.constants import DATE_FORMAT_RU
-from users.tests.factories import TeacherCenterFactory
+from users.tests.factories import *
 from .mixins import *
 
 
-class NotificationTests(MyUtilitiesMixin, TestCase):
+class NotificationTests(MyUtilitiesMixin, CSCTestCase):
     def _get_unread(self, url):
         return (self.client.get(url)
                 .context['request']
@@ -51,8 +54,8 @@ class NotificationTests(MyUtilitiesMixin, TestCase):
                .get())
         student_url = a_s.get_student_url()
         teacher_url = a_s.get_teacher_url()
-        student_list_url = reverse('assignment_list_student', args=[])
-        teacher_list_url = reverse('assignment_list_teacher', args=[])
+        student_list_url = reverse('study:assignment_list', args=[])
+        teacher_list_url = reverse('teaching:assignment_list', args=[])
         student_comment_dict = {'text': "Test student comment without file"}
         teacher_comment_dict = {'text': "Test teacher comment without file"}
 
