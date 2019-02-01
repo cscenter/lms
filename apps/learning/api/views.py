@@ -3,7 +3,10 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from api.pagination import StandardPagination
-from learning.api.serializers import AlumniSerializer, TestimonialSerializer
+from api.permissions import CuratorAccessPermission
+from learning.api.serializers import AlumniSerializer, TestimonialSerializer, \
+    CourseNewsNotificationSerializer
+from learning.models import CourseNewsNotification
 from study_programs.models import AreaOfStudy
 from users.models import User
 
@@ -66,3 +69,14 @@ class TestimonialList(ListAPIView):
             "areas": areas
         }
         return Response(data)
+
+
+class CourseNewsUnreadNotificationsView(ListAPIView):
+    permission_classes = [CuratorAccessPermission]
+    serializer_class = CourseNewsNotificationSerializer
+
+    def get_queryset(self):
+        return (CourseNewsNotification.unread
+                .filter(course_offering_news_id=self.kwargs.get('news_pk'))
+                .select_related("user")
+                .order_by("user__last_name"))

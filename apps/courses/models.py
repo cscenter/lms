@@ -634,14 +634,11 @@ class CourseNews(TimeStampedModel):
         })
 
     def get_stats_url(self):
-        return city_aware_reverse('course_news_unread',
-                                  subdomain=settings.PRIVATE_SUBDOMAIN,
-                                  kwargs={
-            "course_slug": self.course.meta_course.slug,
-            "semester_slug": self.course.semester.slug,
-            "city_code": self.get_city(),
-            "news_pk": self.pk
-        })
+        return reverse(
+            'teaching:course_news_unread',
+            kwargs={
+                "news_pk": self.pk
+            })
 
     def get_delete_url(self):
         return city_aware_reverse('course_news_delete', kwargs={

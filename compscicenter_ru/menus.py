@@ -21,6 +21,7 @@ class MenuItem(_MenuItem):
     visible_to = None
     # Additional check that item should be selected
     # Affects the parent visibility if `MENU_SELECT_PARENTS` setting is enabled
+    # FIXME: remove relative patterns support? Or add the same to the excluded_patterns?
     selected_patterns = None
     excluded_patterns = None
 
@@ -59,7 +60,8 @@ class MenuItem(_MenuItem):
             for pattern in self.selected_patterns:
                 # Relative path means pattern applicable to any subdomain
                 if pattern.startswith('^/'):
-                    pattern = r"^" + request.build_absolute_uri(location=pattern[1:])
+                    pattern = (r"^" + request.build_absolute_uri(location='/') +
+                               pattern[2:])
                 # Deep copy for compiled regexp works in python 3.7+
                 if re.compile(pattern).match(current_path):
                     matched = True
