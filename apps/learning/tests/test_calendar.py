@@ -2,17 +2,18 @@ import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
-from django.test import TestCase
-from django.urls import reverse
+from core.tests.utils import CSCTestCase
 from django.utils import timezone
 
+from core.urls import reverse
+from courses.tests.factories import CourseFactory, CourseClassFactory, \
+    VenueFactory
 from learning.tests.factories import EventFactory, \
     EnrollmentFactory
-from courses.tests.factories import CourseFactory, CourseClassFactory, VenueFactory
-from users.constants import AcademicRoles
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import flatten_calendar_month_events
+from users.constants import AcademicRoles
 from users.tests.factories import StudentCenterFactory, \
     TeacherCenterFactory
 
@@ -26,8 +27,8 @@ from users.tests.factories import StudentCenterFactory, \
 
 
 class CalendarTeacherTests(GroupSecurityCheckMixin,
-                           MyUtilitiesMixin, TestCase):
-    url_name = 'calendar_teacher'
+                           MyUtilitiesMixin, CSCTestCase):
+    url_name = 'teaching:calendar'
     groups_allowed = [AcademicRoles.TEACHER_CENTER]
 
     def test_teacher_calendar(self):
@@ -55,7 +56,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         self.assertSameObjects(own_classes + events, classes)
         # but in full calendar all classes should be shown
         classes = flatten_calendar_month_events(
-            self.client.get(reverse('calendar_full_teacher')).context['calendar'])
+            self.client.get(reverse('teaching:calendar_full')).context['calendar'])
         self.assertSameObjects(own_classes + others_classes + events, classes)
         next_month_qstr = (
             "?year={0}&month={1}"
@@ -77,8 +78,8 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
 
 
 class CalendarStudentTests(GroupSecurityCheckMixin,
-                           MyUtilitiesMixin, TestCase):
-    url_name = 'calendar_student'
+                           MyUtilitiesMixin, CSCTestCase):
+    url_name = 'study:calendar'
     groups_allowed = [AcademicRoles.STUDENT_CENTER]
 
     def test_student_calendar(self):
@@ -105,7 +106,7 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         self.assertSameObjects(own_classes, classes)
         # but in full calendar all classes should be shown
         classes = flatten_calendar_month_events(
-            self.client.get(reverse('calendar_full_student')).context['calendar'])
+            self.client.get(reverse('study:calendar_full')).context['calendar'])
         self.assertSameObjects(own_classes + others_classes, classes)
         next_month_qstr = (
             "?year={0}&month={1}"
@@ -129,14 +130,14 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
         assert response.status_code == 200
 
 
-class CalendarFullSecurityTests(MyUtilitiesMixin, TestCase):
+class CalendarFullSecurityTests(MyUtilitiesMixin, CSCTestCase):
     """
     This TestCase is used only for security check, actual tests for
     "full calendar" are done in CalendarTeacher/CalendarStudent tests
     """
     def test_full_calendar_security(self):
         u = StudentCenterFactory(city_id='spb')
-        url = 'calendar_full_student'
+        url = 'study:calendar_full'
         self.assertLoginRedirect(reverse(url))
         self.doLogin(u)
         self.assertStatusCode(200, url)
@@ -144,7 +145,7 @@ class CalendarFullSecurityTests(MyUtilitiesMixin, TestCase):
         # For teacher role we can skip city setting
         u = TeacherCenterFactory()
         self.doLogin(u)
-        url = 'calendar_full_teacher'
+        url = 'teaching:calendar_full'
         self.assertStatusCode(200, url)
 
 
@@ -157,5 +158,5 @@ def test_correspondence_courses_calendar(client):
     CourseClassFactory.create_batch(
             3, course__is_correspondence=True, date=this_month_date)
     classes = flatten_calendar_month_events(
-        client.get(reverse("calendar_full_student")).context['calendar'])
+        client.get(reverse("study:calendar_full")).context['calendar'])
     assert len(classes) == 3

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import datetime
-import json
 import re
 import uuid
 from collections import Counter
@@ -21,9 +19,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.http.response import HttpResponseForbidden, HttpResponseBadRequest, \
     Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse
 from django.utils import timezone, formats
-from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
@@ -44,13 +40,8 @@ from social_core.utils import user_is_authenticated
 from social_django.models import DjangoStorage
 from social_django.strategy import DjangoStrategy
 
-from api.permissions import CuratorAccessPermission
-from core.auth.backends import YandexRuOAuth2Backend
-from core.exceptions import Redirect
-from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
-from core.utils import render_markdown
 from admission.filters import ApplicantFilter, InterviewsFilter, \
-    InterviewsCuratorFilter, InterviewStatusFilter, ResultsFilter
+    InterviewsCuratorFilter, ResultsFilter
 from admission.forms import InterviewCommentForm, \
     ApplicantReadOnlyForm, InterviewForm, ApplicantStatusForm, \
     ResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
@@ -62,12 +53,17 @@ from admission.serializers import InterviewSlotSerializer
 from admission.services import create_invitation
 from admission.utils import generate_interview_reminder, \
     calculate_time
-from core.constants import DATE_FORMAT_RU
+from api.permissions import CuratorAccessPermission
+from core.auth.backends import YandexRuOAuth2Backend
+from core.exceptions import Redirect
+from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.timezone import now_local
-from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
-from users.utils import get_user_city_code
+from core.urls import reverse
+from core.utils import render_markdown
 from tasks.models import Task
+from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import User
+from users.utils import get_user_city_code
 from .tasks import register_in_yandex_contest, import_testing_results
 
 ADMISSION_SETTINGS = apps.get_app_config("admission")

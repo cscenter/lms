@@ -6,16 +6,16 @@ from django.conf import settings
 from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, \
     UserCreationForm as _UserCreationForm, UserChangeForm as _UserChangeForm
 from django.core.exceptions import ValidationError
-from django.urls import reverse
 from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
 
+from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_ENABLED
+from core.urls import reverse
 from core.utils import is_club_site
 from core.widgets import UbereditorWidget
-from core.forms import CANCEL_SAVE_PAIR
-from users.constants import AcademicRoles, CSCENTER_ACCESS_ALLOWED
 from users import tasks
+from users.constants import AcademicRoles, CSCENTER_ACCESS_ALLOWED
 from .models import User, EnrollmentCertificate
 
 

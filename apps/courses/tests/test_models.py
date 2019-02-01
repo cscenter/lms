@@ -1,6 +1,6 @@
 import pytest
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from core.tests.utils import CSCTestCase
 
 from courses.tests.factories import CourseNewsFactory, SemesterFactory, CourseFactory, \
     CourseClassFactory, CourseClassAttachmentFactory, MetaCourseFactory, \
@@ -90,7 +90,7 @@ def test_course_derivable_fields():
     assert co.materials_files
 
 
-class CourseTests(TestCase):
+class CourseTests(CSCTestCase):
     def test_in_current_term(self):
         """
         In near future only one course should be "ongoing".
@@ -135,7 +135,7 @@ class CourseTests(TestCase):
         assert co.completed_at == next_term_dt.date()
 
 
-class CourseClassTests(TestCase):
+class CourseClassTests(CSCTestCase):
     def test_start_end_validation(self):
         time1 = "13:00"
         time2 = "14:20"
@@ -149,7 +149,7 @@ class CourseClassTests(TestCase):
         self.assertEqual("Lecture", cc.get_type_display())
 
 
-class AssignmentTest(TestCase):
+class AssignmentTest(CSCTestCase):
     def test_clean(self):
         co1 = CourseFactory.create()
         co2 = CourseFactory.create()
@@ -172,7 +172,7 @@ class AssignmentTest(TestCase):
         self.assertFalse(a.is_open)
 
 
-class AssignmentAttachmentTest(TestCase):
+class AssignmentAttachmentTest(CSCTestCase):
     def test_attached_file_name(self):
         fname = "foobar.pdf"
         aa = AssignmentAttachmentFactory.create(attachment__filename=fname)

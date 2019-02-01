@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from core.models import City
 
@@ -16,5 +17,10 @@ def cities(request):
             city.url = "{}{}{}/".format(protocol, sub_domain,
                                         request.site.domain, '/')
     return dict(CITY_LIST=CITY_LIST["CACHE"])
+
+
+def subdomain(request):
+    return {"PRIVATE_SUBDOMAIN": getattr(settings, "PRIVATE_SUBDOMAIN", "")}
+
 
 from core.signals import *

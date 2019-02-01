@@ -11,7 +11,6 @@ from django.contrib.auth import views
 from django.db.models import Prefetch, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponseBadRequest, \
     JsonResponse
-from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.http import is_safe_url
 from django.views import generic
@@ -24,6 +23,7 @@ from ajaxuploader.backends import ProfileImageUploadBackend
 from ajaxuploader.handlers import MemoryImageUploadHandler, \
     TemporaryImageUploadHandler
 from ajaxuploader.signals import file_uploaded
+from core.urls import reverse
 from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from courses.models import Course, Semester
@@ -69,9 +69,9 @@ class LoginView(generic.FormView):
         if not redirect_to:
             user_groups = self.request.user.get_cached_groups()
             if user_groups == {User.roles.STUDENT_CENTER}:
-                redirect_to = reverse("assignment_list_student")
+                redirect_to = reverse("study:assignment_list")
             elif user_groups == {User.roles.TEACHER_CENTER}:
-                redirect_to = reverse("assignment_list_teacher")
+                redirect_to = reverse("teaching:assignment_list")
 
         if not is_safe_url(redirect_to,
                            allowed_hosts={self.request.get_host()}):

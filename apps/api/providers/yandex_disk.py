@@ -8,7 +8,7 @@ class YandexDiskException(Exception):
     pass
 
 
-class YandexDiskRestAPI(object):
+class YandexDiskRestAPI:
     BASE_URL = "https://cloud-api.yandex.net/v1"
     PUBLIC_RESOURCE_URL = BASE_URL + "/disk/public/resources"
     DOWNLOAD_DATA_URL = PUBLIC_RESOURCE_URL + "/download"

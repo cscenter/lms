@@ -3,12 +3,12 @@ from django.db.models import F, Value, TextField
 from django.db.models.functions import Concat
 from django.http import HttpResponseForbidden, Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
 from django.utils.timezone import now
 from django.views import generic
 from vanilla import FormView
 
 from core.constants import DATE_FORMAT_RU
+from core.urls import reverse
 from courses.models import Course
 from learning.enrollment.forms import CourseEnrollmentForm
 from learning.models import Enrollment
@@ -67,8 +67,8 @@ class CourseEnrollView(StudentOnlyMixin, FormView):
             (Enrollment.objects
              .filter(pk=enrollment.pk)
              .update(reason_entry=reason))
-        if self.request.POST.get('back') == 'course_list_student':
-            return redirect('course_list_student')
+        if self.request.POST.get('back') == 'study:course_list':
+            return redirect(reverse('study:course_list'))
         else:
             return HttpResponseRedirect(form.course.get_absolute_url())
 
@@ -114,7 +114,7 @@ class CourseUnenrollView(StudentOnlyMixin, generic.DeleteView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
-        if self.request.GET.get('back') == 'course_list_student':
-            return reverse('course_list_student')
+        if self.request.GET.get('back') == 'study:course_list':
+            return reverse('study:course_list')
         else:
             return self._course.get_absolute_url()

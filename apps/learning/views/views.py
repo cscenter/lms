@@ -19,7 +19,6 @@ from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseForbidden
 from django.http.response import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
@@ -31,6 +30,7 @@ from core import comment_persistence
 from core.exceptions import Redirect
 from core.settings.base import FOUNDATION_YEAR
 from core.timezone import Timezone, CityCode
+from core.urls import reverse
 from core.utils import hashids, render_markdown, is_club_site
 from core.views import LoginRequiredMixin
 from courses.calendar import CalendarEvent
@@ -66,7 +66,9 @@ __all__ = [
     'CoursesListView', 'CourseTeacherListView', 'CourseStudentListView',
     'AssignmentTeacherListView',
     'AssignmentTeacherDetailView', 'StudentAssignmentTeacherDetailView',
-    'AssignmentCommentUpdateView', 'EventDetailView', 'AssignmentAttachmentDownloadView',
+    'AssignmentCommentUpdateView', 'EventDetailView',
+    'AssignmentAttachmentDownloadView',
+    'AssignmentCommentAttachmentDownloadView'
 ]
 
 
@@ -249,7 +251,7 @@ class CourseStudentListView(StudentOnlyMixin, generic.TemplateView):
 class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
     model = StudentAssignment
     context_object_name = 'student_assignment_list'
-    template_name = "learning/assignment_list_teacher.html"
+    template_name = "learning/teaching/assignment_list.html"
     user_type = 'teacher'
 
     filter_by_score = (
@@ -307,7 +309,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
             ('assignment', ""),  # should be the last one
         ]
         self.query["form_url"] = "{}?{}".format(
-            reverse("assignment_list_teacher"),
+            reverse("teaching:assignment_list"),
             urlencode(OrderedDict(query_tuple))
         )
         context["query"] = self.query
@@ -439,7 +441,7 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
             if not term:
                 raise ValidationError("Term not presented among available")
         except (ValueError, ValidationError):
-            raise Redirect(to=reverse("assignment_list_teacher"))
+            raise Redirect(to=reverse("teaching:assignment_list"))
         return term.index
 
     def _get_requested_course(self, courses):
@@ -467,13 +469,13 @@ class AssignmentTeacherListView(TeacherOnlyMixin, TemplateView):
                       _("You were redirected from Assignments due to "
                         "empty course list."),
                       extra_tags='timeout')
-        raise Redirect(to=reverse("course_list_teacher"))
+        raise Redirect(to=reverse("teaching:course_list"))
 
 
 class AssignmentTeacherDetailView(TeacherOnlyMixin,
                                   generic.DetailView):
     model = Assignment
-    template_name = "learning/assignment_detail_teacher.html"
+    template_name = "learning/teaching/assignment_detail.html"
     context_object_name = 'assignment'
 
     def get_queryset(self):
@@ -701,12 +703,62 @@ class AssignmentCommentUpdateView(generic.UpdateView):
         return super(BaseUpdateView, self).post(request, *args, **kwargs)
 
 
+class AssignmentCommentAttachmentDownloadView(LoginRequiredMixin, generic.View):
+    def get(self, request, *args, **kwargs):
+        try:
+            attachment_type, pk = hashids.decode(kwargs['sid'])
+            if attachment_type != ASSIGNMENT_COMMENT_ATTACHMENT:
+                return HttpResponseBadRequest()
+        except IndexError:
+            raise Http404
+
+        response = HttpResponse()
+        user = request.user
+        qs = AssignmentComment.objects.filter(pk=pk)
+        if not user.is_teacher and not user.is_curator:
+            qs = qs.filter(student_assignment__student_id=user.pk)
+        # TODO: restrict access for teachers
+        comment = get_object_or_404(qs)
+        file_field = comment.attached_file
+        file_url = file_field.url
+        file_name = os.path.basename(file_field.name)
+        # Try to generate html version of ipynb
+        if self.request.GET.get("html", False):
+            html_ext = ".html"
+            _, ext = posixpath.splitext(file_name)
+            if ext == ".ipynb":
+                ipynb_src_path = file_field.path
+                converted_path = ipynb_src_path + html_ext
+                if not os.path.exists(converted_path):
+                    # TODO: move html_exporter to separated module
+                    # TODO: disable warnings 404 for css and ico in media folder for ipynb files?
+                    html_exporter = HTMLExporter()
+                    try:
+                        nb_node, _ = html_exporter.from_filename(ipynb_src_path)
+                        with open(converted_path, 'w') as f:
+                            f.write(nb_node)
+                    except (FileNotFoundError, AttributeError):
+                        pass
+                # FIXME: if file doesn't exists - returns 404?
+                file_name += html_ext
+                response['X-Accel-Redirect'] = file_url + html_ext
+                return response
+
+        del response['Content-Type']
+        # Content-Disposition doesn't have appropriate non-ascii symbols support
+        response['Content-Disposition'] = "attachment; filename={}".format(
+            file_name)
+        response['X-Accel-Redirect'] = file_url
+        return response
+
+
 class EventDetailView(generic.DetailView):
     model = Event
     context_object_name = 'event'
     template_name = "learning/event_detail.html"
 
 
+# FIXME: -> courses app
 class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
     def get(self, request, *args, **kwargs):
         try:
@@ -714,22 +766,13 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         except IndexError:
             raise Http404
 
-        response = HttpResponse()
-
-        user = request.user
-        if attachment_type == ASSIGNMENT_TASK_ATTACHMENT:
-            file_field = self.get_task_attachment(pk)
-            if file_field is None:
-                return HttpResponseForbidden()
-        elif attachment_type == ASSIGNMENT_COMMENT_ATTACHMENT:
-            qs = AssignmentComment.objects.filter(pk=pk)
-            if not user.is_teacher and not user.is_curator:
-                qs = qs.filter(student_assignment__student_id=user.pk)
-            # TODO: restrict access for teachers
-            comment = get_object_or_404(qs)
-            file_field = comment.attached_file
-        else:
+        if attachment_type != ASSIGNMENT_TASK_ATTACHMENT:
             return HttpResponseBadRequest()
+        file_field = self.get_task_attachment(pk)
+        if file_field is None:
+            return HttpResponseForbidden()
+
+        response = HttpResponse()
         file_url = file_field.url
         file_name = os.path.basename(file_field.name)
         # Try to generate html version of ipynb

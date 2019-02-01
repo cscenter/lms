@@ -1,12 +1,13 @@
 import datetime
+
 import pytest
 import pytz
 from bs4 import BeautifulSoup
-from django.urls import reverse
 
-from core.admin import get_admin_url
 from admission.tests.factories import InterviewFactory, \
     InterviewStreamFactory, InterviewInvitationFactory
+from core.admin import get_admin_url
+from core.urls import reverse
 from courses.tests.factories import VenueFactory
 
 

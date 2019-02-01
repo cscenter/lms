@@ -3,12 +3,13 @@ from django.contrib.auth.views import redirect_to_login
 from django.db.models import Prefetch
 from django.http import HttpResponseBadRequest, HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
-from django.urls import reverse, NoReverseMatch
+from django.urls import NoReverseMatch
 from django.views import generic
 from vanilla import DetailView
 
 from core.exceptions import Redirect
 from core.settings.base import CENTER_FOUNDATION_YEAR
+from core.urls import reverse
 from core.utils import get_club_domain
 from core.views import ProtectedFormMixin
 from courses.forms import CourseEditDescrForm
@@ -111,8 +112,7 @@ class CourseDetailView(DetailView):
             show_tab = self.kwargs.get('tab', CourseInfoTab.type)
             tab_list.set_active_tab(show_tab)
         except TabNotFound:
-            login_page = redirect_to_login(self.request.get_full_path())
-            raise Redirect(to=login_page)
+            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         return tab_list
 
 

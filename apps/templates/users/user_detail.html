@@ -107,7 +107,7 @@
                         </li>
                         {% if is_editing_allowed %}
                             <li role="presentation">
-                                <a href="{% url 'user_update' profile_user.pk %}"><i class="fa fa-cog"></i> {% trans "Edit" %}</a>
+                                <a href="{{ profile_user.get_update_profile_url }}"><i class="fa fa-cog"></i> {% trans "Edit" %}</a>
                             </li>
                         {% endif %}
                         {% if user.is_curator %}

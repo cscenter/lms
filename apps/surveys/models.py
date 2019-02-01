@@ -6,16 +6,15 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
-from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from post_office import mail
 from post_office.models import EmailTemplate
 
-from core.utils import city_aware_reverse
-from learning.models import Enrollment
+from core.urls import reverse, city_aware_reverse
 from courses.models import Course
+from learning.models import Enrollment
 from surveys.constants import FIELD_TYPES, MULTIPLE_CHOICE_FIELD_TYPES, \
     FieldType, FieldVisibility, STATUS_PUBLISHED, \
     STATUSES, FIELD_WIDGETS, STATUS_DRAFT, CHOICE_FIELD_TYPES

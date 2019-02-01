@@ -1,10 +1,10 @@
 import factory
 import pytest
 from django.forms import model_to_dict
-from django.urls import reverse
 from django.utils.encoding import smart_bytes
 
 from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.urls import reverse
 from courses.models import Assignment
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from users.tests.factories import TeacherCenterFactory, CuratorFactory
@@ -94,7 +94,7 @@ def test_course_assignment_update(client, assert_redirect):
     update_url = a.get_update_url()
     client.login(teacher)
     # Make sure new title is not presented on /teaching/assignments/
-    list_url = reverse('assignment_list_teacher')
+    list_url = reverse('teaching:assignment_list')
     response = client.get(list_url)
     assert response.status_code == 200
     assert smart_bytes(form['title']) not in response.content
@@ -135,13 +135,13 @@ def test_course_assignment_delete(client, assert_redirect):
     teacher = TeacherCenterFactory()
     co = CourseFactory.create(teachers=[teacher])
     a = AssignmentFactory.create(course=co)
-    list_url = reverse('assignment_list_teacher')
     delete_url = a.get_delete_url()
     client.login(teacher)
     response = client.get(delete_url)
     assert response.status_code == 200
     assert smart_bytes(a.title) in response.content
-    assert_redirect(client.post(delete_url), list_url)
-    response = client.get(list_url)
+    teaching_assignment_list = reverse('teaching:assignment_list')
+    assert_redirect(client.post(delete_url), teaching_assignment_list)
+    response = client.get(teaching_assignment_list)
     assert response.status_code == 200
     assert smart_bytes(a.title) not in response.content

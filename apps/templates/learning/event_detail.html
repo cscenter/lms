@@ -21,7 +21,7 @@
         </tr>
         <tr>
           <td>{% trans "Where" %}:</td>
-          <td><a href="{% url 'venue_detail' event.venue.pk %}">{{ event.venue.name }}</a></td>
+          <td><a href="{{ event.venue.get_absolute_url }}">{{ event.venue.name }}</a></td>
         </tr>
       </table>
 

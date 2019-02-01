@@ -3,10 +3,10 @@
 from unittest.mock import Mock
 
 import pytest
-from django.test import TestCase
-from django.urls import reverse
+from core.tests.utils import CSCTestCase
 
 from core.admin import related_spec_to_list, apply_related_spec
+from core.urls import reverse
 
 
 # courtesy of SO http://stackoverflow.com/a/1305682/275084
@@ -22,7 +22,7 @@ class FakeObj(object):
                 setattr(self, key, attr)
 
 
-class RelatedSpec(TestCase):
+class RelatedSpec(CSCTestCase):
     def test_to_list(self):
         spec_form = [('student_assignment',
                       [('assignment',

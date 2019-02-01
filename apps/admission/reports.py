@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-
-from django.core.exceptions import ObjectDoesNotExist
-from django.urls import reverse
-from django.db.models import Prefetch
-from django.utils import formats
-from django.utils.numberformat import format
-from django.utils.encoding import force_text
 from collections import OrderedDict
 
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Prefetch
+from django.utils import formats
+from django.utils.encoding import force_text
+from django.utils.numberformat import format
+
+from admission.models import Applicant, Interview, Comment
 from core.reports import ReportFileOutput
-from admission.models import Applicant, Interview, Campaign, Comment
+from core.urls import reverse
 
 
 class AdmissionReport(ReportFileOutput):

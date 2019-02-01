@@ -1,6 +1,6 @@
 import pytest
-from django.urls import reverse
 
+from core.urls import reverse
 from users.tests.factories import GraduateFactory
 
 

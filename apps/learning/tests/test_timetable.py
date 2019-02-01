@@ -1,8 +1,8 @@
 import pytest
 from dateutil.relativedelta import relativedelta
-from django.urls import reverse
 
 from core.timezone import now_local
+from core.urls import reverse
 from courses.calendar import WeekEventsCalendar, MonthEventsCalendar
 from courses.tests.factories import CourseClassFactory, CourseFactory
 from learning.tests.factories import EnrollmentFactory
@@ -19,7 +19,7 @@ def flatten_events(calendar: WeekEventsCalendar):
 @pytest.mark.django_db
 def test_teacher_timetable_security(curator, client, assert_login_redirect):
     allowed = [CuratorFactory, TeacherCenterFactory]
-    timetable_url = reverse('timetable_teacher')
+    timetable_url = reverse('teaching:timetable')
     for factory_class in allowed:
         user = factory_class(city_id='spb')
         client.login(user)
@@ -38,7 +38,7 @@ def test_teacher_timetable_security(curator, client, assert_login_redirect):
 def test_teacher_timetable(client):
     teacher = TeacherCenterFactory()
     client.login(teacher)
-    timetable_url = reverse('timetable_teacher')
+    timetable_url = reverse('teaching:timetable')
     response = client.get(timetable_url)
     assert response.status_code == 200
     events = flatten_events(response.context['calendar'])
@@ -69,7 +69,7 @@ def test_teacher_timetable(client):
 @pytest.mark.django_db
 def test_student_timetable_security(client, assert_login_redirect):
     allowed = [CuratorFactory, StudentCenterFactory]
-    timetable_url = reverse('timetable_student')
+    timetable_url = reverse('study:timetable')
     for factory_class in allowed:
         user = factory_class(city_id='spb')
         client.login(user)
@@ -90,7 +90,7 @@ def test_student_timetable(client):
     client.login(student)
     co = CourseFactory.create(city_id='spb')
     e = EnrollmentFactory.create(course=co, student=student)
-    timetable_url = reverse('timetable_student')
+    timetable_url = reverse('study:timetable')
     response = client.get(timetable_url)
     calendar = response.context['calendar']
     assert isinstance(calendar, WeekEventsCalendar)

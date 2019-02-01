@@ -1,5 +1,5 @@
 import pytest
-from django.urls import reverse
+from core.urls import reverse
 
 # TODO: tests for recent/passed courses
 

@@ -25,7 +25,7 @@
     <h5>ПОКАЗАТЬ</h5>
     <div class="list-group inverse">
       {% for code, name in filter_by_score %}
-          <a href="{%  url "assignment_list_teacher" %}?term={{ query.term }}&course={{ query.course_slug }}&score={{ code }}&comment={{ query.comment }}&assignment={{ query.assignment.pk }}"
+          <a href="{%  url "teaching:assignment_list" %}?term={{ query.term }}&course={{ query.course_slug }}&score={{ code }}&comment={{ query.comment }}&assignment={{ query.assignment.pk }}"
              class="list-group-item{% if code == query.score %} active{% endif %}">
               {{ name }}</a>
       {% endfor %}
@@ -34,7 +34,7 @@
     <h5>ПОСЛЕДНИЙ КОММЕНТАРИЙ</h5>
     <div class="list-group inverse">
       {% for code, comment in filter_by_comments %}
-          <a href="{% url "assignment_list_teacher" %}?term={{ query.term }}&course={{ query.course_slug }}&score={{ query.score }}&comment={{ code }}&assignment={{ query.assignment.pk }}"
+          <a href="{% url "teaching:assignment_list" %}?term={{ query.term }}&course={{ query.course_slug }}&score={{ query.score }}&comment={{ code }}&assignment={{ query.assignment.pk }}"
              class="list-group-item{% if code == query.comment %} active{% endif %}">{{ comment|safe }}</a>
       {% endfor %}
     </div>
@@ -43,7 +43,7 @@
         <h5>КУРС</h5>
         <div class="list-group inverse">
           {% for course in course_offerings %}
-            <a href="{% url "assignment_list_teacher" %}?term={{ course.semester.slug }}&course={{ course.meta_course.slug }}&score={{ query.score }}&comment={{ query.comment }}"
+            <a href="{% url "teaching:assignment_list" %}?term={{ course.semester.slug }}&course={{ course.meta_course.slug }}&score={{ query.score }}&comment={{ query.comment }}"
                data-slug="{{ course.meta_course.slug }}" class="list-group-item{% if course.meta_course.slug == query.course_slug %} active{% endif %}" title="{{ course.meta_course.name }}">{{ course.meta_course.name }}</a>
           {% endfor %}
         </div>
@@ -53,7 +53,7 @@
         <h5>СЕМЕСТР</h5>
         <div class="list-group inverse">
           {% for term in all_terms %}
-            <a href="{% url "assignment_list_teacher" %}?term={{ term.slug }}&score={{ query.score }}&comment={{ query.comment }}"
+            <a href="{% url "teaching:assignment_list" %}?term={{ term.slug }}&score={{ query.score }}&comment={{ query.comment }}"
                class="list-group-item{% if term.slug == query.term %} active{% endif %}">{{ term }}</a>
           {% endfor %}
         </div>
@@ -84,7 +84,7 @@
     <div class="panel">
         <div class="panel-body">
             <b>{% trans "Deadline" %}</b>: <span class="assignment-date {{ query.assignment.deadline_at_local|date_soon_css }}">{{ query.assignment.deadline_at_local|naturalday:"d E" }} {{ query.assignment.deadline_at_local|time:"H:i" }}</span>
-            <div class="pull-right"><a href="{% url 'assignment_detail_teacher' query.assignment.pk %}">Страница задания</a></div>
+            <div class="pull-right"><a href="{{ query.assignment.get_teacher_url }}">Страница задания</a></div>
         </div>
     </div>
     {% endif %}

@@ -1,17 +1,18 @@
 import datetime
 import os
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.http import HttpResponseRedirect, Http404, \
     HttpResponseForbidden
 from django.shortcuts import redirect
-from django.urls import reverse, reverse_lazy
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import CreateView, UpdateView, DeleteView
 
 from core.exceptions import Redirect
+from core.urls import reverse, reverse_lazy
 from core.views import ProtectedFormMixin
 from courses.forms import CourseClassForm
 from courses.models import CourseClass, CourseClassAttachment
@@ -81,11 +82,11 @@ class CourseClassCreateUpdateMixin:
     def get_success_url(self):
         return_url = self.request.GET.get('back')
         if return_url == 'timetable':
-            return reverse('timetable_teacher')
+            return reverse('teaching:timetable')
         if return_url == 'course':
             return self.object.course.get_absolute_url()
         if return_url == 'calendar':
-            return reverse('calendar_teacher')
+            return reverse('teaching:calendar')
         elif "_addanother" in self.request.POST:
             return self.object.course.get_create_class_url()
         else:
@@ -149,7 +150,7 @@ class CourseClassDeleteView(TeacherOnlyMixin, ProtectedFormMixin,
                             DeleteView):
     model = CourseClass
     template_name = "forms/simple_delete_confirmation.html"
-    success_url = reverse_lazy('timetable_teacher')
+    success_url = reverse_lazy('teaching:timetable')
 
     def is_form_allowed(self, user, obj: CourseClass):
         return user.is_curator or user in obj.course.teachers.all()

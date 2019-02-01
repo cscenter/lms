@@ -1,4 +1,4 @@
 class Redirect(Exception):
-    def __init__(self, *args, **kwargs):
-        self.args = args
+    def __init__(self, to, **kwargs):
+        self.to = to
         self.kwargs = kwargs

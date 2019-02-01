@@ -8,6 +8,13 @@ from users.constants import AcademicRoles
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord
 
+__all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',
+           'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
+           'StudentFactory', 'StudentCenterFactory', 'StudentClubFactory',
+           'TeacherCenterFactory', 'VolunteerFactory', 'GraduateFactory',
+           'ProjectReviewerFactory', 'OnlineCourseRecordFactory',
+           'SHADCourseRecordFactory', 'EnrollmentCertificateFactory')
+
 
 class UserFactory(factory.DjangoModelFactory):
     class Meta:

@@ -9,6 +9,7 @@ APP_DIR = Path(__file__).parents[1]
 
 SITE_ID = 2
 ROOT_URLCONF = 'compsciclub_ru.urls'
+SUBDOMAIN_URLCONFS = {None: ROOT_URLCONF}
 WSGI_APPLICATION = 'compsciclub_ru.wsgi.application'
 
 MIDDLEWARE = [
@@ -66,6 +67,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
                 'core.context_processors.cities',
+                'core.context_processors.subdomain',
             ),
             'debug': DEBUG
         }
@@ -95,3 +97,5 @@ ACCOUNT_ACTIVATION_DAYS = 2
 INCLUDE_REGISTER_URL = False
 INCLUDE_AUTH_URLS = False
 REGISTRATION_FORM = 'compsciclub_ru.forms.RegistrationUniqueEmailAndUsernameForm'
+
+ADMIN_REORDER = []

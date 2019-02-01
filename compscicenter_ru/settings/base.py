@@ -6,8 +6,12 @@ import django
 from core.settings.base import *
 
 SITE_ID = 1
-ROOT_URLCONF = 'compscicenter_ru.urls'
 WSGI_APPLICATION = 'compscicenter_ru.wsgi.application'
+ROOT_URLCONF = 'compscicenter_ru.urls'
+SUBDOMAIN_URLCONFS = {
+    None: ROOT_URLCONF,
+    PRIVATE_SUBDOMAIN: 'compscicenter_ru.backend_urls',
+}
 
 APP_DIR = Path(__file__).parents[1]
 
@@ -15,6 +19,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
     'core.middleware.CurrentCityMiddleware',
+    'subdomains.middleware.SubdomainURLRoutingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'users.middleware.AuthenticationMiddleware',
@@ -25,6 +30,7 @@ MIDDLEWARE = [
 ]
 INSTALLED_APPS += [
     'compscicenter_ru',
+    'menu',
     'post_office',
     'django_jinja',
     'learning.projects.apps.ProjectsConfig',
@@ -74,11 +80,11 @@ TEMPLATES = [
             # Or put filters under templatetags and load with
             # django-jinja decorator
             "filters": {
-                "markdown": "core.jinja2_filters.markdown",
+                "markdown": "compscicenter_ru.jinja2_filters.markdown",
                 "as_survey": "surveys.jinja2_filters.render_form",
             },
             "globals": {
-                "crispy": "core.jinja2_filters.crispy",
+                "crispy": "compscicenter_ru.jinja2_filters.crispy",
             },
             "extensions": [
                 "jinja2.ext.do",
@@ -90,11 +96,12 @@ TEMPLATES = [
                 "django_jinja.builtins.extensions.CsrfExtension",
                 "django_jinja.builtins.extensions.CacheExtension",
                 "django_jinja.builtins.extensions.TimezoneExtension",
-                "django_jinja.builtins.extensions.UrlsExtension",
                 "django_jinja.builtins.extensions.StaticFilesExtension",
                 "django_jinja.builtins.extensions.DjangoFiltersExtension",
                 "webpack_loader.contrib.jinja2ext.WebpackExtension",
-                "core.jinja2_extensions.Extensions"
+                "compscicenter_ru.jinja2_extensions.Extensions",
+                "compscicenter_ru.jinja2_extensions.UrlsExtension",
+                "compscicenter_ru.jinja2_extensions.MenuExtension",
             ],
             "bytecode_cache": {
                 "name": "default",
@@ -133,6 +140,7 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
+                'core.context_processors.subdomain',
             ),
             'debug': DEBUG
         }
@@ -182,3 +190,10 @@ LDAP_SYNC_PASSWORD = False
 
 # Stub
 ADMIN_REORDER = []
+
+
+MENU_SELECT_PARENTS = True
+
+# Share this cookie between subdomains
+SESSION_COOKIE_NAME = "cscsessionid"
+SESSION_COOKIE_DOMAIN = ".compscicenter.ru"

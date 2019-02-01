@@ -7,22 +7,22 @@ import pytz
 import unicodecsv
 from bs4 import BeautifulSoup
 from django.contrib import messages
-from django.test import TestCase
-from django.urls import reverse
 from django.utils.encoding import smart_bytes, force_bytes
 
-from learning.tests.factories import EnrollmentFactory
-from courses.tests.factories import SemesterFactory, CourseFactory, AssignmentFactory
+from core.tests.utils import CSCTestCase
+from core.urls import reverse
+from courses.tests.factories import SemesterFactory, CourseFactory, \
+    AssignmentFactory
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory
 from learning.gradebook.imports import AssignmentGradesImport
+from learning.gradebook.views import _get_course
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GradingSystems, \
     StudentStatuses, GradeTypes
-from users.constants import AcademicRoles
+from learning.tests.factories import EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
-from learning.tests.utils import assert_login_redirect
-from learning.gradebook.views import _get_course
+from users.constants import AcademicRoles
 from users.tests.factories import TeacherCenterFactory, StudentCenterFactory, \
     UserFactory
 
@@ -126,7 +126,7 @@ def test_recalculate_course_grading_system(client):
     assert smart_bytes("/satisfactory/") in response.content
 
 
-class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
+class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         student = StudentCenterFactory()
@@ -177,7 +177,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, TestCase):
             self.assertEqual(grade, int(data[row][col]))
 
 
-class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
+class MarksSheetTeacherTests(MyUtilitiesMixin, CSCTestCase):
     def test_nonempty_gradebook(self):
         teacher = TeacherCenterFactory()
         students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
@@ -189,22 +189,22 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, TestCase):
                                                     is_online=False)
         url = co.get_gradebook_url()
         self.doLogin(teacher)
-        resp = self.client.get(url)
+        response = self.client.get(url)
         for student in students:
             name = "{} {}.".format(student.last_name,
                                         student.first_name[0])
-            self.assertContains(resp, name)
+            self.assertContains(response, name)
         for as_ in as_online:
-            self.assertContains(resp, as_.title)
+            self.assertContains(response, as_.title)
             for s in students:
                 a_s = StudentAssignment.objects.get(student=s, assignment=as_)
-                self.assertContains(resp, a_s.get_teacher_url())
+                self.assertContains(response, a_s.get_teacher_url())
         for as_ in as_offline:
-            self.assertContains(resp, as_.title)
+            self.assertContains(response, as_.title)
             for s in students:
                 a_s = StudentAssignment.objects.get(student=s, assignment=as_)
-                self.assertIn(resp.context['form'].GRADE_PREFIX + str(a_s.pk),
-                              resp.context['form'].fields)
+                self.assertIn(response.context['form'].GRADE_PREFIX + str(a_s.pk),
+                              response.context['form'].fields)
 
     def test_save_markssheet(self):
         teacher = TeacherCenterFactory()
@@ -376,14 +376,14 @@ def test_total_score(client):
 
 
 @pytest.mark.django_db
-def test_security(client, settings):
+def test_security(client, settings, assert_login_redirect):
     teacher = TeacherCenterFactory()
     student = StudentCenterFactory()
     co = CourseFactory.create(teachers=[teacher])
     a1, a2 = AssignmentFactory.create_batch(2, course=co)
     EnrollmentFactory.create(student=student, course=co)
     url = co.get_gradebook_url()
-    assert_login_redirect(client, settings, url)
+    assert_login_redirect(url, method='get')
     test_groups = [
         [],
         [AcademicRoles.STUDENT_CENTER],
@@ -394,7 +394,7 @@ def test_security(client, settings):
     client.login(TeacherCenterFactory())
     assert client.get(url).status_code == 404
     client.login(student)
-    assert_login_redirect(client, settings, url)
+    assert_login_redirect(url, method='get')
     client.login(teacher)
     assert client.get(url).status_code == 200
 
@@ -623,19 +623,19 @@ def test_gradebook_import_assignments_from_csv_security(client):
                                                  is_online=False)
     teacher2 = TeacherCenterFactory()
     client.login(teacher2)
-    url = reverse('gradebook:markssheet_teacher_csv_import_stepic', args=[co.pk])
+    url = reverse('teaching:gradebook_csv_import_stepic', args=[co.pk])
     response = client.post(url, {'assignment': assignments[0].pk,
                                  'csv_file': StringIO("stub\n")})
     assert response.status_code == 403  # not actual teacher
     # Wrong course offering id
-    url = reverse('gradebook:markssheet_teacher_csv_import_stepic',
+    url = reverse('teaching:gradebook_csv_import_stepic',
                   args=[assignments[0].course_id + 1])
     response = client.post(url, {'assignment': assignments[0].pk,
                                  'csv_file': StringIO("stub\n")})
     assert response.status_code == 403
     # csv_file not provided
     redirect_url = co.get_gradebook_url()
-    url = reverse('gradebook:markssheet_teacher_csv_import_stepic', args=[co.pk])
+    url = reverse('teaching:gradebook_csv_import_stepic', args=[co.pk])
     response = client.post(url, {'assignment': assignments[0].pk})
     assert response.status_code == 400
 
@@ -690,7 +690,7 @@ header1,header2,total
         'assignment': assignment.pk,
         'csv_file': tmp_file.open()
     }
-    url_import = reverse('gradebook:markssheet_teacher_csv_import_yandex',
+    url_import = reverse('teaching:gradebook_csv_import_yandex',
                          args=[co.pk])
     client.login(teacher)
     response = client.post(url_import, form, follow=True)
@@ -727,7 +727,7 @@ stepic_id,header2,total
         'assignment': assignment.pk,
         'csv_file': tmp_file.open()
     }
-    url_import = reverse('gradebook:markssheet_teacher_csv_import_stepic', args=[co.pk])
+    url_import = reverse('teaching:gradebook_csv_import_stepic', args=[co.pk])
     response = client.post(url_import, form, follow=True)
     assert StudentAssignment.objects.get(student=student1).score == 10
     assert StudentAssignment.objects.get(student=student2).score == 42

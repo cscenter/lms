@@ -6,7 +6,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">{% trans "Import stepik statements" %}</h4>
             </div>
-            <form action="{% url 'gradebook:markssheet_teacher_csv_import_stepic' gradebook.course.pk %}" enctype="multipart/form-data" method="POST">
+            <form action="{% url 'teaching:gradebook_csv_import_stepic' gradebook.course.pk %}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="modal-body">
                 <div class="form-group">

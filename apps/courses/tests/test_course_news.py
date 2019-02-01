@@ -8,18 +8,17 @@ from users.tests.factories import TeacherCenterFactory
 
 
 @pytest.mark.django_db
-def test_course_news_create_security(client, settings, assert_redirect):
+def test_course_news_create_security(client, settings, assert_login_redirect,
+                                     assert_redirect):
     teacher = TeacherCenterFactory()
     teacher_other = TeacherCenterFactory()
     course = CourseFactory.create(teachers=[teacher])
     url = course.get_create_news_url()
     form = factory.build(dict, FACTORY_CLASS=CourseNewsFactory)
     form.update({'course': course})
-    assert_redirect(client.post(url, form),
-                    "{}?next={}".format(settings.LOGIN_URL, url))
+    assert_login_redirect(url, form=form, method='post')
     client.login(teacher_other)
-    assert_redirect(client.post(url, form),
-                    "{}?next={}".format(settings.LOGIN_URL, url))
+    assert_login_redirect(url, form=form, method='post')
     client.logout()
     client.login(teacher)
     response = client.post(url, form)
@@ -45,7 +44,7 @@ def test_course_news_create_data(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_course_news_update(client, settings, assert_redirect):
+def test_course_news_update(client, assert_login_redirect, assert_redirect):
     """Tests permissions and update action"""
     teacher = TeacherCenterFactory()
     teacher_other = TeacherCenterFactory()
@@ -54,11 +53,9 @@ def test_course_news_update(client, settings, assert_redirect):
     url = course_news.get_update_url()
     form = model_to_dict(course_news)
     form.update({'text': "foobar text"})
-    assert_redirect(client.post(url, form),
-                    "{}?next={}".format(settings.LOGIN_URL, url))
+    assert_login_redirect(url, form=form, method='post')
     client.login(teacher_other)
-    assert_redirect(client.post(url, form),
-                    "{}?next={}".format(settings.LOGIN_URL, url))
+    assert_login_redirect(url, form=form, method='post')
     client.logout()
     client.login(teacher)
     response = client.post(url, form)
@@ -70,18 +67,16 @@ def test_course_news_update(client, settings, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_course_news_delete(client, settings, assert_redirect):
+def test_course_news_delete(client, assert_login_redirect, assert_redirect):
     """Tests permissions and delete action"""
     teacher = TeacherCenterFactory()
     teacher_other = TeacherCenterFactory()
     course = CourseFactory.create(teachers=[teacher])
     course_news = CourseNewsFactory.create(course=course, author=teacher)
     url = course_news.get_delete_url()
-    assert_redirect(client.post(url, {}),
-                    "{}?next={}".format(settings.LOGIN_URL, url))
+    assert_login_redirect(url, form={}, method='post')
     client.login(teacher_other)
-    assert_redirect(client.post(url, {}),
-                    "{}?next={}".format(settings.LOGIN_URL, url))
+    assert_login_redirect(url, form={}, method='post')
     client.logout()
     client.login(teacher)
     response = client.post(url)

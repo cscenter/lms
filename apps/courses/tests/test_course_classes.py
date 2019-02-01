@@ -9,15 +9,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
-from django.urls import reverse
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
 from core.timezone import now_local
-from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
-    CourseFactory, VenueFactory, SemesterFactory, CourseClassAttachmentFactory
+from core.urls import reverse
 from courses.forms import CourseClassForm
 from courses.models import CourseClass
+from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
+    CourseFactory, VenueFactory, SemesterFactory, CourseClassAttachmentFactory
 from users.tests.factories import TeacherCenterFactory
 
 
@@ -148,14 +148,15 @@ def test_course_class_delete(client, assert_redirect, assert_login_redirect):
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher], semester=s)
     cc = CourseClassFactory.create(course=co)
-    url = cc.get_delete_url()
-    assert_login_redirect(url)
-    assert_login_redirect(url, {}, method='post')
+    class_delete_url = cc.get_delete_url()
+    assert_login_redirect(class_delete_url)
+    assert_login_redirect(class_delete_url, {}, method='post')
     client.login(teacher)
-    response = client.get(url)
+    response = client.get(class_delete_url)
     assert response.status_code == 200
     assert smart_bytes(cc) in response.content
-    assert_redirect(client.post(url), reverse('timetable_teacher'))
+    assert_redirect(client.post(class_delete_url),
+                    reverse('teaching:timetable'))
     assert not CourseClass.objects.filter(pk=cc.pk).exists()
 
 
@@ -165,14 +166,14 @@ def test_course_class_back_variable(client, assert_redirect):
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(teachers=[teacher], semester=s)
     cc = CourseClassFactory.create(course=co)
-    base_url = cc.get_update_url()
+    class_update_url = cc.get_update_url()
     client.login(teacher)
     form = model_to_dict(cc)
     del form['slides']
     form['name'] += " foobar"
-    assert_redirect(client.post(base_url, form),
+    assert_redirect(client.post(class_update_url, form),
                     cc.get_absolute_url())
-    url = "{}?back=course".format(base_url)
+    url = "{}?back=course".format(class_update_url)
     assert_redirect(client.post(url, form),
                     co.get_absolute_url())
 
@@ -195,8 +196,8 @@ def test_course_class_attachment_links(client, assert_redirect):
     assert smart_bytes(cca2.material.url) in response.content
     assert smart_bytes(cca2.material_file_name) in response.content
     client.login(teacher)
-    url = cc.get_update_url()
-    response = client.get(url)
+    class_update_url = cc.get_update_url()
+    response = client.get(class_update_url)
     assert response.status_code == 200
     assert smart_bytes(cca1.get_delete_url()) in response.content
     assert smart_bytes(cca1.material_file_name) in response.content

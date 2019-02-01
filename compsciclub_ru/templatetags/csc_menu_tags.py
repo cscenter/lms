@@ -1,14 +1,13 @@
 import re
-import copy
 
 from django import template
 from django.conf import settings
-from django.urls import reverse, NoReverseMatch
+from django.urls import NoReverseMatch
 from django.utils.translation import pgettext_lazy
-
 from treemenus.models import Menu, MenuItem
 
-from .. import CSCMENU_CACHE
+from core.urls import reverse
+from menu_extension import CSCMENU_CACHE
 
 register = template.Library()
 

@@ -23,7 +23,7 @@
                                     <td>
                                         <ul class="list-unstyled margin-bottom-0">
                                             {% for teacher in course.teachers.all %}
-                                                <li><a href="{% url 'teacher_detail' teacher.pk %}">{{ teacher.get_full_name }}</a></li>
+                                                <li><a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_full_name }}</a></li>
                                             {% endfor %}
                                         </ul>
                                     </td>

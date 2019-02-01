@@ -7,7 +7,7 @@ from core.utils import is_club_site
 from .context_processors import cities
 
 
-class CurrentCityMiddleware(object):
+class CurrentCityMiddleware:
     """
     Attach city code to request object:
         * On compsciclub.ru always resolve city from sub domain
@@ -60,11 +60,13 @@ class CurrentCityMiddleware(object):
         return None
 
 
-class RedirectMiddleware(object):
+class RedirectMiddleware:
     """
-    You must add this middleware to MIDDLEWARE list,
-    to make work Redirect exception. All arguments passed to
-    Redirect will be passed to django built in redirect function.
+    Add this middleware to `MIDDLEWARE` setting to enable processing
+    Redirect exception on each request.
+
+    All arguments passed to
+    Redirect will be passed to django's' `redirect` shortcut.
     """
     def __init__(self, get_response):
         self.get_response = get_response
@@ -75,7 +77,7 @@ class RedirectMiddleware(object):
     def process_exception(self, request, exception):
         if not isinstance(exception, Redirect):
             return
-        redirect_to = exception.kwargs.pop("to")
+        redirect_to = exception.to
         if isinstance(redirect_to, HttpResponseRedirect):
-            redirect_to = redirect_to.url
-        return redirect(redirect_to, **exception.kwargs)
+            return redirect_to
+        return HttpResponseRedirect(redirect_to, **exception.kwargs)

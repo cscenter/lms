@@ -2,19 +2,20 @@ import datetime
 
 import pytest
 from bs4 import BeautifulSoup
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from learning.tests.factories import EnrollmentFactory
-from courses.tests.factories import SemesterFactory, CourseFactory, CourseNewsFactory, \
+from core.constants import DATE_FORMAT_RU
+from core.timezone import now_local
+from core.urls import reverse
+from courses.tests.factories import SemesterFactory, CourseFactory, \
+    CourseNewsFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseNewsNotification
-from core.constants import DATE_FORMAT_RU
-from core.timezone import now_local
+from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentCenterFactory, StudentClubFactory
 
 
@@ -86,19 +87,19 @@ def test_unenrollment(client, assert_redirect):
     assert enrollment.pk == enrollment_id
     assert not enrollment.is_deleted
     # Check ongoing courses on student courses page are not empty
-    response = client.get(reverse("course_list_student"))
+    response = client.get(reverse("study:course_list"))
     assert len(response.context['ongoing_rest']) == 0
     assert len(response.context['ongoing_enrolled']) == 1
     assert len(response.context['archive_enrolled']) == 0
     # Check `back` url on unenroll action
-    url = co.get_unenroll_url() + "?back=course_list_student"
+    url = co.get_unenroll_url() + "?back=study:course_list"
     assert_redirect(client.post(url, form),
-                    reverse('course_list_student'))
+                    reverse('study:course_list'))
     assert set(a_ss) == set(StudentAssignment.objects
                                   .filter(student=s,
                                           assignment__course=co))
     # Check courses on student courses page are empty
-    response = client.get(reverse("course_list_student"))
+    response = client.get(reverse("study:course_list"))
     assert len(response.context['ongoing_rest']) == 1
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['archive_enrolled']) == 0
@@ -159,11 +160,11 @@ def test_enrollment(client):
                           .filter(student=student1)
                           .values_list('student', 'assignment'))
     co_other = CourseFactory.create(semester=current_semester)
-    form.update({'back': 'course_list_student'})
+    form.update({'back': 'study:course_list'})
     url = co_other.get_enroll_url()
     response = client.post(url, form)
     assert response.status_code == 302
-    # assert response.url == reverse('course_list_student')
+    # assert response.url == reverse('study:course_list')
     assert co.enrollment_set.count() == 1
     # Try to enroll to old CO
     old_semester = SemesterFactory.create(year=2010)

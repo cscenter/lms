@@ -6,7 +6,6 @@ from learning.views import CourseNewsUnreadNotificationsView, CourseStudentsView
 from .views import EventDetailView
 
 urlpatterns = [
-    path('', include('learning.enrollment.urls')),
     path("courses/", include([
         re_path(RE_COURSE_URI, include([
             path("students/", CourseStudentsView.as_view(), name="course_students"),
@@ -16,7 +15,7 @@ urlpatterns = [
         ]), kwargs={"city_aware": True})
     ])),
 
-    path('learning/', include('learning.studying.urls')),
+    path('learning/', include('learning.study.urls')),
 
     path('teaching/', include('learning.teaching.urls')),
 

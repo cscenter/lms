@@ -38,11 +38,11 @@
     <div class="col-xs-12 h2-and-buttons">
       <h2>
         {% if user_type == 'student' %}
-        <a href="{% url 'assignment_list_student' %}"><span class="fa fa-angle-left"></span></a>
+        <a href="{% url 'study:assignment_list' %}"><span class="fa fa-angle-left"></span></a>
         {{ a_s.assignment.title }} <br>
             <a class="small" href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>
         {% else %}
-        <a href="{% url 'assignment_detail_teacher' a_s.assignment.pk %}"><span class="fa fa-angle-left"></span></a>
+        <a href="{{ a_s.assignment.get_teacher_url }}"><span class="fa fa-angle-left"></span></a>
         {{ a_s.student.get_short_name }} <br>
         <small>{{ a_s.assignment.title }} (<a href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>)</small>
         {% endif %}
@@ -87,7 +87,7 @@
         <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
           <div class="csc-well assignment-comment" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
             {% if is_actual_teacher and comment.author_id == user.pk and not comment.is_stale_for_edit or user.is_curator %}
-                <a href="{% url "assignment_submission_comment_edit" comment.student_assignment_id comment.pk %}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
+                <a href="{% url "teaching:assignment_submission_comment_edit" comment.student_assignment_id comment.pk %}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
             {% endif %}
             <h5 class="assignment">{{ comment.author }}</h5>
             <div class="ubertext">
@@ -119,7 +119,7 @@
         <div class="col-xs-3">
             <div class="-submission" id="o-sidebar">
                 {% if user_type == 'teacher' and is_actual_teacher and next_a_s_pk %}
-                  <a href="{% url 'a_s_detail_teacher' next_a_s_pk %}" class="btn btn-default">
+                  <a href="{% url 'teaching:a_s_detail' next_a_s_pk %}" class="btn btn-default">
                     {% trans "Next unchecked[assignment]" %} <i class="fa fa-angle-right"></i>
                   </a>
                 {% endif %}
@@ -140,9 +140,7 @@
                       <ul class="list-unstyled">
                         {% for teacher in a_s.assignment.course.teachers.all %}
                         <li>
-                          <a href="{% url 'teacher_detail' teacher.pk %}">
-                            {{ teacher.get_full_name }}
-                          </a>
+                          <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_full_name }}</a>
                         </li>
                         {% endfor %}
                       </ul>

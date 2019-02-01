@@ -10,7 +10,6 @@ from django.core.validators import MinValueValidator, \
     MaxValueValidator
 from django.db import models, transaction
 from django.db.models import query, Q
-from django.urls import reverse
 from django.utils import timezone, numberformat
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
@@ -25,11 +24,11 @@ from post_office.utils import get_email_template
 
 from core.db.models import ScoreField
 from core.models import City, University
+from core.settings.base import CENTER_FOUNDATION_YEAR
+from core.urls import reverse
 from courses.models import Venue
 from learning.settings import AcademicDegreeYears
 from users.constants import AcademicRoles
-from core.settings.base import CENTER_FOUNDATION_YEAR
-from users.models import User
 
 WITH_ASSIGNMENTS_TEXT = """
 Сперва мы предложим Вам решить несколько задач в течение получаса, а само 

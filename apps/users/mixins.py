@@ -1,4 +1,5 @@
 from braces.views import UserPassesTestMixin
+from django.contrib.auth.views import redirect_to_login
 
 
 class ParticipantOnlyMixin(UserPassesTestMixin):

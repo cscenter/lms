@@ -1,8 +1,13 @@
 {% load i18n %}
 {% load static %}
+{% load override_url %}
 {% load lookup startswith from core_tags %}
-{% load csc_menu from csc_menu_tags %}
-{% csc_menu "compscicenter" as menu %}
+{% load csc_menu from csc_menu %}
+{% if user.is_authenticated %}
+    {% csc_menu "menu_private" as menu %}
+{% else %}
+    {% csc_menu "menu_public" as menu %}
+{% endif %}
 {% load user_thumbnail from user_thumbnail %}
 
 <div class="header">
@@ -12,14 +17,11 @@
             <div class="logo-cell">
                 <a class="logo-container" href="{% url 'index' %}"><img src="{% static "v1/img/center/logo.svg" %}" alt="Computer Science Center"></a>
             </div>
-            <ul{% if menu.tree|length > 8 %} class="__narrow"{% endif %}>
-                {% for menu_item in menu.tree %}
-                    {# XXX: Hack to hide `curators` menu item #}
-                    {% if menu_item.id != 15 %}
-                    <li {% if menu_item.id in menu.active_items %}class="active"{% endif %}>
-                        <a {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.caption }}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
+            <ul{% if menu|length > 8 %} class="__narrow"{% endif %}>
+                {% for menu_item in menu %}
+                    <li {% if menu_item.selected %}class="active"{% endif %}>
+                        <a {% if menu_item.is_external %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.title }}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
                     </li>
-                    {% endif %}
                 {% endfor %}
             </ul>
         </div>
@@ -38,8 +40,8 @@
                       <li class="dropdown-header">{{ user.get_short_name }}</li>
                       <li><a href="{{ user.get_absolute_url }}">{% trans "Profile" %}</a></li>
                       {% if user.is_staff %}
-                          <li><a href="{% url 'staff:student_search' %}">Курирование</a></li>
-                          <li><a href="{% url 'stats:index' %}">Статистика</a></li>
+                          <li><a href="{% url 'staff:student_search' PRIVATE_SUBDOMAIN %}">Курирование</a></li>
+                          <li><a href="{% url 'stats:index' PRIVATE_SUBDOMAIN %}">Статистика</a></li>
                           <li><a href="{% url 'admin:index' %}" target="_blank">Админ-панель</a></li>
                       {% endif %}
                       <li><a href="{% url 'logout' %}">{% trans "Logout" %}</a></li>
@@ -52,21 +54,20 @@
     </div>
 </div>
 
-{% for menu_item in menu.tree %}
-    {% if menu_item.id in menu.active_items and menu_item.children %}
-      <div class="menu lvl2 {{menu_item.extension.classes}}">
+{% for menu_item in menu %}
+    {% if menu_item.selected and menu_item.children %}
+      <div class="menu lvl2 {{ menu_item.css_classes }}">
         <div class="container">
               <ul>
                 {% for second_level in menu_item.children %}
-                    <li {% if second_level.id in menu.active_items and second_level.extension.classes %}class="{{second_level.extension.classes}} active"
-                    {% elif second_level.extension.classes %}class="{{ second_level.extension.classes }}"
-                    {% elif second_level.id in menu.active_items %}class="active"{% endif %}>
-                        <a {% if second_level.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ second_level.url }}">
-                            {{ second_level.caption }}
-
-                            {% if second_level.extension.budge and request.unread_notifications_cache|lookup:second_level.extension.budge %}
+                    <li {% if second_level.selected and second_level.css_classes %}class="{{second_level.css_classes}} active"
+                    {% elif second_level.css_classes %}class="{{ second_level.css_classes }}"
+                    {% elif second_level.selected %}class="active"{% endif %}>
+                        <a {% if second_level.is_external %}target="_blank"{% endif %} href="{{ second_level.url }}">
+                            {{ second_level.title }}
+                            {% if second_level.budge and request.unread_notifications_cache|lookup:second_level.budge %}
                             <span class="badge">
-                              {{ request.unread_notifications_cache|lookup:second_level.extension.budge|length }}
+                              {{ request.unread_notifications_cache|lookup:second_level.budge|length }}
                             </span>
                             {% endif %}
                         </a>

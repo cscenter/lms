@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from django.urls import reverse
 from django.utils.encoding import smart_bytes
 
-from learning.tests.factories import SemesterFactory, CourseFactory, EnrollmentFactory
+from core.urls import reverse
+from courses.utils import get_term_by_index
 from learning.projects.tests.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import GradingSystems, StudentStatuses, GradeTypes
+from learning.tests.factories import SemesterFactory, CourseFactory, \
+    EnrollmentFactory
 from users.constants import AcademicRoles
-from courses.utils import get_term_by_index
-from users.tests.factories import SHADCourseRecordFactory, OnlineCourseRecordFactory, \
+from users.tests.factories import SHADCourseRecordFactory, \
+    OnlineCourseRecordFactory, \
     TeacherCenterFactory, StudentCenterFactory
 
 

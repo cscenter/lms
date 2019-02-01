@@ -1,5 +1,6 @@
-{% set menu = csc_menu(request, "compscicenter") %}
 {% set user = request.user %}
+{% if user.is_authenticated %}{% set menu_name = "menu_private" %}{% else %}{% set menu_name = "menu_public" %}{% endif %}
+{% set menu = csc_menu(menu_name, request) %}
 <nav class="navbar navbar-main{% if menu_theme %} {{ menu_theme }}{% endif %}">
     <div class="container">
         <button class="navbar-toggler hamburger hamburger--vortex" type="button"
@@ -11,13 +12,10 @@
 
         <div class="menu-desktop-wrapper">
             <ul class="navbar-nav">
-                {% for menu_item in menu["tree"] -%}
-                    {# Hack to hide `curators` from top menu #}
-                    {% if menu_item.id != 15 -%}
+                {% for menu_item in menu -%}
                     <li class="nav-item">
-                        <a class="nav-link {% if menu_item.id in menu["active_items"] %}_active{% endif %}" {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.caption }}</a>
+                        <a class="nav-link {% if menu_item.selected %}_active{% endif %}" {% if menu_item.is_external %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.title }}</a>
                     </li>
-                    {%- endif %}
                 {%- endfor %}
             </ul>
         </div>
@@ -41,8 +39,8 @@
                 <div class="dropdown-menu _arrow-right" aria-labelledby="userMenuButton">
                     <a class="dropdown-item" href="{{ request.user.get_absolute_url() }}">Профиль</a>
                     {% if request.user.is_staff %}
-                        <a class="dropdown-item" href="{{ url('staff:student_search') }}">Курирование</a>
-                        <a class="dropdown-item" href="{{ url('stats:index') }}">Статистика</a>
+                        <a class="dropdown-item" href="{{ url('staff:student_search', PRIVATE_SUBDOMAIN) }}">Курирование</a>
+                        <a class="dropdown-item" href="{{ url('stats:index', PRIVATE_SUBDOMAIN) }}">Статистика</a>
                         <a class="dropdown-item" href="{{ url('admin:index') }}">Админ-панель</a>
                     {% endif %}
                     <div class="dropdown-divider"></div>

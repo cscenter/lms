@@ -1,30 +1,14 @@
-from django.test import SimpleTestCase
-
 from users.constants import AcademicRoles
 from users.tests.factories import UserFactory
 
-# Workaround to use Django's assertRedirects()
-_STS = SimpleTestCase()
 
-
-def assert_redirects(*args, **kwargs):
-    # Deprecated. Use pytest fixture instead
-    _STS.assertRedirects(*args, **kwargs)
-
-
-def assert_login_redirect(client, settings, url):
-    assert_redirects(client.get(url),
-                     "{}?next={}".format(settings.LOGIN_URL, url))
-
-
-def check_url_security(client, settings, groups_allowed, url):
+def check_url_security(client, assert_login_redirect, groups_allowed, url):
     """
     Checks if only users in groups listed in `groups_allowed` can
     access the page which url is stored in `url`.
     Also checks that curator can access any page.
     """
-    assert_redirects(client.get(url),
-                     "{}?next={}".format(settings.LOGIN_URL, url))
+    assert_login_redirect(url, method='get')
     all_test_groups = [
         [],
         [AcademicRoles.TEACHER_CENTER],
@@ -36,9 +20,7 @@ def check_url_security(client, settings, groups_allowed, url):
         if any(g in groups_allowed for g in groups):
             assert client.get(url).status_code == 200
         else:
-            # assert login redirect
-            assert_redirects(client.get(url),
-                             "{}?next={}".format(settings.LOGIN_URL, url))
+            assert_login_redirect(url, method='get')
         client.logout()
     client.login(UserFactory.create(is_superuser=True, is_staff=True,
                                     city_id='spb'))

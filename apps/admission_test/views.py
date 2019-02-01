@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import Http404
 from django.shortcuts import render
-from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from social_core.actions import do_auth
@@ -16,6 +15,7 @@ from vanilla import CreateView
 from admission_test.forms import AdmissionTestApplicationForm
 from admission_test.models import AdmissionTestApplicant
 from core.auth.backends import YandexRuOAuth2Backend
+from core.urls import reverse
 
 STRATEGY = 'social_django.strategy.DjangoStrategy'
 # Override `user` attribute to prevent accidental user creation

@@ -5,28 +5,29 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
-from django.test import TestCase
-from django.urls import reverse
+from core.tests.utils import CSCTestCase
 from django.utils import timezone, formats
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from learning.enrollment import course_failed_by_student
-from learning.tests.factories import EnrollmentFactory, AssignmentCommentFactory, \
-    StudentAssignmentFactory
+from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.urls import reverse
+from courses.models import Assignment, AssignmentAttachment
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     CourseTeacherFactory, AssignmentFactory
+from courses.utils import get_current_term_pair
+from learning.enrollment import course_failed_by_student
 from learning.models import StudentAssignment
-from courses.models import Assignment, AssignmentAttachment
 from learning.settings import StudentStatuses, GradeTypes
-from users.constants import AcademicRoles
-from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from learning.tests.factories import EnrollmentFactory, \
+    AssignmentCommentFactory, \
+    StudentAssignmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
-from learning.tests.utils import assert_login_redirect
-from courses.utils import get_current_term_pair
-from users.tests.factories import UserFactory, TeacherCenterFactory, StudentFactory, \
+from users.constants import AcademicRoles
+from users.tests.factories import UserFactory, TeacherCenterFactory, \
+    StudentFactory, \
     StudentCenterFactory, VolunteerFactory, ProjectReviewerFactory
 
 
@@ -35,8 +36,8 @@ from users.tests.factories import UserFactory, TeacherCenterFactory, StudentFact
 
 
 class StudentAssignmentListTests(GroupSecurityCheckMixin,
-                                 MyUtilitiesMixin, TestCase):
-    url_name = 'assignment_list_student'
+                                 MyUtilitiesMixin, CSCTestCase):
+    url_name = 'study:assignment_list'
     groups_allowed = [AcademicRoles.STUDENT_CENTER]
 
     def test_list(self):
@@ -111,7 +112,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
 
 
 @pytest.mark.django_db
-def test_security_assignmentstudent_detail(client, settings):
+def test_security_assignmentstudent_detail(client, assert_login_redirect):
     """
     Students can't see assignments from completed course, which they failed
     """
@@ -126,7 +127,7 @@ def test_security_assignmentstudent_detail(client, settings):
     a_s = StudentAssignment.objects.get(student=student, assignment=a)
     url = a_s.get_student_url()
     client.login(student)
-    assert_login_redirect(client, settings, url)
+    assert_login_redirect(url, method='get')
     # Teacher still can view student assignment
     client.login(teacher)
     response = client.get(a_s.get_teacher_url())
@@ -227,11 +228,11 @@ def test_studentassignment_first_student_comment_at(curator):
     assert sa.first_student_comment_at == first_student_comment_at
 
 
-class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
+class AssignmentTeacherDetailsTest(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
         teacher = TeacherCenterFactory()
         a = AssignmentFactory.create(course__teachers=[teacher])
-        url = reverse('assignment_detail_teacher', args=[a.pk])
+        url = a.get_teacher_url()
         self.assertLoginRedirect(url)
         test_groups = [
             [],
@@ -257,7 +258,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
                                   teachers=[teacher])
         a = AssignmentFactory.create(course=co)
         self.doLogin(teacher)
-        url = reverse('assignment_detail_teacher', args=[a.pk])
+        url = a.get_teacher_url()
         resp = self.client.get(url)
         self.assertEqual(a, resp.context['assignment'])
         self.assertEqual(0, len(resp.context['a_s_list']))
@@ -268,8 +269,8 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, TestCase):
         self.assertSameObjects([a_s], resp.context['a_s_list'])
 
 
-class AssignmentTeacherListTests(MyUtilitiesMixin, TestCase):
-    url_name = 'assignment_list_teacher'
+class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
+    url_name = 'teaching:assignment_list'
     groups_allowed = [AcademicRoles.TEACHER_CENTER]
 
     def test_group_security(self):
@@ -453,8 +454,7 @@ def test_assignment_deadline_display_for_teacher(settings, client):
     assignment = AssignmentFactory(deadline_at=dt,
                                    course__city_id='spb',
                                    course__teachers=[teacher])
-    url_for_teacher = reverse("assignment_detail_teacher",
-                              kwargs={"pk": assignment.pk})
+    url_for_teacher = assignment.get_teacher_url()
     client.login(teacher)
     response = client.get(url_for_teacher)
     html = BeautifulSoup(response.content, "html.parser")
@@ -492,7 +492,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     student = StudentCenterFactory(city_id='spb')
     sa = StudentAssignmentFactory(assignment=assignment, student=student)
     client.login(student)
-    url_learning_assignments = reverse('assignment_list_student')
+    url_learning_assignments = reverse('study:assignment_list')
     response = client.get(url_learning_assignments)
     html = BeautifulSoup(response.content, "html.parser")
     # Note: On this page used `naturalday` filter, so use passed datetime

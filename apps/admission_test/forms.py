@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from crispy_forms.bootstrap import FormActions, PrependedText, InlineRadios
+from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Row, Submit, HTML, Field
 from django import forms
-from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from admission_test.models import AdmissionTestApplicant
 from admission_test.tasks import register_in_yandex_contest
+from core.urls import reverse
 
 
 class AdmissionTestApplicationForm(forms.ModelForm):
