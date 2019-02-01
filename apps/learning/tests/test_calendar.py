@@ -25,7 +25,6 @@ from users.tests.factories import StudentCenterFactory, \
 # TODO: для СПБ не показываются события НСК (наоборот будет уже верно)
 
 
-
 class CalendarTeacherTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, CSCTestCase):
     url_name = 'teaching:calendar'
@@ -33,10 +32,10 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
 
     def test_teacher_calendar(self):
         teacher = TeacherCenterFactory(city_id='spb')
-        other_teacher = TeacherCenterFactory()
+        other_teacher = TeacherCenterFactory(city_id='spb')
         self.doLogin(teacher)
-        classes = flatten_calendar_month_events(
-            self.client.get(reverse(self.url_name)).context['calendar'])
+        response = self.client.get(reverse(self.url_name))
+        classes = flatten_calendar_month_events(response.context['calendar'])
         assert len(classes) == 0
         this_month_date = (datetime.datetime.now()
                            .replace(day=15, tzinfo=timezone.utc))
@@ -54,10 +53,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         resp = self.client.get(reverse(self.url_name))
         classes = flatten_calendar_month_events(resp.context['calendar'])
         self.assertSameObjects(own_classes + events, classes)
-        # but in full calendar all classes should be shown
-        classes = flatten_calendar_month_events(
-            self.client.get(reverse('teaching:calendar_full')).context['calendar'])
-        self.assertSameObjects(own_classes + others_classes + events, classes)
+        # No events on the next month
         next_month_qstr = (
             "?year={0}&month={1}"
             .format(resp.context['calendar'].next_month.year,
@@ -67,6 +63,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         classes = flatten_calendar_month_events(
             self.client.get(next_month_url).context['calendar'])
         self.assertSameObjects([], classes)
+        # Add some and test
         next_month_date = this_month_date + relativedelta(months=1)
         next_month_classes = (
             CourseClassFactory
@@ -75,6 +72,10 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         classes = flatten_calendar_month_events(
             self.client.get(next_month_url).context['calendar'])
         self.assertSameObjects(next_month_classes, classes)
+        # On a full calendar all classes should be shown
+        response = self.client.get(reverse('teaching:calendar_full'))
+        classes = flatten_calendar_month_events(response.context['calendar'])
+        self.assertSameObjects(own_classes + others_classes + events, classes)
 
 
 class CalendarStudentTests(GroupSecurityCheckMixin,

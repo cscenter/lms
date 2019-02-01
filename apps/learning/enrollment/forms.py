@@ -25,7 +25,7 @@ class CourseEnrollmentForm(forms.Form):
         self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
 
     def is_available(self):
-        from learning.views.utils import get_student_city_code
+        from users.utils import get_student_city_code
         if self._custom_errors is not None:
             return not self._custom_errors
         self._custom_errors = []

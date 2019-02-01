@@ -1,7 +1,7 @@
 from vanilla import DetailView, ListView
 
 from users.mixins import StudentOnlyMixin
-from learning.views.utils import get_student_city_code
+from users.utils import get_student_city_code
 from .models import Stock, Borrow
 
 

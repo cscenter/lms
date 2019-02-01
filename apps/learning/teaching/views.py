@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from itertools import chain
 from typing import Union
 from urllib.parse import urlencode
 
@@ -16,22 +15,64 @@ from core.exceptions import Redirect
 from core.settings.base import FOUNDATION_YEAR
 from core.timezone import Timezone, CityCode
 from core.urls import reverse
-
 from core.utils import render_markdown, is_club_site
 from courses.calendar import CalendarEvent
 from courses.models import CourseClass, Course, Assignment
 from courses.settings import SemesterTypes
 from courses.utils import get_terms_for_calendar_month, get_term_index
-from courses.views import MonthEventsCalendarView
 from courses.views.calendar import MonthEventsCalendarView
-from learning.calendar import LearningCalendarEvent
+from learning.calendar import get_month_events
 from learning.forms import AssignmentModalCommentForm
-from learning.models import AssignmentComment, StudentAssignment, Enrollment, \
-    Event
+from learning.models import AssignmentComment, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole
-from learning.views.utils import get_teacher_city_code
 from learning.views.views import logger
 from users.mixins import TeacherOnlyMixin
+from users.utils import get_teacher_city_code
+
+
+class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
+    """
+    Shows all non-course events and classes filtered by the cities where
+    authorized teacher has taught.
+    """
+
+    def get_default_timezone(self) -> Union[Timezone, CityCode]:
+        return get_teacher_city_code(self.request)
+
+    def get_teacher_cities(self, year, month):
+        default_city = get_teacher_city_code(self.request)
+        if is_club_site():
+            return [default_city]
+        # Collect all the cities where authorized teacher taught.
+        terms_in_month = get_terms_for_calendar_month(year, month)
+        term_indexes = [get_term_index(*term) for term in terms_in_month]
+        cities = list(Course.objects
+                      .filter(semester__index__in=term_indexes)
+                      .for_teacher(self.request.user)
+                      .values_list("city_id", flat=True)
+                      .order_by('city_id')
+                      .distinct())
+        if not cities:
+            cities = [default_city]
+        return cities
+
+    def get_events(self, year, month, **kwargs):
+        cities = self.get_teacher_cities(year, month)
+        return get_month_events(year, month, cities)
+
+
+class CalendarPersonalView(CalendarFullView):
+    """
+    Shows all non-course events and classes for courses in which authenticated
+    teacher participated.
+    """
+    calendar_type = 'teacher'
+    template_name = "learning/calendar.html"
+
+    def get_events(self, year, month, **kwargs):
+        cities = self.get_teacher_cities(year, month)
+        return get_month_events(year, month, cities,
+                                for_teacher=self.request.user)
 
 
 class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
@@ -374,69 +415,6 @@ class AssignmentListView(TeacherOnlyMixin, TemplateView):
                         "empty course list."),
                       extra_tags='timeout')
         raise Redirect(to=reverse("teaching:course_list"))
-
-
-class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
-    """
-    Shows all non-course events and classes filtered by the cities where
-    authorized teacher has taught.
-    """
-
-    def get_default_timezone(self) -> Union[Timezone, CityCode]:
-        return get_teacher_city_code(self.request)
-
-    def get_teacher_cities(self, year, month):
-        default_city = get_teacher_city_code(self.request)
-        if is_club_site():
-            return [default_city]
-        # Collect all the cities where authorized teacher taught.
-        terms_in_month = get_terms_for_calendar_month(year, month)
-        term_indexes = [get_term_index(*term) for term in terms_in_month]
-        cities = list(Course.objects
-                      .filter(semester__index__in=term_indexes)
-                      .for_teacher(self.request.user)
-                      .values_list("city_id", flat=True)
-                      .order_by('city_id')
-                      .distinct())
-        if not cities:
-            cities = [default_city]
-        return cities
-
-    def get_events(self, year, month, **kwargs):
-        cities = self.get_teacher_cities(year, month)
-        return chain(
-            (CalendarEvent(e) for e in self._get_classes(year, month, cities)),
-            (LearningCalendarEvent(e) for e in
-                self._get_events(year, month, cities))
-        )
-
-    @staticmethod
-    def _get_events(year, month, cities):
-        return (Event.objects
-                .for_calendar()
-                .in_cities(cities)
-                .in_month(year, month))
-
-    def _get_classes(self, year, month, cities):
-        return (CourseClass.objects
-                .for_calendar(self.request.user)
-                .in_month(year, month)
-                .in_cities(cities))
-
-
-class CalendarPersonalView(CalendarFullView):
-    """
-    Shows all non-course events and classes for courses in which authenticated
-    teacher participated.
-    """
-    calendar_type = 'teacher'
-    template_name = "learning/calendar.html"
-
-    def _get_classes(self, year, month, cities):
-        return (CourseClass.objects
-                .for_calendar(self.request.user)
-                .in_month(year, month)
-                .for_teacher(self.request.user))
 
 
 class CourseListView(TeacherOnlyMixin, generic.ListView):
