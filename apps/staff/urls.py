@@ -1,7 +1,5 @@
 from django.conf.urls import include, url
 
-
-app_name = 'staff'
 # FIXME: guess it's better inherit these views
 from learning.gradebook.views import GradeBookCuratorDispatchView, \
     GradeBookTeacherView
@@ -14,6 +12,8 @@ from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, 
     WillGraduateStatsReportView, SurveySubmissionsReportView, \
     SurveySubmissionsStatsView
 
+
+app_name = 'staff'
 urlpatterns = [
     url(r'^syllabus/$', SyllabusView.as_view(), name='syllabus'),
     url(r'^warehouse/$', HintListView.as_view(), name='staff_warehouse'),

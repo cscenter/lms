@@ -49,8 +49,6 @@ INSTALLED_APPS = [
     'core.storage.StaticFilesConfig',  # custom list of ignore patterns
     'django.contrib.humanize',
 
-    'treemenus',
-    'menu_extension',
     'sorl.thumbnail',
     'crispy_forms',
     'formtools',

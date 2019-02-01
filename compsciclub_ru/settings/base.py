@@ -27,7 +27,10 @@ MIDDLEWARE = [
 ]
 
 INSTALLED_APPS += [
+    # FIXME: create separated dir for project specific apps
     'compsciclub_ru',
+    'treemenus',
+    'menu_extension',
     'captcha',
     'registration',
     'international_schools.apps.Config',
