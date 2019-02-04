@@ -151,9 +151,9 @@ class TimetableView(StudentOnlyMixin, WeekEventsView):
     def _get_classes(self, iso_year, iso_week):
         w = Week(iso_year, iso_week)
         qs = (CourseClass.objects
+              .for_timetable()
               .filter(date__range=[w.monday(), w.sunday()])
-              .for_student(self.request.user)
-              .for_timetable(self.request.user))
+              .for_student(self.request.user))
         return qs
 
 

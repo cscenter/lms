@@ -34,7 +34,7 @@ CLUB_DOMAIN = 'compsciclub.ru'
 CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
 
-PRIVATE_SUBDOMAIN = 'learn'
+PRIVATE_SUBDOMAIN = 'my'
 
 INSTALLED_APPS = [
     'modeltranslation',  # insert before admin

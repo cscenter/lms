@@ -2,14 +2,12 @@ from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path
 from loginas import urls as loginas_urls
 
 from compscicenter_ru import views
 from compscicenter_ru.views import IndexView
-from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
-from htmlpages.views import flatpage
-from learning.study.views import UsefulListView, InternshipListView
+from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from users.urls import auth_urls
 
 admin.autodiscover()
@@ -21,11 +19,7 @@ urlpatterns = [
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
 
-    path('learning/useful/', UsefulListView.as_view(), name='learning_useful'),
-    path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
-    # FIXME: здесь можно спокойно вынести префикс `learning`. Вопрос "нужно ли"?
     path('', include('learning.urls')),
-    path('learning/library/', include("library.urls")),
 
     path('', include(auth_urls)),
     path('', include('users.urls')),
@@ -33,7 +27,6 @@ urlpatterns = [
     path('notifications/', include("notifications.urls")),
     path('staff/', include("staff.urls")),
     path('stats/', include("stats.urls")),
-    # FIXME: this one?
     path('surveys/', include("surveys.urls")),
 
     # FIXME: тут как быть?
@@ -61,6 +54,3 @@ if settings.DEBUG:
     ]
     if 'rosetta' in settings.INSTALLED_APPS:
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
-
-# Note: html_pages should be the last one
-urlpatterns += [re_path(r'^(?P<url>.*/)$', flatpage, name='html_pages')]

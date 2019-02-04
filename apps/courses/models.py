@@ -25,7 +25,7 @@ from courses.utils import get_current_term_pair, get_term_start, \
 from learning.settings import GradingSystems, ENROLLMENT_DURATION, \
     ASSIGNMENT_TASK_ATTACHMENT
 from .managers import CourseTeacherManager, AssignmentManager, \
-    CourseClassQuerySet, CourseDefaultManager
+    CourseClassManager, CourseDefaultManager
 from .micawber_providers import get_oembed_html
 from .settings import SemesterTypes, ClassTypes
 from .tasks import maybe_upload_slides_yandex
@@ -721,7 +721,7 @@ class CourseClass(TimeStampedModel):
         verbose_name = _("Class")
         verbose_name_plural = _("Classes")
 
-    objects = CourseClassQuerySet.as_manager()
+    objects = CourseClassManager()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

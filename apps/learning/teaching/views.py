@@ -88,9 +88,9 @@ class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
 
     def get_events(self, year, month, **kwargs):
         qs = (CourseClass.objects
+              .for_timetable()
               .in_month(year, month)
-              .filter(course__teachers=self.request.user)
-              .for_timetable(self.request.user))
+              .filter(course__teachers=self.request.user))
         return (CalendarEvent(e) for e in qs)
 
 

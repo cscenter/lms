@@ -151,8 +151,8 @@ class CalendarFullSecurityTests(MyUtilitiesMixin, CSCTestCase):
 
 
 @pytest.mark.django_db
-def test_correspondence_courses_calendar(client):
-    """Make sure correspondence courses are visible in main calendar"""
+def test_correspondence_courses_in_a_full_calendar(client):
+    """Make sure correspondence courses are visible in a full calendar"""
     student = StudentCenterFactory(city_id='spb')
     client.login(student)
     this_month_date = datetime.datetime.utcnow()
@@ -160,4 +160,9 @@ def test_correspondence_courses_calendar(client):
             3, course__is_correspondence=True, date=this_month_date)
     classes = flatten_calendar_month_events(
         client.get(reverse("study:calendar_full")).context['calendar'])
+    assert len(classes) == 3
+    teacher = TeacherCenterFactory(city_id='spb')
+    client.login(teacher)
+    classes = flatten_calendar_month_events(
+        client.get(reverse("teaching:calendar_full")).context['calendar'])
     assert len(classes) == 3
