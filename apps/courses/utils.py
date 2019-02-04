@@ -161,9 +161,9 @@ def get_terms_for_calendar_month(year: int, month: int) -> List[TermTuple]:
         return [start_term]
 
 
-term_types = "|".join(slug for slug, _ in SemesterTypes.choices)
+term_types = r"|".join(slug for slug, _ in SemesterTypes.choices)
 semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
-                              term_types + ")$")
+                              term_types + r")$")
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -175,25 +175,3 @@ def grouper(iterable, n, fillvalue=None):
     """
     args = [iter(iterable)] * n
     return zip_longest(fillvalue=fillvalue, *args)
-
-
-# FIXME: так ли нужен этот метод? Можно попробовать перенести его в Course
-def get_co_from_query_params(query_params, city_code):
-    """
-    Returns course model based on URL-parameters.
-
-    We already parsed `city_code` query-param in middleware and attached it
-    to request object, so pass it as parameter.
-    """
-    from courses.models import Course
-    match = semester_slug_re.search(query_params.get("semester_slug", ""))
-    if not match:
-        return None
-    term_year, term_type = match.group("term_year"), match.group("term_type")
-    course_slug = query_params.get("course_slug", "")
-    qs = Course.objects.in_city(city_code)
-    try:
-        return qs.get(meta_course__slug=course_slug, semester__year=term_year,
-                      semester__type=term_type)
-    except qs.model.DoesNotExist:
-        return None
