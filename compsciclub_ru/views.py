@@ -50,10 +50,9 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
 
     def get_events(self, year, month, **kwargs):
         classes = (CourseClass.objects
-                   .for_calendar(self.request.user)
+                   .for_calendar()
                    .in_month(year, month)
-                   .in_city(self.request.city_code)
-                   .open_only())
+                   .in_city(self.request.city_code))
         return (CalendarEvent(e) for e in classes)
 
     def get_default_timezone(self) -> Union[Timezone, CityCode]:

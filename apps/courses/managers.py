@@ -51,50 +51,28 @@ AssignmentManager = models.Manager.from_queryset(AssignmentQuerySet)
 
 
 class CourseClassQuerySet(query.QuerySet):
-    # FIXME: Tests for club part!!!
-    def for_calendar(self, user=None):
-        q = (self
-             .select_related('course',
-                             'course__meta_course',
-                             'course__semester')
-             .order_by('date', 'starts_at'))
-        # FIXME: Looks like this logic should be in .for_student method???
-        # Hide summer classes on compsciclub.ru if user not enrolled in
-        if is_club_site():
-            assert user is not None
-            # FIXME: если передан юзер, то отфильтровать для него только те, на которые подписан. А если не передан - то вообще все
-            # XXX: On join enrollment table we get a lot of duplicates.
-            # Clean them with right `.order` and `.distinct()`!
-            summer_classes_enrolled_in = Q(
-                course__is_open=True,
-                course__semester__type=SemesterTypes.SUMMER,
-                course__enrollment__student_id=user.pk,
-                course__enrollment__is_deleted=False)
-            others = (Q(course__is_open=True) &
-                      ~Q(course__semester__type=SemesterTypes.SUMMER))
-            q = q.filter(others)
-        return q
+    def for_calendar(self):
+        return (self
+                .select_related('course', 'course__meta_course',
+                                'course__semester')
+                .order_by('date', 'starts_at'))
 
-    def for_timetable(self, user):
-        return self.for_calendar(user).select_related('venue')
+    def for_timetable(self):
+        return self.for_calendar().select_related('venue')
 
     def in_city(self, city_code):
-        return self.filter(Q(course__city_id=city_code,
-                             course__is_correspondence=False) |
-                           Q(course__is_correspondence=True))
+        return self.in_cities([city_code])
 
     def in_cities(self, city_codes: List[str]):
-        return self.filter(course__city_id__in=city_codes)
+        return self.filter(Q(course__city_id__in=city_codes,
+                             course__is_correspondence=False) |
+                           Q(course__is_correspondence=True))
 
     def in_month(self, year, month):
         date_start, date_end = get_boundaries(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
 
-    def open_only(self):
-        return self.filter(course__is_open=True)
-
     def for_student(self, user):
-        """More strict than in `.for_calendar`. Let DB optimize it later."""
         return self.filter(course__enrollment__student_id=user.pk,
                            course__enrollment__is_deleted=False)
 
@@ -102,8 +80,19 @@ class CourseClassQuerySet(query.QuerySet):
         return self.filter(course__teachers=user)
 
 
+class _CourseClassManager(models.Manager):
+    def get_queryset(self):
+        if is_club_site():
+            return super().get_queryset().filter(course__is_open=True)
+        else:
+            return super().get_queryset()
+
+
+CourseClassManager = _CourseClassManager.from_queryset(CourseClassQuerySet)
+
+
 class _CourseDefaultManager(models.Manager):
-    """On compsciclub.ru always restrict selection by open reading"""
+    """On compsciclub.ru always restrict selection by open readings"""
     def get_queryset(self):
         # TODO: add test
         if is_club_site():
