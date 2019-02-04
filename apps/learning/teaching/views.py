@@ -21,6 +21,7 @@ from courses.models import CourseClass, Course, Assignment
 from courses.settings import SemesterTypes
 from courses.utils import get_terms_for_calendar_month, get_term_index
 from courses.views.calendar import MonthEventsCalendarView
+from courses.views.mixins import CourseURLParamsMixin
 from learning.calendar import get_month_events
 from learning.forms import AssignmentModalCommentForm
 from learning.models import AssignmentComment, StudentAssignment, Enrollment
@@ -93,28 +94,15 @@ class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
         return (CalendarEvent(e) for e in qs)
 
 
-class CourseStudentsView(TeacherOnlyMixin, TemplateView):
+class CourseStudentsView(TeacherOnlyMixin, CourseURLParamsMixin, TemplateView):
     # raise_exception = True
     template_name = "learning/teaching/course_students.html"
-
-    def get(self, request, *args, **kwargs):
-        try:
-            year, _ = self.kwargs['semester_slug'].split("-", 1)
-            _ = int(year)
-        except ValueError:
-            raise Http404
-        return super().get(request, *args, **kwargs)
 
     def handle_no_permission(self, request):
         raise Http404
 
     def get_context_data(self, **kwargs):
-        year, semester_type = self.kwargs['semester_slug'].split("-", 1)
-        co = get_object_or_404(Course.objects
-                               .filter(semester__type=semester_type,
-                                       semester__year=year,
-                                       meta_course__slug=self.kwargs['course_slug'])
-                               .in_city(self.request.city_code))
+        co = get_object_or_404(self.get_course_queryset())
         return {
             "co": co,
             "enrollments": (co.enrollment_set(manager="active")

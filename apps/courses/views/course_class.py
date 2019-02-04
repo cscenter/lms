@@ -1,12 +1,10 @@
 import datetime
 import os
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
-from django.http import HttpResponseRedirect, Http404, \
-    HttpResponseForbidden
-from django.shortcuts import redirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import CreateView, UpdateView, DeleteView
@@ -16,7 +14,7 @@ from core.urls import reverse, reverse_lazy
 from core.views import ProtectedFormMixin
 from courses.forms import CourseClassForm
 from courses.models import CourseClass, CourseClassAttachment
-from courses.utils import get_co_from_query_params
+from courses.views.mixins import CourseURLParamsMixin
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseClassDetailView', 'CourseClassCreateView',
@@ -48,14 +46,12 @@ class CourseClassDetailView(generic.DetailView):
         return context
 
 
-class CourseClassCreateUpdateMixin:
+class CourseClassCreateUpdateMixin(CourseURLParamsMixin):
     def get_course(self):
-        return get_co_from_query_params(self.kwargs, self.request.city_code)
+        return get_object_or_404(self.get_course_queryset())
 
     def get_form(self, **kwargs):
         course = self.get_course()
-        if not course:
-            raise Http404('Course not found')
         if not self.is_form_allowed(self.request.user, course):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         kwargs["course"] = course
@@ -123,12 +119,12 @@ class CourseClassCreateView(TeacherOnlyMixin,
         return super().get_success_url()
 
     def post(self, request, *args, **kwargs):
-        """Teachers can't add new classes if course already completed"""
-        is_curator = self.request.user.is_curator
-        co = self.get_course()
-        if not co or (not is_curator and co.is_completed):
+        """Teacher can't add new class if course already completed"""
+        course = self.get_course()
+        if not self.request.user.is_curator and course.is_completed:
             return HttpResponseForbidden()
-        form = self.get_form(data=request.POST, files=request.FILES, course=co)
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             course=course)
         if form.is_valid():
             return self.form_valid(form)
         return self.form_invalid(form)

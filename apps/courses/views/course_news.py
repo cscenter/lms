@@ -1,8 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.db import transaction, IntegrityError
-from django.http import Http404
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from vanilla import CreateView, UpdateView, DeleteView
 
@@ -10,26 +9,24 @@ from core.exceptions import Redirect
 from core.views import ProtectedFormMixin
 from courses.forms import CourseNewsForm
 from courses.models import Course, CourseNews
-from courses.utils import get_co_from_query_params
+from courses.views.mixins import CourseURLParamsMixin
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseNewsCreateView', 'CourseNewsUpdateView',
            'CourseNewsDeleteView')
 
 
-class CourseNewsCreateView(TeacherOnlyMixin, CreateView):
+class CourseNewsCreateView(TeacherOnlyMixin, CourseURLParamsMixin, CreateView):
     model = CourseNews
     template_name = "courses/simple_crispy_form.html"
     form_class = CourseNewsForm
 
     def get_form(self, **kwargs):
         form_class = self.get_form_class()
-        co = get_co_from_query_params(self.kwargs, self.request.city_code)
-        if not co:
-            raise Http404('Course not found')
-        if not self.is_form_allowed(self.request.user, co):
+        course = get_object_or_404(self.get_course_queryset())
+        if not self.is_form_allowed(self.request.user, course):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
-        kwargs["course"] = co
+        kwargs["course"] = course
         return form_class(**kwargs)
 
     def form_valid(self, form):

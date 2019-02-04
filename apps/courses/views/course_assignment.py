@@ -1,8 +1,8 @@
 import os
 
 from django.contrib.auth.views import redirect_to_login
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect, get_object_or_404
 from vanilla import CreateView, UpdateView, DeleteView
 
 from core.exceptions import Redirect
@@ -10,25 +10,23 @@ from core.urls import reverse
 from core.views import ProtectedFormMixin
 from courses.forms import AssignmentForm
 from courses.models import Assignment, Course, AssignmentAttachment
-from courses.utils import get_co_from_query_params
+from courses.views.mixins import CourseURLParamsMixin
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('AssignmentCreateView', 'AssignmentUpdateView',
            'AssignmentDeleteView', 'AssignmentAttachmentDeleteView')
 
 
-class AssignmentCreateUpdateMixin(TeacherOnlyMixin):
+class AssignmentCreateUpdateMixin(TeacherOnlyMixin, CourseURLParamsMixin):
     model = Assignment
     form_class = AssignmentForm
     template_name = "courses/course_assignment_form.html"
 
     def get_course(self):
-        return get_co_from_query_params(self.kwargs, self.request.city_code)
+        return get_object_or_404(self.get_course_queryset())
 
     def get_form(self, **kwargs):
         course = self.get_course()
-        if not course:
-            raise Http404('Course not found')
         if not self.is_form_allowed(self.request.user, course):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         kwargs["course"] = course
