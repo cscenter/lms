@@ -15,7 +15,8 @@ from users.tests.factories import UserFactory, StudentCenterFactory
 __all__ = ('AreaOfStudyFactory', 'StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentFactory',
            'AssignmentNotificationFactory', 'CourseNewsNotificationFactory',
-           'EventFactory')
+           'EventFactory', 'StudentAssignment', 'Enrollment',
+           'AssignmentComment')
 
 
 class AreaOfStudyFactory(factory.DjangoModelFactory):
@@ -26,6 +27,7 @@ class AreaOfStudyFactory(factory.DjangoModelFactory):
     code = factory.Sequence(lambda n: "p%01d" % n)
 
 
+# FIXME: create enrollment
 class StudentAssignmentFactory(factory.DjangoModelFactory):
     class Meta:
         model = StudentAssignment

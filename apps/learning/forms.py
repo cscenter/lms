@@ -32,14 +32,14 @@ class AssignmentCommentForm(forms.ModelForm):
                         css_class='pull-right'),
                     css_class="form-inline"),
                 css_class="form-group"))
-        super(AssignmentCommentForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         model = AssignmentComment
         fields = ['text', 'attached_file']
 
     def clean(self):
-        cleaned_data = super(AssignmentCommentForm, self).clean()
+        cleaned_data = super().clean()
         if (not cleaned_data.get("text")
                 and not cleaned_data.get("attached_file")):
             raise forms.ValidationError(

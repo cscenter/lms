@@ -19,7 +19,8 @@ from learning.calendar import get_month_events
 from learning.enrollment import course_failed_by_student
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
-from learning.views import AssignmentProgressBaseView
+from learning.permissions import course_access_role, CourseRole
+from learning.views import AssignmentSubmissionBaseView
 from users.mixins import StudentOnlyMixin
 from users.utils import get_student_city_code
 
@@ -96,13 +97,11 @@ class StudentAssignmentListView(StudentOnlyMixin, ListView):
         return context
 
 
-class StudentAssignmentStudentDetailView(AssignmentProgressBaseView,
-                                         CreateView):
-    user_type = 'student'
-    template_name = "learning/assignment_submission_detail.html"
+class StudentAssignmentDetailView(AssignmentSubmissionBaseView):
+    template_name = "learning/study/student_assignment_detail.html"
 
-    def has_permissions_coarse(self, user):
-        # Expelled students can't send new submissions or comments
+    def test_func(self, user):
+        # Expelled student can't send new submissions or comments
         if self.request.method == "POST":
             is_student = user.is_active_student
         else:
@@ -110,26 +109,37 @@ class StudentAssignmentStudentDetailView(AssignmentProgressBaseView,
         return (is_student or user.is_curator or user.is_graduate or
                 user.is_teacher)
 
-    def has_permissions_precise(self, user):
-        sa = self.student_assignment
-        # Redirect actual course teacher to teaching/ section
-        if user in sa.assignment.course.teachers.all():
+    def has_access(self, user, student_assignment):
+        sa = student_assignment
+        course = student_assignment.assignment.course
+        role = course_access_role(course=course, user=user)
+        if role == CourseRole.CURATOR:
+            return True
+        elif role == CourseRole.TEACHER and user in course.teachers.all():
+            # Redirects actual course teacher to the teaching/ section
             raise Redirect(to=sa.get_teacher_url())
-        # If student failed course, deny access when he has no submissions
-        # or positive grade
-        if sa.student == user:
-            co = sa.assignment.course
-            if course_failed_by_student(co, self.request.user):
-                if not sa.has_comments(user) and not sa.score:
-                    return False
-        return sa.student == user or user.is_curator
+        elif sa.student == user:
+            if role == CourseRole.STUDENT_RESTRICT:
+                # If student failed the course or was expelled at all, deny
+                # access only when he has no submissions or positive
+                # grade on assignment
+                # XXX: Take into account only student comments since only
+                # they could be treated as `submission`.
+                return sa.has_comments(user) or sa.score
+            else:
+                return role == CourseRole.STUDENT_REGULAR
+        return False
 
     def get_context_data(self, form, **kwargs):
+        sa = self.student_assignment
+        user = self.request.user
         context = super().get_context_data(form, **kwargs)
         # Update `text` label if student has no submissions yet
-        sa = self.student_assignment
         if sa.assignment.is_online and not sa.has_comments(self.request.user):
             context['form'].fields.get('text').label = _("Add solution")
+        # Format datetime for online courses in student timezone
+        if sa.assignment.course.is_correspondence:
+            context['timezone'] = settings.TIME_ZONES[user.city_id]
         return context
 
     def get_success_url(self):

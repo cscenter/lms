@@ -5,7 +5,7 @@ import django_rq
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Case, When, Value
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.timezone import now
@@ -16,8 +16,10 @@ from django_ical.views import ICalFeed
 from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
 
+import courses.utils
 from core.settings.base import TIME_ZONES
 from core.timezone import Timezone, CityCode
+from core.utils import is_club_site
 from courses.calendar import CalendarEvent
 from compsciclub_ru import tasks
 from learning.gallery.models import Image
@@ -215,3 +217,51 @@ class ClubClassesFeed(ICalFeed):
 
     def item_location(self, item):
         return item.venue.address
+
+
+class CoursesListView(generic.ListView):
+    model = Semester
+    template_name = "compsciclub_ru/course_offerings.html"
+
+    def get_queryset(self):
+        cos_qs = (Course.objects
+                  .select_related('meta_course')
+                  .prefetch_related('teachers')
+                  .order_by('meta_course__name'))
+        if is_club_site():
+            cos_qs = cos_qs.in_city(self.request.city_code)
+        else:
+            cos_qs = cos_qs.in_center_branches()
+        prefetch_cos = Prefetch('course_set',
+                                queryset=cos_qs,
+                                to_attr='courseofferings')
+        q = (Semester.objects.prefetch_related(prefetch_cos))
+        # Courses in CS Center started at 2011 year
+        if not is_club_site():
+            q = (q.filter(year__gte=2011)
+                .exclude(type=Case(
+                    When(year=2011, then=Value(SemesterTypes.SPRING)),
+                    default=Value(""))))
+        return q
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        semester_list = [s for s in context["semester_list"]
+                         if s.type != SemesterTypes.SUMMER]
+        if not semester_list:
+            context["semester_list"] = semester_list
+            return context
+        # Check if we only have the fall semester for the ongoing year.
+        current = semester_list[0]
+        if current.type == SemesterTypes.AUTUMN:
+            semester = Semester(type=SemesterTypes.SPRING,
+                                year=current.year + 1)
+            semester.courseofferings = []
+            semester_list.insert(0, semester)
+        # Hide empty pairs
+        context["semester_list"] = [
+            (a, s) for s, a in courses.utils.grouper(semester_list, 2) if \
+            (a and a.courseofferings) or (s and s.courseofferings)
+            ]
+
+        return context

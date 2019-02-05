@@ -23,3 +23,7 @@ class SemesterTypes(DjangoChoices):
 class ClassTypes(DjangoChoices):
     LECTURE = C('lecture', _("Lecture"))
     SEMINAR = C('seminar', _("Seminar"))
+
+
+# TODO: Make a redirect for old links and rewrite download view without this constant?
+ASSIGNMENT_TASK_ATTACHMENT = 0

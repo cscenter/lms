@@ -205,10 +205,12 @@ class StudentAssignment(TimeStampedModel):
         return self.__class__.assignment.field.name
 
     def get_teacher_url(self):
-        return reverse('teaching:a_s_detail', kwargs={"pk": self.pk})
+        return reverse('teaching:student_assignment_detail',
+                       kwargs={"pk": self.pk})
 
     def get_student_url(self):
-        return reverse('study:a_s_detail', kwargs={"pk": self.pk})
+        return reverse('study:student_assignment_detail',
+                       kwargs={"pk": self.pk})
 
     def has_unread(self):
         from notifications.middleware import get_unread_notifications_cache
@@ -318,13 +320,18 @@ class AssignmentComment(TimeStampedModel):
             tz = self.get_city_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
+    def get_update_url(self):
+        return reverse('teaching:student_assignment_comment_edit', kwargs={
+            "pk": self.student_assignment_id,
+            "comment_pk": self.pk
+        })
+
     @property
     def attached_file_name(self):
         return os.path.basename(self.attached_file.name)
 
     def attached_file_url(self):
-        return reverse("study:assignment_comment_attachments_download", kwargs={
-            "student_assignment_id": self.student_assignment_id,
+        return reverse("study:assignment_attachments_download", kwargs={
             "sid": hashids.encode(learn_conf.ASSIGNMENT_COMMENT_ATTACHMENT,
                                   self.pk),
             "file_name": self.attached_file_name

@@ -474,7 +474,7 @@ class OpenNskView(generic.TemplateView):
 
 class CourseOfferingsView(FilterMixin, TemplateView):
     filterset_class = CoursesFilter
-    template_name = "learning/courses/offerings.html"
+    template_name = "compscicenter_ru/course_offerings.html"
 
     def get_queryset(self):
         return (Course.objects

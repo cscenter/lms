@@ -204,67 +204,6 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         student.save()
         self.assertEqual(200, self.client.get(url).status_code)
 
-    def test_failed_course(self):
-        """
-        Make sure student has access only to assignments which he passed if
-        he completed course with unsatisfactory grade
-        """
-        teacher = TeacherCenterFactory()
-        student = StudentFactory(city_id='spb')
-        past_year = datetime.datetime.now().year - 3
-        past_semester = SemesterFactory.create(year=past_year)
-        co = CourseFactory(city_id='spb', teachers=[teacher],
-                           semester=past_semester)
-        enrollment = EnrollmentFactory(student=student, course=co,
-                                       grade=GradeTypes.UNSATISFACTORY)
-        a = AssignmentFactory(course=co)
-        s_a = StudentAssignment.objects.get(student=student, assignment=a)
-        assert s_a.score is None
-        self.doLogin(student)
-        url = s_a.get_student_url()
-        response = self.client.get(url)
-        self.assertLoginRedirect(url)
-        # assert response.status_code == 403
-        # Student discussed the assignment, so has access
-        ac = AssignmentCommentFactory.create(student_assignment=s_a,
-                                             author=student)
-        response = self.client.get(url)
-        co.refresh_from_db()
-        assert course_failed_by_student(co, student)
-        # Course completed, but not failed, user can see all assignments
-        ac.delete()
-        enrollment.grade = GradeTypes.GOOD
-        enrollment.save()
-        response = self.client.get(url)
-        assert not course_failed_by_student(co, student)
-        assert response.status_code == 200
-        # The same behavior should be for expelled student
-        student.status = StudentStatuses.EXPELLED
-        student.save()
-        self.doLogin(student)
-        response = self.client.get(url)
-        assert response.status_code == 200
-        enrollment.grade = GradeTypes.UNSATISFACTORY
-        enrollment.save()
-        response = self.client.get(url)
-        self.assertLoginRedirect(url)
-        ac = AssignmentCommentFactory.create(student_assignment=s_a,
-                                             author=student)
-        response = self.client.get(url)
-        assert response.status_code == 200
-        # Ok, next case - completed course failed, no comments but has grade
-        ac.delete()
-        s_a.score = 1
-        s_a.save()
-        response = self.client.get(url)
-        assert response.status_code == 200
-        # The same if student not expelled
-        student.status = StudentStatuses.WILL_GRADUATE
-        student.save()
-        self.doLogin(student)
-        response = self.client.get(url)
-        assert response.status_code == 200
-
     def test_assignment_contents(self):
         student = StudentCenterFactory(city_id='spb')
         semester = SemesterFactory.create_current()
@@ -433,13 +372,13 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         url1 = a_s1.get_teacher_url()
         url2 = a_s2.get_teacher_url()
         self.doLogin(teacher)
-        self.assertEqual(None, self.client.get(url1).context['next_a_s_pk'])
-        self.assertEqual(None, self.client.get(url2).context['next_a_s_pk'])
+        assert self.client.get(url1).context['next_student_assignment'] is None
+        assert self.client.get(url2).context['next_student_assignment'] is None
         [AssignmentCommentFactory.create(author=a_s.student,
                                          student_assignment=a_s)
          for a_s in [a_s1, a_s2]]
-        self.assertEqual(a_s2.pk, self.client.get(url1).context['next_a_s_pk'])
-        self.assertEqual(a_s1.pk, self.client.get(url2).context['next_a_s_pk'])
+        assert self.client.get(url1).context['next_student_assignment'] == a_s2
+        assert self.client.get(url2).context['next_student_assignment'] == a_s1
 
 
 # Ok, py.test starts here

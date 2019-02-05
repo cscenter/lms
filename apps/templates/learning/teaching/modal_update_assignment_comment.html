@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
-<form action="{% url 'teaching:assignment_submission_comment_edit' comment.student_assignment_id comment.pk %}" method="POST">
+<form action="{{ comment.get_update_url }}" method="POST">
 <div class="modal-body">
     {% crispy form form.helper %}
 </div>

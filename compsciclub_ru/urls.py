@@ -8,12 +8,12 @@ from loginas import urls as loginas_urls
 
 from compsciclub_ru.views import CalendarClubScheduleView, IndexView, \
     TeachersView, \
-    TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed
+    TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed, \
+    CoursesListView
 from core.views import MarkdownHowToHelpView, robots
 from core.views import MarkdownRenderView
 from htmlpages import views
 from international_schools.views import InternationalSchoolsListView
-from learning.views import CoursesListView
 from users.urls import auth_urls
 
 admin.autodiscover()

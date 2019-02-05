@@ -5,8 +5,8 @@ from django.views.generic.base import RedirectView
 from learning.gradebook import views as gv
 from learning.teaching.views import TimetableView as TeacherTimetable, \
     AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView, \
-    CalendarFullView, CalendarPersonalView, CourseListView
-from learning.views import StudentAssignmentTeacherDetailView
+    CalendarFullView, CalendarPersonalView, CourseListView, \
+    StudentAssignmentDetailView
 from learning.api.views import CourseNewsUnreadNotificationsView
 
 COURSE_URI = r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/'
@@ -25,9 +25,8 @@ urlpatterns = [
     path('assignments/', include([
         path('', AssignmentListView.as_view(), name='assignment_list'),
         path('<int:pk>/', AssignmentDetailView.as_view(), name='assignment_detail'),
-        path('submissions/<int:pk>/', StudentAssignmentTeacherDetailView.as_view(), name='a_s_detail'),
-        # FIXME: move this path to comment model as  `get_comment_update_url`
-        path('submissions/<int:submission_pk>/comment/<int:comment_pk>/update/', AssignmentCommentUpdateView.as_view(), name='assignment_submission_comment_edit'),
+        path('submissions/<int:pk>/', StudentAssignmentDetailView.as_view(), name='student_assignment_detail'),
+        path('submissions/<int:pk>/comment/<int:comment_pk>/update/', AssignmentCommentUpdateView.as_view(), name='student_assignment_comment_edit'),
     ])),
     path('marks/', include([
         path('', gv.GradeBookTeacherDispatchView.as_view(), name='gradebook_dispatch'),
