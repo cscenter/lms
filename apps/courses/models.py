@@ -22,8 +22,8 @@ from core.urls import reverse, city_aware_reverse
 from core.utils import hashids
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
-from learning.settings import GradingSystems, ENROLLMENT_DURATION, \
-    ASSIGNMENT_TASK_ATTACHMENT
+from learning.settings import GradingSystems, ENROLLMENT_DURATION
+from courses.settings import ASSIGNMENT_TASK_ATTACHMENT
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
 from .micawber_providers import get_oembed_html
@@ -634,11 +634,8 @@ class CourseNews(TimeStampedModel):
         })
 
     def get_stats_url(self):
-        return reverse(
-            'teaching:course_news_unread',
-            kwargs={
-                "news_pk": self.pk
-            })
+        return reverse('teaching:course_news_unread',
+                       kwargs={"news_pk": self.pk})
 
     def get_delete_url(self):
         return city_aware_reverse('course_news_delete', kwargs={
@@ -938,8 +935,7 @@ class Assignment(TimeStampedModel):
         return timezone.localtime(self.created, timezone=tz)
 
     def get_teacher_url(self):
-        return reverse('teaching:assignment_detail',
-                       kwargs={"pk": self.pk})
+        return reverse('teaching:assignment_detail', kwargs={"pk": self.pk})
 
     def get_update_url(self):
         return city_aware_reverse('assignment_update', kwargs={

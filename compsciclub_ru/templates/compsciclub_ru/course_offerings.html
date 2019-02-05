@@ -7,7 +7,7 @@
   {% if semester_list %}
   <div class="row">
     <div class="col-xs-12">
-        {% if request.site.domain == "compsciclub.ru" %}<h1 class="page-header">{% trans "Courses" %}</h1>{% endif %}
+        <h1 class="page-header">{% trans "Courses" %}</h1>
     {% for autumn_spring in semester_list %}
       {% if forloop.counter == 2 %}
       {% endif %}
@@ -24,8 +24,7 @@
             {% for course in semester.courseofferings %}
               <li>
                 <a href="{{ course.get_absolute_url }}">{{ course.meta_course.name }}</a>
-                {% if request.site.domain == "compscicenter.ru" and course.is_open and course.teachers.all|length == 1 %}<span class="text-nowrap">{% endif %}({% for teacher in course.teachers.all %}{% if request.site.domain == "compscicenter.ru" and course.is_open and course.teachers.all|length != 1 and forloop.last %}<span class="text-nowrap">{% endif %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;color: #333;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}){% if request.site.domain == "compscicenter.ru" and course.is_open %}&nbsp;<sup class="text-nowrap">Курс CS клуба</sup>{% endif %}
-                  {% if request.site.domain == "compscicenter.ru" and course.is_open and course.teachers.all|length == 1 %}</span>{% endif %}
+                ({% for teacher in course.teachers.all %}<a href="{{ teacher.teacher_profile_url }}" style="white-space:nowrap;color: #333;">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %})
               </li>
             {% endfor %}
             </ul>

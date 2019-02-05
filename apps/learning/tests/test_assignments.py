@@ -563,6 +563,7 @@ def test_first_comment_after_deadline(client):
                                    course__city_id='spb')
     sa = StudentAssignmentFactory(assignment=assignment, student__city_id='spb')
     student = sa.student
+    EnrollmentFactory(student=student, course=assignment.course)
     comment = AssignmentCommentFactory.create(student_assignment=sa,
                                               author=student,
                                               created=dt)

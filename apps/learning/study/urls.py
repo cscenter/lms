@@ -1,9 +1,8 @@
-from django.conf.urls import url
 from django.urls import path, include
 from django.views.generic.base import RedirectView
 
 from learning.study.views import TimetableView, \
-    StudentAssignmentStudentDetailView, StudentAssignmentListView, \
+    StudentAssignmentDetailView, StudentAssignmentListView, \
     CalendarFullView, CalendarPersonalView, CourseListView
 from learning.views import AssignmentAttachmentDownloadView
 
@@ -14,12 +13,11 @@ urlpatterns = [
     path('courses/', CourseListView.as_view(), name='course_list'),
     path('assignments/', include([
         path('', StudentAssignmentListView.as_view(), name='assignment_list'),
-        path('<int:pk>/', StudentAssignmentStudentDetailView.as_view(), name='a_s_detail'),
-        url(r'^submissions/(?P<student_assignment_id>\d+)/attachments/(?P<sid>[-\w]+)/(?P<file_name>.+)$', AssignmentAttachmentDownloadView.as_view(), name='assignment_comment_attachments_download'),
+        path('<int:pk>/', StudentAssignmentDetailView.as_view(), name='student_assignment_detail'),
+        # FIXME: в slug надо закодировать и attachments для заданий и для посылок :< для учителей можно и раздельно. В sid - comment или assignment?
+        # FIXME: replace `slug:sid` with Hashids alphabet
+        path('attachments/<slug:sid>/<str:file_name>', AssignmentAttachmentDownloadView.as_view(), name='assignment_attachments_download'),
     ])),
-    url(r'^attachments/(?P<sid>[-\w]+)/(?P<file_name>.+)$',
-        AssignmentAttachmentDownloadView.as_view(),
-        name='assignment_attachments_download'),
     path('timetable/', TimetableView.as_view(), name='timetable'),
     path('calendar/', CalendarPersonalView.as_view(), name='calendar'),
     path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),

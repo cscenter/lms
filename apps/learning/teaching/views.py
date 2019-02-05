@@ -4,8 +4,8 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.http import Http404, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.http import Http404, JsonResponse, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
@@ -23,164 +23,16 @@ from courses.utils import get_terms_for_calendar_month, get_term_index
 from courses.views.calendar import MonthEventsCalendarView
 from courses.views.mixins import CourseURLParamsMixin
 from learning.calendar import get_month_events
-from learning.forms import AssignmentModalCommentForm
+from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
 from learning.models import AssignmentComment, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole
+from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import logger
 from users.mixins import TeacherOnlyMixin
 from users.utils import get_teacher_city_code
 
 
-class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
-    """
-    Shows all non-course events and classes filtered by the cities where
-    authorized teacher has taught.
-    """
-
-    def get_default_timezone(self) -> Union[Timezone, CityCode]:
-        return get_teacher_city_code(self.request)
-
-    def get_teacher_cities(self, year, month):
-        default_city = get_teacher_city_code(self.request)
-        if is_club_site():
-            return [default_city]
-        # Collect all the cities where authorized teacher taught.
-        terms_in_month = get_terms_for_calendar_month(year, month)
-        term_indexes = [get_term_index(*term) for term in terms_in_month]
-        cities = list(Course.objects
-                      .filter(semester__index__in=term_indexes)
-                      .for_teacher(self.request.user)
-                      .values_list("city_id", flat=True)
-                      .order_by('city_id')
-                      .distinct())
-        if not cities:
-            cities = [default_city]
-        return cities
-
-    def get_events(self, year, month, **kwargs):
-        cities = self.get_teacher_cities(year, month)
-        return get_month_events(year, month, cities)
-
-
-class CalendarPersonalView(CalendarFullView):
-    """
-    Shows all non-course events and classes for courses in which authenticated
-    teacher participated.
-    """
-    calendar_type = 'teacher'
-    template_name = "learning/calendar.html"
-
-    def get_events(self, year, month, **kwargs):
-        cities = self.get_teacher_cities(year, month)
-        return get_month_events(year, month, cities,
-                                for_teacher=self.request.user)
-
-
-class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
-    """
-    Shows classes for courses where authorized teacher participate in.
-    """
-    calendar_type = "teacher"
-    template_name = "learning/teaching/timetable.html"
-
-    def get_default_timezone(self):
-        return get_teacher_city_code(self.request)
-
-    def get_events(self, year, month, **kwargs):
-        qs = (CourseClass.objects
-              .for_timetable()
-              .in_month(year, month)
-              .filter(course__teachers=self.request.user))
-        return (CalendarEvent(e) for e in qs)
-
-
-class CourseStudentsView(TeacherOnlyMixin, CourseURLParamsMixin, TemplateView):
-    # raise_exception = True
-    template_name = "learning/teaching/course_students.html"
-
-    def handle_no_permission(self, request):
-        raise Http404
-
-    def get_context_data(self, **kwargs):
-        co = get_object_or_404(self.get_course_queryset())
-        return {
-            "co": co,
-            "enrollments": (co.enrollment_set(manager="active")
-                            .select_related("student"))
-        }
-
-
-# TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
-# FIXME: replace with vanilla view
-class AssignmentCommentUpdateView(generic.UpdateView):
-    model = AssignmentComment
-    pk_url_kwarg = 'comment_pk'
-    context_object_name = "comment"
-    template_name = "learning/teaching/modal_update_assignment_comment.html"
-    form_class = AssignmentModalCommentForm
-
-    def form_valid(self, form):
-        self.object = form.save()
-        html = render_markdown(self.object.text)
-        return JsonResponse({"success": 1,
-                             "id": self.object.pk,
-                             "html": html})
-
-    def form_invalid(self, form):
-        return JsonResponse({"success": 0, "errors": form.errors})
-
-    def check_permissions(self, comment):
-        # Allow view/edit own comments to teachers and all to curators
-        if not self.request.user.is_curator:
-            is_teacher = self.request.user.is_teacher
-            if comment.author_id != self.request.user.pk or not is_teacher:
-                raise PermissionDenied
-            # Check comment not in stale state for edit
-            if comment.is_stale_for_edit():
-                raise PermissionDenied
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.check_permissions(self.object)
-        return super(BaseUpdateView, self).get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        self.check_permissions(self.object)
-        return super(BaseUpdateView, self).post(request, *args, **kwargs)
-
-
-class AssignmentDetailView(TeacherOnlyMixin, generic.DetailView):
-    model = Assignment
-    template_name = "learning/teaching/assignment_detail.html"
-    context_object_name = 'assignment'
-
-    def get_queryset(self):
-        return (Assignment.objects
-                .select_related('course',
-                                'course__meta_course',
-                                'course__semester')
-                .prefetch_related('assignmentattachment_set'))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        role = course_access_role(course=self.object.course,
-                                  user=self.request.user)
-        if role not in [CourseRole.CURATOR, CourseRole.TEACHER]:
-            raise PermissionDenied
-        context['a_s_list'] = (
-            StudentAssignment.objects
-            .filter(assignment__pk=self.object.pk)
-            .select_related('assignment',
-                            'assignment__course',
-                            'assignment__course__meta_course',
-                            'assignment__course__semester',
-                            'student')
-            .prefetch_related('student__groups'))
-        return context
-
-
-# Note: Looks like shit
+# Note: Wow, looks like a shit
 class AssignmentListView(TeacherOnlyMixin, TemplateView):
     model = StudentAssignment
     context_object_name = 'student_assignment_list'
@@ -405,6 +257,69 @@ class AssignmentListView(TeacherOnlyMixin, TemplateView):
         raise Redirect(to=reverse("teaching:course_list"))
 
 
+class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
+    """
+    Shows classes for courses where authorized teacher participate in.
+    """
+    calendar_type = "teacher"
+    template_name = "learning/teaching/timetable.html"
+
+    def get_default_timezone(self):
+        return get_teacher_city_code(self.request)
+
+    def get_events(self, year, month, **kwargs):
+        qs = (CourseClass.objects
+              .for_timetable()
+              .in_month(year, month)
+              .filter(course__teachers=self.request.user))
+        return (CalendarEvent(e) for e in qs)
+
+
+class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
+    """
+    Shows all non-course events and classes filtered by the cities where
+    authorized teacher has taught.
+    """
+
+    def get_default_timezone(self) -> Union[Timezone, CityCode]:
+        return get_teacher_city_code(self.request)
+
+    def get_teacher_cities(self, year, month):
+        default_city = get_teacher_city_code(self.request)
+        if is_club_site():
+            return [default_city]
+        # Collect all the cities where authorized teacher taught.
+        terms_in_month = get_terms_for_calendar_month(year, month)
+        term_indexes = [get_term_index(*term) for term in terms_in_month]
+        cities = list(Course.objects
+                      .filter(semester__index__in=term_indexes)
+                      .for_teacher(self.request.user)
+                      .values_list("city_id", flat=True)
+                      .order_by('city_id')
+                      .distinct())
+        if not cities:
+            cities = [default_city]
+        return cities
+
+    def get_events(self, year, month, **kwargs):
+        cities = self.get_teacher_cities(year, month)
+        return get_month_events(year, month, cities)
+
+
+class CalendarPersonalView(CalendarFullView):
+    """
+    Shows all non-course events and classes for courses in which authenticated
+    teacher participated.
+    """
+    calendar_type = 'teacher'
+    template_name = "learning/calendar.html"
+
+    def get_events(self, year, month, **kwargs):
+        cities = self.get_teacher_cities(year, month)
+        return get_month_events(year, month, cities,
+                                for_teacher=self.request.user)
+
+
 class CourseListView(TeacherOnlyMixin, generic.ListView):
     model = Course
     context_object_name = 'course_list'
@@ -416,3 +331,160 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .select_related('meta_course', 'semester')
                 .prefetch_related('teachers')
                 .order_by('-semester__index', 'meta_course__name'))
+
+
+class CourseStudentsView(TeacherOnlyMixin, CourseURLParamsMixin, TemplateView):
+    # raise_exception = True
+    template_name = "learning/teaching/course_students.html"
+
+    def handle_no_permission(self, request):
+        raise Http404
+
+    def get_context_data(self, **kwargs):
+        co = get_object_or_404(self.get_course_queryset())
+        return {
+            "co": co,
+            "enrollments": (co.enrollment_set(manager="active")
+                            .select_related("student"))
+        }
+
+
+# TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
+# FIXME: replace with vanilla view
+class AssignmentCommentUpdateView(generic.UpdateView):
+    model = AssignmentComment
+    pk_url_kwarg = 'comment_pk'
+    context_object_name = "comment"
+    template_name = "learning/teaching/modal_update_assignment_comment.html"
+    form_class = AssignmentModalCommentForm
+
+    def form_valid(self, form):
+        self.object = form.save()
+        html = render_markdown(self.object.text)
+        return JsonResponse({"success": 1,
+                             "id": self.object.pk,
+                             "html": html})
+
+    def form_invalid(self, form):
+        return JsonResponse({"success": 0, "errors": form.errors})
+
+    def check_permissions(self, comment):
+        # Allow view/edit own comments to teachers and all to curators
+        if not self.request.user.is_curator:
+            is_teacher = self.request.user.is_teacher
+            if comment.author_id != self.request.user.pk or not is_teacher:
+                raise PermissionDenied
+            # Check comment not in stale state for edit
+            if comment.is_stale_for_edit():
+                raise PermissionDenied
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.check_permissions(self.object)
+        return super(BaseUpdateView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        self.check_permissions(self.object)
+        return super(BaseUpdateView, self).post(request, *args, **kwargs)
+
+
+class AssignmentDetailView(TeacherOnlyMixin, generic.DetailView):
+    model = Assignment
+    template_name = "learning/teaching/assignment_detail.html"
+    context_object_name = 'assignment'
+
+    def get_queryset(self):
+        return (Assignment.objects
+                .select_related('course',
+                                'course__meta_course',
+                                'course__semester')
+                .prefetch_related('assignmentattachment_set'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        role = course_access_role(course=self.object.course,
+                                  user=self.request.user)
+        if role not in [CourseRole.CURATOR, CourseRole.TEACHER]:
+            raise PermissionDenied
+        context['a_s_list'] = (
+            StudentAssignment.objects
+            .filter(assignment__pk=self.object.pk)
+            .select_related('assignment',
+                            'assignment__course',
+                            'assignment__course__meta_course',
+                            'assignment__course__semester',
+                            'student')
+            .prefetch_related('student__groups'))
+        return context
+
+
+class StudentAssignmentDetailView(TeacherOnlyMixin,
+                                  AssignmentSubmissionBaseView):
+    template_name = "learning/teaching/student_assignment_detail.html"
+
+    def has_access(self, user, student_assignment):
+        role = course_access_role(course=student_assignment.assignment.course,
+                                  user=user)
+        return role in (CourseRole.TEACHER, CourseRole.CURATOR)
+
+    def get_context_data(self, form, **kwargs):
+        context = super().get_context_data(form, **kwargs)
+        user = self.request.user
+        a_s = self.student_assignment
+        course = a_s.assignment.course
+        # Get next unchecked assignment
+        # FIXME: next student assignment mb?
+        base = (StudentAssignment.objects
+                .filter(score__isnull=True,
+                        first_student_comment_at__isnull=False,
+                        assignment__course=course,
+                        assignment__course__teachers=user)
+                .order_by('assignment__deadline_at', 'pk')
+                .only('pk'))
+        next_student_assignment = (base.filter(pk__gt=a_s.pk).first() or
+                                   base.filter(pk__lt=a_s.pk).first())
+        context['next_student_assignment'] = next_student_assignment
+        context['is_actual_teacher'] = user in course.teachers.all()
+        context['score_form'] = AssignmentScoreForm(
+            initial={'score': a_s.score},
+            maximum_score=a_s.assignment.maximum_score)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        # TODO: separated update view
+        if 'grading_form' in request.POST:
+            a_s = self.student_assignment
+            form = AssignmentScoreForm(request.POST,
+                                       maximum_score=a_s.assignment.maximum_score)
+
+            # Too hard to use ProtectedFormMixin here, let's just inline it's
+            # logic. A little drawback is that teachers still can leave
+            # comments under other's teachers assignments, but can not grade,
+            # so it's acceptable, IMO.
+            teachers = a_s.assignment.course.teachers.all()
+            if request.user not in teachers:
+                raise PermissionDenied
+
+            if form.is_valid():
+                a_s.score = form.cleaned_data['score']
+                a_s.save()
+                if a_s.score is None:
+                    messages.info(self.request,
+                                  _("Score was deleted"),
+                                  extra_tags='timeout')
+                else:
+                    messages.success(self.request,
+                                     _("Score successfully saved"),
+                                     extra_tags='timeout')
+                return redirect(a_s.get_teacher_url())
+            else:
+                # not sure if we can do anything more meaningful here.
+                # it shouldn't happen, after all.
+                return HttpResponseBadRequest(_("Grading form is invalid") +
+                                              "{}".format(form.errors))
+        else:
+            return super().post(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return self.student_assignment.get_teacher_url()

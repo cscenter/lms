@@ -1,14 +1,4 @@
 from braces.views import UserPassesTestMixin
-from django.contrib.auth.views import redirect_to_login
-
-
-class ParticipantOnlyMixin(UserPassesTestMixin):
-    """Used on assignment detail page"""
-    raise_exception = False
-
-    def test_func(self, user):
-        return (user.is_teacher or user.is_curator or user.is_graduate or
-                user.is_student)
 
 
 class TeacherOnlyMixin(UserPassesTestMixin):

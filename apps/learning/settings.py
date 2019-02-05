@@ -5,9 +5,6 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
 
-
-# Assignment types constants
-ASSIGNMENT_TASK_ATTACHMENT = 0
 ASSIGNMENT_COMMENT_ATTACHMENT = 1
 
 # After semester starts, in days

@@ -37,17 +37,11 @@
   <div class="row">
     <div class="col-xs-12 h2-and-buttons">
       <h2>
-        {% if user_type == 'student' %}
-        <a href="{% url 'study:assignment_list' %}"><span class="fa fa-angle-left"></span></a>
-        {{ a_s.assignment.title }} <br>
-            <a class="small" href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>
-        {% else %}
         <a href="{{ a_s.assignment.get_teacher_url }}"><span class="fa fa-angle-left"></span></a>
         {{ a_s.student.get_short_name }} <br>
         <small>{{ a_s.assignment.title }} (<a href="{{ a_s.assignment.course.get_absolute_url }}">{{ a_s.assignment.course }}</a>)</small>
-        {% endif %}
       </h2>
-      {% if user.is_curator or user_type == 'teacher' and is_actual_teacher %}
+      {% if user.is_curator or is_actual_teacher %}
       <div class="btn-toolbar">
         <a href="{{ a_s.assignment.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
       </div>
@@ -87,7 +81,7 @@
         <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
           <div class="csc-well assignment-comment" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
             {% if is_actual_teacher and comment.author_id == user.pk and not comment.is_stale_for_edit or user.is_curator %}
-                <a href="{% url "teaching:assignment_submission_comment_edit" comment.student_assignment_id comment.pk %}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
+                <a href="{{ comment.get_update_url }}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
             {% endif %}
             <h5 class="assignment">{{ comment.author }}</h5>
             <div class="ubertext">
@@ -118,14 +112,14 @@
 
         <div class="col-xs-3">
             <div class="-submission" id="o-sidebar">
-                {% if user_type == 'teacher' and is_actual_teacher and next_a_s_pk %}
-                  <a href="{% url 'teaching:a_s_detail' next_a_s_pk %}" class="btn btn-default">
+                {% if is_actual_teacher and next_student_assignment %}
+                  <a href="{% url 'teaching:student_assignment_detail' next_student_assignment.pk %}" class="btn btn-default">
                     {% trans "Next unchecked[assignment]" %} <i class="fa fa-angle-right"></i>
                   </a>
                 {% endif %}
 
                 <h5 class="assignment">{% trans "Grade" %}</h5>
-                {% if user_type == 'teacher' and is_actual_teacher %}
+                {% if is_actual_teacher %}
                 {% crispy score_form %}
                 {% else %}
                 <span class="nowrap badge assignment-status {{ a_s.state.css_class }}">{{ a_s.state_display }}</span>
