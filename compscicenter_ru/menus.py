@@ -32,18 +32,30 @@ public_menu = [
             r"^/courses/.*/assignments/add$",
             r"^/courses/.*/assignments/\d+/edit$"
         ]),
-    MenuItem(pgettext_lazy("menu", "Онлайн"), '/online/', weight=30, children=[
-        MenuItem(pgettext_lazy("menu", "Онлайн-курсы"), '/online/', weight=10),
-        MenuItem(pgettext_lazy("menu", "Онлайн-программы"), 'https://code.stepik.org/', weight=20, is_external=True),
-        MenuItem(pgettext_lazy("menu", "Видео"), '/videos/', weight=30),
-    ]),
-    MenuItem(pgettext_lazy("menu", "Лекторий"), 'https://open.compscicenter.ru/', weight=40, is_external=True),
-    MenuItem(pgettext_lazy("menu", "Поступление"), '/enrollment/', weight=50, children=[
-        MenuItem(pgettext_lazy("menu", "Поступающим"), '/enrollment/', weight=10),
-        MenuItem(pgettext_lazy("menu", "Подать заявку"), '/application/closed/', weight=20),
-        MenuItem(pgettext_lazy("menu", "Программа для поступления"), '/enrollment/program/', weight=30),
-        MenuItem(pgettext_lazy("menu", "Вопросы и ответы"), '/faq/', weight=40),
-    ]),
+    MenuItem(
+        pgettext_lazy("menu", "Онлайн"),
+        '/online/',
+        weight=30,
+        children=[
+            MenuItem(pgettext_lazy("menu", "Онлайн-курсы"), '/online/', weight=10),
+            MenuItem(pgettext_lazy("menu", "Онлайн-программы"), 'https://code.stepik.org/', weight=20, is_external=True),
+            MenuItem(pgettext_lazy("menu", "Видео"), '/videos/', weight=30),
+        ]),
+    MenuItem(
+        pgettext_lazy("menu", "Лекторий"),
+        'https://open.compscicenter.ru/',
+        weight=40,
+        is_external=True),
+    MenuItem(
+        pgettext_lazy("menu", "Поступление"),
+        '/enrollment/',
+        weight=50,
+        children=[
+            MenuItem(pgettext_lazy("menu", "Поступающим"), '/enrollment/', weight=10),
+            MenuItem(pgettext_lazy("menu", "Подать заявку"), '/application/closed/', weight=20),
+            MenuItem(pgettext_lazy("menu", "Программа для поступления"), '/enrollment/program/', weight=30),
+            MenuItem(pgettext_lazy("menu", "Вопросы и ответы"), '/faq/', weight=40),
+        ]),
 ]
 
 common_menu = [menu_item for menu_item in public_menu if menu_item.weight < 50]

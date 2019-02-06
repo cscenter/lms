@@ -20,7 +20,7 @@ from users.tests.factories import *
 from .mixins import *
 
 
-class NotificationTests(MyUtilitiesMixin, CSCTestCase):
+class NotificationTests(CSCTestCase):
     def _get_unread(self, url):
         return (self.client.get(url)
                 .context['request']
@@ -33,18 +33,19 @@ class NotificationTests(MyUtilitiesMixin, CSCTestCase):
         co = CourseFactory(teachers=[teacher1, teacher2])
         EnrollmentFactory(student=student, course=co, grade=GradeTypes.GOOD)
         # Notify_teachers m2m populated only from view action
-        self.doLogin(teacher1)
+        self.client.login(teacher1)
         a = AssignmentFactory.build()
-        form = {'title': a.title,
-                'is_online': 1,
-                'text': a.text,
-                'passing_score': 0,
-                'maximum_score': 5,
-                'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
-                'deadline_at_1': '00:00'
+        form = {
+            'title': a.title,
+            'is_online': 1,
+            'text': a.text,
+            'passing_score': 0,
+            'maximum_score': 5,
+            'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
+            'deadline_at_1': '00:00'
         }
-        url = co.get_create_assignment_url()
-        response = self.client.post(url, form, follow=True)
+        response = self.client.post(co.get_create_assignment_url(), form,
+                                    follow=True)
         assert response.status_code == 200
         assignments = co.assignment_set.all()
         assert len(assignments) == 1
@@ -61,7 +62,7 @@ class NotificationTests(MyUtilitiesMixin, CSCTestCase):
 
         # Post first comment on assignment
         assert not course_failed_by_student(co, student)
-        self.doLogin(student)
+        self.client.login(student)
         self.client.post(student_url, student_comment_dict)
         # FIXME(Dmitry): this should not affect this test, fix&remove
         self.client.get(student_url)
@@ -72,14 +73,14 @@ class NotificationTests(MyUtilitiesMixin, CSCTestCase):
                               .count()))
         self.assertEqual(0, len(self._get_unread(student_list_url)
                                  .assignments))
-        self.doLogin(teacher1)
+        self.client.login(teacher1)
         assert len(self._get_unread(teacher_list_url).assignments) == 1
-        self.doLogin(teacher2)
+        self.client.login(teacher2)
         assert len(self._get_unread(teacher_list_url).assignments) == 1
         # Read message
         self.client.get(teacher_url)
         assert len(self._get_unread(teacher_list_url).assignments) == 0
-        self.doLogin(teacher1)
+        self.client.login(teacher1)
         assert len(self._get_unread(teacher_list_url).assignments) == 1
 
         # One of teachers answered
@@ -90,7 +91,7 @@ class NotificationTests(MyUtilitiesMixin, CSCTestCase):
                                       is_notified=False)
                               .count())
         assert unread_msgs_for_student == 1
-        self.doLogin(student)
+        self.client.login(student)
         assert len(self._get_unread(student_list_url).assignments) == 1
         self.client.post(student_url, student_comment_dict)
         unread_msgs_for_teacher1 = (AssignmentNotification.objects
@@ -103,9 +104,9 @@ class NotificationTests(MyUtilitiesMixin, CSCTestCase):
 
 
 @pytest.mark.django_db
-def test_notification_teachers_list_for_assignment(client):
+def test_assignment_notification_teachers_list(client):
     """On assignment creation we have to ensure that `notify_teachers`
-    m2m prepopulated by course offering teachers with `notify_by_default=True`
+    m2m prepopulated by course teachers with `notify_by_default=True`
     """
     student = StudentCenterFactory()
     t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)

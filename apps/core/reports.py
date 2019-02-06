@@ -2,7 +2,7 @@ import io
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
-import unicodecsv
+import csv
 from django.conf import settings
 from django.http import HttpResponse
 from django.utils import formats
@@ -10,7 +10,7 @@ from django.utils.encoding import force_text
 from xlsxwriter import Workbook
 
 
-class ReportFileOutput(object):
+class ReportFileOutput:
     """Methods to output csv and xlsx"""
     headers = None
     data = None
@@ -23,8 +23,8 @@ class ReportFileOutput(object):
         raise NotImplementedError()
 
     def output_csv(self):
-        output = io.BytesIO()
-        w = unicodecsv.writer(output, encoding='utf-8')
+        output = io.StringIO()
+        w = csv.writer(output)
 
         w.writerow(self.headers)
         for data_row in self.data:
@@ -35,6 +35,7 @@ class ReportFileOutput(object):
         # if settings.DEBUG:
         #     return self.debug_response(output.read())
 
+        # XXX: default python IO encoding should be set to `utf-8`
         response = HttpResponse(output.read(),
                                 content_type='text/csv; charset=utf-8')
         response['Content-Disposition'] = \

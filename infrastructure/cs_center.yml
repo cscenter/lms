@@ -28,6 +28,7 @@
         certbot_domains:
           - "{{ main_domain }}"
           - "www.compscicenter.ru"
+          - "my.compscicenter.ru"
         certbot_config_dir: "/etc/letsencrypt/live/compscicenter.ru"
         rq_workers:
           - default

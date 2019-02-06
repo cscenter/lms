@@ -33,7 +33,7 @@ top_menu = common_menu + [
         children=[
             MenuItem(
                 pgettext_lazy("menu", "Задания"),
-                '/teaching/assignments/',
+                reverse('teaching:assignment_list'),
                 weight=10,
                 budge='assignments_teacher',
                 selected_patterns=[
@@ -42,12 +42,12 @@ top_menu = common_menu + [
                 ]),
             MenuItem(
                 pgettext_lazy("menu", "Расписание"),
-                '/teaching/timetable/',
+                reverse('teaching:timetable'),
                 weight=20,
                 selected_patterns=[r"^/teaching/calendar/"]),
             MenuItem(
                 pgettext_lazy("menu", "Календарь"),
-                '/teaching/full-calendar/',
+                reverse('teaching:calendar_full'),
                 weight=30),
             MenuItem(
                 pgettext_lazy("menu", "Мои курсы"),
@@ -56,7 +56,7 @@ top_menu = common_menu + [
                 budge='courseoffering_news'),
             MenuItem(
                 pgettext_lazy("menu", "Ведомости"),
-                '/teaching/marks/',
+                reverse('teaching:gradebook_list'),
                 weight=50),
         ],
         visible_to=[
