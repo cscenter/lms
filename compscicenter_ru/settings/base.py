@@ -10,10 +10,9 @@ WSGI_APPLICATION = 'compscicenter_ru.wsgi.application'
 ROOT_URLCONF = 'compscicenter_ru.urls'
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
-    PRIVATE_SUBDOMAIN: 'compscicenter_ru.backend_urls',
+    LMS_SUBDOMAIN: 'my_compscicenter_ru.urls',
 }
-
-APP_DIR = Path(__file__).parents[1]
+PROJECT_DIR = Path(__file__).parents[1]
 
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -30,6 +29,7 @@ MIDDLEWARE = [
 ]
 INSTALLED_APPS += [
     'compscicenter_ru',
+    'my_compscicenter_ru',
     'menu',
     'post_office',
     'django_jinja',
@@ -67,11 +67,13 @@ TEMPLATES = [
         "APP_DIRS": False,
         'DIRS': [
             django.__path__[0] + '/forms/jinja2',
-            str(APP_DIR / "jinja2"),
-            str(PROJECT_DIR / "core" / "jinja2"),
-            str(PROJECT_DIR / "surveys" / "jinja2"),
+            str(ROOT_DIR / "compscicenter_ru" / "jinja2"),
+            str(ROOT_DIR / "my_compscicenter_ru" / "jinja2"),
+            # FIXME: move to apps/jinja2 ?
+            str(APPS_DIR / "core" / "jinja2"),
+            str(APPS_DIR / "surveys" / "jinja2"),
             # svg inline support
-            str(PROJECT_DIR / "assets" / "v2" / "dist" / "img"),
+            str(APPS_DIR / "assets" / "v2" / "dist" / "img"),
         ],
         "NAME": "jinja2",
         "OPTIONS": {
@@ -118,12 +120,12 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': False,
         'DIRS': [
-            str(APP_DIR / "templates"),
-            str(PROJECT_DIR / "admission_test" / "templates"),
-            str(PROJECT_DIR / "surveys" / "jinja2"),
-            str(PROJECT_DIR / "learning" / "admission" / "templates"),
-            str(PROJECT_DIR / "staff" / "templates"),
             str(PROJECT_DIR / "templates"),
+            str(APPS_DIR / "admission_test" / "templates"),
+            str(APPS_DIR / "surveys" / "jinja2"),
+            str(APPS_DIR / "learning" / "admission" / "templates"),
+            str(APPS_DIR / "staff" / "templates"),
+            str(APPS_DIR / "templates"),
             django.__path__[0] + '/forms/templates',
         ],
         'OPTIONS': {
@@ -149,10 +151,10 @@ TEMPLATES = [
 FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
 
 LOCALE_PATHS += [
-    str(APP_DIR / "locale"),
-    str(PROJECT_DIR / "learning" / "projects" / "locale"),
-    str(PROJECT_DIR / "learning" / "admission" / "locale"),
-    str(PROJECT_DIR / "surveys" / "locale"),
+    str(PROJECT_DIR / "locale"),
+    str(APPS_DIR / "learning" / "projects" / "locale"),
+    str(APPS_DIR / "learning" / "admission" / "locale"),
+    str(APPS_DIR / "surveys" / "locale"),
 ]
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '***REMOVED***'
@@ -163,7 +165,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compscicenter.ru'
 
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
-NEWRELIC_CONF = str(APP_DIR / "newrelic.ini")
+NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
 NEWRELIC_ENV = 'development'
 
 

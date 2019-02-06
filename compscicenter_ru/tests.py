@@ -13,7 +13,8 @@ def test_testimonials(client):
 
 @pytest.mark.django_db
 def test_menu_selected_patterns(rf):
-    from compscicenter_ru.menus import MenuItem, Menu
+    from compscicenter_ru.menus import Menu
+    from core.menu import MenuItem
     menu_name = 'test_menu'
     menu_items = [
         MenuItem("Item1", '/about/', weight=10,

@@ -20,11 +20,13 @@ from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from vanilla import TemplateView
 
+import courses.utils
 from api.permissions import CuratorAccessPermission
 from core.templatetags.core_tags import tex
 from core.urls import reverse
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
+from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment
 from study_programs.models import StudyProgram, StudyProgramCourseGroup
 from courses.models import Course, Semester
@@ -665,3 +667,23 @@ class SurveySubmissionsStatsView(CuratorOnlyMixin, TemplateView):
             "total_submissions": stats["total_submissions"],
             "data": stats["fields"]
         }
+
+
+class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
+    template_name = "staff/gradebook_list.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        semester_list = list(context["semester_list"])
+        if not semester_list:
+            return context
+        # Add stub spring term if we have only the fall term for the ongoing
+        # academic year
+        current = semester_list[0]
+        if current.type == SemesterTypes.AUTUMN:
+            term = Semester(type=SemesterTypes.SPRING, year=current.year + 1)
+            term.courseofferings = []
+            semester_list.insert(0, term)
+        context["semester_list"] = [(a, s) for s, a in
+                                    courses.utils.grouper(semester_list, 2)]
+        return context

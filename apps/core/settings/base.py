@@ -10,8 +10,8 @@ import pytz
 
 from django.utils.translation import ugettext_lazy as _
 
-PROJECT_DIR = Path(__file__).parents[2]
-ROOT_DIR = PROJECT_DIR.parent
+ROOT_DIR = Path(__file__).parents[3]
+APPS_DIR = ROOT_DIR / "apps"
 
 MEDIA_ROOT = str(ROOT_DIR / "media")
 MEDIA_URL = "/media/"
@@ -34,7 +34,7 @@ CLUB_DOMAIN = 'compsciclub.ru'
 CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
 
-PRIVATE_SUBDOMAIN = 'my'
+LMS_SUBDOMAIN = 'my'
 
 INSTALLED_APPS = [
     'modeltranslation',  # insert before admin
@@ -86,7 +86,7 @@ INSTALLED_APPS = [
 # django-js-reverse settings
 JS_REVERSE_JS_VAR_NAME = 'URLS'
 JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['api']
-JS_REVERSE_OUTPUT_PATH = str(PROJECT_DIR / "assets" / "js" / "vendor")
+JS_REVERSE_OUTPUT_PATH = str(APPS_DIR / "assets" / "js" / "vendor")
 
 # oEmbed
 MICAWBER_PROVIDERS = "courses.micawber_providers.oembed_providers"
@@ -167,9 +167,9 @@ DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = str(PROJECT_DIR / "static")
+STATIC_ROOT = str(APPS_DIR / "static")
 STATICFILES_DIRS = [
-    str(PROJECT_DIR / "assets"),
+    str(APPS_DIR / "assets"),
 ]
 
 # See django-pipeline for details

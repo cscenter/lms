@@ -49,6 +49,7 @@ class IndexView(TemplateView):
     INSTAGRAM_CACHE_KEY = 'v2_index_instagram_posts'
 
     def get(self, request, *args, **kwargs):
+        # FIXME: remove
         if request.user.index_redirect:
             try:
                 section_code = request.user.index_redirect

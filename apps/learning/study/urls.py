@@ -10,7 +10,6 @@ app_name = 'study'
 
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='study:assignment_list', permanent=False), name='learning_base'),
-    path('courses/', CourseListView.as_view(), name='course_list'),
     path('assignments/', include([
         path('', StudentAssignmentListView.as_view(), name='assignment_list'),
         path('<int:pk>/', StudentAssignmentDetailView.as_view(), name='student_assignment_detail'),
@@ -21,4 +20,5 @@ urlpatterns = [
     path('timetable/', TimetableView.as_view(), name='timetable'),
     path('calendar/', CalendarPersonalView.as_view(), name='calendar'),
     path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),
+    path('courses/', CourseListView.as_view(), name='course_list'),
 ]

@@ -1,0 +1,62 @@
+{% load markdown from core_tags %}
+{% load crispy_forms_tags %}
+{% load tz %}
+
+<div class="csc-well">
+    <div class="ubertext">
+      {% markdown 3600 "assignment_text" a_s.assignment.pk a_s.assignment.modified %}
+        {{ a_s.assignment.text }}
+      {% endmarkdown %}
+    </div>
+    {% with aas=a_s.assignment.assignmentattachment_set.all %}
+      {% if aas %}
+        <ul class="list-unstyled">
+          {% for aa in aas %}
+            <li>
+              <span class="assignment-attachment">
+                <i class="fa fa-file"></i> <a href="{{ aa.file_url }}">{{ aa.file_name }}</a>
+              </span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+</div>
+
+{% if a_s.assignmentcomment_set.all %}
+    <ul class="comment-list">
+    {% for comment in a_s.assignmentcomment_set.all %}
+        {# Should be ok for comparing python int type with None #}
+        {% if first_comment_after_deadline and comment.pk == first_comment_after_deadline.pk %}
+            <li><hr class="deadline"></li>
+        {% endif %}
+        <li class="{% if comment.author == a_s.student %}student{% else %}teacher{% endif %}">
+          <div class="csc-well assignment-comment" {% if user.is_curator or is_actual_teacher %}data-id="{{ comment.pk }}"{% endif %}>
+            {% if is_actual_teacher and comment.author_id == user.pk and not comment.is_stale_for_edit or user.is_curator %}
+                <a href="{{ comment.get_update_url }}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
+            {% endif %}
+            <h5 class="assignment">{{ comment.author }}</h5>
+            <div class="ubertext">
+              {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
+                {{ comment.text }}
+              {% endmarkdown %}
+            </div>
+            <div class="metainfo-holder">
+              {% if comment.attached_file %}
+              <span class="assignment-attachment">
+                <i class="fa fa-file"></i>
+                <a href="{{ comment.attached_file_url }}">
+                  {{ comment.attached_file_name }}
+                </a>
+              </span>
+              {% endif %}
+              <span class="metainfo pull-right">{{ comment.created|timezone:timezone|date:"d.m.Y H:i" }}</span>
+            </div>
+          </div>
+        </li>
+    {% endfor %}
+    </ul>
+{% endif %}
+{% if request.user.is_active_student or is_actual_teacher or request.user.is_curator %}
+    <div class="csc-well">{% crispy form %}</div>
+{% endif %}

@@ -17,14 +17,13 @@ admin.autodiscover()
 
 
 urlpatterns = [
-    # XXX: duplicate in private section?
     path('', views.IndexView.as_view(), name='index'),
     path('robots.txt', TemplateView.as_view(template_name="compscicenter_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
     path('open-nsk/', TemplateView.as_view(template_name='open_nsk.html'), name='open_nsk'),
     # Editing courses/
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
-    # TODO: mb move to nginx?
+    # TODO: move redirect to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
     path('orgs/', views.TeamView.as_view(), name='orgs'),
     # FIXME: точно только публичная версия? Пока не ясно
@@ -37,8 +36,8 @@ urlpatterns = [
 
     path('teachers2/', views.TeachersV2View.as_view(), name='teachers_v2'),
     path('teachers/', views.TeachersView.as_view(), name='teachers'),
-    # FIXME: а вот эта страница только на публичной версии?
     path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
+
     path('faq/', views.QAListView.as_view(), name='faq'),
     path('testimonials2/', views.TestimonialsListV2View.as_view(), name='testimonials_v2'),
     path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
@@ -50,7 +49,6 @@ urlpatterns = [
 
     path('api/', include('api.frontend_urls')),
 
-    # FIXME: тут как быть?
     path('courses/', views.CourseOfferingsView.as_view(), name="course_list"),
     path('', include('courses.urls')),
 

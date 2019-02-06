@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from isoweek import Week
-from vanilla import CreateView, ListView
+from vanilla import ListView
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
@@ -16,7 +16,6 @@ from courses.utils import get_current_term_pair, get_term_index
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
 from learning.calendar import get_month_events
-from learning.enrollment import course_failed_by_student
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole
@@ -235,3 +234,7 @@ class CourseListView(StudentOnlyMixin, generic.TemplateView):
                                            current_year).capitalize()
         }
         return context
+
+
+class HonorCodeView(generic.TemplateView):
+    template_name = "learning/study/honor_code.html"

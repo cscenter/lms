@@ -2,7 +2,8 @@ from django.conf.urls import include
 from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
-from learning.study.views import UsefulListView, InternshipListView
+from learning.study.views import UsefulListView, InternshipListView, \
+    HonorCodeView
 from learning.teaching.views import CourseStudentsView
 from .views import EventDetailView
 
@@ -17,6 +18,7 @@ urlpatterns = [
     # URLs below are not included on compsciclub.ru
     path('learning/useful/', UsefulListView.as_view(), name='learning_useful'),
     path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
+    path('learning/hc/', HonorCodeView.as_view(), name='honor_code'),
     path('learning/library/', include("library.urls")),
 
     path('teaching/', include('learning.teaching.urls')),

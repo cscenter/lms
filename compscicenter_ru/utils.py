@@ -66,7 +66,7 @@ class PublicRoute(Enum):
         try:
             return getattr(cls, code.upper()).url
         except AttributeError:
-            raise PublicRouteException(f"Code {code} doesn't supported")
+            raise PublicRouteException(f"Code {code} is not supported")
 
     @classmethod
     def choices(cls):
