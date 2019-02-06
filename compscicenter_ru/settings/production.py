@@ -132,7 +132,7 @@ LDAP_CLIENT_URI = "ldap://review.compscicenter.ru:389"
 LDAP_DB_SUFFIX = "dc=review,dc=compscicenter,dc=ru"
 LDAP_CLIENT_USERNAME = "admin"
 LDAP_CLIENT_PASSWORD = "C7G92?V6;c3M4.]e}k(Us33]"
-LDAP_TLS_TRUSTED_CA_CERT_FILE = str(APP_DIR / "LDAPTrustedCA.crt")
+LDAP_TLS_TRUSTED_CA_CERT_FILE = str(PROJECT_DIR / "LDAPTrustedCA.crt")
 LDAP_SYNC_PASSWORD = True
 
 REDIS_PASSWORD = '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN'

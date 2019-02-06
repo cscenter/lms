@@ -49,7 +49,7 @@ class Stock(models.Model):
 
     def get_absolute_url(self):
         return reverse("library:book_detail",
-                       subdomain=settings.PRIVATE_SUBDOMAIN,
+                       subdomain=settings.LMS_SUBDOMAIN,
                        args=[self.id])
 
     @property

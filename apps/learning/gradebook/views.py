@@ -13,16 +13,15 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import FormView
 
-import courses.utils
 from courses.models import Course, Semester, Assignment
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook import GradeBookFormFactory, gradebook_data
 from learning.gradebook.imports import AssignmentGradesImport
-from users.mixins import TeacherOnlyMixin, CuratorOnlyMixin
+from users.mixins import TeacherOnlyMixin
 
 __all__ = [
-    "GradeBookCuratorDispatchView", "GradeBookTeacherView",
+    "GradeBookTeacherView",
     "GradeBookTeacherCSVView", "AssignmentScoresImportByStepikIDView",
     "AssignmentScoresImportByYandexLoginView"
 ]
@@ -57,26 +56,6 @@ class GradeBookListBaseView(generic.ListView):
                         queryset=self.get_course_queryset(),
                         to_attr="courseofferings"
                     )))
-
-
-class GradeBookCuratorDispatchView(CuratorOnlyMixin, GradeBookListBaseView):
-    template_name = "learning/gradebook/list_curator.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        semester_list = list(context["semester_list"])
-        if not semester_list:
-            return context
-        # Add stub spring term if we have only the fall term for the ongoing
-        # academic year
-        current = semester_list[0]
-        if current.type == SemesterTypes.AUTUMN:
-            term = Semester(type=SemesterTypes.SPRING, year=current.year + 1)
-            term.courseofferings = []
-            semester_list.insert(0, term)
-        context["semester_list"] = [(a, s) for s, a in
-                                    courses.utils.grouper(semester_list, 2)]
-        return context
 
 
 def _get_course(get_params, user) -> Optional[Course]:

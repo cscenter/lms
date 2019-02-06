@@ -5,7 +5,7 @@ import django
 
 from core.settings.base import *
 
-APP_DIR = Path(__file__).parents[1]
+PROJECT_DIR = Path(__file__).parents[1]
 
 SITE_ID = 2
 ROOT_URLCONF = 'compsciclub_ru.urls'
@@ -43,7 +43,7 @@ CACHES = {
 }
 
 LOCALE_PATHS = [
-    str(APP_DIR / "locale"),
+    str(PROJECT_DIR / "locale"),
 ] + LOCALE_PATHS
 
 TEMPLATES = [
@@ -51,8 +51,8 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': False,
         'DIRS': [
-            str(APP_DIR / "templates"),
             str(PROJECT_DIR / "templates"),
+            str(APPS_DIR / "templates"),
             django.__path__[0] + '/forms/templates',
         ],
         'OPTIONS': {
@@ -87,7 +87,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compsciclub.ru'
 
 GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
-NEWRELIC_CONF = str(APP_DIR / "newrelic.ini")
+NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
 NEWRELIC_ENV = 'development'
 
 # Registration and Recaptcha settings

@@ -17,7 +17,7 @@ class UrlsExtension(Extension):
     def __init__(self, environment):
         super().__init__(environment)
         environment.globals["url"] = self._url_reverse
-        environment.globals["PRIVATE_SUBDOMAIN"] = settings.PRIVATE_SUBDOMAIN
+        environment.globals["LMS_SUBDOMAIN"] = settings.LMS_SUBDOMAIN
 
     def _url_reverse(self, name, subdomain=None, scheme=None, *args, **kwargs):
         try:

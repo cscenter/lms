@@ -36,13 +36,11 @@ def flatpage(request, url):
         url = '/' + url
     site_id = get_current_site(request).id
     try:
-        f = get_object_or_404(HtmlPage,
-            url=url, sites=site_id)
+        f = get_object_or_404(HtmlPage, url=url, sites=site_id)
     except Http404:
         if not url.endswith('/') and settings.APPEND_SLASH:
             url += '/'
-            f = get_object_or_404(HtmlPage,
-                url=url, sites=site_id)
+            f = get_object_or_404(HtmlPage, url=url, sites=site_id)
             return HttpResponsePermanentRedirect('%s/' % request.path)
         else:
             raise

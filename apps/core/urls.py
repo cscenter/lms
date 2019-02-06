@@ -8,21 +8,21 @@ from subdomains.utils import reverse as _reverse
 
 from core.utils import is_club_site
 
-PRIVATE_SUBDOMAIN_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
-                                'surveys', 'library')
-prefixes = "|".join(f"{re.escape(p)}:" for p in PRIVATE_SUBDOMAIN_NAMESPACES)
-starts_with_private_subdomain = re.compile(prefixes).match
+LMS_SUBDOMAIN_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
+                            'surveys', 'library')
+prefixes = "|".join(f"{re.escape(p)}:" for p in LMS_SUBDOMAIN_NAMESPACES)
+starts_with_lms_subdomain = re.compile(prefixes).match
 
 
 def reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
-        current_app=None):
+            current_app=None):
     if is_club_site():
         # For compsciclub.ru use django's relative url
         return django_reverse(viewname, args=args, kwargs=kwargs,
                               current_app=current_app)
 
-    if subdomain is None and starts_with_private_subdomain(viewname):
-        subdomain = settings.PRIVATE_SUBDOMAIN
+    if subdomain is None and starts_with_lms_subdomain(viewname):
+        subdomain = settings.LMS_SUBDOMAIN
 
     return _reverse(viewname, subdomain=subdomain, scheme=scheme,
                     args=args, kwargs=kwargs, current_app=current_app)

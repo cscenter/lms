@@ -20,7 +20,7 @@ def cities(request):
 
 
 def subdomain(request):
-    return {"PRIVATE_SUBDOMAIN": getattr(settings, "PRIVATE_SUBDOMAIN", "")}
+    return {"LMS_SUBDOMAIN": getattr(settings, "LMS_SUBDOMAIN", "")}
 
 
 from core.signals import *

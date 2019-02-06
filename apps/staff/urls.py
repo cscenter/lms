@@ -1,8 +1,7 @@
 from django.conf.urls import include, url
 
 # FIXME: guess it's better inherit these views
-from learning.gradebook.views import GradeBookCuratorDispatchView, \
-    GradeBookTeacherView
+from learning.gradebook.views import GradeBookTeacherView
 from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
     ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
@@ -10,15 +9,14 @@ from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, 
     StudentFacesView, InterviewerFacesView, autograde_projects, \
     CourseParticipantsIntersectionView, SyllabusView, \
     WillGraduateStatsReportView, SurveySubmissionsReportView, \
-    SurveySubmissionsStatsView
-
+    SurveySubmissionsStatsView, GradeBookListView
 
 app_name = 'staff'
 urlpatterns = [
     url(r'^syllabus/$', SyllabusView.as_view(), name='syllabus'),
     url(r'^warehouse/$', HintListView.as_view(), name='staff_warehouse'),
     url(r'^course-marks/$',
-        GradeBookCuratorDispatchView.as_view(),
+        GradeBookListView.as_view(),
         name='course_markssheet_staff_dispatch'),
     url(r'^course-marks/(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
         GradeBookTeacherView.as_view(is_for_staff=True),

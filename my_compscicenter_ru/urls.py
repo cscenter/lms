@@ -6,8 +6,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from loginas import urls as loginas_urls
 
-from compscicenter_ru import views
-from compscicenter_ru.views import IndexView
+from my_compscicenter_ru.views import IndexView
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from users.urls import auth_urls
 
@@ -30,17 +29,11 @@ urlpatterns = [
     path('staff/', include("staff.urls")),
     path('stats/', include("stats.urls")),
     path('surveys/', include("surveys.urls")),
-
-    # FIXME: тут как быть?
-    path('courses/', views.CourseOfferingsView.as_view(), name="course_list"),
-    # FIXME: кажется, что это публичные все ссылки? проверить вручную
-    path('', include('courses.urls')),
-
+    # path('', include('courses.urls')),
     path('', include('learning.projects.urls')),
 
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),
-    # Required `is_staff` only. Mb restrict to `is_superuser`?
     path('narnia/django-rq/', include('django_rq.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

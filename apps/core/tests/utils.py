@@ -4,7 +4,7 @@ from django.conf import settings
 from django.test import Client, TestCase
 from django.utils.functional import Promise
 
-from compscicenter_ru.settings.base import PRIVATE_SUBDOMAIN
+from compscicenter_ru.settings.base import LMS_SUBDOMAIN
 
 
 TEST_DOMAIN = 'compscicenter.ru'
@@ -40,8 +40,8 @@ class TestClient(Client):
             if isinstance(path, Promise):
                 path = str(path)
             parsed_url = urlparse(path)
-            if parsed_url.netloc.startswith(PRIVATE_SUBDOMAIN):
-                kwargs["SERVER_NAME"] = f"{PRIVATE_SUBDOMAIN}.{TEST_DOMAIN}"
+            if parsed_url.netloc.startswith(LMS_SUBDOMAIN):
+                kwargs["SERVER_NAME"] = f"{LMS_SUBDOMAIN}.{TEST_DOMAIN}"
         return super().get(path, *args, **kwargs)
 
     def post(self, path, *args, **kwargs):
@@ -68,8 +68,8 @@ class TestClient(Client):
             if isinstance(path, Promise):
                 path = str(path)
             parsed_url = urlparse(path)
-            if parsed_url.netloc.startswith(PRIVATE_SUBDOMAIN):
-                kwargs["SERVER_NAME"] = f"{PRIVATE_SUBDOMAIN}.{TEST_DOMAIN}"
+            if parsed_url.netloc.startswith(LMS_SUBDOMAIN):
+                kwargs["SERVER_NAME"] = f"{LMS_SUBDOMAIN}.{TEST_DOMAIN}"
         return super().post(path, *args, **kwargs)
 
 
