@@ -14,7 +14,6 @@ from django.views import generic
 from vanilla import FormView
 
 import courses.utils
-from core.exceptions import Redirect
 from courses.models import Course, Semester, Assignment
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
@@ -23,17 +22,16 @@ from learning.gradebook.imports import AssignmentGradesImport
 from users.mixins import TeacherOnlyMixin, CuratorOnlyMixin
 
 __all__ = [
-    "GradeBookCuratorDispatchView", "GradeBookTeacherDispatchView",
-    "GradeBookTeacherView",
+    "GradeBookCuratorDispatchView", "GradeBookTeacherView",
     "GradeBookTeacherCSVView", "AssignmentScoresImportByStepikIDView",
     "AssignmentScoresImportByYandexLoginView"
 ]
 
 
-class _GradeBookDispatchView(generic.ListView):
+class GradeBookListBaseView(generic.ListView):
     model = Semester
 
-    def get_co_queryset(self):
+    def get_course_queryset(self):
         return (Course.objects
                 .select_related("meta_course")
                 .order_by("meta_course__name"))
@@ -42,7 +40,7 @@ class _GradeBookDispatchView(generic.ListView):
         # FIXME: Is it ok to use 'spb' here?
         current_year, term_type = get_current_term_pair('spb')
         term_index = get_term_index(current_year, term_type)
-        # Skip to spring semester
+        # Skip to the spring semester
         # FIXME: why?!
         if term_type == SemesterTypes.AUTUMN:
             spring_order = SemesterTypes.get_choice(SemesterTypes.SPRING).order
@@ -56,12 +54,12 @@ class _GradeBookDispatchView(generic.ListView):
                 .prefetch_related(
                     Prefetch(
                         "course_set",
-                        queryset=self.get_co_queryset(),
+                        queryset=self.get_course_queryset(),
                         to_attr="courseofferings"
                     )))
 
 
-class GradeBookCuratorDispatchView(CuratorOnlyMixin, _GradeBookDispatchView):
+class GradeBookCuratorDispatchView(CuratorOnlyMixin, GradeBookListBaseView):
     template_name = "learning/gradebook/list_curator.html"
 
     def get_context_data(self, **kwargs):
@@ -78,34 +76,6 @@ class GradeBookCuratorDispatchView(CuratorOnlyMixin, _GradeBookDispatchView):
             semester_list.insert(0, term)
         context["semester_list"] = [(a, s) for s, a in
                                     courses.utils.grouper(semester_list, 2)]
-        return context
-
-
-class GradeBookTeacherDispatchView(TeacherOnlyMixin, _GradeBookDispatchView):
-    """
-    Redirect teacher to appropriate gradebook page if he has only
-    one course offering in current term.
-    """
-    template_name = "learning/gradebook/list_teacher.html"
-
-    def get_co_queryset(self):
-        qs = super().get_co_queryset()
-        return qs.filter(teachers=self.request.user)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # FIXME: Is it ok to use 'spb' here?
-        current_year, term_type = get_current_term_pair('spb')
-        current_term_index = get_term_index(current_year, term_type)
-        co_count = 0
-        for semester in context["semester_list"]:
-            if semester.index == current_term_index:
-                if len(semester.courseofferings) == 1:
-                    co = semester.courseofferings[0]
-                    raise Redirect(to=co.get_gradebook_url())
-            co_count += len(semester.courseofferings)
-        if not co_count:
-            context["semester_list"] = []
         return context
 
 

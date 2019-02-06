@@ -109,6 +109,7 @@ class EventDetailView(generic.DetailView):
     template_name = "learning/event_detail.html"
 
 
+# FIXME: move
 class ProtectedMediaFileResponse(HttpResponse):
     """
     Files under `media/assignments/` location are protected by nginx `internal`
@@ -136,6 +137,7 @@ class ProtectedMediaFileResponse(HttpResponse):
         self['X-Accel-Redirect'] = file_uri
 
 
+# FIXME: move to utils
 def export_ipynb_to_html(ipynb_src_path, html_ext='.html'):
     """
     Converts *.ipynb to html and saves the new file in the same directory with

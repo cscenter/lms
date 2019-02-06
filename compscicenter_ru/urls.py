@@ -7,7 +7,7 @@ from django.views.generic import RedirectView, TemplateView
 from loginas import urls as loginas_urls
 
 from compscicenter_ru import views
-from core.views import robots, MarkdownRenderView, MarkdownHowToHelpView
+from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.views import CourseVideoListView
 from htmlpages.views import flatpage
 from users.urls import auth_urls
@@ -19,7 +19,7 @@ admin.autodiscover()
 urlpatterns = [
     # XXX: duplicate in private section?
     path('', views.IndexView.as_view(), name='index'),
-    path('robots.txt', robots, name='robots_txt'),
+    path('robots.txt', TemplateView.as_view(template_name="compscicenter_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
     path('open-nsk/', TemplateView.as_view(template_name='open_nsk.html'), name='open_nsk'),
     # Editing courses/
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),

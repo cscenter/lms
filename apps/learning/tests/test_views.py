@@ -6,22 +6,19 @@ import pytest
 import pytz
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from core.tests.utils import CSCTestCase
 from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
+from core.tests.utils import CSCTestCase
 from core.timezone import now_local
 from core.urls import city_aware_reverse, reverse
 from courses.models import Course
 from courses.tests.factories import *
 from courses.utils import get_current_term_pair
-from learning.enrollment import course_failed_by_student
-from learning.models import StudentAssignment
 from learning.tests.factories import *
-from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.utils import check_url_security
-from users.tests.factories import *
 from users.constants import AcademicRoles
+from users.tests.factories import *
 from .mixins import *
 
 

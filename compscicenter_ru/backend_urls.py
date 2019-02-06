@@ -3,6 +3,7 @@ from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import TemplateView
 from loginas import urls as loginas_urls
 
 from compscicenter_ru import views
@@ -15,6 +16,7 @@ admin.autodiscover()
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
+    path('robots.txt', TemplateView.as_view(template_name="my_compscicenter_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
     path('api/', include('api.backend_urls')),
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),

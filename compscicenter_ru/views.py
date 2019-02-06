@@ -43,7 +43,7 @@ from .filters import CoursesFilter
 
 
 class IndexView(TemplateView):
-    template_name = 'compscicenter_ru/public/index.html'
+    template_name = 'compscicenter_ru/index.html'
     TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
     VK_CACHE_KEY = 'v2_index_vk_social_news'
     INSTAGRAM_CACHE_KEY = 'v2_index_instagram_posts'
@@ -176,7 +176,7 @@ def positive_integer(value):
 
 
 class TestimonialsListV2View(TemplateView):
-    template_name = "compscicenter_ru/public/testimonials.html"
+    template_name = "compscicenter_ru/testimonials.html"
 
     def get_context_data(self, **kwargs):
         total = TestimonialList.get_base_queryset().count()
@@ -234,7 +234,7 @@ class TeachersView(generic.ListView):
 
 
 class TeachersV2View(TemplateView):
-    template_name = "compscicenter_ru/public/teachers.html"
+    template_name = "compscicenter_ru/teachers.html"
 
     def get_context_data(self, **kwargs):
         # Get terms in last 3 academic years.
@@ -364,8 +364,8 @@ class AlumniHonorBoardView(TemplateView):
     def get_template_names(self):
         graduation_year = int(self.kwargs['year'])
         return [
-            f"compscicenter_ru/public/alumni/{graduation_year}.html",
-            "compscicenter_ru/public/alumni/fallback_year.html"
+            f"compscicenter_ru/alumni/{graduation_year}.html",
+            "compscicenter_ru/alumni/fallback_year.html"
         ]
 
     def get_graduates(self, filters):
@@ -411,7 +411,7 @@ class AlumniHonorBoardView(TemplateView):
 
 
 class AlumniV2View(TemplateView):
-    template_name = "compscicenter_ru/public/alumni/index.html"
+    template_name = "compscicenter_ru/alumni/index.html"
 
     def get_context_data(self, **kwargs):
         cache_key = 'cscenter_last_graduation_year'

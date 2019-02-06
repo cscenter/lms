@@ -4,14 +4,14 @@ from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
+from django.views.generic import TemplateView
 from loginas import urls as loginas_urls
 
 from compsciclub_ru.views import CalendarClubScheduleView, IndexView, \
     TeachersView, \
     TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed, \
     CoursesListView
-from core.views import MarkdownHowToHelpView, robots
-from core.views import MarkdownRenderView
+from core.views import MarkdownHowToHelpView, MarkdownRenderView
 from htmlpages import views
 from international_schools.views import InternationalSchoolsListView
 from users.urls import auth_urls
@@ -41,7 +41,7 @@ urlpatterns = i18n_patterns(
 )
 
 urlpatterns += [
-    path('robots.txt', robots, name='robots_txt'),
+    path('robots.txt', TemplateView.as_view(template_name="compsciclub_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
 

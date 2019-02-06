@@ -18,7 +18,7 @@ from users.mixins import StudentOnlyMixin
 
 class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
     form_class = CourseEnrollmentForm
-    template_name = "learning/courses/enrollment.html"
+    template_name = "learning/enrollment/enrollment_enter.html"
 
     def get(self, request, *args, **kwargs):
         form = self.get_form(**kwargs)
@@ -64,7 +64,7 @@ class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
 
 class CourseUnenrollView(StudentOnlyMixin, CourseURLParamsMixin,
                          generic.DeleteView):
-    template_name = "learning/courses/enrollment_leave.html"
+    template_name = "learning/enrollment/enrollment_leave.html"
     context_object_name = "enrollment"
 
     def delete(self, request, *args, **kwargs):

@@ -13,10 +13,6 @@ from vanilla import CreateView
 from .utils import render_markdown
 
 
-def robots(request):
-    return render_to_response('robots.txt', content_type="text/plain")
-
-
 class ReadOnlyFieldsMixin:
     readonly_fields = ()
 

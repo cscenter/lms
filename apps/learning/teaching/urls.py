@@ -6,7 +6,7 @@ from learning.gradebook import views as gv
 from learning.teaching.views import TimetableView as TeacherTimetable, \
     AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView, \
     CalendarFullView, CalendarPersonalView, CourseListView, \
-    StudentAssignmentDetailView
+    StudentAssignmentDetailView, GradeBookListView
 from learning.api.views import CourseNewsUnreadNotificationsView
 
 COURSE_URI = r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/'
@@ -29,7 +29,7 @@ urlpatterns = [
         path('submissions/<int:pk>/comment/<int:comment_pk>/update/', AssignmentCommentUpdateView.as_view(), name='student_assignment_comment_edit'),
     ])),
     path('marks/', include([
-        path('', gv.GradeBookTeacherDispatchView.as_view(), name='gradebook_dispatch'),
+        path('', GradeBookListView.as_view(), name='gradebook_list'),
         # FIXME: make compatible with RE_COURSE_URI
         re_path(COURSE_URI, include([
             path('', gv.GradeBookTeacherView.as_view(), name='gradebook'),
