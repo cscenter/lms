@@ -1,4 +1,4 @@
-{% import "compscicenter_ru/public/layouts/_macros.jinja2" as macros -%}
+{% import "compscicenter_ru/layouts/_macros.jinja2" as macros -%}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -39,7 +39,7 @@
                 </div>
             {%- endif -%}
         {% endblock top_banner %}
-        {% include "compscicenter_ru/public/layouts/_top_menu.html" %}
+        {% include "compscicenter_ru/layouts/_top_menu.html" %}
     </div>
     {% if self.top_banner() %}<div class="top-banner-spacer"></div>{% endif %}
     {% endblock menu %}

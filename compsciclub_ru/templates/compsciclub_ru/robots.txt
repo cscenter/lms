@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /learning/
+Disallow: /teaching/

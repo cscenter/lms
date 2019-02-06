@@ -19,11 +19,13 @@ from core.utils import render_markdown, is_club_site
 from courses.calendar import CalendarEvent
 from courses.models import CourseClass, Course, Assignment
 from courses.settings import SemesterTypes
-from courses.utils import get_terms_for_calendar_month, get_term_index
+from courses.utils import get_terms_for_calendar_month, get_term_index, \
+    get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from courses.views.mixins import CourseURLParamsMixin
 from learning.calendar import get_month_events
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
+from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole
 from learning.views import AssignmentSubmissionBaseView
@@ -488,3 +490,29 @@ class StudentAssignmentDetailView(TeacherOnlyMixin,
 
     def get_success_url(self):
         return self.student_assignment.get_teacher_url()
+
+
+class GradeBookListView(TeacherOnlyMixin, GradeBookListBaseView):
+    template_name = "learning/teaching/gradebook_list.html"
+
+    def get_course_queryset(self):
+        qs = super().get_course_queryset()
+        return qs.filter(teachers=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # FIXME: Is it ok to use 'spb' here?
+        current_year, term_type = get_current_term_pair('spb')
+        current_term_index = get_term_index(current_year, term_type)
+        co_count = 0
+        # Redirect teacher to the appropriate gradebook page if he has only
+        # one course in the current semester.
+        for semester in context["semester_list"]:
+            if semester.index == current_term_index:
+                if len(semester.courseofferings) == 1:
+                    co = semester.courseofferings[0]
+                    raise Redirect(to=co.get_gradebook_url())
+            co_count += len(semester.courseofferings)
+        if not co_count:
+            context["semester_list"] = []
+        return context
