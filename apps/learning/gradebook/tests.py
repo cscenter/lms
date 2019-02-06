@@ -1,10 +1,11 @@
 import datetime
+import io
 from decimal import Decimal
 from io import StringIO, BytesIO
 
 import pytest
 import pytz
-import unicodecsv
+import csv
 from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.utils.encoding import smart_bytes, force_bytes
@@ -155,7 +156,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
         a1, a2 = AssignmentFactory.create_batch(2, course=co)
         for s in [student1, student2]:
             EnrollmentFactory.create(student=s, course=co)
-        url = co.get_gradebook_url(format="csv")
+        gradebook_url = co.get_gradebook_url(format="csv")
         combos = [(a, s, grade + 1)
                   for ((a, s), grade)
                   in zip([(a, s)
@@ -167,7 +168,8 @@ class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
             a_s.score = score
             a_s.save()
         self.doLogin(teacher)
-        data = [row for row in unicodecsv.reader(self.client.get(url)) if row]
+        gradebook_csv = self.client.get(gradebook_url).content.decode('utf-8')
+        data = [s for s in csv.reader(io.StringIO(gradebook_csv)) if s]
         self.assertEqual(3, len(data))
         self.assertIn(a1.title, data[0])
         row_last_names = [row[0] for row in data]

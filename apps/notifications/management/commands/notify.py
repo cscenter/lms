@@ -81,16 +81,17 @@ def report(f, s):
     f.write("{0} {1}".format(dt, s))
 
 
-def notify(notification, name, context, f):
+def send_notification(notification, name, context, f):
+    """Sends email notification, then updates notification state in DB"""
     if not notification.user.email:
-        report(f, "user {0} doesn't have an email"
+        report(f, "User {0} doesn't have an email"
                .format(smart_text(notification.user)))
         notification.is_notified = True
         notification.save()
         return
 
-    html_content = linebreaks(
-        render_to_string(EMAILS[name]['template'], context))
+    html_content = linebreaks(render_to_string(EMAILS[name]['template'],
+                                               context))
     text_content = strip_tags(html_content)
 
     msg = EmailMultiAlternatives("[{}] {}".format(context['course_name'],
@@ -104,6 +105,29 @@ def notify(notification, name, context, f):
     msg.send()
     notification.is_notified = True
     notification.save()
+
+
+def get_assignment_notification_context(notification: AssignmentNotification):
+    base_url = get_base_url(notification)
+    a_s = notification.student_assignment
+    tz_override = None
+    u = notification.user
+    # Override timezone to enrolled students if course is online
+    if a_s.assignment.course.is_correspondence and (
+            u.is_student or u.is_volunteer):
+        tz_override = settings.TIME_ZONES[notification.user.city_code]
+    context = {
+        'a_s_link_student': base_url + a_s.get_student_url(),
+        'a_s_link_teacher': base_url + a_s.get_teacher_url(),
+        'assignment_link': base_url + a_s.assignment.get_teacher_url(),
+        'notification_created': notification.created_local(tz_override),
+        'assignment_name': smart_text(a_s.assignment),
+        'assignment_text': smart_text(a_s.assignment.text),
+        'student_name': smart_text(a_s.student),
+        'deadline_at': a_s.assignment.deadline_at_local(tz=tz_override),
+        'course_name': smart_text(a_s.assignment.course.meta_course)
+    }
+    return context
 
 
 class Command(BaseCommand):
@@ -129,38 +153,19 @@ class Command(BaseCommand):
         )
 
         for notification in notifications_assignments:
-            base_url = get_base_url(notification)
-            a_s = notification.student_assignment
-            tz_override = None
-            u = notification.user
-            # Override timezone to enrolled students if course is online
-            if a_s.assignment.course.is_correspondence and (
-                    u.is_student or u.is_volunteer):
-                tz_override = settings.TIME_ZONES[notification.user.city_code]
-            context = {
-                'a_s_link_student': base_url + a_s.get_student_url(),
-                'a_s_link_teacher': base_url + a_s.get_teacher_url(),
-                'assignment_link': base_url + a_s.assignment.get_teacher_url(),
-                'notification_created': notification.created_local(tz_override),
-                'assignment_name': smart_text(a_s.assignment),
-                'assignment_text': smart_text(a_s.assignment.text),
-                'student_name': smart_text(a_s.student),
-                'deadline_at': a_s.assignment.deadline_at_local(tz=tz_override),
-                'course_name': smart_text(a_s.assignment.course.meta_course)
-            }
+            context = get_assignment_notification_context(notification)
             if notification.is_about_creation:
                 name = 'new_assignment'
             elif notification.is_about_deadline:
                 name = 'deadline_changed'
+            elif notification.is_about_passed:
+                name = 'assignment_passed'
+            elif notification.user == notification.student_assignment.student:
+                name = 'new_comment_for_student'
             else:
-                if notification.user == a_s.student:
-                    name = 'new_comment_for_student'
-                elif notification.is_about_passed:
-                    name = 'assignment_passed'
-                else:
-                    name = 'new_comment_for_teacher'
+                name = 'new_comment_for_teacher'
 
-            notify(notification, name, context, self.stdout)
+            send_notification(notification, name, context, self.stdout)
 
         notifications_course_news \
             = (CourseNewsNotification.objects
@@ -184,7 +189,7 @@ class Command(BaseCommand):
                 'course_news_text': notification.course_offering_news.text,
             }
 
-            notify(notification, name, context, self.stdout)
+            send_notification(notification, name, context, self.stdout)
 
         from notifications.models import Notification
         from notifications.registry import registry

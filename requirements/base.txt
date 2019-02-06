@@ -1,7 +1,6 @@
 Django==2.1.5
 
 requests==2.21.0
-unicodecsv==0.14.1
 
 # Time zones support
 pytz==2018.7

@@ -1,7 +1,7 @@
+import csv
 import itertools
 from typing import Optional
 
-import unicodecsv as csv
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db.models import Prefetch
