@@ -14,7 +14,7 @@ COURSE_URI = r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-
 
 app_name = 'teaching'
 urlpatterns = [
-    path('', RedirectView.as_view(pattern_name='assignment_list', permanent=False), name='base'),
+    path('', RedirectView.as_view(pattern_name='teaching:assignment_list', permanent=False), name='base'),
     path('timetable/', TeacherTimetable.as_view(), name='timetable'),
     path('calendar/', CalendarPersonalView.as_view(), name='calendar'),
     path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),
