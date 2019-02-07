@@ -6,13 +6,15 @@ from django.core import mail, management
 from learning.models import AssignmentNotification
 from learning.tests.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
-from notifications.management.commands.notify import get_base_url
+from notifications.management.commands.notify import get_base_domain
 from users.constants import AcademicRoles
-from users.tests.factories import UserFactory
+from users.tests.factories import UserFactory, StudentCenterFactory
 
 
 @pytest.mark.django_db
-def test_notifications(client):
+def test_notifications(client, settings):
+    # FIXME: Make this as a default setting for test env?
+    settings.DEFAULT_URL_SCHEME = 'https'
     out = OutputIO()
     mail.outbox = []
     management.call_command("notify", stdout=out)
@@ -21,7 +23,9 @@ def test_notifications(client):
 
     out = OutputIO()
     mail.outbox = []
-    an = AssignmentNotificationFactory.create(is_about_passed=True)
+    student = StudentCenterFactory()
+    an = AssignmentNotificationFactory(is_about_passed=True,
+                                       user=student)
     management.call_command("notify", stdout=out)
     assert len(mail.outbox) == 1
     assert AssignmentNotification.objects.get(pk=an.pk).is_notified
@@ -36,7 +40,8 @@ def test_notifications(client):
 
     out = OutputIO()
     mail.outbox = []
-    conn = CourseNewsNotificationFactory.create()
+    student = StudentCenterFactory()
+    conn = CourseNewsNotificationFactory.create(user=student)
     course = conn.course_offering_news.course
     management.call_command("notify", stdout=out)
     assert len(mail.outbox) == 1
@@ -51,18 +56,18 @@ def test_notify_get_base_url():
     """Site domain in notifications depends on recipient user groups"""
     user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER])
     notification = AssignmentNotificationFactory(user=user)
-    assert get_base_url(notification) == "https://compscicenter.ru"
+    assert get_base_domain(notification) == "my.compscicenter.ru"
     user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
                                AcademicRoles.STUDENT_CLUB])
     notification = AssignmentNotificationFactory(user=user)
-    assert get_base_url(notification) == "https://compscicenter.ru"
+    assert get_base_domain(notification) == "my.compscicenter.ru"
     notification.user = UserFactory(groups=[AcademicRoles.STUDENT_CLUB])
-    assert get_base_url(notification) == "http://compsciclub.ru"
+    assert get_base_domain(notification) == "compsciclub.ru"
     notification.user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
                                             AcademicRoles.TEACHER_CLUB])
-    assert get_base_url(notification) == "https://compscicenter.ru"
+    assert get_base_domain(notification) == "my.compscicenter.ru"
     notification.user = UserFactory(groups=[AcademicRoles.TEACHER_CLUB])
-    assert get_base_url(notification) == "http://compsciclub.ru"
+    assert get_base_domain(notification) == "compsciclub.ru"
     notification.user = UserFactory(groups=[AcademicRoles.TEACHER_CLUB,
                                             AcademicRoles.GRADUATE_CENTER])
-    assert get_base_url(notification) == "https://compscicenter.ru"
+    assert get_base_domain(notification) == "my.compscicenter.ru"

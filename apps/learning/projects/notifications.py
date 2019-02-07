@@ -7,6 +7,9 @@ from notifications.decorators import register
 from notifications.service import NotificationService
 from users.models import User
 
+# XXX: `reverse` depends on settings.SITE_ID. Make sure to send notifications with correct settings.
+# FIXME: fix domain for reverse
+
 
 @register(notification_type=NotificationTypes.NEW_PROJECT_REPORT)
 class NewReport(NotificationService):
@@ -48,14 +51,9 @@ class NewReport(NotificationService):
             "author": notification.actor.get_full_name(),
             "author_declension": author_declension,
             "project_name": notification.data.get("project_name", ""),
-            "project_link": self.get_absolute_url(project_url),
-            "report_link": self.get_absolute_url(report_url),
+            "project_link": project_url,
+            "report_link": report_url,
         }
-        # Low chance project name will be updated
-
-    # TODO: make as default implementation?
-    def get_site_url(self, **kwargs):
-        return self.SITE_CENTER_URL
 
 
 @register(notification_type=NotificationTypes.NEW_PROJECT_REPORT_COMMENT)
@@ -112,16 +110,13 @@ class NewReportComment(NotificationService):
             "author": notification.actor.get_full_name(),
             "author_declension": author_declension,
             "project_name": notification.data.get("project_name", ""),
-            "project_link": self.get_absolute_url(project_url),
-            "report_link": self.get_absolute_url(report_url),
+            "project_link": project_url,
+            "report_link": report_url,
             "message": c.text,
             "has_attach": bool(c.attached_file)
         }
 
         return context
-
-    def get_site_url(self, **kwargs):
-        return self.SITE_CENTER_URL
 
 
 @register(notification_type=NotificationTypes.PROJECT_REPORTS_IN_REVIEW_STATE)
@@ -149,19 +144,16 @@ class ReportInReviewState(NotificationService):
         context = notification.data
         project_url = reverse("projects:project_detail",
                               args=[notification.data["project_pk"]])
-        context["project_link"] = self.get_absolute_url(project_url)
+        context["project_link"] = project_url
         reports = []
         for student_id, student_name in context["reports"]:
             report_url = reverse("projects:project_report", kwargs={
                 "project_pk": context["project_pk"],
                 "student_pk": student_id
             })
-            reports.append((student_name, self.get_absolute_url(report_url)))
+            reports.append((student_name, report_url))
         context["reports"] = reports
         return context
-
-    def get_site_url(self, **kwargs):
-        return self.SITE_CENTER_URL
 
 
 @register(notification_type=NotificationTypes.PROJECT_REPORT_COMPLETED)
@@ -187,9 +179,6 @@ class ReportCompleted(NotificationService):
 
     def get_context(self, notification):
         return notification.data
-
-    def get_site_url(self, **kwargs):
-        return self.SITE_CENTER_URL
 
     @staticmethod
     def get_reply_to():
@@ -224,8 +213,8 @@ class ReviewCompleted(NotificationService):
             "project_pk": notification.data["project_pk"],
             "student_pk": notification.data["student_pk"]
         })
-        context["project_link"] = self.get_absolute_url(project_url)
-        context["report_link"] = self.get_absolute_url(report_url)
+        context["project_link"] = project_url
+        context["report_link"] = report_url
         context["reviewer"] = notification.actor.get_full_name()
         # Get other reports data (name, link, status)
         reports = []
@@ -238,7 +227,7 @@ class ReviewCompleted(NotificationService):
                 "student_pk": r.project_student.student.pk
             })
             row = (r.project_student.student.get_full_name(),
-                   self.get_absolute_url(report_url),
+                   report_url,
                    r.get_status_display())
             reports.append(row)
         context["other_reports"] = reports
@@ -250,9 +239,6 @@ class ReviewCompleted(NotificationService):
         if notification.actor.gender == User.GENDER_FEMALE:
             reviewer_declension = "a"
         return self.subject.format(reviewer, reviewer_declension)
-
-    def get_site_url(self, **kwargs):
-        return self.SITE_CENTER_URL
 
 
 @register(notification_type=NotificationTypes.PROJECT_REPORTING_STARTED)
@@ -278,11 +264,8 @@ class ProjectReportingStarted(NotificationService):
         context = notification.data
         project_url = reverse("projects:student_project_detail",
                               args=[notification.data["project_id"]])
-        context["project_link"] = self.get_absolute_url(project_url)
+        context["project_link"] = project_url
         return context
-
-    def get_site_url(self, **kwargs):
-        return self.SITE_CENTER_URL
 
 
 @register(notification_type=NotificationTypes.PROJECT_REPORTING_ENDED)
@@ -308,8 +291,5 @@ class ProjectReportingEnded(NotificationService):
         context = notification.data
         project_url = reverse("projects:student_project_detail",
                               args=[notification.data["project_id"]])
-        context["project_link"] = self.get_absolute_url(project_url)
+        context["project_link"] = project_url
         return context
-
-    def get_site_url(self, **kwargs):
-        return self.SITE_CENTER_URL

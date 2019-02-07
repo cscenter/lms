@@ -1,23 +1,26 @@
 # -*- coding: utf-8 -*-
 import datetime
 from io import StringIO
+from urllib.parse import urlparse
 
 import pytest
 import pytz
 from django.core import mail, management
-from core.tests.utils import CSCTestCase
-from core.urls import reverse
+from subdomains.utils import get_domain
 
-from courses.models import CourseTeacher, Assignment
+from core.constants import DATE_FORMAT_RU
+from core.tests.utils import CSCTestCase, TEST_DOMAIN
+from core.urls import reverse
 from courses.admin import AssignmentAdmin
+from courses.models import CourseTeacher, Assignment
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.enrollment import course_failed_by_student
-from learning.models import StudentAssignment, AssignmentNotification
-from learning.tests.factories import *
+from learning.models import AssignmentNotification
 from learning.settings import StudentStatuses, GradeTypes
-from core.constants import DATE_FORMAT_RU
+from learning.tests.factories import *
+from notifications.management.commands.notify import \
+    get_assignment_notification_context, get_course_news_notification_context
 from users.tests.factories import *
-from .mixins import *
 
 
 class NotificationTests(CSCTestCase):
@@ -104,9 +107,10 @@ class NotificationTests(CSCTestCase):
 
 
 @pytest.mark.django_db
-def test_assignment_notification_teachers_list(client):
-    """On assignment creation we have to ensure that `notify_teachers`
-    m2m prepopulated by course teachers with `notify_by_default=True`
+def test_assignment_notify_teachers_public_form(client):
+    """
+    On assignment creation we have to ensure that `notify_teachers`
+    m2m prepopulated by the course teachers with `notify_by_default=True`
     """
     student = StudentCenterFactory()
     t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
@@ -161,9 +165,11 @@ def test_assignment_notification_teachers_list(client):
 
 
 @pytest.mark.django_db
-def test_notify_teachers_assignment_admin_form(client, curator):
-    """`notify_teachers` should be prepopulated with course
-    teachers if list is not specified manually"""
+def test_assignment_notify_teachers_admin_form(client, curator):
+    """
+    On assignment creation `notify_teachers` should be prepopulated with
+    the course teachers by default.
+    """
     from django.contrib.admin.sites import AdminSite
     t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
     co = CourseFactory.create(teachers=[t1, t2, t3, t4])
@@ -195,25 +201,74 @@ def test_notify_teachers_assignment_admin_form(client, curator):
 
 
 @pytest.mark.django_db
-def test_new_assignment_notifications(settings):
-    co = CourseFactory()
-    enrollments = EnrollmentFactory.create_batch(5, course=co)
-    assignment = AssignmentFactory(course=co)
+def test_new_assignment_create_notification(settings):
+    course = CourseFactory()
+    enrollments = EnrollmentFactory.create_batch(5, course=course)
+    assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 5
+    # Dont' send notification to the students who leaved the course
+    AssignmentNotification.objects.all().delete()
+    assert AssignmentNotification.objects.count() == 0
     enrollment = enrollments[0]
     enrollment.is_deleted = True
     enrollment.save()
-    AssignmentNotification.objects.all().delete()
-    assert AssignmentNotification.objects.count() == 0
-    assignment = AssignmentFactory(course=co)
+    assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 4
     # Don't create new assignment for expelled students
+    AssignmentNotification.objects.all().delete()
     student = enrollments[1].student
     student.status = StudentStatuses.EXPELLED
     student.save()
-    AssignmentNotification.objects.all().delete()
-    assignment = AssignmentFactory(course=co)
+    assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 3
+
+
+@pytest.mark.django_db
+def test_new_assignment_create_notification_context(settings):
+    settings.SITE_ID = 1
+    settings.DEFAULT_URL_SCHEME = 'https'
+    current_domain = get_domain()
+    assert current_domain == TEST_DOMAIN
+    course = CourseFactory(city_id='spb')
+    enrollment = EnrollmentFactory(course=course, student__city_id='spb')
+    student = enrollment.student
+    assignment = AssignmentFactory(course=course)
+    assert AssignmentNotification.objects.count() == 1
+    an = AssignmentNotification.objects.first()
+    context = get_assignment_notification_context(an)
+    student_url = an.student_assignment.get_student_url()
+    parsed_url = urlparse(student_url)
+    relative_student_url = parsed_url.path
+    assert context['a_s_link_student'] == student_url
+    assert parsed_url.hostname == f"{settings.LMS_SUBDOMAIN}.{current_domain}"
+    assert context['a_s_link_student'] == f"https://{parsed_url.hostname}{relative_student_url}"
+    teacher_url = an.student_assignment.get_teacher_url()
+    assert context['a_s_link_teacher'] == teacher_url
+    parsed_url = urlparse(teacher_url)
+    assert parsed_url.hostname == f"{settings.LMS_SUBDOMAIN}.{current_domain}"
+    assignment_link = an.student_assignment.assignment.get_teacher_url()
+    assert context['assignment_link'] == assignment_link
+    assert context['course_name'] == str(course.meta_course)
+    assert context['student_name'] == str(student)
+
+
+@pytest.mark.django_db
+def test_new_course_news_notification_context(settings):
+    settings.SITE_ID = 1
+    settings.DEFAULT_URL_SCHEME = 'https'
+    current_domain = get_domain()
+    assert current_domain == TEST_DOMAIN
+    course = CourseFactory(city_id='spb')
+    student = StudentCenterFactory()
+    enrollment = EnrollmentFactory(course=course, student=student)
+    cn = CourseNewsNotificationFactory(course_offering_news__course=course,
+                                       user=student)
+    context = get_course_news_notification_context(cn)
+    assert context['course_link'] == course.get_absolute_url()
+    cn = CourseNewsNotificationFactory(course_offering_news__course=course,
+                                       user=StudentClubFactory())
+    context = get_course_news_notification_context(cn)
+    assert context['course_link'].startswith('https://compsciclub.ru')
 
 
 @pytest.mark.django_db
@@ -255,7 +310,6 @@ def test_create_deadline_change_notification(settings):
     s1.save()
     a = AssignmentFactory(course=co)
     assert AssignmentNotification.objects.count() == 1
-    # Expellee has no StudentAssignment model
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
     a.deadline_at = dt
     a.save()

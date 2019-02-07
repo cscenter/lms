@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+from urllib.parse import urlparse
 
 from django.apps import apps
 from django.conf import settings
@@ -55,25 +56,40 @@ LEARNING_PARTICIPANTS_CENTER = {
 }
 
 
-def get_base_url(notification):
+def get_base_domain(notification):
     """
     XXX: we resolve notifications for students or teachers only.
     Don't care about interviewers or project reviewers.
     """
     receiver = notification.user
     if isinstance(notification, AssignmentNotification):
-        co = notification.student_assignment.assignment.course
+        course = notification.student_assignment.assignment.course
     elif isinstance(notification, CourseNewsNotification):
-        co = notification.course_offering_news.course
+        course = notification.course_offering_news.course
     else:
         raise NotImplementedError()
     user_groups = {g.pk for g in receiver.groups.all()}
     if not user_groups.intersection(LEARNING_PARTICIPANTS_CENTER):
-        if co.get_city() == "spb":
-            return "http://compsciclub.ru"
+        if course.get_city() == "spb":
+            return "compsciclub.ru"
         else:
-            return "http://{}.compsciclub.ru".format(co.get_city())
-    return "https://compscicenter.ru"
+            return "{}.compsciclub.ru".format(course.get_city())
+    if isinstance(notification, AssignmentNotification):
+        return f"{settings.LMS_SUBDOMAIN}.compscicenter.ru"
+    return "compscicenter.ru"
+
+
+def replace_hostname(url, new_hostname):
+    """
+    `core.urls.reverse` returns domain based on settings.SITE_ID value, but
+    management command could be run from different envs
+    (e.g. send notification for compsciclub.ru)
+    """
+    parsed = urlparse(url)
+    replaced = parsed._replace(netloc=new_hostname,
+                               # FIXME: Default value for scheme on server side?
+                               scheme='https')
+    return replaced.geturl()
 
 
 def report(f, s):
@@ -123,7 +139,7 @@ def get_assignment_notification_template(notification: AssignmentNotification):
 
 
 def get_assignment_notification_context(notification: AssignmentNotification):
-    base_url = get_base_url(notification)
+    base_domain = get_base_domain(notification)
     a_s = notification.student_assignment
     tz_override = None
     u = notification.user
@@ -132,9 +148,10 @@ def get_assignment_notification_context(notification: AssignmentNotification):
             u.is_student or u.is_volunteer):
         tz_override = settings.TIME_ZONES[notification.user.city_code]
     context = {
-        'a_s_link_student': base_url + a_s.get_student_url(),
-        'a_s_link_teacher': base_url + a_s.get_teacher_url(),
-        'assignment_link': base_url + a_s.assignment.get_teacher_url(),
+        'a_s_link_student': replace_hostname(a_s.get_student_url(), base_domain),
+        'a_s_link_teacher': replace_hostname(a_s.get_teacher_url(), base_domain),
+        # FIXME: rename
+        'assignment_link': replace_hostname(a_s.assignment.get_teacher_url(), base_domain),
         'notification_created': notification.created_local(tz_override),
         'assignment_name': smart_text(a_s.assignment),
         'assignment_text': smart_text(a_s.assignment.text),
@@ -145,8 +162,20 @@ def get_assignment_notification_context(notification: AssignmentNotification):
     return context
 
 
+def get_course_news_notification_context(notification: CourseNewsNotification):
+    base_domain = get_base_domain(notification)
+    course = notification.course_offering_news.course
+    context = {
+        'course_link': replace_hostname(course.get_absolute_url(), base_domain),
+        'course_name': smart_text(course.meta_course),
+        'course_news_name': notification.course_offering_news.title,
+        'course_news_text': notification.course_offering_news.text,
+    }
+    return context
+
+
 class Command(BaseCommand):
-    help = 'Sends notifications through email'
+    help = 'Sends email notifications'
     can_import_settings = True
 
     def handle(self, *args, **options):
@@ -181,16 +210,8 @@ class Command(BaseCommand):
                    'course_offering_news__course__meta_course',
                    'course_offering_news__course__semester'))
         for notification in notifications_course_news:
-            base_url = get_base_url(notification)
-            course = notification.course_offering_news.course
-            template_code = 'new_course_news'
-            context = {
-                'course_link': base_url + course.get_absolute_url(),
-                'course_name': smart_text(course.meta_course),
-                'course_news_name': notification.course_offering_news.title,
-                'course_news_text': notification.course_offering_news.text,
-            }
-            send_notification(notification, EMAIL_TEMPLATES[template_code],
+            context = get_course_news_notification_context(notification)
+            send_notification(notification, EMAIL_TEMPLATES['new_course_news'],
                               context, self.stdout)
 
         from notifications.models import Notification
