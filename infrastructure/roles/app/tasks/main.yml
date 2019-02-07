@@ -64,6 +64,7 @@
   register: nginx_status
   tags:
     - nginx
+    - certbot
 
 # Note: if `https_enabled` is set to True, this command is idempotent only
 #  in combination with task which uncomment `ssl_certificate` and
