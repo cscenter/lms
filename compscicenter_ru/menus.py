@@ -7,14 +7,16 @@ from core.urls import reverse
 
 PRIVATE = settings.LMS_SUBDOMAIN
 
+# FIXME: write reverse_static_pages (urljoin subdomain + ...)
+PUBLIC_DOMAIN = 'https://compscicenter.ru'
+
 public_menu = [
     MenuItem(
         pgettext_lazy("menu", "О центре"),
-        # FIXME: что делать с такими штуками?
-        '/about/',
+        PUBLIC_DOMAIN + '/about/',
         weight=10,
         children=[
-            MenuItem(pgettext_lazy("menu", "Цели и история"), '/about/', weight=20),
+            MenuItem(pgettext_lazy("menu", "Цели и история"), PUBLIC_DOMAIN + '/about/', weight=20),
             MenuItem(pgettext_lazy("menu", "Программа"), reverse('syllabus'), weight=30),
             MenuItem(pgettext_lazy("menu", "Команда"), reverse('orgs'), weight=40),
             MenuItem(pgettext_lazy("menu", "Преподаватели"), reverse('teachers'), weight=50),
@@ -26,7 +28,7 @@ public_menu = [
         ]),
     MenuItem(
         pgettext_lazy("menu", "Курсы"),
-        '/courses/',
+        PUBLIC_DOMAIN + '/courses/',
         weight=20,
         excluded_patterns=[
             r"^/courses/.*/assignments/add$",
@@ -34,12 +36,12 @@ public_menu = [
         ]),
     MenuItem(
         pgettext_lazy("menu", "Онлайн"),
-        '/online/',
+        PUBLIC_DOMAIN + '/online/',
         weight=30,
         children=[
-            MenuItem(pgettext_lazy("menu", "Онлайн-курсы"), '/online/', weight=10),
+            MenuItem(pgettext_lazy("menu", "Онлайн-курсы"), reverse('online_courses:list'), weight=10),
             MenuItem(pgettext_lazy("menu", "Онлайн-программы"), 'https://code.stepik.org/', weight=20, is_external=True),
-            MenuItem(pgettext_lazy("menu", "Видео"), '/videos/', weight=30),
+            MenuItem(pgettext_lazy("menu", "Видео"), reverse('course_video_list'), weight=30),
         ]),
     MenuItem(
         pgettext_lazy("menu", "Лекторий"),
@@ -48,13 +50,13 @@ public_menu = [
         is_external=True),
     MenuItem(
         pgettext_lazy("menu", "Поступление"),
-        '/enrollment/',
+        PUBLIC_DOMAIN + '/enrollment/',
         weight=50,
         children=[
-            MenuItem(pgettext_lazy("menu", "Поступающим"), '/enrollment/', weight=10),
-            MenuItem(pgettext_lazy("menu", "Подать заявку"), '/application/closed/', weight=20),
-            MenuItem(pgettext_lazy("menu", "Программа для поступления"), '/enrollment/program/', weight=30),
-            MenuItem(pgettext_lazy("menu", "Вопросы и ответы"), '/faq/', weight=40),
+            MenuItem(pgettext_lazy("menu", "Поступающим"), PUBLIC_DOMAIN + '/enrollment/', weight=10),
+            MenuItem(pgettext_lazy("menu", "Подать заявку"), PUBLIC_DOMAIN + '/application/', weight=20),
+            MenuItem(pgettext_lazy("menu", "Программа для поступления"), PUBLIC_DOMAIN + '/enrollment/program/', weight=30),
+            MenuItem(pgettext_lazy("menu", "Вопросы и ответы"), reverse('faq'), weight=40),
         ]),
 ]
 
