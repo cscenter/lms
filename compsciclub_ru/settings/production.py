@@ -9,6 +9,7 @@ for template in TEMPLATES:
     template['OPTIONS']['debug'] = DEBUG
 
 ALLOWED_HOSTS = [".compsciclub.ru"]
+DEFAULT_URL_SCHEME = 'https'  # default scheme for `core.urls.reverse`
 
 MEDIA_ROOT = str(Path('/shared', 'media'))
 

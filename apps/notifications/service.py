@@ -1,13 +1,12 @@
 import abc
 import logging
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta
 
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import EmailMultiAlternatives
-from django.db.models import Model
 from django.db.transaction import atomic
-from django.template.loader import render_to_string, get_template
+from django.template.loader import get_template
 from django.utils.functional import cached_property
 from django.utils.html import linebreaks, strip_tags
 
@@ -22,8 +21,6 @@ class NotificationService:
     later.
     """
     __metaclass__ = ABCMeta
-
-    SITE_CENTER_URL = "https://my.compscicenter.ru"
 
     @abc.abstractmethod
     def template(self):
@@ -107,7 +104,7 @@ class NotificationService:
             co = notification.course_offering_news.course
         else:
             raise NotImplementedError()
-        # FIXME: запоминать, с какого сайта отправлено уведомление
+        # FIXME: запоминать, с какого сайта отправлено уведомление?
         in_club = AcademicRoles.STUDENT_CLUB in receiver.get_cached_groups()
         if in_club or (receiver.is_teacher_club and
                        not receiver.is_teacher_center):
@@ -116,6 +113,3 @@ class NotificationService:
             else:
                 return "http://{}.compsciclub.ru".format(co.get_city())
         return "https://compscicenter.ru"
-
-    def get_absolute_url(self, url, **kwargs):
-        return self.get_site_url(**kwargs) + url
