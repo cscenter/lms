@@ -31,8 +31,8 @@ class NotificationTest(CSCTestCase):
 
         from_user = UserFactory.create(username="from", password="pwd", email="example@example.com")
         to_user = UserFactory.create(username="to", password="pwd", email="example2@example.com")
-        from notifications import types
-        notify.send(from_user, type=types.LOG,
+        from notifications import NotificationTypes
+        notify.send(from_user, type=NotificationTypes.LOG,
                     recipient=to_user, verb='commented',
                     action_object=from_user)
         notification = Notification.objects.get(recipient=to_user)

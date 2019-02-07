@@ -31,7 +31,7 @@ from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportCuratorAssessmentForm, StudentResultsModelForm
 from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review
-from notifications import types
+from notifications import NotificationTypes
 from notifications.signals import notify
 from users.constants import AcademicRoles
 from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
@@ -457,7 +457,7 @@ class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):
         # TODO: add notification when user unsubscribed?
         notify.send(
             request.user,  # actor
-            type=types.PROJECT_REVIEWER_ENROLLED,
+            type=NotificationTypes.PROJECT_REVIEWER_ENROLLED,
             verb='enrolled in',
             action_object=project,
             public=False,
@@ -558,7 +558,7 @@ class ReportView(FormMixin, generic.DetailView):
         for recipient in curators:
             notify.send(
                 self.request.user,  # Reviewer
-                type=types.PROJECT_REPORT_REVIEW_COMPLETED,
+                type=NotificationTypes.PROJECT_REPORT_REVIEW_COMPLETED,
                 verb='changed',
                 action_object=review,
                 target=report,
@@ -826,7 +826,7 @@ class ReportUpdateStatusView(ReportUpdateViewMixin):
         for recipient in reviewers:
             notify.send(
                 self.request.user,  # Curator who changed status
-                type=types.PROJECT_REPORTS_IN_REVIEW_STATE,
+                type=NotificationTypes.PROJECT_REPORTS_IN_REVIEW_STATE,
                 verb='changed',
                 target=report,
                 recipient=recipient,
@@ -867,7 +867,7 @@ class ReportCuratorSummarizeView(ReportUpdateViewMixin):
         }
         notify.send(
             self.request.user,  # Curator who complete reviewing
-            type=types.PROJECT_REPORT_COMPLETED,
+            type=NotificationTypes.PROJECT_REPORT_COMPLETED,
             verb='complete',
             # In this case action_object and target are the same
             target=self.object,

@@ -2,13 +2,13 @@
 
 from core.urls import reverse
 from learning.projects.models import ReportComment, Report
-from notifications import types
+from notifications import NotificationTypes
 from notifications.decorators import register
 from notifications.service import NotificationService
 from users.models import User
 
 
-@register(notification_type=types.NEW_PROJECT_REPORT)
+@register(notification_type=NotificationTypes.NEW_PROJECT_REPORT)
 class NewReport(NotificationService):
     """
     Student <actor> sent <verb> Report <action_object> on project" <target>
@@ -58,7 +58,7 @@ class NewReport(NotificationService):
         return self.SITE_CENTER_URL
 
 
-@register(notification_type=types.NEW_PROJECT_REPORT_COMMENT)
+@register(notification_type=NotificationTypes.NEW_PROJECT_REPORT_COMMENT)
 class NewReportComment(NotificationService):
     """
     Student <actor> added <verb> comment <action_object> on
@@ -124,7 +124,7 @@ class NewReportComment(NotificationService):
         return self.SITE_CENTER_URL
 
 
-@register(notification_type=types.PROJECT_REPORTS_IN_REVIEW_STATE)
+@register(notification_type=NotificationTypes.PROJECT_REPORTS_IN_REVIEW_STATE)
 class ReportInReviewState(NotificationService):
     """
     Curator <actor> changed <verb> status on "Report for project" <target>
@@ -164,7 +164,7 @@ class ReportInReviewState(NotificationService):
         return self.SITE_CENTER_URL
 
 
-@register(notification_type=types.PROJECT_REPORT_COMPLETED)
+@register(notification_type=NotificationTypes.PROJECT_REPORT_COMPLETED)
 class ReportCompleted(NotificationService):
     """
     Curator <actor> sent email <verb> to Student <recipient>
@@ -196,7 +196,7 @@ class ReportCompleted(NotificationService):
         return "practice@compscicenter.ru"
 
 
-@register(notification_type=types.PROJECT_REPORT_REVIEW_COMPLETED)
+@register(notification_type=NotificationTypes.PROJECT_REPORT_REVIEW_COMPLETED)
 class ReviewCompleted(NotificationService):
     """
     Reviewer <actor> complete <verb> review <action_object> on "Report" <target>
@@ -255,7 +255,7 @@ class ReviewCompleted(NotificationService):
         return self.SITE_CENTER_URL
 
 
-@register(notification_type=types.PROJECT_REPORTING_STARTED)
+@register(notification_type=NotificationTypes.PROJECT_REPORTING_STARTED)
 class ProjectReportingStarted(NotificationService):
     """
     Was sent notification <action_object> about the beginning of the
@@ -285,7 +285,7 @@ class ProjectReportingStarted(NotificationService):
         return self.SITE_CENTER_URL
 
 
-@register(notification_type=types.PROJECT_REPORTING_ENDED)
+@register(notification_type=NotificationTypes.PROJECT_REPORTING_ENDED)
 class ProjectReportingEnded(NotificationService):
     """
     Was sent notification <action_object> about the ending of the

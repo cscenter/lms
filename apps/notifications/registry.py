@@ -1,5 +1,5 @@
 from collections import Iterable
-from notifications import types
+from notifications import NotificationTypes
 
 
 class AlreadyRegistered(Exception):
@@ -47,10 +47,10 @@ class NotificationRegistry(object):
             del self._registry[notification_type.name]
 
     def default_handler_class(self):
-        return self[types.EMPTY]
+        return self[NotificationTypes.EMPTY]
 
     def __contains__(self, notification_type):
-        if not isinstance(notification_type, types):
+        if not isinstance(notification_type, NotificationTypes):
             return False
         return notification_type.name in self._registry
 
@@ -61,7 +61,7 @@ class NotificationRegistry(object):
         return self._registry
 
     def __getitem__(self, notification_type):
-        if isinstance(notification_type, types):
+        if isinstance(notification_type, NotificationTypes):
             code = notification_type.name
         else:
             code = notification_type

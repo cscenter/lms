@@ -112,8 +112,8 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             }
         )
 
-        from notifications import types
-        for t in types:
+        from notifications import NotificationTypes
+        for t in NotificationTypes:
             Type.objects.update_or_create(
                 id=t.value,
                 defaults={

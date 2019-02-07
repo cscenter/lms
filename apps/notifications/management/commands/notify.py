@@ -15,34 +15,34 @@ from django.utils.html import strip_tags, linebreaks
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
 from users.constants import AcademicRoles
-from notifications import types as notification_types
+from notifications import NotificationTypes as notification_types
 
 logger = logging.getLogger(__name__)
 
-EMAILS = {
+EMAIL_TEMPLATES = {
     'new_comment_for_student': {
-        'title': "Преподаватель оставил комментарий к решению задания",
-        'template': "emails/new_comment_for_student.html"
+        'subject': "Преподаватель оставил комментарий к решению задания",
+        'template_name': "emails/new_comment_for_student.html"
     },
     'assignment_passed': {
-        'title': "Студент сдал домашнее задание",
-        'template': "emails/assignment_passed.html"
+        'subject': "Студент сдал домашнее задание",
+        'template_name': "emails/assignment_passed.html"
     },
     'new_comment_for_teacher': {
-        'title': "Студент оставил комментарий к решению задания",
-        'template': "emails/new_comment_for_teacher.html"
+        'subject': "Студент оставил комментарий к решению задания",
+        'template_name': "emails/new_comment_for_teacher.html"
     },
     'new_course_news': {
-        'title': "Добавлена новость к курсу",
-        'template': "emails/new_course_news.html"
+        'subject': "Добавлена новость к курсу",
+        'template_name': "emails/new_course_news.html"
     },
     'deadline_changed': {
-        'title': "Изменился срок сдачи домашнего задания",
-        'template': "emails/deadline_changed.html"
+        'subject': "Изменился срок сдачи домашнего задания",
+        'template_name': "emails/deadline_changed.html"
     },
     'new_assignment': {
-        'title': "Появилось новое домашнее задание",
-        'template': "emails/new_assignment.html"
+        'subject': "Появилось новое домашнее задание",
+        'template_name': "emails/new_assignment.html"
     },
 }
 
@@ -81,8 +81,9 @@ def report(f, s):
     f.write("{0} {1}".format(dt, s))
 
 
-def send_notification(notification, name, context, f):
+def send_notification(notification, template, context, f):
     """Sends email notification, then updates notification state in DB"""
+    # XXX: Note that email is mandatory now
     if not notification.user.email:
         report(f, "User {0} doesn't have an email"
                .format(smart_text(notification.user)))
@@ -90,21 +91,35 @@ def send_notification(notification, name, context, f):
         notification.save()
         return
 
-    html_content = linebreaks(render_to_string(EMAILS[name]['template'],
+    html_content = linebreaks(render_to_string(template['template_name'],
                                                context))
     text_content = strip_tags(html_content)
 
     msg = EmailMultiAlternatives("[{}] {}".format(context['course_name'],
-                                                  EMAILS[name]['title']),
+                                                  template['subject']),
                                  text_content,
                                  settings.DEFAULT_FROM_EMAIL,
                                  [notification.user.email])
     msg.attach_alternative(html_content, "text/html")
     report(f, "sending {0} ({1})".format(smart_text(notification),
-                                         smart_text(name)))
+                                         smart_text(template)))
     msg.send()
     notification.is_notified = True
     notification.save()
+
+
+def get_assignment_notification_template(notification: AssignmentNotification):
+    if notification.is_about_creation:
+        template_code = 'new_assignment'
+    elif notification.is_about_deadline:
+        template_code = 'deadline_changed'
+    elif notification.is_about_passed:
+        template_code = 'assignment_passed'
+    elif notification.user == notification.student_assignment.student:
+        template_code = 'new_comment_for_student'
+    else:
+        template_code = 'new_comment_for_teacher'
+    return EMAIL_TEMPLATES[template_code]
 
 
 def get_assignment_notification_context(notification: AssignmentNotification):
@@ -149,23 +164,11 @@ class Command(BaseCommand):
                 'student_assignment__assignment',
                 'student_assignment__assignment__course',
                 'student_assignment__assignment__course__meta_course',
-                'student_assignment__student')
-        )
-
+                'student_assignment__student'))
         for notification in notifications_assignments:
             context = get_assignment_notification_context(notification)
-            if notification.is_about_creation:
-                name = 'new_assignment'
-            elif notification.is_about_deadline:
-                name = 'deadline_changed'
-            elif notification.is_about_passed:
-                name = 'assignment_passed'
-            elif notification.user == notification.student_assignment.student:
-                name = 'new_comment_for_student'
-            else:
-                name = 'new_comment_for_teacher'
-
-            send_notification(notification, name, context, self.stdout)
+            template = get_assignment_notification_template(notification)
+            send_notification(notification, template, context, self.stdout)
 
         notifications_course_news \
             = (CourseNewsNotification.objects
@@ -177,19 +180,18 @@ class Command(BaseCommand):
                    'course_offering_news__course',
                    'course_offering_news__course__meta_course',
                    'course_offering_news__course__semester'))
-
         for notification in notifications_course_news:
             base_url = get_base_url(notification)
             course = notification.course_offering_news.course
-            name = 'new_course_news'
+            template_code = 'new_course_news'
             context = {
                 'course_link': base_url + course.get_absolute_url(),
                 'course_name': smart_text(course.meta_course),
                 'course_news_name': notification.course_offering_news.title,
                 'course_news_text': notification.course_offering_news.text,
             }
-
-            send_notification(notification, name, context, self.stdout)
+            send_notification(notification, EMAIL_TEMPLATES[template_code],
+                              context, self.stdout)
 
         from notifications.models import Notification
         from notifications.registry import registry
@@ -197,7 +199,6 @@ class Command(BaseCommand):
                                 .unread()
                                 .filter(public=True, emailed=False)
                                 .select_related("recipient"))
-
         # FIXME: I was wrong. It's hard to understand and debug. Refactor
         # id => code
         types_map = {v: k for k, v in
@@ -223,4 +224,5 @@ class Command(BaseCommand):
                                "Mark as deleted.".format(code))
                 Notification.objects.filter(pk=notification.pk).update(
                     deleted=True)
+
         translation.deactivate()
