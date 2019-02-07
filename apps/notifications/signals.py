@@ -21,11 +21,11 @@ def notify_handler(type, **kwargs):
     """
     from django.contrib.contenttypes.models import ContentType
     from django.contrib.auth.models import Group
-    from notifications import types
-    from notifications.models import Type, Notification
+    from notifications import NotificationTypes
+    from notifications.models import Notification
     from users.models import User
 
-    if not isinstance(type, types):
+    if not isinstance(type, NotificationTypes):
         raise ValueError("Notification type must be an instance "
                          "of NotificationType cls")
 

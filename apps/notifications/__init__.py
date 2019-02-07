@@ -118,5 +118,5 @@ def autodiscover():
 
 
 DEFAULT_TYPES = ["EMPTY", "LOG"]
-types = Enum(value='NotificationTypes',
-             names=(DEFAULT_TYPES + NOTIFICATION_TYPES))
+NotificationTypes = Enum(value='NotificationTypes',
+                         names=(DEFAULT_TYPES + NOTIFICATION_TYPES))

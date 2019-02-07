@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from notifications import types
+from notifications import NotificationTypes
 from notifications.service import NotificationService
 from notifications.registry import registry as notification_registry
 
@@ -21,7 +21,7 @@ def register(notification_type):
             pass
     """
 
-    if not isinstance(notification_type, types):
+    if not isinstance(notification_type, NotificationTypes):
         raise ValueError('notification type must be instance of '
                          'NotificationTypes.')
 

@@ -131,7 +131,10 @@ class Notification(models.Model):
                              default=LevelTypes.info,
                              max_length=20)
 
-    type = models.ForeignKey(Type, related_name="+", on_delete=models.CASCADE)
+    type = models.ForeignKey(
+        Type,
+        related_name="+",  # Don't create a backwards relation
+        on_delete=models.CASCADE)
 
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL,
                                   blank=True,

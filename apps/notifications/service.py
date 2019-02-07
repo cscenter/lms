@@ -23,7 +23,7 @@ class NotificationService:
     """
     __metaclass__ = ABCMeta
 
-    SITE_CENTER_URL = "https://compscicenter.ru"
+    SITE_CENTER_URL = "https://my.compscicenter.ru"
 
     @abc.abstractmethod
     def template(self):

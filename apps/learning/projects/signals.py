@@ -10,7 +10,7 @@ from learning.projects.models import ProjectStudent, Report, Project, Review, \
     ReportComment
 from learning.settings import GradeTypes
 from users.constants import AcademicRoles
-from notifications import types
+from notifications import NotificationTypes
 from notifications.signals import notify
 
 _UNSAVED_FILE_SUPERVISOR_PRESENTATION = 'unsaved_supervisor_presentation'
@@ -112,7 +112,7 @@ def post_save_report(sender, instance, created, *args, **kwargs):
             for recipient in recipients:
                 notify.send(
                     report.project_student.student,  # actor
-                    type=types.NEW_PROJECT_REPORT,
+                    type=NotificationTypes.NEW_PROJECT_REPORT,
                     verb='sent',
                     action_object=report,
                     target=report.project_student.project,
@@ -168,7 +168,7 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
         for recipient in recipients.values():
             notify.send(
                 comment.author,  # actor
-                type=types.NEW_PROJECT_REPORT_COMMENT,
+                type=NotificationTypes.NEW_PROJECT_REPORT_COMMENT,
                 verb='added',
                 action_object=comment,
                 target=comment.report,

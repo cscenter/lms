@@ -1,9 +1,9 @@
 from notifications.decorators import register
 from notifications.service import NotificationService
-from notifications import types
+from notifications import NotificationTypes
 
 
-@register(notification_type=types.EMPTY)
+@register(notification_type=NotificationTypes.EMPTY)
 class EmptyNotification(NotificationService):
     """
     Default service to queue any registered notification,
@@ -19,7 +19,7 @@ class EmptyNotification(NotificationService):
         pass
 
 
-@register(notification_type=types.LOG)
+@register(notification_type=NotificationTypes.LOG)
 class LogNotification(NotificationService):
     subject = None
     template = None

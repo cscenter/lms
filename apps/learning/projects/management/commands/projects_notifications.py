@@ -11,7 +11,7 @@ from courses.models import Semester
 from learning.projects.models import ProjectStudent
 from learning.settings import GradeTypes
 from core.constants import DATE_FORMAT_RU
-from notifications import types
+from notifications import NotificationTypes
 from notifications.models import Notification
 from notifications.signals import notify
 
@@ -35,7 +35,7 @@ class Command(BaseCommand):
         remind_about_end_today = (current_term.report_ends_at and
             today.date() == current_term.report_ends_at - timedelta(days=1))
         if remind_about_start_today:
-            notification_code = types.PROJECT_REPORTING_STARTED.name
+            notification_code = NotificationTypes.PROJECT_REPORTING_STARTED.name
             notification_type_id = notification_type_map[notification_code]
             # Check notifications since term start
             filters = dict(
@@ -45,9 +45,9 @@ class Command(BaseCommand):
             if Notification.objects.filter(**filters).count() > 0:
                 return
             self.generate_notifications(current_term,
-                                        types.PROJECT_REPORTING_STARTED)
+                                        NotificationTypes.PROJECT_REPORTING_STARTED)
         elif remind_about_end_today:
-            notification_code = types.PROJECT_REPORTING_ENDED.name
+            notification_code = NotificationTypes.PROJECT_REPORTING_ENDED.name
             notification_type_id = notification_type_map[notification_code]
             # Check notifications since reporting period start
             filters = dict(
@@ -57,7 +57,7 @@ class Command(BaseCommand):
             if Notification.objects.filter(**filters).count() > 0:
                 return
             self.generate_notifications(current_term,
-                                        types.PROJECT_REPORTING_ENDED)
+                                        NotificationTypes.PROJECT_REPORTING_ENDED)
 
     @transaction.atomic
     def generate_notifications(self, term, notification_type):
