@@ -33,7 +33,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
     def get(self, request, *args, **kwargs):
         # Redirects old style links
         if "tab" in request.GET:
-            url_params = dict(self.kwargs)
+            url_params = self.get_course_url_params()
             try:
                 tab_name = request.GET["tab"]
                 url = reverse("course_detail_with_active_tab",
