@@ -1,0 +1,30 @@
+location /media/  {
+    root /shared;
+    access_log off;
+    tcp_nodelay off;
+    # gzip_static on;
+    gzip on;
+    expires 6h;
+    add_header Cache-Control public,max-age=21600;
+
+    location /media/assignments/ {
+        internal;
+    }
+}
+
+location /static {
+    alias {{ static_root }};
+    access_log off;
+    tcp_nodelay off;
+    gzip_static on;
+    gzip on;
+    gzip_min_length 1100;
+    gzip_types text/css text/javascript application/javascript;
+    expires 1M;
+    add_header Cache-Control public,max-age=2592000;
+}
+
+location ~ ^/apple-touch-icon(|-\d+x\d+)(|-precomposed).png {
+    return 204;
+    log_not_found off;
+}

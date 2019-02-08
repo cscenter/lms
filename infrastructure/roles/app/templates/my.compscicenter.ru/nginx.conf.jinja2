@@ -4,6 +4,42 @@ server {
     listen {% if enable_https %}443 ssl http2{% else %}80{% endif %};
     server_name my.{{ main_domain }}{% if hosts_override is defined and hosts_override == 'vagrant-test-hosts' %} my.csc.vagrant{% endif %};
 
-{% include 'compscicenter.ru/_nginx.conf.jinja2' %}
+    charset utf-8;
+    client_max_body_size 42m;
 
+    {% if enable_https -%}
+        {% filter indent(width=4) -%}
+            {% include 'compscicenter.ru/_nginx.ssl.jinja2' %}
+        {% endfilter %}
+    {% endif -%}
+
+    resolver 8.8.8.8;
+
+    error_page 404 =404 @show_404;
+
+    location @show_404 {
+        root {{ repo_root }}/{{ apps_dir_name }}/templates/;
+        try_files /errors/404.html =404;
+    }
+
+    {% filter indent(width=4) -%}
+    {% include 'compscicenter.ru/_nginx.locations.jinja2' %}
+    {% endfilter %}
+
+    # Django
+    location / {
+        set $frame_options '';
+        if ($http_referer !~ '^https?:\/\/([^\/]+\.)?(compscicenter\.ru|webvisor\.com)\/'){
+            set $frame_options 'SAMEORIGIN';
+        }
+        add_header X-Frame-Options $frame_options;
+        add_header Cache-Control no-cache,no-store,must-revalidate;
+
+        # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
+        gzip on;
+        # Serve 30x statuses with nginx
+        uwsgi_intercept_errors on;
+        uwsgi_pass django_{{ site_user }};
+        include uwsgi_params;
+    }
 }
