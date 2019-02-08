@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from django.http import HttpResponseBadRequest
 
@@ -42,3 +43,10 @@ class CourseURLParamsMixin:
                         semester__year=self.kwargs['semester_year'],
                         meta_course__slug=self.kwargs['course_slug'])
                 .in_city(self.request.city_code))
+
+    def get_course_url_params(self) -> Dict:
+        url_params = dict(self.kwargs)
+        # Remove arguments added by CourseURLParamsMixin
+        del url_params['semester_type']
+        del url_params['semester_year']
+        return url_params
