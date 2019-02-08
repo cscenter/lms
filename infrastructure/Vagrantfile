@@ -25,12 +25,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             ansible.tags = ["app-deployment"]
             ansible.skip_tags = ["cronjobs", "lvm-role"]
             ansible.extra_vars = {
-              hosts_override: "test",
+              hosts_override: "vagrant-test-hosts",
               enable_https: false
             }
             ansible.playbook = "setup.yml"
             ansible.groups = {
-                "test" => ["web"]
+                "vagrant-test-hosts" => ["web"]
             }
         end
     end

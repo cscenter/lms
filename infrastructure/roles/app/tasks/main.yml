@@ -20,9 +20,9 @@
     - db_name
     - db_user
     - db_user_password
-    - default_server
     - setup_cronjobs
     - certbot_domains
+    - nginx_configs
     - certbot_config_dir
     - rq_workers
     - rq_workers_target_service_name
@@ -47,7 +47,7 @@
   with_items:
     - logs
 
-- name: clone website repo
+- name: Clone website repo
   become: yes
   become_user: "{{ site_user }}"
   git:
@@ -56,7 +56,7 @@
     dest: "/home/{{ site_user }}/site/repo"
     key_file: "/home/{{ site_user }}/.ssh/id_rsa"
 
-- name: Ensure folder for file-based cache exists
+- name: Ensure directory for file-based cache exists
   file: path=/tmp/django_cache mode=777 state=directory
 
 - name: Nginx status
@@ -69,20 +69,26 @@
 # Note: if `https_enabled` is set to True, this command is idempotent only
 #  in combination with task which uncomment `ssl_certificate` and
 #  `ssl_certificate_key` lines (see in certbot.yml)
-- name: Copy nginx config
+- name: Copy nginx configs
   template:
-    src: "{{ main_domain }}/nginx.conf.jinja2"
-    dest: "/etc/nginx/sites-available/{{ main_domain }}.conf"
+    src: "{{ nginx_domain }}/nginx.conf.jinja2"
+    dest: "/etc/nginx/sites-available/{{ nginx_domain }}.conf"
   notify: reload_nginx
   when: nginx_status.stat.exists
+  loop: "{{ nginx_configs }}"
+  loop_control:
+    loop_var: nginx_domain
   tags:
     - nginx
 
 - name: Symlink nginx config
   file:
-    src: "/etc/nginx/sites-available/{{ main_domain }}.conf"
-    dest: "/etc/nginx/sites-enabled/{{ main_domain }}.conf"
+    src: "/etc/nginx/sites-available/{{ nginx_domain }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ nginx_domain }}.conf"
     state: link
+  loop: "{{ nginx_configs }}"
+  loop_control:
+    loop_var: nginx_domain
   tags:
     - nginx
   when: nginx_status.stat.exists

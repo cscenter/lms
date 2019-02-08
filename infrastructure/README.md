@@ -72,7 +72,7 @@ make deploy app_user=cscenter
 # Create test machine and run full setup.yml playbook on it
 vagrant provision
 # How to run playbook if test machine is already running (doesn't work well with setup.yml, try to use on a single app playbook) 
-ansible-playbook -i ./.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory -e "{'enable_https':no, 'hosts_override':'test'}" cs_center.yml  --tags="cronjobs" --list-tasks 
+ansible-playbook -i ./.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory -e "{'enable_https':no, 'hosts_override':'vagrant-test-hosts'}" cs_center.yml  --tags="cronjobs" --list-tasks 
 ```
 
 

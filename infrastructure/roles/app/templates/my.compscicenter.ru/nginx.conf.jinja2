@@ -1,0 +1,9 @@
+# {{ ansible_managed }}
+{# FIXME: This configuration depends on `django_{{ site_user }}` upstream and have to be included after `compscicenter.ru` nginx config #}
+server {
+    listen {% if enable_https %}443 ssl http2{% else %}80{% endif %};
+    server_name my.{{ main_domain }}{% if hosts_override is defined and hosts_override == 'vagrant-test-hosts' %} my.csc.vagrant{% endif %};
+
+{% include 'compscicenter.ru/_nginx.conf.jinja2' %}
+
+}

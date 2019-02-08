@@ -29,11 +29,14 @@
 # Note: Make sure nginx configs were copied to `dest` (see `nginx.yml`)
 - name: Uncomment `ssl_certificate` and `ssl_certificate_key`
   replace:
-    dest: "/etc/nginx/sites-available/{{ main_domain }}.conf"
+    dest: "/etc/nginx/sites-available/{{ nginx_domain }}.conf"
     regexp: '^(\s*)# ssl_certificate(.*);$'
     replace: '\1ssl_certificate\2;'
     backup: no
   notify: reload_nginx
+  loop: "{{ nginx_configs }}"
+  loop_control:
+    loop_var: nginx_domain
   tags:
     - certbot
     - tls

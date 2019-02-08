@@ -23,12 +23,14 @@
         db_name: cscdb
         db_user: csc
         db_user_password: FooBar
-        default_server: yes
         setup_cronjobs: yes
         certbot_domains:
           - "{{ main_domain }}"
           - "www.compscicenter.ru"
           - "my.compscicenter.ru"
+        nginx_configs:
+          - "{{ main_domain }}"
+          - "my.{{ main_domain }}"
         certbot_config_dir: "/etc/letsencrypt/live/compscicenter.ru"
         rq_workers:
           - default

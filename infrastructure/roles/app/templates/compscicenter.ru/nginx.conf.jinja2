@@ -2,6 +2,7 @@
 upstream django_{{ site_user }} {
     server unix:///tmp/uwsgi_{{ site_dir_name }}.socket;
 }
+
 {% if enable_https %}
 server {
     listen 80;
@@ -37,98 +38,8 @@ server {
 
 server {
     listen {% if enable_https %}443 ssl http2{% else %}80{% endif %} default_server;
-    server_name{% for domain in certbot_domains -%}
-        {% if not domain.startswith("www") %} {{ domain }}{% endif %}
-    {%- endfor %};
+    server_name {{ main_domain }}{% if hosts_override is defined and hosts_override == 'vagrant-test-hosts' %} csc.vagrant{% endif %};
 
-    charset utf-8;
-    client_max_body_size 42m;
-    {% if enable_https -%}
-    # ssl config by Mozilla https://wiki.mozilla.org/Security/Server_Side_TLS
+{% include 'compscicenter.ru/_nginx.conf.jinja2' %}
 
-    # certs sent to the client in SERVER HELLO are concatenated in ssl_certificate
-    # ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
-    # ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
-    ssl_session_timeout 10m;
-    ssl_session_cache shared:SSL:10m;
-
-    # Diffie-Hellman parameter for DHE ciphersuites, recommended 2048 bits
-    ssl_dhparam /etc/nginx/crypto/dhparam.pem;
-
-    # modern configuration. tweak to your needs.
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
-    ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA';
-    ssl_prefer_server_ciphers on;
-
-    # Enable HSTS, ngx_http_headers_module is required (15768000 seconds = 6 months)
-    add_header Strict-Transport-Security max-age=15768000;
-
-    # Fetch OCSP records from URL in ssl_certificate and cache them
-    ssl_stapling on;
-    ssl_stapling_verify on;
-
-    # Verify chain of trust of OCSP response using Root CA and Intermediate certs
-    # We don't need to specify ssl_trusted_certificate, because Let's Encrypt
-    # creates fullchain.pem containing all certificates and we use that
-    # for ssl_certificate already.
-    # ssl_trusted_certificate {{ certbot_config_dir }}/{{ certbot_trusted_chain_filename }};
-    {% endif -%}
-    resolver 8.8.8.8;
-
-    error_page 404 =404 @show_404;
-
-    location @show_404 {
-        root {{ repo_root }}/{{ apps_dir_name }}/templates/;
-        try_files /errors/404.html =404;
-    }
-
-    rewrite ^/lectures/$ http://open.compscicenter.ru/ permanent;
-
-    location /media/  {
-        root /shared;
-        access_log off;
-        tcp_nodelay off;
-        # gzip_static on;
-        gzip on;
-        expires 6h;
-        add_header Cache-Control public,max-age=21600;
-
-        location /media/assignments/ {
-            internal;
-        }
-    }
-
-    location /static {
-        alias {{ static_root }};
-        access_log off;
-        tcp_nodelay off;
-        gzip_static on;
-        gzip on;
-        gzip_min_length 1100;
-        gzip_types text/css text/javascript application/javascript;
-        expires 1M;
-        add_header Cache-Control public,max-age=2592000;
-    }
-
-    location ~ ^/apple-touch-icon(|-\d+x\d+)(|-precomposed).png {
-        return 204;
-        log_not_found off;
-    }
-
-    # Django
-    location / {
-        set $frame_options '';
-        if ($http_referer !~ '^https?:\/\/([^\/]+\.)?(compscicenter\.ru|webvisor\.com)\/'){
-            set $frame_options 'SAMEORIGIN';
-        }
-        add_header X-Frame-Options $frame_options;
-        add_header Cache-Control no-cache,no-store,must-revalidate;
-
-        # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
-        gzip on;
-        # Serve 30x statuses with nginx
-        uwsgi_intercept_errors on;
-        uwsgi_pass django_{{ site_user }};
-        include uwsgi_params;
-    }
 }
