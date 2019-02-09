@@ -60,15 +60,7 @@
               </td>
               <td>
                   {% if course.enrollment_is_open %}
-
-                <form method="post" action="{{ course.get_enroll_url }}">
-                {% csrf_token %}
-                <input type="hidden" name="course_pk" value="{{ course.pk }}">
-                <input type="hidden" name="back" value="study:course_list">
-                <button type="submit" class="btn btn-default btn-sm btn-block">
-                  {% trans "Enroll" %}
-                </button>
-              </form>
+                    <a href="{{ course.get_enroll_url }}" class="btn btn-default btn-sm btn-block">{% trans "Enroll" %}</a>
                   {% endif %}
               </td>
             </tr>
