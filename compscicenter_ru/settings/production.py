@@ -89,6 +89,7 @@ EMAIL_HOST_PASSWORD = 'P@ssw0rd238'
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_DOMAIN = '.compscicenter.ru'
 
 
 # -- learning
