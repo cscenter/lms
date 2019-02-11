@@ -4,31 +4,34 @@ import os
 import posixpath
 
 from braces.views import UserPassesTestMixin
+from django.core.exceptions import PermissionDenied
 from django.db.models import Prefetch, prefetch_related_objects
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
-    HttpResponseForbidden, HttpResponseNotFound
+    HttpResponseForbidden, HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from nbconvert import HTMLExporter
-from vanilla import CreateView
+from vanilla import CreateView, TemplateView
 
 from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from courses.models import AssignmentAttachment
 from courses.settings import ASSIGNMENT_TASK_ATTACHMENT
+from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, AssignmentComment, \
-    AssignmentNotification, Event
+    AssignmentNotification, Event, CourseNewsNotification
 from learning.permissions import course_access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT
+from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)
 
 
 __all__ = (
     'AssignmentSubmissionBaseView', 'EventDetailView',
-    'AssignmentAttachmentDownloadView',
+    'AssignmentAttachmentDownloadView', 'CourseNewsNotificationUpdate',
 )
 
 
@@ -207,3 +210,32 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
                     content_disposition = 'inline'
 
         return ProtectedMediaFileResponse(media_file_uri, content_disposition)
+
+
+class CourseNewsNotificationUpdate(LoginRequiredMixin, CourseURLParamsMixin,
+                                   generic.View):
+    raise_exception = True
+
+    def post(self, request, *args, **kwargs):
+        course = get_object_or_404(self.get_course_queryset())
+        updated = (CourseNewsNotification.unread
+                   .filter(course_offering_news__course=course,
+                           user_id=self.request.user.pk)
+                   .update(is_unread=False))
+        return JsonResponse({"updated": bool(updated)})
+
+
+class CourseStudentsView(TeacherOnlyMixin, CourseURLParamsMixin, TemplateView):
+    # raise_exception = True
+    template_name = "learning/course_students.html"
+
+    def handle_no_permission(self, request):
+        raise Http404
+
+    def get_context_data(self, **kwargs):
+        co = get_object_or_404(self.get_course_queryset())
+        return {
+            "co": co,
+            "enrollments": (co.enrollment_set(manager="active")
+                            .select_related("student"))
+        }

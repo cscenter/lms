@@ -437,7 +437,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
                            "semester_type": self.semester.type,
                            "semester_year": self.semester.year,
                        })
-    # TODO: Replace with `get_gradebook_url` after migrating to jinja2
+    # TODO: Merge with `get_gradebook_url` after migrating to jinja2
     def get_gradebook_csv_url(self):
         return reverse("teaching:gradebook_csv",
                        kwargs={
@@ -446,6 +446,11 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
                            "semester_type": self.semester.type,
                            "semester_year": self.semester.year,
                        })
+
+    def get_course_news_notifications_url(self):
+        return city_aware_reverse('course_news_notifications_read',
+                                  kwargs=self._get_url_kwargs(),
+                                  subdomain=settings.LMS_SUBDOMAIN)
 
     def get_city(self):
         return self.city_id

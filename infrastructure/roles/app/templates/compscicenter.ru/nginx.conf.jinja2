@@ -3,6 +3,19 @@ upstream django_{{ site_user }} {
     server unix:///tmp/uwsgi_{{ site_dir_name }}.socket;
 }
 
+map $http_origin $cors_origin_header_value {
+    default "";
+
+    # Support all known subdomains except www.*
+    {% for domain in certbot_domains %}{% if not domain.startswith('www') -%}
+    "http{% if enable_https %}s{% endif %}://{{ domain }}" "$http_origin";
+    {% endif %}{% endfor %}
+    {%- if hosts_override is defined and hosts_override == 'vagrant-test-hosts' -%}
+    "http{% if enable_https %}s{% endif %}://csc.vagrant" "$http_origin";
+    "http{% if enable_https %}s{% endif %}://my.csc.vagrant" "$http_origin";
+    {% endif %}
+}
+
 {% if enable_https -%}
 server {
     listen 80;
@@ -75,6 +88,10 @@ server {
         }
         add_header X-Frame-Options $frame_options;
         add_header Cache-Control no-cache,no-store,must-revalidate;
+
+        {% filter indent(width=8) -%}
+        {% include 'compscicenter.ru/_nginx.cors.jinja2' %}
+        {% endfilter %}
 
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
         gzip on;

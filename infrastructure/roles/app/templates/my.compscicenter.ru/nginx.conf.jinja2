@@ -1,5 +1,6 @@
 # {{ ansible_managed }}
-{# FIXME: This configuration depends on `django_{{ site_user }}` upstream and have to be included after `compscicenter.ru` nginx config #}
+{# FIXME: This configuration depends on compscicenter.ru conf (see `django_{{ site_user }}` upstream and `map $http_origin`) #}
+
 server {
     listen {% if enable_https %}443 ssl http2{% else %}80{% endif %};
     server_name my.{{ main_domain }}{% if hosts_override is defined and hosts_override == 'vagrant-test-hosts' %} my.csc.vagrant{% endif %};
@@ -34,6 +35,10 @@ server {
         }
         add_header X-Frame-Options $frame_options;
         add_header Cache-Control no-cache,no-store,must-revalidate;
+
+        {% filter indent(width=8) -%}
+        {% include 'compscicenter.ru/_nginx.cors.jinja2' %}
+        {% endfilter %}
 
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
         gzip on;

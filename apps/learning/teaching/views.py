@@ -4,8 +4,8 @@ from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.http import Http404, JsonResponse, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404, redirect
+from django.http import JsonResponse, HttpResponseBadRequest
+from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.generic.edit import BaseUpdateView
@@ -22,7 +22,6 @@ from courses.settings import SemesterTypes
 from courses.utils import get_terms_for_calendar_month, get_term_index, \
     get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
-from courses.views.mixins import CourseURLParamsMixin
 from learning.calendar import get_month_events
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
 from learning.gradebook.views import GradeBookListBaseView
@@ -333,22 +332,6 @@ class CourseListView(TeacherOnlyMixin, generic.ListView):
                 .select_related('meta_course', 'semester')
                 .prefetch_related('teachers')
                 .order_by('-semester__index', 'meta_course__name'))
-
-
-class CourseStudentsView(TeacherOnlyMixin, CourseURLParamsMixin, TemplateView):
-    # raise_exception = True
-    template_name = "learning/teaching/course_students.html"
-
-    def handle_no_permission(self, request):
-        raise Http404
-
-    def get_context_data(self, **kwargs):
-        co = get_object_or_404(self.get_course_queryset())
-        return {
-            "co": co,
-            "enrollments": (co.enrollment_set(manager="active")
-                            .select_related("student"))
-        }
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
