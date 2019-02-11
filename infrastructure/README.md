@@ -148,3 +148,18 @@ ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_cscsite setup.yml 
 # Setup ssl and cronjobs
 ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_cscsite setup.yml -v --skip-tags="system-role,cronjobs,lvm-role,db,nginx-role,redis-role" -e "{'enable_https':no}"
 ```
+
+Настройки по-умолчанию: trim_blocks=true, lstrip_blocks=false
+Как включить lstrip_blocks или вырубить trim_blocks:
+#jinja2: lstrip_blocks: "True"
+
+Поведение по-умолчанию:
+1. Removes trailing new line
+2. Removes the first new line in a block
+
+```
+{% if True %} <-- this new line will be removed
+    test
+{% endif %} <-- this new line will be removed
+
+```

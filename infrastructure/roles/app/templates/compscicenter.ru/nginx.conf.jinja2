@@ -3,17 +3,18 @@ upstream django_{{ site_user }} {
     server unix:///tmp/uwsgi_{{ site_dir_name }}.socket;
 }
 
-map $http_origin $cors_origin_header_value {
-    default "";
+map $http_origin $cors_enabled {
+    default 0;
 
     # Support all known subdomains except www.*
     {% for domain in certbot_domains %}{% if not domain.startswith('www') -%}
-    "http{% if enable_https %}s{% endif %}://{{ domain }}" "$http_origin";
-    {% endif %}{% endfor %}
-    {%- if hosts_override is defined and hosts_override == 'vagrant-test-hosts' -%}
-    "http{% if enable_https %}s{% endif %}://csc.vagrant" "$http_origin";
-    "http{% if enable_https %}s{% endif %}://my.csc.vagrant" "$http_origin";
-    {% endif %}
+    "http{% if enable_https %}s{% endif %}://{{ domain }}" 1;
+    {% endif %}{% endfor -%}
+    {% if hosts_override is defined and hosts_override == 'vagrant-test-hosts' -%}
+    "http{% if enable_https %}s{% endif %}://csc.vagrant" 1;
+    "http{% if enable_https %}s{% endif %}://my.csc.vagrant" 1;
+    {%- endif %}
+
 }
 
 {% if enable_https -%}
@@ -30,7 +31,7 @@ server {
     }
 }
 
-{%- set main_domain_parts = main_domain.split('.') %}
+{% set main_domain_parts = main_domain.split('.') %}
 {% if main_domain_parts|length == 2 %}
 # Redirect from `www.` to the domain without `www`
 server {
