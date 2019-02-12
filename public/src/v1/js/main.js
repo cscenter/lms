@@ -44,7 +44,7 @@ $(document).ready(function () {
 const fn = {
     configureCSRFAjax: function () {
         // Append csrf token on ajax POST requests made with jQuery
-        const token = Cookies.get('csrftoken');
+        const token = Cookies.get('csrf_token');
         // FIXME: add support for allowed subdomains
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
@@ -133,7 +133,7 @@ const fn = {
                 url: $tab.data('notifications-url'),
                 method: "POST",
                 // Avoiding preflight request by sending csrf token in payload
-                data: {"csrfmiddlewaretoken": Cookies.get('csrftoken')},
+                data: {"csrfmiddlewaretoken": Cookies.get('csrf_token')},
                 xhrFields: {
                     withCredentials: true
                 }
