@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-09-04 10:10+0000\n"
-"PO-Revision-Date: 2017-09-04 10:13+0000\n"
-"Last-Translator: b'  <>'\n"
+"POT-Creation-Date: 2019-02-12 16:25+0000\n"
+"PO-Revision-Date: 2019-02-12 16:27+0000\n"
+"Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
@@ -18,154 +18,360 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "%100>=20) ? 1 : 2);\n"
-"X-Translated-Using: django-rosetta 0.7.13\n"
+"X-Translated-Using: django-rosetta 0.9.0\n"
 
-#: cscsite/cscenter/filters.py:36
+#: compscicenter_ru/filters.py:34
 msgid "Saint Petersburg"
 msgstr "Санкт-Петербург"
 
-#: cscsite/cscenter/filters.py:37
+#: compscicenter_ru/filters.py:35
 msgid "Novosibirsk"
 msgstr "Новосибирск"
 
-#: cscsite/cscenter/templates/_top_menu.html:39
+#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:56
+msgid "Computer Science Center on Facebook"
+msgstr ""
+
+#: compscicenter_ru/menus.py:13
+msgctxt "menu"
+msgid "О центре"
+msgstr ""
+
+#: compscicenter_ru/menus.py:17
+msgctxt "menu"
+msgid "Цели и история"
+msgstr ""
+
+#: compscicenter_ru/menus.py:18
+msgctxt "menu"
+msgid "Программа"
+msgstr ""
+
+#: compscicenter_ru/menus.py:19
+msgctxt "menu"
+msgid "Команда"
+msgstr ""
+
+#: compscicenter_ru/menus.py:20
+msgctxt "menu"
+msgid "Преподаватели"
+msgstr ""
+
+#: compscicenter_ru/menus.py:21
+msgctxt "menu"
+msgid "Выпускники"
+msgstr ""
+
+#: compscicenter_ru/menus.py:22
+msgctxt "menu"
+msgid "Отзывы"
+msgstr ""
+
+#: compscicenter_ru/menus.py:28
+msgctxt "menu"
+msgid "Курсы"
+msgstr ""
+
+#: compscicenter_ru/menus.py:36
+msgctxt "menu"
+msgid "Онлайн"
+msgstr ""
+
+#: compscicenter_ru/menus.py:40
+msgctxt "menu"
+msgid "Онлайн-курсы"
+msgstr ""
+
+#: compscicenter_ru/menus.py:41
+msgctxt "menu"
+msgid "Онлайн-программы"
+msgstr ""
+
+#: compscicenter_ru/menus.py:42
+msgctxt "menu"
+msgid "Видео"
+msgstr ""
+
+#: compscicenter_ru/menus.py:45
+msgctxt "menu"
+msgid "Лекторий"
+msgstr ""
+
+#: compscicenter_ru/menus.py:50
+msgctxt "menu"
+msgid "Поступление"
+msgstr ""
+
+#: compscicenter_ru/menus.py:54
+msgctxt "menu"
+msgid "Поступающим"
+msgstr ""
+
+#: compscicenter_ru/menus.py:55
+msgctxt "menu"
+msgid "Подать заявку"
+msgstr ""
+
+#: compscicenter_ru/menus.py:56
+msgctxt "menu"
+msgid "Программа для поступления"
+msgstr ""
+
+#: compscicenter_ru/menus.py:57
+msgctxt "menu"
+msgid "Вопросы и ответы"
+msgstr ""
+
+#: compscicenter_ru/templates/_top_menu.html:43
+#: compscicenter_ru/templates/users/user_detail.html:9
 msgid "Profile"
 msgstr "Профиль"
 
-#: cscsite/cscenter/templates/_top_menu.html:40
+#: compscicenter_ru/templates/_top_menu.html:49
 msgid "Logout"
 msgstr "Выйти"
 
-#: cscsite/cscenter/templates/_top_menu.html:44
+#: compscicenter_ru/templates/_top_menu.html:53
 msgid "Login"
 msgstr "Войти"
 
-#: cscsite/cscenter/templates/base.html:63
-msgid "Computer Science Center, 2011–17 гг."
+#: compscicenter_ru/templates/base.html:59
+msgid "Computer Science Center, 2011–19 гг."
 msgstr ""
 
-#: cscsite/cscenter/templates/base.html:91
+#: compscicenter_ru/templates/base.html:85
 msgid "close all"
 msgstr "закрыть все"
 
-#: cscsite/cscenter/templates/center_teacher_list.html:28
-#: cscsite/cscenter/templates/center_teacher_list.html:53
-#, fuzzy
-#| msgid "No news yet"
-msgid "No professors yet"
-msgstr "Список новостей пуст"
-
-#: cscsite/cscenter/templates/index.html:39
-msgid "Online courses"
-msgstr "Онлайн-курсы"
-
-#: cscsite/cscenter/templates/index.html:40
-msgid "All online courses"
-msgstr "Все онлайн-курсы"
-
-#: cscsite/cscenter/templates/index.html:53
-#: cscsite/cscenter/templates/testimonials.html:14
-msgid "Graduates about CS Center"
-msgstr "Выпускники о CS центре"
-
-#: cscsite/cscenter/templates/index.html:54
-#: cscsite/cscenter/templates/testimonials.html:15
-msgid "All graduates"
-msgstr "Все выпускники"
-
-#: cscsite/cscenter/templates/index.html:71
-#: cscsite/cscenter/templates/testimonials.html:32
-msgid "Graduation"
-msgstr "Выпуск"
-
-#: cscsite/cscenter/templates/index.html:85
-msgid "Full-time courses on video"
-msgstr "Видео очных курсов"
-
-#: cscsite/cscenter/templates/index.html:86
-msgid "All courses"
-msgstr "Все курсы"
-
-#: cscsite/cscenter/templates/index.html:86
-msgid "All video courses"
-msgstr "Все курсы с видео"
-
-#: cscsite/cscenter/templates/index.html:101
-msgid "Semester"
-msgstr "Семестр"
-
-#: cscsite/cscenter/templates/index.html:104
-msgid "Teachers"
-msgstr "Преподаватели"
-
-#: cscsite/cscenter/templates/index.html:109
-#, python-format
-msgid "%(counter)s class"
-msgid_plural "%(counter)s classes"
-msgstr[0] "%(counter)s занятие"
-msgstr[1] "%(counter)s занятия"
-msgstr[2] "%(counter)s занятий"
-
-#: cscsite/cscenter/templates/index.html:110
-msgid "Completed course"
-msgstr "Полный курс"
-
-#: cscsite/cscenter/templates/index.html:110
-msgid "Lectures video"
-msgstr "Есть видео"
-
-#: cscsite/cscenter/templates/index.html:125
-msgid "Supported by"
-msgstr "При поддержке"
-
-#: cscsite/cscenter/templates/index.html:130
-msgid "Yandex School of Data Analysis"
-msgstr "Яндекс ШАД"
-
-#: cscsite/cscenter/templates/index.html:140
-msgid "FML #239"
-msgstr "ФМЛ №239"
-
-#: cscsite/cscenter/templates/index.html:145
-msgid "Computer Science Club"
-msgstr ""
-
-#: cscsite/cscenter/templates/learning/courses/offerings_test.html:13
-#: cscsite/cscenter/templates/learning/courses/offerings_test.html:81
-#| msgid "All courses"
+#: compscicenter_ru/templates/compscicenter_ru/course_offerings.html:27
+#: compscicenter_ru/templates/compscicenter_ru/course_offerings.html:94
 msgid "CS club course"
 msgstr "Курс CS клуба"
 
-#: cscsite/cscenter/templates/learning/courses/offerings_test.html:15
-#: cscsite/cscenter/templates/learning/courses/offerings_test.html:84
+#: compscicenter_ru/templates/compscicenter_ru/course_offerings.html:29
+#: compscicenter_ru/templates/compscicenter_ru/course_offerings.html:97
 msgid "Video"
 msgstr ""
 
-#: cscsite/cscenter/templates/learning/courses/offerings_test.html:16
-#: cscsite/cscenter/templates/learning/courses/offerings_test.html:85
+#: compscicenter_ru/templates/compscicenter_ru/course_offerings.html:30
+#: compscicenter_ru/templates/compscicenter_ru/course_offerings.html:98
 msgid "Slides"
 msgstr ""
 
-#: cscsite/cscenter/templates/learning/courses/offerings_test.html:17
-#: cscsite/cscenter/templates/learning/courses/offerings_test.html:86
+#: compscicenter_ru/templates/compscicenter_ru/course_offerings.html:31
+#: compscicenter_ru/templates/compscicenter_ru/course_offerings.html:99
 msgid "Files"
 msgstr ""
 
-#: cscsite/cscenter/templates/learning/courses/offerings_test.html:99
+#: compscicenter_ru/templates/compscicenter_ru/course_offerings.html:112
 #, fuzzy
 #| msgid "No news yet"
 msgid "No courses yet"
 msgstr "Список новостей пуст"
 
-#: cscsite/cscenter/views.py:327
+#: compscicenter_ru/templates/testimonials.html:14
+msgid "Graduates about CS Center"
+msgstr "Выпускники о CS центре"
+
+#: compscicenter_ru/templates/testimonials.html:15
+msgid "All graduates"
+msgstr "Все выпускники"
+
+#: compscicenter_ru/templates/testimonials.html:32
+msgid "Graduation"
+msgstr "Выпуск"
+
+#: compscicenter_ru/templates/users/user_detail.html:9
+msgid "on site"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:49
+msgid "Change photo"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:72
+msgid "student"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:72
+msgctxt "user_detail"
+msgid "enrolled in"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:76
+#, fuzzy
+#| msgid "Teachers"
+msgid "teacher"
+msgstr "Преподаватели"
+
+#: compscicenter_ru/templates/users/user_detail.html:95
+msgid "Review of Computer Science Center"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:110
+msgid "Edit"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:173
+msgid "Student references"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:185
+msgid "Create reference"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:189
+msgid "books"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:204
+msgid "Student info record"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:207
+msgid "University"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:211
+msgid "Phone"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:215
+msgid "Email"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:221
+msgid "StudentInfo|University year"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:226
+msgid "Comment"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:242
+msgid "Status"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:246
+msgid "Non-degree student"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:251
+msgid "Curriculum year"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:280
+msgid "StudentInfo|Study program"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:296
+msgid "Workplace"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:306
+#: compscicenter_ru/templates/users/user_detail.html:449
+msgid "Assignments"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:315
+msgid "Course offering"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:316
+msgid "Assignment"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:317
+msgid "Grade"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:383
+msgctxt "Project"
+msgid "Shifted"
+msgstr "Перенесён"
+
+#: compscicenter_ru/templates/users/user_detail.html:385
+msgctxt "Project"
+msgid "Canceled"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:402
+msgid "Online courses"
+msgstr "Онлайн-курсы"
+
+#: compscicenter_ru/templates/users/user_detail.html:436
+msgid ".iCal calendar"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:437
+msgid "Link"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:442
+msgid "Classes"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:456
+msgid "Events"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:468
+msgid "Social accounts"
+msgstr ""
+
+#: compscicenter_ru/templates/users/user_detail.html:502
+msgid "Contact information"
+msgstr ""
+
+#: compscicenter_ru/views.py:491
 msgctxt "adjective"
 msgid "autumn"
 msgstr "осенний"
 
-#: cscsite/cscenter/views.py:328
+#: compscicenter_ru/views.py:492
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#, fuzzy
+#~ msgid "No professors yet"
+#~ msgstr "Список новостей пуст"
+
+#~ msgid "All online courses"
+#~ msgstr "Все онлайн-курсы"
+
+#~ msgid "Full-time courses on video"
+#~ msgstr "Видео очных курсов"
+
+#~ msgid "All courses"
+#~ msgstr "Все курсы"
+
+#~ msgid "All video courses"
+#~ msgstr "Все курсы с видео"
+
+#~ msgid "Semester"
+#~ msgstr "Семестр"
+
+#~ msgid "%(counter)s class"
+#~ msgid_plural "%(counter)s classes"
+#~ msgstr[0] "%(counter)s занятие"
+#~ msgstr[1] "%(counter)s занятия"
+#~ msgstr[2] "%(counter)s занятий"
+
+#~ msgid "Completed course"
+#~ msgstr "Полный курс"
+
+#~ msgid "Lectures video"
+#~ msgstr "Есть видео"
+
+#~ msgid "Supported by"
+#~ msgstr "При поддержке"
+
+#~ msgid "Yandex School of Data Analysis"
+#~ msgstr "Яндекс ШАД"
+
+#~ msgid "FML #239"
+#~ msgstr "ФМЛ №239"
 
 #~ msgid "Admin page"
 #~ msgstr "Админка"

@@ -8,15 +8,17 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-02-12 14:58+0000\n"
-"PO-Revision-Date: 2019-02-12 14:59+0000\n"
+"POT-Creation-Date: 2019-02-12 16:25+0000\n"
+"PO-Revision-Date: 2019-02-12 16:22+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Translated-Using: django-rosetta 0.9.0\n"
 
 #: apps/learning/projects/admin.py:77 apps/learning/projects/filters.py:34
@@ -31,7 +33,7 @@ msgstr "Проект"
 msgid "Сумма"
 msgstr "Сумма"
 
-#: apps/learning/projects/admin.py:119 apps/learning/projects/models.py:194
+#: apps/learning/projects/admin.py:119 apps/learning/projects/models.py:163
 msgid "Semester"
 msgstr "Семестр"
 
@@ -47,7 +49,7 @@ msgstr "Студенческие проекты"
 msgid "Any"
 msgstr ""
 
-#: apps/learning/projects/filters.py:28 apps/learning/projects/models.py:215
+#: apps/learning/projects/filters.py:28 apps/learning/projects/models.py:172
 msgid "External project"
 msgstr "Внешний проект"
 
@@ -64,7 +66,7 @@ msgstr "Итоговая оценка"
 msgid "Filter"
 msgstr "Фильтровать"
 
-#: apps/learning/projects/filters.py:233 apps/learning/projects/models.py:200
+#: apps/learning/projects/filters.py:233 apps/learning/projects/models.py:212
 msgid "Participants presentation"
 msgstr "Презентация участников"
 
@@ -152,75 +154,73 @@ msgstr "Отменен"
 
 #: apps/learning/projects/models.py:157
 msgid "Continued without intermediate results"
-msgstr "Продолжение без промежуточного результата"
+msgstr "Продолжение без промежуточных итогов"
 
 #: apps/learning/projects/models.py:159
 msgid "StudentProject|Name"
 msgstr "Название"
 
-#: apps/learning/projects/models.py:161 apps/learning/projects/models.py:421
+#: apps/learning/projects/models.py:166
+msgid "StudentProject|Type"
+msgstr "Тип"
+
+#: apps/learning/projects/models.py:168
+msgid "City"
+msgstr ""
+
+#: apps/learning/projects/models.py:176
+msgid "StudentProject|Status"
+msgstr "Статус"
+
+#: apps/learning/projects/models.py:181 apps/learning/projects/models.py:421
 msgid "Description"
 msgstr "Описание"
 
-#: apps/learning/projects/models.py:166
+#: apps/learning/projects/models.py:186
 msgid "Students"
 msgstr "Студенты"
 
-#: apps/learning/projects/models.py:170
+#: apps/learning/projects/models.py:190
 msgid "Reviewers"
 msgstr "Проверяющие"
 
-#: apps/learning/projects/models.py:177
+#: apps/learning/projects/models.py:197
 msgid "StudentProject|Supervisor"
 msgstr "Руководители"
 
-#: apps/learning/projects/models.py:179
+#: apps/learning/projects/models.py:199
 msgid "Format: Last_name First_name Patronymic, Organization"
 msgstr "Формат: Фамилия Имя Отчество, Организация"
 
-#: apps/learning/projects/models.py:181
+#: apps/learning/projects/models.py:201
 msgid "Supervisor presentation"
 msgstr "Презентация руководителя"
 
-#: apps/learning/projects/models.py:185
+#: apps/learning/projects/models.py:205
 msgid "Link to supervisor presentation"
 msgstr "URL с презентацией руководителя"
 
-#: apps/learning/projects/models.py:188 apps/learning/projects/models.py:207
+#: apps/learning/projects/models.py:208 apps/learning/projects/models.py:219
 msgid "Supported public link to Yandex.Disk only"
 msgstr ""
 "Поддерживаются только публичные ссылки на Яндекс.Диск. Задача на скачивание "
 "слайдов с диска будет проигнорирована, если слайды уже загружены локально."
 
-#: apps/learning/projects/models.py:190
+#: apps/learning/projects/models.py:210
 msgid "SlideShare URL for supervisor presentation"
 msgstr "Slideshare URL с презентацией руководителя"
 
-#: apps/learning/projects/models.py:197
-msgid "StudentProject|Type"
-msgstr "Тип"
-
-#: apps/learning/projects/models.py:204
+#: apps/learning/projects/models.py:216
 msgid "Link to participants presentation"
 msgstr "URL с презентацией участников"
 
-#: apps/learning/projects/models.py:209
+#: apps/learning/projects/models.py:221
 msgid "SlideShare URL for participants presentation"
 msgstr "Slideshare URL с презентацией участников"
 
-#: apps/learning/projects/models.py:211
-msgid "City"
-msgstr ""
-
-#: apps/learning/projects/models.py:219
-#| msgid "Student Projects"
-msgid "StudentProject|Status"
-msgstr "Статус"
-
 #: apps/learning/projects/models.py:225
 msgid "Check if all participants leave project before reporting period"
-msgstr ""
-"Отметьте, если проект нужно скрыть в списке проектов текущего семестра"
+msgstr "Отметьте, если проект нужно скрыть в списке проектов текущего семестра"
 
 #: apps/learning/projects/models.py:229
 msgid "Student project"
@@ -310,8 +310,7 @@ msgstr "2 - студент понимает, почему выбрана та и
 msgid ""
 "0 - Much less than what has already been done, or the student does not "
 "understand them"
-msgstr ""
-"0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
+msgstr "0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
 
 #: apps/learning/projects/models.py:334
 msgid ""
@@ -480,51 +479,51 @@ msgstr "Комментарий к отчету"
 msgid "Report comments"
 msgstr "Комментарии к отчету"
 
-#: apps/learning/projects/views.py:346
+#: apps/learning/projects/views.py:347
 msgid "Report successfully sended"
 msgstr "Отчет успешно отправлен."
 
-#: apps/learning/projects/views.py:394
+#: apps/learning/projects/views.py:395
 msgid "Данные успешно сохранены"
 msgstr "Данные успешно сохранены"
 
-#: apps/learning/projects/views.py:467
+#: apps/learning/projects/views.py:468
 msgid "You successfully enrolled on the project"
 msgstr "Вы успешно подписаны на проект."
 
-#: apps/learning/projects/views.py:577
+#: apps/learning/projects/views.py:578
 msgid "Data not saved. Fix errors."
 msgstr "Данные не сохранены. Исправьте ошибки."
 
-#: apps/learning/projects/views.py:673
+#: apps/learning/projects/views.py:674
 msgid "Comment successfully added."
 msgstr "Комментарий к отчету успешно добавлен."
 
-#: apps/learning/projects/views.py:678
+#: apps/learning/projects/views.py:679
 msgid "The draft successfully saved."
 msgstr "Черновик успешно сохранён."
 
-#: apps/learning/projects/views.py:680
+#: apps/learning/projects/views.py:681
 msgid "The review successfully saved."
 msgstr "Проверка отчёта успешно завершена."
 
-#: apps/learning/projects/views.py:748
+#: apps/learning/projects/views.py:749
 msgid "Report was successfully updated."
 msgstr "Отчет успешно обновлён."
 
-#: apps/learning/projects/views.py:752
+#: apps/learning/projects/views.py:753
 msgid "Data not saved. Check errors."
 msgstr "Данные не сохранены. Проверьте ошибки."
 
-#: apps/learning/projects/views.py:773
+#: apps/learning/projects/views.py:774
 msgid "Status was successfully updated."
 msgstr "Статус отчета успешно обновлён."
 
-#: apps/learning/projects/views.py:843
+#: apps/learning/projects/views.py:844
 msgid "Grades successfully updated."
 msgstr "Баллы успешно обновлены"
 
-#: apps/learning/projects/views.py:851
+#: apps/learning/projects/views.py:852
 msgid "The report results are summed up successfully."
 msgstr "Итоговый комментарий сохранён успешно."
 
@@ -642,8 +641,8 @@ msgstr "Итоговый комментарий сохранён успешно.
 #~ msgstr "Текст"
 
 #~ msgid ""
-#~ "First {n_par} paragraphs or anything before {marker} will serve as excerpt; "
-#~ "LaTeX+Markdown is enabled"
+#~ "First {n_par} paragraphs or anything before {marker} will serve as "
+#~ "excerpt; LaTeX+Markdown is enabled"
 #~ msgstr ""
 #~ "Первые {n_par} параграфов или всё до {marker} будут выдержкой; доступны "
 #~ "LaTeX и Markdown"
