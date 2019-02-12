@@ -12,7 +12,7 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.translation import ugettext_lazy as _
-from djchoices import DjangoChoices, ChoiceItem
+from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
@@ -149,10 +149,34 @@ def project_presentation_files(self, filename):
 
 class Project(TimeStampedModel):
     class ProjectTypes(DjangoChoices):
-        practice = ChoiceItem('practice', _("StudentProject|Practice"))
-        research = ChoiceItem('research', _("StudentProject|Research"))
+        practice = C('practice', _("StudentProject|Practice"))
+        research = C('research', _("StudentProject|Research"))
+
+    class Statuses(DjangoChoices):
+        CANCELED = C('canceled', _("Canceled"))
+        CONTINUED = C('continued', _("Continued without intermediate results"))
 
     name = models.CharField(_("StudentProject|Name"), max_length=255)
+    semester = models.ForeignKey(
+        Semester,
+        on_delete=models.CASCADE,
+        verbose_name=_("Semester"))
+    project_type = models.CharField(
+        choices=ProjectTypes.choices,
+        verbose_name=_("StudentProject|Type"),
+        max_length=10)
+    city = models.ForeignKey(City, verbose_name=_("City"),
+                             default=settings.DEFAULT_CITY_CODE,
+                             on_delete=models.CASCADE)
+    is_external = models.BooleanField(
+        _("External project"),
+        default=False)
+    status = models.CharField(
+        choices=Statuses.choices,
+        verbose_name=_("StudentProject|Status"),
+        null=True,
+        blank=True,
+        max_length=10)
     description = models.TextField(
         _("Description"),
         blank=True,
@@ -184,14 +208,6 @@ class Project(TimeStampedModel):
         help_text=_("Supported public link to Yandex.Disk only"))
     supervisor_presentation_slideshare_url = models.URLField(
         _("SlideShare URL for supervisor presentation"), null=True, blank=True)
-    semester = models.ForeignKey(
-        Semester,
-        on_delete=models.CASCADE,
-        verbose_name=_("Semester"))
-    project_type = models.CharField(
-        choices=ProjectTypes.choices,
-        verbose_name=_("StudentProject|Type"),
-        max_length=10)
     presentation = models.FileField(
         _("Participants presentation"),
         blank=True,
@@ -204,12 +220,6 @@ class Project(TimeStampedModel):
     presentation_slideshare_url = models.URLField(
         _("SlideShare URL for participants presentation"),
         null=True, blank=True)
-    city = models.ForeignKey(City, verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE,
-                             on_delete=models.CASCADE)
-    is_external = models.BooleanField(
-        _("External project"),
-        default=False)
     canceled = models.BooleanField(
         default=False,
         help_text=_("Check if all participants leave project before "
@@ -257,10 +267,14 @@ class Project(TimeStampedModel):
     def get_is_external_display(self):
         return _("Yes") if self.is_external else _("No")
 
+    @property
+    def is_canceled(self):
+        return self.status == self.Statuses.CANCELED
+
     def is_active(self):
         """Check project is from current term"""
         current_term_index = get_current_term_index(self.city_id)
-        return not self.canceled and self.semester.index == current_term_index
+        return not self.is_canceled and self.semester.index == current_term_index
 
     def report_period_started(self):
         if not self.semester.report_starts_at:
