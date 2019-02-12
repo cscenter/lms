@@ -1,11 +1,8 @@
-{% if request.user.is_authenticated %}
-    {% set menu_name = "menu_private" %}
-{% elif request.subdomain == LMS_SUBDOMAIN %}
-    {% set menu_name = "my_compscicenter_ru_public" %}
-{% else %}
-    {% set menu_name = "menu_public" %}
-{% endif %}
-{% set menu = csc_menu(menu_name, request) %}
+{% if request.user.is_authenticated %}{% set menu_name = "menu_private" %}
+{%- elif request.subdomain == LMS_SUBDOMAIN %}{% set menu_name = "my_compscicenter_ru_public" %}
+{%- else %}{% set menu_name = "menu_public" %}
+{%- endif -%}
+{%- set menu = csc_menu(menu_name, request) -%}
 <nav class="navbar navbar-main{% if menu_theme %} {{ menu_theme }}{% endif %}">
     <div class="container">
         <button class="navbar-toggler hamburger hamburger--vortex" type="button"
