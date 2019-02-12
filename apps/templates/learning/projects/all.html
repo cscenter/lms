@@ -27,7 +27,7 @@
                 {% for project in projects %}
                     <tr>
                         <td>
-                            <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
+                            <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
                             {% if request.user.is_curator %}<br>{{ project.semester }}{% endif %}
                         </td>
                         <td>

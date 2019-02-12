@@ -6,9 +6,7 @@ from core.menu import MenuItem
 from core.urls import reverse
 
 PRIVATE = settings.LMS_SUBDOMAIN
-
-# FIXME: write reverse_static_pages (urljoin subdomain + ...)
-PUBLIC_DOMAIN = 'https://compscicenter.ru'
+PUBLIC_DOMAIN = reverse('index')[:-1]  # remove trailing slash
 
 public_menu = [
     MenuItem(

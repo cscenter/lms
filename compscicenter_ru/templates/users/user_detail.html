@@ -378,7 +378,7 @@
                                 <ul>
                                     {% for ps in student_projects %}
                                         <li>
-                                            <a href="{{ ps.project.get_absolute_url }}">{{ ps.project.name }}, {{ ps.project.semester }}</a> /{% spaceless %}
+                                            {% if user.is_authenticated %}<a href="{{ ps.project.get_absolute_url }}">{% endif %}{{ ps.project.name }}, {{ ps.project.semester }}{% if user.is_authenticated %}</a>{% endif %} /{% spaceless %}
                                             {% if not ps.project.canceled %}
                                                 {{ ps.final_grade_display|lower }}
                                             {% elif ps.final_grade == ps.GRADES.NOT_GRADED %}

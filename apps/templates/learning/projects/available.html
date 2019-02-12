@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
+{% load override_url %}
 
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 
@@ -31,7 +32,7 @@
                     {% for project in projects %}
                         <tr>
                             <td>
-                                <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
+                                <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
                             </td>
                             <td>
                                 {% for student in project.students.all %}
@@ -44,7 +45,7 @@
                                     {{ reviewer.get_short_name }}<br>
                                     {% empty %}
                                     {% if project.is_active %}
-                                        <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">
+                                        <form method="post" action="{% url 'projects:reviewer_project_enroll' pk=project.pk %}">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-block btn-primary btn-outline btn-sm">Следить за проектом</button>
                                         </form>

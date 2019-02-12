@@ -263,6 +263,7 @@ class StudentProjectsView(StudentOnlyMixin, generic.ListView):
                 .order_by("-project__semester__index", "project__name"))
 
 
+# FIXME: separate into public and private parts
 class ProjectDetailView(CreateView):
     model = Report
     form_class = ReportForm

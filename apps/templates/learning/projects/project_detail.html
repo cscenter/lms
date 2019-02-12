@@ -3,6 +3,7 @@
 {% load crispy_forms_tags %}
 {% load markdown from core_tags %}
 {% load cache %}
+{% load override_url %}
 
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 
@@ -10,17 +11,17 @@
 <div class="container">
     <ol class=" breadcrumb projects">
         <li class="active">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}
-            {% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</li>
+            {% if request.user.is_curator %} <a href="{% url "admin:projects_project_change" object_id=project.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}</li>
     </ol>
     {% if project.is_active %}
         {% if request.user.is_project_reviewer or request.user.is_curator %}
         <nav>
             <ul class="pager pager-square __projects">
                 <li class="previous">
-                    <a href="{% url "projects:project_detail_prev" project.pk %}"><span aria-hidden="true">←</span> Предыдущий проект</a>
+                    <a href="{{ project.get_prev_project_url }}"><span aria-hidden="true">←</span> Предыдущий проект</a>
                 </li>
                 <li class="next">
-                    <a href="{% url "projects:project_detail_next" project.pk %}">Следующий проект <span aria-hidden="true">→</span></a>
+                    <a href="{{ project.get_next_project_url }}">Следующий проект <span aria-hidden="true">→</span></a>
                 </li>
             </ul>
         </nav>
@@ -65,7 +66,7 @@
 
                 {% if request.user.is_curator %}
                     <h4>Оценки <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
-                    <form action="{% url 'projects:project_results_update' project.pk %}" method="post">
+                    <form action="{% url 'projects:project_results_update' pk=project.pk %}" method="post">
                         <table class="table table-bordered">
                             <thead>
                             <tr class="active">
@@ -128,7 +129,7 @@
                 <div class="links">
                     {% if can_enroll %}
                         {% if project.is_active and not you_enrolled %}
-                            <form method="post" action="{% url 'projects:reviewer_project_enroll' project.pk %}">
+                            <form method="post" action="{% url 'projects:reviewer_project_enroll' pk=project.pk %}">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-block btn-wide btn-primary">Следить за проектом</button>
                             </form>

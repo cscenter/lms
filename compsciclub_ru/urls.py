@@ -3,7 +3,7 @@ from django.conf.urls import include, url
 from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from django.views.generic import TemplateView
 from loginas import urls as loginas_urls
 
@@ -12,8 +12,10 @@ from compsciclub_ru.views import CalendarClubScheduleView, IndexView, \
     TeacherDetailView, AsyncEmailRegistrationView, ClubClassesFeed, \
     CoursesListView
 from core.views import MarkdownHowToHelpView, MarkdownRenderView
+from courses.urls import RE_COURSE_URI
 from htmlpages import views
 from international_schools.views import InternationalSchoolsListView
+from learning.views import CourseNewsNotificationUpdate
 from users.urls import auth_urls
 
 admin.autodiscover()
@@ -51,6 +53,12 @@ urlpatterns += [
 
     path('teaching/', include('learning.teaching.urls')),
     path('learning/', include('learning.study.urls')),
+
+    path("courses/", include([
+       re_path(RE_COURSE_URI, include([
+           path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
+       ]), kwargs={"city_aware": True})
+    ])),
 
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),

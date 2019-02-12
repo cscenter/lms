@@ -28,7 +28,7 @@
                     {% with project=ps.project student=ps.student %}
                     <tr>
                         <td>
-                            <a href="{% url "projects:student_project_detail" project.pk %}">{{ project.name }}</a><br>
+                            <a href="{{ project.get_absolute_url }}">{{ project.name }}</a><br>
                             Руководители: {{ project.supervisor }}
                         </td>
                         <td>{{ ps.report.final_score|default:"-" }}</td>

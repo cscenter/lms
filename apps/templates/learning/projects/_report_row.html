@@ -3,10 +3,10 @@
     {% if can_view_report %}
         {% if ps.report and ps.report.status == 'sent' %}
             {% if not request.user.is_curator %}<span class="text-muted">Проверка отчета куратором</span>
-            {% else %}<a href="{% url "projects:project_report" project.pk ps.student.pk %}">Смотреть отчет</a>{% endif %}
+            {% else %}<a href="{{ ps.get_absolute_url }}">Смотреть отчет</a>{% endif %}
         {% elif ps.report %}
             {% if request.user.is_curator %}<span class="text-muted">{{ ps.report.get_status_display }}</span><br>{% endif %}
-            <a href="{% url "projects:project_report" project.pk ps.student.pk %}">Смотреть отчет</a>
+            <a href="{{ ps.get_absolute_url }}">Смотреть отчет</a>
         {% elif project.is_active %}<span class="text-muted">Начало отчетного периода<br> {{ project.semester.report_starts_at|default:"не установлено" }}</span>
         {% elif project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>
         {% endif %}

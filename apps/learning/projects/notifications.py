@@ -93,7 +93,7 @@ class NewReportComment(NotificationService):
         notification_for_student = (student_id == notification.recipient_id)
         if notification_for_student:
             report_url_name = "projects:student_project_report"
-            project_url_name = "projects:student_project_detail"
+            project_url_name = "projects:study__project_detail"
         else:
             report_url_name = "projects:project_report"
             project_url_name = "projects:project_detail"
@@ -262,7 +262,7 @@ class ProjectReportingStarted(NotificationService):
 
     def get_context(self, notification):
         context = notification.data
-        project_url = reverse("projects:student_project_detail",
+        project_url = reverse("projects:study__project_detail",
                               args=[notification.data["project_id"]])
         context["project_link"] = project_url
         return context
@@ -289,7 +289,7 @@ class ProjectReportingEnded(NotificationService):
 
     def get_context(self, notification):
         context = notification.data
-        project_url = reverse("projects:student_project_detail",
+        project_url = reverse("projects:study__project_detail",
                               args=[notification.data["project_id"]])
         context["project_link"] = project_url
         return context
