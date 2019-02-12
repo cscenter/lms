@@ -36,6 +36,8 @@ CLUB_SITE_ID = 2
 
 LMS_SUBDOMAIN = 'my'
 
+CSRF_COOKIE_NAME = 'csrf_token'
+
 INSTALLED_APPS = [
     'modeltranslation',  # insert before admin
     'dal',
