@@ -21,7 +21,7 @@
         <div class="row">
             <div class="col-xs-12 h2-and-buttons">
               <h2>
-                {% if request.resolver_match.url_name == 'teaching:gradebook' %}
+                {% if request.resolver_match.url_name == 'gradebook' and 'teaching' in request.resolver_match.namespaces %}
                 <a href="{% url 'teaching:gradebook_list' %}"><span class="fa fa-angle-left"></span></a>
                 {% else %}
                 <a href="{% url 'staff:course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
