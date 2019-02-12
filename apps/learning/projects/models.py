@@ -220,10 +220,6 @@ class Project(TimeStampedModel):
     presentation_slideshare_url = models.URLField(
         _("SlideShare URL for participants presentation"),
         null=True, blank=True)
-    canceled = models.BooleanField(
-        default=False,
-        help_text=_("Check if all participants leave project before "
-                    "reporting period"))
 
     class Meta:
         verbose_name = _("Student project")
