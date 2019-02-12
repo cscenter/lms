@@ -170,7 +170,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             enrollment_term_index = get_term_index(s.enrollment_year,
                                                    SemesterTypes.AUTUMN)
             for ps in s.projects_through:
-                if ps.final_grade in self.BAD_GRADES or ps.project.canceled:
+                if ps.final_grade in self.BAD_GRADES or ps.project.is_canceled:
                     continue
                 unique_projects.add(ps.project)
                 internal_projects_cnt += int(not ps.project.is_external)
@@ -282,7 +282,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
 
         def is_project_active(ps):
             return (not ps.project.is_external and
-                    not ps.project.canceled and
+                    not ps.project.is_canceled and
                     ps.final_grade != GradeTypes.NOT_GRADED and
                     ps.final_grade != GradeTypes.UNSATISFACTORY)
 

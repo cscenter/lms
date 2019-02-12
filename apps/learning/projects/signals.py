@@ -57,7 +57,10 @@ def post_save_project_student(sender, instance, *args, **kwargs):
         if ps.final_grade != GradeTypes.UNSATISFACTORY:
             all_left_project = False
             break
-    Project.objects.filter(pk=project_id).update(canceled=all_left_project)
+    if all_left_project:
+        (Project.objects
+         .filter(pk=project_id)
+         .update(status=Project.Statuses.CANCELED))
 
 
 @receiver(post_save, sender=Project)

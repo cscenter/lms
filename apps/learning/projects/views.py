@@ -70,8 +70,9 @@ class ReportListViewMixin:
         current_term_index = get_current_term_index('spb')
         queryset = (Project.objects
                     .select_related("semester")
-                    .filter(semester__index=current_term_index,
-                            canceled=False)
+                    .filter(semester__index=current_term_index)
+                    # FIXME: replace with custom manager
+                    .exclude(status=Project.Statuses.CANCELED)
                     .prefetch_related(
                         Prefetch(
                             "projectstudent_set",
@@ -199,8 +200,8 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
         # FIXME: Respect timezone, hard coded city code
         current_term_index = get_current_term_index('spb')
         queryset = (Project.objects
-                    .filter(semester__index=current_term_index,
-                            canceled=False)
+                    .filter(semester__index=current_term_index)
+                    .exclude(status=Project.Statuses.CANCELED)
                     .select_related("semester")
                     .prefetch_related("students", "reviewers")
                     .annotate(reviewers_cnt=Count("reviewers"))
@@ -407,8 +408,8 @@ class ProjectPrevNextView(generic.RedirectView):
         # FIXME: Respect timezone, hard coded city code
         current_term_index = get_current_term_index('spb')
         queryset = (Project.objects
-                    .filter(semester__index=current_term_index,
-                            canceled=False)
+                    .filter(semester__index=current_term_index)
+                    .exclude(status=Project.Statuses.CANCELED)
                     .annotate(reviewers_cnt=Count("reviewers"))
                     .annotate(
                         have_reviewers=Case(

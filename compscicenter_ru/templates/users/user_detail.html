@@ -379,12 +379,10 @@
                                     {% for ps in student_projects %}
                                         <li>
                                             {% if user.is_authenticated %}<a href="{{ ps.project.get_absolute_url }}">{% endif %}{{ ps.project.name }}, {{ ps.project.semester }}{% if user.is_authenticated %}</a>{% endif %} /{% spaceless %}
-                                            {% if not ps.project.canceled %}
+                                            {% if ps.project.status is None %}
                                                 {{ ps.final_grade_display|lower }}
-                                            {% elif ps.final_grade == ps.GRADES.NOT_GRADED %}
+                                            {% elif ps.project.is_canceled %}
                                                 {% trans "Canceled"|lower context "Project" %}
-                                            {% else %}
-                                                {{ ps.get_final_grade_display|lower }}
                                             {% endif %}
                                             {% endspaceless %}/<br>
                                         </li>

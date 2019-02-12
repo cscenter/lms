@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils.timezone import now
 
 from courses.models import Semester
-from learning.projects.models import ProjectStudent
+from learning.projects.models import ProjectStudent, Project
 from learning.settings import GradeTypes
 from core.constants import DATE_FORMAT_RU
 from notifications import NotificationTypes
@@ -67,9 +67,9 @@ class Command(BaseCommand):
         """
         project_students = (ProjectStudent.objects
                             .filter(project__semester=term,
-                                    project__canceled=False,
                                     report__isnull=True)
-                            .exclude(final_grade=GradeTypes.UNSATISFACTORY)
+                            .exclude(final_grade=GradeTypes.UNSATISFACTORY,
+                                     project__status=Project.Statuses.CANCELED)
                             .select_related("student", "project")
                             .distinct()
                             .all())
