@@ -100,65 +100,8 @@
             </ul>
         </li>
         {% endif %}
-
-        {% if student_projects %}
-        <li>
-        <h4>{% trans "Student projects" %}</h4>
-          <ul>
-            {% for ps in student_projects %}{% with project=ps.project %}
-            <li>
-              {{ project.semester }}:
-              «{{ project.name }}» {% if ps.final_grade %}({{ ps.get_final_grade_display|lower }}){% endif %} {% if project.presentation %} <a href="{{ project.presentation.url }}">{% trans "Presentation"|lower %}</a>{% endif %},
-              {% trans "StudentProject|Supervisor"|lower %} — {{ project.supervisor }}
-              {% if project.description %}
-              <div class="ubertext">
-                {% markdown 3600 "userproject_description" project.pk project.modified %}
-                  {{ project.description }}
-                {% endmarkdown %}
-              </div>
-              {% endif %}
-            </li>
-            {% endwith %}{% endfor %}
-          </ul>
-        </li>
-        {% elif user.is_curator %}
-            <li>Нет студенческих проектов</li>
-        {% endif %}
-
-        {% with shad_courses=profile_user.shadcourserecord_set.all %}
-        {% if shad_courses %}
-        <li>
-            <h4>{% trans "School of Data Analysis courses" %}</h4>
-            <ul>
-              {% for shad in shad_courses %}
-              <li>{{ shad.name }} - {{ shad.teachers }} ({{ shad.grade_display }})</li>
-              {% endfor %}
-            </ul>
-        </li>
-        {% elif user.is_curator %}
-            <li>Нет зачтённых ШАД-курсов</li>
-        {% endif %}
-        {% endwith %}
-
-        {% if profile_user.pk == user.pk or user.is_curator %}
-        {% with recs=profile_user.onlinecourserecord_set.all %}
-        {% if recs %}
-        <li>
-            <h4>{% trans "Online courses" %}</h4>
-            <ul>
-              {% for rec in recs %}
-              <li>{{ rec.name }}</li>
-              {% endfor %}
-            </ul>
-        </li>
-        {% elif user.is_curator %}
-        <li>Нет зачтённых онлайн-курсов</li>
-        {% endif %}
-        {% endwith %}
-        {% endif %}
-
-        {% endif %}
-        {% if profile_user.is_teacher %}
+    {% endif %}
+    {% if profile_user.is_teacher %}
         <li>{% trans "teacher"|title %}{% if profile_user.teaching_set.all %}:{% endif %}
           <ul class="">
             {% for courseoffering in profile_user.teaching_set.all %}
@@ -168,7 +111,7 @@
             {% endfor %}
           </ul>
         </li>
-        {% endif %}
+    {% endif %}
     </ul>
 
     {% if profile_user.pk == user.pk %}

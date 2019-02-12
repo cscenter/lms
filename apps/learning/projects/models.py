@@ -246,8 +246,13 @@ class Project(TimeStampedModel):
         return self.__class__.city.field.name
 
     def get_absolute_url(self):
-        return reverse('projects:project_detail',
-                       args=[self.pk])
+        return reverse('projects:project_detail', args=[self.pk])
+
+    def get_next_project_url(self):
+        return reverse('projects:project_detail_next', args=[self.pk])
+
+    def get_prev_project_url(self):
+        return reverse('projects:project_detail_prev', args=[self.pk])
 
     def get_is_external_display(self):
         return _("Yes") if self.is_external else _("No")

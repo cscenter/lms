@@ -24,7 +24,7 @@ urlpatterns = [
     ])),
     path('learning/projects/', include([
         path('', views.StudentProjectsView.as_view(), name='student_projects'),
-        path('<int:pk>/', views.ProjectDetailView.as_view(), name='student_project_detail'),
+        path('<int:pk>/', views.ProjectDetailView.as_view(), name='study__project_detail'),
         path('<int:project_pk>/report/<int:student_pk>/', views.ReportView.as_view(), name='student_project_report'),
     ])),
 ]

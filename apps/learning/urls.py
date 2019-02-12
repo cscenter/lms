@@ -15,14 +15,13 @@ urlpatterns = [
         ]), kwargs={"city_aware": True})
     ])),
 
+    path('teaching/', include('learning.teaching.urls')),
+
     path('learning/', include('learning.study.urls')),
-    # URLs below are not included on compsciclub.ru
     path('learning/useful/', UsefulListView.as_view(), name='learning_useful'),
     path('learning/internships/', InternshipListView.as_view(), name='learning_internships'),
     path('learning/hc/', HonorCodeView.as_view(), name='honor_code'),
     path('learning/library/', include("library.urls")),
-
-    path('teaching/', include('learning.teaching.urls')),
 
     path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
 ]

@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
+{% load override_url %}
 {% load tz %}
 
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
@@ -36,7 +37,7 @@
                         <tr>
                             <td>
                                 {% if forloop.first %}
-                                    <a href="{% url "projects:project_detail" project.pk %}">{{ project.name }}</a>
+                                    <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
                                 {% else %}
                                     <span style="color: #CCC">—〃—</span>
                                 {% endif %}
@@ -57,11 +58,11 @@
                                         <span class="text-muted">Проверка куратором</span>
                                     {% else %}
                                         <a {% if ps.report.created_local.date > project.semester.report_ends_at %}class="text-danger"{% endif %}
-                                           href="{% url "projects:project_report" project.pk ps.student.pk %}">Оценить отчет</a>
+                                           href="{{ ps.get_absolute_url }}">Оценить отчет</a>
                                     {% endif %}
                                 {% elif ps.report %}
                                     <a {% if ps.report.created.date > project.semester.report_ends_at %}class="text-danger"{% endif %}
-                                       href="{% url "projects:project_report" project.pk ps.student.pk %}">Перейти к отчету
+                                       href="{{ ps.get_absolute_url }}">Перейти к отчету
                                     </a>
                                 {% elif project.is_active %}<span class="text-muted">Не&nbsp;отправлен</span>
                                 {% elif project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>

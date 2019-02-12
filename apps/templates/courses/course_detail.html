@@ -38,7 +38,7 @@
                            aria-controls="course-{{ tab.type }}"
                            data-toggle="tab"
                            data-target="#course-{{ tab.type }}"
-                           {% if tab.type == "news" %}
+                           {% if tab.type == "news" and unread_news is not None %}
                                 data-has-unread="{% if unread_news > 0 %}true{% else %}false{% endif %}"
                                 data-notifications-url="{{ course.get_course_news_notifications_url }}"
                            {% endif %}

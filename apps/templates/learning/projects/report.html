@@ -187,7 +187,7 @@
         {{ project.semester }}
         {% if is_reviewer or user.is_curator %}
             <h5>Название проекта</h5>
-            <a href="{% url 'projects:project_detail' project.pk %}">{{ project.name }}</a>
+            <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
         {% endif %}
         <h5>Руководители</h5>
         {{ project.supervisor }}
