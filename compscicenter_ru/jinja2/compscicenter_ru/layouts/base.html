@@ -8,7 +8,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Computer Science Center — объединённая инициатива Школы анализа данных, Computer Science клуба и JetBrains.">
     <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk" />
-
     <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
     <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
     <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
@@ -21,10 +20,7 @@
     </script>
 </head>
 <body {% block body_attrs %}{% endblock body_attrs %}>
-    <div class="svg-inline">
-        {% block sprites %}{% endblock sprites %}
-    </div>
-
+    <div class="svg-inline">{% block sprites %}{% endblock sprites %}</div>
     {% block before_navbar_container %}{% endblock before_navbar_container %}
     {% block menu %}
     <div class="navbar-container">
@@ -39,7 +35,7 @@
                 </div>
             {%- endif -%}
         {% endblock top_banner %}
-        {% include "compscicenter_ru/layouts/_top_menu.html" %}
+        {%- include "compscicenter_ru/layouts/_top_menu.html" %}
     </div>
     {% if self.top_banner() %}<div class="top-banner-spacer"></div>{% endif %}
     {% endblock menu %}
