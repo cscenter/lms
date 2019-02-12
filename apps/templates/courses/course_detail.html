@@ -13,7 +13,7 @@
 {% block title %}{{ course.meta_course.name }}, {{ course.semester }}{% endblock title %}
 
 {% block content %}{% localtime off %}
-<div class="container" id="course-offering-detail-page" data-id="{{ course.pk }}">
+<div class="container" id="course-detail-page">
     <div class="row">
         <div class="col-xs-9">
             <h2 class="course-main-title">
@@ -30,7 +30,7 @@
                 </div>
             {% endif %}
 
-            <ul class="nav nav-tabs square" role="tablist" id="course-offering-detail-page__tablist">
+            <ul class="nav nav-tabs square" role="tablist" id="course-detail-page__tablist">
                 {% for tab in course_tabs %}
                     <li role="presentation" {% if tab.is_default %}class="active"{% endif %}>
                         <a role="tab"
@@ -38,7 +38,10 @@
                            aria-controls="course-{{ tab.type }}"
                            data-toggle="tab"
                            data-target="#course-{{ tab.type }}"
-                           {% if tab.type == "news" %}data-has-unread="{% if unread_news > 0 %}true{% else %}false{% endif %}"{% endif %}
+                           {% if tab.type == "news" %}
+                                data-has-unread="{% if unread_news > 0 %}true{% else %}false{% endif %}"
+                                data-notifications-url="{{ course.get_course_news_notifications_url }}"
+                           {% endif %}
                            href="{{ course.get_absolute_url }}{{ tab.type }}/">
                             {{ tab.name }}{% if tab.type == "news" and unread_news > 0 %} <span class="badge badge-success">+{{ unread_news }}</span>{% endif %}
                         </a>
