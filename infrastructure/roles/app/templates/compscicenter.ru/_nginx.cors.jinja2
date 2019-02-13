@@ -1,25 +1,20 @@
 {% macro cors_headers() %}
 # As of Nginx 1.7.5, add_header supports an "always" parameter which
 # allows CORS to work if the backend returns 4xx or 5xx status code.
-add_header Access-Control-Allow-Origin "$http_origin" always;
-add_header Access-Control-Allow-Methods "GET,POST,OPTIONS";
-add_header Access-Control-Allow-Headers "DNT,X-Requested-With,Range,X-CSRFToken";
-add_header Access-Control-Allow-Credentials true;
+add_header Access-Control-Allow-Origin "$cors_allow_origin" always;
+add_header Access-Control-Allow-Methods "$cors_allow_methods";
+add_header Access-Control-Allow-Headers "$cors_allow_headers";
+add_header Access-Control-Allow-Credentials "$cors_allow_credentials";
 {% endmacro %}
-
-if ($cors_enabled = 1) {
-    {% filter indent(width=4) -%}
-    {{ cors_headers() }}
-    {%- endfilter %}
-}
 
 if ($request_method = 'OPTIONS') {
     {% filter indent(width=4) -%}
     {{ cors_headers() }}
     {%- endfilter %}
-
     # add_header 'Access-Control-Max-Age' 1728000;
     add_header 'Content-Type' 'text/plain; charset=utf-8';
     add_header 'Content-Length' 0;
     return 204;
 }
+
+{{ cors_headers() }}
