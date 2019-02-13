@@ -33,6 +33,7 @@
 - name: Apt dependencies
   apt:
     name:
+      - openssl
       - python-setuptools
   #    - python-dev
       - git
@@ -63,6 +64,33 @@
       # - libssl-dev not sure we need this package to install python-ldap with pip
     state: present
 
+- name: Register system python3 version
+  command: /usr/bin/python3 -c "import sys; print('{}.{}'.format(sys.version_info.major, sys.version_info.minor));"
+  register: system_python3_version
+  tags:
+    - ansible
+
+- name: Check pip{{ system_python3_version.stdout }} exists
+  command: pip{{ system_python3_version.stdout }} --version
+  register: system_python3_pip_version_output
+  ignore_errors: yes
+
+- name: Download get-pip.py if neccessary
+  get_url: url=https://bootstrap.pypa.io/get-pip.py
+           dest=/tmp/get-pip.py
+  when: system_python3_pip_version_output is failed
+
+- name: Install pip for system python3
+  command: "/usr/bin/python3 /tmp/get-pip.py"
+  when: system_python3_pip_version_output is failed
+
+
+- name: Install Ansible dependency for generating certificates
+  pip:
+    name: pyopenssl
+    executable: pip{{ system_python3_version.stdout }}
+
+
 - name: Get pip{{ python_version }} version
   command: pip{{ python_version }} --version
   register: pip_version_output
@@ -77,11 +105,7 @@
   command: "{{ python_pkg }} /tmp/get-pip.py"
   when: pip_version_output is failed
 
-# FIXME: why?
-- name: Install pip for SYSTEM python3 (will be placed in /usr/bin/pip3)
-  apt: name=python3-pip state=present
-
-- name: install global {{ python_pkg }} dependencies
+- name: Globally install {{ python_pkg }} dependencies
   pip:
     name: "{{ item.name }}"
     version: "{{ item.version }}"
@@ -95,6 +119,7 @@
       version: "2.0.17.1"
     - name: uwsgitop
       version: "0.10"
+
 
 - name: Create uwsgi config dir
   file:
