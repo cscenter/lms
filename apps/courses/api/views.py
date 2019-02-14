@@ -57,7 +57,8 @@ class TeacherList(ListAPIView):
                           .only("teacher_id",
                                 "course__meta_course_id",
                                 "course__semester__index")
-                          .order_by("teacher_id", "course__meta_course__id")
+                          .order_by("teacher_id", "course__meta_course__id",
+                                    "-course__semester__index")
                           .distinct("teacher_id", "course__meta_course__id"))
             )
 

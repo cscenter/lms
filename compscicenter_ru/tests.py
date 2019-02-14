@@ -1,12 +1,9 @@
 import pytest
 from django.core.cache import cache
-from django.utils.encoding import force_text
 
 from core.urls import reverse
 from learning.tests.factories import AreaOfStudyFactory
-from users.constants import AcademicRoles
-from users.tests.factories import GraduateFactory, UserFactory, \
-    StudentCenterFactory
+from users.tests.factories import GraduateFactory
 
 
 # TODO: test context
