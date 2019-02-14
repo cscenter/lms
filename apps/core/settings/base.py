@@ -226,6 +226,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     ),
     'UNAUTHENTICATED_USER': 'users.models.ExtendedAnonymousUser',
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    )
 }
 
 WEBPACK_LOADER = {

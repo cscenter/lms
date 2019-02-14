@@ -171,3 +171,8 @@ GERRIT_CLIENT_PASSWORD = "LEMz8tbPrxyBABArv+U2h2Zi32h8v13h7h2ZFzFOow"
 ALLOWED_HOSTS = ["*"]
 SESSION_COOKIE_DOMAIN = ".csc.test"
 CSRF_COOKIE_DOMAIN = ".csc.test"
+
+REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
+    'rest_framework.renderers.JSONRenderer',
+    'rest_framework.renderers.BrowsableAPIRenderer',
+)
