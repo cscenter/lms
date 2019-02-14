@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-02-12 16:25+0000\n"
-"PO-Revision-Date: 2019-02-12 16:27+0000\n"
+"PO-Revision-Date: 2019-02-14 14:33+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -183,58 +183,57 @@ msgstr "Выпуск"
 
 #: compscicenter_ru/templates/users/user_detail.html:9
 msgid "on site"
-msgstr ""
+msgstr "на сайте"
 
 #: compscicenter_ru/templates/users/user_detail.html:49
 msgid "Change photo"
-msgstr ""
+msgstr "Изменить фото"
 
 #: compscicenter_ru/templates/users/user_detail.html:72
 msgid "student"
-msgstr ""
+msgstr "студент"
 
 #: compscicenter_ru/templates/users/user_detail.html:72
 msgctxt "user_detail"
 msgid "enrolled in"
-msgstr ""
+msgstr "года поступления"
 
 #: compscicenter_ru/templates/users/user_detail.html:76
-#, fuzzy
 #| msgid "Teachers"
 msgid "teacher"
-msgstr "Преподаватели"
+msgstr "преподаватель"
 
 #: compscicenter_ru/templates/users/user_detail.html:95
 msgid "Review of Computer Science Center"
-msgstr ""
+msgstr "Отзыв о центре"
 
 #: compscicenter_ru/templates/users/user_detail.html:110
 msgid "Edit"
-msgstr ""
+msgstr "Редактировать"
 
 #: compscicenter_ru/templates/users/user_detail.html:173
 msgid "Student references"
-msgstr ""
+msgstr "Справки студента"
 
 #: compscicenter_ru/templates/users/user_detail.html:185
 msgid "Create reference"
-msgstr ""
+msgstr "Выдать справку"
 
 #: compscicenter_ru/templates/users/user_detail.html:189
 msgid "books"
-msgstr ""
+msgstr "книги"
 
 #: compscicenter_ru/templates/users/user_detail.html:204
 msgid "Student info record"
-msgstr ""
+msgstr "Карточка студента"
 
 #: compscicenter_ru/templates/users/user_detail.html:207
 msgid "University"
-msgstr ""
+msgstr "Университет"
 
 #: compscicenter_ru/templates/users/user_detail.html:211
 msgid "Phone"
-msgstr ""
+msgstr "Телефон"
 
 #: compscicenter_ru/templates/users/user_detail.html:215
 msgid "Email"
@@ -242,44 +241,44 @@ msgstr ""
 
 #: compscicenter_ru/templates/users/user_detail.html:221
 msgid "StudentInfo|University year"
-msgstr ""
+msgstr "Курс"
 
 #: compscicenter_ru/templates/users/user_detail.html:226
 msgid "Comment"
-msgstr ""
+msgstr "Комментарий"
 
 #: compscicenter_ru/templates/users/user_detail.html:242
 msgid "Status"
-msgstr ""
+msgstr "Статус"
 
 #: compscicenter_ru/templates/users/user_detail.html:246
 msgid "Non-degree student"
-msgstr ""
+msgstr "Вольный слушатель"
 
 #: compscicenter_ru/templates/users/user_detail.html:251
 msgid "Curriculum year"
-msgstr ""
+msgstr "Год программы обучения"
 
 #: compscicenter_ru/templates/users/user_detail.html:280
 msgid "StudentInfo|Study program"
-msgstr ""
+msgstr "Учебная программа"
 
 #: compscicenter_ru/templates/users/user_detail.html:296
 msgid "Workplace"
-msgstr ""
+msgstr "Место работы"
 
 #: compscicenter_ru/templates/users/user_detail.html:306
 #: compscicenter_ru/templates/users/user_detail.html:449
 msgid "Assignments"
-msgstr ""
+msgstr "Задания"
 
 #: compscicenter_ru/templates/users/user_detail.html:315
 msgid "Course offering"
-msgstr ""
+msgstr "Прочтение курса"
 
 #: compscicenter_ru/templates/users/user_detail.html:316
 msgid "Assignment"
-msgstr ""
+msgstr "Задание"
 
 #: compscicenter_ru/templates/users/user_detail.html:317
 msgid "Grade"
@@ -293,7 +292,7 @@ msgstr "Перенесён"
 #: compscicenter_ru/templates/users/user_detail.html:385
 msgctxt "Project"
 msgid "Canceled"
-msgstr ""
+msgstr "Отменен"
 
 #: compscicenter_ru/templates/users/user_detail.html:402
 msgid "Online courses"
@@ -301,27 +300,27 @@ msgstr "Онлайн-курсы"
 
 #: compscicenter_ru/templates/users/user_detail.html:436
 msgid ".iCal calendar"
-msgstr ""
+msgstr ".iCal-календарь"
 
 #: compscicenter_ru/templates/users/user_detail.html:437
 msgid "Link"
-msgstr ""
+msgstr "Ссылка"
 
 #: compscicenter_ru/templates/users/user_detail.html:442
 msgid "Classes"
-msgstr ""
+msgstr "Занятия"
 
 #: compscicenter_ru/templates/users/user_detail.html:456
 msgid "Events"
-msgstr ""
+msgstr "События"
 
 #: compscicenter_ru/templates/users/user_detail.html:468
 msgid "Social accounts"
-msgstr ""
+msgstr "Аккаунты"
 
 #: compscicenter_ru/templates/users/user_detail.html:502
 msgid "Contact information"
-msgstr ""
+msgstr "Контактная информация"
 
 #: compscicenter_ru/views.py:491
 msgctxt "adjective"
