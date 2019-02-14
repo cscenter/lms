@@ -28,18 +28,15 @@ urlpatterns = [
     path('orgs/', views.TeamView.as_view(), name='orgs'),
     # FIXME: точно только публичная версия? Пока не ясно
     path('syllabus/', views.SyllabusView.as_view(), name='syllabus'),
-    path('alumni2/', views.AlumniV2View.as_view(), name='alumni_v2'),
     path('alumni/', views.AlumniView.as_view(), name='alumni'),
-    path('alumni/<str:area_of_study_code>/', views.AlumniView.as_view(), name='alumni_by_area_of_study'),
+    path('alumni/<str:area>/', views.AlumniView.as_view(), name='alumni_by_area'),
     re_path(r'^(?P<year>201[3-7])/$', views.AlumniByYearView.as_view(), name='alumni_memory'),
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
 
-    path('teachers2/', views.TeachersV2View.as_view(), name='teachers_v2'),
     path('teachers/', views.TeachersView.as_view(), name='teachers'),
     path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
 
     path('faq/', views.QAListView.as_view(), name='faq'),
-    path('testimonials2/', views.TestimonialsListV2View.as_view(), name='testimonials_v2'),
     path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
     path('', include('online_courses.urls')),
     path('videos/', CourseVideoListView.as_view(), name='course_video_list'),

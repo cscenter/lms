@@ -155,19 +155,6 @@ class QAListView(generic.ListView):
         return Faq.objects.filter(site=settings.CENTER_SITE_ID).order_by("sort")
 
 
-class TestimonialsListView(generic.ListView):
-    context_object_name = "testimonials"
-    template_name = "testimonials.html"
-    paginate_by = 10
-
-    def get_queryset(self):
-        return (User.objects
-                .filter(groups=User.roles.GRADUATE_CENTER)
-                .exclude(csc_review='').exclude(photo='')
-                .prefetch_related("areas_of_study")
-                .order_by("-graduation_year", "last_name"))
-
-
 def positive_integer(value):
     validate_integer(value)
     value = int(value)
@@ -176,7 +163,7 @@ def positive_integer(value):
     return value
 
 
-class TestimonialsListV2View(TemplateView):
+class TestimonialsListView(TemplateView):
     template_name = "compscicenter_ru/testimonials.html"
 
     def get_context_data(self, **kwargs):
@@ -204,37 +191,7 @@ class TestimonialsListV2View(TemplateView):
         }
 
 
-class TeachersView(generic.ListView):
-    template_name = "center_teacher_list.html"
-    context_object_name = "teachers"
-
-    def get_queryset(self):
-        qs = (User.objects
-              .filter(groups=User.roles.TEACHER_CENTER,
-                      courseteacher__roles=CourseTeacher.roles.lecturer)
-              .distinct())
-        return qs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Consider the last 3 academic years. Teacher is active, if he read
-        # course in this period or will in the future.
-        year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
-        term_index = get_term_index_academic_year_starts(year, term_type)
-        term_index -= 2 * len(SemesterTypes.choices)
-        active_lecturers = Counter(
-            Course.objects
-            .filter(semester__index__gte=term_index)
-            .values_list("teachers__pk", flat=True)
-        )
-        context["active"] = filter(lambda t: t.pk in active_lecturers,
-                                   context[self.context_object_name])
-        context["others"] = filter(lambda t: t.pk not in active_lecturers,
-                                   context[self.context_object_name])
-        return context
-
-
-class TeachersV2View(TemplateView):
+class TeachersView(TemplateView):
     template_name = "compscicenter_ru/teachers.html"
 
     def get_context_data(self, **kwargs):
@@ -254,58 +211,12 @@ class TeachersV2View(TemplateView):
                 "term_index": term_index,
             }
         }
-        return {
-            "app_data": app_data
-        }
-
-
-class AlumniView(generic.ListView):
-    filter_by_year = None
-    template_name = "users/alumni_list.html"
-
-    def get(self, request, *args, **kwargs):
-        # Validate query params
-        code = self.kwargs.get("area_of_study_code", False)
-        # Support old code "dm" for `Data Mining`
-        if code == "dm":
-            redirect_to = reverse("alumni_by_area_of_study", kwargs={
-                "area_of_study_code": "ds"})
-            return HttpResponseRedirect(redirect_to)
-        self.areas_of_study = AreaOfStudy.objects.all()
-        if code and code not in (s.code for s in self.areas_of_study):
-            # TODO: redirect to alumni/ page
-            raise Http404
-        return super(AlumniView, self).get(request, *args, **kwargs)
-
-    def get_queryset(self):
-        params = {
-            "groups__pk": User.roles.GRADUATE_CENTER
-        }
-        if self.filter_by_year is not None:
-            params["graduation_year"] = self.filter_by_year
-        code = self.kwargs.get("area_of_study_code", False)
-        if code:
-            params["areas_of_study"] = code
-        return (User.objects
-                .filter(**params)
-                .order_by("-graduation_year", "last_name", "first_name"))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        code = self.kwargs.get("area_of_study_code", False)
-        context["selected_area_of_study"] = code
-        context["areas_of_study"] = self.areas_of_study
-        if self.filter_by_year:
-            context["base_url"] = reverse(
-                "alumni_{}".format(self.filter_by_year))
-        else:
-            context["base_url"] = reverse("alumni")
-        return context
+        return {"app_data": app_data}
 
 
 class AlumniByYearView(generic.ListView):
     context_object_name = "alumni_list"
-    template_name = "users/alumni_by_year.html"
+    template_name = "compscicenter_ru/alumni_by_year.html"
 
     def get(self, request, *args, **kwargs):
         year = int(self.kwargs['year'])
@@ -313,7 +224,7 @@ class AlumniByYearView(generic.ListView):
         # No graduates in first 2 years after foundation
         if year < CENTER_FOUNDATION_YEAR + 2 or year > now__year:
             return HttpResponseNotFound()
-        return super(AlumniByYearView, self).get(request, *args, **kwargs)
+        return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
         year = int(self.kwargs['year'])
@@ -411,40 +322,56 @@ class AlumniHonorBoardView(TemplateView):
         return context
 
 
-class AlumniV2View(TemplateView):
+class AlumniView(TemplateView):
     template_name = "compscicenter_ru/alumni/index.html"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self):
+        # TODO: Move to the proxy model `Graduate`
+        first_graduation_year = 2013
         cache_key = 'cscenter_last_graduation_year'
         last_graduation_year = cache.get(cache_key)
         if last_graduation_year is None:
             from_last_graduation = (User.objects
                                     .filter(groups=User.roles.GRADUATE_CENTER)
+                                    .exclude(graduation_year__isnull=True)
                                     .order_by("-graduation_year")
                                     .only("graduation_year")
                                     .first())
-            last_graduation_year = from_last_graduation.graduation_year
+            if from_last_graduation:
+                last_graduation_year = from_last_graduation.graduation_year
+            else:
+                last_graduation_year = first_graduation_year
             cache.set(cache_key, last_graduation_year, 86400 * 31)
-        show_year = self.kwargs.get("year", last_graduation_year)
+        years_range = range(first_graduation_year, last_graduation_year + 1)
+        years = [{"label": y, "value": y} for y in reversed(years_range)]
+        year = self.kwargs.get("year")
+        if year not in years_range:
+            year = last_graduation_year
+        year = next((y for y in years if y['value'] == year))
+        # Area state and props
+        areas = [{"label": a.name, "value": a.code} for a in
+                 AreaOfStudy.objects.all()]
+        area = self.kwargs.get("area", None)
+        if area:
+            try:
+                area = next((a for a in areas if a['value'] == area))
+            except StopIteration:
+                raise Http404
         app_data = {
             "state": {
-                "year": {"value": show_year, "label": show_year},
-                "area": self.kwargs.get("area", None),
+                "year": year,
+                "area": area,
                 "city": self.kwargs.get("city", None),
             },
             "props": {
                 "entry_url": reverse("api:alumni"),
                 "cities": [{"label": str(v), "value": k} for k, v
                            in settings.CITIES.items()],
-                "areas": [{"label": a.name, "value": a.code} for a
-                          in AreaOfStudy.objects.all()],
-                "years": [{"label": y, "value": y} for y
-                          in reversed(range(2013, last_graduation_year + 1))]
+                "areas": areas,
+                "years": years
             }
         }
-        return {
-            "app_data": app_data
-        }
+        return {"app_data": app_data}
 
 
 class SyllabusView(generic.TemplateView):
