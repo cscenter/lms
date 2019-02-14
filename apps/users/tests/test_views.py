@@ -8,13 +8,12 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.forms.models import model_to_dict
 from django.utils import translation
-from django.utils.encoding import smart_text, force_text, smart_bytes
+from django.utils.encoding import smart_text, smart_bytes
 
 from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.tests.factories import CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
-from learning.tests.factories import AreaOfStudyFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import AcademicRoles
 from users.forms import UserCreationForm, UserChangeForm
@@ -406,34 +405,6 @@ def test_expelled(client, settings):
     client.login(active_student)
     response = client.get(url)
     assert response.status_code == 200
-
-
-@pytest.mark.django_db
-def test_alumni(client):
-    graduated = UserFactory(groups=[AcademicRoles.GRADUATE_CENTER])
-    student_center = StudentCenterFactory()
-    url_list_all = reverse('alumni')
-    response = client.get(url_list_all)
-    assert student_center.last_name not in force_text(response.content)
-    assert graduated.last_name in force_text(response.content)
-    url = reverse('alumni_by_area_of_study', args=["-"])
-    response = client.get(url)
-    assert response.status_code == 404
-    st1 = AreaOfStudyFactory.create()
-    st2 = AreaOfStudyFactory.create()
-    url = reverse('alumni_by_area_of_study', args=[st1.code])
-    response = client.get(url)
-    assert "areas_of_study" in response.context
-    assert len(response.context["areas_of_study"]) == 2
-    graduated.areas_of_study.add(st1.code)
-    url = reverse('alumni_by_area_of_study', args=[st1.code])
-    response = client.get(url)
-    assert graduated.last_name in force_text(response.content)
-    response = client.get(url_list_all)
-    assert graduated.last_name in force_text(response.content)
-    url = reverse('alumni_by_area_of_study', args=[st2.code])
-    response = client.get(url)
-    assert graduated.last_name not in force_text(response.content)
 
 
 @pytest.mark.django_db

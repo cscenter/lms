@@ -1,11 +1,17 @@
 import pytest
+from django.core.cache import cache
+from django.utils.encoding import force_text
 
 from core.urls import reverse
-from users.tests.factories import GraduateFactory
+from learning.tests.factories import AreaOfStudyFactory
+from users.constants import AcademicRoles
+from users.tests.factories import GraduateFactory, UserFactory, \
+    StudentCenterFactory
 
 
+# TODO: test context
 @pytest.mark.django_db
-def test_testimonials(client):
+def test_testimonials_smoke(client):
     GraduateFactory(csc_review='test', photo='stub.JPG')
     response = client.get(reverse('testimonials'))
     assert response.status_code == 200
@@ -48,3 +54,26 @@ def test_menu_selected_patterns(rf):
     request = rf.request(**env)
     processed_menu = Menu.process(request, name=menu_name)
     assert processed_menu[1].selected
+
+
+# TODO: test alumni api
+@pytest.mark.django_db
+def test_alumni(client):
+    url_alumni_all = reverse('alumni')
+    response = client.get(url_alumni_all)
+    assert response.status_code == 200
+    json_data = response.context_data['app_data']
+    assert json_data['props']['years'] == [{'label': 2013, 'value': 2013}]
+    assert not json_data['props']['areas']
+    graduated = GraduateFactory(graduation_year=2015)
+    cache.delete('cscenter_last_graduation_year')
+    response = client.get(url_alumni_all)
+    assert response.status_code == 200
+    json_data = response.context_data['app_data']
+    assert len(json_data['props']['years']) == 3
+    assert json_data['props']['years'][0]['value'] == 2015
+    assert json_data['state']['year'] == json_data['props']['years'][0]
+    a = AreaOfStudyFactory()
+    response = client.get(url_alumni_all)
+    json_data = response.context_data['app_data']
+    assert json_data['props']['areas'] == [{'label': a.name, 'value': a.code}]

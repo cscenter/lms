@@ -37,6 +37,8 @@ ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
 
 THUMBNAIL_DEBUG = True
+THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
+
 
 EMAIL_HOST = '127.0.0.1'
 EMAIL_HOST_PASSWORD = ''
@@ -149,8 +151,6 @@ SLIDESHARE_API_KEY = "OX5YoPYg"
 SLIDESHARE_SECRET = "R3lITlTK"
 SLIDESHARE_USERNAME = "pacahon"
 SLIDESHARE_PASSWORD = "q3wcp001"
-
-THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.cached_db_kvstore.KVStore'
 
 # Disable django-debug-toolbar jquery
 DEBUG_TOOLBAR_CONFIG = {
