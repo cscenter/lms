@@ -42,7 +42,7 @@ def user_to_ldif(user: User, redirect_to=None):
 
 
 def export(path):
-    """Generates users data in LDIF"""
+    """Generates users data in LDIF format"""
     with open(path, 'w') as f:
         # FIXME: remove duplicates
         for u in User.objects.filter(groups__in=GROUPS_IMPORT_TO_GERRIT):
