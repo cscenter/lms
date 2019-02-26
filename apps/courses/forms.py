@@ -16,7 +16,46 @@ from courses.settings import ClassTypes
 from core.forms import CANCEL_SAVE_PAIR
 from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 
+__all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
+           'CourseClassForm', 'AssignmentForm')
+
 DROP_ATTACHMENT_LINK = '<a href="{}"><i class="fa fa-trash-o"></i>&nbsp;{}</a>'
+
+
+class CourseForm(forms.ModelForm):
+    name_ru = forms.CharField(
+        label=_("Course|name"),
+        required=True,
+        widget=forms.TextInput(attrs={'autocomplete': 'off',
+                                      'autofocus': 'autofocus'}))
+    description_ru = forms.CharField(
+        label=_("Course|description"),
+        required=True,
+        help_text=LATEX_MARKDOWN_HTML_ENABLED,
+        widget=UbereditorWidget)
+
+    @property
+    def helper(self):
+        helper = FormHelper()
+        helper.layout = Layout(
+            TabHolder(
+                Tab(
+                    'RU',
+                    'name_ru',
+                    'description_ru',
+                ),
+                Tab(
+                    'EN',
+                    'name_en',
+                    'description_en',
+                ),
+            ),
+            CANCEL_SAVE_PAIR)
+        return helper
+
+    class Meta:
+        model = MetaCourse
+        fields = ('name_ru', 'name_en', 'description_ru', 'description_en')
 
 
 class CourseEditDescrForm(forms.ModelForm):
@@ -71,42 +110,6 @@ class CourseNewsForm(forms.ModelForm):
     class Meta:
         model = CourseNews
         fields = ['title', 'text']
-
-
-class CourseForm(forms.ModelForm):
-    name_ru = forms.CharField(
-        label=_("Course|name"),
-        required=True,
-        widget=forms.TextInput(attrs={'autocomplete': 'off',
-                                      'autofocus': 'autofocus'}))
-    description_ru = forms.CharField(
-        label=_("Course|description"),
-        required=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED,
-        widget=UbereditorWidget)
-
-    @property
-    def helper(self):
-        helper = FormHelper()
-        helper.layout = Layout(
-            TabHolder(
-                Tab(
-                    'RU',
-                    'name_ru',
-                    'description_ru',
-                ),
-                Tab(
-                    'EN',
-                    'name_en',
-                    'description_en',
-                ),
-            ),
-            CANCEL_SAVE_PAIR)
-        return helper
-
-    class Meta:
-        model = MetaCourse
-        fields = ['name_ru', 'name_en', 'description_ru', 'description_en']
 
 
 class CourseClassForm(forms.ModelForm):
@@ -284,6 +287,7 @@ class AssignmentForm(CityAwareModelForm):
                 Div(
                     Div('passing_score',
                         'maximum_score',
+                        'weight',
                         css_class="form-inline"),
                     css_class="form-group"
                 ),
@@ -296,5 +300,5 @@ class AssignmentForm(CityAwareModelForm):
 
     class Meta:
         model = Assignment
-        fields = ['title', 'text', 'deadline_at', 'attachments', 'is_online',
-                  'passing_score', 'maximum_score']
+        fields = ('title', 'text', 'deadline_at', 'attachments', 'is_online',
+                  'passing_score', 'maximum_score', 'weight')

@@ -199,6 +199,19 @@ def test_studentassignment_last_comment_from():
 
 
 @pytest.mark.django_db
+def test_studentassignment_model_weight_score():
+    assignment = AssignmentFactory(weight=1, maximum_score=10, passing_score=2)
+    student_assignment = StudentAssignment(assignment=assignment, score=2)
+    assert student_assignment.weight_score == 2
+    assignment.weight = Decimal('.5')
+    assert student_assignment.weight_score == 1
+    assignment.weight = Decimal('0.00')
+    assert student_assignment.weight_score == 0
+    assignment.weight = Decimal('0.01')
+    assert student_assignment.weight_score == Decimal('0.02')
+
+
+@pytest.mark.django_db
 def test_studentassignment_first_student_comment_at(curator):
     """`first_student_comment_at` attribute is updated by signal"""
     teacher = TeacherCenterFactory.create()
@@ -412,6 +425,7 @@ def test_assignment_public_form_for_teachers(settings, client):
         "deadline_at_1": "00:00",
         "passing_score": "3",
         "maximum_score": "5",
+        "weight": "1.00",
     }
     add_url = co_in_spb.get_create_assignment_url()
     response = client.post(add_url, form_data, follow=True)

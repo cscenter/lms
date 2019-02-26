@@ -896,6 +896,11 @@ class Assignment(TimeStampedModel):
         _("Maximum score"),
         default=5,
         validators=[MaxValueValidator(1000)])
+    weight = models.DecimalField(
+        _("Problem Weight"),
+        default=1,
+        max_digits=3, decimal_places=2,
+        validators=[MinValueValidator(0), MaxValueValidator(1)])
     notify_teachers = models.ManyToManyField(
         CourseTeacher,
         verbose_name=_("Assignment|notify_settings"),
