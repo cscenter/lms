@@ -13,8 +13,10 @@
     <div class="container">
         <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
         <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering.</p>
-        <a href="#offline-courses" class="btn btn--big btn--green _m-wide">Смотреть программы</a>
-        <a href="/about/" class="btn btn--big btn--white _m-wide">Узнать о центре</a>
+        <div class="cover__btns">
+            <a href="#offline-courses" class="btn btn--big btn--green _m-wide">Смотреть программы</a>
+            <a href="/about/" class="btn btn--big btn--white _m-wide">Узнать о центре</a>
+        </div>
     </div>
 </div> {# -- div.cover #}
 {% endblock after_navbar_container %}
@@ -29,7 +31,7 @@
 
             <div class="card-deck">
                 <a href="{{ url('syllabus') }}" class="card card-offline-course">
-                    <div class="card-block">
+                    <div class="card__body">
                         <div class="card-offline-course__icon">{{ macros.svg_inline('se') }}</div>
                         <h3 class="card-offline-course__card-title">Software Engineering</h3>
                         <p class="card-offline-course__card-text">Разработка программного обеспечения</p>
@@ -37,7 +39,7 @@
                 </a>
 
                 <a href="{{ url('syllabus') }}" class="card card-offline-course">
-                    <div class="card-block">
+                    <div class="card__body">
                         <div class="card-offline-course__icon">{{ macros.svg_inline('ds') }}</div>
                         <h3 class="card-offline-course__card-title">Data Science</h3>
                         <p class="card-offline-course__card-text">Анализ данных</p>
@@ -45,7 +47,7 @@
                 </a>
 
                 <a href="{{ url('syllabus') }}" class="card card-offline-course">
-                    <div class="card-block">
+                    <div class="card__body">
                         <div class="card-offline-course__icon">{{ macros.svg_inline('cs') }}</div>
                         <h3 class="card-offline-course__card-title">Computer Science</h3>
                         <p class="card-offline-course__card-text">Современная информатика</p>
@@ -97,7 +99,7 @@
                         {% if course.avatar_url -%}
                             <div class="card-img-wrapper"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
                         {%- endif %}
-                        <div class="card-block">
+                        <div class="card__body">
                             <h4 class="csc-online-education__card-title">{{ course.name }}</h4>
                             <p class="csc-online-education__card-text">
                                 <small class="text-muted">{{ course.tag }}</small>

@@ -1,4 +1,4 @@
-{% extends "cscenter/layouts/base.html" %}
+{% extends "compscicenter_ru/layouts/base.html" %}
 
 {% block body_attrs %}class="_dark" {% endblock body_attrs %}
 
@@ -6,8 +6,13 @@
  <div class="container page-content">
         <div class="row content-center">
             <div class="col-lg-8">
-                <div class="form-body">
-                    Спасибо за ваш отзыв! <a href="{{ course.get_absolute_url() }}">Перейти на страницу курса</a>
+                <div class="card">
+                    <div class="card__title">
+                        Спасибо за ваш отзыв!
+                    </div>
+                    <div class="card__body">
+                        <a href="{{ course.get_absolute_url() }}">Перейти на страницу курса</a>
+                    </div>
                 </div>
             </div>
         </div>
