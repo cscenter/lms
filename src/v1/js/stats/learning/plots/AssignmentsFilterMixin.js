@@ -62,7 +62,7 @@ let AssignmentsFilterMixin = (superclass) => class extends superclass {
     calculateFilterProps = (rawJSON) => {
         const curriculumYearChoices = new Set();
         rawJSON.forEach(function (assignment) {
-            assignment.assigned_to.forEach(function(sa) {
+            assignment.students.forEach(function(sa) {
                 curriculumYearChoices.add(sa.student.curriculum_year);
             });
         });
@@ -74,7 +74,7 @@ let AssignmentsFilterMixin = (superclass) => class extends superclass {
         if (this.filters.choices.curriculumYear.size === 0) {
             return;
         }
-        let choices = [...this.filters.choices.curriculumYear].sort();
+        let choices = Array.from(this.filters.choices.curriculumYear).sort();
         let self = this;
         return {
             options: {

@@ -40,7 +40,6 @@ class EnrollmentsResults {
         this.data = data;
         let columns = [];
         for (let key in data) {
-            console.log(this.grades, key);
             columns.push([this.grades.get(key), data[key]]);
         }
         return columns;
@@ -53,7 +52,6 @@ class EnrollmentsResults {
         }
 
         // Let's generate here, a lot of troubles with c3.load method right now
-        console.log(data);
         this.plot = c3.generate({
             bindto: this.id,
             data: {

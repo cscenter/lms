@@ -133,7 +133,7 @@ $btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, bord
 
 ._m-wide {
   width: 100%;
-  @include media-breakpoint-up(lg) {
+  @include media-breakpoint-up(md) {
     width: auto;
   }
 }

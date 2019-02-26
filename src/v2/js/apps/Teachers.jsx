@@ -189,16 +189,16 @@ class App extends React.Component {
                         />
                     </div>
                     <div className="col-lg-3">
-                        <div className="ui checkbox-group inline">
-                            <label className="custom-checkbox fill-checkbox">
+                        <div className="grouped inline">
+                            <label className="ui option checkbox">
                                 <input type="checkbox"
-                                       className="fill-control-input"
+                                       className="control__input"
                                        checked={!this.state.recentOnly}
                                        onChange={this.handleRecentCheckboxChange}
                                        value=""
                                 />
-                                <span className="fill-control-indicator" />
-                                <span className="fill-control-description">Ранее преподавали</span>
+                                <span className="control__indicator" />
+                                <span className="control__description">Ранее преподавали</span>
                             </label>
                         </div>
                     </div>

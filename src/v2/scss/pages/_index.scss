@@ -14,8 +14,6 @@
 .card-offline-course {
   background-color: $gray-lighter;
   text-align: center;
-  padding: spacer("6x") spacer("2x") spacer("8x");
-  border-radius: 0;
 
   svg {
     margin-left: 30px;
@@ -67,10 +65,6 @@
   &__card-text {
     font-size: $font-size-sm;
     color: $gray-dark;
-
-    @include media-breakpoint-down(md) {
-      text-align: center;
-    }
   }
 }
 

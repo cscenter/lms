@@ -55,7 +55,7 @@ class AssignmentsResults extends mix(PlotOptions).with(AssignmentsFilterMixin) {
                 let counters = states.reduce(function (a, b) {
                         return a.set(b, 0);
                     }, new Map());
-                assignment.assigned_to
+                assignment.students
                     .filter((sa) => this.matchFilters(sa, "student_assignment"))
                     .forEach((student) => {
                         let state = this.states.get(student.state);
@@ -76,7 +76,6 @@ class AssignmentsResults extends mix(PlotOptions).with(AssignmentsFilterMixin) {
         }
 
         // Let's generate here, a lot of troubles with c3.load method right now
-        console.log(data);
         this.plot = c3.generate({
             bindto: '#' + this.id,
             oninit: () => { this.appendOptionsForm() },
