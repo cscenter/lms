@@ -1,24 +1,25 @@
-{% extends "cscenter/layouts/base.html" %}
+{% extends "compscicenter_ru/layouts/base.html" %}
 
 {% block title %}Опрос по курсу "{{ form.survey.title }}"{% endblock title %}
 
 {% block body_attrs %}class="_dark" data-init-sections="surveys"{% endblock body_attrs %}
 
 {% block content %}
- <div class="container page-content _survey">
-        <div class="row content-center no-gutters">
-            <div class="col-lg-8">
-                {% if request.user.is_curator and not form.survey.is_published %}
-                    Предварительный просмотр. Опрос ещё не опубликован.<br>
-                    <a target="_blank" class="btn btn--green mb-2" href="{{ url("admin:surveys_form_change", form.survey.form_id) }}">Редактировать форму</a>
-                {% endif %}
-                <form action="" class="ui form survey" method="post">
-                    {% csrf_token %}
-                    <div class="form_title __inverse">
-                        <p>Опрос по курсу</p>
-                        <h1>{{ form.survey.title|safe }}</h1>
-                    </div>
-                    <div class="form-body">
+<div class="container page-content _survey">
+    <div class="row content-center no-gutters">
+        <div class="col-lg-8">
+            {% if request.user.is_curator and not form.survey.is_published %}
+                Предварительный просмотр. Опрос ещё не опубликован.<br>
+                <a target="_blank" class="btn btn--green mb-2" href="{{ url("admin:surveys_form_change", form.survey.form_id) }}">Редактировать форму</a>
+            {% endif %}
+            <div class="card _survey">
+                <div class="card__title __inverse">
+                    <p>Опрос по курсу</p>
+                    <h1>{{ form.survey.title|safe }}</h1>
+                </div>
+                <div class="card__body">
+                    <form action="" class="ui form" method="post">
+                        {% csrf_token %}
                         {{ form.non_field_errors() }}
                         {% if form.survey.form.description %}{{ form.survey.form.description }}{% endif %}
                         {{ form|as_survey }}
@@ -27,9 +28,10 @@
                                 <button type="submit" class="btn btn--green _m-wide">Отправить</button>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+</div>
 {% endblock content %}

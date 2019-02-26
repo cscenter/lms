@@ -1,13 +1,12 @@
 from django.contrib import admin
 from django.db.models import Count
-from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from core.filters import AdminRelatedDropdownFilter
+from core.urls import reverse
 from surveys.constants import STATUS_PUBLISHED
-from surveys.models import Form, Field, FieldChoice, FormSubmission, FieldEntry, \
-    CourseSurvey
+from surveys.models import Form, Field, FieldChoice, CourseSurvey
 
 
 class FormFieldAdmin(admin.StackedInline):
