@@ -10,8 +10,6 @@ from django.core.exceptions import ImproperlyConfigured
 
 logger = logging.getLogger(__name__)
 
-GERRIT_MAGIC_JSON_PREFIX = b")]}\'\n"
-
 REQUIRED_SETTINGS = [
     "GERRIT_API_URI",
     "GERRIT_CLIENT_USERNAME",
@@ -24,7 +22,17 @@ for attr in REQUIRED_SETTINGS:
             "Please add {0!r} to your settings module".format(attr))
 
 
-class GerritResponse:
+class Response:
+    """
+    Wrapper for `requests.models.Response`.
+
+    To prevent against Cross Site Script Inclusion (XSSI) attacks,
+    the JSON response body in gerrit starts with a magic prefix line,
+    remove it before encoding body to json.
+    """
+
+    MAGIC_JSON_PREFIX = b")]}\'\n"
+
     def __init__(self, response):
         self._response = response
         logger.debug(f"Response raw content: {response.text}")
@@ -34,19 +42,19 @@ class GerritResponse:
         # FIXME: Invalid json content: b'Account Not Found: sheina.ekaterina.s@yandex.ru\n'
         """
         Encode response content as json.
-
-        To prevent against Cross Site Script Inclusion (XSSI) attacks,
-        the JSON response body starts with a magic prefix line,
-        we should remove it before encoding.
         """
         content = self._response.content
-        if content.startswith(GERRIT_MAGIC_JSON_PREFIX):
-            content = content[len(GERRIT_MAGIC_JSON_PREFIX):]
+        if content.startswith(self.MAGIC_JSON_PREFIX):
+            content = content[len(self.MAGIC_JSON_PREFIX):]
         try:
             return json.loads(content)
         except ValueError:
             logging.error('Invalid json content: %s', content)
             raise
+
+    @property
+    def text(self):
+        return self._response.text
 
     @property
     def data(self):
@@ -71,11 +79,8 @@ class GerritResponse:
         return (self._response.status_code in [412, 409] and
                 "already exists" in self._response.text)
 
-    @property
-    def text(self):
-        return self._response.text
 
-
+# TODO: create service user (e.g. for Jenkins)
 class Gerrit:
     def __init__(self, api_url, auth):
         self.api_url = api_url
@@ -88,11 +93,11 @@ class Gerrit:
         if method == "PUT":
             # Create a new resource but not overwrite an existing
             # The server will respond with HTTP 412 (Precondition Failed)
-            # if the named resourse is already exists.
+            # if the named resource already exists.
             headers["If-None-Match"] = "*"
         kwargs["headers"] = headers
         response = requests.request(method, url, auth=self.auth, **kwargs)
-        return GerritResponse(response)
+        return Response(response)
 
     def get_group(self, group_name):
         return self._request("GET", f"groups/{quote_plus(group_name)}")
@@ -117,8 +122,7 @@ class Gerrit:
         """
         Adds one or several groups as subgroups to a Gerrit internal group.
 
-        group_id
-            Identifier for a group. This can be:
+        `parent_group_id` is identifier for a group. This can be:
             * the UUID of the group
             * the legacy numeric ID of the group
             * the name of the group if it is unique
@@ -150,48 +154,28 @@ class Gerrit:
             "members": members
         })
 
-    def create_branch(self, project, branch_name, payload=None):
-        logger.debug(f"Create branch [{branch_name}] for project {project}")
+    def create_git_branch(self, project_name, branch_name, payload=None):
+        logger.debug(f"Create branch [{branch_name}] for {project_name}")
         branch_uri = "projects/{}/branches/{}".format(
-            quote_plus(project),
+            quote_plus(project_name),
             quote_plus(branch_name)
         )
         payload = payload or {}
-        return self._request("PUT", branch_uri, json={
-            **payload
-        })
+        return self._request("PUT", branch_uri, json={**payload})
 
-    def create_permissions(self, project, permissions: dict):
+    def get_permissions(self, project_name):
+        """
+        Returns information about all access rights for a project.
+        """
+        project_access_uri = f"projects/{quote_plus(project_name)}/access"
+        return self._request("GET", project_access_uri)
+
+    def grant_permissions(self, project_name, permissions: dict):
         """
         On success returns information about all access rights for a project.
         """
-        project_access_uri = f"projects/{quote_plus(project)}/access"
+        project_access_uri = f"projects/{quote_plus(project_name)}/access"
         return self._request("POST", project_access_uri, json=permissions)
-
-    def create_student_permissions(self, project, branch, group_uuid):
-        """Set permissions on branch for student group"""
-        xallow = {
-            "exclusive": False,
-            "rules": {
-                group_uuid: {
-                    "action": "ALLOW", "force": False
-                }
-            }
-        }
-        payload = {
-            "add": {
-                f"refs/heads/{branch}": {"permissions": {
-                    "read": xallow,
-                }},
-                f"refs/for/refs/heads/{branch}": {"permissions": {
-                    # Permits to upload a non-merge commit to
-                    # the refs/for/BRANCH
-                    "push": xallow,
-                    "addPatchSet": xallow,
-                }}
-            },
-        }
-        return self.create_permissions(project, payload)
 
     def get_project(self, project_name):
         # https://gerrit-review.googlesource.com/Documentation/rest-api-projects.html#project-info

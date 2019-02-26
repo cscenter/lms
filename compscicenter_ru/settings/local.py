@@ -157,16 +157,16 @@ DEBUG_TOOLBAR_CONFIG = {
     # 'SHOW_TOOLBAR_CALLBACK': lambda r: False,  # disables it
 }
 
-LDAP_CLIENT_URI = "ldap://review.compscicenter.ru:389"
-LDAP_DB_SUFFIX = "dc=review,dc=compscicenter,dc=ru"
+LDAP_CLIENT_URI = "ldap://test.review.compscicenter.ru:389"
+LDAP_DB_SUFFIX = "dc=test,dc=review,dc=compscicenter,dc=ru"
 LDAP_CLIENT_USERNAME = "admin"
-LDAP_CLIENT_PASSWORD = "***REMOVED***"
-LDAP_TLS_TRUSTED_CA_CERT_FILE = "/Users/jetbrains/Downloads/tmp/trustedCA.crt"
+LDAP_CLIENT_PASSWORD = "superStrongPassword"
+LDAP_TLS_TRUSTED_CA_CERT_FILE = "/Users/jetbrains/websites/csc-review/runtime/rootCA.crt"
 LDAP_SYNC_PASSWORD = True
 
-GERRIT_API_URI = "https://review.compscicenter.ru/a/"
+GERRIT_API_URI = "http://test.review.compscicenter.ru/a/"
 GERRIT_CLIENT_USERNAME = "admin"
-GERRIT_CLIENT_PASSWORD = "LEMz8tbPrxyBABArv+U2h2Zi32h8v13h7h2ZFzFOow"
+GERRIT_CLIENT_PASSWORD = "superStrongPassword"
 
 ALLOWED_HOSTS = ["*"]
 SESSION_COOKIE_DOMAIN = ".csc.test"

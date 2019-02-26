@@ -1,5 +1,5 @@
+import copy
 import logging
-import textwrap
 
 from django.conf import settings
 
@@ -11,27 +11,86 @@ from users.models import User
 logger = logging.getLogger(__name__)
 
 
-def grant_reviewers_access(client, project_name, reviewers_group_uuid):
-    """Grant reviewers Push, Create Reference and Read Access to all branches"""
-    xallow = {
-        "exclusive": True,
-        "rules": {reviewers_group_uuid: {"action": "ALLOW", "force": False}}
-    }
-    read_xallow = xallow.copy()
-    read_xallow["exclusive"] = False
-    payload = {
+def get_default_reviewers_project_access(group_uuid):
+    return {
         "add": {
-            "refs/*": {"permissions": {
-                "read": read_xallow,
-                "push": xallow,
-                "create": xallow
-            }},
+            "refs/*": {
+                "permissions": {
+                    "read": {
+                        "exclusive": False,
+                        "rules": {
+                            group_uuid: {"action": "ALLOW", "force": False}
+                        }
+                    },
+                    "push": {
+                        "exclusive": True,
+                        "rules": {
+                            group_uuid: {"action": "ALLOW", "force": False}
+                        }
+                    },
+                    "create": {
+                        "exclusive": True,
+                        "rules": {
+                            group_uuid: {"action": "ALLOW", "force": False}
+                        }
+                    },
+                }
+            },
         },
     }
-    return client.create_permissions(project_name, payload)
 
 
-def permits_students_read_master(client, project_name, group_uuid):
+def get_default_students_project_access(group_uuid, git_branch_name):
+    xallow = {
+        "exclusive": False,
+        "rules": {
+            group_uuid: {
+                "action": "ALLOW", "force": False
+            }
+        }
+    }
+    force_xallow = copy.deepcopy(xallow)
+    force_xallow['rules'][group_uuid]['force'] = True
+    return {
+        # Remove all access rights on student branch not listed in `add` section
+        "remove": {
+            f"refs/heads/{git_branch_name}": {"permissions": {}},
+            f"refs/for/refs/heads/{git_branch_name}": {"permissions": {}},
+        },
+        "add": {
+            f"refs/heads/{git_branch_name}": {"permissions": {
+                # A user must be able to clone or fetch the project in
+                # order to create a new commit on their local system
+                "read": xallow,
+            }},
+            f"refs/for/refs/heads/{git_branch_name}": {"permissions": {
+                # Permits to upload a non-merge commit to
+                # the refs/for/BRANCH, creating a new change for code review
+                "push": xallow,
+                # Irrespective of `addPatchSet` permission, change owners are
+                # always allowed to upload new patch sets for their changes
+            }}
+        },
+    }
+
+
+def grant_reviewers_access(client, project_name, reviewers_group_uuid):
+    """
+    Grant reviewers Push, Create Reference and Read Access to `refs/*`
+    """
+    payload = get_default_reviewers_project_access(reviewers_group_uuid)
+    # Workaround to avoid duplicates in old UI
+    payload['remove'] = payload['add']
+    return client.grant_permissions(project_name, payload)
+
+
+def grant_student_access(client, project_name, git_branch_name, group_uuid):
+    """Set permissions on branch for student group"""
+    payload = get_default_students_project_access(group_uuid, git_branch_name)
+    return client.grant_permissions(project_name, payload)
+
+
+def grant_students_read_master(client, project_name, group_uuid):
     xallow = {
         "exclusive": False,
         "rules": {group_uuid: {"action": "ALLOW", "force": False}}
@@ -43,7 +102,69 @@ def permits_students_read_master(client, project_name, group_uuid):
             }},
         },
     }
-    return client.create_permissions(project_name, payload)
+    return client.grant_permissions(project_name, payload)
+
+
+def grant_personal_sandbox(client, project_name, group_uuid):
+    payload = {
+        "remove": {
+            "refs/heads/sandbox/${username}/*": {"permissions": {}},
+        },
+        "add": {
+            # ${username} is always replaced with username of the currently
+            # logged in user allowing to specify dynamic access control
+            "refs/heads/sandbox/${username}/*": {
+                "permissions": {
+                    "create": {
+                        "exclusive": True,
+                        "rules": {
+                            group_uuid: {"action": "ALLOW", "force": False}
+                        }
+                    },
+                    # push force permission to be able to clean up stale
+                    # branches
+                    "push": {
+                        "exclusive": True,
+                        "rules": {
+                            group_uuid: {"action": "ALLOW", "force": True}
+                        }
+                    },
+                    "read": {
+                        "exclusive": True,
+                        "rules": {
+                            group_uuid: {"action": "ALLOW", "force": False}
+                        }
+                    },
+                }
+            },
+        },
+    }
+    return client.grant_permissions(project_name, payload)
+
+
+def revoke_add_patch_set_permission(client, project_name):
+    """
+    By default, Add Patch Set is granted to Registered Users on refs/for/*,
+    allowing all registered users to upload a new patch set to any change.
+    Revoking this permission (by granting it to no groups and setting the
+    "Exclusive" flag) will prevent users from uploading a patch set to a
+    change they do not own.
+    """
+    payload = {
+        "add": {
+            "refs/for/*": {"permissions": {
+                "addPatchSet": {
+                    "exclusive": True,
+                    "rules": {
+                        "Registered Users": {"action": "BLOCK", "force": False}
+                    }
+                },
+            }},
+        },
+    }
+    # Workaround to remove duplicates on subsequent calls
+    payload['remove'] = payload['add']
+    return client.grant_permissions(project_name, payload)
 
 
 def get_project_name(course):
@@ -54,7 +175,28 @@ def get_project_name(course):
     return f"{city_code}/{course_name}_{course.semester.year}"
 
 
+def get_reviewers_group_name(course):
+    project_name = get_project_name(course)
+    return f"{project_name}-reviewers"
+
+
+def get_students_group_name(course):
+    project_name = get_project_name(course)
+    return f"{project_name}-students"
+
+
 def init_project_for_course(course, skip_users=False):
+    """
+    Init gerrit project:
+    1. Create reviewers group if not exists
+    2. Synchronize reviewers group members with actual course teachers
+    3. Create project: set gerrit reviewers group as owner, create master
+    branch, grant neccessary permissions to the gerrit reviewers group
+    4. Create students group, grunt permissions to the project, for each
+    enrolled student create gerrit group and add them to the students group
+    5. Grant students access to the personal sandbox
+    """
+    # TODO: sync ldap accounts first
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,
                           settings.GERRIT_CLIENT_PASSWORD))
@@ -64,19 +206,19 @@ def init_project_for_course(course, skip_users=False):
                         roles=CourseTeacher.roles.reviewer)
                 .select_related("teacher"))
     # Creates separated self-owned group for project reviewers
-    reviewers_group = f"{project_name}-reviewers"
+    reviewers_group_name = get_reviewers_group_name(course)
     reviewers_group_members = [t.teacher.ldap_username for t in teachers]
-    reviewers_group_res = client.create_group(reviewers_group, {
+    reviewers_group_res = client.create_group(reviewers_group_name, {
         "members": reviewers_group_members
     })
     # FIXME: Make sure all course teachers have LDAP account
+    # Synchronize reviewers group members with course teachers
     if not reviewers_group_res.created:
         if not reviewers_group_res.already_exists:
-            logger.error(f"Error creating reviewers group for {project_name}. "
+            logger.error(f"Error on creating reviewers group for {project_name}"
                          f"Response message: {reviewers_group_res.text}")
             return
-        # Update reviewers group members
-        reviewers_group_res = client.get_group(reviewers_group)
+        reviewers_group_res = client.get_group(reviewers_group_name)
         reviewers_group_uuid = reviewers_group_res.data["id"]
         members_res = client.get_group_members(reviewers_group_uuid)
         members = {m["username"] for m in members_res.data}
@@ -91,49 +233,48 @@ def init_project_for_course(course, skip_users=False):
         if not res.ok:
             logger.warning(f"Couldn't remove reviewers from group "
                            f"{reviewers_group_uuid}. {res.text}")
-    project_description = textwrap.dedent(f"""\
-            Страница курса: \
-            https://compscicenter.ru{course.get_absolute_url()}
-        """).strip()
-    # FIXME: how to set `Create a new change for every commit not in the target branch` to False? Mb for all projects
+    project_description = f"Страница курса: {course.get_absolute_url()}"
     project_res = client.create_project(project_name, {
         "description": project_description,
-        "owners": [reviewers_group]
+        "owners": [reviewers_group_name]
     })
     if not (project_res.created or project_res.already_exists):
         logger.error(f"Project hasn't been created. {project_res.text}")
         return
     # Init master branch for the project
-    client.create_branch(project_name, "master")
+    client.create_git_branch(project_name, "master")
     # Grant reviewers Push, Create Reference and Read Access to all branches
     reviewers_group_uuid = reviewers_group_res.data["id"]
-    # FIXME: права добавляются N-раз
     res = grant_reviewers_access(client, project_name, reviewers_group_uuid)
     if not res.ok:
         logger.error(f"Couldn't set permissions for group "
-                     f"{reviewers_group}. {res.text}")
+                     f"{reviewers_group_name}. {res.text}")
         return
     # Create students group. Grant permissions common for all students
     # to this group
-    students_group = f"{project_name}-students"
-    students_group_res = client.create_group(students_group, {
+    students_group_name = get_students_group_name(course)
+    students_group_res = client.create_group(students_group_name, {
         # Only members of the owner group can administrate the owned group
         # (assign members, edit the group options)
         "owner_id": reviewers_group_uuid,
     })
     if not students_group_res.created:
         if not students_group_res.already_exists:
-            logger.error(f"Students group `{students_group}` hasn't "
+            logger.error(f"Students group `{students_group_name}` hasn't "
                          f"been created.")
             return
-        students_group_res = client.get_group(students_group)
-    # Common access rules for reading master branch
+        students_group_res = client.get_group(students_group_name)
+    # Permits read master branch (allows to call git clone)
     project_students_group_uuid = students_group_res.data['id']
-    res = permits_students_read_master(client, project_name,
-                                       project_students_group_uuid)
+    res = grant_students_read_master(client, project_name,
+                                     project_students_group_uuid)
     if not res.ok:
         logger.error(f"Couldn't set permissions for group "
-                     f"{students_group}. {res.text}")
+                     f"{students_group_name}. {res.text}")
+
+    grant_personal_sandbox(client, project_name, project_students_group_uuid)
+
+    add_test_student_to_project(client, course, project_students_group_uuid)
 
     if skip_users:
         return
@@ -143,32 +284,53 @@ def init_project_for_course(course, skip_users=False):
                    .filter(course_id=course.pk)
                    .select_related("student"))
     for e in enrollments:
-        add_student_to_project(client, e.student, project_name,
-                               project_students_group_uuid, course)
+        add_student_to_project(client, e.student, course,
+                               project_students_group_uuid)
     # TODO: What to do with notifications?
 
 
-# FIXME: get project_name from `course`, make group uuid optional
-def add_student_to_project(client: Gerrit, student: User, project_name,
-                           project_students_group_uuid, course: Course):
+def add_student_to_project(client: Gerrit, student: User, course: Course,
+                           project_students_group_uuid=None):
+    if project_students_group_uuid is None:
+        students_group_name = get_students_group_name(course)
+        students_group_res = client.get_group(students_group_name)
+        if not students_group_res.ok:
+            logger.error('Students group for the project not found')
+            return
+        project_students_group_uuid = students_group_res.data['id']
+    project_name = get_project_name(course)
     # Make sure student group exists
     student_group_uuid = create_user_group(client, student)
     if not student_group_uuid:
         return
-    # Permits students read master branch
+    # Permits read master branch by adding to students group
     client.include_group(project_students_group_uuid, student_group_uuid)
-    branch_name = student.get_abbreviated_name_in_latin()
+    # Create personal branch
+    git_branch_name = student.get_abbreviated_name_in_latin()
     if course.is_correspondence:
         assert student.city_id is not None
-        branch_name = f"{student.city_id}/{branch_name}"
-    # FIXME: What if already exists?
-    client.create_branch(project_name, branch_name, {
+        git_branch_name = f"{student.city_id}/{git_branch_name}"
+    client.create_git_branch(project_name, git_branch_name, {
         "revision": "master"
     })
     # TODO: show errors
-    # FIXME: Duplicates on repeated call
-    client.create_student_permissions(project_name, branch_name,
-                                      student_group_uuid)
+    grant_student_access(client, project_name, git_branch_name,
+                         student_group_uuid)
+
+
+def add_test_student_to_project(client: Gerrit, course: Course,
+                                project_students_group_uuid):
+    """
+    Add user with uid=student for test purposes.
+
+    Note:
+        Make sure LDAP account for test student exist.
+    """
+    logger.debug("Add test student to the project")
+    student = User(username='student', city_id='spb')
+    student.email = 'student'  # hack `.ldap_username`
+    add_student_to_project(client, student, course,
+                           project_students_group_uuid)
 
 
 def create_user_group(client: Gerrit, user: User):
@@ -177,7 +339,7 @@ def create_user_group(client: Gerrit, user: User):
     if not group_res.created:
         if not group_res.already_exists:
             # TODO: raise error?
-            logger.error(f"Error creating student group {user_group}. "
+            logger.error(f"Error on creating student group {user_group}. "
                          f"{group_res.text}. Skip")
             return
         group_res = client.get_group(user_group)
@@ -195,10 +357,10 @@ def add_users_to_project_by_email(course: Course, emails):
         logger.error(f"Project {project_name} not found")
         return
     # Get project students group uuid
-    students_group = f"{project_name}-students"
-    students_group_res = client.get_group(students_group)
+    students_group_name = get_students_group_name(course)
+    students_group_res = client.get_group(students_group_name)
     if not students_group_res.ok:
-        logger.error(f"Students project group {students_group} not found")
+        logger.error(f"Students project group {students_group_name} not found")
         return
     project_students_group_uuid = students_group_res.data['id']
     # Try to add each student from the email list to the project
@@ -207,6 +369,5 @@ def add_users_to_project_by_email(course: Course, emails):
                            student__email__in=emails)
                    .select_related("student"))
     for e in enrollments:
-        print(e.student)
-        add_student_to_project(client, e.student, project_name,
-                               project_students_group_uuid, course)
+        add_student_to_project(client, e.student, course,
+                               project_students_group_uuid)
