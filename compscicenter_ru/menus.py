@@ -16,7 +16,7 @@ public_menu = [
         children=[
             MenuItem(pgettext_lazy("menu", "Цели и история"), PUBLIC_DOMAIN + '/about/', weight=20),
             MenuItem(pgettext_lazy("menu", "Программа"), reverse('syllabus'), weight=30),
-            MenuItem(pgettext_lazy("menu", "Команда"), reverse('orgs'), weight=40),
+            MenuItem(pgettext_lazy("menu", "Команда"), reverse('team'), weight=40),
             MenuItem(pgettext_lazy("menu", "Преподаватели"), reverse('teachers'), weight=50),
             MenuItem(pgettext_lazy("menu", "Выпускники"), reverse('alumni'), weight=60, selected_patterns=[r"^/2016/$"]),
             MenuItem(pgettext_lazy("menu", "Отзывы"), reverse('testimonials'), weight=70),

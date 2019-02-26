@@ -110,41 +110,7 @@ class IndexView(TemplateView):
 
 
 class TeamView(generic.TemplateView):
-    template_name = "orgs.html"
-
-    # TODO: Add cache for users query?
-    def get_context_data(self, **kwargs):
-        context = super(TeamView, self).get_context_data(**kwargs)
-        board = {
-            863: "andrey_ivanov",
-            5: "alexander_kulikov",
-            607: "evgeniya_kulikova",
-        }
-        curators = {
-            38: "katya_lebedeva",
-            617: "kristina_smolnikova",
-            1213: "katya_artamonova",
-            2605: "mojina_alina",
-            3173: "komissarov_alexander",
-        }
-        tech = {
-            1780: "aleksey_belozerov",
-            865: "sergey_zherevchuk"
-        }
-        context["board"] = {}
-        context["curators"] = {}
-        context["tech"] = {}
-        users_pk = list(board)
-        users_pk.extend(curators.keys())
-        users_pk.extend(tech.keys())
-        for u in User.objects.filter(pk__in=users_pk).all():
-            if u.pk in board:
-                context["board"][board[u.pk]] = u
-            elif u.pk in tech:
-                context["tech"][tech[u.pk]] = u
-            else:
-                context["curators"][curators[u.pk]] = u
-        return context
+    template_name = "compscicenter_ru/team.html"
 
 
 class QAListView(generic.ListView):

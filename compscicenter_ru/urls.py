@@ -25,7 +25,7 @@ urlpatterns = [
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
     # TODO: move redirect to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
-    path('orgs/', views.TeamView.as_view(), name='orgs'),
+    path('team/', views.TeamView.as_view(), name='team'),
     # FIXME: точно только публичная версия? Пока не ясно
     path('syllabus/', views.SyllabusView.as_view(), name='syllabus'),
     path('alumni/', views.AlumniView.as_view(), name='alumni'),
