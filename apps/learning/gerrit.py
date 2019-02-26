@@ -199,7 +199,7 @@ def init_project_for_course(course, skip_users=False):
     # TODO: sync ldap accounts first
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,
-                          settings.GERRIT_CLIENT_PASSWORD))
+                          settings.GERRIT_CLIENT_HTTP_PASSWORD))
     project_name = get_project_name(course)
     teachers = (CourseTeacher.objects
                 .filter(course=course,
@@ -349,7 +349,7 @@ def create_user_group(client: Gerrit, user: User):
 def add_users_to_project_by_email(course: Course, emails):
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,
-                          settings.GERRIT_CLIENT_PASSWORD))
+                          settings.GERRIT_CLIENT_HTTP_PASSWORD))
     # Check project exists
     project_name = get_project_name(course)
     project_res = client.get_project(project_name)
