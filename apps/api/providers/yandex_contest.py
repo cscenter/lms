@@ -5,12 +5,6 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-API_URL = 'https://api.contest.yandex.net/api/public/v2'
-PARTICIPANTS_URL = API_URL + '/contests/{}/participants'
-PARTICIPANT_URL = API_URL + '/contests/{contest_id}/participants/{participant_id}'
-CONTEST_URL = API_URL + '/contests/{contest_id}'
-STANDINGS_URL = API_URL + '/contests/{contest_id}/standings'
-
 
 class RegisterStatus(IntEnum):
     CREATED = 201  # Successfully registered for contest
@@ -50,8 +44,14 @@ class YandexContestAPIException(Exception):
 
 # TODO: catch read timeout exceptions in api?
 class YandexContestAPI:
-    # FIXME: remove?
-    BASE_URL = "https://api.vk.com/method/"
+    BASE_URL = 'https://api.contest.yandex.net/api/public/v2'
+    PARTICIPANTS_URL = BASE_URL + '/contests/{contest_id}/participants'
+    PARTICIPANT_URL = PARTICIPANTS_URL + '/{pid}'
+    SUBMISSIONS_URL = BASE_URL + '/contests/{contest_id}/submissions'
+    SUBMISSION_URL = SUBMISSIONS_URL + '/{sid}'
+    CONTEST_URL = BASE_URL + '/contests/{contest_id}'
+    PROBLEMS_URL = CONTEST_URL + '/problems'
+    STANDINGS_URL = CONTEST_URL + '/standings'
 
     def __init__(self, access_token, refresh_token=None):
         self.access_token = access_token
@@ -65,7 +65,7 @@ class YandexContestAPI:
     def register_in_contest(self, yandex_login, contest_id):
         headers = self.base_headers
         payload = {'login': yandex_login}
-        api_contest_url = PARTICIPANTS_URL.format(contest_id)
+        api_contest_url = self.PARTICIPANTS_URL.format(contest_id)
         response = requests.post(api_contest_url,
                                  headers=headers,
                                  params=payload,
@@ -81,7 +81,7 @@ class YandexContestAPI:
 
     def contest_info(self, contest_id):
         headers = self.base_headers
-        url = CONTEST_URL.format(contest_id=contest_id)
+        url = self.CONTEST_URL.format(contest_id=contest_id)
         response = requests.get(url, headers=headers, timeout=1)
         if response.status_code != ResponseStatus.SUCCESS:
             raise YandexContestAPIException(response.status_code, response.text)
@@ -91,8 +91,8 @@ class YandexContestAPI:
 
     def participant_info(self, contest_id, participant_id):
         headers = self.base_headers
-        url = PARTICIPANT_URL.format(contest_id=contest_id,
-                                     participant_id=participant_id)
+        url = self.PARTICIPANT_URL.format(contest_id=contest_id,
+                                          participant_id=participant_id)
         response = requests.get(url, headers=headers, timeout=1)
         if response.status_code != ResponseStatus.SUCCESS:
             raise YandexContestAPIException(response.status_code, response.text)
@@ -103,7 +103,7 @@ class YandexContestAPI:
     def standings(self, contest_id, **params):
         """Scoreboard for those who started contest and sent anything"""
         headers = self.base_headers
-        url = STANDINGS_URL.format(contest_id=contest_id)
+        url = self.STANDINGS_URL.format(contest_id=contest_id)
         if "page_size" not in params:
             params["page_size"] = 100
         if "locale" not in params:
