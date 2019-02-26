@@ -102,6 +102,7 @@ server {
         try_files /errors/404.html =404;
     }
 
+    rewrite ^/orgs/$ /team/ permanent;
     rewrite ^/lectures/$ https://open.compscicenter.ru/ redirect;
     rewrite ^/open/$ https://open.compscicenter.ru/ redirect;
     rewrite ^/learning/(.*)$ https://my.{{ main_domain }}/learning/$1 redirect;
