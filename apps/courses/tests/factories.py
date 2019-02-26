@@ -167,6 +167,7 @@ class AssignmentFactory(factory.DjangoModelFactory):
     text = "This is a text for a test assignment"
     passing_score = 10
     maximum_score = 80
+    weight = 1
 
     @factory.post_generation
     def notify_teachers(self, create, extracted, **kwargs):

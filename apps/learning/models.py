@@ -269,6 +269,10 @@ class StudentAssignment(TimeStampedModel):
         else:
             return self.state.abbr
 
+    @property
+    def weight_score(self):
+        return (self.score * self.assignment.weight) if self.score else None
+
 
 def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):
     sa = instance.student_assignment

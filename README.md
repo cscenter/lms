@@ -22,7 +22,8 @@ return HttpResponse("<html><body>body tag should be returned</body></html>", con
 psql -h localhost postgres -c "DROP DATABASE cscdb;"; psql -h localhost postgres -c "CREATE DATABASE cscdb;"; psql -h localhost postgres -c "GRANT ALL privileges ON DATABASE cscdb TO csc;"
 psql -h localhost cscdb csc < 
 ./manage.py changepassword admin
-# TODO: update django_site values! ---> write ansible command to fix this
+psql -h localhost cscdb csc -c "update django_site set domain='csc.test' where id = 1; update django_site set domain = 'club.ru' where id = 2;"
+# TODO: Write ansible command to automate routine
 
 # Enable sql console logger
 import logging

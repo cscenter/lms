@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-02-14 12:28+0000\n"
-"PO-Revision-Date: 2019-02-14 12:29+0000\n"
+"PO-Revision-Date: 2019-02-14 15:29+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -766,7 +766,7 @@ msgstr "Текст"
 
 #: apps/courses/models.py:900
 msgid "Problem Weight"
-msgstr "Вес задачи"
+msgstr "Вес задания"
 
 #: apps/courses/models.py:906
 msgid "Assignment|notify_settings"
@@ -2848,19 +2848,6 @@ msgstr ""
 #~ msgid "Profile"
 #~ msgstr "Профиль"
 
-#~ msgid "on site"
-#~ msgstr "на сайте"
-
-#~ msgid "Change photo"
-#~ msgstr "Изменить фото"
-
-#~ msgid "student"
-#~ msgstr "студент"
-
-#~ msgctxt "user_detail"
-#~ msgid "enrolled in"
-#~ msgstr "года поступления"
-
 #~ msgid "teacher"
 #~ msgstr "преподаватель"
 
@@ -2875,22 +2862,6 @@ msgstr ""
 
 #~ msgid "StudentInfo|Study program"
 #~ msgstr "Учебная программа"
-
-#~ msgctxt "Project"
-#~ msgid "Canceled"
-#~ msgstr "Отменен"
-
-#~ msgid ".iCal calendar"
-#~ msgstr ".iCal-календарь"
-
-#~ msgid "Link"
-#~ msgstr "Ссылка"
-
-#~ msgid "Events"
-#~ msgstr "События"
-
-#~ msgid "Social accounts"
-#~ msgstr "Аккаунты"
 
 #, fuzzy
 #~ msgid "Internship category"

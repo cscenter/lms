@@ -21,6 +21,7 @@ def test_assignment_admin_view(settings, admin_client):
         "text": "text",
         "passing_score": "3",
         "maximum_score": "5",
+        "weight": "1.00",
         "_continue": "save_and_continue"
     }
     # Test with empty city aware field

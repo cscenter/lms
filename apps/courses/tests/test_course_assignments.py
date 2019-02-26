@@ -48,7 +48,8 @@ def test_course_assignment_create(client):
                  'deadline_at_1': deadline_time})
     url = co.get_create_assignment_url()
     client.login(teacher)
-    client.post(url, form)
+    response = client.post(url, form)
+    assert response.status_code == 302
     assert Assignment.objects.count() == 1
 
 

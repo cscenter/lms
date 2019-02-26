@@ -44,6 +44,7 @@ class NotificationTests(CSCTestCase):
             'text': a.text,
             'passing_score': 0,
             'maximum_score': 5,
+            'weight': 1,
             'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
             'deadline_at_1': '00:00'
         }
@@ -129,6 +130,7 @@ def test_assignment_notify_teachers_public_form(client):
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,
+        'weight': '1.00',
         'deadline_at_0': a.deadline_at.strftime(DATE_FORMAT_RU),
         'deadline_at_1': '00:00'
     }
@@ -184,6 +186,7 @@ def test_assignment_notify_teachers_admin_form(client, curator):
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,
+        'weight': 1,
         'deadline_at_0': str(a.deadline_at.date()),
         'deadline_at_1': '00:00'
     }

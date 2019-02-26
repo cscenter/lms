@@ -14,9 +14,10 @@ __all__ = ('StudentMeta', 'StudentProgress', 'GradeBookData', 'gradebook_data')
 class StudentMeta:
     def __init__(self, enrollment: Enrollment, index: int):
         self._enrollment = enrollment
+        self.index = index  # Row index in enrolled students list
         # Will be filled later based on assignments data
         self.total_score = None
-        self.index = index
+        self.achieved = None  # expressed in percentages
 
     @property
     def id(self):
@@ -77,6 +78,10 @@ class StudentProgress:
     @property
     def score(self):
         return self._student_assignment.score
+
+    @property
+    def weight_score(self):
+        return self._student_assignment.weight_score
 
     @property
     def assignment_id(self):
@@ -212,9 +217,17 @@ def gradebook_data(course: Course) -> GradeBookData:
             sa, assignments[sa.assignment_id])
     for student_id in enrolled_students:
         student_index = enrolled_students[student_id].index
-        total_score = sum(s.score for s in submissions[student_index]
+        student_submissions = submissions[student_index]
+        total_score = sum(s.score for s in student_submissions
                           if s is not None and s.score is not None)
         setattr(enrolled_students[student_id], "total_score", total_score)
+        max_weighted_score = sum(a.maximum_score * a.weight for a
+                                 in assignments.values())
+        total_weighted_score = sum(s.weight_score for s
+                                   in student_submissions
+                                   if s is not None and s.score is not None
+                                   and s.weight_score is not None)
+        # FIXME: achieved. если нет занятий, то не показывать?
 
     return GradeBookData(course=course,
                          students=enrolled_students,
