@@ -9,322 +9,325 @@
     </div>
     <div class="container page-content">
         <h1 class="mt-5">Fields</h1>
-        <form class="card _no-border" action="">
-            <div class="row">
-                <div class="field col-lg-4">
-                    <div class="ui input">
-                        <input type="text" placeholder="Placeholder">
+        <div class="card _no-border">
+            <form action="">
+                <div class="row">
+                    <div class="field col-lg-4">
+                        <div class="ui input">
+                            <input type="text" placeholder="Placeholder">
+                        </div>
+                    </div>
+                    <div class="field col-lg-4">
+                        <div class="ui input error">
+                            <input type="text" placeholder="Error" value="name@mailcom">
+                        </div>
+                        <p class="help-text error">
+                            Вы совершили ошибку, но непоправимых ошибок нет :)
+                        </p>
+                    </div>
+                    <div class="field col-lg-4">
+                        <div class="ui disabled input">
+                            <input type="text" placeholder="Disabled" tabindex="-1">
+                        </div>
+                    </div>
+                    <div class="field col-lg-4">
+                        <div class="ui icon disabled input loading">
+                            <input type="text" placeholder="Loading content" tabindex="-1">
+                            <i class="icon"></i>
+                        </div>
+                        <p class="help-text">
+                            Значение подрузится с вашего Яндекс-профиля
+                        </p>
+                    </div>
+                    <div class="field col-lg-4">
+                        <div class="ui icon input">
+                            <input type="text" placeholder="" value="Удалить контент">
+                            <i class="icon">{{ macros.svg_inline('cross') }}</i>
+                        </div>
+                    </div>
+                    <div class="field col-lg-4">
+                        <div class="ui input custom-file">
+                            <input type="file" class="custom-file-input" id="customFile" multiple>
+                            <label class="custom-file-label" for="customFile">Загрузить файл</label>
+                        </div>
+                        <p class="help-text">
+                            Вставить сюда имя загруженного файла
+                        </p>
+                    </div>
+                    <div class="field col-lg-4">
+                        <div class="ui action input">
+                            <input type="text" placeholder="Электронный адрес">
+                            <a class="ui button btn _primary">Отправить</a>
+                        </div>
+                    </div>
+                    <div class="field col-lg-4">
+                        <div class="ui icon input">
+                            <input type="search" placeholder="Поиск">
+                            <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                        </div>
+                    </div>
+                    <div class="field col-lg-4">
+                        <div class="grouped inline">
+                            <label class="ui option checkbox">
+                                <input type="checkbox" class="control__input">
+                                <span class="control__indicator"></span>
+                                <span class="control__description">Зеленый</span>
+                            </label>
+                            <label class="ui option checkbox">
+                                <input type="checkbox" class="control__input">
+                                <span class="control__indicator"></span>
+                                <span class="control__description">Красный</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="field col-12">
+                        <h3>Single checkbox row</h3>
+                        <div class="grouped inline">
+                            <label class="ui option checkbox">
+                                <input type="checkbox" class="control__input">
+                                <span class="control__indicator"></span>
+                                <span class="control__description">Зеленый</span>
+                            </label>
+                            <label class="ui option checkbox">
+                                <input type="checkbox" class="control__input">
+                                <span class="control__indicator"></span>
+                                <span class="control__description">Фиолетовый</span>
+                            </label>
+                            <label class="ui option checkbox">
+                                <input type="checkbox" class="control__input">
+                                <span class="control__indicator"></span>
+                                <span class="control__description">Оранжевый</span>
+                            </label>
+                            <label class="ui option checkbox">
+                                <input type="checkbox" class="control__input">
+                                <span class="control__indicator"></span>
+                                <span class="control__description">Темно-коричневый</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
-                <div class="field col-lg-4">
-                    <div class="ui input error">
-                        <input type="text" placeholder="Error" value="name@mailcom">
-                    </div>
-                    <p class="help-text error">
-                        Вы совершили ошибку, но непоправимых ошибок нет :)
-                    </p>
-                </div>
-                <div class="field col-lg-4">
-                    <div class="ui disabled input">
-                        <input type="text" placeholder="Disabled" tabindex="-1">
-                    </div>
-                </div>
-                <div class="field col-lg-4">
-                    <div class="ui icon disabled input loading">
-                        <input type="text" placeholder="Loading content" tabindex="-1">
-                        <i class="icon"></i>
-                    </div>
-                    <p class="help-text">
-                        Значение подрузится с вашего Яндекс-профиля
-                    </p>
-                </div>
-                <div class="field col-lg-4">
-                    <div class="ui icon input">
-                        <input type="text" placeholder="" value="Удалить контент">
-                        <i class="icon">{{ macros.svg_inline('cross') }}</i>
-                    </div>
-                </div>
-                <div class="field col-lg-4">
-                    <div class="ui input custom-file">
-                        <input type="file" class="custom-file-input" id="customFile" multiple>
-                        <label class="custom-file-label" for="customFile">Загрузить файл</label>
-                    </div>
-                    <p class="help-text">
-                        Вставить сюда имя загруженного файла
-                    </p>
-                </div>
-                <div class="field col-lg-4">
-                    <div class="ui action input">
-                        <input type="text" placeholder="Электронный адрес">
-                        <a class="ui button btn btn--green">Отправить</a>
-                    </div>
-                    <p class="help-text">
-                        Подпишитесь на рассылку чтобы быть в курсе новостей центра
-                    </p>
-                </div>
-                <div class="field col-lg-4">
-                    <div class="ui icon input">
-                        <input type="search" placeholder="Поиск">
-                        <i class="_search icon">{{ macros.svg_inline('search') }}</i>
-                    </div>
-                </div>
-                <div class="field col-lg-4">
-                    <div class="grouped inline">
-                        <label class="ui option checkbox">
-                            <input type="checkbox" class="control__input">
-                            <span class="control__indicator"></span>
-                            <span class="control__description">Зеленый</span>
-                        </label>
-                        <label class="ui option checkbox">
-                            <input type="checkbox" class="control__input">
-                            <span class="control__indicator"></span>
-                            <span class="control__description">Красный</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="field col-12">
-                    <h3>Single checkbox row</h3>
-                    <div class="grouped inline">
-                        <label class="ui option checkbox">
-                            <input type="checkbox" class="control__input">
-                            <span class="control__indicator"></span>
-                            <span class="control__description">Зеленый</span>
-                        </label>
-                        <label class="ui option checkbox">
-                            <input type="checkbox" class="control__input">
-                            <span class="control__indicator"></span>
-                            <span class="control__description">Фиолетовый</span>
-                        </label>
-                        <label class="ui option checkbox">
-                            <input type="checkbox" class="control__input">
-                            <span class="control__indicator"></span>
-                            <span class="control__description">Оранжевый</span>
-                        </label>
-                        <label class="ui option checkbox">
-                            <input type="checkbox" class="control__input">
-                            <span class="control__indicator"></span>
-                            <span class="control__description">Темно-коричневый</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
         <h1 class="mt-5">Basic forms</h1>
         <div class="row">
             <div class="col-lg-6">
-                <form class="card _form" action="">
-                    <div class="card__title">
-                        <h2>Вход на сайт</h2>
-                    </div>
-                    <div class="card__body">
-                        <div class="row">
-                            <div class="field col-12">
-                                <div class="ui input">
-                                    <input type="text" placeholder="Логин">
+                <div class="card _form">
+                    <form action="">
+                        <div class="card__title">
+                            <h2>Вход на сайт</h2>
+                        </div>
+                        <div class="card__body">
+                            <div class="row">
+                                <div class="field col-12">
+                                    <div class="ui input">
+                                        <input type="text" placeholder="Логин">
+                                    </div>
+                                    <div class="help-text">
+                                        Логин, номер телефона или электронная почта
+                                    </div>
                                 </div>
-                                <div class="help-text">
-                                    Логин, номер телефона или электронная почта
+                                <div class="field col-12">
+                                    <div class="ui icon input">
+                                        <input type="password" placeholder="Пароль">
+                                        <i class="_password-hidden icon">{{ macros.svg_inline('password-hidden') }}</i>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="field col-12">
-                                <div class="ui icon input">
-                                    <input type="password" placeholder="Пароль">
-                                    <i class="_password-hidden icon">{{ macros.svg_inline('password-hidden') }}</i>
+                                <div class="field col-lg-auto">
+                                    <a href="" class="btn _primary _m-wide">Войти</a>
                                 </div>
-                            </div>
-                            <div class="field col-lg-auto">
-                                <a href="" class="btn btn--green _m-wide">Войти</a>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
         <div class="row">
             <div class="col-lg-6">
-                <form class="card _form" action="">
-                    <div class="card__title">
-                        <h2>Редактировать профиль</h2>
-                        <p>Напишите свои актуальные контакты, чтобы наши кураторы всегда могли быть с вами на связи</p>
-                    </div>
-                    <div class="card__body">
+                <div class="card _form">
+                    <form action="">
+                        <div class="card__title">
+                            <h2>Редактировать профиль</h2>
+                            <p>Напишите свои актуальные контакты, чтобы наши кураторы всегда могли быть с вами на
+                                связи</p>
+                        </div>
+                        <div class="card__body">
+                            <div class="row">
+                                <div class="field col-12">
+                                    <div class="ui input">
+                                        <label for="">Ф.И.О.</label>
+                                        <input type="text" placeholder="Фамилия Имя Отчество">
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <div class="ui input">
+                                        <label for="">Телефон</label>
+                                        <input type="text" placeholder="+7 911 629-19-29">
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <div class="grouped">
+                                        <label class="title-label">На каком направлении вы хотите учиться?</label>
+                                        <label class="ui option checkbox">
+                                            <input type="checkbox" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Зеленый</span>
+                                        </label>
+                                        <label class="ui option checkbox">
+                                            <input type="checkbox" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Красный</span>
+                                        </label>
+                                        <label class="ui option checkbox disabled">
+                                            <input type="checkbox" class="control__input" checked disabled>
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Синий (checked disabled)</span>
+                                        </label>
+                                        <label class="ui option checkbox disabled">
+                                            <input type="checkbox" class="control__input" disabled>
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Фиолетовый (disabled)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <div class="ui input">
+                                        <label for="">Электронная почта</label>
+                                        <input type="text" placeholder="name@mail.com">
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <div class="grouped">
+                                        <label class="title-label">Ваш любимый цвет:</label>
+                                        <label class="ui option radio">
+                                            <input type="radio" name="Colors" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Зеленый</span>
+                                        </label>
+                                        <label class="ui option radio">
+                                            <input type="radio" name="Colors" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">На каком направлении вы хотите учиться не понятно, цвета своего любимого не знаете</span>
+                                        </label>
+                                        <label class="ui option radio disabled">
+                                            <input type="radio" name="Colors-disabled" class="control__input" checked
+                                                   disabled>
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Синий (checked disabled)</span>
+                                        </label>
+                                        <label class="ui option radio disabled">
+                                            <input type="radio" name="Colors-disabled" class="control__input" disabled>
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Фиолетовый (disabled)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <div class="ui input">
+                                        <label>Short Text</label>
+                                        <textarea rows="6" placeholder="Расскажите о своих увлечениях"></textarea>
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <label class="ui option checkbox">
+                                        <input type="checkbox" class="control__input" checked>
+                                        <span class="control__indicator"></span>
+                                        <span class="control__description __user-agreement">Я принимаю условия <a
+                                                href="">Лицензионного соглашения</a> и согласен на обработку персональных данных</span>
+                                    </label>
+                                </div>
+                                <div class="field col-lg-auto">
+                                <a href="" class="btn _primary _m-wide">Сохранить изменения</a>
+                            </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="mt-5">Grid Form</h1>
+        <div class="card _form">
+            <form action="">
+                <div class="card__title __inverse">
+                    <h2>Новый пользователь</h2>
+                </div>
+                <div class="card__body">
+                    <div class="form-section">
+                        <div class="card__title _subtitle">
+                            <h3>Личная информация</h3>
+                        </div>
+
                         <div class="row">
-                            <div class="field col-12">
+                            <div class="field col-lg-12">
                                 <div class="ui input">
                                     <label for="">Ф.И.О.</label>
                                     <input type="text" placeholder="Фамилия Имя Отчество">
                                 </div>
                             </div>
-                            <div class="field col-12">
+                            <div class="field col-lg-4">
                                 <div class="ui input">
                                     <label for="">Телефон</label>
-                                    <input type="text" placeholder="+7 911 629-19-29">
+                                    <input type="text" placeholder="+7(911)212-23-23">
                                 </div>
                             </div>
-                            <div class="field col-12">
-                                <div class="grouped">
-                                    <label class="title-label">На каком направлении вы хотите учиться?</label>
-                                    <label class="ui option checkbox">
-                                        <input type="checkbox" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Зеленый</span>
-                                    </label>
-                                    <label class="ui option checkbox">
-                                        <input type="checkbox" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Красный</span>
-                                    </label>
-                                    <label class="ui option checkbox disabled">
-                                        <input type="checkbox" class="control__input" checked disabled>
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Синий (checked disabled)</span>
-                                    </label>
-                                    <label class="ui option checkbox disabled">
-                                        <input type="checkbox" class="control__input" disabled>
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Фиолетовый (disabled)</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="field col-12">
+                            <div class="field col-lg-4">
                                 <div class="ui input">
-                                    <label for="">Электронная почта</label>
-                                    <input type="text" placeholder="name@mail.com">
+                                    <label for="">Место работы и должность</label>
+                                    <input type="text" placeholder="">
+                                </div>
+                                <div class="help-text">
+                                    Если вы еще учитесь напишите место учебы и курс
                                 </div>
                             </div>
-
-                            <div class="field col-12">
-                                <div class="grouped">
-                                    <label class="title-label">Ваш любимый цвет:</label>
-                                    <label class="ui option radio">
-                                        <input type="radio" name="Colors" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Зеленый</span>
-                                    </label>
-                                    <label class="ui option radio">
-                                        <input type="radio" name="Colors" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">На каком направлении вы хотите учиться не понятно, цвета своего любимого не знаете</span>
-                                    </label>
-                                    <label class="ui option radio disabled">
-                                        <input type="radio" name="Colors-disabled" class="control__input" checked
-                                               disabled>
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Синий (checked disabled)</span>
-                                    </label>
-                                    <label class="ui option radio disabled">
-                                        <input type="radio" name="Colors-disabled" class="control__input" disabled>
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Фиолетовый (disabled)</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="field col-12">
+                            <div class="field col-lg-4">
                                 <div class="ui input">
-                                    <label>Short Text</label>
-                                    <textarea rows="6" placeholder="Расскажите о своих увлечениях"></textarea>
+                                    <label for="">Примечание</label>
+                                    <input type="text" placeholder="Увлечения, хобби…">
                                 </div>
-                            </div>
-                            <div class="field col-12">
-                                <label class="ui option checkbox">
-                                    <input type="checkbox" class="control__input" checked>
-                                    <span class="control__indicator"></span>
-                                    <span class="control__description __user-agreement">Я принимаю условия <a
-                                            href="">Лицензионного соглашения</a> и согласен на обработку персональных данных</span>
-                                </label>
-                            </div>
-
-                            <div class="field col-lg-auto">
-                                <a href="" class="btn btn--green _m-wide">Сохранить изменения</a>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
+                    <div class="form-section">
+                        <div class="card__title _subtitle">
+                            <h3>Профили пользователя</h3>
+                        </div>
+                        <div class="row">
+                            <div class="field col-lg-4">
+                                <div class="ui input">
+                                    <label for="">Stepik</label>
+                                    <input type="text" placeholder="">
+                                </div>
+                            </div>
+                            <div class="field col-lg-4">
+                                <div class="ui input">
+                                    <label for="">Yandex</label>
+                                    <input type="text" placeholder="">
+                                </div>
+                            </div>
+                            <div class="field col-lg-4">
+                                <div class="ui input">
+                                    <label for="">Github</label>
+                                    <input type="text" placeholder="">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="field col-lg-auto">
+                            <div class="ui input">
+                                <a href="" class="btn _primary _m-wide">Добавить пользователя</a>
+                            </div>
+                        </div>
+                        <div class="field col-lg-auto">
+                            <div class="ui input">
+                                <a href="" class="btn _outline _gray _m-wide">Отмена</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-
-        <h1 class="mt-5">Grid Form</h1>
-        <form class="card _form" action="">
-            <div class="card__title __inverse">
-                <h2>Новый пользователь</h2>
-            </div>
-            <div class="card__body">
-                <div class="form-section">
-                    <div class="card__title _subtitle">
-                        <h3>Личная информация</h3>
-                    </div>
-
-                    <div class="row">
-                        <div class="field col-lg-12">
-                            <div class="ui input">
-                                <label for="">Ф.И.О.</label>
-                                <input type="text" placeholder="Фамилия Имя Отчество">
-                            </div>
-                        </div>
-                        <div class="field col-lg-4">
-                            <div class="ui input">
-                                <label for="">Телефон</label>
-                                <input type="text" placeholder="+7(911)212-23-23">
-                            </div>
-                        </div>
-                        <div class="field col-lg-4">
-                            <div class="ui input">
-                                <label for="">Место работы и должность</label>
-                                <input type="text" placeholder="">
-                            </div>
-                            <div class="help-text">
-                                Если вы еще учитесь напишите место учебы и курс
-                            </div>
-                        </div>
-                        <div class="field col-lg-4">
-                            <div class="ui input">
-                                <label for="">Примечание</label>
-                                <input type="text" placeholder="Увлечения, хобби…">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-section">
-                    <div class="card__title _subtitle">
-                        <h3>Профили пользователя</h3>
-                    </div>
-                    <div class="row">
-                        <div class="field col-lg-4">
-                            <div class="ui input">
-                                <label for="">Stepik</label>
-                                <input type="text" placeholder="">
-                            </div>
-                        </div>
-                        <div class="field col-lg-4">
-                            <div class="ui input">
-                                <label for="">Yandex</label>
-                                <input type="text" placeholder="">
-                            </div>
-                        </div>
-                        <div class="field col-lg-4">
-                            <div class="ui input">
-                                <label for="">Github</label>
-                                <input type="text" placeholder="">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="field col-lg-auto">
-                        <div class="ui input">
-                            <a href="" class="btn btn--green _m-wide">Добавить пользователя</a>
-                        </div>
-                    </div>
-                    <div class="field col-lg-auto">
-                        <div class="ui input">
-                            <a href="" class="btn btn--outline_gray _m-wide">Отмена</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </form>
 
         <h1>Single input with btn</h1>
         <form class="card _form _no-border" action="">
@@ -332,7 +335,7 @@
                 <div class="field col-lg-6">
                     <div class="ui action input">
                         <input type="text" placeholder="Электронный адрес">
-                        <a class="ui button btn btn--green">Подписаться</a>
+                        <a class="btn _primary">Подписаться</a>
                     </div>
                 </div>
             </div>
@@ -341,85 +344,87 @@
         <h1>Validation (errors)</h1>
         <div class="row">
             <div class="col-lg-6">
-                <form class="card _form" action="">
-                    <div class="card__title">
-                        <h2>Вход на сайт</h2>
-                    </div>
-                    <div class="card__body">
-                        <div class="row">
-                            <div class="field col-12">
-                                <div class="ui input error">
-                                    <label>Авторизуйтесь на сайте</label>
-                                    <input type="text" placeholder="Логин">
+                <div class="card _form">
+                    <form action="">
+                        <div class="card__title">
+                            <h2>Вход на сайт</h2>
+                        </div>
+                        <div class="card__body">
+                            <div class="row">
+                                <div class="field col-12">
+                                    <div class="ui input error">
+                                        <label>Авторизуйтесь на сайте</label>
+                                        <input type="text" placeholder="Логин">
+                                    </div>
+                                    <div class="help-text">
+                                        Логин, номер телефона или электронная почта
+                                    </div>
+                                    <p class="help-text error">
+                                        Вы совершили ошибку, но непоправимых ошибок нет :)
+                                    </p>
                                 </div>
-                                <div class="help-text">
-                                    Логин, номер телефона или электронная почта
-                                </div>
-                                <p class="help-text error">
-                                    Вы совершили ошибку, но непоправимых ошибок нет :)
-                                </p>
-                            </div>
-                            <div class="field col-12">
-                                <div class="ui input error">
-                                    <label>Расскажите о себе</label>
-                                    <textarea rows="6" placeholder="Расскажите о своих увлечениях"></textarea>
-                                </div>
-                                <p class="help-text error">
-                                    Обязательное поле
-                                </p>
-                            </div>
-                            <div class="field col-12">
-                                <div class="grouped error">
-                                    <label class="title-label">Ваш любимый цвет:</label>
-                                    <label class="ui option radio">
-                                        <input type="radio" name="Colors" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">На каком направлении вы хотите учиться не понятно, цвета своего любимого не знаете</span>
-                                    </label>
-                                    <label class="ui option radio">
-                                        <input type="radio" name="Colors" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Красный</span>
-                                    </label>
-                                    <label class="ui option radio disabled">
-                                        <input type="radio" name="Colors-disabled" class="control__input" disabled>
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Фиолетовый (disabled)</span>
-                                    </label>
+                                <div class="field col-12">
+                                    <div class="ui input error">
+                                        <label>Расскажите о себе</label>
+                                        <textarea rows="6" placeholder="Расскажите о своих увлечениях"></textarea>
+                                    </div>
                                     <p class="help-text error">
                                         Обязательное поле
                                     </p>
                                 </div>
-                            </div>
-                            <div class="field col-12">
-                                <div class="grouped error">
-                                    <label class="title-label">На каком направлении вы хотите учиться?</label>
-                                    <label class="ui option checkbox">
-                                        <input type="checkbox" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Зеленый</span>
-                                    </label>
-                                    <label class="ui option checkbox">
-                                        <input type="checkbox" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Красный</span>
-                                    </label>
-                                    <label class="ui option checkbox disabled">
-                                        <input type="checkbox" class="control__input" disabled>
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Фиолетовый (disabled)</span>
-                                    </label>
-                                    <p class="help-text error">
-                                        Обязательное поле
-                                    </p>
+                                <div class="field col-12">
+                                    <div class="grouped error">
+                                        <label class="title-label">Ваш любимый цвет:</label>
+                                        <label class="ui option radio">
+                                            <input type="radio" name="Colors" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">На каком направлении вы хотите учиться не понятно, цвета своего любимого не знаете</span>
+                                        </label>
+                                        <label class="ui option radio">
+                                            <input type="radio" name="Colors" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Красный</span>
+                                        </label>
+                                        <label class="ui option radio disabled">
+                                            <input type="radio" name="Colors-disabled" class="control__input" disabled>
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Фиолетовый (disabled)</span>
+                                        </label>
+                                        <p class="help-text error">
+                                            Обязательное поле
+                                        </p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="field col-lg-auto">
-                                <a href="" class="btn btn--green _m-wide">Войти</a>
+                                <div class="field col-12">
+                                    <div class="grouped error">
+                                        <label class="title-label">На каком направлении вы хотите учиться?</label>
+                                        <label class="ui option checkbox">
+                                            <input type="checkbox" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Зеленый</span>
+                                        </label>
+                                        <label class="ui option checkbox">
+                                            <input type="checkbox" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Красный</span>
+                                        </label>
+                                        <label class="ui option checkbox disabled">
+                                            <input type="checkbox" class="control__input" disabled>
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Фиолетовый (disabled)</span>
+                                        </label>
+                                        <p class="help-text error">
+                                            Обязательное поле
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="field col-lg-auto">
+                                    <a href="" class="btn _primary _m-wide">Войти</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

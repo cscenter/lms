@@ -3,101 +3,142 @@
 {% block content %}
 <div class="container page-content">
     <div class="row content-center">
-        <div class="team-title col-sm-10">
+        <div class="team__title col-sm-10">
             <h1>Совет центра</h1>
             <p>Совет отвечает за содержание учебного процесса и развитие центра. Цель Совета — сделать
                 так, чтобы каждому студенту центра было полезно и интересно учиться, а ряды преподавателей и выпускников
                 пополнялись из года  в год. Совет также активно занимается онлайн-образованием и
-                расширением деятельности  CS-центра за пределы Санкт-Петербурга.</p>
+                расширением деятельности  CS центра за пределы Санкт-Петербурга.</p>
         </div>
-        <div class="team-row">
-            <div class="member">
-                <img src="/media/pages/team/kylikova.png" alt="">
-                <h3><a href="http://logic.pdmi.ras.ru/~kulikov/">Александр Куликов</a></h3>
-                <p>ПОМИ РАН, CS клуб</p>
-            </div>
-            <div class="member">
-                <img src="/media/pages/team/kylikovae.png" alt="">
-                <h3><a href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774">Евгения Куликова</a></h3>
-                <p>Яндекс</p>
-            </div>
-            <div class="member">
-                <img src="/media/pages/team/ivanova.png" alt="">
-                <h3><a href="http://www.linkedin.com/in/yaivanov">Андрей Иванов</a></h3>
-                <p>JetBrains, СПбАУ РАН</p>
-            </div>
-        </div>
-    </div>
-    <div class="row content-center">
-        <div class="team-title col-sm-10">
-            <h2>Кураторы в Санкт-Петербурге</h2>
-            <p>Кураторы CS центра в Санкт-петербурге. Организуют учебный процесс, курируют онлайн курсы и проектные
-                работы студентов. Проводят прием новых студентов, а также отчетные мероприятия и выпуской.</p>
-        </div>
-        <div class="team-row">
-            <div class="member">
-                <img src="/media/pages/team/artamonovae.png" alt="">
-                <h3>Екатерина Артамонова</h3>
-                <p>Куратор практических работ</p>
-            </div>
-            <div class="member">
-                <img src="/media/pages/team/lebedevae.png" alt="">
-                <h3>Екатерина Лебедева</h3>
-                <p>Куратор</p>
-            </div>
-            <div class="member">
-                <img src="/media/pages/team/smolnikovak.png" alt="">
-                <h3>Кристина Смольникова</h3>
-                <p>Куратор онлайн-курсов</p>
-            </div>
-        </div>
-    </div>
-    <div class="row content-center">
-        <div class="team-title col-sm-10">
-            <h2>Команда в Новосибирске</h2>
-            <p>Организаторы курсов CS центра в Новосибирске.</p>
-        </div>
-        <div class="team-row">
-            <div class="member">
-                <img src="/media/pages/team/mojinaa.png" alt="">
-                <h3>
-                    Алина Можина</h3>
-                <p>Куратор</p>
-            </div>
-            <div class="member">
-                <img src="/media/pages/team/avdushenkoa.png" alt="">
-                <h3>Александр Авдюшенко</h3>
-                <p>Куратор</p>
-            </div>
-            <div class="member">
-                <img src="/media/pages/team/mikhaylovaa.png" alt="">
-                <h3>Александра Михайлова</h3>
-                <p>Оператор и монтажер</p>
-            </div>
-        </div>
-    </div>
-    <div class="row content-center">
-        <div class="team-title col-sm-10">
-            <h2>Техническая поддержка</h2>
-        </div>
-        <div class="team-row">
 
-            <div class="member">
-                <img src="/media/pages/team/belozerova.png" alt="">
-                <h3>
-                    Алексей Белозёров</h3>
-                <p>Оператор и монтажер</p>
+        <div class="col-lg-12">
+            <div class="user-cards _team">
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/ivanov_a.jpg') }}" alt="Андрей Иванов">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">
+                            <a target="_blank" rel="noopener" href="http://www.linkedin.com/in/yaivanov">Андрей Иванов</a>
+                            <p class="workplace">JetBrains, СПбАУ РАН</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/kylikov_a.jpg') }}" alt="Александр Куликов">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">
+                            <a target="_blank" rel="noopener" href="http://logic.pdmi.ras.ru/~kulikov/">Александр Куликов</a>
+                            <p class="workplace">ПОМИ РАН, CS клуб</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/kylikova_e.jpg') }}" alt="Евгения Куликова">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">
+                            <a target="_blank" rel="noopener" href="https://www.linkedin.com/pub/evgenia-kulikova/30/219/774">Евгения Куликова</a>
+                            <p class="workplace">Яндекс</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
 
-            <div class="member">
-                <img src="/media/pages/team/zherevchuk_sv.png" alt="">
-                <h3>Сергей Жеревчук</h3>
-                <p>Разработчик</p>
+        <div class="team__title col-sm-10">
+            <h2>Санкт-Петербург</h2>
+            {# <p>Кураторы CS центра. Организуют учебный процесс, курируют онлайн курсы и проектные#}
+            {# работы студентов. Проводят прием новых студентов, а также отчетные мероприятия и выпуской.</p>#}
+        </div>
+
+        <div class="col-lg-12">
+            <div class="user-cards _team">
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/artamonova_e.jpg') }}" alt="Екатерина Артамонова">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">Екатерина Артамонова<p class="workplace">Куратор</p></div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/belozerov_a.jpg') }}" alt="Алексей Белозёров">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">Алексей Белозёров<p class="workplace">Оператор и монтажёр</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/zherevchuk_sv.jpg') }}" alt="Сергей Жеревчук">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">Сергей Жеревчук<p class="workplace">Разработчик</p></div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/lebedeva_e.jpg') }}" alt="Екатерина Лебедева">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">Екатерина Лебедева<p class="workplace">Куратор</p></div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/mikhaylov_s.jpg') }}" alt="Святослав Михайлов">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">Святослав Михайлов<p class="workplace">Дизайнер</p></div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/smolnikova_k.jpg') }}" alt="Кристина Смольникова">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">Кристина Смольникова<p class="workplace">Куратор</p></div>
+                    </div>
+                </div>
             </div>
-            <div class="member">
-                <img src="/media/pages/team/mikhaylovs.png" alt="">
-                <h3>Святослав Михайлов</h3>
-                <p>Дизайнер</p>
+        </div>
+
+        <div class="team__title col-sm-10">
+            <h2>Новосибирск</h2>
+        </div>
+        <div class="col-lg-12">
+            <div class="user-cards _team ">
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/avdushenko_a.jpg') }}" alt="Александр Авдюшенко">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">Александр Авдюшенко<p class="workplace">Куратор</p></div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/mikhaylova_a.jpg') }}" alt="Александра Михайлова">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">Александра Михайлова<p class="workplace">Оператор и монтажёр</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-card">
+                    <div class="user-card__photo">
+                        <img src="{{ static('v2/img/pages/team/mojina_a.jpg') }}" alt="Алина Можина">
+                    </div>
+                    <div class="card-body">
+                        <div class="user-card__details">Алина Можина<p class="workplace">Куратор</p></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

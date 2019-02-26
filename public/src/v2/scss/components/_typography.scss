@@ -2,6 +2,7 @@
 
 body {
   font-size: $font-size-content-base;
+  font-feature-settings: "tnum" on, "dlig" on;
 }
 
 //
@@ -34,15 +35,15 @@ h1,
     font-weight: $font-weight-light;
   }
   margin-bottom: spacer("6x");
+  letter-spacing: -.04rem;
 }
 
 h2,
 .h2 {
   font-size: $h2-font-size;
-  @include media-breakpoint-up(sm) {
-    font-weight: $font-weight-light;
-  }
-  margin-bottom: spacer("6x");
+  font-weight: $font-weight-light;
+  margin-bottom: spacer("4x");
+  letter-spacing: -.04rem;
 }
 
 h3, .h3 {
@@ -82,10 +83,6 @@ a {
     margin-bottom: 4px;
     color: $link-color;
   }
-}
-
-h1 {
-  @include font-smoothing();
 }
 
 .title_description {
@@ -138,4 +135,10 @@ h1 {
       }
     }
   }
+}
+
+code {
+  padding: .5rem 1rem;
+  background-color: $gray-lighter;
+  display: block;
 }

@@ -24,10 +24,14 @@ $teal:    #07c39f;
 $green:   #30BD4C;
 $red:     #DB3131;
 
+$white-10: rgba(255,255,255,.1);
+$white-30: rgba(255,255,255,.3);
+$white-50: rgba(255,255,255,.5);
+
 $gray-lighter:  #ecf0f2;
 $gray-light:    #CED8DD;
 $gray:          #B4BFC6;
-$gray-dark:     #8b9ca7;
+$gray-dark:     #8899a4;
 $gray-darker:   #374148;
 
 $gray-disable-dark:   #717374;
@@ -37,12 +41,12 @@ $colors: (
   "blue":       $blue,
   "orange":     $orange,
   "teal":       $teal,
-  "white":      $white,
+  "white":      $white
 );
 
 // Themes
 
-$primary:       $blue;
+$primary:       $teal;
 $secondary:     $gray-disable-dark;
 $light:         $gray-lighter;
 $dark:          $gray-darker;
@@ -50,9 +54,13 @@ $error:         $red;
 
 $theme-colors: (
   "primary":    $primary,
-  "secondary":  $secondary,
   "light":      $light,
-  "dark":       $dark
+  "gray":       $gray-dark,
+  "dark":       $gray-darker,
+  "danger":     $error,
+  "white":      $white,
+  "green":      $green,
+  "opacity-10":   $white-10
 );
 // stylelint-enable
 
@@ -66,7 +74,7 @@ $body-color:                $black;
 $yiq-contrasted-threshold: 150 !default;
 
 // Customize the light and dark text colors for use in our YIQ color contrast function.
-$yiq-text-dark: $gray-disable-dark !default;
+$yiq-text-dark: $gray-darker;
 $yiq-text-light: $white !default;
 
 // Options
@@ -114,7 +122,7 @@ $sizes: (
 //
 // Style anchor elements.
 
-$link-color:                theme-color("primary") !default;
+$link-color:                $blue;
 $link-decoration:           none !default;
 $link-hover-color:          darken($link-color, 15%) !default;
 $link-hover-decoration:     none !default;
@@ -206,7 +214,7 @@ $transition-collapse:         height .35s ease !default;
 // Font, line-height, and color for body text, headings, and more.
 
 // stylelint-disable value-keyword-case
-$font-family-sans-serif: "Fira Sans", sans-serif;
+$font-family-sans-serif: "Fira Sans", "Tahoma", sans-serif;
 $font-family-monospace:       SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !default;
 $font-family-base: $font-family-sans-serif;
 // stylelint-enable value-keyword-case
@@ -224,7 +232,7 @@ $font-weight-bold:            600 !default;
 $font-weight-base:            $font-weight-normal !default;
 
 $h1-font-size:                $font-size-base * 3 !default;
-$h2-font-size:                $font-size-base * 2 !default;
+$h2-font-size:                $font-size-base * 2.25 !default;
 $h3-font-size:                $font-size-base * 1.5 !default;
 $h4-font-size:                $font-size-base * 1.25 !default;
 $h5-font-size:                $font-size-base !default;
