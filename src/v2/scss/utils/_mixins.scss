@@ -23,12 +23,10 @@
   }
 }
 
-
 @function calc-rem($size) {
   $remSize: ($size / 16px);
   @return #{$remSize}rem;
 }
-
 
 @function calculate-input-line-height($input-height-px, $spacer) {
   $lineHeight: calc(#{calc-rem($input-height-px)} - #{$spacer} * 2 - #{calc-rem($border-width)} * 2);

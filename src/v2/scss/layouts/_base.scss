@@ -24,13 +24,13 @@ body {
 }
 
 .cover {
-  @include font-smoothing();
   position: relative;
   background: #201f20 no-repeat;
   background-size: cover;
   color: $white;
   padding: 56px 0 96px;
   text-align: center;
+  @include font-smoothing();
   @include media-breakpoint-up(lg) {
     text-align: left;
     padding-top: 0;
