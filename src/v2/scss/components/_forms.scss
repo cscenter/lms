@@ -46,22 +46,16 @@ $form-feedback-invalid-color: $red;
 @import "_forms/inputs";
 @import "_forms/select"; // FIXME: move to options?
 
-.ui.form {
+.card._form, .card._survey{
   margin-bottom: spacer("10x");
   overflow: hidden;
   border: $border-width solid $gray-lighter;
   background: $gray-lighter;
   border-radius: $border-radius-lg;
+  padding: 0;
 
-  .form-body {
+  .card__body {
     padding: 0 spacer("8x");
-  }
-
-  .field {
-    margin-bottom: spacer("6x");
-    &:last-child {
-      margin-bottom: spacer("10x");
-    }
   }
 
   .form-section {
@@ -87,7 +81,7 @@ $form-feedback-invalid-color: $red;
     vertical-align: top;
   }
 
-  .form_title {
+  .card__title {
     padding: spacer("8x") spacer("4x") 0;
     margin-bottom: spacer("8x");
     @include media-breakpoint-up(sm) {
@@ -125,15 +119,26 @@ $form-feedback-invalid-color: $red;
   }
 }
 
+.field {
+  margin-bottom: spacer("6x");
+  &:last-child {
+    margin-bottom: spacer("10x");
+  }
+
+  &.hidden {
+    margin-bottom: 0;
+  }
+}
+
 .title-label {
   font-size: $font-size-content-base;
   margin-bottom: spacer("4x");
 }
 
-.ui.form.survey {
+.card._survey {
   background: $white;
 
-  .form_title {
+  .card__title {
     text-align: center;
     margin-bottom: spacer("10x");
 
@@ -142,14 +147,18 @@ $form-feedback-invalid-color: $red;
     }
   }
 
-  .form-body .field {
+  .card__body .field {
     margin-bottom: spacer("10x");
+
+    &._additional {
+      margin-top: -#{spacer("6x")};
+    }
   }
 
   .survey-label {
+    @extend .h3;
     font-weight: $font-weight-normal;
     margin-bottom: spacer("4x");
-    @extend .h3;
 
     .asterisk {
       font-weight: $font-weight-light;

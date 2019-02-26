@@ -44,7 +44,8 @@ $(document).ready(function () {
 const fn = {
     configureCSRFAjax: function () {
         // Append csrf token on ajax POST requests made with jQuery
-        const token = Cookies.get('csrftoken');
+        const token = Cookies.get('csrf_token');
+        // FIXME: add support for allowed subdomains
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
                 if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -81,9 +82,9 @@ const fn = {
     },
 
     courseOfferingTabs: function() {
-        let course_offering = $('#course-offering-detail-page').data('id');
-        if (course_offering !== undefined) {
-            const tabList = $('#course-offering-detail-page__tablist');
+        let course = $('#course-detail-page');
+        if (course.length > 0) {
+            const tabList = $('#course-detail-page__tablist');
             // Switch tabs if url was changed
             window.onpopstate = function(event) {
                 let target;
@@ -104,7 +105,7 @@ const fn = {
             };
             let activeTab = tabList.find('li.active:first a:first');
             if (activeTab.data("target") === '#course-news') {
-                fn.markNewsAsRead(course_offering, activeTab.get(0));
+                fn.readCourseNewsOnClick(activeTab.get(0));
             }
             tabList.on('click', 'a', function(e) {
                 e.preventDefault();
@@ -112,7 +113,7 @@ const fn = {
 
                 const targetTab = $(this).data("target");
                 if (targetTab === '#course-news') {
-                    fn.markNewsAsRead(course_offering, this);
+                    fn.readCourseNewsOnClick(this);
                 }
                 if (!!(window.history && history.pushState)) {
                     history.pushState(
@@ -125,14 +126,17 @@ const fn = {
         }
     },
 
-    markNewsAsRead: function (course_offering, tab) {
+    readCourseNewsOnClick: function (tab) {
         let $tab = $(tab);
         if ($tab.data('has-unread')) {
             $.ajax({
-                // TODO: Pass url in data attr?
-                url: "/notifications/course-offerings/news/",
+                url: $tab.data('notifications-url'),
                 method: "POST",
-                data: {co: course_offering}
+                // Avoiding preflight request by sending csrf token in payload
+                data: {"csrfmiddlewaretoken": Cookies.get('csrf_token')},
+                xhrFields: {
+                    withCredentials: true
+                }
             }).done((data) => {
                 if (data.updated) {
                     $tab.text(tab.firstChild.nodeValue.trim());
@@ -144,9 +148,6 @@ const fn = {
     },
 
     courseClassSpecificCode: function() {
-        // TODO: Move to appropriate place
-        // Course class editing
-
         // FIXME: use .on here
         $("#id_ends_at").focus(function() {
             ends_at_touched = true;

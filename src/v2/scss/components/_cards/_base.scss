@@ -22,52 +22,60 @@ $card-bg: $white !default;
   font-size: $font-size-base;
   border: $card-border-width solid $card-border-color;
   @include border-radius($card-border-radius);
+  overflow: hidden;
+  padding: spacer("4x") 0;
 
-  &._inversed {
+  &._inverse {
     background-color: $gray-lighter;
-    padding: spacer("4x");
-
-    .card-img {
-      margin-bottom: spacer("4x");
-    }
-
-    .card-body {
-      padding: 0;
-    }
   }
 
-  > hr {
-    margin-right: 0;
-    margin-left: 0;
-  }
+  // FIXME: This is don't use in cards now, can i delete this?
+  //> hr {
+  //  margin-right: 0;
+  //  margin-left: 0;
+  //}
+  //
+  //> .list-group:first-child {
+  //  .list-group-item:first-child {
+  //    @include border-top-radius($card-border-radius);
+  //  }
+  //}
+  //
+  //> .list-group:last-child {
+  //  .list-group-item:last-child {
+  //    @include border-bottom-radius($card-border-radius);
+  //  }
+  //}
 
-  > .list-group:first-child {
-    .list-group-item:first-child {
-      @include border-top-radius($card-border-radius);
+  &._no-border {
+    border: none;
+
+    .card__body, .card__title {
+      padding: 0 spacer("2x") 0 0;
     }
-  }
 
-  > .list-group:last-child {
-    .list-group-item:last-child {
-      @include border-bottom-radius($card-border-radius);
+    .card__img {
+      @include border-radius($card-border-radius);
+      overflow: hidden;
     }
   }
 }
 
-.card-body {
+.card__body {
   // Enable `flex-grow: 1` for decks and groups so that card blocks take up
   // as much space as possible, ensuring footers are aligned to the bottom.
   flex: 1 1 auto;
-  padding: spacer("4x");
-
+  padding: 0 spacer("4x");
   // FIXME: rename to `small-text`
   &._small {
     font-size: $font-size-sm;
   }
 }
 
-.card-title {
-  margin-bottom: spacer("3x");
+.card__title {
+  margin-bottom: spacer('1x');
+  padding: 0 spacer("4x");
+  font-size: $font-size-lg;
 }
 
 
@@ -143,8 +151,9 @@ $card-bg: $white !default;
   padding: spacer("4x");
 }
 
-.card-img {
+.card__img {
   width: 100%; // Required because we use flexbox and this inherently applies align-self: stretch
+  margin: -#{spacer("4x")} 0 spacer("4x") 0;
 }
 
 // Card image caps
