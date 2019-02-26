@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 REQUIRED_SETTINGS = [
     "GERRIT_API_URI",
     "GERRIT_CLIENT_USERNAME",
-    "GERRIT_CLIENT_PASSWORD",
+    "GERRIT_CLIENT_HTTP_PASSWORD",
 ]
 
 for attr in REQUIRED_SETTINGS:
