@@ -23,7 +23,7 @@
         </div>
 
         {% if not request.user.is_authenticated %}
-            <a class="btn _outline menu-btn-reg" href="{{ url('login', subdomain=request.subdomain) }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
+            <a class="btn _outline _gray menu-btn-reg" href="{{ url('login', subdomain=request.subdomain) }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
                 {{ macros.svg_inline('user-sign') }} Войти
             </a>
         {% else %}
