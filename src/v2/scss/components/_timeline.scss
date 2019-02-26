@@ -1,0 +1,61 @@
+.timeline {
+  border-left: $border-width solid $gray-light;
+  padding-top: spacer("10x");
+  position: relative;
+
+  &:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: -4px;
+    width: 8px;
+    height: 14px;
+    background-color: $white;
+  }
+
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -4px;
+    width: 8px;
+    height: 52px;
+    background-color: $white;
+  }
+}
+
+.timeline__date {
+  display: flex;
+  width: 100%;
+  margin: spacer("1x") spacer("2x");
+  position: relative;
+  height: 32px;
+  color: $gray-light;
+
+  &.active {
+    color: $gray-dark;
+
+    &:after {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: -14px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: $white;
+      border: 2px solid $gray-dark;
+    }
+  }
+
+  &:after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: -12px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: $gray-light;
+  }
+}

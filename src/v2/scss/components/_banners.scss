@@ -22,7 +22,7 @@ $top-banner-height: 64px;
   font-size: $font-size-sm;
   text-transform: uppercase;
   @include media-breakpoint-up(lg) {
-    font-weight: $font-weight-light;
+    font-weight: $font-weight-normal;
     letter-spacing: 2px;
   }
 }

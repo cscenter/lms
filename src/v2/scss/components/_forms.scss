@@ -66,12 +66,6 @@ $form-feedback-invalid-color: $red;
       border-top: $hr-border-width solid $hr-border-color;
       display: block;
     }
-
-    .form_title {
-      &._subtitle {
-        padding: 0;
-      }
-    }
   }
 
   label {
@@ -112,7 +106,7 @@ $form-feedback-invalid-color: $red;
     }
   }
 
-  &.__no-border {
+  &._no-border {
     border: none;
     border-radius: 0;
     background: transparent;

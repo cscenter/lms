@@ -1,5 +1,3 @@
-// For each of Bootstrap's buttons, define text, background, and border color.
-
 $btn-border-width: $input-btn-border-width;
 
 $btn-font-weight: $font-weight-normal;
@@ -10,102 +8,152 @@ $btn-link-disabled-color: $gray-disable-dark;
 
 $btn-block-spacing-y: .5rem;
 
-
-
 $btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+$btn-box-shadow: inset 0 1px 0 rgba($white, .15), 0 1px 1px rgba($black, .075) !default;
+$btn-focus-box-shadow: 0 0 0 3px transparentize($gray-dark, .8);
+$button-fill: solid;
 
-//@import "bootstrap/scss/buttons";
+//
+// Mixins
+//
 
-.btn{
-  font-size: $font-size-content-base;
-  @include button-size(spacer("3x"), spacer("6x"), $font-size-content-base, calculate-input-line-height(48px, spacer("3x")), $btn-border-radius);
+// Button variants
+//
+// Easily pump out default styles, as well as :hover, :focus, :active,
+// and disabled options for all buttons
+
+@mixin button-variant($button-fill, $background, $border, $hover-background: darken($background, 7.5%), $hover-border: $hover-background, $active-background: darken($background, 12%), $active-border: $active-background) {
+  @if $button-fill == solid {
+    color: color-yiq($background);
+    @include gradient-bg($background);
+    border-color: $border;
+    @include hover {
+      color: color-yiq($hover-background);
+      @include gradient-bg($hover-background);
+      border-color: $hover-border;
+    }
+  } @else if $button-fill == outline {
+    $color: $background;
+    color: $color;
+    background-color: transparent;
+    background-image: none;
+    @include hover {
+      background-color: rgba($active-background, .1);
+    }
+  }
+  transition: $btn-transition;
+
+  &:focus,
+  &._focus {
+    box-shadow: $btn-focus-box-shadow;
+  }
+
+  // Disabled comes first so active can properly restyle
+  &:disabled,
+  &._disabled {
+    color: color-yiq($background);
+    background-color: $background;
+    opacity: .3;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):not(._disabled):active,
+  &:not(:disabled):not(._disabled)._active,
+  .show > &.dropdown-toggle {
+    &:focus {
+      box-shadow: 0 0 0 $btn-focus-width rgba($border, .5);
+    }
+  }
+}
+
+// Button sizes
+@mixin button-size($padding-y, $padding-x, $font-size, $line-height, $border-radius) {
+  padding: $padding-y $padding-x;
+  font-size: $font-size;
+  line-height: $line-height;
+  border-radius: $border-radius;
+}
+
+
+.btn {
   display: inline-block;
   font-weight: $btn-font-weight;
   text-align: center;
-  white-space: nowrap;
   vertical-align: middle;
   user-select: none;
   border: $btn-border-width solid transparent;
   overflow: hidden;
+  @include button-size(spacer("3x"), spacer("6x"), $font-size-content-base, calculate-input-line-height(48px, spacer("3x")), $btn-border-radius);
+  @include transition($btn-transition);
+  margin-left: 0;
+  @include media-breakpoint-up(md) {
+    margin-left: 1rem;
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+
   &:focus,
   &.focus {
     outline: 0;
-    box-shadow: 0px 0px 0px 3px transparentize($gray-dark, .8);
+    box-shadow: $btn-focus-box-shadow;
+  }
+
+
+  &._big {
+    @include button-size(spacer("3x"), spacer("6x"), $font-size-content-base, calculate-input-line-height(56px, spacer("3x")), $btn-border-radius);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  &._small {
+    @include button-size(spacer("3x"), spacer("4x"), $font-size-sm, calculate-input-line-height(40px, spacer("3x")), $btn-border-radius-sm);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-radius: 2rem;
   }
 }
 
-.btn--big {
-  @include button-size(spacer("3x"), spacer("6x"), $font-size-content-base, calculate-input-line-height(56px, spacer("3x")), $btn-border-radius);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin: 0 auto 1rem;
+//
+// Alternate buttons
+//
 
-  @include media-breakpoint-up(md) {
-    margin: 0 1rem 1rem 0;
+@each $color, $value in $theme-colors {
+  .btn._#{$color} {
+    @include button-variant('solid', $value, $value);
   }
 }
 
-.btn--small {
-  @include button-size(spacer("3x"), spacer("4x"), $font-size-sm, calculate-input-line-height(40px, spacer("3x")), $btn-border-radius-sm);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  border-radius: 2rem;
-}
-
-.btn--white {
-  color: $light;
-  background-color: transparentize($white, .9);
-
-  &:hover {
-    color: $light;
-    background-color: transparentize($white, .8);
-  }
-
-  &:focus {
-    color: $light;
-    background-color: transparentize($white, .85);
+@each $color, $value in $theme-colors {
+  .btn._outline._#{$color} {
+    @include button-variant('outline', $value, $value);
   }
 }
 
-.btn--outline {
-  color: $light;
-  border: $btn-border-width solid transparentize($white, .8);
-
-  &:hover {
-    color: $light;
-    border: $btn-border-width solid transparentize($white, .6);
-  }
-}
-
-.btn--outline_gray {
-  color: $gray-dark;
-  background-color: rgba(0, 0, 0, 0);
-  border: $btn-border-width solid $gray;
-
-  &:hover {
-    color: $gray-dark;
-    background-color: rgba($gray-dark, .1);
-  }
-
-  &:focus {
-    color: $gray-dark;
-    background-color: rgba($gray-dark, .05);
-  }
-}
-
-.btn--green {
+.btn._white._opacity-10 {
   color: $white;
-  background-color: $teal;
+  border-color: transparent;
 
   &:hover {
     color: $white;
-    background-color: darken($teal, 5%);
+    background-color: $white-30;
+    border-color: transparent;
   }
 
-  &:focus {
-    background-color: darken($teal, 3%);
+  &:focus,
+  .focus {
+    background-color: $white-30;
+  }
+
+  &:not(:disabled):not(.disabled):active,
+  &:not(:disabled):not(.disabled).active,
+  .show > &.dropdown-toggle {
+    color: $white;
+    background-color: $white-30;
+    border-color: transparent;
   }
 }
+
 
 .btn-animation {
   height: 28px;
@@ -122,6 +170,7 @@ $btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, bord
   img {
     padding: 10px;
   }
+
   &:hover {
     top: -40px;
 
@@ -135,5 +184,15 @@ $btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, bord
   width: 100%;
   @include media-breakpoint-up(md) {
     width: auto;
+  }
+}
+
+.btn-group {
+  font-size: 0;
+
+  &.spaced {
+    .btn {
+      margin-bottom: 1rem;
+    }
   }
 }

@@ -107,7 +107,7 @@
 .grouped.error .ui.option.radio:not(.disabled) > .control__indicator,
 .grouped.error .ui.option.checkbox:not(.disabled) > .control__indicator {
   background-color: $form-feedback-color;
-  border-color: $form-feedback-invalid-color;
+  border:$control-border-width solid $form-feedback-invalid-color;
   &:hover {
     border-color: $form-feedback-invalid-color;
   }

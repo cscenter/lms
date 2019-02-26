@@ -29,24 +29,6 @@ $card-bg: $white !default;
     background-color: $gray-lighter;
   }
 
-  // FIXME: This is don't use in cards now, can i delete this?
-  //> hr {
-  //  margin-right: 0;
-  //  margin-left: 0;
-  //}
-  //
-  //> .list-group:first-child {
-  //  .list-group-item:first-child {
-  //    @include border-top-radius($card-border-radius);
-  //  }
-  //}
-  //
-  //> .list-group:last-child {
-  //  .list-group-item:last-child {
-  //    @include border-bottom-radius($card-border-radius);
-  //  }
-  //}
-
   &._no-border {
     border: none;
 

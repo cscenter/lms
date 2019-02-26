@@ -11,6 +11,27 @@ $user-card-gutter-width: $grid-gutter-width / 2;
   }
 }
 
+.user-cards._team {
+
+  .user-card {
+    text-align: center;
+    width: percentage(12 / $grid-columns);
+    @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
+      width: percentage(6 / $grid-columns);
+    }
+    @include media-breakpoint-up(sm) {
+      width: percentage(4 / $grid-columns);
+    }
+    @include media-breakpoint-up(lg) {
+      width: percentage(4 / $grid-columns);
+    }
+  }
+
+  .user-card__photo {
+    padding-bottom: 110.25%;
+  }
+}
+
 .user-card {
   float: left; // for older browsers
   vertical-align: top;
@@ -29,7 +50,6 @@ $user-card-gutter-width: $grid-gutter-width / 2;
   @include media-breakpoint-up(lg) {
     width: percentage(2 / $grid-columns);
   }
-
 }
 
 .user-card__photo {

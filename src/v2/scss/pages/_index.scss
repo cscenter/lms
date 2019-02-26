@@ -51,11 +51,11 @@
   }
 
   &__card-title {
-    text-transform: uppercase;
     color: $blue;
     text-align: center;
-    letter-spacing: 3px;
     margin-bottom: 0;
+    letter-spacing: -.01rem;
+    font-weight: $font-weight-light;
 
     @include media-breakpoint-down(md) {
       font-size: $font-size-content-base;
@@ -80,6 +80,7 @@
 
   .about-csc__cover {
     position: relative;
+    @include font-smoothing();
   }
 
   .about-csc__description {
