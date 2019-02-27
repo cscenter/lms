@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sessions',
     'django_jinja',
-    'treemenus'
+    'treemenus',  # v1 menu
+    'menu',  # v2 menu support
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -49,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'core.middleware.AuthenticationMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -85,6 +88,7 @@ TEMPLATES = [
                 "django_jinja.builtins.extensions.StaticFilesExtension",
                 "django_jinja.builtins.extensions.DjangoFiltersExtension",
                 "webpack_loader.contrib.jinja2ext.WebpackExtension",
+                "core.jinja2_extensions.MessagesExtension",
                 "core.jinja2_extensions.MenuExtension",
             ],
             "bytecode_cache": {
@@ -97,8 +101,36 @@ TEMPLATES = [
             "auto_reload": DEBUG,
             "translation_engine": "django.utils.translation",
         }
-    }
+    },
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'APP_DIRS': False,
+        'DIRS': [
+            str(ROOT_DIR / "templates"),
+            str(ROOT_DIR / "assets" / "v2" / "dist" / "img"),  # svg inline support
+        ],
+        'OPTIONS': {
+            'loaders': [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ],
+            'context_processors': (
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+            ),
+            'debug': DEBUG
+        }
+    },
 ]
+
+AUTH_USER_MODEL = "core.User"
+LOGOUT_REDIRECT_URL = '/'
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
