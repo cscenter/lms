@@ -27,11 +27,26 @@
 {% import "v2/components/menu/_macros.jinja2" as top_menu %}
 
 <body {% block body_attrs %}{% endblock body_attrs %}>
-<div class="svg-inline">
-    {% block sprites %}{% endblock sprites %}
+<div class="svg-inline">{% block sprites %}{% endblock sprites %}</div>
+{% block before_navbar_container %}{% endblock before_navbar_container %}
+{% block menu %}
+<div class="navbar-container">
+    {% block top_banner %}
+        {%- if is_admission_active -%}
+            <div class="top-banner">
+                <div class="container">
+                    <div class="top-banner__text">
+                        {{ macros.svg_inline('top-banner-kids') }} До 14 апреля открыт <a class="top-banner__link" href="#">приём заявок</a> на очное обучение в центре
+                    </div>
+                </div>
+            </div>
+        {%- endif -%}
+    {% endblock top_banner %}
+    {%- include "v2/layouts/_top_menu.jinja2" %}
 </div>
-
-{% block menu %}{{ top_menu.render(theme_class="__inner-theme") }}{% endblock menu %}
+{% if self.top_banner() %}<div class="top-banner-spacer"></div>{% endif %}
+{% endblock menu %}
+{% block after_navbar_container %}{% endblock after_navbar_container %}
 
 {% block content %}place page content here{% endblock content %}
 

@@ -1,7 +1,7 @@
 from django.contrib.messages import get_messages, DEFAULT_LEVELS
 from django.utils.translation import pgettext_lazy
 from jinja2.ext import Extension
-from treemenus.models import MenuItem, Menu
+from menu import Menu
 
 
 class MockExtension:
@@ -10,14 +10,14 @@ class MockExtension:
     classes = ''
 
 
-class MenuExtension(Extension):
+class MessagesExtension(Extension):
     def __init__(self, environment):
         super().__init__(environment)
-        environment.globals["csc_menu"] = csc_menu
         environment.globals["messages"] = messages
 
 
 def csc_menu(request, menu_name, root_id=False):
+    from treemenus.models import MenuItem, Menu
     tree_menu = [
         MenuItem(caption='Проекты', url='/v1/pages/projects/')
     ]
@@ -47,3 +47,12 @@ def messages(request):
             message_level = 'info'
         messages_json.append({"text": m.message, "timeout": timeout, "type": message_level})
     return messages_json
+
+
+class MenuExtension(Extension):
+    def __init__(self, environment):
+        super().__init__(environment)
+        environment.globals["csc_menu"] = self._menu
+
+    def _menu(self, menu_name, request, root_id=None):
+        return Menu.process(request, name=menu_name)

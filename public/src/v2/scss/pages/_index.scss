@@ -43,16 +43,15 @@
 
   }
 
-  &__text {
+  .card-offline-course__text {
     margin-bottom: spacer("6x");
     @include media-breakpoint-down(md) {
       text-align: center;
     }
   }
 
-  &__card-title {
+  .card-offline-course__card-title {
     color: $blue;
-    text-align: center;
     margin-bottom: 0;
     letter-spacing: -.01rem;
     font-weight: $font-weight-light;

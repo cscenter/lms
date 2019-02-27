@@ -1,10 +1,10 @@
 @import "_cards/base";
-@import "_cards/card_group";
+@import "_cards/collections";
 @import "_cards/testimonials";
 @import "_cards/users";
 
 
-// FIXME: class name is too generic, since css below hardcoded for 6 columns on desktop, rename it to more appropriate name
+// FIXME: class name is too generic, since css below hardcoded for 6 columns on desktop, rename it to a more appropriate name
 .responsive-card {
   color: $gray-darker;
   float: left; //For old browsers
@@ -24,7 +24,7 @@
   }
 }
 
-// Note: Can be easily replaced with `div.card>div.card__body._small>a.h4+p`. Let's leave this one for now.
+// Note: Can be easily replaced with `div.card>div.card__content._small>a.h4+p`. Let's leave this one for now.
 .text-note {
   position: relative;
   border: 1px solid $border-color;

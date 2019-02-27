@@ -1,0 +1,83 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+
+{% block content %}
+        <div class="svg-inline">
+        {% include "sprites/ui.svg" %}
+    </div>
+<div class="container page-content online-courses">
+    <div class="row">
+        <div class="col-lg-9 order-lg-1 order-2">
+            <div class="row">
+                <div class="col-6 col-lg-4 mb-8">
+                    <a class="card _shadowed" href="#">
+                        <div class="card__img">
+                            <img src="/media/online_courses/combinatorics.png" alt="">
+                        </div>
+                        <div class="card__content">
+                            <h4 class="card__title">Java. Базовый курс</h4>
+                            <div class="author">А.А. Владыкин</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-lg-4 mb-8">
+                    <a class="card _shadowed" href="#">
+                        <div class="card__img">
+                            <img src="/media/online_courses/c_bd.png" alt="">
+                        </div>
+                        <div class="card__content">
+                            <h4 class="card__title">Основы перечислительной комбинаторики</h4>
+                            <div class="author">А.А. Владыкин</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-lg-4 mb-8">
+                    <a class="card _shadowed" href="#">
+                        <div class="card__img">
+                            <img src="/media/online_courses/c_bd.png" alt="">
+                        </div>
+                        <div class="card__content">
+                            <h4 class="card__title">Java. Базовый курс</h4>
+                            <div class="author">А.А. Владыкин</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-lg-4 mb-8">
+                    <a class="card _shadowed" href="#">
+                        <div class="card__img">
+                            <img src="/media/online_courses/python-yandex-2_1.png" alt="">
+                        </div>
+                        <div class="card__content">
+                            <h4 class="card__title">Java. Базовый курс</h4>
+                            <div class="author">А.А. Владыкин</div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-lg-3 order-lg-2 order-0">
+            <form class="ui form __no-border _right-side-filter" action="">
+            <div class="field">
+                <div class="ui icon input">
+                    <input type="search" placeholder="Поиск">
+                    <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                </div>
+            </div>
+            <div class="tags-group">
+                <div class="tag">Математика</div>
+                <div class="tag">Haskell</div>
+                <div class="tag">Математическая статистика</div>
+                <div class="tag active">C++</div>
+                <div class="tag">JavaScript</div>
+                <div class="tag">Алгоритмы</div>
+                <div class="tag">Теория графов</div>
+                <div class="tag">Java</div>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

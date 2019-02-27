@@ -11,4 +11,4 @@
 
 package-lock.json
 node_modules/
-app/db.sqlite3
+core/db.sqlite3
