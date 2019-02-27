@@ -1,0 +1,27 @@
+.tags-group {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+
+  .tag {
+    background: transparent;
+    color: $gray-dark;
+    border: $input-border-width solid $gray-light;
+    border-radius: $border-radius;
+    font-size: $font-size-base;
+    padding: spacer("1x") spacer("2x");
+    margin: 0 spacer("2x") spacer("2x") 0;
+    cursor: pointer;
+    float: left;
+
+    &:hover{
+      background-color: $white;
+      transition: $transition-base;
+    }
+
+    &.active {
+      background-color: $white;
+      color: $teal;
+    }
+  }
+}

@@ -45,8 +45,10 @@ $form-feedback-invalid-color: $red;
 @import "_forms/file-input";
 @import "_forms/inputs";
 @import "_forms/select"; // FIXME: move to options?
+@import "_forms/tags";
 
-.card._form, .card._survey{
+.card._form,
+.card._survey {
   margin-bottom: spacer("10x");
   overflow: hidden;
   border: $border-width solid $gray-lighter;
@@ -54,7 +56,7 @@ $form-feedback-invalid-color: $red;
   border-radius: $border-radius-lg;
   padding: 0;
 
-  .card__body {
+  .card__content {
     padding: 0 spacer("8x");
   }
 
@@ -141,7 +143,7 @@ $form-feedback-invalid-color: $red;
     }
   }
 
-  .card__body .field {
+  .card__content .field {
     margin-bottom: spacer("10x");
 
     &._additional {
@@ -163,4 +165,14 @@ $form-feedback-invalid-color: $red;
 
 .input.free-answer {
   margin-top: spacer("2x");
+}
+
+.ui.form._right-side-filter {
+  margin-bottom: spacer("4x");
+  @include media-breakpoint-up(lg) {
+    margin-left: spacer("4x");
+  }
+  .field {
+    margin-bottom: spacer("4x");
+  }
 }

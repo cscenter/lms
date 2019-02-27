@@ -1,0 +1,88 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+
+{% block content %}
+        <div class="svg-inline">
+        {% include "sprites/ui.svg" %}
+    </div>
+<div class="container page-content">
+    <div class="row">
+        <div class="col-lg-9 order-lg-1 order-2">
+            <div class="user-cards _videoarchive">
+                <a class="user-card" href="#">
+                    <div class="card-body">
+                        <h4 class="card__title">Основы перечислительной комбинаторики</h4>
+                        <p class="author">Иванов А.Е.</p>
+                        <p class="type">Открытая лекция</p>
+                    </div>
+                </a>
+                <a class="user-card" href="#">
+                    <div class="card-body">
+                        <h4 class="card__title">Основы перечислительной комбинаторики</h4>
+                        <p class="author">Иванов А.Е.</p>
+                        <p class="type">Открытая лекция</p>
+                    </div>
+                </a>
+                <a class="user-card" href="#">
+                    <div class="card-body">
+                        <h4 class="card__title">Java. Базовый курс</h4>
+                        <p class="author">Иванов А.Е.</p>
+                        <p class="type">Открытая лекция</p>
+                    </div>
+                </a>
+                <a class="user-card" href="#">
+                    <div class="card-body">
+                        <h4 class="card__title">Основы перечислительной комбинаторики</h4>
+                        <p class="author">Иванов А.Е.</p>
+                        <p class="type">Открытая лекция</p>
+                    </div>
+                </a>
+                <a class="user-card" href="#">
+                    <div class="card-body">
+                        <h4 class="card__title">Основы перечислительной комбинаторики</h4>
+                        <p class="author">Иванов А.Е.</p>
+                        <p class="type">Открытая лекция</p>
+                    </div>
+                </a>
+                <a class="user-card" href="#">
+                    <div class="card-body">
+                        <h4 class="card__title">Основы перечислительной комбинаторики</h4>
+                        <p class="author">Иванов А.Е.</p>
+                        <p class="type">Открытая лекция</p>
+                    </div>
+                </a>
+                <a class="user-card" href="#">
+                    <div class="card-body">
+                        <h4 class="card__title">Основы перечислительной комбинаторики</h4>
+                        <p class="author">Иванов А.Е.</p>
+                        <p class="type">Открытая лекция</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-3 order-lg-2 order-0">
+            <form class="ui form __no-border _right-side-filter" action="">
+                <div class="field">
+                    <div class="ui icon input">
+                        <input type="search" placeholder="Поиск">
+                        <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui icon input">
+                        <input type="search" placeholder="Поиск">
+                        <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="ui icon input">
+                        <input type="search" placeholder="Поиск">
+                        <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

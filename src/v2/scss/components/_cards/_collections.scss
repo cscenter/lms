@@ -1,0 +1,92 @@
+$card-group-margin: ($grid-gutter-width / 2);
+$card-deck-margin: $card-group-margin;
+
+$card-columns-count: 2;
+
+
+// Card deck
+
+.card-deck {
+  display: flex;
+  flex-direction: column;
+
+  .card {
+    margin-bottom: $card-deck-margin;
+  }
+
+  @include media-breakpoint-up(sm) {
+    flex-flow: row wrap;
+    margin-right: -$card-deck-margin;
+    margin-left: -$card-deck-margin;
+
+    .card {
+      display: flex;
+      // Flexbugs #4: https://github.com/philipwalton/flexbugs#4-flex-shorthand-declarations-with-unitless-flex-basis-values-are-ignored
+      flex: 1 0 0%;
+      flex-direction: column;
+      margin-right: $card-deck-margin;
+      margin-bottom: 0; // Override the default
+      margin-left: $card-deck-margin;
+    }
+  }
+
+  &._responsive {
+    color: $gray-darker;
+    float: left; //For old browsers
+    //position: relative;
+    @include make-col-ready();
+
+    &._six {
+      .card {
+        @include media-breakpoint-up(sm) {
+          @include make-col(6);
+        }
+
+        @include media-breakpoint-up(md) {
+          @include make-col(4);
+        }
+
+        @include media-breakpoint-up(lg) {
+          @include make-col(2);
+        }
+      }
+    }
+
+    &._three {
+      .card {
+        @include media-breakpoint-up(sm) {
+          @include make-col(2);
+        }
+
+        @include media-breakpoint-up(md) {
+          @include make-col(3);
+        }
+
+        @include media-breakpoint-up(lg) {
+          @include make-col(4);
+        }
+      }
+    }
+  }
+}
+
+
+//
+// Columns
+//
+
+.card-columns {
+  .card {
+    margin-bottom: spacer("3x");
+  }
+
+  @include media-breakpoint-up(sm) {
+    column-count: $card-columns-count;
+    column-gap: spacer("4x");
+
+    .card {
+      display: inline-block; // Don't let them vertically span multiple columns
+      width: 100%; // Don't let their width change
+    }
+  }
+}

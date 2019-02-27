@@ -1,51 +1,28 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="utf-8">
-    <title>{% block title %}Computer Science Center{% endblock title %}</title>
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description"
-          content="Computer Science Center — объединённая инициатива Школы анализа данных, Computer Science клуба и JetBrains.">
-    <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk"/>
+{% extends "v2/layouts/inner.jinja2" %}
 
-    <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
-    <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
+{% set menu_theme="__transparent-theme" %}
+{% set is_admission_active = True %}
 
-    {% block stylesheets %} {% endblock stylesheets %}
+{% block sprites %}
     <script type="text/javascript">
-        window.__CSC__ = {
-            notifications: {{ messages(request)|tojson }},
-            sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
-        };
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/index.svg") }}");
     </script>
-</head>
+{% endblock sprites %}
 
-{% import "v2/_macros.jinja2" as macros %}
-{% import "v2/components/menu/_macros.jinja2" as top_menu %}
-
-<body>
-
-<div class="svg-inline">
-    {% include "sprites/index.svg" %}
-</div>
-
-<div class="cover cover-index-page">
-    {{ top_menu.render(show_submenu=False, theme_class="__transparent-theme") }}
-
+{% block before_navbar_container %}<div class="cover cover-index-page">{% endblock before_navbar_container %}
+{% block after_navbar_container %}
     <div class="container">
         <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
-        <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём
-            направлениям: Computer Science, Data Science, Software Engineering.</p>
-        <div class="cover__btns btn-group">
+        <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering.</p>
+        <div class="cover__btns">
             <a href="#offline-courses" class="btn _big _primary _m-wide">Смотреть программы</a>
-            <a class="btn _big _white _opacity-10 _m-wide" href="/v2/pages/about/">Узнать о центре</a>
+            <a href="/v2/pages/about/" class="btn _big _white _opacity-10 _m-wide">Узнать о центре</a>
         </div>
     </div>
-</div>
+</div> {# -- div.cover #}
+{% endblock after_navbar_container %}
 
-
+{% block content %}
 <div class="csc-offline-courses" id="offline-courses">
     <div class="container">
         <h2 class="m-center">Очные курсы центра</h2>
@@ -56,7 +33,7 @@
 
         <div class="card-deck">
             <a href="#" class="card card-offline-course">
-                <div class="card__body">
+                <div class="card__content">
                     <div class="card-offline-course__icon">{{ macros.svg_inline('se') }}</div>
                     <h3 class="card-offline-course__card-title">Software Engineering</h3>
                     <p class="card-offline-course__card-text">Разработка программного обеспечения</p>
@@ -64,7 +41,7 @@
             </a>
 
             <a href="#" class="card card-offline-course">
-                <div class="card__body">
+                <div class="card__content">
                     <div class="card-offline-course__icon">{{ macros.svg_inline('ds') }}</div>
                     <h3 class="card-offline-course__card-title">Data Science</h3>
                     <p class="card-offline-course__card-text">Анализ данных</p>
@@ -72,7 +49,7 @@
             </a>
 
             <a href="#" class="card card-offline-course">
-                <div class="card__body">
+                <div class="card__content">
                     <div class="card-offline-course__icon">{{ macros.svg_inline('cs') }}</div>
                     <h3 class="card-offline-course__card-title">Computer Science</h3>
                     <p class="card-offline-course__card-text">Современная информатика</p>
@@ -125,73 +102,61 @@
                 <div class="card-img-wrapper">
                     <img src="/static/v2/img/pages/index/online_programs/algo.jpg" alt="Card image cap">
                 </div>
-                <div class="card__body">
                     <h4 class="csc-online-education__card-title">Алгоритмы и эффективные вычисления</h4>
                     <p class="csc-online-education__card-text">
                         <small class="text-muted">Онлайн-программа</small>
                     </p>
-                </div>
             </a>
 
             <a class="responsive-card" href="#">
                 <div class="card-img-wrapper">
                     <img src="/static/v2/img/pages/index/online_programs/math.jpg" alt="Card image cap">
                 </div>
-                <div class="card__body">
-                    <h4 class="csc-online-education__card-title">Математика для разработчика</h4>
-                    <p class="csc-online-education__card-text">
-                        <small class="text-muted">Онлайн-программа</small>
-                    </p>
-                </div>
+                <h4 class="csc-online-education__card-title">Математика для разработчика</h4>
+                <p class="csc-online-education__card-text">
+                    <small class="text-muted">Онлайн-программа</small>
+                </p>
             </a>
 
             <a class="responsive-card" href="#">
                 <div class="card-img-wrapper">
                     <img src="/static/v2/img/pages/index/online_programs/dev.jpg" alt="Card image cap">
                 </div>
-                <div class="card__body">
-                    <h4 class="csc-online-education__card-title">Разработка на C++, Java и Haskell</h4>
-                    <p class="csc-online-education__card-text">
-                        <small class="text-muted">Онлайн-программа</small>
-                    </p>
-                </div>
+                <h4 class="csc-online-education__card-title">Разработка на C++, Java и Haskell</h4>
+                <p class="csc-online-education__card-text">
+                    <small class="text-muted">Онлайн-программа</small>
+                </p>
             </a>
 
             <a class="responsive-card" href="#">
                 <div class="card-img-wrapper">
                     <img src="/media/online_courses/15b5d7fa0dc91619222db27e7f671064.png" alt="Card image cap">
                 </div>
-                <div class="card__body">
-                    <h4 class="csc-online-education__card-title">Программирование на Java
-                        Script</h4>
-                    <p class="csc-online-education__card-text">
-                        <small class="text-muted">Онлайн-курс</small>
-                    </p>
-                </div>
+                <h4 class="csc-online-education__card-title">Программирование на Java
+                    Script</h4>
+                <p class="csc-online-education__card-text">
+                    <small class="text-muted">Онлайн-курс</small>
+                </p>
             </a>
 
             <a class="responsive-card" href="#">
                 <div class="card-img-wrapper">
                     <img src="/media/online_courses/python-yandex-2_1.png" alt="Card image cap">
                 </div>
-                <div class="card__body">
-                    <h4 class="csc-online-education__card-title">Основы программирования</h4>
-                    <p class="csc-online-education__card-text">
-                        <small class="text-muted">Онлайн-программа</small>
-                    </p>
-                </div>
+                <h4 class="csc-online-education__card-title">Основы программирования</h4>
+                <p class="csc-online-education__card-text">
+                    <small class="text-muted">Онлайн-программа</small>
+                </p>
             </a>
 
             <a class="responsive-card" href="#">
                 <div class="card-img-wrapper">
                     <img src="/media/online_courses/HlrWMsXhcgA.jpg" alt="Card image cap">
                 </div>
-                <div class="card__body">
-                    <h4 class="csc-online-education__card-title">Основы программирования</h4>
-                    <p class="csc-online-education__card-text">
-                        <small class="text-muted">Онлайн-программа</small>
-                    </p>
-                </div>
+                <h4 class="csc-online-education__card-title">Основы программирования</h4>
+                <p class="csc-online-education__card-text">
+                    <small class="text-muted">Онлайн-программа</small>
+                </p>
             </a>
         </div>
         <div class="text-center">
@@ -361,28 +326,4 @@
     </div>
 </div>
 
-<footer class="footer">
-    <div class="container">
-        <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
-        <div class="footer__contacts">
-            <a href="" class="footer__email">
-                info@compscicenter.ru
-            </a>
-            <div class="footer__social-media-icons">
-                <a target="_blank" rel="noopener" href="https://vk.com/compscicenter" title="Computer Science Center on VK.com">{{ macros.svg_inline('vk') }}</a>
-                <a target="_blank" rel="noopener" href="https://t.me/compscicenter_ru" title="Computer Science Center in Telegram">{{ macros.svg_inline('telegram') }}</a>
-                <a target="_blank" rel="noopener" href="https://instagram.com/compscicenter" title="Computer Science Center on Instagram">{{ macros.svg_inline('instagram') }}</a>
-                <a target="_blank" rel="noopener" href="https://twitter.com/compscicenter" title="Computer Science Center on Twitter">{{ macros.svg_inline('twitter') }}</a>
-                <a target="_blank" rel="noopener" href="https://www.facebook.com/CSCenter" title="{{ _('Computer Science Center on Facebook') }}">{{ macros.svg_inline('facebook') }}</a>
-                <a target="_blank" rel="noopener" href="https://www.youtube.com/c/compscicenterru" title="Computer Science Center on YouTube">{{ macros.svg_inline('youtube') }}</a>
-            </div>
-        </div>
-    </div>
-</footer>
-
-
-{{ render_bundle('common', config='V2') }}
-{{ render_bundle('main', config='V2') }}
-
-</body>
-</html>
+{% endblock content %}

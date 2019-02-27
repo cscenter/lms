@@ -1,0 +1,51 @@
+.user-cards._videoarchive {
+  .user-card {
+    margin-bottom: spacer("4x");
+    width: percentage(12 / $grid-columns);
+    @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
+      width: percentage(6 / $grid-columns);
+    }
+    @include media-breakpoint-up(sm) {
+      width: percentage(6 / $grid-columns);
+    }
+    @include media-breakpoint-up(lg) {
+      width: percentage(4 / $grid-columns);
+    }
+
+    .card-body {
+      padding: spacer("4x");
+      text-align: left;
+      background-color: $white;
+      @include font-smoothing();
+      border-radius: $border-radius-sm;
+      overflow: hidden;
+      box-shadow: 0 0 10px $gray-light;
+      height: 100%;
+      display: flex;
+      flex-flow: column;
+
+      .card__title {
+        margin-bottom: spacer("2x");
+        color: $gray-darker;
+      }
+
+      .type {
+        color: $gray-dark;
+        font-size: $font-size-sm;
+        margin-bottom: 0;
+        margin-top: auto;
+      }
+
+      .author {
+        font-size: $font-size-sm;
+        color: $gray-darker;
+        margin-bottom: spacer("8x");
+      }
+
+      &:hover {
+        transition: $transition-base;
+        box-shadow: 0 0 32px $gray-light;
+      }
+    }
+  }
+}
