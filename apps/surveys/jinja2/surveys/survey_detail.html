@@ -17,7 +17,7 @@
                     <p>Опрос по курсу</p>
                     <h1>{{ form.survey.title|safe }}</h1>
                 </div>
-                <div class="card__body">
+                <div class="card__content">
                     <form action="" class="ui form" method="post">
                         {% csrf_token %}
                         {{ form.non_field_errors() }}
