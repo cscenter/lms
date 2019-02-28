@@ -10,7 +10,7 @@ class OnlineCoursesListView(generic.ListView):
     template_name = "online_courses/online_courses_list.html"
 
     def get_context_data(self, **kwargs):
-        context = super(OnlineCoursesListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["recent_courses"] = filter(
             lambda c: not c.is_self_paced and (not c.end or c.end > timezone.now()),
             context[self.context_object_name])
@@ -25,3 +25,12 @@ class OnlineCoursesListView(generic.ListView):
 
     def get_queryset(self):
         return OnlineCourse.objects.order_by("is_self_paced", "-start", "name")
+
+
+class OnlineCoursesView(generic.ListView):
+    context_object_name = 'online_courses'
+    model = OnlineCourse
+    template_name = "compscicenter_ru/online_courses.html"
+
+    def get_queryset(self):
+        return OnlineCourse.objects.order_by("-start", "name")

@@ -4,8 +4,6 @@ import itertools
 import math
 import random
 
-from collections import Counter
-
 from django.contrib.staticfiles.storage import staticfiles_storage
 
 from django.conf import settings
