@@ -3,6 +3,7 @@ import os
 import sys
 
 sys.path.append(os.path.abspath("apps/"))
+sys.path.append(os.path.abspath("compscicenter_ru/apps/"))
 
 if __name__ == "__main__":
     # On production use --settings to override default behavior
