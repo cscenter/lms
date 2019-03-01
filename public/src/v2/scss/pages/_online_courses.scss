@@ -15,7 +15,8 @@
   .card {
     height: 100%; // TODO: replace with `.h-100`?
 
-    .author {
+    .author,
+    .author a {
       color: $gray-dark;
       font-size: $font-size-sm;
     }
