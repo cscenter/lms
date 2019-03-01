@@ -4,22 +4,28 @@
 
 {% block body_attrs %}class="_dark"{% endblock body_attrs %}
 
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
 {% block content %}
-<div class="container page-content online-courses">
+<div class="container page-content online-courses" id="online-courses-page">
     <h1 class="text-center">Онлайн-курсы</h1>
     <div class="row">
         <div class="offset-lg-2 col-lg-8">
             <form class="ui form __no-border" action="">
                 <div class="field">
                     <div class="ui icon input">
-                        <input type="search" placeholder="Поиск">
+                        <input class="fuzzy-search" name="search" type="text" placeholder="Поиск">
                         <i class="_search icon">{{ macros.svg_inline('search') }}</i>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-    <div class="row">
+    <div class="row online-courses-list">
         {% for online_course in online_courses %}
         <div class="col-6 col-md-3 mb-8">
             <div class="card _shadowed">
@@ -27,7 +33,7 @@
                 <a class="card__img" href="{{ online_course.link }}" rel="noopener" target="_blank"><img src="{{ online_course.photo.url }}" alt=""></a>
                 {% endif %}
                 <div class="card__content">
-                    <a class="h4 mb-1" href="{{ online_course.link }}" rel="noopener" target="_blank">{{ online_course.name }}</a>
+                    <a class="h4 mb-1 course-title" href="{{ online_course.link }}" rel="noopener" target="_blank">{{ online_course.name }}</a>
                     <div class="author">{{ online_course.teachers }}</div>
                 </div>
             </div>
@@ -35,4 +41,14 @@
         {% endfor %}
     </div>
 </div>
+
+{# FIXME: Temporary solution before implementing tags support #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+<script type="text/javascript">
+    var onlineCoursesList = new List('online-courses-page', {
+        listClass: 'online-courses-list',
+        valueNames: ['course-title'],
+        page: {{ online_courses| length }}
+    });
+</script>
 {% endblock content %}
