@@ -11,7 +11,7 @@ let Logic = (function createLogicFactory() {
     }
   };
 
-  return function(logic){
+  return function(logic) {
     let newLogic = Object.create(logicPrototype);
     Object.assign(newLogic, logic);
     return newLogic;
