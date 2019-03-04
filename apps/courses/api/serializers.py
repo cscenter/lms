@@ -1,8 +1,22 @@
 from rest_framework import serializers
 
-from courses.models import Course
+from courses.models import Course, CourseTeacher, Semester
 from users.api.serializers import PhotoSerializerField
 from users.models import User
+
+
+class SemesterSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk")
+    index = serializers.IntegerField()
+    year = serializers.IntegerField()
+    name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Semester
+        fields = ("id", "index", "year", "name")
+
+    def get_name(self, obj: Semester):
+        return str(obj)
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -51,3 +65,28 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     def get_sex(self, obj: User):
         return "m" if obj.gender == obj.GENDER_MALE else "w"
+
+
+class CourseTeacherListingField(serializers.RelatedField):
+    def to_representation(self, value: CourseTeacher):
+        return value.teacher.get_abbreviated_name()
+
+
+# FIXME: inherit from CourseSerializer with overriden `fields`
+class CourseVideoSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk")
+    name = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()
+    semester = SemesterSerializer()
+    teachers = CourseTeacherListingField(
+        many=True, read_only=True, source="course_teachers")
+
+    class Meta:
+        model = Course
+        fields = ('id', 'name', 'url', 'semester', 'teachers')
+
+    def get_name(self, obj: Course):
+        return obj.meta_course.name
+
+    def get_url(self, obj: Course):
+        return obj.get_absolute_url()
