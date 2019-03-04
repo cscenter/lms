@@ -228,7 +228,7 @@ $navbar-toggler-border-radius: $border-radius;
   align-items: center;
   font-size: $font-size-base;
   display: none;
-  background-color: $gray-light;
+  background-color: $gray-lighter;
   @include media-breakpoint-up(lg) {
     display: flex;
   }

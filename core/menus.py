@@ -125,6 +125,9 @@ public_menu = [
             MenuItem(pgettext_lazy("menu", "Подать заявку"), '/v2/pages/application/', weight=20),
             MenuItem(pgettext_lazy("menu", "Программа для поступления"), '/v2/pages/enrollment/program/', weight=30),
             MenuItem(pgettext_lazy("menu", "Вопросы и ответы"), '/v2/pages/faq/', weight=40),
+        ],
+        selected_patterns=[
+            r'^/v2/pages/enrollment/',
         ]),
     # Private part (my.* domain)
     MenuItem(
