@@ -11,11 +11,12 @@ from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
 from django.http.response import HttpResponseRedirect, HttpResponseNotFound
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import pgettext_lazy
 from django.views import generic
+from django.views.generic import ListView
 from django_filters.views import FilterMixin
 from rest_framework.renderers import JSONRenderer
 from core.urls import reverse
@@ -436,3 +437,28 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         idx = get_term_index_academic_year_starts(term_year, term_type)
         academic_year, _ = get_term_by_index(idx)
         return academic_year, term_type
+
+
+class CourseVideoListView2(ListView):
+    model = Course
+    template_name = "compscicenter_ru/courses_video_list.html"
+    context_object_name = 'course_list'
+
+    def get_queryset(self):
+        lecturer = CourseTeacher.roles.lecturer
+        lecturers = Prefetch(
+            'course_teachers',
+            queryset=(CourseTeacher.objects
+                      .filter(roles=lecturer)
+                      .select_related('teacher')))
+        # FIXME: filter by completed_at
+        return (Course.objects
+                .filter(is_published_in_video=True)
+                .in_center_branches()
+                .order_by('-semester__year', 'semester__type')
+                .select_related('meta_course', 'semester')
+                .prefetch_related(lecturers))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
