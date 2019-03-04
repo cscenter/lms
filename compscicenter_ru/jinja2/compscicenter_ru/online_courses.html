@@ -28,10 +28,10 @@
         <div class="offset-2 offset-md-0 col-8 col-md-4 col-lg-3 mb-8">
             <div class="card _shadowed">
                 {% if online_course.photo %}
-                <a class="card__img" href="{{ online_course.link }}" rel="noopener" target="_blank"><img src="{{ online_course.photo.url }}" alt=""></a>
+                <a class="card__img" href="{{ online_course.link }}" title="{{ online_course.name }}" rel="noopener" target="_blank"><img src="{{ online_course.photo.url }}" alt=""></a>
                 {% endif %}
                 <div class="card__content">
-                    <a class="h4 mb-1 course-title" href="{{ online_course.link }}" rel="noopener" target="_blank">{{ online_course.name }}</a>
+                    <a class="h4 mb-1 course-title" href="{{ online_course.link }}" title="{{ online_course.name }}" rel="noopener" target="_blank">{{ online_course.name }}</a>
                     <div class="author">{{ online_course.teachers }}</div>
                 </div>
             </div>
