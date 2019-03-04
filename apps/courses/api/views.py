@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from courses.models import Course, CourseTeacher
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
-from courses.api.serializers import CourseSerializer, TeacherSerializer
+from courses.api.serializers import CourseSerializer, TeacherSerializer, \
+    CourseVideoSerializer
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from users.models import User
 
@@ -76,3 +77,23 @@ class TeacherList(ListAPIView):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class CourseVideoList(ListAPIView):
+    pagination_class = None
+    serializer_class = CourseVideoSerializer
+
+    def get_queryset(self):
+        lecturer = CourseTeacher.roles.lecturer
+        lecturers = Prefetch(
+            'course_teachers',
+            queryset=(CourseTeacher.objects
+                      .filter(roles=lecturer)
+                      .select_related('teacher')))
+        # FIXME: filter by completed_at
+        return (Course.objects
+                .filter(is_published_in_video=True)
+                .in_center_branches()
+                .order_by('-semester__year', 'semester__type')
+                .select_related('meta_course', 'semester')
+                .prefetch_related(lecturers))

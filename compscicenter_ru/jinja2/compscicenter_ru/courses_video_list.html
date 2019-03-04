@@ -12,37 +12,6 @@
 
 {% block content %}
 <div class="container page-content">
-    <h1>Видеозаписи лекций</h1>
-    <div class="row">
-        <div class="col-lg-9 order-lg-1 order-2">
-            <div class="row">
-                {% for course in course_list %}
-                <div class="col-12 col-sm-6 col-lg-6 mb-4">
-                    <a class="card _shadowed _video" href="{{ course.get_absolute_url() }}classes/">
-                        <div class="card__content">
-                            <h4 class="card__title">{{ course.meta_course.name }}</h4>
-                            <div class="author">
-                                {% for ct in course.course_teachers.all() -%}
-                                    {{ ct.teacher.get_abbreviated_name() }}{% if not loop.last %}, {% endif %}
-                                {%- endfor %}
-                            </div>
-                        </div>
-                        <div class="card__content _meta" style="flex-grow:0">{{ course.semester }}</div>
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        <div class="col-lg-3 order-lg-2 order-0">
-            <form class="ui form __no-border _right-side-filter" action="">
-                <div class="field">
-                    <div class="ui icon input">
-                        <input type="search" placeholder="Поиск">
-                        <i class="_search icon">{{ macros.svg_inline('search') }}</i>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+    <div id="CourseVideos" data-init='{{ app_data|tojson|safe }}' class="__react-root"></div>
 </div>
 {% endblock content %}
