@@ -22,35 +22,35 @@
 {% endblock after_navbar_container %}
 
 {% block content %}
-    <div class="csc-offline-courses" id="offline-courses">
+    <div class="csc-study-areas" id="study-areas">
         <div class="container">
             <h2 class="m-center">Очные курсы центра</h2>
             <p class="card-offline-course__text">
                 Центр приглашает молодых специалистов, аспирантов, студентов средних и старших курсов технических специальностей пройти двух- или трёхлетние курсы по направлениям:
             </p>
 
-            <div class="card-deck">
-                <a href="{{ url('syllabus') }}" class="card card-offline-course">
+            <div class="card-deck _three">
+                <a href="{{ url('syllabus') }}" class="card _study-area">
                     <div class="card__content">
                         <div class="card-offline-course__icon">{{ macros.svg_inline('se') }}</div>
-                        <h3 class="card-offline-course__card-title">Software Engineering</h3>
-                        <p class="card-offline-course__card-text">Разработка программного обеспечения</p>
+                        <h3 class="card__title">Software Engineering</h3>
+                        <p class="card__subtitle">Разработка программного обеспечения</p>
                     </div>
                 </a>
 
-                <a href="{{ url('syllabus') }}" class="card card-offline-course">
+                <a href="{{ url('syllabus') }}" class="card _study-area">
                     <div class="card__content">
                         <div class="card-offline-course__icon">{{ macros.svg_inline('ds') }}</div>
-                        <h3 class="card-offline-course__card-title">Data Science</h3>
-                        <p class="card-offline-course__card-text">Анализ данных</p>
+                        <h3 class="card__title">Data Science</h3>
+                        <p class="card__subtitle">Анализ данных</p>
                     </div>
                 </a>
 
-                <a href="{{ url('syllabus') }}" class="card card-offline-course">
+                <a href="{{ url('syllabus') }}" class="card _study-area">
                     <div class="card__content">
                         <div class="card-offline-course__icon">{{ macros.svg_inline('cs') }}</div>
-                        <h3 class="card-offline-course__card-title">Computer Science</h3>
-                        <p class="card-offline-course__card-text">Современная информатика</p>
+                        <h3 class="card__title">Computer Science</h3>
+                        <p class="card__subtitle">Современная информатика</p>
                     </div>
                 </a>
             </div>
@@ -93,19 +93,20 @@
     <div class="csc-online-education">
         <div class="container">
             <h2 class="text-center">Онлайн-обучение</h2>
-            <div class="card-deck">
+            <div class="card-deck _online-education">
                 {% for course in courses %}
-                    <a class="responsive-card" href="{{ course.link }}" target="_blank" rel="noopener">
+                    <a class="card _no-border" href="{{ course.link }}" target="_blank" rel="noopener">
                         {% if course.avatar_url -%}
-                            <div class="card-img-wrapper"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
+                            <div class="card__img _darken"><img src="{{ course.avatar_url }}" alt="{{ course.name }}"></div>
                         {%- endif %}
-                        <h4 class="csc-online-education__card-title">{{ course.name }}</h4>
-                        <p class="csc-online-education__card-text">
-                            <small class="text-muted">{{ course.tag }}</small>
-                        </p>
+                        <div class="card__content">
+                            <h4 class="card__title">{{ course.name }}</h4>
+                            <div class="card__subtitle">{{ course.tag }}</div>
+                        </div>
                     </a>
                 {% endfor %}
             </div>
+
             <div class="text-center">
                 <a href="{{ url('online_courses:list') }}" class="btn _outline _gray _small">Все материалы</a>
             </div>
