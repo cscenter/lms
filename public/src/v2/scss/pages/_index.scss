@@ -12,9 +12,14 @@
   @include append-hr-to-container;
 }
 
-._study-area {
+.card._study-area {
   background-color: $gray-lighter;
   text-align: center;
+  margin-bottom: spacer("4x");
+
+  @include media-breakpoint-up(lg) {
+    margin-bottom: 0;
+  }
 
   .card__content {
     padding: spacer("8x") spacer("4x");
