@@ -107,7 +107,6 @@ class CourseVideosPage extends React.Component {
 
         return (
             <Fragment>
-                <h1>Видеозаписи лекций</h1>
                 <div className="row">
                     <div className="col-lg-9 order-lg-1 order-2">
                         <div className="row">
