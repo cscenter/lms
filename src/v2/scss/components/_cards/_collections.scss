@@ -15,7 +15,6 @@ $card-columns-count: 2;
   flex-wrap: wrap;
   margin-left: -$card-group-margin;
   margin-right: -$card-group-margin;
-  float: left; //For IE
 
   &._six {
     .card {
@@ -59,7 +58,7 @@ $card-columns-count: 2;
         @include card-width(2);
       }
 
-      @include media-breakpoint-up(md) {
+      @include media-breakpoint-up(lg) {
         @include card-width(3);
       }
     }
