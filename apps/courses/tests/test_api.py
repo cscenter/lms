@@ -1,4 +1,7 @@
+import datetime
+
 import pytest
+from django.utils.timezone import now
 
 from core.urls import reverse
 from courses.models import CourseTeacher
@@ -36,3 +39,21 @@ def test_courses(client):
     assert response.status_code == 200
     assert len(response.data) == 1
     assert response.data[0]["id"] == c.meta_course_id
+
+
+@pytest.mark.django_db
+def test_video_list(client):
+    url = reverse("api:course_video_records")
+    CourseFactory.create_batch(2, is_published_in_video=False)
+    with_video = CourseFactory.create_batch(5,
+                                            is_published_in_video=True)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert len(response.data) == 5
+    assert set(x.id for x in with_video) == set(x['id'] for x in response.data)
+    today = now().date()
+    future_day = today + datetime.timedelta(days=3)
+    course = CourseFactory(is_published_in_video=True, completed_at=future_day)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert len(response.data) == 5
