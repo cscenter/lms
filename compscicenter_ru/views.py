@@ -346,14 +346,14 @@ class SyllabusView(generic.TemplateView):
         context = super().get_context_data(**kwargs)
         syllabus = (StudyProgram.objects
                     .syllabus()
-                    .filter(year=2017)
+                    .filter(year=2019)
                     .order_by("city_id", "area__name_ru"))
-        context["programs"] = self.group_programs_by_city(syllabus)
+        context["programs"] = self.group_programs_by_branch(syllabus)
         # TODO: validate entry city
-        context["selected_city"] = self.request.GET.get('city', 'spb')
+        context["selected_branch"] = self.request.GET.get('branch', 'spb')
         return context
 
-    def group_programs_by_city(self, syllabus):
+    def group_programs_by_branch(self, syllabus):
         grouped = {}
         for city_id, g in itertools.groupby(syllabus,
                                             key=lambda sp: sp.city_id):

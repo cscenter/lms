@@ -17,27 +17,34 @@
                 <small><span class="text-danger">*</span>Направление Computer Science представлено только в Санкт-Петербурге.</small>
 
                 <ul class="nav nav-tabs square" role="tablist">
-                    <li role="presentation" {% if selected_city == 'spb' %}class="active"{% endif %}>
+                    <li role="presentation" {% if selected_branch == 'spb' %}class="active"{% endif %}>
                         <a data-target="#program-spb"
-                           aria-expanded="{% if selected_city == 'spb' %}true{% else %}false{% endif %}"
+                           aria-expanded="{% if selected_branch == 'spb' %}true{% else %}false{% endif %}"
                            aria-controls="program-spb"
                            href="{% url "syllabus" %}">Санкт-Петербург</a>
                     </li>
 
-                    <li role="presentation" {% if selected_city == 'nsk' %}class="active"{% endif %}>
+                    <li role="presentation" {% if selected_branch == 'nsk' %}class="active"{% endif %}>
                         <a data-target="#program-nsk"
-                           aria-expanded="{% if selected_city == 'nsk' %}true{% else %}false{% endif %}"
+                           aria-expanded="{% if selected_branch == 'nsk' %}true{% else %}false{% endif %}"
                            aria-controls="program-nsk"
-                           href="{% url "syllabus" %}?city=nsk">Новосибирск</a>
+                           href="{% url "syllabus" %}?branch=nsk">Новосибирск</a>
+                    </li>
+
+                    <li role="presentation" {% if selected_branch == 'online' %}class="active"{% endif %}>
+                        <a data-target="#program-online"
+                           aria-expanded="{% if selected_branch == 'online' %}true{% else %}false{% endif %}"
+                           aria-controls="program-online"
+                           href="{% url "syllabus" %}?branch=online">Заочное отделение</a>
                     </li>
                 </ul>
 
                 <div class="tab-content">
                     {% for city_iata, syllabus_by_city in programs.items %}
-                        <div class="tab-pane {% if selected_city == city_iata %}active{% endif %}"
+                        <div class="tab-pane {% if selected_branch == city_iata %}active{% endif %}"
                              role="tabpanel" id="program-{{ city_iata }}">
                             {% for program in syllabus_by_city %}
-                                <h3>{{ program.area.name_ru }} /{{ program.area.name_en }}/</h3>
+                                <h3>{{ program.area.name_ru }}{% if program.area.name_en %} /{{ program.area.name_en }}/{% endif %}</h3>
                                 <p>{{ program.area.description }}</p>
                                 {% if program.course_groups.all %}
                                 <ul style="list-style-type: square;">
