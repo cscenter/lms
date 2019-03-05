@@ -5,6 +5,16 @@ from users.api.serializers import PhotoSerializerField
 from users.models import User
 
 
+class CourseRelatedField(serializers.RelatedField):
+    def to_representation(self, value):
+        return value.course.meta_course_id
+
+
+class CourseTeacherRelatedField(serializers.RelatedField):
+    def to_representation(self, value: CourseTeacher):
+        return value.teacher.get_abbreviated_name()
+
+
 class SemesterSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     index = serializers.IntegerField()
@@ -19,21 +29,35 @@ class SemesterSerializer(serializers.ModelSerializer):
         return str(obj)
 
 
-class CourseSerializer(serializers.ModelSerializer):
+class MetaCourseSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="meta_course_id")
     name = serializers.SerializerMethodField()
+
+    def get_name(self, obj: Course):
+        return obj.meta_course.name
 
     class Meta:
         model = Course
         fields = ('id', 'name')
 
+
+class CourseSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="pk")
+    name = serializers.SerializerMethodField()
+    url = serializers.SerializerMethodField()
+    semester = SemesterSerializer()
+    teachers = CourseTeacherRelatedField(
+        many=True, read_only=True, source="course_teachers")
+
+    class Meta:
+        model = Course
+        fields = ('id', 'name', 'url', 'semester', 'teachers')
+
     def get_name(self, obj: Course):
         return obj.meta_course.name
 
-
-class TeacherCourseListingField(serializers.RelatedField):
-    def to_representation(self, value):
-        return value.course.meta_course_id
+    def get_url(self, obj: Course):
+        return obj.get_absolute_url()
 
 
 class TeacherSerializer(serializers.ModelSerializer):
@@ -42,7 +66,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     sex = serializers.SerializerMethodField()
     photo = PhotoSerializerField("176x246")
     city = serializers.CharField(source="city_id")
-    courses = TeacherCourseListingField(
+    courses = CourseRelatedField(
         many=True, read_only=True, source="courseteacher_set")
     # Duplicates are acceptable
     # TODO: rename
@@ -65,28 +89,3 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     def get_sex(self, obj: User):
         return "m" if obj.gender == obj.GENDER_MALE else "w"
-
-
-class CourseTeacherListingField(serializers.RelatedField):
-    def to_representation(self, value: CourseTeacher):
-        return value.teacher.get_abbreviated_name()
-
-
-# FIXME: inherit from CourseSerializer with overriden `fields`
-class CourseVideoSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="pk")
-    name = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()
-    semester = SemesterSerializer()
-    teachers = CourseTeacherListingField(
-        many=True, read_only=True, source="course_teachers")
-
-    class Meta:
-        model = Course
-        fields = ('id', 'name', 'url', 'semester', 'teachers')
-
-    def get_name(self, obj: Course):
-        return obj.meta_course.name
-
-    def get_url(self, obj: Course):
-        return obj.get_absolute_url()

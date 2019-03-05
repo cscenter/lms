@@ -6,8 +6,8 @@ from rest_framework.response import Response
 from courses.models import Course, CourseTeacher
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
-from courses.api.serializers import CourseSerializer, TeacherSerializer, \
-    CourseVideoSerializer
+from courses.api.serializers import MetaCourseSerializer, TeacherSerializer, \
+    CourseSerializer
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from users.models import User
 
@@ -15,7 +15,7 @@ from users.models import User
 class CourseList(ListAPIView):
     """Returns courses for CS Center"""
     pagination_class = None
-    serializer_class = CourseSerializer
+    serializer_class = MetaCourseSerializer
 
     def get_queryset(self):
         return (Course.objects
@@ -81,7 +81,7 @@ class TeacherList(ListAPIView):
 
 class CourseVideoList(ListAPIView):
     pagination_class = None
-    serializer_class = CourseVideoSerializer
+    serializer_class = CourseSerializer
 
     def get_queryset(self):
         lecturer = CourseTeacher.roles.lecturer
