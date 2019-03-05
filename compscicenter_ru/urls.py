@@ -7,9 +7,7 @@ from django.views.generic import RedirectView, TemplateView
 from loginas import urls as loginas_urls
 
 from compscicenter_ru import views
-from compscicenter_ru.views import CourseVideoListView2
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
-from courses.views import CourseVideoListView
 from htmlpages.views import flatpage
 from users.urls import auth_urls
 from users.views import TeacherDetailView
@@ -40,8 +38,7 @@ urlpatterns = [
     path('faq/', views.QAListView.as_view(), name='faq'),
     path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
     path('', include('online_courses.urls')),
-    path('videos/', CourseVideoListView.as_view(), name='course_video_list'),
-    path('videos2/', CourseVideoListView2.as_view(), name='course_video_list2'),
+    path('videos/', views.CourseVideoListView.as_view(), name='course_video_list'),
 
     path('', include(auth_urls)),
     path('', include('users.urls')),

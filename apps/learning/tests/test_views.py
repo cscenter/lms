@@ -56,17 +56,6 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
         self.assertStatusCode(200, self.url_name)
 
 
-@pytest.mark.django_db
-def test_video_list(client):
-    CourseFactory.create_batch(2, is_published_in_video=False)
-    with_video = CourseFactory.create_batch(5,
-                                            is_published_in_video=True)
-    response = client.get(reverse('course_video_list'))
-    co_to_show = response.context['object_list']
-    assert len(co_to_show) == 5
-    assert set(with_video) == set(co_to_show)
-
-
 class CourseListTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, CSCTestCase):
     url_name = 'teaching:course_list'

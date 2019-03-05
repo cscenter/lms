@@ -439,7 +439,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         return academic_year, term_type
 
 
-class CourseVideoListView2(ListView):
+class CourseVideoListView(ListView):
     model = Course
     template_name = "compscicenter_ru/courses_video_list.html"
     context_object_name = 'course_list'
