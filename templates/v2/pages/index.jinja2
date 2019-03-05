@@ -15,7 +15,7 @@
         <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
         <p class="cover__text">Двух- или трёхлетние очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering.</p>
         <div class="cover__btns">
-            <a href="#offline-courses" class="btn _big _primary _m-wide">Смотреть программы</a>
+            <a href="#study-areas" class="btn _big _primary _m-wide">Смотреть программы</a>
             <a href="/v2/pages/about/" class="btn _big _white _opacity-10 _m-wide">Узнать о центре</a>
         </div>
     </div>
@@ -23,7 +23,7 @@
 {% endblock after_navbar_container %}
 
 {% block content %}
-<div class="csc-offline-courses" id="offline-courses">
+<div class="csc-study-areas" id="study-areas">
     <div class="container">
         <h2 class="m-center">Очные курсы центра</h2>
         <p class="card-offline-course__text">
@@ -31,30 +31,34 @@
             специальностей пройти двух- или трёхлетние курсы по направлениям:
         </p>
 
-        <div class="card-deck">
-            <a href="#" class="card card-offline-course">
-                <div class="card__content">
-                    <div class="card-offline-course__icon">{{ macros.svg_inline('se') }}</div>
-                    <h3 class="card-offline-course__card-title">Software Engineering</h3>
-                    <p class="card-offline-course__card-text">Разработка программного обеспечения</p>
-                </div>
-            </a>
-
-            <a href="#" class="card card-offline-course">
-                <div class="card__content">
-                    <div class="card-offline-course__icon">{{ macros.svg_inline('ds') }}</div>
-                    <h3 class="card-offline-course__card-title">Data Science</h3>
-                    <p class="card-offline-course__card-text">Анализ данных</p>
-                </div>
-            </a>
-
-            <a href="#" class="card card-offline-course">
-                <div class="card__content">
-                    <div class="card-offline-course__icon">{{ macros.svg_inline('cs') }}</div>
-                    <h3 class="card-offline-course__card-title">Computer Science</h3>
-                    <p class="card-offline-course__card-text">Современная информатика</p>
-                </div>
-            </a>
+        <div class="row">
+            <div class="col-lg mb-4 mb-lg-0">
+                <a href="#" class="card _study-area">
+                    <div class="card__content">
+                        <div class="card-offline-course__icon">{{ macros.svg_inline('se') }}</div>
+                        <h3 class="card__title">Software Engineering</h3>
+                        <p class="card__subtitle">Разработка программного обеспечения</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg mb-4 mb-lg-0">
+                <a href="#" class="card _study-area">
+                    <div class="card__content">
+                        <div class="card-offline-course__icon">{{ macros.svg_inline('ds') }}</div>
+                        <h3 class="card__title">Data Science</h3>
+                        <p class="card__subtitle">Анализ данных</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg">
+                <a href="#" class="card _study-area">
+                    <div class="card__content">
+                        <div class="card-offline-course__icon">{{ macros.svg_inline('cs') }}</div>
+                        <h3 class="card__title">Computer Science</h3>
+                        <p class="card__subtitle">Современная информатика</p>
+                    </div>
+                </a>
+            </div>
         </div>
 
     </div>
@@ -96,67 +100,66 @@
     <div class="container">
         <h2 class="text-center">Онлайн-образование</h2>
 
-        <div class="card-deck">
+        <div class="card-deck _online-education">
 
-            <a class="responsive-card" href="#">
-                <div class="card-img-wrapper">
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
                     <img src="/static/v2/img/pages/index/online_programs/algo.jpg" alt="Card image cap">
                 </div>
-                    <h4 class="csc-online-education__card-title">Алгоритмы и эффективные вычисления</h4>
-                    <p class="csc-online-education__card-text">
-                        <small class="text-muted">Онлайн-программа</small>
-                    </p>
+                <div class="card__content">
+                    <h4 class="card__title">Алгоритмы и эффективные вычисления</h4>
+                    <div class="card__subtitle">Онлайн-программа</div>
+                </div>
             </a>
 
-            <a class="responsive-card" href="#">
-                <div class="card-img-wrapper">
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
                     <img src="/static/v2/img/pages/index/online_programs/math.jpg" alt="Card image cap">
                 </div>
-                <h4 class="csc-online-education__card-title">Математика для разработчика</h4>
-                <p class="csc-online-education__card-text">
-                    <small class="text-muted">Онлайн-программа</small>
-                </p>
+                <div class="card__content">
+                    <h4 class="card__title">Математика для разработчика</h4>
+                    <small class="card__subtitle">Онлайн-программа</small>
+                </div>
             </a>
 
-            <a class="responsive-card" href="#">
-                <div class="card-img-wrapper">
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
                     <img src="/static/v2/img/pages/index/online_programs/dev.jpg" alt="Card image cap">
                 </div>
-                <h4 class="csc-online-education__card-title">Разработка на C++, Java и Haskell</h4>
-                <p class="csc-online-education__card-text">
-                    <small class="text-muted">Онлайн-программа</small>
-                </p>
+                <div class="card__content">
+                    <h4 class="card__title">Разработка на C++, Java и Haskell</h4>
+                    <div class="card__subtitle">Онлайн-программа</div>
+                </div>
             </a>
 
-            <a class="responsive-card" href="#">
-                <div class="card-img-wrapper">
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
                     <img src="/media/online_courses/15b5d7fa0dc91619222db27e7f671064.png" alt="Card image cap">
                 </div>
-                <h4 class="csc-online-education__card-title">Программирование на Java
-                    Script</h4>
-                <p class="csc-online-education__card-text">
-                    <small class="text-muted">Онлайн-курс</small>
-                </p>
+                <div class="card__content">
+                    <h4 class="card__title">Программирование на Java Script</h4>
+                    <div class="card__subtitle">Онлайн-курс</div>
+                </div>
             </a>
 
-            <a class="responsive-card" href="#">
-                <div class="card-img-wrapper">
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
                     <img src="/media/online_courses/python-yandex-2_1.png" alt="Card image cap">
                 </div>
-                <h4 class="csc-online-education__card-title">Основы программирования</h4>
-                <p class="csc-online-education__card-text">
-                    <small class="text-muted">Онлайн-программа</small>
-                </p>
+                <div class="card__content">
+                    <h4 class="card__title">Основы программирования</h4>
+                    <div class="card__subtitle">Онлайн-программа</div>
+                </div>
             </a>
 
-            <a class="responsive-card" href="#">
-                <div class="card-img-wrapper">
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
                     <img src="/media/online_courses/HlrWMsXhcgA.jpg" alt="Card image cap">
                 </div>
-                <h4 class="csc-online-education__card-title">Основы программирования</h4>
-                <p class="csc-online-education__card-text">
-                    <small class="text-muted">Онлайн-программа</small>
-                </p>
+                <div class="card__content">
+                    <h4 class="card__title">Основы программирования</h4>
+                    <div class="card__subtitle">Онлайн-программа</div>
+                </div>
             </a>
         </div>
         <div class="text-center">
