@@ -5,19 +5,23 @@
   }
 }
 
-// 2 - screen offline-courses
-.csc-offline-courses {
+// 2 - screen `Study Areas`
+
+.csc-study-areas {
   padding: spacer("10x") 0 0;
   @include append-hr-to-container;
 }
 
-.card-offline-course {
+._study-area {
   background-color: $gray-lighter;
   text-align: center;
 
+  .card__content {
+    padding: spacer("8x") spacer("4x");
+  }
+
   svg {
     margin-left: 30px;
-    fill: #1d1d1d;
   }
 
   &:hover {
@@ -28,29 +32,14 @@
       fill: $white;
     }
 
-    .card-offline-course__icon--data-science {
-      background-image: url("/static/v2/img/pages/index/offline-courses/data-science-hover.svg");
-    }
-
-    .card-offline-course__icon--computer-science {
-      background-image: url("/static/v2/img/pages/index/offline-courses/computer-science-hover.svg");
-    }
-
-    .card-offline-course__card-title,
-    .card-offline-course__card-text {
+    .card__title,
+    .card__subtitle {
       color: $white;
     }
 
   }
 
-  .card-offline-course__text {
-    margin-bottom: spacer("6x");
-    @include media-breakpoint-down(md) {
-      text-align: center;
-    }
-  }
-
-  .card-offline-course__card-title {
+  .card__title {
     color: $blue;
     margin-bottom: 0;
     letter-spacing: -.01rem;
@@ -59,11 +48,6 @@
     @include media-breakpoint-down(md) {
       font-size: $font-size-content-base;
     }
-  }
-
-  &__card-text {
-    font-size: $font-size-sm;
-    color: $gray-dark;
   }
 }
 
@@ -148,65 +132,44 @@
 // 4 - screen csc-online
 
 .csc-online-education {
-  @include media-breakpoint-down(md) {
-    text-align: center;
+  text-align: center;
+  @include media-breakpoint-up(md) {
+    text-align: left;
   }
-
-  .card-img-wrapper {
-    text-align: center;
-    overflow: hidden;
-    position: relative;
-
-    @include media-breakpoint-down(sm) {
-      max-width: 200px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    &::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background-color: rgba($gray-darker, .3);
-      transition: .3s;
-    }
-
-    img {
-      width: 100%;
-
-      @include media-breakpoint-up(sm) {
-        width: 100%;
-      }
-    }
-  }
-
-  .responsive-card {
-    &:hover {
-      .card-img-wrapper {
-        &::before {
-          background-color: rgba($gray-darker, .1);
-        }
-      }
-    }
-  }
-
-  h2 {
-    margin-bottom: 1.5rem;
-  }
-
-  .btn {
-    margin: .5rem 0 2rem;
-  }
+  padding-bottom: spacer("8x");
 }
 
-.csc-online-education__card-title {
-  padding-top: 10px;
-  margin-bottom: 0;
-  font-size: $font-size-base;
-  @include media-breakpoint-up(xl) {
-    font-size: $font-size-content-base;
+.card-deck._online-education {
+  .card {
+    @include media-breakpoint-up(sm) {
+      width: calc(50% - #{$grid-gutter-width});
+    }
+
+    @include media-breakpoint-up(md) {
+      width: calc(33.3333% - #{$grid-gutter-width});
+    }
+
+    @include media-breakpoint-up(lg) {
+      width: #{calc(16.6666% - #{$grid-gutter-width})};
+    }
+
+    @include media-breakpoint-up(xl) {
+      width: #{calc(16.6666% - #{$grid-gutter-width})};
+    }
+  }
+
+  .card__content {
+    padding-top: spacer("2x");
+  }
+
+  .card__title {
+    font-size: $font-size-base;
+    @include media-breakpoint-up(lg) {
+      font-size: $font-size-sm;
+    }
+    @include media-breakpoint-up(xl) {
+      font-size: $font-size-base;
+    }
   }
 }
 
