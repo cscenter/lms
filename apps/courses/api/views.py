@@ -1,5 +1,6 @@
 from django.db.models import Prefetch
 from django.http import HttpResponseBadRequest
+from django.utils.timezone import now
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
@@ -90,9 +91,11 @@ class CourseVideoList(ListAPIView):
             queryset=(CourseTeacher.objects
                       .filter(roles=lecturer)
                       .select_related('teacher')))
-        # FIXME: filter by completed_at
         return (Course.objects
-                .filter(is_published_in_video=True)
+                .filter(is_published_in_video=True,
+                        # Could be incorrect within one day since it doesn't
+                        # check timezone
+                        completed_at__lte=now().date())
                 .in_center_branches()
                 .order_by('-semester__year', 'semester__type')
                 .select_related('meta_course', 'semester')
