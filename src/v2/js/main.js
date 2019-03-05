@@ -63,7 +63,7 @@ $(function () {
         });
 
     // Click `Show Programs' on index page
-    $('a[href="#offline-courses"]').click(function (e) {
+    $('a[href="#study-areas"]').click(function (e) {
         e.preventDefault();
         let scrollTo = $(this).attr('href');
         // Adjustment for top navbar height on small screens

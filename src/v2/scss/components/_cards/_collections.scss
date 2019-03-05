@@ -4,69 +4,78 @@ $card-deck-margin: $card-group-margin;
 $card-columns-count: 2;
 
 
+@mixin card-width($card-count) {
+  width: calc(#{percentage(1 / $card-count)} - #{$grid-gutter-width});
+}
+
 // Card deck
 
 .card-deck {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  margin-left: -$card-group-margin;
+  margin-right: -$card-group-margin;
+  float: left; //For IE
+
+  &._six {
+    .card {
+      @include media-breakpoint-up(sm) {
+       @include card-width(2);
+      }
+
+      @include media-breakpoint-up(md) {
+        @include card-width(3);
+      }
+
+      @include media-breakpoint-up(lg) {
+        @include card-width(4);
+      }
+
+      @include media-breakpoint-up(xl) {
+        @include card-width(6);
+      }
+    }
+  }
+
+  &._four {
+    .card {
+      @include media-breakpoint-up(sm) {
+        @include card-width(2);
+      }
+
+      @include media-breakpoint-up(md) {
+        @include card-width(3);
+      }
+
+      @include media-breakpoint-up(lg) {
+        @include card-width(4);
+      }
+    }
+  }
+
+  &._three {
+    .card {
+      @include media-breakpoint-up(sm) {
+        @include card-width(2);
+      }
+
+      @include media-breakpoint-up(md) {
+        @include card-width(3);
+      }
+    }
+  }
+
+  &._two {
+    .card {
+      @include media-breakpoint-up(sm) {
+        @include card-width(2);
+      }
+    }
+  }
 
   .card {
-    margin-bottom: $card-deck-margin;
-  }
-
-  @include media-breakpoint-up(sm) {
-    flex-flow: row wrap;
-    margin-right: -$card-deck-margin;
-    margin-left: -$card-deck-margin;
-
-    .card {
-      display: flex;
-      // Flexbugs #4: https://github.com/philipwalton/flexbugs#4-flex-shorthand-declarations-with-unitless-flex-basis-values-are-ignored
-      flex: 1 0 0%;
-      flex-direction: column;
-      margin-right: $card-deck-margin;
-      margin-bottom: 0; // Override the default
-      margin-left: $card-deck-margin;
-    }
-  }
-
-  &._responsive {
-    color: $gray-darker;
-    float: left; //For old browsers
-    //position: relative;
-    @include make-col-ready();
-
-    &._six {
-      .card {
-        @include media-breakpoint-up(sm) {
-          @include make-col(6);
-        }
-
-        @include media-breakpoint-up(md) {
-          @include make-col(4);
-        }
-
-        @include media-breakpoint-up(lg) {
-          @include make-col(2);
-        }
-      }
-    }
-
-    &._three {
-      .card {
-        @include media-breakpoint-up(sm) {
-          @include make-col(2);
-        }
-
-        @include media-breakpoint-up(md) {
-          @include make-col(3);
-        }
-
-        @include media-breakpoint-up(lg) {
-          @include make-col(4);
-        }
-      }
-    }
+    margin: 0 $card-group-margin spacer("4x");
+    @include card-width(1);
   }
 }
 
