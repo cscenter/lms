@@ -12,7 +12,11 @@
 	left: 0;
 	width: 100%;
 	height: 100%;
+	display: none;
 
+    @include media-breakpoint-up(lg) {
+		display: block;
+    }
 	/* Position the items */
 	// &:nth-child(2) { top: 25%; }
 	// &:nth-child(3) { top: 50%; }
