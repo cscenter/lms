@@ -140,7 +140,7 @@ class TestimonialsListView(TemplateView):
             raise Http404
         max_page = math.ceil(total / page_size)
         if current_page > max_page:
-            base_url = reverse('testimonials_v2')
+            base_url = reverse('testimonials')
             raise Redirect(to=f"{base_url}?page={max_page}")
         return {
             "app_data": {
