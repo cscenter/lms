@@ -25,8 +25,8 @@ from users.models import GITHUB_LOGIN_VALIDATOR
 
 DEGREE_YEAR_CHOICES = ('', '', '--------') + AcademicDegreeYears.choices
 WHERE_DID_YOU_LEARN = (
-    ('uni', 'плакат/листовка в университете'),
-    ('social_net', 'пост в соц. сетях'),
+    ('uni', 'плакат в университете'),
+    ('social_net', 'пост в социальных сетях'),
     ('friends', 'от друзей'),
     ('other', 'другое')
 )
