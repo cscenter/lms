@@ -191,9 +191,9 @@ class Applicant(TimeStampedModel):
     STUDY_PROGRAM_CS = "cs"
     STUDY_PROGRAM_SE = "se"
     STUDY_PROGRAMS = (
-        (STUDY_PROGRAM_DS, "Анализ данных"),
-        (STUDY_PROGRAM_CS, "Современная информатика"),
-        (STUDY_PROGRAM_SE, "Разработка ПО")
+        (STUDY_PROGRAM_DS, "Data Science (Анализ данных)"),
+        (STUDY_PROGRAM_CS, "Computer Science (Современная информатика)"),
+        (STUDY_PROGRAM_SE, "Software Engineering (Разработка ПО)")
     )
     INFO_SOURCES = (
         ('uni', 'плакат/листовка в университете'),

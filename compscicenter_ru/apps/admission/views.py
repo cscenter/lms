@@ -163,7 +163,9 @@ class ApplicationFormView(TemplateView):
         if not len(active_campaigns):
             raise Redirect(to=reverse("admission:application_closed"))
 
+        others = [10, 14]  # Hide select options with `Other` value
         universities = (University.objects
+                        .exclude(pk__in=others)
                         .annotate(value=F('id'), label=F('name'))
                         .values('value', 'label', 'city_id')
                         .order_by("city_id", "sort"))
@@ -173,14 +175,21 @@ class ApplicationFormView(TemplateView):
                           Applicant.STUDY_PROGRAMS]
         sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
 
+        yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
+
         context['app'] = {
             'props': {
                 'endpoint': reverse('api:applicant_create'),
+                'authCompleteUrl': reverse('admission:auth_complete'),
+                'authBeginUrl': reverse('admission:auth_begin'),
                 'campaigns': list(active_campaigns),
                 'universities': list(universities),
                 'courses': courses,
                 'study_programs': study_programs,
                 'sources': sources
+            },
+            'state': {
+                'isYandexPassportAccessAllowed': bool(yandex_passport_access),
             }
         }
         return context
