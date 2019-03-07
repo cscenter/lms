@@ -12,7 +12,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db import transaction, IntegrityError
-from django.db.models import Q, Avg, Value, Prefetch
+from django.db.models import Q, Avg, Value, Prefetch, F
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import HttpResponseRedirect, JsonResponse
@@ -24,7 +24,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
-from django.views.generic.base import TemplateResponseMixin, RedirectView
+from django.views.generic.base import TemplateResponseMixin, RedirectView, \
+    TemplateView
 from django.views.generic.edit import BaseCreateView, \
     ModelFormMixin
 from django_filters.views import BaseFilterView, FilterMixin
@@ -45,7 +46,8 @@ from admission.filters import ApplicantFilter, InterviewsFilter, \
 from admission.forms import InterviewCommentForm, \
     ApplicantReadOnlyForm, InterviewForm, ApplicantStatusForm, \
     ResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
-    ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm
+    ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm, \
+    WHERE_DID_YOU_LEARN
 from admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign, InterviewAssignment, InterviewSlot, \
     InterviewInvitation, InterviewStream
@@ -56,10 +58,12 @@ from admission.utils import generate_interview_reminder, \
 from api.permissions import CuratorAccessPermission
 from core.auth.backends import YandexRuOAuth2Backend
 from core.exceptions import Redirect
+from core.models import University
 from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown
+from learning.settings import AcademicDegreeYears
 from tasks.models import Task
 from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import User
@@ -141,6 +145,45 @@ def yandex_login_access_complete(request, *args, **kwargs):
     except SocialAuthBaseException as e:
         context = {"error": str(e)}
     return render(request, 'admission/social_close_popup.html', context=context)
+
+
+class ApplicationFormView(TemplateView):
+    template_name = "compscicenter_ru/admission/application_form.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        today = timezone.now()
+        active_campaigns = (Campaign.objects
+                            .filter(current=True, year=today.year,
+                                    application_ends_at__gt=today)
+                            .select_related('city')
+                            .annotate(value=F('id'), label=F('city__name'))
+                            .values('value', 'label'))
+        # FIXME: move this logic to the react form? Or optimize performance and redirect?
+        if not len(active_campaigns):
+            raise Redirect(to=reverse("admission:application_closed"))
+
+        universities = (University.objects
+                        .annotate(value=F('id'), label=F('name'))
+                        .values('value', 'label', 'city_id')
+                        .order_by("city_id", "sort"))
+        courses = [{"value": k, "label": str(v)} for k, v in
+                   AcademicDegreeYears.values.items()]
+        study_programs = [{"value": k, "label": v} for k, v in
+                          Applicant.STUDY_PROGRAMS]
+        sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
+
+        context['app'] = {
+            'props': {
+                'endpoint': reverse('api:applicant_create'),
+                'campaigns': list(active_campaigns),
+                'universities': list(universities),
+                'courses': courses,
+                'study_programs': study_programs,
+                'sources': sources
+            }
+        }
+        return context
 
 
 # FIXME: Don't allow to save duplicates.

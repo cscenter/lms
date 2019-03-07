@@ -1,0 +1,54 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% block title %}Анкета на поступление в {{ super() }}{% endblock title %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="mb-8">
+                    <h1>Набор в CS центр открыт</h1>
+                    <p>Computer Science Center приглашает студентов средних и старших курсов технических вузов пройти
+                        двух- или трёхлетние курсы по направлениям Анализ данных, Современная информатика и Разработка
+                        ПО. За время обучения выпускники сдают двенадцать курсов, из которых минимум пять — по выбору
+                        студента, и проходят три семестра практики или научно-исследовательской работы.
+                    </p>
+                    <h3>Этапы приёмной кампании 2019</h3>
+                    <ul>
+                        <li>Анкета на сайте (открыта до 18:00 14 апреля по московскому времени).</li>
+                        <li>Онлайн-тест</li>
+                        <li>Письменный экзамен</li>
+                        <li>Собеседование</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-3 offset-md-1">
+                <div class="card mb-4">
+                    <img class="card__img" src="{{ static('v2/img/pages/enrollment/note.svg') }}" alt="">
+                    <div class="card__content">
+                        <div class="card__title"><a href="/enrollment/" target="_blank">Памятка для поступающих</a></div>
+                        Советы от кураторов центра для желающих начать свое обучение в центре
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card _inverted">
+                    <div class="card__header _big">
+                        <h2>Анкета на поступление</h2>
+                    </div>
+                     <div class="card__content _big">
+                        <div id="ApplicationForm" data-init='{{ app|tojson }}' class="__react-root"></div>
+                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
