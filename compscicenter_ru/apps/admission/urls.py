@@ -1,4 +1,5 @@
 from django.conf.urls import include, url
+from django.urls import path
 
 from admission.views import InterviewListView, InterviewDetailView, \
     ApplicantListView, ApplicantDetailView, \
@@ -7,7 +8,7 @@ from admission.views import InterviewListView, InterviewDetailView, \
     ApplicationCompleteView, InterviewAssignmentDetailView, \
     InterviewCommentView, InterviewAppointmentView, InterviewSlots, \
     yandex_login_access, yandex_login_access_complete, \
-    applicant_testing_new_task
+    applicant_testing_new_task, ApplicationFormView
 
 from htmlpages.views import flatpage
 
@@ -15,10 +16,8 @@ app_name = 'admission'
 
 urlpatterns = [
     url(r'^application/', include([
-        url(r'^$',
-            ApplicantFormWizardView.as_view(url_name='admission:application_step'),
-            kwargs={"step": "welcome"},
-            name='application'),
+        url(r'^$', ApplicantFormWizardView.as_view(url_name='admission:application_step'), kwargs={"step": "welcome"}, name='application'),
+        path('v2/', ApplicationFormView.as_view(), name='application2'),
         url(r'^yandex_access/$', yandex_login_access, name='auth_begin'),
         url(r'^yandex_access/complete/$', yandex_login_access_complete,
             name='auth_complete'),
