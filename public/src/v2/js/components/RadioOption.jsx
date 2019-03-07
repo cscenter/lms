@@ -18,6 +18,7 @@ const RadioOption = ({
               name,
               disabled: groupDisabled,
               className: groupClassName,
+              required: optionRequired
           }) => {
             const className = cx(optionClassName, groupClassName);
             const disabled = optionDisabled || groupDisabled;
@@ -34,6 +35,7 @@ const RadioOption = ({
             return (
                 <label className={`ui option radio`}>
                     <input
+                        required={optionRequired}
                         className="control__input"
                         type="radio"
                         {...radioProps}
@@ -52,6 +54,7 @@ RadioOption.defaultProps = {
     disabled: false,
     onChange: () => false,
     selected: undefined,
+    required: false,
 };
 
 

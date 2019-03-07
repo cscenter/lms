@@ -1,5 +1,6 @@
 import _isNil from 'lodash-es/isNil';
 import React from 'react';
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import Input from "./Input";
 
@@ -7,11 +8,13 @@ import Input from "./Input";
 class Checkbox extends React.Component {
     static defaultProps = {
         className: '',
+        disabled: false,
+        required: false
     };
 
     constructor(props) {
         super(props);
-        this.state = {checked: false};
+        this.state = {};
     }
 
     computeTabIndex = () => {
@@ -25,29 +28,29 @@ class Checkbox extends React.Component {
         }
     };
 
-    handleClick = (e) => {
-        this.setState({checked: !this.state.checked});
-    };
-
-    handleChange = (e) => {
-        this.props.onChange(e.target.value);
-    };
-
     render() {
         const {
             className,
             label,
+            disabled,
+            required,
             ...rest
         } = this.props;
-        const { checked } = this.state;
         const tabIndex = this.computeTabIndex();
+
+        let labelClass = classNames({
+            'ui option checkbox': true,
+            [className]: className.length > 0,
+            'disabled': disabled
+        });
+
         return (
-            <label className={`ui option ${className}`}>
+            <label className={labelClass}>
                 <input
+                    type="checkbox"
+                    required
                     className="control__input"
-                    checked={checked}
                     tabIndex={tabIndex}
-                    onChange={this.handleChange}
                     {...rest}
                 />
                 <span className="control__indicator" />

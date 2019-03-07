@@ -47,6 +47,18 @@ $form-feedback-invalid-color: $red;
 @import "_forms/select"; // FIXME: move to options?
 @import "_forms/tags";
 
+
+
+.ui.form {
+  label {
+    display: block;
+    font-size: $font-size-content-base;
+    font-weight: $font-weight-normal;
+    vertical-align: top;
+  }
+}
+
+
 .card._form,
 .card._survey {
   margin-bottom: spacer("10x");

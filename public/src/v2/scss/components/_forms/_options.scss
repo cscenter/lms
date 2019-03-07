@@ -8,6 +8,7 @@
   align-items: flex-start;
   margin: 0 0 spacer("4x") 0;
   cursor: pointer;
+  position: relative;
 
   &:hover {
     .control__indicator {
@@ -20,12 +21,25 @@
   }
 
   .control__input {
-    display: none;
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    margin: 0;
+    padding: 0;
 
     &:checked {
       ~ .control__indicator {
         border: none;
         background: $control-checked-bg;
+      }
+    }
+
+    &:focus {
+      ~ .control__indicator {
+        border-color: $control-bg-hover;
+        opacity: .8;
       }
     }
   }
@@ -78,7 +92,7 @@
   width: 100%;
 
   .option:last-child {
-    margin-bottom: 0;
+    margin-bottom: 0!important;
   }
 
   &.inline {

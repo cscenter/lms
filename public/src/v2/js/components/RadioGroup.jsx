@@ -11,6 +11,7 @@ const RadioGroup = ({
                         onChange,
                         name,
                         disabled,
+                        required,
                         children,
                         className,
                     }) => (
@@ -20,6 +21,7 @@ const RadioGroup = ({
             onChange,
             name,
             disabled,
+            required,
             className,
         }}
     >
