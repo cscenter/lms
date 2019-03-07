@@ -115,7 +115,7 @@ class Alumni extends React.Component {
             <Fragment>
                 <h1>Выпускники</h1>
                 <div className="row mb-4">
-                            <div className="col-lg-2">
+                            <div className="col-lg-2 mb-4">
                                 <Select
                                     onChange={this.handleYearChange}
                                     value={year}
@@ -126,7 +126,7 @@ class Alumni extends React.Component {
                                     key="year"
                                 />
                             </div>
-                            <div className="col-lg-3">
+                            <div className="col-lg-3 mb-4">
                                 <Select
                                     onChange={this.handleAreaChange}
                                     value={area}
@@ -137,7 +137,7 @@ class Alumni extends React.Component {
                                     key="area"
                                 />
                             </div>
-                            <div className="col-lg-3">
+                            <div className="col-lg-3 mb-4">
                                 <Select
                                     onChange={this.handleCityChange}
                                     value={city}

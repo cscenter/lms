@@ -112,7 +112,6 @@ a {
 }
 
 .page-content {
-  .content-block {
     ol, ul, dl {
       padding: 0;
       margin: spacer("2x") 0 spacer("6x") 3.5rem;
@@ -134,7 +133,6 @@ a {
         margin-bottom: spacer("2x");
       }
     }
-  }
 }
 
 code {

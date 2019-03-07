@@ -3,14 +3,8 @@ import React, {Fragment} from 'react';
 import _throttle from 'lodash-es/throttle';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
-
-import SelectLazy from "components/SelectLazy";
 import SearchInput from 'components/SearchInput';
-import {
-    hideBodyPreloader,
-    showBodyPreloader,
-    showErrorNotification
-} from "utils";
+import {hideBodyPreloader, showErrorNotification} from "utils";
 import Select from "../components/Select";
 
 
