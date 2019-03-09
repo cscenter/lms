@@ -35,7 +35,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_DOMAIN = '.dev.compscicenter.ru'
+CSRF_COOKIE_NAME = "dev_csrf_token"
 SESSION_COOKIE_DOMAIN = '.dev.compscicenter.ru'
+SESSION_COOKIE_NAME = "dev_cscsessionid"
 
 
 LOGGING = {

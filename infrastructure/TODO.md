@@ -12,8 +12,8 @@ TASK [app : Ensure db user exists] <-- fix cluster drop and it should be OK then
 Dependencies between roles
 support for `uwsgi.default.ini.jinja2`
 
-
 ## Critical:
+enable_https == no => ignore self-signed certificate in nginx role
 * create db backup and download to the local machine
 * system-zsh, system-ntp roles?
 * Do not delete lambda functions logs on recreation
