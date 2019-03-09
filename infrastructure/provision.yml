@@ -15,7 +15,7 @@
     aws_ec2_instance_volume_size: 10
     aws_ec2_keypair: csc
     # Ubuntu 16.04 hvm ssd
-    aws_ec2_image: ami-c7e0c82c
+    aws_ec2_image: ami-0565af6e282977273
     attach_second_volume: yes
     second_volume_size: 30
     second_volume_device_name: "/dev/xvdf"
@@ -130,13 +130,19 @@
           status: completed
       register: snapshots_data
       when: aws_ec2_prev_host_tag is defined and attach_second_volume
+      tags:
+        - snapshot
 
     - name: Find newest backup snapshot
       set_fact: newest_snapshot={{ snapshots_data.snapshots | sort(attribute='start_time') | last }}
       when: aws_ec2_prev_host_tag is defined and attach_second_volume and snapshots_data.snapshots | length > 0
+      tags:
+        - snapshot
 
     - set_fact: snapshot_id={{ newest_snapshot.snapshot_id }}
       when: newest_snapshot is defined and newest_snapshot.snapshot_id
+      tags:
+        - snapshot
 
     - name: Create volume and attach it to the EC2 instance
       ec2_vol:
@@ -152,7 +158,11 @@
           EBSBackup: "Yes"
       register: ec2_vol
       when: attach_second_volume
+      tags:
+        - additional-volume
 
     - name: EBS volumes backup automation
-      include_role:
+      import_role:
         name: backup_ebs
+      tags:
+        - backup-automation

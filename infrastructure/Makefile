@@ -12,6 +12,9 @@ deploy:
 provision:
 	ansible-playbook -i hosts -e aws_ec2_instance_tag=$(AWS_EC2_INSTANCE_TAG) provision.yml -v
 
+setup-vm:
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) setup.yml -v
+# Setup VM and all site applications
 setup:
 	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) setup.yml -v --tags="app-deployment"
 
@@ -35,3 +38,6 @@ update-app-uwsgi-config:
 # FIXME: Generate certificates use `creates` which doesn't depend on domain list. Even with hash check it could be broken when needs to add `--expand` key
 update-app-certificate:
 	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="certbot" --skip-tags="nginx-role" -v
+
+dev-setup:
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_dev_csc setup.yml -v --skip-tags="cronjobs,lvm-role" -e "{'enable_https':no}" --tags="compscicenter.ru"

@@ -163,3 +163,10 @@ ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_cscsite setup.yml 
 {% endif %} <-- this new line will be removed
 
 ```
+
+
+### Dev provision
+
+```bash
+ansible-playbook -i hosts -e aws_ec2_instance_tag=csc_dev provision.yml -v -e "aws_ec2_instance_type=t2.micro" -e "{'attach_second_volume':no}" -e "aws_ec2_region=us-east-1" -e "aws_ec2_keypair=dev_csc" --skip-tags="backup-automation,snapshot,additional-volume"
+```

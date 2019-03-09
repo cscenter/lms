@@ -3,7 +3,8 @@ from .base import *
 DEBUG = False
 for template in TEMPLATES:
     template['OPTIONS']['debug'] = DEBUG
-ALLOWED_HOSTS = ["dev.compscicenter.ru"]
+ALLOWED_HOSTS = [".dev.compscicenter.ru"]
+DEFAULT_URL_SCHEME = 'http'
 
 MEDIA_ROOT = str(Path('/shared', 'media'))
 
@@ -33,6 +34,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # Don't use https for dev env
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_DOMAIN = '.dev.compscicenter.ru'
+SESSION_COOKIE_DOMAIN = '.dev.compscicenter.ru'
 
 
 LOGGING = {
