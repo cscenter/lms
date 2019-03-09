@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, \
     MaxValueValidator
 from django.db import models, transaction
-from django.db.models import query, Q
+from django.db.models import query, Q, F
 from django.utils import timezone, numberformat
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
@@ -137,6 +137,15 @@ class Campaign(models.Model):
                 msg = mark_safe("<br>".join(str(e) for e in errors))
                 raise ValidationError(msg)
 
+    @classmethod
+    def get_active(cls):
+        today = timezone.now()
+        return (cls.objects
+                .filter(current=True, year=today.year,
+                        application_ends_at__gt=today)
+                .select_related('city')
+                .order_by('id'))
+
 
 class ApplicantQuerySet(models.QuerySet):
     pass
@@ -191,8 +200,8 @@ class Applicant(TimeStampedModel):
     STUDY_PROGRAM_CS = "cs"
     STUDY_PROGRAM_SE = "se"
     STUDY_PROGRAMS = (
-        (STUDY_PROGRAM_DS, "Data Science (Анализ данных)"),
         (STUDY_PROGRAM_CS, "Computer Science (Современная информатика)"),
+        (STUDY_PROGRAM_DS, "Data Science (Анализ данных)"),
         (STUDY_PROGRAM_SE, "Software Engineering (Разработка ПО)")
     )
     INFO_SOURCES = (
@@ -213,7 +222,13 @@ class Applicant(TimeStampedModel):
         related_name="applicants")
     first_name = models.CharField(_("First name"), max_length=255)
     surname = models.CharField(_("Surname"), max_length=255)
-    patronymic = models.CharField(_("Patronymic"), max_length=255)
+    patronymic = models.CharField(_("Patronymic"), max_length=255,
+                                  blank=True, null=True)
+    living_place = models.CharField(
+        _("Living Place"),
+        max_length=255,
+        null=True,
+        blank=True)
     email = models.EmailField(
         _("Email"),
         help_text=_("Applicant|email"))
@@ -280,6 +295,16 @@ class Applicant(TimeStampedModel):
         help_text=_("Applicant|work_or_study_experience"),
         null=True,
         blank=True)
+    online_education_experience = models.TextField(
+        _("Online Education Exp"),
+        help_text=_("Applicant|online_education_experience"),
+        null=True,
+        blank=True)
+    probability = models.TextField(
+        _("Probability"),
+        help_text=_("Applicant|probability"),
+        null=True,
+        blank=True)
     has_job = models.NullBooleanField(
         _("Do you work?"),
         help_text=_("Applicant|has_job"))
@@ -310,7 +335,8 @@ class Applicant(TimeStampedModel):
         _("Study program"),
         help_text=_("Applicant|study_program"),
         choices=STUDY_PROGRAMS,
-        max_length=255)
+        max_length=255,
+        blank=True)
     preferred_study_programs_dm_note = models.TextField(
         _("Study program (DM note)"),
         help_text=_("Applicant|study_program_dm"),
@@ -376,6 +402,8 @@ class Applicant(TimeStampedModel):
     @transaction.atomic
     def save(self, **kwargs):
         created = self.pk is None
+        if self.yandex_id:
+            self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
         super().save(**kwargs)
         if created:
             self._assign_testing()

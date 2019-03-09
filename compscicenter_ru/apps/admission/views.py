@@ -18,6 +18,7 @@ from django.db.transaction import atomic
 from django.http import HttpResponseRedirect, JsonResponse
 from django.http.response import HttpResponseForbidden, HttpResponseBadRequest, \
     Http404, HttpResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone, formats
 from django.utils.translation import ugettext_lazy as _
@@ -46,8 +47,8 @@ from admission.filters import ApplicantFilter, InterviewsFilter, \
 from admission.forms import InterviewCommentForm, \
     ApplicantReadOnlyForm, InterviewForm, ApplicantStatusForm, \
     ResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
-    ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm, \
-    WHERE_DID_YOU_LEARN
+    ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm
+from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign, InterviewAssignment, InterviewSlot, \
     InterviewInvitation, InterviewStream
@@ -152,13 +153,9 @@ class ApplicationFormView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        today = timezone.now()
-        active_campaigns = (Campaign.objects
-                            .filter(current=True, year=today.year,
-                                    application_ends_at__gt=today)
-                            .select_related('city')
-                            .annotate(value=F('id'), label=F('city__name'))
-                            .values('value', 'label'))
+        active_campaigns = (Campaign.get_active()
+                            .annotate(value=F('city_id'), label=F('city__name'))
+                            .values('value', 'label', 'id'))
         # FIXME: move this logic to the react form? Or optimize performance and redirect?
         if not len(active_campaigns):
             raise Redirect(to=reverse("admission:application_closed"))
@@ -176,16 +173,16 @@ class ApplicationFormView(TemplateView):
         sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
 
         yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
-
         context['app'] = {
             'props': {
                 'endpoint': reverse('api:applicant_create'),
+                'csrfToken': get_token(self.request),
                 'authCompleteUrl': reverse('admission:auth_complete'),
                 'authBeginUrl': reverse('admission:auth_begin'),
                 'campaigns': list(active_campaigns),
                 'universities': list(universities),
                 'courses': courses,
-                'study_programs': study_programs,
+                'studyPrograms': study_programs,
                 'sources': sources
             },
             'state': {

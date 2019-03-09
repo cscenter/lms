@@ -54,7 +54,7 @@ def register_in_yandex_contest(applicant_id, language_code):
         "status": Test.REGISTERED,
         "contest_status_code": status_code,
     }
-    if status_code == RegisterStatus.CREATED:
+    if status_code in (RegisterStatus.CREATED, RegisterStatus.OK):
         participant_id = data
         update_fields["contest_participant_id"] = participant_id
     else:  # 409 - already registered for this contest
@@ -87,7 +87,7 @@ def register_in_yandex_contest(applicant_id, language_code):
         context={
             'FIRST_NAME': applicant.first_name,
             'SURNAME': applicant.surname,
-            'PATRONYMIC': applicant.patronymic,
+            'PATRONYMIC': applicant.patronymic if applicant.patronymic else "",
             'EMAIL': applicant.email,
             'CITY': applicant.campaign.city.name,
             'PHONE': applicant.phone,

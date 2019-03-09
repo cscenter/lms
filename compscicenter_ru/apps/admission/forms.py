@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from django_filters.conf import settings as filters_settings
 
+from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream
 from core.models import University
@@ -24,12 +25,6 @@ from learning.settings import AcademicDegreeYears
 from users.models import GITHUB_LOGIN_VALIDATOR
 
 DEGREE_YEAR_CHOICES = ('', '', '--------') + AcademicDegreeYears.choices
-WHERE_DID_YOU_LEARN = (
-    ('uni', 'плакат в университете'),
-    ('social_net', 'пост в социальных сетях'),
-    ('friends', 'от друзей'),
-    ('other', 'другое')
-)
 
 
 class CampaignChoiceField(forms.ModelChoiceField):
