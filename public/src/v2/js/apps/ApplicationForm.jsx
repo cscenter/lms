@@ -133,8 +133,7 @@ class ApplicationFormPage extends React.Component {
             contentType: 'application/json',
             data: JSON.stringify(payload)
         }).done((data) => {
-            console.log(data);
-            console.log("OK");
+            this.setState({isFormSubmitted: true});
         }).fail((jqXHR) => {
             if (jqXHR.status === 400) {
                 let msg = "<h5>Анкета не была сохранена</h5>";
@@ -161,6 +160,7 @@ class ApplicationFormPage extends React.Component {
             where_did_you_learn,
             campaign,
             preferred_study_programs,
+            isFormSubmitted,
         } = this.state;
 
         let filteredStudyPrograms = studyPrograms.filter((program) => {
@@ -169,6 +169,17 @@ class ApplicationFormPage extends React.Component {
             }
             return true;
         });
+
+        if (isFormSubmitted) {
+            return (
+                <Fragment>
+                <h3>Заявка зарегистрирована</h3>
+                Спасибо за интерес к обучению в CS центре.<br/>
+                В ближайшее время вам придёт письмо с дальнейшими инструкциями и ссылкой на тест для поступающих.<br/>
+                Если в течение суток письмо не пришло, поищите его в спаме, и, если там нет, напишите на <a href="mailto:info@compscicenter.ru">info@compscicenter.ru</a> о своей проблеме. Не забудьте указать свои ФИО и email.
+                </Fragment>
+            );
+        }
 
         return (
             <form className="ui form" onSubmit={this.handleSubmit}>
