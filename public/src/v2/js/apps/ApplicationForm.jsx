@@ -42,6 +42,18 @@ class ApplicationFormPage extends React.Component {
 
     };
 
+    openAuthPopup = function(url) {
+        const width = 700;
+        const height = 600;
+        const leftOffset = 100;
+        const topOffset = 100;
+
+        url += `?next=${this.props.authCompleteUrl}`;
+        let name = "";
+        const settings = `height=${height},width=${width},left=${leftOffset},top=${topOffset},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=yes,directories=no,status=yes`;
+        window.open(url, name, settings);
+    };
+
     handleInputChange = (event) => {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
@@ -49,6 +61,24 @@ class ApplicationFormPage extends React.Component {
 
         this.setState({
             [name]: value
+        });
+    };
+
+    /**
+     * Handle state for multiple checkboxes with the same name
+     * @param event
+     */
+    handleMultipleCheckboxChange = (event) => {
+        const {name, value} = event.target;
+        let selectedCheckboxes = this.state[name] || [];
+        if (event.target.checked === true) {
+            selectedCheckboxes.push(value);
+        } else {
+            let valueIndex = selectedCheckboxes.indexOf(value);
+            selectedCheckboxes.splice(valueIndex, 1);
+        }
+        this.setState({
+            [name]: selectedCheckboxes
         });
     };
 
@@ -65,18 +95,6 @@ class ApplicationFormPage extends React.Component {
         });
     };
 
-    openAuthPopup = function(url) {
-        const width = 700;
-        const height = 600;
-        const leftOffset = 100;
-        const topOffset = 100;
-
-        url += `?next=${this.props.authCompleteUrl}`;
-        let name = "";
-        const settings = `height=${height},width=${width},left=${leftOffset},top=${topOffset},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=yes,directories=no,status=yes`;
-        window.open(url, name, settings);
-    };
-
     handleAccessYandexLogin = (event) => {
         event.preventDefault();
         const {isYandexPassportAccessAllowed} = this.state;
@@ -87,11 +105,73 @@ class ApplicationFormPage extends React.Component {
         return false;
     };
 
+    handleSubmit = e => {
+        e.preventDefault();
+        const {endpoint, csrfToken, campaigns} = this.props;
+        const {has_job, university, course, campaign, ...payload} = this.state;
+        payload["course"] = course && course.value;
+        payload["has_job"] = (has_job === "yes");
+        if (university) {
+            if (university.__ISNEW__) {
+                payload["university_other"] = university.value;
+            } else {
+                payload["university"] = university.value;
+            }
+        }
+        let campaignSelectedOption = campaigns.find(obj => {
+            return obj.value === campaign
+        });
+        payload["campaign"] = campaignSelectedOption.id;
+
+        this.serverRequest = $.ajax({
+            url: endpoint,
+            type: "post",
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            dataType: "json",
+            contentType: 'application/json',
+            data: JSON.stringify(payload)
+        }).done((data) => {
+            console.log(data);
+            console.log("OK");
+        }).fail((jqXHR) => {
+            if (jqXHR.status === 400) {
+                let msg = "<h5>Анкета не была сохранена</h5>";
+                const data = jqXHR.responseJSON;
+                if (Object.keys(data).length === 1 &&
+                        data.hasOwnProperty('non_field_errors')) {
+                    msg += data['non_field_errors'];
+                    showErrorNotification(msg);
+                } else {
+                    msg += "Все поля обязательны для заполнения.";
+                    showNotification(msg, {type: "error", timeout: 3000});
+                }
+            } else {
+                showErrorNotification("Что-то пошло не так. Попробуйте позже.")
+            }
+        });
+    };
+
     render() {
-        const {isYandexPassportAccessAllowed} = this.state;
-        const {universities, courses, campaigns, study_programs, sources} = this.props;
+        const {universities, courses, campaigns, studyPrograms, sources} = this.props;
+        const {
+            isYandexPassportAccessAllowed,
+            has_job,
+            where_did_you_learn,
+            campaign,
+            preferred_study_programs,
+        } = this.state;
+
+        let filteredStudyPrograms = studyPrograms.filter((program) => {
+            if (campaign === "nsk") {
+                return program.value !== "cs";
+            }
+            return true;
+        });
+
         return (
-            <form className="ui form">
+            <form className="ui form" onSubmit={this.handleSubmit}>
                 <fieldset>
                     <h3>Личная информация</h3>
                     <div className="row">
@@ -107,12 +187,12 @@ class ApplicationFormPage extends React.Component {
 
                         <div className="field col-lg-4">
                             <label htmlFor="patronymic">Отчество</label>
-                            <Input required name="patronymic" id="patronymic" onChange={this.handleInputChange} />
+                            <Input name="patronymic" id="patronymic" onChange={this.handleInputChange} />
                         </div>
 
                         <div className="field col-lg-4">
                             <label htmlFor="email">Электронная почта</label>
-                            <Input required name="email" id="email" onChange={this.handleInputChange} />
+                            <Input type="email" required name="email" id="email" onChange={this.handleInputChange} />
                         </div>
 
                         <div className="field col-lg-4">
@@ -196,22 +276,25 @@ class ApplicationFormPage extends React.Component {
                     <div className="row">
                         <div className="field col-lg-12 mb-2">
                             <label>Вы сейчас работаете?</label>
-                            <RadioGroup required name="has_job" className="inline">
+                            <RadioGroup required name="has_job" className="inline" onChange={this.handleInputChange}>
                                 <RadioOption id="yes">Да</RadioOption>
                                 <RadioOption id="no">Нет</RadioOption>
                             </RadioGroup>
                         </div>
                     </div>
-                    <div className="row">
-                        <div className="field col-lg-6">
-                            <label htmlFor="position">Должность</label>
-                            <Input name="position" id="position" placeholder="" onChange={this.handleInputChange} />
-                        </div>
-                        <div className="field col-lg-6">
-                            <label htmlFor="workplace">Место работы</label>
-                            <Input name="workplace" id="workplace" placeholder="" onChange={this.handleInputChange} />
-                        </div>
-                    </div>
+                    {
+                        has_job && has_job === "yes" &&
+                            <div className="row ">
+                                <div className="field col-lg-4">
+                                    <label htmlFor="position">Должность</label>
+                                    <Input name="position" id="position" placeholder="" onChange={this.handleInputChange} />
+                                </div>
+                                <div className="field col-lg-4">
+                                    <label htmlFor="workplace">Место работы</label>
+                                    <Input name="workplace" id="workplace" placeholder="" onChange={this.handleInputChange} />
+                                </div>
+                            </div>
+                    }
                     <div className="row">
                         <div className="field col-lg-8">
                             <div className="ui input">
@@ -236,36 +319,80 @@ class ApplicationFormPage extends React.Component {
                 <fieldset>
                     <h3>CS центр</h3>
                     <div className="row">
-                        <div className="field col-lg-12">
+                        <div className="field col-lg-12 mb-2">
                             <label>Выберите отделение, в котором собираетесь учиться</label>
-                            <RadioGroup name="campaign" className="inline">
+                            <RadioGroup required name="campaign" className="inline" onChange={this.handleInputChange}>
                                 {campaigns.map((branch) =>
-                                    <RadioOption required key={branch.value} id={`campaign-${branch.value}`} value={branch.value}>
+                                    <RadioOption  key={branch.value} id={`campaign-${branch.value}`} value={branch.value}>
                                         {branch.label}
                                     </RadioOption>
                                 )}
                             </RadioGroup>
                         </div>
                     </div>
-                    <div className="row">
-                        <div className="field col-lg-8">
-                            <label>Какие направления  обучения из трех вам интересны в CS центре?</label>
-                            <p className="text-small mb-2">
-                                Мы не просим поступающих сразу определиться с направлением обучения. Вам предстоит сделать этот выбор через год-полтора после поступления. Сейчас мы предлагаем указать одно или несколько направлений, которые кажутся вам интересными.
-                            </p>
-                            <div className="grouped">
-                                {study_programs.map((study_program) =>
-                                    <Checkbox
-                                        key={study_program.value}
-                                        value={study_program.value}
-                                        checked={false}
-                                        onChange={this.handleInputChange}
-                                        label={study_program.label}
-                                    />
-                                )}
+                    {
+                        campaign && (campaign === "spb" || campaign === "nsk") &&
+                        <Fragment>
+                            <div className="row">
+                                <div className="field col-lg-8">
+                                    <label>Какие направления  обучения из трех вам интересны в CS центре?</label>
+                                    <p className="text-small mb-2">
+                                        Мы не просим поступающих сразу определиться с направлением обучения. Вам предстоит сделать этот выбор через год-полтора после поступления. Сейчас мы предлагаем указать одно или несколько направлений, которые кажутся вам интересными.
+                                    </p>
+                                    <div className="grouped">
+                                        {filteredStudyPrograms.map((studyProgram) =>
+                                            <Checkbox
+                                                name="preferred_study_programs"
+                                                key={studyProgram.value}
+                                                value={studyProgram.value}
+                                                onChange={this.handleMultipleCheckboxChange}
+                                                label={studyProgram.label}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            {
+                                preferred_study_programs && preferred_study_programs.includes('cs') &&
+                                <div className="field col-lg-8">
+                                    <div className="ui input">
+                                        <label htmlFor="preferred_study_programs_cs_note">Вы бы хотели заниматься исследованиями в области Computer Science? Какие темы вам особенно интересны?</label>
+                                        <p className="text-small mb-2">
+                                            Вы можете посмотреть список возможных тем и руководителей НИРов у нас на <a target="_blank" href="https://compscicenter.ru/pages/projects/#research-curators">сайте</a>.
+                                        </p>
+                                        <textarea id="preferred_study_programs_cs_note" name="preferred_study_programs_cs_note" rows="6" onChange={this.handleInputChange} />
+                                    </div>
+                                </div>
+                            }
+                            {
+                                preferred_study_programs && preferred_study_programs.includes('ds') &&
+                                <div className="field col-lg-8">
+                                    <div className="ui input">
+                                        <label htmlFor="preferred_study_programs_dm_note">Что вам больше всего интересно в области Data Science? Какие достижения последних лет вас особенно удивили?</label>
+                                        <textarea id="preferred_study_programs_dm_note" name="preferred_study_programs_dm_note" rows="6" onChange={this.handleInputChange} />
+                                    </div>
+                                </div>
+                            }
+                            {
+                                preferred_study_programs && preferred_study_programs.includes('se') &&
+                                <div className="field col-lg-8">
+                                    <div className="ui input">
+                                        <label htmlFor="preferred_study_programs_se_note">В разработке какого приложения, которым вы пользуетесь каждый день, вы хотели бы принять участие? Каких знаний вам для этого не хватает?</label>
+                                        <textarea id="preferred_study_programs_se_note" name="preferred_study_programs_se_note" rows="6" onChange={this.handleInputChange} />
+                                    </div>
+                                </div>
+                            }
+                        </Fragment>
+                    }
+                    {
+                        campaign && campaign === "online" &&
+                        <div className="row">
+                            <div className="field col-lg-5">
+                                <Input required name="living_place" id="living_place" placeholder="В каком городе вы живёте?" onChange={this.handleInputChange} />
                             </div>
                         </div>
-                    </div>
+                    }
+
                     <div className="row">
                         <div className="field col-lg-8">
                             <label>Почему вы хотите учиться в CS центре? Что вы ожидаете от обучения?</label>
@@ -292,24 +419,27 @@ class ApplicationFormPage extends React.Component {
                             <div className="grouped">
                                 {sources.map((source) =>
                                     <Checkbox
-                                        required
                                         key={source.value}
                                         name="where_did_you_learn"
                                         value={source.value}
-                                        checked={false}
-                                        onChange={this.handleInputChange}
+                                        onChange={this.handleMultipleCheckboxChange}
                                         label={source.label}
                                     />
                                 )}
                             </div>
                         </div>
+                        {
+                            where_did_you_learn && where_did_you_learn.includes("other") &&
+                            <div className="field animation col-lg-5">
+                                <Input required name="where_did_you_learn_other" placeholder="Ваш вариант" onChange={this.handleInputChange} />
+                            </div>
+                        }
                     </div>
                 </fieldset>
                 <div className="row">
                     <div className="col-lg-12">
                         <p>Нажимая «Подать заявку», вы соглашаетесь на передачу данных CS центру и на получение писем по поводу приемной компании.</p>
-                        <button type="button" className="btn _primary _m-wide">Подать заявку</button>
-                        <button type="submit" className="btn _primary _m-wide">test</button>
+                        <button type="submit" className="btn _primary _m-wide">Подать заявку</button>
                     </div>
                 </div>
             </form>
@@ -322,7 +452,7 @@ ApplicationFormPage.propTypes = {
     authBeginUrl: PropTypes.string.isRequired,
     authCompleteUrl: PropTypes.string.isRequired,
     campaigns: PropTypes.arrayOf(PropTypes.shape({
-        value: PropTypes.number.isRequired,
+        value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired
     })).isRequired,
     universities: PropTypes.arrayOf(PropTypes.shape({
@@ -334,7 +464,7 @@ ApplicationFormPage.propTypes = {
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired,
     })).isRequired,
-    study_programs: PropTypes.arrayOf(PropTypes.shape({
+    studyPrograms: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired,
     })).isRequired

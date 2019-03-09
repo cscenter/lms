@@ -48,7 +48,7 @@ class Checkbox extends React.Component {
             <label className={labelClass}>
                 <input
                     type="checkbox"
-                    required
+                    required={required}
                     className="control__input"
                     tabIndex={tabIndex}
                     {...rest}
