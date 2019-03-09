@@ -36,5 +36,7 @@ logger = logging.getLogger('django.db.backends')
 logger.addHandler(sql_console_handler)
 # Debug queries
 logger.removeHandler(sql_console_handler)
+# Run rqworker on Mac OS High Sierra
+OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES ./manage.py rqworker default hight
 ```
 
