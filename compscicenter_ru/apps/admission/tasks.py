@@ -94,7 +94,7 @@ def register_in_yandex_contest(applicant_id, language_code):
             'CONTEST_ID': contest_id,
             'YANDEX_LOGIN': applicant.yandex_id,
         },
-        render_on_delivery=True,
+        render_on_delivery=False,
         backend='ses',
     )
 
