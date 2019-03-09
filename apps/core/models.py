@@ -32,6 +32,10 @@ class City(models.Model):
     def __str__(self):
         return smart_text(self.name)
 
+    @property
+    def is_online_branch(self):
+        return self.code == "online"
+
 
 class FaqCategory(models.Model):
     name = models.CharField(_("Category name"), max_length=255)

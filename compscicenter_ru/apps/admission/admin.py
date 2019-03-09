@@ -132,8 +132,8 @@ class InterviewAssignmentAdmin(admin.ModelAdmin):
 
 
 class ContestAdmin(admin.ModelAdmin):
-    list_display = ['contest_id', 'campaign']
-    list_filter = [CampaignListFilter]
+    list_display = ['contest_id', 'campaign', 'type']
+    list_filter = [CampaignListFilter, 'type']
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget}
     }

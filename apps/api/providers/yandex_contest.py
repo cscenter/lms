@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 class RegisterStatus(IntEnum):
     CREATED = 201  # Successfully registered for contest
+    OK = 200  # FIXME: Looks like it returns instead of DUPLICATED
     BAD_TOKEN = 401  # OAuth header is not declared or is wrong
     NO_ACCESS = 403  # You have no access to this contest
     NOT_FOUND = 404  # Contest not found
@@ -44,6 +45,9 @@ class YandexContestAPIException(Exception):
 
 # TODO: catch read timeout exceptions in api?
 class YandexContestAPI:
+    """
+    https://api.contest.yandex.net/api/public/swagger-ui.html#/
+    """
     BASE_URL = 'https://api.contest.yandex.net/api/public/v2'
     PARTICIPANTS_URL = BASE_URL + '/contests/{contest_id}/participants'
     PARTICIPANT_URL = PARTICIPANTS_URL + '/{pid}'
@@ -65,16 +69,17 @@ class YandexContestAPI:
     def register_in_contest(self, yandex_login, contest_id):
         headers = self.base_headers
         payload = {'login': yandex_login}
-        api_contest_url = self.PARTICIPANTS_URL.format(contest_id)
+        api_contest_url = self.PARTICIPANTS_URL.format(contest_id=contest_id)
         response = requests.post(api_contest_url,
                                  headers=headers,
                                  params=payload,
                                  timeout=3)
-        if response.status_code not in [RegisterStatus.CREATED,
-                                        RegisterStatus.DUPLICATED]:
+        if response.status_code not in {RegisterStatus.CREATED,
+                                        RegisterStatus.OK,
+                                        RegisterStatus.DUPLICATED}:
             raise YandexContestAPIException(response.status_code, response.text)
         participant_id = None
-        if response.status_code == RegisterStatus.CREATED:
+        if response.status_code in (RegisterStatus.CREATED, RegisterStatus.OK):
             participant_id = response.json()
             logger.debug("Meta data: {}".format(participant_id))
         return response.status_code, participant_id
@@ -92,7 +97,7 @@ class YandexContestAPI:
     def participant_info(self, contest_id, participant_id):
         headers = self.base_headers
         url = self.PARTICIPANT_URL.format(contest_id=contest_id,
-                                          participant_id=participant_id)
+                                          pid=participant_id)
         response = requests.get(url, headers=headers, timeout=1)
         if response.status_code != ResponseStatus.SUCCESS:
             raise YandexContestAPIException(response.status_code, response.text)
