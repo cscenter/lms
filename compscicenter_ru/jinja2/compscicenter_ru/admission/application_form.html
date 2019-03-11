@@ -35,23 +35,25 @@
                         <img  src="{{ static('v2/img/pages/enrollment/note.svg') }}" alt="">
                     </div>
                     <div class="card__content">
-                        <div class="card__title"><a href="/enrollment/" target="_blank">Памятка для поступающих</a></div>
+                        <div class="card__title"><a href="/enrollment/checklist/" target="_blank">Памятка для поступающих</a></div>
                         Советы от кураторов центра для желающих начать свое обучение в центре
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-12">
-                <div class="card _inverted">
-                    <div class="card__header _big">
-                        <h2>Анкета на поступление</h2>
+        {% if show_form %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card _inverted">
+                        <div class="card__header _big">
+                            <h2>Анкета на поступление</h2>
+                        </div>
+                         <div class="card__content _big">
+                            <div id="ApplicationForm" data-init='{{ app|tojson }}' class="__react-root"></div>
+                         </div>
                     </div>
-                     <div class="card__content _big">
-                        <div id="ApplicationForm" data-init='{{ app|tojson }}' class="__react-root"></div>
-                     </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
     </div>
 {% endblock content %}

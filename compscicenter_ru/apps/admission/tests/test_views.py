@@ -24,23 +24,22 @@ from users.tests.factories import UserFactory
 
 
 @pytest.mark.django_db
-def test_autoclose_application_form(client):
+def test_application_form_availability(client):
     today = timezone.now()
     campaign = CampaignFactory(year=today.year, current=True)
-    url = reverse("admission:application_step", kwargs={"step": "welcome"})
+    url = reverse("admission:application")
     response = client.get(url)
     assert response.status_code == 200
     campaign.current = False
     campaign.save()
     response = client.get(url)
-    assert response.status_code == 302
-    assert "closed" in response.url
+    assert response.status_code == 200
+    assert not response.context_data["show_form"]
     campaign.current = True
     campaign.application_ends_at = today - datetime.timedelta(days=1)
     campaign.save()
     response = client.get(url)
-    assert response.status_code == 302
-    assert "closed" in response.url
+    assert not response.context_data["show_form"]
 
 
 @pytest.mark.django_db
