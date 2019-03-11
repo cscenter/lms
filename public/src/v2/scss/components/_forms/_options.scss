@@ -85,21 +85,18 @@
 
 // Options collection
 
-// FIXME: баг в IE Edge при комбинации last-child и flex-свойств :(
 .grouped {
-  display: inline-flex;
-  flex-flow: column;
-  width: 100%;
+  display: block;
 
   .option:last-child {
     margin-bottom: 0!important;
   }
 
   &.inline {
+    display: inline-flex;
     height: auto;
     padding: calc(#{$input-outerheight - $control-size} / 2) 0;
-    flex-flow: column;
-    flex-wrap: wrap;
+    flex-flow: column wrap;
     @include media-breakpoint-up(md) {
       flex-flow: row wrap;
       height: $input-outerheight;
@@ -111,6 +108,10 @@
       @include media-breakpoint-up(md) {
         margin: 0 20px 0 0;
       }
+    }
+
+    .option:last-child {
+      margin-bottom: 0;
     }
   }
 }
