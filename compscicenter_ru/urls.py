@@ -56,8 +56,6 @@ urlpatterns = [
 
     # FIXME: separate into application and admission
     path('', include('admission.urls')),
-    # TODO: remove after testing
-    path('', include('admission_test.urls')),
 
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),
