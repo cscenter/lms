@@ -21,17 +21,9 @@
     .sprite-img {
       fill: $gray-dark;
       transition: transform 150ms linear;
-      position: relative;
-      margin-right: spacer("4x");
-      width: 24px;
-      height: 24px;
-      margin-left: -42px;
-      @include media-breakpoint-up(md) {
-        width: 32px;
-        height: 32px;
-        margin-left: -48px;
-      }
-
+      position: absolute;
+      left: 16px;
+      top: 14px; // FIXME: why not 16px? :<
     }
 
     &[aria-expanded="true"] {
