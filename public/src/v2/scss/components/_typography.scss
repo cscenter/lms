@@ -112,14 +112,14 @@ a {
 }
 
 .page-content {
-    ol, ul, dl {
+    ol:not(.ui), ul:not(.ui), dl:not(.ui) {
       padding: 0;
       margin: spacer("2x") 0 spacer("6x") spacer("6x");
       @include media-breakpoint-up(md) {
         margin: spacer("2x") 0 spacer("6x") 3.5rem;
       }
     }
-    ul {
+    ul:not(.ui) {
       list-style-type: none;
       li {
         margin-bottom: spacer("2x");
@@ -131,7 +131,7 @@ a {
         margin-left: -#{spacer("6x")};
       }
     }
-    ol {
+    ol:not(.ui) {
       li {
         margin-bottom: spacer("2x");
       }
