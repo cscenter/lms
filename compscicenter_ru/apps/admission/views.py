@@ -156,9 +156,8 @@ class ApplicationFormView(TemplateView):
         show_form = len(active_campaigns) > 0
         context["show_form"] = show_form
         if show_form:
-            others = [10, 14]  # Hide select options with `Other` value
             universities = (University.objects
-                            .exclude(pk__in=others)
+                            .exclude(abbr='other')
                             .annotate(value=F('id'), label=F('name'))
                             .values('value', 'label', 'city_id')
                             .order_by("name"))
