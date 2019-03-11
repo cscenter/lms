@@ -1,10 +1,12 @@
 from django.conf import settings
 from rest_framework import serializers
+from rest_framework.fields import empty
 from rest_framework.validators import UniqueTogetherValidator
 
 from admission.constants import WHERE_DID_YOU_LEARN
 from admission.models import Applicant, Campaign
 from admission.tasks import register_in_yandex_contest
+from core.models import University
 
 
 class ApplicantSerializer(serializers.ModelSerializer):
@@ -20,7 +22,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
     # curators could insert applicant through admin interface
     # without full information about applicant.
     has_job = serializers.BooleanField(label='Вы сейчас работаете?')
-    # FIXME: Replace with hidden field
+    # FIXME: Replace with hidden field since real value stores in session
     yandex_id = serializers.CharField(max_length=80)
 
     class Meta:
@@ -65,6 +67,15 @@ class ApplicantSerializer(serializers.ModelSerializer):
                         "напишите на info@compscicenter.ru с этой почты.")
         ]
 
+    def __init__(self, instance=None, data=empty, **kwargs):
+        if data is not empty and data:
+            if "university_other" in data:
+                # Make university optional cause its value should be empty in
+                # case when `university_other` value provided. Set value
+                # later in `.validate` method.
+                self.fields["university"].required = False
+        super().__init__(instance, data, **kwargs)
+
     def save(self, **kwargs):
         instance = super().save(**kwargs)
         if instance.pk:
@@ -73,15 +84,25 @@ class ApplicantSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, attrs):
+        # FIXME: Информацию о компании лучше вытащить до работы сериализатора и динамически выставлять флаг required вместо костылей ниже
         campaign = attrs['campaign']
         if (not campaign.city.is_online_branch and
                 not attrs.get("preferred_study_programs")):
             raise serializers.ValidationError(
                 detail='Вы не выбрали интересующие вас направления обучения')
+        if campaign.city.is_online_branch and not attrs.get('living_place'):
+            raise serializers.ValidationError(
+                detail='Пожалуйста, укажите ваш город проживания')
         if not attrs.get('has_job'):
             to_delete = ('workplace', 'position')
             for attr in to_delete:
                 if attr in attrs:
                     del attrs[attr]
+        if attrs.get('university_other'):
+            university, created = University.objects.get_or_create(
+                city=campaign.city,
+                abbr="other",
+                defaults={"name": "Другое"})
+            attrs['university'] = university
         # TODO; where_did_you_learn_other, то where_did_you_learn должно содержать other и наоборот
         return attrs
