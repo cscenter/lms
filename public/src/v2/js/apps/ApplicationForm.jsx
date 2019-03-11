@@ -114,7 +114,7 @@ class ApplicationFormPage extends React.Component {
         payload["course"] = course && course.value;
         payload["has_job"] = (has_job === "yes");
         if (university) {
-            if (university.__ISNEW__) {
+            if (university.__isNew__) {
                 payload["university_other"] = university.value;
             } else {
                 payload["university"] = university.value;
