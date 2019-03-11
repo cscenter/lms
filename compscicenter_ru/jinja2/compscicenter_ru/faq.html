@@ -18,7 +18,7 @@
             {% for qa in faq %}
                 <div class="card _qa mb-4">
                     <button class="btn btn-link card__header" id="question-{{ qa.pk }}" aria-expanded="false">
-                        <h3>{{ macros.svg_inline('border-arrow-right') }}{{ qa.question }}</h3>
+                        {{ macros.svg_inline('border-arrow-right') }}<span class="h3">{{ qa.question }}</span>
                     </button>
                     <div class="collapse" id="answer-{{ qa.pk }}" aria-expanded="true">
                         <div class="card__content">{{ qa.answer|safe }}</div>
