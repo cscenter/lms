@@ -165,7 +165,7 @@ class ApplicationFormView(TemplateView):
                         .exclude(pk__in=others)
                         .annotate(value=F('id'), label=F('name'))
                         .values('value', 'label', 'city_id')
-                        .order_by("city_id", "sort"))
+                        .order_by("name"))
         courses = [{"value": k, "label": str(v)} for k, v in
                    AcademicDegreeYears.values.items()]
         study_programs = [{"value": k, "label": v} for k, v in
