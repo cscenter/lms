@@ -120,6 +120,10 @@ class QAListView(generic.ListView):
         return Faq.objects.filter(site=settings.CENTER_SITE_ID).order_by("sort")
 
 
+class EnrollmentChecklistView(generic.TemplateView):
+    template_name = "compscicenter_ru/enrollment_checklist.html"
+
+
 def positive_integer(value):
     validate_integer(value)
     value = int(value)

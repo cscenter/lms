@@ -19,25 +19,28 @@ urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('robots.txt', TemplateView.as_view(template_name="compscicenter_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
     path('open-nsk/', TemplateView.as_view(template_name='open_nsk.html'), name='open_nsk'),
+    # About section
     path('history/', TemplateView.as_view(template_name='compscicenter_ru/history.html'), name='history'),
+    path('team/', views.TeamView.as_view(), name='team'),
+    path('teachers/', views.TeachersView.as_view(), name='teachers'),
+    path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
+    path('alumni/', views.AlumniView.as_view(), name='alumni'),
+    path('alumni/<str:area>/', views.AlumniView.as_view(), name='alumni_by_area'),
+    path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
     # Editing courses/
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
     # TODO: move redirect to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
-    path('team/', views.TeamView.as_view(), name='team'),
     # FIXME: точно только публичная версия? Пока не ясно
     path('syllabus/', views.SyllabusView.as_view(), name='syllabus'),
-    path('alumni/', views.AlumniView.as_view(), name='alumni'),
-    path('alumni/<str:area>/', views.AlumniView.as_view(), name='alumni_by_area'),
     re_path(r'^(?P<year>201[3-7])/$', views.AlumniByYearView.as_view(), name='alumni_memory'),
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
 
-    path('teachers/', views.TeachersView.as_view(), name='teachers'),
-    path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
 
+    path('enrollment/checklist/', views.EnrollmentChecklistView.as_view(), name='enrollment_checklist'),
     path('faq/', views.QAListView.as_view(), name='faq'),
-    path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
+    # Online education
     path('', include('online_courses.urls')),
     path('videos/', views.CourseVideoListView.as_view(), name='course_video_list'),
 
@@ -51,7 +54,7 @@ urlpatterns = [
 
     path('', include('learning.enrollment.urls')),
 
-    # FIXME: this one?
+    # FIXME: separate into application and admission
     path('', include('admission.urls')),
     # TODO: remove after testing
     path('', include('admission_test.urls')),
