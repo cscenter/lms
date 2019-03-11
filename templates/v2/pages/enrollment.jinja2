@@ -22,7 +22,7 @@
             </div>
             <div class="col-md-3 offset-md-1">
                 <div class="card mb-4">
-                    <img class="card__img" src="/media/pages/enrollment/note.svg" alt="">
+                    <img class="card__img" src="{{ static('v2/img/pages/enrollment/note.svg') }}" alt="">
                     <div class="card__content">
                         <div class="card__title">
                             <a href="">Памятка для поступающих</a>
@@ -104,7 +104,13 @@
                                     </div>
                                     <div class="field col-lg-4">
                                         <div class="grouped">
-                                            <label class="title-label">Доступ к данным на Яндексе</label>
+                                            <label class="title-label">Доступ к данным на Яндексе
+                                                <a class="tooltip__icon" data-toggle="tooltip"
+                                                   data-placement="bottom"
+                                                   title="Вступительный тест организован в системе Яндекс.Контест. Чтобы выдать права участника и затем сопоставить результаты с анкетами, нам нужно знать ваш логин на Яндексе без ошибок, учитывая все особенности, например, вход через социальные сети. Чтобы всё сработало, поделитесь с нами доступом к некоторым данным из вашего Яндекс.Паспорта: логин и ФИО.">
+                                                    ?
+                                                </a>
+                                            </label>
                                             <label class="ui option checkbox">
                                                 <input type="checkbox" class="control__input" checked>
                                                 <span class="control__indicator"></span>
@@ -297,4 +303,15 @@
         </div>
 
     </div>
+
+       <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+
+
 {% endblock content %}

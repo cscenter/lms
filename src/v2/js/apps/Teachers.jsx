@@ -164,7 +164,7 @@ class App extends React.Component {
                             icon="search"
                         />
                     </div>
-                    <div className="col-lg-3">
+                    <div className="col-lg-3 mb-4">
                         <Select
                             onChange={this.handleCityChange}
                             value={city}
@@ -175,7 +175,7 @@ class App extends React.Component {
                             key="city"
                         />
                     </div>
-                    <div className="col-lg-3">
+                    <div className="col-lg-3 mb-4">
                         <SelectLazy
                             onChange={this.handleCourseChange}
                             value={course}
@@ -188,7 +188,7 @@ class App extends React.Component {
                             ref={this.CourseSelect}
                         />
                     </div>
-                    <div className="col-lg-3">
+                    <div className="col-lg-3 mb-4">
                         <div className="grouped inline">
                             <label className="ui option checkbox">
                                 <input type="checkbox"

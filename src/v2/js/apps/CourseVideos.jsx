@@ -3,14 +3,8 @@ import React, {Fragment} from 'react';
 import _throttle from 'lodash-es/throttle';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
-
-import SelectLazy from "components/SelectLazy";
 import SearchInput from 'components/SearchInput';
-import {
-    hideBodyPreloader,
-    showBodyPreloader,
-    showErrorNotification
-} from "utils";
+import {hideBodyPreloader, showErrorNotification} from "utils";
 import Select from "../components/Select";
 
 
@@ -112,7 +106,7 @@ class CourseVideosPage extends React.Component {
                         <div className="row">
                             {filteredItems.map((course) =>
                                 <div key={course.id} className="col-12 col-sm-6 col-lg-4 mb-4">
-                                    <a className="card _shadowed _video"  href={`${course.url}/classes/`}>
+                                    <a className="card _shadowed _video h-100"  href={`${course.url}classes/`}>
                                         <div className="card__content">
                                             <h4 className="card__title">{ course.name }</h4>
                                             <div className="author">

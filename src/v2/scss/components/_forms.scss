@@ -47,6 +47,18 @@ $form-feedback-invalid-color: $red;
 @import "_forms/select"; // FIXME: move to options?
 @import "_forms/tags";
 
+
+
+.ui.form {
+  label {
+    display: block;
+    font-size: $font-size-content-base;
+    font-weight: $font-weight-normal;
+    vertical-align: top;
+  }
+}
+
+
 .card._form,
 .card._survey {
   margin-bottom: spacer("10x");
@@ -60,13 +72,14 @@ $form-feedback-invalid-color: $red;
     padding: 0 spacer("8x");
   }
 
-  .form-section {
+  .field {
     margin-bottom: spacer("6x");
-    &::after {
-      content: "";
-      margin: spacer("2x") -#{spacer("8x")};
-      border-top: $hr-border-width solid $hr-border-color;
-      display: block;
+    &:last-child {
+      margin-bottom: spacer("10x");
+    }
+
+    &.hidden {
+      margin-bottom: 0;
     }
   }
 
@@ -93,7 +106,7 @@ $form-feedback-invalid-color: $red;
       margin: 0 0 spacer("2x") 0;
     }
 
-    &.__inverse {
+    &._inverted {
       padding: spacer("8x") spacer("4x");
       background: $gray-dark;
       color: $white;
@@ -117,12 +130,20 @@ $form-feedback-invalid-color: $red;
 
 .field {
   margin-bottom: spacer("6x");
-  &:last-child {
-    margin-bottom: spacer("10x");
-  }
 
   &.hidden {
     margin-bottom: 0;
+  }
+}
+
+// FIXME: how to deal with .card__content padding?
+fieldset {
+  margin-bottom: spacer("4x");
+  &::after {
+    content: "";
+    margin: spacer("2x") -#{spacer("8x")};
+    border-top: $hr-border-width solid $hr-border-color;
+    display: block;
   }
 }
 
