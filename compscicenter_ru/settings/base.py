@@ -37,7 +37,6 @@ INSTALLED_APPS += [
     'stats.apps.StatisticsConfig',
     'admission.apps.AdmissionConfig',
     'staff',
-    'admission_test',  # TODO: remove after testing
     'surveys.apps.SurveysConfig',
     'online_courses.apps.Config',
     'learning.internships.apps.InternshipsConfig',
@@ -121,7 +120,6 @@ TEMPLATES = [
         'APP_DIRS': False,
         'DIRS': [
             str(PROJECT_DIR / "templates"),
-            str(APPS_DIR / "admission_test" / "templates"),
             str(APPS_DIR / "surveys" / "jinja2"),
             str(APPS_DIR / "learning" / "admission" / "templates"),
             str(APPS_DIR / "staff" / "templates"),
