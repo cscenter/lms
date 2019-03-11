@@ -266,8 +266,11 @@ class ApplicationFormPage extends React.Component {
                             </div>
                         </div>
                         <div className="field col-lg-4">
-                            <label htmlFor="faculty">Факультет, специальность или кафедра</label>
+                            <label htmlFor="faculty">Факультет</label>
                             <Input required name="faculty" id="faculty" placeholder="" onChange={this.handleInputChange} />
+                            <div className="help-text">
+                                Факультет, специальность или кафедра
+                            </div>
                         </div>
                         <div className="field col-lg-4">
                             <div className="ui select">
