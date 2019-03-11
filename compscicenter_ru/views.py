@@ -114,7 +114,7 @@ class TeamView(generic.TemplateView):
 
 class QAListView(generic.ListView):
     context_object_name = "faq"
-    template_name = "faq.html"
+    template_name = "compscicenter_ru/faq.html"
 
     def get_queryset(self):
         return Faq.objects.filter(site=settings.CENTER_SITE_ID).order_by("sort")

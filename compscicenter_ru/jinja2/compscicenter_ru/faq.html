@@ -1,0 +1,30 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% block title %}Вопросы и ответы{% endblock title %}
+
+{% block body_attrs %}class="_dark" data-init-sections="collapsible"{% endblock body_attrs %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/faq.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+
+{% block content %}
+    <div class="container page-content">
+        <h1>Вопросы и ответы</h1>
+        <div class="collapsible">
+            {% for qa in faq %}
+                <div class="card _qa mb-4">
+                    <button class="btn btn-link card__header" id="question-{{ qa.pk }}" aria-expanded="false">
+                        <h3>{{ macros.svg_inline('border-arrow-right') }}{{ qa.question }}</h3>
+                    </button>
+                    <div class="collapse" id="answer-{{ qa.pk }}" aria-expanded="true">
+                        <div class="card__content">{{ qa.answer|safe }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock content %}
