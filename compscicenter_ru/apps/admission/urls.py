@@ -30,7 +30,7 @@ urlpatterns = [
         url(r'^interviews/(?P<pk>\d+)$', InterviewDetailView.as_view(), name='interview_detail'),
         url(r'^interviews/(?P<pk>\d+)/comment$', InterviewCommentView.as_view(), name='interview_comment'),
         url(r'^results/$', InterviewResultsDispatchView.as_view(), name='interview_results_dispatch'),
-        url(r'^results/(?P<city_code>nsk|kzn|spb|)/$', InterviewResultsView.as_view(), name='interview_results_by_city', kwargs={"city_aware": True, "use_delimiter": False}),
+        url(r'^results/(?P<city_code>nsk|kzn|spb|online|)/$', InterviewResultsView.as_view(), name='interview_results_by_city', kwargs={"city_aware": True, "use_delimiter": False}),
         url(r'^appointment/(?P<year>\d{4})/(?P<secret_code>\w+)/$',
             InterviewAppointmentView.as_view(),
             name='interview_appointment'),
