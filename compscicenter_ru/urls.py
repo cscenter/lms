@@ -38,6 +38,7 @@ urlpatterns = [
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
 
 
+    path('enrollment/', RedirectView.as_view(url='/application/')),
     path('enrollment/checklist/', views.EnrollmentChecklistView.as_view(), name='enrollment_checklist'),
     path('faq/', views.QAListView.as_view(), name='faq'),
     # Online education

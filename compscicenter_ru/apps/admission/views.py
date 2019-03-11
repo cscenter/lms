@@ -31,7 +31,6 @@ from django.views.generic.edit import BaseCreateView, \
     ModelFormMixin
 from django_filters.views import BaseFilterView, FilterMixin
 from extra_views.formsets import BaseModelFormSetView
-from formtools.wizard.views import NamedUrlSessionWizardView
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -42,13 +41,12 @@ from social_core.utils import user_is_authenticated
 from social_django.models import DjangoStorage
 from social_django.strategy import DjangoStrategy
 
+from admission.constants import WHERE_DID_YOU_LEARN
 from admission.filters import ApplicantFilter, InterviewsFilter, \
     InterviewsCuratorFilter, ResultsFilter
 from admission.forms import InterviewCommentForm, \
     ApplicantReadOnlyForm, InterviewForm, ApplicantStatusForm, \
-    ResultsModelForm, ApplicationFormStep1, ApplicationInSpbForm, \
-    ApplicationInNskForm, InterviewAssignmentsForm, InterviewFromStreamForm
-from admission.constants import WHERE_DID_YOU_LEARN
+    ResultsModelForm, InterviewAssignmentsForm, InterviewFromStreamForm
 from admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign, InterviewAssignment, InterviewSlot, \
     InterviewInvitation, InterviewStream
@@ -58,9 +56,8 @@ from admission.utils import generate_interview_reminder, \
     calculate_time
 from api.permissions import CuratorAccessPermission
 from core.auth.backends import YandexRuOAuth2Backend
-from core.exceptions import Redirect
 from core.models import University
-from core.settings.base import DEFAULT_CITY_CODE, LANGUAGE_CODE
+from core.settings.base import DEFAULT_CITY_CODE
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown
@@ -69,7 +66,7 @@ from tasks.models import Task
 from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import User
 from users.utils import get_user_city_code
-from .tasks import register_in_yandex_contest, import_testing_results
+from .tasks import import_testing_results
 
 ADMISSION_SETTINGS = apps.get_app_config("admission")
 STRATEGY = 'social_django.strategy.DjangoStrategy'
@@ -156,144 +153,42 @@ class ApplicationFormView(TemplateView):
         active_campaigns = (Campaign.get_active()
                             .annotate(value=F('city_id'), label=F('city__name'))
                             .values('value', 'label', 'id'))
-        # FIXME: move this logic to the react form? Or optimize performance and redirect?
-        if not len(active_campaigns):
-            raise Redirect(to=reverse("admission:application_closed"))
+        show_form = len(active_campaigns) > 0
+        context["show_form"] = show_form
+        if show_form:
+            others = [10, 14]  # Hide select options with `Other` value
+            universities = (University.objects
+                            .exclude(pk__in=others)
+                            .annotate(value=F('id'), label=F('name'))
+                            .values('value', 'label', 'city_id')
+                            .order_by("name"))
+            courses = [{"value": k, "label": str(v)} for k, v in
+                       AcademicDegreeYears.values.items()]
+            study_programs = [{"value": k, "label": v} for k, v in
+                              Applicant.STUDY_PROGRAMS]
+            sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
 
-        others = [10, 14]  # Hide select options with `Other` value
-        universities = (University.objects
-                        .exclude(pk__in=others)
-                        .annotate(value=F('id'), label=F('name'))
-                        .values('value', 'label', 'city_id')
-                        .order_by("name"))
-        courses = [{"value": k, "label": str(v)} for k, v in
-                   AcademicDegreeYears.values.items()]
-        study_programs = [{"value": k, "label": v} for k, v in
-                          Applicant.STUDY_PROGRAMS]
-        sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
-
-        yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
-        context['app'] = {
-            'props': {
-                'endpoint': reverse('api:applicant_create'),
-                'csrfToken': get_token(self.request),
-                'authCompleteUrl': reverse('admission:auth_complete'),
-                'authBeginUrl': reverse('admission:auth_begin'),
-                'campaigns': list(active_campaigns),
-                'universities': list(universities),
-                'courses': courses,
-                'studyPrograms': study_programs,
-                'sources': sources
-            },
-            'state': {
-                'isYandexPassportAccessAllowed': bool(yandex_passport_access),
+            yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
+            context['app'] = {
+                'props': {
+                    'endpoint': reverse('api:applicant_create'),
+                    'csrfToken': get_token(self.request),
+                    'authCompleteUrl': reverse('admission:auth_complete'),
+                    'authBeginUrl': reverse('admission:auth_begin'),
+                    'campaigns': list(active_campaigns),
+                    'universities': list(universities),
+                    'courses': courses,
+                    'studyPrograms': study_programs,
+                    'sources': sources
+                },
+                'state': {
+                    'isYandexPassportAccessAllowed': bool(yandex_passport_access),
+                }
             }
-        }
         return context
 
 
-# FIXME: Don't allow to save duplicates.
-class ApplicantFormWizardView(NamedUrlSessionWizardView):
-    template_name = "admission/application_form.html"
-    form_list = [
-        ('welcome', ApplicationFormStep1),
-        ('spb', ApplicationInSpbForm),
-        ('nsk', ApplicationInNskForm),
-    ]
-    initial_dict = {
-        'spb': {'has_job': 'Нет'},
-        'nsk': {'has_job': 'Нет'},
-    }
-
-    def create_new_applicant(self, cleaned_data):
-        cleaned_data['where_did_you_learn'] = ",".join(
-            cleaned_data['where_did_you_learn'])
-        cleaned_data['preferred_study_programs'] = ",".join(
-            cleaned_data['preferred_study_programs'])
-        if cleaned_data['has_job'] == 'no':
-            del cleaned_data['workplace']
-            del cleaned_data['position']
-        applicant = Applicant(**cleaned_data)
-        applicant.clean()  # normalize yandex login
-        applicant.save()
-        if applicant.pk:
-            register_in_yandex_contest.delay(applicant.pk, LANGUAGE_CODE)
-        else:
-            print("SOMETHING WRONG?")
-
-    def done(self, form_list, **kwargs):
-        cleaned_data = {}
-        for form in form_list:
-            cleaned_data.update(form.cleaned_data)
-        self.create_new_applicant(cleaned_data)
-        # Remove yandex login data from session
-        self.request.session.pop(SESSION_LOGIN_KEY, None)
-        return HttpResponseRedirect(reverse("admission:application_complete"))
-
-    def get_form_kwargs(self, step=None):
-        kwargs = super().get_form_kwargs(step)
-        # Customize yandex login button widget based on stored value
-        yandex_login = self.request.session.get(SESSION_LOGIN_KEY, None)
-        if yandex_login:
-            kwargs["yandex_passport_access_allowed"] = True
-        if step == "welcome":
-            # Validate we have any active campaign with ongoing application
-            # period
-            today = timezone.now()
-            campaigns_qs = (Campaign.objects
-                            .filter(current=True, year=today.year,
-                                    application_ends_at__gt=today)
-                            .select_related('city'))
-            if not len(campaigns_qs):
-                raise Redirect(to=reverse("admission:application_closed"))
-            kwargs["campaigns_qs"] = campaigns_qs
-        return kwargs
-
-    def get_form(self, step=None, data=None, files=None):
-        if step is None:
-            step = self.steps.current
-        # Append yandex login to data if session value was found
-        if step == "welcome":
-            yandex_login = self.request.session.get(SESSION_LOGIN_KEY, None)
-            if yandex_login and data and "yandex_id" not in data:
-                data = data.copy()
-                form_prefix = self.get_form_prefix(step)
-                data[f"{form_prefix}-yandex_id"] = yandex_login
-        return super().get_form(step, data, files)
-
-    @staticmethod
-    def show_spb_form(wizard):
-        saved_data = wizard.storage.get_step_data('welcome')
-        return saved_data and saved_data.get("city") == "spb"
-
-    @staticmethod
-    def show_nsk_form(wizard):
-        saved_data = wizard.storage.get_step_data('welcome')
-        return saved_data and saved_data.get("city") == "nsk"
-
-    def process_step(self, form):
-        """
-        This method is used to postprocess the form data. By default, it
-        returns the raw `form.data` dictionary.
-        """
-        data = super().process_step(form)
-        if self.steps.current == "welcome":
-            # Additionally save city code for easier step recognition
-            data["city"] = form.cleaned_data['campaign'].city_id
-        return data
-
-
-ApplicantFormWizardView.condition_dict = {
-    'spb': ApplicantFormWizardView.show_spb_form,
-    'nsk': ApplicantFormWizardView.show_nsk_form,
-}
-
-
-class ApplicationCompleteView(generic.TemplateView):
-    template_name = "admission/application_form_done.html"
-
-
-class ApplicantContextMixin(object):
+class ApplicantContextMixin:
     @staticmethod
     def get_applicant_context(applicant_id):
         context = {}
