@@ -180,6 +180,19 @@ $button-fill: solid;
   }
 }
 
+.buttons {
+  .btn {
+    margin-right: 1rem;
+    margin-bottom: 1rem;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}
+
+
+// FIXME: remove?
 .btn-group {
   font-size: 0;
 
