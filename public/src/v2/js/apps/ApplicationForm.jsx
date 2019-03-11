@@ -148,6 +148,9 @@ class ApplicationFormPage extends React.Component {
                     msg += "Все поля обязательны для заполнения.";
                     showNotification(msg, {type: "error", timeout: 3000});
                 }
+            } else if (jqXHR.status === 403) {
+                let msg = "<h5>Анкета не была сохранена</h5>Приемная кампания окончена.";
+                showErrorNotification(msg);
             } else {
                 showErrorNotification("Что-то пошло не так. Попробуйте позже.")
             }
