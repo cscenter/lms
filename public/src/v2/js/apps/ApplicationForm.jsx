@@ -176,7 +176,7 @@ class ApplicationFormPage extends React.Component {
                 <h3>Заявка зарегистрирована</h3>
                 Спасибо за интерес к обучению в CS центре.<br/>
                 В ближайшее время вам придёт письмо с дальнейшими инструкциями и ссылкой на тест для поступающих.<br/>
-                Если в течение суток письмо не пришло, поищите его в спаме, и, если там нет, напишите на <a href="mailto:info@compscicenter.ru">info@compscicenter.ru</a> о своей проблеме. Не забудьте указать свои ФИО и email.
+                Если в течение суток письмо не пришло, поищите его в спаме. Если там нет, напишите на <a href="mailto:info@compscicenter.ru">info@compscicenter.ru</a> о своей проблеме. Не забудьте указать свои ФИО и email.
                 </Fragment>
             );
         }
@@ -208,7 +208,7 @@ class ApplicationFormPage extends React.Component {
 
                         <div className="field col-lg-4">
                             <label htmlFor="phone">Контактный телефон</label>
-                            <Input required name="phone" id="phone" placeholder="+7" onChange={this.handleInputChange} />
+                            <Input required name="phone" id="phone" placeholder="+7 (999) 1234567" onChange={this.handleInputChange} />
                         </div>
                     </div>
                 </fieldset>
@@ -412,7 +412,7 @@ class ApplicationFormPage extends React.Component {
                             </div>
                         </div>
                         <div className="field col-lg-8">
-                            <label>Что нужно для выпуска из CS центра? Оцените вероятность, что вы сможете это сделать.</label>
+                            <label>Что нужно для выпуска из CS центра? Оцените вероятность, что вы сможете это сделать</label>
                             <div className="ui input">
                                 <textarea required name="probability" rows="6" onChange={this.handleInputChange} />
                             </div>
@@ -449,7 +449,7 @@ class ApplicationFormPage extends React.Component {
                 </fieldset>
                 <div className="row">
                     <div className="col-lg-12">
-                        <p>Нажимая «Подать заявку», вы соглашаетесь на передачу данных CS центру и на получение писем по поводу приемной компании.</p>
+                        <p>Нажимая «Подать заявку», вы соглашаетесь на передачу данных CS центру и на получение писем по поводу приемной кампании.</p>
                         <button type="submit" className="btn _primary _m-wide">Подать заявку</button>
                     </div>
                 </div>
