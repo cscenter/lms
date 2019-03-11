@@ -1,5 +1,6 @@
 import React, {Fragment} from 'react';
 
+import 'bootstrap/js/src/tooltip';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
 import {showNotification, showErrorNotification} from "utils";
@@ -31,7 +32,8 @@ class ApplicationFormPage extends React.Component {
         };
         window.accessYandexLoginError = function(msg) {
             showNotification(msg, {type: "error"});
-        }
+        };
+        $('[data-toggle="tooltip"]').tooltip();
     };
 
     componentWillUnmount = function () {
@@ -230,7 +232,15 @@ class ApplicationFormPage extends React.Component {
                             </div>
                         </div>
                         <div className="field col-lg-4 mb-2">
-                            <label>Доступ к данным на Яндексе</label>
+                            <label>
+                                Доступ к данным на Яндексе&nbsp;
+                                <span
+                                    className="tooltip__icon"
+                                    data-toggle="tooltip"
+                                    data-placement="bottom"
+                                    title="Вступительный тест организован в системе Яндекс.Контест. Чтобы выдать права участника и затем сопоставить результаты с анкетами, нам нужно знать ваш логин на Яндексе без ошибок, учитывая все особенности, например, вход через социальные сети. Чтобы всё сработало, поделитесь с нами доступом к некоторым данным из вашего Яндекс.Паспорта: логин и ФИО."
+                                >?</span>
+                            </label>
                             <div className="grouped inline">
                                 <Checkbox
                                     required
