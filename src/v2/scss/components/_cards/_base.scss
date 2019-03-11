@@ -27,6 +27,11 @@ $card-bg: $white !default;
 
   &._inverted {
     background-color: $gray-lighter;
+
+    .card__header {
+      background-color: $gray-dark;
+      color: $white;
+    }
   }
 
   &._no-border {
@@ -50,6 +55,16 @@ $card-bg: $white !default;
   // as much space as possible, ensuring footers are aligned to the bottom.
   flex: 1 1 auto;
   padding: spacer("4x");
+
+  &._big {
+    padding: spacer("8x");
+  }
+}
+
+.card__header {
+  :last-child {
+    margin-bottom: 0;
+  }
 }
 
 .card__title {

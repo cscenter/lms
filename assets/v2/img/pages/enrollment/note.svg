@@ -9,6 +9,7 @@
     </mask>
     <use fill="#F3F6F7" fill-rule="nonzero" xlink:href="#note-a"/>
     <rect width="100" height="4" x="87" y="56" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
+    <rect width="74" height="10" x="87" y="39" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
     <rect width="100" height="4" x="87" y="66" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
     <rect width="100" height="4" x="87" y="76" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
     <rect width="100" height="4" x="87" y="86" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
@@ -16,8 +17,5 @@
     <rect width="100" height="4" x="87" y="106" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
     <rect width="60" height="4" x="87" y="116" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
     <polygon fill="#DFE5E9" fill-rule="nonzero" points="174 11 204 38 174 38" mask="url(#note-b)"/>
-    <text fill="#8B9CA7" font-family="FiraSans-ExtraBold, Fira Sans" font-size="21" font-weight="600" mask="url(#note-b)">
-      <tspan x="87" y="49">Памятка</tspan>
-    </text>
   </g>
 </svg>

@@ -85,13 +85,6 @@ $button-fill: solid;
   overflow: hidden;
   @include button-size(spacer("3x"), spacer("6x"), $font-size-content-base, calculate-input-line-height(48px, spacer("3x")), $btn-border-radius);
   @include transition($btn-transition);
-  margin-left: 0;
-  @include media-breakpoint-up(md) {
-    margin-left: 1rem;
-    &:first-child {
-      margin-left: 0;
-    }
-  }
 
   &:focus,
   &.focus {

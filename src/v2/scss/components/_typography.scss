@@ -112,10 +112,12 @@ a {
 }
 
 .page-content {
-  .content-block {
     ol, ul, dl {
       padding: 0;
-      margin: spacer("2x") 0 spacer("6x") 3.5rem;
+      margin: spacer("2x") 0 spacer("6x") spacer("6x");
+      @include media-breakpoint-up(md) {
+        margin: spacer("2x") 0 spacer("6x") 3.5rem;
+      }
     }
     ul {
       list-style-type: none;
@@ -126,7 +128,7 @@ a {
         content: "\2014\a0";
         color: $gray-darker;
         float: left;
-        margin-left: -1.25em;
+        margin-left: -#{spacer("6x")};
       }
     }
     ol {
@@ -134,7 +136,6 @@ a {
         margin-bottom: spacer("2x");
       }
     }
-  }
 }
 
 code {
