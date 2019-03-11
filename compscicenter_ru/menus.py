@@ -48,11 +48,11 @@ public_menu = [
         is_external=True),
     MenuItem(
         pgettext_lazy("menu", "Поступление"),
-        PUBLIC_DOMAIN + '/enrollment/',
+        PUBLIC_DOMAIN + '/application/',
         weight=50,
         children=[
-            MenuItem(pgettext_lazy("menu", "Поступающим"), PUBLIC_DOMAIN + '/enrollment/', weight=10),
             MenuItem(pgettext_lazy("menu", "Подать заявку"), PUBLIC_DOMAIN + '/application/', weight=20),
+            MenuItem(pgettext_lazy("menu", "Памятка"), PUBLIC_DOMAIN + '/enrollment/checklist/', weight=20),
             MenuItem(pgettext_lazy("menu", "Программа для поступления"), PUBLIC_DOMAIN + '/enrollment/program/', weight=30),
             MenuItem(pgettext_lazy("menu", "Вопросы и ответы"), reverse('faq'), weight=40),
         ]),
