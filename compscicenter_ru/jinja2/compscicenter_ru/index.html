@@ -1,6 +1,7 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
 {% set menu_theme="__transparent-theme" %}
+{% set is_admission_active = True %}
 
 {% block sprites %}
     <script type="text/javascript">
@@ -13,12 +14,11 @@
     <div class="container">
         <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
         <p class="cover__text">
-            Очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering.<br>
-            Заочное обучение для жителей других городов.<br>
-            Онлайн-курсы по математике и программированию.
+            Очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science,
+            Data Science, Software Engineering. Заочное обучение для жителей других городов.
         </p>
         <div class="buttons">
-            <a href="#study-areas" class="btn _big _primary _m-wide">Смотреть программы</a>
+            <a href="{{ url('syllabus') }}" class="btn _big _primary _m-wide">Смотреть программы</a>
             <a href="/about/" class="btn _big _white _opacity-10 _m-wide">Узнать о центре</a>
         </div>
     </div>
