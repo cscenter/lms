@@ -11,10 +11,10 @@ PUBLIC_DOMAIN = reverse('index')[:-1]  # remove trailing slash
 public_menu = [
     MenuItem(
         pgettext_lazy("menu", "О центре"),
-        PUBLIC_DOMAIN + '/about/',
+        reverse('history'),
         weight=10,
         children=[
-            MenuItem(pgettext_lazy("menu", "История"), PUBLIC_DOMAIN + '/about/', weight=20),
+            MenuItem(pgettext_lazy("menu", "История"), reverse('history'), weight=20),
             MenuItem(pgettext_lazy("menu", "Программа"), reverse('syllabus'), weight=30),
             MenuItem(pgettext_lazy("menu", "Команда"), reverse('team'), weight=40),
             MenuItem(pgettext_lazy("menu", "Преподаватели"), reverse('teachers'), weight=50),
