@@ -15,6 +15,7 @@ from django_filters.conf import settings as filters_settings
 
 from admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream
+from core.models import City
 from core.timezone import now_local
 from core.urls import reverse
 from core.views import ReadOnlyFieldsMixin
@@ -90,7 +91,7 @@ class InterviewFromStreamForm(forms.Form):
                 raise ValidationError("Все слоты заняты.")
         # TODO: Limit active invitations by slots
 
-    def __init__(self, city_code, *args, **kwargs):
+    def __init__(self, city: City, *args, **kwargs):
         super().__init__(*args, **kwargs)
         stream_field = self.prefix + "-streams"
         if 'data' in kwargs and kwargs['data'].getlist(stream_field):
@@ -98,9 +99,9 @@ class InterviewFromStreamForm(forms.Form):
             self.fields['slot'].queryset = (InterviewSlot.objects
                                             .select_related("stream")
                                             .filter(stream_id__in=stream_ids))
-        today = now_local(city_code).date()
+        today = now_local(city.get_timezone()).date()
         self.fields['streams'].queryset = (InterviewStream.objects
-                                           .filter(venue__city_id=city_code,
+                                           .filter(venue__city_id=city.code,
                                                    date__gt=today)
                                            .select_related("venue"))
         self.helper = FormHelper(self)

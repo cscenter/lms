@@ -25,7 +25,7 @@ run_flame:
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)
 
-msg-translate:
+msg-collect:
 	python manage.py maketranslation -l ru
 
 # https://code.djangoproject.com/ticket/24159
