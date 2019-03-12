@@ -36,6 +36,11 @@ class City(models.Model):
     def is_online_branch(self):
         return self.code == "online"
 
+    def get_timezone(self):
+        if self.code == "online":
+            return settings.TIME_ZONES["spb"]
+        return settings.TIME_ZONES[self.code]
+
 
 class FaqCategory(models.Model):
     name = models.CharField(_("Category name"), max_length=255)

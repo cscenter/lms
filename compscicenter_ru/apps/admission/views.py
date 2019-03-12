@@ -380,8 +380,8 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         if 'form' not in kwargs:
             invitation = InterviewInvitation.objects.for_applicant(applicant)
             if not invitation:
-                city_code = applicant.campaign.city_id
-                context["form"] = InterviewFromStreamForm(city_code=city_code)
+                city = applicant.campaign.city
+                context["form"] = InterviewFromStreamForm(city=city)
             else:
                 context["invitation"] = invitation
         return context
@@ -406,7 +406,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
             .select_related("campaign"))
         self.object = None
         stream_form = InterviewFromStreamForm(
-            city_code=applicant.campaign.city_id,
+            city=applicant.campaign.city,
             data=self.request.POST)
         if not stream_form.is_valid():
             msg = "Действие было отменено"

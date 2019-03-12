@@ -91,6 +91,7 @@ class Campaign(models.Model):
         verbose_name_plural = _("Campaigns")
 
     def get_city_timezone(self):
+        # FIXME return self.city.get_timezone()
         if self.city_id == "online":
             return settings.TIME_ZONES["spb"]
         return settings.TIME_ZONES[self.city_id]
