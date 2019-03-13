@@ -140,7 +140,8 @@ TIME_ZONE = 'UTC'
 TIME_ZONES = {
     'spb': pytz.timezone('Europe/Moscow'),
     'nsk': pytz.timezone('Asia/Novosibirsk'),
-    'kzn': pytz.timezone('Europe/Moscow')
+    'kzn': pytz.timezone('Europe/Moscow'),
+    'online': pytz.timezone('Europe/Moscow'),
 }
 
 AUTH_USER_MODEL = "users.User"
