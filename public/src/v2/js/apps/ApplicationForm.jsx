@@ -274,11 +274,11 @@ class ApplicationFormPage extends React.Component {
                                 />
                             </div>
                             <div className="help-text">
-                                Выберите из списка или введите название вуза, где вы учитесь или учились
+                                Если вашего вуза нет в списке, просто введите название своего университета в это поле.
                             </div>
                         </div>
                         <div className="field col-lg-4">
-                            <label htmlFor="faculty">Факультет</label>
+                            <label htmlFor="faculty">Специальность</label>
                             <Input required name="faculty" id="faculty" placeholder="" onChange={this.handleInputChange} />
                             <div className="help-text">
                                 Факультет, специальность или кафедра
