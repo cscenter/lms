@@ -144,7 +144,7 @@ class ApplicationFormPage extends React.Component {
                     msg += data['non_field_errors'];
                     showErrorNotification(msg);
                 } else {
-                    msg += "Все поля обязательны для заполнения.";
+                    msg += "Одно или более полей пропущены или заполнены некорректно.";
                     showNotification(msg, {type: "error", timeout: 3000});
                 }
             } else if (jqXHR.status === 403) {
