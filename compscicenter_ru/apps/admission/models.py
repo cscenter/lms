@@ -436,6 +436,11 @@ class Applicant(TimeStampedModel):
         if self.yandex_id:
             self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
 
+    def get_living_place_display(self):
+        if not self.living_place and self.campaign.city_id in ('spb', 'nsk'):
+            return self.campaign.city.name
+        return self.living_place
+
     @classmethod
     def get_name_by_status_code(cls, code):
         for status_code, status_name in cls.STATUS:
