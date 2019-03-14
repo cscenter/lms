@@ -365,6 +365,30 @@ class SyllabusView(generic.TemplateView):
         return grouped
 
 
+class OnCampusProgramsView(generic.TemplateView):
+    template_name = "compscicenter_ru/programs/on_campus.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        syllabus = (StudyProgram.objects
+                    .syllabus()
+                    .filter(year=2019)
+                    .order_by("city_id", "area__name_ru"))
+        context["programs"] = self.group_programs_by_branch(syllabus)
+        return context
+
+    def group_programs_by_branch(self, syllabus):
+        grouped = {}
+        for city_id, g in itertools.groupby(syllabus,
+                                            key=lambda sp: sp.city_id):
+            grouped[city_id] = list(g)
+        return grouped
+
+
+class DistanceProgramView(generic.TemplateView):
+    template_name = "compscicenter_ru/programs/distance.html"
+
+
 class OpenNskView(generic.TemplateView):
     template_name = "open_nsk.html"
 
