@@ -128,6 +128,7 @@ public_menu = [
         ],
         selected_patterns=[
             r'^/v2/pages/enrollment/',
+            r'^/v2/pages/faq/',
         ]),
     # Private part (my.* domain)
     MenuItem(

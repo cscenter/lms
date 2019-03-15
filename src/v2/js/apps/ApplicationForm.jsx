@@ -1,5 +1,6 @@
 import React, {Fragment} from 'react';
 
+import 'bootstrap/js/src/tooltip';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
 import {showNotification, showErrorNotification} from "utils";
@@ -31,7 +32,8 @@ class ApplicationFormPage extends React.Component {
         };
         window.accessYandexLoginError = function(msg) {
             showNotification(msg, {type: "error"});
-        }
+        };
+        $('[data-toggle="tooltip"]').tooltip();
     };
 
     componentWillUnmount = function () {
@@ -88,7 +90,6 @@ class ApplicationFormPage extends React.Component {
         });
     };
 
-
     handleCourseChange = (option) => {
         this.setState({
             course: option
@@ -112,7 +113,7 @@ class ApplicationFormPage extends React.Component {
         payload["course"] = course && course.value;
         payload["has_job"] = (has_job === "yes");
         if (university) {
-            if (university.__ISNEW__) {
+            if (university.__isNew__) {
                 payload["university_other"] = university.value;
             } else {
                 payload["university"] = university.value;
@@ -143,9 +144,12 @@ class ApplicationFormPage extends React.Component {
                     msg += data['non_field_errors'];
                     showErrorNotification(msg);
                 } else {
-                    msg += "Все поля обязательны для заполнения.";
+                    msg += "Одно или более полей пропущены или заполнены некорректно.";
                     showNotification(msg, {type: "error", timeout: 3000});
                 }
+            } else if (jqXHR.status === 403) {
+                let msg = "<h5>Анкета не была сохранена</h5>Приемная кампания окончена.";
+                showErrorNotification(msg);
             } else {
                 showErrorNotification("Что-то пошло не так. Попробуйте позже.")
             }
@@ -230,7 +234,15 @@ class ApplicationFormPage extends React.Component {
                             </div>
                         </div>
                         <div className="field col-lg-4 mb-2">
-                            <label>Доступ к данным на Яндексе</label>
+                            <label>
+                                Доступ к данным на Яндексе&nbsp;
+                                <span
+                                    className="tooltip__icon"
+                                    data-toggle="tooltip"
+                                    data-placement="bottom"
+                                    title="Вступительный тест организован в системе Яндекс.Контест. Чтобы выдать права участника и затем сопоставить результаты с анкетами, нам нужно знать ваш логин на Яндексе без ошибок, учитывая все особенности, например, вход через социальные сети. Чтобы всё сработало, поделитесь с нами доступом к некоторым данным из вашего Яндекс.Паспорта: логин и ФИО."
+                                >?</span>
+                            </label>
                             <div className="grouped inline">
                                 <Checkbox
                                     required
@@ -262,12 +274,15 @@ class ApplicationFormPage extends React.Component {
                                 />
                             </div>
                             <div className="help-text">
-                                Выберите из списка или введите название вуза, где вы учитесь или учились
+                                Если вашего вуза нет в списке, просто введите название своего университета в это поле.
                             </div>
                         </div>
                         <div className="field col-lg-4">
-                            <label htmlFor="faculty">Факультет, специальность или кафедра</label>
+                            <label htmlFor="faculty">Специальность</label>
                             <Input required name="faculty" id="faculty" placeholder="" onChange={this.handleInputChange} />
+                            <div className="help-text">
+                                Факультет, специальность или кафедра
+                            </div>
                         </div>
                         <div className="field col-lg-4">
                             <div className="ui select">
@@ -365,31 +380,37 @@ class ApplicationFormPage extends React.Component {
                             </div>
                             {
                                 preferred_study_programs && preferred_study_programs.includes('cs') &&
-                                <div className="field col-lg-8">
-                                    <div className="ui input">
-                                        <label htmlFor="preferred_study_programs_cs_note">Вы бы хотели заниматься исследованиями в области Computer Science? Какие темы вам особенно интересны?</label>
-                                        <p className="text-small mb-2">
-                                            Вы можете посмотреть список возможных тем и руководителей НИРов у нас на <a target="_blank" href="https://compscicenter.ru/pages/projects/#research-curators">сайте</a>.
-                                        </p>
-                                        <textarea id="preferred_study_programs_cs_note" name="preferred_study_programs_cs_note" rows="6" onChange={this.handleInputChange} />
+                                <div className="row">
+                                    <div className="field col-lg-8">
+                                        <div className="ui input">
+                                            <label htmlFor="preferred_study_programs_cs_note">Вы бы хотели заниматься исследованиями в области Computer Science? Какие темы вам особенно интересны?</label>
+                                            <p className="text-small mb-2">
+                                                Вы можете посмотреть список возможных тем и руководителей НИРов у нас на <a target="_blank" href="https://compscicenter.ru/pages/projects/#research-curators">сайте</a>.
+                                            </p>
+                                            <textarea id="preferred_study_programs_cs_note" name="preferred_study_programs_cs_note" rows="6" onChange={this.handleInputChange} />
+                                        </div>
                                     </div>
                                 </div>
                             }
                             {
                                 preferred_study_programs && preferred_study_programs.includes('ds') &&
-                                <div className="field col-lg-8">
-                                    <div className="ui input">
-                                        <label htmlFor="preferred_study_programs_dm_note">Что вам больше всего интересно в области Data Science? Какие достижения последних лет вас особенно удивили?</label>
-                                        <textarea id="preferred_study_programs_dm_note" name="preferred_study_programs_dm_note" rows="6" onChange={this.handleInputChange} />
+                                <div className="row">
+                                    <div className="field col-lg-8">
+                                        <div className="ui input">
+                                            <label htmlFor="preferred_study_programs_dm_note">Что вам больше всего интересно в области Data Science? Какие достижения последних лет вас особенно удивили?</label>
+                                            <textarea id="preferred_study_programs_dm_note" name="preferred_study_programs_dm_note" rows="6" onChange={this.handleInputChange} />
+                                        </div>
                                     </div>
                                 </div>
                             }
                             {
                                 preferred_study_programs && preferred_study_programs.includes('se') &&
-                                <div className="field col-lg-8">
-                                    <div className="ui input">
-                                        <label htmlFor="preferred_study_programs_se_note">В разработке какого приложения, которым вы пользуетесь каждый день, вы хотели бы принять участие? Каких знаний вам для этого не хватает?</label>
-                                        <textarea id="preferred_study_programs_se_note" name="preferred_study_programs_se_note" rows="6" onChange={this.handleInputChange} />
+                                <div className="row">
+                                    <div className="field col-lg-8">
+                                        <div className="ui input">
+                                            <label htmlFor="preferred_study_programs_se_note">В разработке какого приложения, которым вы пользуетесь каждый день, вы хотели бы принять участие? Каких знаний вам для этого не хватает?</label>
+                                            <textarea id="preferred_study_programs_se_note" name="preferred_study_programs_se_note" rows="6" onChange={this.handleInputChange} />
+                                        </div>
                                     </div>
                                 </div>
                             }

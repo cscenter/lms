@@ -1,0 +1,40 @@
+.card._qa {
+  $padding-left: 64px;
+  box-shadow: 0 1px 1px $gray-lighter;
+
+  .card__header {
+    position: relative;
+    cursor: pointer;
+    text-align: left;
+    padding-left: $padding-left;
+    background: none;
+    &:hover,
+    &:focus {
+      text-decoration: none;
+      box-shadow: none;
+
+      .sprite-img {
+        fill: $gray-darker;
+      }
+    }
+
+    .sprite-img {
+      fill: $gray-dark;
+      transition: transform 150ms linear;
+      position: absolute;
+      left: 16px;
+      top: 14px; // FIXME: why not 16px? :<
+    }
+
+    &[aria-expanded="true"] {
+      .sprite-img {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .card__content {
+    padding-left: $padding-left;
+    padding-top: 0;
+  }
+}

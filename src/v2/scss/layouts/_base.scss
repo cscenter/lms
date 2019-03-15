@@ -28,7 +28,7 @@ body {
   background: #201f20 no-repeat;
   background-size: cover;
   color: $white;
-  padding: 56px 0 96px;
+  padding: 40px 0 64px;
   text-align: center;
   @include font-smoothing();
   @include media-breakpoint-up(lg) {
@@ -45,8 +45,31 @@ body {
   background-image: url("/static/v2/img/pages/index/bg-main-page.jpg");
 }
 
+.cover._program {
+  background: linear-gradient(to right, $gray-dark, $gray-darker);
+  padding-bottom: 0;
+
+  .cover__content {
+    padding: 80px 0;
+    @include media-breakpoint-up(sm) {
+      flex-flow: row;
+    }
+  }
+
+  .cover__title {
+    padding: 0;
+    max-width: 100%;
+    margin-bottom: spacer("2x");
+  }
+
+  .translate {
+    font-size: $font-size-sm;
+    margin: 0;
+  }
+}
+
 .cover__title {
-  padding: 56px 0 0;
+  padding: 40px 0 0;
   max-width: 900px;
   @include media-breakpoint-up(lg) {
     font-size: 3.5rem;
@@ -54,12 +77,8 @@ body {
 }
 
 .cover__text {
-  margin-bottom: 56px;
+  margin-bottom: 40px;
   max-width: 900px;
-}
-
-.cover__btns .btn:last-child {
-  margin-right: 0;
 }
 
 // Footer styles

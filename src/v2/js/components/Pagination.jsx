@@ -128,7 +128,7 @@ class Pagination extends React.Component {
         console.debug("start pagination rendering");
 
         return (
-            <ul className="pagination">
+            <ul className="ui pagination">
                 <li className={`page-item${currentPage === 1 ? " disabled" : ""}`}>
                     <button className="page-link"
                             onClick={() => this.setPage(currentPage - 1)}>
