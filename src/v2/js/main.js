@@ -100,7 +100,11 @@ $(function () {
             .then(module => { module.launch(); })
             .catch(error => showComponentError(error));
     }
-
+    if (sections.includes("collapsible")) {
+        import(/* webpackChunkName: "collapsible" */ 'apps/collapsible')
+            .then(module => { module.launch(); })
+            .catch(error => showComponentError(error));
+    }
     let reactApps = document.querySelectorAll('.__react-root');
     if (reactApps.length > 0) {
         import(/* webpackChunkName: "react" */ 'react_app')

@@ -1,0 +1,22 @@
+.card._program {
+  text-align: center;
+  color: $black;
+  border-color: $gray-light;
+}
+
+.program__stats {
+  display: flex;
+  justify-content: center;
+  flex-flow: column;
+    text-align: center;
+  @include media-breakpoint-up(sm) {
+    flex-flow: row;
+  }
+
+  .info {
+    padding: 0 spacer("2x");
+    margin-bottom: spacer("4x");
+    color: $gray-darker;
+    position: relative;
+  }
+}

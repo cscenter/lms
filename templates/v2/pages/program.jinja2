@@ -1,0 +1,285 @@
+{% extends "v2/layouts/inner.jinja2" %}
+{% block before_navbar_container %}
+    <div class="cover _program">{% endblock before_navbar_container %}
+{% block after_navbar_container %}
+    <div class="container text-center">
+        <div class="cover__content">
+            <img src="/static/v2/img/pages/program/ds-white.svg" alt="">
+            <h1 class="cover__title">Data Science</h1>
+            <p class="translate">/ Анализ данных</p>
+            <div class="row content-center mt-10">
+                <div class="col-lg-10">
+                    <p>Направление Data Science можно рассматривать как отделение Школы анализа данных Яндекса в&nbsp;Санкт-Петербурге
+                и&nbsp;в&nbsp;Новосибирске. Здесь ведётся подготовка специалистов в&nbsp;области обработки и&nbsp;анализа
+                данных и&nbsp;извлечения информации из&nbsp;интернета.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div> {# -- div.cover #}
+{% endblock after_navbar_container %}
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+{% block content %}
+    <div class="container mt-10">
+        <div class="row content-center">
+                <h2>Базовые курсы программы</h2>
+            <div class="col-lg-12 text-center">
+                <ul class="nav-tabs content-center mt-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Санкт-Петербург</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Новосибирск</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-10">
+
+                <div class="program__stats">
+                    <p class="info">2&nbsp;года обучения</p>
+                    <p class="info">5&nbsp;базовых курсов</p>
+                    <p class="info">7&nbsp;любых других курса</p>
+                    <p class="info">3&nbsp;практики</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-deck _three mb-8">
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="/static/v2/img/pages/program/algorythms-part1.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Алгоритмы и&nbsp;структуры данных, часть&nbsp;1
+                    </div>
+                    Курс посвящён базовым идеям построения и&nbsp;анализа алгоритмов, а&nbsp;также изучения
+                    структур данных.
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="/static/v2/img/pages/program/algorythms-part2.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Алгоритмы и&nbsp;структуры данных, часть&nbsp;2
+                    </div>
+                    Продолжение изучения базовых алгоритмов
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Дополнительные главы алгоритмов, часть&nbsp;1
+                    </div>
+                    Курс рассчитан на&nbsp;студентов, сдавших базовые курсы по&nbsp;алгоритмам
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Дополнительные главы алгоритмов, часть&nbsp;2
+                    </div>
+                    Курс рассчитан на&nbsp;студентов, сдавших базовые курсы по&nbsp;алгоритмам
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Асимптотический анализ и&nbsp;теория вероятностей
+                    </div>
+                    В&nbsp;курсе разбираются следующие темы: теория множеств, асимптотики, производящие функции,
+                    дискретная и&nbsp;условная вероятность, случайные величины, предельные теоремы.
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Основы дискретной математики
+                    </div>
+                    Целью курса является знакомство слушателей с&nbsp;основными понятиями и&nbsp;методами дискретной
+                    математики.
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Программирование на&nbsp;Java
+                    </div>
+                    Курс знакомит слушателей с&nbsp;языком Java на&nbsp;базовом уровне, но&nbsp;как в&nbsp;теории, так и&nbsp;на&nbsp;практике.
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                   <img src="/static/v2/img/pages/program/python.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Программирование на&nbsp;Python
+                    </div>
+                    Курс ориентирован на&nbsp;людей, уже знакомых с&nbsp;каким-либо языком программирования, например,
+                    Java или
+                    C++.
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Машинное обучение, часть&nbsp;1
+                    </div>
+                    Курс является первой частью годового курса. Он&nbsp;знакомит слушателей с&nbsp;основными понятиями и&nbsp;базовыми
+                    методами машинного обучения.
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Машинное обучение, часть&nbsp;2
+                    </div>
+                    Курс является второй частью годового курса. В&nbsp;нём более подробно затрагиваются другие методы
+                    машинного обучения.
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="container-fluid _light">
+        <div class="container pt-10 pb-10">
+            <div class="row content-center">
+                <div class="col-lg-10 text-center">
+                    <h3>Правила очного обучения</h3>
+                    <p class="text-small">В&nbsp;течение двух или трёх лет учёбы в&nbsp;CS центре студенты сдают двенадцать курсов и&nbsp;проходят
+                        три
+                        семестра
+                        практики или научно-исследовательской работы.
+
+                        Какие именно курсы сдавать в&nbsp;новом семестре, студенты решают сами, опираясь на&nbsp;свои
+                        интересы.
+                        Делать
+                        осмысленный выбор им&nbsp;помогают кураторы и&nbsp;наличие обязательных курсов направлений.</p>
+                     <p class="text-small">Некоторые курсы читаются на&nbsp;выбор: &laquo;Алгоритмы и&nbsp;структуры
+                    данных&raquo; или
+                    &laquo;Дополнительные главы алгоритмов&raquo;, &laquo;Программирование на&nbsp;Java&raquo; или
+                    &laquo;Программирование на&nbsp;Python&raquo;</p>
+                    <a href class="btn _primary">Поступить на&nbsp;программу</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="csc-student-reviews">
+        <div class="container">
+            <h2 class="text-center">Отзывы студентов</h2>
+            <div class="card-columns _testimonials">
+                <div class="card">
+                    <div class="testimonial">
+                        <img class="img-rounded" width="74" height="74" src="/media/pages/index/student.png" alt="">
+                        <div class="testimonial__details">
+                            <div class="testimonial__author">
+                                <h4>Евгений Игоревич Викулов</h4>
+                                <span>Выпуск 2017, Разработка ПО</span>
+                            </div>
+                            <div class="testimonial__text">CS центр — это место, где сбываются мечты. Настоящая кладовая
+                                знаний, где каждому
+                                открыт
+                                путь к желаемым знаниям и умениям. Интересные курсы, увлекательные практики,
+                                живое
+                                общение и обсуждение – здесь каждый найдет себе занятие по душе. Преподаватели,
+                                руководители практик, кураторы, студенты – благодаря всем им в CS центре
+                                образуется
+                                невероятная атмосфера, настраивающая на позитивный лад и продуктивное обучение.
+                                Здесь
+                                очень круто и увлекательно!
+                                <ul>
+                                    <li>огромный выбор направлений, в которых интересно развиваться,</li>
+                                    <li>преподаватели, на пары к которым действительно хочется ходить,</li>
+                                    <li>интересные темы практик (последняя переросла в мой диплом),</li>
+                                    <li>умнейшие люди, общаясь с которыми, хочется идти и развиваться дальше.</li>
+
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="testimonial">
+                        <img class="img-rounded" width="74" height="74" src="/media/pages/index/student.png" alt="">
+                        <div class="testimonial__details">
+                            <h4 class="testimonial__author">Евгений Игоревич Викулов</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                            <p class="testimonial__text">CS центр — это место, где сбываются мечты. Настоящая кладовая
+                                знаний, где каждому
+                                открыт
+                                путь к желаемым знаниям и умениям. Интересные курсы, увлекательные практики,
+                                живое
+                                общение и обсуждение – здесь каждый найдет себе занятие по душе. Преподаватели,
+                                руководители практик, кураторы, студенты – благодаря всем им в CS центре
+                                образуется
+                                невероятная атмосфера, настраивающая на позитивный лад и продуктивное обучение.
+                                Здесь
+                                очень круто и увлекательно!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="testimonial">
+                        <img class="img-rounded" width="74" height="74" src="/media/pages/index/student.png" alt="">
+                        <div class="testimonial__details">
+                            <h4 class="testimonial__author">Евгений Игоревич Викулов</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                            <div class="testimonial__text">
+                                И даже в трудный час, когда уж неизбежен крах,
+                                Твой взор серьезный скажет, чтобы плечи я расправил.
+                                Мне сил и воли придает лишь твое имя на устах,
+                                Лишь ты меня ведёшь вперёд, лишь ты - Грудинин Павел.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="testimonial">
+                        <img class="img-rounded" width="74" height="74" src="/media/pages/index/student.png" alt="">
+                        <div class="testimonial__details">
+                            <h4 class="testimonial__author">Евгений Игоревич Викулов</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                            <p class="testimonial__text">CS центр — это место, где сбываются мечты. Настоящая кладовая
+                                знаний, где каждому открыт
+                                путь к желаемым знаниям и умениям. Интересные курсы, увлекательные практики,
+                                живое общение и обсуждение – здесь каждый найдет себе занятие по душе. Преподаватели,
+                                руководители практик, кураторы, студенты – благодаря всем им в CS центре
+                                образуется
+                                невероятная атмосфера, настраивающая на позитивный лад и продуктивное обучение.
+                                Здесь очень круто и увлекательно!<br>
+                                Я на выборы обычно не хожу, но в этот раз пойду голосовать за Грудинина. Кандидат от
+                                народа!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock content %}
