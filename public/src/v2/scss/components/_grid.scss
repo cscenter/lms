@@ -4,11 +4,15 @@
   background: #f8fafc;
 }
 
+._light {
+  background: $white;
+}
+
 .page-content {
   padding-top: 80px;
-  padding-bottom: spacer("8x");
+  padding-bottom: spacer("10x");
   @include media-breakpoint-up(lg) {
-    padding-top: 40px;
+    padding-top: spacer("10x");
   }
 
   &._survey {

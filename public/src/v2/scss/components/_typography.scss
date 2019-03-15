@@ -85,10 +85,6 @@ a {
   }
 }
 
-.title_description {
-  margin-bottom: spacer("8x");
-}
-
 //TODO: find solution for this
 @include media-breakpoint-down(md) {
   html {
