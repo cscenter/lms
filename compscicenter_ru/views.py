@@ -28,7 +28,8 @@ from compscicenter_ru.serializers import CoursesSerializer
 from compscicenter_ru.utils import group_terms_by_academic_year, PublicRoute, \
     PublicRouteException
 from learning.api.views import TestimonialList
-from study_programs.models import StudyProgram, AreaOfStudy
+from learning.models import Branch
+from study_programs.models import StudyProgram, AcademicDiscipline
 from courses.models import Course, CourseTeacher
 from learning.settings import StudentStatuses
 from core.settings.base import CENTER_FOUNDATION_YEAR
@@ -319,7 +320,7 @@ class AlumniView(TemplateView):
         year = next((y for y in years if y['value'] == year))
         # Area state and props
         areas = [{"label": a.name, "value": a.code} for a in
-                 AreaOfStudy.objects.all()]
+                 AcademicDiscipline.objects.all()]
         area = self.kwargs.get("area", None)
         if area:
             try:
@@ -349,7 +350,7 @@ class SyllabusView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         syllabus = (StudyProgram.objects
-                    .syllabus()
+                    .available_core_courses()
                     .filter(year=2019)
                     .order_by("city_id", "area__name_ru"))
         context["programs"] = self.group_programs_by_branch(syllabus)
@@ -370,18 +371,20 @@ class OnCampusProgramsView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        syllabus = (StudyProgram.objects
-                    .syllabus()
-                    .filter(year=2019)
-                    .order_by("city_id", "area__name_ru"))
-        context["programs"] = self.group_programs_by_branch(syllabus)
+        study_programs = (StudyProgram.objects
+                          .filter(year=2019,
+                                  branch__is_remote=False)
+                          .select_related("branch")
+                          .available_core_courses()
+                          .order_by("branch_id", "area__name_ru"))
+        context["programs"] = self.group_programs_by_branch(study_programs)
+        context["selected_branch"] = self.request.GET.get('branch', 'spb')
         return context
 
     def group_programs_by_branch(self, syllabus):
         grouped = {}
-        for city_id, g in itertools.groupby(syllabus,
-                                            key=lambda sp: sp.city_id):
-            grouped[city_id] = list(g)
+        for branch, g in itertools.groupby(syllabus, key=lambda sp: sp.branch):
+            grouped[branch] = list(g)
         return grouped
 
 

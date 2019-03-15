@@ -9,7 +9,7 @@ from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from users.constants import AcademicRoles
-from .models import AssignmentComment, Enrollment, Event, Useful
+from .models import AssignmentComment, Enrollment, Event, Useful, Branch
 
 
 class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
@@ -105,8 +105,12 @@ class UsefulAdmin(admin.ModelAdmin):
     list_display = ['question', 'sort']
 
 
+class BranchAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_remote')
+
+
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(Event, NonCourseEventAdmin)
 admin.site.register(Useful, UsefulAdmin)
-
+admin.site.register(Branch, BranchAdmin)

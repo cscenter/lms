@@ -222,7 +222,7 @@ class UserDetailView(generic.DetailView):
         syllabus = None
         if profile_user.curriculum_year:
             syllabus = (StudyProgram.objects
-                        .syllabus()
+                        .available_core_courses()
                         .filter(year=profile_user.curriculum_year,
                                 city_id=profile_user.city_id))
         context['syllabus'] = syllabus

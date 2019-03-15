@@ -8,10 +8,10 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 
 from core.models import City
+from learning.models import Branch
 
 
-# Not sure what is the best place for this model
-class AreaOfStudy(models.Model):
+class AcademicDiscipline(models.Model):
     code = models.CharField(_("PK|Code"), max_length=2, primary_key=True)
     name = models.CharField(_("AreaOfStudy|Name"), max_length=255)
     description = models.TextField(_("AreaOfStudy|description"))
@@ -27,7 +27,11 @@ class AreaOfStudy(models.Model):
 
 
 class StudyProgramQuerySet(query.QuerySet):
-    def syllabus(self):
+    def available_core_courses(self):
+        """
+        Note that not all core courses are mandatory - student must complete
+        only one in each group.
+        """
         from study_programs.models import StudyProgramCourseGroup
         return (self.select_related("area")
                     .prefetch_related(
@@ -46,7 +50,11 @@ class StudyProgram(TimeStampedModel):
                              verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE,
                              on_delete=models.CASCADE)
-    area = models.ForeignKey(AreaOfStudy, verbose_name=_("Area of Study"),
+    branch = models.ForeignKey(Branch,
+                               verbose_name=_("Branch"),
+                               related_name="study_programs",
+                               on_delete=models.CASCADE)
+    area = models.ForeignKey(AcademicDiscipline, verbose_name=_("Area of Study"),
                              on_delete=models.CASCADE)
     description = models.TextField(
         _("StudyProgram|description"),
