@@ -18,7 +18,7 @@ from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
 
 from core.db.models import ScoreField
-from core.models import LATEX_MARKDOWN_HTML_ENABLED
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.urls import reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Venue, \
@@ -29,6 +29,29 @@ from learning.managers import EnrollmentDefaultManager, \
 from learning.settings import GradingSystems, GradeTypes
 
 logger = logging.getLogger(__name__)
+
+
+class Branch(models.Model):
+    code = models.CharField(
+        _("Code"),
+        max_length=8)
+    name = models.CharField(_("Branch|Name"), max_length=255)
+    is_remote = models.BooleanField(_("Distance Branch"), default=False)
+    timezone = models.ForeignKey(
+        City,
+        verbose_name=_("Timezone"),
+        on_delete=models.CASCADE)
+    description = models.TextField(
+        _("Description"),
+        help_text=_("Branch|Description"),
+        blank=True)
+
+    class Meta:
+        verbose_name = _("Branch")
+        verbose_name_plural = _("Branches")
+
+    def __str__(self):
+        return self.name
 
 
 class Enrollment(TimeStampedModel):

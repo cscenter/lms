@@ -2,7 +2,7 @@ import pytest
 from django.core.cache import cache
 
 from core.urls import reverse
-from learning.tests.factories import AreaOfStudyFactory
+from learning.tests.factories import AcademicDisciplineFactory
 from users.tests.factories import GraduateFactory
 
 
@@ -70,7 +70,7 @@ def test_alumni(client):
     assert len(json_data['props']['years']) == 3
     assert json_data['props']['years'][0]['value'] == 2015
     assert json_data['state']['year'] == json_data['props']['years'][0]
-    a = AreaOfStudyFactory()
+    a = AcademicDisciplineFactory()
     response = client.get(url_alumni_all)
     json_data = response.context_data['app_data']
     assert json_data['props']['areas'] == [{'label': a.name, 'value': a.code}]

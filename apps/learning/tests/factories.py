@@ -9,19 +9,19 @@ from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseNewsNotification, Event
-from study_programs.models import AreaOfStudy
+from study_programs.models import AcademicDiscipline
 from users.tests.factories import UserFactory, StudentCenterFactory
 
-__all__ = ('AreaOfStudyFactory', 'StudentAssignmentFactory',
+__all__ = ('AcademicDisciplineFactory', 'StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentFactory',
            'AssignmentNotificationFactory', 'CourseNewsNotificationFactory',
            'EventFactory', 'StudentAssignment', 'Enrollment',
            'AssignmentComment')
 
 
-class AreaOfStudyFactory(factory.DjangoModelFactory):
+class AcademicDisciplineFactory(factory.DjangoModelFactory):
     class Meta:
-        model = AreaOfStudy
+        model = AcademicDiscipline
 
     name = factory.Sequence(lambda n: "Study area %03d" % n)
     code = factory.Sequence(lambda n: "p%01d" % n)

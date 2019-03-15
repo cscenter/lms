@@ -27,7 +27,7 @@ Requirements:
     def handle(self, *args, **options):
         current_term = Semester.get_current()
         # TODO: Restrict programmes by last 4-5 years?
-        study_programmes = [sp for sp in StudyProgram.objects.syllabus()]
+        study_programs = [sp for sp in StudyProgram.objects.available_core_courses()]
         students = (User.objects
                     .only("pk", "curriculum_year", "city")
                     # FIXME: move this annotation to manager?
@@ -71,7 +71,7 @@ Requirements:
                               stats["passed"]["adjusted"])
             if total_adjusted >= 12:
                 areas = []
-                for program in study_programmes:
+                for program in study_programs:
                     if (program.year != student.curriculum_year or
                             program.city_id != student.city_id):
                         continue

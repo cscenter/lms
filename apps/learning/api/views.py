@@ -7,7 +7,7 @@ from api.permissions import CuratorAccessPermission
 from learning.api.serializers import AlumniSerializer, TestimonialSerializer, \
     CourseNewsNotificationSerializer
 from learning.models import CourseNewsNotification
-from study_programs.models import AreaOfStudy
+from study_programs.models import AcademicDiscipline
 from users.models import User
 
 
@@ -26,7 +26,7 @@ class AlumniList(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        areas = {a.code: a.name for a in AreaOfStudy.objects.all()}
+        areas = {a.code: a.name for a in AcademicDiscipline.objects.all()}
         serializer = self.get_serializer(queryset, many=True)
         data = {
             "data": serializer.data,
@@ -57,7 +57,7 @@ class TestimonialList(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        areas = {a.code: a.name for a in AreaOfStudy.objects.all()}
+        areas = {a.code: a.name for a in AcademicDiscipline.objects.all()}
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

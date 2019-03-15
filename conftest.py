@@ -8,6 +8,7 @@ from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
 from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase
+from learning.models import Branch
 from notifications.models import Type
 from pytest_django.lazy_django import skip_if_no_django
 
@@ -109,6 +110,33 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             defaults={
                 "name": "Novosibirsk",
                 "abbr": "nsk"
+            }
+        )
+
+        branch, _ = Branch.objects.get_or_create(
+            code='spb',
+            defaults={
+                "name": 'Санкт-Петербург',
+                "is_remote": False,
+                "timezone_id": "spb"
+            }
+        )
+
+        branch, _ = Branch.objects.get_or_create(
+            code='nsk',
+            defaults={
+                "name": 'Новосибирск',
+                "is_remote": False,
+                "timezone_id": "nsk"
+            }
+        )
+
+        branch, _ = Branch.objects.get_or_create(
+            code='distance',
+            defaults={
+                "name": 'Заочное',
+                "is_remote": True,
+                "timezone_id": "spb"
             }
         )
 
