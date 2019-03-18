@@ -4,20 +4,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def sync_data(apps, schema_editor):
-    StudyProgram = apps.get_model('study_programs', 'StudyProgram')
-    Branch = apps.get_model('learning', 'Branch')
-
-    for sp in StudyProgram.objects.all():
-        if sp.city_id == "online":
-            city_code = "distance"
-        else:
-            city_code = sp.city_id
-        branch = Branch.objects.get(code=city_code)
-        sp.branch_id = branch.pk
-        sp.save()
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -32,5 +18,4 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='study_programs', to='learning.Branch', verbose_name='Branch'),
             preserve_default=False,
         ),
-        migrations.RunPython(sync_data),
     ]
