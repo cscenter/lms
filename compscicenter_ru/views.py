@@ -385,7 +385,7 @@ class OnCampusProgramsView(generic.TemplateView):
         study_programs = (StudyProgram.objects
                           .filter(is_active=True,
                                   branch__is_remote=False)
-                          .select_related("branch")
+                          .select_related("branch", "academic_discipline")
                           .order_by("branch_id", "academic_discipline__name_ru"))
         context["programs"] = self.group_programs_by_branch(study_programs)
         context["selected_branch"] = self.request.GET.get('branch', Branches.SPB)
@@ -417,8 +417,6 @@ class OnCampusProgramDetailView(generic.TemplateView):
         cache_key = f"{TESTIMONIALS_CACHE_KEY}_{discipline_code}"
         filters = {"areas_of_study": discipline_code}
         context["testimonials"] = get_random_testimonials(4, cache_key, filters)
-        # FIXME: Для этого направления выбрать все местные бранчи. Брать самые актуальные записи, чтобы не хардкодить год.
-        #  FIXME: Через WindowFunction? Кажется, что легче через StudyProgram (и переиспользовать запрос в списке программ)
         context["branches"] = (Branch.objects
                                .filter(study_programs__academic_discipline__code=discipline_code,
                                        study_programs__is_active=True,
