@@ -27,7 +27,7 @@ Requirements:
     def handle(self, *args, **options):
         current_term = Semester.get_current()
         # TODO: Restrict programmes by last 4-5 years?
-        study_programs = [sp for sp in StudyProgram.objects.available_core_courses()]
+        study_programs = [sp for sp in StudyProgram.objects.grouped_core_courses()]
         students = (User.objects
                     .only("pk", "curriculum_year", "city")
                     # FIXME: move this annotation to manager?

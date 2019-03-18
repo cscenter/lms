@@ -1,19 +1,29 @@
 from django.conf import settings
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
 
 from django.db.models import query, Prefetch
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
 
 from core.models import City
+from courses.models import MetaCourse
 from learning.models import Branch
 
 
 class AcademicDiscipline(models.Model):
     code = models.CharField(_("PK|Code"), max_length=2, primary_key=True)
     name = models.CharField(_("AreaOfStudy|Name"), max_length=255)
+    cover = ImageField(
+        _("AcademicDiscipline|cover"),
+        upload_to="academic_disciplines/",
+        blank=True)
+    icon = models.FileField(
+        _("AcademicDiscipline|icon"),
+        upload_to="academic_disciplines/",
+        blank=True)
     description = models.TextField(_("AreaOfStudy|description"))
 
     class Meta:
@@ -27,13 +37,13 @@ class AcademicDiscipline(models.Model):
 
 
 class StudyProgramQuerySet(query.QuerySet):
-    def available_core_courses(self):
+    def grouped_core_courses(self):
         """
         Note that not all core courses are mandatory - student must complete
         only one in each group.
         """
         from study_programs.models import StudyProgramCourseGroup
-        return (self.select_related("area")
+        return (self.select_related("academic_discipline")
                     .prefetch_related(
                         Prefetch(
                             'course_groups',
@@ -54,8 +64,13 @@ class StudyProgram(TimeStampedModel):
                                verbose_name=_("Branch"),
                                related_name="study_programs",
                                on_delete=models.CASCADE)
-    area = models.ForeignKey(AcademicDiscipline, verbose_name=_("Area of Study"),
-                             on_delete=models.CASCADE)
+    academic_discipline = models.ForeignKey(AcademicDiscipline, verbose_name=_("Area of Study"),
+                                            on_delete=models.CASCADE)
+    is_active = models.BooleanField(
+        _("Activity"),
+        help_text=_("Show on syllabus page. Other activity flags for selected "
+                    "city and academic discipline will be deactivated."),
+        default=True)
     description = models.TextField(
         _("StudyProgram|description"),
         blank=True, null=True)
@@ -66,6 +81,26 @@ class StudyProgram(TimeStampedModel):
         verbose_name_plural = _("Study Programs")
 
     objects = StudyProgramQuerySet.as_manager()
+
+    @transaction.atomic
+    def save(self, **kwargs):
+        created = self.pk is None
+        super().save(**kwargs)
+        if self.is_active:
+            # Deactivate other records with the same academic
+            # discipline and city
+            (StudyProgram.objects
+             .filter(is_active=True,
+                     academic_discipline_id=self.academic_discipline_id,
+                     branch_id=self.branch_id)
+             .exclude(pk=self.pk)
+             .update(is_active=False))
+
+    def get_courses(self):
+        """Returns all core courses sorted by name"""
+        return (MetaCourse.objects
+                .filter(studyprogramcoursegroup__in=self.course_groups.all())
+                .defer("description", "created", "modified"))
 
 
 class StudyProgramCourseGroup(models.Model):

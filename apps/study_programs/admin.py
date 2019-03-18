@@ -33,8 +33,8 @@ class StudyProgramCourseGroupInline(admin.TabularInline):
 
 @admin.register(StudyProgram)
 class StudyProgramAdmin(admin.ModelAdmin):
-    list_filter = ["branch", "year"]
-    list_display = ["area", "branch", "year"]
+    list_filter = ["branch", "year", "is_active"]
+    list_display = ["academic_discipline", "branch", "year", "is_active"]
     inlines = [StudyProgramCourseGroupInline]
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},

@@ -38,6 +38,7 @@ urlpatterns = [
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
     # Programs
     path('syllabus/on-campus/', views.OnCampusProgramsView.as_view(), name='on_campus_programs'),
+    path('syllabus/on-campus/<slug:discipline_code>/', views.OnCampusProgramDetailView.as_view(), name='on_campus_program_detail'),
     path('syllabus/distance/', views.DistanceProgramView.as_view(), name='distance_program'),
 
 

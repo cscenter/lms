@@ -11,6 +11,12 @@ ASSIGNMENT_COMMENT_ATTACHMENT = 1
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)
 
 
+class Branches(DjangoChoices):
+    SPB = C("spb", _("Saint Petersburg"))
+    NSK = C("nsk", _("Novosibirsk"))
+    DISTANCE = C("distance", _("Branches|Distance"))
+
+
 # FIXME: move to users?
 class AcademicDegreeYears(DjangoChoices):
     BACHELOR_SPECIALITY_1 = C("1", _('1 course bachelor, speciality'))

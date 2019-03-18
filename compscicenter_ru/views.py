@@ -3,6 +3,7 @@
 import itertools
 import math
 import random
+from typing import Dict
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 
@@ -31,7 +32,7 @@ from learning.api.views import TestimonialList
 from learning.models import Branch
 from study_programs.models import StudyProgram, AcademicDiscipline
 from courses.models import Course, CourseTeacher
-from learning.settings import StudentStatuses
+from learning.settings import StudentStatuses, Branches
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, \
@@ -42,9 +43,28 @@ from users.models import User
 from .filters import CoursesFilter
 
 
+TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
+
+
+def get_random_testimonials(count, cache_key, filters=None):
+    """Returns reviews from graduated students with photo"""
+    testimonials = cache.get(cache_key)
+    filters = filters or {}
+    if testimonials is None:
+        # TODO: Выбрать только нужные поля
+        s = (User.objects
+             .filter(groups=User.roles.GRADUATE_CENTER, **filters)
+             .exclude(csc_review='').exclude(photo='')
+             .prefetch_related("areas_of_study")
+             .order_by('?'))[:count]
+        testimonials = s
+        cache.set(cache_key, testimonials, 3600)
+    return testimonials
+
+
+
 class IndexView(TemplateView):
     template_name = 'compscicenter_ru/index.html'
-    TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
     VK_CACHE_KEY = 'v2_index_vk_social_news'
     INSTAGRAM_CACHE_KEY = 'v2_index_instagram_posts'
 
@@ -88,16 +108,7 @@ class IndexView(TemplateView):
                                              avatar_url=course.avatar_url,
                                              tag='Онлайн-курс'))
         # Testimonials
-        testimonials = cache.get(self.TESTIMONIALS_CACHE_KEY)
-        if testimonials is None:
-            # TODO: Выбрать только нужные поля
-            s = (User.objects
-                 .filter(groups=User.roles.GRADUATE_CENTER)
-                 .exclude(csc_review='').exclude(photo='')
-                 .prefetch_related("areas_of_study")
-                 .order_by('?'))[:4]
-            testimonials = s
-            cache.set(self.TESTIMONIALS_CACHE_KEY, testimonials, 3600)
+        testimonials = get_random_testimonials(4, TESTIMONIALS_CACHE_KEY)
         _cache = caches['social_networks']
         context = {
             'testimonials': testimonials,
@@ -350,9 +361,9 @@ class SyllabusView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         syllabus = (StudyProgram.objects
-                    .available_core_courses()
+                    .grouped_core_courses()
                     .filter(year=2019)
-                    .order_by("city_id", "area__name_ru"))
+                    .order_by("city_id", "academic_discipline__name_ru"))
         context["programs"] = self.group_programs_by_branch(syllabus)
         # TODO: validate entry city
         context["selected_branch"] = self.request.GET.get('branch', 'spb')
@@ -372,13 +383,12 @@ class OnCampusProgramsView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         study_programs = (StudyProgram.objects
-                          .filter(year=2019,
+                          .filter(is_active=True,
                                   branch__is_remote=False)
                           .select_related("branch")
-                          .available_core_courses()
-                          .order_by("branch_id", "area__name_ru"))
+                          .order_by("branch_id", "academic_discipline__name_ru"))
         context["programs"] = self.group_programs_by_branch(study_programs)
-        context["selected_branch"] = self.request.GET.get('branch', 'spb')
+        context["selected_branch"] = self.request.GET.get('branch', Branches.SPB)
         return context
 
     def group_programs_by_branch(self, syllabus):
@@ -386,6 +396,36 @@ class OnCampusProgramsView(generic.TemplateView):
         for branch, g in itertools.groupby(syllabus, key=lambda sp: sp.branch):
             grouped[branch] = list(g)
         return grouped
+
+
+class OnCampusProgramDetailView(generic.TemplateView):
+    template_name = "compscicenter_ru/programs/on_campus_detail.html"
+
+    def get_context_data(self, discipline_code, **kwargs):
+        context = super().get_context_data(**kwargs)
+        selected_branch = self.request.GET.get('branch', Branches.SPB)
+        study_program = (StudyProgram.objects
+                         .filter(academic_discipline__code=discipline_code,
+                                 branch__code=selected_branch,
+                                 branch__is_remote=False)
+                         .select_related("branch", "academic_discipline")
+                         .order_by("-year")
+                         .first())
+        if not study_program:
+            raise Http404
+        # Testimonials
+        cache_key = f"{TESTIMONIALS_CACHE_KEY}_{discipline_code}"
+        filters = {"areas_of_study": discipline_code}
+        context["testimonials"] = get_random_testimonials(4, cache_key, filters)
+        # FIXME: Для этого направления выбрать все местные бранчи. Брать самые актуальные записи, чтобы не хардкодить год.
+        #  FIXME: Через WindowFunction? Кажется, что легче через StudyProgram (и переиспользовать запрос в списке программ)
+        context["branches"] = (Branch.objects
+                               .filter(study_programs__academic_discipline__code=discipline_code,
+                                       study_programs__is_active=True,
+                                       is_remote=False))
+        context["selected_branch"] = selected_branch
+        context["study_program"] = study_program
+        return context
 
 
 class DistanceProgramView(generic.TemplateView):

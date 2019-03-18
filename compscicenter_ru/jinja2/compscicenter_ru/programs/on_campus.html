@@ -2,56 +2,68 @@
 
 {% block title %}Программы подготовки в {{ super() }}{% endblock title %}
 
+{% block body_attrs %}data-init-sections="tabs"{% endblock body_attrs %}
+
 {% block content %}
     <div class="container page-content">
         <div class="row">
             <div class="col-lg-8">
                 <h1>Очное обучение в CS центре</h1>
-                <ul class="ui nav-tabs">
+                <ul class="ui nav nav-tabs" role="tablist">
                     {% for branch in programs %}
                     <li class="nav-item">
-                        <a class="nav-link {% if selected_branch == branch.code %}active{% endif %}" href="#{{ branch.code }}" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">{{ branch.name }}</a>
+                        <a class="nav-link{% if selected_branch == branch.code %} active{% endif %}"
+                           data-toggle="tab" role="tab"
+                           data-target="#{{ branch.code }}" href="{{ request.path }}?branch={{ branch.code }}"
+                           aria-controls="{{ branch.code }}"
+                           aria-selected="{% if selected_branch == branch.code %}true{% else %}false{% endif %}">{{ branch.name }}</a>
                     </li>
                     {% endfor %}
                 </ul>
                 <div class="tab-content">
                 {% for branch, study_programs in programs.items() %}
-                    <div class="tab-pane fade{% if selected_branch == branch.code %} show active{% endif %}" id="SKLDJFLSKDJF" role="tabpanel" aria-labelledby="SLKSJDFLKSJDF-tab">
-                    <p>{{ branch.description }}</p>
-                    {% for program in study_programs %}
-                        <div class="card _program-card">
-                            <div class="card__img {{ program.area.code }} col-md-4"></div>
-                            <div class="card__content col-md">
-                                <a href="#{{ program.area.code }}" class="card__title">{{ program.area.name_en }}</a>
-                                <p class="card__subtitle">{{ program.area.name_ru }}</p>
-                                <p class="card__text">
-                                    {{ program.description }}
-                                    {{ program.area.description }}
-                                </p>
+                    <div class="tab-pane {% if selected_branch == branch.code %} show active{% endif %}"
+                            id="{{ branch.code }}" role="tabpanel" aria-labelledby="{{ branch.code }}-tab">
+                        <div class="mb-6">{{ branch.description }}</div>
+                        <h2>Программы обучения</h2>
+                        {% for program in study_programs %}
+                            <div class="card _program-card">
+                                <div class="card__img col-md-4">
+                                    {% if program.academic_discipline.cover %}<img src="{{ program.academic_discipline.cover.url }}" alt="">{% endif %}
+                                </div>
+                                <div class="card__content col-md">
+                                    <div class="card__title">
+                                        <a href="{{ url('on_campus_program_detail', discipline_code=program.academic_discipline.code) }}" >{{ program.academic_discipline.name_en }}</a>
+                                    </div>
+                                    <p class="card__subtitle">{{ program.academic_discipline.name_ru }}</p>
+                                    <p class="card__text">
+                                        {{ program.description }}
+                                        {{ program.academic_discipline.description }}
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
                     </div>
                 {% endfor %}
                 </div>
             </div>
             <div class="col-lg-3 offset-lg-1">
-                <aside>
-                    <div class="text-note">
-                        <a href="#">Поступление</a>
-                        <p class="_text">Обучение в центре бесплатное. Набор учащихся проходит по конкурсу один раз в
-                            год.</p>
-                    </div>
-
-                    <div class="card mb-2">
-                        <div class="card__content text-small">
-                            Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
-                            живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
-                            будним вечерам и
-                            выходным.
+                <div class="card mb-4">
+                    <div class="card__content text-small">
+                        <div class="card__title">
+                            <a href="{{ url("distance_program") }}">Заочное обучение</a>
                         </div>
+                        CS центр предлагает всем желающим курсы заочного обучения. Обучение платное.
                     </div>
-                </aside>
+                </div>
+                <div class="card mb-4">
+                    <div class="card__content text-small">
+                        <div class="card__title">
+                            <a href="{{ url("course_list") }}">Все курсы</a>
+                        </div>
+                        Курсы подготовлены сотрудниками Яндекса, JetBrains и других <span class="text-nowrap">IT-компаний</span>, преподавателями ведущих вузов Петербурга и Новосибирска.
+                    </div>
+                </div>
             </div>
         </div>
 

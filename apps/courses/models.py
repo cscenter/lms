@@ -5,6 +5,7 @@ import pytz
 from bitfield import BitField
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -14,6 +15,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
 
 from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
@@ -221,6 +223,18 @@ class Venue(models.Model):
         return reverse('venue_detail', args=[self.pk])
 
 
+def meta_course_cover_upload_to(instance: "MetaCourse", filename) -> str:
+    """
+    Generates path to the cover image for the meta course.
+
+    Example:
+        meta_courses/data-bases/cover.png
+    """
+    course_slug = instance.slug
+    _, ext = os.path.splitext(filename)
+    return os.path.join("meta_courses", course_slug, f"cover{ext}")
+
+
 class MetaCourse(TimeStampedModel):
     """
     General data shared between all courses of the same type.
@@ -236,6 +250,13 @@ class MetaCourse(TimeStampedModel):
     description = models.TextField(
         _("Course|description"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    short_description = models.TextField(
+        _("Course|short_description"),
+        blank=True)
+    cover = ImageField(
+        _("MetaCourse|cover"),
+        upload_to=meta_course_cover_upload_to,
+        blank=True)
 
     class Meta:
         ordering = ["name"]
@@ -250,6 +271,12 @@ class MetaCourse(TimeStampedModel):
 
     def get_update_url(self):
         return reverse('meta_course_edit', args=[self.slug])
+
+    def get_cover_url(self):
+        if self.cover:
+            return self.cover.url
+        else:
+            return staticfiles_storage.url('v2/img/placeholder/meta_course.png')
 
 
 class Course(TimeStampedModel, DerivableFieldsMixin):
