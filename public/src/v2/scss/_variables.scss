@@ -248,7 +248,7 @@ $headings-color:              inherit !default;
 $lead-font-size:              ($font-size-base * 1.25) !default;
 $lead-font-weight:            300 !default;
 
-$text-muted:                  $gray-disable-dark !default;
+$text-muted:                  $gray-dark;
 
 $blockquote-small-color:      $gray-disable-dark !default;
 $blockquote-font-size:        ($font-size-base * 1.25) !default;
