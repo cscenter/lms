@@ -53,6 +53,7 @@ def test_meta_course_update(client, assert_redirect):
     client.login(UserFactory.create(is_superuser=True, is_staff=True))
     form = model_to_dict(mc)
     form.update({'name_ru': "foobar"})
+    del form['cover']
     response = client.post(mc.get_update_url(), form)
     assert response.status_code == 302
     assert MetaCourse.objects.get(pk=mc.pk).name_ru == "foobar"
