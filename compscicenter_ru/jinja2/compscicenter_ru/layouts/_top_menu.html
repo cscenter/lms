@@ -16,7 +16,7 @@
             <ul class="navbar-nav">
                 {% for menu_item in menu -%}
                     <li class="nav-item">
-                        <a class="nav-link {% if menu_item.selected %}_active{% endif %}" {% if menu_item.is_external %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.title }}</a>
+                        <a class="nav-link {% if menu_item.selected %}_active{% endif %}" {% if menu_item.is_external %}target="_blank" rel="noopener"{% endif %} href="{{ menu_item.url }}">{{ menu_item.title }}</a>
                     </li>
                 {%- endfor %}
             </ul>
@@ -64,11 +64,11 @@
                         >{{ menu_item.title }} {{ macros.svg_inline('arrow-bottom') }}</a>
                         <div class="mobile-submenu collapse {% if menu_item.selected %}show{% endif %}" id="top-menu-item-{{ loop.index }}">
                             {% for item in menu_item.children -%}
-                            <a class="mobile-submenu__item{% if item.selected %} _active{% endif %}" href="{{ item.url }}" {% if item.is_external %}target="_blank"{% endif %}>{{ item.title }}</a>
+                            <a class="mobile-submenu__item{% if item.selected %} _active{% endif %}" href="{{ item.url }}" {% if item.is_external %}target="_blank" rel="noopener"{% endif %}>{{ item.title }}</a>
                             {% endfor %}
                         </div>
                     {%- else -%}
-                        <a class="nav-link{% if menu_item.selected %} _active{% endif %}" href="{{ menu_item.url }}" {% if menu_item.is_external %}target="_blank"{% endif %}>{{ menu_item.title }}</a>
+                        <a class="nav-link{% if menu_item.selected %} _active{% endif %}" href="{{ menu_item.url }}" {% if menu_item.is_external %}target="_blank" rel="noopener"{% endif %}>{{ menu_item.title }}</a>
                     {%- endif -%}
                 </li>
             {% endfor %}
@@ -83,7 +83,7 @@
                 <ul class="navbar-nav">
                     {% for second_level in menu_item.children %}
                         <li class="nav-item{% if second_level.selected %} _active{% endif %}">
-                            <a class="nav-link" {% if second_level.is_external %}target="_blank"{% endif %} href="{{ second_level.url }}">{{ second_level.title }}</a>
+                            <a class="nav-link" {% if second_level.is_external %}target="_blank" rel="noopener"{% endif %} href="{{ second_level.url }}">{{ second_level.title }}</a>
                         </li>
                     {% endfor %}
                 </ul>

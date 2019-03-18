@@ -6,8 +6,7 @@ from courses.models import MetaCourse, Course
 
 @register(MetaCourse)
 class MetaCourseTranslationOptions(TranslationOptions):
-    fields = ('name', 'description')
-    fallback_values = '-- sorry, no translation provided --'
+    fields = ('name', 'description', 'short_description')
 
 
 @register(Course)

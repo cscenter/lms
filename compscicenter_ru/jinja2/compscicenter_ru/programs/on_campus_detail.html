@@ -1,0 +1,95 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% block title %}Программа подготовки в {{ super() }}{% endblock title %}
+
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+
+{% block content %}
+    <div class="cover _program">
+        <div class="container text-center">
+            <div class="cover__content">
+            {% with academic_discipline = study_program.academic_discipline %}
+                {% if academic_discipline.icon %}<img src="{{ academic_discipline.icon.url }}" alt="">{% endif %}
+                <h1 class="cover__title">{{ academic_discipline.name_en }}</h1>
+                <p class="translate">/ {{ academic_discipline.name_ru }}</p>
+                <div class="row content-center mt-10">
+                    <div class="col-lg-10">
+                        {{ academic_discipline.description }}
+                    </div>
+                </div>
+            {% endwith %}
+            </div>
+        </div>
+    </div>
+
+ <div class="container mt-10">
+        <div class="row content-center">
+                <h2>Базовые курсы программы</h2>
+            <div class="col-lg-12 text-center">
+                <ul class="ui nav nav-tabs content-center mt-4" role="tablist">
+                    {% for branch in branches %}
+                    <li class="nav-item">
+                        <a class="nav-link{% if selected_branch == branch.code %} active{% endif %}"
+                           {% if selected_branch != branch.code %}href="{{ request.path }}?branch={{ branch.code }}"{% endif %}
+                           >{{ branch.name }}</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-lg-10">
+
+                <div class="program__stats">
+                    <p class="info">2&nbsp;года обучения</p>
+                    <p class="info">5&nbsp;базовых курсов</p>
+                    <p class="info">7&nbsp;любых других курса</p>
+                    <p class="info">3&nbsp;практики</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-deck _three mb-8">
+            {% for meta_course in study_program.get_courses() %}
+                <a href="{{ meta_course.get_absolute_url() }}" class="card _program _shadowed">
+                    <div class="card__img">
+                        <img src="{{ meta_course.get_cover_url() }}" alt="" />
+                    </div>
+                    <div class="card__content">
+                        <div class="card__title">
+                            {{ meta_course.name }}
+                        </div>
+                        {% if meta_course.short_description %}{{ meta_course.short_description }}{% endif %}
+                    </div>
+                </a>
+            {% endfor %}
+
+        </div>
+    </div>
+    <div class="container-fluid _light">
+        <div class="container pt-10 pb-10">
+            <div class="row content-center">
+                <div class="col-lg-10 text-center">
+                    <h3>Правила очного обучения</h3>
+                    <div class="text-small">
+                        {{ study_program.branch.description }}
+                    </div>
+                     <p class="text-small">Некоторые курсы читаются на&nbsp;выбор: &laquo;Алгоритмы и&nbsp;структуры
+                    данных&raquo; или
+                    &laquo;Дополнительные главы алгоритмов&raquo;, &laquo;Программирование на&nbsp;Java&raquo; или
+                    &laquo;Программирование на&nbsp;Python&raquo;</p>
+                    <a href="/application/" class="btn _primary">Поступить в&nbsp;CS центр</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if testimonials %}
+    <div class="csc-student-reviews">
+        <div class="container">
+            <h2 class="text-center">Отзывы студентов</h2>
+            <div class="card-columns _testimonials">
+                {% for student in testimonials %}
+                    {{ macros.testimonial_card(student) }}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock content %}

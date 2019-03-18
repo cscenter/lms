@@ -609,7 +609,7 @@ class SyllabusView(CuratorOnlyMixin, generic.TemplateView):
         context = super().get_context_data(**kwargs)
         syllabus = (StudyProgram.objects
                     .filter(year=2017)
-                    .select_related("area")
+                    .select_related("academic_discipline")
                     .prefetch_related(
                         Prefetch(
                             'course_groups',
@@ -617,7 +617,7 @@ class SyllabusView(CuratorOnlyMixin, generic.TemplateView):
                                       .objects
                                       .prefetch_related("courses")),
                         ))
-                    .order_by("city_id", "area__name_ru"))
+                    .order_by("city_id", "academic_discipline__name_ru"))
         context["programs"] = self.group_programs_by_city(syllabus)
         # TODO: validate entry city
         context["selected_city"] = self.request.GET.get('city', 'spb')

@@ -26,7 +26,7 @@ from courses.models import Course, CourseNews, Venue, \
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager
-from learning.settings import GradingSystems, GradeTypes
+from learning.settings import GradingSystems, GradeTypes, Branches
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 class Branch(models.Model):
     code = models.CharField(
         _("Code"),
+        choices=Branches.choices,
         max_length=8)
     name = models.CharField(_("Branch|Name"), max_length=255)
     is_remote = models.BooleanField(_("Distance Branch"), default=False)
