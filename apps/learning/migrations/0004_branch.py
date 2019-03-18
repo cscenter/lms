@@ -58,5 +58,4 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Branches',
             },
         ),
-        migrations.RunPython(create_branches),
     ]
