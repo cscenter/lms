@@ -9,6 +9,7 @@ from post_office.models import EmailTemplate
 
 from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase
 from learning.models import Branch
+from learning.settings import Branches
 from notifications.models import Type
 from pytest_django.lazy_django import skip_if_no_django
 
@@ -113,8 +114,8 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             }
         )
 
-        branch, _ = Branch.objects.get_or_create(
-            code='spb',
+        branch, _ = Branch.objects.update_or_create(
+            code=Branches.SPB,
             defaults={
                 "name": 'Санкт-Петербург',
                 "is_remote": False,
@@ -122,8 +123,8 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             }
         )
 
-        branch, _ = Branch.objects.get_or_create(
-            code='nsk',
+        branch, _ = Branch.objects.update_or_create(
+            code=Branches.NSK,
             defaults={
                 "name": 'Новосибирск',
                 "is_remote": False,
@@ -131,8 +132,8 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             }
         )
 
-        branch, _ = Branch.objects.get_or_create(
-            code='distance',
+        branch, _ = Branch.objects.update_or_create(
+            code=Branches.DISTANCE,
             defaults={
                 "name": 'Заочное',
                 "is_remote": True,
