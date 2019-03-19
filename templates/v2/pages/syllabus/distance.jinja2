@@ -1,0 +1,144 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block title %}{{ super() }}{% endblock title %}
+
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+
+{% block content %}
+    <div class="cover _program">
+        <div class="container text-center">
+            <div class="cover__content">
+                <img src="/static/v2/img/pages/syllabus/distance/distance.svg" alt="Заочное обучение">
+                <h1 class="cover__title">Заочное обучение</h1>
+                <p class="translate">Платное заочное обучение длительностью один год</p>
+            </div>
+        </div>
+    </div> {# -- div.cover #}
+    <div class="container mt-10">
+        <div class="row content-center mb-4">
+            <div class="col-lg-8 text-center">
+                <h2>Семестр 1. Общие курсы</h2>
+                <p>В&nbsp;первом семестре студенты проходят общие курсы, которые пригодятся для работы в&nbsp;IT и&nbsp;дальнейшего
+                    обучения</p>
+            </div>
+        </div>
+        <div class="card-deck _three mb-8">
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="{{ static('v2/img/pages/syllabus/distance/algorythms-part1.png') }}" alt="Алгоритмы и структуры данных, часть 1">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Алгоритмы и&nbsp;структуры данных, часть&nbsp;1
+                    </div>
+                    Курс посвящён базовым идеям построения и&nbsp;анализа алгоритмов, а&nbsp;также изучения
+                    структур данных.
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="{{ static('v2/img/pages/syllabus/distance/math.png') }}" alt="Математика для разработчиков">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Математика для разработчиков
+                    </div>
+                    Курс позволит вам освежить и&nbsp;систематизировать знания по&nbsp;основам математического анализа,
+                    дискретной
+                    математики, линейной алгебры и&nbsp;теории вероятностей
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="{{ static('v2/img/pages/syllabus/distance/python.png') }}" alt="Программирование на Python">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Программирование на Python
+                    </div>
+                    Курс является введением в&nbsp;язык программирования Python
+                </div>
+            </a>
+        </div>
+        <div class="row content-center mb-4">
+            <div class="col-lg-8 text-center">
+                <h2>Семестр 2. Курсы специализации и&nbsp;практика</h2>
+                <p>Во&nbsp;втором семестре студенты выбирают курс по&nbsp;специализации: машинное обучение, Java или
+                    разработка веб-интерфейсов</p>
+            </div>
+        </div>
+        <div class="card-deck _three mb-8">
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="{{ static('v2/img/pages/syllabus/distance/algorythms-part2.png') }}" alt="Алгоритмы и структуры данных, часть 2">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Алгоритмы и&nbsp;структуры данных, часть&nbsp;2
+                    </div>
+                    Продолжение изучения базовых алгоритмов
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="{{ static('v2/img/pages/syllabus/distance/specialization.png') }}" alt="Курс по специализации">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Курс по специализации
+                    </div>
+                    Один или несколько курсов, для получения начальных навыков профессии в&nbsp;IT (бэкенд-разработчик,
+                    веб-разработчик или аналитик)
+                </div>
+            </a>
+            <a href="#" class="card _program _shadowed">
+                <div class="card__img">
+                    <img src="{{ static('v2/img/pages/syllabus/distance/practice.png') }}" alt="">
+                </div>
+                <div class="card__content">
+                    <div class="card__title">
+                        Практика
+                    </div>
+                    Практика&nbsp;&mdash; это рабочая задача на&nbsp;семестр, которую ставит и&nbsp;курирует сотрудник
+                    ИТ-компании или
+                    института.
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="container-fluid _light">
+        <div class="container pt-10 pb-10">
+            <div class="row content-center pt-10 pb-6">
+                <div class="col-lg-9 text-center">
+                    <h2>Какие профессии можно осваивать после обучения</h2>
+                    <p>Помимо хорошей базовой подготовки программа предлагает курсы специализации для выбора дальнейшей
+                        профессии</p>
+                    <div class="row mt-10">
+                        <div class="col-sm-4 mb-4"><img src="{{ static('v2/img/pages/syllabus/distance/backend.svg') }}" alt="Бэкенд-разработчик">
+                            <p class="mt-2">Бэкенд-разработчик</p>
+                        </div>
+                        <div class="col-sm-4 mb-4"><img src="{{ static('v2/img/pages/syllabus/distance/web-developer.svg') }}" alt="Веб-разработчик">
+                            <p class="mt-2">Веб-разработчик</p>
+                        </div>
+                        <div class="col-sm-4 mb-4"><img src="{{ static('v2/img/pages/syllabus/distance/analytic.svg') }}" alt="Аналитик">
+                            <p class="mt-2">Аналитик</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid">
+        <div class="container pt-10 pb-10">
+            <div class="row content-center pt-10 pb-10">
+                <div class="col-lg-8 text-center">
+                    <h2>Поступление на программу</h2>
+                    <p>Программа платная, стоимость обучения 40&nbsp;000&nbsp;₽ за&nbsp;семестр. Для поступления
+                        необходимо сдать
+                        онлайн-экзамен и&nbsp;пройти онлайн-собеседование.</p>
+                    <a href class="btn _primary _m-wide">Поступить на заочное отделение</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
