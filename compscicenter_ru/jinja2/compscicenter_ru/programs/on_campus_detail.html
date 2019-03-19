@@ -27,9 +27,9 @@
             <div class="col-lg-8 text-center">
                 <h2>Базовые курсы программы</h2>
                 <p class="text-center">
-                    Базовые курсы разбиты на группы.
-                    Вам не обязательно сдавать все, но из каждой группы нужно закончить хотя бы один.
-                    Для наглядности мы пронумеровали группы и отметили курсы.
+                    Базовые курсы разбиты на&nbsp;группы.
+                    Вам не&nbsp;обязательно сдавать все, но&nbsp;из&nbsp;каждой группы нужно закончить хотя&nbsp;бы один.
+                    Для наглядности мы&nbsp;пронумеровали группы и&nbsp;отметили курсы.
                 </p>
             </div>
             <div class="col-lg-12 text-center">
@@ -54,7 +54,7 @@
                 {% set group_index = loop.index %}
                 {% for meta_course in course_group.courses.all() %}
                     <a href="{{ meta_course.get_absolute_url() }}" class="card _program _shadowed">
-                        <div style="position:absolute; right: 16px; top: 0; z-index: 200">{{ group_index }}</div>
+                        <div class="right-label">{{ group_index }}</div>
                         <div class="card__img">
                             <img src="{{ meta_course.get_cover_url() }}" alt="" />
                         </div>
