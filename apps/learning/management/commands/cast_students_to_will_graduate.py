@@ -27,7 +27,9 @@ Requirements:
     def handle(self, *args, **options):
         current_term = Semester.get_current()
         # TODO: Restrict programmes by last 4-5 years?
-        study_programs = [sp for sp in StudyProgram.objects.grouped_core_courses()]
+        study_programs = list(StudyProgram.objects
+                              .select_related("academic_discipline")
+                              .prefetch_core_courses_groups())
         students = (User.objects
                     .only("pk", "curriculum_year", "city")
                     # FIXME: move this annotation to manager?
@@ -83,9 +85,9 @@ Requirements:
                         courses = center_courses.union(
                             stats["in_term"]["courses"])
                         groups_satisfied += any(c.id in courses for c in
-                                                 course_groups.courses.all())
+                                                course_groups.courses.all())
                     if groups_total and groups_satisfied == groups_total:
-                        areas.append(program.area.code)
+                        areas.append(program.academic_discipline.code)
                 if areas:
                     User.objects.filter(pk=student.pk).update(
                         status=StudentStatuses.WILL_GRADUATE)

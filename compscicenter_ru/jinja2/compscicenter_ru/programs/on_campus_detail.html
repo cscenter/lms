@@ -43,7 +43,7 @@
             </div>
         </div>
         <div class="card-deck _three mb-8">
-            {% for meta_course in study_program.get_courses() %}
+            {% for meta_course in core_courses %}
                 <a href="{{ meta_course.get_absolute_url() }}" class="card _program _shadowed">
                     <div class="card__img">
                         <img src="{{ meta_course.get_cover_url() }}" alt="" />
@@ -58,9 +58,12 @@
             {% endfor %}
         </div>
         <p class="text-small text-center text-muted mb-8">
-            Некоторые курсы читаются на&nbsp;выбор, например: «Алгоритмы и&nbsp;структуры данных» или
-            «Дополнительные главы алгоритмов», «Программирование на&nbsp;Java» или
-            «Программирование на&nbsp;Python»
+            Курсы из групп на выбор:<br>
+            {% for course_group in study_program.course_groups.all() %}
+                {% for meta_course in course_group.courses.all() %}
+                    «{{ meta_course.name }}»{% if not loop.last %}{% if course_group.courses.all()|length > 2 %},{% endif %} или {% endif %}
+                {% endfor %}{% if not loop.last %}<br>{% endif %}
+            {% endfor %}
         </p>
     </div>
 

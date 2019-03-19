@@ -222,7 +222,8 @@ class UserDetailView(generic.DetailView):
         syllabus = None
         if profile_user.curriculum_year:
             syllabus = (StudyProgram.objects
-                        .grouped_core_courses()
+                        .select_related("academic_discipline")
+                        .prefetch_core_courses_groups()
                         .filter(year=profile_user.curriculum_year,
                                 city_id=profile_user.city_id))
         context['syllabus'] = syllabus
