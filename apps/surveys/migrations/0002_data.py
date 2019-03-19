@@ -273,7 +273,7 @@ TEMPLATES = {
             "id": 12,
             "label": "Расскажите свои впечатления от семинаров",
             "show_label": False,
-            "placeholder": "Расскажите свои впечатления от семинаров",
+            "placeholder": "Расскажите свои впечатления от семинаров. Если занятия проходят в разных группах, то не забывайте указывать имена преподавателей",
             "order": 900,
             "required": False,
             "field_type": FieldType.TEXTAREA,
@@ -287,7 +287,7 @@ TEMPLATES = {
                         {
                             "operator": "any",
                             "field_name": "practice_lecture_compliance",
-                            "value": [3]
+                            "value": [2, 3]
                         }
                     ]
                 },
