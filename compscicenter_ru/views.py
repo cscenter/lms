@@ -3,6 +3,7 @@
 import itertools
 import math
 import random
+from operator import attrgetter
 from typing import Dict
 
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -361,7 +362,8 @@ class SyllabusView(generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         syllabus = (StudyProgram.objects
-                    .grouped_core_courses()
+                    .select_related("academic_discipline")
+                    .prefetch_core_courses_groups()
                     .filter(year=2019)
                     .order_by("city_id", "academic_discipline__name_ru"))
         context["programs"] = self.group_programs_by_branch(syllabus)
@@ -407,22 +409,29 @@ class OnCampusProgramDetailView(generic.TemplateView):
         study_program = (StudyProgram.objects
                          .filter(academic_discipline__code=discipline_code,
                                  branch__code=selected_branch,
-                                 branch__is_remote=False)
+                                 branch__is_remote=False,
+                                 is_active=True)
+                         .prefetch_core_courses_groups()
                          .select_related("branch", "academic_discipline")
-                         .order_by("-year")
                          .first())
         if not study_program:
             raise Http404
+        context["study_program"] = study_program
         # Testimonials
         cache_key = f"{TESTIMONIALS_CACHE_KEY}_{discipline_code}"
         filters = {"areas_of_study": discipline_code}
         context["testimonials"] = get_random_testimonials(4, cache_key, filters)
+        # Courses
+        courses = []
+        for course_group in study_program.course_groups.all():
+            for meta_course in course_group.courses.all():
+                courses.append(meta_course)
+        context["core_courses"] = sorted(courses, key=attrgetter("name"))
         context["branches"] = (Branch.objects
                                .filter(study_programs__academic_discipline__code=discipline_code,
                                        study_programs__is_active=True,
                                        is_remote=False))
         context["selected_branch"] = selected_branch
-        context["study_program"] = study_program
         return context
 
 

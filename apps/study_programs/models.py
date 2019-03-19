@@ -37,20 +37,17 @@ class AcademicDiscipline(models.Model):
 
 
 class StudyProgramQuerySet(query.QuerySet):
-    def grouped_core_courses(self):
+    def prefetch_core_courses_groups(self):
         """
         Note that not all core courses are mandatory - student must complete
         only one in each group.
         """
         from study_programs.models import StudyProgramCourseGroup
-        return (self.select_related("academic_discipline")
-                    .prefetch_related(
-                        Prefetch(
-                            'course_groups',
-                            queryset=(StudyProgramCourseGroup
-                                      .objects
-                                      .prefetch_related("courses")),
-                        )))
+        return self.prefetch_related(
+            Prefetch(
+                'course_groups',
+                queryset=(StudyProgramCourseGroup.objects
+                          .prefetch_related("courses"))))
 
 
 class StudyProgram(TimeStampedModel):

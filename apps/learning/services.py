@@ -12,7 +12,8 @@ def calculate_areas_for_student(student):
     programs = (StudyProgram.objects
                 .filter(year=student.curriculum_year,
                         city_id=student.city_id)
-                .grouped_core_courses())
+                .select_related("academic_discipline")
+                .prefetch_core_courses_groups())
     current_term = Semester.get_current()
     stats = student.stats(current_term=current_term)
     passed_courses = stats["passed"]["center_courses"]
