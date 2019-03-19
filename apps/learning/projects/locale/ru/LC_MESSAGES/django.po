@@ -9,16 +9,14 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-02-12 16:25+0000\n"
-"PO-Revision-Date: 2019-02-12 16:22+0000\n"
+"PO-Revision-Date: 2019-03-19 10:25+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
-"%100>=11 && n%100<=14)? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
 "X-Translated-Using: django-rosetta 0.9.0\n"
 
 #: apps/learning/projects/admin.py:77 apps/learning/projects/filters.py:34
@@ -220,7 +218,8 @@ msgstr "Slideshare URL с презентацией участников"
 
 #: apps/learning/projects/models.py:225
 msgid "Check if all participants leave project before reporting period"
-msgstr "Отметьте, если проект нужно скрыть в списке проектов текущего семестра"
+msgstr ""
+"Отметьте, если проект нужно скрыть в списке проектов текущего семестра"
 
 #: apps/learning/projects/models.py:229
 msgid "Student project"
@@ -291,8 +290,8 @@ msgstr ""
 #: apps/learning/projects/models.py:325
 msgid "0 - Listed, but not explained why."
 msgstr ""
-"0 - студент лишь перечислил, но, почему используется именно это, объяснить "
-"не может"
+"0 - студент не может объяснить, почему выбрал именно эти технологии или как "
+"его код встраивается в готовый"
 
 #: apps/learning/projects/models.py:326
 msgid ""
@@ -300,17 +299,20 @@ msgid ""
 "understand, but knows something"
 msgstr ""
 "1 - студент не про всё понимает и не пытается понять, но про что-то знает, "
-"зачем"
+"зачем или как"
 
 #: apps/learning/projects/models.py:328
 msgid "2 - Understands why choose one or the other technology"
-msgstr "2 - студент понимает, почему выбрана та или иная технология"
+msgstr ""
+"2 - студент понимает, почему выбраны такие технологии или как устроена "
+"интеграция его наработок в существующий проект"
 
 #: apps/learning/projects/models.py:332
 msgid ""
 "0 - Much less than what has already been done, or the student does not "
 "understand them"
-msgstr "0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
+msgstr ""
+"0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
 
 #: apps/learning/projects/models.py:334
 msgid ""
@@ -641,8 +643,8 @@ msgstr "Итоговый комментарий сохранён успешно.
 #~ msgstr "Текст"
 
 #~ msgid ""
-#~ "First {n_par} paragraphs or anything before {marker} will serve as "
-#~ "excerpt; LaTeX+Markdown is enabled"
+#~ "First {n_par} paragraphs or anything before {marker} will serve as excerpt; "
+#~ "LaTeX+Markdown is enabled"
 #~ msgstr ""
 #~ "Первые {n_par} параграфов или всё до {marker} будут выдержкой; доступны "
 #~ "LaTeX и Markdown"
