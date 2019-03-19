@@ -1,25 +1,26 @@
 {% extends "v2/layouts/inner.jinja2" %}
-{% block before_navbar_container %}
-    <div class="cover _program">{% endblock before_navbar_container %}
-{% block after_navbar_container %}
-    <div class="container text-center">
-        <div class="cover__content">
-            <img src="/static/v2/img/pages/program/ds-white.svg" alt="">
-            <h1 class="cover__title">Data Science</h1>
-            <p class="translate">/ Анализ данных</p>
-            <div class="row content-center mt-10">
-                <div class="col-lg-10">
-                    <p>Направление Data Science можно рассматривать как отделение Школы анализа данных Яндекса в&nbsp;Санкт-Петербурге
-                и&nbsp;в&nbsp;Новосибирске. Здесь ведётся подготовка специалистов в&nbsp;области обработки и&nbsp;анализа
-                данных и&nbsp;извлечения информации из&nbsp;интернета.</p>
+
+{% block title %}{{ super() }}{% endblock title %}
+
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+
+{% block content %}
+    <div class="cover _program">
+        <div class="container text-center">
+            <div class="cover__content">
+                <img src="/media/academic_disciplines/ds-white.svg" alt="">
+                <h1 class="cover__title">Data Science</h1>
+                <p class="translate">/ Анализ данных</p>
+                <div class="row content-center mt-10">
+                    <div class="col-lg-10">
+                        <p>Направление Data Science можно рассматривать как отделение Школы анализа данных Яндекса в&nbsp;Санкт-Петербурге
+                    и&nbsp;в&nbsp;Новосибирске. Здесь ведётся подготовка специалистов в&nbsp;области обработки и&nbsp;анализа
+                    данных и&nbsp;извлечения информации из&nbsp;интернета.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    </div> {# -- div.cover #}
-{% endblock after_navbar_container %}
-{% block body_attrs %}class="_dark"{% endblock body_attrs %}
-{% block content %}
     <div class="container mt-10">
         <div class="row content-center">
                 <h2>Базовые курсы программы</h2>
@@ -46,7 +47,7 @@
         <div class="card-deck _three mb-8">
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                    <img src="/static/v2/img/pages/program/algorythms-part1.png" alt="">
+                    <img src="/static/v2/img/pages/syllabus/distance/algorythms-part1.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -58,7 +59,7 @@
             </a>
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                    <img src="/static/v2/img/pages/program/algorythms-part2.png" alt="">
+                    <img src="/static/v2/img/pages/syllabus/distance/algorythms-part2.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -69,7 +70,7 @@
             </a>
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                    <img src="/static/v2/img/pages/syllabus/distance/course.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -80,7 +81,7 @@
             </a>
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                    <img src="/static/v2/img/pages/syllabus/distance/course.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -91,7 +92,7 @@
             </a>
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                    <img src="/static/v2/img/pages/syllabus/distance/course.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -103,7 +104,7 @@
             </a>
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                    <img src="/static/v2/img/pages/syllabus/distance/course.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -115,7 +116,7 @@
             </a>
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                    <img src="/static/v2/img/pages/syllabus/distance/course.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -126,7 +127,7 @@
             </a>
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                   <img src="/static/v2/img/pages/program/python.png" alt="">
+                   <img src="/static/v2/img/pages/syllabus/distance/python.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -139,7 +140,7 @@
             </a>
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                    <img src="/static/v2/img/pages/syllabus/distance/course.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -151,7 +152,7 @@
             </a>
             <a href="#" class="card _program _shadowed">
                 <div class="card__img">
-                    <img src="/static/v2/img/pages/program/course.png" alt="">
+                    <img src="/static/v2/img/pages/syllabus/distance/course.png" alt="">
                 </div>
                 <div class="card__content">
                     <div class="card__title">
@@ -171,7 +172,7 @@
         <div class="container pt-10 pb-10">
             <div class="row">
                 <div class="col-lg-6 mb-10 mb-lg-0">
-                    <img class="img-fluid mr-10" src="/static/v2/img/pages/program/education-rules.jpg" alt="">
+                    <img class="img-fluid mr-10" src="/static/v2/img/pages/syllabus/distance/education-rules.jpg" alt="">
                 </div>
                 <div class="col-lg-6 pl-0 pl-lg-4 mt-0 mt-xl-6">
                     <h2>Правила очного обучения</h2>

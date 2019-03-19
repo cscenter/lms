@@ -98,6 +98,17 @@ public_menu = [
             r"^/courses/.*/assignments/\d+/edit$"
         ]),
     MenuItem(
+        pgettext_lazy("menu", "Программы"),
+        '/v2/pages/syllabus/on-campus/',
+        weight=30,
+        children=[
+            MenuItem(pgettext_lazy("menu", "Очное обучение"), '/v2/pages/syllabus/on-campus/', weight=10),
+            MenuItem(pgettext_lazy("menu", "Заочное обучение"), '/v2/pages/syllabus/distance/', weight=20),
+        ],
+        selected_patterns=[
+            r'^/v2/pages/syllabus/distance/',
+        ]),
+    MenuItem(
         pgettext_lazy("menu", "Онлайн"),
         '/v2/pages/online_courses/',
         weight=30,
