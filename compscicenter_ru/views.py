@@ -421,12 +421,6 @@ class OnCampusProgramDetailView(generic.TemplateView):
         cache_key = f"{TESTIMONIALS_CACHE_KEY}_{discipline_code}"
         filters = {"areas_of_study": discipline_code}
         context["testimonials"] = get_random_testimonials(4, cache_key, filters)
-        # Courses
-        courses = []
-        for course_group in study_program.course_groups.all():
-            for meta_course in course_group.courses.all():
-                courses.append(meta_course)
-        context["core_courses"] = sorted(courses, key=attrgetter("name"))
         context["branches"] = (Branch.objects
                                .filter(study_programs__academic_discipline__code=discipline_code,
                                        study_programs__is_active=True,

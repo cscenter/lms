@@ -22,9 +22,16 @@
         </div>
     </div>
 
- <div class="container mt-10">
+    <div class="container mt-10">
         <div class="row content-center">
+            <div class="col-lg-8 text-center">
                 <h2>Базовые курсы программы</h2>
+                <p class="text-center">
+                    Базовые курсы разбиты на группы.
+                    Вам не обязательно сдавать все, но из каждой группы нужно закончить хотя бы один.
+                    Для наглядности мы пронумеровали группы и отметили курсы.
+                </p>
+            </div>
             <div class="col-lg-12 text-center">
                 <ul class="ui nav nav-tabs content-center mt-4" role="tablist">
                     {% for branch in branches %}
@@ -43,35 +50,31 @@
             </div>
         </div>
         <div class="card-deck _three mb-8">
-            {% for meta_course in core_courses %}
-                <a href="{{ meta_course.get_absolute_url() }}" class="card _program _shadowed">
-                    <div class="card__img">
-                        <img src="{{ meta_course.get_cover_url() }}" alt="" />
-                    </div>
-                    <div class="card__content">
-                        <div class="card__title">
-                            {{ meta_course.name }}
+            {% for course_group in study_program.course_groups.all() %}
+                {% set group_index = loop.index %}
+                {% for meta_course in course_group.courses.all() %}
+                    <a href="{{ meta_course.get_absolute_url() }}" class="card _program _shadowed">
+                        <div style="position:absolute; right: 16px; top: 0; z-index: 200">{{ group_index }}</div>
+                        <div class="card__img">
+                            <img src="{{ meta_course.get_cover_url() }}" alt="" />
                         </div>
-                        {% if meta_course.short_description %}{{ meta_course.short_description }}{% endif %}
-                    </div>
-                </a>
+                        <div class="card__content">
+                            <div class="card__title">
+                                {{ meta_course.name }}
+                            </div>
+                            {% if meta_course.short_description %}{{ meta_course.short_description }}{% endif %}
+                        </div>
+                    </a>
+                {% endfor %}
             {% endfor %}
         </div>
-        <p class="text-small text-center text-muted mb-8">
-            Курсы из групп на выбор:<br>
-            {% for course_group in study_program.course_groups.all() %}
-                {% for meta_course in course_group.courses.all() %}
-                    «{{ meta_course.name }}»{% if not loop.last %}{% if course_group.courses.all()|length > 2 %},{% endif %} или {% endif %}
-                {% endfor %}{% if not loop.last %}<br>{% endif %}
-            {% endfor %}
-        </p>
     </div>
 
     <div class="container-fluid _light">
         <div class="container pt-10 pb-10">
             <div class="row">
                 <div class="col-lg-6 mb-10 mb-lg-0">
-                    <img class="img-fluid mr-10" src="{{ static('v2/img/pages/program/education_rules.jpg') }}" alt="">
+                    <img class="img-fluid mr-10" src="{{ static('v2/img/pages/syllabus/education_rules.jpg') }}" alt="">
                 </div>
                 <div class="col-lg-6 pl-0 pl-lg-4 mt-0 mt-xl-6">
                     <h2>Правила очного обучения</h2>
