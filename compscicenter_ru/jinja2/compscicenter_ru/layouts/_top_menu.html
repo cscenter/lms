@@ -43,6 +43,7 @@
                     {%- endwith %}
                 </button>
                 <div class="dropdown-menu _arrow-right" aria-labelledby="userMenuButton">
+                    <a class="dropdown-item d-lg-none" href="{{ url('index', subdomain=LMS_SUBDOMAIN) }}">Личный кабинет</a>
                     <a class="dropdown-item" href="{{ request.user.get_absolute_url() }}">Профиль</a>
                     {% if request.user.is_staff %}
                         <a class="dropdown-item" href="{{ url('staff:student_search', LMS_SUBDOMAIN) }}">Курирование</a>
