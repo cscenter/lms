@@ -1,8 +1,12 @@
-{% if request.user.is_authenticated %}{% set menu_name = "menu_private" %}
-{%- elif request.subdomain == LMS_SUBDOMAIN %}{% set menu_name = "my_compscicenter_ru_public" %}
-{%- else %}{% set menu_name = "menu_public" %}
-{%- endif -%}
-{%- set menu = csc_menu(menu_name, request) -%}
+{% if request.subdomain == LMS_SUBDOMAIN %}
+    {% if request.user.is_authenticated %}
+        {% set menu = csc_menu("menu_private", request) %}
+    {% else %}
+        {% set menu = [] %}
+    {% endif %}
+{% else %}
+    {% set menu = csc_menu("menu_public", request) %}
+{% endif %}
 <nav class="navbar navbar-main{% if menu_theme %} {{ menu_theme }}{% endif %}">
     <div class="container">
         <button class="navbar-toggler hamburger hamburger--vortex" type="button"
@@ -27,9 +31,9 @@
                 {{ macros.svg_inline('user-sign') }} Войти
             </a>
         {% else %}
+            <a class="members-area" href="{{ url('index', subdomain=LMS_SUBDOMAIN) }}">Личный кабинет</a>
             <div class="dropdown dropdown-user-menu">
                 <button class="btn" type="button" id="userMenuButton" data-id="{{ request.user.pk }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span>{{ request.user.get_short_name() }}</span>
                     {%- with im = request.user.get_thumbnail("60x60", use_stub=False) -%}
                         {%- if im -%}
                             <img class="user-menu-img" src="{{ im.url }}" width="32" height="32" alt="{{ request.user.get_full_name() }}">

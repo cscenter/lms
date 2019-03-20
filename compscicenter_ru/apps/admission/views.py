@@ -95,7 +95,7 @@ def redirect_to(redirect_url):
 
 
 @never_cache
-@redirect_to("admission:auth_complete")
+@redirect_to("application:auth_complete")
 def yandex_login_access(request, *args, **kwargs):
     redirect_url = reverse(kwargs.pop("redirect_url"))
     request.social_strategy = DjangoStrategy(DjangoStorageCustom, request,
@@ -111,7 +111,7 @@ def yandex_login_access(request, *args, **kwargs):
 
 @never_cache
 @csrf_exempt
-@redirect_to("admission:auth_complete")
+@redirect_to("application:auth_complete")
 def yandex_login_access_complete(request, *args, **kwargs):
     """
     Authentication complete view. Our main goal - to retrieve user yandex login.
@@ -172,8 +172,8 @@ class ApplicationFormView(TemplateView):
                 'props': {
                     'endpoint': reverse('api:applicant_create'),
                     'csrfToken': get_token(self.request),
-                    'authCompleteUrl': reverse('admission:auth_complete'),
-                    'authBeginUrl': reverse('admission:auth_begin'),
+                    'authCompleteUrl': reverse('application:auth_complete'),
+                    'authBeginUrl': reverse('application:auth_begin'),
                     'campaigns': list(active_campaigns),
                     'universities': list(universities),
                     'courses': courses,

@@ -1,12 +1,19 @@
 from django.utils.translation import pgettext_lazy
 from menu import Menu
 
-from compscicenter_ru.menus import common_menu
 from core.menu import MenuItem
 from core.urls import reverse
 from users.constants import AcademicRoles
 
-top_menu = common_menu + [
+top_menu = [
+    MenuItem(
+        pgettext_lazy("menu", "Courses"),
+        reverse("course_list"),
+        weight=10,
+        excluded_patterns=[
+            r"^/courses/.*/assignments/add$",
+            r"^/courses/.*/assignments/\d+/edit$"
+        ]),
     MenuItem(
         pgettext_lazy("menu", "Обучение"),
         reverse('study:assignment_list'),
