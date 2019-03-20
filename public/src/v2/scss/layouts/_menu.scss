@@ -259,7 +259,10 @@ $navbar-toggler-border-radius: $border-radius;
   margin: ($nav-link-padding-y / 2) 0 ($nav-link-padding-y / 2) auto;
   line-height: $nav-link-line-height - 2 * $input-btn-border-width;
   color: $white!important;
-
+  display: none;
+  @include media-breakpoint-up(lg) {
+    display: inline-block;
+  }
 }
 
 .btn.menu-btn-reg {
