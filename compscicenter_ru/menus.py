@@ -21,14 +21,6 @@ public_menu = [
             r"^/events/"
         ]),
     MenuItem(
-        pgettext_lazy("menu", "Courses"),
-        PUBLIC_DOMAIN + '/courses/',
-        weight=20,
-        excluded_patterns=[
-            r"^/courses/.*/assignments/add$",
-            r"^/courses/.*/assignments/\d+/edit$"
-        ]),
-    MenuItem(
         pgettext_lazy("menu", "Online Education"),
         PUBLIC_DOMAIN + '/online/',
         weight=30,
