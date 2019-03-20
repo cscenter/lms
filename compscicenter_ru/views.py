@@ -3,46 +3,41 @@
 import itertools
 import math
 import random
-from operator import attrgetter
-from typing import Dict
-
-from django.contrib.staticfiles.storage import staticfiles_storage
 
 from django.conf import settings
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.http.response import HttpResponseRedirect, HttpResponseNotFound
 from django.db.models import Q, Prefetch
 from django.http import Http404
+from django.http.response import HttpResponseNotFound
 from django.utils.timezone import now
 from django.utils.translation import pgettext_lazy
 from django.views import generic
 from django.views.generic import ListView
 from django_filters.views import FilterMixin
 from rest_framework.renderers import JSONRenderer
-from core.urls import reverse
 from vanilla import TemplateView
 
+from compscicenter_ru.serializers import CoursesSerializer
+from compscicenter_ru.utils import group_terms_by_academic_year
 from core.exceptions import Redirect
 from core.models import Faq
-from compscicenter_ru.serializers import CoursesSerializer
-from compscicenter_ru.utils import group_terms_by_academic_year, PublicRoute, \
-    PublicRouteException
-from learning.api.views import TestimonialList
-from learning.models import Branch
-from study_programs.models import StudyProgram, AcademicDiscipline
-from courses.models import Course, CourseTeacher
-from learning.settings import StudentStatuses, Branches
 from core.settings.base import CENTER_FOUNDATION_YEAR
+from core.urls import reverse
+from courses.models import Course, CourseTeacher
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index
+from learning.api.views import TestimonialList
+from learning.models import Branch
+from learning.settings import StudentStatuses, Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
 from stats.views import StudentsDiplomasStats
+from study_programs.models import StudyProgram, AcademicDiscipline
 from users.models import User
 from .filters import CoursesFilter
-
 
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
 
@@ -63,23 +58,10 @@ def get_random_testimonials(count, cache_key, filters=None):
     return testimonials
 
 
-
 class IndexView(TemplateView):
     template_name = 'compscicenter_ru/index.html'
     VK_CACHE_KEY = 'v2_index_vk_social_news'
     INSTAGRAM_CACHE_KEY = 'v2_index_instagram_posts'
-
-    def get(self, request, *args, **kwargs):
-        # FIXME: remove
-        if request.user.index_redirect:
-            try:
-                section_code = request.user.index_redirect
-                url = PublicRoute.url_by_code(section_code)
-                return HttpResponseRedirect(redirect_to=url)
-            except PublicRouteException:
-                pass
-        context = self.get_context_data()
-        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         # Online programs + online courses

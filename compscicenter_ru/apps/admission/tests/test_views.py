@@ -27,7 +27,7 @@ from users.tests.factories import UserFactory
 def test_application_form_availability(client):
     today = timezone.now()
     campaign = CampaignFactory(year=today.year, current=True)
-    url = reverse("admission:application")
+    url = reverse("application:form")
     response = client.get(url)
     assert response.status_code == 200
     campaign.current = False

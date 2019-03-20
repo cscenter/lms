@@ -32,15 +32,12 @@ urlpatterns = [
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
     # TODO: move redirect to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
-    # FIXME: точно только публичная версия? Пока не ясно
-    path('syllabus/', views.SyllabusView.as_view(), name='syllabus'),
     re_path(r'^(?P<year>201[3-7])/$', views.AlumniByYearView.as_view(), name='alumni_memory'),
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
     # Programs
     path('syllabus/on-campus/', views.OnCampusProgramsView.as_view(), name='on_campus_programs'),
     path('syllabus/on-campus/<slug:discipline_code>/', views.OnCampusProgramDetailView.as_view(), name='on_campus_program_detail'),
     path('syllabus/distance/', views.DistanceProgramView.as_view(), name='distance_program'),
-
 
     path('enrollment/', RedirectView.as_view(url='/application/')),
     path('enrollment/checklist/', views.EnrollmentChecklistView.as_view(), name='enrollment_checklist'),
@@ -59,8 +56,7 @@ urlpatterns = [
 
     path('', include('learning.enrollment.urls')),
 
-    # FIXME: separate into application and admission
-    path('', include('admission.urls')),
+    path('', include('admission.urls_application')),
 
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),

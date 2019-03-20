@@ -1,23 +1,15 @@
 from django.conf.urls import include, url
-from django.urls import path
 
 from admission.views import InterviewListView, InterviewDetailView, \
     ApplicantListView, ApplicantDetailView, \
     ApplicantStatusUpdateView, InterviewResultsView, ApplicantCreateUserView, \
     InterviewResultsDispatchView, InterviewAssignmentDetailView, \
     InterviewCommentView, InterviewAppointmentView, InterviewSlots, \
-    yandex_login_access, yandex_login_access_complete, \
-    applicant_testing_new_task, ApplicationFormView
-
+    applicant_testing_new_task
 
 app_name = 'admission'
 
 urlpatterns = [
-    url(r'^application/', include([
-        path('', ApplicationFormView.as_view(), name='application'),
-        url(r'^yandex_access/$', yandex_login_access, name='auth_begin'),
-        url(r'^yandex_access/complete/$', yandex_login_access_complete, name='auth_complete'),
-    ])),
     url(r'^admission/', include([
         url(r'^applicants/$', ApplicantListView.as_view(), name='applicants'),
         url(r'^applicants/import/testing/$', applicant_testing_new_task, name='import_testing_results'),
@@ -26,8 +18,8 @@ urlpatterns = [
         url(r'^applicants/status/(?P<pk>\d+)/$', ApplicantStatusUpdateView.as_view(), name='applicant_status_update'),
         url(r'^interviews/$', InterviewListView.as_view(), name='interviews'),
         url(r'^interviews/slots/$', InterviewSlots.as_view(), name='interview_slots'),
-        url(r'^interviews/assignments/(?P<pk>\d+)$', InterviewAssignmentDetailView.as_view(), name='interview_assignment_detail'),
-        url(r'^interviews/(?P<pk>\d+)$', InterviewDetailView.as_view(), name='interview_detail'),
+        url(r'^interviews/assignments/(?P<pk>\d+)/$', InterviewAssignmentDetailView.as_view(), name='interview_assignment_detail'),
+        url(r'^interviews/(?P<pk>\d+)/$', InterviewDetailView.as_view(), name='interview_detail'),
         url(r'^interviews/(?P<pk>\d+)/comment$', InterviewCommentView.as_view(), name='interview_comment'),
         url(r'^results/$', InterviewResultsDispatchView.as_view(), name='interview_results_dispatch'),
         url(r'^results/(?P<city_code>nsk|kzn|spb|online|)/$', InterviewResultsView.as_view(), name='interview_results_by_city', kwargs={"city_aware": True, "use_delimiter": False}),

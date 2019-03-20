@@ -29,8 +29,9 @@ urlpatterns = [
     path('staff/', include("staff.urls")),
     path('stats/', include("stats.urls")),
     path('surveys/', include("surveys.urls")),
-    # path('', include('courses.urls')),
     path('', include('learning.projects.urls')),
+
+    path('', include('admission.urls')),
 
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),

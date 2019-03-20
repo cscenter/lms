@@ -202,8 +202,9 @@ def test_interview_list(settings, client, curator):
 
 
 @pytest.mark.django_db
-def test_interview_detail(settings, admin_client):
+def test_interview_detail(settings, client, curator):
     settings.LANGUAGE_CODE = 'ru'
+    client.login(curator)
     # Add interview for msk timezone
     interview = InterviewFactory(date=datetime.datetime(2017, 1, 1,
                                                         15, 0, 0, 0,
@@ -213,7 +214,7 @@ def test_interview_detail(settings, admin_client):
     localized = date_in_utc.astimezone(settings.TIME_ZONES['nsk'])
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "22:00"
-    response = admin_client.get(interview.get_absolute_url())
+    response = client.get(interview.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
     assert any(time_str in s.string for s in
                html.find_all('div', {"class": "date"}))
@@ -223,7 +224,7 @@ def test_interview_detail(settings, admin_client):
     localized = date_in_utc.astimezone(settings.TIME_ZONES['spb'])
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "18:00"
-    response = admin_client.get(interview.get_absolute_url())
+    response = client.get(interview.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
     assert any(time_str in s.string for s in
                html.find_all('div', {"class": "date"}))

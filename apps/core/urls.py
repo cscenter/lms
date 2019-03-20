@@ -9,7 +9,7 @@ from subdomains.utils import reverse as _reverse
 from core.utils import is_club_site
 
 LMS_SUBDOMAIN_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
-                            'surveys', 'library')
+                            'surveys', 'library', 'admission')
 prefixes = "|".join(f"{re.escape(p)}:" for p in LMS_SUBDOMAIN_NAMESPACES)
 starts_with_lms_subdomain = re.compile(prefixes).match
 
