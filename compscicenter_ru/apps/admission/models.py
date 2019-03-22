@@ -237,9 +237,10 @@ class Applicant(TimeStampedModel):
         _("Contact phone"),
         max_length=42,
         help_text=_("Applicant|phone"))
-    stepic_id = models.PositiveIntegerField(
+    stepic_id = models.CharField(
         _("Stepik ID"),
         help_text=_("Applicant|stepic_id"),
+        max_length=255,
         blank=True,
         null=True)
     yandex_id = models.CharField(

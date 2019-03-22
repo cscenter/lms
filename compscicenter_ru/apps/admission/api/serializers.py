@@ -106,3 +106,9 @@ class ApplicantSerializer(serializers.ModelSerializer):
             attrs['university'] = university
         # TODO; where_did_you_learn_other, то where_did_you_learn должно содержать other и наоборот
         return attrs
+
+    def validate_stepic_id(self, value):
+        return value.rsplit("/", maxsplit=1)[-1]
+
+    def validate_github_id(self, value):
+        return value.rsplit("/", maxsplit=1)[-1]
