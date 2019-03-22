@@ -1,6 +1,8 @@
 from django.conf.urls import include, url
 
 # FIXME: guess it's better inherit these views
+from django.urls import path
+
 from learning.gradebook.views import GradeBookTeacherView
 from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
     ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
@@ -61,12 +63,9 @@ urlpatterns = [
         url(r'^reports/learning/will_graduate/(?P<output_format>csv|xlsx)/$',
             WillGraduateStatsReportView.as_view(),
             name='exports_report_will_graduate'),
-        url(r'^reports/admission/(?P<campaign_pk>\d+)/csv/$',
-            AdmissionReportView.as_view(output_format="csv"),
-            name='exports_report_admission_csv'),
-        url(r'^reports/admission/(?P<campaign_pk>\d+)/xlsx/$',
-            AdmissionReportView.as_view(output_format="xlsx"),
-            name='exports_report_admission_xlsx'),
+        path('reports/admission/<int:campaign_id>/<str:output_format>/',
+             AdmissionReportView.as_view(),
+             name='exports_report_admission'),
         url(r'^reports/surveys/(?P<survey_pk>\d+)/(?P<output_format>csv|xlsx)/$',
             SurveySubmissionsReportView.as_view(),
             name='exports_report_survey_submissions'),

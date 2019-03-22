@@ -52,9 +52,10 @@ class AdmissionReport(ReportFileOutput):
                 elif field.name == 'course':
                     value = applicant.get_course_display()
                 elif field.name == 'id':
-                    value = "https://compscicenter.ru{}".format(
-                        reverse("admission:applicant_detail", args=[value])
-                    )
+                    value = reverse("admission:applicant_detail", args=[value])
+                elif field.name == 'created':
+                    value = formats.date_format(applicant.created,
+                                                "SHORT_DATE_FORMAT")
                 row.append(value)
             if hasattr(applicant, "online_test"):
                 row.append(applicant.online_test.score)
@@ -92,14 +93,13 @@ class AdmissionReport(ReportFileOutput):
 
     @staticmethod
     def get_applicant_fields():
-        exclude_applicant_fields = [
-            'created',
+        exclude_applicant_fields = {
             'modified',
             'uuid',
             'yandex_id_normalize',
             'campaign',
             'user'
-        ]
+        }
         return [f for f in Applicant._meta.fields if
                 f.name not in exclude_applicant_fields]
 

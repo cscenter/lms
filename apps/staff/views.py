@@ -377,19 +377,17 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
 
 
 class AdmissionReportView(CuratorOnlyMixin, generic.base.View):
-    http_method_names = ['get']
-    output_format = None
+    FORMATS = ('csv', 'xlsx')
 
-    def get(self, request, *args, **kwargs):
-        campaign_pk = kwargs.get("campaign_pk")
-        campaign = get_object_or_404(Campaign.objects.filter(pk=campaign_pk))
+    def get(self, request, campaign_id, output_format, **kwargs):
+        if output_format not in self.FORMATS:
+            return HttpResponseBadRequest(f"Supported formats {self.FORMATS}")
+        campaign = get_object_or_404(Campaign.objects.filter(pk=campaign_id))
         report = AdmissionReport(campaign=campaign)
-        if self.output_format == "csv":
+        if output_format == "csv":
             return report.output_csv()
-        elif self.output_format == "xlsx":
+        elif output_format == "xlsx":
             return report.output_xlsx()
-        else:
-            raise ValueError("AdmissionReportView: output format not provided")
 
 
 class WillGraduateStatsReportView(CuratorOnlyMixin, generic.base.View):
@@ -632,7 +630,7 @@ class SyllabusView(CuratorOnlyMixin, generic.TemplateView):
 
 
 class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):
-    FORMATS = ["csv", "xlsx"]
+    FORMATS = ("csv", "xlsx")
 
     def get(self, request, survey_pk, output_format, *args, **kwargs):
         if output_format not in self.FORMATS:
