@@ -36,7 +36,7 @@
                 <div class="list-group-item">
                     <h4 class="list-group-item-heading">Поступление. Отчетность по набору</h4>
                     {% for campaign in campaigns %}
-                        <a target="_blank" href="{% url 'staff:exports_report_admission_csv' campaign.pk %}">{{ campaign }}</a><br>
+                        <a target="_blank" href="{% url 'staff:exports_report_admission' campaign.pk 'csv' %}">{{ campaign }}</a><br>
                     {% endfor %}
                 </div>
                 <div class="list-group-item">
