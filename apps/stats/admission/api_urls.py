@@ -8,7 +8,7 @@ from stats.admission.views import CampaignsStagesByYears, \
     CampaignStagesByUniversities, CampaignStagesByCourses, \
     CampaignStatsTestingScoreByCourses, CampaignStatsExamScoreByCourses, \
     CampaignResultsByUniversities, CampaignResultsByCourses, \
-    ApplicationSubmission
+    ApplicationSubmission, ApplicationFormSubmissionByDays
 
 urlpatterns = [
     # Stages
@@ -22,9 +22,8 @@ urlpatterns = [
         CampaignStagesByCourses.as_view({'get': 'list'}),
         name='stats_admission_campaign_stages_by_course'),
     # Applicants
-    url(r'^cities/(?P<city_code>\w+)/applicants/$',
-        CampaignStatsApplicantsResults.as_view(),
-        name='stats_admission_campaign_applicants_results'),
+    url(r'^cities/(?P<city_code>\w+)/applicants/$', CampaignStatsApplicantsResults.as_view(), name='stats_admission_campaign_applicants_results'),
+    url(r'^cities/(?P<city_code>\w+)/applicants/form-submissions/', ApplicationFormSubmissionByDays.as_view(), name='stats_admission_application_form_submission'),
     url(r'^campaigns/(?P<campaign_id>\d+)/applicants/by-university/$',
         CampaignResultsByUniversities.as_view(),
         name='stats_admission_campaign_applicants_by_university'),
