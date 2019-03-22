@@ -17,6 +17,10 @@ class CampaignResultsTimelineSerializer(PandasSerializer):
                 .reset_index('campaign__year'))
 
 
+class ApplicationFormSubmissionTimelineSerializer(PandasSerializer):
+    pass
+
+
 class CampaignResultsByUniversitiesSerializer(PandasSerializer):
     def transform_dataframe(self, dataframe):
         return (dataframe

@@ -1,5 +1,6 @@
-from django.db.models import Count, When, IntegerField, Case, Q
-from django.db.models.functions import TruncDate
+from django.db.models import Count, When, IntegerField, Case, Q, Func, F
+from django.db.models.functions import TruncDate, ExtractMonth, ExtractDay, \
+    ExtractYear
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
@@ -11,9 +12,10 @@ from stats.admission.pandas_serializers import \
     CampaignResultsTimelineSerializer, \
     ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
     CampaignResultsByUniversitiesSerializer, \
-    CampaignResultsByCoursesSerializer, ApplicationSubmissionPandasSerializer
+    CampaignResultsByCoursesSerializer, ApplicationSubmissionPandasSerializer, \
+    ApplicationFormSubmissionTimelineSerializer
 from stats.admission.serializers import StageByYearSerializer, \
-    ApplicationSubmissionSerializer
+    ApplicationSubmissionSerializer, AnnotatedApplicationSubmissionSerializer
 from stats.renderers import ListRenderersMixin
 
 TestingCountAnnotation = Count(
@@ -80,6 +82,27 @@ class CampaignStagesByCourses(ReadOnlyModelViewSet):
                           examination=ExaminationCountAnnotation,
                           interviewing=InterviewingCountAnnotation)
                 .order_by("course"))
+
+
+class ApplicationFormSubmissionByDays(ListRenderersMixin, PandasView):
+    permission_classes = [CuratorAccessPermission]
+    serializer_class = AnnotatedApplicationSubmissionSerializer
+    pandas_serializer_class = ApplicationFormSubmissionTimelineSerializer
+
+    def get_queryset(self):
+        city_code = self.kwargs.get('city_code')
+        qs = (Applicant.objects
+              .filter(campaign__city_id=city_code,
+                      created__year__gte=2017)
+              .annotate(month=ExtractMonth('created'),
+                        day=ExtractDay('created'),
+                        year=ExtractYear('created'))
+              .values('month', 'day', 'year')
+              .annotate(total=Count("year"))
+              # Under the assumption that application form submission date
+              # inside campaign dates range
+              .order_by('month', 'day', 'year'))
+        return qs
 
 
 class CampaignStatsApplicantsResults(ListRenderersMixin, PandasView):
