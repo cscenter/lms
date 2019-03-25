@@ -59,16 +59,19 @@ class Campaign(models.Model):
         _("Campaign|Test_passing_score"),
         help_text=_("Campaign|Test_passing_score-help"))
     exam_max_score = models.SmallIntegerField(
-        _("Campaign|Exam_max_score"))
+        _("Campaign|Exam_max_score"),
+        null=True, blank=True)
     exam_passing_score = models.SmallIntegerField(
         _("Campaign|Exam_passing_score"),
-        help_text=_("Campaign|Exam_passing_score-help"))
+        help_text=_("Campaign|Exam_passing_score-help"),
+        null=True, blank=True)
     current = models.BooleanField(
         _("Current campaign"),
         help_text=_("Show in application form list"),
         default=False)
+    application_starts_at = models.DateTimeField(_("Application Starts on"))
     application_ends_at = models.DateTimeField(
-        _("Application Ends At"),
+        _("Application Ends on"),
         help_text=_("Last day for submitting application"))
     access_token = models.CharField(
         _("Access Token"),

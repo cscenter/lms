@@ -17,21 +17,6 @@ class CampaignResultsTimelineSerializer(PandasSerializer):
                 .reset_index('campaign__year'))
 
 
-class ApplicationFormSubmissionTimelineSerializer(PandasSerializer):
-    def transform_dataframe(self, dataframe):
-        dataframe = (dataframe.pivot_table(index=['month', 'day'],
-                                           columns='year',
-                                           values='total', fill_value=0)
-                     .reset_index())
-        ddmm_column = (dataframe.day.astype(str).str.zfill(2).str.cat(
-            dataframe.month.astype(str).str.zfill(2),
-            sep='.'))
-        dataframe = (dataframe.set_index(ddmm_column)
-                     .drop(['day', 'month'], axis=1))
-        dataframe.index.rename('date', inplace=True)
-        return dataframe
-
-
 class CampaignResultsByUniversitiesSerializer(PandasSerializer):
     def transform_dataframe(self, dataframe):
         return (dataframe
