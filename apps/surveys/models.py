@@ -231,7 +231,7 @@ class Form(AbstractForm):
         course = survey.course
         context = {
             "COURSE_NAME": str(course),
-            "SURVEY_URL": f"https://compscicenter.ru{survey.get_absolute_url()}"
+            "SURVEY_URL": survey.get_absolute_url()
         }
         active_enrollments = (Enrollment.active
                               .filter(course=course.pk)
