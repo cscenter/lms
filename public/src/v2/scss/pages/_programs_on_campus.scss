@@ -73,3 +73,20 @@
   }
 }
 
+a._program-card {
+
+  .card__title {
+    color: $white;
+    @include media-breakpoint-up(md) {
+      color: $link-color;
+    }
+  }
+  &:hover {
+    .card__title {
+      color: $white;
+      @include media-breakpoint-up(md) {
+        color: $link-hover-color;
+      }
+    }
+  }
+}
