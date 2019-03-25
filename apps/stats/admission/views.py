@@ -15,7 +15,7 @@ from stats.admission.pandas_serializers import \
     CampaignResultsByCoursesSerializer, ApplicationSubmissionPandasSerializer, \
     ApplicationFormSubmissionTimelineSerializer
 from stats.admission.serializers import StageByYearSerializer, \
-    ApplicationSubmissionSerializer, AnnotatedApplicationSubmissionSerializer
+    ApplicationSubmissionSerializer
 from stats.renderers import ListRenderersMixin
 
 TestingCountAnnotation = Count(
@@ -86,7 +86,7 @@ class CampaignStagesByCourses(ReadOnlyModelViewSet):
 
 class ApplicationFormSubmissionByDays(ListRenderersMixin, PandasView):
     permission_classes = [CuratorAccessPermission]
-    serializer_class = AnnotatedApplicationSubmissionSerializer
+    serializer_class = SimpleSerializer
     pandas_serializer_class = ApplicationFormSubmissionTimelineSerializer
 
     def get_queryset(self):
@@ -98,7 +98,7 @@ class ApplicationFormSubmissionByDays(ListRenderersMixin, PandasView):
                         day=ExtractDay('created'),
                         year=ExtractYear('created'))
               .values('month', 'day', 'year')
-              .annotate(total=Count("year"))
+              .annotate(total=Count("id"))
               # Under the assumption that application form submission date
               # inside campaign dates range
               .order_by('month', 'day', 'year'))

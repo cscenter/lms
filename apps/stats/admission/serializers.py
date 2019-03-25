@@ -14,11 +14,6 @@ class StageByYearSerializer(serializers.Serializer):
         return instance
 
 
-class AnnotatedApplicationSubmissionSerializer(SimpleSerializer):
-    class Meta:
-        pandas_index = ['day', 'month', 'year']
-
-
 class ApplicationSubmissionSerializer(SimpleSerializer):
     class Meta:
         pandas_index = ['date']
