@@ -1,19 +1,21 @@
+import datetime
+
 from django.db.models import Count, When, IntegerField, Case, Q, Func, F
 from django.db.models.functions import TruncDate, ExtractMonth, ExtractDay, \
     ExtractYear
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
 from rest_pandas.serializers import SimpleSerializer, PandasSerializer
 
 from api.permissions import CuratorAccessPermission
-from admission.models import Applicant, Test, Exam
+from admission.models import Applicant, Test, Exam, Campaign
 from stats.admission.pandas_serializers import \
     CampaignResultsTimelineSerializer, \
     ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
     CampaignResultsByUniversitiesSerializer, \
-    CampaignResultsByCoursesSerializer, ApplicationSubmissionPandasSerializer, \
-    ApplicationFormSubmissionTimelineSerializer
+    CampaignResultsByCoursesSerializer, ApplicationSubmissionPandasSerializer
 from stats.admission.serializers import StageByYearSerializer, \
     ApplicationSubmissionSerializer
 from stats.renderers import ListRenderersMixin
@@ -84,25 +86,53 @@ class CampaignStagesByCourses(ReadOnlyModelViewSet):
                 .order_by("course"))
 
 
-class ApplicationFormSubmissionByDays(ListRenderersMixin, PandasView):
+class ApplicationFormSubmissionByDays(ListAPIView):
     permission_classes = [CuratorAccessPermission]
     serializer_class = SimpleSerializer
-    pandas_serializer_class = ApplicationFormSubmissionTimelineSerializer
 
-    def get_queryset(self):
-        city_code = self.kwargs.get('city_code')
+    def list(self, request, *args, **kwargs):
+        campaigns = (Campaign.objects
+                     .filter(city_id=self.kwargs['city_code'], year__gte=2017))
+        data = self.get_stat(campaigns)
+        return Response(data)
+
+    @staticmethod
+    def get_filters(campaigns):
+        dates = None
+        campaign_ids = []
+        for c in campaigns:
+            application_period = Q(created__gte=c.application_starts_at,
+                                   created__lte=c.application_ends_at)
+            if dates is None:
+                dates = application_period
+            else:
+                dates |= application_period
+            campaign_ids.append(c.id)
+        return Q(campaign__in=campaign_ids) & dates
+
+    def get_stat(self, campaigns):
+        filters = self.get_filters(campaigns)
         qs = (Applicant.objects
-              .filter(campaign__city_id=city_code,
-                      created__year__gte=2017)
+              .filter(filters)
               .annotate(month=ExtractMonth('created'),
                         day=ExtractDay('created'),
                         year=ExtractYear('created'))
-              .values('month', 'day', 'year')
+              .values_list('year', 'month', 'day')
               .annotate(total=Count("id"))
-              # Under the assumption that application form submission date
-              # inside campaign dates range
-              .order_by('month', 'day', 'year'))
-        return qs
+              .order_by('year', 'month', 'day'))
+        # XXX: Aggregated data doesn't include days without applications.
+        data = {}
+        application_start = {}
+        # FIXME: get max length?
+        for c in campaigns:
+            application_start[c.year] = c.application_starts_at.date()
+            d = c.application_ends_at.date() - c.application_starts_at.date()
+            data[c.year] = [0 for _ in range(d.days + 1)]
+        for year, month, day, total in qs:
+            created = datetime.date(year=year, month=month, day=day)
+            index = (created - application_start[year]).days
+            data[year][index] = data[year][index - 1] + total
+        return data
 
 
 class CampaignStatsApplicantsResults(ListRenderersMixin, PandasView):
