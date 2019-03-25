@@ -14,11 +14,7 @@ export default class ApplicationFormSubmissionTimeline {
         this.state = {
             data: {
                 type: 'bar',
-                keys: {
-                    x: 'date',
-                    value: [],
-                },
-                json: [],
+                columns: [],
                 order: null, // https://github.com/c3js/c3/issues/1945
             }
         };
@@ -31,15 +27,20 @@ export default class ApplicationFormSubmissionTimeline {
             },
             axis: {
                 x: {
-                    type: 'categories',
+                    type: 'category',
                     tick: {
+                        format: function (x) { return x + 1 },
                         multiline: false,
                         rotate: 90
                     }
                 }
             },
-            subchart: {
-                show: true
+            tooltip: {
+                format: {
+                    title: (x) => {
+                        return `день ${x + 1}`;
+                    },
+                }
             },
             data: this.state.data
         });
@@ -55,9 +56,12 @@ export default class ApplicationFormSubmissionTimeline {
     }
 
     convertData = (rawJSON) => {
-        const {date, ...years} = rawJSON[0];
-        this.state.data.json = rawJSON;
-        this.state.data.keys.value = Object.keys(years);
+        let columns = [];
+        Object.keys(rawJSON).forEach(year => {
+          let values = rawJSON[year];
+          columns.push([year, ...values]);
+        });
+        this.state.data.columns = columns;
         return rawJSON;
     };
 
