@@ -27,42 +27,43 @@
                         <div class="mb-6">{{ branch.description }}</div>
                         <h2>Программы обучения</h2>
                         {% for program in study_programs %}
-                            <div class="card _program-card">
+                            <a class="card _program-card" href="{{ url('on_campus_program_detail', discipline_code=program.academic_discipline.code) }}" >
                                 <div class="card__img col-md-4">
                                     {% if program.academic_discipline.cover %}<img src="{{ program.academic_discipline.cover.url }}" alt="">{% endif %}
                                 </div>
                                 <div class="card__content col-md">
-                                    <div class="card__title">
-                                        <a href="{{ url('on_campus_program_detail', discipline_code=program.academic_discipline.code) }}" >{{ program.academic_discipline.name_en }}</a>
-                                    </div>
+                                    <div class="card__title">{{ program.academic_discipline.name_en }}</div>
                                     <p class="card__subtitle">{{ program.academic_discipline.name_ru }}</p>
                                     <p class="card__text">
                                         {{ program.academic_discipline.description }}
                                     </p>
                                 </div>
-                            </div>
+                            </a>
                         {% endfor %}
                     </div>
                 {% endfor %}
                 </div>
             </div>
             <div class="col-lg-3 offset-lg-1">
-                <div class="card mb-4">
+                <a class="card mb-4" href="{{ url("distance_program") }}">
                     <div class="card__content text-small">
-                        <div class="card__title">
-                            <a href="{{ url("distance_program") }}">Заочное обучение</a>
-                        </div>
+                        <div class="card__title">Заочное обучение</div>
                         Для жителей других городов <span class="text-nowrap">CS центр</span> предлагает платное заочное обучение. Набор по конкурсу раз в год.
                     </div>
-                </div>
-                <div class="card mb-4">
+                </a>
+                <a class="card mb-4" href="{{ url("course_list") }}">
                     <div class="card__content text-small">
-                        <div class="card__title">
-                            <a href="{{ url("course_list") }}">Все курсы</a>
-                        </div>
+                        <div class="card__title">Все курсы</div>
                         Курсы подготовлены сотрудниками Яндекса, JetBrains и других <span class="text-nowrap">IT-компаний</span>, преподавателями ведущих вузов Петербурга и Новосибирска.
                     </div>
-                </div>
+                </a>
+                <a href="https://compscicenter.ru/pages/projects/" class="card mb-4">
+                    <div class="card__content text-small">
+                        <div class="card__title">Практики и научно-исследовательская работа</div>
+                        Во&nbsp;время обучения студенты работают над практическими или исследовательскими задачами
+                        под руководством опытных программистов или учёных.
+                    </div>
+                </a>
             </div>
         </div>
 
