@@ -16,11 +16,7 @@ export default class ApplicationFormSubmissionTimeline {
                 type: 'bar',
                 keys: {
                     x: 'date',
-                    value: [
-                        "2017",
-                        "2018",
-                        "2019",
-                    ],
+                    value: [],
                 },
                 json: [],
                 order: null, // https://github.com/c3js/c3/issues/1945
@@ -42,9 +38,9 @@ export default class ApplicationFormSubmissionTimeline {
                     }
                 }
             },
-    subchart: {
-        show: true
-    },
+            subchart: {
+                show: true
+            },
             data: this.state.data
         });
         let promise = options.apiRequest || this.getStats(options.cityCode);
@@ -59,18 +55,10 @@ export default class ApplicationFormSubmissionTimeline {
     }
 
     convertData = (rawJSON) => {
-        let json = [];
-        rawJSON.forEach((item) => {
-            const paddedDay = item.day.toString().padStart("2", "0");
-            const paddedMonth = item.month.toString().padStart("2", "0");
-            json.push({
-                [item.year]: item.total,
-                'date': `${paddedDay}.${paddedMonth}`,
-            });
-        });
-        this.state.data.json = json;
-        console.log(json);
-        return json;
+        const {date, ...years} = rawJSON[0];
+        this.state.data.json = rawJSON;
+        this.state.data.keys.value = Object.keys(years);
+        return rawJSON;
     };
 
     reflow = (json) => {
