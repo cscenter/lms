@@ -10,16 +10,14 @@
   .nav-item {
     margin-bottom: -$border-width;
     margin-left: -$border-width;
-    &:first-child{
+    &:first-child {
       margin-left: 0;
-      a {
-        border-top-left-radius: $border-radius;
-      }
+      border-top-left-radius: $border-radius;
+      overflow: hidden;
     }
     &:last-child {
-      a {
         border-top-right-radius: $border-radius;
-      }
+        overflow: hidden;
     }
   }
 

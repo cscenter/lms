@@ -105,6 +105,11 @@ $(function () {
             .then(module => { module.launch(); })
             .catch(error => showComponentError(error));
     }
+    if (sections.includes("tabs")) {
+        import(/* webpackChunkName: "tabs" */ 'apps/tabs')
+            .then(module => { module.launch(); })
+            .catch(error => showComponentError(error));
+    }
     let reactApps = document.querySelectorAll('.__react-root');
     if (reactApps.length > 0) {
         import(/* webpackChunkName: "react" */ 'react_app')
