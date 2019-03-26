@@ -107,11 +107,17 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
 
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ['id', 'yandex_id', 'surname', 'first_name', 'campaign', 'created']
+    list_display = ('id', 'yandex_id', 'surname', 'first_name', 'campaign',
+                    'created_local')
     list_filter = [CampaignListFilter, 'status']
     search_fields = ['yandex_id', 'yandex_id_normalize', 'stepic_id',
                      'first_name', 'surname', 'email']
     readonly_fields = ['yandex_id_normalize']
+
+    def created_local(self, obj):
+        return admin_datetime(obj.created_local())
+    created_local.admin_order_field = 'created'
+    created_local.short_description = _("Created")
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'campaign':

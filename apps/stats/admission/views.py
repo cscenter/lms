@@ -3,6 +3,7 @@ import datetime
 from django.db.models import Count, When, IntegerField, Case, Q, Func, F
 from django.db.models.functions import TruncDate, ExtractMonth, ExtractDay, \
     ExtractYear
+from django.utils import timezone
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
@@ -11,6 +12,7 @@ from rest_pandas.serializers import SimpleSerializer, PandasSerializer
 
 from api.permissions import CuratorAccessPermission
 from admission.models import Applicant, Test, Exam, Campaign
+from core.timezone import now_local
 from stats.admission.pandas_serializers import \
     CampaignResultsTimelineSerializer, \
     ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
@@ -98,15 +100,12 @@ class ApplicationFormSubmissionByDays(ListAPIView):
 
     @staticmethod
     def get_filters(campaigns):
-        dates = None
+        dates = Q()
         campaign_ids = []
         for c in campaigns:
             application_period = Q(created__gte=c.application_starts_at,
                                    created__lte=c.application_ends_at)
-            if dates is None:
-                dates = application_period
-            else:
-                dates |= application_period
+            dates |= application_period
             campaign_ids.append(c.id)
         return Q(campaign__in=campaign_ids) & dates
 
@@ -123,15 +122,29 @@ class ApplicationFormSubmissionByDays(ListAPIView):
         # XXX: Aggregated data doesn't include days without applications.
         data = {}
         application_start = {}
-        # FIXME: get max length?
         for c in campaigns:
-            application_start[c.year] = c.application_starts_at.date()
-            d = c.application_ends_at.date() - c.application_starts_at.date()
-            data[c.year] = [0 for _ in range(d.days + 1)]
+            start = c.application_starts_at_local().date()
+            end = c.application_ends_at_local().date()
+            data[c.year] = [0 for _ in range((end - start).days + 1)]
+            application_start[c.year] = start
         for year, month, day, total in qs:
             created = datetime.date(year=year, month=month, day=day)
             index = (created - application_start[year]).days
-            data[year][index] = data[year][index - 1] + total
+            # Applications could be sent before official release
+            if index >= 0:
+                data[year][index] = total
+        active_campaign = next((c for c in campaigns if c.current), None)
+        for year in data:
+            xs = data[year]
+            index = len(xs)
+            # For current campaign calculate partial sums until today
+            if active_campaign and active_campaign.year == year:
+                start = active_campaign.application_starts_at_local().date()
+                today = now_local(active_campaign.get_city_timezone()).date()
+                index = min(index, (today - start).days + 1)
+            # Partial sums
+            for i in range(1, index):
+                xs[i] += xs[i - 1]
         return data
 
 

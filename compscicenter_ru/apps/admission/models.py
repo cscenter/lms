@@ -103,6 +103,11 @@ class Campaign(models.Model):
     def city_aware_field_name(self):
         return self.__class__.city.field.name
 
+    def application_starts_at_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.application_starts_at, timezone=tz)
+
     def application_ends_at_local(self, tz=None):
         if not tz:
             tz = self.get_city_timezone()
@@ -431,6 +436,11 @@ class Applicant(TimeStampedModel):
     @property
     def city_aware_field_name(self):
         return self.__class__.campaign.field.name
+
+    def created_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.created, timezone=tz)
 
     def get_full_name(self):
         parts = [self.surname, self.first_name, self.patronymic]
