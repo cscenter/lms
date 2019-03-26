@@ -109,7 +109,14 @@ class ApplicationFormPage extends React.Component {
     handleSubmit = e => {
         e.preventDefault();
         const {endpoint, csrfToken, campaigns} = this.props;
-        const {has_job, university, course, campaign, ...payload} = this.state;
+        const {
+            has_job,
+            agreement,
+            university,
+            course,
+            campaign,
+            ...payload
+        } = this.state;
         payload["course"] = course && course.value;
         payload["has_job"] = (has_job === "yes");
         if (university) {
@@ -160,6 +167,7 @@ class ApplicationFormPage extends React.Component {
         const {universities, courses, campaigns, studyPrograms, sources} = this.props;
         const {
             isYandexPassportAccessAllowed,
+            agreement,
             has_job,
             where_did_you_learn,
             campaign,
@@ -470,8 +478,15 @@ class ApplicationFormPage extends React.Component {
                 </fieldset>
                 <div className="row">
                     <div className="col-lg-12">
-                        <p>Нажимая «Подать заявку», вы соглашаетесь на передачу данных CS центру и на получение писем по поводу приемной кампании.</p>
-                        <button type="submit" className="btn _primary _m-wide">Подать заявку</button>
+                        <div className="grouped mb-4">
+                            <Checkbox
+                                required
+                                name={"agreement"}
+                                label={<Fragment>Настоящим Я подтверждаю свое согласие на обработку Оператором моих персональных данных в соответствии с <a target="_blank" href='https://compscicenter.ru/policy/'>Политикой в отношении обработки персональных данных Пользователей Веб-сайта</a>, а также гарантирую достоверность представленных мной данных</Fragment>}
+                                onChange={this.handleInputChange}
+                            />
+                        </div>
+                        <button type="submit" disabled={!agreement} className="btn _primary _m-wide">Подать заявку</button>
                     </div>
                 </div>
             </form>
