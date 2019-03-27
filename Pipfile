@@ -32,7 +32,7 @@ pytest-pythonpath = "==0.7.3"
 [packages]
 # Framework
 pytz = "==2018.9"
-Django = "==2.1.5"
+Django = "==2.1.7"
 # DB
 psycopg2-binary = "==2.7.6.1"
 jsonfield = "==2.0.2"
@@ -81,7 +81,7 @@ tablib = "==0.12.1"
 # Freeze openpyxl lib since tablib 0.12.1 doesn't support a newer one
 # and breaks django-import-export xlsx export
 openpyxl = "==2.5.12"
-nbconvert = "==5.4.0"
+nbconvert = "==5.4.1"
 djangorestframework = "==3.9.0"
 rest-pandas = "==1.0.0"
 django-js-reverse = "==0.8.2"
