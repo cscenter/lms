@@ -482,7 +482,7 @@ class ApplicationFormPage extends React.Component {
                             <Checkbox
                                 required
                                 name={"agreement"}
-                                label={<Fragment>Настоящим Я подтверждаю свое согласие на обработку Оператором моих персональных данных в соответствии с <a target="_blank" href='https://compscicenter.ru/policy/'>Политикой в отношении обработки персональных данных Пользователей Веб-сайта</a>, а также гарантирую достоверность представленных мной данных</Fragment>}
+                                label={<Fragment>Настоящим подтверждаю свое согласие на обработку Оператором моих персональных данных в соответствии с <a target="_blank" href='https://compscicenter.ru/policy/'>Политикой в отношении обработки персональных данных Пользователей Веб-сайта</a>, а также гарантирую достоверность представленных мной данных</Fragment>}
                                 onChange={this.handleInputChange}
                             />
                         </div>
