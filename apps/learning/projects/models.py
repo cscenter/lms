@@ -340,7 +340,7 @@ class ReviewCriteria(TimeStampedModel):
     )
     score_usefulness = models.PositiveSmallIntegerField(
         choices=USEFULNESS_CRITERION,
-        verbose_name=_("Who and why this can be useful."),
+        verbose_name=_("Possible uses and scenarios"),
         blank=True,
         null=True
     )
@@ -358,7 +358,8 @@ class ReviewCriteria(TimeStampedModel):
     )
     score_technologies = models.PositiveSmallIntegerField(
         choices=TECHNOLOGIES_CRITERION,
-        verbose_name=_("What technologies are used."),
+        verbose_name=_("The choice of technologies or method of integration "
+                       "with the existing development"),
         blank=True,
         null=True
     )
