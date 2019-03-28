@@ -1,15 +1,13 @@
+from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from admission.api.serializers import ApplicantSerializer
-from rest_framework.response import Response
-from rest_framework import status
-
 from admission.views import SESSION_LOGIN_KEY
 
 
 class ApplicantCreateAPIView(CreateAPIView):
-    # FIXME: Close access if no active campaigns
     permission_classes = (AllowAny,)
     serializer_class = ApplicantSerializer
 
@@ -31,4 +29,3 @@ class ApplicantCreateAPIView(CreateAPIView):
         self.request.session.pop(SESSION_LOGIN_KEY, None)
         return Response(serializer.data, status=status.HTTP_201_CREATED,
                         headers=headers)
-

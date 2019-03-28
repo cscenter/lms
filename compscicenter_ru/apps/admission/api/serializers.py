@@ -9,15 +9,25 @@ from admission.tasks import register_in_yandex_contest
 from core.models import University
 
 
+class ActiveCampaignField(serializers.PrimaryKeyRelatedField):
+    def get_queryset(self):
+        if self.queryset:
+            return self.queryset.all()
+        return Campaign.get_active()
+
+
 class ApplicantSerializer(serializers.ModelSerializer):
     where_did_you_learn = serializers.MultipleChoiceField(
         WHERE_DID_YOU_LEARN,
         allow_empty=False)
     preferred_study_programs = serializers.MultipleChoiceField(
-        Applicant.STUDY_PROGRAMS, required=False)
-    campaign = serializers.PrimaryKeyRelatedField(
+        Applicant.STUDY_PROGRAMS,
+        required=False,
+        error_messages={'empty': 'Выберите интересующие вас направления обучения'}
+    )
+    campaign = ActiveCampaignField(
         label='Отделение',
-        queryset=Campaign.get_active())
+        error_messages={'does_not_exist': 'Приемная кампания окончена либо не существует'})
     # Note: This field is marked as required on a form level only since
     # curators could insert applicant through admin interface
     # without full information about applicant.
@@ -74,6 +84,22 @@ class ApplicantSerializer(serializers.ModelSerializer):
                 # case when `university_other` value provided. Set value
                 # later in `.validate` method.
                 self.fields["university"].required = False
+            if "campaign" in data:
+                try:
+                    # This logic adds one additional DB hit, but
+                    # improves validation since we need dynamically set
+                    # `required` logic for some fields
+                    campaign = (self.fields['campaign']
+                                .get_queryset()
+                                .get(pk=data['campaign']))
+                    if not campaign.branch.is_remote:
+                        field = self.fields["preferred_study_programs"]
+                        field.required = True
+                        field.allow_empty = False
+                    elif not data.get("living_place"):
+                        self.fields["living_place"].required = True
+                except Campaign.DoesNotExist:
+                    self.fields['campaign'].queryset = Campaign.objects.none()
         super().__init__(instance, data, **kwargs)
 
     def save(self, **kwargs):
@@ -84,15 +110,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, attrs):
-        # FIXME: Информацию о компании лучше вытащить до работы сериализатора и динамически выставлять флаг required вместо костылей ниже
         campaign = attrs['campaign']
-        if (not campaign.city.is_online_branch and
-                not attrs.get("preferred_study_programs")):
-            raise serializers.ValidationError(
-                detail='Вы не выбрали интересующие вас направления обучения')
-        if campaign.city.is_online_branch and not attrs.get('living_place'):
-            raise serializers.ValidationError(
-                detail='Пожалуйста, укажите ваш город проживания')
         if not attrs.get('has_job'):
             to_delete = ('workplace', 'position')
             for attr in to_delete:
@@ -104,7 +122,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
                 abbr="other",
                 defaults={"name": "Другое"})
             attrs['university'] = university
-        # TODO; where_did_you_learn_other, то where_did_you_learn должно содержать other и наоборот
+        # TODO: if where_did_you_learn.other selected, where_did_you_learn_other should be provided?
         return attrs
 
     def validate_stepic_id(self, value):

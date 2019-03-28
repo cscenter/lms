@@ -25,8 +25,10 @@ from post_office.utils import get_email_template
 from core.db.models import ScoreField
 from core.models import City, University
 from core.settings.base import CENTER_FOUNDATION_YEAR
+from core.timezone import now_local
 from core.urls import reverse
 from courses.models import Venue
+from learning.models import Branch
 from learning.settings import AcademicDegreeYears
 from users.constants import AcademicRoles
 
@@ -50,9 +52,14 @@ class Campaign(models.Model):
         _("Campaign|Year"),
         validators=[MinValueValidator(CENTER_FOUNDATION_YEAR)],
         default=current_year)
+    # FIXME: sync branch and city values, then remove `city`
     city = models.ForeignKey(City, default=settings.DEFAULT_CITY_CODE,
                              verbose_name=_("City"),
                              on_delete=models.PROTECT)
+    branch = models.ForeignKey(Branch,
+                               verbose_name=_("Branch"),
+                               related_name="campaigns",
+                               on_delete=models.PROTECT)
     online_test_max_score = models.SmallIntegerField(
         _("Campaign|Test_max_score"))
     online_test_passing_score = models.SmallIntegerField(
@@ -65,6 +72,7 @@ class Campaign(models.Model):
         _("Campaign|Exam_passing_score"),
         help_text=_("Campaign|Exam_passing_score-help"),
         null=True, blank=True)
+    # FIXME: Make this field system/derivable or remove since now we store start and end
     current = models.BooleanField(
         _("Current campaign"),
         help_text=_("Show in application form list"),
@@ -149,11 +157,19 @@ class Campaign(models.Model):
     @classmethod
     def get_active(cls):
         today = timezone.now()
+        # Allow to apply just before the official start
+        two_days_ago = today - datetime.timedelta(days=2)
         return (cls.objects
-                .filter(current=True, year=today.year,
+                .filter(current=True,
+                        application_starts_at__lte=two_days_ago,
                         application_ends_at__gt=today)
-                .select_related('city')
+                .select_related('city', 'branch')
                 .order_by('id'))
+
+    @property
+    def is_active(self):
+        today = timezone.now()
+        return self.current and today <= self.application_ends_at
 
 
 class ApplicantQuerySet(models.QuerySet):

@@ -4,10 +4,13 @@ from itertools import count
 
 import factory
 import pytz
+from django.db import models
 from django.db.models.signals import post_save
 from django.utils import timezone
 from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate
 
+from admission.api.serializers import ApplicantSerializer
+from admission.constants import WHERE_DID_YOU_LEARN
 from core.factories import UniversityFactory
 from core.models import City
 from admission.models import Campaign, Applicant, Contest, Test, \
@@ -15,6 +18,8 @@ from admission.models import Campaign, Applicant, Contest, Test, \
     InterviewSlot, InterviewStream, InterviewInvitation
 from admission.signals import post_save_interview
 from courses.tests.factories import VenueFactory
+from learning.models import Branch
+from learning.settings import AcademicDegreeYears
 from users.constants import AcademicRoles
 from users.tests.factories import UserFactory
 
@@ -29,8 +34,9 @@ class CampaignFactory(factory.DjangoModelFactory):
     class Meta:
         model = Campaign
 
-    year = factory.Iterator(count(start=2015))
+    year = factory.LazyAttribute(lambda o: o.application_ends_at.year)
     city = factory.Iterator(City.objects.all())
+    branch = factory.Iterator(Branch.objects.all())
     online_test_max_score = FuzzyInteger(30, 40)
     online_test_passing_score = FuzzyInteger(20, 25)
     exam_max_score = FuzzyInteger(30, 40)
@@ -54,6 +60,25 @@ class ApplicantFactory(factory.DjangoModelFactory):
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     phone = factory.Sequence(lambda n: '123-555-%04d' % n)
     university = factory.SubFactory(UniversityFactory)
+    yandex_id = factory.Sequence(lambda n: "yandex_login_%03d" % n)
+    faculty = factory.Sequence(lambda n: "faculty_%03d" % n)
+    course = factory.fuzzy.FuzzyChoice([x for x, _ in
+                                        AcademicDegreeYears.choices])
+    where_did_you_learn = factory.fuzzy.FuzzyChoice([x for x, _ in
+                                                     WHERE_DID_YOU_LEARN])
+
+    @classmethod
+    def build_application_form(cls, **kwargs):
+        form_data = factory.build(dict, FACTORY_CLASS=cls, **kwargs)
+        for k in list(form_data.keys()):
+            if k not in ApplicantSerializer.Meta.fields:
+                del form_data[k]
+            elif isinstance(form_data[k], models.Model):
+                if form_data[k].pk is None:
+                    del form_data[k]
+                else:
+                    form_data[k] = form_data[k].pk
+        return form_data
 
 
 class ContestFactory(factory.DjangoModelFactory):

@@ -5,18 +5,29 @@ import datetime
 import factory
 from django.utils import timezone
 
+from core.factories import CityFactory
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    CourseNewsNotification, Event
+    CourseNewsNotification, Event, Branch
+from learning.settings import Branches
 from study_programs.models import AcademicDiscipline
 from users.tests.factories import UserFactory, StudentCenterFactory
 
 __all__ = ('AcademicDisciplineFactory', 'StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentFactory',
-           'AssignmentNotificationFactory', 'CourseNewsNotificationFactory',
-           'EventFactory', 'StudentAssignment', 'Enrollment',
-           'AssignmentComment')
+           'AssignmentNotificationFactory', 'BranchFactory',
+           'CourseNewsNotificationFactory', 'EventFactory',
+           'StudentAssignment', 'Enrollment', 'AssignmentComment', 'Branch')
+
+
+class BranchFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: "Branch %03d" % n)
+    code = factory.Iterator(x for x, _ in Branches.choices)
+    timezone = factory.SubFactory(CityFactory)
+
+    class Meta:
+        model = Branch
 
 
 class AcademicDisciplineFactory(factory.DjangoModelFactory):
