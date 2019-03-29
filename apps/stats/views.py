@@ -92,7 +92,7 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
              .select_related("interview",
                              "interview__applicant",
                              "interview__applicant__campaign",
-                             "interview__applicant__campaign__city",
+                             "interview__applicant__campaign__branch",
                              "interview__applicant__user")
              .prefetch_related("interview__applicant__user__groups"))
         context = {

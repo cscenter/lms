@@ -2,14 +2,12 @@ import datetime
 from operator import attrgetter
 from typing import List
 
-from django.apps import apps
 from django.db import transaction
 from django.utils import timezone
 
+from admission.constants import INVITATION_EXPIRED_IN_HOURS
 from admission.models import InterviewStream, InterviewInvitation, \
     Applicant
-
-ADMISSION_SETTINGS = apps.get_app_config("admission")
 
 
 def create_invitation(streams: List[InterviewStream],
@@ -25,7 +23,7 @@ def create_invitation(streams: List[InterviewStream],
         tzinfo=first_stream.get_city_timezone())
     # Calculate deadline for invitation. It can't be later than 00:00
     # of the first interview day
-    expired_in_hours = ADMISSION_SETTINGS.INVITATION_EXPIRED_IN_HOURS
+    expired_in_hours = INVITATION_EXPIRED_IN_HOURS
     expired_at = timezone.now() + datetime.timedelta(hours=expired_in_hours)
     expired_at = min(expired_at, first_day_interview)
     invitation = InterviewInvitation(applicant=applicant,

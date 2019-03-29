@@ -149,6 +149,12 @@
         <div class="panel-body">
             <h5 class="text-uppercase">Оценки собеседующих</h5>
             <form action="" method="GET" id="interviewers-filter-form">
+                {% if request.GET.city_code %}
+                    <input type="hidden" name="city_code" value="{{ request.GET.city_code }}">
+                {% endif %}
+                {% if request.GET.campaign %}
+                    <input type="hidden" name="campaign" value="{{ request.GET.campaign }}">
+                {% endif %}
                 <div class="row">
                     <div class="col-xs-10 form-group">
                         <select name="interviewer" class="form-control selectpicker" id="interviewer-filter">
@@ -182,7 +188,7 @@
                                     <td>
                                         <a href="{{ comment.interview.applicant.get_absolute_url }}">{{ comment.interview.applicant.get_full_name }}</a>
                                     </td>
-                                    <td>{{ comment.interview.applicant.campaign.display_short }}</td>
+                                    <td>{{ comment.interview.applicant.campaign }}</td>
                                     <td>{{ comment.score }}</td>
                                     <td>
                                         {% if not comment.interview.applicant.user_id %}
