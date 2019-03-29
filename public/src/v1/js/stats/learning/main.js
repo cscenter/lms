@@ -52,7 +52,7 @@ function initFilter() {
         courses.forEach(function (co) {
             let opt = document.createElement('option');
             opt.value = co['pk'];
-            opt.innerHTML = co['course__name'];
+            opt.innerHTML = `${co['meta_course__name']}`;
             courseFilter.get(0).appendChild(opt);
         });
         courseFilter.selectpicker('refresh');
