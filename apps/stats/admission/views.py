@@ -241,8 +241,6 @@ class CampaignStatsTestingScoreByCourses(ListRenderersMixin, PandasView):
                 .order_by('applicant__course'))
 
 
-# XXX: difference from Testing view in model class only (the same for *ByCourses
-# view) Looks like we can easily make them generic. Is it worth it?
 class CampaignStatsExamScoreByUniversities(ListRenderersMixin, PandasView):
     """Distribution of exam results by universities."""
     permission_classes = [CuratorAccessPermission]
