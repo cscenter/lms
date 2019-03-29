@@ -6,7 +6,7 @@ from users.models import User
 
 
 def _index_to_name(course_index):
-    return AcademicDegreeYears.values.get(course_index, str(_("Other")))
+    return str(AcademicDegreeYears.values.get(course_index, _("Other")))
 
 
 class CampaignResultsTimelineSerializer(PandasSerializer):
@@ -47,8 +47,7 @@ class ScoreByUniversitiesSerializer(PandasSerializer):
                 .pivot_table(index='score',
                              columns='applicant__university__name',
                              values='total',
-                             fill_value=0)
-                .reset_index('score'))
+                             fill_value=0))
 
 
 class ScoreByCoursesSerializer(PandasSerializer):
@@ -61,7 +60,6 @@ class ScoreByCoursesSerializer(PandasSerializer):
                            fill_value=0))
         to_rename = {c: _index_to_name(c) for c in df.columns}
         df.rename(columns=to_rename, inplace=True)
-        df = df.reset_index('score')
         return df
 
 

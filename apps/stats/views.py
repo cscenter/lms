@@ -42,7 +42,7 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
         courses_grouped = itertools.groupby(
             Course.objects
                 .filter(is_open=False)
-                .values("pk", "semester_id", "meta_course__name")
+                .values("pk", "semester_id", "meta_course__name", "city_id")
                 .order_by("-semester_id", "meta_course__name"),
             key=lambda x: x["semester_id"])
         courses = {term_id: list(cs) for term_id, cs in courses_grouped}

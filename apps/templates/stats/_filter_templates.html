@@ -17,11 +17,11 @@
 </script>
 
 <script type="text/template" id="plot-filter-curriculum_year-template">
-    <label for="<%-id%>">Год обучения:</label>
+    <label for="<%-id%>">Год программы:</label>
     <select class="form-control selectpicker" id="<%-id%>" name="<%-id%>">
         <option value="">-----</option>
         <% items.forEach(function(item) { %>
-        <option value="<%-item%>"><%-item%></option>
+        <option value="<%-item.value%>"><%-item.label%></option>
         <% }); %>
     </select>
 </script>

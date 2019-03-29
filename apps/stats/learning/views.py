@@ -67,7 +67,7 @@ class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
 
 class AssignmentsStats(ReadOnlyModelViewSet):
     """
-    Aggregate stats about course offering assignment progress.
+    Aggregate stats about course assignment progress.
     """
     permission_classes = [CuratorAccessPermission]
     serializer_class = AssignmentsStatsSerializer
