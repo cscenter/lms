@@ -38,10 +38,6 @@ class Branch(models.Model):
         max_length=8)
     name = models.CharField(_("Branch|Name"), max_length=255)
     is_remote = models.BooleanField(_("Distance Branch"), default=False)
-    timezone = models.ForeignKey(
-        City,
-        verbose_name=_("Timezone"),
-        on_delete=models.CASCADE)
     description = models.TextField(
         _("Description"),
         help_text=_("Branch|Description"),
@@ -53,6 +49,13 @@ class Branch(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def timezone(self):
+        return Branches.get_choice(self.code).timezone
+
+    def get_code_display(self):
+        return Branches.get_choice(self.code).abbr
 
 
 class Enrollment(TimeStampedModel):

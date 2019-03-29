@@ -80,8 +80,8 @@ class ApplicantFilter(django_filters.FilterSet):
     campaign = django_filters.ModelChoiceFilter(
         label=_("Campaign"),
         queryset=(Campaign.objects
-                  .select_related("city")
-                  .order_by("-city__name", "-year").all()))
+                  .select_related("branch")
+                  .order_by("-branch_id", "-year").all()))
     status = ApplicantStatusFilter(choices=Applicant.STATUS,
                                    label=_("Status"))
     surname = django_filters.CharFilter(lookup_expr='icontains',
@@ -137,8 +137,8 @@ class InterviewsCuratorFilter(InterviewsBaseFilter):
         field_name="applicant__campaign",
         label=_("Campaign"),
         queryset=(Campaign.objects
-                  .select_related("city")
-                  .order_by("-city__name", "-year").all()),
+                  .select_related("branch")
+                  .order_by("-branch_id", "-year").all()),
         help_text="")
 
     class Meta(InterviewsBaseFilter.Meta):

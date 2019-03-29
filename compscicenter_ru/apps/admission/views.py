@@ -5,6 +5,7 @@ import uuid
 from collections import Counter
 from functools import wraps
 from itertools import groupby
+from typing import Optional
 from urllib import parse
 
 from django.apps import apps
@@ -68,7 +69,6 @@ from users.models import User
 from users.utils import get_user_city_code
 from .tasks import import_testing_results
 
-ADMISSION_SETTINGS = apps.get_app_config("admission")
 STRATEGY = 'social_django.strategy.DjangoStrategy'
 # Override `user` attribute to prevent accidental user creation
 STORAGE = __name__ + '.DjangoStorageCustom'
@@ -305,7 +305,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         return (
             Applicant.objects
             .select_related("exam", "online_test", "campaign", "university",
-                            "campaign__city")
+                            "campaign__branch")
             .prefetch_related("interview")
             .annotate(exam__score_coalesce=Coalesce('exam__score', Value(-1)),
                       test__score_coalesce=Coalesce('online_test__score',
@@ -316,18 +316,10 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         """Sets filter defaults and redirects"""
         user = self.request.user
         if user.is_curator and "campaign" not in self.request.GET:
-            # Try to find user preferred current campaign id
-            current = list(Campaign.objects
-                           .filter(current=True)
-                           .only("pk", "city_id"))
-            try:
-                c = next(c.pk for c in current if c.city_id == user.city_id)
-            except StopIteration:
-                # We didn't find active campaign for user city. Try to get
-                # any current campaign or show all if no active at all.
-                c = next((c.pk for c in current), "")
+            campaign = get_default_campaign_for_user(user)
+            campaign_id = campaign.id if campaign else ""
             url = reverse("admission:applicants")
-            url = f"{url}?campaign={c}&status="
+            url = f"{url}?campaign={campaign_id}&status="
             return HttpResponseRedirect(redirect_to=url)
         return super().get(request, *args, **kwargs)
 
@@ -494,6 +486,20 @@ class InterviewAssignmentDetailView(CuratorOnlyMixin, generic.DetailView):
         })
 
 
+def get_default_campaign_for_user(user: User) -> Optional[Campaign]:
+    active_campaigns = list(Campaign.objects
+                            .filter(current=True)
+                            .select_related('branch')
+                            .only("pk", "branch"))
+    try:
+        campaign = next(c for c in active_campaigns
+                        if c.branch.code == user.city_id)
+    except StopIteration:
+        # Get any campaign if in the user city no active campaigns
+        campaign = next((c for c in active_campaigns), None)
+    return campaign
+
+
 class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     """
     XXX: Filter by date uses UTC time zone.
@@ -510,23 +516,15 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         user = self.request.user
         if user.is_curator and "campaign" not in self.request.GET:
             # Try to find user preferred current campaign id
-            current = list(Campaign.objects.filter(current=True)
-                           .only("pk", "city_id"))
-            try:
-                current_campaign = next(c for c in current
-                                        if c.city_id == user.city_id)
-            except StopIteration:
-                # We didn't find active campaign for user city. Try to get
-                # any current campaign or show all if no active at all.
-                current_campaign = next((c for c in current), None)
-            if not current_campaign:
+            campaign = get_default_campaign_for_user(user)
+            if not campaign:
                 messages.error(self.request, "Нет активных кампаний по набору.")
                 today_local = timezone.now()  # stub
             else:
-                today_local = now_local(current_campaign.get_city_timezone())
+                today_local = now_local(campaign.branch.timezone)
             date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
             params = parse.urlencode({
-                'campaign': current_campaign.pk,
+                'campaign': campaign.pk,
                 'status': [Interview.COMPLETED, Interview.APPROVED],
                 'date_from': date,
                 'date_to': date

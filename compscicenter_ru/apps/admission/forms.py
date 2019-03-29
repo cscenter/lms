@@ -40,7 +40,7 @@ class InterviewForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        super(InterviewForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper['assignments'].wrap(
             Field, template='admission/forms/assignments_field.html')

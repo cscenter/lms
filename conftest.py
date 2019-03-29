@@ -119,7 +119,6 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             defaults={
                 "name": 'Санкт-Петербург',
                 "is_remote": False,
-                "timezone_id": "spb"
             }
         )
 
@@ -128,7 +127,6 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             defaults={
                 "name": 'Новосибирск',
                 "is_remote": False,
-                "timezone_id": "nsk"
             }
         )
 
@@ -137,7 +135,6 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             defaults={
                 "name": 'Заочное',
                 "is_remote": True,
-                "timezone_id": "spb"
             }
         )
 

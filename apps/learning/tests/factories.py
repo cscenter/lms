@@ -24,7 +24,6 @@ __all__ = ('AcademicDisciplineFactory', 'StudentAssignmentFactory',
 class BranchFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Branch %03d" % n)
     code = factory.Iterator(x for x, _ in Branches.choices)
-    timezone = factory.SubFactory(CityFactory)
 
     class Meta:
         model = Branch

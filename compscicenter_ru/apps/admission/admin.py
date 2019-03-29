@@ -25,8 +25,8 @@ class CampaignListFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         campaigns = (Campaign.objects
-                     .select_related("city")
-                     .order_by("-city_id", "-year"))
+                     .select_related("branch")
+                     .order_by("-branch_id", "-year"))
         return [(c.pk, str(c)) for c in campaigns]
 
     def queryset(self, request, queryset):
@@ -38,8 +38,8 @@ class CampaignListFilter(admin.SimpleListFilter):
 
 class CampaignAdmin(admin.ModelAdmin):
     form = CityAwareModelForm
-    list_display = ['year', 'city', 'current']
-    list_filter = ['city']
+    list_display = ['year', 'branch', 'current']
+    list_filter = ['branch']
     formfield_overrides = {
         models.DateTimeField: {
             'widget': CityAwareAdminSplitDateTimeWidget,

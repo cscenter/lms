@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import pytz
 from django.conf import settings
 
 from django.utils.translation import ugettext_lazy as _
@@ -12,9 +12,15 @@ ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)
 
 
 class Branches(DjangoChoices):
-    SPB = C("spb", _("Saint Petersburg"))
-    NSK = C("nsk", _("Novosibirsk"))
-    DISTANCE = C("distance", _("Branches|Distance"))
+    SPB = C("spb", _("Saint Petersburg"),
+            timezone=pytz.timezone('Europe/Moscow'),
+            abbr=_("SPb"))
+    NSK = C("nsk", _("Novosibirsk"),
+            timezone=pytz.timezone('Asia/Novosibirsk'),
+            abbr=_("Nsk"))
+    DISTANCE = C("distance", _("Branches|Distance"),
+                 timezone=pytz.timezone('Europe/Moscow'),
+                 abbr=_("Distance"))
 
 
 # FIXME: move to users?

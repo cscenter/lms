@@ -4,3 +4,5 @@ WHERE_DID_YOU_LEARN = (
     ('friends', 'от друзей'),
     ('other', 'другое')
 )
+
+INVITATION_EXPIRED_IN_HOURS = 27

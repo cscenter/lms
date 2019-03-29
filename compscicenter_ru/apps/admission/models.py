@@ -101,6 +101,10 @@ class Campaign(models.Model):
         verbose_name = _("Campaign")
         verbose_name_plural = _("Campaigns")
 
+    def __str__(self):
+        return smart_text(_("{}, {}").format(self.branch.name, self.year))
+
+    # FIXME: Rename to get_branch_timezone
     def get_city_timezone(self):
         # FIXME return self.city.get_timezone()
         if self.city_id == "online":
@@ -120,12 +124,6 @@ class Campaign(models.Model):
         if not tz:
             tz = self.get_city_timezone()
         return timezone.localtime(self.application_ends_at, timezone=tz)
-
-    def __str__(self):
-        return smart_text(_("{}, {}").format(self.city.name, self.year))
-
-    def display_short(self):
-        return smart_text(_("{}, {}").format(self.city.abbr, self.year))
 
     def clean(self):
         if self.pk is None and self.current:

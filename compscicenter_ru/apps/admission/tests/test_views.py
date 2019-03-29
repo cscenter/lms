@@ -7,6 +7,7 @@ from django.utils import timezone, formats
 from django.utils.timezone import now
 from post_office.models import Email
 
+from admission.constants import INVITATION_EXPIRED_IN_HOURS
 from admission.forms import InterviewFromStreamForm
 from admission.models import Applicant, Interview, InterviewInvitation
 from admission.tests.factories import ApplicantFactory, InterviewFactory, \
@@ -331,8 +332,7 @@ def test_create_interview_from_slot(curator, client, settings):
 @pytest.mark.django_db
 def test_invitation_slots(curator, client, settings):
     settings.LANGUAGE_CODE = 'ru'
-    admission_settings = apps.get_app_config("admission")
-    expired_after = admission_settings.INVITATION_EXPIRED_IN_HOURS
+    expired_after = INVITATION_EXPIRED_IN_HOURS
     # Make sure invitation will be active
     dt = timezone.now() + datetime.timedelta(hours=expired_after + 30)
     stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
