@@ -253,7 +253,7 @@
                                     {{ profile_user.curriculum_year|default:'—' }}<br>
                                     {% if syllabus %}
                                         {% for program in syllabus %}
-                                            <b>{{ program.area.name_en }}</b>
+                                            <b>{{ program.academic_discipline.name_en }}</b>
                                             {% if program.course_groups.all %}
                                             <ul style="list-style-type: square;">
                                                 {% for meta_course_groups in program.course_groups.all %}
