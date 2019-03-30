@@ -729,7 +729,7 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
     def dispatch(self, request, *args, **kwargs):
         self.active_campaigns = (Campaign.objects
                                  .filter(current=True)
-                                 .select_related("city"))
+                                 .select_related("branch"))
         try:
             city_code = self.kwargs["city_code"]
             self.selected_campaign = next(c for c in self.active_campaigns

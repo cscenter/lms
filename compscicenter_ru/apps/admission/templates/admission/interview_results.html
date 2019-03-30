@@ -3,7 +3,7 @@
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
 
-{% block title %}Результаты набора {{ selected_campaign.city.code }} - CSC{% endblock title %}
+{% block title %}Результаты набора {{ selected_campaign.branch }} - CSC{% endblock title %}
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 
 {% block content %}
@@ -12,7 +12,7 @@
     <div class="nav-tabs-horizontal nav-tabs-inverse">
         <ul class="nav nav-tabs nav-tabs-solid" role="tablist">
             {% for campaign in active_campaigns %}
-                <li role="presentation" {% if selected_campaign.city.code == campaign.city.code %} class="active"{% endif %}>
+                <li role="presentation" {% if selected_campaign.branch.code == campaign.branch.code %} class="active"{% endif %}>
                     <a href="{% url "admission:interview_results_by_city" campaign.city.code %}">{{ campaign }}</a>
                 </li>
             {% endfor %}
