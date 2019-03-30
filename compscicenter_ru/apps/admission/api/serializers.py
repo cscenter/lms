@@ -117,8 +117,9 @@ class ApplicantSerializer(serializers.ModelSerializer):
                 if attr in attrs:
                     del attrs[attr]
         if attrs.get('university_other'):
+            # FIXME: how to remove city_id from here?
             university, created = University.objects.get_or_create(
-                city_id=campaign.branch.code,
+                city_id=campaign.city_id,
                 abbr="other",
                 defaults={"name": "Другое"})
             attrs['university'] = university
