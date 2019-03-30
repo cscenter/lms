@@ -118,7 +118,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
                     del attrs[attr]
         if attrs.get('university_other'):
             university, created = University.objects.get_or_create(
-                city_id=campaign.branch.city_id,
+                city_id=campaign.branch.code,
                 abbr="other",
                 defaults={"name": "Другое"})
             attrs['university'] = university
