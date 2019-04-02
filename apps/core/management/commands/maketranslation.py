@@ -1,5 +1,4 @@
-from django.core.management.commands import makemessages
-
+from django_jinja.management.commands import makemessages
 
 EXTRA_KEYWORDS = [
     '--keyword=_p:1c,2'  # alias for pgettext_lazy

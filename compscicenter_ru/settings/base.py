@@ -17,6 +17,7 @@ PROJECT_DIR = Path(__file__).parents[1]
 MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.sites.middleware.CurrentSiteMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'core.middleware.CurrentCityMiddleware',
     'subdomains.middleware.SubdomainURLRoutingMiddleware',
     'django.middleware.common.CommonMiddleware',

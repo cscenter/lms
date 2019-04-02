@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.conf.urls import include
+from django.conf.urls.i18n import i18n_patterns
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, re_path
@@ -14,8 +15,14 @@ from users.views import TeacherDetailView
 
 admin.autodiscover()
 
+urlpatterns = i18n_patterns(
+    path('alumni/', views.AlumniView.as_view(), name='alumni'),
+    path('alumni/<str:area>/', views.AlumniView.as_view(), name='alumni_by_area'),
+    prefix_default_language=False
+)
 
-urlpatterns = [
+
+urlpatterns += [
     path('', views.IndexView.as_view(), name='index'),
     path('robots.txt', TemplateView.as_view(template_name="compscicenter_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
     path('open-nsk/', TemplateView.as_view(template_name='open_nsk.html'), name='open_nsk'),
@@ -24,8 +31,6 @@ urlpatterns = [
     path('team/', views.TeamView.as_view(), name='team'),
     path('teachers/', views.TeachersView.as_view(), name='teachers'),
     path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
-    path('alumni/', views.AlumniView.as_view(), name='alumni'),
-    path('alumni/<str:area>/', views.AlumniView.as_view(), name='alumni_by_area'),
     path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
     # Editing courses/
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
@@ -79,4 +84,6 @@ if settings.DEBUG:
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
 
 # Note: htmlpages should be the last one
-urlpatterns += [re_path(r'^(?P<url>.*/)$', flatpage, name='html_pages')]
+urlpatterns += i18n_patterns(
+    re_path(r'^(?P<url>.*/)$', flatpage, name='html_pages'),
+    prefix_default_language=False)
