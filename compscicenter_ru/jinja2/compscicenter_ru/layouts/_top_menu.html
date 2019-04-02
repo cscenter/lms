@@ -31,7 +31,7 @@
                 {{ macros.svg_inline('user-sign') }} Войти
             </a>
         {% else %}
-            <a class="members-area" href="{{ url('index', subdomain=LMS_SUBDOMAIN) }}">Личный кабинет</a>
+            <a class="members-area" href="{{ url('index', subdomain=LMS_SUBDOMAIN) }}">{% trans %}Members Area{% endtrans %}</a>
             <div class="dropdown dropdown-user-menu">
                 <button class="btn" type="button" id="userMenuButton" data-id="{{ request.user.pk }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     {%- with im = request.user.get_thumbnail("60x60", use_stub=False) -%}
@@ -43,7 +43,7 @@
                     {%- endwith %}
                 </button>
                 <div class="dropdown-menu _arrow-right" aria-labelledby="userMenuButton">
-                    <a class="dropdown-item d-lg-none" href="{{ url('index', subdomain=LMS_SUBDOMAIN) }}">Личный кабинет</a>
+                    <a class="dropdown-item d-lg-none" href="{{ url('index', subdomain=LMS_SUBDOMAIN) }}">{% trans %}Members Area{% endtrans %}</a>
                     <a class="dropdown-item" href="{{ request.user.get_absolute_url() }}">Профиль</a>
                     {% if request.user.is_staff %}
                         <a class="dropdown-item" href="{{ url('staff:student_search', LMS_SUBDOMAIN) }}">Курирование</a>

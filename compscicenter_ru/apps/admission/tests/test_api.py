@@ -1,5 +1,6 @@
 # TODO: Нельзя сохранить и university и university_other (приоритет у university_other)
 # TODO: where_did_you_learn , если есть с суффиксом _other, то убедиться, что в where_did_you_learn другое? выставить самим
+# FIXME: тест на создание нового универа, т.к. уже было падение по этой причине
 from datetime import timedelta
 
 import pytest

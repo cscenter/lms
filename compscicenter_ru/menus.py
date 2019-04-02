@@ -3,7 +3,7 @@ from django.utils.translation import pgettext_lazy
 from menu import Menu
 
 from core.menu import MenuItem
-from core.urls import reverse
+from core.urls import reverse, reverse_lazy
 
 PRIVATE = settings.LMS_SUBDOMAIN
 PUBLIC_DOMAIN = reverse('index')[:-1]  # remove trailing slash
@@ -42,18 +42,14 @@ public_menu = [
         ]),
     MenuItem(
         pgettext_lazy("menu", "About"),
-        reverse('history'),
+        reverse_lazy('history'),
         weight=60,
         children=[
-            MenuItem(pgettext_lazy("menu", "History"), reverse('history'),
-                     weight=20),
-            MenuItem(pgettext_lazy("menu", "Team"), reverse('team'), weight=40),
-            MenuItem(pgettext_lazy("menu", "Teachers"), reverse('teachers'),
-                     weight=50),
-            MenuItem(pgettext_lazy("menu", "Alumni"), reverse('alumni'),
-                     weight=60, selected_patterns=[r"^/2016/$"]),
-            MenuItem(pgettext_lazy("menu", "Testimonials"),
-                     reverse('testimonials'), weight=70),
+            MenuItem(pgettext_lazy("menu", "History"), reverse_lazy('history'), weight=20),
+            MenuItem(pgettext_lazy("menu", "Team"), reverse_lazy('team'), weight=40),
+            MenuItem(pgettext_lazy("menu", "Teachers"), reverse_lazy('teachers'), weight=50),
+            MenuItem(pgettext_lazy("menu", "Alumni"), reverse_lazy('alumni'), weight=60, selected_patterns=[r"^/2016/$"]),
+            MenuItem(pgettext_lazy("menu", "Testimonials"), reverse_lazy('testimonials'), weight=70),
         ],
         selected_patterns=[
             r"^/events/"
