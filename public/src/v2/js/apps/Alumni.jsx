@@ -1,4 +1,6 @@
 import React, {Fragment} from 'react';
+import { withTranslation } from 'react-i18next';
+import i18next from 'i18next';
 
 import _debounce from 'lodash-es/debounce';
 import $ from 'jquery';
@@ -102,7 +104,7 @@ class Alumni extends React.Component {
             showBodyPreloader();
         }
         const {year, city, area} = this.state;
-        const {years, cities, areas} = this.props;
+        const {t, years, cities, areas} = this.props;
 
         let filteredItems = this.state.items.filter(function(item) {
             let cityCondition = (city !== null) ? item.city === city.value : true;
@@ -131,7 +133,7 @@ class Alumni extends React.Component {
                                     onChange={this.handleAreaChange}
                                     value={area}
                                     name="area"
-                                    placeholder="Направление"
+                                    placeholder={t("Направление")}
                                     isClearable={true}
                                     options={areas}
                                     key="area"
@@ -143,7 +145,7 @@ class Alumni extends React.Component {
                                     value={city}
                                     name="city"
                                     isClearable={true}
-                                    placeholder="Город"
+                                    placeholder={i18next.t("Город")}
                                     options={cities}
                                     key="city"
                                 />
@@ -152,11 +154,11 @@ class Alumni extends React.Component {
                 {
                     filteredItems.length > 0 ?
                         <UserCardList users={filteredItems} />
-                        : "Таких выпускников у нас нет. Выберите другие параметры фильтрации."
+                        : t("Таких выпускников у нас нет. Выберите другие параметры фильтрации.")
                 }
             </Fragment>
         );
     }
 }
 
-export default Alumni;
+export default withTranslation()(Alumni);

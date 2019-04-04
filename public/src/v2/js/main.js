@@ -5,6 +5,7 @@ import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 
 import ravenOptions from './raven_conf';
+import i18n from './i18n';
 import {
     showComponentError,
     getSections,
@@ -25,6 +26,7 @@ if (authenticatedUser !== undefined && !isNaN(parseInt(authenticatedUser))) {
 }
 
 $(function () {
+    i18n.changeLanguage('ru');
     let navbarContainer = document.getElementsByClassName("navbar-container")[0];
     let navbarToggler = $(".navbar-toggler");
     let menuRightBlock = document.getElementsByClassName("dropdown-user-menu")[0] ||
