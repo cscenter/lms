@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-02 12:38+0000\n"
-"PO-Revision-Date: 2019-04-02 12:38+0000\n"
+"POT-Creation-Date: 2019-04-04 14:14+0000\n"
+"PO-Revision-Date: 2019-04-04 14:14+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -71,7 +71,11 @@ msgstr "Новосибирск"
 msgid "Members Area"
 msgstr "Личный кабинет"
 
-#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:56
+#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:51
+msgid "Privacy&nbsp;Policy"
+msgstr "Конфиденциальность"
+
+#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:57
 msgid "Computer Science Center on Facebook"
 msgstr ""
 
@@ -150,22 +154,22 @@ msgctxt "menu"
 msgid "History"
 msgstr "История"
 
-#: compscicenter_ru/menus.py:50
+#: compscicenter_ru/menus.py:49
 msgctxt "menu"
 msgid "Team"
 msgstr "Команда"
 
-#: compscicenter_ru/menus.py:51
+#: compscicenter_ru/menus.py:50
 msgctxt "menu"
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: compscicenter_ru/menus.py:53
+#: compscicenter_ru/menus.py:51
 msgctxt "menu"
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: compscicenter_ru/menus.py:55
+#: compscicenter_ru/menus.py:52
 msgctxt "menu"
 msgid "Testimonials"
 msgstr "Отзывы"
