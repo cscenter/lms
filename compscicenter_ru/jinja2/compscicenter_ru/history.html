@@ -2,13 +2,15 @@
 
 {% block title %}История {{ super() }}{% endblock title %}
 
+{% block body_attrs %}data-init-sections="scrollspy" class="position:relative"{% endblock body_attrs %}
+
 {% block content %}
     <div class="container page-content">
         <div class="row">
             <div class="col-lg-8">
                 <h1 class="_title">Computer Science Center</h1>
                 <div class="mb-8">
-                    <h2 id="2018">2018</h2>
+                    <h2 id="year2018">2018</h2>
                     <p>В 2018 году&nbsp;CS центр запустил полугодовые онлайн-программы для разработчиков по&nbsp;направлениям</p>
                     <div class="row">
                         <div class="col-xl-10">
@@ -54,7 +56,7 @@
                     </p>
                 </div>
                 <section class="content-block">
-                    <h2 id="2017">2017</h2>
+                    <h2 id="year2017">2017</h2>
                     <p>В&nbsp;2017 году компании Яндекс и&nbsp;JetBrains открыли&nbsp;CS центр
                         в&nbsp;<a href="https://compscicenter.ru/syllabus/" target="_blank" rel="noopener">Новосибирске</a>,
                         где до&nbsp;этого действовал филиал Школы анализа данных Яндекса. Теперь в&nbsp;качестве новосибирского филиала Школы можно
@@ -67,7 +69,7 @@
                     </figure>
                 </section>
                 <div class="mb-8">
-                    <h2 id="2016">2016</h2>
+                    <h2 id="year2016">2016</h2>
                     <p>В&nbsp;2015-2016 учебном году&nbsp;CS центр провёл конкурс открытых лекций. Участники попробовали
                         себя в роли лекторов и&nbsp;поделились знаниями со&nbsp;всеми желающими. Центр отвечал за&nbsp;организацию,
                         а участники&nbsp;&mdash; за&nbsp;содержание. По&nbsp;итогам голосования за&nbsp;самые интересные
@@ -105,7 +107,7 @@
                     </div>
                 </div>
                 <div class="mb-8">
-                    <h2 id="2015">2015</h2>
+                    <h2 id="year2015">2015</h2>
                     <p>Онлайн-программа по&nbsp;основам программирования появилась в&nbsp;2015 году и&nbsp;стала пробой переноса
                         полноценного центрового обучения в&nbsp;онлайн-формат. У&nbsp;студентов был год, чтобы пройти
                         двенадцать базовых курсов и&nbsp;погрузиться в&nbsp;новую для большинства область. На&nbsp;этом пути
@@ -115,7 +117,7 @@
                     </p>
                 </div>
                 <div class="mb-8">
-                    <h2 id="2014">2014</h2>
+                    <h2 id="year2014">2014</h2>
                     <p>Первый онлайн-курс CS&nbsp;центра появился в&nbsp;сентябре 2014 года на&nbsp;платформе Stepik.
                         &laquo;Алгоритмы и структуры данных&raquo; Александра Куликова собрал 15000&nbsp;слушателей, 542 из&nbsp;которых
                         успешно прошли курс и&nbsp;получили сертификат об&nbsp;окончании. Курс по&nbsp;алгоритмам, как и&nbsp;большинство
@@ -123,7 +125,7 @@
                     </p>
                 </div>
                 <div class="mb-8">
-                    <h2 id="2013">2013</h2>
+                    <h2 id="year2013">2013</h2>
                     <p>Первый выпускной прошёл в&nbsp;2013&nbsp;году, выпуск составил 22&nbsp;человека. Ребята
                         продолжают участвовать в
                         жизни&nbsp;CS центра: предлагают проекты и&nbsp;становятся преподавателями.
@@ -134,7 +136,7 @@
                     </figure>
                 </div>
                 <div class="mb-8">
-                    <h2 id="2011">2011</h2>
+                    <h2 id="year2011">2011</h2>
                     <p>
                         Computer Science Center создан в&nbsp;Санкт-Петербурге в&nbsp;2011 году на&nbsp;базе Академии
                         современного программирования и&nbsp;<a href="https://compsciclub.ru/" target="_blank" rel="noopener">Computer Science клуба</a>
@@ -173,14 +175,14 @@
             <div class="col-lg-3 offset-lg-1">
                 <div class="sidebar-item">
                 <div class="sticky">
-                    <div class="timeline">
-                        <a class="timeline__date" href="#2018">2018</a>
-                        <a class="timeline__date" href="#2017">2017</a>
-                        <a class="timeline__date" href="#2016">2016</a>
-                        <a class="timeline__date" href="#2015">2015</a>
-                        <a class="timeline__date" href="#2014">2014</a>
-                        <a class="timeline__date" href="#2013">2013</a>
-                        <a class="timeline__date" href="#2011">2011</a>
+                    <div class="timeline list-group" id="history-navigation">
+                        <a class="timeline__date list-group-item" href="#year2018">2018</a>
+                        <a class="timeline__date list-group-item" href="#year2017">2017</a>
+                        <a class="timeline__date list-group-item" href="#year2016">2016</a>
+                        <a class="timeline__date list-group-item" href="#year2015">2015</a>
+                        <a class="timeline__date list-group-item" href="#year2014">2014</a>
+                        <a class="timeline__date list-group-item" href="#year2013">2013</a>
+                        <a class="timeline__date list-group-item" href="#year2011">2011</a>
                     </div>
                 </div>
             </div>
