@@ -61,7 +61,7 @@ class Checkbox extends React.Component {
 }
 
 Checkbox.propTypes = {
-    label: PropTypes.string.isRequired,
+    label: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
     checked: PropTypes.bool,
     onChange: PropTypes.func,
     tabIndex: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),

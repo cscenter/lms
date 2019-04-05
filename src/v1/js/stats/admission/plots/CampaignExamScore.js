@@ -92,13 +92,8 @@ export default class CampaignExamScore extends mix(PlotOptions).with(PlotTypeOpt
 
     convertData = (json) => {
         if (json.length > 0) {
-            let values = [];
-            Object.keys(json[0]).forEach((s) => {
-                if (s !== "score") {
-                    values.push(s);
-                }
-            });
-            this.state.data.keys.value = values;
+            const {score, ...values} = json[0];
+            this.state.data.keys.value = Object.keys(values);
         }
         this.state.data.json = json;
         return json;

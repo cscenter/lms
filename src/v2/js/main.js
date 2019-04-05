@@ -5,6 +5,7 @@ import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 
 import ravenOptions from './raven_conf';
+import i18n from './i18n';
 import {
     showComponentError,
     getSections,
@@ -25,6 +26,7 @@ if (authenticatedUser !== undefined && !isNaN(parseInt(authenticatedUser))) {
 }
 
 $(function () {
+    i18n.changeLanguage('ru');
     let navbarContainer = document.getElementsByClassName("navbar-container")[0];
     let navbarToggler = $(".navbar-toggler");
     let menuRightBlock = document.getElementsByClassName("dropdown-user-menu")[0] ||
@@ -102,6 +104,11 @@ $(function () {
     }
     if (sections.includes("collapsible")) {
         import(/* webpackChunkName: "collapsible" */ 'apps/collapsible')
+            .then(module => { module.launch(); })
+            .catch(error => showComponentError(error));
+    }
+    if (sections.includes("scrollspy")) {
+        import(/* webpackChunkName: "scrollspy" */ 'apps/scrollspy')
             .then(module => { module.launch(); })
             .catch(error => showComponentError(error));
     }
