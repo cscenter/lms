@@ -107,6 +107,11 @@ $(function () {
             .then(module => { module.launch(); })
             .catch(error => showComponentError(error));
     }
+    if (sections.includes("scrollspy")) {
+        import(/* webpackChunkName: "scrollspy" */ 'apps/scrollspy')
+            .then(module => { module.launch(); })
+            .catch(error => showComponentError(error));
+    }
     if (sections.includes("tabs")) {
         import(/* webpackChunkName: "tabs" */ 'apps/tabs')
             .then(module => { module.launch(); })
