@@ -53,14 +53,13 @@
 {% block footer -%}
 <footer class="footer">
     <div class="container">
-        <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
-        <div class="footer__contacts">
-            <a href="/v2/pages/privacy/" class="footer__link">
-                Конфиденциальность
-            </a>
-            <a href="mailto:info@compscicenter.ru" class="footer__link">
-                info@compscicenter.ru
-            </a>
+        <div class="row">
+        <div class="col-lg-auto">
+            <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
+        </div>
+        <div class="col-lg-auto ml-lg-auto">
+            <a href="/v2/pages/privacy/" class="footer__link">Конфиденциальность</a>
+            <a href="mailto:info@compscicenter.ru" class="footer__link">info@compscicenter.ru</a>
             <div class="footer__social-media-icons">
                 <a target="_blank" rel="noopener" href="https://vk.com/compscicenter" title="Computer Science Center on VK.com">{{ macros.svg_inline('vk') }}</a>
                 <a target="_blank" rel="noopener" href="https://t.me/compscicenter_ru" title="Computer Science Center in Telegram">{{ macros.svg_inline('telegram') }}</a>
@@ -69,6 +68,7 @@
                 <a target="_blank" rel="noopener" href="https://www.facebook.com/CSCenter" title="{{ _('Computer Science Center on Facebook') }}">{{ macros.svg_inline('facebook') }}</a>
                 <a target="_blank" rel="noopener" href="https://www.youtube.com/c/compscicenterru" title="Computer Science Center on YouTube">{{ macros.svg_inline('youtube') }}</a>
             </div>
+        </div>
         </div>
     </div>
 </footer>
