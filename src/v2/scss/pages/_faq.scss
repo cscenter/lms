@@ -8,6 +8,8 @@
     text-align: left;
     padding-left: $padding-left;
     background: none;
+    font-size: $font-size-lg;
+    line-height: 2rem;
     &:hover,
     &:focus {
       text-decoration: none;
@@ -23,7 +25,7 @@
       transition: transform 150ms linear;
       position: absolute;
       left: 16px;
-      top: 14px; // FIXME: why not 16px? :<
+      top: 16px;
     }
 
     &[aria-expanded="true"] {
@@ -34,7 +36,6 @@
   }
 
   .card__content {
-    padding-left: $padding-left;
-    padding-top: 0;
+    padding: 0 spacer("8x") spacer("4x") $padding-left;
   }
 }
