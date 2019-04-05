@@ -14,55 +14,60 @@
 
 {% block content %}
     <div class="container page-content">
-        <h1>Вопросы и ответы</h1>
-        <div class="collapsible">
-            <div class="card _qa mb-4">
-                <button class="btn btn-link card__header" id="question-1"
-                        aria-expanded="false" href="#answer-1">
-                    <h3>{{ macros.svg_inline('border-arrow-right') }}Где, по
-                        каким дням
-                        и во сколько проходят занятия в центре?</h3>
-                </button>
-                <div class="collapse" id="answer-1" aria-expanded="true">
-                    <div class="card__content">Место проведения занятий CS
-                        центра в
-                        Санкт-Петербурге — БЦ «Таймс», в Новосибирске — учебные
-                        аудитории нового корпуса Новосибирского государственного
-                        университета (НГУ). Обычно занятия проходят по будням: с
-                        18:30
-                        до 20:00 — первая пара и с 20:00 до 21:30 — вторая.
-                        Система
-                        выбора курсов гибкая, поэтому студенты могут выбрать не
-                        только
-                        интересные, но и удобные в плане расписания предметы.
+        <h1 class="text-center">Вопросы и ответы</h1>
+        <div class="row content-center">
+            <div class="col-lg-10">
+                <div class="collapsible">
+                    <div class="card _qa mb-4">
+                        <button class="btn btn-link card__header" id="question-1"
+                                aria-expanded="false" href="#answer-1">
+                            {{ macros.svg_inline('border-arrow-right') }}Где, по
+                            каким дням
+                            и во сколько проходят занятия в центре?
+                        </button>
+                        <div class="collapse" id="answer-1" aria-expanded="true">
+                            <div class="card__content">Место проведения занятий CS
+                                центра в
+                                Санкт-Петербурге — БЦ «Таймс», в Новосибирске — учебные
+                                аудитории нового корпуса Новосибирского государственного
+                                университета (НГУ). Обычно занятия проходят по будням: с
+                                18:30
+                                до 20:00 — первая пара и с 20:00 до 21:30 — вторая.
+                                Система
+                                выбора курсов гибкая, поэтому студенты могут выбрать не
+                                только
+                                интересные, но и удобные в плане расписания предметы.
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="card _qa mb-4">
-                <button class="btn btn-link card__header" id="question-1"
-                        aria-expanded="false" href="#answer-1">
-                    <h3>{{ macros.svg_inline('border-arrow-right') }}Можно ли
-                        посещать лекции без поступления в качестве вольного
-                        слушателя?</h3>
-                </button>
-                <div class="collapse" id="answer-1" aria-expanded="true">
-                    <div class="card__content">
-                        Многие курсы CS центра закрытые, их могут посещать
-                        только студенты центра. Мы проводим открытые лекции и
-                        публикуем видеозаписи очных занятий. Курсы, которые
-                        проходят в рамках CS клуба, открыты для всех. Расписание
-                        занятий в CS клубе
+                    <div class="card _qa mb-4">
+                        <button class="btn btn-link card__header" id="question-1"
+                                aria-expanded="false" href="#answer-1">
+                            {{ macros.svg_inline('border-arrow-right') }}Можно ли
+                            посещать лекции без поступления в качестве вольного
+                            слушателя?
+                        </button>
+                        <div class="collapse" id="answer-1" aria-expanded="true">
+                            <div class="card__content">
+                                Многие курсы CS центра закрытые, их могут посещать
+                                только студенты центра. Мы проводим открытые лекции и
+                                публикуем видеозаписи очных занятий. Курсы, которые
+                                проходят в рамках CS клуба, открыты для всех. Расписание
+                                занятий в CS клубе
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="card _qa">
-                <button class="btn btn-link card__header" id="question-1"
-                        aria-expanded="false" href="#answer-1">
-                    <h3>{{ macros.svg_inline('border-arrow-right') }}Что делать, если я не нашёл своего вопроса в списке?</h3>
-                </button>
-                <div class="collapse" id="answer-1" aria-expanded="true">
-                    <div class="card__content">
-                        Напишите нам на <a href="mailto:info@compscicenter.ru">info@compscicenter.ru</a>.
+                    <div class="card _qa">
+                        <button class="btn btn-link card__header" id="question-1"
+                                aria-expanded="false" href="#answer-1">
+                            {{ macros.svg_inline('border-arrow-right') }}Что делать, если я не нашёл своего вопроса в
+                            списке?
+                        </button>
+                        <div class="collapse" id="answer-1" aria-expanded="true">
+                            <div class="card__content">
+                                Напишите нам на <a href="mailto:info@compscicenter.ru">info@compscicenter.ru</a>.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
