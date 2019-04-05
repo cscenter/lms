@@ -304,10 +304,10 @@ a.card {
       right: 16px;
       bottom: 0px;
       width: 150px;
-      height: 104px;
+      height: 96px;
       background: linear-gradient(to right, rgba($gray-lighter, 0.2), $gray-lighter);
-      @include media-breakpoint-down(lg) {
-        height: 96px;
+      @include media-breakpoint-up(lg) {
+        height: 104px;
       }
     }
   }

@@ -1,4 +1,4 @@
-$footer-mobile-height: 144px;
+$footer-mobile-height: 168px;
 $footer-height: 88px;
 
 @mixin append-hr-to-container() {
@@ -89,20 +89,13 @@ body {
   position: absolute;
   bottom: 0;
   height: $footer-mobile-height;
+  font-size: $font-size-sm;
+  text-align: center;
   @include media-breakpoint-up(lg) {
     height: $footer-height;
   }
 
   > .container {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    margin-bottom: spacer("8x");
-    color: $gray-darker;
-    font-size: $font-size-sm;
-    line-height: $line-height-base;
-    @include font-smoothing();
-
     &::before {
       content: "";
       width: 100%;
@@ -118,46 +111,26 @@ body {
   }
 }
 
-.footer__copyright {
-  @include make-col(12);
-  text-align: center;
-  display: block;
-  @include media-breakpoint-up(md) {
-    @include make-col(6);
-    text-align: left;
-    float: left; //for old browsers
-  }
-}
-
-.footer__contacts {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  @include make-col(12);
-  @include media-breakpoint-up(md) {
-    @include make-col(6);
-    flex-direction: row;
-    justify-content: flex-end;
-  }
-}
-
 .footer__social-media-icons {
+  margin: spacer("2x");
+  @include media-breakpoint-up(lg) {
+    display: inline-block;
+    margin: 0;
+  }
   a {
     margin: spacer("1x");
     @include media-breakpoint-up(md) {
       margin: 0 0 0 spacer("1x");
     }
   }
-  margin: spacer("2x");
-  @include media-breakpoint-up(md) {
-    margin: 0;
-  }
 }
 
 .footer__link {
-  margin: 0;
-  @include media-breakpoint-up(md) {
-    margin-right: spacer("3x");
+  margin: spacer("2x");
+  display: block;
+  @include media-breakpoint-up(lg) {
+    margin: 0 spacer("3x") 0 0;
+    display: inline-block;
   }
 }
 

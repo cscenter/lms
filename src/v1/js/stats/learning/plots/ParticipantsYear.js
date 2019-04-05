@@ -106,9 +106,9 @@ class ParticipantsYear {
 
         d3.select(this.id)
             .insert('div', ":first-child")
-            .attr('class', 'btn-group pull-right')
-            .attr('role', 'group')
-            .attr('aria-label', 'Toggle')
+                .attr('class', 'btn-group pull-right')
+                .attr('role', 'group')
+                .attr('aria-label', 'Toggle')
             .selectAll('button')
             .data(buttons)
             .enter().append('button').attr('class', function (d) {
@@ -118,15 +118,15 @@ class ParticipantsYear {
                     return 'btn btn-default';
                 }
             })
-            .text(d => d.name)
-            .on('click',  (d, i) => {
-                const buttons = d3.select(this.id)
-                    .select('div')
-                    .selectAll('button')
-                    .classed('active', false);
-                d3.select(buttons[0][i]).classed('active', true);
-                d.render();
-            });
+                .text(d => d.name)
+                .on('click',  (d, i, nodes) => {
+                    d3.select(this.id)
+                        .select('div')
+                        .selectAll('button')
+                        .classed('active', false);
+                    d3.select(nodes[i]).classed('active', true);
+                    d.render();
+                });
     };
 }
 

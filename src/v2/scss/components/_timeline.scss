@@ -1,61 +1,69 @@
 .timeline {
   border-left: $border-width solid $gray-light;
-  padding-top: spacer("10x");
+  margin-top: spacer("10x");
   position: relative;
-
-  &:after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: -4px;
-    width: 8px;
-    height: 14px;
-    background-color: $white;
-  }
-
-  &:before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -4px;
-    width: 8px;
-    height: 52px;
-    background-color: $white;
-  }
+  padding: 0 12px;
 }
 
 .timeline__date {
-  display: flex;
-  width: 100%;
-  margin: spacer("1x") spacer("2x");
+  $bullet-margin: 16px;
+  $bullet-border: 2px;
+  $item-height: 32px;
+
+  display: block;
   position: relative;
-  height: 32px;
+  line-height: $item-height;
   color: $gray-light;
+
+  &:before {
+    z-index: 2;
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: $gray-light;
+    border-radius: 50%;
+    position: absolute;
+    left: -$bullet-margin;
+    top: 12px;
+  }
 
   &.active {
     color: $gray-dark;
 
-    &:after {
-      content: "";
-      position: absolute;
-      top: 8px;
-      left: -14px;
+    &:before {
       width: 12px;
       height: 12px;
-      border-radius: 50%;
       background-color: $white;
       border: 2px solid $gray-dark;
+      left: -$bullet-margin - $bullet-border;
+      top: 12px - $bullet-border;
     }
   }
 
-  &:after {
-    content: "";
-    position: absolute;
-    top: 10px;
-    left: -12px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: $gray-light;
+  &:first-child {
+    &:after {
+      z-index: 1;
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -$bullet-margin;
+      width: 8px;
+      height: $item-height / 2;
+      background-color: $white;
+    }
+  }
+
+  &:last-child {
+    &:after {
+      z-index: 1;
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: -$bullet-margin;
+      width: 8px;
+      height: $item-height / 2;
+      background-color: $white;
+    }
   }
 }

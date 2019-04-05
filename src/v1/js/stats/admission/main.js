@@ -1,4 +1,5 @@
 import CampaignStagesTimeline from "./plots/CampaignStagesTimeline";
+import ApplicationFormSubmissionTimeline from "./plots/ApplicationFormSubmissionTimeline";
 import ApplicantsResultsTimeline from "./plots/ApplicantsResultsTimeline";
 import CampaignResultsStudents from "./plots/CampaignResultsStudents";
 import CampaignTestScore from "./plots/CampaignTestScore";
@@ -23,6 +24,7 @@ let campaignFilterForm = $('#campaigns-filter-form');
     };
     // By city
     new CampaignStagesTimeline('#plot-campaigns-stages-timeline', options);
+    new ApplicationFormSubmissionTimeline('#plot-application-timeline', options);
     new ApplicantsResultsTimeline('#plot-applicants-results-timeline', options);
     // By admission campaign
     new CampaignStages('plot-campaign-stages', options);
