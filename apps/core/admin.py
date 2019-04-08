@@ -197,10 +197,11 @@ class CityAwareModelForm(forms.ModelForm):
             for field_name, field_data in self.fields.items():
                 if isinstance(field_data, CityAwareSplitDateTimeField):
                     value = self.cleaned_data[field_name]
-                    value = value.replace(tzinfo=None)
-                    value = timezone.make_aware(value, city_timezone)
-                    self.cleaned_data[field_name] = value
-                    setattr(self.instance, field_name, value)
+                    if isinstance(value, datetime.datetime):
+                        value = value.replace(tzinfo=None)
+                        value = timezone.make_aware(value, city_timezone)
+                        self.cleaned_data[field_name] = value
+                        setattr(self.instance, field_name, value)
         return super().save(commit)
 
 
