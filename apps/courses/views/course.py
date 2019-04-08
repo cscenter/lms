@@ -19,7 +19,6 @@ from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_term_index
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
-from surveys.models import CourseSurvey
 from users.mixins import TeacherOnlyMixin
 from users.utils import get_user_city_code
 
@@ -93,6 +92,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
                            .count())
         survey_url = course.survey_url
         if not survey_url and not is_club_site():
+            from surveys.models import CourseSurvey
             cs = CourseSurvey.get_active(course)
             if cs:
                 survey_url = cs.get_absolute_url(course=course)
