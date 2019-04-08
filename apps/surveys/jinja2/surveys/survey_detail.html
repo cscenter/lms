@@ -18,6 +18,9 @@
                     <h1>{{ form.survey.title|safe }}</h1>
                 </div>
                 <div class="card__content">
+                    {% if form.survey.expire_at %}
+                        <p>Пожалуйста, заполните опрос до {{ form.survey.expire_at_local(format="H:i d E") }}.</p>
+                    {% endif %}
                     <form action="" class="ui form" method="post">
                         {% csrf_token %}
                         {{ form.non_field_errors() }}

@@ -10,7 +10,7 @@ from vanilla import DetailView
 from core.exceptions import Redirect
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
-from core.utils import get_club_domain
+from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
 from courses.forms import CourseEditDescrForm
 from courses.models import Course, CourseTeacher
@@ -19,6 +19,7 @@ from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_term_index
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
+from surveys.models import CourseSurvey
 from users.mixins import TeacherOnlyMixin
 from users.utils import get_user_city_code
 
@@ -31,7 +32,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
     context_object_name = 'course'
 
     def get(self, request, *args, **kwargs):
-        # Redirects old style links
+        # Redirects old style link
         if "tab" in request.GET:
             url_params = self.get_course_url_params()
             try:
@@ -90,6 +91,11 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
                            .filter(course_offering_news__course=course,
                                    user=request_user)
                            .count())
+        survey_url = course.survey_url
+        if not survey_url and not is_club_site():
+            cs = CourseSurvey.get_active(course)
+            if cs:
+                survey_url = cs.get_absolute_url(course=course)
         return {
             'user_city': get_user_city_code(self.request),
             'tz_override': tz_override,
@@ -97,6 +103,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
             # TODO: move to user method
             'is_actual_teacher': is_actual_teacher,
             'unread_news': unread_news,
+            'survey_url': survey_url,
         }
 
     def make_tabs(self, course: Course):

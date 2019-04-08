@@ -316,8 +316,10 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
         _("Course reviews"),
         null=True,
         blank=True)
-    survey_url = models.URLField(_("Survey URL"), blank=True,
-                                 help_text=_("Link to Survey"))
+    survey_url = models.URLField(
+        _("Survey URL"),
+        blank=True,
+        help_text=_("Leave empty if you want to fetch survey url from DB"))
     online_course_url = models.URLField(_("Online Course URL"), blank=True)
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
