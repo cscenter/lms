@@ -17,7 +17,7 @@ class FormFieldAdmin(admin.StackedInline):
 
 
 class FormAdmin(admin.ModelAdmin):
-    list_display = ["title", "status", "publish_at", "expire_at"]
+    list_display = ("title", "status")
     list_filter = ("status",)
     search_fields = ("title",)
     radio_fields = {"status": admin.HORIZONTAL}
@@ -34,8 +34,9 @@ class FormAdmin(admin.ModelAdmin):
 
 
 class CourseSurveyAdmin(admin.ModelAdmin):
-    list_display = ["course", "get_city", "type",
-                    "get_form_actions", "get_survey_actions"]
+    list_display = ("course", "get_city", "type",
+                    "get_form_actions", "get_survey_actions",
+                    "publish_at", "expire_at")
     list_filter = (
         'course__city',
         ('course__semester', AdminRelatedDropdownFilter),

@@ -6,12 +6,14 @@ from django.contrib.postgres.fields import JSONField
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Q
+from django.utils import formats
 from django.utils.functional import cached_property
-from django.utils.timezone import now
+from django.utils.timezone import now, localtime
 from django.utils.translation import ugettext_lazy as _
 from post_office import mail
 from post_office.models import EmailTemplate
 
+from core.timezone import now_local
 from core.urls import reverse, city_aware_reverse
 from courses.models import Course
 from learning.models import Enrollment
@@ -48,14 +50,6 @@ class AbstractForm(models.Model):
         verbose_name=_("Status"),
         choices=STATUSES,
         default=STATUS_DRAFT)
-    publish_at = models.DateTimeField(
-        verbose_name=_("Published from"),
-        help_text=_("With published selected, won't be shown until this time."),
-        blank=True, null=True)
-    expire_at = models.DateTimeField(
-        verbose_name=_("Expires on"),
-        help_text=_("With published selected, won't be shown after this time."),
-        blank=True, null=True)
     description = models.TextField(
         verbose_name=_("Description"),
         blank=True)
@@ -265,6 +259,15 @@ class CourseSurvey(models.Model):
     course = models.ForeignKey(Course,
                                related_name="surveys",
                                on_delete=models.CASCADE)
+    # Note: Minor inaccuracy with deadlines since we set dates in UTC on client
+    publish_at = models.DateTimeField(
+        verbose_name=_("Published from"),
+        help_text=_("With published selected, won't be shown until this time."),
+        blank=True, null=True)
+    expire_at = models.DateTimeField(
+        verbose_name=_("Expires on"),
+        help_text=_("With published selected, won't be shown after this time."),
+        blank=True, null=True)
     email_template = models.ForeignKey(
         EmailTemplate,
         on_delete=models.CASCADE,
@@ -298,6 +301,12 @@ class CourseSurvey(models.Model):
     def city_aware_field_name(self):
         return self.__class__.course.field.name
 
+    def expire_at_local(self, tz=None, format=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        dt = localtime(self.expire_at, timezone=tz)
+        return formats.date_format(dt, format) if format else dt
+
     @transaction.atomic
     def save(self, *args, **kwargs):
         from surveys.services import course_form_builder
@@ -316,12 +325,13 @@ class CourseSurvey(models.Model):
                     pass
         super().save(*args, **kwargs)
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, course: Course = None):
+        course = course or self.course
         kwargs = {
-            "course_slug": self.course.meta_course.slug,
-            "semester_type": self.course.semester.type,
-            "semester_year": self.course.semester.year,
-            "city_code": self.course.get_city(),
+            "course_slug": course.meta_course.slug,
+            "semester_type": course.semester.type,
+            "semester_year": course.semester.year,
+            "city_code": course.get_city(),
             "slug": self.form.slug
         }
         return city_aware_reverse('surveys:form_detail', kwargs=kwargs)
@@ -340,6 +350,19 @@ class CourseSurvey(models.Model):
 
     def get_email_template(self):
         return f"survey-{self.type}"
+
+    @classmethod
+    def get_active(cls, course: Course) -> Optional["CourseSurvey"]:
+        """Get the latest active survey for the course"""
+        today = now_local(course.get_city_timezone())
+        return (cls.objects
+                .filter(Q(expire_at__gt=today) | Q(expire_at__isnull=True),
+                        Q(publish_at__lte=today) | Q(publish_at__isnull=True),
+                        course=course,
+                        form__status=STATUS_PUBLISHED)
+                .order_by("-expire_at")
+                .select_related("form")
+                .first())
 
 
 class Field(AbstractField):

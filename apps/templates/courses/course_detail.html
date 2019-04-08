@@ -230,10 +230,10 @@
                     {% endif %}
                 {% endif %}
             {% endif %}
-            {% if course.survey_url %}
+            {% if survey_url %}
                 {% if request_user_enrollment is not None or user.is_curator %}
                     <a class=" btn btn-default btn-block btn-success"
-                       href="{{ course.survey_url }}"
+                       href="{{ survey_url }}"
                        target="_blank">{% trans "Start survey" %}</a>
                 {% endif %}
             {% endif %}
