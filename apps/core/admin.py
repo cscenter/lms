@@ -167,6 +167,7 @@ admin.site.register(FaqCategory, FaqCategoryAdmin)
 # TIMEZONE SUPPORT
 
 
+# FIXME: restrict fields?
 class CityAwareModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """
