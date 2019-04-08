@@ -6,8 +6,26 @@ from core.timezone import now_local
 from courses.tests.factories import CourseFactory
 from learning.settings import Branches
 from surveys.constants import STATUS_PUBLISHED, STATUS_DRAFT
-from surveys.models import CourseSurvey, Field
+from surveys.models import CourseSurvey, Field, FieldChoice
 from surveys.tests.factories import CourseSurveyFactory
+
+
+@pytest.mark.django_db
+def test_course_survey_is_active():
+    course = CourseFactory(city_id=Branches.SPB)
+    today = now_local(course.get_city_timezone())
+    cs = CourseSurveyFactory(course=course, publish_at=None, expire_at=None)
+    assert cs.is_active
+    cs.publish_at = today + timedelta(hours=1)
+    assert not cs.is_active
+    cs.publish_at = None
+    cs.publish_at = today - timedelta(hours=1)
+    assert cs.is_active
+    cs.publish_at = None
+    cs.expire_at = today + timedelta(hours=1)
+    assert cs.is_active
+    cs.expire_at = today - timedelta(hours=1)
+    assert not cs.is_active
 
 
 @pytest.mark.django_db
@@ -47,7 +65,7 @@ def test_get_active():
 
 
 @pytest.mark.django_db
-def test_final_survey_builder():
+def test_final_survey_builder_field_label():
     course = CourseFactory(city_id=Branches.SPB)
     cs = CourseSurveyFactory(course=course, type=CourseSurvey.MIDDLE,
                              # Create form with a form builder
@@ -60,3 +78,24 @@ def test_final_survey_builder():
     assert not Field.objects.filter(form_id=cs.form_id, label=default_label).exists()
     final_survey_label = "Что вы думаете о том, как проходили очные лекции?"
     assert Field.objects.filter(form_id=cs.form_id, label=final_survey_label).exists()
+
+
+@pytest.mark.django_db
+def test_final_survey_builder_field_choice_label():
+    course = CourseFactory(city_id=Branches.SPB)
+    cs = CourseSurveyFactory(course=course, type=CourseSurvey.MIDDLE,
+                             # Create form with a form builder
+                             form_id=None)
+    label = "Что вы думаете о том, как проходят очные лекции?"
+    assert Field.objects.filter(form_id=cs.form_id, label=label).exists()
+    field = Field.objects.get(form_id=cs.form_id, label=label)
+    assert FieldChoice.objects.filter(field_id=field.pk, label="Материал разбирается слишком быстро").exists()
+    cs = CourseSurveyFactory(course=course, type=CourseSurvey.FINAL,
+                             # Create form with a form builder
+                             form_id=None)
+    label = "Что вы думаете о том, как проходили очные лекции?"
+    assert Field.objects.filter(form_id=cs.form_id, label=label).exists()
+    field = Field.objects.get(form_id=cs.form_id, label=label)
+    assert not FieldChoice.objects.filter(field_id=field.pk, label="Материал разбирается слишком быстро").exists()
+    assert FieldChoice.objects.filter(field_id=field.pk, label="Материал разбирался слишком быстро").exists()
+    assert FieldChoice.objects.filter(field_id=field.pk, label="Тематика и чтение курса мне понравились, и я хочу продолжить изучение материала").exists()
