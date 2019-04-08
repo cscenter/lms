@@ -6,7 +6,7 @@ from core.timezone import now_local
 from courses.tests.factories import CourseFactory
 from learning.settings import Branches
 from surveys.constants import STATUS_PUBLISHED, STATUS_DRAFT
-from surveys.models import CourseSurvey
+from surveys.models import CourseSurvey, Field
 from surveys.tests.factories import CourseSurveyFactory
 
 
@@ -45,3 +45,18 @@ def test_get_active():
     active_cs = CourseSurvey.get_active(course)
     assert active_cs is None
 
+
+@pytest.mark.django_db
+def test_final_survey_builder():
+    course = CourseFactory(city_id=Branches.SPB)
+    cs = CourseSurveyFactory(course=course, type=CourseSurvey.MIDDLE,
+                             # Create form with a form builder
+                             form_id=None)
+    default_label = "Что вы думаете о том, как проходят очные лекции?"
+    assert Field.objects.filter(form_id=cs.form_id, label=default_label).exists()
+    cs = CourseSurveyFactory(course=course, type=CourseSurvey.FINAL,
+                             # Create form with a form builder
+                             form_id=None)
+    assert not Field.objects.filter(form_id=cs.form_id, label=default_label).exists()
+    final_survey_label = "Что вы думаете о том, как проходили очные лекции?"
+    assert Field.objects.filter(form_id=cs.form_id, label=final_survey_label).exists()
