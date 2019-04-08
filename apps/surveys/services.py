@@ -9,6 +9,18 @@ from surveys.models import Form, FieldChoice, CourseSurvey
 OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
 
 
+def _update_field_label(field):
+    """For FINAL survey type show labels in the past form"""
+    labels = {
+        "Что вы думаете о том, как проходят очные лекции?": "Что вы думаете о том, как проходили очные лекции?",
+        "Как часто вы посещаете занятия?": "Как часто вы посещали занятия?",
+        "Какими материалами вы пользуетесь для выполнения заданий?": "Какими материалами вы пользовались для выполнения заданий?",
+        "Оцените, пожалуйста, сколько часов в неделю вы тратите на выполнение домашних заданий": "Оцените, пожалуйста, сколько часов в неделю вы тратили на выполнение домашних заданий"
+    }
+    if field.label in labels:
+        field.label = labels[field.label]
+
+
 def course_form_builder(survey: CourseSurvey):
     course = survey.course
     if survey.type in [CourseSurvey.MIDDLE]:
@@ -50,6 +62,8 @@ def course_form_builder(survey: CourseSurvey):
             # Mutate original field
             field.pk = None
             field.form_id = form.pk
+            if survey.type == survey.FINAL:
+                _update_field_label(field)
             field.save()
 
             next_index = 1
