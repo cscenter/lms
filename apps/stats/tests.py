@@ -8,6 +8,30 @@ from django.conf import settings
 from admission.tests.factories import ApplicantFactory, CampaignFactory
 from core.timezone import now_local
 from core.urls import reverse
+from learning.settings import Branches
+
+
+@pytest.mark.django_db
+def test_application_form_stats_empty_results(client, curator):
+    url = reverse("api:stats_admission_application_form_submission",
+                  kwargs={"city_code": Branches.SPB},
+                  subdomain=settings.LMS_SUBDOMAIN)
+    start = datetime(year=2018, month=3, day=14, hour=11, tzinfo=pytz.UTC)
+    campaign = CampaignFactory(city_id=Branches.SPB,
+                               application_starts_at=start,
+                               application_ends_at=start + timedelta(hours=1),
+                               year=2018)
+    client.login(curator)
+    response = client.get(url)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert "2018" in data
+    assert len(data) == 1
+    ApplicantFactory(campaign=campaign, created=start + timedelta(minutes=1))
+    response = client.get(url)
+    assert response.status_code == 200
+    data = json.loads(response.content)
+    assert data["2018"][0] == 1
 
 
 @pytest.mark.django_db
@@ -32,7 +56,7 @@ def test_application_form_stats(client, curator):
     assert data["2018"][0] == 3
     assert data["2018"][1] == 4
     # Test partial sums with active campaign
-    today = now_local('spb')
+    today = now_local(Branches.SPB)
     start = today - timedelta(days=2)
     current_campaign = CampaignFactory(
         city_id='spb',

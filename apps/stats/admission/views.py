@@ -1,26 +1,26 @@
-import datetime
+import logging
 
-from django.db.models import Count, When, IntegerField, Case, Q, Func, F
-from django.db.models.functions import TruncDate, ExtractMonth, ExtractDay, \
-    ExtractYear
-from django.utils import timezone
+from django.db.models import Count, When, IntegerField, Case, Q
+from django.db.models.functions import TruncDate
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
-from rest_pandas.serializers import SimpleSerializer, PandasSerializer
+from rest_pandas.serializers import SimpleSerializer
 
-from api.permissions import CuratorAccessPermission
 from admission.models import Applicant, Test, Exam, Campaign
+from api.permissions import CuratorAccessPermission
+from core.db.functions import TruncDateInTZ
 from core.timezone import now_local
 from stats.admission.pandas_serializers import \
     CampaignResultsTimelineSerializer, \
     ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
     CampaignResultsByUniversitiesSerializer, \
     CampaignResultsByCoursesSerializer, ApplicationSubmissionPandasSerializer
-from stats.admission.serializers import StageByYearSerializer, \
-    ApplicationSubmissionSerializer
+from stats.admission.serializers import StageByYearSerializer
 from stats.renderers import ListRenderersMixin
+
+logger = logging.getLogger(__name__)
 
 TestingCountAnnotation = Count(
     Case(When(Q(online_test__isnull=False, online_test__score__isnull=False), then=1),
@@ -110,15 +110,15 @@ class ApplicationFormSubmissionByDays(ListAPIView):
         return Q(campaign__in=campaign_ids) & dates
 
     def get_stat(self, campaigns):
+        active_campaign = next((c for c in campaigns if c.current), None)
+        campaigns_tz = campaigns[0].get_city_timezone() if campaigns else None
         filters = self.get_filters(campaigns)
         qs = (Applicant.objects
               .filter(filters)
-              .annotate(month=ExtractMonth('created'),
-                        day=ExtractDay('created'),
-                        year=ExtractYear('created'))
-              .values_list('year', 'month', 'day')
+              .annotate(date=TruncDateInTZ('created', tzinfo=campaigns_tz))
+              .values_list('date')
               .annotate(total=Count("id"))
-              .order_by('year', 'month', 'day'))
+              .order_by('date'))
         # XXX: Aggregated data doesn't include days without applications.
         data = {}
         application_start = {}
@@ -127,13 +127,18 @@ class ApplicationFormSubmissionByDays(ListAPIView):
             end = c.application_ends_at_local().date()
             data[c.year] = [0 for _ in range((end - start).days + 1)]
             application_start[c.year] = start
-        for year, month, day, total in qs:
-            created = datetime.date(year=year, month=month, day=day)
-            index = (created - application_start[year]).days
+        for created, total in qs:
+            index = (created - application_start[created.year]).days
             # Applications could be sent before official release
+            # FIXME: Bug with a wrong index reproducible locally :<
+            # TODO: remove this debug statement after manual testing
+            if index >= len(data[created.year]):
+                from django.utils.timezone import get_current_timezone
+                _tz = get_current_timezone()
+                logger.error(f"Wrong index {index} for {created}. "
+                             f"Active timezone for thread: {_tz}")
             if index >= 0:
-                data[year][index] = total
-        active_campaign = next((c for c in campaigns if c.current), None)
+                data[created.year][index] = total
         for year in data:
             xs = data[year]
             index = len(xs)
