@@ -1,5 +1,3 @@
-import sys
-
 from .base import *
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
@@ -12,6 +10,7 @@ INSTALLED_APPS += ['debug_toolbar',
                    'django_extensions',
                    # 'template_timings_panel',
                    'rosetta']
+
 
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.versions.VersionsPanel',
