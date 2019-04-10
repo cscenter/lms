@@ -41,6 +41,8 @@ INSTALLED_APPS += [
     'surveys.apps.SurveysConfig',
     'online_courses.apps.Config',
     'learning.internships.apps.InternshipsConfig',
+    'ckeditor',
+    'ckeditor_uploader',
 ]
 
 CACHES = {
@@ -198,3 +200,58 @@ MENU_SELECT_PARENTS = True
 # Share this cookie between subdomains
 SESSION_COOKIE_NAME = "cscsessionid"
 SESSION_COOKIE_DOMAIN = ".compscicenter.ru"
+
+
+# CKEDITOR Settings
+CKEDITOR_UPLOAD_PATH = "uploads/"  # /media/uploads/*
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_ALLOW_NONIMAGE_FILES = False
+CKEDITOR_CONFIGS = {
+    'default': {
+        'skin': 'moono-lisa',
+        'contentsCss': [],
+        'toolbar_Basic': [
+            ['Source', '-', 'Bold', 'Italic']
+        ],
+        'toolbar_YouCustomToolbarConfig': [
+            {'name': 'document',
+             'items': ['Source', '-', 'Preview', 'Maximize', 'ShowBlocks']},
+            {'name': 'basicstyles',
+             'items': ['Bold', 'Italic', 'Underline', 'Subscript',
+                       'Superscript', 'RemoveFormat']},
+            {'name': 'clipboard',
+             'items': ['PasteText', 'PasteFromWord', '-', 'Undo', 'Redo']},
+            {'name': 'insert', 'items': ['Image', 'HorizontalRule', ]},
+            {'name': 'styles', 'items': ['Format']},
+            {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
+            '/',  # put this to force next toolbar on new line
+        ],
+        'toolbar': 'YouCustomToolbarConfig',  # put selected toolbar config here
+        # 'toolbarGroups': [{ 'name': 'document', 'groups': [ 'mode', 'document', 'doctools' ] }],
+        # 'height': 291,
+        'extraAllowedContent': 'div(*)[data-*]; span(*); p(*); th(*); td(*); section(*); ul(*); li(*); iframe[*]; h1(*); h2(*)',
+        'width': '100%',
+        'filebrowserWindowHeight': 725,
+        'filebrowserWindowWidth': 940,
+        # 'toolbarCanCollapse': True,
+        # 'mathJaxLib': '//cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML',
+        'tabSpaces': 4,
+        'extraPlugins': ','.join(
+            [
+                'div',
+                'autolink',
+                'autoembed',
+                'embedsemantic',
+                'autogrow',
+                # 'devtools',
+                'widget',
+                'lineutils',
+                'clipboard',
+                'dialog',
+                'dialogui',
+                'elementspath',
+                'uploadimage',
+                'uploadwidget',
+            ]),
+    }
+}

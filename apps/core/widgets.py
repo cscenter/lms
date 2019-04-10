@@ -1,8 +1,11 @@
+from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django import forms
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django_filters.widgets import RangeWidget
+from webpack_loader import utils
 
-from core.timezone import city_aware_to_naive
 from core.constants import DATE_FORMAT_RU
+from core.timezone import city_aware_to_naive
 
 
 class UbereditorWidget(forms.Textarea):
@@ -14,6 +17,29 @@ class UbereditorWidget(forms.Textarea):
 
 class AdminRichTextAreaWidget(UbereditorWidget):
     template_name = 'widgets/ubertextarea.html'
+
+
+class CKEditorWidget(CKEditorUploadingWidget):
+    """
+    This class set `contentsCss` config value at runtime before render
+    CKEditor widget.
+
+    CKEditor has `contentsCss` setting to pass additional css to ckeditor
+    iframe.
+    When css served by webpack (in conjunction with staticfiles app) we don't
+    know exact path to css file since  bundle name is hashed.
+    To avoid this behavior append webpack paths at runtime.
+    """
+    def _set_config(self):
+        super()._set_config()
+        css = self.config.get('contentsCss', [])
+        for f in utils.get_files('main', 'css'):
+            css.append(f["url"])
+        css.append('html {margin: 20px;}')
+        # TODO: move to settings? how?
+        css.append(staticfiles_storage.url('dist/css/main.css'))
+        self.config['contentsCss'] = css
+
 
 
 class DateTimeRangeWidget(RangeWidget):

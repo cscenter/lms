@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "de411506b561da3d02086abd1b115f97a19649e62f38985f4e18a8c567cd301c"
+            "sha256": "0895119f021af80f257c611bc0a9d30f8779c34df0377b5a54fbd2d3a2ae9ad1"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -180,6 +180,13 @@
             ],
             "index": "pypi",
             "version": "==1.6.2"
+        },
+        "django-ckeditor": {
+            "hashes": [
+                "sha256:266353b93991babb399a62a25bc0cbb945f95901693a4f07c9506edabd6a0cd0"
+            ],
+            "index": "pypi",
+            "version": "==5.6.1"
         },
         "django-crispy-forms": {
             "hashes": [
@@ -930,14 +937,6 @@
                 "sha256:f8da5322f4ff5f667a0d5a27e871b560c6637153c81e318b35cb012b2a98835c"
             ],
             "version": "==18.0.1"
-        },
-        "raven": {
-            "hashes": [
-                "sha256:3fa6de6efa2493a7c827472e984ce9b020797d0da16f1db67197bcc23c8fae54",
-                "sha256:44a13f87670836e153951af9a3c80405d36b43097db869a36e92809673692ce4"
-            ],
-            "index": "pypi",
-            "version": "==6.10.0"
         },
         "redis": {
             "hashes": [

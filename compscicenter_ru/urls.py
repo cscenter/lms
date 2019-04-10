@@ -65,6 +65,7 @@ urlpatterns += [
 
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),
+    path('ckeditor/', include('ckeditor_uploader.urls')),
     # Required `is_staff` only. Mb restrict to `is_superuser`?
     path('narnia/django-rq/', include('django_rq.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
