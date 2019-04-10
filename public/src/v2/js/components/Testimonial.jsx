@@ -12,15 +12,13 @@ class Testimonial extends React.Component {
     render() {
         const {author, photo, imgWidth, imgHeight, text, year, areas} = this.props;
         return (
-            <div className="testimonial">
-                <img className="img-rounded" alt={author} src={photo} width={imgWidth} height={imgHeight} />
-                <div className="testimonial__details">
-                    <div className="testimonial__author">
+            <div className="ui author _testimonial">
+                <img className="author__img" alt={author} src={photo} width={imgWidth} height={imgHeight} />
+                <div className="author__details">
                         <h4>{ author }</h4>
                         <span>Выпуск {year}, {areas}</span>
-                    </div>
-                    <div className="testimonial__text" dangerouslySetInnerHTML={{__html: text}} />
                 </div>
+                <div className="author__testimonial" dangerouslySetInnerHTML={{__html: text}} />
             </div>
         );
     }
