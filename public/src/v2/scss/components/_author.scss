@@ -1,10 +1,11 @@
 .author {
   display: flex;
   flex-wrap: wrap;
+  @include font-smoothing();
 }
 
 .author__img {
-  margin-right: spacer("2x");
+  margin-right: spacer("3x");
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -28,12 +29,15 @@
     margin-top: spacer("1x");
     display: block;
     color: $gray-dark;
+    @include media-breakpoint-up(sm) {
+      margin-bottom: spacer("1x");
+    }
   }
 }
 
 .author._testimonial {
   $img-width: 72px;
-  $img-margin: 12px;
+  $img-margin: 16px;
 
   .author__img {
     width: $img-width;
@@ -57,9 +61,9 @@
 
   .author__testimonial {
     padding: 0;
-    margin-top: spacer("4x");
+    margin-top: spacer("3x");
     @include media-breakpoint-up(sm) {
-      margin-top: spacer("2x");
+      margin-top: 0;
       padding-left: $img-width + $img-margin;
     }
   }
@@ -67,7 +71,7 @@
 
 
 .author__testimonial {
-  margin-top: spacer("2x");
+  color: $gray-darker;
   width: 100%; // ie10 hack
 
   > p:last-child {
