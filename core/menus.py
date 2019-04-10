@@ -68,16 +68,56 @@ class MenuItem(_MenuItem):
 
 public_menu = [
     MenuItem(
-        pgettext_lazy("menu", "О центре"),
-        '/v2/pages/about/',
-        weight=10,
+        pgettext_lazy("menu", "Программы"),
+        '/v2/pages/syllabus/on-campus/',
+        weight=3,
         children=[
-            MenuItem(pgettext_lazy("menu", "Цели и история"), '/v2/pages/about_new/', weight=20),
+            MenuItem(pgettext_lazy("menu", "Очное обучение"), '/v2/pages/syllabus/on-campus/', weight=10),
+            MenuItem(pgettext_lazy("menu", "Заочное обучение"), '/v2/pages/syllabus/distance/', weight=20),
+        ],
+        selected_patterns=[
+            r'^/v2/pages/syllabus/distance/',
+        ]),
+    MenuItem(
+        pgettext_lazy("menu", "Онлайн-образование"),
+        '/v2/pages/online_courses/',
+        weight=4,
+        children=[
+            MenuItem(pgettext_lazy("menu", "Онлайн-курсы"), '/v2/pages/online_courses/', weight=10),
+            MenuItem(pgettext_lazy("menu", "Онлайн-программы"), 'https://code.stepik.org/', weight=20, is_external=True),
+            MenuItem(pgettext_lazy("menu", "Видео"), '/v2/pages/video_archive/', weight=30),
+            MenuItem(pgettext_lazy("menu", "Лекторий"), 'https://open.compscicenter.ru/', weight=40, is_external=True),
+        ],
+        selected_patterns=[
+            r'^/v2/pages/online_courses/',
+            r'^/v2/pages/video_archive/',
+        ]),
+
+    MenuItem(
+        pgettext_lazy("menu", "Поступление"),
+        '/v2/pages/enrollment/',
+        weight=4,
+        children=[
+            MenuItem(pgettext_lazy("menu", "Поступающим"), '/v2/pages/enrollment/', weight=10),
+            MenuItem(pgettext_lazy("menu", "Памятка"), '/v2/pages/checklist/', weight=20),
+            MenuItem(pgettext_lazy("menu", "Программа для поступления"), '/v2/pages/enrollment/program/', weight=30),
+            MenuItem(pgettext_lazy("menu", "Вопросы и ответы"), '/v2/pages/faq/', weight=40),
+        ],
+        selected_patterns=[
+            r'^/v2/pages/enrollment/',
+            r'^/v2/pages/checklist/',
+            r'^/v2/pages/faq/',
+        ]),
+    MenuItem(
+        pgettext_lazy("menu", "О центре"),
+        '/v2/pages/history/',
+        weight=5,
+        children=[
             MenuItem(pgettext_lazy("menu", "История"), '/v2/pages/history/', weight=20),
-            MenuItem(pgettext_lazy("menu", "Программа"), '/v2/pages/programs/', weight=30),
             MenuItem(pgettext_lazy("menu", "Команда"), '/v2/pages/team/', weight=40),
             MenuItem(pgettext_lazy("menu", "Преподаватели"), '/v2/pages/teachers/', weight=50),
-            MenuItem(pgettext_lazy("menu", "Выпускники"), '/v2/pages/alumni/', weight=60, selected_patterns=[r"^/2016/$"]),
+            MenuItem(pgettext_lazy("menu", "Выпускники"), '/v2/pages/alumni/', weight=60,
+                     selected_patterns=[r"^/2016/$"]),
             MenuItem(pgettext_lazy("menu", "Отзывы"), '/v2/pages/testimonials/', weight=70),
         ],
         selected_patterns=[
@@ -89,63 +129,19 @@ public_menu = [
             r'^/v2/pages/alumni/',
             r"^/events/"
         ]),
+    # Private part (my.* domain)
     MenuItem(
         pgettext_lazy("menu", "Курсы"),
         '/v2/pages/courses/',
-        weight=20,
+        weight=6,
         excluded_patterns=[
             r"^/courses/.*/assignments/add$",
             r"^/courses/.*/assignments/\d+/edit$"
         ]),
     MenuItem(
-        pgettext_lazy("menu", "Программы"),
-        '/v2/pages/syllabus/on-campus/',
-        weight=30,
-        children=[
-            MenuItem(pgettext_lazy("menu", "Очное обучение"), '/v2/pages/syllabus/on-campus/', weight=10),
-            MenuItem(pgettext_lazy("menu", "Заочное обучение"), '/v2/pages/syllabus/distance/', weight=20),
-        ],
-        selected_patterns=[
-            r'^/v2/pages/syllabus/distance/',
-        ]),
-    MenuItem(
-        pgettext_lazy("menu", "Онлайн"),
-        '/v2/pages/online_courses/',
-        weight=30,
-        children=[
-            MenuItem(pgettext_lazy("menu", "Онлайн-курсы"), '/v2/pages/online_courses/', weight=10),
-            MenuItem(pgettext_lazy("menu", "Онлайн-программы"), 'https://code.stepik.org/', weight=20, is_external=True),
-            MenuItem(pgettext_lazy("menu", "Видео"), '/v2/pages/video_archive/', weight=30),
-        ],
-        selected_patterns=[
-            r'^/v2/pages/online_courses/',
-            r'^/v2/pages/video_archive/',
-        ]),
-
-    MenuItem(
-        pgettext_lazy("menu", "Лекторий"),
-        'https://open.compscicenter.ru/',
-        weight=40,
-        is_external=True),
-    MenuItem(
-        pgettext_lazy("menu", "Поступление"),
-        '/v2/pages/enrollment/',
-        weight=50,
-        children=[
-            MenuItem(pgettext_lazy("menu", "Поступающим"), '/v2/pages/enrollment/', weight=10),
-            MenuItem(pgettext_lazy("menu", "Подать заявку"), '/v2/pages/application/', weight=20),
-            MenuItem(pgettext_lazy("menu", "Программа для поступления"), '/v2/pages/enrollment/program/', weight=30),
-            MenuItem(pgettext_lazy("menu", "Вопросы и ответы"), '/v2/pages/faq/', weight=40),
-        ],
-        selected_patterns=[
-            r'^/v2/pages/enrollment/',
-            r'^/v2/pages/faq/',
-        ]),
-    # Private part (my.* domain)
-    MenuItem(
         pgettext_lazy("menu", "Обучение"),
         '/v2/pages/learning/',
-        weight=10,
+        weight=7,
         children=[
             MenuItem(pgettext_lazy("menu", "Задания"), '/learning/assignments/', weight=10, budge='assignments_student'),
             MenuItem(pgettext_lazy("menu", "Моё расписание"), '/learning/timetable/', weight=20, selected_patterns=[r" ^/learning/calendar/"]),
