@@ -29,7 +29,7 @@
     margin-top: spacer("1x");
     display: block;
     color: $gray-dark;
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(lg) {
       margin-bottom: spacer("1x");
     }
   }
@@ -42,7 +42,7 @@
   .author__img {
     width: $img-width;
     height: $img-width;
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(lg) {
       position: absolute;
     }
   }
@@ -52,7 +52,7 @@
     justify-content: center;
     flex-flow: column;
     margin: 0;
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(lg) {
       padding-left: $img-width + $img-margin;
       justify-content: start;
       height: auto;
@@ -62,7 +62,7 @@
   .author__testimonial {
     padding: 0;
     margin-top: spacer("3x");
-    @include media-breakpoint-up(sm) {
+    @include media-breakpoint-up(lg) {
       margin-top: 0;
       padding-left: $img-width + $img-margin;
     }
