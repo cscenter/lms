@@ -22,7 +22,7 @@ class CurrentCampaignsMixin(object):
         self.stdout.write("Selected current campaigns ({} total):".format(
             len(campaigns)))
         for campaign in campaigns:
-            self.stdout.write(f"  {campaign}")
+            self.stdout.write(f"  {campaign} [{campaign.city_id}]")
         return campaigns
 
     def get_current_campaign_ids(self, city_code=None):
