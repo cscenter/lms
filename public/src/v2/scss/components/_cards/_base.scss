@@ -56,9 +56,14 @@ $card-bg: $white !default;
   flex: 1 1 auto;
   padding: spacer("4x");
 
+  &._middle {
+    padding: spacer("6x");
+  }
+
   &._big {
     padding: spacer("8x");
   }
+
 }
 
 .card__header {

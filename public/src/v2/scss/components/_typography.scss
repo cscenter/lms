@@ -114,6 +114,10 @@ a {
       @include media-breakpoint-up(md) {
         margin: spacer("2x") 0 spacer("6x") 3.5rem;
       }
+
+      ul:not(.ui) li {
+
+      }
     }
     ul:not(.ui) {
       list-style-type: none;
@@ -121,10 +125,14 @@ a {
         margin-bottom: spacer("2x");
       }
       li::before {
-        content: "\2014\a0";
-        color: $gray-darker;
+        content: "\2014";
+        color: $gray;
         float: left;
         margin-left: -#{spacer("6x")};
+      }
+
+      ul:not(.ui) li::before {
+        content: "\2022";
       }
     }
     ol:not(.ui) {
@@ -138,4 +146,11 @@ code {
   padding: .5rem 1rem;
   background-color: $gray-lighter;
   display: block;
+}
+
+table:not(.ui) tr {
+  border-bottom: $border-width solid $gray-light;
+  th, td {
+    padding-right: 1.5rem;
+  }
 }

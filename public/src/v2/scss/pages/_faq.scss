@@ -6,10 +6,10 @@
     position: relative;
     cursor: pointer;
     text-align: left;
+    padding: spacer("6x");
     padding-left: $padding-left;
     background: none;
     font-size: $font-size-lg;
-    line-height: 2rem;
     &:hover,
     &:focus {
       text-decoration: none;
@@ -24,8 +24,8 @@
       fill: $gray-dark;
       transition: transform 150ms linear;
       position: absolute;
+      top: 20px;
       left: 16px;
-      top: 16px;
     }
 
     &[aria-expanded="true"] {
