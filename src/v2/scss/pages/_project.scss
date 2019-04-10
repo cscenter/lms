@@ -1,0 +1,9 @@
+.project__link {
+  display: block;
+  margin-bottom: spacer("2x");
+
+  .sprite-img._github, .sprite-img._habr{
+    margin-right: spacer("2x");
+    fill: $gray;
+  }
+}
