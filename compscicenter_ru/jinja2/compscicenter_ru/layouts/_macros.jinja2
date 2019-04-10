@@ -4,21 +4,22 @@
 
 {% macro testimonial_card(student) -%}
 <div class="card mb-2">
-    <div class="testimonial">
-        {% with im = student.get_thumbnail("150x150", use_stub=False) %}
-            {% if im %}
-                <img class="img-rounded" alt="{{ student.get_full_name() }}" src="{{ im.url }}" width="74" height="74">
-            {% endif %}
-        {% endwith %}
-        <div class="testimonial__details">
-            <div class="testimonial__author">
+    <div class="card__content _middle">
+        <div class="author _testimonial">
+            {% with im = student.get_thumbnail("150x150", use_stub=False) %}
+                {% if im %}
+                    <img class="author__img" alt="{{ student.get_full_name() }}" src="{{ im.url }}" />
+                {% endif %}
+            {% endwith %}
+            <div class="author__details">
                 <h4>{{ student.get_full_name() }}</h4>
-                <span>Выпуск {{ student.graduation_year }}, {{  student.areas_of_study.all()|join(", ") }}</span>
+                <span>Выпуск {{ student.graduation_year }}, {{ student.areas_of_study.all()|join(", ") }}</span>
             </div>
-            <div class="testimonial__text">
+            <div class="author__testimonial">
                 {{ student.csc_review|markdown("csc_review", 3600, student.pk, student.modified) }}
             </div>
         </div>
+
     </div>
 </div>
 {%- endmacro %}
