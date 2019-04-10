@@ -58,11 +58,11 @@
                                         <span class="text-muted">Проверка куратором</span>
                                     {% else %}
                                         <a {% if ps.report.created_local.date > project.semester.report_ends_at %}class="text-danger"{% endif %}
-                                           href="{{ ps.get_absolute_url }}">Оценить отчет</a>
+                                           href="{{ ps.get_report_url }}">Оценить отчет</a>
                                     {% endif %}
                                 {% elif ps.report %}
                                     <a {% if ps.report.created.date > project.semester.report_ends_at %}class="text-danger"{% endif %}
-                                       href="{{ ps.get_absolute_url }}">Перейти к отчету
+                                       href="{{ ps.get_report_url }}">Перейти к отчету
                                     </a>
                                 {% elif project.is_active %}<span class="text-muted">Не&nbsp;отправлен</span>
                                 {% elif project.report_period_ended %}<span class="text-danger">Отчет не сдан</span>
