@@ -35,9 +35,8 @@ def test_create_reference(client, assert_redirect):
     assert sig_input.attrs.get('value') == curator.get_full_name()
 
     student = StudentCenterFactory()
-    reference = EnrollmentCertificateFactory.build(student=student)
     form_url = reverse('user_reference_add', args=[student.id])
-    form_data = model_to_dict(reference)
+    form_data = factory.build(dict, FACTORY_CLASS=EnrollmentCertificateFactory)
     response = client.post(form_url, form_data)
     assert EnrollmentCertificate.objects.count() == 1
     ref = EnrollmentCertificate.objects.first()

@@ -17,7 +17,10 @@ def test_course_assignment_create_security(client, assert_login_redirect):
     co = CourseFactory.create(teachers=[teacher])
     create_url = co.get_create_assignment_url()
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
-    form.update({'course': co.pk, 'attached_file': None})
+    form.update({
+        'course': co.pk,
+        # 'attached_file': None
+    })
     # Anonymous
     client.logout()
     assert_login_redirect(create_url, method='get')
@@ -43,7 +46,7 @@ def test_course_assignment_create(client):
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     form.update({'course': co.pk,
-                 'attached_file': None,
+                 # 'attached_file': None,
                  'deadline_at_0': deadline_date,
                  'deadline_at_1': deadline_time})
     url = co.get_create_assignment_url()
@@ -61,7 +64,10 @@ def test_course_assignment_update_security(client, assert_login_redirect):
     a = AssignmentFactory(course=co)
     update_url = a.get_update_url()
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
-    form.update({'course': co.pk, 'attached_file': None})
+    form.update({
+        'course': co.pk,
+        # 'attached_file': None
+    })
     # Anonymous
     assert_login_redirect(update_url, method='get')
     assert_login_redirect(update_url, form, method='post')
@@ -89,7 +95,7 @@ def test_course_assignment_update(client, assert_redirect):
     new_title = a.title + " foo42bar"
     form.update({'title': new_title,
                  'course': co.pk,
-                 'attached_file': None,
+                 # 'attached_file': None,
                  'deadline_at_0': deadline_date,
                  'deadline_at_1': deadline_time})
     update_url = a.get_update_url()

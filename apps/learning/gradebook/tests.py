@@ -555,7 +555,7 @@ def test_gradebook_view_form_conflict(client):
     assert form[field_name].value() is None
     assert form[final_grade_field_name].value() == GradeTypes.NOT_GRADED
     form_data = {
-        "initial-" + field_name: None,
+        # "initial-" + field_name: None,
         field_name: 4
     }
     response = client.post(co.get_gradebook_url(), form_data, follow=True)

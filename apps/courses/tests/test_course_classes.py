@@ -42,6 +42,7 @@ def test_course_class_detail_security(client, assert_login_redirect):
     co = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
     form.update({'venue': VenueFactory.create().pk})
+    del form['slides']
     url = co.get_create_class_url()
     assert_login_redirect(url, method='get')
     assert_login_redirect(url, form, method='post')
