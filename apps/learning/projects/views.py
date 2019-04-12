@@ -203,7 +203,7 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
                     .filter(semester__index=current_term_index)
                     .exclude(status=Project.Statuses.CANCELED)
                     .select_related("semester")
-                    .prefetch_related("students", "reviewers")
+                    .prefetch_related("students", "reviewers", "supervisors")
                     .annotate(reviewers_cnt=Count("reviewers"))
                     .annotate(
                         have_reviewers=Case(
@@ -243,7 +243,7 @@ class ProjectListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
     def get_queryset(self):
         queryset = (Project.objects
                     .select_related("semester")
-                    .prefetch_related("students", "reviewers")
+                    .prefetch_related("students", "reviewers", "supervisors")
                     .order_by("-semester__index", "name", "pk"))
         return queryset
 

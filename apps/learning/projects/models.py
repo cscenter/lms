@@ -147,6 +147,35 @@ def project_presentation_files(self, filename):
                         filename)
 
 
+class Supervisor(models.Model):
+    GENDER_MALE = 'M'
+    GENDER_FEMALE = 'F'
+    GENDER_CHOICES = (
+        (GENDER_MALE, _('Male')),
+        (GENDER_FEMALE, _('Female')),
+    )
+    full_name = models.CharField(
+        verbose_name=_("Full Name"),
+        max_length=255)
+    workplace = models.CharField(
+        _("Workplace"),
+        max_length=200,
+        blank=True)
+    gender = models.CharField(
+        _("Gender"),
+        max_length=1,
+        choices=GENDER_CHOICES)
+
+    class Meta:
+        verbose_name = _("Supervisor")
+        verbose_name_plural = _("Supervisors")
+
+    def __str__(self):
+        if self.workplace:
+            return f"{self.full_name} /{self.workplace}/"
+        return self.full_name
+
+
 class Project(TimeStampedModel):
     class ProjectTypes(DjangoChoices):
         practice = C('practice', _("StudentProject|Practice"))
@@ -191,8 +220,11 @@ class Project(TimeStampedModel):
         related_name='project_reviewers',
         blank=True,
         limit_choices_to=(Q(groups=AcademicRoles.PROJECT_REVIEWER) |
-                          Q(is_superuser=True))
-    )
+                          Q(is_superuser=True)))
+    supervisors = models.ManyToManyField(
+        Supervisor,
+        verbose_name=_("Supervisors"),
+        related_name='projects')
     supervisor = models.CharField(
         verbose_name=_("StudentProject|Supervisor"),
         max_length=255,

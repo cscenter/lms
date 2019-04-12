@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-
+from dal_select2.widgets import Select2Multiple
 from django.contrib import admin
+from django.db import models
 from django.urls import reverse
 from django.db.models import Q
 from django.utils.safestring import mark_safe
@@ -11,7 +12,7 @@ from import_export.admin import ExportMixin
 from core.admin import meta
 from learning.projects.import_export import ProjectStudentAdminRecordResource
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
-    ReportComment
+    ReportComment, Supervisor
 from users.constants import AcademicRoles
 from users.models import User
 
@@ -47,14 +48,26 @@ class ProjectStudentInline(admin.TabularInline):
                      self).formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
+@admin.register(Supervisor)
+class SupervisorAdmin(admin.ModelAdmin):
+    model = Supervisor
+    list_display = ("full_name", "workplace")
+    search_fields = ("full_name",)
+
+
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name', 'project_type', 'semester']
     list_filter = ['semester']
     search_fields = ["name"]
     inlines = [ProjectStudentInline]
-    readonly_fields = ["supervisor_presentation_slideshare_url",
-                       "presentation_slideshare_url"]
-    
+    readonly_fields = ("supervisor_presentation_slideshare_url",
+                       "presentation_slideshare_url")
+    formfield_overrides = {
+        models.ManyToManyField: {
+            'widget': Select2Multiple(attrs={"data-width": 'style'})
+        }
+    }
+
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "reviewers":
             kwargs["queryset"] = (

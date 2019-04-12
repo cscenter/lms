@@ -521,3 +521,7 @@ class CourseVideoListView(ListView):
             }
         }
         return context
+
+
+class ProjectsListView(TemplateView):
+    template_name = "compscicenter_ru/projects/project_list.html"

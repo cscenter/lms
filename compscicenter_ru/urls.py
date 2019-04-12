@@ -57,6 +57,10 @@ urlpatterns += [
     path('api/', include('api.frontend_urls')),
 
     path('courses/', views.CourseOfferingsView.as_view(), name="course_list"),
+
+    path('projects/', views.ProjectsListView.as_view(), name="public_projects"),
+    path('', include('publications.urls')),
+
     path('', include('courses.urls')),
 
     path('', include('learning.enrollment.urls')),
