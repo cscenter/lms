@@ -12,14 +12,14 @@
             <h3>Участник{% if participants|length > 1 %}и{% endif %} проекта</h3>
             <div class="row mb-3">
                 {% for user in participants %}
-                    <div class="col-xl-4 col-lg-6">{{ macros.author_card(user, details='') }}</div>
+                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros.author_card(user, details='') }}</div>
                 {% endfor %}
             </div>
             {% set supervisors = project.get_supervisors() %}
             <h3>Руководител{% if supervisors|length > 1 %}и{% else %}ь{% endif %}</h3>
             <div class="row">
                 {% for s in supervisors %}
-                    <div class="col-xl-4 col-lg-6">{{ macros.supervisor_card(s) }}</div>
+                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros.supervisor_card(s) }}</div>
                 {% endfor %}
             </div>
         </div>
