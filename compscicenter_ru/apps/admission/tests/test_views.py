@@ -52,19 +52,19 @@ def test_simple_interviews_list(client, curator, settings):
     interviewer = InterviewerFactory()
     campaign = CampaignFactory(current=True, city_id='nsk')
     today_utc = timezone.now()
-    today_date = formats.date_format(today_utc, "SHORT_DATE_FORMAT")
     today_local_nsk = now_local('nsk')
+    today_date = formats.date_format(today_local_nsk, "SHORT_DATE_FORMAT")
     today_local_nsk_date = formats.date_format(today_local_nsk,
                                                "SHORT_DATE_FORMAT")
     interview1, interview2, interview3 = InterviewFactory.create_batch(3,
         interviewers=[interviewer],
-        date=today_utc,
+        date=today_local_nsk,
         status=Interview.COMPLETED,
         applicant__status=Applicant.INTERVIEW_COMPLETED,
         applicant__campaign=campaign)
-    interview2.date = today_utc + datetime.timedelta(days=1)
+    interview2.date = today_local_nsk + datetime.timedelta(days=1)
     interview2.save()
-    interview3.date = today_utc + datetime.timedelta(days=2)
+    interview3.date = today_local_nsk + datetime.timedelta(days=2)
     interview3.save()
     response = client.get(reverse('admission:interviews'))
     # For curator set default filters and redirect

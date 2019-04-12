@@ -77,7 +77,8 @@ class ReportReviewFormFactory:
     def __init__(self, *args, report, reviewer, **kwargs):
         new_review = ReviewFactory.build(report=report, reviewer=reviewer,
                                          **kwargs)
-        form = ReportReviewForm(data=model_to_dict(new_review))
+        form_data = {k:v for k, v in model_to_dict(new_review).items() if v is not None}
+        form = ReportReviewForm(data=form_data)
         data = form.data
         # FIXME: Check if I can pass it directly to ReportReviewForm
         data[ReportReviewForm.prefix] = "1"
