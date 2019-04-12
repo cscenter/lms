@@ -1,0 +1,46 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% block title %}Студенческие проекты - {{ super() }}{% endblock title %}
+
+{% block content %}
+    <div class="container page-content">
+
+        <a href="{{ url("public_projects") }}" class="text-small text-muted">Примеры студенческих проектов /</a>
+        <h1>{{ project.title }}</h1>
+        <div class="mb-4">
+            {% set participants = project.get_participants() %}
+            <h3>Участник{% if participants|length > 1 %}и{% endif %} проекта</h3>
+            <div class="row mb-3">
+                {% for user in participants %}
+                    <div class="col-xl-4 col-lg-6">{{ macros.author_card(user, details='') }}</div>
+                {% endfor %}
+            </div>
+            {% set supervisors = project.get_supervisors() %}
+            <h3>Руководител{% if supervisors|length > 1 %}и{% else %}ь{% endif %}</h3>
+            <div class="row">
+                {% for s in supervisors %}
+                    <div class="col-xl-4 col-lg-6">{{ macros.supervisor_card(s) }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-10">
+                {{ project.description }}
+                {% set publication_authors = project.get_publication_authors() %}
+                <h3>Текст написал{% if publication_authors|length > 1 %}и{% endif %}</h3>
+                <div class="row mb-3">
+                    {% for pba in publication_authors %}
+                        <div class="col-lg-4 mb-2">
+                        {{ macros.author_card(pba.user, pba.short_description) }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <h3>Публикация на внешних ресурсах</h3>
+                {{ project.external_links }}
+                <a href="https://github.com/" class="project__link" target="_blank" rel="noopener">{{ macros.svg_inline('github') }}https://github.com</a>
+                <a href="https://habr.com/ru/" class="project__link" target="_blank" rel="noopener">{{ macros.svg_inline('habr') }}https://habr.com/ru/</a>
+            </div>
+
+        </div>
+    </div>
+{% endblock content %}

@@ -190,7 +190,7 @@
             <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
         {% endif %}
         <h5>Руководители</h5>
-        {{ project.supervisor }}
+        {% for s in project.supervisors.all %}{{ s }}<br>{% endfor %}
         {% if report.is_completed %}
             <h5>Суммарный балл за отчет</h5>
             {{ report.final_score }}

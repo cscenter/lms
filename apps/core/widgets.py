@@ -37,7 +37,7 @@ class CKEditorWidget(CKEditorUploadingWidget):
             css.append(f["url"])
         css.append('html {margin: 20px;}')
         # TODO: move to settings? how?
-        css.append(staticfiles_storage.url('dist/css/main.css'))
+        css.append(staticfiles_storage.url('v2/dist/css/main.css'))
         self.config['contentsCss'] = css
 
 

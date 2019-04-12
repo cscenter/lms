@@ -116,7 +116,7 @@
                     <h4>Отзывы руководителей <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
                     {% for ps in project.projectstudent_set.all %}
                         <div class="card">
-                            <div class="card-header ch-alt">{{ ps.student }}</div>
+                            <div class="card-header ch-alt">Участник - {{ ps.student }}</div>
                             <div class="card-body card-padding">
                                 {{ ps.supervisor_review|default:"Отзыв ещё не прислали" }}
                             </div>
@@ -152,7 +152,10 @@
                 <div class="card">
                     <div class="card-header ch-alt">Руководители</div>
                     <div class="card-body card-padding">
-                        {{ project.supervisor }}
+                        {% for s in project.supervisors.all %}
+                            {{ s.full_name }}
+                            <div class="text-muted">{{ s.workplace }}</div>
+                        {% endfor %}
                     </div>
                 </div>
                 {% if project.supervisor_presentation or project.presentation %}

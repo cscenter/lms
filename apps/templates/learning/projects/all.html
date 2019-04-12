@@ -35,7 +35,9 @@
                                 <a class="nowrap" href="{{ student.get_absolute_url }}">{{ student.last_name }} {{ student.first_name }}</a><br>
                             {% endfor %}
                         </td>
-                        <td>{{ project.supervisor }}</td>
+                        <td>
+                            {% for s in project.supervisors.all %}{{ s.full_name }}<br>{% endfor %}
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>

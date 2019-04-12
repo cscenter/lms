@@ -41,6 +41,7 @@ INSTALLED_APPS += [
     'surveys.apps.SurveysConfig',
     'online_courses.apps.Config',
     'learning.internships.apps.InternshipsConfig',
+    'publications.apps.PublicationsConfig',
     'ckeditor',
     'ckeditor_uploader',
 ]
@@ -210,18 +211,14 @@ CKEDITOR_CONFIGS = {
     'default': {
         'skin': 'moono-lisa',
         'contentsCss': [],
-        'toolbar_Basic': [
-            ['Source', '-', 'Bold', 'Italic']
-        ],
         'toolbar_YouCustomToolbarConfig': [
             {'name': 'document',
-             'items': ['Source', '-', 'Preview', 'Maximize', 'ShowBlocks']},
+             'items': ['Source', '-', 'Preview', 'Maximize']},
             {'name': 'basicstyles',
-             'items': ['Bold', 'Italic', 'Underline', 'Subscript',
-                       'Superscript', 'RemoveFormat']},
+             'items': ['Bold', 'Italic', 'Underline', 'RemoveFormat']},
             {'name': 'clipboard',
-             'items': ['PasteText', 'PasteFromWord', '-', 'Undo', 'Redo']},
-            {'name': 'insert', 'items': ['Image', 'HorizontalRule', ]},
+             'items': ['-', 'Undo', 'Redo']},
+            {'name': 'insert', 'items': ['Image', 'Table', 'CodeSnippet']},
             {'name': 'styles', 'items': ['Format']},
             {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
             '/',  # put this to force next toolbar on new line
@@ -230,7 +227,8 @@ CKEDITOR_CONFIGS = {
         # 'toolbarGroups': [{ 'name': 'document', 'groups': [ 'mode', 'document', 'doctools' ] }],
         # 'height': 291,
         'extraAllowedContent': 'div(*)[data-*]; span(*); p(*); th(*); td(*); section(*); ul(*); li(*); iframe[*]; h1(*); h2(*)',
-        'width': '100%',
+        'format_tags': 'p;h1;h2;h3;h4;h5',
+        'width': 'calc(100% - 2px)',
         'filebrowserWindowHeight': 725,
         'filebrowserWindowWidth': 940,
         # 'toolbarCanCollapse': True,
@@ -251,7 +249,9 @@ CKEDITOR_CONFIGS = {
                 'dialogui',
                 'elementspath',
                 'uploadimage',
-                'uploadwidget',
+                'codesnippet',
+                # 'image2',
+                # 'uploadwidget',
             ]),
     }
 }

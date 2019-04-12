@@ -2,24 +2,40 @@
 <svg aria-hidden="true" class="sprite-img _{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
 {%- endmacro %}
 
+{% macro _author_card(img_url, full_name, details, testimonial, modifiers) -%}
+    <div class="author{% if modifiers %} {{ modifiers }}{% endif %}">
+        {% if img_url %}
+            <img class="author__img" alt="{{ full_name }}" src="{{ img_url }}" />
+        {% endif %}
+        <div class="author__details">
+            <h4>{{ full_name }}</h4>
+            <span>{{ details }}</span>
+        </div>
+        {% if testimonial %}<div class="author__testimonial">{{ testimonial }}</div>{% endif %}
+    </div>
+{%- endmacro %}
+
+{% macro author_card(user, details, testimonial='', modifiers='') -%}
+    {% with im = user.get_thumbnail(user.ThumbnailSize.SQUARE, use_stub=False) %}
+        {% if im %}{% set img_url = im.url %}{% else %}{% set img_url = '' %}{% endif %}
+        {{ _author_card(im.url, user.get_full_name(), details, testimonial, modifiers) }}
+    {% endwith %}
+{%- endmacro %}
+
+{% macro supervisor_card(supervisor, details, modifiers='') -%}
+    {% if supervisor.gender == supervisor.GENDER_MALE %}
+        {% set img_url = static('v2/img/placeholder/man_144x144.png') %}
+    {% else %}
+        {% set img_url = static('v2/img/placeholder/woman_144x144.png') %}
+    {% endif %}
+    {{ _author_card(img_url, supervisor.full_name, supervisor.workplace, None, modifiers) }}
+{%- endmacro %}
+
 {% macro testimonial_card(student) -%}
 <div class="card mb-2">
     <div class="card__content _middle">
-        <div class="author _testimonial">
-            {% with im = student.get_thumbnail("150x150", use_stub=False) %}
-                {% if im %}
-                    <img class="author__img" alt="{{ student.get_full_name() }}" src="{{ im.url }}" />
-                {% endif %}
-            {% endwith %}
-            <div class="author__details">
-                <h4>{{ student.get_full_name() }}</h4>
-                <span>Выпуск {{ student.graduation_year }}, {{ student.areas_of_study.all()|join(", ") }}</span>
-            </div>
-            <div class="author__testimonial">
-                {{ student.csc_review|markdown("csc_review", 3600, student.pk, student.modified) }}
-            </div>
-        </div>
-
+        {% set parts = ["Выпуск", student.graduation_year, ", ", student.areas_of_study.all()|join(", ")] %}
+        {{ author_card(student, parts|join(''), testimonial=student.csc_review|markdown("csc_review", 3600, student.pk, student.modified), modifiers='_testimonial') }}
     </div>
 </div>
 {%- endmacro %}
