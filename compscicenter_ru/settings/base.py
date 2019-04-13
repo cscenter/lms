@@ -125,7 +125,7 @@ TEMPLATES = [
         'DIRS': [
             str(PROJECT_DIR / "templates"),
             str(APPS_DIR / "surveys" / "jinja2"),
-            str(APPS_DIR / "learning" / "admission" / "templates"),
+            str(PROJECT_DIR / "apps" / "admission" / "templates"),
             str(APPS_DIR / "staff" / "templates"),
             str(APPS_DIR / "templates"),
             django.__path__[0] + '/forms/templates',
@@ -133,6 +133,7 @@ TEMPLATES = [
         'OPTIONS': {
             'loaders': [
                 'django.template.loaders.filesystem.Loader',
+                # FIXME: this setting overrides `APP_DIRS` behavior! WTF?
                 'django.template.loaders.app_directories.Loader',
             ],
             'context_processors': (
@@ -155,7 +156,7 @@ FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
 LOCALE_PATHS += [
     str(PROJECT_DIR / "locale"),
     str(APPS_DIR / "learning" / "projects" / "locale"),
-    str(APPS_DIR / "learning" / "admission" / "locale"),
+    str(PROJECT_DIR / "apps" / "admission" / "locale"),
     str(APPS_DIR / "surveys" / "locale"),
 ]
 # SECURITY WARNING: keep the secret key used in production secret!

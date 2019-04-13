@@ -4,12 +4,13 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+pywatchman = "*"
 colour-runner = "==0.1.1"
 pylint-django = "==2.0.6"
 ipython = "==7.2.0"
 Werkzeug = "==0.15.2"
 # Coverage
-coverage = "==4.5.2"
+coverage = "==4.5.3"
 django-coverage = "==1.2.4"
 # Debug
 ipdb = "==0.12"
@@ -17,9 +18,9 @@ pdbpp = "==0.9.15"
 django-debug-toolbar = "==1.11"
 django-debug-toolbar-template-timings = "==0.9"
 djdt_flamegraph = "==0.2.12"
-django-extensions = "==2.1.4"
+django-extensions = "==2.1.6"
 # Fixtures
-testfixtures = "==6.4.3"
+testfixtures = "==6.7.0"
 factory_boy = "==2.11.1"
 # Test framework
 pytest = ">=4.0.2"
@@ -31,10 +32,10 @@ pytest-pythonpath = "==0.7.3"
 
 [packages]
 # Framework
-pytz = "==2018.9"
+pytz = "==2019.1"
 Django = "==2.1.8"
 # DB
-psycopg2-binary = "==2.7.6.1"
+psycopg2-binary = "==2.8.1"
 jsonfield = "==2.0.2"
 django-prettyjson = "==0.4.1"
 standardjson = "==0.3.1"
@@ -48,7 +49,7 @@ django-formtools = "==2.1"
 # Parsing
 beautifulsoup4 = "==4.7.1"
 # Translation
-django-rosetta = "==0.9.0"
+django-rosetta = "==0.9.3"
 django-modeltranslation = "==0.13"
 # AWS
 boto = "==2.49.0"
@@ -62,7 +63,7 @@ hoep = {editable = true,git = "git://github.com/pacahon/Hoep.git",ref = "0d4c050
 sentry-sdk = "*"
 newrelic = "==4.16.1.117"
 # Oauth2
-social-auth-core = "==2.0.0"
+social-auth-core = "==3.1.0"
 social-auth-app-django = "==3.1.0"
 # Oembed
 micawber = "==0.3.8"
@@ -82,10 +83,10 @@ tablib = "==0.12.1"
 # and breaks django-import-export xlsx export
 openpyxl = "==2.5.12"
 nbconvert = "==5.4.1"
-djangorestframework = "==3.9.0"
-rest-pandas = "==1.0.0"
+djangorestframework = "==3.9.2"
+rest-pandas = "==1.1.0"
 django-js-reverse = "==0.8.2"
-numpy = "==1.16.0"
+numpy = "==1.16.2"
 icalendar = "==4.0.3"
 django-ical = "==1.5"
 python-dateutil = "==2.7.5"
@@ -94,8 +95,8 @@ python-ldap = "==3.1.0"
 attrs = "==18.2.0"
 django-choices = "==1.6.2"
 django-vanilla-views = "==1.0.6"
-django-autocomplete-light = "==3.3.2"
-django-mptt = "==0.9.1"
+django-autocomplete-light = "==3.3.4"
+django-mptt = "==0.10.0"
 django-bootstrap-pagination = "==1.7.0"
 django-bitfield = "==1.9.3"
 django-multiselectfield = "==0.1.8"
@@ -109,14 +110,14 @@ django-bootstrap3 = "==11.0.0"
 django-extra-views = "==0.9.0"
 django-braces = "==1.13.0"
 django-taggit = "==0.23.0"
-sqlparse = "==0.2.4"
+sqlparse = "==0.3.0"
 django-pipeline = "==1.6.14"
 django-loginas = "==0.3.4"
 django-treemenus = {editable = true,git = "https://github.com/pacahon/django-treemenus.git"}
 django-webpack-loader = "==0.6.0"
 XlsxWriter = "==1.1.6"
 jupyter_client = "==5.2.4"
-webdavclient = "==1.0.5"
+webdavclient = "==1.0.8"
 isoweek = "*"
 django-subdomains = {git = "git://github.com/pacahon/django-subdomains.git",ref = "4096c2dc82f9f5e511e8c8f78d31e804ac028b5d"}
 django-simple-menu = "*"
