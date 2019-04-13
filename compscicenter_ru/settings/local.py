@@ -101,6 +101,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'django.utils.autoreload': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         'django.db.backends.schema': {
             'handlers': ['console'],
             'level': 'DEBUG',
