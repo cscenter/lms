@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.contrib.auth import get_user as auth_get_user
+from django.contrib.auth.middleware import \
+    AuthenticationMiddleware as _AuthenticationMiddleware
 from django.contrib.auth.models import AnonymousUser
-from django.utils.deprecation import MiddlewareMixin
 from django.utils.functional import SimpleLazyObject
 
 from users.models import ExtendedAnonymousUser
@@ -15,7 +16,7 @@ def get_user(request):
     return request._cached_user
 
 
-class AuthenticationMiddleware(MiddlewareMixin):
+class AuthenticationMiddleware(_AuthenticationMiddleware):
     def process_request(self, request):
         assert hasattr(request, 'session'), (
             "The Django authentication middleware requires session middleware "
