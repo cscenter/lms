@@ -35,7 +35,7 @@ pytest-pythonpath = "==0.7.3"
 pytz = "==2019.1"
 Django = "==2.2"
 # DB
-psycopg2-binary = "==2.8.1"
+psycopg2-binary = "==2.7.6.1"
 jsonfield = "==2.0.2"
 django-prettyjson = "==0.4.1"
 standardjson = "==0.3.1"
