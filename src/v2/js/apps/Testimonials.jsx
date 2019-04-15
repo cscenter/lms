@@ -139,7 +139,9 @@ class App extends React.Component {
                     {this.state.items.map(item =>
                         <div className="grid-item" key={item.id}>
                             <div className="card mb-2" >
-                                <Testimonial {...item} />
+                                <div className="card__content">
+                                    <Testimonial {...item} />
+                                </div>
                             </div>
                         </div>
                     )}

@@ -1,6 +1,7 @@
 import React, {Fragment} from 'react';
 
 import _throttle from 'lodash-es/throttle';
+import _includes from 'lodash-es/includes';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
 import SearchInput from 'components/SearchInput';
@@ -96,7 +97,7 @@ class CourseVideosPage extends React.Component {
         let filteredItems = this.state.items.filter(function(item) {
             let yearCondition = (year !== null) ? item.semester.year === year.value : true;
             return yearCondition &&
-                   item.name.toLowerCase().search(q.toLowerCase()) !== -1;
+                   _includes(item.name.toLowerCase(), q.toLowerCase());
         });
 
         return (

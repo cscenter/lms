@@ -143,9 +143,13 @@ a {
 }
 
 code {
-  padding: .5rem 1rem;
+  padding: spacer("1x") spacer("2x");
   background-color: $gray-lighter;
-  display: block;
+
+  pre & {
+    padding: spacer("2x") spacer("4x");
+    display: block;
+  }
 }
 
 table:not(.ui) tr {
