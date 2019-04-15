@@ -11,8 +11,7 @@ i18n
     // init i18next
     // for all options read: https://www.i18next.com/overview/configuration-options
     .init({
-        // FIXME: disable debug for production
-        debug: true,
+        debug: __DEVELOPMENT__,
         lng: 'ru',
         fallbackLng: 'ru',
         defaultNS: 'translation',

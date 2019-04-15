@@ -1,4 +1,4 @@
-let ravenOptions = {
+let sentryOptions = {
     // Will cause a deprecation warning, but the demise of `ignoreErrors` is still under discussion.
     // See: https://github.com/getsentry/raven-js/issues/73
     ignoreErrors: [
@@ -23,7 +23,7 @@ let ravenOptions = {
         // See http://toolbar.conduit.com/Developer/HtmlAndGadget/Methods/JSInjection.aspx
         'conduitPage'
     ],
-    ignoreUrls: [
+    blacklistUrls: [
         // Facebook flakiness
             /graph\.facebook\.com/i,
         // Facebook blocked
@@ -43,4 +43,4 @@ let ravenOptions = {
     ]
 };
 
-export default ravenOptions;
+export default sentryOptions;

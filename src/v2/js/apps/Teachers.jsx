@@ -2,6 +2,7 @@ import React, {Fragment} from 'react';
 import { forceCheck } from 'react-lazyload';
 
 import _debounce from 'lodash-es/debounce';
+import _includes from 'lodash-es/includes';
 import $ from 'jquery';
 
 import Select from 'components/Select';
@@ -149,7 +150,7 @@ class App extends React.Component {
             let courseCondition = (course !== null) ? item.courses.has(course.value) : true;
             let activityCondition = recentOnly ? item.last_session >= term_index: true;
             return cityCondition && courseCondition && activityCondition &&
-                   item.name.toLowerCase().search(query.toLowerCase()) !== -1;
+                   _includes(item.name.toLowerCase(), query.toLowerCase());
         });
 
         return (

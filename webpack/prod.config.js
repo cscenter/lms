@@ -1,5 +1,7 @@
 const webpack = require('webpack');
 
+const TerserPlugin = require('terser-webpack-plugin');
+
 const APP_VERSION = process.env.APP_VERSION || "v1";
 
 // TODO: add css minimization
@@ -24,7 +26,17 @@ module.exports = {
 
     optimization: {
         namedModules: false,
-        concatenateModules: true
+        concatenateModules: true,
+        minimizer: [
+            new TerserPlugin({
+                sourceMap: false, // Must be set to true if using source-maps in production
+                terserOptions: {
+                    compress: {
+                        pure_funcs: [ "console.debug" ]
+                    },
+                },
+            }),
+        ],
     },
 
     plugins: [

@@ -1,10 +1,10 @@
-import Raven from 'raven-js';
+import * as Sentry from '@sentry/browser';
 import $ from 'jquery';
 import '@babel/polyfill';
 import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 
-import ravenOptions from './raven_conf';
+import sentryOptions from './sentry_conf';
 import i18n from './i18n';
 import {
     showComponentError,
@@ -13,17 +13,18 @@ import {
     showErrorNotification
 } from 'utils';
 
-// Configure `raven-js`
-Raven
-    .config('https://8e585e0a766b4a8786870813ed7a4be4@app.getsentry.com/13763',
-            ravenOptions)
-    .install();
-let authenticatedUser = $("#userMenuButton").data('id');
-if (authenticatedUser !== undefined && !isNaN(parseInt(authenticatedUser))) {
-    Raven.setUserContext({
-        id: authenticatedUser
+// Configure Sentry SDK
+Sentry.init({
+    dsn: "https://f2a254aefeae4aeaa09657771205672f@sentry.io/13763",
+    ...sentryOptions
+});
+let uid = $("#userMenuButton").data('id');
+if (uid !== undefined && !isNaN(parseInt(uid))) {
+    Sentry.configureScope(scope => {
+        scope.setUser({id: uid});
     });
 }
+
 
 $(function () {
     i18n.changeLanguage('ru');
