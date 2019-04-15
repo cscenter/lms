@@ -17,6 +17,8 @@ from core.models import City
 from core.settings.base import DEFAULT_CITY_CODE
 from core.timezone import now_local
 from core.urls import reverse
+from learning.models import Branch
+from learning.settings import Branches
 from users.tests.factories import UserFactory
 
 
@@ -50,10 +52,9 @@ def test_simple_interviews_list(client, curator, settings):
     curator.save()
     client.login(curator)
     interviewer = InterviewerFactory()
-    campaign = CampaignFactory(current=True, city_id='nsk')
-    today_utc = timezone.now()
-    today_local_nsk = now_local('nsk')
-    today_date = formats.date_format(today_local_nsk, "SHORT_DATE_FORMAT")
+    branch = Branch.objects.get(code=Branches.NSK)
+    campaign = CampaignFactory(current=True, city_id='nsk', branch=branch)
+    today_local_nsk = now_local(Branches.get_choice(Branches.NSK).timezone)
     today_local_nsk_date = formats.date_format(today_local_nsk,
                                                "SHORT_DATE_FORMAT")
     interview1, interview2, interview3 = InterviewFactory.create_batch(3,
@@ -81,17 +82,17 @@ def test_simple_interviews_list(client, curator, settings):
                 f"status={Interview.APPROVED}&"
                 f"date_from={date_from}&date_to={date_to}")
 
-    url = format_url(campaign.pk, today_date, today_date)
+    url = format_url(campaign.pk, today_local_nsk_date, today_local_nsk_date)
     response = client.get(url)
     assert response.status_code == 200
     assert "InterviewsCuratorFilter" in str(response.context['form'].__class__)
     assert len(response.context["interviews"]) == 1
-    url = format_url(campaign.pk, today_date, "")
+    url = format_url(campaign.pk, today_local_nsk_date, "")
     response = client.get(url)
     assert response.status_code == 200
     assert len(response.context["interviews"]) == 3
     url = format_url(campaign.pk,
-                     today_date,
+                     today_local_nsk_date,
                      formats.date_format(interview2.date, "SHORT_DATE_FORMAT"))
     response = client.get(url)
     assert response.status_code == 200
