@@ -75,10 +75,6 @@ class UserQuerySet(query.QuerySet):
                         'semester', 'meta_course')
                 ),
                 Prefetch(
-                    'enrollments__course__courseclass_set',
-                    queryset=CourseClass.objects.annotate(Count('pk')),
-                ),
-                Prefetch(
                     'enrollments__course__teachers',
                     # Note (Zh): Show pure lecturers first (=1),
                     # then teachers with lecturer role (values >1), then others

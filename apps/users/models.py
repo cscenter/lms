@@ -570,7 +570,8 @@ class User(LearningPermissionsMixin, AbstractUser):
                 in_current_term_total += 1
                 in_current_term_courses.add(e.course.meta_course_id)
             if e.course.is_open:
-                # See queryset in `cast_students_to_will_graduate`
+                # FIXME: Something wrong with this approach.
+                # FIXME: Look for `classes_total` annotation and fix
                 if hasattr(e, "classes_total"):
                     classes_total = e.classes_total
                 else:

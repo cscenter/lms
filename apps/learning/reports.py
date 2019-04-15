@@ -672,7 +672,8 @@ class WillGraduateStatsReport(ReportFileOutput):
                 'course',
                 'course__semester',
                 'course__meta_course',)
-            .annotate(classes_total=Count('course__courseclass')))
+            .annotate(classes_total=Count('course__courseclass'))
+            .order_by('student', 'course_id'))
         shad_courses_queryset = (SHADCourseRecord.objects
                                  .select_related("semester"))
         prefetch_list = [

@@ -90,7 +90,7 @@ class Enrollment(TimeStampedModel):
         blank=True)
 
     class Meta:
-        ordering = ["student", "course"]
+        ordering = ("student", "course")
         unique_together = [('student', 'course')]
         verbose_name = _("Enrollment")
         verbose_name_plural = _("Enrollments")
@@ -473,7 +473,7 @@ class Event(TimeStampedModel):
     ends_at = models.TimeField(_("Ends at"))
 
     class Meta:
-        ordering = ["-date", "-starts_at", "name"]
+        ordering = ("-date", "-starts_at", "name")
         verbose_name = _("Non-course event")
         verbose_name_plural = _("Non-course events")
 
