@@ -94,6 +94,19 @@ $navbar-toggler-border-radius: $border-radius;
   }
 }
 
+.nav-link._external, .mobile-submenu__item._external {
+  align-items: flex-start;
+  &::after {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-left: 2px;
+    background-image: url("/static/v2/img/icons/external_link.svg");
+    vertical-align: top;
+  }
+}
+
 .menu-desktop-wrapper {
   // Hack to show rows with menu items vertically closer to each other.
   margin: (($nav-link-line-height - $nav-link-real-line-height) / 2) 0;
