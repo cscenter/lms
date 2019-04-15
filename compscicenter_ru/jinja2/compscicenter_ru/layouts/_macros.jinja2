@@ -34,7 +34,7 @@
 {% macro testimonial_card(student) -%}
 <div class="card mb-2">
     <div class="card__content _middle">
-        {% set parts = ["Выпуск", student.graduation_year, ", ", student.areas_of_study.all()|join(", ")] %}
+        {% set parts = ["Выпуск ", student.graduation_year, ", ", student.areas_of_study.all()|join(", ")] %}
         {{ author_card(student, parts|join(''), testimonial=student.csc_review|markdown("csc_review", 3600, student.pk, student.modified), modifiers='_testimonial') }}
     </div>
 </div>
