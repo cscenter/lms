@@ -221,29 +221,7 @@ class ApplicantContextMixin:
                 elif c.contest_id == context["exam"].yandex_contest_id:
                     contests["exam"] = c
         context["contests"] = contests
-        # Similar applicants
-        conditions = [
-            Q(email=applicant.email),
-            (
-                Q(first_name__iexact=applicant.first_name) &
-                Q(surname__iexact=applicant.surname) &
-                Q(patronymic__iexact=applicant.patronymic)
-            ),
-        ]
-        if applicant.phone:
-            conditions.append(Q(phone=applicant.phone))
-        if applicant.stepic_id:
-            conditions.append(Q(stepic_id=applicant.stepic_id))
-        if applicant.yandex_id_normalize:
-            conditions.append(Q(yandex_id_normalize=applicant.yandex_id_normalize))
-        query = conditions.pop()
-        for c in conditions:
-            query |= c
-
-        similar_applicants = Applicant.objects.filter(query)
-        similar_applicants = filter(lambda a: a != applicant,
-                                    similar_applicants)
-        context["similar_applicants"] = similar_applicants
+        context["similar_applicants"] = applicant.get_similar()
         return context
 
 

@@ -490,6 +490,26 @@ class Applicant(TimeStampedModel):
         """Successfully pass interview and ready to become student center"""
         return self.status in [self.ACCEPT, self.ACCEPT_IF, self.VOLUNTEER]
 
+    def get_similar(self):
+        conditions = [
+            Q(email=self.email),
+            (
+                Q(first_name__iexact=self.first_name) &
+                Q(surname__iexact=self.surname) &
+                Q(patronymic__iexact=self.patronymic)
+            ),
+        ]
+        if self.phone:
+            conditions.append(Q(phone=self.phone))
+        if self.stepic_id:
+            conditions.append(Q(stepic_id=self.stepic_id))
+        if self.yandex_id_normalize:
+            conditions.append(Q(yandex_id_normalize=self.yandex_id_normalize))
+        q = conditions.pop()
+        for c in conditions:
+            q |= c
+        return Applicant.objects.filter(~Q(id=self.pk) & q)
+
 
 def contest_assignments_upload_to(instance, filename):
     # TODO: Can be visible for unauthenticated. Is it ok?
