@@ -110,8 +110,8 @@ class ApplicantAdmin(admin.ModelAdmin):
     list_display = ('id', 'yandex_id', 'surname', 'first_name', 'campaign',
                     'created_local')
     list_filter = [CampaignListFilter, 'status']
-    search_fields = ['yandex_id', 'yandex_id_normalize', 'stepic_id',
-                     'first_name', 'surname', 'email']
+    search_fields = ('yandex_id', 'yandex_id_normalize', 'stepic_id',
+                     'first_name', 'surname', 'email', 'phone')
     readonly_fields = ['yandex_id_normalize']
 
     def created_local(self, obj):
