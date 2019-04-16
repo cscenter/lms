@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-04 14:14+0000\n"
-"PO-Revision-Date: 2019-04-04 14:14+0000\n"
+"POT-Creation-Date: 2019-04-15 14:21+0000\n"
+"PO-Revision-Date: 2019-04-15 14:23+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "%100>=20) ? 1 : 2);\n"
-"X-Translated-Using: django-rosetta 0.9.0\n"
+"X-Translated-Using: django-rosetta 0.9.3\n"
 
 #: compscicenter_ru/apps/online_courses/apps.py:7
 #: compscicenter_ru/apps/online_courses/models.py:45
@@ -58,6 +58,64 @@ msgstr "Без дедлайнов"
 msgid "Online course"
 msgstr "Онлайн-курс"
 
+#: compscicenter_ru/apps/publications/admin.py:13
+msgid "Related Project"
+msgstr "Проект"
+
+#: compscicenter_ru/apps/publications/admin.py:14
+#: compscicenter_ru/apps/publications/models.py:56
+msgid "Projects"
+msgstr "Проекты"
+
+#: compscicenter_ru/apps/publications/admin.py:19
+msgid "Author"
+msgstr "Автор"
+
+#: compscicenter_ru/apps/publications/admin.py:20
+#: compscicenter_ru/apps/publications/models.py:51
+msgid "Authors"
+msgstr "Авторы"
+
+#: compscicenter_ru/apps/publications/models.py:18
+msgid "Short Description"
+msgstr "Заметка"
+
+#: compscicenter_ru/apps/publications/models.py:22
+msgid "Project Publication Author"
+msgstr "Автор публикации"
+
+#: compscicenter_ru/apps/publications/models.py:23
+msgid "Project Publication Authors"
+msgstr "Авторы публикации"
+
+#: compscicenter_ru/apps/publications/models.py:42
+msgid "created"
+msgstr "Создано"
+
+#: compscicenter_ru/apps/publications/models.py:46
+msgid "Title"
+msgstr "Заголовок"
+
+#: compscicenter_ru/apps/publications/models.py:48
+msgid "Slug"
+msgstr "Slug"
+
+#: compscicenter_ru/apps/publications/models.py:59
+msgid "Description"
+msgstr "Описание"
+
+#: compscicenter_ru/apps/publications/models.py:62
+msgid "External Links"
+msgstr "Внешние ссылки"
+
+#: compscicenter_ru/apps/publications/models.py:67
+msgid "Project Publication"
+msgstr "Публикация о проекте"
+
+#: compscicenter_ru/apps/publications/models.py:68
+msgid "Project Publications"
+msgstr "Публикации о проектах"
+
 #: compscicenter_ru/filters.py:34
 msgid "Saint Petersburg"
 msgstr "Санкт-Петербург"
@@ -71,11 +129,11 @@ msgstr "Новосибирск"
 msgid "Members Area"
 msgstr "Личный кабинет"
 
-#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:51
+#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:54
 msgid "Privacy&nbsp;Policy"
 msgstr "Конфиденциальность"
 
-#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:57
+#: compscicenter_ru/jinja2/compscicenter_ru/layouts/base.html:60
 msgid "Computer Science Center on Facebook"
 msgstr ""
 

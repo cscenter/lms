@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.core.management import CommandError
-from django.utils.timezone import now
 from post_office.models import EmailTemplate
 from post_office.utils import get_email_template
 
 from admission.models import Campaign
 
 
-class CurrentCampaignsMixin(object):
+class CurrentCampaignsMixin:
     CURRENT_CAMPAIGNS_AGREE = "The action will affect campaigns above. " \
                               "Continue? (y/n): "
 
@@ -29,7 +28,7 @@ class CurrentCampaignsMixin(object):
         return [c.pk for c in self.get_current_campaigns(city_code)]
 
 
-class HandleErrorsMixin(object):
+class HandleErrorsMixin:
     @staticmethod
     def handle_errors(result):
         if result.has_errors():
@@ -40,7 +39,7 @@ class HandleErrorsMixin(object):
                     print("line {} - {}".format(line + 1, error.error))
 
 
-class ValidateTemplatesMixin(object):
+class ValidateTemplatesMixin:
     TEMPLATE_REGEXP = "admission-{year}-{city_code}-{type}"
 
     def validate_templates(self, campaigns, types=None):
