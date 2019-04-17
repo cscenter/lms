@@ -59,6 +59,12 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
         JSONField: {'widget': PrettyJSONWidget}
     }
 
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = ["contest_status_code"]
+        if obj and obj.contest_participant_id:
+            readonly_fields.append("contest_participant_id")
+        return readonly_fields
+
     def get_campaign(self, obj):
         return obj.applicant.campaign
     get_campaign.short_description = _("Campaign")
@@ -82,13 +88,19 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
 class ExamAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = ExamRecordResource
     raw_id_fields = ("applicant",)
-    list_display = ['__str__', 'score', 'yandex_contest_id']
+    list_display = ('__str__', 'score', 'yandex_contest_id', 'status')
     search_fields = ['applicant__yandex_id', 'applicant__surname',
                      'applicant__first_name', 'yandex_contest_id']
     list_filter = ['applicant__campaign']
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget}
     }
+
+    def get_readonly_fields(self, request, obj=None):
+        readonly_fields = ["contest_status_code"]
+        if obj and obj.contest_participant_id:
+            readonly_fields.append("contest_participant_id")
+        return readonly_fields
 
     def get_queryset(self, request):
         qs = super(ExamAdmin, self).get_queryset(request)
