@@ -7,6 +7,7 @@ from admission.models import Applicant
 from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin
 
 
+# TODO: сделать по аналогии с  derivable fields
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     help = """
     Queue email for applicants with statuses provided through arguments.

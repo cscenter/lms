@@ -35,10 +35,15 @@
                         </div>
                     {% endfor %}
                 </div>
-                <h3>Публикация на внешних ресурсах</h3>
-                {{ project.external_links }}
-                <a href="https://github.com/" class="project__link" target="_blank" rel="noopener">{{ macros.svg_inline('github') }}https://github.com</a>
-                <a href="https://habr.com/ru/" class="project__link" target="_blank" rel="noopener">{{ macros.svg_inline('habr') }}https://habr.com/ru/</a>
+                {% if project.external_links %}
+                    {% set links = project.external_links.split('\n') %}
+                    <h3>Публикация на внешних ресурсах</h3>
+                    <div class="external-links">
+                        {% for uri in links %}
+                            <a href="{{ uri }}" class="project__link" target="_blank" rel="noopener">{{ uri }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
         </div>

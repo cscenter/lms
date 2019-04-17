@@ -9,7 +9,9 @@ from admission.models import Applicant, Test
 
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     TEMPLATE_TYPE = "testing-reminder"
-    help = """Notify it's time to start contest"""
+    help = """
+    Send notification to those who applied but haven't yet started the contest.
+    """
 
     def add_arguments(self, parser):
         parser.add_argument(
