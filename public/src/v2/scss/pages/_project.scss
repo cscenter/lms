@@ -1,9 +1,25 @@
-.project__link {
-  display: block;
-  margin-bottom: spacer("2x");
+%external-link {
+  display: inline-block;
+  margin: spacer("2x") spacer("2x") 0 0;
+  background-repeat: no-repeat;
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+}
 
-  .sprite-img._github, .sprite-img._habr{
-    margin-right: spacer("2x");
-    fill: $gray;
+.external-links {
+  a[href^="https://github.com"] {
+    @extend %external-link;
+    background-image: url("/static/v2/img/icons/github.svg");
+  }
+
+  a[href^="https://habr.com"] {
+    @extend %external-link;
+    background-image: url("/static/v2/img/icons/habr.svg");
   }
 }
