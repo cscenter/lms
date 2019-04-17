@@ -8,7 +8,7 @@ from publications.models import ProjectPublication, ProjectPublicationAuthor
 
 class ProjectAdminInline(admin.TabularInline):
     model = ProjectPublication.projects.through
-    extra = 1
+    extra = 0
     raw_id_fields = ('project',)
     verbose_name = _("Related Project")
     verbose_name_plural = _("Projects")
@@ -19,7 +19,11 @@ class PublicationAuthorAdminInline(admin.TabularInline):
     verbose_name = _("Author")
     verbose_name_plural = _("Authors")
     model = ProjectPublicationAuthor
-    extra = 1
+    extra = 0
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.select_related("user", "project_publication")
 
 
 class ProjectPublicationAdminForm(forms.ModelForm):
@@ -35,7 +39,13 @@ class ProjectPublicationAdmin(admin.ModelAdmin):
     form = ProjectPublicationAdminForm
     list_display = ("pk", "title")
     inlines = (ProjectAdminInline, PublicationAuthorAdminInline)
+    # FIXME: select2 instead?
     exclude = ('projects', 'authors')
+
+    class Media:
+        css = {
+            'all': ('v2/css/django_admin.css',)
+        }
 
 
 admin.site.register(ProjectPublication, ProjectPublicationAdmin)
