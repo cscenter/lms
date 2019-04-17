@@ -227,7 +227,7 @@ CKEDITOR_CONFIGS = {
         'toolbar': 'YouCustomToolbarConfig',  # put selected toolbar config here
         # 'toolbarGroups': [{ 'name': 'document', 'groups': [ 'mode', 'document', 'doctools' ] }],
         # 'height': 291,
-        'extraAllowedContent': 'div(*)[data-*]; span(*); p(*); th(*); td(*); section(*); ul(*); li(*); iframe[*]; h1(*); h2(*)',
+        'extraAllowedContent': 'figure(*); figcaption(figure-caption); div(*)[data-*]; span(*); p(*); th(*); td(*); section(*); ul(*); li(*); iframe[*]; h1(*); h2(*)',
         'format_tags': 'p;h1;h2;h3;h4;h5',
         'width': 'calc(100% - 2px)',
         'filebrowserWindowHeight': 725,

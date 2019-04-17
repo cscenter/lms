@@ -9,14 +9,22 @@ from admission.models import Applicant
 
 
 class Command(CurrentCampaignsMixin, BaseCommand):
-    help = """
-        Prints list of yandex ids who successfully passed test.
-        """
+    help = """Prints list of yandex ids who successfully passed test"""
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--city', type=str,
+            help='City code to restrict current campaigns')
 
     def handle(self, *args, **options):
-        campaigns = self.get_current_campaigns()
+        city_code = options["city"]
+        campaigns = self.get_current_campaigns(city_code)
+        if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
+            self.stdout.write("Canceled")
+            return
+
         for campaign in campaigns:
-            self.stdout.write("***{}***".format(campaign))
+            self.stdout.write(f"Processing {campaign}")
             passing_score = campaign.online_test_passing_score
             if not passing_score:
                 self.stdout.write("Zero passing score. Skip campaign")
@@ -31,8 +39,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
             contest_id = object()
             for a in applicants:
                 if not a["exam__yandex_contest_id"]:
-                    self.stdout.write("Missing contest id "
-                                      "for {}!. Skip".format(a["id"]))
+                    self.stdout.write(f"Missing contest id for {a['id']}!. Skip")
                     continue
                 if a["exam__yandex_contest_id"] != contest_id:
                     contest_id = a["exam__yandex_contest_id"]
