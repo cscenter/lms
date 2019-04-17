@@ -3,6 +3,7 @@
 import datetime
 import uuid
 from collections import OrderedDict
+from typing import Optional
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -15,6 +16,7 @@ from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
+from djchoices import DjangoChoices, ChoiceItem
 from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
@@ -22,6 +24,8 @@ from post_office import mail
 from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
+from api.providers.yandex_contest import YandexContestAPIException, \
+    RegisterStatus
 from core.db.models import ScoreField
 from core.models import City, University
 from core.settings.base import CENTER_FOUNDATION_YEAR
@@ -578,30 +582,7 @@ class Contest(models.Model):
         return self.contest_id
 
 
-class Test(TimeStampedModel):
-    NEW = 'new'  # created
-    REGISTERED = 'registered'  # registered in contest
-    MANUAL = 'manual'  # manual score input
-    STATUSES = (
-        (NEW, _("New")),
-        (REGISTERED, _("Registered in contest")),
-        (MANUAL, _("Manual score input")),
-    )
-    applicant = models.OneToOneField(
-        Applicant,
-        verbose_name=_("Applicant"),
-        on_delete=models.PROTECT,
-        related_name="online_test")
-    status = models.CharField(
-        choices=STATUSES,
-        default=NEW,
-        verbose_name=_("Status"),
-        max_length=15)
-    details = JSONField(
-        verbose_name=_("Details"),
-        load_kwargs={'object_pairs_hook': OrderedDict},
-        blank=True,
-    )
+class YandexContestIntegration(models.Model):
     yandex_contest_id = models.CharField(
         _("Contest #ID"),
         help_text=_("Applicant|yandex_contest_id"),
@@ -609,17 +590,105 @@ class Test(TimeStampedModel):
         blank=True,
         null=True)
     contest_participant_id = models.IntegerField(
-        help_text="Participant ID if user registered in Yandex Contest",
-        editable=False,
+        _("Participant ID"),
+        help_text=_("participant_id in Yandex.Contest"),
         null=True,
         blank=True)
     contest_status_code = models.IntegerField(
         "Yandex API Response",
-        editable=False,
         null=True,
         blank=True)
+
+    class Meta:
+        abstract = True
+
+    def register_in_contest(self, api, applicant):
+        """
+        Registers participant in the contest and saves response
+        info (status_code, participant_id)
+        """
+        # FIXME: using self.__class__ is error prone here since we can't rely on applicant field
+        try:
+            status_code, data = api.register_in_contest(applicant.yandex_id,
+                                                        self.yandex_contest_id)
+        except YandexContestAPIException as e:
+            raise
+        update_fields = {
+            "status": ChallengeStatuses.REGISTERED,
+            "contest_status_code": status_code,
+        }
+        if status_code in (RegisterStatus.CREATED, RegisterStatus.OK):
+            participant_id = data
+            update_fields["contest_participant_id"] = participant_id
+        else:  # 409 - already registered for this contest
+            registered = (self.__class__.objects
+                          .filter(yandex_contest_id=self.yandex_contest_id,
+                                  contest_status_code=RegisterStatus.CREATED,
+                                  applicant__campaign_id=applicant.campaign_id,
+                                  applicant__yandex_id=applicant.yandex_id)
+                          .exclude(contest_participant_id__isnull=True)
+                          .only("contest_participant_id")
+                          .first())
+            # 1. Admins/judges could be registered directly through contest
+            # admin, so we haven't info about there participant id and
+            # can't easily get there results later, but still allow them
+            # testing application form
+            # 2. When registering user in contest on `read timeout` response
+            # we lost information about there participant id without any
+            # ability to restore it through API (until the participant
+            # appears in results table)
+            if registered:
+                participant_id = registered.contest_participant_id
+                update_fields["contest_participant_id"] = participant_id
+        (self.__class__.objects
+         .filter(applicant=applicant)
+         .update(**update_fields))
+
+
+class ChallengeStatuses(DjangoChoices):
+    NEW = ChoiceItem('new', _("Not registered in the contest"))
+    REGISTERED = ChoiceItem('registered', _("Registered in the contest"))
+    MANUAL = ChoiceItem('manual', _("Manual score input"))
+
+
+class ApplicantRandomizeContestMixin:
+    def compute_contest_id(self, contest_type) -> Optional[int]:
+        """
+        Returns contest id based on applicant id and existing contest records.
+        """
+        contests = list(Contest.objects
+                        .filter(campaign_id=self.applicant.campaign_id,
+                                type=contest_type)
+                        .values_list("contest_id", flat=True)
+                        .order_by("contest_id"))
+        if contests:
+            contest_index = self.applicant.id % len(contests)
+            return contests[contest_index]
+
+
+class Test(TimeStampedModel, YandexContestIntegration,
+           ApplicantRandomizeContestMixin):
+    NEW = ChallengeStatuses.NEW
+    REGISTERED = ChallengeStatuses.REGISTERED
+    MANUAL = ChallengeStatuses.MANUAL
+
+    applicant = models.OneToOneField(
+        Applicant,
+        verbose_name=_("Applicant"),
+        on_delete=models.PROTECT,
+        related_name="online_test")
+    status = models.CharField(
+        choices=ChallengeStatuses.choices,
+        default=ChallengeStatuses.NEW,
+        verbose_name=_("Status"),
+        max_length=15)
     score = models.PositiveSmallIntegerField(
         verbose_name=_("Score"), null=True, blank=True)
+    details = JSONField(
+        verbose_name=_("Details"),
+        load_kwargs={'object_pairs_hook': OrderedDict},
+        blank=True,
+    )
 
     class Meta:
         verbose_name = _("Testing")
@@ -635,60 +704,51 @@ class Test(TimeStampedModel):
     def score_display(self):
         return self.score if self.score is not None else "-"
 
-    def compute_contest_id(self):
-        """
-        Returns contest id based on applicant id and existing contest records.
-        """
-        contests = list(Contest.objects
-                        .filter(campaign_id=self.applicant.campaign_id,
-                                type=Contest.TYPE_TEST)
-                        .values_list("contest_id", flat=True)
-                        .order_by("contest_id"))
-        if contests:
-            contest_index = self.applicant.id % len(contests)
-            return contests[contest_index]
-
     def save(self, **kwargs):
         created = self.pk is None
-        if created and not self.yandex_contest_id:
-            contest_id = self.compute_contest_id()
+        if (created and self.status == ChallengeStatuses.NEW and
+                not self.yandex_contest_id):
+            contest_id = self.compute_contest_id(Contest.TYPE_TEST)
             if contest_id:
                 self.yandex_contest_id = contest_id
         super().save(**kwargs)
 
 
-class Exam(TimeStampedModel):
+class Exam(TimeStampedModel, YandexContestIntegration,
+           ApplicantRandomizeContestMixin):
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="exam")
+    status = models.CharField(
+        choices=ChallengeStatuses.choices,
+        default=ChallengeStatuses.MANUAL,
+        verbose_name=_("Status"),
+        max_length=15)
+    score = ScoreField(
+        verbose_name=_("Score"),
+        # Avoid loading empty values with admin interface
+        null=True)
     details = JSONField(
         verbose_name=_("Details"),
         load_kwargs={'object_pairs_hook': OrderedDict},
         blank=True,
         null=True
     )
-    # TODO: replace with FK to Contest model! Migrate all data
-    yandex_contest_id = models.CharField(
-        _("Contest #ID"),
-        help_text=_("Applicant|yandex_contest_id"),
-        max_length=42,
-        blank=True,
-        null=True)
-    score = ScoreField(
-        verbose_name=_("Score"),
-        # Avoid loading empty values with admin interface
-        null=True)
 
     class Meta:
         verbose_name = _("Exam")
         verbose_name_plural = _("Exams")
 
-    def is_imported(self):
-        """NULL value on DB level means we only created model for exam and set
-        contest id, but results never been imported from contest."""
-        return self.score is not None
+    def save(self, **kwargs):
+        created = self.pk is None
+        if (created and self.status == ChallengeStatuses.NEW and
+                not self.yandex_contest_id):
+            contest_id = self.compute_contest_id(Contest.TYPE_EXAM)
+            if contest_id:
+                self.yandex_contest_id = contest_id
+        super().save(**kwargs)
 
     def __str__(self):
         """ Import/export get repr before instance created in db."""
@@ -701,7 +761,6 @@ class Exam(TimeStampedModel):
         return self.score if self.score is not None else "-"
 
 
-@python_2_unicode_compatible
 class InterviewAssignment(models.Model):
     campaign = models.ForeignKey(
         Campaign,
