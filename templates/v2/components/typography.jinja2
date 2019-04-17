@@ -1,0 +1,235 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-9">
+                <section class="content-block">
+                    <h1>H1 header style</h1>
+                    <h2>H2 header style</h2>
+                    <h3>H3 header style</h3>
+                    <h4>H4 header style</h4>
+                    <a href="#">Link</a>
+                    <p>
+                    <h3>Main text text style</h3>
+                    Some text styles <a href="#">link style</a>,
+                    <del>deleted text</del>
+                    ,
+                    <ins>inserted text</ins>
+                    , <em>cursive selection</em> and <strong>bold selection</strong>,
+                    <small>small text</small>
+                    ,
+                    <mark>marked text</mark>
+                    , normal text</p>
+                </section>
+                <section class="content-block">
+                    <h3>Figure</h3>
+                    <figure class="figure">
+                        <img src="/media/pages/text-page/cs-lecture.png" class="figure-img img-fluid" alt="">
+                        <figcaption class="figure-caption">Лекция в Computer Science Center</figcaption>
+                    </figure>
+                </section>
+                <section class="content-block">
+                    <h3>Ul-list style</h3>
+                    <ul>
+                        <li>Проект GoodsReview</li>
+                        <li>Поиск генов в метагномных сборках</li>
+                        <li>Список второго уровня:
+                            <ul>
+                                <li>nginx&nbsp;— сервер, который отдает статические файлы и&nbsp;роутит запросы на&nbsp;java-сервер</li>
+                                <li>jetty&nbsp;— java-сервер</li>
+                                <li>jersey&nbsp;— имплементация REST на&nbsp;java</li>
+                                <li>jade&nbsp;— шаблонизатор</li>
+                                <li>mysql&nbsp;— наша база</li>
+                            </ul>
+                        </li>
+                        <li>Value-tracking анализ JavaScript</li>
+                        <li>Распознавание марки и модели
+                            автомобиля по фотографии
+                        </li>
+                    </ul>
+                </section>
+                <section class="content-block">
+                    <h3>Ol-list style</h3>
+                    <ol>
+                        <li><a href="http://www.linkedin.com/in/yaivanov" target="_blank">Андрей Иванов</a> (<a
+                                href="http://jetbrains.ru/">JetBrains</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>);
+                        </li>
+                        <li><a href="http://halgebra.math.msu.su/wiki/doku.php/staff:bunina">Елена Бунина</a> (<a
+                                href="https://yandex.ru/company/" target="_blank">Яндекс</a>, <a
+                                href="http://yandexdataschool.ru/" target="_blank">ШАД</a>, <a href="http://msu.ru/"
+                                                                                               target="_blank">МГУ</a>);
+                        </li>
+                        <li><a href="https://logic.pdmi.ras.ru/~kulikov/" target="_blank">Александр Куликов</a> (<a
+                                href="http://www.pdmi.ras.ru/pdmi/index.php" target="_blank">ПОМИ РАН</a>, <a
+                                href="https://compsciclub.ru/" target="_blank">CS клуб</a>);
+                        </li>
+                        <li><a href="https://logic.pdmi.ras.ru/~smal/" target="_blank">Александр Смаль</a> (<a
+                                href="http://www.pdmi.ras.ru/pdmi/index.php">ПОМИ РАН</a>, <a
+                                href="http://mit.spbau.ru/"
+                                target="_blank">СПбАУ РАН</a>);
+                        </li>
+                        <li><a href="https://logic.pdmi.ras.ru/~hirsch/" target="_blank">Эдуард Гирш</a> (<a
+                                href="http://www.pdmi.ras.ru/pdmi/index.php" target="_blank">ПОМИ РАН</a>);
+                        </li>
+                        <li><a href="" target="_blank">Евгения Куликова</a> (<a
+                                href="https://yandex.ru/company/" target="_blank">Яндекс</a>).
+                        </li>
+                    </ol>
+                </section>
+                <section class="content-block">
+                    <h3>Code</h3>
+                    <pre>
+<code>#include
+using namespace std;
+
+int main()
+{
+    cout << "Hello, World!";
+    return 0;
+}</code></pre>
+
+                </section>
+
+                <section class="content-block">
+                    <h3>Table</h3>
+                    <table>
+                        <caption>Таблица размеров обуви</caption>
+                        <tbody>
+                        <tr>
+                            <th>Россия</th>
+                            <th>Великобритания</th>
+                            <th>Европа</th>
+                            <th>Длина ступни, см</th>
+                        </tr>
+                        <tr>
+                            <td>34,5</td>
+                            <td>3,5</td>
+                            <td>36</td>
+                            <td>23</td>
+                        </tr>
+                        <tr>
+                            <td>35,5</td>
+                            <td>4</td>
+                            <td>36⅔</td>
+                            <td>23–23,5</td>
+                        </tr>
+                        <tr>
+                            <td>36</td>
+                            <td>4,5</td>
+                            <td>37⅓</td>
+                            <td>23,5</td>
+                        </tr>
+                        <tr>
+                            <td>36,5</td>
+                            <td>5</td>
+                            <td>38</td>
+                            <td>24</td>
+                        </tr>
+                        <tr>
+                            <td>37</td>
+                            <td>5,5</td>
+                            <td>38⅔</td>
+                            <td>24,5</td>
+                        </tr>
+                        <tr>
+                            <td>38</td>
+                            <td>6</td>
+                            <td>39⅓</td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <td>38,5</td>
+                            <td>6,5</td>
+                            <td>40</td>
+                            <td>25,5</td>
+                        </tr>
+                        <tr>
+                            <td>39</td>
+                            <td>7</td>
+                            <td>40⅔</td>
+                            <td>25,5–26</td>
+                        </tr>
+                        <tr>
+                            <td>40</td>
+                            <td>7,5</td>
+                            <td>41⅓</td>
+                            <td>26</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="content-block">
+                    <h3>Table 100% width</h3>
+                    <table class="w-100">
+                        <caption>Таблица размеров обуви</caption>
+                        <tbody>
+                        <tr>
+                            <th>Россия</th>
+                            <th>Великобритания</th>
+                            <th>Европа</th>
+                            <th>Длина ступни, см</th>
+                        </tr>
+                        <tr>
+                            <td>34,5</td>
+                            <td>3,5</td>
+                            <td>36</td>
+                            <td>23</td>
+                        </tr>
+                        <tr>
+                            <td>35,5</td>
+                            <td>4</td>
+                            <td>36⅔</td>
+                            <td>23–23,5</td>
+                        </tr>
+                        <tr>
+                            <td>36</td>
+                            <td>4,5</td>
+                            <td>37⅓</td>
+                            <td>23,5</td>
+                        </tr>
+                        <tr>
+                            <td>36,5</td>
+                            <td>5</td>
+                            <td>38</td>
+                            <td>24</td>
+                        </tr>
+                        <tr>
+                            <td>37</td>
+                            <td>5,5</td>
+                            <td>38⅔</td>
+                            <td>24,5</td>
+                        </tr>
+                        <tr>
+                            <td>38</td>
+                            <td>6</td>
+                            <td>39⅓</td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <td>38,5</td>
+                            <td>6,5</td>
+                            <td>40</td>
+                            <td>25,5</td>
+                        </tr>
+                        <tr>
+                            <td>39</td>
+                            <td>7</td>
+                            <td>40⅔</td>
+                            <td>25,5–26</td>
+                        </tr>
+                        <tr>
+                            <td>40</td>
+                            <td>7,5</td>
+                            <td>41⅓</td>
+                            <td>26</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </section>
+                <p>Отдельная благодарность Якову Зайцеву, подарившему CS центру более 100 книг.</p>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
