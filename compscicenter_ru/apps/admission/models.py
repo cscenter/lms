@@ -582,6 +582,7 @@ class Contest(models.Model):
         return self.contest_id
 
 
+# FIXME: add check that model inherited from this cls has `applicant` FK
 class YandexContestIntegration(models.Model):
     yandex_contest_id = models.CharField(
         _("Contest #ID"),
@@ -607,11 +608,10 @@ class YandexContestIntegration(models.Model):
         Registers participant in the contest and saves response
         info (status_code, participant_id)
         """
-        # FIXME: using self.__class__ is error prone here since we can't rely on applicant field
         try:
             status_code, data = api.register_in_contest(applicant.yandex_id,
                                                         self.yandex_contest_id)
-        except YandexContestAPIException as e:
+        except YandexContestAPIException:
             raise
         update_fields = {
             "status": ChallengeStatuses.REGISTERED,

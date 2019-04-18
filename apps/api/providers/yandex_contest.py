@@ -43,7 +43,7 @@ class YandexContestAPIException(Exception):
     pass
 
 
-# TODO: catch read timeout exceptions in api?
+# TODO: catch read timeout exceptions. See `advent` project
 class YandexContestAPI:
     """
     https://api.contest.yandex.net/api/public/swagger-ui.html#/
