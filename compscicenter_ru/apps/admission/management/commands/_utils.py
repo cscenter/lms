@@ -60,9 +60,9 @@ class ValidateTemplatesMixin:
                     raise CommandError("Email template {} "
                                        "not found".format(template_name))
 
-    def get_template_name(self, campaign, type):
+    def get_template_name(self, campaign, suffix):
         return self.TEMPLATE_REGEXP.format(
             year=campaign.year,
             city_code=campaign.city_id,
-            type=type
+            type=suffix
         )
