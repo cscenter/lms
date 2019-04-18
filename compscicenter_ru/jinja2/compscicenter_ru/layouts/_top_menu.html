@@ -73,7 +73,7 @@
                             {% endfor %}
                         </div>
                     {%- else -%}
-                        <a class="nav-link{% if item.is_external %} _external{% endif %}{% if menu_item.selected %} _active{% endif %}" href="{{ menu_item.url }}" {% if menu_item.is_external %}target="_blank" rel="noopener"{% endif %}>{{ menu_item.title }}</a>
+                        <a class="nav-link{% if menu_item.is_external %} _external{% endif %}{% if menu_item.selected %} _active{% endif %}" href="{{ menu_item.url }}" {% if menu_item.is_external %}target="_blank" rel="noopener"{% endif %}>{{ menu_item.title }}</a>
                     {%- endif -%}
                 </li>
             {% endfor %}
