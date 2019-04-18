@@ -1,5 +1,5 @@
 $input-bg: $white;
-$input-disabled-bg: $gray-disable-dark;
+$input-disabled-bg: $gray-disabled;
 $input-outerheight: 48px;
 $input-line-height: calculate-input-line-height($input-outerheight, spacer("3x"));
 
@@ -25,7 +25,7 @@ $input-plaintext-color: $body-color !default;
 $control-bg: $white;
 $control-bg-hover: $input-border-color-hover;
 $control-checked-bg: $gray-dark;
-$control-disabled-bg: $gray;
+$control-disabled-bg: $gray-light;
 $control-color: $black;
 $control-border-width: 2px;
 $control-border-color: $input-border-color;

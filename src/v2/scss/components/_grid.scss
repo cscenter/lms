@@ -1,11 +1,11 @@
 @import "bootstrap/scss/grid";
 
 ._dark {
-  background: #f8fafc;
+  background: map_get($theme-colors, "dark");
 }
 
 ._light {
-  background: $white;
+  background: map_get($theme-colors, "light");
 }
 
 .page-content {

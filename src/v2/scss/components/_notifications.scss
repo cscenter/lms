@@ -17,9 +17,9 @@
   span{
     a{
       color: $gray-darker;
-      background: $gray-disable-light;
+      background: $gray-lighter;
       &:hover{
-        background: darken($gray-disable-light, 5%);
+        background: darken($gray-lighter, 5%);
       }
     }
     }
@@ -50,7 +50,7 @@
 
 .noty_theme__notification.noty_type__alert,
 .noty_theme__notification.noty_type__notification {
-  background-color: #fff;
+  background-color: $white;
   color: inherit;
 }
 
