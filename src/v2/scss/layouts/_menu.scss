@@ -159,7 +159,7 @@ $navbar-toggler-border-radius: $border-radius;
   }
 
   ul {
-    border-top: 1px solid $gray-disable-dark;
+    border-top: 1px solid $gray-dark;
     list-style: none;
     padding: 0;
     margin: 0 auto;
@@ -171,7 +171,7 @@ $navbar-toggler-border-radius: $border-radius;
     }
 
     li {
-      border-bottom: 1px solid $gray-disable-dark;
+      border-bottom: 1px solid $gray-dark;
       font-size: $font-size-lg;
       &:last-child {
         border-bottom: 0;

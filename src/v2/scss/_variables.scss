@@ -19,49 +19,48 @@
 $white:    #fff;
 $black:    #1d1d1d;
 $blue:    #357A9C;
-$orange:  #ff6c0d;
 $teal:    #07c39f;
 $green:   #30BD4C;
 $red:     #DB3131;
-
-$white-10: rgba(255,255,255,.1);
-$white-30: rgba(255,255,255,.3);
-$white-50: rgba(255,255,255,.5);
-
 $gray-lighter:  #ecf0f2;
-$gray-light:    #CED8DD;
-$gray:          #B4BFC6;
-$gray-dark:     #8899a4;
+$gray-light:    #c0c9ce;
+$gray-dark:     #75828a;
 $gray-darker:   #374148;
-
-$gray-disable-dark:   #717374;
-$gray-disable-light:  #e9e9e9;
+$gray-disabled: #717374;
 
 $colors: (
-  "blue":       $blue,
-  "orange":     $orange,
-  "teal":       $teal,
+  "white":        $white,
+  "black":        $black,
+  "blue":         $blue,
+  "teal":         $teal,
+  "green":        $green,
+  "red":          $red,
+  "gray-lighter": $gray-lighter,
+  "gray-light":   $gray-light,
+  "gray-dark":    $gray-dark,
+  "gray-darker":  $gray-darker,
+  "gray-disabled": $gray-disabled
+);
+
+// Themes. Used in:
+// * components/grid.scss
+// * bootstrap/scss/utilities/_text.scss
+$dark-bg:       #f8fafc;
+$theme-colors: (
+  "light":      $white,
+  "dark":       $dark-bg
+);
+
+// Btns
+$btn-colors: (
+  "primary":    $teal,
+  "light":      $gray-light,
+  "gray":       $gray-dark,
+  "success":    $green,
+  "danger":     $red,
   "white":      $white
 );
 
-// Themes
-
-$primary:       $teal;
-$secondary:     $gray-disable-dark;
-$light:         $gray-lighter;
-$dark:          $gray-darker;
-$error:         $red;
-
-$theme-colors: (
-  "primary":    $primary,
-  "light":      $light,
-  "gray":       $gray-dark,
-  "dark":       $gray-darker,
-  "danger":     $error,
-  "white":      $white,
-  "green":      $green,
-  "opacity-10":   $white-10
-);
 // stylelint-enable
 
 // Body
@@ -250,10 +249,10 @@ $lead-font-weight:            300 !default;
 
 $text-muted:                  $gray-dark;
 
-$blockquote-small-color:      $gray-disable-dark !default;
+$blockquote-small-color:      $gray-disabled;
 $blockquote-font-size:        ($font-size-base * 1.25) !default;
 
-$hr-border-color:             transparentize($gray, .75);
+$hr-border-color:             transparentize($gray-light, .75);
 $hr-border-width:             $border-width !default;
 
 $mark-padding:                .2em !default;
@@ -295,7 +294,7 @@ $btn-border-radius-sm: $border-radius-sm;
 $label-margin-bottom:               spacer("1x"); //Using in reboot.scss
 
 // Nav
-$nav-divider-color:                 $gray-disable-light !default;
+$nav-divider-color:                 $gray-lighter;
 $nav-divider-margin-y:              spacer("2x") !default;
 
 // Z-index master list

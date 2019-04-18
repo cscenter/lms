@@ -96,7 +96,7 @@ $pagination-disabled-border-color: $gray-lighter;
     &.disabled {
       .page-link,
       .ellipsis {
-        fill: $gray-disable-dark;
+        fill: $gray-disabled;
         opacity: .6;
       }
     }
