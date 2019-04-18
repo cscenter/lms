@@ -729,7 +729,8 @@ class Exam(TimeStampedModel, YandexContestIntegration,
     score = ScoreField(
         verbose_name=_("Score"),
         # Avoid loading empty values with admin interface
-        null=True)
+        null=True,
+        blank=True)
     details = JSONField(
         verbose_name=_("Details"),
         load_kwargs={'object_pairs_hook': OrderedDict},
