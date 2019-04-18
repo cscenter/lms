@@ -4,8 +4,9 @@
   right: 0;
   margin: spacer("2x");
   text-align: center;
-  color: $gray;
-  border: $border-width solid $gray;border-radius: 50%;
+  color: $gray-light;
+  border: $border-width solid $gray-light;
+  border-radius: 50%;
   z-index: 1;
   line-height: 2rem;
   vertical-align: center;

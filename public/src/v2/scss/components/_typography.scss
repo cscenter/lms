@@ -1,5 +1,3 @@
-@import "bootstrap/scss/utilities/text"; // TODO: what exactly we use from here right now?
-
 body {
   font-size: $font-size-content-base;
   font-feature-settings: "tnum" on, "dlig" on;
@@ -126,7 +124,7 @@ a {
       }
       li::before {
         content: "\2014";
-        color: $gray;
+        color: $gray-light;
         float: left;
         margin-left: -#{spacer("6x")};
       }
