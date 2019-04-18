@@ -73,13 +73,15 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
         qs = super(OnlineTestAdmin, self).get_queryset(request)
         return qs.select_related('applicant',
                                  'applicant__campaign',
-                                 'applicant__campaign__city')
+                                 'applicant__campaign__city',
+                                 'applicant__campaign__branch',)
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
             kwargs['queryset'] = (
                 Applicant.objects
-                         .select_related("campaign", "campaign__city")
+                         .select_related("campaign", "campaign__city",
+                                         "campaign__branch")
                          .order_by("surname"))
         return (super(OnlineTestAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
