@@ -54,7 +54,8 @@ class Branch(models.Model):
     def timezone(self):
         return Branches.get_choice(self.code).timezone
 
-    def get_code_display(self):
+    @property
+    def abbr(self):
         return Branches.get_choice(self.code).abbr
 
 

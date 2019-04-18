@@ -77,8 +77,11 @@
                             {% if applicant.course %}<br>{{ applicant.get_course_display }}{% endif %}
 
                         </td>
-                        <td>{{ applicant.campaign.branch.get_code_display }},&nbsp;{{ applicant.campaign.year }}</td>
-                        <td>{{ applicant.preferred_study_programs|replace:", <br>"|safe|default:"-" }}</td>
+                        <td>{{ applicant.campaign.branch.abbr }},&nbsp;{{ applicant.campaign.year }}</td>
+                        <td>{% if applicant.preferred_study_programs %}
+                            {% for p in applicant.preferred_study_programs %}{{ p|upper }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                            {% else %}-{% endif %}
+                        </td>
                         <td>{% if applicant.online_test %}{{ applicant.online_test.score_display }}{% else %}-{% endif %}</td>
                         <td>{% if applicant.exam %}{{ applicant.exam.score_display }}{% else %}-{% endif %}</td>
                     </tr>
