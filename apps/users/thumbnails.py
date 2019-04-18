@@ -38,16 +38,16 @@ def get_user_thumbnail(user, geometry, use_stub=True, **options):
         options["crop"] = "center top"
     if "cropbox" not in options:
         options["cropbox"] = user.photo_thumbnail_cropbox()
-    thumbnail = get_thumbnail(path_to_img, geometry, **options)
-    if not thumbnail or isinstance(thumbnail, DummyImageFile):
-        if use_stub:
-            if not user.is_teacher and user.gender == user.GENDER_MALE:
-                factory = BoyStubImage
-            elif not user.is_teacher and user.gender == user.GENDER_FEMALE:
-                factory = GirlStubImage
-            else:
-                factory = BaseStubImage
-            thumbnail = factory(geometry=geometry)
+    if path_to_img:
+        thumbnail = get_thumbnail(path_to_img, geometry, **options)
+    else:
+        thumbnail = None
+    if not thumbnail and use_stub:
+        if not user.is_teacher and user.gender == user.GENDER_MALE:
+            factory = BoyStubImage
+        elif not user.is_teacher and user.gender == user.GENDER_FEMALE:
+            factory = GirlStubImage
         else:
-            thumbnail = None
+            factory = BaseStubImage
+        thumbnail = factory(geometry=geometry)
     return thumbnail

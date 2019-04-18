@@ -702,7 +702,6 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
     model = Applicant
     form_class = ResultsModelForm
     filterset_class = ResultsFilter
-    extra = 0
 
     def dispatch(self, request, *args, **kwargs):
         self.active_campaigns = (Campaign.objects
@@ -734,6 +733,11 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
             return self.formset_valid(formset)
         else:
             return self.formset_invalid(formset)
+
+    def get_factory_kwargs(self):
+        kwargs = super().get_factory_kwargs()
+        kwargs["extra"] = 0
+        return kwargs
 
     def get_formset_kwargs(self):
         """Overrides queryset for instantiating the formset."""
