@@ -85,7 +85,7 @@ YANDEX_DISK_PASSWORD = "***REMOVED***"
 # django-dbbackup settings
 DBBACKUP_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 DBBACKUP_STORAGE_OPTIONS = {
-    'location': '/',
+    'location': '',
     'bucket_name': 'cscenter',
     'region_name': 'eu-central-1',
     'access_key': '***REMOVED***',
