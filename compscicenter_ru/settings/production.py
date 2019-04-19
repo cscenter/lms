@@ -90,6 +90,7 @@ DBBACKUP_STORAGE_OPTIONS = {
     'region_name': 'eu-central-1',
     'access_key': '***REMOVED***',
     'secret_key': '***REMOVED***',
+    'default_acl': None,
 }
 DBBACKUP_TMP_DIR = '/shared/backup_tmp'
 DBBACKUP_DATE_FORMAT = '%d-%m-%Y-%H'
