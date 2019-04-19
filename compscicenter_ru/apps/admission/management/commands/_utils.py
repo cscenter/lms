@@ -57,7 +57,7 @@ class ValidateTemplatesMixin:
                     # Use post office method for caching purpose
                     get_email_template(template_name)
                 except EmailTemplate.DoesNotExist:
-                    raise CommandError("Email template {} "
+                    raise CommandError("Email template `{}` "
                                        "not found".format(template_name))
 
     def get_template_name(self, campaign, suffix):

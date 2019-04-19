@@ -1,3 +1,5 @@
+import ast
+
 from django.core.management.base import BaseCommand, CommandError
 from post_office import mail
 from post_office.models import Email
@@ -7,14 +9,16 @@ from admission.models import Applicant
 from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin
 
 
-# TODO: сделать по аналогии с  derivable fields
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
-    help = """
-    Queue email for applicants with statuses provided through arguments.
-
-    Example:
-        ./manage.py email_to_applicants_with_statuses --city=nsk --statuses=interview_completed,rejected_interview,accept,accept_if,volunteer --template=delay
     """
+    Example:
+        Send notification to applicants from Saint-Petersburg who
+        passed test with 5 or 6 score
+
+        ./manage.py email_to_applicants --city=spb --template=admission-2019-try-online -f online_test__score__in=[5,6]
+    """
+    help = """Send notification to current campaigns applicants"""
+    TEMPLATE_REGEXP = "{type}"
 
     def add_arguments(self, parser):
         # TODO: provide `context` field
@@ -23,21 +27,23 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             help='City code to restrict current campaigns')
         parser.add_argument(
             '--template', type=str,
-            help='Post office email template type. Template name for each '
-                 'campaign is predefined and equal to ' +
-                 self.TEMPLATE_REGEXP)
-        parser.add_argument(
-            '--statuses', type=str,
-            help='Comma separated Applicant.STATUS values')
+            help='Post office email template')
         parser.add_argument(
             '--from', type=str,
             default='CS центр <info@compscicenter.ru>',
             help='Override default `From` header')
+        parser.add_argument('-m', dest='custom_manager', type=str,
+                            default='objects', action='store',
+                            help='Customize model manager name.')
+        parser.add_argument('-f', dest='queryset_filters', type=str,
+                            action='append',
+                            help='Customize one or more filters for queryset. '
+                                 'Usage examples:'
+                                 ' -f status__in=["rejected_test"]=True '
+                                 ' -f id__in=[86]')
 
-    def get_template_name(self, campaign, type):
-        return self.TEMPLATE_REGEXP.format(year=campaign.year,
-                                           city_code=campaign.city.code,
-                                           type=type)
+    def get_template_name(self, campaign, template):
+        return template
 
     def handle(self, *args, **options):
         city_code = options["city"]
@@ -46,30 +52,33 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
-        statuses = options['statuses']
-        if not statuses:
-            raise CommandError("Provide `--statuses` from Applicant.STATUS")
-        all_statuses = {code for code, _ in Applicant.STATUS}
-        statuses = [s.strip() for s in statuses.split(",")]
-        for s in statuses:
-            if s not in all_statuses:
-                raise CommandError(f"Unknown status `{s}`")
+        template_name = options['template']
+        if not template_name:
+            raise CommandError(f"Provide email template name")
+        self.validate_templates(campaigns, types=[template_name])
+
+        manager = getattr(Applicant, options['custom_manager'] or 'objects')
+        queryset_filters = options['queryset_filters']
+        if queryset_filters:
+            queryset_filters = {
+                field: ast.literal_eval(value) for f in queryset_filters
+                for field, value in [f.split('=')]
+            }
+            manager = manager.filter(**queryset_filters)
+        manager = manager.order_by()
 
         header_from = options["from"]
-        template_type = options['template']
-        if not template_type:
-            raise CommandError(f"Provide template type")
-        self.validate_templates(campaigns, types=[template_type])
 
         for campaign in campaigns:
-            self.stdout.write(f"{campaign}:")
-            template_name = self.get_template_name(campaign, template_type)
+            self.stdout.write(f"{campaign}")
             template = get_email_template(template_name)
-            generated = 0
-            applicants = (Applicant.objects
-                          .filter(campaign=campaign, status__in=statuses)
+            processed = 0
+            new_emails = 0
+            applicants = (manager
+                          .filter(campaign=campaign)
                           .only("pk", "email"))
             for a in applicants:
+                processed += 1
                 recipient = a.email
                 if not Email.objects.filter(to=recipient,
                                             template=template).exists():
@@ -77,11 +86,13 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                         recipient,
                         sender=header_from,
                         template=template,
-                        # Render on delivery, we have no really big amount of
-                        # emails to think about saving CPU time
+                        # If emails rendered on delivery, they will store
+                        # value of the template id. It makes `exists`
+                        # method above works correctly.
                         render_on_delivery=True,
                         backend='ses',
                     )
-                    generated += 1
-            self.stdout.write("  Generated emails: {}".format(generated))
-            self.stdout.write("  Done")
+                    new_emails += 1
+            self.stdout.write(f"  Processed: {processed}")
+            self.stdout.write(f"  New emails: {new_emails}")
+        self.stdout.write("Done")
