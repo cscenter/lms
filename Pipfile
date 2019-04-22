@@ -42,7 +42,7 @@ standardjson = "==0.3.1"
 # Images
 sorl-thumbnail = "==12.5.0"
 python-magic = "==0.4.15"
-Pillow = "==6.0.0"
+Pillow = "==5.4.1"
 # Forms
 django-crispy-forms = "==1.7.2"
 django-formtools = "==2.1"
