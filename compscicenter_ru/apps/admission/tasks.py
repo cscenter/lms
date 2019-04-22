@@ -8,7 +8,7 @@ from post_office import mail
 
 from admission.models import Test, Contest
 from api.providers.yandex_contest import YandexContestAPIException, \
-    YandexContestAPI, RegisterStatus
+    YandexContestAPI, RegisterStatus, ContestAPIError
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +40,8 @@ def register_in_yandex_contest(applicant_id, language_code):
                            refresh_token=campaign.refresh_token)
     try:
         online_test.register_in_contest(api, applicant)
-    except YandexContestAPIException as e:
-        error_status_code, text = e.args
-        if error_status_code == RegisterStatus.BAD_TOKEN:
+    except ContestAPIError as e:
+        if e.code == RegisterStatus.BAD_TOKEN:
             notify_admin_bad_token(campaign.pk)
         logger.error(f"Yandex.Contest api request error [id = {applicant_id}]")
         raise

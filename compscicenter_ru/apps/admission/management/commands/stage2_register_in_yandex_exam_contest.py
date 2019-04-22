@@ -4,11 +4,11 @@ from django.core.management import BaseCommand
 
 from admission.models import Applicant, Exam, Contest, ChallengeStatuses
 from api.providers.yandex_contest import YandexContestAPI, \
-    YandexContestAPIException, RegisterStatus
-from ._utils import CurrentCampaignsMixin
+    YandexContestAPIException, RegisterStatus, ContestAPIError
+from ._utils import CurrentCampaignsMixin, CustomizeQueryMixin
 
 
-class Command(CurrentCampaignsMixin, BaseCommand):
+class Command(CurrentCampaignsMixin, CustomizeQueryMixin, BaseCommand):
     help = """
     For those who passed testing (score >= passing_score) creates 
     exam record and registers in yandex contest. 
@@ -16,6 +16,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
     """
 
     def add_arguments(self, parser):
+        CustomizeQueryMixin.add_arguments(self, parser)
         parser.add_argument(
             '--city', type=str,
             help='City code to restrict current campaigns')
@@ -27,13 +28,16 @@ class Command(CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
+        manager = self.get_manager(Applicant, options)
+
         for campaign in campaigns:
             self.stdout.write(f"Processing {campaign}:")
             passing_score = campaign.online_test_passing_score
             if not passing_score:
                 self.stdout.write("Zero passing score. Skip campaign")
                 continue
-            # Make sure we already have associated with campaign exam contests
+            # Make sure we have exam contests associated with campaign
+            # Otherwise we can't assign random contest number
             if not Contest.objects.filter(type=Contest.TYPE_EXAM,
                                           campaign=campaign).exists():
                 self.stdout.write(f"No exam contests found for `{campaign}`. "
@@ -43,23 +47,23 @@ class Command(CurrentCampaignsMixin, BaseCommand):
             api = YandexContestAPI(access_token=campaign.access_token,
                                    refresh_token=campaign.refresh_token)
 
-            applicants = (Applicant.objects
+            applicants = (manager
                           .filter(campaign_id=campaign.pk,
                                   online_test__score__gte=passing_score))
             for a in applicants:
-                exam, _ = Exam.objects.get_or_create(
+                exam, created = Exam.objects.get_or_create(
                     applicant=a,
                     defaults={"status": ChallengeStatuses.NEW})
-                try:
-                    exam.register_in_contest(api, a)
-                except YandexContestAPIException as e:
-                    error_status_code, text = e.args
-                    if error_status_code == RegisterStatus.BAD_TOKEN:
-                        self.stdout.write(f"Bad Token for campaign {campaign}")
-                        break
-                    self.stdout.write(
-                        f"API request error for applicant {a}. "
-                        f"Code: {error_status_code}. Message: {text}"
-                    )
-                    continue
+                if created or exam.status == ChallengeStatuses.NEW:
+                    try:
+                        exam.register_in_contest(api, a)
+                    except ContestAPIError as e:
+                        if e.code == RegisterStatus.BAD_TOKEN:
+                            self.stdout.write(f"Bad campaign token {campaign}")
+                            break
+                        self.stdout.write(
+                            f"API request error for applicant {a}. "
+                            f"Code: {e.code}. Message: {e.message}"
+                        )
+                        continue
         self.stdout.write("Done")
