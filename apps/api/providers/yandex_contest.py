@@ -1,5 +1,5 @@
 import logging
-from enum import IntEnum
+from enum import IntEnum, Enum
 
 import requests
 
@@ -35,15 +35,56 @@ STANDINGS_PARAMS = {
     'show_external': 'showExternal',
     'locale': 'locale',
     'participant': 'participantSearch',
-    'participant_group_id': 'userGroupId'
+    'participant_group_id': 'userGroupId',
 }
 
 
+class SubmissionStatus(IntEnum):
+    SUCCESS = 200
+    BAD_REQUEST = 400  # Bad Request
+    BAD_TOKEN = 401  # OAuth header is not declared or is wrong
+    NOT_FOUND = 404  # Contest or your participation is not found
+
+
+# Map client filter names with API
+SUBMISSIONS_PARAMS = {
+    'page': 'page',
+    'page_size': 'pageSize',
+    'locale': 'locale',
+}
+
+
+class SubmissionVerdict(Enum):
+    OK = 'OK'
+    WRONG_ANSWER = 'WA'
+
+
+class ProblemStatus(Enum):
+    NOT_SUBMITTED = 'NOT_SUBMITTED'
+    NOT_ACCEPTED = 'NOT_ACCEPTED'
+    ACCEPTED = 'ACCEPTED'
+
+
+class Error(Exception):
+    pass
+
+
+class Unavailable(Error):
+    pass
+
+
+class ContestAPIError(Error):
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
+
+
+# FIXME: Replace with ContestAPIError
 class YandexContestAPIException(Exception):
     pass
 
 
-# TODO: catch read timeout exceptions. See `advent` project
+# TODO: better handle exceptions. Use `register_in_contest` method as example
 class YandexContestAPI:
     """
     https://api.contest.yandex.net/api/public/swagger-ui.html#/
@@ -70,14 +111,25 @@ class YandexContestAPI:
         headers = self.base_headers
         payload = {'login': yandex_login}
         api_contest_url = self.PARTICIPANTS_URL.format(contest_id=contest_id)
-        response = requests.post(api_contest_url,
-                                 headers=headers,
-                                 params=payload,
-                                 timeout=3)
-        if response.status_code not in {RegisterStatus.CREATED,
-                                        RegisterStatus.OK,
-                                        RegisterStatus.DUPLICATED}:
-            raise YandexContestAPIException(response.status_code, response.text)
+        try:
+            response = requests.post(api_contest_url,
+                                     headers=headers,
+                                     params=payload,
+                                     timeout=3)
+            response.raise_for_status()
+        # Network problems
+        except (requests.ConnectionError, requests.Timeout) as e:
+            raise Unavailable() from e
+        # Client 4xx or server 5xx HTTP errors
+        except requests.exceptions.HTTPError as e:
+            response = e.response
+            try:
+                RegisterStatus(response.status_code)  # look up in enum
+                raise ContestAPIError(response.status_code, response.text)
+            except ValueError:
+                # Unpredictable client or server error
+                logger.exception("Contest API service had internal error.")
+                raise Unavailable() from e
         participant_id = None
         if response.status_code in (RegisterStatus.CREATED, RegisterStatus.OK):
             participant_id = response.json()

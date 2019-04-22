@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import ast
+
 from django.core.management import CommandError
 from post_office.models import EmailTemplate
 from post_office.utils import get_email_template
@@ -66,3 +68,28 @@ class ValidateTemplatesMixin:
             city_code=campaign.city_id,
             type=suffix
         )
+
+
+class CustomizeQueryMixin:
+    def add_arguments(self, parser):
+        parser.add_argument('-m', dest='custom_manager', type=str,
+                            default='objects', action='store',
+                            help='Customize model manager name.')
+        parser.add_argument('-f', dest='queryset_filters', type=str,
+                            action='append',
+                            help='Customize one or more filters for queryset. '
+                                 'Usage examples:'
+                                 ' -f status__in=["rejected_test"]=True '
+                                 ' -f id__in=[86]')
+
+    def get_manager(self, cls, options):
+        manager = getattr(cls, options['custom_manager'] or 'objects')
+        queryset_filters = options['queryset_filters']
+        if queryset_filters:
+            queryset_filters = {
+                field: ast.literal_eval(value) for f in queryset_filters
+                for field, value in [f.split('=')]
+            }
+            manager = manager.filter(**queryset_filters)
+        manager = manager.order_by()
+        return manager

@@ -6,10 +6,12 @@ from post_office.models import Email
 from post_office.utils import get_email_template
 
 from admission.models import Applicant
-from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin
+from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin, \
+    CustomizeQueryMixin
 
 
-class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
+class Command(ValidateTemplatesMixin, CurrentCampaignsMixin,
+              CustomizeQueryMixin, BaseCommand):
     """
     Example:
         Send notification to applicants from Saint-Petersburg who
@@ -21,6 +23,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     TEMPLATE_REGEXP = "{type}"
 
     def add_arguments(self, parser):
+        CustomizeQueryMixin.add_arguments(self, parser)
         # TODO: provide `context` field
         parser.add_argument(
             '--city', type=str,
@@ -32,15 +35,6 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             '--from', type=str,
             default='CS центр <info@compscicenter.ru>',
             help='Override default `From` header')
-        parser.add_argument('-m', dest='custom_manager', type=str,
-                            default='objects', action='store',
-                            help='Customize model manager name.')
-        parser.add_argument('-f', dest='queryset_filters', type=str,
-                            action='append',
-                            help='Customize one or more filters for queryset. '
-                                 'Usage examples:'
-                                 ' -f status__in=["rejected_test"]=True '
-                                 ' -f id__in=[86]')
 
     def get_template_name(self, campaign, template):
         return template
@@ -57,15 +51,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             raise CommandError(f"Provide email template name")
         self.validate_templates(campaigns, types=[template_name])
 
-        manager = getattr(Applicant, options['custom_manager'] or 'objects')
-        queryset_filters = options['queryset_filters']
-        if queryset_filters:
-            queryset_filters = {
-                field: ast.literal_eval(value) for f in queryset_filters
-                for field, value in [f.split('=')]
-            }
-            manager = manager.filter(**queryset_filters)
-        manager = manager.order_by()
+        manager = self.get_manager(Applicant, options)
 
         header_from = options["from"]
 

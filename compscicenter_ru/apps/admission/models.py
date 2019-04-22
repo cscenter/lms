@@ -25,7 +25,7 @@ from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
 from api.providers.yandex_contest import YandexContestAPIException, \
-    RegisterStatus
+    RegisterStatus, Error as YandexContestError
 from core.db.models import ScoreField
 from core.models import City, University
 from core.settings.base import CENTER_FOUNDATION_YEAR
@@ -611,7 +611,7 @@ class YandexContestIntegration(models.Model):
         try:
             status_code, data = api.register_in_contest(applicant.yandex_id,
                                                         self.yandex_contest_id)
-        except YandexContestAPIException:
+        except YandexContestError:
             raise
         update_fields = {
             "status": ChallengeStatuses.REGISTERED,
