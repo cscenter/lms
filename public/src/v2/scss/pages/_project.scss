@@ -1,25 +1,18 @@
 .external-links {
-  a {
-    display: inline-block;
-    &::before {
-      content: "";
-      display: inline-block;
-      width: 24px;
-      height: 24px;
-      margin-right: 4px;
-      vertical-align: middle;
-      background-repeat: no-repeat;
-    }
-  }
-  a[href^="https://github.com"] {
-    &::before {
-      background-image: url("/static/v2/img/icons/github.svg");
+  svg + span {
+    display: none;
+    @include media-breakpoint-up(md) {
+      display: inline;
     }
   }
 
-  a[href^="https://habr.com"] {
-    &::before {
-      background-image: url("/static/v2/img/icons/habr.svg");
+  svg {
+    &:hover {
+      fill: $blue;
     }
+  }
+
+  .sprite-img {
+    margin-right: spacer("1x");
   }
 }
