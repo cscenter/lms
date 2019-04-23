@@ -87,5 +87,6 @@ class ProjectPublication(models.Model):
         projects = [p.pk for p in self.projects.all()]
         return (User.objects
                 .filter(projectstudent__project__in=projects)
+                .only("first_name", "last_name", "photo", "cropbox_data")
                 .distinct()
-                .order_by("projectstudent__project_id"))
+                .order_by("last_name"))
