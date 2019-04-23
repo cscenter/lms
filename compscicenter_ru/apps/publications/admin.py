@@ -37,7 +37,7 @@ class ProjectPublicationAdminForm(forms.ModelForm):
 
 class ProjectPublicationAdmin(admin.ModelAdmin):
     form = ProjectPublicationAdminForm
-    list_display = ("pk", "title")
+    list_display = ("title", "slug")
     inlines = (ProjectAdminInline, PublicationAuthorAdminInline)
     # FIXME: select2 instead?
     exclude = ('projects', 'authors')
