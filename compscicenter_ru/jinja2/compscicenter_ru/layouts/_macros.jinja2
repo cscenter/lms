@@ -18,7 +18,7 @@
 {% macro author_card(user, details, testimonial='', modifiers='') -%}
     {% with im = user.get_thumbnail(user.ThumbnailSize.SQUARE, use_stub=False) %}
         {% if im %}{% set img_url = im.url %}{% else %}{% set img_url = '' %}{% endif %}
-        {{ _author_card(im.url, user.get_full_name(), details, testimonial, modifiers) }}
+        {{ _author_card(im.url, user.get_short_name(), details, testimonial, modifiers) }}
     {% endwith %}
 {%- endmacro %}
 
