@@ -393,7 +393,7 @@ class ApplicationFormPage extends React.Component {
                                         <div className="ui input">
                                             <label htmlFor="preferred_study_programs_cs_note">Вы бы хотели заниматься исследованиями в области Computer Science? Какие темы вам особенно интересны?</label>
                                             <p className="text-small mb-2">
-                                                Вы можете посмотреть список возможных тем и руководителей НИРов у нас на <a target="_blank" href="https://compscicenter.ru/pages/projects/#research-curators">сайте</a>.
+                                                Вы можете посмотреть список возможных тем и руководителей НИРов у нас на <a target="_blank" href="https://compscicenter.ru/projects/#research-curators">сайте</a>.
                                             </p>
                                             <textarea id="preferred_study_programs_cs_note" name="preferred_study_programs_cs_note" rows="6" onChange={this.handleInputChange} />
                                         </div>
