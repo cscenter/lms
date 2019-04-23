@@ -10,6 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ExportMixin
 
 from core.admin import meta
+from core.filters import AdminRelatedDropdownFilter
 from learning.projects.import_export import ProjectStudentAdminRecordResource
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
     ReportComment, Supervisor
@@ -57,7 +58,9 @@ class SupervisorAdmin(admin.ModelAdmin):
 
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name', 'project_type', 'semester']
-    list_filter = ['semester']
+    list_filter = [
+        ('semester', AdminRelatedDropdownFilter),
+    ]
     search_fields = ["name"]
     inlines = [ProjectStudentInline]
     readonly_fields = ("supervisor_presentation_slideshare_url",
