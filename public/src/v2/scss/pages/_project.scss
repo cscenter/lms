@@ -1,25 +1,25 @@
-%external-link {
-  display: inline-block;
-  margin: spacer("2x") spacer("2x") 0 0;
-  background-repeat: no-repeat;
-  &::before {
-    content: "";
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    margin-right: 4px;
-    vertical-align: middle;
-  }
-}
-
 .external-links {
+  a {
+    display: inline-block;
+    &::before {
+      content: "";
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      margin-right: 4px;
+      vertical-align: middle;
+      background-repeat: no-repeat;
+    }
+  }
   a[href^="https://github.com"] {
-    @extend %external-link;
-    background-image: url("/static/v2/img/icons/github.svg");
+    &::before {
+      background-image: url("/static/v2/img/icons/github.svg");
+    }
   }
 
   a[href^="https://habr.com"] {
-    @extend %external-link;
-    background-image: url("/static/v2/img/icons/habr.svg");
+    &::before {
+      background-image: url("/static/v2/img/icons/habr.svg");
+    }
   }
 }
