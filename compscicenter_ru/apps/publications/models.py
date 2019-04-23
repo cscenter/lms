@@ -35,7 +35,7 @@ class ProjectPublicationAuthor(models.Model):
             s = f"Выпуск {self.user.graduation_year}"
             areas = ", ".join(str(d) for d in self.user.areas_of_study.all())
             return f"{s}, {areas}" if areas else s
-        return ""
+        return "Студент"
 
 
 class ProjectPublication(models.Model):
