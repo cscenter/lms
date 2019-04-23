@@ -18,6 +18,10 @@ from users.constants import AcademicRoles
 from users.models import User
 
 
+class SemesterAdmin(admin.ModelAdmin):
+    ordering = ('-index',)
+
+
 class MetaCourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_display = ['name_ru', 'name_en']
     formfield_overrides = {
@@ -204,7 +208,7 @@ class AssignmentAdmin(admin.ModelAdmin):
 admin.site.register(Venue, VenueAdmin)
 admin.site.register(MetaCourse, MetaCourseAdmin)
 admin.site.register(Course, CourseAdmin)
-admin.site.register(Semester)
+admin.site.register(Semester, SemesterAdmin)
 admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseClassAttachment, CourseClassAttachmentAdmin)
 admin.site.register(CourseNews, CourseNewsAdmin)

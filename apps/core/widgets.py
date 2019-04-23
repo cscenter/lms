@@ -41,7 +41,6 @@ class CKEditorWidget(CKEditorUploadingWidget):
         self.config['contentsCss'] = css
 
 
-
 class DateTimeRangeWidget(RangeWidget):
     template_name = 'widgets/datetime_range.html'
     suffixes = ['from', 'to']
