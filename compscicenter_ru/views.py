@@ -338,29 +338,6 @@ class AlumniView(TemplateView):
         return {"app_data": app_data}
 
 
-class SyllabusView(generic.TemplateView):
-    template_name = "syllabus.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        syllabus = (StudyProgram.objects
-                    .select_related("academic_discipline")
-                    .prefetch_core_courses_groups()
-                    .filter(year=2019)
-                    .order_by("city_id", "academic_discipline__name_ru"))
-        context["programs"] = self.group_programs_by_branch(syllabus)
-        # TODO: validate entry city
-        context["selected_branch"] = self.request.GET.get('branch', 'spb')
-        return context
-
-    def group_programs_by_branch(self, syllabus):
-        grouped = {}
-        for city_id, g in itertools.groupby(syllabus,
-                                            key=lambda sp: sp.city_id):
-            grouped[city_id] = list(g)
-        return grouped
-
-
 class OnCampusProgramsView(generic.TemplateView):
     template_name = "compscicenter_ru/programs/on_campus.html"
 
