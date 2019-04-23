@@ -27,6 +27,7 @@
             <div class="col-lg-10">
                 {{ project.description }}
                 {% set publication_authors = project.get_publication_authors() %}
+                {% if publication_authors %}
                 <h3>Текст написал{% if publication_authors|length > 1 %}и{% else %}{% if publication_authors[0].user.gender == "F" %}а{% endif %}{% endif %}</h3>
                 <div class="row mb-3">
                     {% for pba in publication_authors %}
@@ -35,6 +36,7 @@
                         </div>
                     {% endfor %}
                 </div>
+                {% endif %}
                 {% if project.external_links %}
                     {% set links = project.external_links.split('\n') %}
                     <h3>Проект на внешних ресурсах</h3>
