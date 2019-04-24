@@ -34,6 +34,7 @@ from learning.api.views import TestimonialList
 from learning.models import Branch
 from learning.settings import StudentStatuses, Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
+from publications.models import ProjectPublication
 from stats.views import StudentsDiplomasStats
 from study_programs.models import StudyProgram, AcademicDiscipline
 from users.models import User
@@ -502,3 +503,8 @@ class CourseVideoListView(ListView):
 
 class ProjectsListView(TemplateView):
     template_name = "compscicenter_ru/projects/project_list.html"
+
+    def get_context_data(self, **kwargs):
+        return {
+            "publications": ProjectPublication.objects.order_by('title')
+        }
