@@ -32,6 +32,7 @@ from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index
 from learning.api.views import TestimonialList
 from learning.models import Branch
+from learning.projects.models import Project
 from learning.settings import StudentStatuses, Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
 from publications.models import ProjectPublication
@@ -506,5 +507,8 @@ class ProjectsListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         return {
-            "publications": ProjectPublication.objects.order_by('title')
+            "publications": (ProjectPublication.objects
+                             .filter(is_draft=False,
+                                     type=Project.ProjectTypes.practice)
+                             .order_by('title'))
         }

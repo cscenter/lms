@@ -47,6 +47,9 @@ class ProjectPublication(models.Model):
         verbose_name=_("Title"),
         max_length=255)
     slug = models.SlugField(_("Slug"))
+    is_draft = models.BooleanField(
+        _("Draft"),
+        default=False)
     authors = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Authors"),
@@ -56,6 +59,10 @@ class ProjectPublication(models.Model):
         Project,
         verbose_name=_("Projects"),
         related_name='publications')
+    type = models.CharField(
+        choices=Project.ProjectTypes.choices,
+        editable=False,
+        max_length=10)
     description = models.TextField(
         verbose_name=_("Description"),
         blank=True)
@@ -70,6 +77,14 @@ class ProjectPublication(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, **kwargs):
+        p = self.projects.first()
+        if p:
+            self.type = p.project_type
+        else:
+            self.is_draft = True
+        super().save(**kwargs)
 
     def get_absolute_url(self):
         return reverse("project_publication", kwargs={"slug": self.slug})
