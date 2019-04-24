@@ -47,5 +47,14 @@ class ProjectPublicationAdmin(admin.ModelAdmin):
             'all': ('v2/css/django_admin.css',)
         }
 
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        p = form.instance.projects.first()
+        publication_type = p.project_type if p else ''
+        if form.instance.type != publication_type:
+            (ProjectPublication.objects
+             .filter(pk=form.instance.pk)
+             .update(type=publication_type))
+
 
 admin.site.register(ProjectPublication, ProjectPublicationAdmin)

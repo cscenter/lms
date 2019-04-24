@@ -1,9 +1,10 @@
 from django.conf import settings
-from django.db import models
+from django.db import models, transaction
 from django.utils.encoding import smart_text
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from core.mixins import DerivableFieldsMixin
 from core.urls import reverse
 from learning.projects.models import Project, Supervisor
 from users.models import User
@@ -59,6 +60,7 @@ class ProjectPublication(models.Model):
         Project,
         verbose_name=_("Projects"),
         related_name='publications')
+    # XXX: Type is derivable only through admin interface
     type = models.CharField(
         choices=Project.ProjectTypes.choices,
         editable=False,
@@ -77,14 +79,6 @@ class ProjectPublication(models.Model):
 
     def __str__(self):
         return self.title
-
-    def save(self, **kwargs):
-        p = self.projects.first()
-        if p:
-            self.type = p.project_type
-        else:
-            self.is_draft = True
-        super().save(**kwargs)
 
     def get_absolute_url(self):
         return reverse("project_publication", kwargs={"slug": self.slug})

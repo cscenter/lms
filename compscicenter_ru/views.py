@@ -507,8 +507,12 @@ class ProjectsListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         return {
-            "publications": (ProjectPublication.objects
-                             .filter(is_draft=False,
-                                     type=Project.ProjectTypes.practice)
-                             .order_by('title'))
+            "practice_projects": (ProjectPublication.objects
+                                  .filter(is_draft=False,
+                                          type=Project.ProjectTypes.practice)
+                                  .order_by('title')),
+            "research_projects": (ProjectPublication.objects
+                                  .filter(is_draft=False,
+                                          type=Project.ProjectTypes.research)
+                                  .order_by('title'))
         }

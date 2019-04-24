@@ -52,6 +52,7 @@ def post_delete_interview(sender, instance, *args, **kwargs):
     interview.delete_feedback()
 
 
+# FIXME: Doesn't work through admin interface, what about tests on public?
 @receiver(m2m_changed, sender=Interview.interviewers.through)
 def interview_interviewers_m2m_changed(sender, instance, action, *args, **kwargs):
     """

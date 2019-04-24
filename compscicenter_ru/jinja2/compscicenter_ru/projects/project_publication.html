@@ -30,7 +30,7 @@
         <h1>{{ project.title }}</h1>
         <div class="mb-4">
             {% set participants = project.get_participants() %}
-            <h3>Участник{% if participants|length > 1 %}и{% endif %} проекта</h3>
+            <h3>Участники проекта</h3>
             <div class="row mb-3">
                 {% for user in participants %}
                     <div class="col-xl-4 col-lg-6 mb-2">{{ macros.author_card(user, user.get_student_status()) }}</div>
