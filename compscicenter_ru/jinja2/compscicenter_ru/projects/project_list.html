@@ -47,7 +47,7 @@
                                 <div class="card__content">
                                     <p>Код открытых проектов можно найти в <a href="https://github.com/cscenter" target="_blank" rel="noopener">организации CS центра на GitHub</a>. О некоторых проектах студенты рассказали сами.</p>
                                     <ul>
-                                    {% for project_publication in publications %}
+                                    {% for project_publication in practice_projects %}
                                         <li><a href="{{ project_publication.get_absolute_url() }}">{{ project_publication.title }}</a></li>
                                     {% endfor %}
                                     </ul>
@@ -83,12 +83,9 @@
                             <div class="collapse" id="answer-1" aria-expanded="true">
                                 <div class="card__content">
                                     <ul>
-                                        <li><a href="/pages/research-mikhaylin">Верхние и нижние оценки на время работы
-                                            алгоритмов</a></li>
-                                        <li><a href="/pages/research-knop">Сложность в среднем и диофантова
-                                            сложность</a></li>
-                                        <li><a href="/pages/research-aganezov">Комбинаторика и теория графов в
-                                            биоинформатике</a></li>
+                                        {% for project_publication in research_projects %}
+                                            <li><a href="{{ project_publication.get_absolute_url() }}">{{ project_publication.title }}</a></li>
+                                        {% endfor %}
                                     </ul>
                                 </div>
                             </div>

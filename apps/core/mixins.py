@@ -38,7 +38,7 @@ class DerivableFieldsMixin:
 
     def compute_fields(self, *derivable_fields, prefetch=False) -> bool:
         """
-        Use async version to avoid caching problem with .prefetch_related
+        Use async version instead to avoid caching problem with .prefetch_related
         """
         if not isinstance(self, models.Model):
             raise TypeError('DerivableFieldsMixin needs a model instance')
@@ -61,6 +61,7 @@ class DerivableFieldsMixin:
                 derived_fields.append(field)
 
         if derived_fields:
+            # FIXME: This one recall save method. Replace with .update?
             self.save(update_fields=derived_fields)
             return True
 
