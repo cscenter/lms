@@ -1,0 +1,27 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}{% include "sprites/achievements.svg" %}{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-9">
+                <h1>Fluid image</h1>
+                <figure class="figure">
+                    <img src="/media/pages/text-page/cs-lecture.png" class="figure-img img-fluid" alt="">
+                    <figcaption class="figure-caption">Лекция в Computer Science Center</figcaption>
+                </figure>
+
+                <h1>Fix height</h1>
+                <figure class="figure">
+                    <img src="/media/pages/text-page/cs-lecture.png" class="figure-img h-200px" alt="">
+                    <figcaption class="figure-caption">Лекция в Computer Science Center</figcaption>
+                </figure>
+                <figure class="figure">
+                    <img src="/media/pages/text-page/cs-lecture.png" class="figure-img h-200px" alt="">
+                    <figcaption class="figure-caption">Лекция в Computer Science Center</figcaption>
+                </figure>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
