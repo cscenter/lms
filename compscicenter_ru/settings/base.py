@@ -217,11 +217,13 @@ CKEDITOR_CONFIGS = {
              'items': ['Source', '-', 'Preview', 'Maximize']},
             {'name': 'basicstyles',
              'items': ['Bold', 'Italic', 'Underline', 'RemoveFormat']},
-            {'name': 'clipboard',
-             'items': ['-', 'Undo', 'Redo']},
+            {'name': 'paragraph',
+             'items': ['NumberedList', 'BulletedList']},
             {'name': 'insert', 'items': ['Image', 'Table', 'CodeSnippet']},
             {'name': 'styles', 'items': ['Format']},
             {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
+            {'name': 'clipboard',
+             'items': ['-', 'Undo', 'Redo']},
             '/',  # put this to force next toolbar on new line
         ],
         'toolbar': 'YouCustomToolbarConfig',  # put selected toolbar config here
