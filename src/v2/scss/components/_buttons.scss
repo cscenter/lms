@@ -95,14 +95,13 @@ $button-fill: solid;
 
   &._big {
     @include button-size(spacer("3x"), spacer("6x"), $font-size-content-base, calculate-input-line-height(56px, spacer("3x")), $btn-border-radius);
-    text-transform: uppercase;
-    letter-spacing: 2px;
   }
 
   &._small {
-    @include button-size(spacer("3x"), spacer("4x"), $font-size-sm, calculate-input-line-height(40px, spacer("3x")), $btn-border-radius-sm);
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    @include button-size(spacer("3x"), spacer("4x"), $font-size-base, calculate-input-line-height(40px, spacer("3x")), $btn-border-radius-sm);
+  }
+
+  &._rounded {
     border-radius: 2rem;
   }
 }

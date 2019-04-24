@@ -1,0 +1,77 @@
+@mixin message-variant($message-fill, $color) {
+  color: darken($color, 7.5%);
+
+  svg {
+    fill: darken($color, 7.5%);
+  }
+
+  @if $message-fill == solid {
+    background-color: rgba($color, .1);
+    border: 1px solid transparent;
+  } @else if $message-fill == outline {
+    background-color: transparent;
+    border: 1px solid $color;
+  } @else if $message-fill == inverted {
+    background-color: $color;
+    color: white;
+    svg {
+      fill: $white;
+    }
+  }
+}
+
+@each $color, $value in $message-colors {
+  .message._#{$color} {
+    @include message-variant('solid', $value);
+  }
+}
+
+@each $color, $value in $message-colors {
+  .message._outline._#{$color} {
+    @include message-variant('outline', $value);
+  }
+}
+
+@each $color, $value in $message-colors {
+  .message._inverted._#{$color} {
+    @include message-variant('inverted', $value);
+  }
+}
+
+.message {
+  background-color: $white;
+  padding: spacer("3x") spacer("10x") spacer("3x") spacer("4x");
+  margin-bottom: spacer("4x");
+  position: relative;
+  font-size: $font-size-base;
+  border: $border-width solid $gray-lighter;
+
+  .message__header {
+    font-size: $font-size-content-base;
+    font-weight: $font-weight-bold;
+  }
+
+  p {
+    margin-bottom: 0;
+  }
+
+  .message__btn {
+    margin: spacer("3x") spacer("2x") spacer("1x") 0;
+  }
+
+  .close {
+    cursor: pointer;
+    position: absolute;
+    margin: 0;
+    top: .825rem;
+    right: .5em;
+    opacity: .7;
+    background: none;
+    border: none;
+    transition: $transition-base;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
