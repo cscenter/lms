@@ -61,6 +61,14 @@ $btn-colors: (
   "white":      $white
 );
 
+// Messages
+$message-colors: (
+  "info"   :    $white,
+  "warning":    $blue,
+  "success":    $green,
+  "danger":     $red
+);
+
 // stylelint-enable
 
 // Body
