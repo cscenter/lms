@@ -39,50 +39,17 @@
                         компанию. Это может произойти как летом, так и&nbsp;во&nbsp;время учебного года.</p>
                     <div class="collapsible">
                         <div class="card _qa mb-4">
-                            <button class="btn btn-link card__header" id="question-1"
-                                    aria-expanded="false" href="#answer-1">
+                            <button class="btn btn-link card__header" id="question-1" aria-expanded="false" href="#answer-1">
                                 {{ macros.svg_inline('border-arrow-right') }}
-                                Примеры проектов, выполненных студентами
-                                направлений Data Science и&nbsp;Software Engineering
+                                Примеры проектов, выполненных студентами направлений Data Science и&nbsp;Software Engineering
                             </button>
                             <div class="collapse" id="answer-1" aria-expanded="true">
-                                <div class="card__content"><p>Код открытых проектов можно найти в <a
-                                        href="https://github.com/cscenter" target="_blank" rel="noopener">организации CS
-                                    центра на GitHub</a>. О
-                                    некоторых проектах студенты рассказали сами.</p>
-
+                                <div class="card__content">
+                                    <p>Код открытых проектов можно найти в <a href="https://github.com/cscenter" target="_blank" rel="noopener">организации CS центра на GitHub</a>. О некоторых проектах студенты рассказали сами.</p>
                                     <ul>
-                                        <li><a href="/pages/project-goodsreview">Проект GoodsReview</a></li>
-                                        <li><a href="/pages/research-sosa">Поиск генов в метагномных сборках</a></li>
-                                        <li><a href="/pages/project-deduplication">File System Deduplicator</a></li>
-                                        <li><a href="/pages/project-birukov">Value-tracking анализ JavaScript</a></li>
-                                        <li><a href="/pages/project-avto-recognition">Распознавание марки и модели
-                                            автомобиля по фотографии</a></li>
-                                        <li><a href="/pages/project-happy">Исследование того, как счастье пользователя
-                                            выражается в его движениях мышкой</a></li>
-                                        <li><a href="https://github.com/pritykovskaya/UniRank/wiki">Рейтинг вузов</a>
-                                        </li>
-                                        <li><a href="https://compscicenter.ru/pages/project-duckietown/">Duckietown</a>
-                                        </li>
-                                        <li><a href="https://compscicenter.ru/pages/project-be-a-better-programmer/">Игра
-                                            “Be a Better Programmer. Turing machine”</a></li>
-                                        <li><a href="/pages/project-orlova">Brand Analitics</a></li>
-                                        <li><a href="https://github.com/kvmamich/ideavim">Эмулятор Vim для Idea</a></li>
-                                        <li><a href="https://compscicenter.ru/pages/project-jenkins-job/">Визуализация
-                                            связей в Jenkins Job</a></li>
-                                        <li><a href="https://code.google.com/p/city-places-parser/">Поиск
-                                            достопримечательностей в постах LiveJournal</a></li>
-                                        <li><a href="https://code.google.com/p/alvor/">Статический валидатор SQL
-                                            запросов для платформы Eclipse</a></li>
-                                        <li><a href="https://code.google.com/p/ebook-service/">Cервис поиска электронных
-                                            книг ebooksearch</a></li>
-                                        <li><a href="http://confluence.jetbrains.com/display/GQRY/Genome+Query">Веб-сервис
-                                            для поиска по геному человека и его изучения Genome Query</a></li>
-                                        <li><a href="/pages/project-lioznova">Новые интерфейсы</a></li>
-                                        <li><a href="/pages/project-fortran/">Плагин для языка Fortran для IntelliJ
-                                            Platform</a></li>
-                                        <li><a href="https://habr.com/ru/company/compscicenter/blog/437450/">Метод
-                                            оценки зерна по фотографии</a></li>
+                                    {% for project_publication in publications %}
+                                        <li><a href="{{ project_publication.get_absolute_url() }}">{{ project_publication.title }}</a></li>
+                                    {% endfor %}
                                     </ul>
                                 </div>
                             </div>
