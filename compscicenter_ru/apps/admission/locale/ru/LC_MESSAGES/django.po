@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-17 14:39+0000\n"
-"PO-Revision-Date: 2019-04-17 14:40+0000\n"
+"POT-Creation-Date: 2019-04-24 09:09+0000\n"
+"PO-Revision-Date: 2019-04-24 09:20+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -24,53 +24,53 @@ msgstr ""
 #: compscicenter_ru/apps/admission/filters.py:81
 #: compscicenter_ru/apps/admission/filters.py:138
 #: compscicenter_ru/apps/admission/models.py:105
-#: compscicenter_ru/apps/admission/models.py:959
+#: compscicenter_ru/apps/admission/models.py:964
 msgid "Campaign"
 msgstr "Набор"
 
-#: compscicenter_ru/apps/admission/admin.py:132
+#: compscicenter_ru/apps/admission/admin.py:134
 msgid "Created"
 msgstr ""
 
-#: compscicenter_ru/apps/admission/admin.py:189
+#: compscicenter_ru/apps/admission/admin.py:191
 msgid "Date"
 msgstr "Дата"
 
-#: compscicenter_ru/apps/admission/admin.py:212
-#: compscicenter_ru/apps/admission/models.py:833
-#: compscicenter_ru/apps/admission/models.py:905
-#: compscicenter_ru/apps/admission/models.py:1016
-#: compscicenter_ru/apps/admission/models.py:1077
+#: compscicenter_ru/apps/admission/admin.py:214
+#: compscicenter_ru/apps/admission/models.py:838
+#: compscicenter_ru/apps/admission/models.py:910
+#: compscicenter_ru/apps/admission/models.py:1021
+#: compscicenter_ru/apps/admission/models.py:1082
 msgid "Interview"
 msgstr "Интервью"
 
-#: compscicenter_ru/apps/admission/admin.py:216
-#: compscicenter_ru/apps/admission/models.py:910
+#: compscicenter_ru/apps/admission/admin.py:218
+#: compscicenter_ru/apps/admission/models.py:915
 msgid "Interviewer"
 msgstr "Собеседующий"
 
-#: compscicenter_ru/apps/admission/admin.py:275
+#: compscicenter_ru/apps/admission/admin.py:277
 msgid "Accepted"
 msgstr "Принято"
 
-#: compscicenter_ru/apps/admission/admin.py:277
+#: compscicenter_ru/apps/admission/admin.py:279
 msgid "Yes"
 msgstr "Да"
 
-#: compscicenter_ru/apps/admission/admin.py:277
+#: compscicenter_ru/apps/admission/admin.py:279
 msgid "No"
 msgstr "Нет"
 
-#: compscicenter_ru/apps/admission/admin.py:279
+#: compscicenter_ru/apps/admission/admin.py:281
 #: compscicenter_ru/apps/admission/models.py:423
 #: compscicenter_ru/apps/admission/models.py:677
-#: compscicenter_ru/apps/admission/models.py:721
-#: compscicenter_ru/apps/admission/models.py:809
-#: compscicenter_ru/apps/admission/models.py:1060
+#: compscicenter_ru/apps/admission/models.py:723
+#: compscicenter_ru/apps/admission/models.py:814
+#: compscicenter_ru/apps/admission/models.py:1065
 msgid "Applicant"
 msgstr "Поступающий"
 
-#: compscicenter_ru/apps/admission/admin.py:283
+#: compscicenter_ru/apps/admission/admin.py:285
 #: compscicenter_ru/apps/admission/models.py:61
 msgid "City"
 msgstr "Город"
@@ -94,7 +94,7 @@ msgstr "Фильтровать"
 #: compscicenter_ru/apps/admission/filters.py:120
 #: compscicenter_ru/apps/admission/filters.py:152
 #: compscicenter_ru/apps/admission/models.py:683
-#: compscicenter_ru/apps/admission/models.py:727
+#: compscicenter_ru/apps/admission/models.py:729
 msgid "Status"
 msgstr "Статус"
 
@@ -112,8 +112,8 @@ msgid "Create interview"
 msgstr "Создать собеседование"
 
 #: compscicenter_ru/apps/admission/forms.py:67
-#: compscicenter_ru/apps/admission/models.py:966
-#: compscicenter_ru/apps/admission/models.py:1065
+#: compscicenter_ru/apps/admission/models.py:971
+#: compscicenter_ru/apps/admission/models.py:1070
 msgid "Interview streams"
 msgstr "Потоки собеседований"
 
@@ -584,12 +584,12 @@ msgid "Applicants"
 msgstr "Анкеты"
 
 #: compscicenter_ru/apps/admission/models.py:540
-#: compscicenter_ru/apps/admission/models.py:694
+#: compscicenter_ru/apps/admission/models.py:696
 msgid "Testing"
 msgstr "Онлайн-тестирование"
 
 #: compscicenter_ru/apps/admission/models.py:541
-#: compscicenter_ru/apps/admission/models.py:741
+#: compscicenter_ru/apps/admission/models.py:746
 msgid "Exam"
 msgstr "Экзамен"
 
@@ -602,18 +602,18 @@ msgid "Type"
 msgstr "Тип"
 
 #: compscicenter_ru/apps/admission/models.py:552
-#: compscicenter_ru/apps/admission/models.py:587
+#: compscicenter_ru/apps/admission/models.py:588
 msgid "Contest #ID"
 msgstr "#ID Контеста"
 
 #: compscicenter_ru/apps/admission/models.py:553
-#: compscicenter_ru/apps/admission/models.py:588
+#: compscicenter_ru/apps/admission/models.py:589
 msgid "Applicant|yandex_contest_id"
 msgstr "ID Яндекс.Контеста"
 
 #: compscicenter_ru/apps/admission/models.py:558
-#: compscicenter_ru/apps/admission/models.py:688
-#: compscicenter_ru/apps/admission/models.py:734
+#: compscicenter_ru/apps/admission/models.py:690
+#: compscicenter_ru/apps/admission/models.py:739
 msgid "Details"
 msgstr "Детали"
 
@@ -637,21 +637,19 @@ msgstr "Контест"
 msgid "Contests"
 msgstr "Контесты"
 
-#: compscicenter_ru/apps/admission/models.py:593
+#: compscicenter_ru/apps/admission/models.py:594
 msgid "Participant ID"
 msgstr "ID участника"
 
-#: compscicenter_ru/apps/admission/models.py:594
+#: compscicenter_ru/apps/admission/models.py:595
 msgid "participant_id in Yandex.Contest"
 msgstr "participant_id в Яндекс.Контесте"
 
 #: compscicenter_ru/apps/admission/models.py:649
-#| msgid "Registered in contest"
 msgid "Not registered in the contest"
 msgstr "Не зарегистрирован в контесте"
 
 #: compscicenter_ru/apps/admission/models.py:650
-#| msgid "Registered in contest"
 msgid "Registered in the contest"
 msgstr "Зарегистрирован в контесте"
 
@@ -659,181 +657,187 @@ msgstr "Зарегистрирован в контесте"
 msgid "Manual score input"
 msgstr "Ручной ввод баллов"
 
-#: compscicenter_ru/apps/admission/models.py:686
+#: compscicenter_ru/apps/admission/models.py:684
 #: compscicenter_ru/apps/admission/models.py:730
-#: compscicenter_ru/apps/admission/models.py:918
+msgid ""
+"Choose `manual score input` to avoid synchronization with contest results"
+msgstr "\"Ручной ввод\" отключает синхронизацию балла с контестом."
+
+#: compscicenter_ru/apps/admission/models.py:688
+#: compscicenter_ru/apps/admission/models.py:734
+#: compscicenter_ru/apps/admission/models.py:923
 msgid "Score"
 msgstr "Оценка"
 
-#: compscicenter_ru/apps/admission/models.py:695
+#: compscicenter_ru/apps/admission/models.py:697
 msgid "Testings"
 msgstr "Тестирование"
 
-#: compscicenter_ru/apps/admission/models.py:742
+#: compscicenter_ru/apps/admission/models.py:747
 msgid "Exams"
 msgstr "Результаты экзамена"
 
-#: compscicenter_ru/apps/admission/models.py:767
+#: compscicenter_ru/apps/admission/models.py:772
 msgid "InterviewAssignments|Campaign"
 msgstr "Кампания по набору"
 
-#: compscicenter_ru/apps/admission/models.py:770
+#: compscicenter_ru/apps/admission/models.py:775
 msgid "InterviewAssignments|name"
 msgstr "Название"
 
-#: compscicenter_ru/apps/admission/models.py:772
+#: compscicenter_ru/apps/admission/models.py:777
 msgid "Assignment description"
 msgstr "Описание"
 
-#: compscicenter_ru/apps/admission/models.py:773
-#: compscicenter_ru/apps/admission/models.py:776
+#: compscicenter_ru/apps/admission/models.py:778
+#: compscicenter_ru/apps/admission/models.py:781
 msgid "TeX support"
 msgstr "Поддерживается TeX"
 
-#: compscicenter_ru/apps/admission/models.py:775
+#: compscicenter_ru/apps/admission/models.py:780
 msgid "Assignment solution"
 msgstr "Решение"
 
-#: compscicenter_ru/apps/admission/models.py:781
+#: compscicenter_ru/apps/admission/models.py:786
 msgid "Interview assignment"
 msgstr "Задание для интервью"
 
-#: compscicenter_ru/apps/admission/models.py:782
+#: compscicenter_ru/apps/admission/models.py:787
 msgid "Interview assignments"
 msgstr "Задания для интервью"
 
-#: compscicenter_ru/apps/admission/models.py:796
+#: compscicenter_ru/apps/admission/models.py:801
 msgid "Approval"
 msgstr "Согласование"
 
-#: compscicenter_ru/apps/admission/models.py:797
+#: compscicenter_ru/apps/admission/models.py:802
 msgid "Deferred"
 msgstr "Отложено"
 
-#: compscicenter_ru/apps/admission/models.py:798
+#: compscicenter_ru/apps/admission/models.py:803
 msgid "Canceled"
 msgstr "Отменено"
 
-#: compscicenter_ru/apps/admission/models.py:799
+#: compscicenter_ru/apps/admission/models.py:804
 msgid "Approved"
 msgstr "Согласовано"
 
-#: compscicenter_ru/apps/admission/models.py:800
+#: compscicenter_ru/apps/admission/models.py:805
 msgid "Completed"
 msgstr "Завершено"
 
-#: compscicenter_ru/apps/admission/models.py:806
+#: compscicenter_ru/apps/admission/models.py:811
 msgid "When"
 msgstr "Дата интервью"
 
-#: compscicenter_ru/apps/admission/models.py:814
-#: compscicenter_ru/apps/admission/models.py:955
+#: compscicenter_ru/apps/admission/models.py:819
+#: compscicenter_ru/apps/admission/models.py:960
 msgid "Interview|Interviewers"
 msgstr "Собеседующие"
 
-#: compscicenter_ru/apps/admission/models.py:819
+#: compscicenter_ru/apps/admission/models.py:824
 msgid "Interview|Assignments"
 msgstr "Задания для интервью"
 
-#: compscicenter_ru/apps/admission/models.py:825
+#: compscicenter_ru/apps/admission/models.py:830
 msgid "Interview|Status"
 msgstr "Статус собеседования"
 
-#: compscicenter_ru/apps/admission/models.py:828
+#: compscicenter_ru/apps/admission/models.py:833
 msgid "Note"
 msgstr "Доп. информация"
 
-#: compscicenter_ru/apps/admission/models.py:834
+#: compscicenter_ru/apps/admission/models.py:839
 msgid "Interviews"
 msgstr "Собеседования"
 
-#: compscicenter_ru/apps/admission/models.py:914
+#: compscicenter_ru/apps/admission/models.py:919
 msgid "Text"
 msgstr "Комментарий"
 
-#: compscicenter_ru/apps/admission/models.py:922
+#: compscicenter_ru/apps/admission/models.py:927
 msgid "Comment"
 msgstr "Комментарий"
 
-#: compscicenter_ru/apps/admission/models.py:923
+#: compscicenter_ru/apps/admission/models.py:928
 msgid "Comments"
 msgstr "Комментарии к собеседованию"
 
-#: compscicenter_ru/apps/admission/models.py:936
+#: compscicenter_ru/apps/admission/models.py:941
 msgid "Interview day"
 msgstr "День проведения"
 
-#: compscicenter_ru/apps/admission/models.py:937
+#: compscicenter_ru/apps/admission/models.py:942
 msgid "Period start"
 msgstr "Начинается"
 
-#: compscicenter_ru/apps/admission/models.py:938
+#: compscicenter_ru/apps/admission/models.py:943
 msgid "Period end"
 msgstr "Заканчивается"
 
-#: compscicenter_ru/apps/admission/models.py:940
+#: compscicenter_ru/apps/admission/models.py:945
 msgid "Slot duration"
 msgstr "Длительность слота (мин)"
 
-#: compscicenter_ru/apps/admission/models.py:946
+#: compscicenter_ru/apps/admission/models.py:951
 msgid "Interview venue"
 msgstr "Место"
 
-#: compscicenter_ru/apps/admission/models.py:950
+#: compscicenter_ru/apps/admission/models.py:955
 msgid "Has assignments"
 msgstr "С заданиями"
 
-#: compscicenter_ru/apps/admission/models.py:951
+#: compscicenter_ru/apps/admission/models.py:956
 msgid "Based on this flag, student should arrive 30 min before or not"
 msgstr ""
 "Если отмечено, то в уведомлении будет указано время собеседования на полчаса"
 " раньше."
 
-#: compscicenter_ru/apps/admission/models.py:965
-#: compscicenter_ru/apps/admission/models.py:1025
+#: compscicenter_ru/apps/admission/models.py:970
+#: compscicenter_ru/apps/admission/models.py:1030
 msgid "Interview stream"
 msgstr "Поток собеседований"
 
-#: compscicenter_ru/apps/admission/models.py:994
+#: compscicenter_ru/apps/admission/models.py:999
 msgid "Stream duration can't be less than slot duration"
 msgstr ""
 "Длительность потока должна быть больше, чем длительность хотя бы одного "
 "слота."
 
-#: compscicenter_ru/apps/admission/models.py:1021
+#: compscicenter_ru/apps/admission/models.py:1026
 msgid "Interview start"
 msgstr "Начало"
 
-#: compscicenter_ru/apps/admission/models.py:1022
+#: compscicenter_ru/apps/admission/models.py:1027
 msgid "Interview end"
 msgstr "Окончание"
 
-#: compscicenter_ru/apps/admission/models.py:1031
+#: compscicenter_ru/apps/admission/models.py:1036
 msgid "Interview slot"
 msgstr "Слот для собеседования"
 
-#: compscicenter_ru/apps/admission/models.py:1032
+#: compscicenter_ru/apps/admission/models.py:1037
 msgid "Interview slots"
 msgstr "Слоты для собеседований"
 
-#: compscicenter_ru/apps/admission/models.py:1068
+#: compscicenter_ru/apps/admission/models.py:1073
 msgid "Secret code"
 msgstr "Секретный код"
 
-#: compscicenter_ru/apps/admission/models.py:1071
+#: compscicenter_ru/apps/admission/models.py:1076
 msgid "Expired at"
 msgstr "Истекает"
 
-#: compscicenter_ru/apps/admission/models.py:1073
+#: compscicenter_ru/apps/admission/models.py:1078
 msgid ""
 "Time in UTC since information about city timezone stored in m2m relationship"
 msgstr ""
 
-#: compscicenter_ru/apps/admission/models.py:1084
+#: compscicenter_ru/apps/admission/models.py:1089
 msgid "Interview invitation"
 msgstr "Приглашение на собеседование"
 
-#: compscicenter_ru/apps/admission/models.py:1085
+#: compscicenter_ru/apps/admission/models.py:1090
 msgid "Interview invitations"
 msgstr "Приглашения на собеседования"
 

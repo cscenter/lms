@@ -2,7 +2,8 @@
 
 from django.core.management import BaseCommand
 
-from admission.models import Applicant, Exam, Contest, ChallengeStatuses
+from admission.models import Applicant, Exam, Contest
+from admission.constants import ChallengeStatuses
 from api.providers.yandex_contest import YandexContestAPI, \
     YandexContestAPIException, RegisterStatus, ContestAPIError
 from ._utils import CurrentCampaignsMixin, CustomizeQueryMixin

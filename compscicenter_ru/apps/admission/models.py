@@ -10,13 +10,12 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, \
     MaxValueValidator
 from django.db import models, transaction
-from django.db.models import query, Q, F
+from django.db.models import query, Q
 from django.utils import timezone, numberformat
 from django.utils.encoding import python_2_unicode_compatible, smart_text
 from django.utils.formats import date_format, time_format
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
-from djchoices import DjangoChoices, ChoiceItem
 from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
@@ -24,12 +23,11 @@ from post_office import mail
 from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
-from api.providers.yandex_contest import YandexContestAPIException, \
-    RegisterStatus, Error as YandexContestError
+from admission.constants import ChallengeStatuses
+from api.providers.yandex_contest import RegisterStatus, Error as YandexContestError
 from core.db.models import ScoreField
 from core.models import City, University
 from core.settings.base import CENTER_FOUNDATION_YEAR
-from core.timezone import now_local
 from core.urls import reverse
 from courses.models import Venue
 from learning.models import Branch
@@ -599,6 +597,13 @@ class YandexContestIntegration(models.Model):
         "Yandex API Response",
         null=True,
         blank=True)
+    status = models.CharField(
+        choices=ChallengeStatuses.choices,
+        default=ChallengeStatuses.NEW,
+        verbose_name=_("Status"),
+        help_text=_("Choose `manual score input` to avoid synchronization with "
+                    "contest results"),
+        max_length=15)
 
     class Meta:
         abstract = True
@@ -645,12 +650,6 @@ class YandexContestIntegration(models.Model):
          .update(**update_fields))
 
 
-class ChallengeStatuses(DjangoChoices):
-    NEW = ChoiceItem('new', _("Not registered in the contest"))
-    REGISTERED = ChoiceItem('registered', _("Registered in the contest"))
-    MANUAL = ChoiceItem('manual', _("Manual score input"))
-
-
 class ApplicantRandomizeContestMixin:
     def compute_contest_id(self, contest_type) -> Optional[int]:
         """
@@ -677,11 +676,6 @@ class Test(TimeStampedModel, YandexContestIntegration,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="online_test")
-    status = models.CharField(
-        choices=ChallengeStatuses.choices,
-        default=ChallengeStatuses.NEW,
-        verbose_name=_("Status"),
-        max_length=15)
     score = models.PositiveSmallIntegerField(
         verbose_name=_("Score"), null=True, blank=True)
     details = JSONField(
@@ -721,11 +715,6 @@ class Exam(TimeStampedModel, YandexContestIntegration,
         verbose_name=_("Applicant"),
         on_delete=models.PROTECT,
         related_name="exam")
-    status = models.CharField(
-        choices=ChallengeStatuses.choices,
-        default=ChallengeStatuses.MANUAL,
-        verbose_name=_("Status"),
-        max_length=15)
     score = ScoreField(
         verbose_name=_("Score"),
         # Avoid loading empty values with admin interface
