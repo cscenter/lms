@@ -54,7 +54,6 @@ class ProjectsFilter(django_filters.FilterSet):
         fields = ['semester', 'is_external', 'supervisor', 'students',
                   'projectstudent__final_grade']
 
-
     @property
     def form(self):
         if not hasattr(self, '_form'):
@@ -235,6 +234,11 @@ class CurrentTermProjectsFilter(django_filters.FilterSet):
                                              help_text="")
     presentation_grade = PresentationGradeFilter(label=_("Presentation grade"))
     final_grade = FinalGradeFilter(label=_("Final grade"), help_text="")
+    project_type = django_filters.ChoiceFilter(
+        choices=Project.ProjectTypes.choices,
+        lookup_expr='exact',
+        label=_("Type"))
+
     report = ReportFilter(label=_("Report"), help_text="")
 
     class Meta:
@@ -243,6 +247,7 @@ class CurrentTermProjectsFilter(django_filters.FilterSet):
             'supervisor_grade',
             'presentation_grade',
             'final_grade',
+            'project_type',
             'report',
             'participant_slides'
         ]
@@ -259,16 +264,17 @@ class CurrentTermProjectsFilter(django_filters.FilterSet):
                 self._form.fields[attr].help_text = ""
             self._form.helper.layout = Layout(
                 Row(
-                    Div('report', css_class="col-xs-4"),
-                    Div('participant_slides', css_class="col-xs-4"),
-                    Div('final_grade', css_class="col-xs-4"),
+                    Div('report', css_class="col-xs-3"),
+                    Div('participant_slides', css_class="col-xs-3"),
+                    Div('final_grade', css_class="col-xs-3"),
+                    Div('project_type', css_class="col-xs-3"),
                 ),
                 Row(
-                    Div('supervisor_grade', css_class="col-xs-4"),
-                    Div('presentation_grade', css_class="col-xs-4"),
+                    Div('supervisor_grade', css_class="col-xs-3"),
+                    Div('presentation_grade', css_class="col-xs-3"),
                     Div(Submit('', _('Filter'),
                                css_class="btn-block -inline-submit"),
-                        css_class="col-xs-4")
+                        css_class="col-xs-3")
                 ),
             )
         return self._form
