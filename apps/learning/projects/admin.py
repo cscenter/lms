@@ -49,11 +49,22 @@ class ProjectStudentInline(admin.TabularInline):
                      self).formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
+class ProjectsInline(admin.TabularInline):
+    model = Project.supervisors.through
+    extra = 0
+
+
 @admin.register(Supervisor)
 class SupervisorAdmin(admin.ModelAdmin):
     model = Supervisor
     list_display = ("full_name", "workplace")
     search_fields = ("full_name",)
+    inlines = (ProjectsInline,)
+
+    class Media:
+        css = {
+            'all': ('v2/css/django_admin.css',)
+        }
 
 
 class ProjectAdmin(admin.ModelAdmin):
