@@ -1,5 +1,5 @@
 <div class="report">
-    <a href="{{ ps.student.get_absolute_url }}" class="profile-link">{{ ps.student.get_full_name }}</a><br>
+    <a href="{{ ps.student.get_absolute_url }}" class="profile-link">{{ ps.student.get_short_name }}</a><br>
     {% if can_view_report %}
         {% if ps.report and ps.report.status == 'sent' %}
             {% if not request.user.is_curator %}<span class="text-muted">Проверка отчета куратором</span>
