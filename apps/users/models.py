@@ -387,8 +387,8 @@ class User(LearningPermissionsMixin, AbstractUser):
     def __str__(self):
         return smart_text(self.get_full_name(True))
 
-    def get_absolute_url(self):
-        return reverse('user_detail', args=[self.pk])
+    def get_absolute_url(self, subdomain=None):
+        return reverse('user_detail', args=[self.pk], subdomain=subdomain)
 
     def get_update_profile_url(self):
         return reverse('user_update', args=[self.pk])
