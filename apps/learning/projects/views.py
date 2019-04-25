@@ -199,19 +199,21 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
     def get_queryset(self):
         # FIXME: Respect timezone, hard coded city code
         current_term_index = get_current_term_index('spb')
-        queryset = (Project.objects
-                    .filter(semester__index=current_term_index)
-                    .exclude(status=Project.Statuses.CANCELED)
-                    .select_related("semester")
-                    .prefetch_related("students", "reviewers", "supervisors")
-                    .annotate(reviewers_cnt=Count("reviewers"))
-                    .annotate(
-                        have_reviewers=Case(
-                            When(reviewers_cnt__gt=0, then=Value(1)),
-                            default=Value(0),
-                            output_field=BooleanField()))
-                    .order_by("have_reviewers", "name", "pk"))
-        return queryset
+        qs = (Project.objects
+              .filter(semester__index=current_term_index)
+              .exclude(status=Project.Statuses.CANCELED)
+              .select_related("semester")
+              .prefetch_related("students", "reviewers", "supervisors")
+              .annotate(reviewers_cnt=Count("reviewers"))
+              .annotate(
+                have_reviewers=Case(
+                    When(reviewers_cnt__gt=0, then=Value(1)),
+                    default=Value(0),
+                    output_field=BooleanField()))
+              .order_by("have_reviewers", "name", "pk"))
+        if not self.request.user.is_curator:
+            qs = qs.filter(project_type=Project.ProjectTypes.practice)
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -407,19 +409,21 @@ class ProjectPrevNextView(generic.RedirectView):
     def get_queryset(self):
         # FIXME: Respect timezone, hard coded city code
         current_term_index = get_current_term_index('spb')
-        queryset = (Project.objects
-                    .filter(semester__index=current_term_index)
-                    .exclude(status=Project.Statuses.CANCELED)
-                    .annotate(reviewers_cnt=Count("reviewers"))
-                    .annotate(
-                        have_reviewers=Case(
-                            When(reviewers_cnt__gt=0, then=Value(1)),
-                            default=Value(0),
-                            output_field=BooleanField())
-                    )
-                    .values_list("pk", flat=True)
-                    .order_by("have_reviewers", "name", "pk"))
-        return queryset
+        qs = (Project.objects
+              .filter(semester__index=current_term_index)
+              .exclude(status=Project.Statuses.CANCELED)
+              .annotate(reviewers_cnt=Count("reviewers"))
+              .annotate(
+                have_reviewers=Case(
+                    When(reviewers_cnt__gt=0, then=Value(1)),
+                    default=Value(0),
+                    output_field=BooleanField())
+              )
+              .values_list("pk", flat=True)
+              .order_by("have_reviewers", "name", "pk"))
+        if not self.request.user.is_curator:
+            qs = qs.filter(project_type=Project.ProjectTypes.practice)
+        return qs
 
     def get_redirect_url(self, *args, **kwargs):
         project_id = int(self.kwargs.get("project_id"))
