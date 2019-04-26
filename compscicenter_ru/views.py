@@ -32,6 +32,7 @@ from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index
 from learning.api.views import TestimonialList
 from learning.models import Branch
+from learning.projects.constants import ProjectTypes
 from learning.projects.models import Project
 from learning.settings import StudentStatuses, Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
@@ -509,10 +510,10 @@ class ProjectsListView(TemplateView):
         return {
             "practice_projects": (ProjectPublication.objects
                                   .filter(is_draft=False,
-                                          type=Project.ProjectTypes.practice)
+                                          type=ProjectTypes.practice)
                                   .order_by('title')),
             "research_projects": (ProjectPublication.objects
                                   .filter(is_draft=False,
-                                          type=Project.ProjectTypes.research)
+                                          type=ProjectTypes.research)
                                   .order_by('title'))
         }

@@ -10,6 +10,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from learning.projects.constants import ProjectTypes
 from learning.projects.models import Project, ProjectStudent
 from learning.settings import GradeTypes
 from users.constants import AcademicRoles
@@ -235,7 +236,7 @@ class CurrentTermProjectsFilter(django_filters.FilterSet):
     presentation_grade = PresentationGradeFilter(label=_("Presentation grade"))
     final_grade = FinalGradeFilter(label=_("Final grade"), help_text="")
     project_type = django_filters.ChoiceFilter(
-        choices=Project.ProjectTypes.choices,
+        choices=ProjectTypes.choices,
         lookup_expr='exact',
         label=_("Type"))
 

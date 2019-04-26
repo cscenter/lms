@@ -5,8 +5,19 @@ from factory.fuzzy import FuzzyInteger, FuzzyChoice
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.projects.forms import ReportReviewForm
-from learning.projects.models import Project, ProjectStudent, Report, Review
+from learning.projects.models import Project, ProjectStudent, Report, Review, \
+    ReportingPeriod
+from learning.tests.factories import BranchFactory
 from users.tests.factories import UserFactory
+
+
+class ReportingPeriodFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = ReportingPeriod
+
+    label = factory.Sequence(lambda n: "Period label %03d" % n)
+    term = factory.SubFactory(SemesterFactory)
+    branch = factory.SubFactory(BranchFactory)
 
 
 class ProjectFactory(factory.DjangoModelFactory):

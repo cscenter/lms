@@ -1,11 +1,11 @@
 from django.conf import settings
-from django.db import models, transaction
+from django.db import models
 from django.utils.encoding import smart_text
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from core.mixins import DerivableFieldsMixin
 from core.urls import reverse
+from learning.projects.constants import ProjectTypes
 from learning.projects.models import Project, Supervisor
 from users.models import User
 
@@ -62,7 +62,7 @@ class ProjectPublication(models.Model):
         related_name='publications')
     # XXX: Type is derivable only through admin interface
     type = models.CharField(
-        choices=Project.ProjectTypes.choices,
+        choices=ProjectTypes.choices,
         editable=False,
         max_length=10)
     description = models.TextField(

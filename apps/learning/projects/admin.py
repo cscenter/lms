@@ -13,7 +13,7 @@ from core.admin import meta
 from core.filters import AdminRelatedDropdownFilter
 from learning.projects.import_export import ProjectStudentAdminRecordResource
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
-    ReportComment, Supervisor
+    ReportComment, Supervisor, ReportingPeriod
 from users.constants import AcademicRoles
 from users.models import User
 
@@ -158,6 +158,7 @@ class ReportCommentAdmin(admin.ModelAdmin):
     list_display = ["report", "author"]
 
 
+admin.site.register(ReportingPeriod)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectStudent, ProjectStudentAdmin)
 admin.site.register(Report, ReportAdmin)
