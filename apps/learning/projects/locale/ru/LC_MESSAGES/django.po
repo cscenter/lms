@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-12 09:47+0000\n"
-"PO-Revision-Date: 2019-04-12 09:50+0000\n"
+"POT-Creation-Date: 2019-04-26 17:48+0000\n"
+"PO-Revision-Date: 2019-04-26 17:57+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -17,25 +17,26 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
-"X-Translated-Using: django-rosetta 0.9.0\n"
+"X-Translated-Using: django-rosetta 0.9.3\n"
 
-#: apps/learning/projects/admin.py:89 apps/learning/projects/filters.py:34
+#: apps/learning/projects/admin.py:104 apps/learning/projects/filters.py:35
 msgid "Student"
 msgstr "Студент"
 
-#: apps/learning/projects/admin.py:93 apps/learning/projects/admin.py:111
+#: apps/learning/projects/admin.py:108 apps/learning/projects/admin.py:126
 msgid "Project"
 msgstr "Проект"
 
-#: apps/learning/projects/admin.py:127
+#: apps/learning/projects/admin.py:142
 msgid "Сумма"
 msgstr "Сумма"
 
-#: apps/learning/projects/admin.py:131 apps/learning/projects/models.py:190
+#: apps/learning/projects/admin.py:146 apps/learning/projects/models.py:60
+#: apps/learning/projects/models.py:311
 msgid "Semester"
 msgstr "Семестр"
 
-#: apps/learning/projects/admin.py:139
+#: apps/learning/projects/admin.py:154
 msgid "Edit"
 msgstr "Изменить"
 
@@ -43,40 +44,52 @@ msgstr "Изменить"
 msgid "Student Projects"
 msgstr "Студенческие проекты"
 
-#: apps/learning/projects/filters.py:18
+#: apps/learning/projects/constants.py:6
+msgid "StudentProject|Practice"
+msgstr "Практика"
+
+#: apps/learning/projects/constants.py:7
+msgid "StudentProject|Research"
+msgstr "НИР"
+
+#: apps/learning/projects/filters.py:19
 msgid "Any"
 msgstr ""
 
-#: apps/learning/projects/filters.py:28 apps/learning/projects/models.py:199
+#: apps/learning/projects/filters.py:29 apps/learning/projects/models.py:320
 msgid "External project"
 msgstr "Внешний проект"
 
-#: apps/learning/projects/filters.py:44 apps/learning/projects/models.py:170
+#: apps/learning/projects/filters.py:45 apps/learning/projects/models.py:293
 msgid "Supervisor"
 msgstr "Руководитель"
 
-#: apps/learning/projects/filters.py:50 apps/learning/projects/filters.py:237
-#: apps/learning/projects/models.py:67
+#: apps/learning/projects/filters.py:51 apps/learning/projects/filters.py:237
+#: apps/learning/projects/models.py:190
 msgid "Final grade"
 msgstr "Итоговая оценка"
 
-#: apps/learning/projects/filters.py:77 apps/learning/projects/filters.py:269
+#: apps/learning/projects/filters.py:77 apps/learning/projects/filters.py:276
 msgid "Filter"
 msgstr "Фильтровать"
 
-#: apps/learning/projects/filters.py:233 apps/learning/projects/models.py:242
+#: apps/learning/projects/filters.py:233 apps/learning/projects/models.py:363
 msgid "Participants presentation"
 msgstr "Презентация участников"
 
-#: apps/learning/projects/filters.py:234 apps/learning/projects/models.py:52
+#: apps/learning/projects/filters.py:234 apps/learning/projects/models.py:175
 msgid "Supervisor grade"
 msgstr "Оценка руководителя"
 
-#: apps/learning/projects/filters.py:236 apps/learning/projects/models.py:61
+#: apps/learning/projects/filters.py:236 apps/learning/projects/models.py:184
 msgid "Presentation grade"
 msgstr "Оценка за презентацию"
 
-#: apps/learning/projects/filters.py:238
+#: apps/learning/projects/filters.py:241
+msgid "Type"
+msgstr "Тип"
+
+#: apps/learning/projects/filters.py:243
 msgid "Report"
 msgstr "Отчет"
 
@@ -112,208 +125,267 @@ msgstr "Завершить"
 msgid "Save"
 msgstr "Сохранить"
 
-#: apps/learning/projects/models.py:54
+#: apps/learning/projects/models.py:53
+msgid "Label"
+msgstr "Метка"
+
+#: apps/learning/projects/models.py:55
+msgid "Helps to distinguish student reports for the project."
+msgstr "Помогает различать отчеты студента для проекта, если их несколько."
+
+#: apps/learning/projects/models.py:63
+msgid "Start On"
+msgstr "Дата начала"
+
+#: apps/learning/projects/models.py:64
+msgid "First day of the report period."
+msgstr "Первый день, когда можно отправить отчет."
+
+#: apps/learning/projects/models.py:66
+msgid "End On"
+msgstr "Дата окончания"
+
+#: apps/learning/projects/models.py:67
+msgid "The last day of the report period."
+msgstr "Последний день отправки отчета."
+
+#: apps/learning/projects/models.py:70 apps/learning/projects/models.py:314
+msgid "StudentProject|Type"
+msgstr "Тип"
+
+#: apps/learning/projects/models.py:76
+msgid "Branch"
+msgstr "Отделение"
+
+#: apps/learning/projects/models.py:82
+msgid "Projects|Border for excellent"
+msgstr "Мин. балл для Отлично"
+
+#: apps/learning/projects/models.py:85
+msgid "Projects with final score >= this value will be graded as Excellent"
+msgstr ""
+"Если финальный балл по проекту >= указанного значения, то студент получит "
+"оценку \"Отлично\"."
+
+#: apps/learning/projects/models.py:88
+msgid "Projects|Border for good"
+msgstr "Мин. балл для Хорошо"
+
+#: apps/learning/projects/models.py:91
+msgid "Projects with final score in [GOOD; EXCELLENT) will be graded as Good."
+msgstr ""
+"Если финальный балл по проекту в диапазоне [GOOD; EXCELLENT), то студент "
+"получит оценку \"Хорошо\"."
+
+#: apps/learning/projects/models.py:94
+msgid "Projects|Border for pass"
+msgstr "Мин. балл для Зачет"
+
+#: apps/learning/projects/models.py:97
+msgid ""
+"Projects with final score in [PASS; GOOD) will be graded as Pass, with score"
+" < PASS as Unsatisfactory."
+msgstr ""
+"Если финальный балл по проекту в диапазоне [PASS; GOOD), то студент получит "
+"оценку \"Зачет\", если < PASS, то \"Незачет\"."
+
+#: apps/learning/projects/models.py:101
+msgid "Reporting Period"
+msgstr "Отчетный период"
+
+#: apps/learning/projects/models.py:102
+msgid "Reporting Periods"
+msgstr "Отчетные периоды"
+
+#: apps/learning/projects/models.py:177
 msgid "Integer value from -15 to 15"
 msgstr "Целое число в диапазоне от -15 до 15 включительно"
 
-#: apps/learning/projects/models.py:58
+#: apps/learning/projects/models.py:181
 msgid "Review from supervisor"
 msgstr "Отзыв руководителя"
 
-#: apps/learning/projects/models.py:63
+#: apps/learning/projects/models.py:186
 msgid "Integer value from 0 to 10"
 msgstr "Целое число от 0 до 10 включительно"
 
-#: apps/learning/projects/models.py:73
+#: apps/learning/projects/models.py:196
 msgid "Project student"
 msgstr "Участник проекта"
 
-#: apps/learning/projects/models.py:74
+#: apps/learning/projects/models.py:197
 msgid "Project students"
 msgstr "Участники проекта"
 
-#: apps/learning/projects/models.py:138
+#: apps/learning/projects/models.py:261
 #, fuzzy
 #| msgid "All assignments"
 msgid "Assignment|pass"
 msgstr "Все задания"
 
-#: apps/learning/projects/models.py:154
+#: apps/learning/projects/models.py:277
 msgid "Male"
 msgstr "Мужской"
 
-#: apps/learning/projects/models.py:155
+#: apps/learning/projects/models.py:278
 msgid "Female"
 msgstr "Женский"
 
-#: apps/learning/projects/models.py:158
+#: apps/learning/projects/models.py:281
 msgid "Full Name"
 msgstr "ФИО"
 
-#: apps/learning/projects/models.py:161
+#: apps/learning/projects/models.py:284
 msgid "Workplace"
 msgstr "Место работы"
 
-#: apps/learning/projects/models.py:165
+#: apps/learning/projects/models.py:288
 msgid "Gender"
 msgstr "Пол"
 
-#: apps/learning/projects/models.py:171 apps/learning/projects/models.py:224
-#| msgid "Supervisor"
+#: apps/learning/projects/models.py:294 apps/learning/projects/models.py:345
 msgid "Supervisors"
 msgstr "Руководители"
 
-#: apps/learning/projects/models.py:179
-msgid "StudentProject|Practice"
-msgstr "Практика"
-
-#: apps/learning/projects/models.py:180
-msgid "StudentProject|Research"
-msgstr "НИР"
-
-#: apps/learning/projects/models.py:183
+#: apps/learning/projects/models.py:304
 msgid "Canceled"
 msgstr "Отменен"
 
-#: apps/learning/projects/models.py:184
+#: apps/learning/projects/models.py:305
 msgid "Continued without intermediate results"
 msgstr "Продолжение без промежуточных итогов"
 
-#: apps/learning/projects/models.py:186
+#: apps/learning/projects/models.py:307
 msgid "StudentProject|Name"
 msgstr "Название"
 
-#: apps/learning/projects/models.py:193
-msgid "StudentProject|Type"
-msgstr "Тип"
-
-#: apps/learning/projects/models.py:195
+#: apps/learning/projects/models.py:316
 msgid "City"
 msgstr "Город"
 
-#: apps/learning/projects/models.py:203
+#: apps/learning/projects/models.py:324
 msgid "StudentProject|Status"
 msgstr "Статус"
 
-#: apps/learning/projects/models.py:208 apps/learning/projects/models.py:448
+#: apps/learning/projects/models.py:329 apps/learning/projects/models.py:570
 msgid "Description"
 msgstr "Описание"
 
-#: apps/learning/projects/models.py:213
+#: apps/learning/projects/models.py:334
 msgid "Students"
 msgstr "Студенты"
 
-#: apps/learning/projects/models.py:217
+#: apps/learning/projects/models.py:338
 msgid "Reviewers"
 msgstr "Проверяющие"
 
-#: apps/learning/projects/models.py:227
+#: apps/learning/projects/models.py:348
 msgid "StudentProject|Supervisor"
 msgstr "Руководители"
 
-#: apps/learning/projects/models.py:229
+#: apps/learning/projects/models.py:350
 msgid "Format: Last_name First_name Patronymic, Organization"
 msgstr "Формат: Фамилия Имя Отчество, Организация"
 
-#: apps/learning/projects/models.py:231
+#: apps/learning/projects/models.py:352
 msgid "Supervisor presentation"
 msgstr "Презентация руководителя"
 
-#: apps/learning/projects/models.py:235
+#: apps/learning/projects/models.py:356
 msgid "Link to supervisor presentation"
 msgstr "URL с презентацией руководителя"
 
-#: apps/learning/projects/models.py:238 apps/learning/projects/models.py:249
+#: apps/learning/projects/models.py:359 apps/learning/projects/models.py:370
 msgid "Supported public link to Yandex.Disk only"
 msgstr ""
 "Поддерживаются только публичные ссылки на Яндекс.Диск. Задача на скачивание "
 "слайдов с диска будет проигнорирована, если слайды уже загружены локально."
 
-#: apps/learning/projects/models.py:240
+#: apps/learning/projects/models.py:361
 msgid "SlideShare URL for supervisor presentation"
 msgstr "Slideshare URL с презентацией руководителя"
 
-#: apps/learning/projects/models.py:246
+#: apps/learning/projects/models.py:367
 msgid "Link to participants presentation"
 msgstr "URL с презентацией участников"
 
-#: apps/learning/projects/models.py:251
+#: apps/learning/projects/models.py:372
 msgid "SlideShare URL for participants presentation"
 msgstr "Slideshare URL с презентацией участников"
 
-#: apps/learning/projects/models.py:255
+#: apps/learning/projects/models.py:376
 msgid "Student project"
 msgstr "Студенческий проект"
 
-#: apps/learning/projects/models.py:256
+#: apps/learning/projects/models.py:377
 msgid "Student projects"
 msgstr "Студенческие проекты"
 
-#: apps/learning/projects/models.py:294
+#: apps/learning/projects/models.py:415
 msgid "Yes"
 msgstr "Да"
 
-#: apps/learning/projects/models.py:294
+#: apps/learning/projects/models.py:415
 msgid "No"
 msgstr "Нет"
 
-#: apps/learning/projects/models.py:327
+#: apps/learning/projects/models.py:448
 msgid "0 - Does not understand the task at all"
 msgstr "0 - совсем не понимает задачу"
 
-#: apps/learning/projects/models.py:328
+#: apps/learning/projects/models.py:449
 msgid "1 - Understands, but very superficial"
 msgstr "1 - понимает, но очень поверхностно"
 
-#: apps/learning/projects/models.py:329
+#: apps/learning/projects/models.py:450
 msgid "2 - Understands everything"
 msgstr "2 - всё понимает"
 
-#: apps/learning/projects/models.py:333
+#: apps/learning/projects/models.py:454
 msgid "0 - Does not understand"
 msgstr "0 - не понимает"
 
-#: apps/learning/projects/models.py:334
+#: apps/learning/projects/models.py:455
 msgid "1 - Writing something about the usefulness"
 msgstr "1 - ни то, ни сё, но что-то про полезность пишет"
 
-#: apps/learning/projects/models.py:335
+#: apps/learning/projects/models.py:456
 msgid "2 - Understands and explains"
 msgstr "2 - понимает и рассказывает"
 
-#: apps/learning/projects/models.py:339
+#: apps/learning/projects/models.py:460
 msgid "0 - Understand only theory, or even less"
 msgstr "0 - разобрана только теория или даже меньше"
 
-#: apps/learning/projects/models.py:340
+#: apps/learning/projects/models.py:461
 msgid "1 - Some progress, but not enough"
 msgstr ""
 "1 - что-то сделано, но кажется, что за это время можно было бы и больше"
 
-#: apps/learning/projects/models.py:341
+#: apps/learning/projects/models.py:462
 msgid "2 - The normal rate of work"
 msgstr "2 - работа идёт в разумном темпе"
 
-#: apps/learning/projects/models.py:345
+#: apps/learning/projects/models.py:466
 msgid "0 - Problems not mentioned in the report"
 msgstr "0 - никакие проблемы и их решения не указаны в отчёте"
 
-#: apps/learning/projects/models.py:346
+#: apps/learning/projects/models.py:467
 msgid "1 - Problems are mentioned without any details"
 msgstr "1- проблемы указаны, но как их решили и решили ли, непонятно"
 
-#: apps/learning/projects/models.py:347
+#: apps/learning/projects/models.py:468
 msgid "2 - Problems are mentioned and explained how they been solved"
 msgstr ""
 "2- доступно написано про возникшие трудности и про то, как с ними справились"
 
-#: apps/learning/projects/models.py:351
+#: apps/learning/projects/models.py:472
 msgid "0 - Listed, but not explained why."
 msgstr ""
 "0 - студент не может объяснить, почему выбрал именно эти технологии или как "
 "его код встраивается в готовый"
 
-#: apps/learning/projects/models.py:352
+#: apps/learning/projects/models.py:473
 msgid ""
 "1 - The student does not understand about everything and does not try to "
 "understand, but knows something"
@@ -321,20 +393,20 @@ msgstr ""
 "1 - студент не про всё понимает и не пытается понять, но про что-то знает, "
 "зачем или как"
 
-#: apps/learning/projects/models.py:354
+#: apps/learning/projects/models.py:475
 msgid "2 - Understands why choose one or the other technology"
 msgstr ""
 "2 - студент понимает, почему выбраны такие технологии или как устроена "
 "интеграция его наработок в существующий проект"
 
-#: apps/learning/projects/models.py:358
+#: apps/learning/projects/models.py:479
 msgid ""
 "0 - Much less than what has already been done, or the student does not "
 "understand them"
 msgstr ""
 "0 - сильно меньше, чем то, что уже сделано, или студент их не понимает"
 
-#: apps/learning/projects/models.py:360
+#: apps/learning/projects/models.py:481
 msgid ""
 "1 - It seems to have plans of normal size, but does not understand what to "
 "do."
@@ -342,214 +414,214 @@ msgstr ""
 "1 - вроде планы есть нормального размера, но не до конца понимает, что "
 "именно нужно сделать"
 
-#: apps/learning/projects/models.py:362
+#: apps/learning/projects/models.py:483
 msgid "2 - All right with them"
 msgstr "2 - всё в порядке с ними"
 
-#: apps/learning/projects/models.py:367
+#: apps/learning/projects/models.py:488
 msgid "The global task for term"
 msgstr "Глобальная задача на семестр"
 
-#: apps/learning/projects/models.py:373
+#: apps/learning/projects/models.py:494
 msgid "Possible uses and scenarios"
 msgstr "Возможные способы и сценарии использования"
 
-#: apps/learning/projects/models.py:379
+#: apps/learning/projects/models.py:500
 msgid "What has been done since the start of the project."
 msgstr "Что было сделано с момента старта работы над проектом"
 
-#: apps/learning/projects/models.py:385
+#: apps/learning/projects/models.py:506
 msgid "What problems have arisen in the process."
 msgstr "Какие проблемы возникли при работе"
 
-#: apps/learning/projects/models.py:391
+#: apps/learning/projects/models.py:512
 msgid ""
 "The choice of technologies or method of integration with the existing "
 "development"
 msgstr "Выбор технологий или способ интеграции с существующей разработкой"
 
-#: apps/learning/projects/models.py:398
+#: apps/learning/projects/models.py:519
 msgid "Future plan"
 msgstr "Планы до конца семестра"
 
-#: apps/learning/projects/models.py:424
+#: apps/learning/projects/models.py:544
 msgid "Sent"
 msgstr "Отправлен"
 
-#: apps/learning/projects/models.py:425 apps/learning/projects/models.py:612
+#: apps/learning/projects/models.py:545 apps/learning/projects/models.py:733
 msgid "Review"
 msgstr "Проверка"
 
-#: apps/learning/projects/models.py:426
+#: apps/learning/projects/models.py:546
 msgid "Waiting for final score"
 msgstr "Подведение итогов куратором"
 
-#: apps/learning/projects/models.py:427 apps/learning/projects/models.py:607
+#: apps/learning/projects/models.py:547 apps/learning/projects/models.py:728
 msgid "Completed"
 msgstr "Завершено"
 
-#: apps/learning/projects/models.py:432
+#: apps/learning/projects/models.py:552
 msgid "Poor commit history"
 msgstr ""
 "0 - у студента нет коммитов в репозитории или 1-2 в начале или прямо перед "
 "отчётом"
 
-#: apps/learning/projects/models.py:433
+#: apps/learning/projects/models.py:553
 msgid "Normal activity"
 msgstr "1 - активная жизнь в репозитории"
 
-#: apps/learning/projects/models.py:436
+#: apps/learning/projects/models.py:556
 msgid "Bad report quality and unrelated comments"
 msgstr "0 - отчёт и комментарии к нему написаны плохо"
 
-#: apps/learning/projects/models.py:437
+#: apps/learning/projects/models.py:557
 msgid "Bad report quality, but sensible comments"
 msgstr "1 - отчёт написан плохо, но комментарии полные и разумные"
 
-#: apps/learning/projects/models.py:438
+#: apps/learning/projects/models.py:558
 msgid "Good report quality and sensible comments"
 msgstr "2 - отчёт и комментарии к нему написаны хорошо"
 
-#: apps/learning/projects/models.py:444
+#: apps/learning/projects/models.py:566
 msgid "Status"
 msgstr "Статус"
 
-#: apps/learning/projects/models.py:452
+#: apps/learning/projects/models.py:574
 msgid "Report file"
 msgstr "Файл отчета"
 
-#: apps/learning/projects/models.py:458
+#: apps/learning/projects/models.py:580
 msgid "Student activity in cvs"
 msgstr "Жизнь в репозитории"
 
-#: apps/learning/projects/models.py:465
+#: apps/learning/projects/models.py:587
 msgid "Note for criterion `score_activity`"
 msgstr "Заметка к критерию \"Жизнь в репозитории\""
 
-#: apps/learning/projects/models.py:468
+#: apps/learning/projects/models.py:590
 msgid "Report's quality"
 msgstr "Качество отчета"
 
-#: apps/learning/projects/models.py:475
+#: apps/learning/projects/models.py:597
 msgid "Note for criterion `score_quality`"
 msgstr "Заметка к критерию \"Качество отчета\""
 
-#: apps/learning/projects/models.py:495
+#: apps/learning/projects/models.py:617
 msgid "Final score note"
 msgstr "Итоговый комментарий к отчету"
 
-#: apps/learning/projects/models.py:500 apps/learning/projects/models.py:501
+#: apps/learning/projects/models.py:622 apps/learning/projects/models.py:623
 msgid "Reports"
 msgstr "Отчеты"
 
-#: apps/learning/projects/models.py:560
+#: apps/learning/projects/models.py:682
 msgid "review not completed"
 msgstr "проверка не завершена"
 
-#: apps/learning/projects/models.py:578
+#: apps/learning/projects/models.py:699
 msgid "Project reviewer"
 msgstr ""
 
-#: apps/learning/projects/models.py:582
+#: apps/learning/projects/models.py:703
 msgid "Note for criterion #1"
 msgstr "Заметка к критерию \"Глобальная задача на семестр\""
 
-#: apps/learning/projects/models.py:586
+#: apps/learning/projects/models.py:707
 msgid "Note for criterion #2"
 msgstr "Заметка к критерию \"Возможные способы и сценарии использования\""
 
-#: apps/learning/projects/models.py:590
+#: apps/learning/projects/models.py:711
 msgid "Note for criterion #3"
 msgstr ""
 "Заметка к критерию \"Что было сделано с момента старта работы над проектом\""
 
-#: apps/learning/projects/models.py:594
+#: apps/learning/projects/models.py:715
 msgid "Note for criterion #4"
 msgstr "Заметка к критерию \"Какие проблемы возникли при работе\""
 
-#: apps/learning/projects/models.py:598
+#: apps/learning/projects/models.py:719
 msgid "Note for criterion #5"
 msgstr ""
 "Заметка к критерию \"Выбор технологий или способ интеграции с существующей "
 "разработкой\""
 
-#: apps/learning/projects/models.py:602
+#: apps/learning/projects/models.py:723
 msgid "Note for criterion #6"
 msgstr "Заметка к критерию \"Планы до конца семестра\""
 
-#: apps/learning/projects/models.py:609
+#: apps/learning/projects/models.py:730
 msgid "Check if you already completed the assessment."
 msgstr "Отметьте, если вы закончили проверку отчёта."
 
-#: apps/learning/projects/models.py:613
+#: apps/learning/projects/models.py:734
 msgid "Reviews"
 msgstr "Проверка отчетов"
 
-#: apps/learning/projects/models.py:630
+#: apps/learning/projects/models.py:750
 msgid "ReportComment|text"
 msgstr "Текст комментария"
 
-#: apps/learning/projects/models.py:631
+#: apps/learning/projects/models.py:751
 msgid "LaTeX+Markdown is enabled"
 msgstr "Доступна разметка LaTeX+Markdown"
 
-#: apps/learning/projects/models.py:635
+#: apps/learning/projects/models.py:755
 msgid "Author"
 msgstr "Автор"
 
-#: apps/learning/projects/models.py:643
+#: apps/learning/projects/models.py:763
 msgid "Report comment"
 msgstr "Комментарий к отчету"
 
-#: apps/learning/projects/models.py:644
+#: apps/learning/projects/models.py:764
 msgid "Report comments"
 msgstr "Комментарии к отчету"
 
-#: apps/learning/projects/views.py:347
+#: apps/learning/projects/views.py:350
 msgid "Report successfully sended"
 msgstr "Отчет успешно отправлен."
 
-#: apps/learning/projects/views.py:395
+#: apps/learning/projects/views.py:398
 msgid "Данные успешно сохранены"
 msgstr "Данные успешно сохранены"
 
-#: apps/learning/projects/views.py:468
+#: apps/learning/projects/views.py:473
 msgid "You successfully enrolled on the project"
 msgstr "Вы успешно подписаны на проект."
 
-#: apps/learning/projects/views.py:578
+#: apps/learning/projects/views.py:583
 msgid "Data not saved. Fix errors."
 msgstr "Данные не сохранены. Исправьте ошибки."
 
-#: apps/learning/projects/views.py:674
+#: apps/learning/projects/views.py:679
 msgid "Comment successfully added."
 msgstr "Комментарий к отчету успешно добавлен."
 
-#: apps/learning/projects/views.py:679
+#: apps/learning/projects/views.py:684
 msgid "The draft successfully saved."
 msgstr "Черновик успешно сохранён."
 
-#: apps/learning/projects/views.py:681
+#: apps/learning/projects/views.py:686
 msgid "The review successfully saved."
 msgstr "Проверка отчёта успешно завершена."
 
-#: apps/learning/projects/views.py:749
+#: apps/learning/projects/views.py:754
 msgid "Report was successfully updated."
 msgstr "Отчет успешно обновлён."
 
-#: apps/learning/projects/views.py:753
+#: apps/learning/projects/views.py:758
 msgid "Data not saved. Check errors."
 msgstr "Данные не сохранены. Проверьте ошибки."
 
-#: apps/learning/projects/views.py:774
+#: apps/learning/projects/views.py:779
 msgid "Status was successfully updated."
 msgstr "Статус отчета успешно обновлён."
 
-#: apps/learning/projects/views.py:844
+#: apps/learning/projects/views.py:849
 msgid "Grades successfully updated."
 msgstr "Баллы успешно обновлены"
 
-#: apps/learning/projects/views.py:852
+#: apps/learning/projects/views.py:857
 msgid "The report results are summed up successfully."
 msgstr "Итоговый комментарий сохранён успешно."
 

@@ -25,6 +25,7 @@ from core.utils import hashids
 from core.views import LoginRequiredMixin
 from courses.models import Semester
 from courses.utils import get_current_term_index
+from learning.projects.constants import ProjectTypes
 from learning.projects.filters import ProjectsFilter, CurrentTermProjectsFilter
 from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportStatusForm, ReportSummarizeForm, ReportForm, \
@@ -212,7 +213,7 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
                     output_field=BooleanField()))
               .order_by("have_reviewers", "name", "pk"))
         if not self.request.user.is_curator:
-            qs = qs.filter(project_type=Project.ProjectTypes.practice)
+            qs = qs.filter(project_type=ProjectTypes.practice)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -422,7 +423,7 @@ class ProjectPrevNextView(generic.RedirectView):
               .values_list("pk", flat=True)
               .order_by("have_reviewers", "name", "pk"))
         if not self.request.user.is_curator:
-            qs = qs.filter(project_type=Project.ProjectTypes.practice)
+            qs = qs.filter(project_type=ProjectTypes.practice)
         return qs
 
     def get_redirect_url(self, *args, **kwargs):

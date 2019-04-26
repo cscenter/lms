@@ -2,28 +2,31 @@
 
 import math
 import os
+from typing import Dict, Tuple, NamedTuple
 
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, F
 from django.utils import timezone
-from django.utils.encoding import python_2_unicode_compatible, smart_text
+from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
+from core.timezone import now_local
 from core.urls import reverse
 from core.utils import hashids
 from courses.models import Semester
-from learning.settings import GradeTypes
-from users.constants import AcademicRoles
 from courses.settings import SemesterTypes
-from core.timezone import now_local
 from courses.utils import get_current_term_index
+from learning.models import Branch
+from learning.projects.constants import ProjectTypes
+from learning.settings import GradeTypes, Branches
+from users.constants import AcademicRoles
 
 # Calculate mean scores for these fields when review has been completed
 REVIEW_SCORE_FIELDS = [
@@ -39,6 +42,127 @@ CURATOR_SCORE_FIELDS = [
     "score_quality",
     "score_activity"
 ]
+
+
+class ReportingPeriodKey(NamedTuple):
+    branch_code: str
+    project_type: str
+
+
+class ReportingPeriod(models.Model):
+    label = models.CharField(
+        verbose_name=_("Label"),
+        max_length=150,
+        help_text=_("Helps to distinguish student reports for the project."),
+        blank=True)
+    term = models.ForeignKey(
+        Semester,
+        on_delete=models.CASCADE,
+        verbose_name=_("Semester"),
+        related_name="reporting_periods",)
+    start_on = models.DateField(
+        _("Start On"),
+        help_text=_("First day of the report period."))
+    end_on = models.DateField(
+        _("End On"),
+        help_text=_("The last day of the report period."))
+    project_type = models.CharField(
+        choices=ProjectTypes.choices,
+        verbose_name=_("StudentProject|Type"),
+        max_length=10,
+        null=True,
+        blank=True)
+    branch = models.ForeignKey(
+        Branch,
+        verbose_name=_("Branch"),
+        related_name="+",  # Disable backwards relation
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True)
+    score_excellent = models.SmallIntegerField(
+        _("Projects|Border for excellent"),
+        blank=True,
+        null=True,
+        help_text=_("Projects with final score >= this value will be "
+                    "graded as Excellent"))
+    score_good = models.SmallIntegerField(
+        _("Projects|Border for good"),
+        blank=True,
+        null=True,
+        help_text=_("Projects with final score in [GOOD; EXCELLENT) will be "
+                    "graded as Good."))
+    score_pass = models.SmallIntegerField(
+        _("Projects|Border for pass"),
+        blank=True,
+        null=True,
+        help_text=_("Projects with final score in [PASS; GOOD) will be "
+                    "graded as Pass, with score < PASS as Unsatisfactory."))
+
+    class Meta:
+        verbose_name = _("Reporting Period")
+        verbose_name_plural = _("Reporting Periods")
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(score_excellent__gt=F('score_good')),
+                name='good_score_lt_excellent'),
+            models.CheckConstraint(
+                check=models.Q(score_good__gt=F('score_pass')),
+                name='pass_score_lt_good'),
+        ]
+
+    def __str__(self):
+        return f"{self.term} [{self.project_type}]"
+
+    @classmethod
+    def get_final_periods(cls, term: Semester) -> Dict[ReportingPeriodKey,
+                                                       "ReportingPeriod"]:
+        """
+        Returns final reporting period for each (branch_code, project_type)
+        if any exists.
+        """
+        qs = (cls.objects
+              .exclude(term=term,
+                       score_excellent__isnull=True,
+                       score_good__isnull=True,
+                       score_pass__isnull=True)
+              .select_related("branch")
+              # Customized reporting period should goes first if it ends on the
+              # same date as common (with empty branch or project type or both)
+              .order_by('-end_on',
+                        F('branch_id').desc(nulls_last=True),
+                        F('project_type').desc(nulls_last=True)))
+        periods = {}
+        for period in qs:
+            branches = []
+            if period.branch_id is None:
+                for branch_code, _ in Branches.choices:
+                    branches.append(branch_code)
+            else:
+                branches.append(period.branch.code)
+            project_types = [period.project_type]
+            if period.project_type is None:
+                project_types = [t for t, _ in ProjectTypes.choices]
+            for branch_code in branches:
+                for project_type in project_types:
+                    key = ReportingPeriodKey(branch_code, project_type)
+                    if key not in periods:
+                        periods[key] = period
+        return periods
+
+    def score_to_grade(self, project_student: "ProjectStudent"):
+        score = project_student.total_score
+        if score >= self.score_excellent:
+            final_grade = GradeTypes.EXCELLENT
+        elif score >= self.score_good:
+            final_grade = GradeTypes.GOOD
+        elif score >= self.score_pass:
+            final_grade = GradeTypes.CREDIT
+        else:
+            final_grade = GradeTypes.UNSATISFACTORY
+        # For external projects use binary grading policy
+        if project_student.project.is_external and score >= self.score_pass:
+            final_grade = GradeTypes.CREDIT
+        return final_grade
 
 
 class ProjectStudent(models.Model):
@@ -127,7 +251,7 @@ class ProjectStudent(models.Model):
         """
         label = self.GRADES.values[self.final_grade]
         # For research work grade type is binary at most
-        if self.project.project_type == Project.ProjectTypes.research:
+        if self.project.project_type == ProjectTypes.research:
             return label
         # XXX: Assume all projects >= spring 2016 have ids > magic number
         MAGIC_ID = 357
@@ -177,10 +301,6 @@ class Supervisor(models.Model):
 
 
 class Project(TimeStampedModel):
-    class ProjectTypes(DjangoChoices):
-        practice = C('practice', _("StudentProject|Practice"))
-        research = C('research', _("StudentProject|Research"))
-
     class Statuses(DjangoChoices):
         CANCELED = C('canceled', _("Canceled"))
         CONTINUED = C('continued', _("Continued without intermediate results"))
@@ -416,7 +536,6 @@ def report_file_name(self, filename):
                         filename)
 
 
-@python_2_unicode_compatible
 class Report(ReviewCriteria):
     SENT = 'sent'
     REVIEW = 'review'
@@ -440,7 +559,9 @@ class Report(ReviewCriteria):
         (2, _("Good report quality and sensible comments")),
     )
 
-    project_student = models.OneToOneField(ProjectStudent, on_delete=models.PROTECT)
+    project_student = models.OneToOneField(
+        ProjectStudent,
+        on_delete=models.PROTECT)
     status = models.CharField(
         choices=STATUS,
         verbose_name=_("Status"),
@@ -572,7 +693,6 @@ class Report(ReviewCriteria):
         )
 
 
-@python_2_unicode_compatible
 class Review(ReviewCriteria):
     report = models.ForeignKey(Report, on_delete=models.PROTECT)
     reviewer = models.ForeignKey(
@@ -625,7 +745,6 @@ def report_comment_attachment_upload_to(self, filename):
     )
 
 
-@python_2_unicode_compatible
 class ReportComment(TimeStampedModel):
     report = models.ForeignKey(Report, on_delete=models.PROTECT)
     text = models.TextField(
