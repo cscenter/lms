@@ -48,9 +48,10 @@ def naive_to_city_aware(value, instance):
 
 CityCode = NewType('CityCode', str)
 Timezone = NewType('Timezone', datetime.tzinfo)
+TzAware = Union[Timezone, CityCode]
 
 
-def now_local(tz_aware: Union[Timezone, CityCode]) -> datetime.datetime:
+def now_local(tz_aware: TzAware) -> datetime.datetime:
     if not isinstance(tz_aware, datetime.tzinfo):
         tz_aware = settings.TIME_ZONES[tz_aware]
     return timezone.localtime(timezone.now(), timezone=tz_aware)

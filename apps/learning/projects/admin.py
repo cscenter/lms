@@ -67,6 +67,14 @@ class SupervisorAdmin(admin.ModelAdmin):
         }
 
 
+class ReportingPeriodAdmin(admin.ModelAdmin):
+    list_display = ('term', 'start_on', 'end_on', 'project_type')
+    list_filter = [
+        ('term', AdminRelatedDropdownFilter),
+    ]
+    exclude = ('branch',)
+
+
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name', 'project_type', 'semester']
     list_filter = [
@@ -158,7 +166,7 @@ class ReportCommentAdmin(admin.ModelAdmin):
     list_display = ["report", "author"]
 
 
-admin.site.register(ReportingPeriod)
+admin.site.register(ReportingPeriod, ReportingPeriodAdmin)
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectStudent, ProjectStudentAdmin)
 admin.site.register(Report, ReportAdmin)

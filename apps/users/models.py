@@ -7,7 +7,7 @@ from typing import Optional
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser, AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import smart_text
@@ -20,20 +20,21 @@ from model_utils.fields import MonitorField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from users.utils import photo_thumbnail_cropbox
-from core.models import LATEX_MARKDOWN_ENABLED, City
-from core.utils import is_club_site, en_to_ru_mapping
-from core.urls import reverse
-from courses.models import Semester
 from compscicenter_ru.utils import PublicRoute
+from core.models import LATEX_MARKDOWN_ENABLED, City
+from core.urls import reverse
+from core.utils import is_club_site, en_to_ru_mapping
+from courses.models import Semester
+from learning.models import StudentProfile
 from learning.permissions import LearningPermissionsMixin
-from learning.settings import AcademicDegreeYears, StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes
 from learning.utils import is_negative_grade
 from users.constants import GROUPS_IMPORT_TO_GERRIT, AcademicRoles, \
     BASE_THUMBNAIL_WIDTH, BASE_THUMBNAIL_HEIGHT
 from users.fields import MonitorStatusField
 from users.tasks import update_password_in_gerrit
 from users.thumbnails import get_user_thumbnail
+from users.utils import photo_thumbnail_cropbox
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -48,6 +49,7 @@ logger = logging.getLogger(__name__)
 GITHUB_LOGIN_VALIDATOR = RegexValidator(regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*$")
 
 
+# FIXME: rename to student status log and move to learning app (and all User.status* fields to StudentProfile)
 class UserStatusLog(models.Model):
     created = models.DateField(_("created"), default=now)
     semester = models.ForeignKey(
@@ -90,7 +92,7 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
         return None
 
 
-class User(LearningPermissionsMixin, AbstractUser):
+class User(LearningPermissionsMixin, StudentProfile, AbstractUser):
     class ThumbnailSize:
         """
         Base image aspect ratio is `5:7`.
@@ -136,21 +138,6 @@ class User(LearningPermissionsMixin, AbstractUser):
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
         blank=True)
-    enrollment_year = models.PositiveSmallIntegerField(
-        _("CSCUser|enrollment year"),
-        validators=[MinValueValidator(1990)],
-        blank=True,
-        null=True)
-    graduation_year = models.PositiveSmallIntegerField(
-        _("CSCUser|graduation year"),
-        blank=True,
-        validators=[MinValueValidator(1990)],
-        null=True)
-    curriculum_year = models.PositiveSmallIntegerField(
-        _("CSCUser|Curriculum year"),
-        validators=[MinValueValidator(2000)],
-        blank=True,
-        null=True)
     city = models.ForeignKey(City, verbose_name=_("Default city"),
                              help_text=_("CSCUser|city"),
                              blank=True, null=True,
@@ -182,36 +169,6 @@ class User(LearningPermissionsMixin, AbstractUser):
                    .format(_("LaTeX+Markdown is enabled"),
                            _("will be shown only to logged-in users"))),
         blank=True)
-    # internal student info
-    university = models.CharField(
-        _("University"),
-        max_length=255,
-        blank=True)
-    phone = models.CharField(
-        _("Phone"),
-        max_length=40,
-        blank=True)
-    uni_year_at_enrollment = models.CharField(
-        _("StudentInfo|University year"),
-        choices=AcademicDegreeYears.choices,
-        max_length=2,
-        help_text=_("at enrollment"),
-        null=True,
-        blank=True)
-    comment = models.TextField(
-        _("Comment"),
-        help_text=LATEX_MARKDOWN_ENABLED,
-        blank=True)
-    comment_changed_at = MonitorField(
-        monitor='comment',
-        verbose_name=_("Comment changed"))
-    comment_last_author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Author of last edit"),
-        on_delete=models.PROTECT,
-        related_name='user_commented',
-        blank=True,
-        null=True)
     status = models.CharField(
         choices=StudentStatuses.choices,
         verbose_name=_("Status"),
@@ -227,11 +184,20 @@ class User(LearningPermissionsMixin, AbstractUser):
         monitored='status',
         logging_model=UserStatusLog,
         on_delete=models.CASCADE)
-
-    areas_of_study = models.ManyToManyField(
-        'study_programs.AcademicDiscipline',
-        verbose_name=_("StudentInfo|Areas of study"),
+    comment = models.TextField(
+        _("Comment"),
+        help_text=LATEX_MARKDOWN_ENABLED,
         blank=True)
+    comment_changed_at = MonitorField(
+        monitor='comment',
+        verbose_name=_("Comment changed"))
+    comment_last_author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author of last edit"),
+        on_delete=models.PROTECT,
+        related_name='user_commented',
+        blank=True,
+        null=True)
     workplace = models.CharField(
         _("Workplace"),
         max_length=200,

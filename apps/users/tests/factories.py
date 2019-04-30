@@ -64,6 +64,8 @@ class CuratorFactory(UserFactory):
 
 class StudentFactory(UserFactory):
     city_id = 'spb'
+    branch = factory.SubFactory('learning.tests.factories.BranchFactory',
+                                code='spb')
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
@@ -79,6 +81,8 @@ class StudentFactory(UserFactory):
 class StudentCenterFactory(UserFactory):
     enrollment_year = 2015
     city_id = 'spb'
+    branch = factory.SubFactory('learning.tests.factories.BranchFactory',
+                                code='spb')
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
@@ -110,6 +114,9 @@ class TeacherCenterFactory(UserFactory):
 
 
 class VolunteerFactory(UserFactory):
+    branch = factory.SubFactory('learning.tests.factories.BranchFactory',
+                                code='spb')
+
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
         if not create:
@@ -120,6 +127,9 @@ class VolunteerFactory(UserFactory):
 
 
 class GraduateFactory(UserFactory):
+    branch = factory.SubFactory('learning.tests.factories.BranchFactory',
+                                code='spb')
+
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
         if not create:

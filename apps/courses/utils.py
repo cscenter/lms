@@ -3,16 +3,16 @@ import re
 from calendar import monthrange
 from collections import namedtuple
 from itertools import zip_longest
-from typing import Union, List, Tuple
+from typing import List, Tuple
 
 import pytz
 from dateutil import parser as dparser
 from django.utils import timezone
 
+from core.settings.base import FOUNDATION_YEAR
+from core.timezone import Timezone, now_local, TzAware
 from courses.settings import SemesterTypes, \
     AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START, MONDAY_WEEKDAY
-from core.settings.base import FOUNDATION_YEAR
-from core.timezone import CityCode, Timezone, now_local
 
 # Helps to sort terms in chronological order
 TERMS_INDEX_START = 1
@@ -20,7 +20,7 @@ TERMS_INDEX_START = 1
 TermTuple = namedtuple('TermTuple', ['year', 'type'])
 
 
-def get_current_term_pair(tz_aware: Union[Timezone, CityCode]) -> TermTuple:
+def get_current_term_pair(tz_aware: TzAware) -> TermTuple:
     dt_local = now_local(tz_aware)
     return date_to_term_pair(dt_local)
 
@@ -89,7 +89,7 @@ def get_term_index(target_year, target_term_type):
     return year_portion + term_portion
 
 
-def get_current_term_index(tz_aware: Union[Timezone, CityCode]):
+def get_current_term_index(tz_aware: TzAware):
     return get_term_index(*get_current_term_pair(tz_aware))
 
 

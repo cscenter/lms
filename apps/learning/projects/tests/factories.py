@@ -8,7 +8,7 @@ from learning.projects.forms import ReportReviewForm
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
     ReportingPeriod
 from learning.tests.factories import BranchFactory
-from users.tests.factories import UserFactory
+from users.tests.factories import UserFactory, StudentCenterFactory
 
 
 class ReportingPeriodFactory(factory.DjangoModelFactory):
@@ -52,7 +52,7 @@ class ProjectStudentFactory(factory.DjangoModelFactory):
     class Meta:
         model = ProjectStudent
 
-    student = factory.SubFactory(UserFactory)
+    student = factory.SubFactory(StudentCenterFactory)
     project = factory.SubFactory(ProjectFactory)
     supervisor_grade = FuzzyInteger(-15, 15)
     presentation_grade = FuzzyInteger(0, 10)

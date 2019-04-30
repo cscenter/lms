@@ -244,12 +244,13 @@ class ReviewCompleted(NotificationService):
 @register(notification_type=NotificationTypes.PROJECT_REPORTING_STARTED)
 class ProjectReportingStarted(NotificationService):
     """
-    Was sent notification <action_object> about the beginning of the
-    reporting period <verb> for Semester <target> to Student <recipient>
+    <actor> sent notification about reporting period will start soon
+    to <recipient> from <target> Branch
 
     Models:
-        action_object - None/self
-        target - Semester (not sure)
+        actor: ReportingPeriod
+        target: Branch
+        recipient: Student
     """
 
     subject = "Время присылать отчёты по практике"
@@ -271,12 +272,13 @@ class ProjectReportingStarted(NotificationService):
 @register(notification_type=NotificationTypes.PROJECT_REPORTING_ENDED)
 class ProjectReportingEnded(NotificationService):
     """
-    Was sent notification <action_object> about the ending of the
-    reporting period <verb> for Semester <target> to Student <recipient>
+    <actor> sent notification about reporting period will end soon
+    to <recipient> from <target> Branch
 
     Models:
-        action_object - None/self
-        target - Semester (not sure)
+        actor: ReportingPeriod
+        target: Branch
+        recipient: Student
     """
 
     subject = "До сдачи отчёта остался один день"
