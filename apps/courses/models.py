@@ -1,5 +1,6 @@
 import datetime
 import os.path
+from typing import Union
 
 import pytz
 from bitfield import BitField
@@ -19,7 +20,7 @@ from sorl.thumbnail import ImageField
 
 from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
-from core.timezone import now_local
+from core.timezone import now_local, CityCode, Timezone, TzAware
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids
 from courses.utils import get_current_term_pair, get_term_start, \
@@ -121,18 +122,16 @@ class Semester(models.Model):
         return next_term_starts_at(self.index) - datetime.timedelta(days=1)
 
     @classmethod
-    def get_current(cls):
-        # FIXME: Respect timezone. Hard coded city code
-        year, term_type = get_current_term_pair('spb')
+    def get_current(cls, tz_aware: TzAware = settings.DEFAULT_CITY_CODE):
+        year, term_type = get_current_term_pair(tz_aware)
         obj, created = cls.objects.get_or_create(year=year,
                                                  type=term_type)
         if created:
             obj.save()
         return obj
 
-    def is_current(self):
-        # FIXME: Respect timezone. Hard coded city code
-        year, term = get_current_term_pair('spb')
+    def is_current(self, tz_aware: TzAware = settings.DEFAULT_CITY_CODE):
+        year, term = get_current_term_pair(tz_aware)
         return year == self.year and term == self.type
 
     def save(self, *args, **kwargs):

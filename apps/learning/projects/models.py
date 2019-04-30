@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-
+import datetime
 import math
 import os
-from typing import Dict, Tuple, NamedTuple
+from typing import NamedTuple
 
 from django.apps import apps
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Q, F
-from django.utils import timezone
+from django.utils import timezone, formats
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
@@ -26,6 +27,7 @@ from courses.utils import get_current_term_index
 from learning.models import Branch
 from learning.projects.constants import ProjectTypes
 from learning.settings import GradeTypes, Branches
+from notifications.signals import notify
 from users.constants import AcademicRoles
 
 # Calculate mean scores for these fields when review has been completed
@@ -49,7 +51,63 @@ class ReportingPeriodKey(NamedTuple):
     project_type: str
 
 
+class ReportingPeriodDict(dict):
+    def __setitem__(self, key, value):
+        if not isinstance(key, ReportingPeriodKey):
+            raise TypeError("Key must be ReportingPeriodKey instance")
+        if not isinstance(value, ReportingPeriod):
+            raise TypeError("Value must be ReportingPeriod instance")
+        super().__setitem__(key, value)
+
+    @classmethod
+    def from_queryset(cls, queryset, first_match=False):
+        """
+        Note that this method doesn't take into account date range. You have
+        to make sure that queryset for each (branch, project_type) has
+        only 1 unique date range or use `first_match=True` by date range
+        if queryset data is ordered and target periods go first.
+        """
+        periods = ReportingPeriodDict()
+        for period in queryset:
+            branches = []
+            if period.branch_id is None:
+                for branch_code, _ in Branches.choices:
+                    branches.append(branch_code)
+            else:
+                branches.append(period.branch.code)
+            project_types = [period.project_type]
+            if period.project_type is None:
+                project_types = [t for t, _ in ProjectTypes.choices]
+            for branch_code in branches:
+                for project_type in project_types:
+                    k = ReportingPeriodKey(branch_code, project_type)
+                    if k not in periods:
+                        periods[k] = period
+                    else:
+                        # Replace period if new one is more precise
+                        added = periods[k]
+                        if period.weight > added.weight:
+                            if not first_match and (
+                                    period.start_on != added.start_on or
+                                    period.end_on != added.end_on):
+                                raise TypeError("Reporting periods for the same (branch, project_type) should have the same date ranges.")
+                            periods[k] = period
+        return periods
+
+    def for_branch(self, branch: Branch):
+        return {k: v for k, v in self.items() if k.branch_code == branch.code}
+
+
+# TODO: Добавить студенту branch. Синхронизировать значения для студентов центра.
+# TODO; покрыть тестами. Перенести отчетные периоды, удалить старые поля из Semester.
+#  TODO: Связать отчет с project_student + отчетный период (обязательные уникальные поля)
+# TODO: Выделить критерии в отдельную модель (это критерии практики). Создать критерии для НИР.
+# TODO: 1 активный период в 1 момент времени на странице проекта для студента (в порядке приоритета). При отправке связывать отчет с нужными критериями и отчетным периодом.
 class ReportingPeriod(models.Model):
+    """
+    This model based on assumption that each branch has only 1 (or none)
+    active reporting period at a time.
+    """
     label = models.CharField(
         verbose_name=_("Label"),
         max_length=150,
@@ -66,12 +124,9 @@ class ReportingPeriod(models.Model):
     end_on = models.DateField(
         _("End On"),
         help_text=_("The last day of the report period."))
-    project_type = models.CharField(
-        choices=ProjectTypes.choices,
-        verbose_name=_("StudentProject|Type"),
-        max_length=10,
-        null=True,
-        blank=True)
+    # Note: This field is hidden in admin since it makes logic over complicated:
+    # Not sure what to do in case of date ranges intersection
+    # TODO: make it mandatory or remove at all
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
@@ -79,24 +134,31 @@ class ReportingPeriod(models.Model):
         on_delete=models.CASCADE,
         null=True,
         blank=True)
+    project_type = models.CharField(
+        choices=ProjectTypes.choices,
+        verbose_name=_("StudentProject|Type"),
+        max_length=10,
+        null=True,
+        blank=True)
     score_excellent = models.SmallIntegerField(
-        _("Projects|Border for excellent"),
+        _("Min score for EXCELLENT"),
         blank=True,
         null=True,
         help_text=_("Projects with final score >= this value will be "
                     "graded as Excellent"))
     score_good = models.SmallIntegerField(
-        _("Projects|Border for good"),
+        _("Min score for GOOD"),
         blank=True,
         null=True,
         help_text=_("Projects with final score in [GOOD; EXCELLENT) will be "
                     "graded as Good."))
     score_pass = models.SmallIntegerField(
-        _("Projects|Border for pass"),
+        _("Min score for PASS"),
         blank=True,
         null=True,
         help_text=_("Projects with final score in [PASS; GOOD) will be "
                     "graded as Pass, with score < PASS as Unsatisfactory."))
+    # TODO: перенести настройки времени отправки нотификаций
 
     class Meta:
         verbose_name = _("Reporting Period")
@@ -110,44 +172,64 @@ class ReportingPeriod(models.Model):
                 name='pass_score_lt_good'),
         ]
 
+    def clean(self):
+        errors = {}
+        if self.start_on and self.end_on and self.start_on > self.end_on:
+            errors["end_on"] = "Дата дедлайна меньше даты начала"
+        if self.term_id and self.start_on and self.end_on:
+            start_utc = self.term.starts_at.date()
+            end_utc = self.term.ends_at.date()
+            if self.start_on > end_utc or self.start_on < start_utc:
+                errors["start_on"] = "Дата начала за пределами указанного семестра"
+            if self.end_on > end_utc or self.end_on < start_utc:
+                errors["end_on"] = "Дата дедлайна за пределами указанного семестра"
+        if errors:
+            raise ValidationError(errors)
+        # FIXME: убедиться, что нет пересечений с другими диапазонами (того же типа, либо общими)
+
     def __str__(self):
-        return f"{self.term} [{self.project_type}]"
+        start_on = formats.date_format(self.start_on, 'j E')
+        end_on = formats.date_format(self.end_on, 'j E')
+        parts = []
+        if self.project_type:
+            parts.append(ProjectTypes.labels[self.project_type].lower())
+        if self.branch_id:
+            parts.append(self.branch.abbr.lower())
+        suffix = " [" + ", ".join(parts) + "]" if parts else ""
+        return f"{self.term}, {start_on}-{end_on}{suffix}"
+
+    @property
+    def weight(self):
+        """
+        More precise period has more weight. Specifying branch has more
+        weight than specifying project_type.
+        """
+        weight = 0
+        weight += 2 if self.branch_id is not None else 0
+        weight += int(self.project_type is not None)
+        # TODO: Make sure that compared periods have the same date range
+        return weight
 
     @classmethod
-    def get_final_periods(cls, term: Semester) -> Dict[ReportingPeriodKey,
-                                                       "ReportingPeriod"]:
+    def get_final_periods(cls, term: Semester, *filters) -> ReportingPeriodDict:
         """
         Returns final reporting period for each (branch_code, project_type)
         if any exists.
         """
         qs = (cls.objects
-              .exclude(term=term,
-                       score_excellent__isnull=True,
-                       score_good__isnull=True,
-                       score_pass__isnull=True)
+              .filter(Q(term=term), *filters)
               .select_related("branch")
-              # Customized reporting period should goes first if it ends on the
-              # same date as common (with empty branch or project type or both)
               .order_by('-end_on',
                         F('branch_id').desc(nulls_last=True),
                         F('project_type').desc(nulls_last=True)))
-        periods = {}
-        for period in qs:
-            branches = []
-            if period.branch_id is None:
-                for branch_code, _ in Branches.choices:
-                    branches.append(branch_code)
-            else:
-                branches.append(period.branch.code)
-            project_types = [period.project_type]
-            if period.project_type is None:
-                project_types = [t for t, _ in ProjectTypes.choices]
-            for branch_code in branches:
-                for project_type in project_types:
-                    key = ReportingPeriodKey(branch_code, project_type)
-                    if key not in periods:
-                        periods[key] = period
-        return periods
+        return ReportingPeriodDict.from_queryset(qs, first_match=True)
+
+    @classmethod
+    def get_periods(cls, **filters) -> ReportingPeriodDict:
+        qs = (cls.objects
+              .filter(**filters)
+              .select_related("branch"))
+        return ReportingPeriodDict.from_queryset(qs)
 
     def score_to_grade(self, project_student: "ProjectStudent"):
         score = project_student.total_score
@@ -163,6 +245,54 @@ class ReportingPeriod(models.Model):
         if project_student.project.is_external and score >= self.score_pass:
             final_grade = GradeTypes.CREDIT
         return final_grade
+
+    def is_students_notified(self, notification_type, branch: Branch):
+        from notifications.models import Notification
+        notification_type_map = apps.get_app_config('notifications').type_map
+        notification_type_id = notification_type_map[notification_type.name]
+        actor_content_type = ContentType.objects.get_for_model(self)
+        target_content_type = ContentType.objects.get_for_model(branch)
+        filters = {
+            "type_id": notification_type_id,
+            "actor_object_id": self.pk,
+            "actor_content_type": actor_content_type,
+            "target_object_id": branch.pk,
+            "target_content_type": target_content_type
+        }
+        return Notification.objects.filter(**filters).exists()
+
+    @transaction.atomic
+    def generate_notifications(self, notification_type, target_branch: Branch):
+        """
+        Generate notifications for students without report.
+        """
+        filters = {"student__branch_id": target_branch.pk}
+        if self.project_type is not None:
+            filters["project__project_type"] = self.project_type
+        project_students = (ProjectStudent.objects
+                            .filter(project__semester=self.term,
+                                    report__isnull=True,
+                                    **filters)
+                            .exclude(final_grade=GradeTypes.UNSATISFACTORY,
+                                     project__status=Project.Statuses.CANCELED)
+                            .select_related("student", "project")
+                            .distinct()
+                            .all())
+        context = {
+            "start_on": formats.date_format(self.start_on, "SHORT_DATE_FORMAT"),
+            "end_on": formats.date_format(self.end_on, "SHORT_DATE_FORMAT"),
+        }
+        for ps in project_students:
+            context.update({
+                "project_id": ps.project_id
+            })
+            notify.send(
+                sender=self,  # actor
+                type=notification_type,
+                verb='was sent',
+                target=target_branch,
+                recipient=ps.student,
+                data=context,)
 
 
 class ProjectStudent(models.Model):
@@ -424,6 +554,7 @@ class Project(TimeStampedModel):
         current_term_index = get_current_term_index(self.city_id)
         return not self.is_canceled and self.semester.index == current_term_index
 
+    # FIXME: Нужно заменить на концепцию "report_period_active"
     def report_period_started(self):
         if not self.semester.report_starts_at:
             return False

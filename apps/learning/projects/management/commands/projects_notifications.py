@@ -2,90 +2,40 @@
 
 from datetime import timedelta
 
-from django.apps import apps
 from django.core.management import BaseCommand
-from django.db import transaction
-from django.utils.timezone import now
 
-from courses.models import Semester
-from learning.projects.models import ProjectStudent, Project
-from learning.settings import GradeTypes
-from core.constants import DATE_FORMAT_RU
+from core.timezone import now_local
+from learning.models import Branch
+from learning.projects.constants import REPORTING_NOTIFY_BEFORE_START, \
+    REPORTING_NOTIFY_BEFORE_DEADLINE
+from learning.projects.models import ReportingPeriod
 from notifications import NotificationTypes
-from notifications.models import Notification
-from notifications.signals import notify
 
 
 class Command(BaseCommand):
     help = """
-    Generate notifications when project reporting period started or ended.
+    Generate notifications about project reporting openings/deadlines
     """
 
-    # TODO: add tests
     def handle(self, *args, **options):
-        """
-        When we check notifications existence, check count only, because we
-        insert notifications inside transaction
-        """
-        current_term = Semester.get_current()
-        today = now()
-        notification_type_map = apps.get_app_config('notifications').type_map
-        remind_about_start_today = (current_term.report_starts_at and
-            today.date() == current_term.report_starts_at - timedelta(days=3))
-        remind_about_end_today = (current_term.report_ends_at and
-            today.date() == current_term.report_ends_at - timedelta(days=1))
-        if remind_about_start_today:
-            notification_code = NotificationTypes.PROJECT_REPORTING_STARTED.name
-            notification_type_id = notification_type_map[notification_code]
-            # Check notifications since term start
-            filters = dict(
-                type_id=notification_type_id,
-                timestamp__gte=current_term.starts_at
-            )
-            if Notification.objects.filter(**filters).count() > 0:
-                return
-            self.generate_notifications(current_term,
-                                        NotificationTypes.PROJECT_REPORTING_STARTED)
-        elif remind_about_end_today:
-            notification_code = NotificationTypes.PROJECT_REPORTING_ENDED.name
-            notification_type_id = notification_type_map[notification_code]
-            # Check notifications since reporting period start
-            filters = dict(
-                type_id=notification_type_id,
-                timestamp__date__gte=current_term.report_starts_at
-            )
-            if Notification.objects.filter(**filters).count() > 0:
-                return
-            self.generate_notifications(current_term,
-                                        NotificationTypes.PROJECT_REPORTING_ENDED)
+        for branch in Branch.objects.all():
+            today = now_local(branch.timezone).date()
+            # Reminds about start before period actually started
+            start_on = today + timedelta(days=REPORTING_NOTIFY_BEFORE_START)
+            # Reminds about deadline before period end
+            end_on = today + timedelta(days=REPORTING_NOTIFY_BEFORE_DEADLINE)
 
-    @transaction.atomic
-    def generate_notifications(self, term, notification_type):
-        """
-        Generate notifications of selected type for students without
-        sent report
-        """
-        project_students = (ProjectStudent.objects
-                            .filter(project__semester=term,
-                                    report__isnull=True)
-                            .exclude(final_grade=GradeTypes.UNSATISFACTORY,
-                                     project__status=Project.Statuses.CANCELED)
-                            .select_related("student", "project")
-                            .distinct()
-                            .all())
-        context = {
-            "period_start": term.report_starts_at.strftime(DATE_FORMAT_RU),
-            "deadline": term.report_ends_at.strftime(DATE_FORMAT_RU),
-        }
-        for ps in project_students:
-            context.update({
-                "project_id": ps.project_id
-            })
-            notify.send(
-                sender=None,  # actor
-                type=notification_type,
-                verb='was sent',
-                target=term,
-                recipient=ps.student,
-                data=context
-            )
+            notification_type = NotificationTypes.PROJECT_REPORTING_STARTED
+            coming_periods = ReportingPeriod.get_periods(start_on=start_on)
+            for period in coming_periods.for_branch(branch).values():
+                if period.is_students_notified(notification_type, branch):
+                    continue
+                period.generate_notifications(notification_type, branch)
+
+            notification_type = NotificationTypes.PROJECT_REPORTING_ENDED
+            ending_periods = ReportingPeriod.get_periods(
+                end_on=end_on, start_on__gte=today)
+            for period in ending_periods.for_branch(branch).values():
+                if period.is_students_notified(notification_type, branch):
+                    continue
+                period.generate_notifications(notification_type, branch)

@@ -6,6 +6,7 @@ import os.path
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import smart_text
@@ -26,9 +27,57 @@ from courses.models import Course, CourseNews, Venue, \
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager
-from learning.settings import GradingSystems, GradeTypes, Branches
+from learning.settings import GradingSystems, GradeTypes, Branches, \
+    AcademicDegreeYears
 
 logger = logging.getLogger(__name__)
+
+
+class StudentProfile(models.Model):
+    enrollment_year = models.PositiveSmallIntegerField(
+        _("CSCUser|enrollment year"),
+        validators=[MinValueValidator(1990)],
+        blank=True,
+        null=True)
+    graduation_year = models.PositiveSmallIntegerField(
+        _("CSCUser|graduation year"),
+        blank=True,
+        validators=[MinValueValidator(1990)],
+        null=True)
+    curriculum_year = models.PositiveSmallIntegerField(
+        _("CSCUser|Curriculum year"),
+        validators=[MinValueValidator(2000)],
+        blank=True,
+        null=True)
+    branch = models.ForeignKey(
+        "learning.Branch",
+        verbose_name=_("Branch"),
+        related_name="+",  # Disable backwards relation
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True)
+    university = models.CharField(
+        _("University"),
+        max_length=255,
+        blank=True)
+    phone = models.CharField(
+        _("Phone"),
+        max_length=40,
+        blank=True)
+    uni_year_at_enrollment = models.CharField(
+        _("StudentInfo|University year"),
+        choices=AcademicDegreeYears.choices,
+        max_length=2,
+        help_text=_("at enrollment"),
+        null=True,
+        blank=True)
+    areas_of_study = models.ManyToManyField(
+        'study_programs.AcademicDiscipline',
+        verbose_name=_("StudentInfo|Areas of study"),
+        blank=True)
+
+    class Meta:
+        abstract = True
 
 
 class Branch(models.Model):

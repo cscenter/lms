@@ -592,9 +592,9 @@ def autograde_projects(request):
     if not request.user.is_curator:
         return HttpResponseForbidden()
     try:
-        processed = call_command('autograde_projects')
-        messages.success(request, "Операция выполнена успешно. "
-                                  "Обработано: {}".format(processed))
+        graded = call_command('autograde_projects')
+        messages.success(request, f"Операция выполнена успешно.<br>"
+                                  f"Выставлено оценок: {graded}")
     except CommandError as e:
         messages.error(request, str(e))
     return HttpResponseRedirect(reverse("staff:exports"))
