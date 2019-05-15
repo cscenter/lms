@@ -103,6 +103,7 @@ class ReportingPeriodDict(dict):
 #  TODO: Связать отчет с project_student + отчетный период (обязательные уникальные поля)
 # TODO: Выделить критерии в отдельную модель (это критерии практики). Создать критерии для НИР.
 # TODO: 1 активный период в 1 момент времени на странице проекта для студента (в порядке приоритета). При отправке связывать отчет с нужными критериями и отчетным периодом.
+# TODO: синхронизировать данные Semester - ReportingPeriod
 class ReportingPeriod(models.Model):
     """
     This model based on assumption that each branch has only 1 (or none)
@@ -124,9 +125,7 @@ class ReportingPeriod(models.Model):
     end_on = models.DateField(
         _("End On"),
         help_text=_("The last day of the report period."))
-    # Note: This field is hidden in admin since it makes logic over complicated:
-    # Not sure what to do in case of date ranges intersection
-    # TODO: make it mandatory or remove at all
+    # Note: This field is hidden in admin since it makes logic over complicated
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
@@ -158,7 +157,6 @@ class ReportingPeriod(models.Model):
         null=True,
         help_text=_("Projects with final score in [PASS; GOOD) will be "
                     "graded as Pass, with score < PASS as Unsatisfactory."))
-    # TODO: перенести настройки времени отправки нотификаций
 
     class Meta:
         verbose_name = _("Reporting Period")
@@ -185,7 +183,25 @@ class ReportingPeriod(models.Model):
                 errors["end_on"] = "Дата дедлайна за пределами указанного семестра"
         if errors:
             raise ValidationError(errors)
-        # FIXME: убедиться, что нет пересечений с другими диапазонами (того же типа, либо общими)
+        # Periods can't be partially overlapped. We could only fully override
+        # common period by specifying project type or branch or both.
+        if self.start_on and self.end_on:
+            overlap = (Q(end_on__gte=self.start_on) &
+                       Q(start_on__lte=self.end_on))
+            filters = [overlap]
+            if self.pk:
+                filters.append(~Q(pk=self.pk))
+            if self.project_type:
+                project_type = (Q(project_type__isnull=True) |
+                                Q(project_type=self.project_type))
+                filters.append(project_type)
+            if self.branch_id:
+                branch = Q(branch__isnull=True) | Q(branch_id=self.branch_id)
+                filters.append(branch)
+            for rp in ReportingPeriod.objects.filter(*filters):
+                if rp.start_on != self.start_on or rp.end_on != self.end_on:
+                    raise ValidationError(f"Найдено частичное пересечение дат "
+                                          f"с отчетным периодом «‎{rp}».")
 
     def __str__(self):
         start_on = formats.date_format(self.start_on, 'j E')
@@ -246,7 +262,7 @@ class ReportingPeriod(models.Model):
             final_grade = GradeTypes.CREDIT
         return final_grade
 
-    def is_students_notified(self, notification_type, branch: Branch):
+    def students_are_notified(self, notification_type, branch: Branch) -> bool:
         from notifications.models import Notification
         notification_type_map = apps.get_app_config('notifications').type_map
         notification_type_id = notification_type_map[notification_type.name]

@@ -28,7 +28,7 @@ class Command(BaseCommand):
             notification_type = NotificationTypes.PROJECT_REPORTING_STARTED
             coming_periods = ReportingPeriod.get_periods(start_on=start_on)
             for period in coming_periods.for_branch(branch).values():
-                if period.is_students_notified(notification_type, branch):
+                if period.students_are_notified(notification_type, branch):
                     continue
                 period.generate_notifications(notification_type, branch)
 
@@ -36,6 +36,6 @@ class Command(BaseCommand):
             ending_periods = ReportingPeriod.get_periods(
                 end_on=end_on, start_on__gte=today)
             for period in ending_periods.for_branch(branch).values():
-                if period.is_students_notified(notification_type, branch):
+                if period.students_are_notified(notification_type, branch):
                     continue
                 period.generate_notifications(notification_type, branch)

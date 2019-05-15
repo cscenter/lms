@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-04-30 12:51+0000\n"
-"PO-Revision-Date: 2019-04-30 12:52+0000\n"
+"PO-Revision-Date: 2019-04-30 19:56+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -159,7 +159,7 @@ msgstr "Тип"
 
 #: apps/learning/projects/models.py:143
 msgid "Min score for EXCELLENT"
-msgstr "Мин. балл для EXCELLENT"
+msgstr "Балл на Отлично"
 
 #: apps/learning/projects/models.py:146
 msgid "Projects with final score >= this value will be graded as Excellent"
@@ -169,25 +169,25 @@ msgstr ""
 
 #: apps/learning/projects/models.py:149
 msgid "Min score for GOOD"
-msgstr "Мин. балл для GOOD"
+msgstr "Балл на Хорошо"
 
 #: apps/learning/projects/models.py:152
 msgid "Projects with final score in [GOOD; EXCELLENT) will be graded as Good."
 msgstr ""
-"Если финальный балл по проекту в диапазоне [GOOD; EXCELLENT), то студент "
+"Если финальный балл по проекту в диапазоне [Хорошо; Отлично), то студент "
 "получит оценку \"Хорошо\"."
 
 #: apps/learning/projects/models.py:155
 msgid "Min score for PASS"
-msgstr "Мин. балл для PASS"
+msgstr "Балл на Зачет"
 
 #: apps/learning/projects/models.py:158
 msgid ""
 "Projects with final score in [PASS; GOOD) will be graded as Pass, with score"
 " < PASS as Unsatisfactory."
 msgstr ""
-"Если финальный балл по проекту в диапазоне [PASS; GOOD), то студент получит "
-"оценку \"Зачет\", если < PASS, то \"Незачет\"."
+"Если финальный балл по проекту в диапазоне [Зачет; Хорошо), то студент "
+"получит оценку \"Зачет\", если ниже указанного значения, то \"Незачет\"."
 
 #: apps/learning/projects/models.py:163
 msgid "Reporting Period"
