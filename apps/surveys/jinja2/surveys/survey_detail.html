@@ -19,7 +19,9 @@
                 </div>
                 <div class="card__content">
                     {% if form.survey.expire_at %}
-                        <p>Пожалуйста, заполните опрос до {{ form.survey.expire_at_local(format="H:i j E") }}.</p>
+                        <div class="message _warning mb-8">
+                            Дата окончания опроса &mdash; {{ form.survey.expire_at_local(format="j E H:i") }}
+                        </div>
                     {% endif %}
                     <form action="" class="ui form" method="post">
                         {% csrf_token %}
