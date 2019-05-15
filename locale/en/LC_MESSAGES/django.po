@@ -1,0 +1,30 @@
+#
+msgid ""
+msgstr ""
+"PO-Revision-Date: 2019-05-14 13:29+0000\n"
+"Last-Translator: b'  <pacabest@gmail.com>'\n"
+"X-Translated-Using: django-rosetta 0.9.3\n"
+
+#: apps/courses/tabs.py:303
+msgid "CourseTab|About"
+msgstr "About"
+
+#: apps/courses/tabs.py:315
+msgid "CourseTab|Classes"
+msgstr "Classes"
+
+#: apps/courses/tabs.py:328 apps/learning/tabs.py:66
+msgid "CourseTab|Assignments"
+msgstr "Assignments"
+
+#: apps/learning/tabs.py:19
+msgid "CourseTab|Contacts"
+msgstr "Contacts"
+
+#: apps/learning/tabs.py:34
+msgid "CourseTab|News"
+msgstr "News"
+
+#: apps/learning/tabs.py:51
+msgid "CourseTab|Reviews"
+msgstr "Reviews"
