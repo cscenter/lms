@@ -24,8 +24,7 @@
                     <tr>
                         <th>Название</th>
                         <th>Участники</th>
-                        <th>Руководители</th>
-                        <th>Проверяют</th>
+                        <th style="width: 20%">Проверяют</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -33,14 +32,12 @@
                         <tr>
                             <td>
                                 <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
+                                <br><span class="text-muted">Руководители: {% for s in project.supervisors.all %}{{ s.full_name }}<br>{% endfor %}</span>
                             </td>
                             <td>
                                 {% for student in project.students.all %}
                                     <a class="nowrap" href="{{ student.get_absolute_url }}">{{ student.get_short_name }}</a><br>
                                 {% endfor %}
-                            </td>
-                            <td>
-                                {% for s in project.supervisors.all %}{{ s.full_name }}<br>{% endfor %}
                             </td>
                             <td>
                                 {% for reviewer in project.reviewers.all %}
