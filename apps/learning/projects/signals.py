@@ -40,26 +40,18 @@ def post_save_project_student(sender, instance, *args, **kwargs):
     All participants should have `unsatisfactory` grade in that case.
     """
     project_student = instance
-    project_id = project_student.project_id
     project_students = (ProjectStudent.objects
-                        .filter(project=project_id)
-                        .select_related("report"))
-    all_left_project = True
+                        .filter(project_id=project_student.project_id)
+                        .prefetch_related("reports"))
+    all_left_project = False
     for ps in project_students:
-        try:
-            # Skip if any participant has report
-            _ = ps.report.pk
-            all_left_project = False
+        if ps.reports.exists() or ps.final_grade != GradeTypes.UNSATISFACTORY:
             break
-        except ObjectDoesNotExist:
-            pass
-        # Or has any positive/neutral grade
-        if ps.final_grade != GradeTypes.UNSATISFACTORY:
-            all_left_project = False
-            break
+    else:
+        all_left_project = True
     if all_left_project:
         (Project.objects
-         .filter(pk=project_id)
+         .filter(pk=project_student.project_id)
          .update(status=Project.Statuses.CANCELED))
 
 
@@ -124,7 +116,7 @@ def post_save_report(sender, instance, created, *args, **kwargs):
                     data={
                         "project_name": project.name,
                         "project_pk": project.pk,
-                        "student_pk": student.pk,
+                        "report_id": report.pk,
                     }
                 )
 
@@ -180,6 +172,6 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
                     "student_id": student.pk,
                     "project_name": project.name,
                     "project_pk": project.pk,  # unmodified
-                    "student_pk": student.pk,  # unmodified
+                    "report_id": comment.report.pk,
                 }
             )

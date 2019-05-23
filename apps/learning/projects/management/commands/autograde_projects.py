@@ -32,7 +32,7 @@ class Command(BaseCommand):
         if not periods:
             raise CommandError(f"Для семестра '{current_term}' не "
                                f"найдены отчетные периоды.")
-        # Make sure all final periods has score settings
+        # Make sure all final periods have score settings
         for period in periods.values():
             attrs = ('score_excellent', 'score_good', 'score_pass')
             if any(getattr(period, attr) is None for attr in attrs):
@@ -56,11 +56,11 @@ class Command(BaseCommand):
             if key not in periods:
                 logger.warning(f"Не найден отчетный период. "
                                f"Семестр {current_term}, "
-                               f"отделение: {ps.branch}, "
+                               f"отделение: {ps.student.branch}, "
                                f"тип проекта: {ps.project.project_type}")
                 continue
             period = periods[key]
-            final_grade = period.score_to_grade(ps)
+            final_grade = period.score_to_grade(ps.total_score, ps.project)
             result = ProjectStudent.objects.filter(pk=ps.pk).update(
                 final_grade=final_grade)
             graded += result

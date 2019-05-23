@@ -27,6 +27,7 @@ class BranchFactory(factory.DjangoModelFactory):
 
     class Meta:
         model = Branch
+        django_get_or_create = ('code',)
 
 
 class AcademicDisciplineFactory(factory.DjangoModelFactory):

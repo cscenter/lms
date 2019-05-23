@@ -84,7 +84,8 @@ class Branch(models.Model):
     code = models.CharField(
         _("Code"),
         choices=Branches.choices,
-        max_length=8)
+        max_length=8,
+        unique=True)
     name = models.CharField(_("Branch|Name"), max_length=255)
     is_remote = models.BooleanField(_("Distance Branch"), default=False)
     description = models.TextField(

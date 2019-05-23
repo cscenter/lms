@@ -40,7 +40,7 @@ class NewReport(NotificationService):
     def get_context(self, notification):
         report_url = reverse("projects:project_report", kwargs={
             "project_pk": notification.data["project_pk"],
-            "student_pk": notification.data["student_pk"]
+            "report_id": notification.data["report_id"]
         })
         project_url = reverse("projects:project_detail",
                               args=[notification.data["project_pk"]])
@@ -99,7 +99,7 @@ class NewReportComment(NotificationService):
             project_url_name = "projects:project_detail"
         report_url = reverse(report_url_name, kwargs={
             "project_pk": notification.data["project_pk"],
-            "student_pk": notification.data["student_pk"]
+            "report_id": notification.data["report_id"]
         })
         project_url = reverse(project_url_name,
                               args=[notification.data["project_pk"]])
@@ -146,10 +146,10 @@ class ReportInReviewState(NotificationService):
                               args=[notification.data["project_pk"]])
         context["project_link"] = project_url
         reports = []
-        for student_id, student_name in context["reports"]:
+        for report_id, student_name in context["reports"]:
             report_url = reverse("projects:project_report", kwargs={
                 "project_pk": context["project_pk"],
-                "student_pk": student_id
+                "report_id": report_id
             })
             reports.append((student_name, report_url))
         context["reports"] = reports
@@ -211,7 +211,7 @@ class ReviewCompleted(NotificationService):
                               args=[notification.data["project_pk"]])
         report_url = reverse("projects:project_report", kwargs={
             "project_pk": notification.data["project_pk"],
-            "student_pk": notification.data["student_pk"]
+            "report_id": notification.data["report_id"]
         })
         context["project_link"] = project_url
         context["report_link"] = report_url
@@ -224,7 +224,7 @@ class ReviewCompleted(NotificationService):
         for r in rs:
             report_url = reverse("projects:project_report", kwargs={
                 "project_pk": notification.data["project_pk"],
-                "student_pk": r.project_student.student.pk
+                "report_id": r.pk
             })
             row = (r.project_student.student.get_full_name(),
                    report_url,

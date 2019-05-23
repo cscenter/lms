@@ -62,7 +62,7 @@ class AssignmentGradesImport:
                         logger.debug(msg)
                     success += int(updated)
             except ValidationError as e:
-                logger.error(e.message)
+                logger.debug(e.message)
         return total, success
 
     def clean(self, row):

@@ -49,6 +49,7 @@ def test_application_form_availability(client):
 def test_simple_interviews_list(client, curator, settings):
     settings.LANGUAGE_CODE = 'ru'
     curator.city_id = 'nsk'
+    curator.branch = Branch.objects.get(code=Branches.NSK)
     curator.save()
     client.login(curator)
     interviewer = InterviewerFactory()

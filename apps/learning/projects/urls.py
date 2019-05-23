@@ -14,10 +14,13 @@ urlpatterns = [
         path('<int:pk>/', views.ProjectDetailView.as_view(), name='project_detail'),
         path('<int:pk>/results', views.ProjectResultsView.as_view(), name='project_results_update'),
         path('<int:pk>/enroll', views.ProjectEnrollView.as_view(), name='reviewer_project_enroll'),
-        path('<int:project_pk>/report/<int:student_pk>/status/', views.ReportUpdateStatusView.as_view(), name='project_report_update_status'),
-        path('<int:project_pk>/report/<int:student_pk>/curator_assess/', views.ReportCuratorAssessmentView.as_view(), name='project_report_curator_assessment'),
-        path('<int:project_pk>/report/<int:student_pk>/summarize/', views.ReportCuratorSummarizeView.as_view(), name='project_report_summarize'),
-        path('<int:project_pk>/report/<int:student_pk>/', views.ReportView.as_view(), name='project_report'),
+        path('<int:project_pk>/reports/<int:report_id>/', include([
+            path('update/', views.ReportUpdateStatusView.as_view(), name='project_report_update'),
+            path('curator_assess/', views.ReportCuratorAssessmentView.as_view(), name='project_report_curator_assessment'),
+            path('summarize/', views.ReportCuratorSummarizeView.as_view(), name='project_report_summarize'),
+            path('review/', views.ProcessReviewFormView.as_view(), name='project_report_upsert_review'),
+            path('', views.ReportView.as_view(), name='project_report'),
+        ])),
         path('prev/<int:project_id>)/', views.ProjectPrevNextView.as_view(direction="prev"), name='project_detail_prev'),
         path('next/<int:project_id>/', views.ProjectPrevNextView.as_view(direction="next"), name='project_detail_next'),
         path('attachments/<str:sid>/', views.ReportAttachmentDownloadView.as_view(), name='report_attachments_download'),
@@ -25,6 +28,6 @@ urlpatterns = [
     path('learning/projects/', include([
         path('', views.StudentProjectsView.as_view(), name='student_projects'),
         path('<int:pk>/', views.ProjectDetailView.as_view(), name='study__project_detail'),
-        path('<int:project_pk>/report/<int:student_pk>/', views.ReportView.as_view(), name='student_project_report'),
+        path('<int:project_pk>/report/<int:report_id>/', views.ReportView.as_view(), name='student_project_report'),
     ])),
 ]

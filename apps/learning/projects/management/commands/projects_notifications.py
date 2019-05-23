@@ -27,7 +27,8 @@ class Command(BaseCommand):
 
             notification_type = NotificationTypes.PROJECT_REPORTING_STARTED
             coming_periods = ReportingPeriod.get_periods(start_on=start_on)
-            for period in coming_periods.for_branch(branch).values():
+            for periods in coming_periods.for_branch(branch).values():
+                period = periods[0]  # Periods do not overlap
                 if period.students_are_notified(notification_type, branch):
                     continue
                 period.generate_notifications(notification_type, branch)
@@ -35,7 +36,8 @@ class Command(BaseCommand):
             notification_type = NotificationTypes.PROJECT_REPORTING_ENDED
             ending_periods = ReportingPeriod.get_periods(
                 end_on=end_on, start_on__gte=today)
-            for period in ending_periods.for_branch(branch).values():
+            for periods in ending_periods.for_branch(branch).values():
+                period = periods[0]  # Periods do not overlap
                 if period.students_are_notified(notification_type, branch):
                     continue
                 period.generate_notifications(notification_type, branch)
