@@ -148,27 +148,10 @@
             <h1 class="text-center">Отзывы студентов</h1>
             <div class="card-columns _testimonials">
                 {% for student in testimonials %}
-                    <div class="card">
-                        <div class="testimonial">
-                            {% with im = student.get_thumbnail("150x150", use_stub=False) %}
-                                {% if im %}
-                                    <img class="img-rounded" alt="{{ student.get_full_name() }}" src="{{ im.url }}" width="74" height="74">
-                                {% endif %}
-                            {% endwith %}
-                            <div class="testimonial__details">
-                                <div class="testimonial__author">
-                                    <h4>{{ student.get_full_name() }}</h4>
-                                    <span>Выпуск {{ graduation_year }}, {{  student.areas_of_study.all()|join(", ") }}</span>
-                                </div>
-                                <div class="testimonial__text">
-                                    {{ student.csc_review|markdown("csc_review", 3600, student.pk, student.modified) }}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {{ macros.testimonial_card(student) }}
                 {% endfor %}
 
-                <a href="{{ url('testimonials') }}" class="btn _small _outline _gray mt-3">Все отзывы</a>
+                <a href="{{ url('testimonials') }}" class="btn _small _outline _rounded _gray mt-3">Все отзывы</a>
             </div>
         </div>
     </div>

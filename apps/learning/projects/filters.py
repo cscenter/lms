@@ -198,11 +198,11 @@ class ReportFilter(django_filters.ChoiceFilter):
         # Exclude those who was graded, but didn't send a report.
         if value == self.NO:
             return (qs
-                    .annotate(reports_cnt=Count("projectstudent__report"))
+                    .annotate(reports_cnt=Count("projectstudent__reports"))
 
                     .annotate(ps_cnt=Sum(
                         Case(
-                            When(Q(projectstudent__report__isnull=True) &
+                            When(Q(projectstudent__reports__isnull=True) &
                                  ~Q(projectstudent__final_grade=GradeTypes.NOT_GRADED),
                                  then=Value(0)
                                  ),
@@ -212,10 +212,10 @@ class ReportFilter(django_filters.ChoiceFilter):
                     ))
                     .exclude(reports_cnt=F("ps_cnt")))
         elif value == self.YES_ALL:
-            qs = (qs.annotate(reports_cnt=Count("projectstudent__report"))
+            qs = (qs.annotate(reports_cnt=Count("projectstudent__reports"))
                     .annotate(ps_cnt=Sum(
                         Case(
-                            When(Q(projectstudent__report__isnull=True) &
+                            When(Q(projectstudent__reports__isnull=True) &
                                  ~Q(projectstudent__final_grade=GradeTypes.NOT_GRADED),
                                  then=Value(0)
                                  ),

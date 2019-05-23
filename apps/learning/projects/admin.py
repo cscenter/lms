@@ -13,7 +13,7 @@ from core.admin import meta
 from core.filters import AdminRelatedDropdownFilter
 from learning.projects.import_export import ProjectStudentAdminRecordResource
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
-    ReportComment, Supervisor, ReportingPeriod
+    ReportComment, Supervisor, ReportingPeriod, PracticeCriteria
 from users.constants import AcademicRoles
 from users.models import User
 
@@ -27,26 +27,15 @@ class ProjectStudentInline(admin.TabularInline):
     extra = 0
     min_num = 0
     show_change_link = True
-    readonly_fields = ["get_report_score", "get_total_score"]
-    fields = ('student', 'get_report_score', 'supervisor_grade',
-              'supervisor_review', 'presentation_grade', 'get_total_score',
-              'final_grade')
-    
-    def get_total_score(self, obj):
-        return obj.total_score
-    get_total_score.short_description = "Сумма"
-
-    def get_report_score(self, obj):
-        return obj.report.final_score
-    get_report_score.short_description = "Отчет"
+    fields = ('student', 'supervisor_grade', 'supervisor_review',
+              'presentation_grade', 'final_grade')
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = User.objects.filter(groups__in=[
                 AcademicRoles.STUDENT_CENTER,
                 AcademicRoles.GRADUATE_CENTER]).distinct()
-        return super(ProjectStudentInline,
-                     self).formfield_for_foreignkey(db_field, *args, **kwargs)
+        return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
 class ProjectsInline(admin.TabularInline):
@@ -136,34 +125,30 @@ class ReviewAdmin(admin.ModelAdmin):
 
 class ProjectStudentAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = ProjectStudentAdminRecordResource
-    list_display = ['student', 'project', 'get_project_semester',
-                    'get_total_score', 'final_grade']
-    list_filter = ['project__city', 'project__semester']
+    list_display = ('student', 'project', 'get_project_semester', 'final_grade')
+    list_filter = ('project__city', 'project__semester')
     search_fields = ["project__name"]
-    readonly_fields = ["report_link"]
 
     def get_queryset(self, request):
-        qs = super(ProjectStudentAdmin, self).get_queryset(request)
-        return qs.select_related("report", "student", "project",
+        qs = super().get_queryset(request)
+        return qs.select_related("student", "project",
                                  "project__semester")
-
-    @meta(_("Сумма"))
-    def get_total_score(self, obj):
-        return obj.total_score
 
     @meta(_("Semester"), admin_order_field="project__semester")
     def get_project_semester(self, obj):
         return obj.project.semester
 
-    def report_link(self, instance):
-        url = reverse('admin:%s_%s_change' % (instance.report._meta.app_label,
-                                              instance.report._meta.model_name),
-                      args=(instance.report.id,))
-        return mark_safe('<a href="{}">{}</a>'.format(url, _("Edit")))
-
 
 class ReportCommentAdmin(admin.ModelAdmin):
     list_display = ["report", "author"]
+
+
+class PracticeCriteriaAdmin(admin.ModelAdmin):
+    list_display = ("review", "get_reviewer")
+
+    @meta(_("Report Reviewer"), admin_order_field="review__reviewer")
+    def get_reviewer(self, obj):
+        return obj.review.reviewer
 
 
 admin.site.register(ReportingPeriod, ReportingPeriodAdmin)
@@ -171,4 +156,5 @@ admin.site.register(Project, ProjectAdmin)
 admin.site.register(ProjectStudent, ProjectStudentAdmin)
 admin.site.register(Report, ReportAdmin)
 admin.site.register(Review, ReviewAdmin)
+admin.site.register(PracticeCriteria, PracticeCriteriaAdmin)
 admin.site.register(ReportComment, ReportCommentAdmin)

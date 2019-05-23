@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load crispy_forms_tags %}
-{% load markdown from core_tags %}
+{% load markdown call_method from core_tags %}
 {% load cache %}
 {% load override_url %}
+{% load tz %}
 
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 
-{% block content %}
+{% block content %}{% localtime off %}
 <div class="container">
     <ol class=" breadcrumb projects">
         <li class="active">{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект / {{ project.semester }}
@@ -46,24 +47,44 @@
                     </object>
                 {% endif %}
 
-                {% if project.is_active and has_send_permissions %}
-                    {% if not project.report_period_started %}
-                        <div class="card o-send-report-timetable">
-                            <div class="card-header ch-alt">Сроки отправки отчета</div>
-                            <div class="card-body card-padding">
-                                <dl class="dl-horizontal">
-                                <dt>Дата начала:</dt> <dd>{{ project.semester.report_starts_at }}</dd>
-                                <dt>Дедлайн:</dt> <dd>{{ project.semester.report_ends_at }}</dd>
-                                </dl>
-                            </div>
-                        </div>
-                    {% else %}
-                        <h3>{% trans "Send report form" %}</h3>
-                        Отчет необходимо отправить до {{ project.semester.report_ends_at|date:"j E" }} (включительно).<br>
-                        <div class="csc-well o-send-report-form">
-                            {% crispy form %}
-                        </div>
-                    {% endif %}
+                {% if can_view_report and reporting_periods %}
+                    <h4>Отчеты</h4>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr class="active">
+                            <th>ФИО</th>
+                            <th>Статус</th>
+                            <th>Отправлен</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        {% for ps in project.projectstudent_set.all %}
+                        {% for reporting_period in reporting_periods %}
+                            <tr>
+                                <td class="nowrap">{{ ps.student.get_short_name }}</td>
+                                {% call_method ps "get_report" reporting_period as report %}
+                                {% if report %}
+                                    <td>{{ report.get_status_display }}</td>
+                                    <td {% if report.created_local.date > reporting_period.end_on %} class="text-danger"{% endif %}>
+                                        {{ report.created_local|date:"d.m.Y H:i" }}
+                                    </td>
+                                    <td>
+                                        {% if report.status == 'sent' %}
+                                            {% if request.user.is_curator %}
+                                                <a href="{{ report.get_absolute_url }}">Оценить отчет</a>
+                                            {% endif %}
+                                        {% else %}
+                                            <a href="{{ report.get_absolute_url }}">Смотреть отчет</a>
+                                        {% endif %}
+                                    </td>
+                                {% else %}
+                                    <td>Не отправлен</td>
+                                    <td colspan="2">Отчетный период: {{ reporting_period.start_on|date:"d E" }} &mdash; {{ reporting_period.end_on|date:"d E" }}</td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                        {% endfor %}
+                    </table>
                 {% endif %}
 
                 {% if request.user.is_curator %}
@@ -73,20 +94,15 @@
                             <thead>
                             <tr class="active">
                                 <th>Участник</th>
-                                <th>Отчет</th>
+                                {% for reporting_period in reporting_periods %}
+                                    <th>Отчет{% if forloop.counter > 1 %}&nbsp;{{ forloop.counter }}{% endif %}</th>
+                                {% endfor %}
                                 <th>През.</th>
                                 <th>Рук.</th>
                                 <th>Сумма</th>
                                 <th>Итог</th>
                             </tr>
                             </thead>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="6">
-                                        <button type="submit" class="btn btn-primary pull-right">Сохранить</button>
-                                    </td>
-                                </tr>
-                            </tfoot>
                             <tbody>
                                 {% csrf_token %}
                                 {{ results_formset.management_form }}
@@ -97,8 +113,11 @@
                                 {% for form in results_formset %}
                                     {% with ps=form.instance %}
                                     <tr>
-                                        <td>{{ ps.student }}</td>
-                                        <td>{{ ps.report.final_score }}</td>
+                                        <td>{{ ps.student.get_short_name }}</td>
+                                        {% for reporting_period in reporting_periods %}
+                                            {% call_method ps "get_report" reporting_period as report %}
+                                            <td>{% if report %}{{ report.final_score|default_if_none:"-" }}{% else %}-{% endif %}</td>
+                                        {% endfor %}
                                         <td>{% if ps.presentation_grade != None %}{{ ps.presentation_grade }}{% else %}-{% endif %}</td>
                                         <td>{% if ps.supervisor_grade != None %}{{ ps.supervisor_grade }}{% else %}-{% endif %}</td>
                                         <td>{{ ps.total_score }}</td>
@@ -113,17 +132,49 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                        <button type="submit" class="btn btn-primary">Сохранить оценки</button>
                     </form>
 
                     <h4>Отзывы руководителей <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
                     {% for ps in project.projectstudent_set.all %}
-                        <div class="card">
-                            <div class="card-header ch-alt">Участник - {{ ps.student }}</div>
-                            <div class="card-body card-padding">
-                                {{ ps.supervisor_review|default:"Отзыв ещё не прислали" }}
-                            </div>
-                        </div>
+                        <b>Студент</b>: {{ ps.student.get_short_name }}<br>
+                        <b>Отзыв</b>: {{ ps.supervisor_review|default:"не прислали" }}<br><br>
                     {% endfor %}
+                {% endif %}
+
+                {% if can_send_report and reporting_periods and project_student %}
+                    <h3>Отчет{% if reporting_periods.length > 1 %}ы{% endif %}</h3>
+                    <div class="panel-group">
+                        {% for reporting_period in reporting_periods %}
+                            {% call_method project_student "get_report" reporting_period as report %}
+                            <div class="panel panel-default">
+                                {# hidden ubertext doesn't reflow properly. HACK IT to be always visible #}
+                                <a class="panel-heading" href="#report-{{ reporting_period.id }}-{{ project_student.id }}" aria-expanded="{% if forloop.first or not report %}true{% else %}false{% endif %}">
+                                    Отчетный период {{ reporting_period.start_on|date:"j E" }} &mdash; {{ reporting_period.end_on|date:"j E" }}
+                                </a>
+                                <div class="panel-collapse {% if not forloop.first and report %}collapse{% endif %}" id="report-{{ reporting_period.id }}-{{ project_student.id }}" aria-expanded="{% if forloop.first or not report %}true{% else %}false{% endif %}">
+                                    <div class="panel-body p-20">
+                                        {% if report %}
+                                                <dl class="dl-horizontal m-0">
+                                                    <dt>Отправлен</dt><dd>{{ report.created|date:"d.m.Y H:i" }} <a href="{{ report.get_absolute_url }}">Смотреть отчет</a></dd>
+                                                    <dt>Статус</dt><dd>{{ report.get_status_display }}</dd>
+                                                    <dt>Финальный балл</dt><dd>{{ report.final_score|default_if_none:"-" }}</dd>
+                                                </dl>
+                                        {% else %}
+                                            {% call_method reporting_period "is_started" project as reporting_period_is_started %}
+                                            {% if not reporting_period_is_started %}
+                                                Форма отправки отчета появится после начала отчетного периода.
+                                            {% else %}
+                                                <p class="text-muted">Отправьте отчет до {{ reporting_period.end_on|date:"j E" }} включительно.</p>
+                                                {% crispy reporting_period.get_report_form %}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
                 {% endif %}
 
             </div>
@@ -152,8 +203,8 @@
                         {% endif %}
                 {% endif %}
                 <div class="card">
-                    <div class="card-header ch-alt">Руководители</div>
-                    <div class="card-body card-padding">
+                    <div class="card-header ch-alt p-15">Руководители</div>
+                    <div class="card-body p-15">
                         {% for s in project.supervisors.all %}
                             {{ s.full_name }}
                             <div class="text-muted">{{ s.workplace }}</div>
@@ -162,8 +213,8 @@
                 </div>
                 {% if project.supervisor_presentation or project.presentation %}
                 <div class="card">
-                    <div class="card-header ch-alt">Презентации</div>
-                    <div class="card-body card-padding">
+                    <div class="card-header ch-alt p-15">Презентации</div>
+                    <div class="card-body p-15">
                         {% if project.supervisor_presentation %}
                         <a class="presentation-link" href="{{ project.supervisor_presentation.url }}"><i class="fa fa-file "></i> Презентация руководителя</a><br>
                         {% endif %}
@@ -174,10 +225,10 @@
                 </div>
                 {% endif %}
                 <div class="card">
-                    <div class="card-header ch-alt">Участники проекта</div>
-                    <div class="card-body card-padding">
+                    <div class="card-header ch-alt p-15">Участники проекта</div>
+                    <div class="card-body p-15">
                         {% for ps in project.projectstudent_set.all %}
-                            {% include "learning/projects/_report_row.html" %}
+                            <a href="{{ ps.student.get_absolute_url }}" class="profile-link">{{ ps.student.get_abbreviated_name }}</a><br>
                         {% empty %}
                             Нет участников
                         {% endfor %}
@@ -187,4 +238,4 @@
         </div>
     </div>
 </div>
-{% endblock content %}
+{% endlocaltime off %}{% endblock content %}

@@ -5,11 +5,11 @@ let review_form = $("#review-form form");
 export function reviewFormValidation() {
     review_form.submit(function(event) {
         var clickedSubmitButton = $("input[type=submit][clicked=true]", review_form);
-        if (clickedSubmitButton.attr('name') == 'review_form-send') {
+        if (clickedSubmitButton.attr('name') === 'review_form-send') {
             // Validate select's
             var all_has_value = true;
             $('select', review_form).each(function() {
-               if ($(this).val() == "") {
+               if ($(this).val() === "") {
                    all_has_value = false;
                }
             });

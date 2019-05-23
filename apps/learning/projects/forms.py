@@ -9,7 +9,7 @@ from core.models import LATEX_MARKDOWN_ENABLED
 from core.urls import reverse_lazy
 from core.widgets import UbereditorWidget
 from learning.projects.models import ReportComment, Review, Report, \
-    ProjectStudent
+    ProjectStudent, PracticeCriteria
 
 
 class StudentResultsModelForm(forms.ModelForm):
@@ -40,22 +40,22 @@ class ReportForm(forms.ModelForm):
 
     class Meta:
         model = Report
-        fields = ("text", "file")
+        fields = ("text", "file", "reporting_period")
+        widgets = {
+            "reporting_period": forms.HiddenInput(),
+        }
 
     def __init__(self, *args, **kwargs):
         project_student = kwargs.pop('project_student', None)
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('text'),
-            Div(Div('file',
-                    Div(Submit('send_report_form', _('Send')),
-                        css_class='pull-right'),
-                    css_class="form-inline"),
-                css_class="form-group"))
+            'reporting_period',
+            'text',
+            Div(Div('file', css_class="form-inline"),
+                css_class="form-group"),
+            Div(Submit('send_report_form', "Отправить отчет")))
         super(ReportForm, self).__init__(*args, **kwargs)
-        # Required data appended only on POST-action
-        if project_student:
-            self.instance.project_student = project_student
+        self.instance.project_student = project_student
 
     # TODO: clean persisted comment. But it can be race condition. Or fuck it, students should be redirected from project page. Just wait 2 weeks before stale cache be cleaned?
 
@@ -72,14 +72,7 @@ class ReportStatusForm(forms.ModelForm):
         super(ReportStatusForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.form_show_labels = False
-        self.helper.form_action = reverse_lazy(
-            "projects:project_report_update_status",
-            kwargs={
-                "project_pk": self.instance.project_student.project_id,
-                "student_pk": self.instance.project_student.student_id
-            }
-        )
-
+        self.helper.form_action = self.instance.get_update_url()
         self.helper.layout = Layout(
             FieldWithButtons("status", StrictButton(
                 '<i class="fa fa-floppy-o" aria-hidden="true"></i>',
@@ -148,37 +141,18 @@ class ReportReviewForm(forms.ModelForm):
 
     class Meta:
         model = Review
-        fields = (
-            "score_global_issue",
-            "score_global_issue_note",
-            "score_usefulness",
-            "score_usefulness_note",
-            "score_progress",
-            "score_progress_note",
-            "score_problems",
-            "score_problems_note",
-            "score_technologies",
-            "score_technologies_note",
-            "score_plans",
-            "score_plans_note",
-            "is_completed",
-        )
+        fields = ("is_completed",)
 
         widgets = {
-            "score_global_issue_note": forms.Textarea(attrs={"rows": 3}),
-            "score_usefulness_note": forms.Textarea(attrs={"rows": 3}),
-            "score_progress_note": forms.Textarea(attrs={"rows": 3}),
-            "score_problems_note": forms.Textarea(attrs={"rows": 3}),
-            "score_technologies_note": forms.Textarea(attrs={"rows": 3}),
-            "score_plans_note": forms.Textarea(attrs={"rows": 3}),
             "is_completed": forms.HiddenInput(),
         }
 
     def __init__(self, *args, **kwargs):
         report = kwargs.pop('report', None)
         reviewer = kwargs.pop('author', None)
-        super(ReportReviewForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
+        self.helper.form_tag = False
         self.helper.layout.append(
             FormActions(
                 HTML('<input type="hidden" name={} value=1>'.format(
@@ -193,17 +167,54 @@ class ReportReviewForm(forms.ModelForm):
         # Append required data not represented in form fields
         self.instance.report = report
         self.instance.reviewer = reviewer
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.prefix + "-send" in self.data:
+            cleaned_data["is_completed"] = True
+        return cleaned_data
+
+
+class PracticeCriteriaForm(forms.ModelForm):
+    prefix = "review_practice_criteria"
+
+    class Meta:
+        model = PracticeCriteria
+        fields = (
+            "score_global_issue",
+            "score_global_issue_note",
+            "score_usefulness",
+            "score_usefulness_note",
+            "score_progress",
+            "score_progress_note",
+            "score_problems",
+            "score_problems_note",
+            "score_technologies",
+            "score_technologies_note",
+            "score_plans",
+            "score_plans_note",
+        )
+
+        widgets = {
+            "score_global_issue_note": forms.Textarea(attrs={"rows": 3}),
+            "score_usefulness_note": forms.Textarea(attrs={"rows": 3}),
+            "score_progress_note": forms.Textarea(attrs={"rows": 3}),
+            "score_problems_note": forms.Textarea(attrs={"rows": 3}),
+            "score_technologies_note": forms.Textarea(attrs={"rows": 3}),
+            "score_plans_note": forms.Textarea(attrs={"rows": 3}),
+            "is_completed": forms.HiddenInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_tag = False
+        self.helper.disable_csrf = True
         # Hide label text
         for field in self.Meta.fields:
             if field.endswith("_note"):
                 self.fields[field].help_text = self.fields[field].label
                 self.fields[field].label = ""
-
-    def clean(self):
-        cleaned_data = super(ReportReviewForm, self).clean()
-        if self.prefix + "-send" in self.data:
-            cleaned_data["is_completed"] = True
-        return cleaned_data
 
 
 class ReportSummarizeForm(forms.ModelForm):
@@ -219,7 +230,7 @@ class ReportSummarizeForm(forms.ModelForm):
         )
 
     def __init__(self, *args, **kwargs):
-        super(ReportSummarizeForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.helper = FormHelper(self)
         self.helper.layout = Layout(
             Div('final_score_note'),
@@ -236,16 +247,14 @@ class ReportSummarizeForm(forms.ModelForm):
             "projects:project_report_summarize",
             kwargs={
                 "project_pk": self.instance.project_student.project_id,
-                "student_pk": self.instance.project_student.student_id
+                "report_id": self.instance.id
             }
         )
 
     def save(self, commit=True):
         if self.cleaned_data.get('complete', False):
-            # Calculate mean values for review score fields and set on instance
-            self.instance.calculate_mean_scores()
             self.instance.status = self._meta.model.COMPLETED
-        instance = super(ReportSummarizeForm, self).save(commit)
+        instance = super().save(commit)
         return instance
 
 
@@ -279,7 +288,7 @@ class ReportCuratorAssessmentForm(forms.ModelForm):
             "projects:project_report_curator_assessment",
             kwargs={
                 "project_pk": self.instance.project_student.project_id,
-                "student_pk": self.instance.project_student.student_id
+                "report_id": self.instance.pk
             }
         )
 

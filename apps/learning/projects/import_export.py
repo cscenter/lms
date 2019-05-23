@@ -22,8 +22,6 @@ class ProjectStudentAdminRecordResource(resources.ModelResource):
                                attribute='total_score')
     final_grade = fields.Field(column_name='Финальная оценка',
                                attribute='get_final_grade_display')
-    report_score = fields.Field(column_name='Балл за отчет',
-                                attribute='report__final_score')
     presentation_grade = fields.Field(column_name='Оценка за презентацию',
                                       attribute='presentation_grade')
     supervisor_grade = fields.Field(column_name='Оценка руководителя',
@@ -34,16 +32,15 @@ class ProjectStudentAdminRecordResource(resources.ModelResource):
     class Meta:
         model = ProjectStudent
         skip_unchanged = True
-        fields = [
+        fields = (
             "semester",
             "student",
             "project",
             "total_score",
             "final_grade",
-            "report_score",
             "presentation_grade",
             "supervisor_grade",
             "is_external",
             "city",
-        ]
+        )
         export_order = fields

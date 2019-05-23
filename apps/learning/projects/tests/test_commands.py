@@ -26,10 +26,10 @@ def test_autograde_projects(settings):
                                             supervisor_grade=1,
                                             presentation_grade=2)
     assert project_student.final_grade == ProjectStudent.GRADES.NOT_GRADED
-    # No reporting periods was found
+    # No reporting periods were found
     with pytest.raises(CommandError) as e:
         management.call_command("autograde_projects")
-    rp = ReportingPeriodFactory(term=current_term,
+    rp = ReportingPeriodFactory(term=current_term, branch=None,
                                 start_on=start_on, end_on=end_on)
     # No score settings
     with pytest.raises(CommandError) as e:
@@ -38,7 +38,6 @@ def test_autograde_projects(settings):
     rp.score_good = 6
     rp.score_pass = 2
     rp.save()
-    assert project_student.total_score == 3
     out = StringIO()
     management.call_command("autograde_projects", stdout=out)
     assert out.getvalue().strip() == "1"

@@ -1,14 +1,20 @@
 import factory
 from django.forms import model_to_dict
 from factory.fuzzy import FuzzyInteger, FuzzyChoice
+from faker import Faker
+from faker.providers import date_time
 
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory
-from learning.projects.forms import ReportReviewForm
+from learning.projects.forms import ReportReviewForm, PracticeCriteriaForm
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
-    ReportingPeriod
+    ReportingPeriod, PracticeCriteria
 from learning.tests.factories import BranchFactory
 from users.tests.factories import UserFactory, StudentCenterFactory
+
+
+fake = Faker()
+fake.add_provider(date_time)
 
 
 class ReportingPeriodFactory(factory.DjangoModelFactory):
@@ -17,7 +23,8 @@ class ReportingPeriodFactory(factory.DjangoModelFactory):
 
     label = factory.Sequence(lambda n: "Period label %03d" % n)
     term = factory.SubFactory(SemesterFactory)
-    branch = factory.SubFactory(BranchFactory)
+    start_on = fake.past_date(start_date="-10d", tzinfo=None)
+    end_on = fake.future_date(end_date="+10d", tzinfo=None)
 
 
 class ProjectFactory(factory.DjangoModelFactory):
@@ -30,6 +37,7 @@ class ProjectFactory(factory.DjangoModelFactory):
     supervisor = factory.Sequence(lambda n: "Test supervisor %03d" % n)
     project_type = 'practice'
     semester = factory.SubFactory(SemesterFactory)
+    branch = factory.SubFactory(BranchFactory)
 
     @factory.post_generation
     def students(self, create, extracted, **kwargs):
@@ -63,6 +71,7 @@ class ReportFactory(factory.DjangoModelFactory):
         model = Report
 
     project_student = factory.SubFactory(ProjectStudentFactory)
+    reporting_period = factory.SubFactory(ReportingPeriodFactory)
     score_activity = FuzzyChoice([v for v, _ in Report.ACTIVITY])
     score_quality = FuzzyChoice([v for v, _ in Report.QUALITY])
 
@@ -73,6 +82,21 @@ class ReviewFactory(factory.DjangoModelFactory):
 
     report = factory.SubFactory(ReportFactory)
     reviewer = factory.SubFactory(UserFactory)
+
+    @factory.post_generation
+    def criteria(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if not extracted:
+            criteria = ReviewPracticeCriteriaFactory(review=self)
+            self.criteria = criteria
+
+
+class ReviewPracticeCriteriaFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = PracticeCriteria
+
+    review = factory.SubFactory(ReviewFactory)
     score_global_issue = FuzzyChoice([v for v, _ in
                                       Review.GLOBAL_ISSUE_CRITERION])
     score_usefulness = FuzzyChoice([v for v, _ in
@@ -84,18 +108,11 @@ class ReviewFactory(factory.DjangoModelFactory):
     score_plans = FuzzyChoice([v for v, _ in Review.PLANS_CRITERION])
 
 
-class ReportReviewFormFactory:
-    def __init__(self, *args, report, reviewer, **kwargs):
-        new_review = ReviewFactory.build(report=report, reviewer=reviewer,
-                                         **kwargs)
-        form_data = {k:v for k, v in model_to_dict(new_review).items() if v is not None}
-        form = ReportReviewForm(data=form_data)
-        data = form.data
-        # FIXME: Check if I can pass it directly to ReportReviewForm
-        data[ReportReviewForm.prefix] = "1"
-        self.data = data
-        self.send_to = reverse("projects:project_report", kwargs={
-            "student_pk": report.project_student.student.pk,
-            "project_pk": report.project_student.project.pk,
-        })
+def review_form_factory(is_completed=True):
+    criteria = factory.build(dict, FACTORY_CLASS=ReviewPracticeCriteriaFactory,
+                             review=None)
+    del criteria["review"]
+    data = {f"{PracticeCriteriaForm.prefix}-{k}": v for k, v in criteria.items()}
 
+    data[f"{ReportReviewForm.prefix}-is_completed"] = is_completed
+    return data

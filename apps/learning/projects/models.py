@@ -2,10 +2,12 @@
 import datetime
 import math
 import os
-from typing import NamedTuple
+from decimal import Decimal
+from typing import NamedTuple, Optional
 
 from django.apps import apps
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -17,6 +19,8 @@ from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 
+from core.db.models import ScoreField
+from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local
 from core.urls import reverse
@@ -31,6 +35,7 @@ from notifications.signals import notify
 from users.constants import AcademicRoles
 
 # Calculate mean scores for these fields when review has been completed
+# FIXME: move to the model with criteria
 REVIEW_SCORE_FIELDS = [
     "score_global_issue",
     "score_usefulness",
@@ -55,12 +60,12 @@ class ReportingPeriodDict(dict):
     def __setitem__(self, key, value):
         if not isinstance(key, ReportingPeriodKey):
             raise TypeError("Key must be ReportingPeriodKey instance")
-        if not isinstance(value, ReportingPeriod):
-            raise TypeError("Value must be ReportingPeriod instance")
+        if not isinstance(value, (ReportingPeriod, list)):
+            raise TypeError("Value must be ReportingPeriod instance or list")
         super().__setitem__(key, value)
 
     @classmethod
-    def from_queryset(cls, queryset, first_match=False):
+    def from_queryset(cls, queryset):
         """
         Note that this method doesn't take into account date range. You have
         to make sure that queryset for each (branch, project_type) has
@@ -82,28 +87,23 @@ class ReportingPeriodDict(dict):
                 for project_type in project_types:
                     k = ReportingPeriodKey(branch_code, project_type)
                     if k not in periods:
-                        periods[k] = period
+                        periods[k] = [period]
                     else:
                         # Replace period if new one is more precise
-                        added = periods[k]
-                        if period.weight > added.weight:
-                            if not first_match and (
-                                    period.start_on != added.start_on or
-                                    period.end_on != added.end_on):
-                                raise TypeError("Reporting periods for the same (branch, project_type) should have the same date ranges.")
-                            periods[k] = period
+                        for i, p in enumerate(periods[k]):
+                            ranges_eq = (p.start_on == period.start_on and
+                                         p.end_on == period.end_on)
+                            if ranges_eq and period.weight > p.weight:
+                                periods[k][i] = period
+                                break
+                        else:
+                            periods[k].append(period)
         return periods
 
     def for_branch(self, branch: Branch):
         return {k: v for k, v in self.items() if k.branch_code == branch.code}
 
 
-# TODO: Добавить студенту branch. Синхронизировать значения для студентов центра.
-# TODO; покрыть тестами. Перенести отчетные периоды, удалить старые поля из Semester.
-#  TODO: Связать отчет с project_student + отчетный период (обязательные уникальные поля)
-# TODO: Выделить критерии в отдельную модель (это критерии практики). Создать критерии для НИР.
-# TODO: 1 активный период в 1 момент времени на странице проекта для студента (в порядке приоритета). При отправке связывать отчет с нужными критериями и отчетным периодом.
-# TODO: синхронизировать данные Semester - ReportingPeriod
 class ReportingPeriod(models.Model):
     """
     This model based on assumption that each branch has only 1 (or none)
@@ -214,6 +214,10 @@ class ReportingPeriod(models.Model):
         suffix = " [" + ", ".join(parts) + "]" if parts else ""
         return f"{self.term}, {start_on}-{end_on}{suffix}"
 
+    def is_started(self, project: "Project"):
+        today = now_local(project.branch.timezone).date()
+        return today >= self.start_on
+
     @property
     def weight(self):
         """
@@ -238,7 +242,11 @@ class ReportingPeriod(models.Model):
               .order_by('-end_on',
                         F('branch_id').desc(nulls_last=True),
                         F('project_type').desc(nulls_last=True)))
-        return ReportingPeriodDict.from_queryset(qs, first_match=True)
+        final_periods = ReportingPeriodDict()
+        all_periods = ReportingPeriodDict.from_queryset(qs)
+        for k, v in all_periods.items():
+            final_periods[k] = v[0]
+        return final_periods
 
     @classmethod
     def get_periods(cls, **filters) -> ReportingPeriodDict:
@@ -247,8 +255,7 @@ class ReportingPeriod(models.Model):
               .select_related("branch"))
         return ReportingPeriodDict.from_queryset(qs)
 
-    def score_to_grade(self, project_student: "ProjectStudent"):
-        score = project_student.total_score
+    def score_to_grade(self, score, project):
         if score >= self.score_excellent:
             final_grade = GradeTypes.EXCELLENT
         elif score >= self.score_good:
@@ -258,9 +265,14 @@ class ReportingPeriod(models.Model):
         else:
             final_grade = GradeTypes.UNSATISFACTORY
         # For external projects use binary grading policy
-        if project_student.project.is_external and score >= self.score_pass:
+        if project.is_external and score >= self.score_pass:
             final_grade = GradeTypes.CREDIT
         return final_grade
+
+    def get_report_form(self, **kwargs):
+        from learning.projects.forms import ReportForm
+        return ReportForm(initial={"reporting_period": self.id},
+                          **kwargs)
 
     def students_are_notified(self, notification_type, branch: Branch) -> bool:
         from notifications.models import Notification
@@ -287,7 +299,7 @@ class ReportingPeriod(models.Model):
             filters["project__project_type"] = self.project_type
         project_students = (ProjectStudent.objects
                             .filter(project__semester=self.term,
-                                    report__isnull=True,
+                                    reports__isnull=True,
                                     **filters)
                             .exclude(final_grade=GradeTypes.UNSATISFACTORY,
                                      project__status=Project.Statuses.CANCELED)
@@ -360,28 +372,21 @@ class ProjectStudent(models.Model):
     def city_aware_field_name(self):
         return self.__class__.project.field.name
 
-    def get_report_url(self):
-        return reverse(
-            "projects:student_project_report",
-            kwargs={
-                "project_pk": self.project_id,
-                "student_pk": self.student_id
-            }
-        )
+    def get_report(self, reporting_period: ReportingPeriod):
+        for report in self.reports.all():
+            if report.reporting_period_id == reporting_period.pk:
+                return report
 
     @property
     def total_score(self):
-        acc = 0
-        for attr in (self.supervisor_grade, self.presentation_grade):
-            try:
-                acc += int(attr)
-            except (TypeError, ValueError):
-                continue
-        try:
-            acc += int(self.report.final_score)
-        except (TypeError, ValueError, ObjectDoesNotExist):
-            pass
-        return acc
+        score = 0
+        for report in self.reports.all():
+            score += report.final_score if report.final_score else 0
+        if self.supervisor_grade:
+            score += self.supervisor_grade
+        if self.presentation_grade:
+            score += self.presentation_grade
+        return score
 
     def has_final_grade(self):
         return self.final_grade != self.GRADES.NOT_GRADED
@@ -463,6 +468,13 @@ class Project(TimeStampedModel):
     city = models.ForeignKey(City, verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE,
                              on_delete=models.CASCADE)
+    branch = models.ForeignKey(
+        Branch,
+        to_field="code",
+        verbose_name=_("Branch"),
+        related_name="+",  # Disable backwards relation
+        on_delete=models.CASCADE,
+        default=Branches.SPB)
     is_external = models.BooleanField(
         _("External project"),
         default=False)
@@ -570,28 +582,204 @@ class Project(TimeStampedModel):
         current_term_index = get_current_term_index(self.city_id)
         return not self.is_canceled and self.semester.index == current_term_index
 
-    # FIXME: Нужно заменить на концепцию "report_period_active"
-    def report_period_started(self):
-        if not self.semester.report_starts_at:
-            return False
-        today = now_local(self.city_id).date()
-        return today >= self.semester.report_starts_at
-
     def report_period_ended(self):
         today = now_local(self.city_id).date()
         if not self.semester.report_ends_at:
             return None
         return self.semester.report_ends_at > today
 
-    def report_period_active(self):
-        semester = self.semester
-        if not semester.report_starts_at or not semester.report_ends_at:
-            return False
-        today = now_local(self.city_id).date()
-        return semester.report_starts_at <= today <= semester.report_ends_at
+
+def report_file_name(self, filename):
+    return os.path.join('projects',
+                        '{}-{}'.format(
+                            self.project_student.project.semester.year,
+                            self.project_student.project.semester.type),
+                        '{}'.format(self.project_student.project.pk),
+                        'reports',
+                        filename)
 
 
-class ReviewCriteria(TimeStampedModel):
+class Report(DerivableFieldsMixin, TimeStampedModel):
+    SENT = 'sent'
+    REVIEW = 'review'
+    SUMMARY = 'rating'  # Summarize
+    COMPLETED = 'completed'
+    STATUS = (
+        (SENT, _("New Report")),
+        (REVIEW, _("Review")),
+        (SUMMARY, _("Waiting for final score")),
+        (COMPLETED, _("Completed")),
+
+    )
+
+    ACTIVITY = (
+        (0, _("Poor commit history")),
+        (1, _("Normal activity")),
+    )
+    QUALITY = (
+        (0, _("Bad report quality and unrelated comments")),
+        (1, _("Bad report quality, but sensible comments")),
+        (2, _("Good report quality and sensible comments")),
+    )
+
+    project_student = models.ForeignKey(
+        ProjectStudent,
+        related_name="reports",
+        on_delete=models.PROTECT)
+    reporting_period = models.ForeignKey(
+        ReportingPeriod,
+        related_name="reports",
+        on_delete=models.PROTECT)
+    status = models.CharField(
+        choices=STATUS,
+        verbose_name=_("Status"),
+        default=SENT,
+        max_length=15)
+    text = models.TextField(
+        _("Description"),
+        blank=True,
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    file = models.FileField(
+        _("Report file"),
+        blank=True,
+        null=True,
+        upload_to=report_file_name)
+    # curators criteria
+    score_activity = models.PositiveSmallIntegerField(
+        verbose_name=_("Student activity in cvs"),
+        validators=[MaxValueValidator(1)],
+        choices=ACTIVITY,
+        blank=True,
+        null=True
+    )
+    score_activity_note = models.TextField(
+        _("Note for criterion `score_activity`"),
+        blank=True, null=True)
+    score_quality = models.PositiveSmallIntegerField(
+        verbose_name=_("Report's quality"),
+        validators=[MaxValueValidator(2)],
+        choices=QUALITY,
+        blank=True,
+        null=True
+    )
+    score_quality_note = models.TextField(
+        _("Note for criterion `score_quality`"),
+        blank=True, null=True)
+    final_score = ScoreField(
+        verbose_name=_("Final Score"),
+        null=True,
+        blank=True)
+    # TODO: Visible to curator and student only
+    final_score_note = models.TextField(
+        _("Final score note"),
+        blank=True,
+        null=True)
+
+    derivable_fields = ('final_score',)
+
+    class Meta:
+        verbose_name = _("Reports")
+        verbose_name_plural = _("Reports")
+        unique_together = [('project_student', 'reporting_period')]
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        if self.status in (Report.SUMMARY, Report.COMPLETED):
+            if created:
+                self.final_score = 0
+            else:
+                self.compute_fields("final_score")
+        super().save(*args, **kwargs)
+
+    def _compute_final_score(self):
+        final_score = Decimal(0)
+        # FIXME: Delegate this logic to review criteria model
+        scores = {field_name: (0, 0) for field_name in REVIEW_SCORE_FIELDS}
+        for review in self.review_set.all():
+            for field_name in REVIEW_SCORE_FIELDS:
+                total, count = scores[field_name]
+                if getattr(review, field_name) is not None:
+                    scores[field_name] = (
+                        total + getattr(review, field_name),
+                        count + 1
+                    )
+        for field_name in REVIEW_SCORE_FIELDS:
+            total, count = scores.get(field_name)
+            mean = math.ceil(total / count) if count else 0
+            final_score += mean
+        for field_name in CURATOR_SCORE_FIELDS:
+            score = getattr(self, field_name)
+            final_score += score if score else 0
+
+        if self.final_score != final_score:
+            self.final_score = final_score
+            return True
+
+        return False
+
+    @property
+    def file_name(self):
+        if self.file:
+            return os.path.basename(self.file.name)
+
+    def file_url(self):
+        return reverse(
+            "projects:report_attachments_download",
+            args=[
+                hashids.encode(
+                    apps.get_app_config("projects").REPORT_ATTACHMENT,
+                    self.pk
+                )]
+        )
+
+    def __str__(self):
+        return smart_text(self.project_student.student)
+
+    def get_city(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city()
+
+    def get_city_timezone(self):
+        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
+        return next_in_city_aware_mro.get_city_timezone()
+
+    @property
+    def city_aware_field_name(self):
+        return self.__class__.project_student.field.name
+
+    def created_local(self, tz=None):
+        if not tz:
+            tz = self.get_city_timezone()
+        return timezone.localtime(self.created, timezone=tz)
+
+    def get_absolute_url(self):
+        """May been inefficient if `project_student` not prefetched """
+        return reverse("projects:project_report",
+                       kwargs={
+                           "project_pk": self.project_student.project_id,
+                           "report_id": self.id
+                       })
+
+    def get_update_url(self):
+        return reverse("projects:project_report_update",
+                       kwargs={
+                           "project_pk": self.project_student.project_id,
+                           "report_id": self.id
+                       })
+
+    def get_review_url(self):
+        return reverse("projects:project_report_upsert_review",
+                       kwargs={
+                           "project_pk": self.project_student.project_id,
+                           "report_id": self.id
+                       })
+
+    @property
+    def is_completed(self):
+        return self.status == self.COMPLETED
+
+
+class Review(TimeStampedModel):
     GLOBAL_ISSUE_CRITERION = (
         (0, _("0 - Does not understand the task at all")),
         (1, _("1 - Understands, but very superficial")),
@@ -631,6 +819,19 @@ class ReviewCriteria(TimeStampedModel):
         (2, _("2 - All right with them"))
     )
 
+    report = models.ForeignKey(Report, on_delete=models.PROTECT)
+    reviewer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Project reviewer"),
+        on_delete=models.CASCADE)
+    # FIXME: remove blank/null if possible
+    criteria_content_type = models.ForeignKey(
+        ContentType, null=True, blank=True,
+        related_name='+', on_delete=models.CASCADE
+    )
+    criteria_object_id = models.PositiveIntegerField(null=True, blank=True)
+    criteria = GenericForeignKey('criteria_content_type', 'criteria_object_id')
+
     score_global_issue = models.PositiveSmallIntegerField(
         choices=GLOBAL_ISSUE_CRITERION,
         verbose_name=_("The global task for term"),
@@ -668,185 +869,6 @@ class ReviewCriteria(TimeStampedModel):
         blank=True,
         null=True
     )
-
-    class Meta:
-        abstract = True
-
-
-def report_file_name(self, filename):
-    return os.path.join('projects',
-                        '{}-{}'.format(
-                            self.project_student.project.semester.year,
-                            self.project_student.project.semester.type),
-                        '{}'.format(self.project_student.project.pk),
-                        'reports',
-                        filename)
-
-
-class Report(ReviewCriteria):
-    SENT = 'sent'
-    REVIEW = 'review'
-    SUMMARY = 'rating'  # Summarize
-    COMPLETED = 'completed'
-    STATUS = (
-        (SENT, _("Sent")),
-        (REVIEW, _("Review")),
-        (SUMMARY, _("Waiting for final score")),
-        (COMPLETED, _("Completed")),
-
-    )
-
-    ACTIVITY = (
-        (0, _("Poor commit history")),
-        (1, _("Normal activity")),
-    )
-    QUALITY = (
-        (0, _("Bad report quality and unrelated comments")),
-        (1, _("Bad report quality, but sensible comments")),
-        (2, _("Good report quality and sensible comments")),
-    )
-
-    project_student = models.OneToOneField(
-        ProjectStudent,
-        on_delete=models.PROTECT)
-    status = models.CharField(
-        choices=STATUS,
-        verbose_name=_("Status"),
-        default=SENT,
-        max_length=15)
-    text = models.TextField(
-        _("Description"),
-        blank=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    file = models.FileField(
-        _("Report file"),
-        blank=True,
-        null=True,
-        upload_to=report_file_name)
-    # curators only below
-    score_activity = models.PositiveSmallIntegerField(
-        verbose_name=_("Student activity in cvs"),
-        validators=[MaxValueValidator(1)],
-        choices=ACTIVITY,
-        blank=True,
-        null=True
-    )
-    score_activity_note = models.TextField(
-        _("Note for criterion `score_activity`"),
-        blank=True, null=True)
-    score_quality = models.PositiveSmallIntegerField(
-        verbose_name=_("Report's quality"),
-        validators=[MaxValueValidator(2)],
-        choices=QUALITY,
-        blank=True,
-        null=True
-    )
-    score_quality_note = models.TextField(
-        _("Note for criterion `score_quality`"),
-        blank=True, null=True)
-
-    @property
-    def file_name(self):
-        if self.file:
-            return os.path.basename(self.file.name)
-
-    def file_url(self):
-        return reverse(
-            "projects:report_attachments_download",
-            args=[
-                hashids.encode(
-                    apps.get_app_config("projects").REPORT_ATTACHMENT,
-                    self.pk
-                )]
-        )
-
-    # TODO: Visible to curator and student only
-    final_score_note = models.TextField(
-        _("Final score note"),
-        blank=True,
-        null=True)
-
-    class Meta:
-        verbose_name = _("Reports")
-        verbose_name_plural = _("Reports")
-
-    def __str__(self):
-        return smart_text(self.project_student.student)
-
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.project_student.field.name
-
-    def created_local(self, tz=None):
-        if not tz:
-            tz = self.get_city_timezone()
-        return timezone.localtime(self.created, timezone=tz)
-
-    def get_absolute_url(self):
-        """May been inefficient if `project_student` not prefetched """
-        return reverse("projects:project_report",
-                       kwargs={
-                           "project_pk": self.project_student.project_id,
-                           "student_pk": self.project_student.student_id
-                       })
-
-    def review_state(self):
-        return self.status == self.REVIEW
-
-    def summarize_state(self):
-        return self.status == self.SUMMARY
-
-    def is_completed(self):
-        return self.status == self.COMPLETED
-
-    def calculate_mean_scores(self):
-        """Set mean values on score fields which been assessed by reviewers"""
-        scores = {field_name: (0, 0) for field_name in REVIEW_SCORE_FIELDS}
-        for review in self.review_set.all():
-            for field_name in REVIEW_SCORE_FIELDS:
-                total, count = scores[field_name]
-                if getattr(review, field_name) is not None:
-                    scores[field_name] = (
-                        total + getattr(review, field_name),
-                        count + 1
-                    )
-        for field_name in REVIEW_SCORE_FIELDS:
-            total, count = scores.get(field_name)
-            mean = math.ceil(total / count) if count else 0
-            setattr(self, field_name, mean)
-
-    @property
-    def final_score(self):
-        """Sum of all criteria"""
-        if not self.is_completed():
-            return _("review not completed")
-        return self.calculate_final_score()
-
-    def calculate_final_score(self):
-        """For preliminary assessment call calculate_mean_scores first"""
-        return sum(
-            getattr(self, field.name) for field in self._meta.get_fields()
-            if isinstance(field, models.IntegerField) and
-            field.name.startswith("score_") and
-            getattr(self, field.name) is not None
-        )
-
-
-class Review(ReviewCriteria):
-    report = models.ForeignKey(Report, on_delete=models.PROTECT)
-    reviewer = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Project reviewer"),
-        on_delete=models.CASCADE)
-
     score_global_issue_note = models.TextField(
         _("Note for criterion #1"),
         blank=True, null=True)
@@ -881,6 +903,120 @@ class Review(ReviewCriteria):
         verbose_name = _("Review")
         verbose_name_plural = _("Reviews")
         unique_together = [('report', 'reviewer')]
+
+
+
+
+class PracticeCriteria(models.Model):
+    GLOBAL_ISSUE_CRITERION = (
+        (0, _("0 - Does not understand the task at all")),
+        (1, _("1 - Understands, but very superficial")),
+        (2, _("2 - Understands everything"))
+    )
+
+    USEFULNESS_CRITERION = (
+        (0, _("0 - Does not understand")),
+        (1, _("1 - Writing something about the usefulness")),
+        (2, _("2 - Understands and explains"))
+    )
+
+    PROGRESS_CRITERION = (
+        (0, _("0 - Understand only theory, or even less")),
+        (1, _("1 - Some progress, but not enough")),
+        (2, _("2 - The normal rate of work"))
+    )
+
+    PROBLEMS_CRITERION = (
+        (0, _("0 - Problems not mentioned in the report")),
+        (1, _("1 - Problems are mentioned without any details")),
+        (2, _("2 - Problems are mentioned and explained how they been solved"))
+    )
+
+    TECHNOLOGIES_CRITERION = (
+        (0, _("0 - Listed, but not explained why.")),
+        (1, _("1 - The student does not understand about everything and "
+              "does not try to understand, but knows something")),
+        (2, _("2 - Understands why choose one or the other technology"))
+    )
+
+    PLANS_CRITERION = (
+        (0, _("0 - Much less than what has already been done, or the student "
+              "does not understand them")),
+        (1, _("1 - It seems to have plans of normal size, but does not "
+              "understand what to do.")),
+        (2, _("2 - All right with them"))
+    )
+
+    review = models.ForeignKey(
+        Review,
+        verbose_name=_("Review"),
+        related_name="+",
+        on_delete=models.CASCADE)
+    score_global_issue = models.PositiveSmallIntegerField(
+        choices=GLOBAL_ISSUE_CRITERION,
+        verbose_name=_("The global task for term"),
+        blank=True,
+        null=True
+    )
+    score_usefulness = models.PositiveSmallIntegerField(
+        choices=USEFULNESS_CRITERION,
+        verbose_name=_("Possible uses and scenarios"),
+        blank=True,
+        null=True
+    )
+    score_progress = models.PositiveSmallIntegerField(
+        choices=PROGRESS_CRITERION,
+        verbose_name=_("What has been done since the start of the project."),
+        blank=True,
+        null=True
+    )
+    score_problems = models.PositiveSmallIntegerField(
+        choices=PROBLEMS_CRITERION,
+        verbose_name=_("What problems have arisen in the process."),
+        blank=True,
+        null=True
+    )
+    score_technologies = models.PositiveSmallIntegerField(
+        choices=TECHNOLOGIES_CRITERION,
+        verbose_name=_("The choice of technologies or method of integration "
+                       "with the existing development"),
+        blank=True,
+        null=True
+    )
+    score_plans = models.PositiveSmallIntegerField(
+        choices=PLANS_CRITERION,
+        verbose_name=_("Future plan"),
+        blank=True,
+        null=True
+    )
+    score_global_issue_note = models.TextField(
+        _("Note for criterion #1"),
+        blank=True, null=True)
+
+    score_usefulness_note = models.TextField(
+        _("Note for criterion #2"),
+        blank=True, null=True)
+
+    score_progress_note = models.TextField(
+        _("Note for criterion #3"),
+        blank=True, null=True)
+
+    score_problems_note = models.TextField(
+        _("Note for criterion #4"),
+        blank=True, null=True)
+
+    score_technologies_note = models.TextField(
+        _("Note for criterion #5"),
+        blank=True, null=True)
+
+    score_plans_note = models.TextField(
+        _("Note for criterion #6"),
+        blank=True,
+        null=True)
+
+    class Meta:
+        verbose_name = _("Practice Criteria")
+        verbose_name_plural = _("Practice Criteria")
 
 
 def report_comment_attachment_upload_to(self, filename):

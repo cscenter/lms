@@ -103,6 +103,27 @@
             </div>
         {% endif %}
 
+        {% if is_reviewer and report.status == report.REVIEW and not review_form.instance.is_completed %}
+            <a href="#review-form" data-toggle="collapse" aria-expanded="{% if has_errors %}true{% else %}false{% endif %}" class="collapse-link">
+                Оценить работу
+            </a>
+            <div class="panel-collapse">
+                <div class="{% if not has_errors %}collapse {% endif %}csc-well" id="review-form">
+                    <form method="post" action="{{ report.get_review_url }}">
+                        {% crispy review_criteria_form %}
+                        {% crispy review_form %}
+                    </form>
+                </div>
+            </div>
+        {% elif is_reviewer and review_form.instance.is_completed %}
+            <div class="card">
+                <div class="card-header ch-alt"><h2>Ваша итоговая оценка</h2></div>
+                <div class="card-body card-padding -preliminary-scores">
+                    {% include "learning/projects/_report_preliminary_assessment.html" with review=own_review %}
+                </div>
+            </div>
+        {% endif %}
+
         {% if request.user.is_curator and report.status != report.SENT %}
             <h3>Проверка отчета</h3>
             <div class="panel-group">
@@ -130,27 +151,9 @@
             </div>
         {% endif %}
 
-        {% if is_reviewer and report.review_state and not review_form.instance.is_completed %}
-            <a href="#review-form" data-toggle="collapse" aria-expanded="{% if has_errors %}true{% else %}false{% endif %}" class="collapse-link">
-                Оценить работу
-            </a>
-            <div class="panel-collapse">
-                <div class="{% if not has_errors %}collapse {% endif %}csc-well" id="review-form">
-                    {% crispy review_form %}
-                </div>
-            </div>
-        {% elif is_reviewer and not user.is_curator and review_form.instance.is_completed %}
-            <div class="card">
-                <div class="card-header ch-alt"><h2>Ваша итоговая оценка</h2></div>
-                <div class="card-body card-padding -preliminary-scores">
-                    {% include "learning/projects/_report_preliminary_assessment.html" with review=own_review %}
-                </div>
-            </div>
-        {% endif %}
-
-        {% if request.user.is_curator and report.summarize_state %}
+        {% if request.user.is_curator and report.status == report.SUMMARY %}
             <div class="csc-well" id="report-summarize-form">
-                <span href="#report-summarize-form" class="collapse-link" style="border: none;">Подвести итоги&nbsp;({% blocktrans count counter=report_summary_form.instance.calculate_final_score trimmed %}
+                <span href="#report-summarize-form" class="collapse-link" style="border: none;">Подведение итогов&nbsp;({% blocktrans count counter=report_summary_form.instance.final_score trimmed %}
                                     {{ counter }} point
                                     {% plural %}
                                     {{ counter }} points
@@ -183,6 +186,8 @@
             <h5>Статус отчета</h5>
             {{ report.get_status_display }}
         {% endif %}
+        <h5>Дата отправки</h5>
+        <span {% if report.created_local.date > report.reporting_period.end_on %} class="text-danger"{% endif %}>{{ report.created_local|date:"j E Y H:i" }}</span>
         <h5>{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект</h5>
         {{ project.semester }}
         {% if is_reviewer or user.is_curator %}
