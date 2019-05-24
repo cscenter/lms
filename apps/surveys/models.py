@@ -260,8 +260,7 @@ class CourseSurvey(models.Model):
     # Note: Minor inaccuracy with deadline since we set dates in UTC on client
     expire_at = models.DateTimeField(
         verbose_name=_("Expires on"),
-        help_text=_("With published selected, won't be shown after this time."),
-        blank=True, null=True)
+        help_text=_("With published selected, won't be shown after this time."))
     email_template = models.ForeignKey(
         EmailTemplate,
         on_delete=models.CASCADE,

@@ -9,8 +9,10 @@
     <div class="row content-center no-gutters">
         <div class="col-lg-8">
             {% if request.user.is_curator and not form.survey.is_published %}
-                Предварительный просмотр. Опрос ещё не опубликован.<br>
-                <a target="_blank" class="btn _primary mb-2" href="{{ url("admin:surveys_form_change", object_id=form.survey.form_id) }}">Редактировать форму</a>
+                <div class="message _danger mb-8">
+                    <h4>Предварительный просмотр</h4>
+                    Опрос ещё не опубликован. <a target="_blank" href="{{ url("admin:surveys_form_change", object_id=form.survey.form_id) }}">Редактировать форму опроса.</a>
+                </div>
             {% endif %}
             <div class="card _survey">
                 <div class="card__title _inverted">
