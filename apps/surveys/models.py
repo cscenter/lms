@@ -30,8 +30,6 @@ class FormManager(models.Manager):
         if for_user is not None and for_user.is_staff:
             return self.all()
         filters = [
-            Q(publish_at__lte=now_local) | Q(publish_at__isnull=True),
-            Q(expire_at__gte=now_local) | Q(expire_at__isnull=True),
             Q(status=STATUS_PUBLISHED),
         ]
         return self.filter(*filters)
@@ -259,11 +257,7 @@ class CourseSurvey(models.Model):
     course = models.ForeignKey(Course,
                                related_name="surveys",
                                on_delete=models.CASCADE)
-    # Note: Minor inaccuracy with deadlines since we set dates in UTC on client
-    publish_at = models.DateTimeField(
-        verbose_name=_("Published from"),
-        help_text=_("With published selected, won't be shown until this time."),
-        blank=True, null=True)
+    # Note: Minor inaccuracy with deadline since we set dates in UTC on client
     expire_at = models.DateTimeField(
         verbose_name=_("Expires on"),
         help_text=_("With published selected, won't be shown after this time."),
@@ -352,8 +346,7 @@ class CourseSurvey(models.Model):
     def is_active(self):
         today = now_local(self.course.get_city_timezone())
         expired = self.expire_at is not None and self.expire_at <= today
-        started = self.publish_at is None or self.publish_at <= today
-        return started and not expired
+        return self.is_published and not expired
 
     def get_email_template(self):
         return f"survey-{self.type}"
@@ -364,7 +357,6 @@ class CourseSurvey(models.Model):
         today = now_local(course.get_city_timezone())
         return (cls.objects
                 .filter(Q(expire_at__gt=today) | Q(expire_at__isnull=True),
-                        Q(publish_at__lte=today) | Q(publish_at__isnull=True),
                         course=course,
                         form__status=STATUS_PUBLISHED)
                 .order_by("-expire_at")

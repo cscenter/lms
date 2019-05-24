@@ -44,8 +44,7 @@ class CourseSurveyAdmin(admin.ModelAdmin):
         }
     }
     list_display = ("course", "get_city", "type",
-                    "get_form_actions", "get_survey_actions",
-                    "publish_at", "expire_at")
+                    "get_form_actions", "get_survey_actions", "expire_at")
     list_filter = (
         'course__city',
         ('course__semester', AdminRelatedDropdownFilter),
