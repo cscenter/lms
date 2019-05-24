@@ -53,7 +53,7 @@ class Semester(models.Model):
         null=True,
         help_text=_("Students can enroll on or leave the course "
                     "before this date (inclusive)"))
-
+    # FIXME: remove
     report_starts_at = models.DateField(
         _("Report start"),
         blank=True,

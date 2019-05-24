@@ -582,12 +582,6 @@ class Project(TimeStampedModel):
         current_term_index = get_current_term_index(self.city_id)
         return not self.is_canceled and self.semester.index == current_term_index
 
-    def report_period_ended(self):
-        today = now_local(self.city_id).date()
-        if not self.semester.report_ends_at:
-            return None
-        return self.semester.report_ends_at > today
-
 
 def report_file_name(self, filename):
     return os.path.join('projects',
