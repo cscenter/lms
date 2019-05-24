@@ -1,10 +1,6 @@
 import factory
-from django.forms import model_to_dict
 from factory.fuzzy import FuzzyInteger, FuzzyChoice
-from faker import Faker
-from faker.providers import date_time
 
-from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.projects.forms import ReportReviewForm, PracticeCriteriaForm
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
@@ -13,18 +9,14 @@ from learning.tests.factories import BranchFactory
 from users.tests.factories import UserFactory, StudentCenterFactory
 
 
-fake = Faker()
-fake.add_provider(date_time)
-
-
 class ReportingPeriodFactory(factory.DjangoModelFactory):
     class Meta:
         model = ReportingPeriod
 
     label = factory.Sequence(lambda n: "Period label %03d" % n)
     term = factory.SubFactory(SemesterFactory)
-    start_on = fake.past_date(start_date="-10d", tzinfo=None)
-    end_on = fake.future_date(end_date="+10d", tzinfo=None)
+    start_on = factory.Faker('past_date', start_date="-10d", tzinfo=None)
+    end_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)
 
 
 class ProjectFactory(factory.DjangoModelFactory):

@@ -2,6 +2,7 @@ import random
 from random import randint
 
 import factory
+import pytz
 
 from core.factories import EmailTemplateFactory
 from courses.tests.factories import CourseFactory
@@ -56,6 +57,7 @@ class CourseSurveyFactory(factory.DjangoModelFactory):
 
     form = factory.SubFactory(FormFactory)
     course = factory.SubFactory(CourseFactory)
+    expire_at = factory.Faker('future_datetime', end_date="+30d", tzinfo=pytz.UTC)
     type = factory.Iterator([
         c for c, n in CourseSurvey._meta.get_field('type').choices
     ])

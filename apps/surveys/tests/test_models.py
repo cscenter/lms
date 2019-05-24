@@ -14,8 +14,7 @@ from surveys.tests.factories import CourseSurveyFactory
 def test_course_survey_is_active():
     course = CourseFactory(city_id=Branches.SPB)
     today = now_local(course.get_city_timezone())
-    cs = CourseSurveyFactory(course=course, expire_at=None,
-                             form__status=STATUS_PUBLISHED)
+    cs = CourseSurveyFactory(course=course, form__status=STATUS_PUBLISHED)
     assert cs.is_active
     cs.expire_at = today + timedelta(hours=2)
     assert cs.is_active
@@ -32,8 +31,7 @@ def test_get_active():
     course = CourseFactory(city_id=Branches.SPB)
     active_cs = CourseSurvey.get_active(course)
     assert active_cs is None
-    cs = CourseSurveyFactory(course=course, expire_at=None,
-                             form__status=STATUS_PUBLISHED)
+    cs = CourseSurveyFactory(course=course, form__status=STATUS_PUBLISHED)
     active_cs = CourseSurvey.get_active(course)
     assert active_cs == cs
     today = now_local(course.get_city_timezone())
