@@ -30,7 +30,7 @@ class CourseSurveyDetailView(FormView):
             form__slug=self.kwargs["slug"])
         if not survey.is_published and not self.request.user.is_curator:
             raise Http404
-        if not survey.is_active:
+        if not survey.is_active and not self.request.user.is_curator:
             msg = "Опрос окончен. Перенаправляем на страницу курса."
             messages.info(self.request, msg,
                           extra_tags='timeout')
