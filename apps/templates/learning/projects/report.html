@@ -186,14 +186,12 @@
             <h5>Статус отчета</h5>
             {{ report.get_status_display }}
         {% endif %}
-        <h5>Дата отправки</h5>
+        <h5>Дата отправки отчета</h5>
         <span {% if report.created_local.date > report.reporting_period.end_on %} class="text-danger"{% endif %}>{{ report.created_local|date:"j E Y H:i" }}</span>
         <h5>{% if project.is_external %}Внешний{% else %}Внутренний{% endif %} проект</h5>
         {{ project.semester }}
-        {% if is_reviewer or user.is_curator %}
-            <h5>Название проекта</h5>
-            <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
-        {% endif %}
+        <h5>Название проекта</h5>
+        <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
         <h5>Руководители</h5>
         {% for s in project.supervisors.all %}{{ s }}<br>{% endfor %}
         {% if report.is_completed %}
