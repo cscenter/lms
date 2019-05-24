@@ -6,7 +6,7 @@ from core.timezone import now_local
 from courses.tests.factories import CourseFactory
 from learning.settings import Branches
 from surveys.constants import STATUS_PUBLISHED, STATUS_DRAFT
-from surveys.models import CourseSurvey, Field, FieldChoice
+from surveys.models import CourseSurvey, Field, FieldChoice, Form
 from surveys.tests.factories import CourseSurveyFactory
 
 
@@ -14,17 +14,16 @@ from surveys.tests.factories import CourseSurveyFactory
 def test_course_survey_is_active():
     course = CourseFactory(city_id=Branches.SPB)
     today = now_local(course.get_city_timezone())
-    cs = CourseSurveyFactory(course=course, publish_at=None, expire_at=None)
+    cs = CourseSurveyFactory(course=course, expire_at=None,
+                             form__status=STATUS_PUBLISHED)
     assert cs.is_active
-    cs.publish_at = today + timedelta(hours=1)
+    cs.expire_at = today + timedelta(hours=2)
+    assert cs.is_active
+    cs.expire_at = today - timedelta(hours=2)
     assert not cs.is_active
-    cs.publish_at = None
-    cs.publish_at = today - timedelta(hours=1)
+    cs.expire_at = today + timedelta(hours=2)
     assert cs.is_active
-    cs.publish_at = None
-    cs.expire_at = today + timedelta(hours=1)
-    assert cs.is_active
-    cs.expire_at = today - timedelta(hours=1)
+    cs.form.status = STATUS_DRAFT
     assert not cs.is_active
 
 
@@ -58,7 +57,7 @@ def test_get_active():
     cs2.form.save()
     active_cs = CourseSurvey.get_active(course)
     assert active_cs == cs
-    cs.publish_at = today + timedelta(days=1)
+    cs.expire_at = today - timedelta(days=1)
     cs.save()
     active_cs = CourseSurvey.get_active(course)
     assert active_cs is None
