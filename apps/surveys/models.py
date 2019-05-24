@@ -352,7 +352,7 @@ class CourseSurvey(models.Model):
     def is_active(self):
         today = now_local(self.course.get_city_timezone())
         expired = self.expire_at is not None and self.expire_at <= today
-        started = self.publish_at is None or self.publish_at >= today
+        started = self.publish_at is None or self.publish_at <= today
         return started and not expired
 
     def get_email_template(self):
