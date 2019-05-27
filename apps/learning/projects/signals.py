@@ -121,20 +121,6 @@ def post_save_report(sender, instance, created, *args, **kwargs):
                 )
 
 
-@receiver(post_save, sender=Review)
-def post_save_review(sender, instance, created, *args, **kwargs):
-    """Update report status if all reviews are completed."""
-    review = instance
-    report = review.report
-    Report = apps.get_model('projects', 'Report')
-    if review.is_completed:
-        total_reviewers = len(report.project_student.project.reviewers.all())
-        completed_reviews = sum(r.is_completed for r in report.review_set.all())
-        if completed_reviews == total_reviewers:
-            report.status = Report.SUMMARY
-            report.save()
-
-
 @receiver(post_save, sender=ReportComment)
 def post_save_comment(sender, instance, created, *args, **kwargs):
     """Add notification when report comment has been created."""

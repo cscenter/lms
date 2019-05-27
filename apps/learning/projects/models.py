@@ -598,6 +598,7 @@ class Report(DerivableFieldsMixin, TimeStampedModel):
     REVIEW = 'review'
     SUMMARY = 'rating'  # Summarize
     COMPLETED = 'completed'
+    # FIXME: django-sfm support for state transitioning
     STATUS = (
         (SENT, _("New Report")),
         (REVIEW, _("Review")),
@@ -682,6 +683,7 @@ class Report(DerivableFieldsMixin, TimeStampedModel):
             if created:
                 self.final_score = 0
             else:
+                # FIXME: call .save method
                 self.compute_fields("final_score")
         super().save(*args, **kwargs)
 
@@ -898,7 +900,16 @@ class Review(TimeStampedModel):
         verbose_name_plural = _("Reviews")
         unique_together = [('report', 'reviewer')]
 
-
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super().save(*args, **kwargs)
+        if self.is_completed and self.report.status == Report.REVIEW:
+            r = self.report
+            reviewers_total = len(r.project_student.project.reviewers.all())
+            reviews_completed = sum(r.is_completed for r in r.review_set.all())
+            if reviews_completed == reviewers_total:
+                r.status = Report.SUMMARY
+                r.save(update_fields=("status",))
 
 
 class PracticeCriteria(models.Model):
