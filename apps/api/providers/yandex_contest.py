@@ -107,7 +107,7 @@ class YandexContestAPI:
             "Authorization": f"OAuth {self.access_token}"
         }
 
-    def register_in_contest(self, yandex_login, contest_id):
+    def register_in_contest(self, yandex_login, contest_id, timeout: int = 3):
         headers = self.base_headers
         payload = {'login': yandex_login}
         api_contest_url = self.PARTICIPANTS_URL.format(contest_id=contest_id)
@@ -115,7 +115,7 @@ class YandexContestAPI:
             response = requests.post(api_contest_url,
                                      headers=headers,
                                      params=payload,
-                                     timeout=3)
+                                     timeout=timeout)
             response.raise_for_status()
         # Network problems
         except (requests.ConnectionError, requests.Timeout) as e:
@@ -131,11 +131,13 @@ class YandexContestAPI:
                 logger.exception("Contest API service had internal error.")
                 raise Unavailable() from e
         participant_id = None
+        # FIXME: this logic should be encapsulated in the response object
         if response.status_code in (RegisterStatus.CREATED, RegisterStatus.OK):
             participant_id = response.json()
             logger.debug("Meta data: {}".format(participant_id))
         return response.status_code, participant_id
 
+    # FIXME: api.contest(42).info()
     def contest_info(self, contest_id):
         headers = self.base_headers
         url = self.CONTEST_URL.format(contest_id=contest_id)
@@ -146,6 +148,36 @@ class YandexContestAPI:
         logger.debug("Meta data: {}".format(info))
         return response.status_code, info
 
+    # FIXME: api.contest(42).problems()
+    def contest_problems(self, contest_id, timeout: int = 1):
+        headers = self.base_headers
+        url = self.PROBLEMS_URL.format(contest_id=contest_id)
+        response = self.request_and_check(url, "get", headers=headers,
+                                          timeout=timeout)
+        info = response.json()
+        logger.debug("Meta data: {}".format(info))
+        return response.status_code, info["problems"]
+
+    @staticmethod
+    def request_and_check(url, method, **kwargs):
+        assert method in ('post', 'get')
+        try:
+            return getattr(requests, method)(url, **kwargs)
+        # Network problems
+        except (requests.ConnectionError, requests.Timeout) as e:
+            raise Unavailable() from e
+        # Client 4xx or server 5xx HTTP errors
+        except requests.exceptions.HTTPError as e:
+            response = e.response
+            try:
+                ResponseStatus(response.status_code)  # known statuses
+                raise ContestAPIError(response.status_code, response.text)
+            except ValueError:
+                # Unpredictable client or server error
+                logger.exception("Contest API service had internal error.")
+                raise Unavailable() from e
+
+    # FIXME: api.contest(42).participant(1).info()
     def participant_info(self, contest_id, participant_id):
         headers = self.base_headers
         url = self.PARTICIPANT_URL.format(contest_id=contest_id,
@@ -157,8 +189,11 @@ class YandexContestAPI:
         logger.debug("Meta data: {}".format(info))
         return response.status_code, info
 
-    def standings(self, contest_id, **params):
-        """Scoreboard for those who started contest and sent anything"""
+    def standings(self, contest_id, timeout=3, **params):
+        """
+        Scoreboard contains results of those who started the contest and
+        sent any submission for check.
+        """
         headers = self.base_headers
         url = self.STANDINGS_URL.format(contest_id=contest_id)
         if "page_size" not in params:
@@ -172,16 +207,15 @@ class YandexContestAPI:
             params["show_external"] = False
         if "show_virtual" not in params:
             params["show_virtual"] = False
-        for bool_attr in ["for_judge", "show_external", "show_virtual"]:
+        for bool_attr in ("for_judge", "show_external", "show_virtual"):
             params[bool_attr] = str(params[bool_attr]).lower()
         payload = {}
         for param_key, param_value in params.items():
             key = STANDINGS_PARAMS.get(param_key, param_key)
             payload[key] = param_value
         logger.debug(f"Payload: {payload}")
-        response = requests.get(url, headers=headers, params=payload, timeout=3)
-        if response.status_code != ResponseStatus.SUCCESS:
-            raise YandexContestAPIException(response.status_code, response.text)
+        response = self.request_and_check(url, "get", headers=headers,
+                                          params=payload, timeout=timeout)
         json_data = response.json()
         logger.debug(f"Meta data: {json_data}")
         return response.status_code, json_data

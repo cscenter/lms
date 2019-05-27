@@ -57,7 +57,7 @@ class Command(CurrentCampaignsMixin, CustomizeQueryMixin, BaseCommand):
                     defaults={"status": ChallengeStatuses.NEW})
                 if created or exam.status == ChallengeStatuses.NEW:
                     try:
-                        exam.register_in_contest(api, a)
+                        exam.register_in_contest(api)
                     except ContestAPIError as e:
                         if e.code == RegisterStatus.BAD_TOKEN:
                             self.stdout.write(f"Bad campaign token {campaign}")
