@@ -3,9 +3,10 @@
 import datetime
 import uuid
 from collections import OrderedDict
-from typing import Optional
+from typing import Optional, NamedTuple
 
 from django.conf import settings
+from django.core import checks
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, \
     MaxValueValidator
@@ -24,7 +25,8 @@ from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
 from admission.constants import ChallengeStatuses
-from api.providers.yandex_contest import RegisterStatus, Error as YandexContestError
+from api.providers.yandex_contest import RegisterStatus, \
+    Error as YandexContestError
 from core.db.models import ScoreField
 from core.models import City, University
 from core.settings.base import CENTER_FOUNDATION_YEAR
@@ -580,7 +582,11 @@ class Contest(models.Model):
         return self.contest_id
 
 
-# FIXME: add check that model inherited from this cls has `applicant` FK
+class YandexContestImportResults(NamedTuple):
+    on_scoreboard: int
+    updated: int
+
+
 class YandexContestIntegration(models.Model):
     yandex_contest_id = models.CharField(
         _("Contest #ID"),
@@ -608,11 +614,43 @@ class YandexContestIntegration(models.Model):
     class Meta:
         abstract = True
 
-    def register_in_contest(self, api, applicant):
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        errors.extend(cls._check_applicant_fk())
+        return errors
+
+    @classmethod
+    def _check_applicant_fk(cls):
+        errors = []
+        try:
+            applicant = cls._meta.get_field("applicant")
+            if (not applicant.is_relation or
+                    not issubclass(applicant.remote_field.model, Applicant)):
+                errors.append(
+                    checks.Error(
+                        f'`{cls}.applicant` is not a FK to Applicant model',
+                        hint='define applicant = OneToOneField(Applicant, ...)',
+                        obj=cls,
+                        id='admission.E002',
+                    ))
+        except cls.DoesNotExist:
+            errors.append(
+                checks.Error(
+                    f'`{cls.__name__}` is a subclass of YandexContestIntegration'
+                    f' and must define `applicant` field',
+                    hint='define applicant = OneToOneField(Applicant, ...)',
+                    obj=cls,
+                    id='admission.E001',
+                ))
+        return errors
+
+    def register_in_contest(self, api):
         """
         Registers participant in the contest and saves response
         info (status_code, participant_id)
         """
+        applicant = self.applicant
         try:
             status_code, data = api.register_in_contest(applicant.yandex_id,
                                                         self.yandex_contest_id)
@@ -648,6 +686,61 @@ class YandexContestIntegration(models.Model):
         (self.__class__.objects
          .filter(applicant=applicant)
          .update(**update_fields))
+
+    @classmethod
+    def import_results(cls, api, contest: Contest) -> YandexContestImportResults:
+        """
+        Importing contest results page by page.
+
+        Since scoreboard can be modified at any moment we could miss some
+        results during the importing if someone has improved his position
+        and moved to a scoreboard `page` that has already been processed.
+        """
+        paging = {
+            "page_size": 50,
+            "page": 1
+        }
+        scoreboard_total = 0
+        updated_total = 0
+        if not contest.details:
+            contest.details = {}
+        while True:
+            try:
+                status, json_data = api.standings(contest.contest_id, **paging)
+                # XXX: Assignments order on scoreboard could be different from
+                # the similar contest problems API call response
+                if "titles" not in contest.details:
+                    titles = [t["name"] for t in json_data["titles"]]
+                    contest.details["titles"] = titles
+                    contest.save(update_fields=("details",))
+                page_total = 0
+                for row in json_data['rows']:
+                    scoreboard_total += 1
+                    page_total += 1
+                    total_score_str: str = row['score'].replace(',', '.')
+                    total_score = int(round(float(total_score_str)))
+                    score_details = [a["score"] for a in row["problemResults"]]
+                    update_fields = {
+                        "score": total_score,
+                        "details": {"scores": score_details}
+                    }
+                    yandex_login = row['participantInfo']['login']
+                    participant_id = row['participantInfo']['id']
+                    updated = (cls.objects
+                               .filter(Q(applicant__yandex_id=yandex_login) |
+                                       Q(contest_participant_id=participant_id),
+                                       applicant__campaign_id=contest.campaign_id,
+                                       yandex_contest_id=contest.contest_id,
+                                       status=ChallengeStatuses.REGISTERED)
+                               .update(**update_fields))
+                    updated_total += updated
+                if page_total < paging["page_size"]:
+                    break
+                paging["page"] += 1
+            except YandexContestError as e:
+                raise
+        return YandexContestImportResults(on_scoreboard=scoreboard_total,
+                                          updated=updated_total)
 
 
 class ApplicantRandomizeContestMixin:
