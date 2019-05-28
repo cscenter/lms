@@ -109,8 +109,3 @@ class ExamRecordResource(ContestDetailsMixin,
         can have null value, so if we omit django field validation on client, 
         it will be very bad"""
         assert int(Decimal(row["score"])) >= 0
-
-    def get_or_init_instance(self, instance_loader, row):
-        instance, created = super().get_or_init_instance(instance_loader, row)
-        instance.__str__ = lambda self: self.pk
-        return instance, created

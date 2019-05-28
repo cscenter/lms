@@ -31,6 +31,7 @@
     Результаты теста не найдены.
     <hr>
 {% endif %}
+
 {% if exam %}
     <h4>Экзамен: {{ exam.score_display }} / <span>{{ campaign.exam_max_score }}</span> {% if contests.exam and contests.exam.file %}Контест <a
             href="{{ contests.exam.file_url }}" target="_blank">{% if exam.yandex_contest_id %}#{{ exam.yandex_contest_id }}{% endif %}</a>{% elif exam.yandex_contest_id  %}
@@ -39,7 +40,20 @@
     {% for k,v in exam.details.items %}
         <li>
             {% if k == "scores" %}
-                <b>Результаты</b>:<br>{% for k, v in v.items %}Задача {{ k }}: {{ v }}<br>{% endfor %}
+                {# FIXME: move logic below to separated method after migrating to jinja2 #}
+                {% if "titles" in contests.exam.details %}
+                    {% if v|length != contests.exam.details.titles|length %}
+                        Размерности заголовков и результатов экзамена не совпадают
+                    {% else %}
+                        <ul class="list-unstyled">
+                        {% for score in v %}
+                            <li>{{ contests.exam.details.titles|lookup:forloop.counter0 }}: {{ score|default:"-" }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% else %}
+                    <b>Результаты</b>:<br>{% for score in v %}Задача {{ forloop.counter }}: {{ score }}<br>{% endfor %}
+                {% endif %}
             {% else %}
                 <b>{{ k }}</b>: {{ v }}
             {% endif %}

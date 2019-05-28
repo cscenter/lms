@@ -9,7 +9,7 @@
     {% elif field.name == 'course' %}
         <dd>{{ applicant_form.instance.get_course_display }}</dd>
     {% elif field.name == 'living_place' %}
-        <dd>{{ applicant_form.instance.get_living_place_display }}</dd>
+        <dd>{{ applicant_form.instance.get_living_place_display|default:"<не указано>" }}</dd>
     {% elif field.name == 'university' %}
         <dd>{% if applicant_form.instance.university_other %}{{ applicant_form.instance.university_other }}{% else %}{{ applicant_form.instance.university.name }}{% endif %}</dd>
     {% elif field.name == 'where_did_you_learn' %}
