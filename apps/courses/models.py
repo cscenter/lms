@@ -53,36 +53,6 @@ class Semester(models.Model):
         null=True,
         help_text=_("Students can enroll on or leave the course "
                     "before this date (inclusive)"))
-    # FIXME: remove
-    report_starts_at = models.DateField(
-        _("Report start"),
-        blank=True,
-        null=True,
-        help_text=_("Start point of project report period."))
-
-    report_ends_at = models.DateField(
-        _("Report end"),
-        blank=True,
-        null=True,
-        help_text=_("End point of project report period."))
-
-    # Projects settings.
-    # unsatisfactory [PASS BORDER] pass [GOOD BORDER] good [EXCELLENT BORDER]
-    projects_grade_excellent = models.SmallIntegerField(
-        _("Projects|Border for excellent"),
-        blank=True,
-        null=True,
-        help_text=_("Semester|projects_grade_excellent"))
-    projects_grade_good = models.SmallIntegerField(
-        _("Projects|Border for good"),
-        blank=True,
-        null=True,
-        help_text=_("Semester|projects_grade_good"))
-    projects_grade_pass = models.SmallIntegerField(
-        _("Projects|Border for pass"),
-        blank=True,
-        null=True,
-        help_text=_("Semester|projects_grade_pass"))
 
     index = models.PositiveSmallIntegerField(
         verbose_name=_("Semester index"),
