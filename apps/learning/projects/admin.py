@@ -2,10 +2,7 @@
 from dal_select2.widgets import Select2Multiple
 from django.contrib import admin
 from django.db import models
-from django.urls import reverse
 from django.db.models import Q
-from django.utils.safestring import mark_safe
-
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ExportMixin
 

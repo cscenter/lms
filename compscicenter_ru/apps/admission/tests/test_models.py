@@ -1,8 +1,8 @@
 import pytest
 
 from admission.tests.factories import CampaignFactory, ContestFactory, \
-    ApplicantFactory
-from admission.models import Contest
+    ApplicantFactory, InterviewInvitationFactory
+from admission.models import Contest, Applicant
 
 
 # FIXME: Test.compute_contest_id instead
@@ -25,3 +25,22 @@ def test_applicant_set_contest_id(client):
     # At this point we made full cycle over all available contests and should
     # repeat them due to round robin
     assert a.online_test.yandex_contest_id == expected_contest_id
+
+
+@pytest.mark.django_db
+def test_interview_invitation_create():
+    """Make sure Applicant status autoupdated"""
+    a = ApplicantFactory(status=Applicant.PERMIT_TO_EXAM)
+    invitation = InterviewInvitationFactory(applicant=a, interview=None)
+    a.refresh_from_db()
+    assert a.status == Applicant.INTERVIEW_TOBE_SCHEDULED
+    invitation = InterviewInvitationFactory(applicant=a)
+    assert invitation.interview_id is not None
+    a.refresh_from_db()
+    assert a.status == Applicant.INTERVIEW_SCHEDULED
+    a.status = Applicant.PENDING
+    a.interview.delete()
+    a.save()
+    invitation = InterviewInvitationFactory(applicant=a, interview=None)
+    a.refresh_from_db()
+    assert a.status == Applicant.PENDING

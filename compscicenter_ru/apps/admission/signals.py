@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
-import datetime
 
 from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
-from post_office.models import Email
-from post_office.utils import get_email_template
 
-from admission.models import Applicant, Interview, Comment, Campaign, \
-    InterviewStream, InterviewSlot
-from admission.utils import slot_range, \
-    generate_interview_feedback_email
+from admission.models import Applicant, Interview, Comment, Campaign
+from admission.utils import generate_interview_feedback_email
 
 APPLICANT_FINAL_STATES = (Applicant.ACCEPT,
                           Applicant.VOLUNTEER,
@@ -116,19 +111,3 @@ def __sync_applicant_status(interview, check_comments=False):
         interview.applicant.status = new_status
         Applicant.objects.filter(pk=interview.applicant.pk).update(
             status=interview.applicant.status)
-
-
-@receiver(post_save, sender=InterviewStream)
-def post_save_interview_stream(sender, instance, created, *args, **kwargs):
-    """
-    Generate slots from stream. Stream should be created with admin interface,
-    which using atomic internal, don't worry about consistency in that case
-    """
-    if created:
-        interview_stream = instance
-        step = datetime.timedelta(minutes=interview_stream.duration)
-        srange = slot_range(interview_stream.start_at,
-                            interview_stream.end_at, step)
-        InterviewSlot.objects.bulk_create([
-            InterviewSlot(start_at=start, end_at=end,
-                          stream=interview_stream) for start, end in srange])
