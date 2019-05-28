@@ -138,7 +138,7 @@
                     <h4>Отзывы руководителей <i class="fa fa-user-secret" aria-hidden="true"></i></h4>
                     {% for ps in project.projectstudent_set.all %}
                         <b>Студент</b>: {{ ps.student.get_short_name }}<br>
-                        <b>Отзыв</b>: {{ ps.supervisor_review|default:"не прислали" }}<br><br>
+                        <b>Отзыв</b>: {{ ps.supervisor_review|default:"не прислали"|linebreaksbr }}<br><br>
                     {% endfor %}
                 {% endif %}
 
