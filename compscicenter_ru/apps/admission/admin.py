@@ -1,11 +1,12 @@
 from django.db import models
 from django.db.models import TextField
 from django.utils import timezone
+from import_export.formats.base_formats import CSV
 from jsonfield import JSONField
 from prettyjson import PrettyJSONWidget
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from import_export.admin import ExportMixin
+from import_export.admin import ExportMixin, ImportMixin, ImportExportMixin
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
     CityAwareSplitDateTimeField, meta
@@ -87,7 +88,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
 
-class ExamAdmin(ExportMixin, admin.ModelAdmin):
+class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = ExamRecordResource
     raw_id_fields = ("applicant",)
     list_display = ('__str__', 'score', 'yandex_contest_id', 'status')
@@ -97,6 +98,7 @@ class ExamAdmin(ExportMixin, admin.ModelAdmin):
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget}
     }
+    formats = (CSV,)
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = ["contest_status_code"]
