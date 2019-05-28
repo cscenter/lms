@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 import datetime
 import math
+
 import pytest
 
 from courses.tests.factories import SemesterFactory
 from learning.projects.constants import ProjectTypes
+from learning.projects.models import ReportingPeriod, \
+    ReportingPeriodKey, PracticeCriteria
 from learning.projects.tests.factories import ReportFactory, ReviewFactory, \
     ReportingPeriodFactory, ProjectStudentFactory
-from learning.projects.models import REVIEW_SCORE_FIELDS, Review, \
-    ReportingPeriod, ReportingPeriodKey
 from learning.settings import Branches, GradeTypes
 from learning.tests.factories import BranchFactory
 from users.tests.factories import ProjectReviewerFactory
@@ -230,7 +231,7 @@ def test_reporting_period_score_to_grade():
 
 
 @pytest.mark.django_db
-def test_mean_review_score():
+def test_mean_reviewing_score():
     report = ReportFactory(score_quality=0, score_activity=0)
     project = report.project_student.project
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
@@ -238,21 +239,22 @@ def test_mean_review_score():
     project.reviewers.add(reviewer2)
     report.compute_fields("final_score")
     assert report.final_score == 0
-    r1, r2 = ReviewFactory.create_batch(2, report=report)
-    for field in REVIEW_SCORE_FIELDS:
-        setattr(r1, field, 0)
-        setattr(r2, field, 0)
-    r1.save()
-    r2.save()
+    review1, review2 = ReviewFactory.create_batch(2, report=report)
+    for field in review1.criteria.SCORE_FIELDS:
+        setattr(review1.criteria, field, 0)
+    for field in review2.criteria.SCORE_FIELDS:
+        setattr(review2.criteria, field, 0)
+    review1.criteria.save()
+    review2.criteria.save()
     report.compute_fields("final_score")
     assert report.final_score == 0
-    add = len(Review.PLANS_CRITERION) - 1
-    r1.score_plans = add
-    r1.save()
+    add = len(PracticeCriteria.PLANS_CRITERION) - 1
+    review1.criteria.score_plans = add
+    review1.criteria.save()
     report.compute_fields("final_score")
     assert report.final_score == math.ceil(add / 2)
-    r2.score_plans = add
-    r2.save()
+    review2.criteria.score_plans = add
+    review2.criteria.save()
     report.compute_fields("final_score")
     assert report.final_score == add
     report.score_activity += 1

@@ -90,14 +90,14 @@ class ReviewPracticeCriteriaFactory(factory.DjangoModelFactory):
 
     review = factory.SubFactory(ReviewFactory)
     score_global_issue = FuzzyChoice([v for v, _ in
-                                      Review.GLOBAL_ISSUE_CRITERION])
+                                      PracticeCriteria.GLOBAL_ISSUE_CRITERION])
     score_usefulness = FuzzyChoice([v for v, _ in
-                                    Review.USEFULNESS_CRITERION])
-    score_progress = FuzzyChoice([v for v, _ in Review.PROGRESS_CRITERION])
-    score_problems = FuzzyChoice([v for v, _ in Review.PROBLEMS_CRITERION])
+                                    PracticeCriteria.USEFULNESS_CRITERION])
+    score_progress = FuzzyChoice([v for v, _ in PracticeCriteria.PROGRESS_CRITERION])
+    score_problems = FuzzyChoice([v for v, _ in PracticeCriteria.PROBLEMS_CRITERION])
     score_technologies = FuzzyChoice([v for v, _ in
-                                      Review.TECHNOLOGIES_CRITERION])
-    score_plans = FuzzyChoice([v for v, _ in Review.PLANS_CRITERION])
+                                      PracticeCriteria.TECHNOLOGIES_CRITERION])
+    score_plans = FuzzyChoice([v for v, _ in PracticeCriteria.PLANS_CRITERION])
 
 
 def review_form_factory(is_completed=True):

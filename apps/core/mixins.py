@@ -30,10 +30,13 @@ class DerivableFieldsMixin:
         return prefetch_fields
 
     def _call_compute_method(self, method_name):
+        if not hasattr(self, method_name):
+            logger.warning('Try to compute unknown field %s', method_name)
+            return False
         try:
             return getattr(self, method_name)()
-        except AttributeError:
-            logger.warning('Try to compute unknown field %s', method_name)
+        except Exception as e:
+            logger.exception(e)
         return False
 
     def compute_fields(self, *derivable_fields, prefetch=False) -> bool:
