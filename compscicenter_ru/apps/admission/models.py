@@ -25,6 +25,7 @@ from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
 from admission.constants import ChallengeStatuses
+from admission.utils import slot_range
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
 from core.db.models import ScoreField
@@ -868,7 +869,6 @@ class InterviewAssignment(models.Model):
         return smart_text(self.name)
 
 
-@python_2_unicode_compatible
 class Interview(TimeStampedModel):
     APPROVAL = 'approval'
     APPROVED = 'waiting'
@@ -1048,6 +1048,17 @@ class InterviewStream(TimeStampedModel):
         verbose_name = _("Interview stream")
         verbose_name_plural = _("Interview streams")
 
+    def save(self, **kwargs):
+        created = self.pk is None
+        super().save(**kwargs)
+        if created:
+            # Generate slots from stream settings
+            step = datetime.timedelta(minutes=self.duration)
+            slots = [InterviewSlot(start_at=start_at, end_at=end_at, stream=self)
+                     for start_at, end_at
+                     in slot_range(self.start_at, self.end_at, step)]
+            InterviewSlot.objects.bulk_create(slots)
+
     def get_city_timezone(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         # self.venue.get_city_timezone()
@@ -1163,11 +1174,22 @@ class InterviewInvitation(TimeStampedModel):
         null=True,
         blank=True)
 
+    objects = InterviewInvitationQuerySet.as_manager()
+
     class Meta:
         verbose_name = _("Interview invitation")
         verbose_name_plural = _("Interview invitations")
 
-    objects = InterviewInvitationQuerySet.as_manager()
+    def save(self, **kwargs):
+        created = self.pk is None
+        super().save(**kwargs)
+        if created and not self.interview_id:
+            # Update status if we send invitation before
+            # summing up the exam results
+            if self.applicant.status == Applicant.PERMIT_TO_EXAM:
+                (Applicant.objects
+                 .filter(pk=self.applicant_id)
+                 .update(status=Applicant.INTERVIEW_TOBE_SCHEDULED))
 
     def __unicode__(self):
         return str(self.applicant)

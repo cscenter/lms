@@ -203,7 +203,8 @@ class InterviewInvitationFactory(factory.DjangoModelFactory):
         model = InterviewInvitation
 
     applicant = factory.SubFactory(ApplicantFactory)
-    interview = factory.SubFactory(InterviewFactory)
+    interview = factory.SubFactory(InterviewFactory,
+                                   applicant=factory.SelfAttribute('..applicant'))
     expired_at = factory.Faker('date_time_between',
                                start_date="now", end_date="+30d",
                                tzinfo=timezone.utc)

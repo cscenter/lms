@@ -1,3 +1,4 @@
+from dal_select2.widgets import Select2Multiple
 from django.db import models
 from django.db.models import TextField
 from django.utils import timezone
@@ -243,6 +244,11 @@ class InterviewStreamAdmin(admin.ModelAdmin):
     list_display = ["date", "campaign"]
     list_filter = [CampaignListFilter]
     inlines = [InterviewSlotsInline]
+    formfield_overrides = {
+        models.ManyToManyField: {
+            'widget': Select2Multiple(attrs={"data-width": 'style'})
+        }
+    }
     # TODO: how to customize time widget format to H:M?
 
     def get_readonly_fields(self, request, obj=None):
