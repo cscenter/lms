@@ -4,7 +4,10 @@ from collections import OrderedDict
 from decimal import Decimal
 
 from import_export import resources, fields, widgets
+from import_export.instance_loaders import CachedInstanceLoader
+from import_export.widgets import IntegerWidget, ForeignKeyWidget
 
+from admission.constants import ChallengeStatuses
 from admission.models import Applicant, Test, Exam
 
 
@@ -20,25 +23,22 @@ class JsonFieldWidget(widgets.Widget):
         return "\n".join("{}: {}".format(k, v) for k, v in value.items())
 
 
-class DetailsApplicantImportMixin(object):
+class ContestDetailsMixin:
+    # Other fields will be aggregated for the `details` json field
+    known_fields = (
+        'created',
+        'applicant',
+        'yandex_login',
+        'score',
+        'status',
+    )
+
     def before_import(self, data, using_transactions, dry_run, **kwargs):
         if "details" in data.headers:
-            print("Column `details` will be ignored")
+            print("Column `details` will be replaced")
             del data["details"]
         data.append_col(self.row_collect_details(data.headers),
                         header="details")
-
-        if "applicant" not in data.headers:
-            data.append_col(self.get_applicant_for_row(data.headers),
-                            header="applicant")
-        # Optionally save contest id
-        if self.contest_id:
-            try:
-                del data['yandex_contest_id']
-            except KeyError:
-                pass
-            data.append_col(lambda r: self.contest_id,
-                            header="yandex_contest_id")
 
     def before_import_row(self, row, **kwargs):
         for k, v in row.items():
@@ -51,59 +51,18 @@ class DetailsApplicantImportMixin(object):
         def wrapper(row):
             details = OrderedDict()
             for i, h in enumerate(headers):
-                if h not in self.separated_fields:
+                if h not in self.known_fields:
                     details[h] = row[i]
             return details
         return wrapper
 
-    def get_applicant_for_row(self, headers):
-        """Get applicant id by `lookup` field value within provided campaigns"""
-        lookup_field = self.lookup_field
-        campaign_ids = self.campaign_ids
-        lookup_index = headers.index(lookup_field)
-        username_index = headers.index("user_name")
 
-        def wrapper(row):
-            qs = Applicant.objects.filter(campaign_id__in=campaign_ids)
-            if not row[lookup_index]:
-                print("Empty {}. Skip".format(lookup_field))
-                return ""
-            if lookup_field == "yandex_id":
-                row[lookup_index] = row[lookup_index].lower().replace("-", ".")
-                qs = qs.filter(yandex_id_normalize=row[lookup_index])
-            else:
-                qs = qs.filter(stepic_id=row[lookup_index])
-            cnt = qs.count()
-            if cnt > 1:
-                print("Duplicates for {} = {}. Skip".format(
-                    lookup_field, row[lookup_index]))
-                return ""
-            elif cnt == 0:
-                score_index = headers.index("score")
-                print("No applicant for {} = {}; user_name = {}; score = {}; "
-                      "contest = {}".format(lookup_field,
-                                            row[lookup_index],
-                                            row[username_index],
-                                            row[score_index],
-                                            self.contest_id))
-                return ""
-            return qs.get().pk
-
-        return wrapper
-
-    def import_field(self, field, obj, data):
-        """Don't assign null value for applicant because this field is required, 
-        later we skip rows without applicant value"""
-        if (field.attribute and
-                field.column_name in data and
-                field.column_name == "applicant" and
-                not data["applicant"]):
-            return
-        super().import_field(field, obj, data)
-
-
-class OnlineTestRecordResource(DetailsApplicantImportMixin,
+class OnlineTestRecordResource(ContestDetailsMixin,
                                resources.ModelResource):
+    applicant = fields.Field(
+        column_name='applicant',
+        attribute='applicant_id',
+        widget=IntegerWidget())
     details = fields.Field(column_name='details',
                            attribute='details',
                            widget=JsonFieldWidget())
@@ -111,64 +70,47 @@ class OnlineTestRecordResource(DetailsApplicantImportMixin,
     fio = fields.Field(column_name='fio', attribute='applicant')
     yandex_login = fields.Field(column_name='yandex_login',
                                 attribute='applicant__yandex_id')
+    status = fields.Field(column_name='status', attribute='status',
+                          default=ChallengeStatuses.MANUAL)
 
     class Meta:
         model = Test
-        import_id_fields = ['applicant']
+        import_id_fields = ('applicant',)
         skip_unchanged = True
 
-    def __init__(self, **kwargs):
-        self.lookup_field = kwargs.get("lookup_field", "")
-        self.separated_fields = kwargs.get("separated_fields", False)
-        self.campaign_ids = kwargs.get("campaign_ids", False)
-        self.contest_id = kwargs.get("contest_id", False)
-
     def skip_row(self, instance, original):
-        # We didn't find applicant, skip record
-        if not hasattr(instance, "applicant") or not instance.applicant:
-            return True
-        # Create record if new
-        if not instance.pk:
-            return False
-        # Otherwise leave the lowest score
+        # Leave the lowest score
         if original.score and instance.score:
             return instance.score > original.score
         return super().skip_row(instance, original)
 
 
-class ExamRecordResource(DetailsApplicantImportMixin,
+# FIXME: RowResult.obj_repr calls Exam.__str__ which makes additional db hits
+class ExamRecordResource(ContestDetailsMixin,
                          resources.ModelResource):
+    applicant = fields.Field(
+        column_name='applicant',
+        attribute='applicant_id',
+        widget=IntegerWidget())
+
     details = fields.Field(column_name='details',
                            attribute='details',
                            widget=JsonFieldWidget())
-    # Note: It returns __str__ representation of `applicant` attribute
-    fio = fields.Field(column_name='fio', attribute='applicant')
-    yandex_login = fields.Field(column_name='yandex_login',
-                                attribute='applicant__yandex_id')
 
     class Meta:
         model = Exam
-        import_id_fields = ['applicant']
+        import_id_fields = ('applicant',)
         skip_unchanged = True
-
-    def __init__(self, **kwargs):
-        self.lookup_field = kwargs.get("lookup_field", "")
-        self.separated_fields = kwargs.get("separated_fields", False)
-        self.campaign_ids = kwargs.get("campaign_ids", False)
-        self.contest_id = kwargs.get("contest_id", False)
-
-    def skip_row(self, instance, original):
-        # Skip new instances. We only update existed.
-        if not instance.pk:
-            return True
-        if original.yandex_contest_id != str(instance.yandex_contest_id):
-            print("Contest id from DB != contest_id from csv for record: "
-                  "{}".format(instance.applicant.yandex_id))
-            return True
-        return False
+        fields = ('applicant', 'score', 'status', 'details')
+        instance_loader_class = CachedInstanceLoader
 
     def before_import_row(self, row, **kwargs):
         """Double check that score is always a valid type, on DB level we 
         can have null value, so if we omit django field validation on client, 
         it will be very bad"""
         assert int(Decimal(row["score"])) >= 0
+
+    def get_or_init_instance(self, instance_loader, row):
+        instance, created = super().get_or_init_instance(instance_loader, row)
+        instance.__str__ = lambda self: self.pk
+        return instance, created
