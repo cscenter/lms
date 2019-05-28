@@ -877,7 +877,7 @@ class InterviewAppointmentView(generic.TemplateView):
             streams = [s.id for s in invitation.streams.all()]
             slots = (InterviewSlot.objects
                      .filter(stream_id__in=streams)
-                     .select_related("stream")
+                     .select_related("stream", "stream__venue")
                      .order_by("stream__date", "start_at"))
             time_diff = InterviewStream.WITH_ASSIGNMENTS_TIMEDELTA
             any_slot_is_empty = False
@@ -886,12 +886,11 @@ class InterviewAppointmentView(generic.TemplateView):
                     any_slot_is_empty = True
                 if slot.stream.with_assignments:
                     slot.start_at = calculate_time(slot.start_at, time_diff)
-            slots = groupby(slots, key=lambda s: s.stream.date)
+            slots = groupby(slots, key=lambda s: s.stream)
             grouped_slots = []
             for stream_date, g in slots:
                 grouped_slots.append((stream_date, list(g)))
             context["slots"] = grouped_slots
-            context["show_dates"] = len(grouped_slots) > 1
             if not any_slot_is_empty:
                 # TODO: Do something bad
                 pass

@@ -23,28 +23,24 @@
             {% elif invitation.is_expired %}
                 Приглашение больше не актуально.
             {% else %}
-                {% if invitation.streams.all|length == 1 %}
-                    {% with stream=invitation.streams.all.0 %}
-                        Собеседование пройдёт <span class="nowrap">{{ stream.date|date:"d E" }}</span>.<br>
-                        Место проведения: {{ stream.venue.address }}
-                    {% endwith %}
-                {% endif %}
                 <form action="" method="POST" class="margin-bottom-0">
                     {% csrf_token %}
                     <div class="form-group">
-                        <p>Выберите из доступных вариантов время, в которое
-                            сможете подъехать:</p>
-                                <div class="btn-group" data-toggle="buttons">
-                                {% for stream_date, slots_iterator in slots %}
-                                    {% if show_dates %}<b>{{ stream_date }}</b><br>{% endif %}
-                                    {% for slot in slots_iterator %}
+                        <p>Выберите из доступных вариантов время, в которое сможете подъехать:</p>
+                            <div class="btn-group" data-toggle="buttons">
+                            {% for stream, slots_iterator in slots %}
+                                <div class="info">
+                                    <b>{{ stream.date|date:"j E" }}</b><br>
+                                    <div class="margin-bottom-5">Место проведения: {{ stream.venue.address }}</div>
+                                </div>
+                                {% for slot in slots_iterator %}
                                     <label class="btn btn-default {% if not slot.is_empty %}disabled{% endif %}">
                                         <input type="radio" name="time" autocomplete="off" {% if not slot.is_empty %}disabled{% endif %} value="{{ slot.pk }}"> {{ slot.start_at }}
                                     </label>
-                                    {% endfor %}
-                                    <div class=" clearfix mb-20"></div>
                                 {% endfor %}
-                                </div>
+                                <div class=" clearfix mb-20"></div>
+                            {% endfor %}
+                            </div>
                     </div>
                     <input class="btn btn-primary" type="submit"
                            value="Отправить">
