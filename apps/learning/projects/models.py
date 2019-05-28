@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-import datetime
 import math
 import os
 from decimal import Decimal
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Dict
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, transaction
 from django.db.models import Q, F
@@ -33,17 +32,6 @@ from learning.projects.constants import ProjectTypes
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
 from users.constants import AcademicRoles
-
-# Calculate mean scores for these fields when review has been completed
-# FIXME: move to the model with criteria
-REVIEW_SCORE_FIELDS = [
-    "score_global_issue",
-    "score_usefulness",
-    "score_progress",
-    "score_problems",
-    "score_technologies",
-    "score_plans",
-]
 
 CURATOR_SCORE_FIELDS = [
     "score_quality",
@@ -689,20 +677,16 @@ class Report(DerivableFieldsMixin, TimeStampedModel):
 
     def _compute_final_score(self):
         final_score = Decimal(0)
-        # FIXME: Delegate this logic to review criteria model
-        scores = {field_name: (0, 0) for field_name in REVIEW_SCORE_FIELDS}
-        for review in self.review_set.all():
-            for field_name in REVIEW_SCORE_FIELDS:
-                total, count = scores[field_name]
-                if getattr(review, field_name) is not None:
-                    scores[field_name] = (
-                        total + getattr(review, field_name),
-                        count + 1
-                    )
-        for field_name in REVIEW_SCORE_FIELDS:
-            total, count = scores.get(field_name)
-            mean = math.ceil(total / count) if count else 0
-            final_score += mean
+        scores = {}
+        for review in self.review_set.prefetch_related("criteria").all():
+            for field_name, score in review.get_scores().items():
+                if field_name not in scores:
+                    scores[field_name] = (score, 1)
+                else:
+                    score_sum, reviews_count = scores[field_name]
+                    scores[field_name] = (score_sum + score, reviews_count + 1)
+        for score_sum, reviews_count in scores.values():
+            final_score += math.ceil(score_sum / reviews_count)
         for field_name in CURATOR_SCORE_FIELDS:
             score = getattr(self, field_name)
             final_score += score if score else 0
@@ -776,45 +760,6 @@ class Report(DerivableFieldsMixin, TimeStampedModel):
 
 
 class Review(TimeStampedModel):
-    GLOBAL_ISSUE_CRITERION = (
-        (0, _("0 - Does not understand the task at all")),
-        (1, _("1 - Understands, but very superficial")),
-        (2, _("2 - Understands everything"))
-    )
-
-    USEFULNESS_CRITERION = (
-        (0, _("0 - Does not understand")),
-        (1, _("1 - Writing something about the usefulness")),
-        (2, _("2 - Understands and explains"))
-    )
-
-    PROGRESS_CRITERION = (
-        (0, _("0 - Understand only theory, or even less")),
-        (1, _("1 - Some progress, but not enough")),
-        (2, _("2 - The normal rate of work"))
-    )
-
-    PROBLEMS_CRITERION = (
-        (0, _("0 - Problems not mentioned in the report")),
-        (1, _("1 - Problems are mentioned without any details")),
-        (2, _("2 - Problems are mentioned and explained how they been solved"))
-    )
-
-    TECHNOLOGIES_CRITERION = (
-        (0, _("0 - Listed, but not explained why.")),
-        (1, _("1 - The student does not understand about everything and "
-              "does not try to understand, but knows something")),
-        (2, _("2 - Understands why choose one or the other technology"))
-    )
-
-    PLANS_CRITERION = (
-        (0, _("0 - Much less than what has already been done, or the student "
-              "does not understand them")),
-        (1, _("1 - It seems to have plans of normal size, but does not "
-              "understand what to do.")),
-        (2, _("2 - All right with them"))
-    )
-
     report = models.ForeignKey(Report, on_delete=models.PROTECT)
     reviewer = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -827,69 +772,6 @@ class Review(TimeStampedModel):
     )
     criteria_object_id = models.PositiveIntegerField(null=True, blank=True)
     criteria = GenericForeignKey('criteria_content_type', 'criteria_object_id')
-
-    score_global_issue = models.PositiveSmallIntegerField(
-        choices=GLOBAL_ISSUE_CRITERION,
-        verbose_name=_("The global task for term"),
-        blank=True,
-        null=True
-    )
-    score_usefulness = models.PositiveSmallIntegerField(
-        choices=USEFULNESS_CRITERION,
-        verbose_name=_("Possible uses and scenarios"),
-        blank=True,
-        null=True
-    )
-    score_progress = models.PositiveSmallIntegerField(
-        choices=PROGRESS_CRITERION,
-        verbose_name=_("What has been done since the start of the project."),
-        blank=True,
-        null=True
-    )
-    score_problems = models.PositiveSmallIntegerField(
-        choices=PROBLEMS_CRITERION,
-        verbose_name=_("What problems have arisen in the process."),
-        blank=True,
-        null=True
-    )
-    score_technologies = models.PositiveSmallIntegerField(
-        choices=TECHNOLOGIES_CRITERION,
-        verbose_name=_("The choice of technologies or method of integration "
-                       "with the existing development"),
-        blank=True,
-        null=True
-    )
-    score_plans = models.PositiveSmallIntegerField(
-        choices=PLANS_CRITERION,
-        verbose_name=_("Future plan"),
-        blank=True,
-        null=True
-    )
-    score_global_issue_note = models.TextField(
-        _("Note for criterion #1"),
-        blank=True, null=True)
-
-    score_usefulness_note = models.TextField(
-        _("Note for criterion #2"),
-        blank=True, null=True)
-
-    score_progress_note = models.TextField(
-        _("Note for criterion #3"),
-        blank=True, null=True)
-
-    score_problems_note = models.TextField(
-        _("Note for criterion #4"),
-        blank=True, null=True)
-
-    score_technologies_note = models.TextField(
-        _("Note for criterion #5"),
-        blank=True, null=True)
-
-    score_plans_note = models.TextField(
-        _("Note for criterion #6"),
-        blank=True,
-        null=True)
-
     is_completed = models.BooleanField(
         _("Completed"),
         default=False,
@@ -911,8 +793,39 @@ class Review(TimeStampedModel):
                 r.status = Report.SUMMARY
                 r.save(update_fields=("status",))
 
+    def get_scores(self):
+        if self.criteria:
+            return self.criteria.get_scores()
 
-class PracticeCriteria(models.Model):
+
+class CriteriaScoresMixin:
+    """
+    This mixin helps to calculate Report.final_score mean value
+    across all related reviews.
+    """
+    def get_scores(self) -> Dict:
+        """Returns mapping of all score field names to score values"""
+        """Returns criteria values"""
+        scores = {}
+        for field_name in self.SCORE_FIELDS:
+            score = getattr(self, field_name)
+            if score is None:
+                score = 0
+            scores[field_name] = score
+        return scores
+
+
+# TODO: Add check that CriteriaScoresMixin subclass define SCORE_FIELDS
+class PracticeCriteria(CriteriaScoresMixin, models.Model):
+    SCORE_FIELDS = (
+        "score_global_issue",
+        "score_usefulness",
+        "score_progress",
+        "score_problems",
+        "score_technologies",
+        "score_plans",
+    )
+
     GLOBAL_ISSUE_CRITERION = (
         (0, _("0 - Does not understand the task at all")),
         (1, _("1 - Understands, but very superficial")),
