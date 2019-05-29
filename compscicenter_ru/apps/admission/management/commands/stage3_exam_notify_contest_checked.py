@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-import math
-from decimal import Decimal
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
-from ._utils import ValidateTemplatesMixin, CurrentCampaignsMixin
+from admission.constants import ChallengeStatuses
 from admission.models import Applicant, Exam
+from ._utils import ValidateTemplatesMixin, CurrentCampaignsMixin
 
 
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
-    TEMPLATE_TYPE = "exam-checked"
-    help = 'Generate mails about check completeness'
+    TEMPLATE_TYPE = "exam-contest-checked"
+    help = 'Generate mails about contest check completeness'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -21,7 +20,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             help='City code to restrict current campaigns')
 
     def handle(self, *args, **options):
-        city_code = options["city"] if options["city"] else None
+        city_code = options["city"]
         campaigns = self.get_current_campaigns(city_code)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
@@ -33,51 +32,36 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
         for campaign in campaigns:
             template_name = self.get_template_name(campaign, self.TEMPLATE_TYPE)
             template = get_email_template(template_name)
-            results = (
+            exam_results = (
                 Exam.objects
-                .filter(applicant__campaign=campaign.pk)
-                .exclude(applicant__status=Applicant.REJECTED_BY_CHEATING)
-                # TODO: restrict selected data
+                .filter(applicant__campaign=campaign.pk,
+                        applicant__status=Applicant.PERMIT_TO_EXAM,
+                        status__in=[ChallengeStatuses.NEW,
+                                    ChallengeStatuses.REGISTERED])
                 .select_related("applicant")
             )
-            for e in results.iterator():
+            print(exam_results.query)
+
+            for e in exam_results:
+                if e.status == ChallengeStatuses.NEW:
+                    self.stdout.write(f"{e} wasn't registered in the contest!")
+                    continue
                 applicant = e.applicant
                 recipients = [applicant.email]
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
-                    pluralized_scores = []
-                    for v in e.details["scores"].values():
-                        try:
-                            v = int(v)
-                            plural_part = self.pluralize(v)
-                        except ValueError:
-                            plural_part = "а"
-                        pluralized_scores.append([v, plural_part])
-                    context = {
-                        "total": str(e.score),
-                        "scores": pluralized_scores
-                    }
                     mail.send(
                         recipients,
                         sender='CS центр <info@compscicenter.ru>',
                         template=template,
-                        context=context,
-                        render_on_delivery=False,
+                        # If emails rendered on delivery, they will store
+                        # value of the template id. It makes
+                        # `Email.objects.exists()` work correctly.
+                        render_on_delivery=True,
                         backend='ses',
                     )
                     generated += 1
         self.stdout.write("Generated emails: {}".format(generated))
         self.stdout.write("Done")
 
-    # shitty code
-    @staticmethod
-    def pluralize(value):
-        endings = ["", "a", "ов"]
-        if value % 100 in (11, 12, 13, 14):
-            return endings[2]
-        if value % 10 == 1:
-            return endings[0]
-        if value % 10 in (2, 3, 4):
-            return endings[1]
-        else:
-            return endings[2]
+

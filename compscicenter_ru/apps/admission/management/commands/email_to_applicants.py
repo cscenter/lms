@@ -1,5 +1,3 @@
-import ast
-
 from django.core.management.base import BaseCommand, CommandError
 from post_office import mail
 from post_office.models import Email
