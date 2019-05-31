@@ -82,7 +82,10 @@ def is_club_site():
 
 def get_club_domain(code=None):
     protocol = "http://"
-    prefix = "kzn." if code == "kzn" else ""
+    if code in ('kzn', 'nsk'):
+        prefix = f"{code}."
+    else:
+        prefix = ""
     return protocol + prefix + settings.CLUB_DOMAIN
 
 
