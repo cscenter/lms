@@ -57,7 +57,7 @@
       {% endif %}
       {% get_language_info_list for LANGUAGES as languages %}
       <span class="cities">
-          {% trans 'City' %}: {% for city in CITY_LIST reversed %}{% if city.code == 'spb' or city.code == 'kzn' %}
+          {% trans 'City' %}: {% for city in CITY_LIST reversed %}{% if city.code == 'spb' or city.code == 'kzn' or city.code == 'nsk' %}
           {% if request.city_code == city.code %}<span>{{ city.name }}</span>
           {% else %}<a href="{{city.url}}{% if LANGUAGE_CODE != "ru" %}{{ LANGUAGE_CODE }}/{% endif %}">{{ city.name }}</a>{% endif %} {% endif %}{% endfor %}
       </span>
