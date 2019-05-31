@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-04-24 09:09+0000\n"
-"PO-Revision-Date: 2019-04-24 09:20+0000\n"
+"PO-Revision-Date: 2019-05-31 07:08+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -537,7 +537,7 @@ msgstr "Какие области Computer Science вам интересно б�
 msgid "Applicant|study_program_cs"
 msgstr ""
 "Вы можете посмотреть список возможных тем и руководителей НИРов у нас на "
-"сайте: https://compscicenter.ru/pages/projects/#research-curators"
+"сайте: https://compscicenter.ru/projects/"
 
 #: compscicenter_ru/apps/admission/models.py:386
 msgid "Where did you learn?"
