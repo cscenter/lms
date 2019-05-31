@@ -28,6 +28,7 @@
           - "{{ main_domain }}"
           - "www.compsciclub.ru"
           - "kzn.compsciclub.ru"
+          - "nsk.compsciclub.ru"
         nginx_configs:
           - "{{ main_domain }}"
         certbot_config_dir: "/etc/letsencrypt/live/compsciclub.ru"

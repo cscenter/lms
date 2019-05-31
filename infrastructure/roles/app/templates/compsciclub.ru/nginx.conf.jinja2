@@ -18,6 +18,7 @@ server {
 
 {%- set main_domain_parts = main_domain.split('.') -%}
 {% if main_domain_parts|length == 2 %}
+
 # Redirect from `www.` to domain without `www`
 server {
     listen 443 ssl;
