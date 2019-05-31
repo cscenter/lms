@@ -47,6 +47,8 @@ class CampaignFactory(factory.DjangoModelFactory):
     application_ends_at = factory.Faker('date_time_between',
                                         start_date="now", end_date="+30d",
                                         tzinfo=timezone.utc)
+    # FIXME: create registration template
+    template_appointment = InterviewInvitation.EMAIL_TEMPLATE
 
 
 class ApplicantFactory(factory.DjangoModelFactory):

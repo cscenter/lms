@@ -150,12 +150,11 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
         # Create email templates
         from admission.models import Interview, InterviewInvitation
 
-        template_names = [
+        template_names = (
             Interview.FEEDBACK_TEMPLATE,
             Interview.REMINDER_TEMPLATE,
-            InterviewInvitation.ONE_STREAM_EMAIL_TEMPLATE,
-            "admission-interview-invitation-n-streams"
-        ]
+            InterviewInvitation.EMAIL_TEMPLATE,
+        )
         for template_name in template_names:
             EmailTemplate.objects.update_or_create(
                 name=template_name
