@@ -34,7 +34,7 @@ from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
 from courses.models import Venue
 from learning.models import Branch
-from learning.settings import AcademicDegreeYears
+from learning.settings import AcademicDegreeYears, Branches
 from users.constants import AcademicRoles
 
 WITH_ASSIGNMENTS_TEXT = """
@@ -50,6 +50,14 @@ WITH_ASSIGNMENTS_TEXT = """
 def current_year():
     # Don't care about inaccuracy and use UTC timezone here
     return timezone.now().year
+
+
+def validate_template(value):
+    if not EmailTemplate.objects.filter(name=value).exists():
+        raise ValidationError(
+            _("Email template with name `%(template_name)s` doesn't exist"),
+            params={'template_name': value},
+        )
 
 
 class Campaign(models.Model):
@@ -96,11 +104,16 @@ class Campaign(models.Model):
         help_text=_("Yandex.Contest Refresh Token"),
         max_length=255,
         blank=True)
-    template_name = models.CharField(
-        _("Template Name"),
-        help_text=_("Template name for invitation email message"),
-        max_length=255,
-        blank=True)
+    template_registration = models.CharField(
+        _("Registration Template"),
+        help_text=_("Template name for contest registration email"),
+        validators=[validate_template],
+        max_length=255)
+    template_appointment = models.CharField(
+        _("Invitation Template"),
+        help_text=_("Template name for interview invitation email"),
+        validators=[validate_template],
+        max_length=255)
 
     class Meta:
         verbose_name = _("Campaign")
@@ -134,28 +147,18 @@ class Campaign(models.Model):
         if self.pk is None and self.current:
             msg = _("You can't set `current` on campaign creation")
             raise ValidationError(msg)
+        errors = {}
         if self.current:
-            errors = []
             contests = Contest.objects.filter(campaign_id=self.pk,
                                               type=Contest.TYPE_TEST).count()
             if not contests:
                 msg = _("Before mark campaign as `current` - add contests "
                         "for testing")
-                errors.append(msg)
-            if not self.template_name:
-                errors.append(_("Empty template name"))
-            else:
-                from post_office.models import EmailTemplate
-                tn = self.template_name
-                if not EmailTemplate.objects.filter(name=tn).exists():
-                    msg = _("Email template {} doesn't exist")
-                    errors.append(msg.format(self.template_name))
+                errors["__all__"] = msg
             if not self.access_token:
-                msg = _("Empty access token")
-                errors.append(msg)
-            if errors:
-                msg = mark_safe("<br>".join(str(e) for e in errors))
-                raise ValidationError(msg)
+                errors["access_token"] = _("Empty access token")
+        if errors:
+            raise ValidationError(errors)
 
     @classmethod
     def get_active(cls):
@@ -1041,7 +1044,6 @@ class InterviewStream(TimeStampedModel):
         Campaign,
         verbose_name=_("Campaign"),
         on_delete=models.CASCADE,
-        blank=True,
         related_name="interview_streams")
 
     class Meta:
@@ -1086,14 +1088,6 @@ class InterviewStream(TimeStampedModel):
             if diff < self.duration:
                 raise ValidationError(
                     _("Stream duration can't be less than slot duration"))
-        if self.venue_id and not self.campaign_id:
-            try:
-                self.campaign = Campaign.objects.get(current=True,
-                                                     city_id=self.venue.city_id)
-            except Campaign.DoesNotExist:
-                msg = f"No current campaign provided for venue {self.venue}"
-                raise ValidationError(msg)
-        # TODO: Divisible or not?
 
 
 class InterviewSlotQuerySet(query.QuerySet):
@@ -1147,7 +1141,7 @@ class InterviewInvitationQuerySet(query.QuerySet):
 
 
 class InterviewInvitation(TimeStampedModel):
-    ONE_STREAM_EMAIL_TEMPLATE = "admission-interview-invitation"
+    EMAIL_TEMPLATE = "admission-interview-invitation"
 
     applicant = models.ForeignKey(
         Applicant,
@@ -1211,34 +1205,27 @@ class InterviewInvitation(TimeStampedModel):
             "secret_code": str(self.secret_code).replace("-", "")
         })
 
-    def send_email(self, stream=None, uri_builder=None):
-        # XXX: Create data migration if you changed template name
-        template_name = "admission-interview-invitation-n-streams"
-        if uri_builder:
-            secret_link = uri_builder(self.get_absolute_url())
-        else:
-            secret_link = "https://compscicenter.ru{}".format(
-                self.get_absolute_url())
+    def send_email(self):
+        streams = []
+        for stream in self.streams.select_related("venue").all():
+            s = {
+                "city": stream.venue.city.name,
+                "date": date_format(stream.date, "j E"),
+                "office": stream.venue.name,
+                "with_assignments": stream.with_assignments,
+                "directions": stream.venue.directions,
+            }
+            streams.append(s)
         context = {
-            "SECRET_LINK": secret_link,
+            "BRANCH": streams[0]["city"],
+            "SECRET_LINK": self.get_absolute_url(),
+            "STREAMS": streams
         }
-        if stream:
-            template_name = self.ONE_STREAM_EMAIL_TEMPLATE
-            context.update({
-                "SUBJECT_CITY": stream.venue.city.name,
-                "SHORT_DATE": date_format(stream.date, "d E"),
-                "OFFICE_TITLE": stream.venue.name,
-                "WITH_ASSIGNMENTS": stream.with_assignments,
-                "DIRECTIONS": stream.venue.directions,
-            })
         return mail.send(
             [self.applicant.email],
-            # TODO: move to settings
             sender='CS центр <info@compscicenter.ru>',
-            template=template_name,
+            template=self.applicant.campaign.template_appointment,
             context=context,
-            # Render on delivery, we have no really big amount of
-            # emails to think about saving CPU time
-            render_on_delivery=True,
+            render_on_delivery=False,
             backend='ses',
         )

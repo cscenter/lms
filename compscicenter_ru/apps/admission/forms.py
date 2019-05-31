@@ -20,6 +20,7 @@ from core.timezone import now_local
 from core.urls import reverse
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
+from learning.models import Branch
 
 
 class InterviewForm(forms.ModelForm):
@@ -91,7 +92,7 @@ class InterviewFromStreamForm(forms.Form):
                 raise ValidationError("Все слоты заняты.")
         # TODO: Limit active invitations by slots
 
-    def __init__(self, city: City, *args, **kwargs):
+    def __init__(self, branch: Branch, *args, **kwargs):
         super().__init__(*args, **kwargs)
         stream_field = self.prefix + "-streams"
         if 'data' in kwargs and kwargs['data'].getlist(stream_field):
@@ -99,9 +100,9 @@ class InterviewFromStreamForm(forms.Form):
             self.fields['slot'].queryset = (InterviewSlot.objects
                                             .select_related("stream")
                                             .filter(stream_id__in=stream_ids))
-        today = now_local(city.get_timezone()).date()
+        today = now_local(branch.timezone).date()
         self.fields['streams'].queryset = (InterviewStream.objects
-                                           .filter(venue__city_id=city.code,
+                                           .filter(campaign__branch=branch,
                                                    date__gt=today)
                                            .select_related("venue"))
         self.helper = FormHelper(self)

@@ -10,9 +10,7 @@ from admission.models import InterviewStream, InterviewInvitation, \
     Applicant
 
 
-def create_invitation(streams: List[InterviewStream],
-                      applicant: Applicant,
-                      **kwargs):
+def create_invitation(streams: List[InterviewStream], applicant: Applicant):
     """Create invitation and send email to applicant."""
     streams = list(streams)  # Queryset -> list
     first_stream = min(streams, key=attrgetter('date'))
@@ -31,6 +29,4 @@ def create_invitation(streams: List[InterviewStream],
     with transaction.atomic():
         invitation.save()
         invitation.streams.add(*streams)
-        stream = first_stream if len(streams) == 1 else None
-        invitation.send_email(stream=stream,
-                              uri_builder=kwargs.get('uri_builder'))
+        invitation.send_email()

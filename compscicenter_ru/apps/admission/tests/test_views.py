@@ -259,29 +259,27 @@ def test_interview_comment_create(curator, client, settings):
 def test_invitation_creation(curator, client, settings):
     """Create invitation from single stream"""
     settings.LANGUAGE_CODE = 'ru'
-    applicant = ApplicantFactory(campaign__city_id='nsk')
+    campaign = CampaignFactory()
+    applicant = ApplicantFactory(campaign=campaign)
     tomorrow = now() + datetime.timedelta(days=2)
     InterviewStreamFactory(date=tomorrow.date(),
                            with_assignments=True,
-                           venue__city_id='nsk')
-    stream_nsk = InterviewStreamFactory(date=tomorrow.date(),
-                                        with_assignments=False,
-                                        venue__city_id='nsk')
-    assert stream_nsk.slots.count() > 0
+                           campaign=campaign)
+    stream = InterviewStreamFactory(date=tomorrow.date(),
+                                    with_assignments=False,
+                                    campaign=campaign)
+    assert stream.slots.count() > 0
     client.login(curator)
     response = client.post(applicant.get_absolute_url(), {})
     assert response.status_code == 200
     assert len(response.context['form'].errors) > 0
     form_data = {
-        InterviewFromStreamForm.prefix + "-streams": stream_nsk.pk
+        InterviewFromStreamForm.prefix + "-streams": stream.pk
     }
     response = client.post(applicant.get_absolute_url(), form_data, follow=True)
     message = list(response.context['messages'])[0]
     assert 'success' in message.tags
     assert Email.objects.count() == 1
-    invitation_qs = (Email.objects
-                     .filter(template__name=InterviewInvitation.ONE_STREAM_EMAIL_TEMPLATE))
-    assert invitation_qs.count() == 1
     assert Interview.objects.count() == 0
     assert InterviewInvitation.objects.count() == 1
 
@@ -289,18 +287,19 @@ def test_invitation_creation(curator, client, settings):
 @pytest.mark.django_db
 def test_create_interview_from_slot(curator, client, settings):
     settings.LANGUAGE_CODE = 'ru'
-    applicant_nsk = ApplicantFactory(campaign__city_id='nsk')
+    campaign = CampaignFactory(branch__code='nsk', city_id='nsk')
+    applicant = ApplicantFactory(campaign=campaign)
     tomorrow_utc = now() + datetime.timedelta(days=2)
     interviewer = InterviewerFactory()
-    stream_nsk = InterviewStreamFactory(date=tomorrow_utc.date(),
-                                        start_at=datetime.time(hour=12),
-                                        end_at=datetime.time(hour=15),
-                                        with_assignments=False,
-                                        venue__city_id='nsk',
-                                        interviewers=[interviewer])
-    assert stream_nsk.slots.count() > 0
+    stream = InterviewStreamFactory(date=tomorrow_utc.date(),
+                                    start_at=datetime.time(hour=12),
+                                    end_at=datetime.time(hour=15),
+                                    campaign=campaign,
+                                    with_assignments=False,
+                                    interviewers=[interviewer])
+    assert stream.slots.count() > 0
     # Make slot busy
-    slot = stream_nsk.slots.order_by("start_at").first()
+    slot = stream.slots.order_by("start_at").first()
     interview = InterviewFactory()
     slot.interview_id = interview.pk
     slot.save()
@@ -308,10 +307,10 @@ def test_create_interview_from_slot(curator, client, settings):
     assert Interview.objects.count() == 1
     client.login(curator)
     form_data = {
-        InterviewFromStreamForm.prefix + "-streams": stream_nsk.pk,
+        InterviewFromStreamForm.prefix + "-streams": stream.pk,
         InterviewFromStreamForm.prefix + "-slot": slot.pk
     }
-    response = client.post(applicant_nsk.get_absolute_url(), form_data, follow=True)
+    response = client.post(applicant.get_absolute_url(), form_data, follow=True)
     assert response.status_code == 200
     message = list(response.context['messages'])[0]
     assert 'error' in message.tags
@@ -319,13 +318,13 @@ def test_create_interview_from_slot(curator, client, settings):
     # Empty slot and repeat
     slot.interview_id = None
     slot.save()
-    response = client.post(applicant_nsk.get_absolute_url(), form_data, follow=True)
+    response = client.post(applicant.get_absolute_url(), form_data, follow=True)
     message = list(response.context['messages'])[0]
     assert 'success' in message.tags
     assert InterviewInvitation.objects.count() == 0
     assert Interview.objects.count() == 2
     # Check interview date
-    interview = Interview.objects.get(applicant=applicant_nsk)
+    interview = Interview.objects.get(applicant=applicant)
     assert interview.date.hour == 5  # UTC +7 for nsk
     assert interview.date_local().hour == slot.start_at.hour
     assert interview.date_local().minute == slot.start_at.minute
