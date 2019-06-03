@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-06-03 13:47+0000\n"
-"PO-Revision-Date: 2019-06-03 13:48+0000\n"
+"POT-Creation-Date: 2019-06-03 15:34+0000\n"
+"PO-Revision-Date: 2019-06-03 15:35+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -221,7 +221,7 @@ msgid "Courses"
 msgstr "Курсы"
 
 #: apps/courses/forms.py:27 apps/courses/models.py:211
-#: apps/users/models.py:619 apps/users/models.py:636
+#: apps/users/models.py:619 apps/users/models.py:635
 msgid "Course|name"
 msgstr "Название"
 
@@ -398,7 +398,7 @@ msgstr "Системное поле. Не редактировать вручн�
 #: apps/templates/learning/study/course_list.html:81
 #: apps/templates/learning/teaching/course_list.html:11
 #: apps/templates/users/teacher_detail.html:40 apps/users/models.py:57
-#: apps/users/models.py:640
+#: apps/users/models.py:639
 msgid "Semester"
 msgstr "Семестр"
 
@@ -581,7 +581,6 @@ msgid "Reviewer"
 msgstr "Проверяющий ДЗ"
 
 #: apps/courses/models.py:555
-#| msgid "Seminar"
 msgid "Seminarian"
 msgstr "Семинарист"
 
@@ -1062,11 +1061,11 @@ msgstr "Отделения"
 #: apps/templates/learning/teaching/assignment_list.html:97
 #: apps/templates/learning/teaching/student_assignment_detail.html:85
 #: apps/users/models.py:65 apps/users/models.py:517 apps/users/models.py:617
-#: apps/users/models.py:634 apps/users/models.py:668
+#: apps/users/models.py:633 apps/users/models.py:667
 msgid "Student"
 msgstr "Студент"
 
-#: apps/learning/models.py:126 apps/users/models.py:645
+#: apps/learning/models.py:126 apps/users/models.py:644
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
@@ -1324,23 +1323,23 @@ msgstr "По-умолчанию"
 msgid "Binary"
 msgstr "Зачет-Незачет"
 
-#: apps/learning/settings.py:57
+#: apps/learning/settings.py:56 apps/users/constants.py:42
 msgid "Not graded"
 msgstr "Без оценки"
 
-#: apps/learning/settings.py:58
+#: apps/learning/settings.py:57
 msgid "Enrollment|Unsatisfactory"
 msgstr "Незачёт"
 
-#: apps/learning/settings.py:59
+#: apps/learning/settings.py:58
 msgid "Enrollment|Pass"
 msgstr "Зачёт"
 
-#: apps/learning/settings.py:60
+#: apps/learning/settings.py:59 apps/users/constants.py:45
 msgid "Good"
 msgstr "Хорошо"
 
-#: apps/learning/settings.py:61
+#: apps/learning/settings.py:60 apps/users/constants.py:46
 msgid "Excellent"
 msgstr "Отлично"
 
@@ -2398,6 +2397,16 @@ msgstr "Проверяющий [Отчеты]"
 msgid "Curator of projects"
 msgstr "Куратор проектов"
 
+#: apps/users/constants.py:43
+#| msgid "Enrollment|Unsatisfactory"
+msgid "SHADCourseGrade|Unsatisfactory"
+msgstr "Незачёт"
+
+#: apps/users/constants.py:44
+#| msgid "SHAD course records"
+msgid "SHADCourseGrade|Pass"
+msgstr "Удовлетворительно"
+
 #: apps/users/forms.py:25
 msgid "Username"
 msgstr "Имя пользователя"
@@ -2582,31 +2591,31 @@ msgstr "Запись об онлайн-курсе"
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: apps/users/models.py:637
+#: apps/users/models.py:636
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: apps/users/models.py:651
+#: apps/users/models.py:650
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: apps/users/models.py:652
+#: apps/users/models.py:651
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: apps/users/models.py:663
+#: apps/users/models.py:662
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: apps/users/models.py:664
+#: apps/users/models.py:663
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: apps/users/models.py:674
+#: apps/users/models.py:673
 msgid "Student Reference"
 msgstr "Справка студента"
 
-#: apps/users/models.py:675
+#: apps/users/models.py:674
 msgid "Student References"
 msgstr "Справки студента"
 

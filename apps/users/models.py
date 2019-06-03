@@ -30,7 +30,7 @@ from learning.permissions import LearningPermissionsMixin
 from learning.settings import StudentStatuses, GradeTypes
 from learning.utils import is_negative_grade
 from users.constants import GROUPS_IMPORT_TO_GERRIT, AcademicRoles, \
-    BASE_THUMBNAIL_WIDTH, BASE_THUMBNAIL_HEIGHT
+    BASE_THUMBNAIL_WIDTH, BASE_THUMBNAIL_HEIGHT, SHADCourseGradeTypes
 from users.fields import MonitorStatusField
 from users.tasks import update_password_in_gerrit
 from users.thumbnails import get_user_thumbnail
@@ -628,7 +628,6 @@ class OnlineCourseRecord(TimeStampedModel):
 
 
 class SHADCourseRecord(TimeStampedModel):
-    GRADES = GradeTypes
     student = models.ForeignKey(
         User,
         verbose_name=_("Student"),
@@ -643,8 +642,8 @@ class SHADCourseRecord(TimeStampedModel):
     grade = models.CharField(
         max_length=100,
         verbose_name=_("Enrollment|grade"),
-        choices=GradeTypes.choices,
-        default=GradeTypes.NOT_GRADED)
+        choices=SHADCourseGradeTypes.choices,
+        default=SHADCourseGradeTypes.NOT_GRADED)
 
     class Meta:
         ordering = ["name"]
@@ -653,7 +652,7 @@ class SHADCourseRecord(TimeStampedModel):
 
     @property
     def grade_display(self):
-        return self.GRADES.values[self.grade]
+        return SHADCourseGradeTypes.values[self.grade]
 
     def __str__(self):
         return smart_text("{} [{}]".format(self.name, self.student_id))
