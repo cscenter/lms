@@ -5,19 +5,17 @@ from django.core.management import BaseCommand, CommandError
 from django.db.models import Q
 
 from ._utils import CurrentCampaignsMixin
-from admission.models import Applicant, Test
+from admission.models import Applicant, Test, Campaign
 
 
 class Command(CurrentCampaignsMixin, BaseCommand):
     help = """
-    Recalculate applicant statuses for selected campaign.
+    Updates applicant status for selected campaign based on exam results.
 
-        1. Set `REJECTED_BY_EXAM` for applicants with  
-            exam score <= `reject_value`
-        2. Set `INTERVIEW_TOBE_SCHEDULED` for applicants with 
-            exam score >= `exam_score_pass`
-        3. Set `PENDING` for applicants with 
-            exam score in (reject_value, exam_score_pass) range
+    Details:
+        Set `INTERVIEW_TOBE_SCHEDULED` to applicants with exam score >= Campaign.exam_score_pass
+        Set `REJECTED_BY_EXAM` to applicants with exam score <= `reject_value`
+        Set `PENDING` to applicants with exam score in (reject_value, exam_score_pass) range
     """
 
     def add_arguments(self, parser):
@@ -27,28 +25,44 @@ class Command(CurrentCampaignsMixin, BaseCommand):
         parser.add_argument(
             '--reject_value', type=Decimal,
             help='Set `rejected by exam` to applicants with exam score equal or'
-                 ' below this value')
+                 ' below this value.')
 
     def handle(self, *args, **options):
         if not options["city"]:
-            raise CommandError("Provide campaign city code")
+            available = (Campaign.objects
+                         .filter(current=True)
+                         .select_related('branch'))
+            options = [c.branch.code for c in available]
+            msg = f"Provide campaign branch code. Available options: {options}"
+            raise CommandError(msg)
         city_code = options["city"]
         campaigns = self.get_current_campaigns(city_code)
         assert len(campaigns) == 1
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return
-        campaign = campaigns.first()
+
+        campaign = campaigns.get()
+        self.stdout.write("Минимальный шаг оценки - 0.01")
+        exam_score_pass = Decimal(campaign.exam_passing_score)
+        if not exam_score_pass:
+            self.stdout.write(f"Zero exam passing score for {campaign}. Cancel")
+            return
+        self.stdout.write(f"{exam_score_pass} и больше - прошёл на собеседование.")
+
         reject_value = options["reject_value"]
         if not reject_value:
-            raise CommandError(
-                "Score value for rejection is not specified. If you haven't "
-                "any application form in pending status, set "
-                "`reject_value` = `passing_score` - 0.01")
-        exam_score_pass = campaign.exam_passing_score
-        if not exam_score_pass:
-            self.stdout.write("Zero exam passing score "
-                              "for {}. Cancel".format(campaign))
+            reject_value = exam_score_pass - Decimal('0.01')
+        else:
+            if reject_value >= exam_score_pass:
+                raise CommandError(f"reject_value is greater than current "
+                                   f"Campaign.exam_score_pass value")
+            self.stdout.write(f"От {reject_value} до {exam_score_pass} (не "
+                              f"включая крайние значения) - в ожидании решения.")
+
+        if input(f"{reject_value} и меньше - отказ по результатам экзамена. "
+                 f"Продолжить? [y/n] ") != "y":
+            self.stdout.write("Aborted")
             return
 
         self.stdout.write("Total applicants: {}".format(
@@ -84,15 +98,18 @@ class Command(CurrentCampaignsMixin, BaseCommand):
                                Q(status=Applicant.INTERVIEW_TOBE_SCHEDULED)))
         total_pass_exam = pass_exam_q.update(
             status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-        # Count those who passed the interview phase and waiting
-        # for final decision
+        # Some applicants could have exam score < passing score, but they
+        # still pass to the next stage (by manual application form check)
+        # Also count those who passed the interview phase and waiting
+        # for the final decision
         interviewed = (Applicant.objects
                        .filter(campaign=campaign.pk)
-                       .filter(Q(status=Applicant.INTERVIEW_SCHEDULED) |
+                       .filter(Q(status=Applicant.INTERVIEW_TOBE_SCHEDULED) |
+                               Q(status=Applicant.INTERVIEW_SCHEDULED) |
                                Q(status=Applicant.INTERVIEW_COMPLETED) |
                                Q(status=Applicant.REJECTED_BY_INTERVIEW))
                        .count())
-        total_pass_exam += interviewed
+        total_pass_exam = interviewed
 
         pending_q = (Applicant.objects
                      .filter(campaign=campaign.pk,
@@ -121,7 +138,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
         self.stdout.write("Cheaters: {}".format(total_cheaters))
         self.stdout.write("Rejected by test: {}".format(total_rejected_by_test))
         self.stdout.write("Rejected by exam: {}".format(total_rejects_by_exam))
-        self.stdout.write("Pass exam: {}".format(total_pass_exam))
+        self.stdout.write("Pass exam stage: {}".format(total_pass_exam))
         self.stdout.write("Pending status: {}".format(total_pending))
         self.stdout.write("Refused status: {}".format(total_refused))
         self.stdout.write("{} = {}".format(
