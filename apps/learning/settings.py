@@ -51,7 +51,6 @@ class GradeTypes(DjangoChoices):
     """
     Used as a grade choices for models:
         * Enrollment
-        * SHADCourseRecord
         * ProjectStudent
     """
     NOT_GRADED = C('not_graded', _("Not graded"))

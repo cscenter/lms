@@ -36,3 +36,11 @@ GROUPS_IMPORT_TO_GERRIT = [
     AcademicRoles.TEACHER_CENTER,
     AcademicRoles.GRADUATE_CENTER
 ]
+
+
+class SHADCourseGradeTypes(DjangoChoices):
+    NOT_GRADED = C('not_graded', _("Not graded"))
+    UNSATISFACTORY = C('unsatisfactory', _("SHADCourseGrade|Unsatisfactory"))
+    CREDIT = C('pass', _("SHADCourseGrade|Pass"))
+    GOOD = C('good', _("Good"))
+    EXCELLENT = C('excellent', _("Excellent"))
