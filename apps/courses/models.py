@@ -552,6 +552,7 @@ class CourseTeacher(models.Model):
     roles = BitField(flags=(
         ('lecturer', _('Lecturer')),
         ('reviewer', _('Reviewer')),
+        ('seminar', _('Seminarian')),
     ), default=('lecturer',))
     notify_by_default = models.BooleanField(
         _("Notify by default"),

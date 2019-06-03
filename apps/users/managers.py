@@ -76,16 +76,15 @@ class UserQuerySet(query.QuerySet):
                 ),
                 Prefetch(
                     'enrollments__course__teachers',
-                    # Note (Zh): Show pure lecturers first (=1),
-                    # then teachers with lecturer role (values >1), then others
+                    # Note (Zh): Show lecturers first, then seminarians,
+                    # then others
                     queryset=User.objects.extra(
                         select={
-                            'is_lecturer': '"%s"."roles" & %s' %
-                            (CourseTeacher._meta.db_table,
-                             int(CourseTeacher.roles.lecturer))
+                            'is_lecturer': '"%s"."roles" & %s' % (CourseTeacher._meta.db_table, int(CourseTeacher.roles.lecturer)),
+                            'is_seminarian': '"%s"."roles" & %s' % (CourseTeacher._meta.db_table, int(CourseTeacher.roles.seminar)),
                         },
                         order_by=["-is_lecturer",
-                                  "%s.roles" % CourseTeacher._meta.db_table,
+                                  "-is_seminarian",
                                   "last_name",
                                   "first_name"]
                     )

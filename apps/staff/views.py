@@ -297,6 +297,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
                     teachers=", ".join(t.get_abbreviated_name() for t in
                                        e.course.teachers.all()),
                     final_grade=str(e.grade_honest).lower(),
+                    # FIXME: db hit for each record
                     class_count=e.course.courseclass_set.count() * 2
                 )
                 courses.append(course)
