@@ -10,7 +10,7 @@ from admission.models import Applicant, Exam
 
 
 class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
-    help = """Generate emails about online exam results."""
+    help = """Generate emails about exam results."""
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -37,7 +37,6 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("{}:".format(campaign))
             statuses = [
                 Applicant.REJECTED_BY_EXAM,
-                Applicant.THEY_REFUSED
             ]
             if not options["fail_only"]:
                 statuses.append(Applicant.INTERVIEW_TOBE_SCHEDULED)
@@ -56,14 +55,15 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
                     context = {
-                        'SUBJECT_CITY': campaign.city.name
+                        'BRANCH': campaign.branch.name
                     }
                     mail.send(
                         recipients,
                         sender='CS центр <info@compscicenter.ru>',
                         template=template,
-                        # Render on delivery, we have no really big amount of
-                        # emails to think about saving CPU time
+                        # If emails rendered on delivery, they will store
+                        # value of the template id. It makes
+                        # `Email.objects.exists()` work correctly.
                         render_on_delivery=True,
                         context=context,
                         backend='ses',
