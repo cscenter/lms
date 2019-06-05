@@ -12,7 +12,18 @@
     <div class="container page-content">
         <div class="row">
             <div class="col-12">
-                <h1>Default message</h1>
+                <pre>
+FIXME: Ссылки не везде различимы.
+Поддержка тега code - по желанию.
+Нужно явно разделить сообщения по типам _warning и _info (такого сейчас нет).
+    _info - сопутствующая информация, не требующая особого внимания.
+    _warning - уже важнее.
+Shadowed - не вижу тени.
+font-weight: bolder не работает, либо совсем не заметно.
+Нужно понять, какие глифы (или как эта фигня в шрифтах называется) подтянуть,
+чтобы заработало (смотри тег `b` в текстах сообщений). Ну и подумать, нужно ли.
+                </pre>
+                <h1>Types</h1>
                 <div class="message">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
@@ -20,13 +31,12 @@
                     <div class="message__header">
                         Базовый стиль
                     </div>
-                    <p>
-                        Обратите внимание на важную информацию
-                    </p>
+                    <p>Обратите <b>внимание</b> на важную информацию</p>
+                    <p>Модификатор <code>отсутствует</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
                     <button href="#" class="btn _success _small message__btn">Разрешить доступ</button>
                     <button href="#" class="btn _light _small message__btn">Не разрешать</button>
                 </div>
-                <h1>Colored</h1>
                 <div class="message _danger">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
@@ -34,7 +44,9 @@
                     <div class="message__header">
                         Внимание
                     </div>
-                    <p>Срочно примите неотложные меры!</p>
+                    <p><b>Срочно</b> примите неотложные меры!</p>
+                    <p>Модификатор <code>._danger</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
                 </div>
                 <div class="message _warning">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -43,7 +55,9 @@
                     <div class="message__header">
                         Системное сообщение
                     </div>
-                    <p>Мы предупреждаем что все ваши действия будут записанны в наших логах</p>
+                    <p>Мы <b>предупреждаем</b> что все ваши действия будут записанны в наших логах</p>
+                    <p>Модификатор <code>._warning</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
                 </div>
                 <div class="message _success">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -52,7 +66,9 @@
                     <div class="message__header">
                         У вас кое-что получается!
                     </div>
-                    <p>Мы предупреждаем что все ваши действия будут записанны в наших логах</p>
+                    <p>Мы <b>предупреждаем</b> что все ваши действия будут записанны в наших логах</p>
+                    <p>Модификатор <code>._success</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
                 </div>
 
                 <h1>Bordered</h1>
@@ -63,7 +79,7 @@
                     <div class="message__header">
                         Внимание
                     </div>
-                    <p>Срочно примите неотложные меры!</p>
+                    <p><b>Срочно</b> примите неотложные меры!</p>
                 </div>
                 <div class="message _warning _outline">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
