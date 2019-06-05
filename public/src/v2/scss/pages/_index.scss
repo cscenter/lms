@@ -5,6 +5,24 @@
   }
 }
 
+.cover-index-page {
+  background-image: url("/static/v2/img/pages/index/bg-main-page.jpg");
+  background-color: #201f20;
+  padding: 0 0 64px;
+  @include media-breakpoint-up(lg) {
+    text-align: left;
+  }
+
+  .cover__title {
+    padding-top: 40px;
+  }
+
+  .cover__text {
+    margin-bottom: 40px;
+    max-width: 900px;
+  }
+}
+
 // 2 - screen `Study Areas`
 
 .csc-study-areas {

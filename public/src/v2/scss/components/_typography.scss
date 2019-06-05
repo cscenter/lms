@@ -138,6 +138,14 @@ a {
         margin-bottom: spacer("2x");
       }
     }
+
+  ol._unstyled, ul._unstyled, dl._unstyled {
+    margin: 0;
+
+    li:before {
+      content: "";
+    }
+  }
 }
 
 code {
