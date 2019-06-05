@@ -70,6 +70,7 @@ h6, .h6 {
   display: block;
   font-size: 80%; // back to default font-size
   color: $blockquote-small-color;
+
   &::before {
     content: "\2014 \00A0"; // em dash, nbsp
   }
@@ -106,44 +107,54 @@ a {
 }
 
 .page-content {
-    ol:not(.ui), ul:not(.ui), dl:not(.ui) {
+  ol:not(.ui), ul:not(.ui), dl:not(.ui) {
+    padding: 0;
+    margin: spacer("2x") 0 spacer("6x") spacer("6x");
+    @include media-breakpoint-up(md) {
+      margin: spacer("2x") 0 spacer("6x") 3.5rem;
+    }
+
+    ul:not(.ui) li {
+
+    }
+  }
+
+  ul:not(.ui) {
+    list-style-type: none;
+
+    li {
+      margin-bottom: spacer("2x");
+    }
+
+    li::before {
+      content: "\2014";
+      color: $gray-light;
+      float: left;
+      margin-left: -#{spacer("6x")};
+    }
+
+    ul:not(.ui) li::before {
+      content: "\2022";
+    }
+  }
+
+  ol:not(.ui) {
+    li {
+      margin-bottom: spacer("2x");
+    }
+  }
+
+  ol,
+  ul,
+  dl {
+    &._unstyled {
+      margin: 0;
       padding: 0;
-      margin: spacer("2x") 0 spacer("6x") spacer("6x");
-      @include media-breakpoint-up(md) {
-        margin: spacer("2x") 0 spacer("6x") 3.5rem;
-      }
-
-      ul:not(.ui) li {
-
-      }
-    }
-    ul:not(.ui) {
       list-style-type: none;
-      li {
-        margin-bottom: spacer("2x");
-      }
+
       li::before {
-        content: "\2014";
-        color: $gray-light;
-        float: left;
-        margin-left: -#{spacer("6x")};
+        content: "";
       }
-
-      ul:not(.ui) li::before {
-        content: "\2022";
-      }
-    }
-    ol:not(.ui) {
-      li {
-        margin-bottom: spacer("2x");
-      }
-    }
-
-  ol._unstyled, ul._unstyled, dl._unstyled {
-    margin: 0;
-
-    li:before {
-      content: "";
     }
   }
 }
@@ -160,6 +171,7 @@ code {
 
 table:not(.ui) tr {
   border-bottom: $border-width solid $gray-light;
+
   th, td {
     padding-right: 1.5rem;
   }
