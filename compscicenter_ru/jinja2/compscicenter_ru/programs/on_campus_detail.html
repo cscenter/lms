@@ -5,13 +5,13 @@
 {% block body_attrs %}class="_dark"{% endblock body_attrs %}
 
 {% block content %}
-    <div class="cover _program">
+    <div class="cover">
         <div class="container text-center">
             <div class="cover__content">
             {% with academic_discipline = study_program.academic_discipline %}
                 {% if academic_discipline.icon %}<img src="{{ academic_discipline.icon.url }}" alt="">{% endif %}
-                <h1 class="cover__title">{{ academic_discipline.name_en }}</h1>
-                <p class="translate">/ {{ academic_discipline.name_ru }}</p>
+                <h1 class="cover__title mb-2">{{ academic_discipline.name_en }}</h1>
+                <p class="cover__subtitle">/ {{ academic_discipline.name_ru }}</p>
                 <div class="row content-center mt-10">
                     <div class="col-lg-10">
                         {{ academic_discipline.description }}
