@@ -53,6 +53,7 @@ urlpatterns += [
     path('videos/', views.CourseVideoListView.as_view(), name='course_video_list'),
 
     path('', include(auth_urls)),
+    path('students/<int:student_id>/', views.StudentProfileView.as_view(), name='student_profile'),
     path('', include('users.urls')),
 
     path('api/', include('api.frontend_urls')),

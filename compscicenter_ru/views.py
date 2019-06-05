@@ -39,6 +39,7 @@ from online_courses.models import OnlineCourse, OnlineCourseTuple
 from publications.models import ProjectPublication
 from stats.views import StudentsDiplomasStats
 from study_programs.models import StudyProgram, AcademicDiscipline
+from users.constants import AcademicRoles
 from users.models import User
 from .filters import CoursesFilter
 
@@ -517,3 +518,16 @@ class ProjectsListView(TemplateView):
                                           type=ProjectTypes.research)
                                   .order_by('title'))
         }
+
+
+class StudentProfileView(generic.DetailView):
+    pk_url_kwarg = "student_id"
+    context_object_name = "student"
+
+    def get_queryset(self):
+        return User.objects.select_related("graduate_profile")
+
+    def get_template_names(self):
+        if hasattr(self.object, 'graduate_profile'):
+            return "compscicenter_ru/profiles/graduate.html"
+        return "compscicenter_ru/profiles/student.html"

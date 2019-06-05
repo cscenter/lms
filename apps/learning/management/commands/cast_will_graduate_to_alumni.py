@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 
 from django.core.cache import cache
 from django.core.management import BaseCommand
+from django.db import transaction
 from django.utils.timezone import now
 
+from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from users.models import User
 
@@ -13,19 +16,31 @@ class Command(BaseCommand):
             "student group with `GRADUATE_CENTER`. "
             "Also clean status and set graduation year.")
 
+    def add_arguments(self, parser):
+        parser.add_argument('graduation_at', metavar='GRADUATION_DATE',
+                            help='Graduation date in dd.mm.yyyy format')
+
     def handle(self, *args, **options):
+        graduation_at_str = options['graduation_at']
+        graduation_at = datetime.strptime(graduation_at_str, "%d.%m.%Y").date()
         will_graduate_list = User.objects.filter(groups__in=[
             User.roles.STUDENT_CENTER,
             User.roles.VOLUNTEER,
         ], status=StudentStatuses.WILL_GRADUATE)
 
-        for user in will_graduate_list:
-            user.groups.remove(User.roles.STUDENT_CENTER)
-            user.groups.remove(User.roles.VOLUNTEER)
-            user.groups.add(User.roles.GRADUATE_CENTER)
-            user.graduation_year = now().year
-            user.status = ""
-            user.save()
+        for student in will_graduate_list:
+            defaults = {
+                "graduation_at": graduation_at,
+            }
+            with transaction.atomic():
+                student.groups.remove(User.roles.STUDENT_CENTER)
+                student.groups.remove(User.roles.VOLUNTEER)
+                student.groups.add(User.roles.GRADUATE_CENTER)
+                student.graduation_year = now().year
+                student.status = ""
+                student.save()
+                GraduateProfile.objects.get_or_create(student=student,
+                                                      defaults=defaults)
 
         cache.delete("cscenter_last_graduation_year")
         # Drop cache on /{YEAR}/ page

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
 import os.path
 
 from django.conf import settings
@@ -17,6 +18,7 @@ from djchoices import DjangoChoices, ChoiceItem
 from model_utils.fields import MonitorField
 from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
@@ -564,3 +566,44 @@ class Useful(models.Model):
 
     def __str__(self):
         return smart_text(self.question)
+
+
+def graduate_photo_upload_to(instance: "GraduateProfile", filename):
+    _, ext = os.path.splitext(filename)
+    filename = instance.student.get_abbreviated_name_in_latin()
+    return f"alumni/{instance.graduation_at.year}/{filename}{ext}"
+
+
+class GraduateProfile(models.Model):
+    student = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Student"),
+        on_delete=models.CASCADE,
+        related_name="graduate_profile")
+    graduation_at = models.DateField(
+        verbose_name=_("Graduation at"),
+        help_text=_("Graduation ceremony date"))
+    graduation_year = models.PositiveSmallIntegerField(
+        verbose_name=_("Graduation Year"),
+        help_text=_("Helps filtering by year"),
+        editable=False)
+    photo = ImageField(
+        _("Photo"),
+        upload_to=graduate_photo_upload_to,
+        blank=True)
+    testimonial = models.TextField(
+        _("Testimonial"),
+        help_text=_("Testimonial about Computer Science Center"),
+        blank=True)
+
+    class Meta:
+        verbose_name = _("Graduate Profile")
+        verbose_name_plural = _("Graduate Profiles")
+
+    def __str__(self):
+        return smart_text(self.student)
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        self.graduation_year = self.graduation_at.year
+        super().save(**kwargs)
