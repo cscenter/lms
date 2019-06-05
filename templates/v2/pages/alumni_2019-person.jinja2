@@ -1,0 +1,161 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block body_attrs %}class="_nofooter"{% endblock body_attrs %}
+
+{% block sprites %}{% include "sprites/achievements.svg" %}{% endblock sprites %}
+
+{% block menu %}
+    <div class="navbar-container">
+        <nav class="navbar navbar-main{% if theme_class %} {{ theme_class }}{% endif %}">
+            <div class="container">
+                <a class="navbar-logo" href="/v2/pages/">{{ macros.svg_inline('logo-csc') }}</a>
+                <div class="menu-desktop-wrapper">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link _active" href="/v2/pages/about/">Выпускники 2018</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Статистика</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Фотографии</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Отзывы</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+{% endblock menu %}
+
+{% block content %}
+    <div class="cover _green-gradient p-6">
+        <div class="container page-content text-center">
+            <div class="cover-student-avatar">
+                <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
+            </div>
+            <p>Выпускница CS центра</p>
+            <h1>Дарья Широкова</h1>
+        </div>
+    </div>
+    <div class="container page-content mt-lg-10">
+        <h2 class="text-center">История</h2>
+        <div class="row content-center">
+            <div class="col-lg-5 col-sm-8 col-8">
+                <div class="timeline _person-history">
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <div class="timeline__date">20 мая 2017</div>
+                            <p>Подала заявление</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <div class="timeline__date">31 мая 2017</div>
+                            <p>Написала экзамен на 9/10</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline__element">
+                        <div class="timeline__img">
+                            <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
+                        </div>
+                        <div class="timeline__content">
+                            <div class="timeline__date _important">10 июня 2017</div>
+                            <h3>Зачислена в CSC и длинный заголовок на несколько строчек</h3>
+                        </div>
+                    </div>
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <div class="timeline__date">Осень 2017</div>
+                            <ul class="ui _unstyled">
+                                <li>Алгоритмы и структуры данных, часть 1, осень 2017 /отлично/
+                                </li>
+                                <li>Программирование на C++, часть 1, осень 2017 /отлично/
+                                </li>
+                                <li>Программирование на Java, осень 2017 /отлично/</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <span class="timeline__date">Весна 2018</span>
+                            <ul class="_unstyled">
+                                <li>Алгоритмы и структуры данных, часть 2, осень 2017 /отлично/
+                                </li>
+                                <li>Программирование на Java, осень 2017 /отлично/</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline__element _photo">
+                        <div class="timeline__img">
+                            <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
+                        </div>
+                        <div class="timeline__content">
+                            <span class="timeline__date _important">Весна 2018</span>
+                            <h3>Закончила обучение в CS центре</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid _dark">
+        <div class="container pt-10 pb-10">
+            <div class="row content-center pt-10 pb-6">
+                <div class="col-lg-9 text-center">
+                    <h2>Статистика и достижения</h2>
+                    <div class="row mt-10">
+                        <div class="col-sm-4"><img src="/static/v2/img/pages/syllabus/distance/backend.svg"
+                                                   alt="Бэкенд-разработчик">
+                            <p class="mt-2">Курсов сдано</p>
+                        </div>
+                        <div class="col-sm-4"><img src="/static/v2/img/pages/syllabus/distance/web-developer.svg"
+                                                   alt="Веб-разработчик">
+                            <p class="mt-2">Курсов не сдано</p>
+                        </div>
+                        <div class="col-sm-4"><img src="/static/v2/img/pages/syllabus/distance/analytic.svg"
+                                                   alt="Аналитик">
+                            <p class="mt-2">Аналитик</p>
+                        </div>
+                    </div>
+                    <div class="row mt-10">
+                        <div class="col-sm-4 mb-4"><img src="/static/v2/img/pages/syllabus/distance/backend.svg"
+                                                        alt="Бэкенд-разработчик">
+                            <p class="mt-2">Курсов сдано</p>
+                        </div>
+                        <div class="col-sm-4 mb-4"><img src="/static/v2/img/pages/syllabus/distance/web-developer.svg"
+                                                        alt="Веб-разработчик">
+                            <p class="mt-2">Курсов не сдано</p>
+                        </div>
+                        <div class="col-sm-4 mb-4"><img src="/static/v2/img/pages/syllabus/distance/analytic.svg"
+                                                        alt="Аналитик">
+                            <p class="mt-2">Аналитик</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid _light">
+        <div class="container pt-10 pb-10">
+            <div class="row content-center pt-10 pb-6">
+                <div class="col-lg-9 text-center">
+                    <h2>Особое достижение</h2>
+                    <div class="row mt-10 content-center">
+                        <div class="col-sm-4"><img class="w-100" src="/static/v2/img/pages/syllabus/distance/backend.svg"
+                                                   alt="Бэкенд-разработчик">
+                            <p class="mt-2">Курсов сдано</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}
