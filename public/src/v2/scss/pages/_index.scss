@@ -8,8 +8,9 @@
 .cover-index-page {
   background-image: url("/static/v2/img/pages/index/bg-main-page.jpg");
   background-color: #201f20;
-  padding: 0 0 64px;
+  padding: 40px 0 64px;
   @include media-breakpoint-up(lg) {
+    padding-top: 0;
     text-align: left;
   }
 
