@@ -1,0 +1,35 @@
+.cover {
+  position: relative;
+  background: linear-gradient(to right, $gray-dark, $gray-darker);
+  background-size: cover;
+  color: $white;
+  @include font-smoothing();
+  text-align: center;
+
+  &._green-gradient {
+    background: linear-gradient(to right, $teal, $blue);
+  }
+
+  nav {
+    z-index: 5;
+  }
+}
+
+.cover__content {
+  padding: 80px 0;
+  @include media-breakpoint-up(sm) {
+    flex-flow: row;
+  }
+}
+
+.cover__title {
+  max-width: 100%;
+
+  @include media-breakpoint-up(lg) {
+    font-size: 3.5rem;
+  }
+}
+
+.cover__subtitle {
+  font-size: $font-size-sm;
+}

@@ -95,6 +95,8 @@ $button-fill: solid;
 
   &._big {
     @include button-size(spacer("3x"), spacer("6x"), $font-size-content-base, calculate-input-line-height(56px, spacer("3x")), $btn-border-radius);
+    text-transform: uppercase;
+    letter-spacing: 2px;
   }
 
   &._small {
