@@ -8,6 +8,7 @@ from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
+from learning.models import GraduateProfile
 from users.constants import AcademicRoles
 from .models import AssignmentComment, Enrollment, Event, Useful, Branch
 
@@ -109,8 +110,15 @@ class BranchAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_remote')
 
 
+class GraduateProfileAdmin(admin.ModelAdmin):
+    list_display = ('student', 'graduation_year')
+    list_filter = ('graduation_year',)
+    raw_id_fields = ('student',)
+
+
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(Event, NonCourseEventAdmin)
 admin.site.register(Useful, UsefulAdmin)
 admin.site.register(Branch, BranchAdmin)
+admin.site.register(GraduateProfile, GraduateProfileAdmin)
