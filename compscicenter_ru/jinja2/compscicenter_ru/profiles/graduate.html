@@ -3,6 +3,78 @@
 {% block title %}Выпускник {{ super() }}{% endblock title %}
 
 {% block content %}
-    graduate template
+<div class="cover _green-gradient p-6">
+        <div class="container page-content text-center">
+            <div class="cover-student-avatar">
+                <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
+            </div>
+            <p>{% if student.gender == student.GENDER_MALE %}Выпускник{% else %}Выпускница{% endif %} CS центра</p>
+            <h1>{{ student.get_short_name() }}</h1>
+        </div>
+    </div>
+
+    <div class="container page-content mt-lg-10">
+        <h2 class="text-center">История обучения</h2>
+        <div class="row content-center">
+            <div class="col-lg-5 col-sm-8 col-8">
+                <div class="timeline _person-history">
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <div class="timeline__date">20 мая 2017</div>
+                            <p>Подала заявление</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <div class="timeline__date">31 мая 2017</div>
+                            <p>Написала экзамен на 9/10</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline__element">
+                        <div class="timeline__img">
+                            <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
+                        </div>
+                        <div class="timeline__content">
+                            <div class="timeline__date _important">10 июня 2017</div>
+                            <h3>Зачислена в CSC и длинный заголовок на несколько строчек</h3>
+                        </div>
+                    </div>
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <div class="timeline__date">Осень 2017</div>
+                            <ul class="ui _unstyled">
+                                <li>Алгоритмы и структуры данных, часть 1, осень 2017 /отлично/
+                                </li>
+                                <li>Программирование на C++, часть 1, осень 2017 /отлично/
+                                </li>
+                                <li>Программирование на Java, осень 2017 /отлично/</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <span class="timeline__date">Весна 2018</span>
+                            <ul class="_unstyled">
+                                <li>Алгоритмы и структуры данных, часть 2, осень 2017 /отлично/
+                                </li>
+                                <li>Программирование на Java, осень 2017 /отлично/</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline__element _photo">
+                        <div class="timeline__img">
+                            <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
+                        </div>
+                        <div class="timeline__content">
+                            <span class="timeline__date _important">Весна 2018</span>
+                            <h3>Закончила обучение в CS центре</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock content %}
 
