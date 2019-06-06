@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-from django.core.cache import cache
 from django.core.management import BaseCommand
 from django.db import transaction
-from django.utils.timezone import now
 
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
@@ -12,10 +10,6 @@ from users.models import User
 
 
 class Command(BaseCommand):
-    help = ("Get all students with status `will_graduate` and replace there "
-            "student group with `GRADUATE_CENTER`. "
-            "Also clean status and set graduation year.")
-
     def add_arguments(self, parser):
         parser.add_argument('graduation_at', metavar='GRADUATION_DATE',
                             help='Graduation date in dd.mm.yyyy format')
@@ -30,26 +24,15 @@ class Command(BaseCommand):
 
         for student in will_graduate_list:
             with transaction.atomic():
-                student.groups.remove(User.roles.STUDENT_CENTER)
-                student.groups.remove(User.roles.VOLUNTEER)
-                student.groups.add(User.roles.GRADUATE_CENTER)
-                student.graduation_year = now().year
-                student.status = ""
-                student.save()
                 defaults = {
-                    "is_active": True,
                     "graduation_at": graduation_at,
                     "testimonial": student.csc_review,
-                    "details": {}
+                    "details": {},
+                    "is_active": False
                 }
                 profile, created = GraduateProfile.objects.get_or_create(
                     student=student,
                     defaults=defaults)
                 if not created:
-                    profile.is_active = True
                     profile.testimonial = student.csc_review
                     profile.save()
-
-        cache.delete("cscenter_last_graduation_year")
-        # Drop cache on /{YEAR}/ page
-        cache.delete("alumni_{}_stats".format(now().year))

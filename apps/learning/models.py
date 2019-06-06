@@ -581,6 +581,9 @@ class GraduateProfile(models.Model):
         verbose_name=_("Student"),
         on_delete=models.CASCADE,
         related_name="graduate_profile")
+    is_active = models.BooleanField(
+        _("Activity"),
+        default=True)
     graduation_at = models.DateField(
         verbose_name=_("Graduation at"),
         help_text=_("Graduation ceremony date"))
@@ -616,3 +619,14 @@ class GraduateProfile(models.Model):
         created = self.pk is None
         self.graduation_year = self.graduation_at.year
         super().save(**kwargs)
+
+    def get_absolute_url(self):
+        return reverse('student_profile', args=[self.student_id], subdomain=None)
+
+    def get_photo(self):
+        if self.photo:
+            return self.photo
+        else:
+            return self.student.get_thumbnail(self.student.ThumbnailSize.BASE,
+                                              use_stub=True, new_stub=True,
+                                              stub_official=False)
