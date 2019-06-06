@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db.models import DecimalField
 
@@ -23,3 +24,11 @@ class ScoreField(DecimalField):
     def formfield(self, **kwargs):
         kwargs.setdefault("form_class", forms.GradeField)
         return super().formfield(**kwargs)
+
+
+class PrettyJSONField(JSONField):
+    def formfield(self, **kwargs):
+        return super(JSONField, self).formfield(**{
+            'form_class': forms.PrettyJSONField,
+            **kwargs,
+        })

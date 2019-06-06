@@ -3,73 +3,72 @@
 {% block title %}Выпускник {{ super() }}{% endblock title %}
 
 {% block content %}
-<div class="cover _green-gradient p-6">
-        <div class="container page-content text-center">
-            <div class="cover-student-avatar">
+    <div class="cover _green-gradient">
+        <div class="cover__content">
+            <div class="cover-student-avatar mt-8 mb-4">
                 <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
             </div>
-            <p>{% if student.gender == student.GENDER_MALE %}Выпускник{% else %}Выпускница{% endif %} CS центра</p>
-            <h1>{{ student.get_short_name() }}</h1>
+            <div class="mb-1">{% if student.gender == student.GENDER_MALE %}Выпускник{% else %}Выпускница{% endif %} CS центра</div>
+            <h1 class="mb-0">{{ student.get_short_name() }}</h1>
         </div>
     </div>
 
     <div class="container page-content mt-lg-10">
         <h2 class="text-center">История обучения</h2>
         <div class="row content-center">
-            <div class="col-lg-5 col-sm-8 col-8">
+            <div class="col-lg-6 col-sm-8 col-8">
                 <div class="timeline _person-history">
                     <div class="timeline__element">
                         <div class="timeline__content">
-                            <div class="timeline__date">20 мая 2017</div>
-                            <p>Подала заявление</p>
+                            <div class="timeline__date">Весной {{ student.enrollment_year }} года</div>
+                            <p>Отправил{% if student.gender == student.GENDER_FEMALE %}а{% endif %} заявление</p>
                         </div>
                     </div>
-
+                    {% if applicant is not none and applicant.exam is defined %}
                     <div class="timeline__element">
                         <div class="timeline__content">
-                            <div class="timeline__date">31 мая 2017</div>
-                            <p>Написала экзамен на 9/10</p>
+                            <div class="timeline__date">{{ applicant.exam.created|date("j E Y") }} года</div>
+                            <p>Написал{% if student.gender == student.GENDER_FEMALE %}а{% endif %} экзамен на {{ applicant.exam.score }} из {{ applicant.campaign.exam_max_score }}</p>
                         </div>
                     </div>
+                    {% endif %}
 
                     <div class="timeline__element">
                         <div class="timeline__img">
-                            <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
+                            {% with im = student.get_thumbnail(student.ThumbnailSize.SQUARE, use_stub=False) -%}
+                                {% if im %}<img class="img-fluid" alt="{{ student.get_full_name() }}" src="{{ im.url }}">
+                                {%- else %}
+                                {% endif %}
+                            {% endwith %}
+
                         </div>
                         <div class="timeline__content">
-                            <div class="timeline__date _important">10 июня 2017</div>
-                            <h3>Зачислена в CSC и длинный заголовок на несколько строчек</h3>
+                            <div class="timeline__date _important">31 июля {{ student.enrollment_year }} года</div>
+                            <h3>Зачислен{% if student.gender == student.GENDER_FEMALE %}а{% endif %} в CS центр</h3>
                         </div>
                     </div>
-                    <div class="timeline__element">
-                        <div class="timeline__content">
-                            <div class="timeline__date">Осень 2017</div>
-                            <ul class="ui _unstyled">
-                                <li>Алгоритмы и структуры данных, часть 1, осень 2017 /отлично/
-                                </li>
-                                <li>Программирование на C++, часть 1, осень 2017 /отлично/
-                                </li>
-                                <li>Программирование на Java, осень 2017 /отлично/</li>
-                            </ul>
+
+                    {% for term, elements in timeline.items() %}
+                        <div class="timeline__element">
+                            <div class="timeline__content">
+                                <div class="timeline__date">{{ term }}</div>
+                                <ul class="ui _unstyled">
+                                    {% for timeline_element in elements %}
+                                        <li>{{ timeline_element.name }} /{{ timeline_element.grade.lower() }}/
+                                    {% endfor %}
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                    <div class="timeline__element">
-                        <div class="timeline__content">
-                            <span class="timeline__date">Весна 2018</span>
-                            <ul class="_unstyled">
-                                <li>Алгоритмы и структуры данных, часть 2, осень 2017 /отлично/
-                                </li>
-                                <li>Программирование на Java, осень 2017 /отлично/</li>
-                            </ul>
-                        </div>
-                    </div>
+                    {% endfor %}
+
                     <div class="timeline__element _photo">
                         <div class="timeline__img">
                             <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
                         </div>
                         <div class="timeline__content">
-                            <span class="timeline__date _important">Весна 2018</span>
-                            <h3>Закончила обучение в CS центре</h3>
+                            <span class="timeline__date _important">{{ student.graduate_profile.graduation_at|date("j E Y") }} года</span>
+                            <h3>Закончил{% if student.gender == student.GENDER_FEMALE %}а{% endif %} обучение в CS центре</h3>
                         </div>
                     </div>
                 </div>

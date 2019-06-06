@@ -3,6 +3,8 @@
 import itertools
 import math
 import random
+from enum import Enum
+from typing import NamedTuple
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -17,30 +19,32 @@ from django.utils.translation import pgettext_lazy
 from django.views import generic
 from django.views.generic import ListView
 from django_filters.views import FilterMixin
+from djchoices import DjangoChoices, ChoiceItem
 from rest_framework.renderers import JSONRenderer
 from vanilla import TemplateView
 
+from admission.models import Applicant
 from compscicenter_ru.serializers import CoursesSerializer
 from compscicenter_ru.utils import group_terms_by_academic_year
 from core.exceptions import Redirect
 from core.models import Faq
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
-from courses.models import Course, CourseTeacher
+from courses.models import Course, CourseTeacher, Semester
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index
 from learning.api.views import TestimonialList
-from learning.models import Branch
+from learning.models import Branch, Enrollment
 from learning.projects.constants import ProjectTypes
-from learning.projects.models import Project
+from learning.projects.models import Project, ProjectStudent
 from learning.settings import StudentStatuses, Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
 from publications.models import ProjectPublication
 from stats.views import StudentsDiplomasStats
 from study_programs.models import StudyProgram, AcademicDiscipline
 from users.constants import AcademicRoles
-from users.models import User
+from users.models import User, SHADCourseRecord
 from .filters import CoursesFilter
 
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
@@ -520,6 +524,44 @@ class ProjectsListView(TemplateView):
         }
 
 
+class TimelineElementTypes(Enum):
+    COURSE = 1
+    SHAD = 2
+    PRACTICE = 3
+    RESEARCH = 4
+
+
+class TimelineElement(NamedTuple):
+    term: Semester
+    type: Enum
+    name: str
+    grade: str
+
+
+def timeline_element_factory(obj) -> TimelineElement:
+    if isinstance(obj, SHADCourseRecord):
+        return TimelineElement(term=obj.semester,
+                               type=TimelineElementTypes.SHAD,
+                               name=obj.name,
+                               grade=obj.get_grade_display())
+    elif isinstance(obj, ProjectStudent):
+        if obj.project.project_type == ProjectTypes.practice:
+            project_type = TimelineElementTypes.PRACTICE
+        else:
+            project_type = TimelineElementTypes.RESEARCH
+        return TimelineElement(term=obj.project.semester,
+                               type=project_type,
+                               name=obj.project.name,
+                               grade=obj.get_final_grade_display())
+    elif isinstance(obj, Enrollment):
+        return TimelineElement(term=obj.course.semester,
+                               type=TimelineElementTypes.COURSE,
+                               name=obj.course.meta_course.name,
+                               grade=obj.get_grade_display())
+    else:
+        raise TypeError("timeline_element_factory: Unsupported object")
+
+
 class StudentProfileView(generic.DetailView):
     pk_url_kwarg = "student_id"
     context_object_name = "student"
@@ -531,3 +573,36 @@ class StudentProfileView(generic.DetailView):
         if hasattr(self.object, 'graduate_profile'):
             return "compscicenter_ru/profiles/graduate.html"
         return "compscicenter_ru/profiles/student.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        student = self.object
+        context["applicant"] = (Applicant.objects
+                                .filter(user=student)
+                                .select_related("exam", "campaign")
+                                .first())
+        timeline_elements = []
+        enrollments = (Enrollment.active
+                       .filter(student=student)
+                       .exclude(grade__in=[Enrollment.GRADES.NOT_GRADED,
+                                           Enrollment.GRADES.UNSATISFACTORY])
+                       .select_related('course',
+                                       'course__semester',
+                                       'course__meta_course'))
+        for e in enrollments:
+            timeline_elements.append(timeline_element_factory(e))
+        shad_courses = (SHADCourseRecord.objects
+                        .filter(student=student)
+                        .exclude(grade__in=[Enrollment.GRADES.NOT_GRADED,
+                                            Enrollment.GRADES.UNSATISFACTORY])
+                        .select_related("semester"))
+        for c in shad_courses:
+            timeline_elements.append(timeline_element_factory(c))
+        for c in student.get_projects_queryset():
+            timeline_elements.append(timeline_element_factory(c))
+        timeline_elements.sort(key=lambda o: (o.term.index, o.type.value))
+        timeline = {}
+        for k, g in itertools.groupby(timeline_elements, key=lambda o: o.term):
+            timeline[k] = list(g)
+        context["timeline"] = timeline
+        return context
