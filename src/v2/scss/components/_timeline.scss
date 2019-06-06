@@ -128,3 +128,9 @@ $timeline-bullet-photo-size: $timeline-bullet-size * 10;
     display: block;
   }
 }
+
+.timeline__label {
+  font-size: $font-size-sm;
+  color: $gray-light;
+  margin: spacer("4x") 0 spacer("2x");
+}
