@@ -12,7 +12,7 @@
             <div class="menu-desktop-wrapper">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link _active" href="/{{graduation_year}}/">Выпускники 2018</a>
+                        <a class="nav-link _active" href="/{{ graduation_year }}/">Выпускники {{ graduation_year }}</a>
                     </li>
                     <li class="nav-item"><a class="nav-link" href="#stats">Статистика</a></li>
                     <li class="nav-item"><a class="nav-link" href="#photos">Фотографии</a></li>
@@ -30,29 +30,19 @@
     <div class="container page-content">
         <h1 class="text-center">Выпуск {{ graduation_year }} в лицах</h1>
         <div class="user-cards">
-            {% for user in graduates -%}
-                <a class="user-card" href="{{ user.get_absolute_url() }}" id="user-card-{{ user.pk }}">
+            {% for graduate_profile in graduates -%}
+                <a class="user-card" href="{{ graduate_profile.get_absolute_url() }}" id="user-card-{{ graduate_profile.student_id }}">
                     <div class="user-card__photo">
-                        {% with im = user.get_thumbnail(user.ThumbnailSize.BASE, use_stub=False) -%}
-                            {% if im -%}
-                                <img alt="{{ user.get_full_name() }}" src="{{ im.url }}">
-                            {%- else -%}
-                                {% if user.gender == user.__class__.GENDER_FEMALE -%}
-                                    <img src="{{ static("v2/img/placeholder/woman.png") }}" alt="{{ user.get_full_name() }}">
-                                {%- else -%}
-                                    <img src="{{ static("v2/img/placeholder/man.png") }}" alt="{{ user.get_full_name() }}">
-                                {%- endif %}
-                            {%- endif %}
-                        {%- endwith %}
+                        <img alt="{{ graduate_profile.student.get_full_name() }}" src="{{ graduate_profile.get_photo().url }}">
                     </div>
-                    <div class="user-card__details">{{ user.get_short_name() }}</div>
+                    <div class="user-card__details">{{ graduate_profile.student.get_short_name() }}</div>
                 </a>
             {% endfor -%}
         </div>
     </div>
 
     <div class="_dark"><a name="stats"></a>
-        <div class="container py-4">
+        <div class="container py-8">
             <h1 class="text-center">Статистика</h1>
             <div class="row">
                 <div class="col-lg-6 mt-5 mb-sm-5 text-center">
@@ -131,7 +121,7 @@
         </div>
     </div>
 
-    <div class="container py-4"><a name="photos"></a>
+    <div class="container py-8"><a name="photos"></a>
         <h1 class="text-center">Фотографии</h1>
         <div class="row">
             <div class="col-md-6 mt-3"><img class="img-fluid" src="/media/alumni/2018/graduates-1.jpg" alt=""></div>
