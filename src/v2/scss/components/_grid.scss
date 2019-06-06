@@ -9,11 +9,8 @@
 }
 
 .page-content {
-  padding-top: 80px;
+  padding-top: spacer("10x");
   padding-bottom: spacer("10x");
-  @include media-breakpoint-up(lg) {
-    padding-top: spacer("10x");
-  }
 
   &._survey {
     @include media-breakpoint-down(xs) {
