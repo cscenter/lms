@@ -4,8 +4,4 @@
   display: inline-block;
   overflow: hidden;
   border-radius: 50%;
-
-  @include media-breakpoint-up(sm) {
-    display: none;
-  }
 }
