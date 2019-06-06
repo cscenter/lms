@@ -356,6 +356,9 @@ class User(LearningPermissionsMixin, StudentProfile, AbstractUser):
     def get_absolute_url(self, subdomain=None):
         return reverse('user_detail', args=[self.pk], subdomain=subdomain)
 
+    def get_student_profile_url(self, subdomain=None):
+        return reverse('student_profile', args=[self.pk], subdomain=subdomain)
+
     def get_update_profile_url(self):
         return reverse('user_update', args=[self.pk])
 

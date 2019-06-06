@@ -35,7 +35,7 @@ from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index
 from learning.api.views import TestimonialList
-from learning.models import Branch, Enrollment
+from learning.models import Branch, Enrollment, GraduateProfile
 from learning.projects.constants import ProjectTypes
 from learning.projects.models import Project, ProjectStudent
 from learning.settings import StudentStatuses, Branches
@@ -252,40 +252,26 @@ class AlumniHonorBoardView(TemplateView):
             "compscicenter_ru/alumni/fallback_year.html"
         ]
 
-    def get_graduates(self, filters):
-        return (User.objects
-                .filter(**filters)
-                .distinct()
-                .only("pk", "first_name", "last_name", "patronymic", "gender",
-                      "cropbox_data", "photo")
-                .order_by("last_name", "first_name"))
-
     def get_context_data(self, **kwargs):
         graduation_year = int(self.kwargs['year'])
         preview = self.request.GET.get('preview', False)
-        filters = {
-            "groups__pk": User.roles.GRADUATE_CENTER,
-            "graduation_year": graduation_year
-        }
-        if preview and self.request.user.is_curator:
-            filters = {"status": StudentStatuses.WILL_GRADUATE}
-        graduates = self.get_graduates(filters)
+        filters = Q(graduation_year=graduation_year)
+        if not preview or not self.request.user.is_curator:
+            filters = filters & Q(is_active=True)
+        graduates = list(GraduateProfile.objects
+                         .filter(filters)
+                         .select_related("student")
+                         .prefetch_related("student__areas_of_study")
+                         .order_by("student__last_name"))
+                     # .only("pk", "first_name", "last_name", "patronymic", "gender",
+                     #       "cropbox_data", "photo")
         if not len(graduates):
             raise Http404
-        cache_key = f'alumni_{graduation_year}_testimonials'
-        testimonials = cache.get(cache_key)
-        if testimonials is None:
-            s = (User.objects
-                 .filter(**filters)
-                 .exclude(csc_review='')
-                 .prefetch_related("areas_of_study"))
-            testimonials = s[:]
-            cache.set(cache_key, testimonials, 3600)
         # Get random testimonials
-        testimonials_count = len(testimonials) if testimonials else 0
-        indexes = random.sample(range(testimonials_count),
-                                min(testimonials_count, 4))
-        random_testimonials = [testimonials[index] for index in indexes]
+        with_testimonial = [gp.student for gp in graduates if gp.testimonial]
+        indexes = random.sample(range(len(with_testimonial)),
+                                min(len(with_testimonial), 4))
+        random_testimonials = [with_testimonial[index] for index in indexes]
         context = {
             "graduation_year": graduation_year,
             "graduates": graduates,
@@ -572,7 +558,7 @@ class StudentProfileView(generic.DetailView):
     def get_template_names(self):
         if hasattr(self.object, 'graduate_profile'):
             return "compscicenter_ru/profiles/graduate.html"
-        return "compscicenter_ru/profiles/student.html"
+        raise Http404
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -582,20 +568,24 @@ class StudentProfileView(generic.DetailView):
                                 .select_related("exam", "campaign")
                                 .first())
         timeline_elements = []
+        # TODO: move to timeline queryset
         enrollments = (Enrollment.active
                        .filter(student=student)
                        .exclude(grade__in=[Enrollment.GRADES.NOT_GRADED,
                                            Enrollment.GRADES.UNSATISFACTORY])
                        .select_related('course',
                                        'course__semester',
-                                       'course__meta_course'))
+                                       'course__meta_course')
+                       .order_by("course__semester__index",
+                                 "course__meta_course__name"))
         for e in enrollments:
             timeline_elements.append(timeline_element_factory(e))
         shad_courses = (SHADCourseRecord.objects
                         .filter(student=student)
                         .exclude(grade__in=[Enrollment.GRADES.NOT_GRADED,
                                             Enrollment.GRADES.UNSATISFACTORY])
-                        .select_related("semester"))
+                        .select_related("semester")
+                        .order_by("semester__index", "name"))
         for c in shad_courses:
             timeline_elements.append(timeline_element_factory(c))
         for c in student.get_projects_queryset():
@@ -605,4 +595,5 @@ class StudentProfileView(generic.DetailView):
         for k, g in itertools.groupby(timeline_elements, key=lambda o: o.term):
             timeline[k] = list(g)
         context["timeline"] = timeline
+        context["timeline_element_types"] = TimelineElementTypes
         return context
