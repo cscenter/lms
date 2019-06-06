@@ -5,6 +5,7 @@ import os
 import os.path
 
 from django.conf import settings
+from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -20,7 +21,7 @@ from model_utils.managers import QueryManager
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from core.db.models import ScoreField
+from core.db.models import ScoreField, PrettyJSONField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.urls import reverse
 from core.utils import hashids
@@ -595,6 +596,10 @@ class GraduateProfile(models.Model):
         _("Testimonial"),
         help_text=_("Testimonial about Computer Science Center"),
         blank=True)
+    details = PrettyJSONField(
+        verbose_name=_("Details"),
+        blank=True,
+    )
 
     class Meta:
         verbose_name = _("Graduate Profile")
@@ -602,6 +607,10 @@ class GraduateProfile(models.Model):
 
     def __str__(self):
         return smart_text(self.student)
+
+    def clean(self):
+        if not self.details:
+            self.details = {}
 
     def save(self, **kwargs):
         created = self.pk is None

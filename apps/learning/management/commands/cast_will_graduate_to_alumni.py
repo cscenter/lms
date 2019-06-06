@@ -6,6 +6,7 @@ from django.core.management import BaseCommand
 from django.db import transaction
 from django.utils.timezone import now
 
+from admission.models import Applicant
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from users.models import User

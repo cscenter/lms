@@ -1,7 +1,8 @@
 from crispy_forms.layout import Button, Submit, Div
 from django import forms
+from django.contrib.postgres.forms import JSONField
 from django.utils.translation import ugettext_lazy as _
-
+from prettyjson import PrettyJSONWidget
 
 CANCEL_BUTTON = Button('cancel', _('Cancel'),
                        onclick='history.go(-1);',
@@ -22,3 +23,7 @@ class GradeField(forms.DecimalField):
         if value not in self.empty_values and hasattr(value, "replace"):
             value = value.replace(",", ".")
         return super().to_python(value)
+
+
+class PrettyJSONField(JSONField):
+    widget = PrettyJSONWidget
