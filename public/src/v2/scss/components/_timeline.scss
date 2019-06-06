@@ -63,8 +63,6 @@ $timeline-bullet-photo-size: $timeline-bullet-size * 10;
   }
 
   &.active {
-    color: $gray-dark;
-
     &::before {
       width: $timeline-bullet-active-size;
       height: $timeline-bullet-active-size;
@@ -93,6 +91,10 @@ $timeline-bullet-photo-size: $timeline-bullet-size * 10;
 }
 
 .timeline._compact {
+  .active {
+    color: $gray-dark;
+  }
+
   .timeline__element {
     margin-bottom: 0;
   }
