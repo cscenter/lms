@@ -17,6 +17,14 @@ $navbar-toggler-border-radius: $border-radius;
 
 @import "hamburger";
 
+body {
+  padding-top: $navbar-mobile-height;
+
+  @include media-breakpoint-up(lg) {
+    padding-top: 0;
+  }
+}
+
 .navbar-container {
   position: fixed;
   width: 100%;
