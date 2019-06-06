@@ -4,7 +4,6 @@
   display: inline-block;
   overflow: hidden;
   border-radius: 50%;
-  margin-bottom: spacer("8x");
 
   @include media-breakpoint-up(sm) {
     display: none;
