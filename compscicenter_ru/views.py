@@ -570,10 +570,11 @@ class StudentProfileView(generic.DetailView):
         student = self.object
         timeline_elements = []
         # TODO: move to timeline queryset
+        exclude_grades = [Enrollment.GRADES.NOT_GRADED,
+                          Enrollment.GRADES.UNSATISFACTORY]
         enrollments = (Enrollment.active
                        .filter(student=student)
-                       .exclude(grade__in=[Enrollment.GRADES.NOT_GRADED,
-                                           Enrollment.GRADES.UNSATISFACTORY])
+                       .exclude(grade__in=exclude_grades)
                        .select_related('course',
                                        'course__semester',
                                        'course__meta_course')
@@ -583,13 +584,14 @@ class StudentProfileView(generic.DetailView):
             timeline_elements.append(timeline_element_factory(e))
         shad_courses = (SHADCourseRecord.objects
                         .filter(student=student)
-                        .exclude(grade__in=[Enrollment.GRADES.NOT_GRADED,
-                                            Enrollment.GRADES.UNSATISFACTORY])
+                        .exclude(grade__in=exclude_grades)
                         .select_related("semester")
                         .order_by("semester__index", "name"))
         for c in shad_courses:
             timeline_elements.append(timeline_element_factory(c))
-        for c in student.get_projects_queryset():
+        projects = (student.get_projects_queryset()
+                    .exclude(final_grade__in=exclude_grades))
+        for c in projects:
             timeline_elements.append(timeline_element_factory(c))
         timeline_elements.sort(key=lambda o: (o.term.index, o.type.value))
         timeline = {}

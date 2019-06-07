@@ -1,6 +1,6 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
-{% block title %}Выпускник {{ super() }}{% endblock title %}
+{% block title %}{{ student.get_abbreviated_name() }} - {% if student.gender == student.GENDER_MALE %}выпускник{% else %}выпускница{% endif %} CS центра{% endblock title %}
 
 {% block content %}
     {% with graduate_profile = student.graduate_profile %}
