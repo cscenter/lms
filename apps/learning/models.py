@@ -628,5 +628,5 @@ class GraduateProfile(models.Model):
             return self.photo
         else:
             return self.student.get_thumbnail(self.student.ThumbnailSize.BASE,
-                                              use_stub=True, new_stub=True,
+                                              use_stub=True,
                                               stub_official=False)

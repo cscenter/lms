@@ -1,8 +1,22 @@
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
 
-BASE_THUMBNAIL_WIDTH = 170
-BASE_THUMBNAIL_HEIGHT = 238
+BASE_THUMBNAIL_WIDTH = 176
+BASE_THUMBNAIL_HEIGHT = 246
+
+
+class ThumbnailSizes(DjangoChoices):
+    """
+    Base image aspect ratio is `5:7`.
+    """
+    BASE = C(f'{BASE_THUMBNAIL_WIDTH}x{BASE_THUMBNAIL_HEIGHT}')
+    BASE_PRINT = C('250x350')
+    SQUARE = C('150x150')
+    SQUARE_SMALL = C('60x60')
+    # FIXME: replace?
+    INTERVIEW_LIST = C('100x100')
+    # On center site only
+    TEACHER_LIST = C("220x308")
 
 
 class AcademicRoles(DjangoChoices):

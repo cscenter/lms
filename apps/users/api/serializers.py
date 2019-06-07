@@ -1,8 +1,12 @@
 from rest_framework import serializers
 
+from users.constants import ThumbnailSizes
+
 
 class PhotoSerializerField(serializers.Field):
     def __init__(self, photo_dimensions, **kwargs):
+        assert photo_dimensions in ThumbnailSizes.values
+        self.thumbnail_options = kwargs.pop("thumbnail_options", {})
         self.photo_dimensions = photo_dimensions
         super().__init__(**kwargs)
 
@@ -13,9 +17,9 @@ class PhotoSerializerField(serializers.Field):
         pass
 
     def to_representation(self, obj):
-        # TODO: get dimensions from map and throw warning if unspecified value was passed
-        image = obj.get_thumbnail(self.photo_dimensions, use_stub=False)
-        if image:
-            return image.url
-        else:
-            return None
+        thumbnail_options = {
+            "use_stub": True,
+            **self.thumbnail_options
+        }
+        image = obj.get_thumbnail(self.photo_dimensions, **thumbnail_options)
+        return image.url

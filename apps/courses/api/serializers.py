@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from courses.models import Course, CourseTeacher, Semester
 from users.api.serializers import PhotoSerializerField
+from users.constants import ThumbnailSizes
 from users.models import User
 
 
@@ -64,7 +65,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     name = serializers.SerializerMethodField()
     sex = serializers.SerializerMethodField()
-    photo = PhotoSerializerField("176x246")
+    photo = PhotoSerializerField(User.ThumbnailSize.BASE)
     city = serializers.CharField(source="city_id")
     courses = CourseRelatedField(
         many=True, read_only=True, source="courseteacher_set")
