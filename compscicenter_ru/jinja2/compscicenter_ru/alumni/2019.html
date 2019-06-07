@@ -1,0 +1,150 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% block body_attrs %}class="mb-0"{% endblock body_attrs %}
+
+{% block menu %}
+<div class="navbar-container">
+    <nav class="navbar navbar-main{% if theme_class %} {{ theme_class }}{% endif %}">
+        <div class="container">
+            <a class="navbar-logo" href="/">{{ macros.svg_inline('logo-csc') }}</a>
+            <div class="menu-desktop-wrapper">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link _active" href="/{{graduation_year}}/">Выпускники {{ graduation_year }}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#stats">Статистика</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#photos">Фотографии</a></li>
+                    {% if testimonials -%}
+                        <li class="nav-item"><a class="nav-link" href="#testimonials">Отзывы</a></li>
+                    {%- endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+{% endblock menu %}
+
+{% block content %}
+    <div class="container page-content">
+        <h1 class="text-center">Выпуск {{ graduation_year }} в лицах</h1>
+        <div class="user-cards">
+            {% for graduate_profile in graduates -%}
+                <a class="user-card" href="{{ graduate_profile.get_absolute_url() }}" id="user-card-{{ graduate_profile.pk }}">
+                    <div class="user-card__photo">
+                        <img alt="{{ graduate_profile.student.get_full_name() }}" src="{{ graduate_profile.get_photo().url }}">
+                    </div>
+                    <div class="user-card__details">{{ graduate_profile.student.get_short_name() }}</div>
+                </a>
+            {% endfor -%}
+        </div>
+    </div>
+
+    <div class="_dark pt-4" id="stats">
+        <div class="container page-content">
+            <h1 class="text-center">Статистика</h1>
+            <div class="row">
+                <div class="col-lg-6 mt-10 mb-sm-5 text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="infographic-count">78</p>
+                            <p>Преподавателей</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="infographic-count">34</p>
+                            <p>Курса</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="infographic-count">5 053</p>
+                            <p>Часа в аудиториях</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="infographic-count">46</p>
+                            <p>Уникальных проектов</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mt-8 mt-sm-0 mb-sm-5 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="90%" height="420" viewBox="0 0 740 660">
+                        <g fill="none" fill-rule="evenodd">
+                            <g fill-rule="nonzero" stroke="#374148" transform="rotate(10 291.925 702.267)">
+                                <path fill="#8899A4"
+                                      d="M293.544514,561.508798 C441.280685,561.508798 561.044514,441.521111 561.044514,293.508798 C561.044514,145.496485 441.280685,25.5087982 293.544514,25.5087982 C145.808344,25.5087982 26.0445141,145.496485 26.0445141,293.508798 C26.0445141,441.521111 145.808344,561.508798 293.544514,561.508798 Z M293.544514,484.448095 C188.288393,484.448095 102.961447,398.96166 102.961447,293.508798 C102.961447,188.055936 188.288393,102.569501 293.544514,102.569501 C398.800636,102.569501 484.127581,188.055936 484.127581,293.508798 C484.127581,398.96166 398.800636,484.448095 293.544514,484.448095 Z"/>
+                                <path fill="#07C39F"
+                                      d="M293.998442,0.216304058 C131.824552,0.216304058 0.356639546,131.844588 0.356639546,294.216304 C0.356639546,456.588021 131.824552,588.216304 293.998442,588.216304 C312.358665,588.216304 330.53629,586.521213 348.35664,583.176959 L324.575987,456.14892 C314.587602,458.023389 304.370711,458.976129 293.998442,458.976129 C203.114967,458.976129 129.439353,385.210643 129.439353,294.216304 C129.439353,203.221965 203.114967,129.456479 293.998442,129.456479 L293.998442,0.216304058 Z"/>
+                                <path fill="#4A90E2"
+                                      d="M556.178586,379.090908 C565.019861,351.73794 569.572324,323.023876 569.572324,293.751551 C569.572324,140.956097 446.002915,17.0909084 293.572324,17.0909084 L293.572324,111.309703 C394.091568,111.309703 475.578516,192.991701 475.578516,293.751551 C475.578516,313.133081 472.579437,332.049379 466.761098,350.050047 L556.178586,379.090908 Z"/>
+                            </g>
+                            <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="148">
+                                <tspan x="257" y="340">199</tspan>
+                            </text>
+                            <text fill="#07C39F" font-family="FiraSans-Regular, Fira Sans" font-size="78">
+                                <tspan x="0" y="532">103</tspan>
+                            </text>
+                            <text fill="#4A90E2" font-family="FiraSans-Regular, Fira Sans" font-size="78">
+                                <tspan x="609" y="109">57</tspan>
+                            </text>
+                            <text fill="#4A90E2" font-family="FiraSans-Regular, Fira Sans" font-size="78">
+                                <tspan x="562" y="564">39</tspan>
+                            </text>
+                            <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="20">
+                                <tspan x="290" y="374">оценок по курсам</tspan>
+                            </text>
+                            <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="16">
+                                <tspan x="2" y="558">оценки отлично</tspan>
+                            </text>
+                            <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="16">
+                                <tspan x="611" y="135">оценок хорошо</tspan>
+                            </text>
+                            <text fill="#374148" font-family="FiraSans-Regular, Fira Sans" font-size="16">
+                                <tspan x="564" y="590">оценок</tspan>
+                                <tspan x="564" y="609">удовлетварительно</tspan>
+                            </text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+ <div class="container page-content"><a name="photos"></a>
+        <h1 class="text-center">Фотографии</h1>
+        <div class="row">
+            <div class="col-md-6 mt-3">
+                <img class="img-fluid" src="/media/alumni/2019/joint-photo-1.jpg" alt="">
+            </div>
+            <div class="col-md-6 mt-3">
+                <img class="img-fluid" src="/media/alumni/2019/joint-photo-2.jpg" alt="">
+            </div>
+            <div class="col-md-6 mt-3">
+                <img class="img-fluid" src="/media/alumni/2019/joint-photo-3.jpg" alt="">
+            </div>
+            <div class="col-md-6 mt-3">
+                <img class="img-fluid" src="/media/alumni/2019/joint-photo-4.jpg" alt="">
+            </div>
+            <div class="col-md-6 mt-3">
+                <img class="img-fluid" src="/media/alumni/2019/joint-photo-5.jpg" alt="">
+            </div>
+            <div class="col-md-6 mt-3">
+                <img class="img-fluid" src="/media/alumni/2019/joint-photo-6.jpg" alt="">
+            </div>
+        </div>
+    </div>
+
+    {% if testimonials %}
+    <div class="csc-student-reviews"><a name="testimonials"></a>
+        <div class="container">
+            <h1 class="text-center">Отзывы студентов</h1>
+            <div class="card-columns _testimonials">
+                {% for student in testimonials %}
+                    {{ macros.testimonial_card(student) }}
+                {% endfor %}
+
+                <a href="{{ url('testimonials') }}" class="btn _small _outline _rounded _gray mt-3">Все отзывы</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}
