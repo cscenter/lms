@@ -4,7 +4,7 @@ import itertools
 import math
 import random
 from enum import Enum
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -522,6 +522,7 @@ class TimelineElement(NamedTuple):
     term: Semester
     type: Enum
     name: str
+    url: Optional[str]
     grade: str
 
 
@@ -530,6 +531,7 @@ def timeline_element_factory(obj) -> TimelineElement:
         return TimelineElement(term=obj.semester,
                                type=TimelineElementTypes.SHAD,
                                name=obj.name,
+                               url=None,
                                grade=obj.get_grade_display())
     elif isinstance(obj, ProjectStudent):
         if obj.project.project_type == ProjectTypes.practice:
@@ -539,11 +541,13 @@ def timeline_element_factory(obj) -> TimelineElement:
         return TimelineElement(term=obj.project.semester,
                                type=project_type,
                                name=obj.project.name,
+                               url=None,
                                grade=obj.get_final_grade_display())
     elif isinstance(obj, Enrollment):
         return TimelineElement(term=obj.course.semester,
                                type=TimelineElementTypes.COURSE,
                                name=obj.course.meta_course.name,
+                               url=obj.course.get_absolute_url(),
                                grade=obj.get_grade_display())
     else:
         raise TypeError("timeline_element_factory: Unsupported object")
