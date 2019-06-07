@@ -80,7 +80,13 @@
                                             {% endif %}
                                             {% set ns.element_type = timeline_element.type %}
                                         {% endif %}
-                                        <li>{{ timeline_element.name }} <span class="text-nowrap">/{{ timeline_element.grade.lower() }}/</span></li>
+                                        <li>
+                                            {%- if timeline_element.url is not none -%}
+                                                <a href="{{ timeline_element.url }}">{{ timeline_element.name }}</a>
+                                            {%- else -%}
+                                                {{ timeline_element.name }}
+                                            {%- endif %} <span class="text-small">{{ timeline_element.grade.lower() }}</span>
+                                        </li>
                                     {% endfor %}
                                 </ul>
                             </div>
