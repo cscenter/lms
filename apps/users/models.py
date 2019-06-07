@@ -30,7 +30,7 @@ from learning.permissions import LearningPermissionsMixin
 from learning.settings import StudentStatuses, GradeTypes
 from learning.utils import is_negative_grade
 from users.constants import GROUPS_IMPORT_TO_GERRIT, AcademicRoles, \
-    BASE_THUMBNAIL_WIDTH, BASE_THUMBNAIL_HEIGHT, SHADCourseGradeTypes
+    SHADCourseGradeTypes, ThumbnailSizes
 from users.fields import MonitorStatusField
 from users.tasks import update_password_in_gerrit
 from users.thumbnails import get_user_thumbnail
@@ -93,18 +93,7 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
 
 
 class User(LearningPermissionsMixin, StudentProfile, AbstractUser):
-    class ThumbnailSize:
-        """
-        Base image aspect ratio is `5:7`.
-        """
-        BASE = f'{BASE_THUMBNAIL_WIDTH}x{BASE_THUMBNAIL_HEIGHT}'
-        BASE_PRINT = '250x350'
-        SQUARE = '150x150'
-        SQUARE_SMALL = '60x60'
-        # FIXME: replace?
-        INTERVIEW_LIST = '100x100'
-        # On center site
-        TEACHER_LIST = "220x308"
+    ThumbnailSize = ThumbnailSizes
 
     roles = AcademicRoles
 

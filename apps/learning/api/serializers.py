@@ -9,11 +9,13 @@ from users.api.serializers import PhotoSerializerField
 from users.models import User
 
 
+# FIXME: Create base AlumniSerializer. TestimonialSerializer should override Meta.fields only (and photo?)
 class AlumniSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     name = serializers.SerializerMethodField()
     sex = serializers.SerializerMethodField()
-    photo = PhotoSerializerField("176x246")
+    photo = PhotoSerializerField(User.ThumbnailSize.BASE,
+                                 thumbnail_options={"stub_official": False})
     year = serializers.IntegerField(source="graduation_year")
     city = serializers.CharField(source="city_id")
     areas = serializers.PrimaryKeyRelatedField(many=True, read_only=True,
@@ -33,7 +35,8 @@ class AlumniSerializer(serializers.ModelSerializer):
 class TestimonialSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     author = serializers.SerializerMethodField()
-    photo = PhotoSerializerField("150x150")
+    photo = PhotoSerializerField(User.ThumbnailSize.SQUARE,
+                                 thumbnail_options={"stub_official": False})
     year = serializers.IntegerField(source="graduation_year")
     areas = serializers.PrimaryKeyRelatedField(many=True, read_only=True,
                                                source="areas_of_study")

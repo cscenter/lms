@@ -2,6 +2,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from sorl.thumbnail import get_thumbnail
 from sorl.thumbnail.images import BaseImageFile, DummyImageFile
 
+from users.constants import ThumbnailSizes
+
 
 class BaseStubImage(BaseImageFile):
     @property
@@ -9,53 +11,44 @@ class BaseStubImage(BaseImageFile):
         return staticfiles_storage.url("v1/img/center/profile_no_photo.png")
 
     def __init__(self, **kwargs):
-        geometry = kwargs.get("geometry", None)
-        if geometry:
-            self.size = geometry.split("x")
-        else:
-            self.size = 175, 238
+        geometry = kwargs.get("geometry", ThumbnailSizes.BASE)
+        self.size = geometry.split("x")
+
+    @property
+    def _suffix(self):
+        if self.size[0] == self.size[1]:
+            return f"_{ThumbnailSizes.SQUARE}"
+        return ""
 
     def exists(self):
         return True
 
 
-class GirlStubImage(BaseStubImage):
-    @property
-    def url(self):
-        return staticfiles_storage.url("v1/img/csc_girl.svg")
-
-
 class BoyStubImage(BaseStubImage):
     @property
     def url(self):
-        return staticfiles_storage.url("v1/img/csc_boy.svg")
+        return staticfiles_storage.url(f"v2/img/placeholder/boy{self._suffix}.png")
 
 
-class BoyStubV2Image(BaseStubImage):
+class GirlStubImage(BaseStubImage):
     @property
     def url(self):
-        return staticfiles_storage.url("v2/img/placeholder/boy.png")
-
-
-class GirlStubV2Image(BaseStubImage):
-    @property
-    def url(self):
-        return staticfiles_storage.url("v2/img/placeholder/girl.png")
+        return staticfiles_storage.url(f"v2/img/placeholder/girl{self._suffix}.png")
 
 
 class ManStubImage(BaseStubImage):
     @property
     def url(self):
-        return staticfiles_storage.url("v2/img/placeholder/man.png")
+        return staticfiles_storage.url(f"v2/img/placeholder/man{self._suffix}.png")
 
 
 class WomanStubImage(BaseStubImage):
     @property
     def url(self):
-        return staticfiles_storage.url("v2/img/placeholder/woman.png")
+        return staticfiles_storage.url(f"v2/img/placeholder/woman{self._suffix}.png")
 
 
-def get_user_thumbnail(user, geometry, use_stub=True, new_stub=False,
+def get_user_thumbnail(user, geometry, use_stub=True,
                        stub_official=True, **options):
     path_to_img = getattr(user, "photo", None)
     # Default crop settings
@@ -67,20 +60,13 @@ def get_user_thumbnail(user, geometry, use_stub=True, new_stub=False,
         thumbnail = get_thumbnail(path_to_img, geometry, **options)
     else:
         thumbnail = None
+    # TODO: Override default DummyImageFile?
     if not thumbnail and use_stub:
-        if not new_stub:
-            if not user.is_teacher and user.gender == user.GENDER_MALE:
-                factory = BoyStubImage
-            elif not user.is_teacher and user.gender == user.GENDER_FEMALE:
-                factory = GirlStubImage
-            else:
-                factory = BaseStubImage
+        if user.gender == user.GENDER_MALE:
+            factory = ManStubImage if stub_official else BoyStubImage
+        elif user.gender == user.GENDER_FEMALE:
+            factory = WomanStubImage if stub_official else GirlStubImage
         else:
-            if user.gender == user.GENDER_MALE:
-                factory = ManStubImage if stub_official else BoyStubV2Image
-            elif user.gender == user.GENDER_FEMALE:
-                factory = WomanStubImage if stub_official else GirlStubV2Image
-            else:
-                factory = BaseStubImage
+            factory = BaseStubImage
         thumbnail = factory(geometry=geometry)
     return thumbnail

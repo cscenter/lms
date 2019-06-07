@@ -46,7 +46,7 @@
 
                     <div class="timeline__element">
                         <div class="timeline__img">
-                            {% with im = student.get_thumbnail(student.ThumbnailSize.BASE, use_stub=True, new_stub=True, stub_official=False) -%}
+                            {% with im = student.get_thumbnail(student.ThumbnailSize.BASE, use_stub=True, stub_official=False) -%}
                                 {% if im %}<img class="img-fluid" alt="{{ student.get_full_name() }}" src="{{ im.url }}">{% endif %}
                             {% endwith %}
 
