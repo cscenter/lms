@@ -113,13 +113,6 @@ $timeline-bullet-photo-size: $timeline-bullet-size * 10;
   h4 {
     margin: 0;
   }
-
-  a{
-    color: $black;
-    &:hover {
-      color: $link-color;
-    }
-  }
 }
 
 .timeline__img {
