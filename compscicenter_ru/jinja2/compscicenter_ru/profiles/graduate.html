@@ -18,7 +18,7 @@
         <div class="_dark">
             <div class="container py-10">
                 <div class="row content-center">
-                    <div class="col-lg-9">
+                    <div class="col-lg-8">
                         <div class="card">
                             <div class="card__content _big">
                                 <h2>Отзыв о CS центре</h2>
@@ -35,7 +35,7 @@
     <div class="container page-content">
         <h2 class="text-center">История обучения</h2>
         <div class="row content-center">
-            <div class="col-lg-6 col-sm-8 col-8">
+            <div class="col-lg-6 col-sm-8 col-10">
                 <div class="timeline _person-history">
                     <div class="timeline__element active">
                         <div class="timeline__content">
@@ -43,14 +43,6 @@
                             <p>Отправил{% if student.gender == student.GENDER_FEMALE %}а{% endif %} заявление</p>
                         </div>
                     </div>
-                    {% if applicant is not none and applicant.exam is defined and applicant.exam.score %}
-                    <div class="timeline__element">
-                        <div class="timeline__content">
-                            <div class="timeline__date">{{ applicant.exam.created|date("j E Y") }} года</div>
-                            <p>Написал{% if student.gender == student.GENDER_FEMALE %}а{% endif %} экзамен на {{ applicant.exam.score }} из {{ applicant.campaign.exam_max_score }}</p>
-                        </div>
-                    </div>
-                    {% endif %}
 
                     <div class="timeline__element">
                         <div class="timeline__img">
@@ -61,7 +53,7 @@
                         </div>
                         <div class="timeline__content">
                             <div class="timeline__date _important">31 июля {{ student.enrollment_year }} года</div>
-                            <h3>Зачислен{% if student.gender == student.GENDER_FEMALE %}а{% endif %} в CS центр</h3>
+                            <h3>Зачислен{% if student.gender == student.GENDER_FEMALE %}а{% endif %} в CS центр{% if student.city_id == 'spb' %} в Санкт-Петербурге{% elif student.city_id == 'nsk' %} в Новосибирске{% endif %}</h3>
                         </div>
                     </div>
 

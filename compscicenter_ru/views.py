@@ -268,6 +268,7 @@ class AlumniHonorBoardView(TemplateView):
         if not len(graduates):
             raise Http404
         # Get random testimonials
+        # FIXME: Prefetch areas_of_study for random testimonials only
         with_testimonial = [gp.student for gp in graduates if gp.testimonial]
         indexes = random.sample(range(len(with_testimonial)),
                                 min(len(with_testimonial), 4))
@@ -563,10 +564,6 @@ class StudentProfileView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         student = self.object
-        context["applicant"] = (Applicant.objects
-                                .filter(user=student)
-                                .select_related("exam", "campaign")
-                                .first())
         timeline_elements = []
         # TODO: move to timeline queryset
         enrollments = (Enrollment.active
