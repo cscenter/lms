@@ -24,9 +24,9 @@
 
 {% macro supervisor_card(supervisor, details, modifiers='') -%}
     {% if supervisor.gender == supervisor.GENDER_MALE %}
-        {% set img_url = static('v2/img/placeholder/man_144x144.png') %}
+        {% set img_url = static('v2/img/placeholder/man_150x150.png') %}
     {% else %}
-        {% set img_url = static('v2/img/placeholder/woman_144x144.png') %}
+        {% set img_url = static('v2/img/placeholder/woman_150x150.png') %}
     {% endif %}
     {{ _author_card(img_url, supervisor.full_name, supervisor.workplace, None, modifiers) }}
 {%- endmacro %}
@@ -35,7 +35,9 @@
 <div class="card mb-2">
     <div class="card__content _middle">
         {% set parts = ["Выпуск ", student.graduation_year, ", ", student.areas_of_study.all()|join(", ")] %}
-        {{ author_card(student, parts|join(''), testimonial=student.csc_review|markdown("csc_review", 3600, student.pk, student.modified), modifiers='_testimonial') }}
+        {% with im = student.get_thumbnail(student.ThumbnailSize.SQUARE, use_stub=True, stub_official=False) %}
+            {{ _author_card(im.url, student.get_short_name(), details=parts|join(''), testimonial=student.csc_review|markdown("csc_review", 3600, student.pk, student.modified), modifiers='_testimonial') }}
+        {% endwith %}
     </div>
 </div>
 {%- endmacro %}
