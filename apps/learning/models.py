@@ -575,7 +575,7 @@ def graduate_photo_upload_to(instance: "GraduateProfile", filename):
     return f"alumni/{instance.graduation_at.year}/{filename}{ext}"
 
 
-class GraduateProfile(models.Model):
+class GraduateProfile(TimeStampedModel):
     student = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Student"),
