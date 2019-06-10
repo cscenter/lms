@@ -50,6 +50,7 @@ class WomanStubImage(BaseStubImage):
 
 def get_user_thumbnail(user, geometry, use_stub=True,
                        stub_official=True, **options):
+    # FIXME: create get_thumbnail with stub_factory keyword arg, rewrite this one
     path_to_img = getattr(user, "photo", None)
     # Default crop settings
     if "crop" not in options:
