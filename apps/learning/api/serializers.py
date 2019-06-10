@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from api.utils import make_api_fragment_key
 from core.utils import render_markdown
-from learning.models import CourseNewsNotification
+from learning.models import CourseNewsNotification, GraduateProfile
 from users.api.serializers import PhotoSerializerField
 from users.models import User
 
@@ -32,34 +32,36 @@ class AlumniSerializer(serializers.ModelSerializer):
         return "b" if obj.gender == obj.GENDER_MALE else "g"
 
 
-class TestimonialSerializer(serializers.ModelSerializer):
+class GraduateProfileSerializer(serializers.ModelSerializer):
+    # FIXME: add student_id?
     id = serializers.IntegerField(source="pk")
     author = serializers.SerializerMethodField()
     photo = PhotoSerializerField(User.ThumbnailSize.SQUARE,
                                  thumbnail_options={"stub_official": False})
     year = serializers.IntegerField(source="graduation_year")
     areas = serializers.PrimaryKeyRelatedField(many=True, read_only=True,
-                                               source="areas_of_study")
+                                               source="academic_disciplines")
     text = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
-        fields = ["id", "author", "photo", "year", "areas", "text"]
+        model = GraduateProfile
+        fields = ("id", "author", "photo", "year", "areas", "text")
 
-    def get_author(self, obj):
-        return obj.get_full_name()
+    def get_author(self, graduate_profile):
+        return graduate_profile.student.get_full_name()
 
-    def get_text(self, obj):
+    def get_text(self, graduate_profile):
         try:
             fragment_cache = caches['markdown_fragments']
         except InvalidCacheBackendError:
             fragment_cache = caches['default']
         expire_time = 3600
-        vary_on = [bytes(obj.pk), force_bytes(obj.modified)]
+        vary_on = [bytes(graduate_profile.pk),
+                   force_bytes(graduate_profile.modified)]
         cache_key = make_api_fragment_key("csc_review", vary_on)
         value = fragment_cache.get(cache_key)
         if value is None:
-            value = render_markdown(obj.csc_review)
+            value = render_markdown(graduate_profile.testimonial)
             fragment_cache.set(cache_key, value, expire_time)
         return value
 

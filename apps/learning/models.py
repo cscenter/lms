@@ -32,6 +32,8 @@ from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager
 from learning.settings import GradingSystems, GradeTypes, Branches, \
     AcademicDegreeYears
+from users.constants import ThumbnailSizes
+from users.thumbnails import ThumbnailMixin
 
 logger = logging.getLogger(__name__)
 
@@ -575,7 +577,7 @@ def graduate_photo_upload_to(instance: "GraduateProfile", filename):
     return f"alumni/{instance.graduation_at.year}/{filename}{ext}"
 
 
-class GraduateProfile(TimeStampedModel):
+class GraduateProfile(ThumbnailMixin, TimeStampedModel):
     student = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Student"),
@@ -615,22 +617,25 @@ class GraduateProfile(TimeStampedModel):
     def __str__(self):
         return smart_text(self.student)
 
-    def clean(self):
-        if not self.details:
-            self.details = {}
-
     def save(self, **kwargs):
         created = self.pk is None
         self.graduation_year = self.graduation_at.year
+        if not self.details:
+            self.details = {}
         super().save(**kwargs)
 
     def get_absolute_url(self):
         return reverse('student_profile', args=[self.student_id], subdomain=None)
 
-    def get_photo(self):
-        if self.photo:
-            return self.photo
-        else:
-            return self.student.get_thumbnail(self.student.ThumbnailSize.BASE,
-                                              use_stub=True,
-                                              stub_official=False)
+    @property
+    def gender(self):
+        return self.student.gender
+
+    def get_thumbnail(self, geometry=ThumbnailSizes.BASE, **options):
+        thumbnail_options = {
+            "use_stub": True,
+            "stub_official": False,
+            "cropbox": None,
+            **options
+        }
+        return super().get_thumbnail(geometry, **thumbnail_options)

@@ -4,9 +4,9 @@ from rest_framework.response import Response
 
 from api.pagination import StandardPagination
 from api.permissions import CuratorAccessPermission
-from learning.api.serializers import AlumniSerializer, TestimonialSerializer, \
+from learning.api.serializers import AlumniSerializer, GraduateProfileSerializer, \
     CourseNewsNotificationSerializer
-from learning.models import CourseNewsNotification
+from learning.models import CourseNewsNotification, GraduateProfile
 from study_programs.models import AcademicDiscipline
 from users.models import User
 
@@ -37,23 +37,29 @@ class AlumniList(ListAPIView):
 
 
 class TestimonialList(ListAPIView):
-    """Retrieves data for alumni page"""
+    # FIXME: Add index for pagination if limit/offset is too slow
     pagination_class = StandardPagination
-    serializer_class = TestimonialSerializer
+    serializer_class = GraduateProfileSerializer
 
     def get_queryset(self):
         return (self.get_base_queryset()
-                .prefetch_related("areas_of_study")
-                .only("pk", "modified", "first_name", "last_name", "patronymic",
-                      "graduation_year", "cropbox_data", "photo", "csc_review",
-                      )
+                .select_related("student")
+                .prefetch_related("academic_disciplines")
+                .only("pk", "modified", "graduation_year", "photo",
+                      "testimonial",
+                      "student__photo",
+                      "student__cropbox_data",
+                      "student__first_name",
+                      "student__last_name",
+                      "student__patronymic",
+                      "student__gender",)
                 .order_by("-graduation_year", "pk"))
 
     @staticmethod
     def get_base_queryset():
-        return (User.objects
-                .filter(groups=User.roles.GRADUATE_CENTER)
-                .exclude(csc_review=''))
+        return (GraduateProfile.objects
+                .filter(is_active=True)
+                .exclude(testimonial=''))
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

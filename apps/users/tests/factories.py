@@ -129,6 +129,7 @@ class VolunteerFactory(UserFactory):
 class GraduateFactory(UserFactory):
     branch = factory.SubFactory('learning.tests.factories.BranchFactory',
                                 code='spb')
+    graduation_year = 2019
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):

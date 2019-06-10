@@ -9,16 +9,18 @@ from core.factories import CityFactory
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    CourseNewsNotification, Event, Branch
+    CourseNewsNotification, Event, Branch, GraduateProfile
 from learning.settings import Branches
 from study_programs.models import AcademicDiscipline
-from users.tests.factories import UserFactory, StudentCenterFactory
+from users.tests.factories import UserFactory, StudentCenterFactory, \
+    GraduateFactory
 
 __all__ = ('AcademicDisciplineFactory', 'StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentFactory',
            'AssignmentNotificationFactory', 'BranchFactory',
            'CourseNewsNotificationFactory', 'EventFactory',
-           'StudentAssignment', 'Enrollment', 'AssignmentComment', 'Branch')
+           'StudentAssignment', 'Enrollment', 'AssignmentComment', 'Branch',
+           'GraduateProfileFactory')
 
 
 class BranchFactory(factory.DjangoModelFactory):
@@ -96,3 +98,11 @@ class EventFactory(factory.DjangoModelFactory):
             + datetime.timedelta(days=3)).date()
     starts_at = "13:00"
     ends_at = "13:45"
+
+
+class GraduateProfileFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = GraduateProfile
+
+    student = factory.SubFactory(GraduateFactory)
+    graduation_at = factory.Faker('future_date', end_date="+10d", tzinfo=None)

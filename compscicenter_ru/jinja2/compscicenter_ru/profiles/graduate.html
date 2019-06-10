@@ -7,7 +7,7 @@
     <div class="cover _green-gradient">
         <div class="cover__content">
             <div class="cover-student-avatar mt-8 mb-4">
-                <img class="img-fluid" src="{{ graduate_profile.get_photo().url }}" alt="">
+                <img class="img-fluid" src="{{ graduate_profile.get_thumbnail(student.ThumbnailSize.SQUARE).url }}" alt="">
             </div>
             <div class="mb-1">{% if student.gender == student.GENDER_MALE %}Выпускник{% else %}Выпускница{% endif %} CS центра</div>
             <h1 class="mb-0">{{ student.get_short_name() }}</h1>
@@ -95,7 +95,7 @@
 
                     <div class="timeline__element">
                         <div class="timeline__img">
-                            <img class="img-fluid" src="{{ graduate_profile.get_photo().url }}" alt="">
+                            <img class="img-fluid" src="{{ graduate_profile.get_thumbnail(student.ThumbnailSize.SQUARE).url }}" alt="">
                         </div>
                         <div class="timeline__content">
                             <span class="timeline__date _important">{{ graduate_profile.graduation_at|date("j E Y") }} года</span>

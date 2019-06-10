@@ -36,8 +36,7 @@ from users.mixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
 from users.tasks import email_template_name, html_email_template_name, \
     subject_template_name
-from users.thumbnails import get_user_thumbnail
-from users.utils import photo_thumbnail_cropbox
+from users.thumbnails import get_user_thumbnail, photo_thumbnail_cropbox
 from .forms import LoginForm, UserProfileForm, EnrollmentCertificateCreateForm
 from .models import User, EnrollmentCertificate
 

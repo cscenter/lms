@@ -2,14 +2,15 @@ import pytest
 from django.core.cache import cache
 
 from core.urls import reverse
-from learning.tests.factories import AcademicDisciplineFactory
+from learning.tests.factories import AcademicDisciplineFactory, \
+    GraduateProfileFactory
 from users.tests.factories import GraduateFactory
 
 
 # TODO: test context
 @pytest.mark.django_db
 def test_testimonials_smoke(client):
-    GraduateFactory(csc_review='test', photo='stub.JPG')
+    GraduateProfileFactory(testimonial='test', photo='stub.JPG')
     response = client.get(reverse('testimonials'))
     assert response.status_code == 200
 

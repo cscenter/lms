@@ -5,6 +5,11 @@ BASE_THUMBNAIL_WIDTH = 176
 BASE_THUMBNAIL_HEIGHT = 246
 
 
+class GenderTypes(DjangoChoices):
+    MALE = C('M')
+    FEMALE = C('F')
+
+
 class ThumbnailSizes(DjangoChoices):
     """
     Base image aspect ratio is `5:7`.
