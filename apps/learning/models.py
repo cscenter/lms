@@ -587,6 +587,10 @@ class GraduateProfile(TimeStampedModel):
     graduation_at = models.DateField(
         verbose_name=_("Graduation at"),
         help_text=_("Graduation ceremony date"))
+    academic_disciplines = models.ManyToManyField(
+        'study_programs.AcademicDiscipline',
+        verbose_name=_("Fields of study"),
+        blank=True)
     graduation_year = models.PositiveSmallIntegerField(
         verbose_name=_("Graduation Year"),
         help_text=_("Helps filtering by year"),
