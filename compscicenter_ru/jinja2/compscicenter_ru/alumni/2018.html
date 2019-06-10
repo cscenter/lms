@@ -33,7 +33,7 @@
             {% for graduate_profile in graduates -%}
                 <a class="user-card" href="{{ graduate_profile.get_absolute_url() }}" id="user-card-{{ graduate_profile.student_id }}">
                     <div class="user-card__photo">
-                        <img alt="{{ graduate_profile.student.get_full_name() }}" src="{{ graduate_profile.get_photo().url }}">
+                        <img alt="{{ graduate_profile.student.get_full_name() }}" src="{{ graduate_profile.get_thumbnail().url }}">
                     </div>
                     <div class="user-card__details">{{ graduate_profile.student.get_short_name() }}</div>
                 </a>

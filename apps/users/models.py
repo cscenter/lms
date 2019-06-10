@@ -30,11 +30,10 @@ from learning.permissions import LearningPermissionsMixin
 from learning.settings import StudentStatuses, GradeTypes
 from learning.utils import is_negative_grade
 from users.constants import GROUPS_IMPORT_TO_GERRIT, AcademicRoles, \
-    SHADCourseGradeTypes, ThumbnailSizes
+    SHADCourseGradeTypes, ThumbnailSizes, GenderTypes
 from users.fields import MonitorStatusField
 from users.tasks import update_password_in_gerrit
-from users.thumbnails import get_user_thumbnail
-from users.utils import photo_thumbnail_cropbox
+from users.thumbnails import ThumbnailMixin
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -92,20 +91,19 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
         return None
 
 
-class User(LearningPermissionsMixin, StudentProfile, AbstractUser):
+class User(LearningPermissionsMixin, StudentProfile, ThumbnailMixin,
+           AbstractUser):
     ThumbnailSize = ThumbnailSizes
 
     roles = AcademicRoles
 
     ENROLLMENT_CACHE_KEY = "_student_enrollment_{}"
 
+    # FIXME: replace with GenderTypes choices
     GENDER_MALE = 'M'
     GENDER_FEMALE = 'F'
-    GENDER_CHOICES = (
-        (GENDER_MALE, _('Male')),
-        (GENDER_FEMALE, _('Female')),
-    )
-    gender = models.CharField(_("Gender"), max_length=1, choices=GENDER_CHOICES)
+    gender = models.CharField(_("Gender"), max_length=1,
+                              choices=GenderTypes.choices)
 
     modified = AutoLastModifiedField(_('modified'))
 
@@ -422,15 +420,6 @@ class User(LearningPermissionsMixin, StudentProfile, AbstractUser):
             except (IOError, OSError):
                 pass
         return None
-
-    def photo_thumbnail_cropbox(self):
-        """Used by `thumbnail` template tag. Format: x1,y1,x2,y2"""
-        if self.cropbox_data:
-            return photo_thumbnail_cropbox(self.cropbox_data)
-        return ""
-
-    def get_thumbnail(self, geometry, use_stub=True, **options):
-        return get_user_thumbnail(self, geometry, use_stub, **options)
 
     def get_short_bio(self):
         """Returns only the first paragraph from the bio."""

@@ -113,6 +113,7 @@ class BranchAdmin(admin.ModelAdmin):
 class GraduateProfileAdmin(admin.ModelAdmin):
     list_display = ('student', 'graduation_year')
     list_filter = ('graduation_year',)
+    search_fields = ('student__last_name',)
     raw_id_fields = ('student',)
 
 
