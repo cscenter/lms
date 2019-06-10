@@ -22,7 +22,7 @@
                         <div class="card">
                             <div class="card__content _big">
                                 <h2>Отзыв о CS центре</h2>
-                                {{ graduate_profile.testimonial|markdown("csc_review", 3600, student.pk, student.modified) }}
+                                {{ graduate_profile.testimonial|markdown("csc_review", 3600, graduate_profile.pk, graduate_profile.modified) }}
                             </div>
                         </div>
                     </div>
