@@ -271,9 +271,8 @@ class ProjectDetailView(CreateView):
     def get_context_data(self, project, project_student, **kwargs):
         user = self.request.user
         you_enrolled = user in project.reviewers.all()
-        can_send_report = (project.is_active and project_student and
-                           not project_student.has_final_grade() and
-                           user in project.students.all())
+        can_send_report = (project_student and
+                           not project_student.has_final_grade())
         # FIXME: только для залогиненных.
         key = ReportingPeriodKey(project.branch_id, project.project_type)
         reporting_periods = (ReportingPeriod.get_periods(term_id=project.semester_id)
