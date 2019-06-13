@@ -50,18 +50,15 @@ from .filters import CoursesFilter
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
 
 
-def get_random_testimonials(count, cache_key, filters=None):
+def get_random_testimonials(count, cache_key, **filters):
     """Returns reviews from graduated students with photo"""
     testimonials = cache.get(cache_key)
-    filters = filters or {}
     if testimonials is None:
-        # TODO: Выбрать только нужные поля
-        s = (User.objects
-             .filter(groups=User.roles.GRADUATE_CENTER, **filters)
-             .exclude(csc_review='').exclude(photo='')
-             .prefetch_related("areas_of_study")
-             .order_by('?'))[:count]
-        testimonials = s
+        testimonials = (GraduateProfile.active
+                        .filter(**filters)
+                        .with_testimonial()
+                        .prefetch_related("academic_disciplines")
+                        .order_by('?'))[:count]
         cache.set(cache_key, testimonials, 3600)
     return testimonials
 
@@ -139,7 +136,7 @@ class TestimonialsListView(TemplateView):
     template_name = "compscicenter_ru/testimonials.html"
 
     def get_context_data(self, **kwargs):
-        total = TestimonialList.get_base_queryset().count()
+        total = GraduateProfile.active.with_testimonial().count()
         page_size = 16
         try:
             current_page = positive_integer(self.request.GET.get("page", 1))
@@ -186,67 +183,11 @@ class TeachersView(TemplateView):
         return {"app_data": app_data}
 
 
-class AlumniByYearView(generic.ListView):
-    context_object_name = "alumni_list"
-    template_name = "compscicenter_ru/alumni_by_year.html"
-
-    def get(self, request, *args, **kwargs):
-        year = int(self.kwargs['year'])
-        now__year = now().year
-        # No graduates in first 2 years after foundation
-        if year < CENTER_FOUNDATION_YEAR + 2 or year > now__year:
-            return HttpResponseNotFound()
-        return super().get(request, *args, **kwargs)
-
-    def get_queryset(self):
-        year = int(self.kwargs['year'])
-        filters = (Q(groups__pk=User.roles.GRADUATE_CENTER) &
-                   Q(graduation_year=year))
-        if year == now().year and self.request.user.is_curator:
-            filters = filters | Q(status=StudentStatuses.WILL_GRADUATE)
-        return (User.objects
-                .filter(filters)
-                .distinct()
-                .order_by("-graduation_year", "last_name", "first_name"))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        year = int(self.kwargs['year'])
-        context["year"] = year
-        testimonials = cache.get('alumni_{}_testimonials'.format(year))
-        if testimonials is None:
-            s = (User.objects
-                 .filter(
-                    groups=User.roles.GRADUATE_CENTER,
-                    graduation_year=year,
-                 )
-                 .exclude(csc_review='').exclude(photo='')
-                 .prefetch_related("areas_of_study"))
-            testimonials = s[:]
-            cache.set('alumni_{}_testimonials'.format(year),
-                      testimonials, 3600)
-        context['testimonials'] = self.testimonials_random(testimonials)
-
-        is_curator = self.request.user.is_curator
-        stats = cache.get('alumni_{}_stats_{}'.format(year, is_curator))
-        if stats is None:
-            stats = StudentsDiplomasStats.as_view()(self.request, year,
-                                                    **kwargs).data
-            cache.set('alumni_{}_stats_{}'.format(year, is_curator), stats,
-                      24 * 3600)
-        context["stats"] = stats
-        return context
-
-    @staticmethod
-    def testimonials_random(testimonials):
-        indexes = random.sample(range(len(testimonials)),
-                                min(len(testimonials), 5))
-        return [testimonials[index] for index in indexes]
-
-
 class AlumniHonorBoardView(TemplateView):
     def get_template_names(self):
         graduation_year = int(self.kwargs['year'])
+        if graduation_year <= 2017:
+            return "compscicenter_ru/alumni_by_year.html"
         return [
             f"compscicenter_ru/alumni/{graduation_year}.html",
             "compscicenter_ru/alumni/fallback_year.html"
@@ -255,21 +196,19 @@ class AlumniHonorBoardView(TemplateView):
     def get_context_data(self, **kwargs):
         graduation_year = int(self.kwargs['year'])
         preview = self.request.GET.get('preview', False)
-        filters = Q(graduation_year=graduation_year)
         if not preview or not self.request.user.is_curator:
-            filters = filters & Q(is_active=True)
-        graduates = list(GraduateProfile.objects
-                         .filter(filters)
-                         .select_related("student")
-                         .prefetch_related("student__areas_of_study")
+            manager = GraduateProfile.active
+        else:
+            manager = GraduateProfile.objects.select_related("student")
+        graduates = list(manager
+                         .filter(graduation_year=graduation_year)
+                         .prefetch_related("academic_disciplines")
                          .order_by("student__last_name"))
-                     # .only("pk", "first_name", "last_name", "patronymic", "gender",
-                     #       "cropbox_data", "photo")
         if not len(graduates):
             raise Http404
         # Get random testimonials
         # FIXME: Prefetch areas_of_study for random testimonials only
-        with_testimonial = [gp.student for gp in graduates if gp.testimonial]
+        with_testimonial = [gp for gp in graduates if gp.testimonial]
         indexes = random.sample(range(len(with_testimonial)),
                                 min(len(with_testimonial), 4))
         random_testimonials = [with_testimonial[index] for index in indexes]
@@ -278,6 +217,16 @@ class AlumniHonorBoardView(TemplateView):
             "graduates": graduates,
             "testimonials": random_testimonials
         }
+        if graduation_year <= 2017:
+            is_curator = self.request.user.is_curator
+            cache_key = f'alumni_{graduation_year}_stats_{is_curator}'
+            stats = cache.get(cache_key)
+            if stats is None:
+                stats = StudentsDiplomasStats.as_view()(self.request,
+                                                        graduation_year,
+                                                        **kwargs).data
+                cache.set(cache_key, stats, 3600 * 24 * 31)
+            context["stats"] = stats
         return context
 
 
@@ -373,8 +322,8 @@ class OnCampusProgramDetailView(generic.TemplateView):
         context["study_program"] = study_program
         # Testimonials
         cache_key = f"{TESTIMONIALS_CACHE_KEY}_{discipline_code}"
-        filters = {"areas_of_study": discipline_code}
-        context["testimonials"] = get_random_testimonials(4, cache_key, filters)
+        context["testimonials"] = get_random_testimonials(
+            4, cache_key, academic_disciplines=discipline_code)
         context["branches"] = (Branch.objects
                                .filter(study_programs__academic_discipline__code=discipline_code,
                                        study_programs__is_active=True,

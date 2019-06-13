@@ -81,3 +81,27 @@ EnrollmentDefaultManager = _EnrollmentDefaultManager.from_queryset(
     EnrollmentQuerySet)
 EnrollmentActiveManager = _EnrollmentActiveManager.from_queryset(
     EnrollmentQuerySet)
+
+
+class _GraduateProfileActiveManager(models.Manager):
+    def get_queryset(self):
+        return (super().get_queryset()
+                .filter(is_active=True)
+                .select_related("student")
+                .only("pk", "modified", "graduation_year", "photo",
+                      "testimonial",
+                      "student__photo",
+                      "student__cropbox_data",
+                      "student__first_name",
+                      "student__last_name",
+                      "student__patronymic",
+                      "student__gender",))
+
+
+class GraduateProfileQuerySet(models.QuerySet):
+    def with_testimonial(self):
+        return self.exclude(testimonial='')
+
+
+GraduateProfileActiveManager = _GraduateProfileActiveManager.from_queryset(
+    GraduateProfileQuerySet)
