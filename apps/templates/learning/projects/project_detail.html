@@ -142,7 +142,7 @@
                     {% endfor %}
                 {% endif %}
 
-                {% if can_send_report and reporting_periods and project_student %}
+                {% if reporting_periods and project_student %}
                     <h3>Отчет{% if reporting_periods.length > 1 %}ы{% endif %}</h3>
                     <div class="panel-group">
                         {% for reporting_period in reporting_periods %}
@@ -160,7 +160,7 @@
                                                     <dt>Статус</dt><dd>{{ report.get_status_display }}</dd>
                                                     <dt>Финальный балл</dt><dd>{{ report.final_score|default_if_none:"-" }}</dd>
                                                 </dl>
-                                        {% else %}
+                                        {% elif project.is_active and can_send_report %}
                                             {% call_method reporting_period "is_started" project as reporting_period_is_started %}
                                             {% if not reporting_period_is_started %}
                                                 Форма отправки отчета появится после начала отчетного периода.
@@ -168,6 +168,8 @@
                                                 <p class="text-muted">Отправьте отчет до {{ reporting_period.end_on|date:"j E" }} включительно.</p>
                                                 {% crispy reporting_period.get_report_form %}
                                             {% endif %}
+                                        {% else %}
+                                            Отчет не был отправлен.
                                         {% endif %}
                                     </div>
                                 </div>
