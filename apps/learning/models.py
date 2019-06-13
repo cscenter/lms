@@ -29,7 +29,8 @@ from courses.models import Course, CourseNews, Venue, \
     Assignment
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
-    EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager
+    EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
+    GraduateProfileActiveManager
 from learning.settings import GradingSystems, GradeTypes, Branches, \
     AcademicDegreeYears
 from users.constants import ThumbnailSizes
@@ -609,6 +610,9 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
         verbose_name=_("Details"),
         blank=True,
     )
+
+    objects = models.Manager()
+    active = GraduateProfileActiveManager()
 
     class Meta:
         verbose_name = _("Graduate Profile")

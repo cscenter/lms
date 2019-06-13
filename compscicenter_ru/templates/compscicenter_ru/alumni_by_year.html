@@ -2,29 +2,23 @@
 
 {% load i18n %}
 {% load user_thumbnail from user_thumbnail %}
-{% load markdown from core_tags %}
+{% load markdown call_method from core_tags %}
 {% load static %}
 
 {% block body_attrs %} data-init-section="lazy-img"{% endblock body_attrs %}
 
 {% block content %}
     <div id="graduates-by-year">
-    {% if alumni_list %}
         <div class="graduates-list">
             <h3>Выпуск {{ year }} в лицах</h3> <a href="#stats" class="dashed-link">Статистика</a>{% if testimonials %}<a href="#testimonials" class="dashed-link">Отзывы о CS центре</a>{% endif %}
             <div class="clearfix"></div>
             <div class="c-student-faces">
-            {% for alumni in alumni_list %}
+            {% for graduate_profile in graduates %}
                 <div class="student">
-                    <a href="{{ alumni.get_absolute_url }}">
-                    {% if alumni.photo %}
-                        {% user_thumbnail alumni alumni.ThumbnailSize.SQUARE as im %}
-                            <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                        {% enduser_thumbnail %}
-                    {% else %}
-                        <img width="150" height="150" data-src="holder.js/150x150?text=%3F&fontweight=normal&size=50" />
-                    {% endif %}
-                    <figcaption>{{ alumni.last_name }} {{ alumni.first_name }}</figcaption>
+                    <a href="{{ graduate_profile.get_absolute_url }}">
+                        {% call_method graduate_profile "get_thumbnail" graduate_profile.student.ThumbnailSize.SQUARE as im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                        <figcaption>{{ graduate_profile.student.last_name }} {{ graduate_profile.student.first_name }}</figcaption>
                     </a>
                 </div>
             {% endfor %}
@@ -110,21 +104,18 @@
         <div class="testimonials-wrapper">
            <a name="testimonials"></a><h3>Отзывы о CS центре</h3>
             <div class="testimonials __list">
-                {% for student in testimonials %}
+                {% for graduate_profile in testimonials %}
                 <div class="col-xs-12">
                     <div class="testimonial{% if forloop.counter|divisibleby:2 %} right{% endif %}">
                         <blockquote>
-                            {% markdown 3600 "csc_review" student.pk student.modified %}
-                                {{ student.csc_review }}
+                            {% markdown 3600 "csc_review" graduate_profile.pk graduate_profile.modified %}
+                                {{ graduate_profile.testimonial }}
                             {% endmarkdown %}
                         </blockquote>
                         <div>
-                            {% if student.photo %}
-                            {% user_thumbnail student student.ThumbnailSize.SQUARE as im %}
+                            {% call_method graduate_profile "get_thumbnail" graduate_profile.student.ThumbnailSize.SQUARE as im %}
                             <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                            {% enduser_thumbnail %}
-                            {% endif %}
-                            <span><a href="{{ student.get_absolute_url }}">{{ student.get_full_name }}</a></span>{% for a in  student.areas_of_study.all %}{{ a }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                            <span><a href="{{ graduate_profile.get_absolute_url }}">{{ graduate_profile.student.get_short_name }}</a></span>{% for a in graduate_profile.academic_disciplines.all %}{{ a }}{% if not forloop.last %}, {% endif %}{% endfor %}
                         </div>
                     </div>
                 </div>
@@ -133,8 +124,5 @@
             <a href="{%  url "testimonials" %}" class="big-link">Читать все отзывы</a>
         </div>
         {% endif %}
-    {% else %}
-        <div class="empty">Пока ждём выпуска!</div>
-    {% endif %}
     </div>
 {% endblock content %}

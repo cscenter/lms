@@ -137,8 +137,8 @@
         <div class="container">
             <h1 class="text-center">Отзывы студентов</h1>
             <div class="card-columns _testimonials">
-                {% for student in testimonials %}
-                    {{ macros.testimonial_card(student) }}
+                {% for graduate_profile in testimonials %}
+                    {{ macros.testimonial_card(graduate_profile) }}
                 {% endfor %}
 
                 <a href="{{ url('testimonials') }}" class="btn _small _outline _rounded _gray mt-3">Все отзывы</a>

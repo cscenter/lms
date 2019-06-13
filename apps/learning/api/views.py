@@ -42,24 +42,10 @@ class TestimonialList(ListAPIView):
     serializer_class = GraduateProfileSerializer
 
     def get_queryset(self):
-        return (self.get_base_queryset()
-                .select_related("student")
+        return (GraduateProfile.active
+                .with_testimonial()
                 .prefetch_related("academic_disciplines")
-                .only("pk", "modified", "graduation_year", "photo",
-                      "testimonial",
-                      "student__photo",
-                      "student__cropbox_data",
-                      "student__first_name",
-                      "student__last_name",
-                      "student__patronymic",
-                      "student__gender",)
                 .order_by("-graduation_year", "pk"))
-
-    @staticmethod
-    def get_base_queryset():
-        return (GraduateProfile.objects
-                .filter(is_active=True)
-                .exclude(testimonial=''))
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

@@ -37,7 +37,6 @@ urlpatterns += [
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
     # TODO: move redirect to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
-    re_path(r'^(?P<year>201[3-7])/$', views.AlumniByYearView.as_view(), name='alumni_memory'),
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
     # Programs
     path('syllabus/', RedirectView.as_view(url='/syllabus/on-campus/', permanent=False)),

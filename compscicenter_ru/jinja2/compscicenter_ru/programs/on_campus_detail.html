@@ -89,8 +89,8 @@
         <div class="container">
             <h2 class="text-center">Отзывы студентов</h2>
             <div class="card-columns _testimonials">
-                {% for student in testimonials %}
-                    {{ macros.testimonial_card(student) }}
+                {% for graduate_profile in testimonials %}
+                    {{ macros.testimonial_card(graduate_profile) }}
                 {% endfor %}
             </div>
         </div>
