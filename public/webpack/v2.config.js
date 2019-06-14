@@ -32,8 +32,8 @@ const common = {
 
     entry: {
         common: [
-            // FIXME: investigate `useBuiltIns=entry` in .babelrc instead of including all polyfills?
-            '@babel/polyfill',
+            // "core-js/stable",
+            // "regenerator-runtime/runtime",
             'jquery',
             'popper.js',
             'fontfaceobserver',
@@ -50,7 +50,7 @@ const common = {
     externals: {},
 
     resolve: {
-        extensions: ['.jsx', '.js'],
+        extensions: ['.jsx', '.js', '.ts', '.tsx'],
         modules: [
             path.join(__srcdir, '/js'),
             __nodemodulesdir
@@ -61,7 +61,7 @@ const common = {
     module: {
         rules: [
             {
-                test: /\.(js|jsx)$/,
+                test: /\.(js|jsx|ts|tsx)$/,
                 include: path.resolve(__srcdir, "js"),
                 use: [
                     {
