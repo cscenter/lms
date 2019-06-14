@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-class UserCard extends React.Component {
+class UserCard extends React.Component<any, any> {
     static defaultProps = {
         className: 'user-card'
     };

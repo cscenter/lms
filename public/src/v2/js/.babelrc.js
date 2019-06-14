@@ -59,6 +59,7 @@ module.exports = {
                 },
             }
         ],
+        "@babel/typescript",
         "@babel/preset-react"
     ],
     plugins: plugins,
