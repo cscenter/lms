@@ -9,48 +9,39 @@ from users.api.serializers import PhotoSerializerField
 from users.models import User
 
 
-# FIXME: Create base AlumniSerializer. TestimonialSerializer should override Meta.fields only (and photo?)
-class AlumniSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="pk")
-    name = serializers.SerializerMethodField()
-    sex = serializers.SerializerMethodField()
-    photo = PhotoSerializerField(User.ThumbnailSize.BASE,
-                                 thumbnail_options={"stub_official": False})
-    year = serializers.IntegerField(source="graduation_year")
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name')
+
+
+class StudentSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source="first_name")
+    surname = serializers.CharField(source="last_name")
     city = serializers.CharField(source="city_id")
-    areas = serializers.PrimaryKeyRelatedField(many=True, read_only=True,
-                                               source="areas_of_study")
+    sex = serializers.CharField(source="gender")
 
     class Meta:
         model = User
-        fields = ('id', 'name', 'sex', 'year', 'city', 'photo', 'areas')
-
-    def get_name(self, obj):
-        return f"{obj.first_name} {obj.last_name}"
-
-    def get_sex(self, obj: User):
-        return "b" if obj.gender == obj.GENDER_MALE else "g"
+        fields = ('name', 'surname', 'patronymic', 'sex', 'city')
 
 
+# TODO: add detail_url?
 class GraduateProfileSerializer(serializers.ModelSerializer):
-    # FIXME: add student_id?
     id = serializers.IntegerField(source="pk")
-    author = serializers.SerializerMethodField()
-    photo = PhotoSerializerField(User.ThumbnailSize.SQUARE,
+    student = StudentSerializer()
+    photo = PhotoSerializerField(User.ThumbnailSize.BASE,
                                  thumbnail_options={"stub_official": False})
     year = serializers.IntegerField(source="graduation_year")
     areas = serializers.PrimaryKeyRelatedField(many=True, read_only=True,
                                                source="academic_disciplines")
-    text = serializers.SerializerMethodField()
+    testimonial = serializers.SerializerMethodField()
 
     class Meta:
         model = GraduateProfile
-        fields = ("id", "author", "photo", "year", "areas", "text")
+        fields = ("id", "student", "photo", "year", "areas", "testimonial")
 
-    def get_author(self, graduate_profile):
-        return graduate_profile.student.get_full_name()
-
-    def get_text(self, graduate_profile):
+    def get_testimonial(self, graduate_profile):
         try:
             fragment_cache = caches['markdown_fragments']
         except InvalidCacheBackendError:
@@ -58,7 +49,8 @@ class GraduateProfileSerializer(serializers.ModelSerializer):
         expire_time = 3600
         vary_on = [bytes(graduate_profile.pk),
                    force_bytes(graduate_profile.modified)]
-        cache_key = make_api_fragment_key("csc_review", vary_on)
+        cache_key = make_api_fragment_key(GraduateProfile.TESTIMONIAL_CACHE_KEY,
+                                          vary_on)
         value = fragment_cache.get(cache_key)
         if value is None:
             value = render_markdown(graduate_profile.testimonial)
@@ -66,10 +58,19 @@ class GraduateProfileSerializer(serializers.ModelSerializer):
         return value
 
 
-class UserSerializer(serializers.ModelSerializer):
+class AlumniSerializer(GraduateProfileSerializer):
     class Meta:
-        model = User
-        fields = ('first_name', 'last_name')
+        model = GraduateProfile
+        fields = ('id', 'student', 'photo', 'year', 'areas')
+
+
+class TestimonialCardSerializer(GraduateProfileSerializer):
+    student = serializers.SerializerMethodField()
+    photo = PhotoSerializerField(User.ThumbnailSize.SQUARE,
+                                 thumbnail_options={"stub_official": False})
+
+    def get_student(self, graduate_profile):
+        return graduate_profile.student.get_full_name()
 
 
 class CourseNewsNotificationSerializer(serializers.ModelSerializer):

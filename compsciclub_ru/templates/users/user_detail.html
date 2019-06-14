@@ -288,22 +288,6 @@
           </td>
         </tr>
         <tr>
-          <td>{% trans "StudentInfo|Study program" %}:</td>
-          <td>
-            {% with sps=profile_user.areas_of_study.all %}
-            {% if sps %}
-            <ul class="list-unstyled">
-              {% for sp in sps %}
-              <li>{{ sp.name }}</li>
-              {% endfor %}
-            </ul>
-            {% else %}
-            —
-            {% endif %}
-            {% endwith %}
-          </td>
-        </tr>
-        <tr>
           <td>{% trans "Workplace" %}:</td>
           <td>{{ profile_user.workplace|default:"—" }}</td>
         </tr>
