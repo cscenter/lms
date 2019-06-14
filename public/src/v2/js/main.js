@@ -1,6 +1,5 @@
 import * as Sentry from '@sentry/browser';
 import $ from 'jquery';
-import '@babel/polyfill';
 import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 

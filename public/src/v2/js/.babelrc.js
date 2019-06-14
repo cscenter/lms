@@ -38,8 +38,9 @@ module.exports = {
             "@babel/preset-env",
             {
                 modules: false,
-                useBuiltIns: false,
-                debug: false,
+                useBuiltIns: "usage",
+                corejs: 3,
+                debug: true,
                 loose: true,
                 spec: true,
                 targets: {
