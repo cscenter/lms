@@ -18,7 +18,6 @@ class AlumniList(ListAPIView):
 
     def get_queryset(self):
         return (GraduateProfile.active
-                .with_testimonial()
                 .prefetch_related("academic_disciplines")
                 .order_by("-graduation_year",
                           "student__last_name",
