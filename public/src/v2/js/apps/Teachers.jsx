@@ -106,6 +106,7 @@ class App extends React.Component {
         }).done((data) => {
             data.forEach((item) => {
                item.courses = new Set(item.courses);
+               item.url = `/teachers/${item.id}`;
             });
             this.setState({
                 loading: false,
