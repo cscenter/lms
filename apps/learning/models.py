@@ -579,6 +579,8 @@ def graduate_photo_upload_to(instance: "GraduateProfile", filename):
 
 
 class GraduateProfile(ThumbnailMixin, TimeStampedModel):
+    TESTIMONIAL_CACHE_KEY = "csc_review"
+
     student = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Student"),

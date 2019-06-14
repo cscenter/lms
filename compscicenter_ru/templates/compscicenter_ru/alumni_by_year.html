@@ -108,7 +108,7 @@
                 <div class="col-xs-12">
                     <div class="testimonial{% if forloop.counter|divisibleby:2 %} right{% endif %}">
                         <blockquote>
-                            {% markdown 3600 "csc_review" graduate_profile.pk graduate_profile.modified %}
+                            {% markdown 3600 graduate_profile.TESTIMONIAL_CACHE_KEY graduate_profile.pk graduate_profile.modified %}
                                 {{ graduate_profile.testimonial }}
                             {% endmarkdown %}
                         </blockquote>

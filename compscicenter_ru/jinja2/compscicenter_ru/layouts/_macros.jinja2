@@ -31,15 +31,15 @@
     {{ _author_card(img_url, supervisor.full_name, supervisor.workplace, None, modifiers) }}
 {%- endmacro %}
 
-{% macro testimonial_card(graduate) -%}
+{% macro testimonial_card(graduate_profile) -%}
 <div class="card mb-2">
     <div class="card__content _middle">
-        {% set parts = ["Выпуск ", graduate.graduation_year, ", ", graduate.academic_disciplines.all()|join(", ")] %}
-        {% with im = graduate.get_thumbnail(graduate.student.ThumbnailSize.SQUARE) %}
+        {% set parts = ["Выпуск ", graduate_profile.graduation_year, ", ", graduate_profile.academic_disciplines.all()|join(", ")] %}
+        {% with im = graduate_profile.get_thumbnail(graduate_profile.student.ThumbnailSize.SQUARE) %}
             {{ _author_card(im.url,
-                            full_name=graduate.student.get_short_name(),
+                            full_name=graduate_profile.student.get_short_name(),
                             details=parts|join(''),
-                            testimonial=graduate.testimonial|markdown("csc_review", 3600, graduate.pk, graduate.modified),
+                            testimonial=graduate_profile.testimonial|markdown(graduate_profile.TESTIMONIAL_CACHE_KEY, 3600, graduate_profile.pk, graduate_profile.modified),
                             modifiers='_testimonial') }}
         {% endwith %}
     </div>

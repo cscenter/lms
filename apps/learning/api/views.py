@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from api.pagination import StandardPagination
 from api.permissions import CuratorAccessPermission
-from learning.api.serializers import AlumniSerializer, GraduateProfileSerializer, \
+from learning.api.serializers import AlumniSerializer, TestimonialCardSerializer, \
     CourseNewsNotificationSerializer
 from learning.models import CourseNewsNotification, GraduateProfile
 from study_programs.models import AcademicDiscipline
@@ -17,12 +17,12 @@ class AlumniList(ListAPIView):
     serializer_class = AlumniSerializer
 
     def get_queryset(self):
-        return (User.objects
-                .filter(groups__pk=User.roles.GRADUATE_CENTER)
-                .prefetch_related("areas_of_study")
-                .only("pk", "first_name", "last_name", "graduation_year",
-                      "cropbox_data", "photo", "city_id", "gender")
-                .order_by("-graduation_year", "last_name", "first_name"))
+        return (GraduateProfile.active
+                .with_testimonial()
+                .prefetch_related("academic_disciplines")
+                .order_by("-graduation_year",
+                          "student__last_name",
+                          "student__first_name"))
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -39,7 +39,7 @@ class AlumniList(ListAPIView):
 class TestimonialList(ListAPIView):
     # FIXME: Add index for pagination if limit/offset is too slow
     pagination_class = StandardPagination
-    serializer_class = GraduateProfileSerializer
+    serializer_class = TestimonialCardSerializer
 
     def get_queryset(self):
         return (GraduateProfile.active

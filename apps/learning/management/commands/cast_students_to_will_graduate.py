@@ -91,4 +91,3 @@ Requirements:
                 if areas:
                     User.objects.filter(pk=student.pk).update(
                         status=StudentStatuses.WILL_GRADUATE)
-                    student.areas_of_study.set(areas)
