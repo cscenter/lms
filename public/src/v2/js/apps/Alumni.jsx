@@ -91,7 +91,7 @@ class Alumni extends React.Component {
             data: payload
         }).done((result) => {
             result.data.forEach((g) => {
-                g.url = `/students/${g.id}`;
+                g.url = `/students/${g.student.id}/`;
                 g.name = `${g.student.name} ${g.student.surname}`;
             });
             this.setState({
