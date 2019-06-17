@@ -160,9 +160,9 @@ class App extends React.Component {
                 <div className="row mb-4">
                     <div className="col-lg-3 mb-4">
                         <SearchInput
-                            onChange={this.handleSearchInputChange}
+                            handleSearch={this.handleSearchInputChange}
+                            query={query}
                             placeholder="Поиск"
-                            value={query}
                             icon="search"
                         />
                     </div>
