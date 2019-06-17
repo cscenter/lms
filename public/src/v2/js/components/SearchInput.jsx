@@ -28,14 +28,13 @@ class SearchInput extends React.Component {
             query: this.props.query
         };
         // TODO: https://stackoverflow.com/a/28046731/1341309
-        this.handleChangeDebounced = _debounce(function() {
-            this.props.handleSearch.apply(this, [this.state.query]);
-        }, 200);
+        this.handleChangeDebounced = _debounce(this.props.handleSearch, 200);
     }
 
     handleChange = (e) => {
-        this.setState({query: e.target.value});
-        this.handleChangeDebounced();
+        this.setState({query: e.target.value}, () => {
+            this.handleChangeDebounced(this.state.query);
+        });
     };
 
     render() {
