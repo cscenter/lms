@@ -14,6 +14,7 @@ from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.tests.factories import CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
+from learning.tests.factories import GraduateProfileFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import AcademicRoles
 from users.forms import UserCreationForm, UserChangeForm
@@ -283,7 +284,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         resp = self.client.get(reverse('user_detail', args=[user.pk]))
         self.assertContains(resp, test_note)
 
-    def test_graduate_can_edit_csc_review(self):
+    def test_graduate_can_edit_testimonial(self):
         """
         Only graduates can (and should) have "CSC review" field in their
         profiles
@@ -292,19 +293,22 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = User.objects.create_user(**user_data)
         self.client.login(None, **user_data)
-        resp = self.client.get(user.get_update_profile_url())
-        self.assertNotContains(resp, 'csc_review')
+        response = self.client.post(user.get_update_profile_url(),
+                                    {'testimonial': test_review})
+        self.assertRedirects(response, reverse('user_detail', args=[user.pk]),
+                             status_code=302)
+        response = self.client.get(reverse('user_detail', args=[user.pk]))
+        assert smart_bytes(test_review) not in response.content
         user.groups.set([user.roles.GRADUATE_CENTER])
         user.graduation_year = 2014
         user.save()
-        resp = self.client.get(user.get_update_profile_url())
-        self.assertIn(b'csc_review', resp.content)
-        resp = self.client.post(user.get_update_profile_url(),
-                                {'csc_review': test_review})
-        self.assertRedirects(resp, reverse('user_detail', args=[user.pk]),
+        GraduateProfileFactory(student=user)
+        response = self.client.post(user.get_update_profile_url(),
+                                    {'testimonial': test_review})
+        self.assertRedirects(response, reverse('user_detail', args=[user.pk]),
                              status_code=302)
-        resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertContains(resp, test_review)
+        response = self.client.get(reverse('user_detail', args=[user.pk]))
+        assert smart_bytes(test_review) in response.content
 
     def test_duplicate_check(self):
         """

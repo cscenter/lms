@@ -7,11 +7,26 @@
 {% endblock javascripts %}
 
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-xs-12">
-      {% crispy form form.helper %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <form method="post" action="{{ form.action }}">
+                    {% crispy form form.helper %}
+                    {% if testimonial_form %}
+                        {% crispy testimonial_form %}
+                    {% endif %}
+                    <div class="pull-right">
+                        <input type="button"
+                               name="cancel"
+                               value="Отмена"
+                               class="btn btn btn-default"
+                               id="button-id-cancel"
+                               onclick="history.go(-1);">
+                        <input type="submit" name="save" value="Сохранить"
+                               class="btn btn-primary" id="submit-id-save">
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 {% endblock content %}

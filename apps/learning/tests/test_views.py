@@ -519,6 +519,7 @@ def test_student_courses_list_csclub(client, settings, mocker):
 
 @pytest.mark.django_db
 def test_api_testimonials_smoke(client):
-    GraduateFactory(csc_review='test', photo='stub.JPG')
+    GraduateProfileFactory(testimonial='test', photo='stub.JPG')
     response = client.get(reverse("api:testimonials"))
     assert response.status_code == 200
+    assert len(response.data['results']) == 1

@@ -47,6 +47,7 @@ from users.constants import AcademicRoles
 from users.models import User, SHADCourseRecord
 from .filters import CoursesFilter
 
+# FIXME: remove?
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
 
 

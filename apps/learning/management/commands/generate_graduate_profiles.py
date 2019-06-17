@@ -28,7 +28,6 @@ class Command(BaseCommand):
             with transaction.atomic():
                 defaults = {
                     "graduation_at": graduation_at,
-                    "testimonial": student.csc_review,
                     "details": {},
                     "is_active": False
                 }
@@ -36,5 +35,4 @@ class Command(BaseCommand):
                     student=student,
                     defaults=defaults)
                 if not created:
-                    profile.testimonial = student.csc_review
                     profile.save()

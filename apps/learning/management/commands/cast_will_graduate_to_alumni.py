@@ -39,7 +39,6 @@ class Command(BaseCommand):
                 defaults = {
                     "is_active": True,
                     "graduation_at": graduation_at,
-                    "testimonial": student.csc_review,
                     "details": {}
                 }
                 profile, created = GraduateProfile.objects.get_or_create(
@@ -47,7 +46,6 @@ class Command(BaseCommand):
                     defaults=defaults)
                 if not created:
                     profile.is_active = True
-                    profile.testimonial = student.csc_review
                     profile.save()
 
         cache.delete("cscenter_last_graduation_year")

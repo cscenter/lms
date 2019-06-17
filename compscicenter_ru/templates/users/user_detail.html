@@ -90,12 +90,12 @@
             {% elif profile_user.pk == user.pk or user.is_curator %}
                 <div class="about-me"></div>
             {% endif %}
-            {% if profile_user.csc_review %}
+            {% if profile_user.is_graduate and profile_user.graduate_profile and profile_user.graduate_profile.testimonial %}
                 <div class="review">
                     <h4>{% trans "Review of Computer Science Center" %}</h4>
                     <div class="ubertext">
-                        {% markdown 3600 "csc_review" profile_user.pk profile_user.modified %}
-                            {{ profile_user.csc_review }}{% endmarkdown %}
+                        {% markdown 3600 profile_user.graduate_profile.TESTIMONIAL_CACHE_KEY profile_user.graduate_profile.pk profile_user.graduate_profile.modified %}
+                            {{ profile_user.graduate_profile.testimonial }}{% endmarkdown %}
                     </div>
                 </div>
             {% endif %}

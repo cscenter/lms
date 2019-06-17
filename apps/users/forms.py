@@ -77,45 +77,38 @@ class UserProfileForm(forms.ModelForm):
         self.fields['index_redirect'].choices = [option_empty] + user_options
 
         self.helper = FormHelper()
-        if kwargs['instance'].is_graduate:
-            show_fields = ['phone', 'workplace', 'bio', 'csc_review',
-                           'yandex_id', 'github_id', 'stepic_id',
-                           'private_contacts']
-        else:
-            show_fields = ['phone', 'workplace', 'bio',
-                           'yandex_id', 'github_id', 'stepic_id',
-                           'private_contacts']
+        show_fields = ['phone', 'workplace', 'bio',
+                       'yandex_id', 'github_id', 'stepic_id',
+                       'private_contacts']
 
-        club_fields = ['first_name', 'last_name', 'patronymic']
         if is_club_site():
+            club_fields = ['first_name', 'last_name', 'patronymic']
             show_fields = club_fields + show_fields
-            del self.fields["index_redirect"]
         else:
             show_fields.append('index_redirect')
-            for field in club_fields:
-                del self.fields[field]
+        to_delete = []
+        for field_name in self.fields:
+            if field_name not in show_fields:
+                to_delete.append(field_name)
+        for field_name in to_delete:
+            del self.fields[field_name]
 
-        self.helper.layout = Layout(Div(*show_fields), CANCEL_SAVE_PAIR)
-
-        if 'csc_review' not in show_fields:
-            del self.fields['csc_review']
+        self.helper.layout = Layout(Div(*show_fields))
+        self.helper.form_tag = False
 
     class Meta:
         model = User
-        fields = ['phone', 'workplace', 'bio', 'yandex_id', 'github_id',
-                  'stepic_id', 'csc_review', 'private_contacts',
-                  'first_name', 'last_name', 'patronymic',
-                  'index_redirect']
+        fields = ('phone', 'workplace', 'bio', 'yandex_id', 'github_id',
+                  'stepic_id', 'private_contacts', 'first_name', 'last_name',
+                  'patronymic', 'index_redirect')
         widgets = {
             'bio': UbereditorWidget,
-            'csc_review': UbereditorWidget,
             'private_contacts': UbereditorWidget
         }
         help_texts = {
             'bio': "{}. {}".format(
                 _("Tell something about yourself"),
                 LATEX_MARKDOWN_ENABLED),
-            'csc_review': LATEX_MARKDOWN_ENABLED,
             'private_contacts': (
                 "{}; {}"
                 .format(LATEX_MARKDOWN_ENABLED,
@@ -125,10 +118,6 @@ class UserProfileForm(forms.ModelForm):
             'stepic_id': _("stepik.org/users/<b>USER_ID</b>"),
             'workplace': _("Specify one or more jobs (comma-separated)")
         }
-
-    def clean_csc_review(self):
-        csc_review = self.cleaned_data['csc_review']
-        return csc_review.strip()
 
 
 class EnrollmentCertificateCreateForm(forms.ModelForm):
