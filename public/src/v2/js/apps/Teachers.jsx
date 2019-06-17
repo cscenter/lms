@@ -1,7 +1,7 @@
 import React, {Fragment} from 'react';
 import { forceCheck } from 'react-lazyload';
 
-import _debounce from 'lodash-es/debounce';
+import _throttle from 'lodash-es/throttle';
 import _includes from 'lodash-es/includes';
 import $ from 'jquery';
 
@@ -28,7 +28,7 @@ class App extends React.Component {
             "recentOnly": true,
             ...props.initialState
         };
-        this.fetch = _debounce(this.fetch, 300);
+        this.fetch = _throttle(this.fetch, 300);
         this.CourseSelect = React.createRef();
     }
 

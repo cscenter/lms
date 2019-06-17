@@ -2,7 +2,7 @@ import React, {Fragment} from 'react';
 import { withTranslation } from 'react-i18next';
 import i18next from 'i18next';
 
-import _debounce from 'lodash-es/debounce';
+import _throttle from 'lodash-es/throttle';
 import $ from 'jquery';
 
 import Select from 'components/Select';
@@ -23,7 +23,7 @@ class Alumni extends React.Component {
             "items": [],
             ...props.initialState
         };
-        this.fetch = _debounce(this.fetch, 300);
+        this.fetch = _throttle(this.fetch, 300);
     }
 
     handleYearChange = (year) => {
