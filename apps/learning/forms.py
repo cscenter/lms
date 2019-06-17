@@ -1,13 +1,14 @@
-from django import forms
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
     Div, HTML
+from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from core.forms import GradeField
-from core.widgets import UbereditorWidget
 from core.models import LATEX_MARKDOWN_ENABLED
+from core.widgets import UbereditorWidget
+from learning.models import GraduateProfile
 from .models import AssignmentComment
 
 
@@ -36,7 +37,7 @@ class AssignmentCommentForm(forms.ModelForm):
 
     class Meta:
         model = AssignmentComment
-        fields = ['text', 'attached_file']
+        fields = ('text', 'attached_file')
 
     def clean(self):
         cleaned_data = super().clean()
@@ -98,3 +99,25 @@ class AssignmentScoreForm(forms.Form):
             msg = _("Score can't be larger than maximum one ({0})")
             raise forms.ValidationError(msg.format(self.maximum_score))
         return cleaned_data
+
+
+class TestimonialForm(forms.ModelForm):
+    class Meta:
+        model = GraduateProfile
+        fields = ('testimonial',)
+        widgets = {
+            'testimonial': UbereditorWidget,
+        }
+        help_texts = {
+            'testimonial': LATEX_MARKDOWN_ENABLED,
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_tag = False
+        self.helper.disable_csrf = True
+
+    def clean_testimonial(self):
+        testimonial = self.cleaned_data['testimonial']
+        return testimonial.strip()

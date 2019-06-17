@@ -8,6 +8,7 @@ from braces.views import LoginRequiredMixin
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import views
+from django.db import transaction
 from django.db.models import Prefetch, Count
 from django.http import HttpResponseRedirect, Http404, HttpResponseBadRequest, \
     JsonResponse
@@ -27,6 +28,7 @@ from core.urls import reverse
 from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from courses.models import Course, Semester
+from learning.forms import TestimonialForm
 from learning.models import StudentAssignment, \
     Enrollment
 from learning.settings import GradeTypes
@@ -236,6 +238,30 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
 
     def is_form_allowed(self, user, obj):
         return obj.pk == user.pk or user.is_curator
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("graduate_profile")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if hasattr(self.object, "graduate_profile"):
+            profile = self.object.graduate_profile
+            context["testimonial_form"] = TestimonialForm(instance=profile)
+        return context
+
+    def form_valid(self, form):
+        """If the form is valid, save the associated model."""
+        with transaction.atomic():
+            self.object = form.save()
+            if hasattr(self.object, "graduate_profile"):
+                profile = self.object.graduate_profile
+                testimonial_form = TestimonialForm(instance=profile,
+                                                   data=self.request.POST)
+                # This one always should be valid
+                assert testimonial_form.is_valid()
+                profile.testimonial = testimonial_form.cleaned_data['testimonial']
+                profile.save()
+        return super().form_valid(form)
 
 
 class EnrollmentCertificateCreateView(ProtectedFormMixin, generic.CreateView):

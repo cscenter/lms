@@ -203,9 +203,6 @@ class User(LearningPermissionsMixin, StudentProfile, ThumbnailMixin,
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
 
-    def clean(self):
-        self.csc_review = self.csc_review.strip()
-
     def save(self, **kwargs):
         created = self.pk is None
         password_changed = self._password is not None

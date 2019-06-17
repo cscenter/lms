@@ -173,15 +173,6 @@
     </div>
     {% endif %}
 
-    {% if profile_user.csc_review %}
-        <div class="review">
-            <h4>{% blocktrans with name=profile_user.first_name %}{{name}} about CSC{% endblocktrans %}:</h4>
-            <div class="ubertext">
-              {% markdown 3600 "csc_review" profile_user.pk profile_user.modified %}{{ profile_user.csc_review }}{% endmarkdown %}
-            </div>
-        </div>
-    {% endif %}
-
     {% if user.is_authenticated and profile_user.private_contacts.strip %}
         <div class="contact-info">
             <h4>{% trans "Contact information" %}:</h4>

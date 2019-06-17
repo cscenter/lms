@@ -142,7 +142,6 @@ class ReportReviewForm(forms.ModelForm):
     class Meta:
         model = Review
         fields = ("is_completed",)
-
         widgets = {
             "is_completed": forms.HiddenInput(),
         }
