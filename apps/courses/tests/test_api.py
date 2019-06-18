@@ -27,7 +27,7 @@ def test_teachers_list(client):
     assert len(response.data[0]["courses"]) == 2
     assert course1.meta_course_id in response.data[0]["courses"]
     assert course2.meta_course_id in response.data[0]["courses"]
-    assert response.data[0]["last_session"] == course2.semester.index
+    assert response.data[0]["latest_session"] == course2.semester.index
     assert response.data[0]["city"] == t1.city_id
 
 

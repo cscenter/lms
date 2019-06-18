@@ -60,11 +60,11 @@
 
             {% if profile_user.is_graduate %}
                 <div class="progress-info">
-                    {% with u=profile_user %}
-                    С сентября {{ u.enrollment_year }} года по июнь {{ u.graduation_year }} года<br>
-                        {% if u.gender == 'F' %}прошла{% else %}прошёл{% endif %}
-                        обучение по направлени{{ u.areas_of_study.all|pluralize:"ю,ям" }}
-                        {% for program in u.areas_of_study.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
+                    {% with gp=profile_user.graduate_profile %}
+                    С сентября {{ profile_user.enrollment_year }} года по июнь {{ gp.graduation_year }} года<br>
+                        {% if profile_user.gender == profile_user.GENDER_FEMALE %}прошла{% else %}прошёл{% endif %}
+                        обучение по направлени{{ gp.academic_disciplines.all|pluralize:"ю,ям" }}
+                        {% for program in gp.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
                     {% endwith %}
                 </div>
                 {% elif profile_user.is_student %}
@@ -279,17 +279,21 @@
                             <tr>
                                 <td>{% trans "StudentInfo|Study program" %}:</td>
                                 <td>
-                                    {% with sps=profile_user.areas_of_study.all %}
-                                        {% if sps %}
-                                            <ul class="list-unstyled">
-                                                {% for sp in sps %}
-                                                    <li>{{ sp.name }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    {% endwith %}
+                                    {% if profile_user.graduate_profile %}
+                                        {% with sps=profile_user.graduate_profile.academic_disciplines.all %}
+                                            {% if sps %}
+                                                <ul class="list-unstyled">
+                                                    {% for sp in sps %}
+                                                        <li>{{ sp.name }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
                                 </td>
                             </tr>
                             <tr>
