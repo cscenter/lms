@@ -17,12 +17,12 @@ class Command(BaseCommand):
             "Also clean status and set graduation year.")
 
     def add_arguments(self, parser):
-        parser.add_argument('graduation_at', metavar='GRADUATION_DATE',
+        parser.add_argument('graduated_on', metavar='GRADUATION_DATE',
                             help='Graduation date in dd.mm.yyyy format')
 
     def handle(self, *args, **options):
-        graduation_at_str = options['graduation_at']
-        graduation_at = datetime.strptime(graduation_at_str, "%d.%m.%Y").date()
+        graduated_on_str = options['graduated_on']
+        graduated_on = datetime.strptime(graduated_on_str, "%d.%m.%Y").date()
         will_graduate_list = User.objects.filter(groups__in=[
             User.roles.STUDENT_CENTER,
             User.roles.VOLUNTEER,
@@ -38,7 +38,7 @@ class Command(BaseCommand):
                 student.save()
                 defaults = {
                     "is_active": True,
-                    "graduation_at": graduation_at,
+                    "graduated_on": graduated_on,
                     "details": {}
                 }
                 profile, created = GraduateProfile.objects.get_or_create(

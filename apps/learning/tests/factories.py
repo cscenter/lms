@@ -105,4 +105,4 @@ class GraduateProfileFactory(factory.DjangoModelFactory):
         model = GraduateProfile
 
     student = factory.SubFactory(GraduateFactory)
-    graduation_at = factory.Faker('future_date', end_date="+10d", tzinfo=None)
+    graduated_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)
