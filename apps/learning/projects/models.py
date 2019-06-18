@@ -31,7 +31,7 @@ from learning.models import Branch
 from learning.projects.constants import ProjectTypes
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
-from users.constants import AcademicRoles
+from users.constants import AcademicRoles, GenderTypes
 
 CURATOR_SCORE_FIELDS = [
     "score_quality",
@@ -411,12 +411,8 @@ def project_presentation_files(self, filename):
 
 
 class Supervisor(models.Model):
-    GENDER_MALE = 'M'
-    GENDER_FEMALE = 'F'
-    GENDER_CHOICES = (
-        (GENDER_MALE, _('Male')),
-        (GENDER_FEMALE, _('Female')),
-    )
+    GENDER_MALE = GenderTypes.MALE
+    GENDER_FEMALE = GenderTypes.FEMALE
     full_name = models.CharField(
         verbose_name=_("Full Name"),
         max_length=255)
@@ -427,7 +423,7 @@ class Supervisor(models.Model):
     gender = models.CharField(
         _("Gender"),
         max_length=1,
-        choices=GENDER_CHOICES)
+        choices=GenderTypes.choices)
 
     class Meta:
         verbose_name = _("Supervisor")

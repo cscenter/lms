@@ -5,6 +5,7 @@ from learning.projects.models import ReportComment, Report
 from notifications import NotificationTypes
 from notifications.decorators import register
 from notifications.service import NotificationService
+from users.constants import GenderTypes
 from users.models import User
 
 # XXX: `reverse` depends on settings.SITE_ID. Make sure to send notifications with correct settings.
@@ -34,7 +35,7 @@ class NewReport(NotificationService):
     def get_subject(self, notification, **kwargs):
         return self.subject.format(
             notification.actor.get_full_name(),
-            "а" if notification.actor.gender == User.GENDER_FEMALE else ""
+            "а" if notification.actor.gender == GenderTypes.FEMALE else ""
         )
 
     def get_context(self, notification):
@@ -45,7 +46,7 @@ class NewReport(NotificationService):
         project_url = reverse("projects:project_detail",
                               args=[notification.data["project_pk"]])
         author_declension = ""
-        if notification.actor.gender == User.GENDER_FEMALE:
+        if notification.actor.gender == GenderTypes.FEMALE:
             author_declension = "a"
         return {
             "author": notification.actor.get_full_name(),
@@ -104,7 +105,7 @@ class NewReportComment(NotificationService):
         project_url = reverse(project_url_name,
                               args=[notification.data["project_pk"]])
         author_declension = ""
-        if notification.actor.gender == User.GENDER_FEMALE:
+        if notification.actor.gender == GenderTypes.FEMALE:
             author_declension = "a"
         context = {
             "author": notification.actor.get_full_name(),
@@ -236,7 +237,7 @@ class ReviewCompleted(NotificationService):
     def get_subject(self, notification, **kwargs):
         reviewer = notification.actor.get_full_name()
         reviewer_declension = ""
-        if notification.actor.gender == User.GENDER_FEMALE:
+        if notification.actor.gender == GenderTypes.FEMALE:
             reviewer_declension = "a"
         return self.subject.format(reviewer, reviewer_declension)
 

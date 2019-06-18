@@ -99,9 +99,8 @@ class User(LearningPermissionsMixin, StudentProfile, ThumbnailMixin,
 
     ENROLLMENT_CACHE_KEY = "_student_enrollment_{}"
 
-    # FIXME: replace with GenderTypes choices
-    GENDER_MALE = 'M'
-    GENDER_FEMALE = 'F'
+    GENDER_MALE = GenderTypes.MALE
+    GENDER_FEMALE = GenderTypes.FEMALE
     gender = models.CharField(_("Gender"), max_length=1,
                               choices=GenderTypes.choices)
 
@@ -146,10 +145,6 @@ class User(LearningPermissionsMixin, StudentProfile, ThumbnailMixin,
         _("stepik.org ID"),
         blank=True,
         null=True)
-    csc_review = models.TextField(
-        _("CSC review"),
-        help_text=_("LaTeX+Markdown is enabled"),
-        blank=True)
     private_contacts = models.TextField(
         _("Contact information"),
         help_text=("{}; {}"
