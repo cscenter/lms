@@ -6,8 +6,9 @@ BASE_THUMBNAIL_HEIGHT = 246
 
 
 class GenderTypes(DjangoChoices):
-    MALE = C('M')
-    FEMALE = C('F')
+    MALE = C('M', _('Male'))
+    FEMALE = C('F', _('Female'))
+    OTHER = C('o', _('Other/Prefer Not to Say'))
 
 
 class ThumbnailSizes(DjangoChoices):

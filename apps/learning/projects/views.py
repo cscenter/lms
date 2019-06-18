@@ -38,7 +38,7 @@ from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review, ReportingPeriod, ReportingPeriodKey, PracticeCriteria
 from notifications import NotificationTypes
 from notifications.signals import notify
-from users.constants import AcademicRoles
+from users.constants import AcademicRoles, GenderTypes
 from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
 from users.models import User
@@ -647,7 +647,7 @@ class ProcessReviewFormView(LoginRequiredMixin, ModelFormMixin, View):
             .values_list("pk", flat=True))
         student = report.project_student.student
         student_declension = ""
-        if student.gender == User.GENDER_FEMALE:
+        if student.gender == GenderTypes.FEMALE:
             student_declension = "a"
         context = {
             "report_id": report.pk,

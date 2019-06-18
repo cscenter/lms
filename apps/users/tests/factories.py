@@ -4,7 +4,7 @@ import factory
 from django.contrib.auth.models import Group
 
 from learning.settings import GradeTypes
-from users.constants import AcademicRoles
+from users.constants import AcademicRoles, GenderTypes
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord
 
@@ -21,7 +21,7 @@ class UserFactory(factory.DjangoModelFactory):
         model = User
 
     username = factory.Sequence(lambda n: "testuser%03d" % n)
-    gender = factory.Iterator([User.GENDER_MALE, User.GENDER_FEMALE])
+    gender = factory.Iterator([GenderTypes.MALE, GenderTypes.FEMALE])
     password = "test123foobar@!"
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     first_name = factory.Sequence(lambda n: "Ivan%03d" % n)

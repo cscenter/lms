@@ -29,8 +29,8 @@ class CourseList(ListAPIView):
                 .distinct("meta_course__name"))
 
 
-class TeacherList(ListAPIView):
-    """Returns teachers for CS Center"""
+class LecturerList(ListAPIView):
+    """Returns list of CS Center lecturers"""
     pagination_class = None
     serializer_class = TeacherSerializer
 

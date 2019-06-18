@@ -64,29 +64,24 @@ class CourseSerializer(serializers.ModelSerializer):
 class TeacherSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     name = serializers.SerializerMethodField()
-    sex = serializers.SerializerMethodField()
     photo = PhotoSerializerField(User.ThumbnailSize.BASE)
     city = serializers.CharField(source="city_id")
     courses = CourseRelatedField(
-        many=True, read_only=True, source="courseteacher_set")
-    # Duplicates are acceptable
-    # TODO: rename
-    last_session = serializers.SerializerMethodField(
+        source="courseteacher_set", many=True, read_only=True,
+        help_text="List of meta course ids. May contain duplicates")
+    latest_session = serializers.SerializerMethodField(
         help_text="The latest term index when the teacher read the course")
 
     class Meta:
         model = User
-        fields = ('id', 'name', 'sex', 'workplace', 'city', 'photo',
+        fields = ('id', 'name', 'workplace', 'city', 'photo',
                   'courses', 'last_session')
 
     def get_name(self, obj):
         return obj.get_full_name()
 
-    def get_last_session(self, obj):
+    def get_latest_session(self, obj):
         last = 0
         for t in obj.courseteacher_set.all():
             last = max(last, t.course.semester.index)
         return last
-
-    def get_sex(self, obj: User):
-        return "m" if obj.gender == obj.GENDER_MALE else "w"
