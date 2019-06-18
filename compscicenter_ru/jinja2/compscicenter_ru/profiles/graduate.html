@@ -98,7 +98,7 @@
                             <img class="img-fluid" src="{{ graduate_profile.get_thumbnail(student.ThumbnailSize.SQUARE).url }}" alt="">
                         </div>
                         <div class="timeline__content">
-                            <span class="timeline__date _important">{{ graduate_profile.graduation_at|date("j E Y") }} года</span>
+                            <span class="timeline__date _important">{{ graduate_profile.graduated_on|date("j E Y") }} года</span>
                             <h3>Закончил{% if student.gender == student.GENDER_FEMALE %}а{% endif %} обучение в CS центре</h3>
                         </div>
                     </div>

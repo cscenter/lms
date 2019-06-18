@@ -575,7 +575,7 @@ class Useful(models.Model):
 def graduate_photo_upload_to(instance: "GraduateProfile", filename):
     _, ext = os.path.splitext(filename)
     filename = instance.student.get_abbreviated_name_in_latin()
-    return f"alumni/{instance.graduation_at.year}/{filename}{ext}"
+    return f"alumni/{instance.graduated_on.year}/{filename}{ext}"
 
 
 class GraduateProfile(ThumbnailMixin, TimeStampedModel):
@@ -589,8 +589,8 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
     is_active = models.BooleanField(
         _("Activity"),
         default=True)
-    graduation_at = models.DateField(
-        verbose_name=_("Graduation at"),
+    graduated_on = models.DateField(
+        verbose_name=_("Graduation on"),
         help_text=_("Graduation ceremony date"))
     academic_disciplines = models.ManyToManyField(
         'study_programs.AcademicDiscipline',
@@ -625,7 +625,7 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
 
     def save(self, **kwargs):
         created = self.pk is None
-        self.graduation_year = self.graduation_at.year
+        self.graduation_year = self.graduated_on.year
         if not self.details:
             self.details = {}
         super().save(**kwargs)
