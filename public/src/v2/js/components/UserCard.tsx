@@ -5,6 +5,7 @@ class UserCard extends React.Component<any, any> {
     static defaultProps = {
         className: 'user-card'
     };
+    static propTypes: {};
 
     render() {
         let {id, photo, name, url, workplace} = this.props;
@@ -24,11 +25,14 @@ class UserCard extends React.Component<any, any> {
     }
 }
 
-UserCard.propTypes = {
+const propTypes = {
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
     photo: PropTypes.string.isRequired,
+    workplace: PropTypes.string,
 };
+
+UserCard.propTypes = propTypes;
 
 export default UserCard;

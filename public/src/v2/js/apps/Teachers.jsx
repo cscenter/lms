@@ -149,7 +149,7 @@ class App extends React.Component {
         let filteredItems = this.state.items.filter(function(item) {
             let cityCondition = (city !== null) ? item.city === city.value : true;
             let courseCondition = (course !== null) ? item.courses.has(course.value) : true;
-            let activityCondition = recentOnly ? item.last_session >= term_index: true;
+            let activityCondition = recentOnly ? item.latest_session >= term_index: true;
             return cityCondition && courseCondition && activityCondition &&
                    _includes(item.name.toLowerCase(), query.toLowerCase());
         });
