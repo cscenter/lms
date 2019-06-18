@@ -33,7 +33,12 @@
             <h3>Участники проекта</h3>
             <div class="row mb-3">
                 {% for user in participants %}
-                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros.author_card(user, user.get_student_status()) }}</div>
+                    {% if user.graduate_profile %}
+                        {% set subtitle = 'Выпуск ' + user.graduate_profile.graduation_year|string %}
+                    {% else %}
+                        {% set subtitle = '' %}
+                    {% endif %}
+                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros.author_card(user, subtitle) }}</div>
                 {% endfor %}
             </div>
             {% set supervisors = project.get_supervisors() %}
@@ -55,7 +60,7 @@
                 <div class="row mb-3">
                     {% for pba in publication_authors %}
                         <div class="col-lg-4 mb-2">
-                        {{ macros.author_card(pba.user, pba.short_description) }}
+                        {{ macros.author_card(pba.user, '') }}
                         </div>
                     {% endfor %}
                 </div>

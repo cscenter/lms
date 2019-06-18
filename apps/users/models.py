@@ -482,13 +482,6 @@ class User(LearningPermissionsMixin, StudentProfile, ThumbnailMixin,
             sections.append(PublicRoute.STAFF.choice)
         return sections
 
-    def get_student_status(self):
-        if self.graduation_year:
-            s = f"Выпуск {self.graduation_year}"
-            areas = ", ".join(str(d) for d in self.areas_of_study.all())
-            return f"{s}, {areas}" if areas else s
-        return _("Student")
-
     def stats(self, current_term):
         """
         Stats for SUCCESSFULLY completed courses and enrollments in 

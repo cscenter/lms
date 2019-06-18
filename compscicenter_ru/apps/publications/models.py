@@ -28,16 +28,6 @@ class ProjectPublicationAuthor(models.Model):
         return "{0} [{1}]".format(smart_text(self.project_publication),
                                   smart_text(self.user))
 
-    @property
-    def short_description(self):
-        if self.description:
-            return self.description
-        elif self.user.graduation_year:
-            s = f"Выпуск {self.user.graduation_year}"
-            areas = ", ".join(str(d) for d in self.user.areas_of_study.all())
-            return f"{s}, {areas}" if areas else s
-        return "Студент"
-
 
 class ProjectPublication(models.Model):
     created = models.DateTimeField(
@@ -97,5 +87,6 @@ class ProjectPublication(models.Model):
         return (User.objects
                 .filter(projectstudent__project__in=projects)
                 .only("first_name", "last_name", "photo", "cropbox_data")
+                .select_related("graduate_profile")
                 .distinct()
                 .order_by("last_name"))

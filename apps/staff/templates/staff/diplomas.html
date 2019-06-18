@@ -21,7 +21,7 @@
     <h3>{{ city }}</h3>
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
 {% for s in students %}\diploma{{ '{' }}{{ s.pk }}{{ '}' }}{{ '{' }}{{s.first_name}}{{ '}' }}{{ '{' }}{{s.patronymic}}{{ '}' }}{{ '{' }}{{s.last_name}}{{ '}' }}{{ '{' }}{% if s.gender == 'F' %}a{% endif %}{{ '}' }}
-{{ '{' }}направлени{{ s.areas_of_study.all|pluralize:"ю,ям" }} {% for program in s.areas_of_study.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}направлени{{ s.graduate_profile.academic_disciplines.all|pluralize:"ю,ям" }} {% for program in s.graduate_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.index != forloop.last %} и {% endif %}{% endfor %}{{ '}' }}
 {{ '{' }}{{s.enrollment_year}} года{{ '}' }}
 {{ '{' }}{% for course in s.courses %}
 {% spaceless %}\{{course.type}}{{ '{' }}{{course.name}}{{ '}' }}{% if course.type == "course" %}{{ '{' }}1 семестр{{ '}' }}{{ '{' }}{% if course.class_count > 0 %}{{course.class_count}}{% endif %}{{ '}' }}{% endif %}{{ '{' }}{{course.final_grade}}{{ '}' }}

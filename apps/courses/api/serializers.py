@@ -75,7 +75,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'name', 'workplace', 'city', 'photo',
-                  'courses', 'last_session')
+                  'courses', 'latest_session')
 
     def get_name(self, obj):
         return obj.get_full_name()

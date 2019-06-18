@@ -244,13 +244,17 @@ class ProgressReportForDiplomas(ProgressReport):
         return headers
 
     def export_row(self, student):
+        if hasattr(student, "graduate_profile"):
+            disciplines = student.graduate_profile.academic_disciplines.all()
+        else:
+            disciplines = []
         row = [
             student.last_name,
             student.first_name,
             student.patronymic,
             student.email,
             student.university,
-            " и ".join(s.name for s in student.areas_of_study.all()),
+            " и ".join(s.name for s in disciplines),
             self.passed_courses_total(student),
             self.get_applicant_form_absolute_url(student),
         ]
@@ -331,6 +335,10 @@ class ProgressReportFull(ProgressReport):
             sum(1 for _ in student.online_courses)
         )
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
+        if hasattr(student, "graduate_profile"):
+            disciplines = student.graduate_profile.academic_disciplines.all()
+        else:
+            disciplines = []
         row = [
             student.last_name,
             student.first_name,
@@ -346,7 +354,7 @@ class ProgressReportFull(ProgressReport):
             student.curriculum_year,
             student.graduation_year,
             student.yandex_id,
-            " и ".join(s.name for s in student.areas_of_study.all()),
+            " и ".join(s.name for s in disciplines),
             student.get_status_display(),
             '',  # FIXME: error in student.status_changed_at field
             student.comment,
@@ -515,6 +523,10 @@ class ProgressReportForSemester(ProgressReport):
             student.shad_eq_target_semester
         )
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
+        if hasattr(student, "graduate_profile"):
+            disciplines = student.graduate_profile.academic_disciplines.all()
+        else:
+            disciplines = []
         row = [
             student.last_name,
             student.first_name,
@@ -530,7 +542,7 @@ class ProgressReportForSemester(ProgressReport):
             student.curriculum_year,
             student.graduation_year,
             student.yandex_id,
-            " и ".join(s.name for s in student.areas_of_study.all()),
+            " и ".join(s.name for s in disciplines),
             student.get_status_display(),
             '',  # FIXME: error with student.status_changed_at
             student.comment,

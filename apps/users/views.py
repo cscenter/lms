@@ -177,11 +177,11 @@ class UserDetailView(generic.DetailView):
         ]
         select_list = []
         if self.request.user.is_curator:
+            select_list += ['graduate_profile']
             prefetch_list += ['borrows',
                               'borrows__stock',
                               'borrows__stock__book',
                               'onlinecourserecord_set',
-                              'areas_of_study',
                               'enrollment_certificates']
         filters = {}
         if not self.request.user.is_curator:

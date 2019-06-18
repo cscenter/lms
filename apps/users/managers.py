@@ -61,6 +61,7 @@ class UserQuerySet(query.QuerySet):
         # due to user_id IN(blabla thousands ids), but it's ok now.
         return (
             q
+            .select_related('graduate_profile')
             .order_by('last_name', 'first_name')
             .prefetch_related(
                 'groups',
@@ -98,7 +99,7 @@ class UserQuerySet(query.QuerySet):
                     to_attr='projects_through'
                 ),
                 Prefetch(
-                    'areas_of_study',
+                    'graduate_profile__academic_disciplines',
                 ),
                 Prefetch(
                     'shadcourserecord_set',

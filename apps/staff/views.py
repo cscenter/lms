@@ -135,7 +135,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         less_failed_courses = set()
 
         for s in students:
-            if len(s.areas_of_study.all()) >= 2:
+            if s.graduate_profile and len(s.graduate_profile.academic_disciplines.all()) >= 2:
                 finished_two_or_more_programs.add(s)
             by_enrollment_year[s.enrollment_year].add(s)
             degree_year = AcademicDegreeYears.BACHELOR_SPECIALITY_1

@@ -68,7 +68,7 @@ class UserAdmin(_UserAdmin):
                                              'github_id']}),
         (_('Student info record'),
          {'fields': ['branch', 'status', 'enrollment_year',
-                     'graduation_year', 'curriculum_year', 'areas_of_study',
+                     'graduation_year', 'curriculum_year',
                      'university', 'uni_year_at_enrollment', 'phone']}),
         (_("Curator's note"),
          {'fields': ['comment', 'comment_changed_at', 'comment_last_author']}),
