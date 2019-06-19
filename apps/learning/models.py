@@ -590,7 +590,7 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
         _("Activity"),
         default=True)
     graduated_on = models.DateField(
-        verbose_name=_("Graduation on"),
+        verbose_name=_("Graduated on"),
         help_text=_("Graduation ceremony date"))
     academic_disciplines = models.ManyToManyField(
         'study_programs.AcademicDiscipline',

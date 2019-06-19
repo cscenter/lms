@@ -28,6 +28,7 @@ from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment
+from staff.forms import GraduationForm
 from study_programs.models import StudyProgram, StudyProgramCourseGroup
 from courses.models import Course, Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
@@ -95,7 +96,10 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         current_term = get_current_term_pair(settings.DEFAULT_CITY_CODE)
         current_term_index = get_term_index(current_term.year, current_term.type)
         prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
+        graduation_form = GraduationForm()
+        graduation_form.helper.form_action = reverse('staff:create_alumni_profiles')
         context = {
+            "alumni_profiles_form": graduation_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term_year, "type": prev_term},
             "campaigns": Campaign.objects.order_by("-city__name", "-year"),
@@ -598,6 +602,24 @@ def autograde_projects(request):
                                   f"Выставлено оценок: {graded}")
     except CommandError as e:
         messages.error(request, str(e))
+    return HttpResponseRedirect(reverse("staff:exports"))
+
+
+def create_alumni_profiles(request):
+    if not request.user.is_curator:
+        return HttpResponseForbidden()
+
+    form = GraduationForm(data=request.POST)
+    if form.is_valid():
+        graduated_on = form.cleaned_data['graduated_on']
+        try:
+            cmd = call_command('create_alumni_profiles',
+                               graduated_on.strftime('%d.%m.%Y'))
+            messages.success(request, f"Операция выполнена успешно.")
+        except CommandError as e:
+            messages.error(request, str(e))
+    else:
+        messages.error(request, str('Неверный формат даты выпуска'))
     return HttpResponseRedirect(reverse("staff:exports"))
 
 
