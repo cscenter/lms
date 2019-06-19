@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.db.models import Prefetch
@@ -49,7 +51,8 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
             index = get_term_index(CENTER_FOUNDATION_YEAR,
                                    SemesterTypes.AUTUMN)
             if co.semester.index < index:
-                url = get_club_domain(co.city.code) + co.get_absolute_url()
+                parsed = urlparse(co.get_absolute_url())
+                url = get_club_domain(co.city.code) + parsed.path
                 return HttpResponseRedirect(url)
         return self.render_to_response(context)
 
