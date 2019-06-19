@@ -9,9 +9,14 @@ import Select from 'components/Select';
 import UserCardList from 'components/UserCardList';
 import {
     hideBodyPreloader,
+    loadIntersectionObserverPolyfill,
     showBodyPreloader,
     showErrorNotification
 } from "../utils";
+
+export let polyfills = [
+    loadIntersectionObserverPolyfill(),
+];
 
 
 class Alumni extends React.Component {
