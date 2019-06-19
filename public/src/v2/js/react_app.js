@@ -7,6 +7,19 @@ export function renderComponentInElement(el) {
     let componentName = el.id;
     import(/* webpackChunkName: "[request]" */ `apps/${componentName}`)
         .then(component => {
+            // Not the best place for loading polyfills since we could do it
+            // in parallel with application source, but this limitation allows
+            // to store all dependencies in one place.
+            // TODO: Optimization: add support for data-polyfills
+            if (component.hasOwnProperty('polyfills')) {
+                return Promise
+                    .all(component.polyfills)
+                    .then(() => component);
+            } else {
+                return component;
+            }
+        })
+        .then(component => {
             let props = {
                 initialState: {}
             };

@@ -1,19 +1,24 @@
 import React, {Fragment} from 'react';
-import { forceCheck } from 'react-lazyload';
 
 import _throttle from 'lodash-es/throttle';
 import _includes from 'lodash-es/includes';
 import $ from 'jquery';
 
 import Select from 'components/Select';
-import SelectLazy from "components/SelectLazy";
+import SelectLazyOptions from "components/SelectLazyOptions";
 import SearchInput from 'components/SearchInput';
 import UserCardList from 'components/UserCardList';
 import {
     hideBodyPreloader,
     showBodyPreloader,
-    showErrorNotification
+    showErrorNotification,
+    loadIntersectionObserverPolyfill
 } from "utils";
+
+
+export let polyfills = [
+    loadIntersectionObserverPolyfill(),
+];
 
 
 class App extends React.Component {
@@ -178,7 +183,7 @@ class App extends React.Component {
                         />
                     </div>
                     <div className="col-lg-3 mb-4">
-                        <SelectLazy
+                        <SelectLazyOptions
                             onChange={this.handleCourseChange}
                             value={course}
                             name="course"

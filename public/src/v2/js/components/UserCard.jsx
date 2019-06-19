@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import LazyImage from "./LazyImage";
 
-class UserCard extends React.Component<any, any> {
+class UserCard extends React.Component {
     static defaultProps = {
         className: 'user-card'
     };
-    static propTypes: {};
 
     render() {
         let {id, photo, name, url, workplace} = this.props;
@@ -13,9 +13,7 @@ class UserCard extends React.Component<any, any> {
             <a className={this.props.className}
                href={url}
                id={`user-card-${id}`}>
-                <div className={`user-card__photo`}>
-                     <img src={photo} alt={name} />
-                </div>
+                <LazyImage src={photo} alt={name} className={`user-card__photo`} />
                 <div className="user-card__details">
                     {name}
                     {workplace !== null ? <div className="workplace">{workplace}</div> : ""}
