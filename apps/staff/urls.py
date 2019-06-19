@@ -11,7 +11,7 @@ from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, 
     StudentFacesView, InterviewerFacesView, autograde_projects, \
     CourseParticipantsIntersectionView, SyllabusView, \
     WillGraduateStatsReportView, SurveySubmissionsReportView, \
-    SurveySubmissionsStatsView, GradeBookListView
+    SurveySubmissionsStatsView, GradeBookListView, create_alumni_profiles
 
 app_name = 'staff'
 urlpatterns = [
@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^faces/$',
         StudentFacesView.as_view(),
         name='student_faces'),
+    path('commands/create_alumni_profiles/', create_alumni_profiles, name='create_alumni_profiles'),
     url(r'^projects/autograde/$',
         autograde_projects,
         name='autograde_projects'),

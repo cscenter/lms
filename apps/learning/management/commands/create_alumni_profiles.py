@@ -10,8 +10,7 @@ from users.models import User
 
 
 class Command(BaseCommand):
-    help = "Generates graduate profiles for students with " \
-           "StudentStatuses.WILL_GRADUATE status"
+    help = "Create alumni profiles for students who will graduate soon"
 
     def add_arguments(self, parser):
         parser.add_argument('graduated_on', metavar='GRADUATION_DATE',
