@@ -218,9 +218,8 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         User.objects.create_user(**user_data)
         login = self.client.login(None, **user_data)
         resp = self.client.get(reverse('logout'),
-                               {'next': reverse('course_video_list')})
-        self.assertRedirects(resp, reverse('course_video_list'),
-                             status_code=302)
+                               {'next': reverse('video_list')})
+        self.assertRedirects(resp, reverse('video_list'), status_code=302)
 
     def test_yandex_id_from_email(self):
         """

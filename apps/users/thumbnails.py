@@ -17,9 +17,11 @@ def photo_thumbnail_cropbox(data):
         return ""
 
 
-# FIXME: add django checks for mandatory fields for this mixin: photo, cropbox_data, gender
+# FIXME: add django checks for mandatory fields for this mixin: photo, gender
 # FIXME: rename to UserThumbnailMixin?
 class ThumbnailMixin:
+    ThumbnailSize = ThumbnailSizes
+
     def get_thumbnail(self, geometry=ThumbnailSizes.BASE, **options):
         return get_user_thumbnail(self, geometry, **options)
 

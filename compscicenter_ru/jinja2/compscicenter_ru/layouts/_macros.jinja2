@@ -45,3 +45,13 @@
     </div>
 </div>
 {%- endmacro %}
+
+{% macro speaker_card(speaker) -%}
+    {% with im = speaker.get_thumbnail(speaker.ThumbnailSize.SQUARE) %}
+        {{ _author_card(
+                im.url,
+                full_name=speaker.full_name,
+                details=speaker.workplace,
+                testimonial=None) }}
+    {% endwith %}
+{%- endmacro %}
