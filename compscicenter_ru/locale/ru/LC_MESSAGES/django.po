@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-04-15 14:21+0000\n"
-"PO-Revision-Date: 2019-04-15 14:23+0000\n"
+"POT-Creation-Date: 2019-06-20 13:51+0000\n"
+"PO-Revision-Date: 2019-06-20 13:51+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -22,7 +22,7 @@ msgstr ""
 
 #: compscicenter_ru/apps/online_courses/apps.py:7
 #: compscicenter_ru/apps/online_courses/models.py:45
-#: compscicenter_ru/templates/users/user_detail.html:402
+#: compscicenter_ru/templates/users/user_detail.html:406
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
@@ -58,63 +58,133 @@ msgstr "Без дедлайнов"
 msgid "Online course"
 msgstr "Онлайн-курс"
 
-#: compscicenter_ru/apps/publications/admin.py:13
+#: compscicenter_ru/apps/publications/admin.py:14
 msgid "Related Project"
 msgstr "Проект"
 
-#: compscicenter_ru/apps/publications/admin.py:14
+#: compscicenter_ru/apps/publications/admin.py:15
 #: compscicenter_ru/apps/publications/models.py:56
 msgid "Projects"
 msgstr "Проекты"
 
-#: compscicenter_ru/apps/publications/admin.py:19
+#: compscicenter_ru/apps/publications/admin.py:20
 msgid "Author"
 msgstr "Автор"
 
-#: compscicenter_ru/apps/publications/admin.py:20
+#: compscicenter_ru/apps/publications/admin.py:21
 #: compscicenter_ru/apps/publications/models.py:51
 msgid "Authors"
 msgstr "Авторы"
 
-#: compscicenter_ru/apps/publications/models.py:18
+#: compscicenter_ru/apps/publications/apps.py:7
+msgid "Publications"
+msgstr "Публикации"
+
+#: compscicenter_ru/apps/publications/models.py:24
 msgid "Short Description"
 msgstr "Заметка"
 
-#: compscicenter_ru/apps/publications/models.py:22
+#: compscicenter_ru/apps/publications/models.py:28
 msgid "Project Publication Author"
 msgstr "Автор публикации"
 
-#: compscicenter_ru/apps/publications/models.py:23
+#: compscicenter_ru/apps/publications/models.py:29
 msgid "Project Publication Authors"
 msgstr "Авторы публикации"
 
-#: compscicenter_ru/apps/publications/models.py:42
+#: compscicenter_ru/apps/publications/models.py:39
 msgid "created"
 msgstr "Создано"
 
-#: compscicenter_ru/apps/publications/models.py:46
+#: compscicenter_ru/apps/publications/models.py:43
+#: compscicenter_ru/apps/publications/models.py:146
 msgid "Title"
 msgstr "Заголовок"
 
-#: compscicenter_ru/apps/publications/models.py:48
+#: compscicenter_ru/apps/publications/models.py:45
+#: compscicenter_ru/apps/publications/models.py:147
 msgid "Slug"
 msgstr "Slug"
 
-#: compscicenter_ru/apps/publications/models.py:59
+#: compscicenter_ru/apps/publications/models.py:47
+msgid "Draft"
+msgstr "Черновик"
+
+#: compscicenter_ru/apps/publications/models.py:64
+#: compscicenter_ru/apps/publications/models.py:110
+#: compscicenter_ru/apps/publications/models.py:149
 msgid "Description"
 msgstr "Описание"
 
-#: compscicenter_ru/apps/publications/models.py:62
+#: compscicenter_ru/apps/publications/models.py:67
 msgid "External Links"
 msgstr "Внешние ссылки"
 
-#: compscicenter_ru/apps/publications/models.py:67
+#: compscicenter_ru/apps/publications/models.py:72
 msgid "Project Publication"
 msgstr "Публикация о проекте"
 
-#: compscicenter_ru/apps/publications/models.py:68
+#: compscicenter_ru/apps/publications/models.py:73
 msgid "Project Publications"
 msgstr "Публикации о проектах"
+
+#: compscicenter_ru/apps/publications/models.py:107
+msgid "First Name"
+msgstr "Имя"
+
+#: compscicenter_ru/apps/publications/models.py:108
+msgid "Surname"
+msgstr "Фамилия"
+
+#: compscicenter_ru/apps/publications/models.py:109
+msgid "Patronymic"
+msgstr "Отчество"
+
+#: compscicenter_ru/apps/publications/models.py:112
+msgid "Photo"
+msgstr "Фото"
+
+#: compscicenter_ru/apps/publications/models.py:116
+msgid "Aspect ratio 5:7. Min size: {}"
+msgstr ""
+
+#: compscicenter_ru/apps/publications/models.py:117
+#: compscicenter_ru/templates/users/user_detail.html:300
+msgid "Workplace"
+msgstr "Место работы"
+
+#: compscicenter_ru/apps/publications/models.py:121
+msgid "Speaker"
+msgstr "Лектор"
+
+#: compscicenter_ru/apps/publications/models.py:122
+#: compscicenter_ru/apps/publications/models.py:156
+msgid "Speakers"
+msgstr "Лекторы"
+
+#: compscicenter_ru/apps/publications/models.py:148
+msgid "Event Date"
+msgstr "Дата события"
+
+#: compscicenter_ru/apps/publications/models.py:151
+msgid "Video URL"
+msgstr "URL Видео"
+
+#: compscicenter_ru/apps/publications/models.py:152
+msgid "https://support.google.com/youtube/answer/171780?hl=en"
+msgstr ""
+
+#: compscicenter_ru/apps/publications/models.py:153
+msgid "Slides URL"
+msgstr "Слайды"
+
+#: compscicenter_ru/apps/publications/models.py:160
+msgid "Open Lecture"
+msgstr "Открытая лекция"
+
+#: compscicenter_ru/apps/publications/models.py:161
+msgid "Open Lectures"
+msgstr "Открытые лекции"
 
 #: compscicenter_ru/filters.py:34
 msgid "Saint Petersburg"
@@ -253,7 +323,7 @@ msgstr ""
 msgid "close all"
 msgstr "закрыть все"
 
-#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:44
+#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:38
 msgctxt "alumni"
 msgid "graduate"
 msgid_plural "graduates"
@@ -261,7 +331,7 @@ msgstr[0] "выпускник"
 msgstr[1] "выпускника"
 msgstr[2] "выпускников"
 
-#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:56
+#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:50
 msgctxt "alumni"
 msgid "teacher"
 msgid_plural "teachers"
@@ -269,7 +339,7 @@ msgstr[0] "преподаватель"
 msgstr[1] "преподавателя"
 msgstr[2] "преподавателей"
 
-#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:76
+#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:70
 msgctxt "alumni"
 msgid "hour"
 msgid_plural "hours"
@@ -277,7 +347,7 @@ msgstr[0] "час"
 msgstr[1] "часа"
 msgstr[2] "часов"
 
-#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:89
+#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:83
 msgctxt "alumni"
 msgid " project and research work"
 msgid_plural "projects and research works"
@@ -285,7 +355,7 @@ msgstr[0] "проект и НИР"
 msgstr[1] "проекта и НИР"
 msgstr[2] "проектов и НИР"
 
-#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:101
+#: compscicenter_ru/templates/compscicenter_ru/alumni_by_year.html:95
 msgctxt "alumni"
 msgid "passed course"
 msgid_plural "passed courses"
@@ -398,70 +468,75 @@ msgstr "Год программы обучения"
 msgid "StudentInfo|Study program"
 msgstr "Учебная программа"
 
-#: compscicenter_ru/templates/users/user_detail.html:296
-msgid "Workplace"
-msgstr "Место работы"
-
-#: compscicenter_ru/templates/users/user_detail.html:306
-#: compscicenter_ru/templates/users/user_detail.html:449
+#: compscicenter_ru/templates/users/user_detail.html:310
+#: compscicenter_ru/templates/users/user_detail.html:453
 msgid "Assignments"
 msgstr "Задания"
 
-#: compscicenter_ru/templates/users/user_detail.html:315
+#: compscicenter_ru/templates/users/user_detail.html:319
 msgid "Course offering"
 msgstr "Прочтение курса"
 
-#: compscicenter_ru/templates/users/user_detail.html:316
+#: compscicenter_ru/templates/users/user_detail.html:320
 msgid "Assignment"
 msgstr "Задание"
 
-#: compscicenter_ru/templates/users/user_detail.html:317
+#: compscicenter_ru/templates/users/user_detail.html:321
 msgid "Grade"
-msgstr ""
+msgstr "Оценка"
 
-#: compscicenter_ru/templates/users/user_detail.html:385
+#: compscicenter_ru/templates/users/user_detail.html:389
 msgctxt "Project"
 msgid "Shifted"
 msgstr "Перенесён"
 
-#: compscicenter_ru/templates/users/user_detail.html:387
+#: compscicenter_ru/templates/users/user_detail.html:391
 msgctxt "Project"
 msgid "Canceled"
 msgstr "Отменен"
 
-#: compscicenter_ru/templates/users/user_detail.html:436
+#: compscicenter_ru/templates/users/user_detail.html:440
 msgid ".iCal calendar"
 msgstr ".iCal-календарь"
 
-#: compscicenter_ru/templates/users/user_detail.html:437
+#: compscicenter_ru/templates/users/user_detail.html:441
 msgid "Link"
 msgstr "Ссылка"
 
-#: compscicenter_ru/templates/users/user_detail.html:442
+#: compscicenter_ru/templates/users/user_detail.html:446
 msgid "Classes"
 msgstr "Занятия"
 
-#: compscicenter_ru/templates/users/user_detail.html:456
+#: compscicenter_ru/templates/users/user_detail.html:460
 msgid "Events"
 msgstr "События"
 
-#: compscicenter_ru/templates/users/user_detail.html:468
+#: compscicenter_ru/templates/users/user_detail.html:472
 msgid "Social accounts"
 msgstr "Аккаунты"
 
-#: compscicenter_ru/templates/users/user_detail.html:502
+#: compscicenter_ru/templates/users/user_detail.html:506
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: compscicenter_ru/views.py:437
+#: compscicenter_ru/views.py:359
 msgctxt "adjective"
 msgid "autumn"
 msgstr "осенний"
 
-#: compscicenter_ru/views.py:438
+#: compscicenter_ru/views.py:360
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#~ msgid "About Lecturer"
+#~ msgstr "О лекторе"
+
+#~ msgid "Lecturer"
+#~ msgstr "Лектор"
+
+#~ msgid "Lecturers"
+#~ msgstr "Лекторы"
 
 #~ msgctxt "menu"
 #~ msgid "Courses"

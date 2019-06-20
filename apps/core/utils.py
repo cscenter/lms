@@ -139,7 +139,7 @@ Soft sign is ignored by this recommendation, we intentionally ignore this
 symbol since it's not valid for CN values in LDAP accounts. Common Name used 
 as a branch name in `gerrit` code review system.
 """
-_en_to_ru_mapping = {
+_ru_en_mapping = {
     'А': "A",
     'Б': "B",
     'В': "V",
@@ -207,7 +207,7 @@ _en_to_ru_mapping = {
     'ю': "iu",
     'я': "ia",
 }
-en_to_ru_mapping = {ord(k): v for k, v in _en_to_ru_mapping.items()}
+ru_en_mapping = {ord(k): v for k, v in _ru_en_mapping.items()}
 
 
 # FIXME: add tests!

@@ -12,5 +12,4 @@ before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - python manage.py migrate --noinput --settings=compscicenter_ru.settings.test
 script:
-  - pytest --create-db
   - pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
