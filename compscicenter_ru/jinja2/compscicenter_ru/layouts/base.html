@@ -17,11 +17,6 @@
             notifications: {{ messages(request)|tojson }},
             sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
         };
-        if (navigator.appVersion.indexOf("MSIE 10") !== -1) {
-            var s = document.createElement("script");
-            s.src = "https://polyfill.io/v3/polyfill.min.js?features=Set%2CMap";
-            document.head.appendChild(s);
-        }
     </script>
 </head>
 <body {% block body_attrs %}{% endblock body_attrs %}>
