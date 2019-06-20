@@ -93,7 +93,6 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
 
 class User(LearningPermissionsMixin, StudentProfile, ThumbnailMixin,
            AbstractUser):
-    ThumbnailSize = ThumbnailSizes
 
     roles = AcademicRoles
 

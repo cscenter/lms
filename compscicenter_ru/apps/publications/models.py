@@ -11,8 +11,9 @@ from core.urls import reverse
 from core.utils import ru_en_mapping
 from learning.projects.constants import ProjectTypes
 from learning.projects.models import Project, Supervisor
-from users.constants import ThumbnailSizes
+from users.constants import ThumbnailSizes, GenderTypes
 from users.models import User
+from users.thumbnails import ThumbnailMixin
 
 
 class ProjectPublicationAuthor(models.Model):
@@ -103,10 +104,13 @@ def lecturer_photo_upload_to(instance: "Speaker", filename):
     return f"publications/speakers/{filename}{ext}"
 
 
-class Speaker(models.Model):
+class Speaker(ThumbnailMixin, models.Model):
     first_name = models.CharField(_("First Name"), max_length=255)
     last_name = models.CharField(_("Surname"), max_length=255)
     patronymic = models.CharField(_("Patronymic"), max_length=255, blank=True)
+    gender = models.CharField(_("Gender"), max_length=1,
+                              choices=GenderTypes.choices,
+                              default=GenderTypes.OTHER)
     description = models.TextField(_("Description"), blank=True)
     photo = models.ImageField(
         _("Photo"),
@@ -162,3 +166,6 @@ class OpenLecture(TimeStampedModel):
 
     def __str__(self):
         return f"{self.name}"
+
+    def get_absolute_url(self):
+        return reverse("open_lecture_detail", kwargs={"slug": self.slug})

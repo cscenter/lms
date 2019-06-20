@@ -1,0 +1,33 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% block title %}Открытая лекция в {{ super() }}{% endblock title %}
+
+
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-10">
+                <a href="{{ url("video_list") }}" class="text-small text-muted">Список лекций /</a>
+                <h1>{{ open_lecture.name }}</h1>
+                <div class="video">
+                    <iframe class="embed _responsive" src="{{ open_lecture.video_url }}"  frameborder="0"  allowfullscreen></iframe>
+                </div>
+                {% with speakers=open_lecture.speakers.all() %}
+                    {% if speakers|length > 0 %}
+                        <h3>Лектор{% if speakers|length > 1 %}ы{% endif %}</h3>
+                        {% for speaker in speakers %}
+                            <div class="mb-4">
+                                {{ macros.speaker_card(speaker) }}
+                                {{ speaker.description }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <h3>Описание</h3>
+                {{ open_lecture.description }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

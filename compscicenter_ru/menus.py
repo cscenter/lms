@@ -27,7 +27,7 @@ public_menu = [
         children=[
             MenuItem(pgettext_lazy("menu", "Online courses"), reverse('online_courses:list'), weight=10),
             MenuItem(pgettext_lazy("menu", "Online programs"), 'https://code.stepik.org/', weight=20, is_external=True),
-            MenuItem(pgettext_lazy("menu", "Video"), reverse('course_video_list'), weight=30),
+            MenuItem(pgettext_lazy("menu", "Video"), reverse('video_list'), weight=30),
             MenuItem(pgettext_lazy("menu", "Lecture Hall"), 'https://open.compscicenter.ru/', weight=40, is_external=True),
         ]),
     MenuItem(
