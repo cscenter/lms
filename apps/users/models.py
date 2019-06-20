@@ -23,7 +23,7 @@ from sorl.thumbnail import ImageField
 from compscicenter_ru.utils import PublicRoute
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.urls import reverse
-from core.utils import is_club_site, en_to_ru_mapping
+from core.utils import is_club_site, ru_en_mapping
 from courses.models import Semester
 from learning.models import StudentProfile
 from learning.permissions import LearningPermissionsMixin
@@ -361,12 +361,10 @@ class User(LearningPermissionsMixin, StudentProfile, ThumbnailMixin,
 
     def get_full_name(self, last_name_first=False):
         if last_name_first:
-            parts = [self.last_name, self.first_name, self.patronymic]
+            parts = (self.last_name, self.first_name, self.patronymic)
         else:
-            parts = [self.first_name, self.patronymic, self.last_name]
-        full_name = smart_text(" "
-                               .join(part for part in parts if part)
-                               .strip())
+            parts = (self.first_name, self.patronymic, self.last_name)
+        full_name = smart_text(" ".join(p for p in parts if p).strip())
         return full_name or self.username
 
     def get_short_name(self):
@@ -397,7 +395,7 @@ class User(LearningPermissionsMixin, StudentProfile, ThumbnailMixin,
         parts = [self.last_name, self.first_name[:1], self.patronymic[:1]]
         parts = [p.lower() for p in parts if p] or [self.username.lower()]
         # TODO: remove apostrophe
-        return ".".join(parts).translate(en_to_ru_mapping)
+        return ".".join(parts).translate(ru_en_mapping)
 
     @property
     def photo_data(self):

@@ -3,7 +3,8 @@ from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
 
 from core.widgets import CKEditorWidget
-from publications.models import ProjectPublication, ProjectPublicationAuthor
+from publications.models import ProjectPublication, ProjectPublicationAuthor, \
+    OpenLecture, Speaker
 
 
 class ProjectAdminInline(admin.TabularInline):
@@ -35,6 +36,7 @@ class ProjectPublicationAdminForm(forms.ModelForm):
         fields = '__all__'
 
 
+@admin.register(ProjectPublication)
 class ProjectPublicationAdmin(admin.ModelAdmin):
     form = ProjectPublicationAdminForm
     list_display = ("title", "slug")
@@ -57,4 +59,19 @@ class ProjectPublicationAdmin(admin.ModelAdmin):
              .update(type=publication_type))
 
 
-admin.site.register(ProjectPublication, ProjectPublicationAdmin)
+@admin.register(Speaker)
+class LecturerAdmin(admin.ModelAdmin):
+    list_display = ("last_name", "first_name", "patronymic", "workplace")
+    search_fields = ("last_name",)
+
+
+class LecturerInlineAdmin(admin.StackedInline):
+    model = OpenLecture.speakers.through
+    extra = 0
+
+
+@admin.register(OpenLecture)
+class OpenLectureAdmin(admin.ModelAdmin):
+    list_display = ("name", "date_at")
+    exclude = ('speakers',)
+    inlines = (LecturerInlineAdmin, )
