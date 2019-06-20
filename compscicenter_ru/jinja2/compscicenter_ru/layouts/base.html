@@ -17,8 +17,12 @@
             notifications: {{ messages(request)|tojson }},
             sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
         };
+        if (navigator.appVersion.indexOf("MSIE 10") !== -1) {
+            var s = document.createElement("script");
+            s.src = "https://polyfill.io/v3/polyfill.min.js?features=Set";
+            document.head.appendChild(s);
+        }
     </script>
-    <!--[if IE 10]><script crossorigin="anonymous" src="https://polyfill.io/v3/polyfill.min.js?features=Set"></script><![endif]-->
 </head>
 <body {% block body_attrs %}{% endblock body_attrs %}>
     <div class="svg-inline">{% block sprites %}{% endblock sprites %}</div>
