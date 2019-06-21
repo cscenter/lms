@@ -360,8 +360,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         applicant_id = self.kwargs[self.pk_url_kwarg]
         try:
             interview = Interview.objects.get(applicant_id=applicant_id)
-            return HttpResponseRedirect(reverse("admission:interview_detail",
-                                                args=[interview.pk]))
+            return HttpResponseRedirect(interview.get_absolute_url())
         except Interview.DoesNotExist:
             return super().get(request, *args, **kwargs)
 
