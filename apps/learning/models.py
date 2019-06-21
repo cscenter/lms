@@ -34,7 +34,7 @@ from learning.managers import EnrollmentDefaultManager, \
 from learning.settings import GradingSystems, GradeTypes, Branches, \
     AcademicDegreeYears
 from users.constants import ThumbnailSizes
-from users.thumbnails import ThumbnailMixin
+from users.thumbnails import UserThumbnailMixin
 
 logger = logging.getLogger(__name__)
 
@@ -578,7 +578,7 @@ def graduate_photo_upload_to(instance: "GraduateProfile", filename):
     return f"alumni/{instance.graduated_on.year}/{filename}{ext}"
 
 
-class GraduateProfile(ThumbnailMixin, TimeStampedModel):
+class GraduateProfile(UserThumbnailMixin, TimeStampedModel):
     TESTIMONIAL_CACHE_KEY = "csc_review"
 
     student = models.OneToOneField(
