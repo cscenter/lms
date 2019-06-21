@@ -40,18 +40,8 @@ const PATHS = {
 
 
 const VENDOR = [
-    '@babel/polyfill',
-    // 'history',
-    // 'react',
-    // 'react-dom',
-    // 'react-redux',
-    // 'react-router',
-    // 'react-mixin',
-    // 'classnames',
-    // 'redux',
-    // 'react-router-redux',
-    // 'jquery',
-    // 'bootstrap-sass',
+    "core-js/stable",
+    "regenerator-runtime/runtime",
     path.join(__srcdir, '/js/editor.js'),
 ];
 

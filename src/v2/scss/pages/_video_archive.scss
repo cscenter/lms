@@ -9,7 +9,16 @@
     }
 
     .author {
+      margin-top: spacer("2x");
       font-size: $font-size-sm;
+      color: $gray-dark;
     }
+
+    .card__title {
+      color: $black;
+    }
+  }
+  .tags-group {
+    margin-top: spacer("8x");
   }
 }

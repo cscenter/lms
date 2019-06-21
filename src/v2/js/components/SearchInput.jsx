@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Icon from "./Icon";
 
+import _debounce from 'lodash-es/debounce';
+
 function InputIcon(props) {
     const icon = props.icon;
     if (icon !== null) {
@@ -17,11 +19,22 @@ function InputIcon(props) {
 
 class SearchInput extends React.Component {
     static defaultProps = {
-        value: ''
+        query: ''
     };
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            query: this.props.query
+        };
+        // TODO: https://stackoverflow.com/a/28046731/1341309
+        this.handleChangeDebounced = _debounce(this.props.handleSearch, 200);
+    }
+
     handleChange = (e) => {
-        this.props.onChange(e.target.value);
+        this.setState({query: e.target.value}, () => {
+            this.handleChangeDebounced(this.state.query);
+        });
     };
 
     render() {
@@ -33,7 +46,7 @@ class SearchInput extends React.Component {
                     name="query"
                     type="text"
                     autoComplete="off"
-                    {...this.props}
+                    value={this.state.query}
                     onChange={this.handleChange}
                 />
                 <InputIcon icon={icon}/>
@@ -43,8 +56,8 @@ class SearchInput extends React.Component {
 }
 
 SearchInput.propTypes = {
-    onChange: PropTypes.func.isRequired,
-    value: PropTypes.string.isRequired
+    handleSearch: PropTypes.func.isRequired,
+    query: PropTypes.string.isRequired
 };
 
 export default SearchInput;
