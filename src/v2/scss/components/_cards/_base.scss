@@ -64,9 +64,6 @@ $card-bg: $white !default;
     padding: spacer("8x");
   }
 
-}
-
-.card__header {
   :last-child {
     margin-bottom: 0;
   }

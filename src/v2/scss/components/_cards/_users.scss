@@ -88,6 +88,7 @@ $user-card-gutter-width: $grid-gutter-width / 2;
 }
 
 .user-card__details {
+  overflow: hidden;
   @include font-smoothing();
 
   .workplace {

@@ -2,16 +2,21 @@ import React, {Fragment} from 'react';
 import { withTranslation } from 'react-i18next';
 import i18next from 'i18next';
 
-import _debounce from 'lodash-es/debounce';
+import _throttle from 'lodash-es/throttle';
 import $ from 'jquery';
 
 import Select from 'components/Select';
 import UserCardList from 'components/UserCardList';
 import {
     hideBodyPreloader,
+    loadIntersectionObserverPolyfill,
     showBodyPreloader,
     showErrorNotification
 } from "../utils";
+
+export let polyfills = [
+    loadIntersectionObserverPolyfill(),
+];
 
 
 class Alumni extends React.Component {
@@ -23,7 +28,7 @@ class Alumni extends React.Component {
             "items": [],
             ...props.initialState
         };
-        this.fetch = _debounce(this.fetch, 300);
+        this.fetch = _throttle(this.fetch, 300);
     }
 
     handleYearChange = (year) => {
@@ -90,6 +95,10 @@ class Alumni extends React.Component {
             dataType: "json",
             data: payload
         }).done((result) => {
+            result.data.forEach((g) => {
+                g.url = `/students/${g.student.id}/`;
+                g.name = `${g.student.name} ${g.student.surname}`;
+            });
             this.setState({
                 loading: false,
                 items: result.data,
@@ -107,7 +116,7 @@ class Alumni extends React.Component {
         const {t, years, cities, areas} = this.props;
 
         let filteredItems = this.state.items.filter(function(item) {
-            let cityCondition = (city !== null) ? item.city === city.value : true;
+            let cityCondition = (city !== null) ? item.student.city === city.value : true;
             let areaCondition = (area !== null) ? item.areas.includes(area.value) : true;
             let yearCondition = (year !== null) ? item.year === year.value : true;
             return cityCondition && areaCondition && yearCondition;
@@ -117,39 +126,39 @@ class Alumni extends React.Component {
             <Fragment>
                 <h1>Выпускники</h1>
                 <div className="row mb-4">
-                            <div className="col-lg-2 mb-4">
-                                <Select
-                                    onChange={this.handleYearChange}
-                                    value={year}
-                                    name="year"
-                                    isClearable={false}
-                                    placeholder="Год выпуска"
-                                    options={years}
-                                    key="year"
-                                />
-                            </div>
-                            <div className="col-lg-3 mb-4">
-                                <Select
-                                    onChange={this.handleAreaChange}
-                                    value={area}
-                                    name="area"
-                                    placeholder={t("Направление")}
-                                    isClearable={true}
-                                    options={areas}
-                                    key="area"
-                                />
-                            </div>
-                            <div className="col-lg-3 mb-4">
-                                <Select
-                                    onChange={this.handleCityChange}
-                                    value={city}
-                                    name="city"
-                                    isClearable={true}
-                                    placeholder={i18next.t("Город")}
-                                    options={cities}
-                                    key="city"
-                                />
-                            </div>
+                    <div className="col-lg-2 mb-4">
+                        <Select
+                            onChange={this.handleYearChange}
+                            value={year}
+                            name="year"
+                            isClearable={false}
+                            placeholder="Год выпуска"
+                            options={years}
+                            key="year"
+                        />
+                    </div>
+                    <div className="col-lg-3 mb-4">
+                        <Select
+                            onChange={this.handleAreaChange}
+                            value={area}
+                            name="area"
+                            placeholder={t("Направление")}
+                            isClearable={true}
+                            options={areas}
+                            key="area"
+                        />
+                    </div>
+                    <div className="col-lg-3 mb-4">
+                        <Select
+                            onChange={this.handleCityChange}
+                            value={city}
+                            name="city"
+                            isClearable={true}
+                            placeholder={i18next.t("Город")}
+                            options={cities}
+                            key="city"
+                        />
+                    </div>
                 </div>
                 {
                     filteredItems.length > 0 ?

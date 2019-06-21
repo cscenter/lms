@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import LazyImage from "./LazyImage";
 
 class UserCard extends React.Component {
     static defaultProps = {
@@ -7,14 +8,12 @@ class UserCard extends React.Component {
     };
 
     render() {
-        let {id, photo, name, sex, workplace} = this.props;
+        let {id, photo, name, url, workplace} = this.props;
         return (
             <a className={this.props.className}
-               href={`/users/${id}/`}
+               href={url}
                id={`user-card-${id}`}>
-                <div className={`user-card__photo _${sex}`}>
-                    {photo !== null ? <img src={photo} alt={name} /> : ""}
-                </div>
+                <LazyImage src={photo} alt={name} className={`user-card__photo`} />
                 <div className="user-card__details">
                     {name}
                     {workplace !== null ? <div className="workplace">{workplace}</div> : ""}
@@ -24,9 +23,14 @@ class UserCard extends React.Component {
     }
 }
 
-UserCard.propTypes = {
+const propTypes = {
     id: PropTypes.number.isRequired,
-    name: PropTypes.string.isRequired
+    name: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+    photo: PropTypes.string.isRequired,
+    workplace: PropTypes.string,
 };
+
+UserCard.propTypes = propTypes;
 
 export default UserCard;

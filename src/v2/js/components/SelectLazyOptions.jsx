@@ -13,7 +13,7 @@ const inputStyles = {
 };
 
 
-class SelectLazy extends React.Component {
+class SelectLazyOptions extends React.Component {
 
     constructor(props) {
         super(props);
@@ -55,9 +55,9 @@ class SelectLazy extends React.Component {
     }
 }
 
-SelectLazy.propTypes = {
+SelectLazyOptions.propTypes = {
     onChange: PropTypes.func.isRequired,
     handleLoadOptions: PropTypes.func.isRequired
 };
 
-export default SelectLazy;
+export default SelectLazyOptions;

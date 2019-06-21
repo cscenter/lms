@@ -38,13 +38,14 @@ module.exports = {
             "@babel/preset-env",
             {
                 modules: false,
-                useBuiltIns: false,
-                debug: false,
+                useBuiltIns: "usage",
+                corejs: 3,
+                debug: true,
                 loose: true,
                 spec: true,
                 targets: {
                     browsers: [
-                        "last 1 major version",
+                        // "last 1 major version",
                         ">= 1%",
                         "Chrome >= 45",
                         "Firefox >= 38",
@@ -54,11 +55,11 @@ module.exports = {
                         "Safari >= 9",
                         "Android >= 4.4",
                         "Opera >= 30"
-
                     ]
                 },
             }
         ],
+        "@babel/typescript",
         "@babel/preset-react"
     ],
     plugins: plugins,

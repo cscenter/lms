@@ -1,6 +1,10 @@
+// FIXME:  https://babeljs.io/docs/en/next/babel-plugin-syntax-dynamic-import#working-with-webpack-and-babel-preset-env
+import 'core-js/modules/es.array.iterator';
+import "core-js/modules/es.promise";
+// Sentry needs Object.assign
+import "core-js/modules/es.object.assign";
 import * as Sentry from '@sentry/browser';
 import $ from 'jquery';
-import '@babel/polyfill';
 import 'bootstrap/js/src/collapse';
 import 'bootstrap/js/src/dropdown';
 

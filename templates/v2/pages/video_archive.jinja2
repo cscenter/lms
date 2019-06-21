@@ -3,52 +3,103 @@
 {% block body_attrs %}class="_dark"{% endblock body_attrs %}
 
 {% block content %}
-        <div class="svg-inline">
+    <div class="svg-inline">
         {% include "sprites/ui.svg" %}
-        </div>
-<div class="container page-content">
-    <div class="row">
-        <div class="col-lg-9 order-lg-1 order-2">
-
-
-            <div class="row">
-                <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                    <a class="card _shadowed _video h-100" href="#">
+    </div>
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-9 order-lg-1 order-2">
+                <div class="card-deck _three">
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img" href="" >
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </a>
                         <div class="card__content">
-                            <h4 class="card__title">Основы программирования на python</h4>
-                            <div class="author">А. В. Гардер, С. И. Грязнов, М. Д. Кормышов, А. В. Смаль</div>
+                            <a class="card__title" href="#" rel="noopener">Основы программирования python</a>
+                            <div class="author">А. В. Гардер, С. И. Грязнов</div>
+                            <div class="tags-group">
+                                <a class="tag _pill _lecture" href="#"></a>
+                                <a class="tag _pill _year" href="#">2018</a>
+                            </div>
                         </div>
-                    </a>
-                </div>
-                <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                    <a class="card _shadowed _video h-100" href="#">
+                    </div>
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img" href="" >
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </a>
                         <div class="card__content">
-                            <h4 class="card__title">Основы перечислительной комбинаторики</h4>
-                            <div class="author">А.А. Владыкин</div>
+                            <a class="card__title" href="#" rel="noopener">Основы программирования python</a>
+                            <div class="author">А. В. Гардер, С. И. Грязнов</div>
+                            <div class="tags-group">
+                                <a class="tag _pill _course" href="#"></a>
+                                <a class="tag _pill _year" href="#">2018</a>
+                            </div>
                         </div>
-                    </a>
-                </div>
-                <div class="col-12 col-sm-6 col-lg-4 mb-4">
-                    <a class="card _shadowed _video h-100" href="#">
+                    </div>
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img" href="" >
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </a>
                         <div class="card__content">
-                            <h4 class="card__title">Java. Базовый курс</h4>
-                            <div class="author">А.А. Владыкин</div>
+                            <a class="card__title" href="#" rel="noopener">Основы программирования python</a>
+                            <div class="author">А. В. Гардер, С. И. Грязнов</div>
+                            <div class="tags-group">
+                                <a class="tag _pill _course" href="#"></a>
+                                <a class="tag _pill _year" href="#">2018</a>
+                            </div>
                         </div>
-                    </a>
-                </div>
-
-            </div>
-        </div>
-        <div class="col-lg-3 order-lg-2 order-0">
-            <form class="ui form __no-border _right-side-filter" action="">
-                <div class="field">
-                    <div class="ui icon input">
-                        <input type="search" placeholder="Поиск">
-                        <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                    </div>
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img" href="" >
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </a>
+                        <div class="card__content">
+                            <a class="card__title" href="#" rel="noopener">Основы программирования python</a>
+                            <div class="author">А. В. Гардер, С. И. Грязнов</div>
+                            <div class="tags-group">
+                                <a class="tag _pill _lecture" href="#"></a>
+                                <a class="tag _pill _year" href="#">2018</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img" href="" >
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </a>
+                        <div class="card__content">
+                            <a class="card__title" href="#" rel="noopener">Основы программирования python</a>
+                            <div class="author">А. В. Гардер, С. И. Грязнов</div>
+                            <div class="tags-group">
+                                <a class="tag _pill _lecture" href="#"></a>
+                                <a class="tag _pill _year" href="#">2018</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </form>
+            </div>
+            <div class="col-lg-3 order-lg-2 order-0">
+                <form class="ui form __no-border _right-side-filter" action="">
+                    <div class="field">
+                        <div class="ui icon input">
+                            <input type="search" placeholder="Поиск">
+                            <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                        </div>
+                    </div>
+                    <div class="grouped inline">
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Лекции</span>
+                        </label>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Курсы</span>
+                        </label>
+                        <label class="ui option checkbox disabled">
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 {% endblock content %}

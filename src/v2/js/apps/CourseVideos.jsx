@@ -127,9 +127,9 @@ class CourseVideosPage extends React.Component {
                         <div className="ui form">
                             <div className="field">
                                 <SearchInput
-                                    onChange={this.handleSearchInputChange}
+                                    handleSearch={this.handleSearchInputChange}
+                                    query={q}
                                     placeholder="Название курса"
-                                    value={q}
                                     icon="search"
                                 />
                             </div>

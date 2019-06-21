@@ -3,6 +3,15 @@ import Noty from 'noty';
 
 export const MOBILE_VIEWPORT_MAX = 992;
 
+/**
+ * Do feature detection, to figure out if polyfill needs to be imported.
+ **/
+export async function loadIntersectionObserverPolyfill() {
+    if (typeof window.IntersectionObserver === 'undefined') {
+        return import(/* webpackChunkName: "intersection-observer" */ 'intersection-observer');
+    }
+}
+
 export function getSections() {
     if (document.body.hasAttribute("data-init-sections")) {
         let sections = document.body.getAttribute("data-init-sections");
@@ -12,7 +21,7 @@ export function getSections() {
     }
 }
 
-export function showComponentError(error, msg='An error occurred while loading the component') {
+export function showComponentError(error, msg = 'An error occurred while loading the component') {
     showErrorNotification(msg);
     console.error(error);
 }
@@ -32,7 +41,11 @@ export function showNotification(msg, options) {
 }
 
 export function showErrorNotification(msg) {
-    showNotification(msg, {type: "error", timeout: false, closeWith: ['button']});
+    showNotification(msg, {
+        type: "error",
+        timeout: false,
+        closeWith: ['button']
+    });
 }
 
 export function showBodyPreloader() {
