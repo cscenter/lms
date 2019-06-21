@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='campaign',
             name='template_registration',
-            field=models.CharField(help_text='Template name for contest registration email', max_length=255, validators=[admission.models.validate_template], verbose_name='Registration Template'),
+            field=models.CharField(help_text='Template name for contest registration email', max_length=255, validators=[admission.models.validate_template_name], verbose_name='Registration Template'),
         ),
         migrations.AlterField(
             model_name='interviewstream',

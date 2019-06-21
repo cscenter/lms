@@ -7,6 +7,8 @@ from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
+from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
+    INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
 from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase
 from learning.models import Branch
 from learning.settings import Branches
@@ -151,9 +153,9 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
         from admission.models import Interview, InterviewInvitation
 
         template_names = (
-            Interview.FEEDBACK_TEMPLATE,
-            Interview.REMINDER_TEMPLATE,
-            InterviewInvitation.EMAIL_TEMPLATE,
+            APPOINTMENT_INVITATION_TEMPLATE,
+            INTERVIEW_FEEDBACK_TEMPLATE,
+            INTERVIEW_REMINDER_TEMPLATE,
         )
         for template_name in template_names:
             EmailTemplate.objects.update_or_create(

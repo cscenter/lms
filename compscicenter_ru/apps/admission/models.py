@@ -13,9 +13,8 @@ from django.core.validators import MinValueValidator, \
 from django.db import models, transaction
 from django.db.models import query, Q
 from django.utils import timezone, numberformat
-from django.utils.encoding import python_2_unicode_compatible, smart_text
+from django.utils.encoding import smart_text
 from django.utils.formats import date_format, time_format
-from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
@@ -24,7 +23,7 @@ from post_office import mail
 from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
-from admission.constants import ChallengeStatuses
+from admission.constants import ChallengeStatuses, INTERVIEW_FEEDBACK_TEMPLATE
 from admission.utils import slot_range
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
@@ -34,17 +33,8 @@ from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
 from courses.models import Venue
 from learning.models import Branch
-from learning.settings import AcademicDegreeYears, Branches
+from learning.settings import AcademicDegreeYears
 from users.constants import AcademicRoles
-
-WITH_ASSIGNMENTS_TEXT = """
-Сперва мы предложим Вам решить несколько задач в течение получаса, а само 
-собеседование займёт ещё около 30 минут. На нём мы обсудим Вашу мотивацию 
-поступления в центр, существующий опыт и успехи в учёбе. Возможно, в разговоре 
-мы затронем также результаты экзамена, попросим решить какие-то задачи по 
-математике и программированию. Специально готовиться к собеседованию не стоит: 
-приходите с теми знаниями, которые есть, а вот про мотивацию подумайте, 
-пожалуйста, заранее. Собеседование проведут кураторы и преподаватели центра."""
 
 
 def current_year():
@@ -52,7 +42,7 @@ def current_year():
     return timezone.now().year
 
 
-def validate_template(value):
+def validate_template_name(value):
     if not EmailTemplate.objects.filter(name=value).exists():
         raise ValidationError(
             _("Email template with name `%(template_name)s` doesn't exist"),
@@ -104,15 +94,21 @@ class Campaign(models.Model):
         help_text=_("Yandex.Contest Refresh Token"),
         max_length=255,
         blank=True)
+    # FIXME: factory boy allows to save blank values for template names :<
     template_registration = models.CharField(
         _("Registration Template"),
         help_text=_("Template name for contest registration email"),
-        validators=[validate_template],
+        validators=[validate_template_name],
         max_length=255)
     template_appointment = models.CharField(
         _("Invitation Template"),
         help_text=_("Template name for interview invitation email"),
-        validators=[validate_template],
+        validators=[validate_template_name],
+        max_length=255)
+    template_interview_reminder = models.CharField(
+        _("Interview Reminder Template"),
+        help_text=_("Template name for interview reminder email"),
+        validators=[validate_template_name],
         max_length=255)
 
     class Meta:
@@ -886,8 +882,6 @@ class Interview(TimeStampedModel):
         (COMPLETED, _('Completed')),
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
-    REMINDER_TEMPLATE = "admission-interview-reminder"
-    FEEDBACK_TEMPLATE = "admission-interview-feedback"
 
     date = models.DateTimeField(_("When"))
     applicant = models.OneToOneField(
@@ -962,7 +956,8 @@ class Interview(TimeStampedModel):
 
     def delete_reminder(self):
         try:
-            template = get_email_template(Interview.REMINDER_TEMPLATE)
+            template_name = self.applicant.campaign.template_interview_reminder
+            template = get_email_template(template_name)
             (Email.objects
              .filter(template=template, to=self.applicant.email)
              .exclude(status=EMAIL_STATUS.sent)
@@ -972,7 +967,7 @@ class Interview(TimeStampedModel):
 
     def delete_feedback(self):
         try:
-            template = get_email_template(Interview.FEEDBACK_TEMPLATE)
+            template = get_email_template(INTERVIEW_FEEDBACK_TEMPLATE)
             (Email.objects
              .filter(template=template, to=self.applicant.email)
              .exclude(status=EMAIL_STATUS.sent)
@@ -1141,8 +1136,6 @@ class InterviewInvitationQuerySet(query.QuerySet):
 
 
 class InterviewInvitation(TimeStampedModel):
-    EMAIL_TEMPLATE = "admission-interview-invitation"
-
     applicant = models.ForeignKey(
         Applicant,
         verbose_name=_("Applicant"),
