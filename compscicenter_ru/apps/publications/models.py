@@ -13,7 +13,7 @@ from learning.projects.constants import ProjectTypes
 from learning.projects.models import Project, Supervisor
 from users.constants import ThumbnailSizes, GenderTypes
 from users.models import User
-from users.thumbnails import ThumbnailMixin
+from users.thumbnails import UserThumbnailMixin
 
 
 class ProjectPublicationAuthor(models.Model):
@@ -104,7 +104,7 @@ def lecturer_photo_upload_to(instance: "Speaker", filename):
     return f"publications/speakers/{filename}{ext}"
 
 
-class Speaker(ThumbnailMixin, models.Model):
+class Speaker(UserThumbnailMixin, models.Model):
     first_name = models.CharField(_("First Name"), max_length=255)
     last_name = models.CharField(_("Surname"), max_length=255)
     patronymic = models.CharField(_("Patronymic"), max_length=255, blank=True)
@@ -169,3 +169,7 @@ class OpenLecture(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("open_lecture_detail", kwargs={"slug": self.slug})
+
+    def save(self, **kwargs):
+        self.description = self.description.strip()
+        super().save(**kwargs)

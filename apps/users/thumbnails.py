@@ -1,4 +1,6 @@
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core import checks
+from django.core.exceptions import FieldDoesNotExist
 from sorl.thumbnail import get_thumbnail
 from sorl.thumbnail.images import BaseImageFile, DummyImageFile
 
@@ -18,8 +20,14 @@ def photo_thumbnail_cropbox(data):
 
 
 # FIXME: add django checks for mandatory fields for this mixin: photo, gender
-# FIXME: rename to UserThumbnailMixin?
-class ThumbnailMixin:
+# FIXME: Make gender optional
+class UserThumbnailMixin:
+    """
+    This Django's model mixin helps to generate thumbnail for photo image field.
+
+    In case of no photo provided generates stub thumbnail which depends
+    on user gender.
+    """
     ThumbnailSize = ThumbnailSizes
 
     def get_thumbnail(self, geometry=ThumbnailSizes.BASE, **options):
@@ -30,6 +38,28 @@ class ThumbnailMixin:
         if hasattr(self, "cropbox_data"):
             return photo_thumbnail_cropbox(self.cropbox_data)
         return ""
+
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        errors.extend(cls._check_photo_field())
+        return errors
+
+    @classmethod
+    def _check_photo_field(cls):
+        errors = []
+        try:
+            photo = cls._meta.get_field("photo")
+            # TODO: check field type
+        except FieldDoesNotExist:
+            errors.append(
+                checks.Error(
+                    f'`{cls.__name__}` must define `photo` image field',
+                    hint='define photo = models.ImageField(...)',
+                    obj=cls,
+                    id='users.thumbnails.E001',
+                ))
+        return errors
 
 
 class BaseStubImage(BaseImageFile):

@@ -33,7 +33,7 @@ from users.constants import GROUPS_IMPORT_TO_GERRIT, AcademicRoles, \
     SHADCourseGradeTypes, ThumbnailSizes, GenderTypes
 from users.fields import MonitorStatusField
 from users.tasks import update_password_in_gerrit
-from users.thumbnails import ThumbnailMixin
+from users.thumbnails import UserThumbnailMixin
 from .managers import CustomUserManager
 
 # See 'https://help.yandex.ru/pdd/additional/mailbox-alias.xml'.
@@ -91,7 +91,7 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
         return None
 
 
-class User(LearningPermissionsMixin, StudentProfile, ThumbnailMixin,
+class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
            AbstractUser):
 
     roles = AcademicRoles
