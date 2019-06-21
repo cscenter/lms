@@ -1,6 +1,10 @@
-.infographic-count{
-  font-size: 68px;
+.infographic-count {
+  font-size: 48px;
   font-weight: $font-weight-bold;
   color: $teal;
   margin-bottom: -10px;
+
+  @include media-breakpoint-up(lg) {
+    font-size: 68px;
+  }
 }
