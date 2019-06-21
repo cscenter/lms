@@ -55,3 +55,9 @@
                 testimonial=None) }}
     {% endwith %}
 {%- endmacro %}
+
+{% macro video_iframe(url, modifiers='') -%}
+<div class="video{% if modifiers %} {{ modifiers }}{% endif %}">
+    <iframe class="embed _responsive" src="{{ url }}"  frameborder="0"  allowfullscreen></iframe>
+</div>
+{%- endmacro %}
