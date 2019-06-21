@@ -3,10 +3,41 @@ import datetime
 import pytest
 from post_office.models import Email, STATUS as EMAIL_STATUS
 
-from admission.constants import INTERVIEW_FEEDBACK_TEMPLATE
+from admission.constants import INTERVIEW_FEEDBACK_TEMPLATE, \
+    INVITATION_EXPIRED_IN_HOURS
+from admission.services import create_invitation
 from admission.tests.factories import InterviewFactory, InterviewerFactory, \
-    CommentFactory
-from admission.models import Interview
+    CommentFactory, InterviewStreamFactory, ApplicantFactory
+from admission.models import Interview, InterviewInvitation
+
+
+@pytest.mark.django_db
+def test_create_invitation(mocker):
+    # Fix current time
+    mocked_timezone = mocker.patch('django.utils.timezone.now')
+    dt_utc = datetime.datetime(2018, month=3, day=8, hour=13, minute=0,
+                               tzinfo=datetime.timezone.utc)
+    mocked_timezone.return_value = dt_utc
+    tomorrow = datetime.date(2018, month=3, day=9)
+    from django.utils import timezone
+    stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
+                                    end_at=datetime.time(16, 0),
+                                    duration=20,
+                                    date=tomorrow,
+                                    with_assignments=False,
+                                    campaign__current=True)
+    applicant = ApplicantFactory(campaign=stream.campaign)
+    tz = stream.venue.get_city_timezone()
+    tomorrow_begin = datetime.datetime.combine(tomorrow,
+                                               datetime.datetime.min.time())
+    tomorrow_begin_local = tz.localize(tomorrow_begin)
+    expired_at_expected = dt_utc + datetime.timedelta(hours=INVITATION_EXPIRED_IN_HOURS)
+    assert expired_at_expected > tomorrow_begin_local
+    create_invitation([stream], applicant)
+    assert InterviewInvitation.objects.count() == 1
+    invitation = InterviewInvitation.objects.first()
+    expired_at_local = timezone.localtime(invitation.expired_at, timezone=tz)
+    assert expired_at_local.strftime("%d.%m.%Y %H:%M") == "09.03.2018 00:00"
 
 
 @pytest.mark.django_db
