@@ -5,6 +5,7 @@ from itertools import groupby
 from django.utils import timezone
 from post_office import mail
 
+from admission.constants import INTERVIEW_FEEDBACK_TEMPLATE
 from core.constants import DATE_FORMAT_RU
 
 logger = logging.getLogger(__name__)
@@ -32,8 +33,9 @@ def calculate_time(time, timedelta):
 def generate_interview_reminder(interview, slot) -> None:
     today = timezone.now()
     if interview.date - today > timedelta(days=1):
+        campaign = interview.applicant.campaign
         meeting_at = interview.date_local()
-        # Give them some time to solve proposed tasks
+        # Give them time to solve some assignments before interview part
         if slot.stream.with_assignments:
             meeting_at -= timedelta(minutes=30)
         scheduled_time = interview.date - timedelta(days=1)
@@ -41,9 +43,9 @@ def generate_interview_reminder(interview, slot) -> None:
             [interview.applicant.email],
             scheduled_time=scheduled_time,
             sender='info@compscicenter.ru',
-            template=interview.REMINDER_TEMPLATE,
+            template=campaign.template_interview_reminder,
             context={
-                "SUBJECT_CITY": interview.applicant.campaign.city.name,
+                "SUBJECT_CITY": campaign.city.name,
                 "DATE": meeting_at.strftime(DATE_FORMAT_RU),
                 "TIME": meeting_at.strftime("%H:%M"),
                 "DIRECTIONS": slot.stream.venue.directions
@@ -60,7 +62,7 @@ def generate_interview_feedback_email(interview) -> None:
     if interview.status != interview.COMPLETED:
         return
     # Fail silently if template not found
-    template_name = interview.FEEDBACK_TEMPLATE
+    template_name = INTERVIEW_FEEDBACK_TEMPLATE
     try:
         template = EmailTemplate.objects.get(name=template_name)
     except EmailTemplate.DoesNotExist:
@@ -74,7 +76,7 @@ def generate_interview_feedback_email(interview) -> None:
     try:
         # Update scheduled_time if feedback task in a queue and not completed
         email_identifiers = {
-            "template__name": interview.FEEDBACK_TEMPLATE,
+            "template__name": INTERVIEW_FEEDBACK_TEMPLATE,
             "to": recipients
         }
         email = Email.objects.get(**email_identifiers)

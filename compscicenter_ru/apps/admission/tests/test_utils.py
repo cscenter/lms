@@ -3,6 +3,7 @@ import datetime
 import pytest
 from post_office.models import Email, STATUS as EMAIL_STATUS
 
+from admission.constants import INTERVIEW_FEEDBACK_TEMPLATE
 from admission.tests.factories import InterviewFactory, InterviewerFactory, \
     CommentFactory
 from admission.models import Interview
@@ -10,7 +11,7 @@ from admission.models import Interview
 
 @pytest.mark.django_db
 def test_generate_interview_feedback_email():
-    email_qs = Email.objects.filter(template__name=Interview.FEEDBACK_TEMPLATE)
+    email_qs = Email.objects.filter(template__name=INTERVIEW_FEEDBACK_TEMPLATE)
     interview = InterviewFactory(status=Interview.APPROVED,
                                  applicant__campaign__city_id='spb')
     assert Email.objects.count() == 0
