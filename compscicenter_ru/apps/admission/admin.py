@@ -224,13 +224,13 @@ class InterviewCommentAdmin(admin.ModelAdmin):
 
 
 class InterviewSlotAdmin(admin.ModelAdmin):
-    list_display = ('start_at', 'stream_date')
+    list_display = ('stream_date', 'start_at',)
     search_fields = ('start_at',)
     list_filter = ('stream__date',)
     raw_id_fields = ("interview",)
     list_select_related = ('stream',)
 
-    @meta(_("Date"))
+    @meta(_("Date"), admin_order_field="stream__date")
     def stream_date(self, obj):
         return obj.stream.date.strftime("%d.%m.%Y")
 
