@@ -189,7 +189,7 @@ class ApplicationFormView(TemplateView):
 
 class ApplicantContextMixin:
     @staticmethod
-    def get_applicant_context(applicant_id):
+    def get_applicant_context(request, applicant_id):
         context = {}
         applicant = get_object_or_404(
             Applicant.objects
@@ -197,7 +197,8 @@ class ApplicantContextMixin:
                                      "online_test", "university")
                      .filter(pk=applicant_id))
         context["applicant"] = applicant
-        context["applicant_form"] = ApplicantReadOnlyForm(instance=applicant)
+        context["applicant_form"] = ApplicantReadOnlyForm(request=request,
+                                                          instance=applicant)
         context["campaign"] = applicant.campaign
         contest_ids = []
         try:
@@ -344,7 +345,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
     def get_context_data(self, **kwargs):
         applicant_id = self.kwargs[self.pk_url_kwarg]
         context = kwargs
-        context.update(self.get_applicant_context(applicant_id))
+        context.update(self.get_applicant_context(self.request, applicant_id))
         applicant = context["applicant"]
         context["status_form"] = ApplicantStatusForm(instance=applicant)
         if 'form' not in kwargs:
@@ -578,7 +579,7 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                     Prefetch("comments",
                              queryset=(Comment.objects
                                        .select_related("interviewer")))))
-        context = self.get_applicant_context(interview.applicant_id)
+        context = self.get_applicant_context(self.request, interview.applicant_id)
         # Activate timezone for the whole detail view
         timezone.activate(context['applicant'].get_city_timezone())
         context.update({
