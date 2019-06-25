@@ -1,6 +1,7 @@
 .card {
   &._video {
     color: $gray-darker;
+    border: none;
 
     ._meta {
       padding-top: 0;
@@ -18,7 +19,7 @@
       color: $black;
     }
   }
-  .tags-group {
+  .labels {
     margin-top: spacer("8x");
   }
 }

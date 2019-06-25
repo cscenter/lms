@@ -43,10 +43,14 @@ class CourseVideosPage extends React.Component {
     };
 
     componentWillUnmount = function () {
-        this.serverRequest.abort();
+        if (this.requests) {
+            for(const request of this.requests) {
+                request.abort();
+            }
+        }
     };
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.state.loading) {
             this.fetch();
         } else {
@@ -69,33 +73,59 @@ class CourseVideosPage extends React.Component {
 
     fetch = (payload = null) => {
         console.debug("CourseVideosPage: fetch", this.props, payload);
-        this.serverRequest = $.ajax({
+        this.requests = this.props.entry_url.map(entryURL => $.ajax({
             type: "GET",
-            url: this.props.entry_url,
+            url: entryURL,
             dataType: "json",
             data: payload
-        }).done((data) => {
-            // Collect options for year select
-            let years = new Set();
-            data.forEach((item) => { years.add(item.semester.year) });
-            let options = [];
-            years.forEach((year) => {
-               options.push({value: year, label: year});
+        }));
+
+        Promise.all(this.requests)
+            .then((iterables) => {
+                let data = [];
+                // Aggregate data for year select
+                let years = new Set();
+                for(const d of iterables) {
+                    data = data.concat(d);
+                    d.forEach((item) => { years.add(item.year) });
+                }
+                let yearOptions = Array.from(years, year => ({
+                    value: year, label: year
+                }));
+                this.setState({
+                    loading: false,
+                    items: data,
+                    yearOptions: yearOptions
+                });
+            }).catch((reason) => {
+                showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
             });
-            this.setState({
-                loading: false,
-                items: data,
-                yearOptions: options
-            });
-        }).fail(() => {
-            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
-        });
     };
+
+    getLabelColor(videoType) {
+        if (videoType === "course") {
+            return "_blue"
+        } else if (videoType === "lecture") {
+            return "_green"
+        } else {
+            return ""
+        }
+    }
+
+    getTypeLabelName(videoType) {
+        if (videoType === "course") {
+            return "Курс"
+        } else if (videoType === "lecture") {
+            return "Лекция"
+        } else {
+            return ""
+        }
+    }
 
     render() {
         const {q, year} = this.state;
         let filteredItems = this.state.items.filter(function(item) {
-            let yearCondition = (year !== null) ? item.semester.year === year.value : true;
+            let yearCondition = (year !== null) ? item.year === year.value : true;
             return yearCondition &&
                    _includes(item.name.toLowerCase(), q.toLowerCase());
         });
@@ -104,19 +134,21 @@ class CourseVideosPage extends React.Component {
             <Fragment>
                 <div className="row">
                     <div className="col-lg-9 order-lg-1 order-2">
-                        <div className="row">
-                            {filteredItems.map((course) =>
-                                <div key={course.id} className="col-12 col-sm-6 col-lg-4 mb-4">
-                                    <a className="card _shadowed _video h-100"  href={`${course.url}classes/`}>
-                                        <div className="card__content">
-                                            <h4 className="card__title">{ course.name }</h4>
-                                            <div className="author">
-                                                {course.teachers.join(", ")}
-                                            </div>
+                        <div className="card-deck _three">
+                            {filteredItems.map((videoRecord) =>
+                                <a key={`${videoRecord.type}_${videoRecord.id}`} className="card _shadowed _video"  href={`${videoRecord.url}classes/`}>
+                                    {videoRecord.preview ? <div class="card__img"><img src={videoRecord.preview}/></div> : ""}
+                                    <div className="card__content">
+                                        <h4 className="card__title">{ videoRecord.name }</h4>
+                                        <div className="author">
+                                            {videoRecord.teachers.join(", ")}
                                         </div>
-                                        <div className="card__content _meta">{course.semester.name}</div>
-                                    </a>
-                                </div>
+                                        <div className="ui labels circular">
+                                            <span className="ui label _gray">{videoRecord.year}</span>
+                                            <span className={`ui label ${this.getLabelColor(videoRecord.type)}`}>{this.getTypeLabelName(videoRecord.type)}</span>
+                                        </div>
+                                    </div>
+                                </a>
                             )}
 
                             {!this.state.loading && filteredItems.length <= 0 && "Выберите другие параметры фильтрации."}
@@ -152,8 +184,10 @@ class CourseVideosPage extends React.Component {
     }
 }
 
-CourseVideosPage.propTypes = {
-    entry_url: PropTypes.string.isRequired
+const propTypes = {
+    entry_url: PropTypes.arrayOf(PropTypes.string).isRequired
 };
+
+CourseVideosPage.propTypes = propTypes;
 
 export default CourseVideosPage;

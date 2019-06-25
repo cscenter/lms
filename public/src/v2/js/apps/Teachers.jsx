@@ -1,4 +1,5 @@
 import React, {Fragment} from 'react';
+import * as PropTypes from 'prop-types';
 
 import _throttle from 'lodash-es/throttle';
 import _includes from 'lodash-es/includes';
@@ -14,7 +15,6 @@ import {
     showErrorNotification,
     loadIntersectionObserverPolyfill
 } from "utils";
-
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
@@ -219,5 +219,11 @@ class App extends React.Component {
         );
     }
 }
+
+const propTypes = {
+    entry_url: PropTypes.string.isRequired,
+};
+
+App.propTypes = propTypes;
 
 export default App;
