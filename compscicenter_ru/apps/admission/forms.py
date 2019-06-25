@@ -217,11 +217,11 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
     class Meta:
         model = Applicant
         exclude = ("campaign", "first_name", "patronymic", "surname",
-                   "status", "admin_note", "yandex_id_normalize", "user",
+                   "status", "yandex_id_normalize", "user",
                    "university_other", "contest_id", "participant_id",
                    "is_unsubscribed", "university2")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, request, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Swap label with help text for next fields
         to_swap = [
@@ -230,6 +230,8 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
         ]
         for field in to_swap:
             self.fields[field].label = self.fields[field].help_text
+        if not request.user.is_curator:
+            del self.fields['admin_note']
 
 
 class ApplicantStatusForm(forms.ModelForm):
