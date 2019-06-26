@@ -4,12 +4,12 @@ from django.utils.timezone import now
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
+from core.settings.base import CENTER_FOUNDATION_YEAR
+from courses.api.serializers import MetaCourseSerializer, TeacherSerializer, \
+    CourseVideoSerializer
 from courses.models import Course, CourseTeacher
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
-from courses.api.serializers import MetaCourseSerializer, TeacherSerializer, \
-    CourseSerializer
-from core.settings.base import CENTER_FOUNDATION_YEAR
 from users.models import User
 
 
@@ -82,7 +82,7 @@ class LecturerList(ListAPIView):
 
 class CourseVideoList(ListAPIView):
     pagination_class = None
-    serializer_class = CourseSerializer
+    serializer_class = CourseVideoSerializer
 
     def get_queryset(self):
         lecturer = CourseTeacher.roles.lecturer
