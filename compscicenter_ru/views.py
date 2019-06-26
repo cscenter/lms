@@ -11,39 +11,32 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q, Prefetch
+from django.db.models import Q
 from django.http import Http404
-from django.http.response import HttpResponseNotFound
 from django.utils.timezone import now
-from django.utils.translation import pgettext_lazy
+from django.utils.translation import gettext, pgettext_lazy, ugettext_lazy as _
 from django.views import generic
-from django.views.generic import ListView
 from django_filters.views import FilterMixin
-from djchoices import DjangoChoices, ChoiceItem
 from rest_framework.renderers import JSONRenderer
 from vanilla import TemplateView
 
-from admission.models import Applicant
 from compscicenter_ru.serializers import CoursesSerializer
 from compscicenter_ru.utils import group_terms_by_academic_year
 from core.exceptions import Redirect
 from core.models import Faq
-from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
-from courses.models import Course, CourseTeacher, Semester
+from courses.models import Course, Semester
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index
-from learning.api.views import TestimonialList
 from learning.models import Branch, Enrollment, GraduateProfile
 from learning.projects.constants import ProjectTypes
-from learning.projects.models import Project, ProjectStudent
-from learning.settings import StudentStatuses, Branches
+from learning.projects.models import ProjectStudent
+from learning.settings import Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
 from publications.models import ProjectPublication
 from stats.views import StudentsDiplomasStats
 from study_programs.models import StudyProgram, AcademicDiscipline
-from users.constants import AcademicRoles
 from users.models import User, SHADCourseRecord
 from .filters import CoursesFilter
 
@@ -415,34 +408,27 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         return academic_year, term_type
 
 
-class CourseVideoListView(ListView):
-    model = Course
+class CourseVideoListView(TemplateView):
     template_name = "compscicenter_ru/courses_video_list.html"
-    context_object_name = 'course_list'
-
-    def get_queryset(self):
-        lecturer = CourseTeacher.roles.lecturer
-        lecturers = Prefetch(
-            'course_teachers',
-            queryset=(CourseTeacher.objects
-                      .filter(roles=lecturer)
-                      .select_related('teacher')))
-        # FIXME: filter by completed_at
-        return (Course.objects
-                .filter(is_published_in_video=True)
-                .in_center_branches()
-                .order_by('-semester__year', 'semester__type')
-                .select_related('meta_course', 'semester')
-                .prefetch_related(lecturers))
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['app_data'] = {
+        video_types = [
+            {"value": "course", "label": gettext("Course")},
+            {"value": "lecture", "label": gettext("Lecture")},
+        ]
+        app_data = {
             "props": {
-                "entry_url": reverse("api:course_video_records")
-            }
+                "entry_url": [
+                    reverse("api:course_video_records"),
+                    reverse("api:open_lecture_video_records"),
+                ],
+                "videoTypes": video_types
+            },
+            "state": {
+                "videoTypes": [item["value"] for item in video_types]
+            },
         }
-        return context
+        return {"app_data": app_data}
 
 
 class ProjectsListView(TemplateView):

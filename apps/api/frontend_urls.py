@@ -6,4 +6,5 @@ urlpatterns = [
     url(r'^v2/', include('courses.api.urls')),
     url(r'^v2/', include('learning.api.urls')),
     url(r'^v2/', include('admission.api.urls')),
+    url(r'^v2/', include('publications.api.urls')),
 ]

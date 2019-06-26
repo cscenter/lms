@@ -1,6 +1,6 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
-{% block title %}Видеозаписи лекций {{ super() }}{% endblock title %}
+{% block title %}Видеозаписи {{ super() }}{% endblock title %}
 
 {% block body_attrs %}class="_dark"{% endblock body_attrs %}
 
@@ -12,7 +12,7 @@
 
 {% block content %}
 <div class="container page-content">
-    <h1>Видеозаписи лекций</h1>
+    <h1>Видеозаписи</h1>
     <div id="CourseVideos" data-init='{{ app_data|tojson|safe }}' class="__react-root"></div>
 </div>
 {% endblock content %}

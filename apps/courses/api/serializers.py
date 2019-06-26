@@ -61,6 +61,26 @@ class CourseSerializer(serializers.ModelSerializer):
         return obj.get_absolute_url()
 
 
+class CourseVideoSerializer(CourseSerializer):
+    type = serializers.CharField(default="course")
+    year = serializers.SerializerMethodField()
+    preview_url = serializers.SerializerMethodField()
+    speakers = CourseTeacherRelatedField(
+        many=True, read_only=True, source="course_teachers")
+
+    class Meta(CourseSerializer.Meta):
+        fields = ('id', 'name', 'preview_url', 'url', 'type', 'year', 'speakers')
+
+    def get_url(self, obj: Course):
+        return obj.get_url_for_tab('classes')
+
+    def get_year(self, obj: Course):
+        return obj.semester.year
+
+    def get_preview_url(self, obj: Course):
+        return ""
+
+
 class TeacherSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     name = serializers.SerializerMethodField()

@@ -134,6 +134,11 @@ class Speaker(UserThumbnailMixin, models.Model):
         return " ".join(p for p in parts if p).strip()
 
     @property
+    def abbreviated_name(self):
+        parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
+        return ". ".join(p for p in parts if p).strip()
+
+    @property
     def abbreviated_name_in_latin(self):
         """
         Returns transliterated user surname + rest initials in lower case.
@@ -173,3 +178,11 @@ class OpenLecture(TimeStampedModel):
     def save(self, **kwargs):
         self.description = self.description.strip()
         super().save(**kwargs)
+
+    @property
+    def preview_url(self):
+        video_id = self.video_url.rsplit('embed/', maxsplit=1)[-1]
+        if video_id and not video_id.startswith("http"):
+            return f"https://img.youtube.com/vi/{video_id}/mqdefault.jpg"
+        else:
+            return ""

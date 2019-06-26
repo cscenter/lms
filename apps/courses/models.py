@@ -10,6 +10,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.db.models import Prefetch
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
