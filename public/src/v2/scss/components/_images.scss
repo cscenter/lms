@@ -38,6 +38,9 @@ $figure-caption-color:              $gray-dark;
   position: relative;
   padding-top: 52.5%;
   background: $gray-darker;
+  overflow: hidden;
+  background-position: 50%;
+  background-repeat: no-repeat;
 
   img {
     width: 100%;

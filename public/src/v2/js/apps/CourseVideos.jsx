@@ -3,10 +3,21 @@ import React, {Fragment} from 'react';
 import _throttle from 'lodash-es/throttle';
 import _includes from 'lodash-es/includes';
 import $ from 'jquery';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import SearchInput from 'components/SearchInput';
-import {hideBodyPreloader, showErrorNotification} from "utils";
+import {
+    hideBodyPreloader,
+    loadIntersectionObserverPolyfill,
+    showErrorNotification
+} from "utils";
 import Select from "../components/Select";
+import LazyImage from "../components/LazyImage";
+import Checkbox from "../components/Checkbox";
+
+
+export let polyfills = [
+    loadIntersectionObserverPolyfill(),
+];
 
 
 class CourseVideosPage extends React.Component {
@@ -19,6 +30,7 @@ class CourseVideosPage extends React.Component {
             "q": "",  // query string
             "year": null,
             "yearOptions": [],
+            "videoTypes": [],
             ...props.initialState
         };
         this.fetch = _throttle(this.fetch, 300);
@@ -36,6 +48,25 @@ class CourseVideosPage extends React.Component {
         });
     };
 
+    // FIXME: Duplicated. Move to utility method?
+    /**
+     * Handle state for multiple checkboxes with the same name
+     * @param event
+     */
+    handleMultipleCheckboxChange = (event) => {
+        const {name, value} = event.target;
+        let selectedCheckboxes = this.state[name] || [];
+        if (event.target.checked === true) {
+            selectedCheckboxes.push(value);
+        } else {
+            let valueIndex = selectedCheckboxes.indexOf(value);
+            selectedCheckboxes.splice(valueIndex, 1);
+        }
+        this.setState({
+            [name]: selectedCheckboxes
+        });
+    };
+
     componentDidMount = () => {
         const filterState = this.getFilterState(this.state);
         console.debug("CourseVideosPage: filterState", filterState);
@@ -44,7 +75,7 @@ class CourseVideosPage extends React.Component {
 
     componentWillUnmount = function () {
         if (this.requests) {
-            for(const request of this.requests) {
+            for (const request of this.requests) {
                 request.abort();
             }
         }
@@ -85,21 +116,25 @@ class CourseVideosPage extends React.Component {
                 let data = [];
                 // Aggregate data for year select
                 let years = new Set();
-                for(const d of iterables) {
+                for (const d of iterables) {
                     data = data.concat(d);
-                    d.forEach((item) => { years.add(item.year) });
+                    d.forEach((item) => {
+                        years.add(item.year)
+                    });
                 }
                 let yearOptions = Array.from(years, year => ({
                     value: year, label: year
                 }));
+                yearOptions.sort((a, b) => b.value - a.value);
+                data.sort((a, b) => b.year - a.year);
                 this.setState({
                     loading: false,
                     items: data,
                     yearOptions: yearOptions
                 });
             }).catch((reason) => {
-                showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
-            });
+            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
+        });
     };
 
     getLabelColor(videoType) {
@@ -123,11 +158,12 @@ class CourseVideosPage extends React.Component {
     }
 
     render() {
-        const {q, year} = this.state;
-        let filteredItems = this.state.items.filter(function(item) {
+        const {q, year, videoTypes} = this.state;
+        let filteredItems = this.state.items.filter(function (item) {
             let yearCondition = (year !== null) ? item.year === year.value : true;
-            return yearCondition &&
-                   _includes(item.name.toLowerCase(), q.toLowerCase());
+            let videoTypesCondition = videoTypes.includes(item.type);
+            return yearCondition && videoTypesCondition &&
+                _includes(item.name.toLowerCase(), q.toLowerCase());
         });
 
         return (
@@ -136,13 +172,22 @@ class CourseVideosPage extends React.Component {
                     <div className="col-lg-9 order-lg-1 order-2">
                         <div className="card-deck _three">
                             {filteredItems.map((videoRecord) =>
-                                <a key={`${videoRecord.type}_${videoRecord.id}`} className="card _shadowed _video"  href={`${videoRecord.url}classes/`}>
-                                    {videoRecord.preview ? <div class="card__img"><img src={videoRecord.preview}/></div> : ""}
+                                <a key={`${videoRecord.type}_${videoRecord.id}`}
+                                   className="card _shadowed _video"
+                                   href={videoRecord.url}>
+                                    {videoRecord.preview_url ?
+                                        <LazyImage src={videoRecord.preview_url}
+                                                   alt={videoRecord.name}
+                                                   className={`card__img lazy-wrapper`}/>
+                                        : ""
+                                    }
                                     <div className="card__content">
-                                        <h4 className="card__title">{ videoRecord.name }</h4>
+                                        <h4 className="card__title">{videoRecord.name}</h4>
                                         <div className="author">
-                                            {videoRecord.teachers.join(", ")}
+                                            {videoRecord.speakers.join(", ")}
                                         </div>
+                                    </div>
+                                    <div className="card__content _meta">
                                         <div className="ui labels circular">
                                             <span className="ui label _gray">{videoRecord.year}</span>
                                             <span className={`ui label ${this.getLabelColor(videoRecord.type)}`}>{this.getTypeLabelName(videoRecord.type)}</span>
@@ -165,7 +210,7 @@ class CourseVideosPage extends React.Component {
                                     icon="search"
                                 />
                             </div>
-                            <div className="field">
+                            <div className="field mb-2">
                                 <Select
                                     onChange={this.handleYearChange}
                                     value={year}
@@ -176,6 +221,20 @@ class CourseVideosPage extends React.Component {
                                     key="year"
                                 />
                             </div>
+                            <div className="field">
+                                <div className="grouped inline">
+                                    {this.props.videoTypes.map((item) =>
+                                        <Checkbox
+                                            name="videoTypes"
+                                            key={item.value}
+                                            value={item.value}
+                                            defaultChecked={true}
+                                            onChange={this.handleMultipleCheckboxChange}
+                                            label={item.label}
+                                        />
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -185,7 +244,20 @@ class CourseVideosPage extends React.Component {
 }
 
 const propTypes = {
-    entry_url: PropTypes.arrayOf(PropTypes.string).isRequired
+    entry_url: PropTypes.arrayOf(PropTypes.string).isRequired,
+    videoTypes: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired
+    })),
+    items: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        name: PropTypes.string.isRequired,
+        url: PropTypes.string.isRequired,
+        preview_url: PropTypes.string.isRequired,
+        type: PropTypes.oneOf(['course', 'lecture']).isRequired,
+        year: PropTypes.number.isRequired,
+        speakers: PropTypes.arrayOf(PropTypes.string).isRequired
+    })),
 };
 
 CourseVideosPage.propTypes = propTypes;
