@@ -147,14 +147,13 @@ class CourseVideosPage extends React.Component {
         }
     }
 
-    getTypeLabelName(videoType) {
-        if (videoType === "course") {
-            return "Курс"
-        } else if (videoType === "lecture") {
-            return "Лекция"
-        } else {
-            return ""
+    getVideoTypeLabel(videoType) {
+        for (const x of this.props.videoTypes) {
+            if (x.value === videoType) {
+                return x.label
+            }
         }
+        return ""
     }
 
     render() {
@@ -190,14 +189,13 @@ class CourseVideosPage extends React.Component {
                                     <div className="card__content _meta">
                                         <div className="ui labels circular">
                                             <span className="ui label _gray">{videoRecord.year}</span>
-                                            <span className={`ui label ${this.getLabelColor(videoRecord.type)}`}>{this.getTypeLabelName(videoRecord.type)}</span>
+                                            <span className={`ui label ${this.getLabelColor(videoRecord.type)}`}>{this.getVideoTypeLabel(videoRecord.type)}</span>
                                         </div>
                                     </div>
                                 </a>
                             )}
-
-                            {!this.state.loading && filteredItems.length <= 0 && "Выберите другие параметры фильтрации."}
                         </div>
+                        {!this.state.loading && filteredItems.length <= 0 && "Выберите другие параметры фильтрации."}
                     </div>
 
                     <div className="col-lg-3 order-lg-2 order-0">
