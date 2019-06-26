@@ -23,7 +23,7 @@ from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local, CityCode, Timezone, TzAware
 from core.urls import reverse, city_aware_reverse
-from core.utils import hashids
+from core.utils import hashids, get_youtube_video_id
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
@@ -298,6 +298,10 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     materials_video = models.BooleanField(default=False, editable=False)
     materials_slides = models.BooleanField(default=False, editable=False)
     materials_files = models.BooleanField(default=False, editable=False)
+    youtube_video_id = models.CharField(
+        max_length=255, editable=False,
+        help_text="Helpful for getting thumbnail on /videos/ page",
+        blank=True)
 
     is_open = models.BooleanField(
         _("Open course offering"),
@@ -316,7 +320,13 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
 
     objects = CourseDefaultManager()
 
-    derivable_fields = ['materials_video', 'materials_slides', 'materials_files']
+    derivable_fields = [
+        'materials_video',
+        'youtube_video_id',
+        'materials_slides',
+        'materials_files',
+    ]
+
     prefetch_before_compute_fields = {
         # TODO: remove default ordering for courseclass_set
         'materials_video': ['courseclass_set'],
@@ -342,6 +352,21 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
 
         if self.materials_video != materials_video:
             self.materials_video = materials_video
+            return True
+
+        return False
+
+    def _compute_youtube_video_id(self):
+        youtube_video_id = ''
+        for course_class in self.courseclass_set.order_by('pk').all():
+            if course_class.video_url.strip() != "":
+                video_id = get_youtube_video_id(course_class.video_url)
+                if video_id is not None:
+                    youtube_video_id = video_id
+                    break
+
+        if self.youtube_video_id != youtube_video_id:
+            self.youtube_video_id = youtube_video_id
             return True
 
         return False

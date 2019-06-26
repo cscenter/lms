@@ -1,4 +1,6 @@
 import datetime
+from urllib.parse import urlparse, parse_qs
+
 import hoep as h
 import logging
 
@@ -229,3 +231,30 @@ def queryset_iterator(queryset, chunk_size=1000):
         for pk in range(limits['min'], limits['max'] + 1, chunk_size):
             for row in queryset.filter(pk__gte=pk)[:chunk_size]:
                 yield row
+
+
+def get_youtube_video_id(video_url):
+    """
+    Returns Youtube video id extracted from the given valid url.
+
+    Supported formats:
+        https://youtu.be/sxnSFdRECas
+        https://www.youtube.com/watch?v=0lZJicHYJXM
+        http://www.youtube.com/v/_lOT2p_FCvA?version=3&amp;hl=en_US
+        https://www.youtube.com/embed/8SPq-9kS69M
+        https://www.youtube-nocookie.com/embed/8SPq-9kS69M
+        youtube.com/embed/8SPq-9kS69M
+    """
+    if video_url.startswith(('youtu', 'www')):
+        video_url = 'https://' + video_url
+    parsed = urlparse(video_url)
+    video_id = None
+    if 'youtube' in parsed.hostname:
+        if parsed.path == '/watch':
+            qs = parse_qs(parsed.query)
+            video_id = qs['v'][0]
+        elif parsed.path.startswith(('/embed/', '/v/')):
+            video_id = parsed.path.split('/', maxsplit=2)[2]
+    elif 'youtu.be' in parsed.hostname:
+        video_id = parsed.path.split('/')[1]
+    return video_id

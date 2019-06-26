@@ -78,6 +78,9 @@ class CourseVideoSerializer(CourseSerializer):
         return obj.semester.year
 
     def get_preview_url(self, obj: Course):
+        video_id = obj.youtube_video_id
+        if video_id:
+            return f"https://img.youtube.com/vi/{video_id}/mqdefault.jpg"
         return ""
 
 
