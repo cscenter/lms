@@ -1,14 +1,14 @@
 from rest_framework.generics import ListAPIView
 
-from publications.api.serializers import OpenLectureVideoSerializer
-from publications.models import OpenLecture
+from publications.api.serializers import RecordedEventSerializer
+from publications.models import RecordedEvent
 
 
-class OpenLectureVideoList(ListAPIView):
+class RecordedEventList(ListAPIView):
     pagination_class = None
-    serializer_class = OpenLectureVideoSerializer
+    serializer_class = RecordedEventSerializer
 
     def get_queryset(self):
-        return (OpenLecture.objects
+        return (RecordedEvent.objects
                 .prefetch_related("speakers")
                 .order_by('-date_at'))

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-06-20 13:51+0000\n"
-"PO-Revision-Date: 2019-06-20 13:51+0000\n"
+"POT-Creation-Date: 2019-06-27 12:48+0000\n"
+"PO-Revision-Date: 2019-06-27 12:49+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -19,6 +19,40 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.9.3\n"
+
+#: compscicenter_ru/apps/announcements/models.py:13
+#: compscicenter_ru/apps/publications/models.py:44
+#: compscicenter_ru/apps/publications/models.py:155
+msgid "Title"
+msgstr "Заголовок"
+
+#: compscicenter_ru/apps/announcements/models.py:14
+#: compscicenter_ru/apps/publications/models.py:65
+#: compscicenter_ru/apps/publications/models.py:114
+#: compscicenter_ru/apps/publications/models.py:158
+msgid "Description"
+msgstr "Описание"
+
+#: compscicenter_ru/apps/announcements/models.py:16
+#: compscicenter_ru/apps/announcements/models.py:20
+msgid "Publish Start at"
+msgstr ""
+
+#: compscicenter_ru/apps/announcements/models.py:18
+msgid "Publish End at"
+msgstr ""
+
+#: compscicenter_ru/apps/announcements/models.py:23
+#, fuzzy
+#| msgid "Event Date"
+msgid "Event Place"
+msgstr "Дата события"
+
+#: compscicenter_ru/apps/announcements/models.py:25
+#, fuzzy
+#| msgid "Publications"
+msgid "Actions"
+msgstr "Публикации"
 
 #: compscicenter_ru/apps/online_courses/apps.py:7
 #: compscicenter_ru/apps/online_courses/models.py:45
@@ -63,7 +97,7 @@ msgid "Related Project"
 msgstr "Проект"
 
 #: compscicenter_ru/apps/publications/admin.py:15
-#: compscicenter_ru/apps/publications/models.py:56
+#: compscicenter_ru/apps/publications/models.py:57
 msgid "Projects"
 msgstr "Проекты"
 
@@ -72,7 +106,7 @@ msgid "Author"
 msgstr "Автор"
 
 #: compscicenter_ru/apps/publications/admin.py:21
-#: compscicenter_ru/apps/publications/models.py:51
+#: compscicenter_ru/apps/publications/models.py:52
 msgid "Authors"
 msgstr "Авторы"
 
@@ -80,111 +114,104 @@ msgstr "Авторы"
 msgid "Publications"
 msgstr "Публикации"
 
-#: compscicenter_ru/apps/publications/models.py:24
+#: compscicenter_ru/apps/publications/models.py:25
 msgid "Short Description"
 msgstr "Заметка"
 
-#: compscicenter_ru/apps/publications/models.py:28
+#: compscicenter_ru/apps/publications/models.py:29
 msgid "Project Publication Author"
 msgstr "Автор публикации"
 
-#: compscicenter_ru/apps/publications/models.py:29
+#: compscicenter_ru/apps/publications/models.py:30
 msgid "Project Publication Authors"
 msgstr "Авторы публикации"
 
-#: compscicenter_ru/apps/publications/models.py:39
+#: compscicenter_ru/apps/publications/models.py:40
 msgid "created"
 msgstr "Создано"
 
-#: compscicenter_ru/apps/publications/models.py:43
-#: compscicenter_ru/apps/publications/models.py:146
-msgid "Title"
-msgstr "Заголовок"
-
-#: compscicenter_ru/apps/publications/models.py:45
-#: compscicenter_ru/apps/publications/models.py:147
+#: compscicenter_ru/apps/publications/models.py:46
+#: compscicenter_ru/apps/publications/models.py:156
 msgid "Slug"
 msgstr "Slug"
 
-#: compscicenter_ru/apps/publications/models.py:47
+#: compscicenter_ru/apps/publications/models.py:48
 msgid "Draft"
 msgstr "Черновик"
 
-#: compscicenter_ru/apps/publications/models.py:64
-#: compscicenter_ru/apps/publications/models.py:110
-#: compscicenter_ru/apps/publications/models.py:149
-msgid "Description"
-msgstr "Описание"
-
-#: compscicenter_ru/apps/publications/models.py:67
+#: compscicenter_ru/apps/publications/models.py:68
 msgid "External Links"
 msgstr "Внешние ссылки"
 
-#: compscicenter_ru/apps/publications/models.py:72
+#: compscicenter_ru/apps/publications/models.py:73
 msgid "Project Publication"
 msgstr "Публикация о проекте"
 
-#: compscicenter_ru/apps/publications/models.py:73
+#: compscicenter_ru/apps/publications/models.py:74
 msgid "Project Publications"
 msgstr "Публикации о проектах"
 
-#: compscicenter_ru/apps/publications/models.py:107
+#: compscicenter_ru/apps/publications/models.py:108
 msgid "First Name"
 msgstr "Имя"
 
-#: compscicenter_ru/apps/publications/models.py:108
+#: compscicenter_ru/apps/publications/models.py:109
 msgid "Surname"
 msgstr "Фамилия"
 
-#: compscicenter_ru/apps/publications/models.py:109
+#: compscicenter_ru/apps/publications/models.py:110
 msgid "Patronymic"
 msgstr "Отчество"
 
-#: compscicenter_ru/apps/publications/models.py:112
+#: compscicenter_ru/apps/publications/models.py:111
+msgid "Gender"
+msgstr ""
+
+#: compscicenter_ru/apps/publications/models.py:116
 msgid "Photo"
 msgstr "Фото"
 
-#: compscicenter_ru/apps/publications/models.py:116
+#: compscicenter_ru/apps/publications/models.py:120
 msgid "Aspect ratio 5:7. Min size: {}"
 msgstr ""
 
-#: compscicenter_ru/apps/publications/models.py:117
+#: compscicenter_ru/apps/publications/models.py:121
 #: compscicenter_ru/templates/users/user_detail.html:300
 msgid "Workplace"
 msgstr "Место работы"
 
-#: compscicenter_ru/apps/publications/models.py:121
+#: compscicenter_ru/apps/publications/models.py:125
 msgid "Speaker"
 msgstr "Лектор"
 
-#: compscicenter_ru/apps/publications/models.py:122
-#: compscicenter_ru/apps/publications/models.py:156
+#: compscicenter_ru/apps/publications/models.py:126
+#: compscicenter_ru/apps/publications/models.py:165
 msgid "Speakers"
 msgstr "Лекторы"
 
-#: compscicenter_ru/apps/publications/models.py:148
+#: compscicenter_ru/apps/publications/models.py:157
 msgid "Event Date"
 msgstr "Дата события"
 
-#: compscicenter_ru/apps/publications/models.py:151
+#: compscicenter_ru/apps/publications/models.py:160
 msgid "Video URL"
 msgstr "URL Видео"
 
-#: compscicenter_ru/apps/publications/models.py:152
+#: compscicenter_ru/apps/publications/models.py:161
 msgid "https://support.google.com/youtube/answer/171780?hl=en"
 msgstr ""
 
-#: compscicenter_ru/apps/publications/models.py:153
+#: compscicenter_ru/apps/publications/models.py:162
 msgid "Slides URL"
 msgstr "Слайды"
 
-#: compscicenter_ru/apps/publications/models.py:160
-msgid "Open Lecture"
-msgstr "Открытая лекция"
+#: compscicenter_ru/apps/publications/models.py:169
+msgid "Recorded Event"
+msgstr "Видеозапись мероприятия"
 
-#: compscicenter_ru/apps/publications/models.py:161
-msgid "Open Lectures"
-msgstr "Открытые лекции"
+#: compscicenter_ru/apps/publications/models.py:170
+msgid "Recorded Events"
+msgstr "Видеозаписи мероприятий"
 
 #: compscicenter_ru/filters.py:34
 msgid "Saint Petersburg"
@@ -519,28 +546,40 @@ msgstr "Аккаунты"
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: compscicenter_ru/views.py:359
+#: compscicenter_ru/views.py:352
 msgctxt "adjective"
 msgid "autumn"
 msgstr "осенний"
 
-#: compscicenter_ru/views.py:360
+#: compscicenter_ru/views.py:353
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
 
+#: compscicenter_ru/views.py:416
+#, fuzzy
+#| msgctxt "menu"
+#| msgid "Courses"
+msgid "Course"
+msgstr "Курсы"
+
+#: compscicenter_ru/views.py:417
+#, fuzzy
+#| msgid "Lecturer"
+msgid "Lecture"
+msgstr "Лектор"
+
+#~ msgid "Open Lecture"
+#~ msgstr "Открытая лекция"
+
+#~ msgid "Open Lectures"
+#~ msgstr "Открытые лекции"
+
 #~ msgid "About Lecturer"
 #~ msgstr "О лекторе"
 
-#~ msgid "Lecturer"
-#~ msgstr "Лектор"
-
 #~ msgid "Lecturers"
 #~ msgstr "Лекторы"
-
-#~ msgctxt "menu"
-#~ msgid "Courses"
-#~ msgstr "Курсы"
 
 #~ msgctxt "menu"
 #~ msgid "Online"

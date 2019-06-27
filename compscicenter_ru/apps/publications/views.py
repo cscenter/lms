@@ -1,6 +1,6 @@
 from django.views.generic import DetailView
 
-from publications.models import ProjectPublication, OpenLecture
+from publications.models import ProjectPublication, RecordedEvent
 
 
 class ProjectPublicationView(DetailView):
@@ -11,10 +11,10 @@ class ProjectPublicationView(DetailView):
         return ProjectPublication.objects.prefetch_related("projects")
 
 
-class OpenLectureView(DetailView):
-    context_object_name = "open_lecture"
+class RecordedEventView(DetailView):
+    context_object_name = "recorded_event"
     slug_url_kwarg = "slug"
-    template_name = "compscicenter_ru/publications/open_lecture.html"
+    template_name = "compscicenter_ru/publications/recorded_event.html"
 
     def get_queryset(self):
-        return OpenLecture.objects.get_queryset()
+        return RecordedEvent.objects.get_queryset()

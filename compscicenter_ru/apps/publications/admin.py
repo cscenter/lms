@@ -4,7 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from core.widgets import CKEditorWidget
 from publications.models import ProjectPublication, ProjectPublicationAuthor, \
-    OpenLecture, Speaker
+    RecordedEvent, Speaker
 
 
 class ProjectAdminInline(admin.TabularInline):
@@ -66,12 +66,12 @@ class LecturerAdmin(admin.ModelAdmin):
 
 
 class LecturerInlineAdmin(admin.StackedInline):
-    model = OpenLecture.speakers.through
+    model = RecordedEvent.speakers.through
     extra = 0
 
 
-@admin.register(OpenLecture)
-class OpenLectureAdmin(admin.ModelAdmin):
+@admin.register(RecordedEvent)
+class RecordedEventAdmin(admin.ModelAdmin):
     list_display = ("name", "date_at")
     exclude = ('speakers',)
     inlines = (LecturerInlineAdmin, )
