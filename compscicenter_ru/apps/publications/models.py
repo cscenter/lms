@@ -151,7 +151,7 @@ class Speaker(UserThumbnailMixin, models.Model):
         return ".".join(parts).translate(ru_en_mapping)
 
 
-class OpenLecture(TimeStampedModel):
+class RecordedEvent(TimeStampedModel):
     name = models.CharField(_("Title"), max_length=255)
     slug = models.SlugField(_("Slug"), max_length=70, unique=True)
     date_at = models.DateField(_("Event Date"))
@@ -163,17 +163,17 @@ class OpenLecture(TimeStampedModel):
     speakers = models.ManyToManyField(
         Speaker,
         verbose_name=_("Speakers"),
-        related_name='open_lectures')
+        related_name='recorded_events')
 
     class Meta:
-        verbose_name = _("Open Lecture")
-        verbose_name_plural = _("Open Lectures")
+        verbose_name = _("Recorded Event")
+        verbose_name_plural = _("Recorded Events")
 
     def __str__(self):
         return f"{self.name}"
 
     def get_absolute_url(self):
-        return reverse("open_lecture_detail", kwargs={"slug": self.slug})
+        return reverse("recorded_event_detail", kwargs={"slug": self.slug})
 
     def save(self, **kwargs):
         self.description = self.description.strip()

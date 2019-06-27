@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from courses.api.serializers import CourseVideoSerializer
-from publications.models import OpenLecture, Speaker
+from publications.models import RecordedEvent, Speaker
 
 
 class SpeakersRelatedField(serializers.RelatedField):
@@ -9,7 +9,7 @@ class SpeakersRelatedField(serializers.RelatedField):
         return value.abbreviated_name
 
 
-class OpenLectureVideoSerializer(serializers.ModelSerializer):
+class RecordedEventSerializer(serializers.ModelSerializer):
     type = serializers.CharField(default="lecture")
     year = serializers.SerializerMethodField()
     url = serializers.SerializerMethodField()
@@ -17,10 +17,10 @@ class OpenLectureVideoSerializer(serializers.ModelSerializer):
     speakers = SpeakersRelatedField(many=True, read_only=True)
 
     class Meta(CourseVideoSerializer.Meta):
-        model = OpenLecture
+        model = RecordedEvent
 
-    def get_url(self, obj: OpenLecture):
+    def get_url(self, obj: RecordedEvent):
         return obj.get_absolute_url()
 
-    def get_year(self, obj: OpenLecture):
+    def get_year(self, obj: RecordedEvent):
         return obj.date_at.year

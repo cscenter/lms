@@ -420,7 +420,7 @@ class CourseVideoListView(TemplateView):
             "props": {
                 "entry_url": [
                     reverse("api:course_video_records"),
-                    reverse("api:open_lecture_video_records"),
+                    reverse("api:recorded_events_videos"),
                 ],
                 "videoTypes": video_types
             },
