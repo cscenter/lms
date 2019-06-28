@@ -15,6 +15,12 @@ ACTIONS_DEFAULT = """\
 
 
 class AnnouncementTag(TagBase):
+    modifier = models.CharField(
+        verbose_name=_("Modifier"),
+        max_length=20,
+        help_text=_("This class could affect the tag view"),
+        blank=True, null=True)
+
     class Meta:
         verbose_name = _("Announcement Tag")
         verbose_name_plural = _("Announcement Tags")
@@ -54,7 +60,10 @@ class Announcement(TimeStampedModel):
     publish_end_at = models.DateTimeField(_("Publish End at"))
     tags = TaggableManager(through=TaggedAnnouncement, blank=True)
     short_description = models.TextField(_("Short Description"))
-    description = models.TextField(_("Description"), blank=True)
+    description = models.TextField(
+        verbose_name=_("Description"),
+        help_text=_("Don't forget to add &lt;h3&gt;Title&lt;/h3&gt; on the first line"),
+        blank=True)
     thumbnail = models.ImageField(
         _("Photo"),
         upload_to="announcements/",

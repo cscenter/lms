@@ -1,0 +1,64 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% block title %}Анонс мероприятия "{{ announcement.name }}"{% endblock title %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="container-fluid _dark py-10">
+        <div class="container">
+            <div class="row no-gutters">
+                {% if announcement.thumbnail %}
+                    <div class="col-md-3 mr-md-8"
+                         style="background-image:url('{{ announcement.thumbnail.url }}'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 196px; border-radius: 4px;">
+                    </div>
+                {% endif %}
+                <div class="col-md-8 mt-6 mt-lg-0">
+                    <div class="announcement">
+                        {% with tags = announcement.tags.all() %}
+                            {% if tags %}
+                            <div class="ui labels _circular">
+                                {% for tag in tags %}
+                                    <span class="ui label {% if tag.modifier %}{{ tag.modifier }}{% else %}_gray{% endif %}">{{ tag.name }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        {% endwith %}
+                        <h1>{{ announcement.name }}</h1>
+                        {% if announcement.event_place or announcement.event_date_at %}
+                            <div class="grouped mb-4">
+                                {% if announcement.event_place %}
+                                    <div class="announcement__detail">
+                                        {{ macros.svg_inline('location') }}<span>{{ announcement.event_place }}</span>
+                                    </div>
+                                {% endif %}
+                                {% if announcement.event_date_at %}
+                                    <div class="announcement__detail">
+                                        {{ macros.svg_inline('calendar') }}<span>{{ announcement.event_date_at|date("j E Y H:i") }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        {% if announcement.event_actions %}{{ announcement.event_actions }}{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-9">
+                {% if announcement.description %}
+                    {{ announcement.description }}
+                {% else %}
+                    <h3>Описание</h3>
+                    {{ announcement.short_description }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}
