@@ -6,6 +6,7 @@ from django.urls import path
 from django.views.generic import TemplateView
 from loginas import urls as loginas_urls
 
+from announcements.views import AnnouncementTagAutocomplete
 from my_compscicenter_ru.views import IndexView
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from users.urls import auth_urls
@@ -36,6 +37,10 @@ urlpatterns = [
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),
     path('narnia/django-rq/', include('django_rq.urls')),
+    # Quick fix for admin page. Better to separate projects into private/public parts
+    path("", include(([
+        path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
+    ], "announcements"))),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
