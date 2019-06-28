@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-06-27 12:48+0000\n"
-"PO-Revision-Date: 2019-06-27 12:49+0000\n"
+"POT-Creation-Date: 2019-06-27 15:49+0000\n"
+"PO-Revision-Date: 2019-06-27 15:51+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -20,39 +20,59 @@ msgstr ""
 "%100>=20) ? 1 : 2);\n"
 "X-Translated-Using: django-rosetta 0.9.3\n"
 
-#: compscicenter_ru/apps/announcements/models.py:13
+#: compscicenter_ru/apps/announcements/apps.py:7
+#: compscicenter_ru/apps/announcements/models.py:54
+msgid "Announcements"
+msgstr "Анонсы"
+
+#: compscicenter_ru/apps/announcements/models.py:17
+msgid "Announcement Tag"
+msgstr "Тег анонса"
+
+#: compscicenter_ru/apps/announcements/models.py:18
+msgid "Announcement Tags"
+msgstr "Теги"
+
+#: compscicenter_ru/apps/announcements/models.py:35
 #: compscicenter_ru/apps/publications/models.py:44
 #: compscicenter_ru/apps/publications/models.py:155
 msgid "Title"
 msgstr "Заголовок"
 
-#: compscicenter_ru/apps/announcements/models.py:14
+#: compscicenter_ru/apps/announcements/models.py:36
 #: compscicenter_ru/apps/publications/models.py:65
 #: compscicenter_ru/apps/publications/models.py:114
 #: compscicenter_ru/apps/publications/models.py:158
 msgid "Description"
 msgstr "Описание"
 
-#: compscicenter_ru/apps/announcements/models.py:16
-#: compscicenter_ru/apps/announcements/models.py:20
+#: compscicenter_ru/apps/announcements/models.py:38
 msgid "Publish Start at"
-msgstr ""
+msgstr "Опубликовать с"
 
-#: compscicenter_ru/apps/announcements/models.py:18
+#: compscicenter_ru/apps/announcements/models.py:40
 msgid "Publish End at"
-msgstr ""
+msgstr "Опубликовать до"
 
-#: compscicenter_ru/apps/announcements/models.py:23
-#, fuzzy
-#| msgid "Event Date"
-msgid "Event Place"
+#: compscicenter_ru/apps/announcements/models.py:42
+#: compscicenter_ru/apps/publications/models.py:157
+msgid "Event Date"
 msgstr "Дата события"
 
-#: compscicenter_ru/apps/announcements/models.py:25
+#: compscicenter_ru/apps/announcements/models.py:45
+#| msgid "Event Date"
+msgid "Event Place"
+msgstr "Место события"
+
+#: compscicenter_ru/apps/announcements/models.py:47
 #, fuzzy
 #| msgid "Publications"
 msgid "Actions"
 msgstr "Публикации"
+
+#: compscicenter_ru/apps/announcements/models.py:53
+msgid "Announcement"
+msgstr "Анонс"
 
 #: compscicenter_ru/apps/online_courses/apps.py:7
 #: compscicenter_ru/apps/online_courses/models.py:45
@@ -188,10 +208,6 @@ msgstr "Лектор"
 #: compscicenter_ru/apps/publications/models.py:165
 msgid "Speakers"
 msgstr "Лекторы"
-
-#: compscicenter_ru/apps/publications/models.py:157
-msgid "Event Date"
-msgstr "Дата события"
 
 #: compscicenter_ru/apps/publications/models.py:160
 msgid "Video URL"
@@ -557,17 +573,15 @@ msgid "spring"
 msgstr "весенний"
 
 #: compscicenter_ru/views.py:416
-#, fuzzy
 #| msgctxt "menu"
 #| msgid "Courses"
 msgid "Course"
-msgstr "Курсы"
+msgstr "Курс"
 
 #: compscicenter_ru/views.py:417
-#, fuzzy
 #| msgid "Lecturer"
 msgid "Lecture"
-msgstr "Лектор"
+msgstr "Лекция"
 
 #~ msgid "Open Lecture"
 #~ msgstr "Открытая лекция"
