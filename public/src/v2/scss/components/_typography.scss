@@ -19,18 +19,12 @@ h6,
 .h4,
 .h5,
 .h6 {
+  display: block;
   margin-bottom: spacer("4x");
   font-family: $headings-font-family;
   font-weight: $headings-font-weight;
   line-height: $headings-line-height;
   color: $headings-color;
-}
-
-a.h1,
-a.h2,
-a.h3,
-a.h4 {
-  display: inline-block;
 }
 
 h1,
