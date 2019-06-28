@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -56,7 +55,8 @@ class Announcement(TimeStampedModel):
     name = models.CharField(_("Title"), max_length=255)
     publish_start_at = models.DateTimeField(
         _("Publish Start at"),
-        default=timezone.now)
+        # Note: Lambda allows to patch timezone to tests
+        default=lambda: timezone.now())
     publish_end_at = models.DateTimeField(_("Publish End at"))
     tags = TaggableManager(through=TaggedAnnouncement, blank=True)
     short_description = models.TextField(_("Short Description"))
