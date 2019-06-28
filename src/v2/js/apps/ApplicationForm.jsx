@@ -2,7 +2,7 @@ import React, {Fragment} from 'react';
 
 import 'bootstrap/js/src/tooltip';
 import $ from 'jquery';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import {showNotification, showErrorNotification} from "utils";
 import Select from "components/Select";
 import {Creatable as CreatableSelect} from 'react-select';
