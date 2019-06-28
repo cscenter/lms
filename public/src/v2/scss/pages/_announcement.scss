@@ -15,14 +15,7 @@
 }
 
 .announcement {
-  width: 100%;
   h1, .h1 {
     margin-bottom: spacer("2x");
-  }
-
-  padding-top: spacer("6x");
-  align-self: center;
-  @include media-breakpoint-up(md) {
-    padding-top: 0;
   }
 }

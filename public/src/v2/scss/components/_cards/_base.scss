@@ -115,15 +115,19 @@ $card-bg: $white !default;
   margin-top: auto;
 }
 
+
+.card__background {
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
 .card._horizontal {
   .card__content {
     padding: spacer("6x") spacer("4x");
     align-self: center;
     @include media-breakpoint-up(md) {
       padding: spacer("8x") spacer("10x") spacer("8x") spacer("8x");
-    }
-    .announcement {
-      padding: 0;
     }
   }
 }
