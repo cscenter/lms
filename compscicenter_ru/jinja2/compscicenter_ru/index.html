@@ -94,6 +94,48 @@
         </div>
     </div>
 
+    {% if announcements %}
+        <script type="text/javascript">
+            (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+        </script>
+        {% for announcement in announcements %}
+            <div class="container mb-10">
+            <div class="card _horizontal">
+                <div class="row no-gutters">
+                    <div class="col-md-5"  style="background-image:url('/static/v2/img/pages/index/cscenter_meetup-1056.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 196px"></div>
+                    <div class="col-md-7 d-flex">
+                        <div class="card__content">
+                            <div class="announcement">
+                                <div class="ui labels _circular mb-2">
+                                    <span class="ui label _blue">Курс</span>
+                                    <span class="ui label _gray">Бесплатно</span>
+                                </div>
+                                <h3>{{ announcement.name }}</h3>
+                                {{ announcement.description }}
+                                {% if announcement.event_place or announcement.event_date_at %}
+                                    <div class="grouped mb-4">
+                                        {% if announcement.event_place %}
+                                            <div class="announcement__detail">
+                                                {{ macros.svg_inline('location') }}<span>{{ announcement.event_place }}</span>
+                                            </div>
+                                        {% endif %}
+                                        {% if announcement.event_date_at %}
+                                            <div class="announcement__detail">
+                                                {{ macros.svg_inline('calendar') }}<span>{{ announcement.event_date_at }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                                {% if announcement.event_actions %}{{ announcement.event_actions }}{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="csc-online-education">
         <div class="container">
             <h2 class="text-center">Онлайн-обучение</h2>
