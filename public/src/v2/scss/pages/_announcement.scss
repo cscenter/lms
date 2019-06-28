@@ -1,21 +1,23 @@
 .announcement__detail {
-  display: flex;
-  align-items: center;
+  display: inline-table;
   margin-right: spacer("4x");
 
   .sprite-img {
     fill: $gray-light;
     margin-right: spacer("1x");
-    float: left;
+    width: 1em;
+    height: 1em;
+    display: table-cell;
+  }
+
+  span {
+    display: table-cell;
   }
 }
 
-.grouped .announcement__detail {
-  display: inline-flex;
-}
-
 .announcement {
-  h1, .h1 {
+  h1,
+  .h1 {
     margin-bottom: spacer("2x");
   }
 }
