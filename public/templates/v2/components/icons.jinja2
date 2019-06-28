@@ -1,0 +1,26 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-9">
+                <h2>Icons</h2>
+                <p>{{ macros.svg_inline('location') }} Текст на русском 18px</p>
+                <p>{{ macros.svg_inline('location') }} текст на русском 18px</p>
+                <p>{{ macros.svg_inline('location') }} English text 18px</p>
+                <p>{{ macros.svg_inline('location') }} english text 18px</p>
+                <p>{{ macros.svg_inline('calendar') }} Текст на русском 18px</p>
+                <p>{{ macros.svg_inline('calendar') }} текст на русском 18px</p>
+                <p>{{ macros.svg_inline('calendar') }} English text 18px</p>
+                <p>{{ macros.svg_inline('calendar') }} english text 18px</p>
+
+            </div>
+        </div>
+    </div>
+{% endblock content %}
