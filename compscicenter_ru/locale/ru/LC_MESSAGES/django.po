@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-06-28 13:59+0000\n"
-"PO-Revision-Date: 2019-06-28 14:00+0000\n"
+"POT-Creation-Date: 2019-06-28 16:05+0000\n"
+"PO-Revision-Date: 2019-06-28 16:05+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -21,7 +21,7 @@ msgstr ""
 "X-Translated-Using: django-rosetta 0.9.3\n"
 
 #: compscicenter_ru/apps/announcements/apps.py:7
-#: compscicenter_ru/apps/announcements/models.py:85
+#: compscicenter_ru/apps/announcements/models.py:88
 msgid "Announcements"
 msgstr "Анонсы"
 
@@ -60,7 +60,7 @@ msgstr "Опубликовать до"
 msgid "Short Description"
 msgstr "Заметка"
 
-#: compscicenter_ru/apps/announcements/models.py:63
+#: compscicenter_ru/apps/announcements/models.py:64
 #: compscicenter_ru/apps/publications/models.py:65
 #: compscicenter_ru/apps/publications/models.py:114
 #: compscicenter_ru/apps/publications/models.py:158
@@ -68,29 +68,33 @@ msgid "Description"
 msgstr "Описание"
 
 #: compscicenter_ru/apps/announcements/models.py:65
+msgid "Don't forget to add &lt;h3&gt;Title&lt;/h3&gt; on the first line"
+msgstr ""
+"Не забудьте добавить &lt;h3&gt;Заголовок&lt;/h3&gt; в начале описания."
+
+#: compscicenter_ru/apps/announcements/models.py:68
 #: compscicenter_ru/apps/publications/models.py:116
 msgid "Photo"
 msgstr "Фото"
 
-#: compscicenter_ru/apps/announcements/models.py:69
+#: compscicenter_ru/apps/announcements/models.py:72
 msgid "Recommended dimensions 600x400"
 msgstr "Рекомендуемые размеры фото 600x400"
 
-#: compscicenter_ru/apps/announcements/models.py:71
+#: compscicenter_ru/apps/announcements/models.py:74
 #: compscicenter_ru/apps/publications/models.py:157
 msgid "Event Date"
 msgstr "Дата события"
 
-#: compscicenter_ru/apps/announcements/models.py:74
+#: compscicenter_ru/apps/announcements/models.py:77
 msgid "Event Place"
 msgstr "Место события"
 
-#: compscicenter_ru/apps/announcements/models.py:76
-#| msgid "Publications"
+#: compscicenter_ru/apps/announcements/models.py:79
 msgid "Actions"
 msgstr "Действия"
 
-#: compscicenter_ru/apps/announcements/models.py:84
+#: compscicenter_ru/apps/announcements/models.py:87
 msgid "Announcement"
 msgstr "Анонс"
 
