@@ -1,28 +1,23 @@
 .announcement__detail {
-  display: flex;
-  align-items: center;
+  display: inline-table;
   margin-right: spacer("4x");
 
   .sprite-img {
     fill: $gray-light;
     margin-right: spacer("1x");
-    float: left;
+    width: 1em;
+    height: 1em;
+    display: table-cell;
   }
-}
 
-.grouped .announcement__detail {
-  display: inline-flex;
+  span {
+    display: table-cell;
+  }
 }
 
 .announcement {
-  width: 100%;
-  h1, .h1 {
+  h1,
+  .h1 {
     margin-bottom: spacer("2x");
-  }
-
-  padding-top: spacer("6x");
-  align-self: center;
-  @include media-breakpoint-up(md) {
-    padding-top: 0;
   }
 }

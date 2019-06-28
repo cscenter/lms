@@ -7,6 +7,9 @@
     <script type="text/javascript">
         window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/index.svg") }}");
     </script>
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
 {% endblock sprites %}
 
 {% block before_navbar_container %}<div class="cover cover-index-page">{% endblock before_navbar_container %}
@@ -89,6 +92,43 @@
         </div>
     </div>
 </div>
+
+    <div class="container mb-10">
+        <div class="card _horizontal _dark">
+            <div class="row no-gutters">
+                <div class="col-md-5"
+                     style="background-image:url('/static/v2/img/pages/index/cscenter_meetup-1056.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 196px">
+                </div>
+                <div class="col-md-7 d-flex">
+                    <div class="card__content">
+                        <div class="announcement">
+                            <div class="ui labels _circular mb-2">
+                                <span class="ui label _blue" href="#">Курс</span>
+                                <span class="ui label _gray" href="#">Бесплатно</span>
+                            </div>
+                            <p class="text-muted mb-0">Новая лекция в CS центре</p>
+                            <h3>Введение в трансфинитные методы</h3>
+                            <p>Лекция носит теоретический характер и&nbsp;ориентирована на&nbsp;студентов младших курсов
+                                и&nbsp;не&nbsp;боящихся
+                                трудностей школьников. Для понимания доклада нужно представлять, что&nbspтакое
+                                многочлен, корень
+                                многочлена, поле комплексных чисел, равномощные множества и&nbsp;мощность
+                                континуума.</p>
+                            <div class="grouped mb-4">
+                                <div class="announcement__detail">
+                                    {{ macros.svg_inline('location') }}<span>Санкт-Петербург, БЦ «Таймс»</span>
+                                </div>
+                                <div class="announcement__detail">
+                                    {{ macros.svg_inline('calendar') }}<span>21 сентября в 20:00</span>
+                                </div>
+                            </div>
+                            <a href="#" class="btn _big _primary _m-wide">Записаться</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <div class="csc-online-education">
     <div class="container">
