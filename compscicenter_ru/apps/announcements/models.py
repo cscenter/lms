@@ -6,6 +6,7 @@ from model_utils.models import TimeStampedModel
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase, TagBase
 
+from core.urls import reverse
 from core.utils import ru_en_mapping
 
 ACTIONS_DEFAULT = """\
@@ -52,6 +53,7 @@ class Announcement(TimeStampedModel):
         default=timezone.now)
     publish_end_at = models.DateTimeField(_("Publish End at"))
     tags = TaggableManager(through=TaggedAnnouncement, blank=True)
+    short_description = models.TextField(_("Short Description"))
     description = models.TextField(_("Description"), blank=True)
     thumbnail = models.ImageField(
         _("Photo"),
@@ -78,3 +80,7 @@ class Announcement(TimeStampedModel):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("announcements:announcement_detail",
+                       kwargs={"pk": self.pk})

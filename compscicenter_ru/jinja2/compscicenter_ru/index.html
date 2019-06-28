@@ -102,16 +102,25 @@
             <div class="container mb-10">
             <div class="card _horizontal">
                 <div class="row no-gutters">
-                    <div class="col-md-5"  style="background-image:url('/static/v2/img/pages/index/cscenter_meetup-1056.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 196px"></div>
-                    <div class="col-md-7 d-flex">
+                    {% if announcement.thumbnail %}
+                    <div class="col-md-5 card__background" style="min-height: 196px; background-image:url({{ announcement.thumbnail.url }});"></div>
+                    {% endif %}
+                    <div class="col-md-7">
                         <div class="card__content">
                             <div class="announcement">
-                                <div class="ui labels _circular mb-2">
-                                    <span class="ui label _blue">Курс</span>
-                                    <span class="ui label _gray">Бесплатно</span>
+                                {% with tags = announcement.tags.all() %}
+                                    {% if tags %}
+                                    <div class="ui labels _circular mb-2">
+                                        {% for tag in tags %}
+                                            <span class="ui label {% if tag.slug == 'course' %}_blue{% else %}_gray{% endif %}">{{ tag.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                {% endwith %}
+                                <a class="h3" href="{{ announcement.get_absolute_url() }}">{{ announcement.name }}</a>
+                                <div class="mb-4">
+                                    {{ announcement.short_description }}
                                 </div>
-                                <h3>{{ announcement.name }}</h3>
-                                {{ announcement.description }}
                                 {% if announcement.event_place or announcement.event_date_at %}
                                     <div class="grouped mb-4">
                                         {% if announcement.event_place %}
