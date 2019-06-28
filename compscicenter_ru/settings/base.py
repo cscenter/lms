@@ -42,6 +42,7 @@ INSTALLED_APPS += [
     'online_courses.apps.Config',
     'learning.internships.apps.InternshipsConfig',
     'publications.apps.PublicationsConfig',
+    'announcements.apps.AnnouncementsConfig',
     'ckeditor',
     'ckeditor_uploader',
 ]

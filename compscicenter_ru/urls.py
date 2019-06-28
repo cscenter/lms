@@ -59,6 +59,7 @@ urlpatterns += [
 
     path('courses/', views.CourseOfferingsView.as_view(), name="course_list"),
 
+    path('', include('announcements.urls')),
     path('projects/', views.ProjectsListView.as_view(), name="public_projects"),
     path('', include('publications.urls')),
 
