@@ -1,11 +1,12 @@
 .card {
   &._video {
     color: $gray-darker;
+    border: none;
 
     ._meta {
       padding-top: 0;
       color: $gray-dark;
-      flex-grow: 0;
+       flex-grow: 0;
     }
 
     .author {
@@ -17,8 +18,12 @@
     .card__title {
       color: $black;
     }
-  }
-  .tags-group {
-    margin-top: spacer("8x");
+
+    .card__img.lazy-wrapper {
+      padding-top: 56.25%; // 16:9
+      background-color: $gray-lighter;
+      background-image: url("/static/v2/img/placeholder/camera.svg");
+      background-size: 64px;
+    }
   }
 }

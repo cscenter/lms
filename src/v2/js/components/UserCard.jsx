@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import LazyImage from "./LazyImage";
 
 class UserCard extends React.Component {

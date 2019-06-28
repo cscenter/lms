@@ -1,0 +1,71 @@
+@mixin label-color($color) {
+  background-color: rgba($color, .1);
+  color: $color;
+  &:before {
+    color: $color;
+  }
+}
+
+@mixin label-color-hover($color) {
+  &:hover {
+    background-color: rgba($color, .2);
+  }
+}
+
+.ui.label {
+  background: transparent;
+  color: $gray-dark;
+  border: $input-border-width solid $gray-light;
+  border-radius: $border-radius;
+  font-size: $font-size-base;
+  padding: spacer("1x") spacer("2x");
+  display: inline-block;
+
+  &._gray {
+    @include label-color($gray-dark);
+  }
+
+  &._green {
+    @include label-color($green);
+  }
+
+  &._blue {
+    @include label-color($blue);
+  }
+}
+
+.ui.labels a.label,
+a.ui.label {
+  transition: $transition-base;
+  &:hover,
+  &.active {
+    background-color: $white;
+    color: $teal;
+  }
+
+  &._green {
+    @include label-color-hover($green);
+  }
+
+  &._blue {
+    @include label-color-hover($blue);
+  }
+}
+
+.ui.labels {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+
+  > .label {
+    margin: 0 spacer("2x") spacer("2x") 0;
+  }
+}
+
+.ui.labels._circular .label,
+.ui.label._circular {
+    font-size: $font-size-sm;
+    line-height: $line-height-sm;
+    border: none;
+    border-radius: 2rem;
+}
