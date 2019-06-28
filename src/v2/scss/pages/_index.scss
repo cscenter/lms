@@ -97,7 +97,7 @@ a.card {
 
 .about-csc {
   text-align: center;
-  @include append-hr-to-container();
+  margin-bottom: spacer("10x");
 
   .about-csc__cover {
     position: relative;
