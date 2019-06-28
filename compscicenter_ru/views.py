@@ -20,6 +20,7 @@ from django_filters.views import FilterMixin
 from rest_framework.renderers import JSONRenderer
 from vanilla import TemplateView
 
+from announcements.models import Announcement
 from compscicenter_ru.serializers import CoursesSerializer
 from compscicenter_ru.utils import group_terms_by_academic_year
 from core.exceptions import Redirect
@@ -89,7 +90,6 @@ class IndexView(TemplateView):
                                              link=course.link,
                                              avatar_url=course.avatar_url,
                                              tag='Онлайн-курс'))
-        # Testimonials
         testimonials = get_random_testimonials(4, TESTIMONIALS_CACHE_KEY)
         _cache = caches['social_networks']
         context = {
@@ -97,7 +97,8 @@ class IndexView(TemplateView):
             'courses': courses,
             'vk_news': _cache.get(self.VK_CACHE_KEY),
             'instagram_posts': _cache.get(self.INSTAGRAM_CACHE_KEY),
-            'is_admission_active': False
+            'is_admission_active': False,
+            'announcements': list(Announcement.current.all())
         }
         return context
 
