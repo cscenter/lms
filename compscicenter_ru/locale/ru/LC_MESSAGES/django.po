@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-06-27 15:49+0000\n"
-"PO-Revision-Date: 2019-06-27 15:51+0000\n"
+"POT-Creation-Date: 2019-06-28 13:59+0000\n"
+"PO-Revision-Date: 2019-06-28 14:00+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -21,56 +21,76 @@ msgstr ""
 "X-Translated-Using: django-rosetta 0.9.3\n"
 
 #: compscicenter_ru/apps/announcements/apps.py:7
-#: compscicenter_ru/apps/announcements/models.py:54
+#: compscicenter_ru/apps/announcements/models.py:85
 msgid "Announcements"
 msgstr "Анонсы"
 
-#: compscicenter_ru/apps/announcements/models.py:17
+#: compscicenter_ru/apps/announcements/models.py:19
+msgid "Modifier"
+msgstr "Модификатор"
+
+#: compscicenter_ru/apps/announcements/models.py:21
+msgid "This class could affect the tag view"
+msgstr "Может влиять на отображение тега"
+
+#: compscicenter_ru/apps/announcements/models.py:25
 msgid "Announcement Tag"
 msgstr "Тег анонса"
 
-#: compscicenter_ru/apps/announcements/models.py:18
+#: compscicenter_ru/apps/announcements/models.py:26
 msgid "Announcement Tags"
 msgstr "Теги"
 
-#: compscicenter_ru/apps/announcements/models.py:35
+#: compscicenter_ru/apps/announcements/models.py:56
 #: compscicenter_ru/apps/publications/models.py:44
 #: compscicenter_ru/apps/publications/models.py:155
 msgid "Title"
 msgstr "Заголовок"
 
-#: compscicenter_ru/apps/announcements/models.py:36
+#: compscicenter_ru/apps/announcements/models.py:58
+msgid "Publish Start at"
+msgstr "Опубликовать с"
+
+#: compscicenter_ru/apps/announcements/models.py:60
+msgid "Publish End at"
+msgstr "Опубликовать до"
+
+#: compscicenter_ru/apps/announcements/models.py:62
+#: compscicenter_ru/apps/publications/models.py:25
+msgid "Short Description"
+msgstr "Заметка"
+
+#: compscicenter_ru/apps/announcements/models.py:63
 #: compscicenter_ru/apps/publications/models.py:65
 #: compscicenter_ru/apps/publications/models.py:114
 #: compscicenter_ru/apps/publications/models.py:158
 msgid "Description"
 msgstr "Описание"
 
-#: compscicenter_ru/apps/announcements/models.py:38
-msgid "Publish Start at"
-msgstr "Опубликовать с"
+#: compscicenter_ru/apps/announcements/models.py:65
+#: compscicenter_ru/apps/publications/models.py:116
+msgid "Photo"
+msgstr "Фото"
 
-#: compscicenter_ru/apps/announcements/models.py:40
-msgid "Publish End at"
-msgstr "Опубликовать до"
+#: compscicenter_ru/apps/announcements/models.py:69
+msgid "Recommended dimensions 600x400"
+msgstr "Рекомендуемые размеры фото 600x400"
 
-#: compscicenter_ru/apps/announcements/models.py:42
+#: compscicenter_ru/apps/announcements/models.py:71
 #: compscicenter_ru/apps/publications/models.py:157
 msgid "Event Date"
 msgstr "Дата события"
 
-#: compscicenter_ru/apps/announcements/models.py:45
-#| msgid "Event Date"
+#: compscicenter_ru/apps/announcements/models.py:74
 msgid "Event Place"
 msgstr "Место события"
 
-#: compscicenter_ru/apps/announcements/models.py:47
-#, fuzzy
+#: compscicenter_ru/apps/announcements/models.py:76
 #| msgid "Publications"
 msgid "Actions"
-msgstr "Публикации"
+msgstr "Действия"
 
-#: compscicenter_ru/apps/announcements/models.py:53
+#: compscicenter_ru/apps/announcements/models.py:84
 msgid "Announcement"
 msgstr "Анонс"
 
@@ -134,10 +154,6 @@ msgstr "Авторы"
 msgid "Publications"
 msgstr "Публикации"
 
-#: compscicenter_ru/apps/publications/models.py:25
-msgid "Short Description"
-msgstr "Заметка"
-
 #: compscicenter_ru/apps/publications/models.py:29
 msgid "Project Publication Author"
 msgstr "Автор публикации"
@@ -186,10 +202,6 @@ msgstr "Отчество"
 #: compscicenter_ru/apps/publications/models.py:111
 msgid "Gender"
 msgstr ""
-
-#: compscicenter_ru/apps/publications/models.py:116
-msgid "Photo"
-msgstr "Фото"
 
 #: compscicenter_ru/apps/publications/models.py:120
 msgid "Aspect ratio 5:7. Min size: {}"
@@ -562,24 +574,21 @@ msgstr "Аккаунты"
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: compscicenter_ru/views.py:352
+#: compscicenter_ru/views.py:353
 msgctxt "adjective"
 msgid "autumn"
 msgstr "осенний"
 
-#: compscicenter_ru/views.py:353
+#: compscicenter_ru/views.py:354
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
 
-#: compscicenter_ru/views.py:416
-#| msgctxt "menu"
-#| msgid "Courses"
+#: compscicenter_ru/views.py:417
 msgid "Course"
 msgstr "Курс"
 
-#: compscicenter_ru/views.py:417
-#| msgid "Lecturer"
+#: compscicenter_ru/views.py:418
 msgid "Lecture"
 msgstr "Лекция"
 
