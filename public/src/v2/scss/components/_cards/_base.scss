@@ -122,20 +122,8 @@ $card-bg: $white !default;
     @include media-breakpoint-up(md) {
       padding: spacer("8x") spacer("10x") spacer("8x") spacer("8x");
     }
-
-    .announcement__detail {
-      display: flex;
-      align-items: center;
-      margin-right: spacer("4x");
-
-      .sprite-img {
-        fill: $gray-light;
-        margin-right: spacer("1x");
-      }
-    }
-
-    .grouped .announcement__detail {
-      display: inline-flex;
+    .announcement {
+      padding: 0;
     }
   }
 }
