@@ -1,9 +1,11 @@
 import factory
 import pytz
 
-from announcements.models import Announcement, AnnouncementTag
+from announcements.models import Announcement, AnnouncementTag, \
+    AnnouncementEventDetails
 
-__all__ = ('AnnouncementTagFactory', 'AnnouncementFactory', )
+__all__ = ('AnnouncementTagFactory', 'AnnouncementFactory',
+           'AnnouncementEventDetailsFactory')
 
 
 class AnnouncementTagFactory(factory.DjangoModelFactory):
@@ -31,3 +33,11 @@ class AnnouncementFactory(factory.DjangoModelFactory):
         if extracted:
             for tag in extracted:
                 self.tags.add(tag)
+
+
+class AnnouncementEventDetailsFactory(factory.DjangoModelFactory):
+    announcement = factory.SubFactory(AnnouncementFactory)
+    ends_on = factory.Faker('future_date', end_date="+30d")
+
+    class Meta:
+        model = AnnouncementEventDetails

@@ -1,4 +1,5 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
+{%- import "compscicenter_ru/announcements/macros.jinja2" as announcement_macros -%}
 
 {% block title %}Анонс мероприятия "{{ announcement.name }}"{% endblock title %}
 
@@ -29,6 +30,23 @@
                             {% endif %}
                         {% endwith %}
                         <h1>{{ announcement.name }}</h1>
+                        {% if announcement.event_details %}
+                            {% with event_details=announcement.event_details %}
+                                <div class="grouped mb-4">
+                                    {% if event_details.venue_id %}
+                                        <div class="announcement__detail">
+                                            {{ macros.svg_inline('location') }}<span>{{ event_details.venue.address }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if event_details.starts_on %}
+                                        <div class="announcement__detail">
+                                            {{ macros.svg_inline('calendar') }}{{ announcement_macros.event_dates(event_details) }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endwith %}
+                        {% endif %}
+
                         {% if announcement.event_place or announcement.event_date_at %}
                             <div class="grouped mb-4">
                                 {% if announcement.event_place %}
@@ -43,7 +61,7 @@
                                 {% endif %}
                             </div>
                         {% endif %}
-                        {% if announcement.event_actions %}{{ announcement.event_actions }}{% endif %}
+                        {% if announcement.actions %}{{ announcement.actions }}{% endif %}
                     </div>
                 </div>
             </div>
@@ -52,6 +70,19 @@
     <div class="container page-content">
         <div class="row">
             <div class="col-lg-9">
+                {% if announcement.event_details %}
+                    {% with speakers=announcement.event_details.speakers.all() %}
+                        {% if speakers|length > 0 %}
+                            <h3>Лектор{% if speakers|length > 1 %}ы{% endif %}</h3>
+                            {% for speaker in speakers %}
+                                <div class="mb-4">
+                                    {{ macros.speaker_card(speaker) }}
+                                    {{ speaker.description }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
                 {% if announcement.description %}
                     {{ announcement.description }}
                 {% else %}

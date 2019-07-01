@@ -1,0 +1,7 @@
+{% macro event_dates(event_details) -%}
+<span>{{ event_details.starts_on|date("j E Y") }}{% if event_details.starts_at %}{{ event_details.starts_at|date(" H:i") }}{% endif %}
+    {%- if event_details.ends_on and event_details.ends_on != event_details.starts_on %} &mdash; {{ event_details.ends_on|date("j E Y") }}{% if event_details.ends_at %}{{ event_details.ends_at|date(" H:i") }}{% endif %}
+    {%- elif event_details.ends_on and event_details.ends_at %} &mdash; {{ event_details.ends_at|date("H:i") }}
+    {%- endif -%}
+</span>
+{%- endmacro %}

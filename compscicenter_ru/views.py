@@ -98,7 +98,10 @@ class IndexView(TemplateView):
             'vk_news': _cache.get(self.VK_CACHE_KEY),
             'instagram_posts': _cache.get(self.INSTAGRAM_CACHE_KEY),
             'is_admission_active': False,
-            'announcements': list(Announcement.current.prefetch_related("tags"))
+            'announcements': list(Announcement.current
+                                  .select_related("event_details",
+                                                  "event_details__venue")
+                                  .prefetch_related("tags"))
         }
         return context
 
