@@ -51,17 +51,21 @@ class AnnouncementCurrentManager(models.Manager):
         )
 
 
+def timezone_now():
+    """Helper function for patching timezone in tests"""
+    return timezone.now()
+
+
 class Announcement(TimeStampedModel):
     name = models.CharField(_("Title"), max_length=255)
     publish_start_at = models.DateTimeField(
         _("Publish Start at"),
-        # Note: Lambda allows to patch timezone to tests
-        default=lambda: timezone.now())
+        default=timezone_now)
     publish_end_at = models.DateTimeField(_("Publish End at"))
     tags = TaggableManager(through=TaggedAnnouncement, blank=True)
     short_description = models.TextField(_("Short Description"))
     description = models.TextField(
-        verbose_name=_("Description"),
+        verbose_name=_("Detail Description"),
         help_text=_("Don't forget to add &lt;h3&gt;Title&lt;/h3&gt; on the first line"),
         blank=True)
     thumbnail = models.ImageField(
@@ -70,12 +74,7 @@ class Announcement(TimeStampedModel):
         blank=True,
         null=True,
         help_text=_("Recommended dimensions 600x400"))
-    event_date_at = models.DateTimeField(
-        _("Event Date"),
-        blank=True,
-        null=True)
-    event_place = models.CharField(_("Event Place"), max_length=255, blank=True)
-    event_actions = models.TextField(
+    actions = models.TextField(
         _("Actions"),
         blank=True,
         default=ACTIONS_DEFAULT.strip())
@@ -93,3 +92,44 @@ class Announcement(TimeStampedModel):
     def get_absolute_url(self):
         return reverse("announcements:announcement_detail",
                        kwargs={"pk": self.pk})
+
+
+class AnnouncementEventDetails(models.Model):
+    announcement = models.OneToOneField(Announcement,
+                                        related_name="event_details",
+                                        primary_key=True,
+                                        on_delete=models.CASCADE)
+    venue = models.ForeignKey(
+        'courses.Venue',
+        verbose_name=_("Venue"),
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True)
+    starts_on = models.DateField(
+        _("Start Date"),
+        blank=True,
+        null=True)
+    starts_at = models.TimeField(
+        _("Start Time"),
+        blank=True,
+        null=True)
+    ends_on = models.DateField(
+        _("End Date"),
+        blank=True,
+        null=True)
+    ends_at = models.TimeField(
+        _("End Time"),
+        blank=True,
+        null=True)
+    speakers = models.ManyToManyField(
+        'publications.Speaker',
+        verbose_name=_("Speakers"),
+        related_name='+',
+        blank=True)
+
+    class Meta:
+        verbose_name = _("Announcement Details")
+        verbose_name_plural = _("Announcement Details")
+
+    def __str__(self):
+        return str(self.announcement)
