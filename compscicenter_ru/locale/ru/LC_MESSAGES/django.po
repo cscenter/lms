@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-07-01 13:12+0000\n"
-"PO-Revision-Date: 2019-07-01 13:15+0000\n"
+"POT-Creation-Date: 2019-07-02 09:54+0000\n"
+"PO-Revision-Date: 2019-07-02 09:54+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -22,8 +22,8 @@ msgstr ""
 
 #: compscicenter_ru/apps/announcements/admin.py:31
 #: compscicenter_ru/apps/announcements/admin.py:32
+#: compscicenter_ru/apps/announcements/models.py:131
 #: compscicenter_ru/apps/announcements/models.py:132
-#| msgid "Announcement Tags"
 msgid "Announcement Details"
 msgstr "Детали анонса"
 
@@ -68,7 +68,6 @@ msgid "Short Description"
 msgstr "Краткое описание"
 
 #: compscicenter_ru/apps/announcements/models.py:68
-#| msgid "Description"
 msgid "Detail Description"
 msgstr "Детальное описание"
 
@@ -99,7 +98,6 @@ msgid "Venue"
 msgstr "Место проведения"
 
 #: compscicenter_ru/apps/announcements/models.py:109
-#| msgid "Publish Start at"
 msgid "Start Date"
 msgstr "Дата начала"
 
@@ -108,7 +106,6 @@ msgid "Start Time"
 msgstr "Время начала"
 
 #: compscicenter_ru/apps/announcements/models.py:117
-#| msgid "Event Date"
 msgid "End Date"
 msgstr "Дата окончания"
 
@@ -121,12 +118,6 @@ msgstr "Время окончания"
 #: compscicenter_ru/apps/publications/models.py:165
 msgid "Speakers"
 msgstr "Лекторы"
-
-#: compscicenter_ru/apps/announcements/models.py:131
-#, fuzzy
-#| msgid "Announcement Tag"
-msgid "Announcement Detail"
-msgstr "Тег анонса"
 
 #: compscicenter_ru/apps/online_courses/apps.py:7
 #: compscicenter_ru/apps/online_courses/models.py:45
@@ -332,66 +323,62 @@ msgid "Online programs"
 msgstr "Онлайн-программы"
 
 #: compscicenter_ru/menus.py:30
+#| msgid "Video URL"
 msgctxt "menu"
-msgid "Video"
-msgstr "Видео"
+msgid "Video Records"
+msgstr "Видеозаписи лекций"
 
-#: compscicenter_ru/menus.py:31
-msgctxt "menu"
-msgid "Lecture Hall"
-msgstr "Лекторий"
-
-#: compscicenter_ru/menus.py:34
+#: compscicenter_ru/menus.py:33
 msgctxt "menu"
 msgid "Admission"
 msgstr "Поступление"
 
-#: compscicenter_ru/menus.py:38
+#: compscicenter_ru/menus.py:37
 msgctxt "menu"
 msgid "Apply"
 msgstr "Подать заявку"
 
-#: compscicenter_ru/menus.py:39
+#: compscicenter_ru/menus.py:38
 msgctxt "menu"
 msgid "Checklist"
 msgstr "Памятка"
 
-#: compscicenter_ru/menus.py:40
+#: compscicenter_ru/menus.py:39
 msgctxt "menu"
 msgid "Program for Admission"
 msgstr "Программа для поступления"
 
-#: compscicenter_ru/menus.py:41
+#: compscicenter_ru/menus.py:40
 msgctxt "menu"
 msgid "FAQ"
 msgstr "Вопросы и ответы"
 
-#: compscicenter_ru/menus.py:44
+#: compscicenter_ru/menus.py:43
 msgctxt "menu"
 msgid "About"
 msgstr "О центре"
 
-#: compscicenter_ru/menus.py:48
+#: compscicenter_ru/menus.py:47
 msgctxt "menu"
 msgid "History"
 msgstr "История"
 
-#: compscicenter_ru/menus.py:49
+#: compscicenter_ru/menus.py:48
 msgctxt "menu"
 msgid "Team"
 msgstr "Команда"
 
-#: compscicenter_ru/menus.py:50
+#: compscicenter_ru/menus.py:49
 msgctxt "menu"
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: compscicenter_ru/menus.py:51
+#: compscicenter_ru/menus.py:50
 msgctxt "menu"
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: compscicenter_ru/menus.py:52
+#: compscicenter_ru/menus.py:51
 msgctxt "menu"
 msgid "Testimonials"
 msgstr "Отзывы"
@@ -613,23 +600,35 @@ msgstr "Аккаунты"
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: compscicenter_ru/views.py:353
+#: compscicenter_ru/views.py:356
 msgctxt "adjective"
 msgid "autumn"
 msgstr "осенний"
 
-#: compscicenter_ru/views.py:354
+#: compscicenter_ru/views.py:357
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
 
-#: compscicenter_ru/views.py:417
+#: compscicenter_ru/views.py:420
 msgid "Course"
 msgstr "Курс"
 
-#: compscicenter_ru/views.py:418
+#: compscicenter_ru/views.py:421
 msgid "Lecture"
 msgstr "Лекция"
+
+#~ msgctxt "menu"
+#~ msgid "Video"
+#~ msgstr "Видеозаписи лекций2"
+
+#, fuzzy
+#~ msgid "Announcement Detail"
+#~ msgstr "Тег анонса"
+
+#~ msgctxt "menu"
+#~ msgid "Lecture Hall"
+#~ msgstr "Лекторий"
 
 #~ msgid "Event Place"
 #~ msgstr "Место события"
