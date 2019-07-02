@@ -33,7 +33,7 @@ pytest-pythonpath = "==0.7.3"
 [packages]
 # Framework
 pytz = "==2019.1"
-Django = "==2.2.1"
+Django = "==2.2.3"
 # DB
 psycopg2-binary = "==2.8.2"
 jsonfield = "==2.0.2"
