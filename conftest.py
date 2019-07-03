@@ -3,7 +3,6 @@ from urllib.parse import urlparse
 import pytest
 from django.conf import settings
 
-from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
@@ -17,6 +16,7 @@ from pytest_django.lazy_django import skip_if_no_django
 
 from core.models import City
 from users.constants import AcademicRoles
+from users.models import Group
 from users.tests.factories import UserFactory
 
 

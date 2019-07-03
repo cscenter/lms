@@ -1,9 +1,7 @@
-from __future__ import unicode_literals, absolute_import
-
 from django.contrib.auth.models import UserManager
-from django.db.models import Prefetch, Count, query, Q
+from django.db.models import Prefetch, query, Q
 
-from courses.models import CourseTeacher, CourseClass
+from courses.models import CourseTeacher
 
 
 class UserQuerySet(query.QuerySet):

@@ -1,8 +1,7 @@
-from django.contrib.auth.models import Group
 from rest_framework import serializers
 
 from learning.models import StudentAssignment
-from users.models import User
+from users.models import User, Group
 
 
 class GroupSerializer(serializers.ModelSerializer):

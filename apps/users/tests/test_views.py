@@ -5,7 +5,6 @@ import factory
 import pytest
 from bs4 import BeautifulSoup
 from django.conf import settings
-from django.contrib.auth.models import Group
 from django.forms.models import model_to_dict
 from django.utils import translation
 from django.utils.encoding import smart_text, smart_bytes
@@ -18,13 +17,14 @@ from learning.tests.factories import GraduateProfileFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import AcademicRoles
 from users.forms import UserCreationForm, UserChangeForm
-from users.models import User
+from users.models import User, Group
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
     TeacherCenterFactory, StudentClubFactory, \
     StudentFactory, StudentCenterFactory
 
 
 class UserTests(MyUtilitiesMixin, CSCTestCase):
+    # FIXME: remove this test after customizing Group model
     def test_groups_pks_synced_with_migrations(self):
         """
         We need to be sure, that migrations creates groups with desired pk's.

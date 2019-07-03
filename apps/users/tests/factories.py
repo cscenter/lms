@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import factory
-from django.contrib.auth.models import Group
 
 from learning.settings import GradeTypes
 from users.constants import AcademicRoles, GenderTypes
-from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
+from users.models import User, Group, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord
 
 __all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',

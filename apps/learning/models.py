@@ -77,6 +77,7 @@ class StudentProfile(models.Model):
         help_text=_("at enrollment"),
         null=True,
         blank=True)
+    # FIXME: remove
     areas_of_study = models.ManyToManyField(
         'study_programs.AcademicDiscipline',
         verbose_name=_("StudentInfo|Areas of study"),

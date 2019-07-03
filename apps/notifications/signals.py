@@ -20,10 +20,9 @@ def notify_handler(type, **kwargs):
     Dispatch data to appropriate signal handler based on notification type
     """
     from django.contrib.contenttypes.models import ContentType
-    from django.contrib.auth.models import Group
     from notifications import NotificationTypes
     from notifications.models import Notification
-    from users.models import User
+    from users.models import User, Group
 
     if not isinstance(type, NotificationTypes):
         raise ValueError("Notification type must be an instance "

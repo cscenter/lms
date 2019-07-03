@@ -2,11 +2,10 @@ from captcha.fields import ReCaptchaField
 from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
-from django.contrib.auth.models import Group
 from django.utils.translation import ugettext_lazy as _
 
 from registration.forms import RegistrationFormUniqueEmail
-from users.models import User
+from users.models import User, Group
 
 
 class RegistrationUniqueEmailAndUsernameForm(RegistrationFormUniqueEmail):
