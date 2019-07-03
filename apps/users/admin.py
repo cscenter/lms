@@ -52,6 +52,7 @@ class UserAdmin(_UserAdmin):
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
                     'is_staff']
     list_filter = ['is_staff', 'is_superuser', 'is_active', 'city', 'groups']
+    filter_horizontal = ('groups',)
 
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},

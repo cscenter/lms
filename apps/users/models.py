@@ -5,7 +5,9 @@ from string import ascii_lowercase, digits
 from typing import Optional
 
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, AnonymousUser
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import AnonymousUser, PermissionsMixin
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import RegexValidator
 from django.db import models
@@ -91,22 +93,89 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
         return None
 
 
+class Group(models.Model):
+    """
+    Groups are a generic way of categorizing users to apply permissions, or
+    some other label, to those users. A user can belong to any number of
+    groups.
+
+    A user in a group automatically has all the permissions granted to that
+    group. For example, if the group 'Site editors' has the permission
+    can_edit_home_page, any user in that group will have that permission.
+
+    Beyond permissions, groups are a convenient way to categorize users to
+    apply some label, or extended functionality, to them. For example, you
+    could create a group 'Special users', and you could write code that would
+    do special things to those users -- such as giving them access to a
+    members-only portion of your site, or sending them members-only email
+    messages.
+    """
+    name = models.CharField(_('name'), max_length=150, unique=True)
+
+    class Meta:
+        verbose_name = _('group')
+        verbose_name_plural = _('groups')
+
+    def __str__(self):
+        return self.name
+
+    def natural_key(self):
+        return self.name,
+
+
 class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
-           AbstractUser):
-
+           AbstractBaseUser, PermissionsMixin):
     roles = AcademicRoles
-
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
     ENROLLMENT_CACHE_KEY = "_student_enrollment_{}"
-
     GENDER_MALE = GenderTypes.MALE
     GENDER_FEMALE = GenderTypes.FEMALE
+
+    username_validator = UnicodeUsernameValidator()
+
+    username = models.CharField(
+        _('username'),
+        max_length=150,
+        unique=True,
+        help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
+        validators=[username_validator],
+        error_messages={
+            'unique': _("A user with that username already exists."),
+        },
+    )
+    first_name = models.CharField(_('first name'), max_length=30, blank=True)
+    last_name = models.CharField(_('last name'), max_length=150, blank=True)
+    email = models.EmailField(_('email address'), unique=True)
+    is_staff = models.BooleanField(
+        _('staff status'),
+        default=False,
+        help_text=_('Designates whether the user can log into this admin site.'),
+    )
+    is_active = models.BooleanField(
+        _('active'),
+        default=True,
+        help_text=_(
+            'Designates whether this user should be treated as active. '
+            'Unselect this instead of deleting accounts.'
+        ),
+    )
+    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name=_('groups'),
+        blank=True,
+        help_text=_(
+            'The groups this user belongs to. A user will get all permissions '
+            'granted to each of their groups.'
+        ),
+        related_name="user_set",
+        related_query_name="user",
+    )
+    user_permissions = None
     gender = models.CharField(_("Gender"), max_length=1,
                               choices=GenderTypes.choices)
-
     modified = AutoLastModifiedField(_('modified'))
-
-    email = models.EmailField(_('email address'), unique=True)
-
     patronymic = models.CharField(
         _("CSCUser|patronymic"),
         max_length=100,
@@ -196,6 +265,10 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         ordering = ['last_name', 'first_name']
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
+
+    def clean(self):
+        super().clean()
+        self.email = self.__class__.objects.normalize_email(self.email)
 
     def save(self, **kwargs):
         created = self.pk is None
@@ -359,6 +432,12 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         return applicant_form_url
 
     def get_full_name(self, last_name_first=False):
+        """
+        Returns first name, last name and patronymic, with a space in between
+        or username if not enough data.
+
+        For bibliographic list use `last_name_first=True`
+        """
         if last_name_first:
             parts = (self.last_name, self.first_name, self.patronymic)
         else:
@@ -370,6 +449,11 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         return (smart_text(" ".join([self.first_name, self.last_name]).strip())
                 or self.username)
 
+    def get_abbreviated_name(self):
+        parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
+        abbrev_name = smart_text(". ".join(p for p in parts if p).strip())
+        return abbrev_name or self.username
+
     def get_abbreviated_short_name(self, last_name_first=True):
         first_letter = self.first_name[:1] + "." if self.first_name else ""
         if last_name_first:
@@ -377,11 +461,6 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         else:
             parts = [first_letter, self.last_name]
         return " ".join(parts).strip() or self.username
-
-    def get_abbreviated_name(self):
-        parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
-        abbrev_name = smart_text(". ".join(p for p in parts if p).strip())
-        return abbrev_name or self.username
 
     def get_abbreviated_name_in_latin(self):
         """

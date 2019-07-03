@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import tablib
-from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from import_export import resources, fields, widgets
 
 from learning.settings import AcademicDegreeYears
 from core.timezone import now_local
-from .models import User
+from .models import User, Group
 
 
 class AcademicDegreeYearWidget(widgets.IntegerWidget):

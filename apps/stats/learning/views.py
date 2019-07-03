@@ -1,4 +1,3 @@
-from django.contrib.auth.models import Group
 from django.db.models import Prefetch
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +9,7 @@ from learning.models import StudentAssignment, \
     Enrollment
 from courses.models import Assignment
 from stats.renderers import ListRenderersMixin
-from users.models import User
+from users.models import User, Group
 from .pandas_serializers import ParticipantsByYearPandasSerializer, \
     ParticipantsByGroupPandasSerializer
 from .serializers import ParticipantsStatsSerializer, \
