@@ -15,45 +15,36 @@ class LearningPermissionsMixin:
         return self._cached_groups
 
     @property
+    def is_curator(self):
+        return self.is_superuser and self.is_staff
+
+    @property
     def is_student(self):
-        if is_club_site():
-            return AcademicRoles.STUDENT_CLUB in self._cached_groups
-        student_in_center = AcademicRoles.STUDENT in self._cached_groups
-        return student_in_center or self.is_volunteer
-
-    @property
-    def is_expelled(self):
-        return None
-
-    @property
-    def is_active_student(self):
-        if is_club_site():
-            return self.is_student
-        return self.is_student and self.status != StudentStatuses.EXPELLED
-
-    @property
-    def is_teacher(self):
-        return self.is_teacher_center or self.is_teacher_club
-
-    @property
-    def is_teacher_club(self):
-        return AcademicRoles.TEACHER_CLUB in self._cached_groups
-
-    @property
-    def is_teacher_center(self):
-        return AcademicRoles.TEACHER_CENTER in self._cached_groups
-
-    @property
-    def is_graduate(self):
-        return AcademicRoles.GRADUATE_CENTER in self._cached_groups
+        return AcademicRoles.STUDENT in self._cached_groups
 
     @property
     def is_volunteer(self):
         return AcademicRoles.VOLUNTEER in self._cached_groups
 
     @property
-    def is_curator(self):
-        return self.is_superuser and self.is_staff
+    def is_expelled(self):
+        return None
+
+    # FIXME: inline
+    @property
+    def is_active_student(self):
+        if is_club_site():
+            return self.is_student
+        has_perm = self.is_student or self.is_volunteer
+        return has_perm and self.status != StudentStatuses.EXPELLED
+
+    @property
+    def is_teacher(self):
+        return AcademicRoles.TEACHER in self._cached_groups
+
+    @property
+    def is_graduate(self):
+        return AcademicRoles.GRADUATE_CENTER in self._cached_groups
 
     @property
     def is_curator_of_projects(self):

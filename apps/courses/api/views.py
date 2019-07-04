@@ -10,6 +10,7 @@ from courses.api.serializers import MetaCourseSerializer, TeacherSerializer, \
 from courses.models import Course, CourseTeacher
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
+from users.constants import AcademicRoles
 from users.models import User
 
 
@@ -37,7 +38,7 @@ class LecturerList(ListAPIView):
     def get_queryset(self):
         lecturer = CourseTeacher.roles.lecturer
         queryset = (User.objects
-                    .has_role(User.roles.TEACHER_CENTER)
+                    .has_role(AcademicRoles.TEACHER)
                     .filter(courseteacher__roles=lecturer)
                     .only("pk", "first_name", "last_name", "patronymic",
                           "cropbox_data", "photo", "city_id", "gender",

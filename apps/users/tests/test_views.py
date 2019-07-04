@@ -35,7 +35,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         with translation.override('en'):
             self.assertEqual(User.roles.values[User.roles.STUDENT],
                              Group.objects.get(pk=1).name)
-            self.assertEqual(User.roles.values[User.roles.TEACHER_CENTER],
+            self.assertEqual(User.roles.values[User.roles.TEACHER],
                              Group.objects.get(pk=2).name)
             self.assertEqual(User.roles.values[User.roles.GRADUATE_CENTER],
                              Group.objects.get(pk=3).name)
@@ -80,36 +80,6 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
                     patronymic=u"Васильевна")
         self.assertEqual(smart_text(user), user.get_full_name(True))
 
-    def test_group_props(self):
-        """
-        Tests properties based on groups (is_student, is_graduate, is_teacher)
-        """
-        user = User(username="foo", email="foo@localhost.ru")
-        user.save()
-        self.assertFalse(user.is_student)
-        self.assertFalse(user.is_teacher)
-        self.assertFalse(user.is_graduate)
-        user = User(username="bar", email="bar@localhost.ru")
-        user.save()
-        add_user_groups(user, [user.roles.STUDENT])
-        self.assertTrue(user.is_student)
-        self.assertFalse(user.is_teacher)
-        self.assertFalse(user.is_graduate)
-        user = User(username="baz", email="baz@localhost.ru")
-        user.save()
-        add_user_groups(user, [user.roles.STUDENT, user.roles.TEACHER_CENTER])
-        self.assertTrue(user.is_student)
-        self.assertTrue(user.is_teacher)
-        self.assertFalse(user.is_graduate)
-        user = User(username="baq", email="baq@localhost.ru")
-        user.save()
-        add_user_groups(user, [user.roles.STUDENT,
-                               user.roles.TEACHER_CENTER,
-                               user.roles.GRADUATE_CENTER])
-        self.assertTrue(user.is_student)
-        self.assertTrue(user.is_teacher)
-        self.assertTrue(user.is_graduate)
-
     def test_login_page(self):
         response = self.client.get(reverse('login'))
         soup = BeautifulSoup(response.content, "html.parser")
@@ -151,7 +121,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         assert response.status_code == 302
         resp = self.client.get(reverse('teaching:assignment_list'))
         self.assertLoginRedirect(url)
-        add_user_groups(user, [user.roles.STUDENT, user.roles.TEACHER_CENTER])
+        add_user_groups(user, [user.roles.STUDENT, user.roles.TEACHER])
         user.save()
         resp = self.client.get(reverse('teaching:assignment_list'))
         # Teacher has no course offering and redirects to courses list
@@ -209,7 +179,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         user = User.objects.create_user(**user_data)
         resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 404)
-        add_user_groups(user, [AcademicRoles.TEACHER_CENTER])
+        add_user_groups(user, [AcademicRoles.TEACHER])
         user.save()
         resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 200)
@@ -479,7 +449,7 @@ def test_login_restrictions(client, settings):
     response = client.post(reverse('login'), user_data, follow=True)
     assert not response.wsgi_request.user.is_authenticated
     # Center teacher
-    add_user_groups(student, [AcademicRoles.TEACHER_CENTER])
+    add_user_groups(student, [AcademicRoles.TEACHER])
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     # Just to make sure we have no super user permissions

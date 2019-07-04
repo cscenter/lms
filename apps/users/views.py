@@ -71,7 +71,7 @@ class LoginView(generic.FormView):
             user_groups = self.request.user.get_cached_groups()
             if user_groups == {User.roles.STUDENT}:
                 redirect_to = reverse("study:assignment_list")
-            elif user_groups == {User.roles.TEACHER_CENTER}:
+            elif user_groups == {User.roles.TEACHER}:
                 redirect_to = reverse("teaching:assignment_list")
 
         if not is_safe_url(redirect_to,

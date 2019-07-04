@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import factory
+from django.contrib.sites.models import Site
 
 from learning.settings import GradeTypes
 from users.constants import AcademicRoles, GenderTypes
@@ -78,11 +79,10 @@ class StudentFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.STUDENT,
-                           AcademicRoles.STUDENT_CLUB]
-        add_user_groups(self, required_groups)
+        for site in Site.objects.all():
+            self.add_group(role=AcademicRoles.STUDENT, site_id=site.id)
 
-
+# FIXME: Нужна ли такая специфика? Думаем...
 class StudentCenterFactory(UserFactory):
     enrollment_year = 2015
     city_id = 'spb'
@@ -111,7 +111,7 @@ class TeacherCenterFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.TEACHER_CENTER]
+        required_groups = [AcademicRoles.TEACHER]
         add_user_groups(self, required_groups)
 
 

@@ -18,10 +18,6 @@ class PermissionMixin:
         return True
 
     @property
-    def is_expelled(self):
-        return None
-
-    @property
     def is_teacher(self):
         return True
 

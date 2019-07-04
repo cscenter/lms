@@ -249,12 +249,12 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, CSCTestCase):
         self.assertLoginRedirect(url)
         test_groups = [
             [],
-            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.TEACHER],
             [AcademicRoles.STUDENT],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
-            if groups == [AcademicRoles.TEACHER_CENTER]:
+            if groups == [AcademicRoles.TEACHER]:
                 self.assertEqual(403, self.client.get(url).status_code)
             else:
                 self.assertLoginRedirect(url)
@@ -284,7 +284,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, CSCTestCase):
 
 class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
     url_name = 'teaching:assignment_list'
-    groups_allowed = [AcademicRoles.TEACHER_CENTER]
+    groups_allowed = [AcademicRoles.TEACHER]
 
     def test_group_security(self):
         """Custom logic instead of GroupSecurityCheckMixin.
@@ -292,7 +292,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
         self.assertLoginRedirect(reverse(self.url_name))
         all_test_groups = [
             [],
-            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.TEACHER],
             [AcademicRoles.STUDENT],
             [AcademicRoles.GRADUATE_CENTER]
         ]

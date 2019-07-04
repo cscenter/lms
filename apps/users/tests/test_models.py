@@ -3,11 +3,10 @@ from django.core.exceptions import ValidationError
 
 from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import SemesterFactory, CourseFactory
-from learning.permissions import has_master_degree
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
 from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
-    StudentCenterFactory, UserGroupFactory
+    UserGroupFactory
 
 
 @pytest.mark.django_db
@@ -36,14 +35,14 @@ def test_user_city_code(client, settings):
 @pytest.mark.django_db
 def test_cached_groups(settings):
     user = UserFactory(groups=[AcademicRoles.STUDENT,
-                               AcademicRoles.TEACHER_CENTER])
+                               AcademicRoles.TEACHER])
     assert set(user._cached_groups) == {AcademicRoles.STUDENT,
-                                        AcademicRoles.TEACHER_CENTER}
+                                        AcademicRoles.TEACHER}
     user.status = StudentStatuses.EXPELLED
     user.groups.add(UserGroupFactory(user=user, role=AcademicRoles.VOLUNTEER))
     # Invalidate cache
     del user._cached_groups
-    assert user._cached_groups == {AcademicRoles.TEACHER_CENTER,
+    assert user._cached_groups == {AcademicRoles.TEACHER,
                                    AcademicRoles.STUDENT,
                                    AcademicRoles.VOLUNTEER}
     user.groups.all().delete()
@@ -53,63 +52,6 @@ def test_cached_groups(settings):
     settings.SITE_ID = settings.CLUB_SITE_ID
     del user._cached_groups
     assert not set(user._cached_groups)
-
-
-@pytest.mark.django_db
-def test_permissions(client):
-    current_semester = SemesterFactory.create_current()
-    # Unauthenticated user
-    response = client.get("/")
-    request_user = response.wsgi_request.user
-    assert not request_user.is_authenticated
-    assert not request_user.is_student
-    assert not request_user.is_volunteer
-    assert not request_user.is_active_student
-    assert not has_master_degree(request_user)
-    assert not request_user.is_teacher_center
-    assert not request_user.is_teacher_club
-    assert not request_user.is_teacher
-    assert not request_user.is_graduate
-    assert not request_user.is_curator
-    assert not request_user.is_curator_of_projects
-    assert not request_user.is_interviewer
-    assert not request_user.is_project_reviewer
-    # Active student
-    student = StudentCenterFactory(status='')
-    client.login(student)
-    response = client.get("/")
-    request_user = response.wsgi_request.user
-    assert request_user.is_authenticated
-    assert request_user.is_student
-    assert not request_user.is_volunteer
-    assert request_user.is_active_student
-    assert not has_master_degree(request_user)
-    assert not request_user.is_teacher_center
-    assert not request_user.is_teacher_club
-    assert not request_user.is_teacher
-    assert not request_user.is_graduate
-    assert not request_user.is_curator
-    assert not request_user.is_curator_of_projects
-    assert not request_user.is_interviewer
-    assert not request_user.is_project_reviewer
-    # Expelled student
-    student.status = StudentStatuses.EXPELLED
-    student.save()
-    response = client.get("/")
-    request_user = response.wsgi_request.user
-    assert request_user.is_authenticated
-    assert request_user.is_student
-    assert not request_user.is_volunteer
-    assert not request_user.is_active_student
-    assert not has_master_degree(request_user)
-    assert not request_user.is_teacher_center
-    assert not request_user.is_teacher_club
-    assert not request_user.is_teacher
-    assert not request_user.is_graduate
-    assert not request_user.is_curator
-    assert not request_user.is_curator_of_projects
-    assert not request_user.is_interviewer
-    assert not request_user.is_project_reviewer
 
 
 @pytest.mark.django_db

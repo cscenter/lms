@@ -104,7 +104,7 @@ class StudentAssignmentDetailView(AssignmentSubmissionBaseView):
         if self.request.method == "POST":
             is_student = user.is_active_student
         else:
-            is_student = user.is_student
+            is_student = user.is_student or user.is_volunteer
         return (is_student or user.is_curator or user.is_graduate or
                 user.is_teacher)
 
