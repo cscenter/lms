@@ -1,19 +1,21 @@
+import datetime
+
 import pytest
 
-from core.urls import reverse
+from core.urls import reverse, reverse_lazy
 from courses.settings import SemesterTypes
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
-from learning.tests.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from users.constants import AcademicRoles
 from users.tests.factories import StudentCenterFactory, StudentClubFactory, \
-    UserFactory, VolunteerFactory, GraduateFactory
+    UserFactory, VolunteerFactory, add_user_groups
 
 
 @pytest.fixture(scope="module")
 def search_url():
-    return reverse('staff:student_search_json')
+    return reverse_lazy('staff:student_search_json')
 
 
 @pytest.mark.django_db
@@ -239,8 +241,10 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
         enrollment_year=2011, status="", city_id='nsk')
     volunteers = VolunteerFactory.create_batch(
         3, enrollment_year=2011, status="", city_id='spb')
+    graduated_on = datetime.date(year=2017, month=1, day=1)
     graduated = GraduateFactory.create_batch(
-        5, city_id='spb', status='', enrollment_year=2011, graduation_year=2017)
+        5, city_id='spb', status='', enrollment_year=2011,
+        graduate_profile__graduated_on=graduated_on)
     response = client.get("{}?{}".format(search_url, "status=studying"))
     json_data = response.json()
     total_studying = len(students_spb) + len(students_nsk) + len(volunteers)
@@ -273,7 +277,7 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == len(volunteers) + len(graduated)
     # Edge case #2 - graduate can have `master` subgroup
-    graduated[0].groups.add(AcademicRoles.MASTERS_DEGREE)
+    add_user_groups(graduated[0], [AcademicRoles.MASTERS_DEGREE])
     query = "status=studying&groups={},{}".format(AcademicRoles.GRADUATE_CENTER,
                                                   AcademicRoles.MASTERS_DEGREE)
     response = client.get("{}?{}".format(search_url, query))

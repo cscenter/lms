@@ -313,7 +313,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
         # Default filter for grade - `no_grade`
         TEACHER_ASSIGNMENTS_PAGE = reverse(self.url_name)
         teacher = TeacherCenterFactory()
-        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
+        students = StudentCenterFactory.create_batch(3)
         now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         # some other teacher's course offering
@@ -556,16 +556,16 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Make student as a volunteer, should be the same
-    student.groups.remove(AcademicRoles.STUDENT_CENTER)
-    student.groups.add(AcademicRoles.VOLUNTEER)
+    student.remove_group(AcademicRoles.STUDENT_CENTER)
+    student.add_group(AcademicRoles.VOLUNTEER)
     response = client.get(url_learning_assignments)
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Club students has no access to the page on center site
-    student.groups.remove(AcademicRoles.VOLUNTEER)
-    student.groups.add(AcademicRoles.STUDENT_CLUB)
+    student.remove_group(AcademicRoles.VOLUNTEER)
+    student.add_group(AcademicRoles.STUDENT_CLUB)
     response = client.get(url_learning_assignments)
     assert response.status_code == 302
 

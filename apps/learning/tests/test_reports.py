@@ -14,7 +14,7 @@ from learning.tests.factories import SemesterFactory, CourseFactory, \
 from users.constants import AcademicRoles
 from users.tests.factories import SHADCourseRecordFactory, \
     OnlineCourseRecordFactory, \
-    TeacherCenterFactory, StudentCenterFactory
+    TeacherCenterFactory, StudentCenterFactory, add_user_groups
 
 
 def check_value_for_header(report, header, row_index, expected_value):
@@ -202,8 +202,8 @@ def test_report_for_target_term(rf):
     progress_report = get_progress_report(prev_s)
     assert len(progress_report.data) == 3
     # Graduated students not included in report
-    student3.groups.clear()
-    student3.groups.add(AcademicRoles.GRADUATE_CENTER)
+    student3.groups.all().delete()
+    student3.add_group(AcademicRoles.GRADUATE_CENTER)
     progress_report = get_progress_report(prev_s)
     assert len(progress_report.data) == 2
     STATIC_HEADERS_CNT = len(progress_report.static_headers)

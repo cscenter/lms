@@ -632,10 +632,10 @@ class ProcessReviewFormView(LoginRequiredMixin, ModelFormMixin, View):
 
     def send_notification_to_curators(self, review):
         """Reviewer completed assessment"""
-        curators = (User.objects.filter(
-            is_superuser=True,
-            is_staff=True,
-            groups=AcademicRoles.CURATOR_PROJECTS))
+        curators = (User.objects
+                    .has_role(AcademicRoles.CURATOR_PROJECTS)
+                    .filter(is_superuser=True,
+                            is_staff=True))
         report = (Report.objects
                   .select_related("project_student",
                                   "project_student__project",

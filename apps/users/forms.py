@@ -52,8 +52,9 @@ class LoginForm(AuthenticationForm):
             user = self.get_user()
             if user.is_curator:
                 return is_valid
-            user_groups = set(g.pk for g in user.groups.all())
-            if not user_groups.intersection(CSCENTER_ACCESS_ALLOWED):
+            user_roles = set(g.role for g
+                             in user.groups.filter(site_id=settings.SITE_ID))
+            if not user_roles.intersection(CSCENTER_ACCESS_ALLOWED):
                 is_valid = False
                 no_access_msg = _("You haven't enough access rights to login "
                                   "on this site. Contact curators if you think "
@@ -172,26 +173,7 @@ class UserChangeForm(_UserChangeForm):
         enrollment_year = cleaned_data.get('enrollment_year')
         groups = {x.pk for x in cleaned_data.get('groups', [])}
         u: User = self.instance
-        if u.roles.STUDENT_CENTER in groups:
-            if enrollment_year is None:
-                self.add_error('enrollment_year', ValidationError(
-                    _("Enrollment year should be provided for students")))
-        if groups.intersection({AcademicRoles.STUDENT_CENTER,
-                                AcademicRoles.VOLUNTEER,
-                                AcademicRoles.GRADUATE_CENTER}):
-            if not cleaned_data.get('city', ''):
-                self.add_error('city', ValidationError(
-                    _("Provide city for student")))
-
-        if u.roles.VOLUNTEER in groups and enrollment_year is None:
-            self.add_error('enrollment_year', ValidationError(
-                _("CSCUser|enrollment year should be provided for volunteers")))
-
-        graduation_year = cleaned_data.get('graduation_year')
-        if u.roles.GRADUATE_CENTER in groups and graduation_year is None:
-            self.add_error('graduation_year', ValidationError(
-                _("CSCUser|graduation year should be provided for graduates")))
-
+        # FIXME: How to check these invariants with 1-to-many relation?
         if u.roles.VOLUNTEER in groups and u.roles.STUDENT_CENTER in groups:
             msg = _("User can't be volunteer and student at the same time")
             self.add_error('groups', ValidationError(msg))

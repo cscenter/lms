@@ -19,6 +19,7 @@ from learning.tests.factories import *
 from learning.tests.utils import check_url_security
 from users.constants import AcademicRoles
 from users.tests.factories import *
+from users.tests.factories import add_user_groups
 from .mixins import *
 
 
@@ -185,8 +186,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.doLogin(student)
         assert self.client.get(url).status_code == 200
         # Change student to graduate, make sure they have access to HW
-        student.groups.clear()
-        student.groups.add(AcademicRoles.GRADUATE_CENTER)
+        student.groups.all().delete()
+        add_user_groups(student, [AcademicRoles.GRADUATE_CENTER])
         student.save()
         self.assertEqual(200, self.client.get(url).status_code)
 

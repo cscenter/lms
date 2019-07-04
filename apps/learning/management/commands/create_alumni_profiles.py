@@ -19,10 +19,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         graduated_on_str = options['graduated_on']
         graduated_on = datetime.strptime(graduated_on_str, "%d.%m.%Y").date()
-        will_graduate_list = User.objects.filter(groups__in=[
-            User.roles.STUDENT_CENTER,
-            User.roles.VOLUNTEER,
-        ], status=StudentStatuses.WILL_GRADUATE)
+        will_graduate_list = (User.objects
+                              .has_role(User.roles.STUDENT_CENTER,
+                                        User.roles.VOLUNTEER)
+                              .filter(status=StudentStatuses.WILL_GRADUATE))
 
         for student in will_graduate_list:
             with transaction.atomic():

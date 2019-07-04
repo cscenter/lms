@@ -1,10 +1,11 @@
+import datetime
+
 import pytest
 from django.core.cache import cache
 
 from core.urls import reverse
 from learning.tests.factories import AcademicDisciplineFactory, \
     GraduateProfileFactory
-from users.tests.factories import GraduateFactory
 
 
 # TODO: test context
@@ -54,7 +55,6 @@ def test_menu_selected_patterns(rf):
     assert processed_menu[1].selected
 
 
-# TODO: test alumni api
 @pytest.mark.django_db
 def test_alumni(client):
     url_alumni_all = reverse('alumni')
@@ -63,7 +63,8 @@ def test_alumni(client):
     json_data = response.context_data['app_data']
     assert json_data['props']['years'] == [{'label': 2013, 'value': 2013}]
     assert not json_data['props']['areas']
-    graduated = GraduateFactory(graduation_year=2015)
+    graduated_on = datetime.date(year=2015, month=1, day=1)
+    graduated = GraduateProfileFactory(graduated_on=graduated_on)
     cache.delete('cscenter_last_graduation_year')
     response = client.get(url_alumni_all)
     assert response.status_code == 200

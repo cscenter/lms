@@ -95,15 +95,10 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
 
 class Group(models.Model):
     """
-    Groups are a generic way of categorizing users to apply permissions, or
-    some other label, to those users. A user can belong to any number of
-    groups.
+    Groups are a generic way of categorizing users to apply some label.
+    A user can belong to any number of groups.
 
-    A user in a group automatically has all the permissions granted to that
-    group. For example, if the group 'Site editors' has the permission
-    can_edit_home_page, any user in that group will have that permission.
-
-    Beyond permissions, groups are a convenient way to categorize users to
+    Groups are a convenient way to categorize users to
     apply some label, or extended functionality, to them. For example, you
     could create a group 'Special users', and you could write code that would
     do special things to those users -- such as giving them access to a
@@ -123,8 +118,60 @@ class Group(models.Model):
         return self.name,
 
 
+def get_current_site():
+    return settings.SITE_ID
+
+
+class UserGroup(models.Model):
+    """Maps users to site and groups. Used by users.groups.AccessGroup."""
+
+    user = models.ForeignKey('users.User', verbose_name=_("User"),
+                             on_delete=models.CASCADE,
+                             related_name="groups",
+                             related_query_name="group")
+    site = models.ForeignKey('sites.Site', verbose_name=_("Site"),
+                             db_index=False,
+                             on_delete=models.PROTECT,
+                             default=get_current_site)
+    role = models.PositiveSmallIntegerField(_("Role"),
+                                            choices=AcademicRoles.choices)
+
+    class Meta:
+        db_table = "users_user_groups"
+        constraints = [
+            models.UniqueConstraint(fields=('user', 'role', 'site'),
+                                    name='unique_user_role_site'),
+        ]
+        verbose_name = _("Access Group")
+        verbose_name_plural = _("Access Groups")
+
+    @property
+    def _key(self):
+        """
+        Convenience function to make eq overrides easier and clearer.
+        Arbitrary decision that group is primary, followed by site and then user
+        """
+        return self.role, self.site, self.user_id
+
+    def __eq__(self, other):
+        """
+        Overriding eq b/c the django impl relies on the primary key which
+        requires fetch. Sometimes we just want to compare groups w/o doing
+        another fetch.
+        """
+        # noinspection PyProtectedMember
+        return type(self) == type(other) and self._key == other._key
+
+    def __hash__(self):
+        return hash(self._key)
+
+    def __str__(self):
+        return "[AccessGroup] user: {}  role: {}  site: {}".format(
+            self.user_id, self.role, self.site)
+
+
 class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
-           AbstractBaseUser, PermissionsMixin):
+           AbstractBaseUser):
     roles = AcademicRoles
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
@@ -161,18 +208,14 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         ),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-    groups = models.ManyToManyField(
-        Group,
-        verbose_name=_('groups'),
-        blank=True,
+    is_superuser = models.BooleanField(
+        _('superuser status'),
+        default=False,
         help_text=_(
-            'The groups this user belongs to. A user will get all permissions '
-            'granted to each of their groups.'
+            'Designates that this user has all permissions without '
+            'explicitly assigning them.'
         ),
-        related_name="user_set",
-        related_query_name="user",
     )
-    user_permissions = None
     gender = models.CharField(_("Gender"), max_length=1,
                               choices=GenderTypes.choices)
     modified = AutoLastModifiedField(_('modified'))
@@ -270,6 +313,21 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         super().clean()
         self.email = self.__class__.objects.normalize_email(self.email)
 
+    def get_group_permissions(self, obj=None):
+        return PermissionsMixin.get_group_permissions(self, obj)
+
+    def get_all_permissions(self, obj=None):
+        return PermissionsMixin.get_all_permissions(self, obj)
+
+    def has_perm(self, perm, obj=None):
+        return PermissionsMixin.has_perm(self, perm, obj)
+
+    def has_perms(self, perm_list, obj=None):
+        return PermissionsMixin.has_perms(self, perm_list, obj)
+
+    def has_module_perms(self, app_label):
+        return PermissionsMixin.has_module_perms(self, app_label)
+
     def save(self, **kwargs):
         created = self.pk is None
         password_changed = self._password is not None
@@ -287,6 +345,15 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         elif created and gerrit_sync_enabled:
             # TODO: schedule task for creating LDAP account
             pass
+
+    def add_group(self, role, site_id: int = None):
+        """Add new role associated with the current site by default"""
+        site_id = site_id or settings.SITE_ID
+        self.groups.get_or_create(user=self, role=role, site_id=site_id)
+
+    def remove_group(self, role, site_id: int = None):
+        sid = site_id or settings.SITE_ID
+        self.groups.filter(user=self, role=role, site_id=sid).delete()
 
     @property
     def city_code(self):
@@ -317,12 +384,13 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
             user = User.objects.create_user(username=username,
                                             email=applicant.email,
                                             password=random_password)
-        groups = []
+        roles = []
         if applicant.status == Applicant.VOLUNTEER:
-            groups.append(User.roles.VOLUNTEER)
+            roles.append(User.roles.VOLUNTEER)
         else:
-            groups.append(User.roles.STUDENT_CENTER)
-        user.groups.add(*groups)
+            roles.append(User.roles.STUDENT_CENTER)
+        for role in roles:
+            user.add_group(role)
         # Migrate data from application form to user profile
         same_attrs = [
             "first_name",
@@ -499,19 +567,22 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
 
     @cached_property
     def _cached_groups(self) -> set:
+        # FIXME: restrict by sett
         try:
             gs = self._prefetched_objects_cache['groups']
-            user_groups = set(g.pk for g in gs)
+            groups = set(g.role for g in gs if g.site_id == settings.SITE_ID)
         except (AttributeError, KeyError):
-            user_groups = set(self.groups.values_list("pk", flat=True))
+            groups = set(self.groups
+                         .filter(site_id=settings.SITE_ID)
+                         .values_list("role", flat=True))
         # Add club group on club site to center students
-        center_student = (self.roles.STUDENT_CENTER in user_groups or
-                          self.roles.VOLUNTEER in user_groups or
-                          self.roles.GRADUATE_CENTER in user_groups)
-        if (center_student and self.roles.STUDENT_CLUB not in user_groups
+        center_student = (self.roles.STUDENT_CENTER in groups or
+                          self.roles.VOLUNTEER in groups or
+                          self.roles.GRADUATE_CENTER in groups)
+        if (center_student and self.roles.STUDENT_CLUB not in groups
                 and is_club_site()):
-            user_groups.add(self.roles.STUDENT_CLUB)
-        return user_groups
+            groups.add(self.roles.STUDENT_CLUB)
+        return groups
 
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         """
@@ -717,3 +788,6 @@ class EnrollmentCertificate(TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.student)
+
+    def get_absolute_url(self):
+        return reverse('user_reference_detail', args=[self.student_id, self.pk])

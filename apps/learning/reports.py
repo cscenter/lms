@@ -215,13 +215,17 @@ class ProgressReportForDiplomas(ProgressReport):
         Explicitly exclude rows with bad grades (or without) on query level.
         """
         filters = kwargs.pop("filters", {})
-        return User.objects.students_info(
-            filters={
-                "status": StudentStatuses.WILL_GRADUATE,
-                **filters
-            },
-            exclude_grades=[GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
-        )
+        filters = {
+            "status": StudentStatuses.WILL_GRADUATE,
+            **filters
+        }
+        return (User.objects
+                .has_role(User.roles.STUDENT_CENTER,
+                          User.roles.GRADUATE_CENTER,
+                          User.roles.VOLUNTEER)
+                .students_info(filters=filters,
+                               exclude_grades=[GradeTypes.UNSATISFACTORY,
+                                               GradeTypes.NOT_GRADED]))
 
     @property
     def static_headers(self):
@@ -288,6 +292,9 @@ class ProgressReportFull(ProgressReport):
     @staticmethod
     def get_queryset(**kwargs):
         return (User.objects
+                .has_role(User.roles.STUDENT_CENTER,
+                          User.roles.GRADUATE_CENTER,
+                          User.roles.VOLUNTEER)
                 .students_info()
                 .select_related("applicant"))
 
@@ -396,19 +403,11 @@ class ProgressReportForSemester(ProgressReport):
     def get_queryset(**kwargs):
         semester = kwargs.pop("semester")
         filters = kwargs.pop("filters", {})
-        return User.objects.students_info(
-            filters={
-                "groups__in": [
-                    User.roles.STUDENT_CENTER,
-                    User.roles.VOLUNTEER
-                ],
-                **filters
-            },
-            exclude={
-                "status": StudentStatuses.EXPELLED
-            },
-            semester=semester,
-        )
+        return (User.objects
+                .has_role(User.roles.STUDENT_CENTER, User.roles.VOLUNTEER)
+                .students_info(filters=filters,
+                               exclude={"status": StudentStatuses.EXPELLED},
+                               semester=semester))
 
     def before_process_row(self, student):
         student.enrollments_eq_target_semester = 0

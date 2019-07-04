@@ -23,17 +23,16 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         graduated_on_str = options['graduated_on']
         graduated_on = datetime.strptime(graduated_on_str, "%d.%m.%Y").date()
-        will_graduate_list = User.objects.filter(groups__in=[
-            User.roles.STUDENT_CENTER,
-            User.roles.VOLUNTEER,
-        ], status=StudentStatuses.WILL_GRADUATE)
+        will_graduate_list = (User.objects
+                              .has_role(User.roles.STUDENT_CENTER,
+                                        User.roles.VOLUNTEER)
+                              .filter(status=StudentStatuses.WILL_GRADUATE))
 
         for student in will_graduate_list:
             with transaction.atomic():
-                student.groups.remove(User.roles.STUDENT_CENTER)
-                student.groups.remove(User.roles.VOLUNTEER)
-                student.groups.add(User.roles.GRADUATE_CENTER)
-                student.graduation_year = now().year
+                student.remove_group(User.roles.STUDENT_CENTER)
+                student.remove_group(User.roles.VOLUNTEER)
+                student.add_group(User.roles.GRADUATE_CENTER)
                 student.status = ""
                 student.save()
                 defaults = {

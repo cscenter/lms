@@ -35,11 +35,11 @@ class Command(BaseCommand):
         # Ok, try to update teacher groups, looks as hell, but it works
         for teacher in teachers:
             if teachers[teacher]["state"] == self.BOTH:
-                teachers[teacher]["obj"].groups.add(AcademicRoles.TEACHER_CENTER)
-                teachers[teacher]["obj"].groups.add(AcademicRoles.TEACHER_CLUB)
+                teachers[teacher]["obj"].add_group(AcademicRoles.TEACHER_CENTER)
+                teachers[teacher]["obj"].add_group(AcademicRoles.TEACHER_CLUB)
             elif teachers[teacher]["state"] == self.CLUB_ONLY:
-                teachers[teacher]["obj"].groups.add(AcademicRoles.TEACHER_CLUB)
-                teachers[teacher]["obj"].groups.remove(AcademicRoles.TEACHER_CENTER)
+                teachers[teacher]["obj"].add_group(AcademicRoles.TEACHER_CLUB)
+                teachers[teacher]["obj"].remove_group(AcademicRoles.TEACHER_CENTER)
             elif teachers[teacher]["state"] == self.CENTER_ONLY:
-                teachers[teacher]["obj"].groups.add(AcademicRoles.TEACHER_CENTER)
-                teachers[teacher]["obj"].groups.remove(AcademicRoles.TEACHER_CLUB)
+                teachers[teacher]["obj"].add_group(AcademicRoles.TEACHER_CENTER)
+                teachers[teacher]["obj"].remove_group(AcademicRoles.TEACHER_CLUB)

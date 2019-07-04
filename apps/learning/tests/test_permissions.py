@@ -5,6 +5,7 @@ from courses.tests.factories import CourseFactory, SemesterFactory
 from learning.permissions import course_access_role, CourseRole
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import EnrollmentFactory
+from users.constants import AcademicRoles
 from users.models import ExtendedAnonymousUser, User
 from users.tests.factories import CuratorFactory, TeacherCenterFactory, \
     StudentFactory
@@ -53,7 +54,7 @@ def test_course_access_role_teacher():
     role = course_access_role(course=course2, user=teacher2)
     assert role == CourseRole.TEACHER
     # Now make sure that teacher role is prevailed on any student role
-    teacher2.groups.add(teacher2.roles.STUDENT_CENTER)
+    teacher2.add_group(AcademicRoles.STUDENT_CENTER)
     role = course_access_role(course=course, user=teacher2)
     assert role == CourseRole.TEACHER
     delete_enrollment_cache(teacher2, course)

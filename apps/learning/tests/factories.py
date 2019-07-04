@@ -12,8 +12,9 @@ from learning.models import StudentAssignment, \
     CourseNewsNotification, Event, Branch, GraduateProfile
 from learning.settings import Branches
 from study_programs.models import AcademicDiscipline
+from users.constants import AcademicRoles
 from users.tests.factories import UserFactory, StudentCenterFactory, \
-    GraduateFactory
+    add_user_groups
 
 __all__ = ('AcademicDisciplineFactory', 'StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentFactory',
@@ -100,9 +101,26 @@ class EventFactory(factory.DjangoModelFactory):
     ends_at = "13:45"
 
 
+class GraduateFactory(UserFactory):
+    branch = factory.SubFactory('learning.tests.factories.BranchFactory',
+                                code='spb')
+
+    graduate_profile = factory.RelatedFactory(
+        'learning.tests.factories.GraduateProfileFactory',
+        'student'
+    )
+
+    @factory.post_generation
+    def _add_required_groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        required_groups = [AcademicRoles.GRADUATE_CENTER]
+        add_user_groups(self, required_groups)
+
+
 class GraduateProfileFactory(factory.DjangoModelFactory):
     class Meta:
         model = GraduateProfile
 
-    student = factory.SubFactory(GraduateFactory)
+    student = factory.SubFactory(GraduateFactory, graduate_profile=None)
     graduated_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)

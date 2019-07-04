@@ -40,8 +40,8 @@ Requirements:
                                      then=Value(None)),
                                 default=F("projectstudent__pk")
                             ), distinct=True))
-                    .filter(groups__in=[User.roles.STUDENT_CENTER],
-                            curriculum_year__gte=str(current_term.year - 3),
+                    .has_role(User.roles.STUDENT_CENTER)
+                    .filter(curriculum_year__gte=str(current_term.year - 3),
                             passed_projects__gte=3)
                     .exclude(status__in=[StudentStatuses.WILL_GRADUATE,
                                          StudentStatuses.EXPELLED])

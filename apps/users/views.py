@@ -279,8 +279,7 @@ class EnrollmentCertificateCreateView(ProtectedFormMixin, generic.CreateView):
         return super(EnrollmentCertificateCreateView, self).form_valid(form)
 
     def get_success_url(self):
-        return reverse('user_reference_detail',
-                       args=[self.object.student_id, self.object.pk])
+        return self.object.get_absolute_url()
 
     def is_form_allowed(self, user, obj):
         return user.is_curator
@@ -293,6 +292,9 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         student_info = (User.objects
+                        .has_role(User.roles.STUDENT_CENTER,
+                                  User.roles.GRADUATE_CENTER,
+                                  User.roles.VOLUNTEER)
                         .students_info(exclude_grades=[
                             GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED
                         ])

@@ -895,7 +895,7 @@ class Interview(TimeStampedModel):
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
-        limit_choices_to={'groups__pk': AcademicRoles.INTERVIEWER})
+        limit_choices_to={'group__role': AcademicRoles.INTERVIEWER})
 
     assignments = models.ManyToManyField(
         'InterviewAssignment',
@@ -1037,7 +1037,7 @@ class InterviewStream(TimeStampedModel):
     interviewers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
-        limit_choices_to={'groups__pk': AcademicRoles.INTERVIEWER})
+        limit_choices_to={'group__role': AcademicRoles.INTERVIEWER})
     campaign = models.ForeignKey(
         Campaign,
         verbose_name=_("Campaign"),

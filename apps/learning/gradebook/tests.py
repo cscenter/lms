@@ -182,7 +182,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
 class MarksSheetTeacherTests(MyUtilitiesMixin, CSCTestCase):
     def test_nonempty_gradebook(self):
         teacher = TeacherCenterFactory()
-        students = UserFactory.create_batch(3, groups=['Student [CENTER]'])
+        students = StudentCenterFactory.create_batch(3)
         co = CourseFactory.create(teachers=[teacher])
         for student in students:
             EnrollmentFactory.create(student=student, course=co)

@@ -4,15 +4,19 @@ import factory
 
 from learning.settings import GradeTypes
 from users.constants import AcademicRoles, GenderTypes
-from users.models import User, Group, SHADCourseRecord, EnrollmentCertificate, \
-    OnlineCourseRecord
+from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
+    OnlineCourseRecord, UserGroup
 
 __all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
            'StudentFactory', 'StudentCenterFactory', 'StudentClubFactory',
-           'TeacherCenterFactory', 'VolunteerFactory', 'GraduateFactory',
-           'ProjectReviewerFactory', 'OnlineCourseRecordFactory',
+           'TeacherCenterFactory', 'VolunteerFactory', 'ProjectReviewerFactory', 'OnlineCourseRecordFactory',
            'SHADCourseRecordFactory', 'EnrollmentCertificateFactory')
+
+
+def add_user_groups(user, groups):
+    for role in groups:
+        user.add_group(role=role)
 
 
 class UserFactory(factory.DjangoModelFactory):
@@ -31,12 +35,7 @@ class UserFactory(factory.DjangoModelFactory):
         if not create:
             return
         if extracted:
-            for group in extracted:
-                if isinstance(group, int):
-                    group_add = Group.objects.get(pk=group)
-                else:
-                    group_add = Group.objects.get(name=group)
-                self.groups.add(group_add)
+            add_user_groups(self, extracted)
 
     @factory.post_generation
     def raw_password(self, create, extracted, **kwargs):
@@ -56,6 +55,15 @@ class UserFactory(factory.DjangoModelFactory):
             self.curriculum_year = self.enrollment_year
 
 
+class UserGroupFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = UserGroup
+
+    user = factory.SubFactory(UserFactory)
+    role = factory.Faker('random_element',
+                         elements=[c for c, _ in AcademicRoles.choices])
+
+
 class CuratorFactory(UserFactory):
     is_superuser = True
     is_staff = True
@@ -67,14 +75,12 @@ class StudentFactory(UserFactory):
                                 code='spb')
 
     @factory.post_generation
-    def groups(self, create, extracted, **kwargs):
+    def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-
-        groups = extracted or [AcademicRoles.STUDENT_CENTER,
-                               AcademicRoles.STUDENT_CLUB]
-        for group in groups:
-            self.groups.add(group)
+        required_groups = [AcademicRoles.STUDENT_CENTER,
+                           AcademicRoles.STUDENT_CLUB]
+        add_user_groups(self, required_groups)
 
 
 class StudentCenterFactory(UserFactory):
@@ -84,32 +90,29 @@ class StudentCenterFactory(UserFactory):
                                 code='spb')
 
     @factory.post_generation
-    def groups(self, create, extracted, **kwargs):
+    def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [AcademicRoles.STUDENT_CENTER]
-        for group in groups:
-            self.groups.add(group)
+        required_groups = [AcademicRoles.STUDENT_CENTER]
+        add_user_groups(self, required_groups)
 
 
 class StudentClubFactory(UserFactory):
     @factory.post_generation
-    def groups(self, create, extracted, **kwargs):
+    def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [AcademicRoles.STUDENT_CLUB]
-        for group in groups:
-            self.groups.add(group)
+        required_groups = [AcademicRoles.STUDENT_CLUB]
+        add_user_groups(self, required_groups)
 
 
 class TeacherCenterFactory(UserFactory):
     @factory.post_generation
-    def groups(self, create, extracted, **kwargs):
+    def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [AcademicRoles.TEACHER_CENTER]
-        for group in groups:
-            self.groups.add(group)
+        required_groups = [AcademicRoles.TEACHER_CENTER]
+        add_user_groups(self, required_groups)
 
 
 class VolunteerFactory(UserFactory):
@@ -117,36 +120,20 @@ class VolunteerFactory(UserFactory):
                                 code='spb')
 
     @factory.post_generation
-    def groups(self, create, extracted, **kwargs):
+    def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [AcademicRoles.VOLUNTEER]
-        for group in groups:
-            self.groups.add(group)
-
-
-class GraduateFactory(UserFactory):
-    branch = factory.SubFactory('learning.tests.factories.BranchFactory',
-                                code='spb')
-    graduation_year = 2019
-
-    @factory.post_generation
-    def groups(self, create, extracted, **kwargs):
-        if not create:
-            return
-        groups = extracted or [AcademicRoles.GRADUATE_CENTER]
-        for group in groups:
-            self.groups.add(group)
+        required_groups = [AcademicRoles.VOLUNTEER]
+        add_user_groups(self, required_groups)
 
 
 class ProjectReviewerFactory(UserFactory):
     @factory.post_generation
-    def groups(self, create, extracted, **kwargs):
+    def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        groups = extracted or [AcademicRoles.PROJECT_REVIEWER]
-        for group in groups:
-            self.groups.add(group)
+        required_groups = [AcademicRoles.PROJECT_REVIEWER]
+        add_user_groups(self, required_groups)
 
 
 class OnlineCourseRecordFactory(factory.DjangoModelFactory):

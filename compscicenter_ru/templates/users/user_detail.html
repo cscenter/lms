@@ -175,9 +175,7 @@
                             <ul>
                                 {% for reference in profile_user.enrollment_certificates.all %}
                                     <li>
-                                        <a target="_blank" href="{% url 'user_reference_detail' profile_user.id reference.id %}">
-                                            {{ reference.created|date:"d.m.Y" }}
-                                        </a>
+                                        <a target="_blank" href="{{ reference.get_absolute_url }}">{{ reference.created|date:"d.m.Y" }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>

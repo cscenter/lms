@@ -3,9 +3,9 @@ from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django.utils.translation import ugettext_lazy as _
-
 from registration.forms import RegistrationFormUniqueEmail
-from users.models import User, Group
+
+from users.constants import AcademicRoles
 
 
 class RegistrationUniqueEmailAndUsernameForm(RegistrationFormUniqueEmail):
@@ -20,6 +20,5 @@ class RegistrationUniqueEmailAndUsernameForm(RegistrationFormUniqueEmail):
 
     def save(self, commit=True):
         user = super().save(commit)
-        group = Group.objects.get(pk=User.roles.STUDENT_CLUB)
-        user.groups.add(group)
+        user.add_group(AcademicRoles.STUDENT_CLUB)
         return user
