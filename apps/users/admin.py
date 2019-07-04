@@ -96,7 +96,8 @@ class UserAdmin(_UserAdmin):
                        'last_login', 'date_joined']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
                     'is_staff']
-    list_filter = ['is_staff', 'is_superuser', 'is_active', 'city']
+    list_filter = ['is_active', 'city', 'group__site', 'group__role',
+                   'is_staff', 'is_superuser']
     filter_horizontal = []
 
     formfield_overrides = {
