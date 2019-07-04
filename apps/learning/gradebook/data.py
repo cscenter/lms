@@ -191,7 +191,8 @@ def gradebook_data(course: Course) -> GradeBookData:
                              "course_id",
                              "is_online",
                              "maximum_score",
-                             "passing_score")
+                             "passing_score",
+                             "weight")
                        .order_by("deadline_at", "pk"))
     for index, a in enumerate(_assignments_qs.iterator()):
         assignments[a.pk] = a

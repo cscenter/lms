@@ -61,7 +61,8 @@ class StudentSearchJSONView(ListAPIView):
 
     def get_queryset(self):
         return (User.objects
-                .only('username', 'first_name', 'last_name', 'pk'))
+                .only('username', 'first_name', 'last_name', 'pk')
+                .order_by('last_name', 'first_name'))
 
 
 class StudentSearchView(CuratorOnlyMixin, TemplateView):
