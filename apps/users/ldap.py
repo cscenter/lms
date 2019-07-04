@@ -44,6 +44,5 @@ def user_to_ldif(user: User, redirect_to=None):
 def export(path):
     """Generates users data in LDIF format"""
     with open(path, 'w') as f:
-        # FIXME: remove duplicates
-        for u in User.objects.filter(groups__in=GROUPS_IMPORT_TO_GERRIT):
+        for u in User.objects.has_role(*GROUPS_IMPORT_TO_GERRIT).distinct():
             user_to_ldif(u, f)

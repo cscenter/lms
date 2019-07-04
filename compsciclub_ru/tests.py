@@ -29,7 +29,7 @@ class CourseSecurityTests(CSCTestCase):
         self.assertNotContains(resp, co_kzn.meta_course.name)
 
     def test_student_list_center_site(self):
-        s = UserFactory.create(groups=[AcademicRoles.STUDENT_CENTER])
+        s = UserFactory(groups=[AcademicRoles.STUDENT_CENTER])
         self.client.login(s)
         current_semester = SemesterFactory.create_current()
         co_center = CourseFactory(semester=current_semester,

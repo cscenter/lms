@@ -30,15 +30,15 @@ class UserFilter(FilterSet):
     cities = CharInFilter(field_name='city_id')
     curriculum_year = NumberInFilter(field_name='curriculum_year')
     # TODO: Restrict choices
-    groups = NumberInFilter(field_name='groups', distinct=True)
+    groups = NumberInFilter(field_name='group__role', distinct=True)
     # TODO: TypedChoiceFilter?
     status = CharFilter(method='status_filter')
     cnt_enrollments = CharFilter(method='cnt_enrollments_filter')
 
     class Meta:
         model = User
-        fields = ["name", "cities", "curriculum_year", "groups", "status",
-                  "cnt_enrollments",]
+        fields = ("name", "cities", "curriculum_year", "groups", "status",
+                  "cnt_enrollments",)
 
     def __init__(self, data, **kwargs):
         self.empty_query = not data or all(not v for v in data.values())

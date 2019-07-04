@@ -37,8 +37,8 @@ class LecturerList(ListAPIView):
     def get_queryset(self):
         lecturer = CourseTeacher.roles.lecturer
         queryset = (User.objects
-                    .filter(groups=User.roles.TEACHER_CENTER,
-                            courseteacher__roles=lecturer)
+                    .has_role(User.roles.TEACHER_CENTER)
+                    .filter(courseteacher__roles=lecturer)
                     .only("pk", "first_name", "last_name", "patronymic",
                           "cropbox_data", "photo", "city_id", "gender",
                           "workplace")

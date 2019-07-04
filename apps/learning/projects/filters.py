@@ -34,11 +34,9 @@ class ProjectsFilter(django_filters.FilterSet):
     students = django_filters.ModelChoiceFilter(
         label=_("Student"),
         queryset=(User.objects
-                  .filter(
-                groups__in=[AcademicRoles.STUDENT_CENTER,
-                            AcademicRoles.GRADUATE_CENTER])
-                  .distinct()
-                  .all())
+                  .has_role(AcademicRoles.STUDENT_CENTER,
+                            AcademicRoles.GRADUATE_CENTER)
+                  .distinct())
     )
 
     supervisor = django_filters.CharFilter(lookup_expr='icontains',

@@ -7,7 +7,7 @@ from learning.permissions import has_master_degree
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
 from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
-    StudentCenterFactory
+    StudentCenterFactory, UserGroupFactory
 
 
 @pytest.mark.django_db
@@ -35,28 +35,25 @@ def test_user_city_code(client, settings):
 
 @pytest.mark.django_db
 def test_cached_groups(settings):
-    user = UserFactory.create()
-    user.groups.add(AcademicRoles.STUDENT_CENTER,
-                    AcademicRoles.TEACHER_CENTER)
+    user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
+                               AcademicRoles.TEACHER_CENTER])
     assert set(user._cached_groups) == {AcademicRoles.STUDENT_CENTER,
                                         AcademicRoles.TEACHER_CENTER}
     user.status = StudentStatuses.EXPELLED
-    user.groups.add(AcademicRoles.VOLUNTEER)
+    user.groups.add(UserGroupFactory(user=user, role=AcademicRoles.VOLUNTEER))
     # Invalidate property cache
     del user._cached_groups
     # Nothing change!
     assert user._cached_groups == {AcademicRoles.TEACHER_CENTER,
                                    AcademicRoles.STUDENT_CENTER,
                                    AcademicRoles.VOLUNTEER}
-    # Add student club group for center students on club site
-    user.groups.clear()
-    del user._cached_groups
-    user.groups.add(AcademicRoles.STUDENT_CENTER)
+    user.groups.all().delete()
+    user.add_group(role=AcademicRoles.STUDENT_CENTER)
     user.status = ''
     user.save()
     settings.SITE_ID = settings.CLUB_SITE_ID
-    assert set(user._cached_groups) == {AcademicRoles.STUDENT_CENTER,
-                                        AcademicRoles.STUDENT_CLUB}
+    del user._cached_groups
+    assert not set(user._cached_groups)
 
 
 @pytest.mark.django_db

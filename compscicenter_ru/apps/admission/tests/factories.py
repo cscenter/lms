@@ -22,7 +22,7 @@ from courses.tests.factories import VenueFactory
 from learning.models import Branch
 from learning.settings import AcademicDegreeYears
 from users.constants import AcademicRoles
-from users.tests.factories import UserFactory
+from users.tests.factories import UserFactory, add_user_groups
 
 
 class FuzzyTime(FuzzyNaiveDateTime):
@@ -121,13 +121,11 @@ class InterviewAssignmentFactory(factory.DjangoModelFactory):
 
 class InterviewerFactory(UserFactory):
     @factory.post_generation
-    def groups(self, create, extracted, **kwargs):
+    def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-
-        groups = extracted or [AcademicRoles.INTERVIEWER]
-        for group in groups:
-            self.groups.add(group)
+        required_groups = [AcademicRoles.INTERVIEWER]
+        add_user_groups(self, required_groups)
 
 
 class InterviewFactory(factory.DjangoModelFactory):

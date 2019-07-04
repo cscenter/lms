@@ -481,7 +481,7 @@ class Project(TimeStampedModel):
         verbose_name=_("Reviewers"),
         related_name='project_reviewers',
         blank=True,
-        limit_choices_to=(Q(groups=AcademicRoles.PROJECT_REVIEWER) |
+        limit_choices_to=(Q(group__role=AcademicRoles.PROJECT_REVIEWER) |
                           Q(is_superuser=True)))
     supervisors = models.ManyToManyField(
         Supervisor,

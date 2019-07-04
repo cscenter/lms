@@ -292,9 +292,7 @@
           <ul>
             {% for enrollment_certificate in profile_user.enrollment_certificates.all %}
             <li>
-              <a href="{% url 'user_reference_detail' profile_user.id enrollment_certificate.id %}">
-                {{ enrollment_certificate.created|date:"d.m.Y" }}
-              </a>
+              <a href="{{ enrollment_certificate.get_absolute_url }}">{{ enrollment_certificate.created|date:"d.m.Y" }}</a>
             </li>
             {% endfor %}
           </ul>

@@ -9,18 +9,20 @@ from django.forms.models import model_to_dict
 from django.utils import translation
 from django.utils.encoding import smart_text, smart_bytes
 
+from core.admin import get_admin_url
 from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.tests.factories import CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import GraduateProfileFactory
 from learning.tests.mixins import MyUtilitiesMixin
+from users.admin import UserGroupForm
 from users.constants import AcademicRoles
 from users.forms import UserCreationForm, UserChangeForm
-from users.models import User, Group
+from users.models import User, Group, UserGroup
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
     TeacherCenterFactory, StudentClubFactory, \
-    StudentFactory, StudentCenterFactory
+    StudentFactory, StudentCenterFactory, add_user_groups
 
 
 class UserTests(MyUtilitiesMixin, CSCTestCase):
@@ -43,50 +45,6 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
                              Group.objects.get(pk=5).name)
             self.assertEqual(User.roles.values[User.roles.TEACHER_CLUB],
                              Group.objects.get(pk=6).name)
-
-    def test_student_should_have_enrollment_year(self):
-        """
-        If user set "student" group (pk=1 in initial_data fixture), they
-        should also provide an enrollment year, otherwise they should get
-        ValidationError
-        """
-        user = UserFactory()
-        user_data = model_to_dict(user)
-        user_data.update({
-            'groups': [user.roles.STUDENT_CENTER],
-        })
-        form = UserChangeForm(user_data, instance=user)
-        self.assertFalse(form.is_valid())
-        self.assertIn('enrollment_year', form.errors.keys())
-        user_data.update({'enrollment_year': 2010})
-        form = UserChangeForm(user_data, instance=user)
-        assert not form.is_valid()
-        assert 'city' in form.errors.keys()
-        user_data.update({'city': 'spb'})
-        form = UserChangeForm(user_data, instance=user)
-        assert form.is_valid()
-
-    def test_graduate_should_have_graduation_year(self):
-        """
-        If user set "graduate" group (pk=3 in initial_data fixture), they
-        should also provide graduation year, otherwise they should get
-        ValidationError
-        """
-        user = UserFactory()
-        user_data = model_to_dict(user)
-        user_data.update({
-            'groups': [user.roles.GRADUATE_CENTER],
-        })
-        form = UserChangeForm(user_data, instance=user)
-        assert not form.is_valid()
-        self.assertIn('graduation_year', form.errors.keys())
-        user_data.update({'graduation_year': 2015})
-        form = UserChangeForm(user_data, instance=user)
-        assert not form.is_valid()
-        assert 'city' in form.errors.keys()
-        user_data.update({'city': 'spb'})
-        form = UserChangeForm(user_data, instance=user)
-        assert form.is_valid()
 
     def test_full_name_contains_patronymic(self):
         """
@@ -133,20 +91,21 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.assertFalse(user.is_graduate)
         user = User(username="bar", email="bar@localhost.ru")
         user.save()
-        user.groups.set([user.roles.STUDENT_CENTER])
+        add_user_groups(user, [user.roles.STUDENT_CENTER])
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = User(username="baz", email="baz@localhost.ru")
         user.save()
-        user.groups.set([user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER])
+        add_user_groups(user, [user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER])
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = User(username="baq", email="baq@localhost.ru")
         user.save()
-        user.groups.set([user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER,
-                         user.roles.GRADUATE_CENTER])
+        add_user_groups(user, [user.roles.STUDENT_CENTER,
+                               user.roles.TEACHER_CENTER,
+                               user.roles.GRADUATE_CENTER])
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertTrue(user.is_graduate)
@@ -165,7 +124,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         good_user_attrs = factory.build(dict, FACTORY_CLASS=UserFactory)
         good_user = User.objects.create_user(**good_user_attrs)
         # graduated students redirected to LOGIN_REDIRECT_URL
-        good_user.groups.add(AcademicRoles.GRADUATE_CENTER)
+        add_user_groups(good_user, [AcademicRoles.GRADUATE_CENTER])
         self.assertNotIn('_auth_user_id', self.client.session)
         bad_user = copy.copy(good_user_attrs)
         bad_user['password'] = "BAD"
@@ -185,14 +144,14 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 200
         self.assertLoginRedirect(url)
-        user.groups.set([user.roles.STUDENT_CENTER])
+        add_user_groups(user, [user.roles.STUDENT_CENTER])
         user.city_id = 'spb'
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
         resp = self.client.get(reverse('teaching:assignment_list'))
         self.assertLoginRedirect(url)
-        user.groups.set([user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER])
+        add_user_groups(user, [user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER])
         user.save()
         resp = self.client.get(reverse('teaching:assignment_list'))
         # Teacher has no course offering and redirects to courses list
@@ -250,7 +209,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         user = User.objects.create_user(**user_data)
         resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 404)
-        user.groups.set([user.roles.TEACHER_CENTER])
+        add_user_groups(user, [AcademicRoles.TEACHER_CENTER])
         user.save()
         resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 200)
@@ -298,7 +257,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
                              status_code=302)
         response = self.client.get(reverse('user_detail', args=[user.pk]))
         assert smart_bytes(test_review) not in response.content
-        user.groups.set([user.roles.GRADUATE_CENTER])
+        add_user_groups(user, [user.roles.GRADUATE_CENTER])
         user.graduation_year = 2014
         user.save()
         GraduateProfileFactory(student=user)
@@ -393,6 +352,61 @@ def test_club_students_profiles_on_cscenter_site(client):
 
 
 @pytest.mark.django_db
+def test_student_should_have_enrollment_year(admin_client):
+    """
+    If user set "student" group (pk=1 in initial_data fixture), they
+    should also provide an enrollment year, otherwise they should get
+    ValidationError
+    """
+    user = UserFactory(photo='/a/b/c')
+    assert user.groups.count() == 0
+    form_data = {k: v for k, v in model_to_dict(user).items() if v is not None}
+    del form_data['photo']
+    form_data.update({
+        # Django wants all inline formsets
+        'userstatuslog_set-INITIAL_FORMS': '0',
+        'userstatuslog_set-TOTAL_FORMS': '0',
+        'onlinecourserecord_set-INITIAL_FORMS': '0',
+        'onlinecourserecord_set-TOTAL_FORMS': '0',
+        'shadcourserecord_set-TOTAL_FORMS': '0',
+        'shadcourserecord_set-INITIAL_FORMS': '0',
+        'groups-TOTAL_FORMS': '1',
+        'groups-INITIAL_FORMS': '0',
+        'groups-MAX_NUM_FORMS': '',
+        'groups-0-user': user.pk,
+        'groups-0-role': AcademicRoles.STUDENT_CENTER,
+        'groups-0-site': settings.SITE_ID,
+    })
+    admin_url = get_admin_url(user)
+    response = admin_client.post(admin_url, form_data)
+    assert response.status_code == 200
+
+    # Empty user.city_id and enrollment_year
+    def get_user_group_formset(response):
+        form = None
+        for inline_formset_obj in response.context['inline_admin_formsets']:
+            if issubclass(inline_formset_obj.formset.model, UserGroup):
+                form = inline_formset_obj.formset
+        return form
+    user_group_form = get_user_group_formset(response)
+    assert user_group_form, "Inline form for UserGroup is missing"
+    assert not user_group_form.is_valid()
+    form_data.update({'enrollment_year': 2010})
+    response = admin_client.post(admin_url, form_data)
+    assert response.status_code == 200
+    user_group_form = get_user_group_formset(response)
+    assert user_group_form, "Inline form for UserGroup is missing"
+    assert not user_group_form.is_valid()
+    user.refresh_from_db()
+    assert user.groups.count() == 0
+    form_data.update({'city': 'spb'})
+    response = admin_client.post(admin_url, form_data)
+    assert response.status_code == 302
+    user.refresh_from_db()
+    assert user.groups.count() == 1
+
+
+@pytest.mark.django_db
 def test_expelled(client, settings):
     """Center students and volunteers can't access student section
     if there status equal expelled"""
@@ -422,48 +436,50 @@ def test_login_restrictions(client, settings):
     assert response.status_code == 200
     assert len(response.context["form"].errors) > 0
     # Login as center student
-    student.groups.add(AcademicRoles.STUDENT_CENTER)
+    add_user_groups(student, [AcademicRoles.STUDENT_CENTER])
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as center and club student simultaneously
-    student.groups.add(AcademicRoles.STUDENT_CLUB)
+    add_user_groups(student, [AcademicRoles.STUDENT_CLUB])
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as volunteer
-    student.groups.set([AcademicRoles.VOLUNTEER])
+    add_user_groups(student, [AcademicRoles.VOLUNTEER])
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as volunteer and club students simultaneously
-    student.groups.add(AcademicRoles.STUDENT_CLUB)
+    add_user_groups(student, [AcademicRoles.STUDENT_CLUB])
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Login as graduate only
-    student.groups.set([AcademicRoles.GRADUATE_CENTER])
+    student.groups.all().delete()
+    add_user_groups(student, [AcademicRoles.GRADUATE_CENTER])
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # graduate and club
-    student.groups.add(AcademicRoles.STUDENT_CLUB)
+    add_user_groups(student, [AcademicRoles.STUDENT_CLUB])
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()
     # Only club gtfo
-    student.groups.set([AcademicRoles.STUDENT_CLUB])
+    student.groups.all().delete()
+    add_user_groups(student, [AcademicRoles.STUDENT_CLUB])
     student.save()
     response = client.post(reverse('login'), user_data, follow=True)
     assert not response.wsgi_request.user.is_authenticated
     # Club teacher
-    student.groups.add(AcademicRoles.TEACHER_CLUB)
+    add_user_groups(student, [AcademicRoles.TEACHER_CLUB])
     response = client.post(reverse('login'), user_data, follow=True)
     assert not response.wsgi_request.user.is_authenticated
     # Center teacher
-    student.groups.add(AcademicRoles.TEACHER_CENTER)
+    add_user_groups(student, [AcademicRoles.TEACHER_CENTER])
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     # Just to make sure we have no super user permissions

@@ -5,10 +5,10 @@ from core.timezone import now_local
 from core.urls import reverse
 from courses.calendar import WeekEventsCalendar, MonthEventsCalendar
 from courses.tests.factories import CourseClassFactory, CourseFactory
-from learning.tests.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from learning.tests.utils import flatten_calendar_month_events
 from users.tests.factories import TeacherCenterFactory, StudentCenterFactory, \
-    CuratorFactory, GraduateFactory, VolunteerFactory
+    CuratorFactory, VolunteerFactory
 
 
 def flatten_events(calendar: WeekEventsCalendar):

@@ -10,6 +10,7 @@ from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from learning.models import GraduateProfile
 from users.constants import AcademicRoles
+from users.models import User
 from .models import AssignmentComment, Enrollment, Event, Useful, Branch
 
 
@@ -72,12 +73,10 @@ class EnrollmentAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'student':
-            kwargs['queryset'] = (get_user_model().objects
-                                  .filter(groups__in=[
-                                        AcademicRoles.STUDENT_CENTER,
-                                        AcademicRoles.VOLUNTEER]))
-        return (super(EnrollmentAdmin, self)
-                .formfield_for_foreignkey(db_field, request, **kwargs))
+            kwargs['queryset'] = (User.objects
+                                  .has_role(AcademicRoles.STUDENT_CENTER,
+                                            AcademicRoles.VOLUNTEER))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):

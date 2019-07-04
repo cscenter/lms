@@ -14,3 +14,25 @@
         });
     </script>
 {% endblock %}
+
+{% block field_sets %}
+    {% for fieldset in adminform %}
+        {% include "admin/includes/fieldset.html" %}
+        {# Insert inlines #}
+        {% for inline_admin_formset in inline_admin_formsets %}
+            {% if inline_admin_formset.opts.insert_after_fieldset and inline_admin_formset.opts.insert_after_fieldset == fieldset.name %}
+                {% include inline_admin_formset.opts.template %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endblock %}
+
+
+{# Filter inlines that where already rendered to avoid duplication #}
+{% block inline_field_sets %}
+    {% for inline_admin_formset in inline_admin_formsets %}
+        {% if not inline_admin_formset.opts.insert_after_fieldset %}
+            {% include inline_admin_formset.opts.template %}
+        {% endif %}
+    {% endfor %}
+{% endblock %}

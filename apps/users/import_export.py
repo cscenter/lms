@@ -75,16 +75,14 @@ class UserRecordResource(resources.ModelResource):
     gender = fields.Field(column_name='gender',
                           attribute='gender',
                           widget=UserGenderWidget())
-    groups = fields.Field(column_name='groups',
-                          attribute='groups',
-                          widget=GroupManyToManyWidget(Group))
+    # FIXME: add groups back
 
     class Meta:
         model = User
         fields = (
             'email', 'username', 'status', 'last_name', 'first_name',
             'patronymic', 'gender', 'city', 'phone', 'university', 'course',
-            'comment', 'groups', 'yandex_id', 'stepic_id', 'github_id'
+            'comment', 'yandex_id', 'stepic_id', 'github_id'
         )
         export_order = fields
         # m2m relationships won't be processed if imported fields

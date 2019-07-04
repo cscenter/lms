@@ -96,11 +96,10 @@ def post_save_report(sender, instance, created, *args, **kwargs):
         User = get_user_model()
         if report.status == report.SENT:
             # Send email to curators
-            recipients = User.objects.filter(
-                is_superuser=True,
-                is_staff=True,
-                groups=AcademicRoles.CURATOR_PROJECTS
-            )
+            recipients = (User.objects
+                          .has_role(AcademicRoles.CURATOR_PROJECTS)
+                          .filter(is_superuser=True,
+                                  is_staff=True))
             # TODO: test database hitting
             project = report.project_student.project
             student = report.project_student.student
@@ -129,10 +128,9 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
         User = get_user_model()
         comment = instance
         curators = (User.objects
-                    .filter(
-                        is_superuser=True,
-                        is_staff=True,
-                        groups=AcademicRoles.CURATOR_PROJECTS)
+                    .has_role(AcademicRoles.CURATOR_PROJECTS)
+                    .filter(is_superuser=True,
+                            is_staff=True)
                     .exclude(pk=comment.author.pk))
         # Make dict to avoid duplicates
         recipients = {c.pk: c for c in curators}

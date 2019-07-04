@@ -119,8 +119,8 @@ class TeachersView(generic.ListView):
                          .distinct()
                          .values_list("teachers__pk", flat=True))
         return (User.objects
-                .filter(groups=User.roles.TEACHER_CLUB,
-                        courseteacher__teacher_id__in=lecturers)
+                .has_role(User.roles.TEACHER_CLUB)
+                .filter(courseteacher__teacher_id__in=lecturers)
                 .distinct)
 
 

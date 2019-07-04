@@ -117,7 +117,11 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             "city_id": city_code,
             "status": StudentStatuses.WILL_GRADUATE
         }
-        students = User.objects.students_info(filters=filters)
+        students = (User.objects
+                    .has_role(User.roles.STUDENT_CENTER,
+                              User.roles.GRADUATE_CENTER,
+                              User.roles.VOLUNTEER)
+                    .students_info(filters=filters))
 
         unique_teachers = set()
         total_hours = 0
@@ -449,10 +453,10 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         return super(StudentFacesView, self).get_template_names()
 
     def get_queryset(self, city_code, enrollment_year):
-        groups = [User.roles.STUDENT_CENTER, User.roles.VOLUNTEER]
+        roles = (User.roles.STUDENT_CENTER, User.roles.VOLUNTEER)
         qs = (User.objects
-              .filter(groups__in=groups,
-                      city_id=city_code,
+              .has_role(*roles)
+              .filter(city_id=city_code,
                       enrollment_year=enrollment_year)
               .distinct()
               .prefetch_related("groups"))

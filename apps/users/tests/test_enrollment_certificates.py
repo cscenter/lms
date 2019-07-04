@@ -13,9 +13,10 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
+from users.constants import AcademicRoles
 from users.models import User, EnrollmentCertificate
 from users.tests.factories import UserFactory, EnrollmentCertificateFactory, \
-    StudentCenterFactory
+    StudentCenterFactory, add_user_groups, StudentClubFactory
 
 
 @pytest.mark.django_db
@@ -40,7 +41,7 @@ def test_create_reference(client, assert_redirect):
     response = client.post(form_url, form_data)
     assert EnrollmentCertificate.objects.count() == 1
     ref = EnrollmentCertificate.objects.first()
-    expected_url = reverse('user_reference_detail', args=[student.id, ref.pk])
+    expected_url = ref.get_absolute_url()
     assert_redirect(response, expected_url)
 
 
@@ -48,7 +49,8 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
     def test_user_detail_view(self):
         """Show reference-add button only to curators (superusers)"""
         # check user page without curator credentials
-        student = UserFactory.create(groups=['Student [CENTER]'], enrollment_year=2011)
+        student = UserFactory.create(groups=[AcademicRoles.STUDENT_CENTER],
+                                     enrollment_year=2011)
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
         response = self.client.get(url)
@@ -103,8 +105,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
             student=student,
             note="TEST",
             signature="SIGNATURE")
-        url = reverse('user_reference_detail',
-                             args=[student.id, reference.id])
+        url = reference.get_absolute_url()
         self.doLogin(student)
         self.assertLoginRedirect(url)
         curator = UserFactory.create(is_superuser=True, is_staff=True)
@@ -119,19 +120,18 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(len(es), expected_enrollments_count)
 
     def test_club_student_login_on_cscenter_site(self):
-        student = UserFactory.create(is_superuser=False, is_staff=False,
-                                     groups=[User.roles.STUDENT_CLUB])
-        self.doLogin(student)
+        club_student = StudentClubFactory()
+        self.doLogin(club_student)
         login_data = {
-            'username': student.username,
-            'password': student.raw_password
+            'username': club_student.username,
+            'password': club_student.raw_password
         }
         response = self.client.post(reverse('login'), login_data)
         form = response.context['form']
         self.assertFalse(form.is_valid())
         # can't login message in __all__
         self.assertIn("__all__", form.errors)
-        student.groups.set([User.roles.STUDENT_CENTER])
-        student.save()
+        add_user_groups(club_student, [User.roles.STUDENT_CENTER])
+        club_student.save()
         response = self.client.post(reverse('login'), login_data)
         self.assertEqual(response.status_code, 302)

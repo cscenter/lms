@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import UserManager
 from django.db.models import Prefetch, query, Q
 
@@ -5,6 +6,14 @@ from courses.models import CourseTeacher
 
 
 class UserQuerySet(query.QuerySet):
+    def has_role(self, *roles):
+        """
+        Returns users who have at least one of the provided roles
+        for current site. May return duplicates.
+        """
+        return self.filter(group__role__in=roles,
+                           group__site_id=settings.SITE_ID)
+
     # TODO: Refactor later to remove WHERE IN(ids) due to performance reasons,
     # rename ProgressReport.get_queryset after that. Add tests before
     # Investigate how to use tmp table with JOIN in that case?
@@ -22,16 +31,8 @@ class UserQuerySet(query.QuerySet):
         from courses.models import Course
         from learning.projects.models import ProjectStudent
 
-        # Note: At the same time student must be only in one of these groups
-        # So, group_by not necessary for this m2m relationship (in theory)
         filters = filters or {}
         if isinstance(filters, dict):
-            if "groups__in" not in filters:
-                filters["groups__in"] = [
-                    User.roles.STUDENT_CENTER,
-                    User.roles.GRADUATE_CENTER,
-                    User.roles.VOLUNTEER
-                ]
             q = self.filter(**filters)
             if exclude:
                 q = q.exclude(**exclude)

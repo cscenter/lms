@@ -128,7 +128,7 @@ def test_course_assignment_timezone(settings, client):
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] == settings.TIME_ZONES['nsk']
-    teacher_nsk.groups.add(AcademicRoles.STUDENT_CENTER)
+    teacher_nsk.add_group(AcademicRoles.STUDENT_CENTER)
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] == settings.TIME_ZONES['nsk']

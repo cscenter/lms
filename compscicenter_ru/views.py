@@ -11,7 +11,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import gettext, pgettext_lazy, ugettext_lazy as _
@@ -236,23 +236,14 @@ class AlumniView(TemplateView):
     template_name = "compscicenter_ru/alumni/index.html"
 
     def get_context_data(self):
-        # TODO: Move to the proxy model `Graduate`
-        first_graduation_year = 2013
+        first_graduation = 2013
         cache_key = 'cscenter_last_graduation_year'
         last_graduation_year = cache.get(cache_key)
         if last_graduation_year is None:
-            from_last_graduation = (User.objects
-                                    .filter(groups=User.roles.GRADUATE_CENTER)
-                                    .exclude(graduation_year__isnull=True)
-                                    .order_by("-graduation_year")
-                                    .only("graduation_year")
-                                    .first())
-            if from_last_graduation:
-                last_graduation_year = from_last_graduation.graduation_year
-            else:
-                last_graduation_year = first_graduation_year
+            d = GraduateProfile.objects.aggregate(year=Max('graduation_year'))
+            last_graduation_year = d['year'] if d['year'] else first_graduation
             cache.set(cache_key, last_graduation_year, 86400 * 31)
-        years_range = range(first_graduation_year, last_graduation_year + 1)
+        years_range = range(first_graduation, last_graduation_year + 1)
         years = [{"label": y, "value": y} for y in reversed(years_range)]
         year = self.kwargs.get("year")
         if year not in years_range:

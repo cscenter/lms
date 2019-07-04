@@ -14,10 +14,10 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
-        student_groups = [User.roles.STUDENT_CENTER, User.roles.VOLUNTEER]
+        roles = [User.roles.STUDENT_CENTER, User.roles.VOLUNTEER]
         will_graduate_list = (User.objects
-                              .filter(groups__in=student_groups,
-                                      status=StudentStatuses.WILL_GRADUATE)
+                              .has_role(*roles)
+                              .filter(status=StudentStatuses.WILL_GRADUATE)
                               .values_list("pk", flat=True))
 
         # Collect unique courses among all students
