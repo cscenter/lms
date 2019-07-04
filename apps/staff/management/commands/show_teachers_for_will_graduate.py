@@ -14,7 +14,7 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
-        roles = [User.roles.STUDENT_CENTER, User.roles.VOLUNTEER]
+        roles = [User.roles.STUDENT, User.roles.VOLUNTEER]
         will_graduate_list = (User.objects
                               .has_role(*roles)
                               .filter(status=StudentStatuses.WILL_GRADUATE)

@@ -35,20 +35,19 @@ def test_user_city_code(client, settings):
 
 @pytest.mark.django_db
 def test_cached_groups(settings):
-    user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
+    user = UserFactory(groups=[AcademicRoles.STUDENT,
                                AcademicRoles.TEACHER_CENTER])
-    assert set(user._cached_groups) == {AcademicRoles.STUDENT_CENTER,
+    assert set(user._cached_groups) == {AcademicRoles.STUDENT,
                                         AcademicRoles.TEACHER_CENTER}
     user.status = StudentStatuses.EXPELLED
     user.groups.add(UserGroupFactory(user=user, role=AcademicRoles.VOLUNTEER))
-    # Invalidate property cache
+    # Invalidate cache
     del user._cached_groups
-    # Nothing change!
     assert user._cached_groups == {AcademicRoles.TEACHER_CENTER,
-                                   AcademicRoles.STUDENT_CENTER,
+                                   AcademicRoles.STUDENT,
                                    AcademicRoles.VOLUNTEER}
     user.groups.all().delete()
-    user.add_group(role=AcademicRoles.STUDENT_CENTER)
+    user.add_group(role=AcademicRoles.STUDENT)
     user.status = ''
     user.save()
     settings.SITE_ID = settings.CLUB_SITE_ID

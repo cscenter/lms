@@ -12,7 +12,7 @@ def check_url_security(client, assert_login_redirect, groups_allowed, url):
     all_test_groups = [
         [],
         [AcademicRoles.TEACHER_CENTER],
-        [AcademicRoles.STUDENT_CENTER],
+        [AcademicRoles.STUDENT],
         [AcademicRoles.GRADUATE_CENTER]
     ]
     for groups in all_test_groups:

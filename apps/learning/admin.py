@@ -74,7 +74,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'student':
             kwargs['queryset'] = (User.objects
-                                  .has_role(AcademicRoles.STUDENT_CENTER,
+                                  .has_role(AcademicRoles.STUDENT,
                                             AcademicRoles.VOLUNTEER))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 

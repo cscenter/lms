@@ -43,7 +43,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
         all_test_groups = [
             [],
             [AcademicRoles.TEACHER_CENTER],
-            [AcademicRoles.STUDENT_CENTER],
+            [AcademicRoles.STUDENT],
             [AcademicRoles.GRADUATE_CENTER]
         ]
         for groups in all_test_groups:
@@ -174,7 +174,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         test_groups = [
             [],
             [AcademicRoles.TEACHER_CENTER],
-            [AcademicRoles.STUDENT_CENTER],
+            [AcademicRoles.STUDENT],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -263,7 +263,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         test_groups = [
             [],
             [AcademicRoles.TEACHER_CENTER],
-            [AcademicRoles.STUDENT_CENTER],
+            [AcademicRoles.STUDENT],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
@@ -284,7 +284,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         test_groups = [
             [],
             [AcademicRoles.TEACHER_CENTER],
-            [AcademicRoles.STUDENT_CENTER]
+            [AcademicRoles.STUDENT]
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
@@ -387,7 +387,7 @@ def test_events_smoke(client):
 def test_student_courses_list(client, assert_login_redirect):
     url = reverse('study:course_list')
     check_url_security(client, assert_login_redirect,
-                       groups_allowed=[AcademicRoles.STUDENT_CENTER],
+                       groups_allowed=[AcademicRoles.STUDENT],
                        url=url)
     student_spb = StudentCenterFactory(city_id='spb')
     client.login(student_spb)

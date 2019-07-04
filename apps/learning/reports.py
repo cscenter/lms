@@ -220,7 +220,7 @@ class ProgressReportForDiplomas(ProgressReport):
             **filters
         }
         return (User.objects
-                .has_role(User.roles.STUDENT_CENTER,
+                .has_role(User.roles.STUDENT,
                           User.roles.GRADUATE_CENTER,
                           User.roles.VOLUNTEER)
                 .students_info(filters=filters,
@@ -292,7 +292,7 @@ class ProgressReportFull(ProgressReport):
     @staticmethod
     def get_queryset(**kwargs):
         return (User.objects
-                .has_role(User.roles.STUDENT_CENTER,
+                .has_role(User.roles.STUDENT,
                           User.roles.GRADUATE_CENTER,
                           User.roles.VOLUNTEER)
                 .students_info()
@@ -404,7 +404,7 @@ class ProgressReportForSemester(ProgressReport):
         semester = kwargs.pop("semester")
         filters = kwargs.pop("filters", {})
         return (User.objects
-                .has_role(User.roles.STUDENT_CENTER, User.roles.VOLUNTEER)
+                .has_role(User.roles.STUDENT, User.roles.VOLUNTEER)
                 .students_info(filters=filters,
                                exclude={"status": StudentStatuses.EXPELLED},
                                semester=semester))

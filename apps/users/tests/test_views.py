@@ -33,7 +33,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         Not so actual for prod db, but we still should check it.
         """
         with translation.override('en'):
-            self.assertEqual(User.roles.values[User.roles.STUDENT_CENTER],
+            self.assertEqual(User.roles.values[User.roles.STUDENT],
                              Group.objects.get(pk=1).name)
             self.assertEqual(User.roles.values[User.roles.TEACHER_CENTER],
                              Group.objects.get(pk=2).name)
@@ -91,19 +91,19 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.assertFalse(user.is_graduate)
         user = User(username="bar", email="bar@localhost.ru")
         user.save()
-        add_user_groups(user, [user.roles.STUDENT_CENTER])
+        add_user_groups(user, [user.roles.STUDENT])
         self.assertTrue(user.is_student)
         self.assertFalse(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = User(username="baz", email="baz@localhost.ru")
         user.save()
-        add_user_groups(user, [user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER])
+        add_user_groups(user, [user.roles.STUDENT, user.roles.TEACHER_CENTER])
         self.assertTrue(user.is_student)
         self.assertTrue(user.is_teacher)
         self.assertFalse(user.is_graduate)
         user = User(username="baq", email="baq@localhost.ru")
         user.save()
-        add_user_groups(user, [user.roles.STUDENT_CENTER,
+        add_user_groups(user, [user.roles.STUDENT,
                                user.roles.TEACHER_CENTER,
                                user.roles.GRADUATE_CENTER])
         self.assertTrue(user.is_student)
@@ -144,14 +144,14 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 200
         self.assertLoginRedirect(url)
-        add_user_groups(user, [user.roles.STUDENT_CENTER])
+        add_user_groups(user, [user.roles.STUDENT])
         user.city_id = 'spb'
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
         resp = self.client.get(reverse('teaching:assignment_list'))
         self.assertLoginRedirect(url)
-        add_user_groups(user, [user.roles.STUDENT_CENTER, user.roles.TEACHER_CENTER])
+        add_user_groups(user, [user.roles.STUDENT, user.roles.TEACHER_CENTER])
         user.save()
         resp = self.client.get(reverse('teaching:assignment_list'))
         # Teacher has no course offering and redirects to courses list
@@ -374,7 +374,7 @@ def test_student_should_have_enrollment_year(admin_client):
         'groups-INITIAL_FORMS': '0',
         'groups-MAX_NUM_FORMS': '',
         'groups-0-user': user.pk,
-        'groups-0-role': AcademicRoles.STUDENT_CENTER,
+        'groups-0-role': AcademicRoles.STUDENT,
         'groups-0-site': settings.SITE_ID,
     })
     admin_url = get_admin_url(user)
@@ -436,7 +436,7 @@ def test_login_restrictions(client, settings):
     assert response.status_code == 200
     assert len(response.context["form"].errors) > 0
     # Login as center student
-    add_user_groups(student, [AcademicRoles.STUDENT_CENTER])
+    add_user_groups(student, [AcademicRoles.STUDENT])
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()

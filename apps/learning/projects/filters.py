@@ -34,7 +34,7 @@ class ProjectsFilter(django_filters.FilterSet):
     students = django_filters.ModelChoiceFilter(
         label=_("Student"),
         queryset=(User.objects
-                  .has_role(AcademicRoles.STUDENT_CENTER,
+                  .has_role(AcademicRoles.STUDENT,
                             AcademicRoles.GRADUATE_CENTER)
                   .distinct())
     )

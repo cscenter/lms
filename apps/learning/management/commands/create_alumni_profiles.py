@@ -20,7 +20,7 @@ class Command(BaseCommand):
         graduated_on_str = options['graduated_on']
         graduated_on = datetime.strptime(graduated_on_str, "%d.%m.%Y").date()
         will_graduate_list = (User.objects
-                              .has_role(User.roles.STUDENT_CENTER,
+                              .has_role(User.roles.STUDENT,
                                         User.roles.VOLUNTEER)
                               .filter(status=StudentStatuses.WILL_GRADUATE))
 

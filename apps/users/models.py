@@ -387,7 +387,7 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         if applicant.status == Applicant.VOLUNTEER:
             roles.append(User.roles.VOLUNTEER)
         else:
-            roles.append(User.roles.STUDENT_CENTER)
+            roles.append(User.roles.STUDENT)
         for role in roles:
             user.add_group(role)
         # Migrate data from application form to user profile
@@ -575,7 +575,7 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
                          .filter(site_id=settings.SITE_ID)
                          .values_list("role", flat=True))
         # Add club group on club site to center students
-        center_student = (self.roles.STUDENT_CENTER in groups or
+        center_student = (self.roles.STUDENT in groups or
                           self.roles.VOLUNTEER in groups or
                           self.roles.GRADUATE_CENTER in groups)
         if (center_student and self.roles.STUDENT_CLUB not in groups

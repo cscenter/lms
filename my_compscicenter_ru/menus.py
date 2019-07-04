@@ -29,7 +29,7 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Проекты организаторов"), '/learning/internships/', weight=80),
         ],
         visible_to=[
-            AcademicRoles.STUDENT_CENTER,
+            AcademicRoles.STUDENT,
             AcademicRoles.VOLUNTEER,
         ],
         css_classes='for-students'),

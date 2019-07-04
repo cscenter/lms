@@ -54,16 +54,16 @@ def test_notifications(client, settings):
 @pytest.mark.django_db
 def test_notify_get_base_url():
     """Site domain in notifications depends on recipient user groups"""
-    user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER])
+    user = UserFactory(groups=[AcademicRoles.STUDENT])
     notification = AssignmentNotificationFactory(user=user)
     assert get_base_domain(notification) == "my.compscicenter.ru"
-    user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
+    user = UserFactory(groups=[AcademicRoles.STUDENT,
                                AcademicRoles.STUDENT_CLUB])
     notification = AssignmentNotificationFactory(user=user)
     assert get_base_domain(notification) == "my.compscicenter.ru"
     notification.user = UserFactory(groups=[AcademicRoles.STUDENT_CLUB])
     assert get_base_domain(notification) == "compsciclub.ru"
-    notification.user = UserFactory(groups=[AcademicRoles.STUDENT_CENTER,
+    notification.user = UserFactory(groups=[AcademicRoles.STUDENT,
                                             AcademicRoles.TEACHER_CLUB])
     assert get_base_domain(notification) == "my.compscicenter.ru"
     notification.user = UserFactory(groups=[AcademicRoles.TEACHER_CLUB])

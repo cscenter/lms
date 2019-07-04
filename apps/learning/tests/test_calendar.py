@@ -81,7 +81,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
 class CalendarStudentTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, CSCTestCase):
     url_name = 'study:calendar'
-    groups_allowed = [AcademicRoles.STUDENT_CENTER]
+    groups_allowed = [AcademicRoles.STUDENT]
 
     def test_student_calendar(self):
         student = StudentCenterFactory(city_id='spb')

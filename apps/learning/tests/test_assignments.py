@@ -38,7 +38,7 @@ from users.tests.factories import UserFactory, TeacherCenterFactory, \
 class StudentAssignmentListTests(GroupSecurityCheckMixin,
                                  MyUtilitiesMixin, CSCTestCase):
     url_name = 'study:assignment_list'
-    groups_allowed = [AcademicRoles.STUDENT_CENTER]
+    groups_allowed = [AcademicRoles.STUDENT]
 
     def test_list(self):
         u = StudentCenterFactory()
@@ -250,7 +250,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, CSCTestCase):
         test_groups = [
             [],
             [AcademicRoles.TEACHER_CENTER],
-            [AcademicRoles.STUDENT_CENTER],
+            [AcademicRoles.STUDENT],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -293,7 +293,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
         all_test_groups = [
             [],
             [AcademicRoles.TEACHER_CENTER],
-            [AcademicRoles.STUDENT_CENTER],
+            [AcademicRoles.STUDENT],
             [AcademicRoles.GRADUATE_CENTER]
         ]
         for groups in all_test_groups:
@@ -556,7 +556,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Make student as a volunteer, should be the same
-    student.remove_group(AcademicRoles.STUDENT_CENTER)
+    student.remove_group(AcademicRoles.STUDENT)
     student.add_group(AcademicRoles.VOLUNTEER)
     response = client.get(url_learning_assignments)
     assert response.status_code == 200
