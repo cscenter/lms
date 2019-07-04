@@ -20,5 +20,5 @@ class RegistrationUniqueEmailAndUsernameForm(RegistrationFormUniqueEmail):
 
     def save(self, commit=True):
         user = super().save(commit)
-        user.add_group(AcademicRoles.STUDENT_CLUB)
+        user.add_group(AcademicRoles.STUDENT)
         return user

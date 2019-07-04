@@ -59,7 +59,7 @@ class LoginView(generic.FormView):
         return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
-        context = super(LoginView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context["has_next"] = (self.redirect_field_name in self.request.POST
                                or self.redirect_field_name in self.request.GET)
         return context

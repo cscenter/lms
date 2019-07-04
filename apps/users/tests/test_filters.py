@@ -194,11 +194,10 @@ def test_student_search_by_groups(client, curator, search_url):
     json_data = response.json()
     assert json_data["count"] == len(students) + len(volunteers)
     url_show_club_students = "{}?{}".format(
-        search_url, "groups={}".format(AcademicRoles.STUDENT_CLUB))
+        search_url, "groups={}".format(AcademicRoles.STUDENT))
     response = client.get(url_show_club_students)
     json_data = response.json()
-    assert AcademicRoles.STUDENT_CLUB not in UserFilter.FILTERING_GROUPS
-    # Since club group not in predefined list - this is an empty query
+    # FIXME: What should I do here to fix it???
     pytest.xfail(reason='Groups are not restricted right now. '
                         'Struggling with django_filters')
     assert json_data["count"] == 0

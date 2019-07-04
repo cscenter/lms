@@ -26,8 +26,8 @@ class ThumbnailSizes(DjangoChoices):
 
 
 class AcademicRoles(DjangoChoices):
-    STUDENT = C(1, _('Student [CENTER]'))
-    TEACHER = C(2, _('Teacher [CENTER]'))
+    STUDENT = C(1, _('Student'))
+    TEACHER = C(2, _('Teacher'))
     GRADUATE_CENTER = C(3, _('Graduate'))
     VOLUNTEER = C(4, _('Volunteer'))
     STUDENT_CLUB = C(5, _('Student [CLUB]'))

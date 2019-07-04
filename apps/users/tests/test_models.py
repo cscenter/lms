@@ -5,6 +5,7 @@ from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import AcademicRoles
+from users.models import User
 from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
     UserGroupFactory
 
@@ -30,6 +31,34 @@ def test_user_city_code(client, settings):
     client.login(student)
     response = client.get('/')
     assert response.wsgi_request.user.city_code == 'kzn'
+
+
+@pytest.mark.django_db
+def test_user_add_group(settings):
+    settings.SITE_ID = settings.CENTER_SITE_ID
+    user = User(username="foo", email="foo@localhost.ru")
+    user.save()
+    user.add_group(AcademicRoles.STUDENT)
+    assert user.groups.count() == 1
+    user_group = user.groups.first()
+    assert user_group.site_id == settings.CENTER_SITE_ID
+    settings.SITE_ID = settings.CLUB_SITE_ID
+    user = User(username="bar", email="bar@localhost.ru")
+    user.save()
+    user.add_group(AcademicRoles.STUDENT)
+    assert user.groups.count() == 1
+    user_group = user.groups.first()
+    assert user_group.site_id == settings.CLUB_SITE_ID
+
+
+@pytest.mark.django_db
+def test_user_add_group_already_exists():
+    user = User(username="foo", email="foo@localhost.ru")
+    user.save()
+    user.add_group(AcademicRoles.STUDENT)
+    assert user.groups.count() == 1
+    user.add_group(AcademicRoles.STUDENT)
+    assert user.groups.count() == 1
 
 
 @pytest.mark.django_db

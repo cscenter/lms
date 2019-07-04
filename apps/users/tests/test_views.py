@@ -16,9 +16,8 @@ from courses.tests.factories import CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import GraduateProfileFactory
 from learning.tests.mixins import MyUtilitiesMixin
-from users.admin import UserGroupForm
 from users.constants import AcademicRoles
-from users.forms import UserCreationForm, UserChangeForm
+from users.forms import UserCreationForm
 from users.models import User, Group, UserGroup
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
     TeacherCenterFactory, StudentClubFactory, \
@@ -26,26 +25,6 @@ from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
 
 
 class UserTests(MyUtilitiesMixin, CSCTestCase):
-    # FIXME: remove this test after customizing Group model
-    def test_groups_pks_synced_with_migrations(self):
-        """
-        We need to be sure, that migrations creates groups with desired pk's.
-        Not so actual for prod db, but we still should check it.
-        """
-        with translation.override('en'):
-            self.assertEqual(User.roles.values[User.roles.STUDENT],
-                             Group.objects.get(pk=1).name)
-            self.assertEqual(User.roles.values[User.roles.TEACHER],
-                             Group.objects.get(pk=2).name)
-            self.assertEqual(User.roles.values[User.roles.GRADUATE_CENTER],
-                             Group.objects.get(pk=3).name)
-            self.assertEqual(User.roles.values[User.roles.VOLUNTEER],
-                             Group.objects.get(pk=4).name)
-            self.assertEqual(User.roles.values[User.roles.STUDENT_CLUB],
-                             Group.objects.get(pk=5).name)
-            self.assertEqual(User.roles.values[User.roles.TEACHER_CLUB],
-                             Group.objects.get(pk=6).name)
-
     def test_full_name_contains_patronymic(self):
         """
         If "patronymic" is set, get_full_name's result should contain it
