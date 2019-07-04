@@ -1,13 +1,21 @@
+from django.conf import settings
 from django.db.models import Count, Case, When, Q, Value, F
 from django_filters.rest_framework import BaseInFilter, NumberFilter, \
     FilterSet, CharFilter
 
 from learning.settings import StudentStatuses, GradeTypes
+from users.constants import AcademicRoles
 from users.models import User
 
 
 class NumberInFilter(BaseInFilter, NumberFilter):
     pass
+
+
+class RolesInFilter(NumberInFilter):
+    def filter(self, qs, value):
+        qs = super().filter(qs, value)
+        return qs.filter(group__site_id=settings.SITE_ID)
 
 
 class CharInFilter(BaseInFilter, CharFilter):
@@ -16,10 +24,10 @@ class CharInFilter(BaseInFilter, CharFilter):
 
 class UserFilter(FilterSet):
     FILTERING_GROUPS = [
-        User.roles.VOLUNTEER,
-        User.roles.STUDENT,
-        User.roles.GRADUATE_CENTER,
-        User.roles.MASTERS_DEGREE,
+        AcademicRoles.VOLUNTEER,
+        AcademicRoles.STUDENT,
+        AcademicRoles.GRADUATE_CENTER,
+        AcademicRoles.MASTERS_DEGREE,
     ]
 
     ENROLLMENTS_MAX = 12
@@ -30,7 +38,7 @@ class UserFilter(FilterSet):
     cities = CharInFilter(field_name='city_id')
     curriculum_year = NumberInFilter(field_name='curriculum_year')
     # TODO: Restrict choices
-    groups = NumberInFilter(field_name='group__role', distinct=True)
+    groups = RolesInFilter(field_name='group__role', distinct=True)
     # TODO: TypedChoiceFilter?
     status = CharFilter(method='status_filter')
     cnt_enrollments = CharFilter(method='cnt_enrollments_filter')

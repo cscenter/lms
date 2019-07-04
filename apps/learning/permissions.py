@@ -11,6 +11,7 @@ class LearningPermissionsMixin:
     def _cached_groups(self):
         return set()
 
+    # FIXME: Store groups or rename to get_cached_roles()
     def get_cached_groups(self):
         return self._cached_groups
 

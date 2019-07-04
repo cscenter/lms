@@ -383,13 +383,11 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
             user = User.objects.create_user(username=username,
                                             email=applicant.email,
                                             password=random_password)
-        roles = []
         if applicant.status == Applicant.VOLUNTEER:
-            roles.append(User.roles.VOLUNTEER)
+            user.add_group(AcademicRoles.VOLUNTEER)
         else:
-            roles.append(User.roles.STUDENT)
-        for role in roles:
-            user.add_group(role)
+            user.add_group(AcademicRoles.STUDENT)
+        user.add_group(AcademicRoles.STUDENT, site_id=settings.CLUB_SITE_ID)
         # Migrate data from application form to user profile
         same_attrs = [
             "first_name",
@@ -569,19 +567,12 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         # FIXME: restrict by sett
         try:
             gs = self._prefetched_objects_cache['groups']
-            groups = set(g.role for g in gs if g.site_id == settings.SITE_ID)
+            roles = set(g.role for g in gs if g.site_id == settings.SITE_ID)
         except (AttributeError, KeyError):
-            groups = set(self.groups
+            roles = set(self.groups
                          .filter(site_id=settings.SITE_ID)
                          .values_list("role", flat=True))
-        # Add club group on club site to center students
-        center_student = (self.roles.STUDENT in groups or
-                          self.roles.VOLUNTEER in groups or
-                          self.roles.GRADUATE_CENTER in groups)
-        if (center_student and self.roles.STUDENT_CLUB not in groups
-                and is_club_site()):
-            groups.add(self.roles.STUDENT_CLUB)
-        return groups
+        return roles
 
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         """

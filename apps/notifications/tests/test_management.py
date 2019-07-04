@@ -8,7 +8,8 @@ from learning.tests.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
 from notifications.management.commands.notify import get_base_domain
 from users.constants import AcademicRoles
-from users.tests.factories import UserFactory, StudentCenterFactory
+from users.tests.factories import UserFactory, StudentCenterFactory, \
+    StudentClubFactory, StudentFactory
 
 
 @pytest.mark.django_db
@@ -57,11 +58,10 @@ def test_notify_get_base_url():
     user = UserFactory(groups=[AcademicRoles.STUDENT])
     notification = AssignmentNotificationFactory(user=user)
     assert get_base_domain(notification) == "my.compscicenter.ru"
-    user = UserFactory(groups=[AcademicRoles.STUDENT,
-                               AcademicRoles.STUDENT_CLUB])
+    user = StudentFactory()
     notification = AssignmentNotificationFactory(user=user)
     assert get_base_domain(notification) == "my.compscicenter.ru"
-    notification.user = UserFactory(groups=[AcademicRoles.STUDENT_CLUB])
+    notification.user = StudentClubFactory()
     assert get_base_domain(notification) == "compsciclub.ru"
     notification.user = UserFactory(groups=[AcademicRoles.STUDENT,
                                             AcademicRoles.TEACHER_CLUB])

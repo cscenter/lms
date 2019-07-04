@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import factory
+from django.conf import settings
 from django.contrib.sites.models import Site
 
 from learning.settings import GradeTypes
@@ -82,7 +83,7 @@ class StudentFactory(UserFactory):
         for site in Site.objects.all():
             self.add_group(role=AcademicRoles.STUDENT, site_id=site.id)
 
-# FIXME: Нужна ли такая специфика? Думаем...
+
 class StudentCenterFactory(UserFactory):
     enrollment_year = 2015
     city_id = 'spb'
@@ -93,8 +94,7 @@ class StudentCenterFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.STUDENT]
-        add_user_groups(self, required_groups)
+        self.add_group(AcademicRoles.STUDENT, site_id=settings.CENTER_SITE_ID)
 
 
 class StudentClubFactory(UserFactory):
@@ -102,8 +102,7 @@ class StudentClubFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.STUDENT_CLUB]
-        add_user_groups(self, required_groups)
+        self.add_group(AcademicRoles.STUDENT, site_id=settings.CLUB_SITE_ID)
 
 
 class TeacherCenterFactory(UserFactory):
@@ -111,8 +110,7 @@ class TeacherCenterFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.TEACHER]
-        add_user_groups(self, required_groups)
+        self.add_group(AcademicRoles.TEACHER, site_id=settings.CENTER_SITE_ID)
 
 
 class VolunteerFactory(UserFactory):

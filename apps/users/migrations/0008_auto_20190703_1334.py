@@ -12,7 +12,8 @@ def migrate_groups(apps, schema_editor):
     for user in User.objects.all():
         for group in user.groups.all():
             site = 1
-            if group.pk in (AcademicRoles.STUDENT_CLUB, AcademicRoles.TEACHER_CLUB):
+            # 5, 6 == AcademicRoles.STUDENT_CLUB, AcademicRoles.TEACHER_CLUB
+            if group.pk in (5, 6):
                 site = 2
             user.groups_new.add(UserGroup(user=user, site_id=site, group=group.pk), bulk=False)
 
