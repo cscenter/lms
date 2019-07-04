@@ -28,7 +28,7 @@ def test_smoke(client, curator, settings):
 @pytest.mark.django_db
 def test_classes(client):
     user = UserFactory(groups=[User.roles.STUDENT,
-                               User.roles.TEACHER_CENTER],
+                               User.roles.TEACHER],
                        city_id='spb')
     client.login(user)
     fname = 'csc_classes.ics'
@@ -54,8 +54,7 @@ def test_classes(client):
 
 @pytest.mark.django_db
 def test_assignments(client):
-    user = UserFactory(groups=[User.roles.STUDENT,
-                               User.roles.TEACHER_CENTER],
+    user = UserFactory(groups=[User.roles.STUDENT, User.roles.TEACHER],
                        city_id='spb')
     client.login(user)
     fname = 'csc_assignments.ics'

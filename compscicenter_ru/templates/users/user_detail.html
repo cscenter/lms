@@ -67,7 +67,7 @@
                         {% for program in gp.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
                     {% endwith %}
                 </div>
-                {% elif profile_user.is_student %}
+                {% elif profile_user.is_student or profile_user.is_volunteer %}
                 <div class="progress-info">
                     {% trans "student"|title %}{% if profile_user.enrollment_year %} {{ profile_user.enrollment_year }} {% trans "enrolled in" context "user_detail" %}{% endif %}{% if profile_user.status == "expelled" %}, {{ profile_user.get_status_display|lower }}{% endif %}
                 </div>
@@ -116,7 +116,7 @@
                                     <i class="fa fa-user-secret"></i> Для куратора
                                 </a>
                             </li>
-                            {% if profile_user.is_student or profile_user.is_graduate %}
+                            {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
                                 <li role="presentation">
                                     <a href="#student-assignments-tab" role="tab" data-toggle="tab">
                                         <i class="fa fa-list"></i>&nbsp;Задания
@@ -169,7 +169,7 @@
                         </tr>
                     </table>
 
-                    {% if profile_user.is_student or profile_user.is_graduate %}
+                    {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
                         <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
                         {% if profile_user.enrollment_certificates.count > 0 %}
                             <ul>
@@ -198,7 +198,7 @@
                         {% endif %}
                     {% endwith %}
 
-                    {% if profile_user.is_student or profile_user.is_graduate %}
+                    {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
                         <h4 class="_mtop-30">{% trans "Student info record" %}:</h4>
                         <table class="table table-condensed table-striped">
                             <tr>
@@ -302,7 +302,7 @@
                     {% endif %}
                 </div>
 
-                {% if profile_user.is_student or profile_user.is_graduate %}
+                {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
                     <div class="tab-pane" role="tabpanel" id="student-assignments-tab">
                         {% if assignments %}
                             <h4 class="_mtop-30">{% trans "Assignments" %}:

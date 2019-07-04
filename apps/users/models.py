@@ -589,7 +589,7 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         won't be refreshed if enrollment was deleted or changed after call.
         """
         from learning.models import Enrollment
-        if self.is_student or self.is_graduate:
+        if self.is_student or self.is_volunteer or self.is_graduate:
             cache_key = self.ENROLLMENT_CACHE_KEY.format(course_id)
             if not hasattr(self, cache_key):
                 e = (Enrollment.active
@@ -620,7 +620,7 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
             sections.append(PublicRoute.PROJECTS.choice)
         if self.is_interviewer:
             sections.append(PublicRoute.ADMISSION.choice)
-        if self.is_student:
+        if self.is_student or self.is_volunteer:
             sections.append(PublicRoute.LEARNING.choice)
         if self.is_teacher:
             sections.append(PublicRoute.TEACHING.choice)

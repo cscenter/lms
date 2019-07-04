@@ -54,7 +54,8 @@ class CourseReviewsTab(CourseTab):
 
     @classmethod
     def is_enabled(cls, course, user=None):
-        return course.enrollment_is_open and (user.is_student or user.is_curator)
+        has_perm = user.is_curator or user.is_student or user.is_volunteer
+        return course.enrollment_is_open and has_perm
 
     def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
         return CourseTabPanel(context={"items": get_course_reviews(**kwargs)})
@@ -68,7 +69,7 @@ class CourseAssignmentsTab(CourseTab):
 
     @classmethod
     def is_enabled(cls, course, user=None):
-        return (user.is_student or user.is_graduate or user.is_curator or
+        return (user.is_curator or user.is_student or user.is_graduate or
                 user.is_teacher or user.get_enrollment(course.pk))
 
     def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:

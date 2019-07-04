@@ -42,7 +42,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
         self.assertLoginRedirect(reverse(self.url_name))
         all_test_groups = [
             [],
-            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.TEACHER],
             [AcademicRoles.STUDENT],
             [AcademicRoles.GRADUATE_CENTER]
         ]
@@ -60,7 +60,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
 class CourseListTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, CSCTestCase):
     url_name = 'teaching:course_list'
-    groups_allowed = [AcademicRoles.TEACHER_CENTER]
+    groups_allowed = [AcademicRoles.TEACHER]
 
 
 class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
@@ -173,7 +173,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertLoginRedirect(url)
         test_groups = [
             [],
-            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.TEACHER],
             [AcademicRoles.STUDENT],
         ]
         for groups in test_groups:
@@ -262,12 +262,12 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         # Test GET
         test_groups = [
             [],
-            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.TEACHER],
             [AcademicRoles.STUDENT],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == [AcademicRoles.TEACHER_CENTER]:
+            if groups == [AcademicRoles.TEACHER]:
                 self.assertLoginRedirect(url)
             else:
                 assert self.client.get(url).status_code == 302
@@ -283,12 +283,12 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         grade_dict = {'grading_form': True, 'score': 3}
         test_groups = [
             [],
-            [AcademicRoles.TEACHER_CENTER],
+            [AcademicRoles.TEACHER],
             [AcademicRoles.STUDENT]
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == [AcademicRoles.TEACHER_CENTER]:
+            if groups == [AcademicRoles.TEACHER]:
                 self.assertPOSTLoginRedirect(url, grade_dict)
             else:
                 assert self.client.get(url).status_code == 302

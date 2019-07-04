@@ -119,8 +119,6 @@ class Branch(models.Model):
 
 class Enrollment(TimeStampedModel):
     GRADES = GradeTypes
-    objects = EnrollmentDefaultManager()
-    active = EnrollmentActiveManager()
 
     student = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -148,6 +146,9 @@ class Enrollment(TimeStampedModel):
         _("Leave reason"),
         blank=True)
 
+    objects = EnrollmentDefaultManager()
+    active = EnrollmentActiveManager()
+
     class Meta:
         unique_together = [('student', 'course')]
         verbose_name = _("Enrollment")
@@ -158,7 +159,8 @@ class Enrollment(TimeStampedModel):
                                   smart_text(self.student.get_full_name()))
 
     def clean(self):
-        if not self.student.is_student:
+        has_perm = self.student.is_student or self.student.is_volunteer
+        if not has_perm:
             raise ValidationError(_("Only students can enroll to courses"))
 
     def save(self, *args, **kwargs):
@@ -265,7 +267,8 @@ class StudentAssignment(TimeStampedModel):
         unique_together = [['assignment', 'student']]
 
     def clean(self):
-        if not self.student.is_student:
+        has_perm = self.student.is_student or self.student.is_volunteer
+        if not has_perm:
             raise ValidationError(_("Student field should point to "
                                     "an actual student"))
         if self.score and self.score > self.assignment.maximum_score:

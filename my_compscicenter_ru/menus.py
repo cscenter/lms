@@ -67,7 +67,7 @@ top_menu = [
                 weight=50),
         ],
         visible_to=[
-            AcademicRoles.TEACHER_CENTER
+            AcademicRoles.TEACHER
         ],
         css_classes='for-teachers'),
     MenuItem(

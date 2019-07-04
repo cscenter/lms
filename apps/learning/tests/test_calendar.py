@@ -28,7 +28,7 @@ from users.tests.factories import StudentCenterFactory, \
 class CalendarTeacherTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, CSCTestCase):
     url_name = 'teaching:calendar'
-    groups_allowed = [AcademicRoles.TEACHER_CENTER]
+    groups_allowed = [AcademicRoles.TEACHER]
 
     def test_teacher_calendar(self):
         teacher = TeacherCenterFactory(city_id='spb')

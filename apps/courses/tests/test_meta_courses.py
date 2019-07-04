@@ -36,7 +36,7 @@ def test_meta_course_update_security(client, assert_login_redirect):
     url = mc.get_update_url()
     all_test_groups = [
         [],
-        [AcademicRoles.TEACHER_CENTER],
+        [AcademicRoles.TEACHER],
         [AcademicRoles.STUDENT],
         [AcademicRoles.GRADUATE_CENTER]
     ]

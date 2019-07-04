@@ -91,25 +91,3 @@ class NotificationService:
 
     def get_context(self, notification):
         return {}
-
-    def get_site_url(self, **kwargs):
-        raise NotImplementedError()
-        """Returns site url based on context information"""
-        # TODO: Delete after migrating all notifications to new module
-        notification = kwargs.pop("notification")
-        receiver = notification.user
-        if isinstance(notification, AssignmentNotification):
-            co = notification.student_assignment.assignment.course
-        elif isinstance(notification, CourseNewsNotification):
-            co = notification.course_offering_news.course
-        else:
-            raise NotImplementedError()
-        # FIXME: запоминать, с какого сайта отправлено уведомление?
-        in_club = AcademicRoles.STUDENT_CLUB in receiver.get_cached_groups()
-        if in_club or (receiver.is_teacher_club and
-                       not receiver.is_teacher_center):
-            if co.get_city() == "spb":
-                return "http://compsciclub.ru"
-            else:
-                return "http://{}.compsciclub.ru".format(co.get_city())
-        return "https://compscicenter.ru"
