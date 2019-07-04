@@ -2,21 +2,17 @@ from urllib.parse import urlparse
 
 import pytest
 from django.conf import settings
-
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
+from pytest_django.lazy_django import skip_if_no_django
 
 from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
     INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
+from core.models import City
 from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase
 from learning.models import Branch
 from learning.settings import Branches
 from notifications.models import Type
-from pytest_django.lazy_django import skip_if_no_django
-
-from core.models import City
-from users.constants import AcademicRoles
-from users.models import Group
 from users.tests.factories import UserFactory
 
 
@@ -66,15 +62,6 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
     since some tests rely on it.
     """
     with django_db_blocker.unblock():
-        # Create user groups
-        for group_id, group_name in AcademicRoles.values.items():
-            Group.objects.update_or_create(
-                pk=group_id,
-                defaults={
-                    "name": group_name
-                }
-            )
-
         # Create sites
         Site.objects.update_or_create(
             id=settings.CENTER_SITE_ID,
@@ -150,7 +137,6 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             )
 
         # Create email templates
-        from admission.models import Interview, InterviewInvitation
 
         template_names = (
             APPOINTMENT_INVITATION_TEMPLATE,

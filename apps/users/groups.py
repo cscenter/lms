@@ -11,14 +11,10 @@ logger = logging.getLogger(__name__)
 # A list of registered access roles.
 REGISTERED_ACCESS_ROLES = {}
 
-# TODO: register groups for importing to gerrit
-# TODO: Для каждой аппликухи создать роли типа student. пусть они и будут повторяться, но можно
-# TODO: будет делать проверку ininstance(obj, ProjectRole). Если оно надо вообще...
-
 
 def register_access_role(cls):
     """
-    Decorator that allows access roles to be registered within the roles
+    Decorator that allows access roles to be registered within the groups
     module and referenced by their string values.
     Assumes that the decorated class has a "ROLE" attribute, defining its type.
     """
@@ -62,18 +58,13 @@ class RoleCache:
     def get_user_roles(cls, user):
         return get_cache(cls.CACHE_NAMESPACE)[cls.CACHE_KEY][user.id]
 
-    def has_role(self, role, site_id, course_id):
+    def has_role(self, role, site_id):
         """
         Return whether this RoleCache contains a role with
         the specified role, course_id, and site.
         """
-        return any(
-            access_role.role == role and
-            access_role.site_id == site_id and
-            # `None == None` works fine for built-in type `int`
-            access_role.course_id == course_id
-            for access_role in self._roles
-        )
+        return any(access_role.role == role and access_role.site_id == site_id
+                   for access_role in self._roles)
 
 
 class AccessRole:
@@ -111,44 +102,39 @@ class AccessRole:
         return User.objects.none()
 
 
-class Staff(AccessRole):
+class Curator(AccessRole):
     """
     The global staff role. Allows to access the admin section.
     """
     def has_user(self, user):
-        return user.is_staff
+        return user.is_superuser
 
     def add_users(self, *users):
         for user in users:
             if user.is_active:
-                user.is_staff = True
+                user.is_superuser = True
                 user.save()
 
     def remove_users(self, *users):
         for user in users:
-            user.is_staff = False
+            user.is_superuser = False
             user.save()
 
     def users_with_role(self):
         raise Exception("This operation is un-indexed, and shouldn't be used")
 
-# TODO: Admin? Superuser? Или оставить Curator?
-
 
 class RoleBase(AccessRole):
     """
-    Roles by type (e.g., teacher, beta_user), site and optionally course_id
+    Roles by type (e.g., teacher, beta_user) and site
     """
-    def __init__(self, role_name: str, site_id: int, course_id=None):
+    # FIXME: use role_id instead
+    def __init__(self, role_name: str, site_id: int):
         """
-        Create role from required role_name and site w/ optional course_id.
-        You may just provide a role name and site if it's a global role
-        (not constrained to a course). Use the subclasses for these.
+        Create role from required role_name and site.
         """
         super(RoleBase, self).__init__()
-
         self._site_id = site_id
-        self.course_id = course_id
         self._role_name = role_name
 
     # pylint: disable=arguments-differ
@@ -170,8 +156,7 @@ class RoleBase(AccessRole):
             # Cache a list of roles that a user has.
             user._roles = RoleCache(user)
 
-        return user._roles.has_role(self._role_name, self._site_id,
-                                    self.course_id)
+        return user._roles.has_role(self._role_name, self._site_id)
 
     def add_users(self, *users):
         """
@@ -181,9 +166,9 @@ class RoleBase(AccessRole):
         # legit get updated.
         for u in users:
             if u.is_authenticated and u.is_active and not self.has_user(u):
-                entry = UserGroup(user=u, role=self._role_name,
-                                 site_id=self._site_id,
-                                 course_id=self.course_id)
+                entry = UserGroup(user=u,
+                                  role=self._role_name,
+                                  site_id=self._site_id)
                 entry.save()
                 if hasattr(u, '_roles'):
                     # TODO: add to cache instead
@@ -194,8 +179,9 @@ class RoleBase(AccessRole):
         Remove the supplied django users from this role.
         """
         entries = (UserGroup.objects
-                   .filter(user__in=users, role=self._role_name,
-                           site_id=self._site_id, course_id=self.course_id))
+                   .filter(user__in=users,
+                           role=self._role_name,
+                           site_id=self._site_id))
         entries.delete()
         for user in users:
             if hasattr(user, '_roles'):
@@ -207,11 +193,10 @@ class RoleBase(AccessRole):
         Return a django QuerySet for all of the users with this role
         """
         filters = {
-            "user_role__role": self._role_name,
-            "user_role__site_id": self._site_id
+            "group__role": self._role_name,
+            "group__site_id": self._site_id
         }
-        if self.course_id is None:
-            filters["user_role__course_id__isnull"] = True
+        # FIXME: .has_role
         return User.objects.filter(**filters)
 
 
