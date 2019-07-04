@@ -17,7 +17,7 @@ class CharInFilter(BaseInFilter, CharFilter):
 class UserFilter(FilterSet):
     FILTERING_GROUPS = [
         User.roles.VOLUNTEER,
-        User.roles.STUDENT_CENTER,
+        User.roles.STUDENT,
         User.roles.GRADUATE_CENTER,
         User.roles.MASTERS_DEGREE,
     ]

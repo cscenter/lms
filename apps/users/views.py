@@ -69,7 +69,7 @@ class LoginView(generic.FormView):
 
         if not redirect_to:
             user_groups = self.request.user.get_cached_groups()
-            if user_groups == {User.roles.STUDENT_CENTER}:
+            if user_groups == {User.roles.STUDENT}:
                 redirect_to = reverse("study:assignment_list")
             elif user_groups == {User.roles.TEACHER_CENTER}:
                 redirect_to = reverse("teaching:assignment_list")
@@ -292,7 +292,7 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         student_info = (User.objects
-                        .has_role(User.roles.STUDENT_CENTER,
+                        .has_role(User.roles.STUDENT,
                                   User.roles.GRADUATE_CENTER,
                                   User.roles.VOLUNTEER)
                         .students_info(exclude_grades=[

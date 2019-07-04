@@ -119,7 +119,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             "status": StudentStatuses.WILL_GRADUATE
         }
         students = (User.objects
-                    .has_role(User.roles.STUDENT_CENTER,
+                    .has_role(User.roles.STUDENT,
                               User.roles.GRADUATE_CENTER,
                               User.roles.VOLUNTEER)
                     .students_info(filters=filters))
@@ -454,7 +454,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         return super(StudentFacesView, self).get_template_names()
 
     def get_queryset(self, city_code, enrollment_year):
-        roles = (User.roles.STUDENT_CENTER, User.roles.VOLUNTEER)
+        roles = (User.roles.STUDENT, User.roles.VOLUNTEER)
         qs = (User.objects
               .has_role(*roles)
               .filter(city_id=city_code,

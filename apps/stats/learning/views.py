@@ -26,7 +26,7 @@ class CourseParticipantsStatsByGroup(ListRenderersMixin, PandasView):
 
     def get_queryset(self):
         groups = [
-            User.roles.STUDENT_CENTER,
+            User.roles.STUDENT,
             User.roles.VOLUNTEER,
             User.roles.GRADUATE_CENTER,
         ]

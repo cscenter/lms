@@ -54,7 +54,7 @@ def test_course_access_role_teacher():
     role = course_access_role(course=course2, user=teacher2)
     assert role == CourseRole.TEACHER
     # Now make sure that teacher role is prevailed on any student role
-    teacher2.add_group(AcademicRoles.STUDENT_CENTER)
+    teacher2.add_group(AcademicRoles.STUDENT)
     role = course_access_role(course=course, user=teacher2)
     assert role == CourseRole.TEACHER
     delete_enrollment_cache(teacher2, course)

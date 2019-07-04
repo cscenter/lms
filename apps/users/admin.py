@@ -54,11 +54,11 @@ class UserGroupForm(forms.ModelForm):
         cleaned_data = super().clean()
         role = int(cleaned_data['role'])
         user = cleaned_data['user']
-        if role == AcademicRoles.STUDENT_CENTER:
+        if role == AcademicRoles.STUDENT:
             if user.enrollment_year is None:
                 msg = _("Enrollment year should be provided for students")
                 self.add_error(None, ValidationError(msg))
-        if role in {AcademicRoles.STUDENT_CENTER,
+        if role in {AcademicRoles.STUDENT,
                     AcademicRoles.VOLUNTEER,
                     AcademicRoles.GRADUATE_CENTER}:
             if not user.city_id:
@@ -145,7 +145,7 @@ class SHADCourseRecordAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = User.objects.filter(group__role__in=[
-                AcademicRoles.STUDENT_CENTER,
+                AcademicRoles.STUDENT,
                 AcademicRoles.VOLUNTEER]).distinct()
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 

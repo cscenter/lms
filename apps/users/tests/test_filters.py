@@ -61,7 +61,7 @@ def test_student_search(client, curator, search_url):
     assert response.json()["count"] == 0
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={}".format(AcademicRoles.STUDENT_CENTER)
+        "curriculum_year=2011&groups={}".format(AcademicRoles.STUDENT)
     ))
     assert response.json()["count"] == 2
     response = client.get("{}?{}".format(
@@ -73,7 +73,7 @@ def test_student_search(client, curator, search_url):
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups[]={}&groups[]={}".format(
-            AcademicRoles.STUDENT_CENTER,
+            AcademicRoles.STUDENT,
             AcademicRoles.VOLUNTEER
         )
     ))
@@ -83,7 +83,7 @@ def test_student_search(client, curator, search_url):
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups[]={}&groups[]={}&status={}".format(
-            AcademicRoles.STUDENT_CENTER,
+            AcademicRoles.STUDENT,
             AcademicRoles.VOLUNTEER,
             StudentStatuses.EXPELLED
         )
@@ -94,7 +94,7 @@ def test_student_search(client, curator, search_url):
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups[]={}&groups[]={}&status={},{}".format(
-            AcademicRoles.STUDENT_CENTER,
+            AcademicRoles.STUDENT,
             AcademicRoles.VOLUNTEER,
             StudentStatuses.EXPELLED,
             StudentStatuses.REINSTATED
@@ -104,7 +104,7 @@ def test_student_search(client, curator, search_url):
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
-            AcademicRoles.STUDENT_CENTER,
+            AcademicRoles.STUDENT,
             AcademicRoles.VOLUNTEER,
             StudentStatuses.EXPELLED,
             StudentStatuses.REINSTATED,
@@ -116,7 +116,7 @@ def test_student_search(client, curator, search_url):
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
-            AcademicRoles.STUDENT_CENTER,
+            AcademicRoles.STUDENT,
             AcademicRoles.VOLUNTEER,
             StudentStatuses.EXPELLED,
             StudentStatuses.REINSTATED,
@@ -137,7 +137,7 @@ def test_student_search_enrollments(client, curator, search_url):
     ENROLLMENTS_URL = "{}?{}".format(
         search_url,
         "curriculum_year=2011&groups={},{}&cnt_enrollments={{}}".format(
-            AcademicRoles.STUDENT_CENTER,
+            AcademicRoles.STUDENT,
             AcademicRoles.VOLUNTEER,
         )
     )

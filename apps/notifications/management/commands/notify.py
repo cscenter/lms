@@ -49,7 +49,7 @@ EMAIL_TEMPLATES = {
 
 # Student and teacher groups which can access center site.
 LEARNING_PARTICIPANTS_CENTER = {
-    AcademicRoles.STUDENT_CENTER,
+    AcademicRoles.STUDENT,
     AcademicRoles.VOLUNTEER,
     AcademicRoles.GRADUATE_CENTER,
     AcademicRoles.TEACHER_CENTER,

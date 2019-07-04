@@ -78,7 +78,7 @@ class StudentFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.STUDENT_CENTER,
+        required_groups = [AcademicRoles.STUDENT,
                            AcademicRoles.STUDENT_CLUB]
         add_user_groups(self, required_groups)
 
@@ -93,7 +93,7 @@ class StudentCenterFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.STUDENT_CENTER]
+        required_groups = [AcademicRoles.STUDENT]
         add_user_groups(self, required_groups)
 
 
@@ -142,7 +142,7 @@ class OnlineCourseRecordFactory(factory.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "Online course %03d" % n)
     student = factory.SubFactory(UserFactory,
-                                 groups=[User.roles.STUDENT_CENTER])
+                                 groups=[User.roles.STUDENT])
 
 
 class SHADCourseRecordFactory(factory.DjangoModelFactory):
@@ -152,7 +152,7 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "SHAD course name %03d" % n)
     teachers = factory.Sequence(lambda n: "SHAD course teachers %03d" % n)
     student = factory.SubFactory(UserFactory,
-                                 groups=[User.roles.STUDENT_CENTER])
+                                 groups=[User.roles.STUDENT])
     grade = factory.Iterator(list(GradeTypes.values))
     semester = factory.SubFactory('learning.tests.factories.SemesterFactory')
 
@@ -164,4 +164,4 @@ class EnrollmentCertificateFactory(factory.DjangoModelFactory):
     signature = "FIO"
     note = ""
     student = factory.SubFactory(UserFactory,
-                                 groups=[User.roles.STUDENT_CENTER])
+                                 groups=[User.roles.STUDENT])

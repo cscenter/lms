@@ -26,7 +26,7 @@ class ThumbnailSizes(DjangoChoices):
 
 
 class AcademicRoles(DjangoChoices):
-    STUDENT_CENTER = C(1, _('Student [CENTER]'))
+    STUDENT = C(1, _('Student [CENTER]'))
     TEACHER_CENTER = C(2, _('Teacher [CENTER]'))
     GRADUATE_CENTER = C(3, _('Graduate'))
     VOLUNTEER = C(4, _('Volunteer'))
@@ -41,7 +41,7 @@ class AcademicRoles(DjangoChoices):
 
 
 CSCENTER_ACCESS_ALLOWED = {
-    AcademicRoles.STUDENT_CENTER,
+    AcademicRoles.STUDENT,
     AcademicRoles.VOLUNTEER,
     AcademicRoles.TEACHER_CENTER,
     AcademicRoles.GRADUATE_CENTER,
@@ -51,7 +51,7 @@ CSCENTER_ACCESS_ALLOWED = {
 
 
 GROUPS_IMPORT_TO_GERRIT = [
-    AcademicRoles.STUDENT_CENTER,
+    AcademicRoles.STUDENT,
     AcademicRoles.VOLUNTEER,
     AcademicRoles.TEACHER_CENTER,
     AcademicRoles.GRADUATE_CENTER

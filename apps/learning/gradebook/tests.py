@@ -138,7 +138,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
         self.assertLoginRedirect(url)
         test_groups = [
             [],
-            [AcademicRoles.STUDENT_CENTER],
+            [AcademicRoles.STUDENT],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
@@ -388,7 +388,7 @@ def test_security(client, settings, assert_login_redirect):
     assert_login_redirect(url, method='get')
     test_groups = [
         [],
-        [AcademicRoles.STUDENT_CENTER],
+        [AcademicRoles.STUDENT],
     ]
     for groups in test_groups:
         client.login(UserFactory.create(groups=groups))

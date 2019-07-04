@@ -174,10 +174,10 @@ class UserChangeForm(_UserChangeForm):
         groups = {x.pk for x in cleaned_data.get('groups', [])}
         u: User = self.instance
         # FIXME: How to check these invariants with 1-to-many relation?
-        if u.roles.VOLUNTEER in groups and u.roles.STUDENT_CENTER in groups:
+        if u.roles.VOLUNTEER in groups and u.roles.STUDENT in groups:
             msg = _("User can't be volunteer and student at the same time")
             self.add_error('groups', ValidationError(msg))
 
-        if u.roles.GRADUATE_CENTER in groups and u.roles.STUDENT_CENTER in groups:
+        if u.roles.GRADUATE_CENTER in groups and u.roles.STUDENT in groups:
             msg = _("User can't be graduated and student at the same time")
             self.add_error('groups', ValidationError(msg))

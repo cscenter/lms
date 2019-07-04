@@ -84,7 +84,7 @@ def has_permissions(menu_item, user, user_groups, **kwargs):
         if not user_groups.intersection(menu_item.groups_allowed):
             return False
         restricted_to_students = {
-            user.roles.STUDENT_CENTER,
+            user.roles.STUDENT,
             user.roles.VOLUNTEER
         }
         if (restricted_to_students.intersection(menu_item.groups_allowed) and

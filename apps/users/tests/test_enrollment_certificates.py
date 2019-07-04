@@ -49,7 +49,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
     def test_user_detail_view(self):
         """Show reference-add button only to curators (superusers)"""
         # check user page without curator credentials
-        student = UserFactory.create(groups=[AcademicRoles.STUDENT_CENTER],
+        student = UserFactory.create(groups=[AcademicRoles.STUDENT],
                                      enrollment_year=2011)
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
@@ -131,7 +131,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
         self.assertFalse(form.is_valid())
         # can't login message in __all__
         self.assertIn("__all__", form.errors)
-        add_user_groups(club_student, [User.roles.STUDENT_CENTER])
+        add_user_groups(club_student, [User.roles.STUDENT])
         club_student.save()
         response = self.client.post(reverse('login'), login_data)
         self.assertEqual(response.status_code, 302)

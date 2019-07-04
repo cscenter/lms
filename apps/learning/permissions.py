@@ -18,7 +18,7 @@ class LearningPermissionsMixin:
     def is_student(self):
         if is_club_site():
             return AcademicRoles.STUDENT_CLUB in self._cached_groups
-        student_in_center = AcademicRoles.STUDENT_CENTER in self._cached_groups
+        student_in_center = AcademicRoles.STUDENT in self._cached_groups
         return student_in_center or self.is_volunteer
 
     @property
