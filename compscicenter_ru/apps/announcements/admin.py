@@ -40,7 +40,7 @@ class AnnouncementEventDetailsInline(admin.StackedInline):
 @admin.register(Announcement)
 class AnnouncementAdmin(admin.ModelAdmin):
     form = AnnouncementForm
-    list_display = ("name", "publish_start_at", "publish_end_at")
+    list_display = ("name", "slug", "publish_start_at", "publish_end_at")
     inlines = (AnnouncementEventDetailsInline,)
 
     class Media:
