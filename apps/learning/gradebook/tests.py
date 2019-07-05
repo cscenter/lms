@@ -24,8 +24,7 @@ from learning.settings import GradingSystems, \
 from learning.tests.factories import EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import AcademicRoles
-from users.tests.factories import TeacherCenterFactory, StudentCenterFactory, \
-    UserFactory
+from users.tests.factories import TeacherFactory, UserFactory, StudentFactory
 
 
 # TODO: test redirect to gradebook for teachers if only 1 course in current term
@@ -33,7 +32,7 @@ from users.tests.factories import TeacherCenterFactory, StudentCenterFactory, \
 @pytest.mark.django_db
 def test__get_course(client, curator):
     """Testing `views.gradebook._get_course` method"""
-    teacher1, teacher2 = TeacherCenterFactory.create_batch(2)
+    teacher1, teacher2 = TeacherFactory.create_batch(2)
     course = CourseFactory.create(teachers=[teacher1])
     filters = {}
     co = _get_course(filters, teacher1)  # KeyError
@@ -57,15 +56,16 @@ def test__get_course(client, curator):
 
 @pytest.mark.django_db
 def test_recalculate_course_grading_system(client):
-    teacher = TeacherCenterFactory.create()
-    students = StudentCenterFactory.create_batch(2)
+    teacher = TeacherFactory()
+    students = StudentFactory.create_batch(2)
     s = SemesterFactory.create_current()
     co = CourseFactory.create(semester=s, teachers=[teacher])
     assert co.grading_type == GradingSystems.BASE
     assignments = AssignmentFactory.create_batch(2,
                                                  course=co,
                                                  is_online=False,
-                                                 passing_score=10, maximum_score=20)
+                                                 passing_score=10,
+                                                 maximum_score=20)
     client.login(teacher)
     url = co.get_gradebook_url()
     # Save empty form first, nothing should been updated
@@ -129,8 +129,8 @@ def test_recalculate_course_grading_system(client):
 
 class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
-        teacher = TeacherCenterFactory()
-        student = StudentCenterFactory()
+        teacher = TeacherFactory()
+        student = StudentFactory()
         co = CourseFactory.create(teachers=[teacher])
         a1, a2 = AssignmentFactory.create_batch(2, course=co)
         EnrollmentFactory.create(student=student, course=co)
@@ -142,7 +142,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
-        self.doLogin(TeacherCenterFactory())
+        self.doLogin(TeacherFactory())
         self.assertEqual(404, self.client.get(url).status_code)
         self.doLogin(student)
         self.assertLoginRedirect(url)
@@ -150,8 +150,8 @@ class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(200, self.client.get(url).status_code)
 
     def test_csv(self):
-        teacher = TeacherCenterFactory()
-        student1, student2 = StudentCenterFactory.create_batch(2)
+        teacher = TeacherFactory()
+        student1, student2 = StudentFactory.create_batch(2)
         co = CourseFactory.create(teachers=[teacher])
         a1, a2 = AssignmentFactory.create_batch(2, course=co)
         for s in [student1, student2]:
@@ -181,8 +181,8 @@ class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
 
 class MarksSheetTeacherTests(MyUtilitiesMixin, CSCTestCase):
     def test_nonempty_gradebook(self):
-        teacher = TeacherCenterFactory()
-        students = StudentCenterFactory.create_batch(3)
+        teacher = TeacherFactory()
+        students = StudentFactory.create_batch(3)
         co = CourseFactory.create(teachers=[teacher])
         for student in students:
             EnrollmentFactory.create(student=student, course=co)
@@ -209,9 +209,9 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, CSCTestCase):
                               response.context['form'].fields)
 
     def test_save_markssheet(self):
-        teacher = TeacherCenterFactory()
+        teacher = TeacherFactory()
         self.doLogin(teacher)
-        students = StudentCenterFactory.create_batch(2)
+        students = StudentFactory.create_batch(2)
         co = CourseFactory.create(teachers=[teacher])
         for student in students:
             EnrollmentFactory.create(student=student, course=co)
@@ -331,8 +331,8 @@ def test_empty_gradebook_data():
 @pytest.mark.django_db
 def test_empty_gradebook_view(client):
     """Smoke test for gradebook view with empty assignments list"""
-    teacher = TeacherCenterFactory()
-    students = StudentCenterFactory.create_batch(3)
+    teacher = TeacherFactory()
+    students = StudentFactory.create_batch(3)
     co1 = CourseFactory.create(teachers=[teacher])
     co2 = CourseFactory.create(teachers=[teacher])
     for student in students:
@@ -355,10 +355,10 @@ def test_empty_gradebook_view(client):
 @pytest.mark.django_db
 def test_total_score(client):
     """Calculate total score by assignments for course offering"""
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     client.login(teacher)
     co = CourseFactory.create(teachers=[teacher])
-    student = StudentCenterFactory()
+    student = StudentFactory()
     EnrollmentFactory.create(student=student, course=co)
     assignments_count = 2
     assignments = AssignmentFactory.create_batch(assignments_count,
@@ -379,8 +379,8 @@ def test_total_score(client):
 
 @pytest.mark.django_db
 def test_security(client, settings, assert_login_redirect):
-    teacher = TeacherCenterFactory()
-    student = StudentCenterFactory()
+    teacher = TeacherFactory()
+    student = StudentFactory()
     co = CourseFactory.create(teachers=[teacher])
     a1, a2 = AssignmentFactory.create_batch(2, course=co)
     EnrollmentFactory.create(student=student, course=co)
@@ -393,7 +393,7 @@ def test_security(client, settings, assert_login_redirect):
     for groups in test_groups:
         client.login(UserFactory.create(groups=groups))
     # Raise 404 if teacher not in teaching staff of the course
-    client.login(TeacherCenterFactory())
+    client.login(TeacherFactory())
     assert client.get(url).status_code == 404
     client.login(student)
     assert_login_redirect(url, method='get')
@@ -404,7 +404,7 @@ def test_security(client, settings, assert_login_redirect):
 @pytest.mark.django_db
 def test_save_gradebook_form(client):
     """Make sure that all fields are optional. Save only sent data"""
-    teacher = TeacherCenterFactory.create()
+    teacher = TeacherFactory.create()
     client.login(teacher)
     co = CourseFactory.create(teachers=[teacher])
     a1, a2 = AssignmentFactory.create_batch(2, course=co,
@@ -463,9 +463,9 @@ def test_save_gradebook_form(client):
 @pytest.mark.django_db
 def test_save_gradebook_l10n(client):
     """Input value for grade value can be int or decimal"""
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     client.login(teacher)
-    student = StudentCenterFactory()
+    student = StudentFactory()
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory(course=co, is_online=False,
@@ -488,9 +488,9 @@ def test_save_gradebook_less_than_passing_score(client):
     Make sure the form is valid when score is less than passing score, but not
     the lowest possible value.
     """
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     client.login(teacher)
-    student = StudentCenterFactory()
+    student = StudentFactory()
     co = CourseFactory.create(teachers=[teacher])
     e = EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory(course=co, is_online=False,
@@ -508,9 +508,9 @@ def test_save_gradebook_less_than_passing_score(client):
 
 @pytest.mark.django_db
 def test_gradebook_view_form_invalid(client):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     client.login(teacher)
-    student = StudentCenterFactory()
+    student = StudentFactory()
     co = CourseFactory.create(teachers=[teacher])
     e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GradeTypes.EXCELLENT)
@@ -538,10 +538,10 @@ def test_gradebook_view_form_invalid(client):
 
 @pytest.mark.django_db
 def test_gradebook_view_form_conflict(client):
-    teacher1, teacher2 = TeacherCenterFactory.create_batch(2)
+    teacher1, teacher2 = TeacherFactory.create_batch(2)
     client.login(teacher1)
     co = CourseFactory.create(teachers=[teacher1, teacher2])
-    student = StudentCenterFactory()
+    student = StudentFactory()
     e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GradeTypes.NOT_GRADED)
     a = AssignmentFactory(course=co, is_online=False,
@@ -617,13 +617,13 @@ def test_gradebook_view_form_conflict(client):
 
 @pytest.mark.django_db
 def test_gradebook_import_assignments_from_csv_security(client):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
-    student_spb = StudentCenterFactory(city_id='spb')
+    student_spb = StudentFactory(city_id='spb')
     EnrollmentFactory.create(student=student_spb, course=co)
     assignments = AssignmentFactory.create_batch(3, course=co,
                                                  is_online=False)
-    teacher2 = TeacherCenterFactory()
+    teacher2 = TeacherFactory()
     client.login(teacher2)
     url = reverse('teaching:gradebook_csv_import_stepic', args=[co.pk])
     response = client.post(url, {'assignment': assignments[0].pk,
@@ -645,9 +645,9 @@ def test_gradebook_import_assignments_from_csv_security(client):
 @pytest.mark.django_db
 def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
     mocker.patch('django.contrib.messages.api.add_message')
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
-    student = StudentCenterFactory()
+    student = StudentFactory()
     student.stepic_id = 20
     student.save()
     EnrollmentFactory.create(student=student, course=co)
@@ -669,13 +669,13 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
 
 @pytest.mark.django_db
 def test_gradebook_import_assignments_from_csv(client, tmpdir):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
-    student1 = StudentCenterFactory(city_id='spb', yandex_id='yandex1',
+    student1 = StudentFactory(city_id='spb', yandex_id='yandex1',
                                     stepic_id='1')
-    student2 = StudentCenterFactory(city_id='spb', yandex_id='yandex2',
+    student2 = StudentFactory(city_id='spb', yandex_id='yandex2',
                                     stepic_id='2')
-    student3 = StudentCenterFactory(city_id='spb', yandex_id='custom_one',
+    student3 = StudentFactory(city_id='spb', yandex_id='custom_one',
                                     stepic_id='3')
     for s in [student1, student2, student3]:
         EnrollmentFactory.create(student=s, course=co)

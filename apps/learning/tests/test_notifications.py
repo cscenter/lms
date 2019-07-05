@@ -9,7 +9,7 @@ from django.core import mail, management
 from subdomains.utils import get_domain
 
 from core.constants import DATE_FORMAT_RU
-from core.tests.utils import CSCTestCase, TEST_DOMAIN
+from core.tests.utils import CSCTestCase, TEST_DOMAIN, ANOTHER_DOMAIN_ID
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
 from courses.models import CourseTeacher, Assignment
@@ -30,9 +30,9 @@ class NotificationTests(CSCTestCase):
                 .unread_notifications_cache)
 
     def test_assignment(self):
-        student = StudentCenterFactory()
-        teacher1 = TeacherCenterFactory()
-        teacher2 = TeacherCenterFactory()
+        student = StudentFactory()
+        teacher1 = TeacherFactory()
+        teacher2 = TeacherFactory()
         co = CourseFactory(teachers=[teacher1, teacher2])
         EnrollmentFactory(student=student, course=co, grade=GradeTypes.GOOD)
         # Notify_teachers m2m populated only from view action
@@ -113,8 +113,8 @@ def test_assignment_notify_teachers_public_form(client):
     On assignment creation we have to ensure that `notify_teachers`
     m2m prepopulated by the course teachers with `notify_by_default=True`
     """
-    student = StudentCenterFactory()
-    t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
+    student = StudentFactory()
+    t1, t2, t3, t4 = TeacherFactory.create_batch(4)
     # Course offering with 4 teachers whom notify_by_default flag set to True
     co = CourseFactory.create(teachers=[t1, t2, t3, t4])
     co_teacher1 = CourseTeacher.objects.get(course=co, teacher=t1)
@@ -173,7 +173,7 @@ def test_assignment_notify_teachers_admin_form(client, curator):
     the course teachers by default.
     """
     from django.contrib.admin.sites import AdminSite
-    t1, t2, t3, t4 = TeacherCenterFactory.create_batch(4)
+    t1, t2, t3, t4 = TeacherFactory.create_batch(4)
     co = CourseFactory.create(teachers=[t1, t2, t3, t4])
     ma = AssignmentAdmin(Assignment, AdminSite())
     client.login(curator)
@@ -262,14 +262,15 @@ def test_new_course_news_notification_context(settings):
     current_domain = get_domain()
     assert current_domain == TEST_DOMAIN
     course = CourseFactory(city_id='spb')
-    student = StudentCenterFactory()
+    student = StudentFactory()
     enrollment = EnrollmentFactory(course=course, student=student)
     cn = CourseNewsNotificationFactory(course_offering_news__course=course,
                                        user=student)
     context = get_course_news_notification_context(cn)
     assert context['course_link'] == course.get_absolute_url()
-    cn = CourseNewsNotificationFactory(course_offering_news__course=course,
-                                       user=StudentClubFactory())
+    cn = CourseNewsNotificationFactory(
+        course_offering_news__course=course,
+        user=StudentFactory(required_groups__site_id=ANOTHER_DOMAIN_ID,))
     context = get_course_news_notification_context(cn)
     assert context['course_link'].startswith('https://compsciclub.ru')
 

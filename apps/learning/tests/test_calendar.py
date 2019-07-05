@@ -14,8 +14,7 @@ from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import flatten_calendar_month_events
 from users.constants import AcademicRoles
-from users.tests.factories import StudentCenterFactory, \
-    TeacherCenterFactory
+from users.tests.factories import StudentFactory, TeacherFactory
 
 
 # TODO: add test: kzn courses not shown on center site and spb on kzn
@@ -31,8 +30,8 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
     groups_allowed = [AcademicRoles.TEACHER]
 
     def test_teacher_calendar(self):
-        teacher = TeacherCenterFactory(city_id='spb')
-        other_teacher = TeacherCenterFactory(city_id='spb')
+        teacher = TeacherFactory(city_id='spb')
+        other_teacher = TeacherFactory(city_id='spb')
         self.doLogin(teacher)
         response = self.client.get(reverse(self.url_name))
         classes = flatten_calendar_month_events(response.context['calendar'])
@@ -84,7 +83,7 @@ class CalendarStudentTests(GroupSecurityCheckMixin,
     groups_allowed = [AcademicRoles.STUDENT]
 
     def test_student_calendar(self):
-        student = StudentCenterFactory(city_id='spb')
+        student = StudentFactory(city_id='spb')
         self.doLogin(student)
         co = CourseFactory.create()
         co_other = CourseFactory.create()
@@ -137,14 +136,14 @@ class CalendarFullSecurityTests(MyUtilitiesMixin, CSCTestCase):
     "full calendar" are done in CalendarTeacher/CalendarStudent tests
     """
     def test_full_calendar_security(self):
-        u = StudentCenterFactory(city_id='spb')
+        u = StudentFactory(city_id='spb')
         url = 'study:calendar_full'
         self.assertLoginRedirect(reverse(url))
         self.doLogin(u)
         self.assertStatusCode(200, url)
         self.client.logout()
         # For teacher role we can skip city setting
-        u = TeacherCenterFactory()
+        u = TeacherFactory()
         self.doLogin(u)
         url = 'teaching:calendar_full'
         self.assertStatusCode(200, url)
@@ -153,7 +152,7 @@ class CalendarFullSecurityTests(MyUtilitiesMixin, CSCTestCase):
 @pytest.mark.django_db
 def test_correspondence_courses_in_a_full_calendar(client):
     """Make sure correspondence courses are visible in a full calendar"""
-    student = StudentCenterFactory(city_id='spb')
+    student = StudentFactory(city_id='spb')
     client.login(student)
     this_month_date = datetime.datetime.utcnow()
     CourseClassFactory.create_batch(
@@ -161,7 +160,7 @@ def test_correspondence_courses_in_a_full_calendar(client):
     classes = flatten_calendar_month_events(
         client.get(reverse("study:calendar_full")).context['calendar'])
     assert len(classes) == 3
-    teacher = TeacherCenterFactory(city_id='spb')
+    teacher = TeacherFactory(city_id='spb')
     client.login(teacher)
     classes = flatten_calendar_month_events(
         client.get(reverse("teaching:calendar_full")).context['calendar'])

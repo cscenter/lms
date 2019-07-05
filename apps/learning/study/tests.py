@@ -12,7 +12,7 @@ from users.tests.factories import *
 @pytest.mark.django_db
 def test_access_student_assignment_curator(client, assert_login_redirect):
     """learning/assignments/<id>/ always visible to the curator"""
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     curator = CuratorFactory()
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
@@ -33,8 +33,8 @@ def test_access_student_assignment_teacher(client, assert_login_redirect):
     """
     Redirects course teacher to the appropriate teaching/ section.
     """
-    teacher = TeacherCenterFactory()
-    other_teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
+    other_teacher = TeacherFactory()
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
     course = CourseFactory(city_id='spb', teachers=[teacher],
@@ -54,7 +54,7 @@ def test_access_student_assignment_teacher(client, assert_login_redirect):
 
 @pytest.mark.django_db
 def test_access_student_assignment_regular_student(client, assert_login_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
     course = CourseFactory(city_id='spb', teachers=[teacher],
@@ -72,7 +72,7 @@ def test_access_student_assignment_regular_student(client, assert_login_redirect
     response = client.get(student_url)
     assert response.status_code == 200
     # Access student assignment by student who wasn't enrolled in
-    student_other = StudentCenterFactory()
+    student_other = StudentFactory()
     assert course_access_role(course=course, user=student_other) == CourseRole.NO_ROLE
     client.login(student_other)
     assert student_other.is_active_student
@@ -94,7 +94,7 @@ def test_access_student_assignment_regular_student(client, assert_login_redirect
 def test_access_student_assignment_failed_course(client, assert_login_redirect):
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     course = CourseFactory(city_id='spb', teachers=[teacher],
                            semester=past_semester)
     student_assignment = StudentAssignmentFactory(assignment__course=course,

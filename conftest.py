@@ -1,7 +1,6 @@
 from urllib.parse import urlparse
 
 import pytest
-from django.conf import settings
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 from pytest_django.lazy_django import skip_if_no_django
@@ -9,7 +8,8 @@ from pytest_django.lazy_django import skip_if_no_django
 from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
     INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
 from core.models import City
-from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase
+from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase, \
+    ANOTHER_DOMAIN, TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID
 from learning.models import Branch
 from learning.settings import Branches
 from notifications.models import Type
@@ -62,21 +62,22 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
     since some tests rely on it.
     """
     with django_db_blocker.unblock():
-        # Create sites
-        Site.objects.update_or_create(
-            id=settings.CENTER_SITE_ID,
-            defaults={
-                "domain": TEST_DOMAIN,
-                "name": TEST_DOMAIN
-            }
-        )
-        Site.objects.update_or_create(
-            id=settings.CLUB_SITE_ID,
-            defaults={
-                "domain": "compsciclub.ru",
-                "name": "compsciclub.ru"
-            }
-        )
+        # Create site objects with respect to AutoField
+        domains = [
+            (TEST_DOMAIN_ID, TEST_DOMAIN),
+            (ANOTHER_DOMAIN_ID, ANOTHER_DOMAIN),
+        ]
+        for site_id, domain in domains:
+            try:
+                site = Site.objects.get(id=site_id)
+                site.domain = domain
+                site.name = domain
+                site.save()
+            except Site.DoesNotExist:
+                site = Site(domain=domain, name=domain)
+                site.save()
+                site.id = site_id
+                site.save()
 
         # Create cities
         City.objects.update_or_create(

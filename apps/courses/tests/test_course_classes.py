@@ -18,12 +18,12 @@ from courses.forms import CourseClassForm
 from courses.models import CourseClass
 from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory, VenueFactory, SemesterFactory, CourseClassAttachmentFactory
-from users.tests.factories import TeacherCenterFactory
+from users.tests.factories import TeacherFactory
 
 
 @pytest.mark.django_db
 def test_course_class_detail_is_actual_teacher(client):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     cc = CourseClassFactory.create()
     cc_other = CourseClassFactory.create()
     url = cc.get_absolute_url()
@@ -38,7 +38,7 @@ def test_course_class_detail_is_actual_teacher(client):
 
 @pytest.mark.django_db
 def test_course_class_detail_security(client, assert_login_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
     form.update({'venue': VenueFactory.create().pk})
@@ -50,7 +50,7 @@ def test_course_class_detail_security(client, assert_login_redirect):
 
 @pytest.mark.django_db
 def test_course_class_create(client):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher], semester=s)
@@ -74,7 +74,7 @@ def test_course_class_create(client):
 
 @pytest.mark.django_db
 def test_course_class_create_and_add(client, assert_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher], semester=s)
@@ -106,7 +106,7 @@ def test_course_class_create_and_add(client, assert_redirect):
 
 @pytest.mark.django_db
 def test_course_class_update(client, assert_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher], semester=s)
@@ -123,7 +123,7 @@ def test_course_class_update(client, assert_redirect):
 
 @pytest.mark.django_db
 def test_course_class_update_and_add(client, assert_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher], semester=s)
@@ -144,7 +144,7 @@ def test_course_class_update_and_add(client, assert_redirect):
 
 @pytest.mark.django_db
 def test_course_class_delete(client, assert_redirect, assert_login_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher], semester=s)
@@ -163,7 +163,7 @@ def test_course_class_delete(client, assert_redirect, assert_login_redirect):
 
 @pytest.mark.django_db
 def test_course_class_back_variable(client, assert_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(teachers=[teacher], semester=s)
     cc = CourseClassFactory.create(course=co)
@@ -181,7 +181,7 @@ def test_course_class_back_variable(client, assert_redirect):
 
 @pytest.mark.django_db
 def test_course_class_attachment_links(client, assert_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher], semester=s)
@@ -218,7 +218,7 @@ def test_course_class_attachments(client, assert_redirect,
     compscicenter_ru.urls.urlpatterns += s
     settings.DEBUG = False
 
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher], semester=s)
@@ -277,7 +277,7 @@ def test_course_class_form_available(client, curator, settings):
     """Test form availability based on `is_completed` value"""
     # XXX: Date widget depends on locale
     settings.LANGUAGE_CODE = 'ru'
-    teacher = TeacherCenterFactory(city_id='spb')
+    teacher = TeacherFactory(city_id='spb')
     semester = SemesterFactory.create_current()
     co = CourseFactory(semester=semester, teachers=[teacher])
     course_class_add_url = co.get_create_class_url()

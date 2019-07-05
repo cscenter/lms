@@ -7,7 +7,7 @@ from courses.calendar import WeekEventsCalendar, MonthEventsCalendar
 from courses.tests.factories import CourseClassFactory, CourseFactory
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from learning.tests.utils import flatten_calendar_month_events
-from users.tests.factories import TeacherCenterFactory, StudentCenterFactory, \
+from users.tests.factories import TeacherFactory, StudentFactory, \
     CuratorFactory, VolunteerFactory
 
 
@@ -18,7 +18,7 @@ def flatten_events(calendar: WeekEventsCalendar):
 
 @pytest.mark.django_db
 def test_teacher_timetable_security(curator, client, assert_login_redirect):
-    allowed = [CuratorFactory, TeacherCenterFactory]
+    allowed = [CuratorFactory, TeacherFactory]
     timetable_url = reverse('teaching:timetable')
     for factory_class in allowed:
         user = factory_class(city_id='spb')
@@ -26,7 +26,7 @@ def test_teacher_timetable_security(curator, client, assert_login_redirect):
         response = client.get(timetable_url)
         assert response.status_code == 200
         client.logout()
-    denied = [StudentCenterFactory, GraduateFactory, VolunteerFactory]
+    denied = [StudentFactory, GraduateFactory, VolunteerFactory]
     for factory_class in denied:
         user = factory_class(city_id='spb')
         client.login(user)
@@ -36,7 +36,7 @@ def test_teacher_timetable_security(curator, client, assert_login_redirect):
 
 @pytest.mark.django_db
 def test_teacher_timetable(client):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     client.login(teacher)
     timetable_url = reverse('teaching:timetable')
     response = client.get(timetable_url)
@@ -68,7 +68,7 @@ def test_teacher_timetable(client):
 
 @pytest.mark.django_db
 def test_student_timetable_security(client, assert_login_redirect):
-    allowed = [CuratorFactory, StudentCenterFactory]
+    allowed = [CuratorFactory, StudentFactory]
     timetable_url = reverse('study:timetable')
     for factory_class in allowed:
         user = factory_class(city_id='spb')
@@ -76,7 +76,7 @@ def test_student_timetable_security(client, assert_login_redirect):
         response = client.get(timetable_url)
         assert response.status_code == 200
         client.logout()
-    denied = [TeacherCenterFactory]
+    denied = [TeacherFactory]
     for factory_class in denied:
         user = factory_class(city_id='spb')
         client.login(user)
@@ -86,7 +86,7 @@ def test_student_timetable_security(client, assert_login_redirect):
 
 @pytest.mark.django_db
 def test_student_timetable(client):
-    student = StudentCenterFactory()
+    student = StudentFactory()
     client.login(student)
     co = CourseFactory.create(city_id='spb')
     e = EnrollmentFactory.create(course=co, student=student)

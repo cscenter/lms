@@ -8,6 +8,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 from core.constants import DATE_FORMAT_RU
+from core.tests.utils import ANOTHER_DOMAIN_ID
 from core.timezone import now_local
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory, \
@@ -16,7 +17,7 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseNewsNotification
 from learning.tests.factories import EnrollmentFactory
-from users.tests.factories import StudentCenterFactory, StudentClubFactory
+from users.tests.factories import StudentFactory
 
 
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
@@ -31,8 +32,9 @@ def test_enrollment_for_club_students(client):
                                           enrollment_end_at=tomorrow.date())
     co = CourseFactory.create(city='spb', semester=term, is_open=False)
     assert co.enrollment_is_open
-    student_center = StudentCenterFactory(city_id='spb')
-    student_club = StudentClubFactory(city_id='spb')
+    student_center = StudentFactory(city_id='spb')
+    student_club = StudentFactory(required_groups__site_id=ANOTHER_DOMAIN_ID,
+                                  city_id='spb')
     form = {'course_pk': co.pk}
     client.login(student_center)
     response = client.post(co.get_enroll_url(), form)
@@ -46,7 +48,7 @@ def test_enrollment_for_club_students(client):
 
 @pytest.mark.django_db
 def test_unenrollment(client, assert_redirect):
-    s = StudentCenterFactory.create(city_id='spb')
+    s = StudentFactory.create(city_id='spb')
     assert s.city_id is not None
     client.login(s)
     current_semester = SemesterFactory.create_current()
@@ -107,7 +109,7 @@ def test_unenrollment(client, assert_redirect):
 
 @pytest.mark.django_db
 def test_enrollment_capacity(client):
-    s = StudentCenterFactory(city_id='spb')
+    s = StudentFactory(city_id='spb')
     client.login(s)
     current_semester = SemesterFactory.create_current()
     co = CourseFactory.create(city_id='spb',
@@ -125,7 +127,7 @@ def test_enrollment_capacity(client):
     client.post(co.get_enroll_url(), form)
     assert 1 == Enrollment.active.filter(student=s, course=co).count()
     # Capacity reached, show to second student nothing
-    s2 = StudentCenterFactory(city_id='spb')
+    s2 = StudentFactory(city_id='spb')
     client.login(s2)
     response = client.get(co_url)
     assert smart_bytes(_("No places available")) in response.content
@@ -143,7 +145,7 @@ def test_enrollment_capacity(client):
 
 @pytest.mark.django_db
 def test_enrollment(client):
-    student1, student2 = StudentCenterFactory.create_batch(2, city_id='spb')
+    student1, student2 = StudentFactory.create_batch(2, city_id='spb')
     client.login(student1)
     today = now_local(student1.city_code)
     current_semester = SemesterFactory.create_current()
@@ -190,7 +192,7 @@ def test_enrollment(client):
 
 @pytest.mark.django_db
 def test_enrollment_reason(client):
-    student = StudentCenterFactory(city_id='spb')
+    student = StudentFactory(city_id='spb')
     client.login(student)
     today = now_local(student.city_code)
     current_semester = SemesterFactory.create_current()
@@ -214,7 +216,7 @@ def test_enrollment_reason(client):
 
 @pytest.mark.django_db
 def test_enrollment_leave_reason(client):
-    student = StudentCenterFactory(city_id='spb')
+    student = StudentFactory(city_id='spb')
     client.login(student)
     today = now_local(student.city_code)
     current_semester = SemesterFactory.create_current()
@@ -251,7 +253,7 @@ def test_enrollment_leave_reason(client):
 @pytest.mark.django_db
 def test_assignments(client):
     """Create assignments for active enrollments only"""
-    ss = StudentCenterFactory.create_batch(3)
+    ss = StudentFactory.create_batch(3)
     current_semester = SemesterFactory.create_current()
     co = CourseFactory.create(semester=current_semester)
     for student in ss:
@@ -282,7 +284,7 @@ def test_assignments(client):
 @pytest.mark.django_db
 def test_reenrollment(client):
     """Create assignments for student if they left the course and come back"""
-    s = StudentCenterFactory(city_id='spb')
+    s = StudentFactory(city_id='spb')
     assignment = AssignmentFactory(course__is_open=True,
                                    course__city_id='spb')
     co = assignment.course
@@ -307,8 +309,8 @@ def test_enrollment_in_other_city(client):
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
     co_spb = CourseFactory(city='spb', semester=term, is_open=False)
     assert co_spb.enrollment_is_open
-    student_spb = StudentCenterFactory(city_id='spb')
-    student_nsk = StudentCenterFactory(city_id='nsk')
+    student_spb = StudentFactory(city_id='spb')
+    student_nsk = StudentFactory(city_id='nsk')
     form = {'course_pk': co_spb.pk}
     client.login(student_spb)
     response = client.post(co_spb.get_enroll_url(), form)
@@ -318,7 +320,7 @@ def test_enrollment_in_other_city(client):
     response = client.post(co_spb.get_enroll_url(), form)
     assert response.status_code == 403
     assert Enrollment.objects.count() == 1
-    student = StudentCenterFactory(city_id=None)
+    student = StudentFactory(city_id=None)
     client.login(student)
     response = client.post(co_spb.get_enroll_url(), form)
     assert response.status_code == 302
@@ -348,8 +350,8 @@ def test_correspondence_courses(client):
                            is_open=False,
                            is_correspondence=True)
     assert co_spb.enrollment_is_open
-    student_spb = StudentCenterFactory(city_id='spb')
-    student_nsk = StudentCenterFactory(city_id='nsk')
+    student_spb = StudentFactory(city_id='spb')
+    student_nsk = StudentFactory(city_id='nsk')
     form = {'course_pk': co_spb.pk}
     client.login(student_spb)
     response = client.post(co_spb.get_enroll_url(), form)
@@ -371,7 +373,7 @@ def test_enrollment_is_enrollment_open(client):
     co_spb = CourseFactory(city='spb', semester=term, is_open=False,
                            completed_at=tomorrow.date())
     assert co_spb.enrollment_is_open
-    student_spb = StudentCenterFactory(city_id='spb')
+    student_spb = StudentFactory(city_id='spb')
     client.login(student_spb)
     response = client.get(co_spb.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")

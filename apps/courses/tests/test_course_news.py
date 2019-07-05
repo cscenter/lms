@@ -4,14 +4,14 @@ from django.forms import model_to_dict
 
 from courses.tests.factories import CourseFactory, CourseNewsFactory
 from courses.models import CourseNews
-from users.tests.factories import TeacherCenterFactory
+from users.tests.factories import TeacherFactory
 
 
 @pytest.mark.django_db
 def test_course_news_create_security(client, settings, assert_login_redirect,
                                      assert_redirect):
-    teacher = TeacherCenterFactory()
-    teacher_other = TeacherCenterFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
     course = CourseFactory.create(teachers=[teacher])
     url = course.get_create_news_url()
     form = factory.build(dict, FACTORY_CLASS=CourseNewsFactory)
@@ -28,7 +28,7 @@ def test_course_news_create_security(client, settings, assert_login_redirect,
 
 @pytest.mark.django_db
 def test_course_news_create_data(client, assert_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     course = CourseFactory.create(teachers=[teacher])
     url = course.get_create_news_url()
     form = factory.build(dict, FACTORY_CLASS=CourseNewsFactory)
@@ -46,8 +46,8 @@ def test_course_news_create_data(client, assert_redirect):
 @pytest.mark.django_db
 def test_course_news_update(client, assert_login_redirect, assert_redirect):
     """Tests permissions and update action"""
-    teacher = TeacherCenterFactory()
-    teacher_other = TeacherCenterFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
     course = CourseFactory.create(teachers=[teacher])
     course_news = CourseNewsFactory.create(course=course, author=teacher)
     url = course_news.get_update_url()
@@ -69,8 +69,8 @@ def test_course_news_update(client, assert_login_redirect, assert_redirect):
 @pytest.mark.django_db
 def test_course_news_delete(client, assert_login_redirect, assert_redirect):
     """Tests permissions and delete action"""
-    teacher = TeacherCenterFactory()
-    teacher_other = TeacherCenterFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
     course = CourseFactory.create(teachers=[teacher])
     course_news = CourseNewsFactory.create(course=course, author=teacher)
     url = course_news.get_delete_url()

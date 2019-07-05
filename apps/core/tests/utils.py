@@ -9,6 +9,9 @@ from compscicenter_ru.settings.base import LMS_SUBDOMAIN
 
 
 TEST_DOMAIN = 'compscicenter.ru'
+TEST_DOMAIN_ID = 1
+ANOTHER_DOMAIN = 'compsciclub.ru'
+ANOTHER_DOMAIN_ID = 2
 
 
 class TestClient(Client):

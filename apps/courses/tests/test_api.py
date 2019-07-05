@@ -6,13 +6,13 @@ from django.utils.timezone import now
 from core.urls import reverse
 from courses.models import CourseTeacher
 from courses.tests.factories import SemesterFactory, CourseFactory
-from users.tests.factories import TeacherCenterFactory
+from users.tests.factories import TeacherFactory
 
 
 @pytest.mark.django_db
 def test_teachers_list(client):
     url = reverse("api:teachers")
-    t1, t2 = TeacherCenterFactory.create_batch(2)
+    t1, t2 = TeacherFactory.create_batch(2)
     term = SemesterFactory.create_current()
     next_term = SemesterFactory.create_next(term)
     course1, course2 = CourseFactory.create_batch(2, semester=term,

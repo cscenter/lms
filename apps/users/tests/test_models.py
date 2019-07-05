@@ -62,6 +62,15 @@ def test_user_add_group_already_exists():
 
 
 @pytest.mark.django_db
+def test_user_remove_group():
+    """Test subsequent calls with the same role"""
+    user = User(username="foo", email="foo@localhost.ru")
+    user.save()
+    user.remove_group(AcademicRoles.STUDENT)
+    user.remove_group(AcademicRoles.STUDENT)
+
+
+@pytest.mark.django_db
 def test_cached_groups(settings):
     user = UserFactory(groups=[AcademicRoles.STUDENT,
                                AcademicRoles.TEACHER])

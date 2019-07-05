@@ -3,10 +3,9 @@ import re
 import factory
 import pytest
 from bs4 import BeautifulSoup
-from django.forms.models import model_to_dict
 from django.utils.translation import ugettext as _
 
-from core.tests.utils import CSCTestCase
+from core.tests.utils import CSCTestCase, ANOTHER_DOMAIN_ID
 from core.urls import reverse
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory
@@ -16,7 +15,7 @@ from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import AcademicRoles
 from users.models import User, EnrollmentCertificate
 from users.tests.factories import UserFactory, EnrollmentCertificateFactory, \
-    StudentCenterFactory, add_user_groups, StudentClubFactory
+    StudentFactory
 
 
 @pytest.mark.django_db
@@ -35,7 +34,7 @@ def test_create_reference(client, assert_redirect):
     sig_input = soup.find(id="id_signature")
     assert sig_input.attrs.get('value') == curator.get_full_name()
 
-    student = StudentCenterFactory()
+    student = StudentFactory()
     form_url = reverse('user_reference_add', args=[student.id])
     form_data = factory.build(dict, FACTORY_CLASS=EnrollmentCertificateFactory)
     response = client.post(form_url, form_data)
@@ -67,7 +66,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
 
     def test_user_detail_reference_list_view(self):
         """Check reference list appears on student profile page for curators only"""
-        student = StudentCenterFactory()
+        student = StudentFactory()
         EnrollmentFactory.create()
         EnrollmentCertificateFactory.create(student=student)
         curator = UserFactory.create(is_superuser=True, is_staff=True)
@@ -87,7 +86,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
 
     def test_reference_detail(self):
         """Check enrollments duplicates, reference fields"""
-        student = StudentCenterFactory()
+        student = StudentFactory()
         # add 2 enrollments from 1 course reading exactly
         meta_course = MetaCourseFactory.create()
         semesters = SemesterFactory.create_batch(2, year=2014)
@@ -119,19 +118,20 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
         expected_enrollments_count = 1
         self.assertEqual(len(es), expected_enrollments_count)
 
-    def test_club_student_login_on_cscenter_site(self):
-        club_student = StudentClubFactory()
-        self.doLogin(club_student)
+    def test_student_login_without_appropriate_role(self):
+        """Test login on site without appropriate role on current site"""
+        student = StudentFactory(required_groups__site_id=ANOTHER_DOMAIN_ID,)
+        self.doLogin(student)
         login_data = {
-            'username': club_student.username,
-            'password': club_student.raw_password
+            'username': student.username,
+            'password': student.raw_password
         }
         response = self.client.post(reverse('login'), login_data)
         form = response.context['form']
         self.assertFalse(form.is_valid())
         # can't login message in __all__
         self.assertIn("__all__", form.errors)
-        add_user_groups(club_student, [User.roles.STUDENT])
-        club_student.save()
+        student.add_group(AcademicRoles.STUDENT)
+        student.save()
         response = self.client.post(reverse('login'), login_data)
         self.assertEqual(response.status_code, 302)

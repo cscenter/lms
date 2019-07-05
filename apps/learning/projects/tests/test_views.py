@@ -18,7 +18,7 @@ from learning.projects.tests.factories import ProjectFactory, ReportFactory, \
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from notifications.models import Notification
 from users.constants import AcademicRoles
-from users.tests.factories import StudentCenterFactory, ProjectReviewerFactory, \
+from users.tests.factories import StudentFactory, ProjectReviewerFactory, \
     UserFactory, CuratorFactory
 
 URL_REPORTS = reverse_lazy("projects:report_list_reviewers")
@@ -33,7 +33,7 @@ def test_user_detail(client):
 
     Just a simple test to check something appears.
     """
-    student = StudentCenterFactory(enrollment_year='2013')
+    student = StudentFactory(enrollment_year='2013')
     semester1 = SemesterFactory.create(year=2014, type='spring')
     semester2 = SemesterFactory.create(year=2014, type='autumn')
     p1 = ProjectFactory.create(students=[student], semester=semester1)
@@ -51,7 +51,7 @@ def test_user_detail(client):
 
 @pytest.mark.django_db
 def test_staff_diplomas_view(curator, client):
-    student = StudentCenterFactory(enrollment_year='2013',
+    student = StudentFactory(enrollment_year='2013',
                                    status=StudentStatuses.WILL_GRADUATE)
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
@@ -68,7 +68,7 @@ def test_staff_diplomas_view(curator, client):
 def test_project_reviewer_only_mixin_security(client, curator):
     response = client.get(URL_REPORTS)
     assert response.status_code == 302
-    student = StudentCenterFactory()
+    student = StudentFactory()
     client.login(student)
     response = client.get(URL_REPORTS)
     assert response.status_code == 302
@@ -92,7 +92,7 @@ def test_reviewer_list(client, curator):
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
     client.login(reviewer)
-    student = StudentCenterFactory()
+    student = StudentFactory()
     response = client.get(URL_REPORTS)
     assert response.status_code == 200
     assert len(response.context["reports"]) == 0
@@ -141,7 +141,7 @@ def test_create_project_presentations(client):
 @pytest.mark.django_db
 def test_project_detail_unauth(client):
     """Make sure unauth user never see report form with any status"""
-    student = StudentCenterFactory()
+    student = StudentFactory()
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     reviewer = ProjectReviewerFactory()
@@ -166,7 +166,7 @@ def test_project_detail_student_participant(client):
     from datetime import timedelta
     semester = SemesterFactory.create_current(city_code=Branches.SPB)
     semester_prev = SemesterFactory.create_prev(semester)
-    student = StudentCenterFactory()
+    student = StudentFactory()
     reviewer = ProjectReviewerFactory()
     project = ProjectFactory.create(students=[student], reviewers=[reviewer],
                                     semester=semester,
@@ -224,7 +224,7 @@ def test_project_detail_student_participant_notifications(client, curator):
     today = now_local(Branches.SPB).date()
     rp = ReportingPeriodFactory(term=semester, start_on=today, branch=None,
                                 end_on=today + timedelta(days=1))
-    student = StudentCenterFactory(city_id='spb')
+    student = StudentFactory(city_id='spb')
     reviewer = ProjectReviewerFactory()
     project = ProjectFactory(students=[student], reviewers=[reviewer],
                              semester=semester, branch__code=Branches.SPB)
@@ -245,7 +245,7 @@ def test_project_detail_reviewer(client, curator):
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
-    student = StudentCenterFactory(city_id='spb')
+    student = StudentFactory(city_id='spb')
     project = ProjectFactory(students=[student], semester=semester_prev)
     url = project.get_absolute_url()
     response = client.get(url)
@@ -270,7 +270,7 @@ def test_reviewer_project_enroll(client, curator):
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
-    student = StudentCenterFactory()
+    student = StudentFactory()
     old_project = ProjectFactory(students=[student], semester=semester_prev)
     url_for_old = reverse("projects:reviewer_project_enroll",
                           args=[old_project.pk])
@@ -319,7 +319,7 @@ def test_reportpage_permissions(client, curator):
     response = client.get(report.get_absolute_url())
     assert response.status_code == 200
     # Login as student, but not participant of review
-    student = StudentCenterFactory()
+    student = StudentFactory()
     client.login(student)
     response = client.get(report.get_absolute_url())
     assert response.status_code == 302
@@ -350,7 +350,7 @@ def test_report_notifications(client, curator):
     client.login(reviewer1)
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
-    student1, student2 = StudentCenterFactory.create_batch(2, city_id='spb')
+    student1, student2 = StudentFactory.create_batch(2, city_id='spb')
     project = ProjectFactory(students=[student1, student2],
                              semester=semester,
                              reviewers=[reviewer1, reviewer2])
@@ -504,7 +504,7 @@ def test_reportpage_summarize_notifications(client, curator):
     client.login(reviewer1)
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
-    student1, student2 = StudentCenterFactory.create_batch(2)
+    student1, student2 = StudentFactory.create_batch(2)
     project = ProjectFactory(students=[student1, student2],
                              semester=semester,
                              reviewers=[reviewer1, reviewer2])

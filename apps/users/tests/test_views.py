@@ -6,7 +6,6 @@ import pytest
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.forms.models import model_to_dict
-from django.utils import translation
 from django.utils.encoding import smart_text, smart_bytes
 
 from core.admin import get_admin_url
@@ -18,10 +17,9 @@ from learning.tests.factories import GraduateProfileFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import AcademicRoles
 from users.forms import UserCreationForm
-from users.models import User, Group, UserGroup
+from users.models import User, UserGroup
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
-    TeacherCenterFactory, StudentClubFactory, \
-    StudentFactory, StudentCenterFactory, add_user_groups
+    StudentFactory, add_user_groups, StudentFactory
 
 
 class UserTests(MyUtilitiesMixin, CSCTestCase):
@@ -236,25 +234,6 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         form = UserCreationForm(data=form_data)
         self.assertTrue(form.is_valid())
 
-    def test_shads(self):
-        """
-        Students should have "shad courses" on profile page
-        """
-        student = StudentCenterFactory()
-        sc = SHADCourseRecordFactory(student=student, grade=GradeTypes.GOOD)
-        response = self.client.get(student.get_absolute_url())
-        assert smart_bytes(sc.name) in response.content
-        assert smart_bytes(sc.teachers) in response.content
-        # Bad grades should be visible for authenticated users only
-        sc.grade = GradeTypes.UNSATISFACTORY
-        sc.save()
-        response = self.client.get(student.get_absolute_url())
-        assert smart_bytes(sc.name) not in response.content
-        student2 = StudentCenterFactory()
-        self.doLogin(student2)
-        response = self.client.get(student.get_absolute_url())
-        assert smart_bytes(sc.name) in response.content
-
     @unittest.skip("not implemented")
     def test_completed_courses(self):
         """On profile page unauthenticated users cant' see uncompleted or
@@ -264,7 +243,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
     def test_email_on_detail(self):
         """Email field should be displayed only to curators (superuser)"""
         student_mail = "student@student.mail"
-        student = StudentCenterFactory.create(email=student_mail)
+        student = StudentFactory(email=student_mail)
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
         resp = self.client.get(url)
@@ -277,27 +256,24 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
 
 
 @pytest.mark.django_db
-def test_club_students_profiles_on_cscenter_site(client):
-    """Only teachers and curators can see club students profiles on cscenter site"""
-    student_club = StudentClubFactory.create()
-    url = reverse('user_detail', args=[student_club.pk])
-    response = client.get(url)
-    assert response.status_code == 404
-
+def test_shads(client):
+    """
+    Students should have "shad courses" on profile page
+    """
     student = StudentFactory()
-    url = reverse('user_detail', args=[student.pk])
-    response = client.get(url)
-    assert response.status_code == 200
-    client.login(student)
-    url = reverse('user_detail', args=[student_club.pk])
-    response = client.get(url)
-    assert response.status_code == 404
-
-    teacher_center = TeacherCenterFactory.create()
-    client.login(teacher_center)
-    url = reverse('user_detail', args=[student_club.pk])
-    response = client.get(url)
-    assert response.status_code == 200
+    sc = SHADCourseRecordFactory(student=student, grade=GradeTypes.GOOD)
+    response = client.get(student.get_absolute_url())
+    assert smart_bytes(sc.name) in response.content
+    assert smart_bytes(sc.teachers) in response.content
+    # Bad grades should be visible for authenticated users only
+    sc.grade = GradeTypes.UNSATISFACTORY
+    sc.save()
+    response = client.get(student.get_absolute_url())
+    assert smart_bytes(sc.name) not in response.content
+    student2 = StudentFactory()
+    client.login(student2)
+    response = client.get(student.get_absolute_url())
+    assert smart_bytes(sc.name) in response.content
 
 
 @pytest.mark.django_db
@@ -359,77 +335,15 @@ def test_student_should_have_enrollment_year(admin_client):
 def test_expelled(client, settings):
     """Center students and volunteers can't access student section
     if there status equal expelled"""
-    student = StudentCenterFactory(status=StudentStatuses.EXPELLED,
-                                   city_id=settings.DEFAULT_CITY_CODE)
+    student = StudentFactory(status=StudentStatuses.EXPELLED,
+                             city_id=settings.DEFAULT_CITY_CODE)
     client.login(student)
     url = reverse('study:course_list')
     response = client.get(url)
     assert response.status_code == 302
     assert "login" in response["Location"]
     # active student
-    active_student = StudentCenterFactory(city_id=settings.DEFAULT_CITY_CODE)
+    active_student = StudentFactory(city_id=settings.DEFAULT_CITY_CODE)
     client.login(active_student)
     response = client.get(url)
     assert response.status_code == 200
-
-
-@pytest.mark.django_db
-def test_login_restrictions(client, settings):
-    """Again. Club students and teachers have no access to center site"""
-    assert settings.SITE_ID == settings.CENTER_SITE_ID
-
-    user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-    student = User.objects.create_user(**user_data)
-    # Try to login without groups at all
-    response = client.post(reverse('login'), user_data)
-    assert response.status_code == 200
-    assert len(response.context["form"].errors) > 0
-    # Login as center student
-    add_user_groups(student, [AcademicRoles.STUDENT])
-    response = client.post(reverse('login'), user_data, follow=True)
-    assert response.wsgi_request.user.is_authenticated
-    client.logout()
-    # Login as center and club student simultaneously
-    add_user_groups(student, [AcademicRoles.STUDENT_CLUB])
-    response = client.post(reverse('login'), user_data, follow=True)
-    assert response.wsgi_request.user.is_authenticated
-    client.logout()
-    # Login as volunteer
-    add_user_groups(student, [AcademicRoles.VOLUNTEER])
-    student.save()
-    response = client.post(reverse('login'), user_data, follow=True)
-    assert response.wsgi_request.user.is_authenticated
-    client.logout()
-    # Login as volunteer and club students simultaneously
-    add_user_groups(student, [AcademicRoles.STUDENT_CLUB])
-    response = client.post(reverse('login'), user_data, follow=True)
-    assert response.wsgi_request.user.is_authenticated
-    client.logout()
-    # Login as graduate only
-    student.groups.all().delete()
-    add_user_groups(student, [AcademicRoles.GRADUATE_CENTER])
-    student.save()
-    response = client.post(reverse('login'), user_data, follow=True)
-    assert response.wsgi_request.user.is_authenticated
-    client.logout()
-    # graduate and club
-    add_user_groups(student, [AcademicRoles.STUDENT_CLUB])
-    response = client.post(reverse('login'), user_data, follow=True)
-    assert response.wsgi_request.user.is_authenticated
-    client.logout()
-    # Only club gtfo
-    student.groups.all().delete()
-    add_user_groups(student, [AcademicRoles.STUDENT_CLUB])
-    student.save()
-    response = client.post(reverse('login'), user_data, follow=True)
-    assert not response.wsgi_request.user.is_authenticated
-    # Club teacher
-    add_user_groups(student, [AcademicRoles.TEACHER_CLUB])
-    response = client.post(reverse('login'), user_data, follow=True)
-    assert not response.wsgi_request.user.is_authenticated
-    # Center teacher
-    add_user_groups(student, [AcademicRoles.TEACHER])
-    response = client.post(reverse('login'), user_data, follow=True)
-    assert response.wsgi_request.user.is_authenticated
-    # Just to make sure we have no super user permissions
-    assert not response.wsgi_request.user.is_curator

@@ -12,7 +12,7 @@ from django.utils import formats
 from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
 from users.constants import AcademicRoles
-from users.tests.factories import TeacherCenterFactory
+from users.tests.factories import TeacherFactory
 
 
 def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:
@@ -62,7 +62,7 @@ def test_course_news(settings, admin_client):
 def test_course_assignment_deadline_l10n(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     assignment = AssignmentFactory(deadline_at=dt,
                                    course__city_id='spb',
                                    course__teachers=[teacher])
@@ -84,7 +84,7 @@ def test_course_assignment_deadline_l10n(settings, client):
 def test_update_derivable_fields(curator, client, mocker):
     """Derivable fields should be recalculated on updating course class"""
     mocker.patch("courses.tasks.maybe_upload_slides_yandex.delay")
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
                               teachers=[teacher])
     cc1 = CourseClassFactory.create(course=co, video_url="")
@@ -115,7 +115,7 @@ def test_course_assignment_timezone(settings, client):
     Course teacher always must see the timezone of the course,
     even if he studying in CS Center.
     """
-    teacher_nsk = TeacherCenterFactory(city_id='nsk')
+    teacher_nsk = TeacherFactory(city_id='nsk')
     # 12 january 2017 23:59 (local time)
     deadline_at = datetime.datetime(2017, 1, 12, 23, 59, 0, 0,
                                     tzinfo=pytz.UTC)

@@ -7,13 +7,13 @@ from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment
 from courses.tests.factories import CourseFactory, AssignmentFactory
-from users.tests.factories import TeacherCenterFactory, CuratorFactory
+from users.tests.factories import TeacherFactory, CuratorFactory
 
 
 @pytest.mark.django_db
 def test_course_assignment_create_security(client, assert_login_redirect):
-    teacher = TeacherCenterFactory()
-    teacher_other = TeacherCenterFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     create_url = co.get_create_assignment_url()
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
@@ -39,7 +39,7 @@ def test_course_assignment_create_security(client, assert_login_redirect):
 
 @pytest.mark.django_db
 def test_course_assignment_create(client):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     CourseFactory.create_batch(3, teachers=[teacher])
     co = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
@@ -58,8 +58,8 @@ def test_course_assignment_create(client):
 
 @pytest.mark.django_db
 def test_course_assignment_update_security(client, assert_login_redirect):
-    teacher = TeacherCenterFactory()
-    teacher_other = TeacherCenterFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
     co = CourseFactory(teachers=[teacher])
     a = AssignmentFactory(course=co)
     update_url = a.get_update_url()
@@ -86,7 +86,7 @@ def test_course_assignment_update_security(client, assert_login_redirect):
 
 @pytest.mark.django_db
 def test_course_assignment_update(client, assert_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     a = AssignmentFactory.create(course=co)
     form = model_to_dict(a)
@@ -116,8 +116,8 @@ def test_course_assignment_update(client, assert_redirect):
 
 @pytest.mark.django_db
 def test_course_assignment_delete_security(client, assert_login_redirect):
-    teacher = TeacherCenterFactory()
-    teacher_other = TeacherCenterFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
     co = CourseFactory(teachers=[teacher])
     a = AssignmentFactory(course=co)
     delete_url = a.get_delete_url()
@@ -139,7 +139,7 @@ def test_course_assignment_delete_security(client, assert_login_redirect):
 
 @pytest.mark.django_db
 def test_course_assignment_delete(client, assert_redirect):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     a = AssignmentFactory.create(course=co)
     delete_url = a.get_delete_url()

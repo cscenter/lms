@@ -108,7 +108,7 @@ class IndexView(generic.TemplateView):
 
 
 class TeachersView(generic.ListView):
-    template_name = "users/teacher_list.html"
+    template_name = "compsciclub_ru/users/teacher_list.html"
 
     @property
     def get_queryset(self):
@@ -119,13 +119,13 @@ class TeachersView(generic.ListView):
                          .distinct()
                          .values_list("teachers__pk", flat=True))
         return (User.objects
-                .has_role(User.roles.TEACHER_CLUB)
+                .has_role(User.roles.TEACHER)
                 .filter(courseteacher__teacher_id__in=lecturers)
                 .distinct)
 
 
 class TeacherDetailView(DetailView):
-    template_name = "users/teacher_club_detail.html"
+    template_name = "compsciclub_ru/users/teacher_detail.html"
     context_object_name = 'teacher'
 
     def get_queryset(self):

@@ -31,7 +31,6 @@ class AcademicRoles(DjangoChoices):
     GRADUATE_CENTER = C(3, _('Graduate'))
     VOLUNTEER = C(4, _('Volunteer'))
     STUDENT_CLUB = C(5, _('Student [CLUB]'))
-    TEACHER_CLUB = C(6, _('Teacher [CLUB]'))
     INTERVIEWER = C(7, _('Interviewer [Admission]'))
     # Should be always set with one of the student group
     # FIXME: Rename it
