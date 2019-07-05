@@ -25,8 +25,7 @@ class AnnouncementDetailView(DetailView):
     template_name = "compscicenter_ru/announcements/announcement_detail.html"
 
     def get_queryset(self):
-
+        # Note: Announcement always accessible by direct link
         return (Announcement.objects
-                .filter(publish_start_at__lte=timezone.now())
                 .select_related("event_details",
                                 "event_details__venue"))
