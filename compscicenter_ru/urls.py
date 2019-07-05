@@ -7,6 +7,8 @@ from django.urls import path, re_path
 from django.views.generic import RedirectView, TemplateView
 from loginas import urls as loginas_urls
 
+from announcements.views import AnnouncementTagAutocomplete, \
+    AnnouncementDetailView
 from compscicenter_ru import views
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from htmlpages.views import flatpage
@@ -46,6 +48,7 @@ urlpatterns += [
 
     path('enrollment/', RedirectView.as_view(url='/application/')),
     path('enrollment/checklist/', views.EnrollmentChecklistView.as_view(), name='enrollment_checklist'),
+    path('enrollment/program/', views.EnrollmentPreparationProgramView.as_view(), name='enrollment_preparation_program'),
     path('faq/', views.QAListView.as_view(), name='faq'),
     # Online education
     path('', include('online_courses.urls')),
@@ -58,8 +61,10 @@ urlpatterns += [
     path('api/', include('api.frontend_urls')),
 
     path('courses/', views.CourseOfferingsView.as_view(), name="course_list"),
-
-    path('', include('announcements.urls')),
+    # Place tags-autocomplete under `announcements` namespace
+    path("", include(([
+        path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
+    ], "announcements"))),
     path('projects/', views.ProjectsListView.as_view(), name="public_projects"),
     path('', include('publications.urls')),
 
@@ -90,7 +95,8 @@ if settings.DEBUG:
     if 'rosetta' in settings.INSTALLED_APPS:
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
 
-# Note: htmlpages should be the last one
-urlpatterns += i18n_patterns(
-    re_path(r'^(?P<url>.*/)$', flatpage, name='html_pages'),
-    prefix_default_language=False)
+urlpatterns += i18n_patterns(re_path(r'^pages/(?P<url>.*/)$', flatpage, name='html_pages'), prefix_default_language=False)
+urlpatterns += [
+    path('policy/', flatpage, {'url': '/policy/'}, name="policy_html_page"),
+    path('<slug:slug>/', AnnouncementDetailView.as_view(), name="announcement_detail"),
+]

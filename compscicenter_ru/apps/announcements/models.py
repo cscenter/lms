@@ -91,7 +91,7 @@ class Announcement(TimeStampedModel):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("announcements:announcement_detail",
+        return reverse("announcement_detail",
                        kwargs={"slug": self.slug})
 
 

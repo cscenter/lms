@@ -119,7 +119,11 @@ class QAListView(generic.ListView):
 
 
 class EnrollmentChecklistView(generic.TemplateView):
-    template_name = "compscicenter_ru/enrollment_checklist.html"
+    template_name = "compscicenter_ru/enrollment/checklist.html"
+
+
+class EnrollmentPreparationProgramView(generic.TemplateView):
+    template_name = "compscicenter_ru/enrollment/preparation_program.html"
 
 
 def positive_integer(value):

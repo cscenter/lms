@@ -18,6 +18,7 @@ class AnnouncementTagFactory(factory.DjangoModelFactory):
 
 class AnnouncementFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Announcement %03d" % n)
+    slug = factory.Sequence(lambda n: "slug-%03d" % n)
     short_description = factory.Sequence(lambda n: "Short description %03d" % n)
     publish_end_at = factory.Faker('future_datetime', end_date="+30d",
                                    tzinfo=pytz.UTC)
