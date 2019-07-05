@@ -28,7 +28,7 @@ class CourseParticipantsStatsByGroup(ListRenderersMixin, PandasView):
         groups = [
             User.roles.STUDENT,
             User.roles.VOLUNTEER,
-            User.roles.GRADUATE_CENTER,
+            User.roles.GRADUATE,
         ]
         course_id = self.kwargs['course_id']
         return (User.objects

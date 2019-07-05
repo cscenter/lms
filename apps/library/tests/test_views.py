@@ -15,12 +15,16 @@ def test_user_detail(client, curator):
     user = UserFactory()
     client.login(user)
     response = client.get(user.get_absolute_url())
+    assert response.status_code == 404
+    student = StudentFactory()
+    client.login(student)
+    response = client.get(student.get_absolute_url())
     assert response.status_code == 200
-    borrow = BorrowFactory(student=user)
-    response = client.get(user.get_absolute_url())
+    borrow = BorrowFactory(student=student)
+    response = client.get(student.get_absolute_url())
     assert response.status_code == 200
     client.login(curator)
-    response = client.get(user.get_absolute_url())
+    response = client.get(student.get_absolute_url())
     assert response.status_code == 200
     book = borrow.stock.book
     assert smart_bytes(book.title) in response.content

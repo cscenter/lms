@@ -38,7 +38,7 @@ def test_meta_course_update_security(client, assert_login_redirect):
         [],
         [AcademicRoles.TEACHER],
         [AcademicRoles.STUDENT],
-        [AcademicRoles.GRADUATE_CENTER]
+        [AcademicRoles.GRADUATE]
     ]
     for groups in all_test_groups:
         client.login(UserFactory.create(groups=groups, city_id='spb'))

@@ -51,7 +51,7 @@ EMAIL_TEMPLATES = {
 LEARNING_PARTICIPANTS_CENTER = {
     AcademicRoles.STUDENT,
     AcademicRoles.VOLUNTEER,
-    AcademicRoles.GRADUATE_CENTER,
+    AcademicRoles.GRADUATE,
     AcademicRoles.TEACHER,
 }
 

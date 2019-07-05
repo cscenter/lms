@@ -43,7 +43,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
             [],
             [AcademicRoles.TEACHER],
             [AcademicRoles.STUDENT],
-            [AcademicRoles.GRADUATE_CENTER]
+            [AcademicRoles.GRADUATE]
         ]
         for groups in all_test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -186,7 +186,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         assert self.client.get(url).status_code == 200
         # Change student to graduate, make sure they have access to HW
         student.groups.all().delete()
-        student.add_group(AcademicRoles.GRADUATE_CENTER)
+        student.add_group(AcademicRoles.GRADUATE)
         student.save()
         self.assertEqual(200, self.client.get(url).status_code)
 

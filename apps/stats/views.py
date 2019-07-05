@@ -159,7 +159,7 @@ class StudentsDiplomasStats(APIView):
     http_method_names = ['get']
 
     def get(self, request, graduation_year, format=None):
-        filters = (Q(group__role=User.roles.GRADUATE_CENTER) &
+        filters = (Q(group__role=User.roles.GRADUATE) &
                    Q(graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
             filters = filters | Q(status=StudentStatuses.WILL_GRADUATE)

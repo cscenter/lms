@@ -45,7 +45,7 @@ class LearningPermissionsMixin:
 
     @property
     def is_graduate(self):
-        return AcademicRoles.GRADUATE_CENTER in self._cached_groups
+        return AcademicRoles.GRADUATE in self._cached_groups
 
     @property
     def is_curator_of_projects(self):

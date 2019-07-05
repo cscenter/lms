@@ -71,7 +71,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         good_user_attrs = factory.build(dict, FACTORY_CLASS=UserFactory)
         good_user = User.objects.create_user(**good_user_attrs)
         # graduated students redirected to LOGIN_REDIRECT_URL
-        add_user_groups(good_user, [AcademicRoles.GRADUATE_CENTER])
+        add_user_groups(good_user, [AcademicRoles.GRADUATE])
         self.assertNotIn('_auth_user_id', self.client.session)
         bad_user = copy.copy(good_user_attrs)
         bad_user['password'] = "BAD"
@@ -204,7 +204,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
                              status_code=302)
         response = self.client.get(reverse('user_detail', args=[user.pk]))
         assert smart_bytes(test_review) not in response.content
-        add_user_groups(user, [user.roles.GRADUATE_CENTER])
+        add_user_groups(user, [AcademicRoles.GRADUATE])
         user.graduation_year = 2014
         user.save()
         GraduateProfileFactory(student=user)

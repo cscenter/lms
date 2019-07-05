@@ -120,7 +120,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         }
         students = (User.objects
                     .has_role(User.roles.STUDENT,
-                              User.roles.GRADUATE_CENTER,
+                              User.roles.GRADUATE,
                               User.roles.VOLUNTEER)
                     .students_info(filters=filters))
 

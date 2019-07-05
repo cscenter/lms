@@ -13,7 +13,7 @@ from users.models import User
 
 class Command(BaseCommand):
     help = ("Get all students with status `will_graduate` and replace there "
-            "student group with `GRADUATE_CENTER`. "
+            "student group with `GRADUATE`. "
             "Also clean status and set graduation year.")
 
     def add_arguments(self, parser):
@@ -32,7 +32,7 @@ class Command(BaseCommand):
             with transaction.atomic():
                 student.remove_group(User.roles.STUDENT)
                 student.remove_group(User.roles.VOLUNTEER)
-                student.add_group(User.roles.GRADUATE_CENTER)
+                student.add_group(User.roles.GRADUATE)
                 student.status = ""
                 student.save()
                 defaults = {

@@ -221,7 +221,7 @@ class ProgressReportForDiplomas(ProgressReport):
         }
         return (User.objects
                 .has_role(User.roles.STUDENT,
-                          User.roles.GRADUATE_CENTER,
+                          User.roles.GRADUATE,
                           User.roles.VOLUNTEER)
                 .students_info(filters=filters,
                                exclude_grades=[GradeTypes.UNSATISFACTORY,
@@ -293,7 +293,7 @@ class ProgressReportFull(ProgressReport):
     def get_queryset(**kwargs):
         return (User.objects
                 .has_role(User.roles.STUDENT,
-                          User.roles.GRADUATE_CENTER,
+                          User.roles.GRADUATE,
                           User.roles.VOLUNTEER)
                 .students_info()
                 .select_related("applicant"))

@@ -74,6 +74,6 @@ def test_notify_get_base_url():
     assert get_base_domain(notification) == "compsciclub.ru"
     notification.user = TeacherFactory(
         required_groups__site_id=ANOTHER_DOMAIN_ID,
-        groups=[AcademicRoles.GRADUATE_CENTER],
+        groups=[AcademicRoles.GRADUATE],
     )
     assert get_base_domain(notification) == "my.compscicenter.ru"
