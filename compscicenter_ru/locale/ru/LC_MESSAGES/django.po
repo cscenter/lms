@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-07-02 09:54+0000\n"
-"PO-Revision-Date: 2019-07-02 09:54+0000\n"
+"POT-Creation-Date: 2019-07-05 16:11+0000\n"
+"PO-Revision-Date: 2019-07-05 16:13+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -22,13 +22,13 @@ msgstr ""
 
 #: compscicenter_ru/apps/announcements/admin.py:31
 #: compscicenter_ru/apps/announcements/admin.py:32
-#: compscicenter_ru/apps/announcements/models.py:131
-#: compscicenter_ru/apps/announcements/models.py:132
+#: compscicenter_ru/apps/announcements/models.py:135
+#: compscicenter_ru/apps/announcements/models.py:136
 msgid "Announcement Details"
 msgstr "Детали анонса"
 
 #: compscicenter_ru/apps/announcements/apps.py:7
-#: compscicenter_ru/apps/announcements/models.py:87
+#: compscicenter_ru/apps/announcements/models.py:91
 msgid "Announcements"
 msgstr "Анонсы"
 
@@ -55,65 +55,79 @@ msgid "Title"
 msgstr "Заголовок"
 
 #: compscicenter_ru/apps/announcements/models.py:62
+#: compscicenter_ru/apps/publications/models.py:46
+#: compscicenter_ru/apps/publications/models.py:156
+msgid "Slug"
+msgstr "Slug"
+
+#: compscicenter_ru/apps/announcements/models.py:63
+msgid ""
+"Write the URL part after `compscicenter.ru/` If this is an open lecture, add"
+" `open-lecture-` prefix"
+msgstr ""
+"Напишите адрес страницы после <code>compscicenter.ru/</code> Если это "
+"открытая лекция, в начало добавьте <code>open-lecture-</code>"
+
+#: compscicenter_ru/apps/announcements/models.py:66
 msgid "Publish Start at"
 msgstr "Опубликовать с"
 
-#: compscicenter_ru/apps/announcements/models.py:64
+#: compscicenter_ru/apps/announcements/models.py:68
 msgid "Publish End at"
 msgstr "Опубликовать до"
 
-#: compscicenter_ru/apps/announcements/models.py:66
+#: compscicenter_ru/apps/announcements/models.py:70
 #: compscicenter_ru/apps/publications/models.py:25
 msgid "Short Description"
 msgstr "Краткое описание"
 
-#: compscicenter_ru/apps/announcements/models.py:68
+#: compscicenter_ru/apps/announcements/models.py:72
 msgid "Detail Description"
 msgstr "Детальное описание"
 
-#: compscicenter_ru/apps/announcements/models.py:69
+#: compscicenter_ru/apps/announcements/models.py:73
 msgid "Don't forget to add &lt;h3&gt;Title&lt;/h3&gt; on the first line"
 msgstr ""
 "Не забудьте добавить &lt;h3&gt;Заголовок&lt;/h3&gt; в начале описания."
 
-#: compscicenter_ru/apps/announcements/models.py:72
+#: compscicenter_ru/apps/announcements/models.py:76
 #: compscicenter_ru/apps/publications/models.py:116
 msgid "Photo"
 msgstr "Фото"
 
-#: compscicenter_ru/apps/announcements/models.py:76
+#: compscicenter_ru/apps/announcements/models.py:80
 msgid "Recommended dimensions 600x400"
 msgstr "Рекомендуемые размеры фото 600x400"
 
-#: compscicenter_ru/apps/announcements/models.py:78
+#: compscicenter_ru/apps/announcements/models.py:82
 msgid "Actions"
 msgstr "Действия"
 
-#: compscicenter_ru/apps/announcements/models.py:86
+#: compscicenter_ru/apps/announcements/models.py:90
 msgid "Announcement"
 msgstr "Анонс"
 
-#: compscicenter_ru/apps/announcements/models.py:104
+#: compscicenter_ru/apps/announcements/models.py:108
 msgid "Venue"
 msgstr "Место проведения"
 
-#: compscicenter_ru/apps/announcements/models.py:109
+#: compscicenter_ru/apps/announcements/models.py:113
 msgid "Start Date"
 msgstr "Дата начала"
 
-#: compscicenter_ru/apps/announcements/models.py:113
+#: compscicenter_ru/apps/announcements/models.py:117
 msgid "Start Time"
 msgstr "Время начала"
 
-#: compscicenter_ru/apps/announcements/models.py:117
+#: compscicenter_ru/apps/announcements/models.py:121
 msgid "End Date"
 msgstr "Дата окончания"
 
-#: compscicenter_ru/apps/announcements/models.py:121
+#: compscicenter_ru/apps/announcements/models.py:125
 msgid "End Time"
 msgstr "Время окончания"
 
-#: compscicenter_ru/apps/announcements/models.py:126
+#: compscicenter_ru/apps/announcements/models.py:130
 #: compscicenter_ru/apps/publications/models.py:126
 #: compscicenter_ru/apps/publications/models.py:165
 msgid "Speakers"
@@ -190,11 +204,6 @@ msgstr "Авторы публикации"
 #: compscicenter_ru/apps/publications/models.py:40
 msgid "created"
 msgstr "Создано"
-
-#: compscicenter_ru/apps/publications/models.py:46
-#: compscicenter_ru/apps/publications/models.py:156
-msgid "Slug"
-msgstr "Slug"
 
 #: compscicenter_ru/apps/publications/models.py:48
 msgid "Draft"
@@ -323,7 +332,6 @@ msgid "Online programs"
 msgstr "Онлайн-программы"
 
 #: compscicenter_ru/menus.py:30
-#| msgid "Video URL"
 msgctxt "menu"
 msgid "Video Records"
 msgstr "Видеозаписи лекций"
@@ -600,21 +608,21 @@ msgstr "Аккаунты"
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: compscicenter_ru/views.py:356
+#: compscicenter_ru/views.py:360
 msgctxt "adjective"
 msgid "autumn"
 msgstr "осенний"
 
-#: compscicenter_ru/views.py:357
+#: compscicenter_ru/views.py:361
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
 
-#: compscicenter_ru/views.py:420
+#: compscicenter_ru/views.py:424
 msgid "Course"
 msgstr "Курс"
 
-#: compscicenter_ru/views.py:421
+#: compscicenter_ru/views.py:425
 msgid "Lecture"
 msgstr "Лекция"
 

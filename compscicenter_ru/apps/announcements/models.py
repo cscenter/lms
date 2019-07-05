@@ -58,7 +58,10 @@ def timezone_now():
 
 class Announcement(TimeStampedModel):
     name = models.CharField(_("Title"), max_length=255)
-    slug = models.SlugField(_("Slug"))
+    slug = models.SlugField(
+        _("Slug"),
+        help_text=_("Write the URL part after `compscicenter.ru/` If this is "
+                    "an open lecture, add `open-lecture-` prefix"))
     publish_start_at = models.DateTimeField(
         _("Publish Start at"),
         default=timezone_now)
