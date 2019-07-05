@@ -5,7 +5,7 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
-from core.tests.utils import CSCTestCase
+from core.tests.utils import CSCTestCase, ANOTHER_DOMAIN_ID
 from django.utils import timezone, formats
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
@@ -562,10 +562,9 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     html = BeautifulSoup(response.content, "html.parser")
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
-    # Club students has no access to the page on center site
-    # FIXME: А вот этот тест можно не привязывать именно к клубу теперь. Можно создать отдельный site_id и прочекать, что доступа нет.
+    # Users without student role on current site has no access to the page
     student.remove_group(AcademicRoles.VOLUNTEER)
-    student.add_group(AcademicRoles.STUDENT_CLUB)
+    student.add_group(AcademicRoles.STUDENT, site_id=ANOTHER_DOMAIN_ID)
     response = client.get(url_learning_assignments)
     assert response.status_code == 302
 
