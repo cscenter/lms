@@ -14,6 +14,19 @@ def create_groups(apps, schema_editor):
                 "name": group_name
             }
         )
+    # Crutch for delete STUDENT_CLUB, TEACHER_CLUB
+    Group.objects.update_or_create(
+        pk=5,
+        defaults={
+            "name": "DELETED STUDENT_CLUB"
+        }
+    )
+    Group.objects.update_or_create(
+        pk=6,
+        defaults={
+            "name": "DELETED TEACHER_CLUB"
+        }
+    )
 
 
 class Migration(migrations.Migration):
