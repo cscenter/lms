@@ -58,6 +58,7 @@ def timezone_now():
 
 class Announcement(TimeStampedModel):
     name = models.CharField(_("Title"), max_length=255)
+    slug = models.SlugField(_("Slug"))
     publish_start_at = models.DateTimeField(
         _("Publish Start at"),
         default=timezone_now)
@@ -91,7 +92,7 @@ class Announcement(TimeStampedModel):
 
     def get_absolute_url(self):
         return reverse("announcements:announcement_detail",
-                       kwargs={"pk": self.pk})
+                       kwargs={"slug": self.slug})
 
 
 class AnnouncementEventDetails(models.Model):
