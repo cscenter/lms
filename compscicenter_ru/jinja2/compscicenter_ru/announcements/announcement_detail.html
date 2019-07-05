@@ -1,7 +1,7 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 {%- import "compscicenter_ru/announcements/macros.jinja2" as announcement_macros -%}
 
-{% block title %}Анонс мероприятия "{{ announcement.name }}"{% endblock title %}
+{% block title %}{{ announcement.name }}{% endblock title %}
 
 {% block sprites %}
     <script type="text/javascript">
