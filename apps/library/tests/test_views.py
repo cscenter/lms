@@ -3,7 +3,7 @@ from django.utils.encoding import smart_bytes
 
 from core.urls import reverse
 from library.tests.factories import BorrowFactory
-from users.tests.factories import UserFactory, StudentCenterFactory
+from users.tests.factories import UserFactory, StudentFactory
 
 
 # TODO: borrows tests. Например. Убедиться, что нельзя удалить книгу, если её кто-то занял из резерва.
@@ -31,7 +31,7 @@ def test_user_detail(client, curator):
 
 @pytest.mark.django_db
 def test_city_support(client, curator):
-    student = StudentCenterFactory(city_id='spb')
+    student = StudentFactory(city_id='spb')
     borrow_spb = BorrowFactory(student=student, stock__city_id='spb',
                                stock__copies=12)
     assert borrow_spb.stock.available_copies == 11

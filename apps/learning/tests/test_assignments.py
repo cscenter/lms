@@ -26,9 +26,8 @@ from learning.tests.factories import EnrollmentFactory, \
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from users.constants import AcademicRoles
-from users.tests.factories import UserFactory, TeacherCenterFactory, \
-    StudentFactory, \
-    StudentCenterFactory, VolunteerFactory, ProjectReviewerFactory
+from users.tests.factories import UserFactory, TeacherFactory, \
+    StudentFactory, VolunteerFactory, ProjectReviewerFactory
 
 
 # TODO: assignment submission page - comments localisation, assignment created localization
@@ -41,7 +40,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
     groups_allowed = [AcademicRoles.STUDENT]
 
     def test_list(self):
-        u = StudentCenterFactory()
+        u = StudentFactory()
         now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseFactory.create(semester=s)
@@ -91,7 +90,7 @@ class StudentAssignmentListTests(GroupSecurityCheckMixin,
         """Move to archive active assignments from course offerings
         which student already leave
         """
-        u = StudentCenterFactory()
+        u = StudentFactory()
         now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         # Create open co to pass enrollment limit
@@ -116,8 +115,8 @@ def test_security_assignmentstudent_detail(client, assert_login_redirect):
     """
     Students can't see assignments from completed course, which they failed
     """
-    teacher = TeacherCenterFactory()
-    student = StudentCenterFactory()
+    teacher = TeacherFactory()
+    student = StudentFactory()
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
     co = CourseFactory(teachers=[teacher], semester=past_semester)
@@ -137,7 +136,7 @@ def test_security_assignmentstudent_detail(client, assert_login_redirect):
 @pytest.mark.django_db
 def test_security_course_detail(client):
     """Student can't watch news from completed course which they failed"""
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     student = StudentFactory()
     past_year = datetime.datetime.now().year - 3
     co = CourseFactory(teachers=[teacher], semester__year=past_year)
@@ -165,8 +164,8 @@ def test_security_course_detail(client):
 
 @pytest.mark.django_db
 def test_assignment_contents(client):
-    teacher = TeacherCenterFactory()
-    student = StudentCenterFactory()
+    teacher = TeacherFactory()
+    student = StudentFactory()
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
     a = AssignmentFactory.create(course=co)
@@ -179,8 +178,8 @@ def test_assignment_contents(client):
 @pytest.mark.django_db
 def test_studentassignment_last_comment_from():
     """`last_comment_from` attribute is updated by signal"""
-    teacher = TeacherCenterFactory.create()
-    student = StudentCenterFactory.create()
+    teacher = TeacherFactory.create()
+    student = StudentFactory.create()
     now_year, now_season = get_current_term_pair('spb')
     s = SemesterFactory.create(year=now_year, type=now_season)
     co = CourseFactory.create(city_id='spb', semester=s,
@@ -214,8 +213,8 @@ def test_studentassignment_model_weight_score():
 @pytest.mark.django_db
 def test_studentassignment_first_student_comment_at(curator):
     """`first_student_comment_at` attribute is updated by signal"""
-    teacher = TeacherCenterFactory.create()
-    student = StudentCenterFactory.create()
+    teacher = TeacherFactory.create()
+    student = StudentFactory.create()
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
     assignment = AssignmentFactory.create(course=co)
@@ -243,7 +242,7 @@ def test_studentassignment_first_student_comment_at(curator):
 
 class AssignmentTeacherDetailsTest(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
-        teacher = TeacherCenterFactory()
+        teacher = TeacherFactory()
         a = AssignmentFactory.create(course__teachers=[teacher])
         url = a.get_teacher_url()
         self.assertLoginRedirect(url)
@@ -263,8 +262,8 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(200, self.client.get(url).status_code)
 
     def test_details(self):
-        teacher = TeacherCenterFactory()
-        student = StudentCenterFactory()
+        teacher = TeacherFactory()
+        student = StudentFactory()
         now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         co = CourseFactory.create(city='spb', semester=s,
@@ -312,8 +311,8 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
     def test_list(self):
         # Default filter for grade - `no_grade`
         TEACHER_ASSIGNMENTS_PAGE = reverse(self.url_name)
-        teacher = TeacherCenterFactory()
-        students = StudentCenterFactory.create_batch(3)
+        teacher = TeacherFactory()
+        students = StudentFactory.create_batch(3)
         now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         # some other teacher's course offering
@@ -415,7 +414,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
 @pytest.mark.django_db
 def test_assignment_public_form_for_teachers(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     co_in_spb = CourseFactory(city='spb', teachers=[teacher])
     client.login(teacher)
     form_data = {
@@ -464,7 +463,7 @@ def test_assignment_public_form_for_teachers(settings, client):
 def test_assignment_deadline_display_for_teacher(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     assignment = AssignmentFactory(deadline_at=dt,
                                    course__city_id='spb',
                                    course__teachers=[teacher])
@@ -503,7 +502,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
                                    course__city_id='spb',
                                    course__is_correspondence=False,
                                    course__semester_id=current_term.pk)
-    student = StudentCenterFactory(city_id='spb')
+    student = StudentFactory(city_id='spb')
     sa = StudentAssignmentFactory(assignment=assignment, student=student)
     client.login(student)
     url_learning_assignments = reverse('study:assignment_list')
@@ -564,6 +563,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Club students has no access to the page on center site
+    # FIXME: А вот этот тест можно не привязывать именно к клубу теперь. Можно создать отдельный site_id и прочекать, что доступа нет.
     student.remove_group(AcademicRoles.VOLUNTEER)
     student.add_group(AcademicRoles.STUDENT_CLUB)
     response = client.get(url_learning_assignments)
@@ -601,7 +601,7 @@ def test_studentassignment_submission_grade(client):
     1.23 and 1,23 formats
     """
     sa = StudentAssignmentFactory()
-    teacher = TeacherCenterFactory.create()
+    teacher = TeacherFactory.create()
     CourseTeacherFactory(course=sa.assignment.course,
                          teacher=teacher)
     sa.assignment.passing_score = 1
@@ -632,7 +632,7 @@ def test_studentassignment_submission_grade(client):
 
 @pytest.mark.django_db
 def test_assignment_attachment_permissions(curator, client, tmpdir):
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     term = SemesterFactory.create_current()
     co = CourseFactory.create(semester=term, teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=AssignmentFactory)
@@ -655,7 +655,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     task_attachment_url = a_attachment.file_url()
     response = client.get(task_attachment_url)
     assert response.status_code == 302  # LoginRequiredMixin
-    student_spb = StudentCenterFactory(city_id='spb')
+    student_spb = StudentFactory(city_id='spb')
     client.login(student_spb)
     response = client.get(task_attachment_url)
     assert response.status_code == 403  # not enrolled in
@@ -675,7 +675,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     response = client.get(task_attachment_url)
     assert response.status_code == 200
     # Check not actual teacher access
-    other_teacher = TeacherCenterFactory()
+    other_teacher = TeacherFactory()
     client.login(other_teacher)
     response = client.get(task_attachment_url)
     assert response.status_code == 403  # not a course teacher (among all terms)

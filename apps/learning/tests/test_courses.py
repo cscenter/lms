@@ -7,7 +7,7 @@ from django.conf import settings
 from core.urls import reverse
 from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
     SemesterFactory, CourseFactory
-from users.tests.factories import TeacherCenterFactory, StudentCenterFactory
+from users.tests.factories import TeacherFactory, StudentFactory
 
 
 @pytest.mark.django_db
@@ -19,9 +19,9 @@ def test_course_is_correspondence(settings, client):
     assignment = AssignmentFactory(deadline_at=deadline_at,
                                    course__city_id='spb',
                                    course__is_correspondence=False)
-    teacher_nsk = TeacherCenterFactory(city_id='nsk')
-    student_spb = StudentCenterFactory(city_id='spb')
-    student_nsk = StudentCenterFactory(city_id='nsk')
+    teacher_nsk = TeacherFactory(city_id='nsk')
+    student_spb = StudentFactory(city_id='spb')
+    student_nsk = StudentFactory(city_id='nsk')
     co = assignment.course
     # Unauthenticated user doesn't see tab
     url = co.get_url_for_tab("assignments")
@@ -58,7 +58,7 @@ def test_course_is_correspondence(settings, client):
     assert response.status_code == 200
     assert response.context["tz_override"] is None
     # Teacher without city, fallback to course offering timezone
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     assert teacher.city_id is None
     client.login(teacher)
     response = client.get(url)
@@ -68,7 +68,7 @@ def test_course_is_correspondence(settings, client):
 
 @pytest.mark.django_db
 def test_course_list(client):
-    student = StudentCenterFactory(city_id=settings.DEFAULT_CITY_CODE)
+    student = StudentFactory(city_id=settings.DEFAULT_CITY_CODE)
     client.login(student)
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
     co = CourseFactory.create(semester=s,

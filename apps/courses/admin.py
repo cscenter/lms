@@ -40,8 +40,7 @@ class CourseTeacherInline(admin.TabularInline):
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "teacher":
             kwargs["queryset"] = (User.objects
-                                  .has_role(AcademicRoles.TEACHER,
-                                            AcademicRoles.TEACHER_CLUB)
+                                  .has_role(AcademicRoles.TEACHER)
                                   .distinct())
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import factory
-from django.conf import settings
-from django.contrib.sites.models import Site
 
 from learning.settings import GradeTypes
 from users.constants import AcademicRoles, GenderTypes
@@ -11,8 +9,8 @@ from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
 
 __all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
-           'StudentFactory', 'StudentCenterFactory', 'StudentClubFactory',
-           'TeacherCenterFactory', 'VolunteerFactory', 'ProjectReviewerFactory', 'OnlineCourseRecordFactory',
+           'StudentFactory', 'TeacherFactory', 'VolunteerFactory',
+           'ProjectReviewerFactory', 'OnlineCourseRecordFactory',
            'SHADCourseRecordFactory', 'EnrollmentCertificateFactory')
 
 
@@ -37,7 +35,9 @@ class UserFactory(factory.DjangoModelFactory):
         if not create:
             return
         if extracted:
-            add_user_groups(self, extracted)
+            site_id = kwargs.pop("site_id", None)
+            for role in extracted:
+                self.add_group(role=role, site_id=site_id)
 
     @factory.post_generation
     def raw_password(self, create, extracted, **kwargs):
@@ -72,45 +72,26 @@ class CuratorFactory(UserFactory):
 
 
 class StudentFactory(UserFactory):
-    city_id = 'spb'
-    branch = factory.SubFactory('learning.tests.factories.BranchFactory',
-                                code='spb')
-
-    @factory.post_generation
-    def _add_required_groups(self, create, extracted, **kwargs):
-        if not create:
-            return
-        for site in Site.objects.all():
-            self.add_group(role=AcademicRoles.STUDENT, site_id=site.id)
-
-
-class StudentCenterFactory(UserFactory):
     enrollment_year = 2015
     city_id = 'spb'
     branch = factory.SubFactory('learning.tests.factories.BranchFactory',
                                 code='spb')
 
     @factory.post_generation
-    def _add_required_groups(self, create, extracted, **kwargs):
+    def required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        self.add_group(AcademicRoles.STUDENT, site_id=settings.CENTER_SITE_ID)
+        site_id = kwargs.pop("site_id", None)
+        self.add_group(role=AcademicRoles.STUDENT, site_id=site_id)
 
 
-class StudentClubFactory(UserFactory):
+class TeacherFactory(UserFactory):
     @factory.post_generation
-    def _add_required_groups(self, create, extracted, **kwargs):
+    def required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        self.add_group(AcademicRoles.STUDENT, site_id=settings.CLUB_SITE_ID)
-
-
-class TeacherCenterFactory(UserFactory):
-    @factory.post_generation
-    def _add_required_groups(self, create, extracted, **kwargs):
-        if not create:
-            return
-        self.add_group(AcademicRoles.TEACHER, site_id=settings.CENTER_SITE_ID)
+        site_id = kwargs.pop("site_id", None)
+        self.add_group(role=AcademicRoles.TEACHER, site_id=site_id)
 
 
 class VolunteerFactory(UserFactory):

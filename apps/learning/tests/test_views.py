@@ -9,7 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
-from core.tests.utils import CSCTestCase
+from core.tests.utils import CSCTestCase, ANOTHER_DOMAIN_ID
 from core.timezone import now_local
 from core.urls import city_aware_reverse, reverse
 from courses.models import Course
@@ -18,8 +18,7 @@ from courses.utils import get_current_term_pair
 from learning.tests.factories import *
 from learning.tests.utils import check_url_security
 from users.constants import AcademicRoles
-from users.tests.factories import *
-from users.tests.factories import add_user_groups
+from users.tests.factories import UserFactory, StudentFactory, TeacherFactory
 from .mixins import *
 
 
@@ -79,8 +78,8 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
         """
         Testing is_enrolled and is_actual_teacher here
         """
-        student = StudentCenterFactory()
-        teacher = TeacherCenterFactory()
+        student = StudentFactory()
+        teacher = TeacherFactory()
         co = CourseFactory.create()
         co_other = CourseFactory.create()
         url = co.get_absolute_url()
@@ -114,8 +113,8 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(True, ctx['is_actual_teacher'])
 
     def test_assignment_list(self):
-        student = StudentCenterFactory(city_id='spb')
-        teacher = TeacherCenterFactory(city_id='spb')
+        student = StudentFactory(city_id='spb')
+        teacher = TeacherFactory(city_id='spb')
         today = now_local(student.city_code).date()
         next_day = today + datetime.timedelta(days=1)
         co = CourseFactory.create(teachers=[teacher],
@@ -144,8 +143,8 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
 
 class CourseEditDescrTests(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
-        teacher = TeacherCenterFactory()
-        teacher_other = TeacherCenterFactory()
+        teacher = TeacherFactory()
+        teacher_other = TeacherFactory()
         co = CourseFactory.create(teachers=[teacher])
         url = co.get_update_url()
         self.assertLoginRedirect(url)
@@ -158,8 +157,8 @@ class CourseEditDescrTests(MyUtilitiesMixin, CSCTestCase):
 
 class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
-        teacher = TeacherCenterFactory()
-        student = StudentCenterFactory(city_id='spb')
+        teacher = TeacherFactory()
+        student = StudentFactory(city_id='spb')
         s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
         co = CourseFactory(city_id='spb', semester=s,
                            teachers=[teacher])
@@ -187,12 +186,12 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         assert self.client.get(url).status_code == 200
         # Change student to graduate, make sure they have access to HW
         student.groups.all().delete()
-        add_user_groups(student, [AcademicRoles.GRADUATE_CENTER])
+        student.add_group(AcademicRoles.GRADUATE_CENTER)
         student.save()
         self.assertEqual(200, self.client.get(url).status_code)
 
     def test_assignment_contents(self):
-        student = StudentCenterFactory(city_id='spb')
+        student = StudentFactory(city_id='spb')
         semester = SemesterFactory.create_current()
         co = CourseFactory.create(city_id='spb', semester=semester)
         EnrollmentFactory.create(student=student, course=co)
@@ -205,8 +204,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertContains(self.client.get(url), a.text)
 
     def test_teacher_redirect_to_appropriate_link(self):
-        student = StudentCenterFactory(city_id='spb')
-        teacher = TeacherCenterFactory()
+        student = StudentFactory(city_id='spb')
+        teacher = TeacherFactory()
         semester = SemesterFactory.create_current()
         co = CourseFactory(city_id='spb', teachers=[teacher],
                            semester=semester)
@@ -224,7 +223,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertRedirects(self.client.get(url), expected_url)
 
     def test_comment(self):
-        student = StudentCenterFactory(city_id='spb')
+        student = StudentFactory(city_id='spb')
         # Create open reading to make sure student has access to CO
         co = CourseFactory(city_id='spb', is_open=True)
         EnrollmentFactory.create(student=student, course=co)
@@ -248,8 +247,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
 
 class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
-        teacher = TeacherCenterFactory()
-        student = StudentCenterFactory()
+        teacher = TeacherFactory()
+        student = StudentFactory()
         co = CourseFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
@@ -295,8 +294,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
             self.doLogout()
 
     def test_comment(self):
-        teacher = TeacherCenterFactory()
-        student = StudentCenterFactory()
+        teacher = TeacherFactory()
+        student = StudentFactory()
         co = CourseFactory.create(teachers=[teacher])
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
@@ -317,9 +316,9 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertContains(resp, 'attachment1')
 
     def test_grading(self):
-        teacher = TeacherCenterFactory()
+        teacher = TeacherFactory()
         co = CourseFactory.create(teachers=[teacher])
-        student = StudentCenterFactory()
+        student = StudentFactory()
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co, maximum_score=13)
         a_s = (StudentAssignment.objects
@@ -342,8 +341,8 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(11, StudentAssignment.objects.get(pk=a_s.pk).score)
 
     def test_next_unchecked(self):
-        teacher = TeacherCenterFactory()
-        student = StudentCenterFactory()
+        teacher = TeacherFactory()
+        student = StudentFactory()
         co = CourseFactory.create(teachers=[teacher])
         co_other = CourseFactory.create()
         EnrollmentFactory.create(student=student, course=co)
@@ -389,7 +388,7 @@ def test_student_courses_list(client, assert_login_redirect):
     check_url_security(client, assert_login_redirect,
                        groups_allowed=[AcademicRoles.STUDENT],
                        url=url)
-    student_spb = StudentCenterFactory(city_id='spb')
+    student_spb = StudentFactory(city_id='spb')
     client.login(student_spb)
     response = client.get(url)
     assert response.status_code == 200
@@ -426,7 +425,7 @@ def test_student_courses_list(client, assert_login_redirect):
     assert len(cos_available) == len(response.context['ongoing_rest'])
     assert len(cos_archived) == len(response.context['archive_enrolled'])
     # Test for student from nsk
-    student_nsk = StudentCenterFactory(city_id='nsk')
+    student_nsk = StudentFactory(city_id='nsk')
     client.login(student_nsk)
     CourseFactory.create(semester__year=prev_year, city_id='nsk',
                          is_open=False)
@@ -458,7 +457,8 @@ def test_student_courses_list_csclub(client, settings, mocker):
     now_year, now_season = get_current_term_pair(settings.DEFAULT_CITY_CODE)
     assert now_season == "spring"
     url = reverse('study:course_list')
-    student = StudentClubFactory(city_id='spb')
+    student = StudentFactory(required_groups__site_id=ANOTHER_DOMAIN_ID,
+                             city_id='spb')
     client.login(student)
     response = client.get(url)
     assert response.status_code == 200

@@ -20,8 +20,8 @@ from learning.models import StudentAssignment
 from courses.models import Semester, CourseNews
 from courses.settings import SemesterTypes
 from courses.utils import get_term_start
-from users.tests.factories import UserFactory, StudentCenterFactory, \
-    TeacherCenterFactory
+from users.tests.factories import UserFactory, StudentFactory, \
+    TeacherFactory
 
 
 class CommonTests(CSCTestCase):
@@ -69,7 +69,7 @@ class CommonTests(CSCTestCase):
 
 class StudentAssignmentTests(CSCTestCase):
     def test_clean(self):
-        u1 = StudentCenterFactory()
+        u1 = StudentFactory()
         u2 = UserFactory.create(groups=[])
         as_ = StudentAssignmentFactory.create(student=u1)
         as_.student = u2
@@ -82,8 +82,8 @@ class StudentAssignmentTests(CSCTestCase):
         as_.save()
 
     def test_submission_is_sent(self):
-        u_student = StudentCenterFactory()
-        u_teacher = TeacherCenterFactory()
+        u_student = StudentFactory()
+        u_teacher = TeacherFactory()
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course__teachers=[u_teacher],
@@ -128,7 +128,7 @@ class StudentAssignmentTests(CSCTestCase):
     def test_student_assignment_state(self):
         import datetime
         from django.utils import timezone
-        student = StudentCenterFactory()
+        student = StudentFactory()
         a_online = AssignmentFactory.create(
             passing_score=5, maximum_score=10, is_online=True,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
@@ -194,7 +194,7 @@ class EnrollmentTests(CSCTestCase):
 class AssignmentNotificationTests(CSCTestCase):
     def test_clean(self):
         an = AssignmentNotificationFactory.create(
-            user=StudentCenterFactory(),
+            user=StudentFactory(),
             is_about_passed=True)
         self.assertRaises(ValidationError, an.clean)
 

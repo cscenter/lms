@@ -2,15 +2,16 @@ import datetime
 
 import pytest
 
-from core.urls import reverse, reverse_lazy
+from core.tests.utils import ANOTHER_DOMAIN_ID
+from core.urls import reverse_lazy
 from courses.settings import SemesterTypes
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from users.constants import AcademicRoles
-from users.tests.factories import StudentCenterFactory, StudentClubFactory, \
-    UserFactory, VolunteerFactory, add_user_groups
+from users.tests.factories import UserFactory, VolunteerFactory, \
+    add_user_groups, StudentFactory
 
 
 @pytest.fixture(scope="module")
@@ -22,21 +23,22 @@ def search_url():
 def test_student_search(client, curator, search_url):
     """Simple test cases to make sure, multi values still works"""
     # XXX: `name` filter not tested now due to postgres specific syntax
-    student = StudentCenterFactory(enrollment_year=2011,
-                                   status="",
-                                   last_name='Иванов',
-                                   first_name='Иван')
-    StudentCenterFactory(enrollment_year=2011,
-                         status="",
-                         last_name='Иванов',
-                         first_name='Иван')
-    StudentCenterFactory(enrollment_year=2012,
-                         status=StudentStatuses.EXPELLED,
-                         last_name='Иванов',
-                         first_name='Иван')
-    StudentClubFactory(enrollment_year=2011,
-                       last_name='Сидоров',
-                       first_name='Сидор')
+    student = StudentFactory(enrollment_year=2011,
+                             status="",
+                             last_name='Иванов',
+                             first_name='Иван')
+    StudentFactory(enrollment_year=2011,
+                   status="",
+                   last_name='Иванов',
+                   first_name='Иван')
+    StudentFactory(enrollment_year=2012,
+                   status=StudentStatuses.EXPELLED,
+                   last_name='Иванов',
+                   first_name='Иван')
+    StudentFactory(enrollment_year=2011,
+                   last_name='Сидоров',
+                   required_groups__site_id=ANOTHER_DOMAIN_ID,
+                   first_name='Сидор')
     volunteer = VolunteerFactory(enrollment_year=2011, status="")
 
     response = client.get(search_url)
@@ -132,7 +134,7 @@ def test_student_search_enrollments(client, curator, search_url):
     Count successfully passed courses instead of course_offerings.
     """
     client.login(curator)
-    student = StudentCenterFactory(curriculum_year=2011, status="",
+    student = StudentFactory(curriculum_year=2011, status="",
                                    last_name='Иванов', first_name='Иван')
     ENROLLMENTS_URL = "{}?{}".format(
         search_url,
@@ -164,7 +166,7 @@ def test_student_search_enrollments(client, curator, search_url):
     EnrollmentFactory.create(student=student, grade=GradeTypes.GOOD, course=co3)
     response = client.get(ENROLLMENTS_URL.format("2"))
     assert response.json()["count"] == 1
-    other_student = StudentCenterFactory(curriculum_year=2011)
+    other_student = StudentFactory(curriculum_year=2011)
     e3 = EnrollmentFactory.create(student=other_student, grade=GradeTypes.GOOD)
     response = client.get(ENROLLMENTS_URL.format("2"))
     assert response.json()["count"] == 1
@@ -174,12 +176,11 @@ def test_student_search_enrollments(client, curator, search_url):
 
 @pytest.mark.django_db
 def test_student_search_by_groups(client, curator, search_url):
-    from users.filters import UserFilter
     client.login(curator)
     # All users below are considered as `studying` due to empty status
-    club_students = StudentClubFactory.create_batch(2)
-    students = StudentCenterFactory.create_batch(3, enrollment_year=2011,
-                                                 status="", city_id='spb')
+    StudentFactory.create_batch(2, required_groups__site_id=ANOTHER_DOMAIN_ID,)
+    students = StudentFactory.create_batch(3, enrollment_year=2011,
+                                              status="", city_id='spb')
     volunteers = VolunteerFactory.create_batch(4, enrollment_year=2011,
                                                status="", city_id='spb')
     # Empty results if no query provided
@@ -207,9 +208,9 @@ def test_student_search_by_groups(client, curator, search_url):
 def test_student_search_by_city(client, curator, search_url):
     client.login(curator)
     _ = UserFactory.create(city_id='spb')  # random user
-    students_spb = StudentCenterFactory.create_batch(3,
+    students_spb = StudentFactory.create_batch(3,
         enrollment_year=2011, status="", city_id='spb')
-    students_nsk = StudentCenterFactory.create_batch(2,
+    students_nsk = StudentFactory.create_batch(2,
         enrollment_year=2011, status="", city_id='nsk')
     # Send empty query
     response = client.get("{}?{}".format(search_url, "cities="))
@@ -234,9 +235,9 @@ def test_student_search_by_city(client, curator, search_url):
 @pytest.mark.django_db
 def test_student_by_virtual_status_studying(client, curator, search_url):
     client.login(curator)
-    students_spb = StudentCenterFactory.create_batch(4,
+    students_spb = StudentFactory.create_batch(4,
         enrollment_year=2011, status="", city_id='spb')
-    students_nsk = StudentCenterFactory.create_batch(7,
+    students_nsk = StudentFactory.create_batch(7,
         enrollment_year=2011, status="", city_id='nsk')
     volunteers = VolunteerFactory.create_batch(
         3, enrollment_year=2011, status="", city_id='spb')
@@ -248,7 +249,7 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
     json_data = response.json()
     total_studying = len(students_spb) + len(students_nsk) + len(volunteers)
     assert json_data["count"] == total_studying
-    expelled = StudentCenterFactory.create_batch(
+    expelled = StudentFactory.create_batch(
         2, enrollment_year=2011, status="expelled", city_id='spb')
     # If no groups specified - `GRADUATE_CENTER` group excluded from results
     response = client.get("{}?{}".format(search_url, "status=studying"))

@@ -3,13 +3,13 @@ from io import StringIO as OutputIO
 import pytest
 from django.core import mail, management
 
+from core.tests.utils import ANOTHER_DOMAIN_ID
 from learning.models import AssignmentNotification
 from learning.tests.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
 from notifications.management.commands.notify import get_base_domain
 from users.constants import AcademicRoles
-from users.tests.factories import UserFactory, StudentCenterFactory, \
-    StudentClubFactory, StudentFactory
+from users.tests.factories import UserFactory, StudentFactory, TeacherFactory
 
 
 @pytest.mark.django_db
@@ -24,7 +24,7 @@ def test_notifications(client, settings):
 
     out = OutputIO()
     mail.outbox = []
-    student = StudentCenterFactory()
+    student = StudentFactory()
     an = AssignmentNotificationFactory(is_about_passed=True,
                                        user=student)
     management.call_command("notify", stdout=out)
@@ -41,7 +41,7 @@ def test_notifications(client, settings):
 
     out = OutputIO()
     mail.outbox = []
-    student = StudentCenterFactory()
+    student = StudentFactory()
     conn = CourseNewsNotificationFactory.create(user=student)
     course = conn.course_offering_news.course
     management.call_command("notify", stdout=out)
@@ -61,13 +61,19 @@ def test_notify_get_base_url():
     user = StudentFactory()
     notification = AssignmentNotificationFactory(user=user)
     assert get_base_domain(notification) == "my.compscicenter.ru"
-    notification.user = StudentClubFactory()
+    notification.user = StudentFactory(
+        required_groups__site_id=ANOTHER_DOMAIN_ID
+    )
     assert get_base_domain(notification) == "compsciclub.ru"
     notification.user = UserFactory(groups=[AcademicRoles.STUDENT,
-                                            AcademicRoles.TEACHER_CLUB])
+                                            AcademicRoles.TEACHER])
     assert get_base_domain(notification) == "my.compscicenter.ru"
-    notification.user = UserFactory(groups=[AcademicRoles.TEACHER_CLUB])
+    notification.user = TeacherFactory(
+        required_groups__site_id=ANOTHER_DOMAIN_ID
+    )
     assert get_base_domain(notification) == "compsciclub.ru"
-    notification.user = UserFactory(groups=[AcademicRoles.TEACHER_CLUB,
-                                            AcademicRoles.GRADUATE_CENTER])
+    notification.user = TeacherFactory(
+        required_groups__site_id=ANOTHER_DOMAIN_ID,
+        groups=[AcademicRoles.GRADUATE_CENTER],
+    )
     assert get_base_domain(notification) == "my.compscicenter.ru"

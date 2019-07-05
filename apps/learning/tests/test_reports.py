@@ -13,8 +13,7 @@ from learning.tests.factories import SemesterFactory, CourseFactory, \
     EnrollmentFactory
 from users.constants import AcademicRoles
 from users.tests.factories import SHADCourseRecordFactory, \
-    OnlineCourseRecordFactory, \
-    TeacherCenterFactory, StudentCenterFactory, add_user_groups
+    OnlineCourseRecordFactory, TeacherFactory, StudentFactory
 
 
 def check_value_for_header(report, header, row_index, expected_value):
@@ -34,11 +33,11 @@ def test_report_common(rf):
     def get_progress_report():
         return ProgressReportFull(honest_grade_system=True,
                                   request=rf.request())
-    teacher = TeacherCenterFactory.create()
+    teacher = TeacherFactory.create()
     s = SemesterFactory.create_current()
     co1, co2, co3 = CourseFactory.create_batch(3, semester=s,
                                                teachers=[teacher])
-    student1, student2, student3 = StudentCenterFactory.create_batch(3)
+    student1, student2, student3 = StudentFactory.create_batch(3)
     EnrollmentFactory(student=student1, course=co1, grade=GradeTypes.GOOD)
     EnrollmentFactory(student=student2, course=co1, grade=GradeTypes.GOOD)
     EnrollmentFactory(student=student2, course=co2, grade=GradeTypes.NOT_GRADED)
@@ -125,8 +124,8 @@ def test_report_full(rf):
         return ProgressReportFull(honest_grade_system=True,
                                   request=rf.request())
 
-    teacher = TeacherCenterFactory.create()
-    students = StudentCenterFactory.create_batch(3)
+    teacher = TeacherFactory.create()
+    students = StudentFactory.create_batch(3)
     s = SemesterFactory.create_current()
     co1, co2 = CourseFactory.create_batch(2, semester=s,
                                           teachers=[teacher])
@@ -181,14 +180,14 @@ def test_report_for_target_term(rf):
         return ProgressReportForSemester(term,
                                          honest_grade_system=True,
                                          request=rf.request())
-    teacher = TeacherCenterFactory.create()
+    teacher = TeacherFactory.create()
     s = SemesterFactory.create_current()
     prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
     prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
     co_active = CourseFactory.create(semester=s, teachers=[teacher])
     co1, co2, co3 = CourseFactory.create_batch(3, semester=prev_s,
                                                teachers=[teacher])
-    student1, student2, student3 = StudentCenterFactory.create_batch(3)
+    student1, student2, student3 = StudentFactory.create_batch(3)
     e_active = EnrollmentFactory.create(student=student1,
                                         course=co_active,
                                         grade=GradeTypes.EXCELLENT)
@@ -289,8 +288,8 @@ def test_report_for_target_term(rf):
 def test_report_diplomas_csv(rf):
     request = rf.get(reverse('staff:exports_students_diplomas_csv',
                              kwargs={"city_code": "spb"}))
-    teacher = TeacherCenterFactory.create()
-    student1, student2, student3 = StudentCenterFactory.create_batch(
+    teacher = TeacherFactory.create()
+    student1, student2, student3 = StudentFactory.create_batch(
         3, city_id="spb")
     s = SemesterFactory.create_current()
     prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
@@ -370,7 +369,7 @@ def test_report_diplomas_csv(rf):
 @pytest.mark.django_db
 def test_report_diplomas_by_city(rf):
     stub_request = rf.get("/")
-    s1, s2, s3 = StudentCenterFactory.create_batch(3, city_id="spb")
+    s1, s2, s3 = StudentFactory.create_batch(3, city_id="spb")
     s1.status = StudentStatuses.WILL_GRADUATE
     s1.save()
     s2.status = StudentStatuses.WILL_GRADUATE

@@ -13,7 +13,7 @@ from learning.models import StudentAssignment, \
 from learning.settings import Branches
 from study_programs.models import AcademicDiscipline
 from users.constants import AcademicRoles
-from users.tests.factories import UserFactory, StudentCenterFactory, \
+from users.tests.factories import UserFactory, StudentFactory, \
     add_user_groups
 
 __all__ = ('AcademicDisciplineFactory', 'StudentAssignmentFactory',
@@ -47,7 +47,7 @@ class StudentAssignmentFactory(factory.DjangoModelFactory):
         model = StudentAssignment
 
     assignment = factory.SubFactory(AssignmentFactory)
-    student = factory.SubFactory(StudentCenterFactory)
+    student = factory.SubFactory(StudentFactory)
 
 
 class AssignmentCommentFactory(factory.DjangoModelFactory):
@@ -68,7 +68,7 @@ class EnrollmentFactory(factory.DjangoModelFactory):
     class Meta:
         model = Enrollment
 
-    student = factory.SubFactory(StudentCenterFactory)
+    student = factory.SubFactory(StudentFactory)
     course = factory.SubFactory(CourseFactory)
 
 
@@ -111,11 +111,11 @@ class GraduateFactory(UserFactory):
     )
 
     @factory.post_generation
-    def _add_required_groups(self, create, extracted, **kwargs):
+    def required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.GRADUATE_CENTER]
-        add_user_groups(self, required_groups)
+        site_id = kwargs.pop("site_id", None)
+        self.add_group(role=AcademicRoles.GRADUATE_CENTER, site_id=site_id)
 
 
 class GraduateProfileFactory(factory.DjangoModelFactory):

@@ -6,7 +6,7 @@ from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
 from courses.models import CourseNews
 from learning.tests.factories import EnrollmentFactory
 from learning.settings import GradeTypes
-from users.tests.factories import StudentCenterFactory, TeacherCenterFactory
+from users.tests.factories import StudentFactory, TeacherFactory
 
 # TODO: тест для видимости таб из под разных ролей. (прятать табу во вьюхе, если нет содержимого)
 
@@ -25,7 +25,7 @@ def test_course_news_tab_permissions(client):
     response = client.get(co.get_absolute_url())
     assert "news" not in response.context['course_tabs']
     # By default student can't see the news until enroll in the course
-    student_spb = StudentCenterFactory(city_id='spb')
+    student_spb = StudentFactory(city_id='spb')
     client.login(student_spb)
     response = client.get(co.get_absolute_url())
     assert "news" not in response.context['course_tabs']
@@ -43,7 +43,7 @@ def test_course_news_tab_permissions(client):
     response = client.get(co_prev.get_absolute_url())
     assert "news" in response.context['course_tabs']
     # Teacher from the same course can view news from other offerings
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     client.login(teacher)
     response = client.get(co_prev.get_absolute_url())
     assert "news" not in response.context['course_tabs']
@@ -69,7 +69,7 @@ def test_course_assignments_tab_permissions(client):
     co_prev = a.course
     co = CourseFactory(meta_course=meta_course,
                        semester=current_semester)
-    teacher = TeacherCenterFactory()
+    teacher = TeacherFactory()
     CourseTeacherFactory(teacher=teacher, course=co)
     # Unauthenticated user can't see tab at all
     response = client.get(co_prev.get_absolute_url())
@@ -79,7 +79,7 @@ def test_course_assignments_tab_permissions(client):
     response = client.get(co_prev.get_absolute_url())
     assert "assignments" in response.context['course_tabs']
     assert smart_bytes(a.get_teacher_url()) in response.content
-    student = StudentCenterFactory()
+    student = StudentFactory()
     client.login(student)
     response = client.get(co_prev.get_absolute_url())
     assert "assignments" in response.context['course_tabs']

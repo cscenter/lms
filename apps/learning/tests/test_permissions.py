@@ -8,8 +8,8 @@ from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from users.constants import AcademicRoles
 from users.models import ExtendedAnonymousUser, User
-from users.tests.factories import CuratorFactory, TeacherCenterFactory, \
-    StudentFactory, StudentCenterFactory
+from users.tests.factories import CuratorFactory, TeacherFactory, \
+    StudentFactory
 
 
 def delete_enrollment_cache(user: User, course: Course):
@@ -86,7 +86,7 @@ def test_anonymous_user_permissions(client):
 @pytest.mark.django_db
 def test_request_user_permissions(client):
     # Active student
-    student = StudentCenterFactory(status='')
+    student = StudentFactory(status='')
     client.login(student)
     response = client.get("/")
     request_user = response.wsgi_request.user
@@ -133,8 +133,8 @@ def test_course_access_role_for_anon_and_curator():
 
 @pytest.mark.django_db
 def test_course_access_role_teacher():
-    teacher = TeacherCenterFactory()
-    teacher_other = TeacherCenterFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
     course = CourseFactory(teachers=[teacher])
     role = course_access_role(course=course, user=teacher)
     assert role == CourseRole.TEACHER
@@ -142,7 +142,7 @@ def test_course_access_role_teacher():
     assert role == CourseRole.NO_ROLE
     # Teacher for the same meta course has access to all readings
     meta_course = course.meta_course
-    teacher2 = TeacherCenterFactory()
+    teacher2 = TeacherFactory()
     course2 = CourseFactory(meta_course=meta_course, teachers=[teacher2])
     role = course_access_role(course=course2, user=teacher2)
     assert role == CourseRole.TEACHER
