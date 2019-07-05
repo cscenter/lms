@@ -268,17 +268,17 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
     response = client.get(url)
     assert response.json()["count"] == len(volunteers)
     # Edge case - show `studying` among graduated
-    query = "status=studying&groups={}".format(AcademicRoles.GRADUATE_CENTER)
+    query = "status=studying&groups={}".format(AcademicRoles.GRADUATE)
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == 0
     # If some group added except graduate group - concat results
     query = "status=studying&groups={},{}".format(AcademicRoles.VOLUNTEER,
-                                                  AcademicRoles.GRADUATE_CENTER)
+                                                  AcademicRoles.GRADUATE)
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == len(volunteers) + len(graduated)
     # Edge case #2 - graduate can have `master` subgroup
     add_user_groups(graduated[0], [AcademicRoles.MASTERS_DEGREE])
-    query = "status=studying&groups={},{}".format(AcademicRoles.GRADUATE_CENTER,
+    query = "status=studying&groups={},{}".format(AcademicRoles.GRADUATE,
                                                   AcademicRoles.MASTERS_DEGREE)
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == len(graduated)

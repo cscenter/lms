@@ -178,6 +178,6 @@ class UserChangeForm(_UserChangeForm):
             msg = _("User can't be volunteer and student at the same time")
             self.add_error('groups', ValidationError(msg))
 
-        if u.roles.GRADUATE_CENTER in groups and u.roles.STUDENT in groups:
+        if u.roles.GRADUATE in groups and u.roles.STUDENT in groups:
             msg = _("User can't be graduated and student at the same time")
             self.add_error('groups', ValidationError(msg))

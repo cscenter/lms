@@ -52,7 +52,7 @@ def test_user_permissions():
     user.save()
     user.add_group(AcademicRoles.STUDENT)
     user.add_group(AcademicRoles.TEACHER)
-    user.add_group(AcademicRoles.GRADUATE_CENTER)
+    user.add_group(AcademicRoles.GRADUATE)
     assert user.is_student
     assert not user.is_volunteer
     assert user.is_teacher
@@ -61,7 +61,7 @@ def test_user_permissions():
     user.save()
     user.add_group(AcademicRoles.STUDENT)
     user.add_group(AcademicRoles.TEACHER)
-    user.add_group(AcademicRoles.GRADUATE_CENTER)
+    user.add_group(AcademicRoles.GRADUATE)
     user.add_group(AcademicRoles.VOLUNTEER)
     assert user.is_student
     assert user.is_volunteer

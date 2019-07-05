@@ -289,7 +289,7 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         student_info = (User.objects
                         .has_role(User.roles.STUDENT,
-                                  User.roles.GRADUATE_CENTER,
+                                  User.roles.GRADUATE,
                                   User.roles.VOLUNTEER)
                         .students_info(exclude_grades=[
                             GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED

@@ -115,7 +115,7 @@ class GraduateFactory(UserFactory):
         if not create:
             return
         site_id = kwargs.pop("site_id", None)
-        self.add_group(role=AcademicRoles.GRADUATE_CENTER, site_id=site_id)
+        self.add_group(role=AcademicRoles.GRADUATE, site_id=site_id)
 
 
 class GraduateProfileFactory(factory.DjangoModelFactory):

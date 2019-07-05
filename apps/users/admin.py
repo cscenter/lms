@@ -60,7 +60,7 @@ class UserGroupForm(forms.ModelForm):
                 self.add_error(None, ValidationError(msg))
         if role in {AcademicRoles.STUDENT,
                     AcademicRoles.VOLUNTEER,
-                    AcademicRoles.GRADUATE_CENTER}:
+                    AcademicRoles.GRADUATE}:
             if not user.city_id:
                 msg = _("Provide city for student")
                 self.add_error(None, ValidationError(msg))

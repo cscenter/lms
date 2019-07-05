@@ -51,7 +51,7 @@ def test_login_restrictions(client, settings):
     client.logout()
     # Login as graduate only
     student.groups.all().delete()
-    student.add_group(AcademicRoles.GRADUATE_CENTER)
+    student.add_group(AcademicRoles.GRADUATE)
     response = client.post(reverse('login'), user_data, follow=True)
     assert response.wsgi_request.user.is_authenticated
     client.logout()

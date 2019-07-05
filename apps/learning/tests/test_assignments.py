@@ -293,7 +293,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
             [],
             [AcademicRoles.TEACHER],
             [AcademicRoles.STUDENT],
-            [AcademicRoles.GRADUATE_CENTER]
+            [AcademicRoles.GRADUATE]
         ]
         for groups in all_test_groups:
             user = UserFactory.create(groups=groups, city_id='spb')

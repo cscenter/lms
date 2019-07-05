@@ -202,7 +202,7 @@ def test_report_for_target_term(rf):
     assert len(progress_report.data) == 3
     # Graduated students not included in report
     student3.groups.all().delete()
-    student3.add_group(AcademicRoles.GRADUATE_CENTER)
+    student3.add_group(AcademicRoles.GRADUATE)
     progress_report = get_progress_report(prev_s)
     assert len(progress_report.data) == 2
     STATIC_HEADERS_CNT = len(progress_report.static_headers)

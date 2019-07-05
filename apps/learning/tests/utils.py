@@ -13,7 +13,7 @@ def check_url_security(client, assert_login_redirect, groups_allowed, url):
         [],
         [AcademicRoles.TEACHER],
         [AcademicRoles.STUDENT],
-        [AcademicRoles.GRADUATE_CENTER]
+        [AcademicRoles.GRADUATE]
     ]
     for groups in all_test_groups:
         client.login(UserFactory.create(groups=groups, city_id='spb'))
