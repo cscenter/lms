@@ -186,21 +186,17 @@ class UserDetailView(generic.DetailView):
         filters = {}
         if not self.request.user.is_curator:
             filters["is_active"] = True
+            filters["group__site_id"] = settings.SITE_ID
         return (auth.get_user_model()._default_manager
                 .filter(**filters)
                 .select_related(*select_list)
-                .prefetch_related(*prefetch_list))
+                .prefetch_related(*prefetch_list)
+                .distinct('pk'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         u = self.request.user
         profile_user = context[self.context_object_name]
-        # On Center site show club students to teachers and curators only
-        if settings.SITE_ID == settings.CENTER_SITE_ID:
-            if (profile_user.get_cached_groups() == {User.roles.STUDENT_CLUB}
-                    and not (u.is_teacher or u.is_curator)):
-                raise Http404
-
         context['is_editing_allowed'] = (u == profile_user or u.is_curator)
         context['student_projects'] = profile_user.get_projects_queryset()
         context['current_semester'] = Semester.get_current()
