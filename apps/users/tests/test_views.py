@@ -165,29 +165,13 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
     def test_user_detail_view(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
         user = User.objects.create_user(**user_data)
-        resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.context['profile_user'], user)
-        self.assertFalse(resp.context['is_editing_allowed'])
-
-    def test_user_can_update_profile(self):
-        test_note = "The best user in the world"
-        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = User.objects.create_user(**user_data)
-        resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.client.login(None, **user_data)
-        resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertEqual(resp.context['profile_user'], user)
-        self.assertTrue(resp.context['is_editing_allowed'])
-        self.assertContains(resp, user.get_update_profile_url())
-        resp = self.client.get(user.get_update_profile_url())
-        self.assertContains(resp, 'bio')
-        resp = self.client.post(user.get_update_profile_url(),
-                                {'bio': test_note})
-        self.assertRedirects(resp, reverse('user_detail', args=[user.pk]),
-                             status_code=302)
-        resp = self.client.get(reverse('user_detail', args=[user.pk]))
-        self.assertContains(resp, test_note)
+        response = self.client.get(user.get_absolute_url())
+        assert response.status_code == 404
+        user.add_group(AcademicRoles.STUDENT)
+        response = self.client.get(user.get_absolute_url())
+        assert response.status_code == 200
+        assert response.context['profile_user'] == user
+        assert not response.context['is_editing_allowed']
 
     def test_graduate_can_edit_testimonial(self):
         """
@@ -253,6 +237,25 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.doLogin(curator)
         resp = self.client.get(url)
         self.assertContains(resp, student_mail)
+
+
+@pytest.mark.django_db
+def test_user_can_update_profile(client, assert_redirect):
+    test_note = "The best user in the world"
+    user = StudentFactory()
+    client.login(user)
+    response = client.get(user.get_absolute_url())
+    assert response.status_code == 200
+    assert response.context['profile_user'] == user
+    assert response.context['is_editing_allowed']
+    assert smart_bytes(user.get_update_profile_url()) in response.content
+    response = client.get(user.get_update_profile_url())
+    assert b'bio' in response.content
+    form_data = {'bio': test_note}
+    response = client.post(user.get_update_profile_url(), form_data)
+    assert_redirect(response, user.get_absolute_url())
+    response = client.get(user.get_absolute_url())
+    assert smart_bytes(test_note) in response.content
 
 
 @pytest.mark.django_db
