@@ -12,7 +12,6 @@ from announcements.views import AnnouncementTagAutocomplete, \
 from compscicenter_ru import views
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from htmlpages.views import flatpage
-from users.urls import auth_urls
 from users.views import TeacherDetailView
 
 admin.autodiscover()
@@ -54,7 +53,7 @@ urlpatterns += [
     path('', include('online_courses.urls')),
     path('videos/', views.CourseVideoListView.as_view(), name='video_list'),
 
-    path('', include(auth_urls)),
+    path('', include('auth.urls')),
     path('students/<int:student_id>/', views.StudentProfileView.as_view(), name='student_profile'),
     path('', include('users.urls')),
 
