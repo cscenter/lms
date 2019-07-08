@@ -11,7 +11,6 @@ from core.widgets import AdminRichTextAreaWidget
 from core.filters import AdminRelatedDropdownFilter
 from users.constants import AcademicRoles
 from users.forms import UserCreationForm, UserChangeForm
-from users.groups import REGISTERED_ACCESS_ROLES
 from .import_export import UserRecordResource
 from .models import User, EnrollmentCertificate, \
     OnlineCourseRecord, SHADCourseRecord, UserStatusLog, UserGroup

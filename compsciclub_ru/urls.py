@@ -16,7 +16,6 @@ from courses.urls import RE_COURSE_URI
 from htmlpages import views
 from international_schools.views import InternationalSchoolsListView
 from learning.views import CourseNewsNotificationUpdate
-from users.urls import auth_urls
 
 admin.autodiscover()
 
@@ -25,7 +24,7 @@ urlpatterns = i18n_patterns(
 
     path('register/', AsyncEmailRegistrationView.as_view(), name='registration_register'),
     path('', include('registration.backends.default.urls')),
-    path('', include(auth_urls)),
+    path('', include('auth.urls')),
 
     path("schedule/", CalendarClubScheduleView.as_view(), name="public_schedule"),
     path("schedule/classes.ics", ClubClassesFeed(), name="public_schedule_classes_ics"),

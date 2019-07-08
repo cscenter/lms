@@ -22,7 +22,7 @@ MIDDLEWARE = [
     'subdomains.middleware.SubdomainURLRoutingMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'users.middleware.AuthenticationMiddleware',
+    'auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'notifications.middleware.UnreadNotificationsCacheMiddleware',
     'learning.middleware.StudentCityMiddleware',

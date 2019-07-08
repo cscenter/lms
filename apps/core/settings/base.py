@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     'core.storage.StaticFilesConfig',  # custom list of ignore patterns
     'django.contrib.humanize',
 
+    'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
+    'users.apps.UsersConfig',
     'sorl.thumbnail',
     'crispy_forms',
     'formtools',
@@ -71,7 +73,6 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',  # what about club site?
 
-    'users.apps.UsersConfig',
     'core',
     'htmlpages',
     'courses.apps.CoursesConfig',
@@ -147,7 +148,7 @@ TIME_ZONES = {
 
 AUTH_USER_MODEL = "users.User"
 AUTHENTICATION_BACKENDS = [
-    "users.backends.EmailOrUsernameModelBackend",
+    "auth.backends.EmailOrUsernameModelBackend",
 ]
 CAN_LOGIN_AS = lambda request, target_user: request.user.is_curator
 

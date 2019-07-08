@@ -9,7 +9,6 @@ from loginas import urls as loginas_urls
 from announcements.views import AnnouncementTagAutocomplete
 from my_compscicenter_ru.views import IndexView
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
-from users.urls import auth_urls
 
 admin.autodiscover()
 
@@ -23,7 +22,7 @@ urlpatterns = [
 
     path('', include('learning.urls')),
 
-    path('', include(auth_urls)),
+    path('', include('auth.urls')),
     path('', include('users.urls')),
 
     path('notifications/', include("notifications.urls")),

@@ -56,7 +56,7 @@ from admission.services import create_invitation
 from admission.utils import generate_interview_reminder, \
     calculate_time
 from api.permissions import CuratorAccessPermission
-from core.auth.backends import YandexRuOAuth2Backend
+from auth.backends import YandexRuOAuth2Backend
 from core.models import University
 from core.settings.base import DEFAULT_CITY_CODE
 from core.timezone import now_local
