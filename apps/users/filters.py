@@ -61,9 +61,9 @@ class UserFilter(FilterSet):
             if not groups:
                 groups = self.FILTERING_GROUPS[:]
                 if "studying" in data.get("status", []):
-                    groups.remove(User.roles.GRADUATE)
+                    groups.remove(AcademicRoles.GRADUATE)
             # Special case - show `studying` among graduated
-            only_graduate_selected = (groups == {User.roles.GRADUATE})
+            only_graduate_selected = (groups == {AcademicRoles.GRADUATE})
             if "studying" in data.get("status", []) and only_graduate_selected:
                 self.empty_query = True
             else:

@@ -8,6 +8,7 @@ from treemenus.models import Menu, MenuItem
 
 from core.urls import reverse
 from menu_extension import CSCMENU_CACHE
+from users.constants import AcademicRoles
 
 register = template.Library()
 
@@ -50,7 +51,7 @@ def csc_menu(context, menu_name, root_id=False):
     # Flattened to tree
     menu_tree = []
     user = context['request'].user
-    user_groups = user.get_cached_groups()
+    user_groups = user.roles
     for item in flattened:
         if not has_permissions(item, user, user_groups):
             continue
@@ -84,8 +85,8 @@ def has_permissions(menu_item, user, user_groups, **kwargs):
         if not user_groups.intersection(menu_item.groups_allowed):
             return False
         restricted_to_students = {
-            user.roles.STUDENT,
-            user.roles.VOLUNTEER
+            AcademicRoles.STUDENT,
+            AcademicRoles.VOLUNTEER
         }
         if (restricted_to_students.intersection(menu_item.groups_allowed) and
                 not user.is_active_student):

@@ -39,6 +39,7 @@ from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
+from users.constants import AcademicRoles
 from users.mixins import CuratorOnlyMixin
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams
@@ -82,7 +83,7 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                                  .filter(curriculum_year__isnull=False)
                                  .order_by('curriculum_year')
                                  .distinct()),
-            'groups': {gid: User.roles.values[gid] for gid in
+            'groups': {gid: AcademicRoles.values[gid] for gid in
                        UserFilter.FILTERING_GROUPS},
             "status": StudentStatuses.values,
             "cnt_enrollments": range(UserFilter.ENROLLMENTS_MAX + 1)
@@ -119,9 +120,9 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             "status": StudentStatuses.WILL_GRADUATE
         }
         students = (User.objects
-                    .has_role(User.roles.STUDENT,
-                              User.roles.GRADUATE,
-                              User.roles.VOLUNTEER)
+                    .has_role(AcademicRoles.STUDENT,
+                              AcademicRoles.GRADUATE,
+                              AcademicRoles.VOLUNTEER)
                     .students_info(filters=filters))
 
         unique_teachers = set()
@@ -454,7 +455,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         return super(StudentFacesView, self).get_template_names()
 
     def get_queryset(self, city_code, enrollment_year):
-        roles = (User.roles.STUDENT, User.roles.VOLUNTEER)
+        roles = (AcademicRoles.STUDENT, AcademicRoles.VOLUNTEER)
         qs = (User.objects
               .has_role(*roles)
               .filter(city_id=city_code,

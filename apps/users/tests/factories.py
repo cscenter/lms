@@ -120,8 +120,7 @@ class OnlineCourseRecordFactory(factory.DjangoModelFactory):
         model = OnlineCourseRecord
 
     name = factory.Sequence(lambda n: "Online course %03d" % n)
-    student = factory.SubFactory(UserFactory,
-                                 groups=[User.roles.STUDENT])
+    student = factory.SubFactory(StudentFactory)
 
 
 class SHADCourseRecordFactory(factory.DjangoModelFactory):
@@ -130,8 +129,7 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
 
     name = factory.Sequence(lambda n: "SHAD course name %03d" % n)
     teachers = factory.Sequence(lambda n: "SHAD course teachers %03d" % n)
-    student = factory.SubFactory(UserFactory,
-                                 groups=[User.roles.STUDENT])
+    student = factory.SubFactory(StudentFactory)
     grade = factory.Iterator(list(GradeTypes.values))
     semester = factory.SubFactory('learning.tests.factories.SemesterFactory')
 
@@ -142,5 +140,4 @@ class EnrollmentCertificateFactory(factory.DjangoModelFactory):
 
     signature = "FIO"
     note = ""
-    student = factory.SubFactory(UserFactory,
-                                 groups=[User.roles.STUDENT])
+    student = factory.SubFactory(StudentFactory)

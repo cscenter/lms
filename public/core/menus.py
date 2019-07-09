@@ -29,8 +29,8 @@ class MenuItem(_MenuItem):
     def check(self, request):
         """Evaluate if we should be visible for this request"""
         if self.visible_to is not None:
-            user_groups = request.user.get_cached_groups()
-            self.visible = bool(user_groups.intersection(self.visible_to))
+            user_roles = request.user.roles
+            self.visible = bool(user_roles.intersection(self.visible_to))
         if callable(self.check_func):
             self.visible = self.check_func(request)
         if self.for_staff and not request.user.is_curator:

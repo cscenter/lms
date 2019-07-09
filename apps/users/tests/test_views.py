@@ -91,14 +91,14 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 200
         self.assertLoginRedirect(url)
-        add_user_groups(user, [user.roles.STUDENT])
+        add_user_groups(user, [AcademicRoles.STUDENT])
         user.city_id = 'spb'
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
         resp = self.client.get(reverse('teaching:assignment_list'))
         self.assertLoginRedirect(url)
-        add_user_groups(user, [user.roles.STUDENT, user.roles.TEACHER])
+        add_user_groups(user, [AcademicRoles.STUDENT, AcademicRoles.TEACHER])
         user.save()
         resp = self.client.get(reverse('teaching:assignment_list'))
         # Teacher has no course offering and redirects to courses list

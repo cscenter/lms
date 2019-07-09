@@ -15,6 +15,7 @@ from learning.projects.models import ReportComment, ProjectStudent
 from learning.settings import StudentStatuses, GradeTypes
 from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from learning.utils import grade_to_mark
+from users.constants import AcademicRoles
 from users.models import User, SHADCourseRecord
 
 
@@ -220,9 +221,9 @@ class ProgressReportForDiplomas(ProgressReport):
             **filters
         }
         return (User.objects
-                .has_role(User.roles.STUDENT,
-                          User.roles.GRADUATE,
-                          User.roles.VOLUNTEER)
+                .has_role(AcademicRoles.STUDENT,
+                          AcademicRoles.GRADUATE,
+                          AcademicRoles.VOLUNTEER)
                 .students_info(filters=filters,
                                exclude_grades=[GradeTypes.UNSATISFACTORY,
                                                GradeTypes.NOT_GRADED]))
@@ -292,9 +293,9 @@ class ProgressReportFull(ProgressReport):
     @staticmethod
     def get_queryset(**kwargs):
         return (User.objects
-                .has_role(User.roles.STUDENT,
-                          User.roles.GRADUATE,
-                          User.roles.VOLUNTEER)
+                .has_role(AcademicRoles.STUDENT,
+                          AcademicRoles.GRADUATE,
+                          AcademicRoles.VOLUNTEER)
                 .students_info()
                 .select_related("applicant"))
 
@@ -404,7 +405,7 @@ class ProgressReportForSemester(ProgressReport):
         semester = kwargs.pop("semester")
         filters = kwargs.pop("filters", {})
         return (User.objects
-                .has_role(User.roles.STUDENT, User.roles.VOLUNTEER)
+                .has_role(AcademicRoles.STUDENT, AcademicRoles.VOLUNTEER)
                 .students_info(filters=filters,
                                exclude={"status": StudentStatuses.EXPELLED},
                                semester=semester))

@@ -147,9 +147,9 @@ TIME_ZONES = {
 }
 
 AUTH_USER_MODEL = "users.User"
-AUTHENTICATION_BACKENDS = [
-    "auth.backends.EmailOrUsernameModelBackend",
-]
+AUTHENTICATION_BACKENDS = (
+    "auth.backends.RBACModelBackend",
+)
 CAN_LOGIN_AS = lambda request, target_user: request.user.is_curator
 
 LOGIN_URL = "/login/"
