@@ -9,7 +9,7 @@ from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from learning.models import GraduateProfile
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User
 from .models import AssignmentComment, Enrollment, Event, Useful, Branch
 
@@ -74,8 +74,8 @@ class EnrollmentAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'student':
             kwargs['queryset'] = (User.objects
-                                  .has_role(AcademicRoles.STUDENT,
-                                            AcademicRoles.VOLUNTEER))
+                                  .has_role(Roles.STUDENT,
+                                            Roles.VOLUNTEER))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 

@@ -8,7 +8,7 @@ from study_programs.models import StudyProgram
 from courses.models import Semester
 from learning.projects.models import ProjectStudent
 from learning.settings import StudentStatuses
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User, SHADCourseRecord, OnlineCourseRecord
 
 
@@ -41,7 +41,7 @@ Requirements:
                                      then=Value(None)),
                                 default=F("projectstudent__pk")
                             ), distinct=True))
-                    .has_role(AcademicRoles.STUDENT)
+                    .has_role(Roles.STUDENT)
                     .filter(curriculum_year__gte=str(current_term.year - 3),
                             passed_projects__gte=3)
                     .exclude(status__in=[StudentStatuses.WILL_GRADUATE,

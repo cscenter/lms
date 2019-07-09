@@ -27,7 +27,7 @@ from courses.models import Course, Semester, CourseClass
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User
 
 
@@ -120,7 +120,7 @@ class TeachersView(generic.ListView):
                          .distinct()
                          .values_list("teachers__pk", flat=True))
         return (User.objects
-                .has_role(AcademicRoles.TEACHER)
+                .has_role(Roles.TEACHER)
                 .filter(courseteacher__teacher_id__in=lecturers)
                 .distinct)
 

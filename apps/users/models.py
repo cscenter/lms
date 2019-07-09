@@ -31,7 +31,7 @@ from learning.models import StudentProfile
 from learning.permissions import LearningPermissionsMixin
 from learning.settings import StudentStatuses, GradeTypes
 from learning.utils import is_negative_grade
-from users.constants import GROUPS_IMPORT_TO_GERRIT, AcademicRoles, \
+from users.constants import GROUPS_IMPORT_TO_GERRIT, Roles, \
     SHADCourseGradeTypes, ThumbnailSizes, GenderTypes
 from users.fields import MonitorStatusField
 from users.tasks import update_password_in_gerrit
@@ -82,7 +82,6 @@ class UserStatusLog(models.Model):
 
 
 class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
-    group = AcademicRoles
     city_code = None
     index_redirect = None
     roles = set()
@@ -135,7 +134,7 @@ class UserGroup(models.Model):
                              on_delete=models.PROTECT,
                              default=get_current_site)
     role = models.PositiveSmallIntegerField(_("Role"),
-                                            choices=AcademicRoles.choices)
+                                            choices=Roles.choices)
 
     class Meta:
         db_table = "users_user_groups"
@@ -384,10 +383,10 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
                                             email=applicant.email,
                                             password=random_password)
         if applicant.status == Applicant.VOLUNTEER:
-            user.add_group(AcademicRoles.VOLUNTEER)
+            user.add_group(Roles.VOLUNTEER)
         else:
-            user.add_group(AcademicRoles.STUDENT)
-        user.add_group(AcademicRoles.STUDENT, site_id=settings.CLUB_SITE_ID)
+            user.add_group(Roles.STUDENT)
+        user.add_group(Roles.STUDENT, site_id=settings.CLUB_SITE_ID)
         # Migrate data from application form to user profile
         same_attrs = [
             "first_name",

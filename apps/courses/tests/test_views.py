@@ -11,7 +11,7 @@ from django.utils import formats
 
 from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import TeacherFactory
 
 
@@ -128,7 +128,7 @@ def test_course_assignment_timezone(settings, client):
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] == settings.TIME_ZONES['nsk']
-    teacher_nsk.add_group(AcademicRoles.STUDENT)
+    teacher_nsk.add_group(Roles.STUDENT)
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] == settings.TIME_ZONES['nsk']

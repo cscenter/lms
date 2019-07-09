@@ -1,6 +1,6 @@
 import pytest
 
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User
 
 
@@ -17,13 +17,13 @@ def test_user_permissions():
     assert not user.is_project_reviewer
     user = User(username="bar", email="bar@localhost.ru")
     user.save()
-    user.add_group(AcademicRoles.CURATOR_PROJECTS)
+    user.add_group(Roles.CURATOR_PROJECTS)
     assert user.is_curator_of_projects
     assert not user.is_project_reviewer
     user = User(username="baz", email="baz@localhost.ru")
     user.save()
-    user.add_group(AcademicRoles.PROJECT_REVIEWER)
-    user.add_group(AcademicRoles.CURATOR_PROJECTS)
+    user.add_group(Roles.PROJECT_REVIEWER)
+    user.add_group(Roles.CURATOR_PROJECTS)
     assert user.is_curator_of_projects
     assert user.is_project_reviewer
 

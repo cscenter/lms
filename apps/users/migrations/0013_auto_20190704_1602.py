@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from users.constants import AcademicRoles
+from users.constants import Roles
 
 
 def mutate_groups(apps, schema_editor):
@@ -16,12 +16,12 @@ def mutate_groups(apps, schema_editor):
             # 5 - AcademicRoles.STUDENT_CLUB
             if user_group.role == 5:
                 assert user_group.site_id == 2
-                user_group.role = AcademicRoles.STUDENT
+                user_group.role = Roles.STUDENT
                 user_group.save()
             # 6 - AcademicRoles.TEACHER_CLUB
             elif user_group.role == 6:
                 assert user_group.site_id == 2
-                user_group.role = AcademicRoles.TEACHER
+                user_group.role = Roles.TEACHER
                 user_group.save()
 
 

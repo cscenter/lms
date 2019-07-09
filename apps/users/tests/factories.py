@@ -3,7 +3,7 @@
 import factory
 
 from learning.settings import GradeTypes
-from users.constants import AcademicRoles, GenderTypes
+from users.constants import Roles, GenderTypes
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord, UserGroup
 
@@ -63,7 +63,7 @@ class UserGroupFactory(factory.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     role = factory.Faker('random_element',
-                         elements=[c for c, _ in AcademicRoles.choices])
+                         elements=[c for c, _ in Roles.choices])
 
 
 class CuratorFactory(UserFactory):
@@ -82,7 +82,7 @@ class StudentFactory(UserFactory):
         if not create:
             return
         site_id = kwargs.pop("site_id", None)
-        self.add_group(role=AcademicRoles.STUDENT, site_id=site_id)
+        self.add_group(role=Roles.STUDENT, site_id=site_id)
 
 
 class TeacherFactory(UserFactory):
@@ -91,7 +91,7 @@ class TeacherFactory(UserFactory):
         if not create:
             return
         site_id = kwargs.pop("site_id", None)
-        self.add_group(role=AcademicRoles.TEACHER, site_id=site_id)
+        self.add_group(role=Roles.TEACHER, site_id=site_id)
 
 
 class VolunteerFactory(UserFactory):
@@ -102,7 +102,7 @@ class VolunteerFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.VOLUNTEER]
+        required_groups = [Roles.VOLUNTEER]
         add_user_groups(self, required_groups)
 
 
@@ -111,7 +111,7 @@ class ProjectReviewerFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.PROJECT_REVIEWER]
+        required_groups = [Roles.PROJECT_REVIEWER]
         add_user_groups(self, required_groups)
 
 

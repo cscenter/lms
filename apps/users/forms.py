@@ -9,7 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site
 from core.widgets import UbereditorWidget
-from users.constants import AcademicRoles
+from users.constants import Roles
 from .models import User, EnrollmentCertificate
 
 
@@ -107,10 +107,10 @@ class UserChangeForm(_UserChangeForm):
         groups = {x.pk for x in cleaned_data.get('groups', [])}
         u: User = self.instance
         # FIXME: How to check these invariants with 1-to-many relation?
-        if AcademicRoles.VOLUNTEER in groups and AcademicRoles.STUDENT in groups:
+        if Roles.VOLUNTEER in groups and Roles.STUDENT in groups:
             msg = _("User can't be volunteer and student at the same time")
             self.add_error('groups', ValidationError(msg))
 
-        if AcademicRoles.GRADUATE in groups and AcademicRoles.STUDENT in groups:
+        if Roles.GRADUATE in groups and Roles.STUDENT in groups:
             msg = _("User can't be graduated and student at the same time")
             self.add_error('groups', ValidationError(msg))

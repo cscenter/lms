@@ -3,7 +3,7 @@ from enum import Enum, auto
 from core.utils import is_club_site
 from learning.enrollment import course_failed_by_student
 from learning.settings import StudentStatuses
-from users.constants import AcademicRoles
+from users.constants import Roles
 
 
 class LearningPermissionsMixin:
@@ -17,11 +17,11 @@ class LearningPermissionsMixin:
 
     @property
     def is_student(self):
-        return AcademicRoles.STUDENT in self.roles
+        return Roles.STUDENT in self.roles
 
     @property
     def is_volunteer(self):
-        return AcademicRoles.VOLUNTEER in self.roles
+        return Roles.VOLUNTEER in self.roles
 
     @property
     def is_expelled(self):
@@ -37,23 +37,23 @@ class LearningPermissionsMixin:
 
     @property
     def is_teacher(self):
-        return AcademicRoles.TEACHER in self.roles
+        return Roles.TEACHER in self.roles
 
     @property
     def is_graduate(self):
-        return AcademicRoles.GRADUATE in self.roles
+        return Roles.GRADUATE in self.roles
 
     @property
     def is_curator_of_projects(self):
-        return AcademicRoles.CURATOR_PROJECTS in self.roles
+        return Roles.CURATOR_PROJECTS in self.roles
 
     @property
     def is_interviewer(self):
-        return AcademicRoles.INTERVIEWER in self.roles
+        return Roles.INTERVIEWER in self.roles
 
     @property
     def is_project_reviewer(self):
-        return AcademicRoles.PROJECT_REVIEWER in self.roles
+        return Roles.PROJECT_REVIEWER in self.roles
 
 
 def has_master_degree(user):
@@ -61,7 +61,7 @@ def has_master_degree(user):
     Emphasis that user is studying for a masters degree.
     This group doesn't give any access to the site.
     """
-    return AcademicRoles.MASTERS_DEGREE in user.roles
+    return Roles.MASTERS_DEGREE in user.roles
 
 
 class CourseRole(Enum):

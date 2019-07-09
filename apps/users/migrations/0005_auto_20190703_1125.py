@@ -2,12 +2,12 @@
 
 from django.db import migrations
 
-from users.constants import AcademicRoles
+from users.constants import Roles
 
 
 def create_groups(apps, schema_editor):
     Group = apps.get_model('users', 'Group')
-    for group_id, group_name in AcademicRoles.values.items():
+    for group_id, group_name in Roles.values.items():
         Group.objects.update_or_create(
             pk=group_id,
             defaults={

@@ -15,7 +15,7 @@ from django.utils.html import strip_tags, linebreaks
 
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
-from users.constants import AcademicRoles
+from users.constants import Roles
 from notifications import NotificationTypes as notification_types
 
 logger = logging.getLogger(__name__)
@@ -49,10 +49,10 @@ EMAIL_TEMPLATES = {
 
 # Student and teacher groups which can access center site.
 LEARNING_PARTICIPANTS_CENTER = {
-    AcademicRoles.STUDENT,
-    AcademicRoles.VOLUNTEER,
-    AcademicRoles.GRADUATE,
-    AcademicRoles.TEACHER,
+    Roles.STUDENT,
+    Roles.VOLUNTEER,
+    Roles.GRADUATE,
+    Roles.TEACHER,
 }
 
 

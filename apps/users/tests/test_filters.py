@@ -9,7 +9,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import UserFactory, VolunteerFactory, \
     add_user_groups, StudentFactory
 
@@ -58,25 +58,25 @@ def test_student_search(client, curator, search_url):
     # Now test groups filter
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={}".format(AcademicRoles.MASTERS_DEGREE)
+        "curriculum_year=2011&groups={}".format(Roles.MASTERS_DEGREE)
     ))
     assert response.json()["count"] == 0
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={}".format(AcademicRoles.STUDENT)
+        "curriculum_year=2011&groups={}".format(Roles.STUDENT)
     ))
     assert response.json()["count"] == 2
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={}".format(AcademicRoles.VOLUNTEER)
+        "curriculum_year=2011&groups={}".format(Roles.VOLUNTEER)
     ))
     assert response.json()["count"] == 1
     assert response.json()["results"][0]["short_name"] == volunteer.get_short_name()
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups[]={}&groups[]={}".format(
-            AcademicRoles.STUDENT,
-            AcademicRoles.VOLUNTEER
+            Roles.STUDENT,
+            Roles.VOLUNTEER
         )
     ))
     assert response.json()["count"] == 3
@@ -85,8 +85,8 @@ def test_student_search(client, curator, search_url):
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups[]={}&groups[]={}&status={}".format(
-            AcademicRoles.STUDENT,
-            AcademicRoles.VOLUNTEER,
+            Roles.STUDENT,
+            Roles.VOLUNTEER,
             StudentStatuses.EXPELLED
         )
     ))
@@ -96,8 +96,8 @@ def test_student_search(client, curator, search_url):
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups[]={}&groups[]={}&status={},{}".format(
-            AcademicRoles.STUDENT,
-            AcademicRoles.VOLUNTEER,
+            Roles.STUDENT,
+            Roles.VOLUNTEER,
             StudentStatuses.EXPELLED,
             StudentStatuses.REINSTATED
         )
@@ -106,8 +106,8 @@ def test_student_search(client, curator, search_url):
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
-            AcademicRoles.STUDENT,
-            AcademicRoles.VOLUNTEER,
+            Roles.STUDENT,
+            Roles.VOLUNTEER,
             StudentStatuses.EXPELLED,
             StudentStatuses.REINSTATED,
             "cnt_enrollments=2"
@@ -118,8 +118,8 @@ def test_student_search(client, curator, search_url):
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
-            AcademicRoles.STUDENT,
-            AcademicRoles.VOLUNTEER,
+            Roles.STUDENT,
+            Roles.VOLUNTEER,
             StudentStatuses.EXPELLED,
             StudentStatuses.REINSTATED,
             "cnt_enrollments=0,2"
@@ -139,8 +139,8 @@ def test_student_search_enrollments(client, curator, search_url):
     ENROLLMENTS_URL = "{}?{}".format(
         search_url,
         "curriculum_year=2011&groups={},{}&cnt_enrollments={{}}".format(
-            AcademicRoles.STUDENT,
-            AcademicRoles.VOLUNTEER,
+            Roles.STUDENT,
+            Roles.VOLUNTEER,
         )
     )
     response = client.get(ENROLLMENTS_URL.format("2"))
@@ -195,7 +195,7 @@ def test_student_search_by_groups(client, curator, search_url):
     json_data = response.json()
     assert json_data["count"] == len(students) + len(volunteers)
     url_show_club_students = "{}?{}".format(
-        search_url, "groups={}".format(AcademicRoles.STUDENT))
+        search_url, "groups={}".format(Roles.STUDENT))
     response = client.get(url_show_club_students)
     json_data = response.json()
     # FIXME: What should I do here to fix it???
@@ -264,22 +264,22 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
     assert response.json()["count"] == total_studying
     # More precisely by group
     url = "{}?{}".format(
-        search_url, "status=studying&groups={}".format(AcademicRoles.VOLUNTEER))
+        search_url, "status=studying&groups={}".format(Roles.VOLUNTEER))
     response = client.get(url)
     assert response.json()["count"] == len(volunteers)
     # Edge case - show `studying` among graduated
-    query = "status=studying&groups={}".format(AcademicRoles.GRADUATE)
+    query = "status=studying&groups={}".format(Roles.GRADUATE)
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == 0
     # If some group added except graduate group - concat results
-    query = "status=studying&groups={},{}".format(AcademicRoles.VOLUNTEER,
-                                                  AcademicRoles.GRADUATE)
+    query = "status=studying&groups={},{}".format(Roles.VOLUNTEER,
+                                                  Roles.GRADUATE)
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == len(volunteers) + len(graduated)
     # Edge case #2 - graduate can have `master` subgroup
-    add_user_groups(graduated[0], [AcademicRoles.MASTERS_DEGREE])
-    query = "status=studying&groups={},{}".format(AcademicRoles.GRADUATE,
-                                                  AcademicRoles.MASTERS_DEGREE)
+    add_user_groups(graduated[0], [Roles.MASTERS_DEGREE])
+    query = "status=studying&groups={},{}".format(Roles.GRADUATE,
+                                                  Roles.MASTERS_DEGREE)
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == len(graduated)
 

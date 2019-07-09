@@ -7,7 +7,7 @@ from core.urls import reverse
 from courses.tests.factories import CourseFactory, CourseClassFactory, \
     AssignmentFactory
 from learning.tests.factories import EnrollmentFactory, EventFactory
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User
 from users.tests.factories import UserFactory, StudentFactory
 
@@ -28,8 +28,8 @@ def test_smoke(client, curator, settings):
 
 @pytest.mark.django_db
 def test_classes(client):
-    user = UserFactory(groups=[AcademicRoles.STUDENT,
-                               AcademicRoles.TEACHER],
+    user = UserFactory(groups=[Roles.STUDENT,
+                               Roles.TEACHER],
                        city_id='spb')
     client.login(user)
     fname = 'csc_classes.ics'
@@ -55,7 +55,7 @@ def test_classes(client):
 
 @pytest.mark.django_db
 def test_assignments(client):
-    user = UserFactory(groups=[AcademicRoles.STUDENT, AcademicRoles.TEACHER],
+    user = UserFactory(groups=[Roles.STUDENT, Roles.TEACHER],
                        city_id='spb')
     client.login(user)
     fname = 'csc_assignments.ics'

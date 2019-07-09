@@ -12,7 +12,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User, EnrollmentCertificate
 from users.tests.factories import UserFactory, EnrollmentCertificateFactory, \
     StudentFactory
@@ -48,7 +48,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
     def test_user_detail_view(self):
         """Show reference-add button only to curators (superusers)"""
         # check user page without curator credentials
-        student = UserFactory.create(groups=[AcademicRoles.STUDENT],
+        student = UserFactory.create(groups=[Roles.STUDENT],
                                      enrollment_year=2011)
         self.doLogin(student)
         url = reverse('user_detail', args=[student.pk])
@@ -131,7 +131,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
         self.assertFalse(form.is_valid())
         # can't login message in __all__
         self.assertIn("__all__", form.errors)
-        student.add_group(AcademicRoles.STUDENT)
+        student.add_group(Roles.STUDENT)
         student.save()
         response = self.client.post(reverse('login'), login_data)
         self.assertEqual(response.status_code, 302)

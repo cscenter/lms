@@ -23,7 +23,7 @@ from learning.settings import GradingSystems, \
     StudentStatuses, GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import TeacherFactory, UserFactory, StudentFactory
 
 
@@ -138,7 +138,7 @@ class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
         self.assertLoginRedirect(url)
         test_groups = [
             [],
-            [AcademicRoles.STUDENT],
+            [Roles.STUDENT],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
@@ -388,7 +388,7 @@ def test_security(client, settings, assert_login_redirect):
     assert_login_redirect(url, method='get')
     test_groups = [
         [],
-        [AcademicRoles.STUDENT],
+        [Roles.STUDENT],
     ]
     for groups in test_groups:
         client.login(UserFactory.create(groups=groups))

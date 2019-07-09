@@ -31,7 +31,7 @@ from learning.models import Branch
 from learning.projects.constants import ProjectTypes
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
-from users.constants import AcademicRoles, GenderTypes
+from users.constants import Roles, GenderTypes
 
 CURATOR_SCORE_FIELDS = [
     "score_quality",
@@ -481,7 +481,7 @@ class Project(TimeStampedModel):
         verbose_name=_("Reviewers"),
         related_name='project_reviewers',
         blank=True,
-        limit_choices_to=(Q(group__role=AcademicRoles.PROJECT_REVIEWER) |
+        limit_choices_to=(Q(group__role=Roles.PROJECT_REVIEWER) |
                           Q(is_superuser=True)))
     supervisors = models.ManyToManyField(
         Supervisor,

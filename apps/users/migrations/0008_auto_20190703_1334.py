@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from users.constants import AcademicRoles
+from users.constants import Roles
 
 
 def migrate_groups(apps, schema_editor):

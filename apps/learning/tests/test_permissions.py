@@ -6,7 +6,7 @@ from learning.permissions import course_access_role, CourseRole, \
     has_master_degree
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import EnrollmentFactory
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import ExtendedAnonymousUser, User
 from users.tests.factories import CuratorFactory, TeacherFactory, \
     StudentFactory
@@ -35,34 +35,34 @@ def test_user_permissions():
     assert not user.is_graduate
     user = User(username="bar", email="bar@localhost.ru")
     user.save()
-    user.add_group(AcademicRoles.STUDENT)
+    user.add_group(Roles.STUDENT)
     assert user.is_student
     assert not user.is_volunteer
     assert not user.is_teacher
     assert not user.is_graduate
     user = User(username="baz", email="baz@localhost.ru")
     user.save()
-    user.add_group(AcademicRoles.STUDENT)
-    user.add_group(AcademicRoles.TEACHER)
+    user.add_group(Roles.STUDENT)
+    user.add_group(Roles.TEACHER)
     assert user.is_student
     assert not user.is_volunteer
     assert user.is_teacher
     assert not user.is_graduate
     user = User(username="baq", email="baq@localhost.ru")
     user.save()
-    user.add_group(AcademicRoles.STUDENT)
-    user.add_group(AcademicRoles.TEACHER)
-    user.add_group(AcademicRoles.GRADUATE)
+    user.add_group(Roles.STUDENT)
+    user.add_group(Roles.TEACHER)
+    user.add_group(Roles.GRADUATE)
     assert user.is_student
     assert not user.is_volunteer
     assert user.is_teacher
     assert user.is_graduate
     user = User(username="zoo", email="zoo@localhost.ru")
     user.save()
-    user.add_group(AcademicRoles.STUDENT)
-    user.add_group(AcademicRoles.TEACHER)
-    user.add_group(AcademicRoles.GRADUATE)
-    user.add_group(AcademicRoles.VOLUNTEER)
+    user.add_group(Roles.STUDENT)
+    user.add_group(Roles.TEACHER)
+    user.add_group(Roles.GRADUATE)
+    user.add_group(Roles.VOLUNTEER)
     assert user.is_student
     assert user.is_volunteer
     assert user.is_teacher
@@ -152,7 +152,7 @@ def test_course_access_role_teacher():
     role = course_access_role(course=course2, user=teacher2)
     assert role == CourseRole.TEACHER
     # Now make sure that teacher role is prevailed on any student role
-    teacher2.add_group(AcademicRoles.STUDENT)
+    teacher2.add_group(Roles.STUDENT)
     role = course_access_role(course=course, user=teacher2)
     assert role == CourseRole.TEACHER
     delete_enrollment_cache(teacher2, course)

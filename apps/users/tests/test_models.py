@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User
 from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
     UserGroupFactory
@@ -38,14 +38,14 @@ def test_user_add_group(settings):
     settings.SITE_ID = settings.CENTER_SITE_ID
     user = User(username="foo", email="foo@localhost.ru")
     user.save()
-    user.add_group(AcademicRoles.STUDENT)
+    user.add_group(Roles.STUDENT)
     assert user.groups.count() == 1
     user_group = user.groups.first()
     assert user_group.site_id == settings.CENTER_SITE_ID
     settings.SITE_ID = settings.CLUB_SITE_ID
     user = User(username="bar", email="bar@localhost.ru")
     user.save()
-    user.add_group(AcademicRoles.STUDENT)
+    user.add_group(Roles.STUDENT)
     assert user.groups.count() == 1
     user_group = user.groups.first()
     assert user_group.site_id == settings.CLUB_SITE_ID
@@ -55,9 +55,9 @@ def test_user_add_group(settings):
 def test_user_add_group_already_exists():
     user = User(username="foo", email="foo@localhost.ru")
     user.save()
-    user.add_group(AcademicRoles.STUDENT)
+    user.add_group(Roles.STUDENT)
     assert user.groups.count() == 1
-    user.add_group(AcademicRoles.STUDENT)
+    user.add_group(Roles.STUDENT)
     assert user.groups.count() == 1
 
 
@@ -66,25 +66,25 @@ def test_user_remove_group():
     """Test subsequent calls with the same role"""
     user = User(username="foo", email="foo@localhost.ru")
     user.save()
-    user.remove_group(AcademicRoles.STUDENT)
-    user.remove_group(AcademicRoles.STUDENT)
+    user.remove_group(Roles.STUDENT)
+    user.remove_group(Roles.STUDENT)
 
 
 @pytest.mark.django_db
 def test_cached_groups(settings):
-    user = UserFactory(groups=[AcademicRoles.STUDENT,
-                               AcademicRoles.TEACHER])
-    assert set(user._cached_groups) == {AcademicRoles.STUDENT,
-                                        AcademicRoles.TEACHER}
+    user = UserFactory(groups=[Roles.STUDENT,
+                               Roles.TEACHER])
+    assert set(user._cached_groups) == {Roles.STUDENT,
+                                        Roles.TEACHER}
     user.status = StudentStatuses.EXPELLED
-    user.groups.add(UserGroupFactory(user=user, role=AcademicRoles.VOLUNTEER))
+    user.groups.add(UserGroupFactory(user=user, role=Roles.VOLUNTEER))
     # Invalidate cache
     del user._cached_groups
-    assert user._cached_groups == {AcademicRoles.TEACHER,
-                                   AcademicRoles.STUDENT,
-                                   AcademicRoles.VOLUNTEER}
+    assert user._cached_groups == {Roles.TEACHER,
+                                   Roles.STUDENT,
+                                   Roles.VOLUNTEER}
     user.groups.all().delete()
-    user.add_group(role=AcademicRoles.STUDENT)
+    user.add_group(role=Roles.STUDENT)
     user.status = ''
     user.save()
     settings.SITE_ID = settings.CLUB_SITE_ID

@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from learning.projects.constants import ProjectTypes
 from learning.projects.models import Project, ProjectStudent
 from learning.settings import GradeTypes
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User
 
 EMPTY_CHOICE = ('', _('Any'))
@@ -34,8 +34,8 @@ class ProjectsFilter(django_filters.FilterSet):
     students = django_filters.ModelChoiceFilter(
         label=_("Student"),
         queryset=(User.objects
-                  .has_role(AcademicRoles.STUDENT,
-                            AcademicRoles.GRADUATE)
+                  .has_role(Roles.STUDENT,
+                            Roles.GRADUATE)
                   .distinct())
     )
 

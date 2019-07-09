@@ -17,7 +17,7 @@ from courses.tests.factories import *
 from courses.utils import get_current_term_pair
 from learning.tests.factories import *
 from learning.tests.utils import check_url_security
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import UserFactory, StudentFactory, TeacherFactory
 from .mixins import *
 
@@ -41,9 +41,9 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
         self.assertLoginRedirect(reverse(self.url_name))
         all_test_groups = [
             [],
-            [AcademicRoles.TEACHER],
-            [AcademicRoles.STUDENT],
-            [AcademicRoles.GRADUATE]
+            [Roles.TEACHER],
+            [Roles.STUDENT],
+            [Roles.GRADUATE]
         ]
         for groups in all_test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -59,7 +59,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
 class CourseListTeacherTests(GroupSecurityCheckMixin,
                              MyUtilitiesMixin, CSCTestCase):
     url_name = 'teaching:course_list'
-    groups_allowed = [AcademicRoles.TEACHER]
+    groups_allowed = [Roles.TEACHER]
 
 
 class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
@@ -172,8 +172,8 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertLoginRedirect(url)
         test_groups = [
             [],
-            [AcademicRoles.TEACHER],
-            [AcademicRoles.STUDENT],
+            [Roles.TEACHER],
+            [Roles.STUDENT],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
@@ -186,7 +186,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         assert self.client.get(url).status_code == 200
         # Change student to graduate, make sure they have access to HW
         student.groups.all().delete()
-        student.add_group(AcademicRoles.GRADUATE)
+        student.add_group(Roles.GRADUATE)
         student.save()
         self.assertEqual(200, self.client.get(url).status_code)
 
@@ -261,12 +261,12 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         # Test GET
         test_groups = [
             [],
-            [AcademicRoles.TEACHER],
-            [AcademicRoles.STUDENT],
+            [Roles.TEACHER],
+            [Roles.STUDENT],
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == [AcademicRoles.TEACHER]:
+            if groups == [Roles.TEACHER]:
                 self.assertLoginRedirect(url)
             else:
                 assert self.client.get(url).status_code == 302
@@ -282,12 +282,12 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         grade_dict = {'grading_form': True, 'score': 3}
         test_groups = [
             [],
-            [AcademicRoles.TEACHER],
-            [AcademicRoles.STUDENT]
+            [Roles.TEACHER],
+            [Roles.STUDENT]
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups))
-            if groups == [AcademicRoles.TEACHER]:
+            if groups == [Roles.TEACHER]:
                 self.assertPOSTLoginRedirect(url, grade_dict)
             else:
                 assert self.client.get(url).status_code == 302
@@ -386,7 +386,7 @@ def test_events_smoke(client):
 def test_student_courses_list(client, assert_login_redirect):
     url = reverse('study:course_list')
     check_url_security(client, assert_login_redirect,
-                       groups_allowed=[AcademicRoles.STUDENT],
+                       groups_allowed=[Roles.STUDENT],
                        url=url)
     student_spb = StudentFactory(city_id='spb')
     client.login(student_spb)
