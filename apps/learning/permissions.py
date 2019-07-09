@@ -11,21 +11,17 @@ class LearningPermissionsMixin:
     def _cached_groups(self):
         return set()
 
-    # FIXME: Store groups or rename to get_cached_roles()
-    def get_cached_groups(self):
-        return self._cached_groups
-
     @property
     def is_curator(self):
         return self.is_superuser and self.is_staff
 
     @property
     def is_student(self):
-        return AcademicRoles.STUDENT in self._cached_groups
+        return AcademicRoles.STUDENT in self.roles
 
     @property
     def is_volunteer(self):
-        return AcademicRoles.VOLUNTEER in self._cached_groups
+        return AcademicRoles.VOLUNTEER in self.roles
 
     @property
     def is_expelled(self):
@@ -41,23 +37,23 @@ class LearningPermissionsMixin:
 
     @property
     def is_teacher(self):
-        return AcademicRoles.TEACHER in self._cached_groups
+        return AcademicRoles.TEACHER in self.roles
 
     @property
     def is_graduate(self):
-        return AcademicRoles.GRADUATE in self._cached_groups
+        return AcademicRoles.GRADUATE in self.roles
 
     @property
     def is_curator_of_projects(self):
-        return AcademicRoles.CURATOR_PROJECTS in self._cached_groups
+        return AcademicRoles.CURATOR_PROJECTS in self.roles
 
     @property
     def is_interviewer(self):
-        return AcademicRoles.INTERVIEWER in self._cached_groups
+        return AcademicRoles.INTERVIEWER in self.roles
 
     @property
     def is_project_reviewer(self):
-        return AcademicRoles.PROJECT_REVIEWER in self._cached_groups
+        return AcademicRoles.PROJECT_REVIEWER in self.roles
 
 
 def has_master_degree(user):
@@ -65,7 +61,7 @@ def has_master_degree(user):
     Emphasis that user is studying for a masters degree.
     This group doesn't give any access to the site.
     """
-    return AcademicRoles.MASTERS_DEGREE in user.get_cached_groups()
+    return AcademicRoles.MASTERS_DEGREE in user.roles
 
 
 class CourseRole(Enum):

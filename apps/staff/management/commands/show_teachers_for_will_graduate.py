@@ -4,6 +4,7 @@ from django.core.management import BaseCommand
 
 from learning.models import Enrollment
 from learning.settings import StudentStatuses, GradeTypes
+from users.constants import AcademicRoles
 from users.models import User
 
 
@@ -14,7 +15,7 @@ class Command(BaseCommand):
     """
 
     def handle(self, *args, **options):
-        roles = [User.roles.STUDENT, User.roles.VOLUNTEER]
+        roles = (AcademicRoles.STUDENT, AcademicRoles.VOLUNTEER)
         will_graduate_list = (User.objects
                               .has_role(*roles)
                               .filter(status=StudentStatuses.WILL_GRADUATE)

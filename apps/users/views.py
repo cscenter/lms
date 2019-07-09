@@ -27,6 +27,7 @@ from learning.models import StudentAssignment, \
     Enrollment
 from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
+from users.constants import AcademicRoles
 from users.mixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
 from users.thumbnails import get_user_thumbnail, photo_thumbnail_cropbox
@@ -205,9 +206,9 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         student_info = (User.objects
-                        .has_role(User.roles.STUDENT,
-                                  User.roles.GRADUATE,
-                                  User.roles.VOLUNTEER)
+                        .has_role(AcademicRoles.STUDENT,
+                                  AcademicRoles.GRADUATE,
+                                  AcademicRoles.VOLUNTEER)
                         .students_info(exclude_grades=[
                             GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED
                         ])

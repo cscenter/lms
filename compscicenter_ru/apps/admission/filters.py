@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+import datetime
 
 import django_filters
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row, Field
 from django import forms
 from django.forms import SelectMultiple
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -41,40 +43,6 @@ class InterviewStatusFilter(django_filters.ChoiceFilter):
         return super().filter(qs, value)
 
 
-# Forms
-class InterviewsFilterForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
-        self.helper.form_method = "get"
-        self.helper.layout = Layout(
-            Row(
-                Div('status', css_class="col-xs-4"),
-                Div('date', css_class="col-xs-5"),
-                Div(Submit('', _('Filter'),
-                           css_class="btn-block -inline-submit"),
-                    css_class="col-xs-3"),
-            ),
-        )
-        super().__init__(*args, **kwargs)
-
-
-class InterviewsCuratorFilterForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
-        self.helper.form_method = "get"
-        self.helper.layout = Layout(
-            Row(
-                Div(Field('campaign'), css_class="col-xs-3"),
-                Div('status', css_class="col-xs-3"),
-                Div('date', css_class="col-xs-4"),
-                Div(Submit('', _('Filter'),
-                           css_class="btn-block -inline-submit"),
-                    css_class="col-xs-2"),
-            ),
-        )
-        super().__init__(*args, **kwargs)
-
-
 # Filters
 class ApplicantFilter(django_filters.FilterSet):
     campaign = django_filters.ModelChoiceFilter(
@@ -107,6 +75,57 @@ class ApplicantFilter(django_filters.FilterSet):
                         css_class="col-xs-2"),
                 ))
         return self._form
+
+
+class InterviewsFilterForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_method = "get"
+        self.helper.layout = Layout(
+            Row(
+                Div('status', css_class="col-xs-4"),
+                Div('date', css_class="col-xs-5"),
+                Div(Submit('', _('Filter'),
+                           css_class="btn-block -inline-submit"),
+                    css_class="col-xs-3"),
+            ),
+        )
+        super().__init__(*args, **kwargs)
+
+
+class InterviewsCuratorFilterForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_method = "get"
+        self.helper.layout = Layout(
+            Row(
+                Div(Field('campaign'), css_class="col-xs-3"),
+                Div('status', css_class="col-xs-3"),
+                Div('date', css_class="col-xs-4"),
+                Div(Submit('', _('Filter'),
+                           css_class="btn-block -inline-submit"),
+                    css_class="col-xs-2"),
+            ),
+        )
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = self.cleaned_data
+        campaign = cleaned_data.get('campaign')
+        if campaign and cleaned_data.get('date'):
+            tz = campaign.get_city_timezone()
+            date_slice = cleaned_data['date']
+            start = date_slice.start
+            stop = date_slice.stop
+            # Make sure campaign timezone has correct offset and replace
+            # tzinfo with campaign timezone
+            if isinstance(start, datetime.datetime):
+                start_naive = timezone.make_naive(start)
+                start = tz.localize(start_naive)
+            if isinstance(stop, datetime.datetime):
+                stop_naive = timezone.make_naive(stop)
+                stop = tz.localize(stop_naive)
+            cleaned_data['date'] = slice(start, stop, date_slice.step)
 
 
 class InterviewsBaseFilter(django_filters.FilterSet):

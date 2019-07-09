@@ -11,6 +11,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 
 from core.urls import reverse
 from auth.forms import UserPasswordResetForm, LoginForm
+from users.constants import AcademicRoles
 from users.models import User
 from users.tasks import email_template_name, html_email_template_name, \
     subject_template_name
@@ -41,10 +42,10 @@ class LoginView(generic.FormView):
         redirect_to = self.request.GET.get(self.redirect_field_name)
 
         if not redirect_to:
-            user_groups = self.request.user.get_cached_groups()
-            if user_groups == {User.roles.STUDENT}:
+            user_roles = self.request.user.roles
+            if user_roles == {AcademicRoles.STUDENT}:
                 redirect_to = reverse("study:assignment_list")
-            elif user_groups == {User.roles.TEACHER}:
+            elif user_roles == {AcademicRoles.TEACHER}:
                 redirect_to = reverse("teaching:assignment_list")
 
         if not is_safe_url(redirect_to,

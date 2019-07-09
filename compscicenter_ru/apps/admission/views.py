@@ -477,10 +477,10 @@ def get_default_campaign_for_user(user: User) -> Optional[Campaign]:
     return campaign
 
 
-# FIXME: use correct tzdata for filter by date if campaign value provided (DependentFilter?)
+# FIXME: For interviewers filterset form use user timezone instead of UTC?
 class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
     """
-    XXX: Filter by date uses UTC time zone.
+    XXX: Filter by date uses UTC time zone
     """
     context_object_name = 'interviews'
     model = Interview

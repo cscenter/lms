@@ -85,6 +85,7 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
     group = AcademicRoles
     city_code = None
     index_redirect = None
+    roles = set()
 
     def __str__(self):
         return 'ExtendedAnonymousUser'
@@ -172,7 +173,6 @@ class UserGroup(models.Model):
 
 class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
            AbstractBaseUser):
-    roles = AcademicRoles
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
     ENROLLMENT_CACHE_KEY = "_student_enrollment_{}"
@@ -339,7 +339,7 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         # LDAP database if password was changed.
         gerrit_sync_enabled = getattr(settings, "LDAP_SYNC_PASSWORD", False)
         if not created and password_changed and gerrit_sync_enabled:
-            if self.get_cached_groups().intersection(GROUPS_IMPORT_TO_GERRIT):
+            if self.roles.intersection(GROUPS_IMPORT_TO_GERRIT):
                 update_password_in_gerrit.delay(user_id=self.pk)
         elif created and gerrit_sync_enabled:
             # TODO: schedule task for creating LDAP account
@@ -570,9 +570,13 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
             roles = set(g.role for g in gs if g.site_id == settings.SITE_ID)
         except (AttributeError, KeyError):
             roles = set(self.groups
-                         .filter(site_id=settings.SITE_ID)
-                         .values_list("role", flat=True))
+                        .filter(site_id=settings.SITE_ID)
+                        .values_list("role", flat=True))
         return roles
+
+    @cached_property
+    def roles(self) -> set:
+        return self._cached_groups
 
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         """

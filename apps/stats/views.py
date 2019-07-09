@@ -14,6 +14,7 @@ from learning.settings import StudentStatuses, GradeTypes
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.settings import SemesterTypes
 from courses.utils import get_term_index
+from users.constants import AcademicRoles
 from users.mixins import CuratorOnlyMixin
 from users.models import User
 
@@ -159,7 +160,7 @@ class StudentsDiplomasStats(APIView):
     http_method_names = ['get']
 
     def get(self, request, graduation_year, format=None):
-        filters = (Q(group__role=User.roles.GRADUATE) &
+        filters = (Q(group__role=AcademicRoles.GRADUATE) &
                    Q(graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
             filters = filters | Q(status=StudentStatuses.WILL_GRADUATE)

@@ -6,6 +6,7 @@ from django.db import transaction
 
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
+from users.constants import AcademicRoles
 from users.models import User
 
 
@@ -20,8 +21,8 @@ class Command(BaseCommand):
         graduated_on_str = options['graduated_on']
         graduated_on = datetime.strptime(graduated_on_str, "%d.%m.%Y").date()
         will_graduate_list = (User.objects
-                              .has_role(User.roles.STUDENT,
-                                        User.roles.VOLUNTEER)
+                              .has_role(AcademicRoles.STUDENT,
+                                        AcademicRoles.VOLUNTEER)
                               .filter(status=StudentStatuses.WILL_GRADUATE))
 
         for student in will_graduate_list:

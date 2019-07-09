@@ -6,6 +6,7 @@ from import_export import resources, fields, widgets
 
 from learning.settings import AcademicDegreeYears
 from core.timezone import now_local
+from users.constants import AcademicRoles
 from .models import User, Group
 
 
@@ -57,7 +58,7 @@ class UserGenderWidget(widgets.CharWidget):
 class GroupManyToManyWidget(widgets.ManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
-            return self.model.objects.filter(pk=User.roles.VOLUNTEER)
+            return self.model.objects.filter(pk=AcademicRoles.VOLUNTEER)
         return super().clean(value, row, *args, **kwargs)
 
     def render(self, value, obj=None):

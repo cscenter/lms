@@ -68,7 +68,7 @@ def get_base_domain(notification):
         course = notification.course_offering_news.course
     else:
         raise NotImplementedError()
-    user_roles = receiver.get_cached_groups()
+    user_roles = receiver.roles
     if not user_roles.intersection(LEARNING_PARTICIPANTS_CENTER):
         if course.get_city() == "spb":
             return "compsciclub.ru"
