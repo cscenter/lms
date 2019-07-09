@@ -9,7 +9,7 @@ from import_export.admin import ImportMixin
 from core.admin import RelatedSpecMixin
 from core.widgets import AdminRichTextAreaWidget
 from core.filters import AdminRelatedDropdownFilter
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.forms import UserCreationForm, UserChangeForm
 from .import_export import UserRecordResource
 from .models import User, EnrollmentCertificate, \
@@ -46,24 +46,24 @@ class UserGroupForm(forms.ModelForm):
     # ACCESS_ROLES = [(role_name, _(cls.verbose_name)) for role_name, cls
     #                 in REGISTERED_ACCESS_ROLES.items()]
     # FIXME: Use registred roles
-    ACCESS_ROLES = AcademicRoles.choices
+    ACCESS_ROLES = Roles.choices
     role = forms.ChoiceField(choices=ACCESS_ROLES)
 
     def clean(self):
         cleaned_data = super().clean()
         role = int(cleaned_data['role'])
         user = cleaned_data['user']
-        if role == AcademicRoles.STUDENT:
+        if role == Roles.STUDENT:
             if user.enrollment_year is None:
                 msg = _("Enrollment year should be provided for students")
                 self.add_error(None, ValidationError(msg))
-        if role in {AcademicRoles.STUDENT,
-                    AcademicRoles.VOLUNTEER,
-                    AcademicRoles.GRADUATE}:
+        if role in {Roles.STUDENT,
+                    Roles.VOLUNTEER,
+                    Roles.GRADUATE}:
             if not user.city_id:
                 msg = _("Provide city for student")
                 self.add_error(None, ValidationError(msg))
-        if role == AcademicRoles.VOLUNTEER:
+        if role == Roles.VOLUNTEER:
             if user.enrollment_year is None:
                 msg = _("CSCUser|enrollment year should be provided for "
                         "volunteers")
@@ -144,8 +144,8 @@ class SHADCourseRecordAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = User.objects.filter(group__role__in=[
-                AcademicRoles.STUDENT,
-                AcademicRoles.VOLUNTEER]).distinct()
+                Roles.STUDENT,
+                Roles.VOLUNTEER]).distinct()
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 

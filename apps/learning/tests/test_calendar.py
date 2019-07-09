@@ -13,7 +13,7 @@ from learning.tests.factories import EventFactory, \
 from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import flatten_calendar_month_events
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import StudentFactory, TeacherFactory
 
 
@@ -27,7 +27,7 @@ from users.tests.factories import StudentFactory, TeacherFactory
 class CalendarTeacherTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, CSCTestCase):
     url_name = 'teaching:calendar'
-    groups_allowed = [AcademicRoles.TEACHER]
+    groups_allowed = [Roles.TEACHER]
 
     def test_teacher_calendar(self):
         teacher = TeacherFactory(city_id='spb')
@@ -80,7 +80,7 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
 class CalendarStudentTests(GroupSecurityCheckMixin,
                            MyUtilitiesMixin, CSCTestCase):
     url_name = 'study:calendar'
-    groups_allowed = [AcademicRoles.STUDENT]
+    groups_allowed = [Roles.STUDENT]
 
     def test_student_calendar(self):
         student = StudentFactory(city_id='spb')

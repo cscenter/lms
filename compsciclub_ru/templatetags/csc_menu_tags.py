@@ -8,7 +8,7 @@ from treemenus.models import Menu, MenuItem
 
 from core.urls import reverse
 from menu_extension import CSCMENU_CACHE
-from users.constants import AcademicRoles
+from users.constants import Roles
 
 register = template.Library()
 
@@ -85,8 +85,8 @@ def has_permissions(menu_item, user, user_groups, **kwargs):
         if not user_groups.intersection(menu_item.groups_allowed):
             return False
         restricted_to_students = {
-            AcademicRoles.STUDENT,
-            AcademicRoles.VOLUNTEER
+            Roles.STUDENT,
+            Roles.VOLUNTEER
         }
         if (restricted_to_students.intersection(menu_item.groups_allowed) and
                 not user.is_active_student):

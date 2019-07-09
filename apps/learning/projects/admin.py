@@ -11,7 +11,7 @@ from core.filters import AdminRelatedDropdownFilter
 from learning.projects.import_export import ProjectStudentAdminRecordResource
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
     ReportComment, Supervisor, ReportingPeriod, PracticeCriteria
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User
 
 
@@ -30,8 +30,8 @@ class ProjectStudentInline(admin.TabularInline):
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = (User.objects
-                                  .has_role(AcademicRoles.STUDENT,
-                                            AcademicRoles.GRADUATE)
+                                  .has_role(Roles.STUDENT,
+                                            Roles.GRADUATE)
                                   .distinct())
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
@@ -81,7 +81,7 @@ class ProjectAdmin(admin.ModelAdmin):
         if db_field.name == "reviewers":
             kwargs["queryset"] = (
                 User.objects
-                    .filter(Q(group__role=AcademicRoles.PROJECT_REVIEWER) |
+                    .filter(Q(group__role=Roles.PROJECT_REVIEWER) |
                             Q(is_superuser=True, is_staff=True))
                     .distinct())
         return super().formfield_for_manytomany(db_field, request, **kwargs)

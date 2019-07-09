@@ -10,7 +10,7 @@ from django.template.loader import get_template
 from django.utils.functional import cached_property
 from django.utils.html import linebreaks, strip_tags
 
-from users.constants import AcademicRoles
+from users.constants import Roles
 
 logger = logging.getLogger("notifications.handlers")
 

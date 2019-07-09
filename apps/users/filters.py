@@ -4,7 +4,7 @@ from django_filters.rest_framework import BaseInFilter, NumberFilter, \
     FilterSet, CharFilter
 
 from learning.settings import StudentStatuses, GradeTypes
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User
 
 
@@ -24,10 +24,10 @@ class CharInFilter(BaseInFilter, CharFilter):
 
 class UserFilter(FilterSet):
     FILTERING_GROUPS = [
-        AcademicRoles.VOLUNTEER,
-        AcademicRoles.STUDENT,
-        AcademicRoles.GRADUATE,
-        AcademicRoles.MASTERS_DEGREE,
+        Roles.VOLUNTEER,
+        Roles.STUDENT,
+        Roles.GRADUATE,
+        Roles.MASTERS_DEGREE,
     ]
 
     ENROLLMENTS_MAX = 12
@@ -61,9 +61,9 @@ class UserFilter(FilterSet):
             if not groups:
                 groups = self.FILTERING_GROUPS[:]
                 if "studying" in data.get("status", []):
-                    groups.remove(AcademicRoles.GRADUATE)
+                    groups.remove(Roles.GRADUATE)
             # Special case - show `studying` among graduated
-            only_graduate_selected = (groups == {AcademicRoles.GRADUATE})
+            only_graduate_selected = (groups == {Roles.GRADUATE})
             if "studying" in data.get("status", []) and only_graduate_selected:
                 self.empty_query = True
             else:

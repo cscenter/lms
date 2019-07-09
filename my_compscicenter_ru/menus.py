@@ -3,7 +3,7 @@ from menu import Menu
 
 from core.menu import MenuItem
 from core.urls import reverse
-from users.constants import AcademicRoles
+from users.constants import Roles
 
 top_menu = [
     MenuItem(
@@ -29,8 +29,8 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Проекты организаторов"), '/learning/internships/', weight=80),
         ],
         visible_to=[
-            AcademicRoles.STUDENT,
-            AcademicRoles.VOLUNTEER,
+            Roles.STUDENT,
+            Roles.VOLUNTEER,
         ],
         css_classes='for-students'),
     MenuItem(
@@ -67,7 +67,7 @@ top_menu = [
                 weight=50),
         ],
         visible_to=[
-            AcademicRoles.TEACHER
+            Roles.TEACHER
         ],
         css_classes='for-teachers'),
     MenuItem(
@@ -80,7 +80,7 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Результаты"), '/admission/results/', weight=30, for_staff=True),
         ],
         visible_to=[
-            AcademicRoles.INTERVIEWER
+            Roles.INTERVIEWER
         ]),
     MenuItem(
         pgettext_lazy("menu", "Проекты"),
@@ -93,7 +93,7 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Все отчеты"), '/projects/reports-all/', weight=40, for_staff=True),
         ],
         visible_to=[
-            AcademicRoles.PROJECT_REVIEWER
+            Roles.PROJECT_REVIEWER
         ]),
     MenuItem(
         pgettext_lazy("menu", "Курирование"),

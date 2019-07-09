@@ -9,7 +9,7 @@ from learning.models import StudentAssignment, \
     Enrollment
 from courses.models import Assignment
 from stats.renderers import ListRenderersMixin
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User, Group
 from .pandas_serializers import ParticipantsByYearPandasSerializer, \
     ParticipantsByGroupPandasSerializer
@@ -27,9 +27,9 @@ class CourseParticipantsStatsByGroup(ListRenderersMixin, PandasView):
 
     def get_queryset(self):
         groups = [
-            AcademicRoles.STUDENT,
-            AcademicRoles.VOLUNTEER,
-            AcademicRoles.GRADUATE,
+            Roles.STUDENT,
+            Roles.VOLUNTEER,
+            Roles.GRADUATE,
         ]
         course_id = self.kwargs['course_id']
         return (User.objects

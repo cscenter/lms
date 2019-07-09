@@ -1,4 +1,4 @@
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import UserFactory
 
 
@@ -11,9 +11,9 @@ def check_url_security(client, assert_login_redirect, groups_allowed, url):
     assert_login_redirect(url, method='get')
     all_test_groups = [
         [],
-        [AcademicRoles.TEACHER],
-        [AcademicRoles.STUDENT],
-        [AcademicRoles.GRADUATE]
+        [Roles.TEACHER],
+        [Roles.STUDENT],
+        [Roles.GRADUATE]
     ]
     for groups in all_test_groups:
         client.login(UserFactory.create(groups=groups, city_id='spb'))

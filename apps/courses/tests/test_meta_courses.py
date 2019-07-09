@@ -5,7 +5,7 @@ from django.forms import model_to_dict
 
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory
 from courses.models import MetaCourse
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import UserFactory
 
 
@@ -36,9 +36,9 @@ def test_meta_course_update_security(client, assert_login_redirect):
     url = mc.get_update_url()
     all_test_groups = [
         [],
-        [AcademicRoles.TEACHER],
-        [AcademicRoles.STUDENT],
-        [AcademicRoles.GRADUATE]
+        [Roles.TEACHER],
+        [Roles.STUDENT],
+        [Roles.GRADUATE]
     ]
     for groups in all_test_groups:
         client.login(UserFactory.create(groups=groups, city_id='spb'))

@@ -15,7 +15,7 @@ from courses.tests.factories import CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import GraduateProfileFactory
 from learning.tests.mixins import MyUtilitiesMixin
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.forms import UserCreationForm
 from users.models import User, UserGroup
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
@@ -71,7 +71,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         good_user_attrs = factory.build(dict, FACTORY_CLASS=UserFactory)
         good_user = User.objects.create_user(**good_user_attrs)
         # graduated students redirected to LOGIN_REDIRECT_URL
-        add_user_groups(good_user, [AcademicRoles.GRADUATE])
+        add_user_groups(good_user, [Roles.GRADUATE])
         self.assertNotIn('_auth_user_id', self.client.session)
         bad_user = copy.copy(good_user_attrs)
         bad_user['password'] = "BAD"
@@ -91,14 +91,14 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 200
         self.assertLoginRedirect(url)
-        add_user_groups(user, [AcademicRoles.STUDENT])
+        add_user_groups(user, [Roles.STUDENT])
         user.city_id = 'spb'
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
         resp = self.client.get(reverse('teaching:assignment_list'))
         self.assertLoginRedirect(url)
-        add_user_groups(user, [AcademicRoles.STUDENT, AcademicRoles.TEACHER])
+        add_user_groups(user, [Roles.STUDENT, Roles.TEACHER])
         user.save()
         resp = self.client.get(reverse('teaching:assignment_list'))
         # Teacher has no course offering and redirects to courses list
@@ -156,7 +156,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         user = User.objects.create_user(**user_data)
         resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 404)
-        add_user_groups(user, [AcademicRoles.TEACHER])
+        add_user_groups(user, [Roles.TEACHER])
         user.save()
         resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 200)
@@ -167,7 +167,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         user = User.objects.create_user(**user_data)
         response = self.client.get(user.get_absolute_url())
         assert response.status_code == 404
-        user.add_group(AcademicRoles.STUDENT)
+        user.add_group(Roles.STUDENT)
         response = self.client.get(user.get_absolute_url())
         assert response.status_code == 200
         assert response.context['profile_user'] == user
@@ -188,7 +188,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
                              status_code=302)
         response = self.client.get(reverse('user_detail', args=[user.pk]))
         assert smart_bytes(test_review) not in response.content
-        add_user_groups(user, [AcademicRoles.GRADUATE])
+        add_user_groups(user, [Roles.GRADUATE])
         user.graduation_year = 2014
         user.save()
         GraduateProfileFactory(student=user)
@@ -302,7 +302,7 @@ def test_student_should_have_enrollment_year(admin_client):
         'groups-INITIAL_FORMS': '0',
         'groups-MAX_NUM_FORMS': '',
         'groups-0-user': user.pk,
-        'groups-0-role': AcademicRoles.STUDENT,
+        'groups-0-role': Roles.STUDENT,
         'groups-0-site': settings.SITE_ID,
     })
     admin_url = get_admin_url(user)

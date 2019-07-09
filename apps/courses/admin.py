@@ -14,7 +14,7 @@ from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseTeacher, Course, CourseClassAttachment, Venue, \
     Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
     AssignmentAttachment
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.models import User
 
 
@@ -40,7 +40,7 @@ class CourseTeacherInline(admin.TabularInline):
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "teacher":
             kwargs["queryset"] = (User.objects
-                                  .has_role(AcademicRoles.TEACHER)
+                                  .has_role(Roles.TEACHER)
                                   .distinct())
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 

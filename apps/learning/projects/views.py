@@ -38,7 +38,7 @@ from learning.projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review, ReportingPeriod, ReportingPeriodKey, PracticeCriteria
 from notifications import NotificationTypes
 from notifications.signals import notify
-from users.constants import AcademicRoles, GenderTypes
+from users.constants import Roles, GenderTypes
 from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
 from users.models import User
@@ -633,7 +633,7 @@ class ProcessReviewFormView(LoginRequiredMixin, ModelFormMixin, View):
     def send_notification_to_curators(self, review):
         """Reviewer completed assessment"""
         curators = (User.objects
-                    .has_role(AcademicRoles.CURATOR_PROJECTS)
+                    .has_role(Roles.CURATOR_PROJECTS)
                     .filter(is_superuser=True,
                             is_staff=True))
         report = (Report.objects

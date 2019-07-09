@@ -12,7 +12,7 @@ from learning.models import StudentAssignment, \
     CourseNewsNotification, Event, Branch, GraduateProfile
 from learning.settings import Branches
 from study_programs.models import AcademicDiscipline
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import UserFactory, StudentFactory, \
     add_user_groups
 
@@ -115,7 +115,7 @@ class GraduateFactory(UserFactory):
         if not create:
             return
         site_id = kwargs.pop("site_id", None)
-        self.add_group(role=AcademicRoles.GRADUATE, site_id=site_id)
+        self.add_group(role=Roles.GRADUATE, site_id=site_id)
 
 
 class GraduateProfileFactory(factory.DjangoModelFactory):

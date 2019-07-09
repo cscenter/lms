@@ -21,7 +21,7 @@ from admission.signals import post_save_interview
 from courses.tests.factories import VenueFactory
 from learning.models import Branch
 from learning.settings import AcademicDegreeYears
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import UserFactory, add_user_groups
 
 
@@ -124,7 +124,7 @@ class InterviewerFactory(UserFactory):
     def _add_required_groups(self, create, extracted, **kwargs):
         if not create:
             return
-        required_groups = [AcademicRoles.INTERVIEWER]
+        required_groups = [Roles.INTERVIEWER]
         add_user_groups(self, required_groups)
 
 

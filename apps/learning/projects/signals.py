@@ -9,7 +9,7 @@ from django.dispatch import receiver
 from learning.projects.models import ProjectStudent, Report, Project, Review, \
     ReportComment
 from learning.settings import GradeTypes
-from users.constants import AcademicRoles
+from users.constants import Roles
 from notifications import NotificationTypes
 from notifications.signals import notify
 
@@ -97,7 +97,7 @@ def post_save_report(sender, instance, created, *args, **kwargs):
         if report.status == report.SENT:
             # Send email to curators
             recipients = (User.objects
-                          .has_role(AcademicRoles.CURATOR_PROJECTS)
+                          .has_role(Roles.CURATOR_PROJECTS)
                           .filter(is_superuser=True,
                                   is_staff=True))
             # TODO: test database hitting
@@ -128,7 +128,7 @@ def post_save_comment(sender, instance, created, *args, **kwargs):
         User = get_user_model()
         comment = instance
         curators = (User.objects
-                    .has_role(AcademicRoles.CURATOR_PROJECTS)
+                    .has_role(Roles.CURATOR_PROJECTS)
                     .filter(is_superuser=True,
                             is_staff=True)
                     .exclude(pk=comment.author.pk))

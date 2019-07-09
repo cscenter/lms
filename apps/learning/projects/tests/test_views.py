@@ -17,7 +17,7 @@ from learning.projects.tests.factories import ProjectFactory, ReportFactory, \
     ReviewPracticeCriteriaFactory, review_form_factory
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from notifications.models import Notification
-from users.constants import AcademicRoles
+from users.constants import Roles
 from users.tests.factories import StudentFactory, ProjectReviewerFactory, \
     UserFactory, CuratorFactory
 
@@ -72,7 +72,7 @@ def test_project_reviewer_only_mixin_security(client, curator):
     client.login(student)
     response = client.get(URL_REPORTS)
     assert response.status_code == 302
-    reviewer = UserFactory.create(groups=[AcademicRoles.PROJECT_REVIEWER])
+    reviewer = UserFactory.create(groups=[Roles.PROJECT_REVIEWER])
     client.login(reviewer)
     response = client.get(URL_REPORTS)
     assert response.status_code == 200
@@ -110,7 +110,7 @@ def test_reviewer_list(client, curator):
     # With ?show=available filter show projects from current term to reviewers
     response = client.get(URL_PROJECTS)
     assert len(response.context["reports"]) == 1
-    curator.add_group(AcademicRoles.PROJECT_REVIEWER)
+    curator.add_group(Roles.PROJECT_REVIEWER)
     client.login(curator)
     # Redirects to list with all reports
     response = client.get(URL_REPORTS, follow=True)
@@ -216,7 +216,7 @@ def test_project_detail_student_participant(client):
 def test_project_detail_student_participant_notifications(client, curator):
     """Test notifications are added to the queue after report has been sent"""
     from datetime import timedelta
-    curator.add_group(AcademicRoles.CURATOR_PROJECTS)
+    curator.add_group(Roles.CURATOR_PROJECTS)
     curator.save()
     # This curator not in reviewers group and doesn't receive notifications
     curator2 = UserFactory(is_superuser=True, is_staff=True)
@@ -344,7 +344,7 @@ def test_reportpage_update_permissions():
 @pytest.mark.django_db
 def test_report_notifications(client, curator):
     """Test notifications about new comment and on changing report status"""
-    curator.add_group(AcademicRoles.CURATOR_PROJECTS)
+    curator.add_group(Roles.CURATOR_PROJECTS)
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
     client.login(reviewer1)
@@ -480,7 +480,7 @@ def test_review(client, curator, assert_login_redirect):
 @pytest.mark.django_db
 def test_review_notifications(client, curator, assert_login_redirect):
     """Test notification about new review for project curators"""
-    curator.add_group(AcademicRoles.CURATOR_PROJECTS)
+    curator.add_group(Roles.CURATOR_PROJECTS)
     curator2 = CuratorFactory()
     reviewer1 = ProjectReviewerFactory()
     report = ReportFactory(status=Report.REVIEW,
@@ -498,7 +498,7 @@ def test_reportpage_summarize_notifications(client, curator):
     from users.mixins import CuratorOnlyMixin
     from learning.projects.views import ReportCuratorSummarizeView
     assert issubclass(ReportCuratorSummarizeView, CuratorOnlyMixin)
-    curator.add_group(AcademicRoles.PROJECT_REVIEWER)
+    curator.add_group(Roles.PROJECT_REVIEWER)
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
     client.login(reviewer1)
