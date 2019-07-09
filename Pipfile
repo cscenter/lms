@@ -119,6 +119,7 @@ isoweek = "*"
 django-subdomains = {git = "git://github.com/pacahon/django-subdomains.git",ref = "4096c2dc82f9f5e511e8c8f78d31e804ac028b5d"}
 django-simple-menu = "*"
 django-ckeditor = "==5.7.1"
+rules = "*"
 
 [requires]
 python_version = "3.6"
