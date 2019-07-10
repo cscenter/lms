@@ -187,7 +187,7 @@ class CourseVideosPage extends React.Component {
                                         </div>
                                     </div>
                                     <div className="card__content _meta">
-                                        <div className="ui labels circular">
+                                        <div className="ui labels _circular">
                                             <span className="ui label _gray">{videoRecord.year}</span>
                                             <span className={`ui label ${this.getLabelColor(videoRecord.type)}`}>{this.getVideoTypeLabel(videoRecord.type)}</span>
                                         </div>
