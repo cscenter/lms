@@ -1,17 +1,19 @@
 .announcement__detail {
   display: inline-table;
-  margin-right: spacer("4x");
+  margin: 0 spacer("2x") spacer("2x") 0;
 
   .sprite-img {
     fill: $gray-light;
     margin-right: spacer("1x");
-    width: 1em;
-    height: 1em;
+    width: 1.2em;
+    height: 1.2em;
     display: table-cell;
+    vertical-align: top; //For Safari and IE
   }
 
   span {
     display: table-cell;
+    vertical-align: middle;
   }
 }
 

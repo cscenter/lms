@@ -25,6 +25,14 @@ $card-bg: $white !default;
   overflow: hidden;
   padding: 0;
 
+  &:hover {
+    .card__img {
+      &::before {
+        background-color: rgba($gray-darker, .1);
+      }
+    }
+  }
+
   &._inverted {
     background-color: $gray-lighter;
 
@@ -47,6 +55,16 @@ $card-bg: $white !default;
       overflow: hidden;
     }
   }
+
+  &._horizontal {
+    .card__content {
+      padding: spacer("6x") spacer("4x");
+      align-self: center;
+      @include media-breakpoint-up(md) {
+        padding: spacer("8x") spacer("10x") spacer("8x") spacer("8x");
+      }
+    }
+  }
 }
 
 .card__content,
@@ -56,16 +74,22 @@ $card-bg: $white !default;
   flex: 1 1 auto;
   padding: spacer("4x");
 
-  &._middle {
-    padding: spacer("6x");
+  > :last-child {
+    margin-bottom: 0;
   }
 
   &._big {
     padding: spacer("8x");
   }
 
-  > :last-child {
-    margin-bottom: 0;
+  // FIXME: middle bigger than default styles. Is it OK?
+  &._middle {
+    padding: spacer("6x");
+  }
+
+  &._meta {
+    padding-top: 0;
+    flex-grow: 0;
   }
 }
 
@@ -98,16 +122,6 @@ $card-bg: $white !default;
   }
 }
 
-.card {
-  &:hover {
-    .card__img {
-      &::before {
-        background-color: rgba($gray-darker, .1);
-      }
-    }
-  }
-}
-
 .card__subtitle {
   color: $gray-dark;
   font-size: $font-size-sm;
@@ -120,14 +134,4 @@ $card-bg: $white !default;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-}
-
-.card._horizontal {
-  .card__content {
-    padding: spacer("6x") spacer("4x");
-    align-self: center;
-    @include media-breakpoint-up(md) {
-      padding: spacer("8x") spacer("10x") spacer("8x") spacer("8x");
-    }
-  }
 }

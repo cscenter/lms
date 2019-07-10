@@ -98,6 +98,7 @@ a.card {
 .about-csc {
   text-align: center;
   margin-bottom: spacer("10x");
+  @include append-hr-to-container;
 
   .about-csc__cover {
     position: relative;
@@ -130,6 +131,7 @@ a.card {
       }
     }
   }
+
   .about-csc_btn {
     margin-bottom: 2rem;
     @include media-breakpoint-up(lg) {
