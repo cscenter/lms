@@ -764,10 +764,12 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
     def get_context_data(self, filter, formset, **kwargs):
 
         def cpm_interview_best_score(form):
-            if form.instance.interview.average_score is None:
-                return Comment.UNREACHABLE_COMMENT_SCORE
+            a = form.instance
+            exam_score = a.exam.score if hasattr(a, "exam") else -1
+            if a.interview.average_score is None:
+                return Comment.UNREACHABLE_COMMENT_SCORE, exam_score
             else:
-                return form.instance.interview.average_score
+                return a.interview.average_score, exam_score
 
         formset.forms.sort(key=cpm_interview_best_score, reverse=True)
         stats = Counter()
