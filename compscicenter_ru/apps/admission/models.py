@@ -198,6 +198,7 @@ class Applicant(TimeStampedModel):
     INTERVIEW_COMPLETED = 'interview_completed'
     REJECTED_BY_INTERVIEW = 'rejected_interview'
     PENDING = 'pending'
+    OFFER_PAID = 'offer_paid'
     ACCEPT = 'accept'
     ACCEPT_IF = 'accept_if'
     VOLUNTEER = 'volunteer'
@@ -212,6 +213,7 @@ class Applicant(TimeStampedModel):
         (INTERVIEW_SCHEDULED, _('Interview assigned')),
         (INTERVIEW_COMPLETED, _('Interview completed')),
         (REJECTED_BY_INTERVIEW, _('Rejected by interview')),
+        (OFFER_PAID, _('Offer paid')),
         (ACCEPT, _('Accept')),
         (ACCEPT_IF, _('Accept with condition')),
         (VOLUNTEER, _("Applicant|Volunteer")),
