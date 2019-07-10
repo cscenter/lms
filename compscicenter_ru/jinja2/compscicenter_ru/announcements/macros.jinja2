@@ -8,7 +8,7 @@
 </span>
 {%- endmacro %}
 
-{% macro _announcement_content(announcement) -%}
+{% macro _announcement_content(announcement, card_type) -%}
 {% with tags = announcement.tags.all() %}
     {% if tags %}
     <div class="ui labels _circular mb-2">
@@ -24,7 +24,7 @@
 {% endif %}
 {% if announcement.event_details %}
     {% with event_details=announcement.event_details %}
-        <div class="grouped mb-4">
+        <div class="grouped{% if card_type == 'h' %} mb-4{% endif %}">
             {% if event_details.venue %}
                 <div class="announcement__detail">
                     {{ macros.svg_inline('location') }}<span>{{ event_details.venue.address }}</span>
@@ -40,16 +40,16 @@
 {% endif %}
 {%- endmacro %}
 
-{% macro announcement_horizontal(announcement) -%}
+{% macro announcement_horizontal(announcement, card_type='h') -%}
 <div class="card _horizontal _dark">
     <div class="row no-gutters">
         {% if announcement.thumbnail %}
-        <div class="col-md-5 card__background" style="min-height: 196px; background-image:url({{ announcement.thumbnail.url }});"></div>
+        <div class="col-md-5 card__background" style="min-height: 196px; background-image: url({{ announcement.thumbnail.url }});"></div>
         {% endif %}
         <div class="col-md-7">
             <div class="card__content">
                 <div class="announcement">
-                    {{ _announcement_content(announcement) }}
+                    {{ _announcement_content(announcement, card_type=card_type) }}
                     <a href="{{ announcement.get_absolute_url() }}" class="btn _big _primary _m-wide">Подробнее</a>
                 </div>
             </div>
@@ -58,19 +58,19 @@
 </div>
 {%- endmacro %}
 
-{% macro announcement_vertical(announcement) -%}
+{% macro announcement_vertical(announcement, card_type) -%}
 <div class="card _dark">
     {% if announcement.thumbnail %}
-    <div class="w-100 card__background" style="background-image:url({{ announcement.thumbnail.url }}); min-height: 196px">
+    <div class="w-100 card__background" style="min-height: 196px; background-image: url({{ announcement.thumbnail.url }});">
     {% endif %}
     </div>
     <div class="card__content _big">
         <div class="announcement">
-            {{ _announcement_content(announcement) }}
+            {{ _announcement_content(announcement, card_type=card_type) }}
         </div>
     </div>
     <div class="card__content _big _meta">
-        <a href="{{ announcement.get_absolute_url() }}" class="btn _outline _gray w-100">Подробнее</a>
+        <a href="{{ announcement.get_absolute_url() }}" class="btn _outline _gray {% if card_type == 'v3' %}w-100{% else %}_m-wide{% endif %}">Подробнее</a>
     </div>
 </div>
 {%- endmacro %}
