@@ -3,11 +3,6 @@
     color: $gray-darker;
     border: none;
 
-    ._meta {
-      padding-top: 0;
-      color: $gray-dark;
-       flex-grow: 0;
-    }
 
     .author {
       margin-top: spacer("2x");
@@ -25,5 +20,9 @@
       background-image: url("/static/v2/img/placeholder/camera.svg");
       background-size: 64px;
     }
+  }
+
+  ._meta {
+    color: $gray-dark;
   }
 }
