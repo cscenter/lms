@@ -3,7 +3,7 @@ from enum import Enum, auto
 from core.utils import is_club_site
 from learning.enrollment import course_failed_by_student
 from learning.settings import StudentStatuses
-from users.constants import Roles
+from users.constants import Roles as UserRoles
 
 
 class LearningPermissionsMixin:
@@ -17,11 +17,11 @@ class LearningPermissionsMixin:
 
     @property
     def is_student(self):
-        return Roles.STUDENT in self.roles
+        return UserRoles.STUDENT in self.roles
 
     @property
     def is_volunteer(self):
-        return Roles.VOLUNTEER in self.roles
+        return UserRoles.VOLUNTEER in self.roles
 
     @property
     def is_expelled(self):
@@ -37,23 +37,23 @@ class LearningPermissionsMixin:
 
     @property
     def is_teacher(self):
-        return Roles.TEACHER in self.roles
+        return UserRoles.TEACHER in self.roles
 
     @property
     def is_graduate(self):
-        return Roles.GRADUATE in self.roles
+        return UserRoles.GRADUATE in self.roles
 
     @property
     def is_curator_of_projects(self):
-        return Roles.CURATOR_PROJECTS in self.roles
+        return UserRoles.CURATOR_PROJECTS in self.roles
 
     @property
     def is_interviewer(self):
-        return Roles.INTERVIEWER in self.roles
+        return UserRoles.INTERVIEWER in self.roles
 
     @property
     def is_project_reviewer(self):
-        return Roles.PROJECT_REVIEWER in self.roles
+        return UserRoles.PROJECT_REVIEWER in self.roles
 
 
 def has_master_degree(user):
@@ -61,7 +61,7 @@ def has_master_degree(user):
     Emphasis that user is studying for a masters degree.
     This group doesn't give any access to the site.
     """
-    return Roles.MASTERS_DEGREE in user.roles
+    return UserRoles.MASTERS_DEGREE in user.roles
 
 
 class CourseRole(Enum):
@@ -79,7 +79,7 @@ def course_access_role(*, course, user) -> CourseRole:
     """
     Some course data (e.g. assignments, news) are private and accessible
     depending on the user role: curator, course teacher or
-    enrolled student. This roles do not overlap in the same course.
+    enrolled student. This UserRoles do not overlap in the same course.
     """
     if not user.is_authenticated:
         return CourseRole.NO_ROLE

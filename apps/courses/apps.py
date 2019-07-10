@@ -7,5 +7,7 @@ class CoursesConfig(AppConfig):
     verbose_name = _("Courses")
 
     def ready(self):
+        # Register app permissions
+        from . import permissions
         # Register tabs
         from . import tabs

@@ -1,27 +1,27 @@
+from typing import Iterable
+
 from rules import RuleSet
 
+from auth.permissions import all_permissions
 
-class RoleRuleSetRegistryError(Exception):
+
+class RolePermissionsRegistryError(Exception):
     pass
 
 
-class AlreadyRegistered(RoleRuleSetRegistryError):
+class AlreadyRegistered(RolePermissionsRegistryError):
     pass
 
 
-class PermissionAlreadyRegistered(RoleRuleSetRegistryError):
-    """
-    Throw this exception when two rules with the same name are binded
-    to different predicate functions.
-    """
+class PermissionNotRegistered(RolePermissionsRegistryError):
     pass
 
 
-class NotRegistered(RoleRuleSetRegistryError):
+class NotRegistered(RolePermissionsRegistryError):
     pass
 
 
-class RoleRuleSetRegistry:
+class RolePermissionsRegistry:
     """
     This registry helps to organize Role-based access control. Inheritance
     between roles is not supported.
@@ -32,7 +32,7 @@ class RoleRuleSetRegistry:
     def __init__(self):
         self._registry = {}
 
-    def register(self, role_name, rule_set: RuleSet):
+    def register(self, role_name, permissions: Iterable[str]):
         """
         Registers the given rule set for given role name.
         If notification already registered, this will raise AlreadyRegistered.
@@ -41,20 +41,14 @@ class RoleRuleSetRegistry:
         if role_name in self._registry:
             msg = 'The role name {} is already registered.'.format(role_name)
             raise AlreadyRegistered(msg)
-        # If rule with the same name is already registered in another rule set,
-        # make sure they are both binded to the same predicate function
-        for rule_name in rule_set:
-            for another_role_name, another_rule_set in self._registry.items():
-                for another_rule_name in another_rule_set:
-                    if rule_name == another_rule_name:
-                        another_predicate = another_rule_set[another_rule_name]
-                        if another_predicate != rule_set[rule_name]:
-                            msg = ('The permission name {} registered at least '
-                                   'in two roles `{}` and `{}` but binded to '
-                                   'different predicates'.format(rule_name,
-                                                                 role_name,
-                                                                 another_role_name))
-                            raise PermissionAlreadyRegistered(msg)
+        rule_set = RuleSet()
+        for permission in permissions:
+            if permission not in all_permissions:
+                msg = ("Permission `{}` is not registered in global rule set. "
+                       "Call `auth.permissions.add_perm` "
+                       "first.".format(permission))
+                raise PermissionNotRegistered(msg)
+            rule_set.add_rule(permission, all_permissions[permission])
         self._registry[role_name] = rule_set
 
     def unregister(self, role_name):
@@ -84,4 +78,4 @@ class RoleRuleSetRegistry:
         return self._registry.items()
 
 
-role_registry = RoleRuleSetRegistry()
+role_registry = RolePermissionsRegistry()
