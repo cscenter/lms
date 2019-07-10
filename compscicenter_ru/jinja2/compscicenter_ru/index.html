@@ -113,7 +113,7 @@
                         {% if card_type == 'h' %}
                             {{ announcement_macros.announcement_horizontal(announcement) }}
                         {% else %}
-                            {{ announcement_macros.announcement_vertical(announcement) }}
+                            {{ announcement_macros.announcement_vertical(announcement, card_type=card_type) }}
                         {% endif %}
                     {% endfor %}
                 </div>
