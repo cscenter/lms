@@ -1,7 +1,76 @@
+{% import "compscicenter_ru/layouts/_macros.jinja2" as macros -%}
+
 {% macro event_dates(event_details) -%}
 <span>{{ event_details.starts_on|date("j E Y") }}{% if event_details.starts_at %}{{ event_details.starts_at|date(" H:i") }}{% endif %}
     {%- if event_details.ends_on and event_details.ends_on != event_details.starts_on %} &mdash; {{ event_details.ends_on|date("j E Y") }}{% if event_details.ends_at %}{{ event_details.ends_at|date(" H:i") }}{% endif %}
     {%- elif event_details.ends_on and event_details.ends_at %} &mdash; {{ event_details.ends_at|date("H:i") }}
     {%- endif -%}
 </span>
+{%- endmacro %}
+
+{% macro _announcement_content(announcement) -%}
+{% with tags = announcement.tags.all() %}
+    {% if tags %}
+    <div class="ui labels _circular mb-2">
+        {% for tag in tags %}
+            <span class="ui label {% if tag.modifier %}{{ tag.modifier }}{% else %}_gray{% endif %}">{{ tag.name }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endwith %}
+<h3>{{ announcement.name }}</h3>
+{% if announcement.short_description %}
+    <div class="mb-4">{{ announcement.short_description }}</div>
+{% endif %}
+{% if announcement.event_details %}
+    {% with event_details=announcement.event_details %}
+        <div class="grouped mb-4">
+            {% if event_details.venue %}
+                <div class="announcement__detail">
+                    {{ macros.svg_inline('location') }}<span>{{ event_details.venue.address }}</span>
+                </div>
+            {% endif %}
+            {% if event_details.starts_on %}
+                <div class="announcement__detail">
+                    {{ macros.svg_inline('calendar') }}{{ event_dates(event_details) }}
+                </div>
+            {% endif %}
+        </div>
+    {% endwith %}
+{% endif %}
+{%- endmacro %}
+
+{% macro announcement_horizontal(announcement) -%}
+<div class="card _horizontal _dark">
+    <div class="row no-gutters">
+        {% if announcement.thumbnail %}
+        <div class="col-md-5 card__background" style="min-height: 196px; background-image:url({{ announcement.thumbnail.url }});"></div>
+        {% endif %}
+        <div class="col-md-7">
+            <div class="card__content">
+                <div class="announcement">
+                    {{ _announcement_content(announcement) }}
+                    <a href="{{ announcement.get_absolute_url() }}" class="btn _big _primary _m-wide">Подробнее</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro announcement_vertical(announcement) -%}
+<div class="card _dark">
+    {% if announcement.thumbnail %}
+    <div class="w-100 card__background" style="background-image:url({{ announcement.thumbnail.url }}); min-height: 196px">
+    {% endif %}
+    </div>
+    <div class="card__content _big">
+        <div class="announcement">
+            {{ _announcement_content(announcement) }}
+        </div>
+    </div>
+    <div class="card__content _big _meta">
+        <a href="{{ announcement.get_absolute_url() }}" class="btn _outline _gray w-100">Подробнее</a>
+    </div>
+</div>
 {%- endmacro %}

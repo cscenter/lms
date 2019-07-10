@@ -98,53 +98,27 @@
         <script type="text/javascript">
             (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
         </script>
-        {% for announcement in announcements %}
+        {% with %}
+            {% if announcements|length % 2 == 0 %}
+                {% set card_type = "v2" %}
+            {% elif announcements|length % 3 == 0 %}
+                {% set card_type = "v3" %}
+            {% else %}
+                {% set card_type = "h" %}
+            {% endif %}
             <div class="container mb-10">
-            <div class="card _horizontal _dark">
-                <div class="row no-gutters">
-                    {% if announcement.thumbnail %}
-                    <div class="col-md-5 card__background" style="min-height: 196px; background-image:url({{ announcement.thumbnail.url }});"></div>
-                    {% endif %}
-                    <div class="col-md-7">
-                        <div class="card__content">
-                            <div class="announcement">
-                                {% with tags = announcement.tags.all() %}
-                                    {% if tags %}
-                                    <div class="ui labels _circular mb-2">
-                                        {% for tag in tags %}
-                                            <span class="ui label {% if tag.modifier %}{{ tag.modifier }}{% else %}_gray{% endif %}">{{ tag.name }}</span>
-                                        {% endfor %}
-                                    </div>
-                                    {% endif %}
-                                {% endwith %}
-                                <h3>{{ announcement.name }}</h3>
-                                {% if announcement.short_description %}
-                                    <div class="mb-4">{{ announcement.short_description }}</div>
-                                {% endif %}
-                                {% if announcement.event_details %}
-                                    {% with event_details=announcement.event_details %}
-                                        <div class="grouped mb-4">
-                                            {% if event_details.venue %}
-                                                <div class="announcement__detail">
-                                                    {{ macros.svg_inline('location') }}<span>{{ event_details.venue.address }}</span>
-                                                </div>
-                                            {% endif %}
-                                            {% if event_details.starts_on %}
-                                                <div class="announcement__detail">
-                                                    {{ macros.svg_inline('calendar') }}{{ announcement_macros.event_dates(event_details) }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    {% endwith %}
-                                {% endif %}
-                                <a href="{{ announcement.get_absolute_url() }}" class="btn _big _primary _m-wide">Подробнее</a>
-                            </div>
-                        </div>
-                    </div>
+                <h2 class="text-center mb-6">Мероприятия</h2>
+                <div class="card-deck{% if card_type == 'v2' %} _two{% elif card_type == 'v3' %} _three{% endif %}">
+                    {% for announcement in announcements %}
+                        {% if card_type == 'h' %}
+                            {{ announcement_macros.announcement_horizontal(announcement) }}
+                        {% else %}
+                            {{ announcement_macros.announcement_vertical(announcement) }}
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
-            </div>
-        {% endfor %}
+        {% endwith %}
     {% endif %}
 
     <div class="csc-online-education">
