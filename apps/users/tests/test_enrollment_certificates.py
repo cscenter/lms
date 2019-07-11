@@ -15,7 +15,7 @@ from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import Roles
 from users.models import User, EnrollmentCertificate
 from users.tests.factories import UserFactory, EnrollmentCertificateFactory, \
-    StudentFactory
+    StudentFactory, CuratorFactory
 
 
 @pytest.mark.django_db
@@ -26,7 +26,7 @@ def test_create_reference(client, assert_redirect):
     user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
     user = User.objects.create_user(**user_data)
     UserFactory.reset_sequence(1)
-    curator = UserFactory(is_superuser=True, is_staff=True)
+    curator = CuratorFactory()
     client.login(curator)
     form_url = reverse('user_reference_add', args=[user.id])
     response = client.get(form_url)
@@ -57,7 +57,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
         button = soup.find('a', text=_("Create reference"))
         self.assertIsNone(button)
         # check with curator credentials
-        curator = UserFactory.create(is_superuser=True, is_staff=True)
+        curator = CuratorFactory()
         self.doLogin(curator)
         response = self.client.get(url)
         soup = BeautifulSoup(response.content, "html.parser")
@@ -69,7 +69,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
         student = StudentFactory()
         EnrollmentFactory.create()
         EnrollmentCertificateFactory.create(student=student)
-        curator = UserFactory.create(is_superuser=True, is_staff=True)
+        curator = CuratorFactory()
         url = reverse('user_detail', args=[student.pk])
         self.doLogin(curator)
         response = self.client.get(url)
@@ -107,7 +107,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
         url = reference.get_absolute_url()
         self.doLogin(student)
         self.assertLoginRedirect(url)
-        curator = UserFactory.create(is_superuser=True, is_staff=True)
+        curator = CuratorFactory()
         self.doLogin(curator)
         response = self.client.get(url)
         self.assertEqual(response.context['object'].note, "TEST")

@@ -6,7 +6,7 @@ from django.forms import model_to_dict
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory
 from courses.models import MetaCourse
 from users.constants import Roles
-from users.tests.factories import UserFactory
+from users.tests.factories import UserFactory, CuratorFactory
 
 
 @pytest.mark.django_db
@@ -31,7 +31,7 @@ def test_meta_course_detail(client):
 
 
 @pytest.mark.django_db
-def test_meta_course_update_security(client, assert_login_redirect):
+def test_meta_course_update_security(client, curator, assert_login_redirect):
     mc = MetaCourseFactory.create()
     url = mc.get_update_url()
     all_test_groups = [
@@ -44,14 +44,14 @@ def test_meta_course_update_security(client, assert_login_redirect):
         client.login(UserFactory.create(groups=groups, city_id='spb'))
         assert_login_redirect(url, form={}, method='post')
         client.logout()
-    client.login(UserFactory.create(is_superuser=True, is_staff=True))
+    client.login(curator)
     assert client.post(url, {'name': "foobar"}).status_code == 200
 
 
 @pytest.mark.django_db
-def test_meta_course_update(client, assert_redirect):
+def test_meta_course_update(client, curator, assert_redirect):
     mc = MetaCourseFactory.create()
-    client.login(UserFactory.create(is_superuser=True, is_staff=True))
+    client.login(curator)
     form = factory.build(dict, FACTORY_CLASS=MetaCourseFactory)
     form.update({
         'name_ru': "foobar",

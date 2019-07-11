@@ -219,7 +219,7 @@ def test_project_detail_student_participant_notifications(client, curator):
     curator.add_group(Roles.CURATOR_PROJECTS)
     curator.save()
     # This curator not in reviewers group and doesn't receive notifications
-    curator2 = UserFactory(is_superuser=True, is_staff=True)
+    curator2 = CuratorFactory()
     semester = SemesterFactory.create_current()
     today = now_local(Branches.SPB).date()
     rp = ReportingPeriodFactory(term=semester, start_on=today, branch=None,

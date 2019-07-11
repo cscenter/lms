@@ -1,6 +1,5 @@
 import datetime
 import os.path
-from typing import Union
 
 import pytz
 from bitfield import BitField
@@ -10,7 +9,6 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import Prefetch
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -21,13 +19,13 @@ from sorl.thumbnail import ImageField
 
 from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
-from core.timezone import now_local, CityCode, Timezone, TzAware
+from core.timezone import now_local, TzAware
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids, get_youtube_video_id
+from courses.settings import ASSIGNMENT_TASK_ATTACHMENT
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
-from courses.settings import ASSIGNMENT_TASK_ATTACHMENT
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
 from .micawber_providers import get_oembed_html

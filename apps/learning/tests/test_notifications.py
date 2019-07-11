@@ -167,7 +167,7 @@ def test_assignment_notify_teachers_public_form(client):
 
 
 @pytest.mark.django_db
-def test_assignment_notify_teachers_admin_form(client, curator):
+def test_assignment_notify_teachers_admin_form(admin_client):
     """
     On assignment creation `notify_teachers` should be prepopulated with
     the course teachers by default.
@@ -176,7 +176,6 @@ def test_assignment_notify_teachers_admin_form(client, curator):
     t1, t2, t3, t4 = TeacherFactory.create_batch(4)
     co = CourseFactory.create(teachers=[t1, t2, t3, t4])
     ma = AssignmentAdmin(Assignment, AdminSite())
-    client.login(curator)
     a = AssignmentFactory.build()
     # Send data with empty notify_teachers list
     post_data = {
@@ -190,13 +189,13 @@ def test_assignment_notify_teachers_admin_form(client, curator):
         'deadline_at_0': str(a.deadline_at.date()),
         'deadline_at_1': '00:00'
     }
-    response = client.post(reverse('admin:courses_assignment_add'), post_data)
+    response = admin_client.post(reverse('admin:courses_assignment_add'), post_data)
     assert (Assignment.objects.count() == 1)
     assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
     # Manually select teachers from list
     co_t1, co_t2, co_t3, co_t4 = CourseTeacher.objects.filter(course=co).all()
     post_data['notify_teachers'] = [co_t1.pk, co_t2.pk]
-    response = client.post(reverse('admin:courses_assignment_add'), post_data)
+    response = admin_client.post(reverse('admin:courses_assignment_add'), post_data)
     assert (Assignment.objects.count() == 2)
     assert len(Assignment.objects.order_by('id').all()[0].notify_teachers.all()) == 4
     assert len(Assignment.objects.order_by('id').all()[1].notify_teachers.all()) == 2

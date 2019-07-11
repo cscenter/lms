@@ -481,8 +481,9 @@ class Project(TimeStampedModel):
         verbose_name=_("Reviewers"),
         related_name='project_reviewers',
         blank=True,
+        # FIXME: replace `is_staff` with CURATOR role
         limit_choices_to=(Q(group__role=Roles.PROJECT_REVIEWER) |
-                          Q(is_superuser=True)))
+                          Q(is_staff=True)))
     supervisors = models.ManyToManyField(
         Supervisor,
         verbose_name=_("Supervisors"),

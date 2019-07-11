@@ -1,12 +1,18 @@
+import datetime
+
 import pytest
+from django.utils import timezone
 from django.utils.encoding import smart_bytes
 
 from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
     CourseTeacherFactory, CourseFactory, MetaCourseFactory, AssignmentFactory
 from courses.models import CourseNews
+from learning.tabs import CourseReviewsTab
 from learning.tests.factories import EnrollmentFactory
 from learning.settings import GradeTypes
-from users.tests.factories import StudentFactory, TeacherFactory
+from users.tests.factories import StudentFactory, TeacherFactory, \
+    VolunteerFactory
+
 
 # TODO: тест для видимости таб из под разных ролей. (прятать табу во вьюхе, если нет содержимого)
 
@@ -34,7 +40,7 @@ def test_course_news_tab_permissions(client):
     e_current = EnrollmentFactory(course=co, student=student_spb)
     response = client.get(co.get_absolute_url())
     assert "news" in response.context['course_tabs']
-    # Prev courses should be successfully passed to see the news
+    # To see the news for completed course student should successfully pass it.
     e_prev = EnrollmentFactory(course=co_prev, student=student_spb)
     response = client.get(co_prev.get_absolute_url())
     assert "news" not in response.context['course_tabs']
@@ -86,3 +92,29 @@ def test_course_assignments_tab_permissions(client):
     tab = response.context['course_tabs']['assignments']
     assert len(tab.tab_panel.context["items"]) == 1
     assert smart_bytes(a.get_teacher_url()) not in response.content
+
+
+@pytest.mark.django_db
+def test_course_reviews_tab_permissions(client, curator):
+    today = timezone.now()
+    next_week = today + datetime.timedelta(weeks=1)
+    yesterday = today - datetime.timedelta(days=1)
+    current_term = SemesterFactory.create_current(enrollment_end_at=next_week.date())
+    prev_term = SemesterFactory.create_prev(current_term)
+    course = CourseFactory(semester=current_term)
+    prev_course = CourseFactory(semester=prev_term,
+                                meta_course=course.meta_course,
+                                reviews='Very good')
+    assert course.enrollment_is_open
+    student = StudentFactory()
+    client.login(student)
+    response = client.get(course.get_absolute_url())
+    assert CourseReviewsTab.is_enabled(course, student)
+    assert "reviews" in response.context['course_tabs']
+    volunteer = VolunteerFactory()
+    assert CourseReviewsTab.is_enabled(course, volunteer)
+    assert CourseReviewsTab.is_enabled(course, curator)
+    current_term.enrollment_end_at = yesterday.date()
+    current_term.save()
+    assert not course.enrollment_is_open
+    assert not CourseReviewsTab.is_enabled(course, curator)

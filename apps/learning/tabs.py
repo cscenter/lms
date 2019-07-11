@@ -4,7 +4,6 @@ from typing import List, Optional
 from django.db.models import Prefetch
 from django.utils.translation import ugettext_noop
 
-from core.utils import is_club_site
 from courses.models import Assignment
 from courses.tabs import CourseTab, CourseTabPanel
 from courses.tabs_registry import register
@@ -21,7 +20,7 @@ class CourseContactsTab(CourseTab):
     is_hidden = False
 
     @classmethod
-    def is_enabled(cls, course, user=None):
+    def is_enabled(cls, course, user):
         return user.get_enrollment(course.pk) or user.is_curator
 
     def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
@@ -35,11 +34,8 @@ class CourseNewsTab(CourseTab):
     priority = 60
 
     @classmethod
-    def is_enabled(cls, course, user=None):
-        if is_club_site():
-            return True
-        role = course_access_role(course=course, user=user)
-        return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
+    def is_enabled(cls, course, user):
+        return user.has_perm("learning.can_view_course_news", course)
 
     def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
         return CourseTabPanel(context={"items": get_course_news(**kwargs)})
@@ -53,9 +49,8 @@ class CourseReviewsTab(CourseTab):
     is_hidden = False
 
     @classmethod
-    def is_enabled(cls, course, user=None):
-        has_perm = user.is_curator or user.is_student or user.is_volunteer
-        return course.enrollment_is_open and has_perm
+    def is_enabled(cls, course, user):
+        return user.has_perm("learning.can_view_course_reviews", course)
 
     def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
         return CourseTabPanel(context={"items": get_course_reviews(**kwargs)})
@@ -68,7 +63,7 @@ class CourseAssignmentsTab(CourseTab):
     priority = 50
 
     @classmethod
-    def is_enabled(cls, course, user=None):
+    def is_enabled(cls, course, user):
         return (user.is_curator or user.is_student or user.is_graduate or
                 user.is_teacher or user.get_enrollment(course.pk))
 
@@ -83,7 +78,7 @@ def get_course_news(course, **kwargs):
 
 
 def get_course_reviews(course, **kwargs):
-    return course.enrollment_is_open and course.get_reviews()
+    return course.get_reviews()
 
 
 def get_course_assignments(course, user, user_role=None) -> List[Assignment]:

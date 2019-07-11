@@ -18,7 +18,8 @@ from courses.utils import get_current_term_pair
 from learning.tests.factories import *
 from learning.tests.utils import check_url_security
 from users.constants import Roles
-from users.tests.factories import UserFactory, StudentFactory, TeacherFactory
+from users.tests.factories import UserFactory, StudentFactory, TeacherFactory, \
+    CuratorFactory
 from .mixins import *
 
 
@@ -52,7 +53,7 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
             else:
                 self.assertLoginRedirect(reverse(self.url_name))
             self.client.logout()
-        self.doLogin(UserFactory.create(is_superuser=True, is_staff=True, city_id='spb'))
+        self.doLogin(CuratorFactory(city_id='spb'))
         self.assertStatusCode(200, self.url_name)
 
 

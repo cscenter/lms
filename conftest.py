@@ -13,7 +13,8 @@ from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase, \
 from learning.models import Branch
 from learning.settings import Branches
 from notifications.models import Type
-from users.tests.factories import UserFactory
+from users.constants import Roles
+from users.tests.factories import UserFactory, CuratorFactory
 
 
 @pytest.fixture()
@@ -49,7 +50,7 @@ def assert_login_redirect(client, settings, assert_redirect):
 
 @pytest.fixture(scope="function")
 def curator():
-    return UserFactory.create(is_superuser=True, is_staff=True)
+    return CuratorFactory()
 
 
 @pytest.fixture(scope="session", autouse=True)

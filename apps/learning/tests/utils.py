@@ -1,5 +1,5 @@
 from users.constants import Roles
-from users.tests.factories import UserFactory
+from users.tests.factories import UserFactory, CuratorFactory
 
 
 def check_url_security(client, assert_login_redirect, groups_allowed, url):
@@ -22,8 +22,7 @@ def check_url_security(client, assert_login_redirect, groups_allowed, url):
         else:
             assert_login_redirect(url, method='get')
         client.logout()
-    client.login(UserFactory.create(is_superuser=True, is_staff=True,
-                                    city_id='spb'))
+    client.login(CuratorFactory(city_id='spb'))
     assert client.get(url).status_code == 200
 
 
