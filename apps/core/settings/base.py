@@ -192,6 +192,7 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000
 
 # SORL settings
 THUMBNAIL_DUMMY = True
+THUMBNAIL_PRESERVE_FORMAT = True
 # Lets store keys in redis and share them between csclub and cscenter sites
 # It's safe while we store images in shared directory
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
