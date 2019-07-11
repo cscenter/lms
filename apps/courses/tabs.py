@@ -124,7 +124,7 @@ class CourseTab:
         self.tab_dict = tab_dict
 
     @classmethod
-    def is_enabled(cls, course, user=None):
+    def is_enabled(cls, course, user):
         """Returns true if this course tab is enabled in the course.
         Args:
             course: the course using the feature
@@ -305,7 +305,7 @@ class CourseInfoTab(CourseTab):
     is_default = True
 
     @classmethod
-    def is_enabled(cls, course, user=None):
+    def is_enabled(cls, course, user):
         return True
 
 
@@ -316,7 +316,7 @@ class CourseClassesTab(CourseTab):
     priority = 40
 
     @classmethod
-    def is_enabled(cls, course, user=None):
+    def is_enabled(cls, course, user):
         return True
 
     def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
@@ -329,7 +329,7 @@ class CourseAssignmentsTab(CourseTab):
     priority = 50
 
     @classmethod
-    def is_enabled(cls, course, user=None):
+    def is_enabled(cls, course, user):
         return True
 
 

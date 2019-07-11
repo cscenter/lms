@@ -81,8 +81,9 @@ class ProjectAdmin(admin.ModelAdmin):
         if db_field.name == "reviewers":
             kwargs["queryset"] = (
                 User.objects
+                    # FIXME: add curator role instread of checking is_staff
                     .filter(Q(group__role=Roles.PROJECT_REVIEWER) |
-                            Q(is_superuser=True, is_staff=True))
+                            Q(is_staff=True))
                     .distinct())
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 

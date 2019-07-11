@@ -27,7 +27,7 @@ from learning.tests.mixins import MyUtilitiesMixin
 from learning.tests.test_views import GroupSecurityCheckMixin
 from users.constants import Roles
 from users.tests.factories import UserFactory, TeacherFactory, \
-    StudentFactory, VolunteerFactory, ProjectReviewerFactory
+    StudentFactory, VolunteerFactory, ProjectReviewerFactory, CuratorFactory
 
 
 # TODO: assignment submission page - comments localisation, assignment created localization
@@ -305,7 +305,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
             else:
                 self.assertLoginRedirect(reverse(self.url_name))
             self.client.logout()
-        self.doLogin(UserFactory.create(is_superuser=True, is_staff=True))
+        self.doLogin(CuratorFactory())
         self.assertStatusCode(302, self.url_name)
 
     def test_list(self):

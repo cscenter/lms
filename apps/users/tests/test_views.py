@@ -19,7 +19,7 @@ from users.constants import Roles
 from users.forms import UserCreationForm
 from users.models import User, UserGroup
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
-    StudentFactory, add_user_groups, StudentFactory
+    StudentFactory, add_user_groups, StudentFactory, CuratorFactory
 
 
 class UserTests(MyUtilitiesMixin, CSCTestCase):
@@ -233,7 +233,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         resp = self.client.get(url)
         self.assertNotContains(resp, student_mail)
         # check with curator credentials
-        curator = UserFactory.create(is_superuser=True, is_staff=True)
+        curator = CuratorFactory()
         self.doLogin(curator)
         resp = self.client.get(url)
         self.assertContains(resp, student_mail)

@@ -634,8 +634,8 @@ class ProcessReviewFormView(LoginRequiredMixin, ModelFormMixin, View):
         """Reviewer completed assessment"""
         curators = (User.objects
                     .has_role(Roles.CURATOR_PROJECTS)
-                    .filter(is_superuser=True,
-                            is_staff=True))
+                    # FIXME: replace with CURATOR role
+                    .filter(is_staff=True))
         report = (Report.objects
                   .select_related("project_student",
                                   "project_student__project",

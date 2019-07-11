@@ -1,6 +1,10 @@
 from enum import Enum, auto
 
+import rules
+
+from auth.permissions import add_perm
 from core.utils import is_club_site
+from courses.models import Course
 from learning.enrollment import course_failed_by_student
 from learning.settings import StudentStatuses
 from users.constants import Roles as UserRoles
@@ -102,3 +106,19 @@ def course_access_role(*, course, user) -> CourseRole:
         # his own course
         role = CourseRole.TEACHER
     return role
+
+
+@rules.predicate
+def can_view_course_news(user, course: Course):
+    role = course_access_role(course=course, user=user)
+    return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
+
+
+@rules.predicate
+def can_view_course_reviews(user, course: Course):
+    return course.enrollment_is_open
+
+
+add_perm("learning.can_view_course_news", can_view_course_news)
+# TODO: Where should live permission below?
+add_perm("learning.can_view_course_reviews", can_view_course_reviews)

@@ -3,13 +3,11 @@ from crispy_forms.layout import Layout, Submit, Div
 from django import forms
 from django.contrib.auth.forms import UserCreationForm as _UserCreationForm, \
     UserChangeForm as _UserChangeForm
-from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site
 from core.widgets import UbereditorWidget
-from users.constants import Roles
 from .models import User, EnrollmentCertificate
 
 
@@ -99,18 +97,3 @@ class UserChangeForm(_UserChangeForm):
     class Meta:
         fields = '__all__'
         model = User
-
-    def clean(self):
-        """XXX: we can't validate m2m like `groups` in Model.clean() method"""
-        cleaned_data = super().clean()
-        enrollment_year = cleaned_data.get('enrollment_year')
-        groups = {x.pk for x in cleaned_data.get('groups', [])}
-        u: User = self.instance
-        # FIXME: How to check these invariants with 1-to-many relation?
-        if Roles.VOLUNTEER in groups and Roles.STUDENT in groups:
-            msg = _("User can't be volunteer and student at the same time")
-            self.add_error('groups', ValidationError(msg))
-
-        if Roles.GRADUATE in groups and Roles.STUDENT in groups:
-            msg = _("User can't be graduated and student at the same time")
-            self.add_error('groups', ValidationError(msg))

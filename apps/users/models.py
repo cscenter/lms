@@ -6,7 +6,8 @@ from typing import Optional
 
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser
-from django.contrib.auth.models import AnonymousUser, PermissionsMixin
+from django.contrib.auth.models import AnonymousUser, PermissionsMixin, \
+    _user_has_perm
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import RegexValidator
@@ -22,6 +23,7 @@ from model_utils.fields import MonitorField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
+from auth.permissions import all_permissions
 from compscicenter_ru.utils import PublicRoute
 from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.urls import reverse
@@ -318,7 +320,13 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         return PermissionsMixin.get_all_permissions(self, obj)
 
     def has_perm(self, perm, obj=None):
-        return PermissionsMixin.has_perm(self, perm, obj)
+        # Active superusers have all permissions implicitly added
+        # by Django but no more
+        is_registered_permission = perm not in all_permissions
+        if self.is_active and self.is_superuser and is_registered_permission:
+            return True
+        # Otherwise we need to check the backends.
+        return _user_has_perm(self, perm, obj)
 
     def has_perms(self, perm_list, obj=None):
         return PermissionsMixin.has_perms(self, perm_list, obj)
@@ -558,8 +566,6 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         normalized_bio = normalize_newlines(self.bio)
         lf = normalized_bio.find("\n")
         return self.bio if lf == -1 else normalized_bio[:lf]
-
-    # TODO: think how to add declension method with ru/en support
 
     @cached_property
     def _cached_groups(self) -> set:

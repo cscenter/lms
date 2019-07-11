@@ -67,8 +67,15 @@ class UserGroupFactory(factory.DjangoModelFactory):
 
 
 class CuratorFactory(UserFactory):
-    is_superuser = True
     is_staff = True
+    is_superuser = True
+
+    @factory.post_generation
+    def required_groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        site_id = kwargs.pop("site_id", None)
+        self.add_group(role=Roles.CURATOR, site_id=site_id)
 
 
 class StudentFactory(UserFactory):
