@@ -4,15 +4,15 @@ from django.urls import path, re_path
 from courses.urls import RE_COURSE_URI
 from learning.study.views import UsefulListView, InternshipListView, \
     HonorCodeView
-from learning.views.views import CourseStudentsView
-from .views import EventDetailView, CourseNewsNotificationUpdate
+from .views import EventDetailView, CourseNewsNotificationUpdate, CourseStudentsView, InvitationView
 
 urlpatterns = [
     path("courses/", include([
         re_path(RE_COURSE_URI, include([
             path("students/", CourseStudentsView.as_view(), name="course_students"),
             path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
-        ]), kwargs={"city_aware": True})
+        ]), kwargs={"city_aware": True}),
+        path('invitation/<str:token>/', InvitationView.as_view(), name="course_invitation"),
     ])),
 
     path('teaching/', include('learning.teaching.urls')),

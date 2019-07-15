@@ -69,8 +69,6 @@ urlpatterns += [
 
     path('', include('courses.urls')),
 
-    path('', include('learning.enrollment.urls')),
-
     path('', include('admission.urls_application')),
 
     path('narnia/', admin.site.urls),

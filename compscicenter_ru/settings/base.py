@@ -8,6 +8,9 @@ from core.settings.base import *
 SITE_ID = 1
 WSGI_APPLICATION = 'compscicenter_ru.wsgi.application'
 ROOT_URLCONF = 'compscicenter_ru.urls'
+LMS_SUBDOMAIN = 'my'
+REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
+                                 'surveys', 'library', 'admission')
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
     LMS_SUBDOMAIN: 'my_compscicenter_ru.urls',

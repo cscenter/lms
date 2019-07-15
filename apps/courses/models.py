@@ -401,7 +401,8 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
             self.completed_at = next_term_dt.date()
         super().save(*args, **kwargs)
 
-    def _get_url_kwargs(self) -> dict:
+    @property
+    def url_kwargs(self) -> dict:
         """
         Returns keyword arguments useful for most of course offering url
         patterns.
@@ -414,36 +415,38 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
 
     def get_absolute_url(self):
         return city_aware_reverse('course_detail',
-                                  kwargs=self._get_url_kwargs())
+                                  kwargs=self.url_kwargs)
 
     def get_url_for_tab(self, active_tab):
-        kwargs = {**self._get_url_kwargs(), "tab": active_tab}
+        kwargs = {**self.url_kwargs, "tab": active_tab}
         return city_aware_reverse("course_detail_with_active_tab",
                                   kwargs=kwargs)
 
     def get_create_assignment_url(self):
         return city_aware_reverse("assignment_add",
-                                  kwargs=self._get_url_kwargs())
+                                  kwargs=self.url_kwargs)
 
     def get_create_news_url(self):
         return city_aware_reverse("course_news_create",
-                                  kwargs=self._get_url_kwargs())
+                                  kwargs=self.url_kwargs)
 
     def get_create_class_url(self):
         return city_aware_reverse("course_class_add",
-                                  kwargs=self._get_url_kwargs())
+                                  kwargs=self.url_kwargs)
 
     def get_update_url(self):
         return city_aware_reverse("course_update",
-                                  kwargs=self._get_url_kwargs())
+                                  kwargs=self.url_kwargs)
 
     def get_enroll_url(self):
         return city_aware_reverse('course_enroll',
-                                  kwargs=self._get_url_kwargs())
+                                  kwargs=self.url_kwargs,
+                                  subdomain=settings.LMS_SUBDOMAIN)
 
     def get_unenroll_url(self):
         return city_aware_reverse('course_leave',
-                                  kwargs=self._get_url_kwargs())
+                                  kwargs=self.url_kwargs,
+                                  subdomain=settings.LMS_SUBDOMAIN)
 
     def get_gradebook_url(self, for_curator=False, format=None):
         if for_curator:
@@ -471,7 +474,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
 
     def get_course_news_notifications_url(self):
         return city_aware_reverse('course_news_notifications_read',
-                                  kwargs=self._get_url_kwargs(),
+                                  kwargs=self.url_kwargs,
                                   subdomain=settings.LMS_SUBDOMAIN)
 
     def get_city(self):

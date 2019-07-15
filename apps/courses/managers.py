@@ -131,7 +131,7 @@ class CourseQuerySet(models.QuerySet):
                                        "patronymic"))
         return (self
                 .select_related('meta_course', 'semester')
-                .only("pk", "city_id", "is_open",
+                .only("pk", "city_id", "is_open", "grading_type",
                       "materials_video", "materials_slides", "materials_files",
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type")

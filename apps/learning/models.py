@@ -3,13 +3,14 @@
 import logging
 import os
 import os.path
+from secrets import token_urlsafe
 
 from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -23,7 +24,7 @@ from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
-from core.urls import reverse
+from core.urls import reverse, city_aware_reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Venue, \
     Assignment
@@ -204,6 +205,81 @@ class Enrollment(TimeStampedModel):
                 self.grade == self.GRADES.CREDIT):
             return _("Satisfactory")
         return self.GRADES.values[self.grade]
+
+
+class EnrollmentInvitation(models.Model):
+    invitation = models.ForeignKey(
+        'learning.Invitation',
+        verbose_name=_("Course Invitation"),
+        on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        Course,
+        verbose_name=_("Course offering"),
+        on_delete=models.CASCADE)
+    token = models.CharField(verbose_name=_("Token"), max_length=128)
+    expire_at = models.DateTimeField(
+        _("Expire at"),
+        help_text=_("Leave blank to use course enrollment deadline from "
+                    "semester settings"),
+        null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Enrollment Invitation")
+        verbose_name_plural = _("Enrollment Invitations")
+        constraints = [
+            models.UniqueConstraint(fields=('invitation', 'course'),
+                                    name='unique_invitation_course'),
+        ]
+
+    def __str__(self):
+        return f"[Invitation] course={self.course_id}"
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        if created and not self.token:
+            self.token = token_urlsafe(48)  # 64 chars in base64
+        super().save(**kwargs)
+
+    def get_absolute_url(self):
+        return city_aware_reverse(
+            "course_enroll_by_invitation",
+            kwargs={"token": self.token, **self.course.url_kwargs},
+            subdomain=settings.LMS_SUBDOMAIN)
+
+    def is_active(self):
+        if self.expire_at:
+            # FIXME: localize now_
+            return self.expire_at <= timezone.now()
+        else:
+            return self.course.enrollment_is_open
+
+
+class Invitation(TimeStampedModel):
+    name = models.CharField(_("Name"), max_length=255)
+    token = models.CharField(verbose_name=_("Token"), max_length=128)
+    courses = models.ManyToManyField(
+        'courses.Course',
+        through=EnrollmentInvitation,
+        verbose_name=_("Courses"))
+
+    class Meta:
+        verbose_name = _("Invitation")
+        verbose_name_plural = _("Invitations")
+
+    def __str__(self):
+        return self.name
+
+    @transaction.atomic
+    def save(self, **kwargs):
+        created = self.pk is None
+        if created and not self.token:
+            self.token = token_urlsafe(48)  # 64 chars in base64
+        super().save(**kwargs)
+
+    def get_absolute_url(self):
+        return reverse("course_invitation",
+                       kwargs={"token": self.token},
+                       subdomain=settings.LMS_SUBDOMAIN)
 
 
 class StudentAssignment(TimeStampedModel):
