@@ -62,6 +62,16 @@ class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
             return HttpResponseRedirect(form.course.get_absolute_url())
 
 
+class CourseInvitationEnrollView(CourseURLParamsMixin, FormView):
+    template_name = "learning/enrollment/invitations.html"
+
+    def get_context_data(self, **kwargs):
+        course = get_object_or_404(self.get_course_queryset())
+        return {
+            "course": course
+        }
+
+
 class CourseUnenrollView(StudentOnlyMixin, CourseURLParamsMixin,
                          generic.DeleteView):
     template_name = "learning/enrollment/enrollment_leave.html"

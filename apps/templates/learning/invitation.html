@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% load i18n %}
+{% load static %}
+
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+
+
+{% block content %}
+    <div class="container">
+        <div class="panel">
+            <div class="panel-body">
+                {% if invitations %}
+                <table class="table" width="100%">
+                    <thead>
+                        <th>Курс</th>
+                        <th class="actions" width="150"></th>
+                    </thead>
+                    <tbody>
+                    {% for invitation in invitations %}
+                        {% with course=invitation.course %}
+                            <tr>
+                                <td style="vertical-align: middle">
+                                    <a href="{{ course.get_absolute_url }}"
+                                       class="title">{{ course.meta_course.name }}</a>
+                                </td>
+                                <td align="right">
+                                    {% if invitation.is_active %}
+                                        <a class="btn btn-primary" href="{{ invitation.get_absolute_url }}">Записаться</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endwith %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                    <div class="empty">¯\_(ツ)_/¯</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

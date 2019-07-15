@@ -3,7 +3,7 @@ from django.urls import path, re_path
 
 from courses import views
 
-# FIXME: move to settings, replace with branch code
+# FIXME: move to settings, replace with branch code (for cs center)
 RE_COURSE_URI = r"^(?P<course_slug>[-\w]+)/(?P<city_code>nsk|kzn|spb|)(?P<city_delimiter>/?)(?P<semester_slug>[-\w]+)/"
 
 

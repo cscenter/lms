@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.db import models as db_models
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
@@ -8,7 +9,8 @@ from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from learning.models import GraduateProfile
+from courses.models import Course
+from learning.models import GraduateProfile, Invitation, EnrollmentInvitation
 from users.constants import Roles
 from users.models import User
 from .models import AssignmentComment, Enrollment, Event, Useful, Branch
@@ -116,8 +118,28 @@ class GraduateProfileAdmin(admin.ModelAdmin):
     raw_id_fields = ('student',)
 
 
+class CourseInlineAdmin(admin.TabularInline):
+    model = EnrollmentInvitation
+    readonly_fields = ('token', )
+    raw_id_fields = ('course',)
+    extra = 0
+
+
+class InvitationAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created', 'get_link')
+    inlines = (CourseInlineAdmin, )
+    readonly_fields = ('token',)
+    exclude = ('courses',)
+
+    def get_link(self, obj):
+        url = obj.get_absolute_url()
+        return mark_safe(f"<a target='_blank' href='{url}'>Смотреть на сайте</a>")
+    get_link.short_description = _("Invitation Link")
+
+
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
+admin.site.register(Invitation, InvitationAdmin)
 admin.site.register(Event, NonCourseEventAdmin)
 admin.site.register(Useful, UsefulAdmin)
 admin.site.register(Branch, BranchAdmin)

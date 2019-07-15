@@ -9,7 +9,10 @@ PROJECT_DIR = Path(__file__).parents[1]
 
 SITE_ID = 2
 ROOT_URLCONF = 'compsciclub_ru.urls'
-SUBDOMAIN_URLCONFS = {None: ROOT_URLCONF}
+LMS_SUBDOMAIN = None
+SUBDOMAIN_URLCONFS = {
+    None: ROOT_URLCONF
+}
 WSGI_APPLICATION = 'compsciclub_ru.wsgi.application'
 
 MIDDLEWARE = [

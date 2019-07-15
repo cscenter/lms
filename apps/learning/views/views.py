@@ -5,11 +5,13 @@ import posixpath
 
 from braces.views import UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Prefetch, prefetch_related_objects
+from django.db.models import Prefetch, prefetch_related_objects, Q
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
     HttpResponseForbidden, HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
 from django.views import generic
+from django.views.generic import DetailView
 from nbconvert import HTMLExporter
 from vanilla import CreateView, TemplateView
 
@@ -21,7 +23,7 @@ from courses.settings import ASSIGNMENT_TASK_ATTACHMENT
 from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, AssignmentComment, \
-    AssignmentNotification, Event, CourseNewsNotification
+    AssignmentNotification, Event, CourseNewsNotification, Invitation
 from learning.permissions import course_access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT
 from users.mixins import TeacherOnlyMixin
@@ -32,6 +34,7 @@ logger = logging.getLogger(__name__)
 __all__ = (
     'AssignmentSubmissionBaseView', 'EventDetailView',
     'AssignmentAttachmentDownloadView', 'CourseNewsNotificationUpdate',
+    'CourseStudentsView', 'InvitationView',
 )
 
 
@@ -238,4 +241,25 @@ class CourseStudentsView(TeacherOnlyMixin, CourseURLParamsMixin, TemplateView):
             "co": co,
             "enrollments": (co.enrollment_set(manager="active")
                             .select_related("student"))
+        }
+
+
+class InvitationView(TemplateView):
+    template_name = "learning/invitation.html"
+
+    def get(self, request, *args, **kwargs):
+        qs = (Invitation.objects
+              .filter(token=kwargs['token']))
+        invitation = get_object_or_404(qs)
+        context = self.get_context_data(invitation=invitation)
+        return self.render_to_response(context)
+
+    def get_context_data(self, invitation, **kwargs):
+        course_invitations = (invitation.courses.through.objects
+                              .select_related('course',
+                                              'course__meta_course',
+                                              'course__semester'))
+        # TODO: Count how many active inviattions.
+        return {
+            'invitations': course_invitations,
         }

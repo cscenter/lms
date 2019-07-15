@@ -21,6 +21,7 @@ urlpatterns = [
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
 
     path('', include('learning.urls')),
+    path('', include('learning.enrollment.urls')),
 
     path('', include('auth.urls')),
     path('', include('users.urls')),
