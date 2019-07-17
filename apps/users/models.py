@@ -10,7 +10,7 @@ from django.contrib.auth.models import AnonymousUser, PermissionsMixin, \
     _user_has_perm
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import smart_text
@@ -29,14 +29,13 @@ from core.models import LATEX_MARKDOWN_ENABLED, City
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping
 from courses.models import Semester
-from learning.models import StudentProfile
 from learning.permissions import LearningPermissionsMixin
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeYears
 from learning.utils import is_negative_grade
 from users.constants import GROUPS_IMPORT_TO_GERRIT, Roles, \
-    SHADCourseGradeTypes, ThumbnailSizes, GenderTypes
+    SHADCourseGradeTypes, GenderTypes
 from users.fields import MonitorStatusField
-from users.tasks import update_password_in_gerrit
+from auth.tasks import update_password_in_gerrit
 from users.thumbnails import UserThumbnailMixin
 from .managers import CustomUserManager
 
@@ -170,6 +169,55 @@ class UserGroup(models.Model):
     def __str__(self):
         return "[AccessGroup] user: {}  role: {}  site: {}".format(
             self.user_id, self.role, self.site)
+
+
+class StudentProfile(models.Model):
+    enrollment_year = models.PositiveSmallIntegerField(
+        _("CSCUser|enrollment year"),
+        validators=[MinValueValidator(1990)],
+        blank=True,
+        null=True)
+    # FIXME: remove
+    graduation_year = models.PositiveSmallIntegerField(
+        _("CSCUser|graduation year"),
+        blank=True,
+        validators=[MinValueValidator(1990)],
+        null=True)
+    curriculum_year = models.PositiveSmallIntegerField(
+        _("CSCUser|Curriculum year"),
+        validators=[MinValueValidator(2000)],
+        blank=True,
+        null=True)
+    branch = models.ForeignKey(
+        "learning.Branch",
+        verbose_name=_("Branch"),
+        related_name="+",  # Disable backwards relation
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True)
+    university = models.CharField(
+        _("University"),
+        max_length=255,
+        blank=True)
+    phone = models.CharField(
+        _("Phone"),
+        max_length=40,
+        blank=True)
+    uni_year_at_enrollment = models.CharField(
+        _("StudentInfo|University year"),
+        choices=AcademicDegreeYears.choices,
+        max_length=2,
+        help_text=_("at enrollment"),
+        null=True,
+        blank=True)
+    # FIXME: remove
+    areas_of_study = models.ManyToManyField(
+        'study_programs.AcademicDiscipline',
+        verbose_name=_("StudentInfo|Areas of study"),
+        blank=True)
+
+    class Meta:
+        abstract = True
 
 
 class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,

@@ -2,6 +2,7 @@ import datetime
 from typing import Union
 
 import django_rq
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
@@ -19,30 +20,35 @@ from vanilla import DetailView
 import courses.utils
 from core.settings.base import TIME_ZONES
 from core.timezone import Timezone, CityCode
+from core.urls import reverse
 from core.utils import is_club_site
 from courses.calendar import CalendarEvent
-from compsciclub_ru import tasks
-from learning.gallery.models import Image
 from courses.models import Course, Semester, CourseClass
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
+from learning.gallery.models import Image
 from users.constants import Roles
 from users.models import User
+from auth.tasks import send_activation_email, ActivationEmailContext
 
 
 class AsyncEmailRegistrationView(RegistrationView):
-    """Send activation email with queue"""
-    SEND_ACTIVATION_EMAIL = False  # Prevent sending email on request
+    """Send activation email using redis queue"""
+    # Create inactive user without sending email
+    SEND_ACTIVATION_EMAIL = False
 
     def register(self, form):
         new_user = super().register(form)
-        queue = django_rq.get_queue('club')
         site = get_current_site(self.request)
-        queue.enqueue(tasks.send_activation_email,
-                      site.pk,
-                      new_user.registrationprofile.pk,
-                      self.request.LANGUAGE_CODE)
+        activation_url = reverse("registration_activate", kwargs={
+            "activation_key": new_user.registrationprofile.activation_key
+        })
+        context = ActivationEmailContext(
+            site_name=site.name,
+            activation_url=self.request.build_absolute_uri(activation_url),
+            language_code=self.request.LANGUAGE_CODE)
+        send_activation_email.delay(context, new_user.registrationprofile.pk)
         return new_user
 
 

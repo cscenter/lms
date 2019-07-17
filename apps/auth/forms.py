@@ -2,15 +2,13 @@ from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit
 from django import forms
-from django.conf import settings
 from django.contrib.auth.forms import PasswordResetForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
 
+from auth.tasks import send_restore_password_email
 from core.urls import reverse
-from users import tasks
-from users.constants import CSCENTER_ACCESS_ALLOWED
 
 
 class UserPasswordResetForm(PasswordResetForm):
@@ -24,7 +22,7 @@ class UserPasswordResetForm(PasswordResetForm):
             'uid': context['uid'],
             'token': context['token'],
         }
-        tasks.send_restore_password_email.delay(
+        send_restore_password_email.delay(
             from_email=from_email,
             to_email=to_email,
             context=ctx,
@@ -58,16 +56,16 @@ class LoginForm(AuthenticationForm):
                             css_class="pull-right")))
 
     def is_valid(self):
-        is_valid = super(LoginForm, self).is_valid()
-        # Prevent login for club students on compscicenter.ru
-        # FIXME: remove?
-        if is_valid and settings.SITE_ID == settings.CENTER_SITE_ID:
+        is_valid = super().is_valid()
+        if is_valid:
             user = self.get_user()
+            # FIXME: replace with permission `can_login_on_site`
             if user.is_curator:
                 return is_valid
-            user_roles = set(g.role for g
-                             in user.groups.filter(site_id=settings.SITE_ID))
-            if not user_roles.intersection(CSCENTER_ACCESS_ALLOWED):
+            # User without any role doesn't have any permission to the site,
+            # even with account (it could be created for the purposes
+            # of another site)
+            if not user.roles:
                 is_valid = False
                 no_access_msg = _("You haven't enough access rights to login "
                                   "on this site. Contact curators if you think "

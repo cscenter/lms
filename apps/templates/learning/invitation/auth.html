@@ -1,0 +1,7 @@
+{% extends "login.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block form_legend %}
+    <p>Войдите на сайт, чтобы продолжить.<br><a href="{{ register_url }}">Зарегистрируйтесь</a>, если нет профиля на сайте.</p>
+{% endblock form_legend %}

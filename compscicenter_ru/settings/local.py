@@ -180,3 +180,5 @@ REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
     'rest_framework.renderers.JSONRenderer',
     'rest_framework.renderers.BrowsableAPIRenderer',
 )
+
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']

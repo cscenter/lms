@@ -6,10 +6,8 @@ import os.path
 from secrets import token_urlsafe
 
 from django.conf import settings
-from django.contrib.postgres.fields import JSONField
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.encoding import smart_text
@@ -23,70 +21,21 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
+from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Venue, \
-    Assignment
+    Assignment, Semester
+from courses.utils import date_to_term_pair, get_term_index
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
     GraduateProfileActiveManager
-from learning.settings import GradingSystems, GradeTypes, Branches, \
-    AcademicDegreeYears
+from learning.settings import GradingSystems, GradeTypes, Branches
 from users.constants import ThumbnailSizes
 from users.thumbnails import UserThumbnailMixin
 
 logger = logging.getLogger(__name__)
-
-
-class StudentProfile(models.Model):
-    enrollment_year = models.PositiveSmallIntegerField(
-        _("CSCUser|enrollment year"),
-        validators=[MinValueValidator(1990)],
-        blank=True,
-        null=True)
-    # FIXME: remove
-    graduation_year = models.PositiveSmallIntegerField(
-        _("CSCUser|graduation year"),
-        blank=True,
-        validators=[MinValueValidator(1990)],
-        null=True)
-    curriculum_year = models.PositiveSmallIntegerField(
-        _("CSCUser|Curriculum year"),
-        validators=[MinValueValidator(2000)],
-        blank=True,
-        null=True)
-    branch = models.ForeignKey(
-        "learning.Branch",
-        verbose_name=_("Branch"),
-        related_name="+",  # Disable backwards relation
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True)
-    university = models.CharField(
-        _("University"),
-        max_length=255,
-        blank=True)
-    phone = models.CharField(
-        _("Phone"),
-        max_length=40,
-        blank=True)
-    uni_year_at_enrollment = models.CharField(
-        _("StudentInfo|University year"),
-        choices=AcademicDegreeYears.choices,
-        max_length=2,
-        help_text=_("at enrollment"),
-        null=True,
-        blank=True)
-    # FIXME: remove
-    areas_of_study = models.ManyToManyField(
-        'study_programs.AcademicDiscipline',
-        verbose_name=_("StudentInfo|Areas of study"),
-        blank=True)
-
-    class Meta:
-        abstract = True
 
 
 class Branch(models.Model):
@@ -277,9 +226,16 @@ class Invitation(TimeStampedModel):
         super().save(**kwargs)
 
     def get_absolute_url(self):
-        return reverse("course_invitation",
+        return reverse("invitation:course_list",
                        kwargs={"token": self.token},
                        subdomain=settings.LMS_SUBDOMAIN)
+
+    @property
+    def is_active(self):
+        course_invitation = self.courses.through.objects.first()
+        if course_invitation:
+            return course_invitation.is_active
+        return False
 
 
 class StudentAssignment(TimeStampedModel):

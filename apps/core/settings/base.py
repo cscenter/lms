@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
+    'loginas',
+    'registration',
     'users.apps.UsersConfig',
     'sorl.thumbnail',
     'crispy_forms',
@@ -58,8 +60,8 @@ INSTALLED_APPS = [
     'bootstrap3',
     'micawber.contrib.mcdjango',
     'dbbackup',
+    'simple_history',
 
-    'loginas',
     'import_export',
     'pipeline',
     'bootstrap_pagination',
@@ -83,6 +85,7 @@ INSTALLED_APPS = [
     # FIXME: quick fix, error on user detail page
     'taggit',  # used by library app only
     'library.apps.LibraryConfig',
+    'captcha',
 ]
 
 # django-js-reverse settings
@@ -249,3 +252,8 @@ DATE_FORMAT = 'j E Y'
 # Presume foundation year starts from spring term
 FOUNDATION_YEAR = 2007
 CENTER_FOUNDATION_YEAR = 2011
+
+
+# Recaptcha settings
+NOCAPTCHA = True
+RECAPTCHA_USE_SSL = True

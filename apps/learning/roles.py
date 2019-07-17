@@ -4,6 +4,7 @@ from djchoices import DjangoChoices, C
 from auth.registry import role_registry
 
 
+# TODO: Add description of each role
 class Roles(DjangoChoices):
     STUDENT = C(1, _('Student'), permissions=(
         "courses.can_view_contacts",
@@ -29,6 +30,12 @@ class Roles(DjangoChoices):
         "learning.can_view_course_news",
         "learning.can_view_course_reviews"
     ))
+    INVITED = C(11, _('Invited User'), permissions=(
+        "courses.can_view_contacts",
+        "courses.can_view_assignments",
+        "learning.can_view_course_news",
+        "learning.can_view_course_reviews"
+    ))
 
 
 role_registry.register(Roles.STUDENT,
@@ -39,3 +46,5 @@ role_registry.register(Roles.VOLUNTEER,
                        Roles.get_choice(Roles.VOLUNTEER).permissions)
 role_registry.register(Roles.CURATOR,
                        Roles.get_choice(Roles.CURATOR).permissions)
+role_registry.register(Roles.INVITED,
+                       Roles.get_choice(Roles.INVITED).permissions)

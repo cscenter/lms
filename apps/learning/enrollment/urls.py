@@ -8,9 +8,9 @@ from learning.enrollment.views import CourseEnrollView, CourseUnenrollView, \
 urlpatterns = [
     path("courses/", include([
         re_path(RE_COURSE_URI, include([
-            path("enroll", CourseEnrollView.as_view(), name="course_enroll"),
-            path("invitation/<str:token>/", CourseInvitationEnrollView.as_view(), name="course_enroll_by_invitation"),
-            path("unenroll", CourseUnenrollView.as_view(), name="course_leave"),
+            path("enroll/", CourseEnrollView.as_view(), name="course_enroll"),
+            path("enroll/invitation/<str:token>/", CourseInvitationEnrollView.as_view(), name="course_enroll_by_invitation"),
+            path("unenroll/", CourseUnenrollView.as_view(), name="course_leave"),
         ]), kwargs={"city_aware": True})
     ])),
 ]

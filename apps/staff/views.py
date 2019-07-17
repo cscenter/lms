@@ -104,7 +104,9 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "alumni_profiles_form": graduation_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term_year, "type": prev_term},
-            "campaigns": Campaign.objects.order_by("-city__name", "-year"),
+            "campaigns": (Campaign.objects
+                          .select_related("branch")
+                          .order_by("-city__name", "-year")),
             "center_branches": settings.CITIES
         }
         return context

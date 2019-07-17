@@ -2,6 +2,7 @@
 {% load static %}
 {% load i18n %}
 
+{% block title %}{% trans "Log in" %}{% endblock title %}
 {% block body_attrs %} class="sign-in"{% endblock body_attrs %}
 
 {% block content %}
@@ -10,14 +11,16 @@
             <div class="col-xs-12">
                 <div class="container-box panel panel-body panel-default">
                 <form id="sign-in" method="POST">
-                    {% if has_next %}
-                        {% if user.is_authenticated %}
-                            <p>У вас недостаточно прав для просмотра данной страницы.
-                                Чтобы продолжить, пожалуйста, войдите под аккаунтом с достаточным уровнем прав.</p>
-                        {% else %}
-                            <p>Войдите на сайт, чтобы продолжить.</p>
+                    {% block form_legend %}
+                        {% if has_next %}
+                            {% if user.is_authenticated %}
+                                <p>У вас недостаточно прав для просмотра данной страницы.
+                                    Чтобы продолжить, пожалуйста, войдите под аккаунтом с достаточным уровнем прав.</p>
+                            {% else %}
+                                <p>Войдите на сайт, чтобы продолжить.</p>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
+                    {% endblock form_legend %}
                     {% csrf_token %}
 
                     <label for="{{ form.username.id_for_label }}">
