@@ -776,7 +776,9 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
         received_statuses = {
             Applicant.ACCEPT,
             Applicant.ACCEPT_IF,
-            Applicant.VOLUNTEER
+            Applicant.VOLUNTEER,
+            Applicant.WAITING_FOR_PAYMENT,
+            Applicant.ACCEPT_PAID,
         }
         received = 0
         for form in formset.forms:

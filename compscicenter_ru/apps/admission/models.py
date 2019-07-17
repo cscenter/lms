@@ -200,6 +200,7 @@ class Applicant(TimeStampedModel):
     PENDING = 'pending'
     ACCEPT = 'accept'
     ACCEPT_PAID = 'accept_paid'
+    WAITING_FOR_PAYMENT = 'waiting_for_payment'
     ACCEPT_IF = 'accept_if'
     VOLUNTEER = 'volunteer'
     THEY_REFUSED = 'they_refused'
@@ -214,6 +215,7 @@ class Applicant(TimeStampedModel):
         (INTERVIEW_COMPLETED, _('Interview completed')),
         (REJECTED_BY_INTERVIEW, _('Rejected by interview')),
         (ACCEPT_PAID, _('Accept on paid')),
+        (WAITING_FOR_PAYMENT, _('Waiting for Payment')),
         (ACCEPT, _('Accept')),
         (ACCEPT_IF, _('Accept with condition')),
         (VOLUNTEER, _("Applicant|Volunteer")),
@@ -224,7 +226,8 @@ class Applicant(TimeStampedModel):
         ACCEPT_PAID,
         ACCEPT_IF,
         REJECTED_BY_INTERVIEW,
-        VOLUNTEER
+        VOLUNTEER,
+        WAITING_FOR_PAYMENT
     }
     STUDY_PROGRAM_DS = "ds"
     STUDY_PROGRAM_CS = "cs"

@@ -256,6 +256,7 @@ class ResultsModelForm(ModelForm):
         (Applicant.VOLUNTEER, "Берём в вольные слушатели"),
         (Applicant.ACCEPT_IF, "Берём с условием"),
         (Applicant.ACCEPT_PAID, "Платное"),
+        (Applicant.WAITING_FOR_PAYMENT, "Ожидаем оплаты"),
         (Applicant.REJECTED_BY_INTERVIEW, "Не берём"),
         (Applicant.THEY_REFUSED, "Отказался"),
     )
