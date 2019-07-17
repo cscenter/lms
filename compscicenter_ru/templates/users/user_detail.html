@@ -145,7 +145,7 @@
                             <td>Группы</td>
                             <td>
                                 {% for group in profile_user.groups.all %}
-                                    {% trans group.name %}{% if not forloop.last %}, {% endif %}{% empty %}нет указанных групп
+                                    {{ group.get_role_display }}{% if not forloop.last %}, {% endif %}{% empty %}нет указанных групп
                                 {% endfor %}
                             </td>
                         </tr>
