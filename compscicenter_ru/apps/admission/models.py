@@ -221,13 +221,21 @@ class Applicant(TimeStampedModel):
         (VOLUNTEER, _("Applicant|Volunteer")),
         (THEY_REFUSED, _("He or she refused")),
     )
-    FINAL_STATUSES = {
+    # One of the statuses below could be set after interviewing
+    INTERVIEW_RESULTS = {
         ACCEPT,
         ACCEPT_PAID,
         ACCEPT_IF,
         REJECTED_BY_INTERVIEW,
         VOLUNTEER,
         WAITING_FOR_PAYMENT
+    }
+    # Successful final states
+    ACCEPT_STATUSES = {
+        ACCEPT,
+        ACCEPT_PAID,
+        ACCEPT_IF,
+        VOLUNTEER,
     }
     STUDY_PROGRAM_DS = "ds"
     STUDY_PROGRAM_CS = "cs"
@@ -495,10 +503,6 @@ class Applicant(TimeStampedModel):
                 "{} [{}]".format(self.get_full_name(), self.campaign))
         else:
             return smart_text(self.get_full_name())
-
-    def interview_successfull(self):
-        """Successfully pass interview and ready to become student center"""
-        return self.status in [self.ACCEPT, self.ACCEPT_IF, self.VOLUNTEER]
 
     def get_similar(self):
         conditions = [
