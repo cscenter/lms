@@ -65,11 +65,11 @@ class UserDetailView(generic.DetailView):
     context_object_name = 'profile_user'
 
     def get_queryset(self, *args, **kwargs):
-        enrollments_queryset = Enrollment.active.select_related(
-            'course',
-            'course__semester',
-            'course__meta_course'
-        )
+        enrollments_queryset = (Enrollment.active
+                                .select_related('course',
+                                                'course__semester',
+                                                'course__meta_course',)
+                                .order_by("course"))
         shad_courses_queryset = (SHADCourseRecord.objects
                                  .select_related("semester"))
         if not self.request.user.is_authenticated:
