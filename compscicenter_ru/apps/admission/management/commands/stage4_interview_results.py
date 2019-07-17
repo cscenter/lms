@@ -35,7 +35,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             self.stdout.write("Canceled")
             return
 
-        self.validate_templates(campaigns, types=Applicant.FINAL_STATUSES)
+        self.validate_templates(campaigns, types=Applicant.INTERVIEW_RESULTS)
 
         header_from = options["from"]
 
@@ -45,14 +45,14 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                 'SUBJECT_CITY': campaign.city.name
             }
             # Generate emails for each status
-            for status in Applicant.FINAL_STATUSES:
+            for status in Applicant.INTERVIEW_RESULTS:
                 template_name = self.get_template_name(campaign, status)
                 template = get_email_template(template_name)
                 applicants = Applicant.objects.filter(campaign_id=campaign.pk,
                                                       status=status)
                 generated = 0
                 for a in applicants.iterator():
-                    if a.status in Applicant.FINAL_STATUSES:
+                    if a.status in Applicant.INTERVIEW_RESULTS:
                         recipients = [a.email]
                         # Note: This check doesn't work with
                         # `render_on_delivery=False`
