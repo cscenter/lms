@@ -5,14 +5,6 @@ from django.utils.encoding import smart_text
 
 
 class PermissionMixin:
-
-    @property
-    def _cached_groups(self):
-        return set()
-
-    def get_cached_groups(self):
-        return self._cached_groups
-
     @property
     def is_student(self):
         return True
