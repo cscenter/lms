@@ -71,25 +71,26 @@ def test_user_remove_group():
 
 
 @pytest.mark.django_db
-def test_cached_groups(settings):
+def test_roles(settings):
     user = UserFactory(groups=[Roles.STUDENT,
                                Roles.TEACHER])
-    assert set(user._cached_groups) == {Roles.STUDENT,
-                                        Roles.TEACHER}
+    assert set(user.roles) == {Roles.STUDENT, Roles.TEACHER}
     user.status = StudentStatuses.EXPELLED
     user.groups.add(UserGroupFactory(user=user, role=Roles.VOLUNTEER))
     # Invalidate cache
-    del user._cached_groups
-    assert user._cached_groups == {Roles.TEACHER,
-                                   Roles.STUDENT,
-                                   Roles.VOLUNTEER}
+    del user.site_groups
+    del user.roles
+    assert user.roles == {Roles.TEACHER,
+                          Roles.STUDENT,
+                          Roles.VOLUNTEER}
     user.groups.all().delete()
     user.add_group(role=Roles.STUDENT)
     user.status = ''
     user.save()
     settings.SITE_ID = settings.CLUB_SITE_ID
-    del user._cached_groups
-    assert not set(user._cached_groups)
+    del user.site_groups
+    del user.roles
+    assert not set(user.site_groups)
 
 
 @pytest.mark.django_db
