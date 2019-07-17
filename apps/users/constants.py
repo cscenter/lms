@@ -37,6 +37,7 @@ class Roles(DjangoChoices):
     MASTERS_DEGREE = C(8, _('Studying for a master degree'))
     PROJECT_REVIEWER = C(9, _('Project reviewer'))
     CURATOR_PROJECTS = C(10, _('Curator of projects'))
+    INVITED = C(11, _('Invited User'))
 
 
 CSCENTER_ACCESS_ALLOWED = {

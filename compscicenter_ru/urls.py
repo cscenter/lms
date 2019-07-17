@@ -6,6 +6,8 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.views.generic import RedirectView, TemplateView
 from loginas import urls as loginas_urls
+from registration.backends.default.views import ActivationView, \
+    ResendActivationView
 
 from announcements.views import AnnouncementTagAutocomplete, \
     AnnouncementDetailView
@@ -53,8 +55,8 @@ urlpatterns += [
     path('', include('online_courses.urls')),
     path('videos/', views.CourseVideoListView.as_view(), name='video_list'),
 
-    path('', include('auth.urls')),
     path('students/<int:student_id>/', views.StudentProfileView.as_view(), name='student_profile'),
+    path('', include('auth.urls')),
     path('', include('users.urls')),
 
     path('api/', include('api.frontend_urls')),

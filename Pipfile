@@ -120,6 +120,7 @@ django-subdomains = {git = "git://github.com/pacahon/django-subdomains.git",ref 
 django-simple-menu = "*"
 django-ckeditor = "==5.7.1"
 rules = "*"
+django-simple-history = "*"
 
 [requires]
 python_version = "3.6"

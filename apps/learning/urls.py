@@ -4,7 +4,8 @@ from django.urls import path, re_path
 from courses.urls import RE_COURSE_URI
 from learning.study.views import UsefulListView, InternshipListView, \
     HonorCodeView
-from .views import EventDetailView, CourseNewsNotificationUpdate, CourseStudentsView, InvitationView
+from .views import EventDetailView, CourseNewsNotificationUpdate, \
+    CourseStudentsView
 
 urlpatterns = [
     path("courses/", include([
@@ -12,7 +13,6 @@ urlpatterns = [
             path("students/", CourseStudentsView.as_view(), name="course_students"),
             path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
         ]), kwargs={"city_aware": True}),
-        path('invitation/<str:token>/', InvitationView.as_view(), name="course_invitation"),
     ])),
 
     path('teaching/', include('learning.teaching.urls')),

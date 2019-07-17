@@ -33,8 +33,6 @@ INSTALLED_APPS += [
     # FIXME: create separated dir for project specific apps
     'treemenus',
     'menu_extension',
-    'captcha',
-    'registration',
     'international_schools.apps.Config',
     'compsciclub_ru.apps.ProjectConfig',  # should be the last one
 ]
@@ -92,12 +90,6 @@ GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
 NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
 NEWRELIC_ENV = 'development'
-
-# Registration and Recaptcha settings
-RECAPTCHA_PUBLIC_KEY = '6Lc_7AsTAAAAAOoC9MhVSoJ6O-vILaGgDEgtLBty'
-RECAPTCHA_PRIVATE_KEY = '6Lc_7AsTAAAAAJeq5ZzlUQC471py3sq404u8DYqr'
-NOCAPTCHA = True
-RECAPTCHA_USE_SSL = True
 
 ACCOUNT_ACTIVATION_DAYS = 2
 INCLUDE_REGISTER_URL = False

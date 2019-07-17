@@ -13,8 +13,7 @@ from core.urls import reverse
 from auth.forms import UserPasswordResetForm, LoginForm
 from users.constants import Roles
 from users.models import User
-from users.tasks import email_template_name, html_email_template_name, \
-    subject_template_name
+from auth.tasks import EMAIL_RESTORE_PASSWORD_TEMPLATE, subject_template_name
 
 
 class LoginView(generic.FormView):
@@ -93,6 +92,6 @@ class LogoutView(LoginRequiredMixin, generic.RedirectView):
 
 pass_reset_view = views.PasswordResetView.as_view(
     form_class=UserPasswordResetForm,
-    email_template_name=email_template_name,
-    html_email_template_name=html_email_template_name,
+    email_template_name=EMAIL_RESTORE_PASSWORD_TEMPLATE,
+    html_email_template_name=None,
     subject_template_name=subject_template_name)
