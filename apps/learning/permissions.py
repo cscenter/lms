@@ -12,7 +12,7 @@ from users.constants import Roles as UserRoles
 
 class LearningPermissionsMixin:
     @property
-    def _cached_groups(self):
+    def site_groups(self):
         return set()
 
     @property

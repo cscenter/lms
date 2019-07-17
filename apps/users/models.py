@@ -152,7 +152,7 @@ class UserGroup(models.Model):
         Convenience function to make eq overrides easier and clearer.
         Arbitrary decision that group is primary, followed by site and then user
         """
-        return self.role, self.site, self.user_id
+        return self.role, self.site_id, self.user_id
 
     def __eq__(self, other):
         """
@@ -168,7 +168,7 @@ class UserGroup(models.Model):
 
     def __str__(self):
         return "[AccessGroup] user: {}  role: {}  site: {}".format(
-            self.user_id, self.role, self.site)
+            self.user_id, self.role, self.site_id)
 
 
 class StudentProfile(models.Model):
@@ -616,20 +616,17 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         return self.bio if lf == -1 else normalized_bio[:lf]
 
     @cached_property
-    def _cached_groups(self) -> set:
-        # FIXME: restrict by sett
+    def site_groups(self) -> set:
         try:
             gs = self._prefetched_objects_cache['groups']
-            roles = set(g.role for g in gs if g.site_id == settings.SITE_ID)
+            access_roles = set(g for g in gs if g.site_id == settings.SITE_ID)
         except (AttributeError, KeyError):
-            roles = set(self.groups
-                        .filter(site_id=settings.SITE_ID)
-                        .values_list("role", flat=True))
-        return roles
+            access_roles = set(self.groups.filter(site_id=settings.SITE_ID))
+        return access_roles
 
     @cached_property
     def roles(self) -> set:
-        return self._cached_groups
+        return {g.role for g in self.site_groups}
 
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         """
