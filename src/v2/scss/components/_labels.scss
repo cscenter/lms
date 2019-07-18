@@ -1,7 +1,7 @@
 @mixin label-color($color) {
   background-color: rgba($color, .1);
   color: $color;
-  &:before {
+  &::before {
     color: $color;
   }
 }
@@ -32,11 +32,34 @@
   &._blue {
     @include label-color($blue);
   }
+
+  &._icon {
+    display: inline-table;
+    margin: 0 spacer("2x") spacer("2x") 0;
+    border: none;
+    padding: 0;
+    color: $black;
+
+    .sprite-img {
+      fill: $gray-light;
+      margin-right: spacer("1x");
+      width: 1.2em;
+      height: 1.2em;
+      display: table-cell;
+      vertical-align: top; //For Safari and IE
+    }
+
+    span {
+      display: table-cell;
+      vertical-align: middle;
+    }
+  }
 }
 
 .ui.labels a.label,
 a.ui.label {
   transition: $transition-base;
+
   &:hover,
   &.active {
     background-color: $white;
@@ -64,8 +87,8 @@ a.ui.label {
 
 .ui.labels._circular .label,
 .ui.label._circular {
-    font-size: $font-size-sm;
-    line-height: $line-height-sm;
-    border: none;
-    border-radius: 2rem;
+  font-size: $font-size-sm;
+  line-height: $line-height-sm;
+  border: none;
+  border-radius: 2rem;
 }
