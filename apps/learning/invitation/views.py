@@ -6,11 +6,12 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from registration.backends.default.views import RegistrationView, ActivationView
-from vanilla import TemplateView
+from vanilla import TemplateView, GenericView
 
 from auth.tasks import send_activation_email, ActivationEmailContext
 from auth.views import LoginView
 from core.urls import reverse
+from courses.views.mixins import CourseURLParamsMixin
 from learning.invitation.forms import InvitationLoginForm, \
     InvitationRegistrationForm
 from learning.models import Invitation
@@ -77,7 +78,6 @@ class InvitationRegisterView(InvitationParamMixin, RegistrationView):
     SEND_ACTIVATION_EMAIL = False  # Prevent sending email on request
     template_name = "learning/invitation/registration.html"
 
-    # FIXME: Check invitation is not expired
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             url = self.invitation.get_absolute_url()
@@ -124,3 +124,10 @@ class InvitationActivationView(InvitationParamMixin, ActivationView):
         messages.success(self.request, _("Учетная запись активирована."),
                          extra_tags='timeout')
         return self.invitation.get_absolute_url()
+
+
+class CourseInvitationEnrollView(CourseURLParamsMixin, InvitationParamMixin,
+                                 GenericView):
+    def post(self, request, *args, **kwargs):
+        course = get_object_or_404(self.get_course_queryset())
+        # TODO: приглашение не протухло, мы ещё тут. значит надо прочекать все права. Если ок - записываем на курс. Если не ок - редирект назад с ошибкой

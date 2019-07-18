@@ -27,6 +27,7 @@ from users.utils import get_user_city_code
 __all__ = ('CourseDetailView', 'CourseEditView')
 
 
+# FIXME: разделить кастомную логику
 class CourseDetailView(CourseURLParamsMixin, DetailView):
     model = Course
     template_name = "courses/course_detail.html"
@@ -35,13 +36,12 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
     def get(self, request, *args, **kwargs):
         # Redirects old style link
         if "tab" in request.GET:
-            url_params = self.get_course_url_params()
             try:
                 tab_name = request.GET["tab"]
                 url = reverse("course_detail_with_active_tab",
-                              kwargs={**url_params, "tab": tab_name})
+                              kwargs={**kwargs, "tab": tab_name})
             except NoReverseMatch:
-                url = reverse("course_detail", kwargs=url_params)
+                url = reverse("course_detail", kwargs=kwargs)
             return HttpResponseRedirect(url)
         # Redirects to login page if tab is not visible to authenticated user
         context = self.get_context_data()
