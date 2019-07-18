@@ -1,11 +1,19 @@
 //TODO: Create mobile view
 .nav-tabs {
   display: flex;
-  flex-wrap: wrap;
-  padding-left: 0;
-  margin-bottom: spacer("6x");
+  flex-wrap: nowrap;
+  padding: 0 0 spacer("2x") 0;
+  margin-bottom: spacer("4x");
   list-style: none;
-  border-bottom: $border-width solid $border-color;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $gray-light;
+    border-radius: 4px;
+  }
 
   .nav-item {
     margin-bottom: -$border-width;
@@ -13,11 +21,9 @@
     &:first-child {
       margin-left: 0;
       border-top-left-radius: $border-radius;
-      overflow: hidden;
     }
     &:last-child {
-        border-top-right-radius: $border-radius;
-        overflow: hidden;
+      border-top-right-radius: $border-radius;
     }
   }
 
@@ -26,15 +32,16 @@
     padding: spacer("1x") spacer("4x");
     color: $gray-dark;
     opacity: 1;
+
     &.disabled {
       color: $input-disabled-bg;
       background-color: $control-disabled-bg;
       border-color: transparent;
-      &:hover{
+      &:hover {
         background-color: $control-disabled-bg;
       }
     }
-    &:hover{
+    &:hover {
       background-color: $gray-lighter;
     }
   }
