@@ -21,7 +21,6 @@ import courses.utils
 from core.settings.base import TIME_ZONES
 from core.timezone import Timezone, CityCode
 from core.urls import reverse
-from core.utils import is_club_site
 from courses.calendar import CalendarEvent
 from courses.models import Course, Semester, CourseClass
 from courses.settings import SemesterTypes
@@ -231,25 +230,16 @@ class CoursesListView(generic.ListView):
     template_name = "compsciclub_ru/course_offerings.html"
 
     def get_queryset(self):
-        cos_qs = (Course.objects
-                  .select_related('meta_course')
-                  .prefetch_related('teachers')
-                  .order_by('meta_course__name'))
-        if is_club_site():
-            cos_qs = cos_qs.in_city(self.request.city_code)
-        else:
-            cos_qs = cos_qs.in_center_branches()
-        prefetch_cos = Prefetch('course_set',
-                                queryset=cos_qs,
-                                to_attr='courseofferings')
-        q = (Semester.objects.prefetch_related(prefetch_cos))
-        # Courses in CS Center started at 2011 year
-        if not is_club_site():
-            q = (q.filter(year__gte=2011)
-                .exclude(type=Case(
-                    When(year=2011, then=Value(SemesterTypes.SPRING)),
-                    default=Value(""))))
-        return q
+        courses_qs = (Course.objects
+                      .in_city(self.request.city_code)
+                      .select_related('meta_course')
+                      .prefetch_related('teachers')
+                      .order_by('meta_course__name'))
+        courses_set = Prefetch('course_set',
+                               queryset=courses_qs,
+                               to_attr='courseofferings')
+        return (Semester.objects
+                .prefetch_related(courses_set))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

@@ -3,8 +3,14 @@ from django.urls import path, re_path
 
 from courses import views
 
-# FIXME: move to settings, replace with branch code (for cs center)
-RE_COURSE_URI = r"^(?P<course_slug>[-\w]+)/(?P<city_code>nsk|kzn|spb|)(?P<city_delimiter>/?)(?P<semester_slug>[-\w]+)/"
+from courses.settings import SemesterTypes
+
+_terms = r"|".join(slug for slug, _ in SemesterTypes.choices)
+semester_slug = r"(?P<semester_year>\d{4})-(?P<semester_type>" + _terms + r")"
+
+
+# FIXME: move to settings, replace with branch code (for cs center) But how? :<
+RE_COURSE_URI = r"^(?P<course_slug>[-\w]+)/(?P<city_code>nsk|kzn|spb|)(?P<city_delimiter>/?)" + semester_slug + r"/"
 
 
 urlpatterns = [

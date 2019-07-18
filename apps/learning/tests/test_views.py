@@ -69,11 +69,11 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
         assert 200 == self.client.get(co.get_absolute_url()).status_code
         url = city_aware_reverse('course_detail', kwargs={
             "course_slug": "space-odyssey",
-            "semester_slug": "2010",
+            "semester_year": 2010,
+            "semester_type": "autumn",
             "city_code": ""
         })
-        # Can't parse `semester_slug`
-        self.assertEqual(400, self.client.get(url).status_code)
+        assert self.client.get(url).status_code == 404
 
     def test_course_user_relations(self):
         """

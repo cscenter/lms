@@ -404,12 +404,12 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     @property
     def url_kwargs(self) -> dict:
         """
-        Returns keyword arguments useful for most of course offering url
-        patterns.
+        Keyword arguments for the `courses.urls.RE_COURSE_URI` pattern.
         """
         return {
             "course_slug": self.meta_course.slug,
-            "semester_slug": self.semester.slug,
+            "semester_year": self.semester.year,
+            "semester_type": self.semester.type,
             "city_code": self.get_city()
         }
 
@@ -658,9 +658,7 @@ class CourseNews(TimeStampedModel):
 
     def get_update_url(self):
         return city_aware_reverse('course_news_update', kwargs={
-            "course_slug": self.course.meta_course.slug,
-            "semester_slug": self.course.semester.slug,
-            "city_code": self.get_city(),
+            **self.course.url_kwargs,
             "pk": self.pk
         })
 
@@ -670,9 +668,7 @@ class CourseNews(TimeStampedModel):
 
     def get_delete_url(self):
         return city_aware_reverse('course_news_delete', kwargs={
-            "course_slug": self.course.meta_course.slug,
-            "semester_slug": self.course.semester.slug,
-            "city_code": self.get_city(),
+            **self.course.url_kwargs,
             "pk": self.pk
         })
 
@@ -772,25 +768,19 @@ class CourseClass(TimeStampedModel):
 
     def get_absolute_url(self):
         return city_aware_reverse('class_detail', kwargs={
-           "city_code": self.get_city(),
-           "course_slug": self.course.meta_course.slug,
-           "semester_slug": self.course.semester.slug,
-           "pk": self.pk
+            **self.course.url_kwargs,
+            "pk": self.pk
         })
 
     def get_update_url(self):
         return city_aware_reverse('course_class_update', kwargs={
-            "course_slug": self.course.meta_course.slug,
-            "semester_slug": self.course.semester.slug,
-            "city_code": self.get_city(),
+            **self.course.url_kwargs,
             "pk": self.pk
         })
 
     def get_delete_url(self):
         return city_aware_reverse('course_class_delete', kwargs={
-            "course_slug": self.course.meta_course.slug,
-            "semester_slug": self.course.semester.slug,
-            "city_code": self.get_city(),
+            **self.course.url_kwargs,
             "pk": self.pk
         })
 
@@ -890,9 +880,7 @@ class CourseClassAttachment(TimeStampedModel):
 
     def get_delete_url(self):
         return city_aware_reverse('course_class_attachment_delete', kwargs={
-            "course_slug": self.course_class.course.meta_course.slug,
-            "semester_slug": self.course_class.course.semester.slug,
-            "city_code": self.get_city(),
+            **self.course_class.course.url_kwargs,
             "class_pk": self.course_class.pk,
             "pk": self.pk
         })
@@ -975,17 +963,13 @@ class Assignment(TimeStampedModel):
 
     def get_update_url(self):
         return city_aware_reverse('assignment_update', kwargs={
-            "course_slug": self.course.meta_course.slug,
-            "semester_slug": self.course.semester.slug,
-            "city_code": self.get_city(),
+            **self.course.url_kwargs,
             "pk": self.pk
         })
 
     def get_delete_url(self):
         return city_aware_reverse('assignment_delete', kwargs={
-            "course_slug": self.course.meta_course.slug,
-            "semester_slug": self.course.semester.slug,
-            "city_code": self.get_city(),
+            **self.course.url_kwargs,
             "pk": self.pk
         })
 
@@ -1054,9 +1038,7 @@ class AssignmentAttachment(TimeStampedModel):
 
     def get_delete_url(self):
         return city_aware_reverse('assignment_attachment_delete', kwargs={
-            "course_slug": self.assignment.course.meta_course.slug,
-            "semester_slug": self.assignment.course.semester.slug,
+            **self.assignment.course.url_kwargs,
             "assignment_pk": self.assignment.pk,
             "pk": self.pk,
-            "city_code": self.assignment.course.get_city(),
         })

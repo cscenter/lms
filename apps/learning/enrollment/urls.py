@@ -2,8 +2,8 @@ from django.conf.urls import include
 from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
-from learning.enrollment.views import CourseEnrollView, CourseUnenrollView, \
-    CourseInvitationEnrollView
+from learning.enrollment.views import CourseEnrollView, CourseUnenrollView
+from learning.invitation.views import CourseInvitationEnrollView
 
 urlpatterns = [
     path("courses/", include([

@@ -32,8 +32,7 @@ class CourseClassDetailView(generic.DetailView):
                 .select_related("course",
                                 "course__meta_course",
                                 "course__semester",
-                                "venue")
-                .in_city(self.request.city_code))
+                                "venue"))
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)

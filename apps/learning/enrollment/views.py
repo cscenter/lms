@@ -1,7 +1,7 @@
 from django.core.exceptions import PermissionDenied
 from django.db.models import F, Value, TextField
 from django.db.models.functions import Concat
-from django.http import HttpResponseForbidden, Http404, HttpResponseRedirect
+from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.timezone import now
 from django.views import generic
@@ -9,7 +9,6 @@ from vanilla import FormView
 
 from core.constants import DATE_FORMAT_RU
 from core.urls import reverse
-from courses.models import Course
 from courses.views.mixins import CourseURLParamsMixin
 from learning.enrollment.forms import CourseEnrollmentForm
 from learning.models import Enrollment
@@ -60,16 +59,6 @@ class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
             return redirect(reverse('study:course_list'))
         else:
             return HttpResponseRedirect(form.course.get_absolute_url())
-
-
-class CourseInvitationEnrollView(CourseURLParamsMixin, FormView):
-    template_name = "learning/enrollment/invitations.html"
-
-    def get_context_data(self, **kwargs):
-        course = get_object_or_404(self.get_course_queryset())
-        return {
-            "course": course
-        }
 
 
 class CourseUnenrollView(StudentOnlyMixin, CourseURLParamsMixin,
