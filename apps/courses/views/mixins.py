@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 class CourseURLParamsMixin:
     """
-    Validates URL params from the `courses.urls.RE_COURSE_URI`.
+    Makes sure `request.city_code` set by `core.middleware.CurrentCityMiddleware`
+    is fulfilled from the request url query params.
     Provides a basic queryset for the course.
     """
     def setup(self, request, *args, **kwargs):
@@ -23,7 +24,12 @@ class CourseURLParamsMixin:
         super().setup(request, *args, **kwargs)
 
     def get_course_queryset(self):
-        """Returns queryset for the course based on view kwargs"""
+        """
+        Returns queryset for the course based on request URL query params
+
+        Note that `request.city_code` have to be set with `city_code` value
+        captured from the URL.
+        """
         return (Course.objects
                 .in_city(self.request.city_code)
                 .filter(semester__type=self.kwargs['semester_type'],
