@@ -46,11 +46,8 @@ class CourseClassDetailView(generic.DetailView):
 
 
 class CourseClassCreateUpdateMixin(CourseURLParamsMixin):
-    def get_course(self):
-        return get_object_or_404(self.get_course_queryset())
-
     def get_form(self, **kwargs):
-        course = self.get_course()
+        course = self.course
         if not self.is_form_allowed(self.request.user, course):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         kwargs["course"] = course
@@ -119,7 +116,7 @@ class CourseClassCreateView(TeacherOnlyMixin,
 
     def post(self, request, *args, **kwargs):
         """Teacher can't add new class if course already completed"""
-        course = self.get_course()
+        course = self.course
         if not self.request.user.is_curator and course.is_completed:
             return HttpResponseForbidden()
         form = self.get_form(data=request.POST, files=request.FILES,

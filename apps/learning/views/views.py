@@ -217,9 +217,8 @@ class CourseNewsNotificationUpdate(LoginRequiredMixin, CourseURLParamsMixin,
     raise_exception = True
 
     def post(self, request, *args, **kwargs):
-        course = get_object_or_404(self.get_course_queryset())
         updated = (CourseNewsNotification.unread
-                   .filter(course_offering_news__course=course,
+                   .filter(course_offering_news__course=self.course,
                            user_id=self.request.user.pk)
                    .update(is_unread=False))
         return JsonResponse({"updated": bool(updated)})
@@ -233,9 +232,9 @@ class CourseStudentsView(TeacherOnlyMixin, CourseURLParamsMixin, TemplateView):
         raise Http404
 
     def get_context_data(self, **kwargs):
-        co = get_object_or_404(self.get_course_queryset())
+        course = self.course
         return {
-            "co": co,
-            "enrollments": (co.enrollment_set(manager="active")
+            "co": course,
+            "enrollments": (course.enrollment_set(manager="active")
                             .select_related("student"))
         }

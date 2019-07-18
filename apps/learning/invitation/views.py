@@ -14,7 +14,7 @@ from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin
 from learning.invitation.forms import InvitationLoginForm, \
     InvitationRegistrationForm
-from learning.models import Invitation
+from learning.models import Invitation, EnrollmentInvitation
 from learning.roles import Roles
 
 
@@ -126,8 +126,13 @@ class InvitationActivationView(InvitationParamMixin, ActivationView):
         return self.invitation.get_absolute_url()
 
 
-class CourseInvitationEnrollView(CourseURLParamsMixin, InvitationParamMixin,
-                                 GenericView):
+class CourseInvitationEnrollView(CourseURLParamsMixin, GenericView):
     def post(self, request, *args, **kwargs):
-        course = get_object_or_404(self.get_course_queryset())
+        qs = (EnrollmentInvitation.objects
+              .filter(token=kwargs['course_token']))
+        course_invitation = get_object_or_404(qs)
+        if course_invitation.course_id != self.course.pk:
+            raise Http404
+        if not course_invitation.is_active:
+            raise Http404
         # TODO: приглашение не протухло, мы ещё тут. значит надо прочекать все права. Если ок - записываем на курс. Если не ок - редирект назад с ошибкой

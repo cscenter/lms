@@ -56,23 +56,25 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
                 return HttpResponseRedirect(url)
         return self.render_to_response(context)
 
-    def get_object(self):
+    def get_course_queryset(self):
         course_teachers = Prefetch('course_teachers',
                                    queryset=(CourseTeacher.objects
                                              .select_related("teacher")))
-        return get_object_or_404(
-            self.get_course_queryset()
+        return (super().get_course_queryset()
                 .select_related('meta_course', 'semester', 'city')
                 .prefetch_related(course_teachers))
 
+    def get_object(self):
+        return self.course
+
     def get_context_data(self, *args, **kwargs):
-        co = self.get_object()
-        teachers_by_role = co.get_grouped_teachers()
+        course = self.course
+        teachers_by_role = course.get_grouped_teachers()
         context = {
-            'course': co,
-            'course_tabs': self.make_tabs(co),
+            'course': course,
+            'course_tabs': self.make_tabs(course),
             'teachers': teachers_by_role,
-            **self._get_additional_context(co)
+            **self._get_additional_context(course)
         }
         return context
 
@@ -126,7 +128,7 @@ class CourseEditView(TeacherOnlyMixin, CourseURLParamsMixin, ProtectedFormMixin,
     form_class = CourseEditDescrForm
 
     def get_object(self, queryset=None):
-        return get_object_or_404(self.get_course_queryset())
+        return self.course
 
     def get_initial(self):
         """Keep in mind that `initial` overrides values from model dict"""

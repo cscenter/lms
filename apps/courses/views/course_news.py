@@ -23,10 +23,9 @@ class CourseNewsCreateView(TeacherOnlyMixin, CourseURLParamsMixin, CreateView):
 
     def get_form(self, **kwargs):
         form_class = self.get_form_class()
-        course = get_object_or_404(self.get_course_queryset())
-        if not self.is_form_allowed(self.request.user, course):
+        if not self.is_form_allowed(self.request.user, self.course):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
-        kwargs["course"] = course
+        kwargs["course"] = self.course
         return form_class(**kwargs)
 
     def form_valid(self, form):
