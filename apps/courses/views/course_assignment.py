@@ -22,11 +22,8 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, CourseURLParamsMixin):
     form_class = AssignmentForm
     template_name = "courses/course_assignment_form.html"
 
-    def get_course(self):
-        return get_object_or_404(self.get_course_queryset())
-
     def get_form(self, **kwargs):
-        course = self.get_course()
+        course = self.course
         if not self.is_form_allowed(self.request.user, course):
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         kwargs["course"] = course

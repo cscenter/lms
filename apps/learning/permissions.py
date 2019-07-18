@@ -119,6 +119,12 @@ def can_view_course_reviews(user, course: Course):
     return course.enrollment_is_open
 
 
+@rules.predicate
+def can_enroll_in_course(user, course: Course):
+    if not course.enrollment_is_open:
+        return False
+
+
 add_perm("learning.can_view_course_news", can_view_course_news)
 # TODO: Where should live permission below?
 add_perm("learning.can_view_course_reviews", can_view_course_reviews)

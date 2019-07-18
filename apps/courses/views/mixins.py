@@ -2,6 +2,7 @@ import logging
 from typing import Dict
 
 from django.http import HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
 
 from courses.models import Course
 from courses.utils import semester_slug_re
@@ -22,6 +23,7 @@ class CourseURLParamsMixin:
                            "populated from the GET-parameters")
             return HttpResponseBadRequest()
         super().setup(request, *args, **kwargs)
+        self.course: Course = get_object_or_404(self.get_course_queryset())
 
     def get_course_queryset(self):
         """

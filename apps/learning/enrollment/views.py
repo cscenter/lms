@@ -34,11 +34,13 @@ class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
             return self.form_valid(form)
         return self.form_invalid(form)
 
+    def get_course_queryset(self):
+        return (super().get_course_queryset()
+                .select_related("semester"))
+
     def get_form(self, data=None, files=None, **kwargs):
-        course = get_object_or_404(self.get_course_queryset()
-                                   .select_related("semester"))
         return CourseEnrollmentForm(data=data, files=files,
-                                    request=self.request, course=course)
+                                    request=self.request, course=self.course)
 
     def form_valid(self, form):
         enrollment, _ = Enrollment.objects.update_or_create(
