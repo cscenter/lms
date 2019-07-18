@@ -26,12 +26,12 @@
     {% with event_details=announcement.event_details %}
         <div class="grouped{% if card_type == 'h' %} mb-4{% endif %}">
             {% if event_details.venue %}
-                <div class="announcement__detail">
+                <div class="ui label _icon">
                     {{ macros.svg_inline('location') }}<span>{{ event_details.venue.address }}</span>
                 </div>
             {% endif %}
             {% if event_details.starts_on %}
-                <div class="announcement__detail">
+                <div class="ui label _icon">
                     {{ macros.svg_inline('calendar') }}{{ event_dates(event_details) }}
                 </div>
             {% endif %}
@@ -44,7 +44,7 @@
 <div class="card _horizontal _dark">
     <div class="row no-gutters">
         {% if announcement.thumbnail %}
-        <div class="col-md-5 card__background" style="min-height: 196px; background-image: url({{ announcement.thumbnail.url }});"></div>
+        <div class="col-md-5 card__background" style="min-height: 196px; background-image: url('{{ announcement.thumbnail.url }}');"></div>
         {% endif %}
         <div class="col-md-7">
             <div class="card__content">
@@ -61,9 +61,8 @@
 {% macro announcement_vertical(announcement, card_type) -%}
 <div class="card _dark">
     {% if announcement.thumbnail %}
-    <div class="w-100 card__background" style="min-height: 196px; background-image: url({{ announcement.thumbnail.url }});">
+    <div class="w-100 card__background" style="min-height: 196px; background-image: url('{{ announcement.thumbnail.url }}');"></div>
     {% endif %}
-    </div>
     <div class="card__content _big">
         <div class="announcement">
             {{ _announcement_content(announcement, card_type=card_type) }}

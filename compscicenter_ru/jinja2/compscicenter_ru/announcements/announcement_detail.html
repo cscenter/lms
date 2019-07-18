@@ -34,12 +34,12 @@
                             {% with event_details=announcement.event_details %}
                                 <div class="grouped mb-4">
                                     {% if event_details.venue_id %}
-                                        <div class="announcement__detail">
+                                        <div class="ui label _icon">
                                             {{ macros.svg_inline('location') }}<span>{{ event_details.venue.address }}</span>
                                         </div>
                                     {% endif %}
                                     {% if event_details.starts_on %}
-                                        <div class="announcement__detail">
+                                        <div class="ui label _icon">
                                             {{ macros.svg_inline('calendar') }}{{ announcement_macros.event_dates(event_details) }}
                                         </div>
                                     {% endif %}
@@ -50,12 +50,12 @@
                         {% if announcement.event_place or announcement.event_date_at %}
                             <div class="grouped mb-4">
                                 {% if announcement.event_place %}
-                                    <div class="announcement__detail">
+                                    <div class="ui label _icon">
                                         {{ macros.svg_inline('location') }}<span>{{ announcement.event_place }}</span>
                                     </div>
                                 {% endif %}
                                 {% if announcement.event_date_at %}
-                                    <div class="announcement__detail">
+                                    <div class="ui label _icon">
                                         {{ macros.svg_inline('calendar') }}<span>{{ announcement.event_date_at|date("j E Y H:i") }}</span>
                                     </div>
                                 {% endif %}
