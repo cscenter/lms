@@ -21,7 +21,7 @@ def test_announcement_dates_macros(client, settings):
     response = client.get(announcement.get_absolute_url())
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
-    event_details = html.find_all('div', {"class": "announcement__detail"})
+    event_details = html.find_all('div', {"class": "ui label _icon"})
     assert event_details
     assert any(t.find('span', text="1 июля 2019 13:07") for t in event_details)
     announcement_details.ends_on = datetime.date(year=2019, month=7, day=1)
@@ -30,7 +30,7 @@ def test_announcement_dates_macros(client, settings):
     response = client.get(announcement.get_absolute_url())
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
-    event_details = html.find_all('div', {"class": "announcement__detail"})
+    event_details = html.find_all('div', {"class": "ui label _icon"})
     assert event_details
     assert any(t.find('span', text="1 июля 2019 13:07 — 15:07") for t in event_details)
     announcement_details.ends_on = datetime.date(year=2019, month=7, day=3)
@@ -38,7 +38,7 @@ def test_announcement_dates_macros(client, settings):
     response = client.get(announcement.get_absolute_url())
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
-    event_details = html.find_all('div', {"class": "announcement__detail"})
+    event_details = html.find_all('div', {"class": "ui label _icon"})
     assert event_details
     assert any(t.find('span', text="1 июля 2019 13:07 — 3 июля 2019 15:07") for t in event_details)
     announcement_details.ends_at = None
@@ -46,6 +46,6 @@ def test_announcement_dates_macros(client, settings):
     response = client.get(announcement.get_absolute_url())
     assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
-    event_details = html.find_all('div', {"class": "announcement__detail"})
+    event_details = html.find_all('div', {"class": "ui label _icon"})
     assert event_details
     assert any(t.find('span', text="1 июля 2019 13:07 — 3 июля 2019") for t in event_details)
