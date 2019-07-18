@@ -1,0 +1,173 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block content %}
+    <div class="svg-inline">
+        {% include "sprites/common.svg" %}
+        {% include "sprites/index.svg" %}
+        {% include "sprites/ui.svg" %}
+    </div>
+    <div class="container page-content p-8">
+        <h1>Btn sizes</h1>
+        <div class="btn _big _primary">
+            Promo block big btn
+        </div>
+        <div class="btn _primary">
+            Default button
+        </div>
+        <div class="btn _small _primary">
+            Small button
+        </div>
+        <div class="btn _extra-small _primary">
+            Extra small
+        </div>
+    </div>
+    <div class="container page-content p-8">
+        <h1>Content btns</h1>
+        <h2>Main</h2>
+        <div class="btn _primary">
+            Main priority btn
+        </div>
+        <div class="btn  _outline _gray">
+            Secondary priority btn
+        </div>
+        <div class="btn _light">
+            Secondary priority btn
+        </div>
+        <h2 class="mt-10">Secondary btn</h2>
+        <div class="btn _small _outline _rounded _gray">
+            View all
+        </div>
+    </div>
+
+    <div class="container p-8" style="background-color: #1b181b">
+        <h2 class="text-white">On black</h2>
+        <div class="btn _primary">
+            Main priority
+        </div>
+        <div class="btn _light _outline">
+             Secondary priority
+        </div>
+        <div class="btn _white _opacity-10">
+            Secondary priority opacity btn
+        </div>
+    </div>
+
+    <div class="container p-8">
+        <h1 class="">Interface icons</h1>
+        <h2>Add, success</h2>
+        <div class="btn _success">
+            Accept
+        </div>
+        <div class="btn _success">
+            {{ macros.svg_inline('plus') }}
+            <span>Add new user</span>
+        </div>
+        <div class="btn _success">
+            {{ macros.svg_inline('user-sign') }}
+            <span>Add new user</span>
+        </div>
+        <div class="btn _extra-small _success _rounded">
+            {{ macros.svg_inline('plus') }}
+            <span>Add new user</span>
+        </div>
+    </div>
+
+    <div class="container p-8">
+        <h2>Navigation</h2>
+        <div class="btn _extra-small _gray _outline _rounded">
+            {{ macros.svg_inline('arrow-left') }}
+            <span>Back</span>
+        </div>
+        <div class="btn _extra-small _gray _outline _rounded">
+            <span>Forward</span>
+            {{ macros.svg_inline('arrow-right') }}
+        </div>
+    </div>
+    <div class="container p-8">
+        <h2>Navigation mobile view</h2>
+        <div class="btn _extra-small _m-collapse _gray _outline _rounded">
+            {{ macros.svg_inline('arrow-left') }}
+            <span>Back</span>
+        </div>
+        <div class="btn _extra-small _m-collapse _gray _outline _rounded">
+            <span>Forward</span>
+            {{ macros.svg_inline('arrow-right') }}
+        </div>
+    </div>
+    <div class="container p-8" style="background-color: #1b181b">
+        <h2 class="text-white">On black</h2>
+        <div class="btn _extra-small _light _outline _rounded">
+            {{ macros.svg_inline('arrow-left') }}
+            <span>Back</span>
+        </div>
+        <div class="btn _extra-small _light _outline _rounded">
+            <span>Forward</span>
+            {{ macros.svg_inline('arrow-right') }}
+        </div>
+        <div class="btn _extra-small _m-collapse _light _outline _rounded">
+            {{ macros.svg_inline('arrow-left') }}
+            <span>Back</span>
+        </div>
+        <div class="btn _extra-small _m-collapse _light _outline _rounded">
+            <span>Forward</span>
+            {{ macros.svg_inline('arrow-right') }}
+        </div>
+    </div>
+    <div class="container p-8">
+        <h2>Remove</h2>
+        <div class="btn _danger">
+            <span>Delete immediately!</span>
+            {{ macros.svg_inline('cross') }}
+        </div>
+        <div class="btn _small _gray">
+            Default button
+            {{ macros.svg_inline('cross') }}
+        </div>
+    </div>
+
+    <div class="container p-8">
+        <h2>Buttons group</h2>
+        <div class="buttons">
+            <div class="btn _big _danger">
+                <span>Delete immediately!</span>
+                {{ macros.svg_inline('cross') }}
+            </div>
+            <div class="btn _big _gray">
+                Default button
+                {{ macros.svg_inline('cross') }}
+            </div>
+        </div>
+        <div class="buttons">
+            <div class="btn _danger">
+                <span>Delete immediately!</span>
+                {{ macros.svg_inline('cross') }}
+            </div>
+            <div class="btn _gray">
+                Default button
+                {{ macros.svg_inline('cross') }}
+            </div>
+        </div>
+        <div class="buttons">
+            <div class="btn _small _danger">
+                <span>Delete immediately!</span>
+                {{ macros.svg_inline('cross') }}
+            </div>
+            <div class="btn _small _gray">
+                Default button
+                {{ macros.svg_inline('cross') }}
+            </div>
+        </div>
+        <div class="buttons">
+            <div class="btn _extra-small _danger">
+                <span>Delete immediately!</span>
+                {{ macros.svg_inline('cross') }}
+            </div>
+            <div class="btn _extra-small _gray">
+                Default button
+                {{ macros.svg_inline('cross') }}
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}
