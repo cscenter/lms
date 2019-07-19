@@ -85,38 +85,47 @@ def test_unenrollment(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_enrollment_capacity(client):
+def test_enrollment_capacity_view(client):
     s = StudentFactory(city_id='spb')
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    co = CourseFactory.create(city_id='spb',
-                              semester=current_semester,
-                              is_open=True)
-    co_url = co.get_absolute_url()
-    response = client.get(co_url)
+    course = CourseFactory.create(city_id='spb',
+                                  semester=current_semester,
+                                  is_open=True)
+    response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Places available")) not in response.content
     assert smart_bytes(_("No places available")) not in response.content
-    co.capacity = 1
-    co.save()
-    response = client.get(co_url)
+    course.capacity = 1
+    course.save()
+    response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Places available")) in response.content
-    form = {'course_pk': co.pk}
-    client.post(co.get_enroll_url(), form)
-    assert 1 == Enrollment.active.filter(student=s, course=co).count()
-    # Capacity reached, show to second student nothing
+    form = {'course_pk': course.pk}
+    client.post(course.get_enroll_url(), form)
+    assert 1 == Enrollment.active.filter(student=s, course=course).count()
+    # Capacity is reached
+    course.refresh_from_db()
+    assert course.learners_count == 1
+    assert course.places_left == 0
     s2 = StudentFactory(city_id='spb')
     client.login(s2)
-    response = client.get(co_url)
+    response = client.get(course.get_absolute_url())
     assert smart_bytes(_("No places available")) in response.content
-    co.capacity = 2
-    co.save()
-    response = client.get(co_url)
+    # POST request should be rejected
+    response = client.post(course.get_enroll_url(), form)
+    assert response.status_code == 302
+    # Increase capacity
+    course.capacity += 1
+    course.save()
+    assert course.places_left == 1
+    response = client.get(course.get_absolute_url())
     assert (smart_bytes(_("Places available")) + b": 1") in response.content
     # Unenroll first student, capacity should increase
     client.login(s)
-    response = client.post(co.get_unenroll_url(), form)
-    assert Enrollment.active.filter(course=co).count() == 0
-    response = client.get(co_url)
+    response = client.post(course.get_unenroll_url(), form)
+    assert Enrollment.active.filter(course=course).count() == 0
+    course.refresh_from_db()
+    assert course.learners_count == 0
+    response = client.get(course.get_absolute_url())
     assert (smart_bytes(_("Places available")) + b": 2") in response.content
 
 
@@ -143,7 +152,6 @@ def test_enrollment(client):
     url = co_other.get_enroll_url()
     response = client.post(url, form)
     assert response.status_code == 302
-    # assert response.url == reverse('study:course_list')
     assert co.enrollment_set.count() == 1
     # Try to enroll to old CO
     old_semester = SemesterFactory.create(year=2010)
@@ -151,24 +159,10 @@ def test_enrollment(client):
     form = {'course_pk': old_co.pk}
     url = old_co.get_enroll_url()
     assert client.post(url, form).status_code == 403
-    # If course offering has limited capacity and we reach it - reject request
-    url = co.get_enroll_url()
-    co.capacity = 1
-    co.save()
-    client.login(student2)
-    form = {'course_pk': co.pk}
-    response = client.post(url, form)
-    assert response.status_code == 302
-    # Add 1 available place
-    assert co.enrollment_set.count() == 1
-    co.capacity = 2
-    co.save()
-    response = client.post(url, form, follow=True)
-    assert co.enrollment_set.count() == 2
 
 
 @pytest.mark.django_db
-def test_enrollment_reason(client):
+def test_enrollment_reason_entry(client):
     student = StudentFactory(city_id='spb')
     client.login(student)
     today = now_local(student.city_code)
@@ -179,16 +173,16 @@ def test_enrollment_reason(client):
     form = {'course_pk': co.pk, 'reason': 'foo'}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
-    assert Enrollment.objects.first().reason_entry == 'foo'
+    date = today.strftime(DATE_FORMAT_RU)
+    assert Enrollment.objects.first().reason_entry == f'{date}\nfoo\n\n'
     client.post(co.get_unenroll_url(), form)
     assert Enrollment.active.count() == 0
-    assert Enrollment.objects.first().reason_entry == 'foo'
+    assert Enrollment.objects.first().reason_entry == f'{date}\nfoo\n\n'
     # Enroll for the second time, first entry reason should be saved
     form['reason'] = 'bar'
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
-    assert 'foo' in Enrollment.active.first().reason_entry
-    assert 'bar' in Enrollment.active.first().reason_entry
+    assert Enrollment.objects.first().reason_entry == f'{date}\nbar\n\n{date}\nfoo\n\n'
 
 
 @pytest.mark.django_db
@@ -264,17 +258,19 @@ def test_reenrollment(client):
     s = StudentFactory(city_id='spb')
     assignment = AssignmentFactory(course__is_open=True,
                                    course__city_id='spb')
-    co = assignment.course
-    e = EnrollmentFactory(student=s, course=co)
+    course = assignment.course
+    e = EnrollmentFactory(student=s, course=course)
     assert not e.is_deleted
     assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
+    # Deactivate student enrollment
     e.is_deleted = True
     e.save()
-    assignment2 = AssignmentFactory(course=co)
+    assert Enrollment.active.count() == 0
+    assignment2 = AssignmentFactory(course=course)
     assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
     client.login(s)
-    form = {'course_pk': co.pk}
-    response = client.post(co.get_enroll_url(), form, follow=True)
+    form = {'course_pk': course.pk}
+    response = client.post(course.get_enroll_url(), form, follow=True)
     assert response.status_code == 200
     e.refresh_from_db()
     assert StudentAssignment.objects.filter(student_id=s.pk).count() == 2

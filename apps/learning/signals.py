@@ -1,11 +1,25 @@
+from django.db.models import OuterRef
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.timezone import now
 
-from courses.models import Assignment, CourseNews, CourseTeacher
+from core.db.expressions import SubqueryCount
+from courses.models import Assignment, CourseNews, CourseTeacher, Course
 from learning.models import AssignmentComment, AssignmentNotification, \
     StudentAssignment, Enrollment, CourseNewsNotification
 from learning.settings import StudentStatuses
+
+
+@receiver(post_save, sender=Enrollment)
+def compute_course_learners_count(sender, instance: Enrollment, created,
+                                  *args, **kwargs):
+    if created and instance.is_deleted:
+        return
+    Course.objects.filter(id=instance.course_id).update(
+        learners_count=SubqueryCount(
+            Enrollment.active.filter(course_id=OuterRef('id'))
+        )
+    )
 
 
 @receiver(post_save, sender=CourseNews)

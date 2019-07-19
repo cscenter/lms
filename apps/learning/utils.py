@@ -35,6 +35,7 @@ def split_on_condition(iterable, predicate):
     return true_lst, false_lst
 
 
+# FIXME: relocate
 def course_failed_by_student(course: Course, student, enrollment=None) -> bool:
     """Checks that student didn't fail the completed course"""
     from learning.models import Enrollment
@@ -49,3 +50,10 @@ def course_failed_by_student(course: Course, student, enrollment=None) -> bool:
                     course_id=course.id,
                     grade__in=bad_grades)
             .exists())
+
+
+def populate_assignments_for_student(enrollment):
+    from learning.models import StudentAssignment
+    for a in enrollment.course.assignment_set.all():
+        StudentAssignment.objects.get_or_create(assignment=a,
+                                                student_id=enrollment.student_id)
