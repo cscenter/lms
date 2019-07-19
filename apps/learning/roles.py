@@ -10,7 +10,8 @@ class Roles(DjangoChoices):
         "courses.can_view_contacts",
         "courses.can_view_assignments",
         "learning.can_view_course_news",
-        "learning.can_view_course_reviews"
+        "learning.can_view_course_reviews",
+        "learning.can_enroll_in_course",
     ))
     TEACHER = C(2, _('Teacher'), permissions=(
         "courses.can_view_contacts",
@@ -22,7 +23,8 @@ class Roles(DjangoChoices):
         "courses.can_view_contacts",
         "courses.can_view_assignments",
         "learning.can_view_course_news",
-        "learning.can_view_course_reviews"
+        "learning.can_view_course_reviews",
+        "learning.can_enroll_in_course",
     ))
     CURATOR = C(5, _('Curator'), permissions=(
         "courses.can_view_contacts",

@@ -17,7 +17,7 @@ from courses.models import Assignment, AssignmentAttachment
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     CourseTeacherFactory, AssignmentFactory
 from courses.utils import get_current_term_pair
-from learning.enrollment import course_failed_by_student
+from learning.utils import course_failed_by_student
 from learning.models import StudentAssignment
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import EnrollmentFactory, \

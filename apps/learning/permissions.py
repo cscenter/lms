@@ -5,7 +5,7 @@ import rules
 from auth.permissions import add_perm
 from core.utils import is_club_site
 from courses.models import Course
-from learning.enrollment import course_failed_by_student
+from learning.utils import course_failed_by_student
 from learning.settings import StudentStatuses
 from users.constants import Roles as UserRoles
 
@@ -123,8 +123,15 @@ def can_view_course_reviews(user, course: Course):
 def can_enroll_in_course(user, course: Course):
     if not course.enrollment_is_open:
         return False
+    # If the student can't take this course remotely, check that the city
+    # of the student and the city match
+    # FIXME: на сайте клуба user.city_id надо заменить на request.city_code :< Как потестировать ещё предикаты сайта клуба?
+    if not course.is_correspondence and user.city_id != course.get_city():
+        return False
+    return True
 
 
 add_perm("learning.can_view_course_news", can_view_course_news)
 # TODO: Where should live permission below?
 add_perm("learning.can_view_course_reviews", can_view_course_reviews)
+add_perm("learning.can_enroll_in_course", can_enroll_in_course)

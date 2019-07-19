@@ -1,9 +1,17 @@
-from rules import always_true
+import rules
 
 from auth.permissions import all_permissions, add_perm
+from learning.permissions import can_enroll_in_course
 
 # Override permissions to meet compsciclub.ru requirements
-assert "learning.can_view_course_news" in all_permissions
 all_permissions.remove_rule("learning.can_view_course_news")
+all_permissions.remove_rule("learning.can_enroll_in_course")
 
-add_perm("learning.can_view_course_news", always_true)
+
+@rules.predicate
+def course_is_open(user, course):
+    return course.is_open
+
+
+add_perm("learning.can_view_course_news", rules.always_true)
+add_perm("learning.can_enroll_in_course", can_enroll_in_course & course_is_open)
