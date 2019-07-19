@@ -32,6 +32,7 @@ from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
     GraduateProfileActiveManager
 from learning.settings import GradingSystems, GradeTypes, Branches
+from learning.utils import populate_assignments_for_student
 from users.constants import ThumbnailSizes
 from users.thumbnails import UserThumbnailMixin
 
@@ -116,15 +117,8 @@ class Enrollment(TimeStampedModel):
     def save(self, *args, **kwargs):
         created = self.pk is None
         super().save(*args, **kwargs)
-        # TODO: Call on changing `is_deleted` flag only
-        self._populate_assignments_for_new_enrolled_student(created)
-
-    def _populate_assignments_for_new_enrolled_student(self, created):
-        if self.is_deleted:
-            return
-        for a in self.course.assignment_set.all():
-            StudentAssignment.objects.get_or_create(assignment=a,
-                                                    student_id=self.student_id)
+        if created or not self.is_deleted:
+            populate_assignments_for_student(self)
 
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)

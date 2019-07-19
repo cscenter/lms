@@ -292,15 +292,6 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     is_published_in_video = models.BooleanField(
         _("Published in video section"),
         default=False)
-
-    materials_video = models.BooleanField(default=False, editable=False)
-    materials_slides = models.BooleanField(default=False, editable=False)
-    materials_files = models.BooleanField(default=False, editable=False)
-    youtube_video_id = models.CharField(
-        max_length=255, editable=False,
-        help_text="Helpful for getting thumbnail on /videos/ page",
-        blank=True)
-
     is_open = models.BooleanField(
         _("Open course offering"),
         help_text=_("This course offering will be available on Computer"
@@ -315,6 +306,14 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
+    materials_video = models.BooleanField(default=False, editable=False)
+    materials_slides = models.BooleanField(default=False, editable=False)
+    materials_files = models.BooleanField(default=False, editable=False)
+    youtube_video_id = models.CharField(
+        max_length=255, editable=False,
+        help_text="Helpful for getting thumbnail on /videos/ page",
+        blank=True)
+    learners_count = models.PositiveIntegerField(editable=False, default=0)
 
     objects = CourseDefaultManager()
 
@@ -323,6 +322,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
         'youtube_video_id',
         'materials_slides',
         'materials_files',
+        'learners_count',
     ]
 
     prefetch_before_compute_fields = {
@@ -391,6 +391,12 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
             self.materials_files = materials_files
             return True
 
+        return False
+
+    def _compute_learners_count(self):
+        """
+        Calculate this value with external signal on adding new learner.
+        """
         return False
 
     def save(self, *args, **kwargs):
@@ -528,12 +534,10 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     def is_capacity_limited(self):
         return self.capacity > 0
 
-    @cached_property
+    @property
     def places_left(self):
-        """Returns how many places left if the number is limited"""
         if self.is_capacity_limited:
-            active_enrollments = self.enrollment_set(manager="active").count()
-            return max(0, self.capacity - active_enrollments)
+            return max(0, self.capacity - self.learners_count)
         else:
             return float("inf")
 
