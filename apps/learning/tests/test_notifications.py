@@ -14,7 +14,7 @@ from core.urls import reverse
 from courses.admin import AssignmentAdmin
 from courses.models import CourseTeacher, Assignment
 from courses.tests.factories import CourseFactory, AssignmentFactory
-from learning.enrollment import course_failed_by_student
+from learning.utils import course_failed_by_student
 from learning.models import AssignmentNotification
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import *
