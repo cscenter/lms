@@ -15,7 +15,8 @@ from core.views import MarkdownHowToHelpView, MarkdownRenderView
 from courses.urls import RE_COURSE_URI
 from htmlpages import views
 from international_schools.views import InternationalSchoolsListView
-from learning.views import CourseNewsNotificationUpdate
+from learning.views import CourseNewsNotificationUpdate, CourseEnrollView, \
+    CourseUnenrollView
 
 admin.autodiscover()
 
@@ -31,7 +32,6 @@ urlpatterns = i18n_patterns(
 
     url(r"^courses/$", CoursesListView.as_view(), name="course_list"),
 
-    path('', include('learning.enrollment.urls')),
     path('', include('courses.urls')),
 
     url(r'^teachers/$', TeachersView.as_view(), name='teachers'),
@@ -53,10 +53,14 @@ urlpatterns += [
     path('teaching/', include('learning.teaching.urls')),
     path('learning/', include('learning.study.urls')),
 
+
+
     path("courses/", include([
-       re_path(RE_COURSE_URI, include([
-           path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
-       ]), kwargs={"city_aware": True})
+        re_path(RE_COURSE_URI, include([
+            path("enroll/", CourseEnrollView.as_view(), name="course_enroll"),
+            path("unenroll/", CourseUnenrollView.as_view(), name="course_leave"),
+            path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
+        ]), kwargs={"city_aware": True})
     ])),
 
     path('narnia/', admin.site.urls),

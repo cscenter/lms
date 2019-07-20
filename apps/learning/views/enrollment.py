@@ -13,7 +13,7 @@ from core.constants import DATE_FORMAT_RU
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin
-from learning.enrollment.forms import CourseEnrollmentForm
+from learning.forms import CourseEnrollmentForm
 from learning.models import Enrollment
 from learning.services import EnrollmentService, AlreadyEnrolled, \
     CourseCapacityFull
@@ -26,7 +26,7 @@ class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
 
     def get_course_queryset(self):
         return (super().get_course_queryset()
-                .select_related("semester"))
+                .select_related("semester", "meta_course"))
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.has_perm("learning.can_enroll_in_course",
@@ -55,6 +55,11 @@ class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
         else:
             return_to = self.course.get_absolute_url()
         return HttpResponseRedirect(return_to)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["course"] = self.course
+        return context
 
 
 class CourseUnenrollView(StudentOnlyMixin, CourseURLParamsMixin,
@@ -88,8 +93,8 @@ class CourseUnenrollView(StudentOnlyMixin, CourseURLParamsMixin,
         course = get_object_or_404(self.get_course_queryset())
         enrollment = get_object_or_404(
             Enrollment.active
-                .filter(student=self.request.user, course_id=course.pk)
-                .select_related("course", "course__semester"))
+            .filter(student=self.request.user, course_id=course.pk)
+            .select_related("course", "course__semester"))
         if not course.enrollment_is_open:
             raise PermissionDenied
         return enrollment

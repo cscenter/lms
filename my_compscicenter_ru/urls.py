@@ -22,7 +22,6 @@ urlpatterns = [
 
     path('', include('learning.urls')),
     path("courses/", include('learning.invitation.urls')),
-    path('', include('learning.enrollment.urls')),
 
     path('', include('auth.urls')),
     path('', include('users.urls')),

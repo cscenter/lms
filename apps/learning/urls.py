@@ -2,14 +2,18 @@ from django.conf.urls import include
 from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
+from learning.invitation.views import CourseInvitationEnrollView
 from learning.study.views import UsefulListView, InternshipListView, \
     HonorCodeView
 from .views import EventDetailView, CourseNewsNotificationUpdate, \
-    CourseStudentsView
+    CourseStudentsView, CourseEnrollView, CourseUnenrollView
 
 urlpatterns = [
     path("courses/", include([
         re_path(RE_COURSE_URI, include([
+            path("enroll/", CourseEnrollView.as_view(), name="course_enroll"),
+            path("unenroll/", CourseUnenrollView.as_view(), name="course_leave"),
+            path("enroll/invitation/<str:course_token>/", CourseInvitationEnrollView.as_view(), name="course_enroll_by_invitation"),
             path("students/", CourseStudentsView.as_view(), name="course_students"),
             path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
         ]), kwargs={"city_aware": True}),
