@@ -8,6 +8,7 @@ from courses.models import Assignment, CourseNews, CourseTeacher, Course
 from learning.models import AssignmentComment, AssignmentNotification, \
     StudentAssignment, Enrollment, CourseNewsNotification
 from learning.settings import StudentStatuses
+from learning.utils import update_course_learners_count
 
 
 @receiver(post_save, sender=Enrollment)
@@ -15,11 +16,7 @@ def compute_course_learners_count(sender, instance: Enrollment, created,
                                   *args, **kwargs):
     if created and instance.is_deleted:
         return
-    Course.objects.filter(id=instance.course_id).update(
-        learners_count=SubqueryCount(
-            Enrollment.active.filter(course_id=OuterRef('id'))
-        )
-    )
+    update_course_learners_count(instance.course_id)
 
 
 @receiver(post_save, sender=CourseNews)

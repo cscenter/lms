@@ -21,6 +21,7 @@ from users.tests.factories import StudentFactory
 
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
 # TODO: Test volunteer can enroll!
+# TODO: вызывает запись на полный курс, смотрим, что после поднятия исключения CapacityFull созданный объект Enrollment не живёт в БД, т.к. транзакция откатывается
 
 
 @pytest.mark.django_db

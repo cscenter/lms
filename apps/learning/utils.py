@@ -1,3 +1,6 @@
+from django.db.models import OuterRef
+
+from core.db.expressions import SubqueryCount
 from courses.models import Course
 from learning.settings import GradeTypes
 
@@ -57,3 +60,12 @@ def populate_assignments_for_student(enrollment):
     for a in enrollment.course.assignment_set.all():
         StudentAssignment.objects.get_or_create(assignment=a,
                                                 student_id=enrollment.student_id)
+
+
+def update_course_learners_count(course_id):
+    from learning.models import Enrollment
+    Course.objects.filter(id=course_id).update(
+        learners_count=SubqueryCount(
+            Enrollment.active.filter(course_id=OuterRef('id'))
+        )
+    )

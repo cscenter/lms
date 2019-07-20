@@ -368,8 +368,7 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         return PermissionsMixin.get_all_permissions(self, obj)
 
     def has_perm(self, perm, obj=None):
-        # Active superusers have all permissions implicitly added
-        # by Django but no more
+        # Active superusers have only permissions implicitly added by Django
         is_registered_permission = perm not in all_permissions
         if self.is_active and self.is_superuser and is_registered_permission:
             return True

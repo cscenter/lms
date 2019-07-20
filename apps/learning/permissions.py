@@ -128,6 +128,8 @@ def can_enroll_in_course(user, course: Course):
     # FIXME: на сайте клуба user.city_id надо заменить на request.city_code :< Как потестировать ещё предикаты сайта клуба?
     if not course.is_correspondence and user.city_id != course.get_city():
         return False
+    if course.is_capacity_limited and not course.places_left:
+        return False
     return True
 
 
