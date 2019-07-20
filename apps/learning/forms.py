@@ -121,3 +121,15 @@ class TestimonialForm(forms.ModelForm):
     def clean_testimonial(self):
         testimonial = self.cleaned_data['testimonial']
         return testimonial.strip()
+
+
+class CourseEnrollmentForm(forms.Form):
+    reason = forms.CharField(
+        label=_("Почему вы выбрали этот курс?"),
+        widget=forms.Textarea(),
+        required=False)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.helper = FormHelper(self)
+        self.helper.layout.append(Submit('enroll', 'Записаться на курс'))
