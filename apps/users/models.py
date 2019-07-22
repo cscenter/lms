@@ -446,11 +446,14 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         same_attrs = [
             "first_name",
             "patronymic",
-            "stepic_id",
             "phone"
         ]
         for attr_name in same_attrs:
             setattr(user, attr_name, getattr(applicant, attr_name))
+        try:
+            user.stepic_id = int(applicant.stepic_id)
+        except ValueError:
+            pass
         user.last_name = applicant.surname
         user.enrollment_year = user.curriculum_year = timezone.now().year
         # Looks like the same fields below
