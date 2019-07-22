@@ -21,11 +21,6 @@ class NotificationType(Enum):
 class Command(CurrentCampaignsMixin, BaseCommand):
     help = """For each current campaign generates bunch of notifications"""
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--city', type=str,
-            help='City code to restrict current campaigns')
-
     @staticmethod
     def get_template_name(campaign, type):
         return "admission-{}-{}-stage1-{}".format(campaign.year,

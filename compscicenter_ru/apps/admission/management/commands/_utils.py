@@ -12,6 +12,12 @@ class CurrentCampaignsMixin:
     CURRENT_CAMPAIGNS_AGREE = "The action will affect campaigns above. " \
                               "Continue? (y/n): "
 
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument(
+            '--city', type=str,
+            help='City code to restrict current campaigns')
+
     def get_current_campaigns(self, city_code=None):
         filter_params = {"current": True}
         if city_code:
@@ -28,6 +34,14 @@ class CurrentCampaignsMixin:
 
     def get_current_campaign_ids(self, city_code=None):
         return [c.pk for c in self.get_current_campaigns(city_code)]
+
+    @staticmethod
+    def get_branch_options():
+        """Returns all branches for current campaigns"""
+        available = (Campaign.objects
+                     .filter(current=True)
+                     .select_related('branch'))
+        return {c.branch.code for c in available}
 
 
 class HandleErrorsMixin:
@@ -49,18 +63,21 @@ class ValidateTemplatesMixin:
         # passing score for test results non zero
         check_types = types or ["success", "fail"]
         qs = EmailTemplate.objects.get_queryset()
-        for campaign in campaigns:
-            if not campaign.online_test_passing_score:
-                raise CommandError("Passing score for campaign '{}'"
-                                   " must be non zero".format(campaign))
+        errors = []
+        for c in campaigns:
+            if not c.online_test_passing_score:
+                msg = f"Passing score for campaign '{c}' must be non zero"
+                errors.append(msg)
             for t in check_types:
-                template_name = self.get_template_name(campaign, t)
+                template_name = self.get_template_name(c, t)
                 try:
                     # Use post office method for caching purpose
                     get_email_template(template_name)
                 except EmailTemplate.DoesNotExist:
-                    raise CommandError("Email template `{}` "
-                                       "not found".format(template_name))
+                    msg = f"Email template `{template_name}` not found"
+                    errors.append(msg)
+        if errors:
+            raise CommandError("\n".join(errors))
 
     def get_template_name(self, campaign, suffix):
         return self.TEMPLATE_REGEXP.format(
@@ -72,14 +89,15 @@ class ValidateTemplatesMixin:
 
 class CustomizeQueryMixin:
     def add_arguments(self, parser):
+        super().add_arguments(parser)
         parser.add_argument('-m', dest='custom_manager', type=str,
                             default='objects', action='store',
                             help='Customize model manager name.')
         parser.add_argument('-f', dest='queryset_filters', type=str,
                             action='append',
-                            help='Customize one or more filters for queryset. '
-                                 'Usage examples:'
-                                 ' -f status__in=["rejected_test"]=True '
+                            help='Add `.filter()` expression to queryset'
+                                 'Usage example:'
+                                 ' -f status__in=["rejected_test"] '
                                  ' -f id__in=[86]')
 
     def get_manager(self, cls, options):
