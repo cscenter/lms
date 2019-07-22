@@ -30,11 +30,12 @@ h6,
 h1,
 .h1 {
   font-size: $h1-font-size;
-  @include media-breakpoint-up(sm) {
-    font-weight: $font-weight-light;
-  }
   margin-bottom: spacer("6x");
   letter-spacing: -.04rem;
+  font-weight: $font-weight-light;
+  @include media-breakpoint-down(md) {
+    font-size: 1.75rem;
+  }
 }
 
 h2,
@@ -43,21 +44,34 @@ h2,
   font-weight: $font-weight-light;
   margin-bottom: spacer("4x");
   letter-spacing: -.04rem;
+  @include media-breakpoint-down(md) {
+    font-size: 1.5rem;
+  }
 }
 
-h3, .h3 {
+h3,
+.h3 {
   font-size: $h3-font-size;
+  @include media-breakpoint-down(md) {
+    font-size: 1.25rem;
+  }
 }
 
-h4, .h4 {
+h4,
+.h4 {
   font-size: $h4-font-size;
+  @include media-breakpoint-down(md) {
+    font-size: 1rem;
+  }
 }
 
-h5, .h5 {
+h5,
+.h5 {
   font-size: $h5-font-size;
 }
 
-h6, .h6 {
+h6,
+.h6 {
   font-size: $h6-font-size;
 }
 
@@ -85,30 +99,10 @@ a {
   }
 }
 
-//TODO: find solution for this
-@include media-breakpoint-down(md) {
-  html {
-
-    h1, .h1 {
-      font-size: 1.75rem;
-    }
-
-    h2, .h2 {
-      font-size: 1.5rem;
-    }
-
-    h3, .h3 {
-      font-size: 1.25rem;
-    }
-
-    h4, .h4 {
-      font-size: 1rem;
-    }
-  }
-}
-
 .page-content {
-  ol:not(.ui), ul:not(.ui), dl:not(.ui) {
+  ol:not(.ui),
+  ul:not(.ui),
+  dl:not(.ui) {
     padding: 0;
     margin: spacer("2x") 0 spacer("6x") spacer("6x");
     @include media-breakpoint-up(md) {
@@ -173,7 +167,8 @@ code {
 table:not(.ui) tr {
   border-bottom: $border-width solid $gray-light;
 
-  th, td {
+  th,
+  td {
     padding-right: 1.5rem;
   }
 }
