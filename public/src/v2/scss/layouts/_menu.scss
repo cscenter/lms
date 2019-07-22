@@ -57,12 +57,12 @@ body {
   padding: $nav-link-padding-y $nav-link-padding-x;
   margin-left: -$nav-link-padding-x;
 
-  ._logo-csc {
+  svg {
     height: 24px;
     width: 72px;
     @include media-breakpoint-up(lg) {
-        height: 32px;
-        width: 88px;
+      height: 32px;
+      width: 88px;
     }
   }
 }

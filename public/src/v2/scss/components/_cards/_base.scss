@@ -93,6 +93,21 @@ $card-bg: $white !default;
   }
 }
 
+.card__header.cover {
+  padding: 0;
+
+  .cover__content {
+    @extend .card__content;
+
+    &._big {
+      padding: 80px spacer("4x");
+      @include media-breakpoint-up(md) {
+      padding: 80px spacer("10x");
+      }
+    }
+  }
+}
+
 .card__title {
   margin-bottom: spacer("1x");
   font-size: $font-size-lg;

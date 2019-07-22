@@ -1,0 +1,12 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+
+{% block content %}
+    {% include "v2/components/cards/_announcements.jinja2" %}
+{% endblock content %}
