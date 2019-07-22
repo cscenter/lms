@@ -15,6 +15,7 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, CourseNewsNotification
+from learning.services import EnrollmentService, CourseCapacityFull
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory
 
@@ -83,6 +84,26 @@ def test_unenrollment(client, assert_redirect):
     assert len(response.context['ongoing_rest']) == 1
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['archive_enrolled']) == 0
+
+
+@pytest.mark.django_db
+def test_enrollment_capacity():
+    student = StudentFactory(city_id='spb')
+    current_semester = SemesterFactory.create_current()
+    course = CourseFactory.create(city_id='spb',
+                                  semester=current_semester,
+                                  capacity=1,
+                                  is_open=True)
+    EnrollmentFactory(course=course)
+    course.refresh_from_db()
+    assert course.places_left == 0
+    # 1 active enrollment
+    assert Enrollment.objects.count() == 1
+    with pytest.raises(CourseCapacityFull):
+        EnrollmentService.enroll(student, course, reason='')
+    # Make sure enrollment record created by enrollment service
+    # was rollbacked by transaction context manager
+    assert Enrollment.objects.count() == 1
 
 
 @pytest.mark.django_db

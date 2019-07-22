@@ -39,6 +39,11 @@ class EnrollmentService:
                 defaults={'is_deleted': True}))
             if not enrollment.is_deleted:
                 raise AlreadyEnrolled
+            # This is a sharable lock for concurrent enrollments if needs to
+            # control participants number. A blocking operation since `nowait`
+            # is not used.
+            if course.is_capacity_limited:
+                locked = Course.objects.select_for_update().get(pk=course.pk)
             # Try to update state of the enrollment record to `active`
             filters = [Q(pk=enrollment.pk), Q(is_deleted=True)]
             if course.is_capacity_limited:
@@ -53,13 +58,13 @@ class EnrollmentService:
                 # At this point we don't know the exact reason why row wasn't
                 # updated. It could happen if the enrollment state was
                 # `is_deleted=False` or no places left or both.
-                # The first one is really rare (user should do concurrent
+                # The first one is quit impossible (user should do concurrent
                 # requests) and still should be considered as success, so
                 # let's take into account only the second case.
                 if course.is_capacity_limited:
-                    # TODO: add test that created record was rollbacked
                     raise CourseCapacityFull
             else:
                 if not created:
                     populate_assignments_for_student(enrollment)
+                # FIXME: это число могло измениться, если кто-то отписался от курса. Нужно отписку тоже поместить в транзакции
                 update_course_learners_count(course.pk)
