@@ -38,13 +38,14 @@ class PermissionMixin:
         return True
 
 
-class ExtendedAnonymousUser(PermissionMixin, AnonymousUser):
+class ExtAnonymousUser(PermissionMixin, AnonymousUser):
     group = []
     city_code = None
     index_redirect = None
+    roles = set()
 
     def __str__(self):
-        return 'ExtendedAnonymousUser'
+        return 'ExtAnonymousUser'
 
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         return None

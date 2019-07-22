@@ -1,4 +1,4 @@
-from core.models import ExtendedAnonymousUser
+from core.models import ExtAnonymousUser
 from django.conf import settings
 from django.contrib.auth import get_user as auth_get_user
 from django.contrib.auth.models import AnonymousUser
@@ -10,7 +10,7 @@ def get_user(request):
     if not hasattr(request, '_cached_user'):
         request._cached_user = auth_get_user(request)
         if isinstance(request._cached_user, AnonymousUser):
-            request._cached_user = ExtendedAnonymousUser()
+            request._cached_user = ExtAnonymousUser()
     return request._cached_user
 
 
