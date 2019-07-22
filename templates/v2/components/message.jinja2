@@ -13,11 +13,8 @@
         <div class="row">
             <div class="col-12">
                 <pre>
-FIXME: Ссылки не везде различимы.
+FIXME: 
 Поддержка тега code - по желанию.
-Нужно явно разделить сообщения по типам _warning и _info (такого сейчас нет).
-    _info - сопутствующая информация, не требующая особого внимания.
-    _warning - уже важнее.
 Shadowed - не вижу тени.
 font-weight: bolder не работает, либо совсем не заметно.
 Нужно понять, какие глифы (или как эта фигня в шрифтах называется) подтянуть,
@@ -55,7 +52,7 @@ font-weight: bolder не работает, либо совсем не замет
                     <div class="message__header">
                         Системное сообщение
                     </div>
-                    <p>Мы <b>предупреждаем</b> что все ваши действия будут записанны в наших логах</p>
+                    <p>Мы <b>предупреждаем</b> что все ваши <a href="#">действия</a> будут записанны в наших логах</p>
                     <p>Модификатор <code>._warning</code></p>
                     <p>Перейти в раздел <a href="#">преподавания</a>.</p>
                 </div>
@@ -70,6 +67,17 @@ font-weight: bolder не работает, либо совсем не замет
                     <p>Модификатор <code>._success</code></p>
                     <p>Перейти в раздел <a href="#">преподавания</a>.</p>
                 </div>
+                <div class="message _info">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Информационное сообщение
+                    </div>
+                    <p>Мы <b>оповещаем</b> вас, что все ваши действия будут записанны в наших логах</p>
+                    <p>Модификатор <code>._info</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
+                </div>
 
                 <h1>Bordered</h1>
                 <div class="message _danger _outline">
@@ -79,7 +87,7 @@ font-weight: bolder не работает, либо совсем не замет
                     <div class="message__header">
                         Внимание
                     </div>
-                    <p><b>Срочно</b> примите неотложные меры!</p>
+                    <p><b>Срочно</b> примите неотложные <a href="">меры</a>!</p>
                 </div>
                 <div class="message _warning _outline">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -99,6 +107,15 @@ font-weight: bolder не работает, либо совсем не замет
                     </div>
                     <p>Мы предупреждаем что все ваши действия будут записанны в наших логах</p>
                 </div>
+                <div class="message _info _outline">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Информационное сообщение
+                    </div>
+                    <p>Мы оповещаем что все ваши действия будут записанны в наших логах</p>
+                </div>
 
                 <h1>Contrast</h1>
                 <div class="message _danger _inverted">
@@ -108,7 +125,7 @@ font-weight: bolder не работает, либо совсем не замет
                     <div class="message__header">
                         Внимание
                     </div>
-                    <p>Срочно примите неотложные меры!</p>
+                    <p>Срочно примите неотложные <a href="">меры</a>!</p>
                 </div>
                 <div class="message _warning _inverted">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -117,7 +134,7 @@ font-weight: bolder не работает, либо совсем не замет
                     <div class="message__header">
                         Системное сообщение
                     </div>
-                    <p>Мы предупреждаем что все ваши действия будут записанны в наших логах</p>
+                    <p>Мы предупреждаем что все ваши <a href="">действия</a> будут записанны в наших логах</p>
                 </div>
                 <div class="message _success _inverted">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -126,7 +143,16 @@ font-weight: bolder не работает, либо совсем не замет
                     <div class="message__header">
                         У вас кое-что получается!
                     </div>
-                    <p>Мы предупреждаем что все ваши действия будут записанны в наших логах</p>
+                    <p>Мы предупреждаем что все ваши <a href="">действия</a> будут записанны в наших логах</p>
+                </div>
+                <div class="message _info _inverted">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Информационное сообщение
+                    </div>
+                    <p>Мы оповещаем что все ваши действия будут записанны в наших логах</p>
                 </div>
 
                 <h1>Shadowed</h1>
@@ -137,7 +163,7 @@ font-weight: bolder не работает, либо совсем не замет
                     <div class="message__header">
                         Внимание
                     </div>
-                    <p>Срочно примите неотложные меры!</p>
+                    <p>Срочно примите неотложные <a href="#">меры!</a></p>
                 </div>
                 <section class="page-content">
                 <h1>Using</h1>
@@ -148,7 +174,7 @@ font-weight: bolder не работает, либо совсем не замет
                                 <form action="">
                                     <div class="card__title">
                                         <h2>Вход на сайт</h2>
-                                        <div class="mt-1 message _warning">
+                                        <div class="mt-1 message _warning _inverted">
                                             На заполнение формы у вас есть 5 минут
                                         </div>
                                     </div>

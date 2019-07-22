@@ -137,7 +137,11 @@ public_menu = [
         excluded_patterns=[
             r"^/courses/.*/assignments/add$",
             r"^/courses/.*/assignments/\d+/edit$"
-        ]),
+        ],
+        selected_patterns=[
+            r'^/v2/pages/course/',
+        ],
+    ),
     MenuItem(
         pgettext_lazy("menu", "Обучение"),
         '/v2/pages/learning/',

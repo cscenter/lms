@@ -1,0 +1,149 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/index.svg") }}");
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/common.svg") }}");
+    </script>
+{% endblock sprites %}
+{% block content %}
+    <div class="container page-content">
+    <div class="row content-center no-gutters">
+        <div class="col-lg-9">
+            <div class="card">
+                <div class="card__header cover _img"
+                     style="background-image:url('/static/v2/img/pages/syllabus/distance/algorythms-part1.png')">
+                    <div class="cover__content _big">
+                        <h2 class="cover__title">Функциональное программирование</h2>
+                    </div>
+                </div>
+
+                <div class="card__content _big text-base">
+                    <p>Курс знакомит слушателей с&nbsp;функциональными языками программирования и&nbsp;методами
+                        программирования на&nbsp;этих языках.
+                        Мы&nbsp;рассмотрим отличия функционального подхода к&nbsp;программированию от&nbsp;традиционного
+                        императивного, познакомимся с&nbsp;лямбда-исчислением, как теоретической основой
+                        функционального
+                        программирования, изучим системы типов функциональных языков и&nbsp;алгоритм вывода типов
+                        Хиндли-Дамаса-Милнера.
+                    </p>
+                    <p>
+                        Мы&nbsp;познакомимся с&nbsp;языком программирования Haskell, изучим ленивую и&nbsp;энергичную
+                        семантики,
+                        алгебраические типы данных и&nbsp;их&nbsp;использование для сопоставления с&nbsp;образцом.
+                        Изучая систему
+                        типов языка Haskell, мы&nbsp;обсудим параметрический и&nbsp;специальный полиморфизм&nbsp;и,
+                        в&nbsp;частности,
+                        механизм классов типов.</p>
+                    <h2 class="mt-8">Прочтения курса</h2>
+                    <ul class="ui nav-tabs mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">Санкт-Петербург</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Новосибирск</a>
+                        </li>
+                    </ul>
+                    <div class="message _warning mb-6">
+                        <p>Базовый курс для направлений <a href="#">Computer Science</a> и <a href="#">Data Science</a></p>
+                    </div>
+                    <div class="card-deck _three">
+                        <a href="#" class="card">
+                            <div class="card__content mb-8">
+                                <div class="card__title">
+                                    Осень 2019
+                                </div>
+                                <p>Лекторы: Т.&nbsp;Ф.&nbsp;Валеев, А.&nbsp;Казанин</p>
+                            </div>
+                            <div class="card__content _meta">
+                                <div class="grouped">
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('video') }}<span>123</span>
+                                    </div>
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('user') }}<span>123</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="card">
+                            <div class="card__content mb-8">
+                                <div class="card__title">
+                                    Осень 2019
+                                </div>
+                                <p>Лектор: Д. Н. Москвин</p>
+                            </div>
+                            <div class="card__content _meta">
+                                <div class="grouped">
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('video') }}<span>123</span>
+                                    </div>
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('user') }}<span>123</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="card">
+                            <div class="card__content mb-8">
+                                <div class="card__title">
+                                    Осень 2019
+                                </div>
+                                <p>Лектор: Д. Н. Москвин</p>
+                            </div>
+                            <div class="card__content _meta">
+                                <div class="grouped">
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('video') }}<span>123</span>
+                                    </div>
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('user') }}<span>123</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="card">
+                            <div class="card__content mb-8">
+                                <div class="card__title">
+                                    Осень 2019
+                                </div>
+                                <p>Лектор: Д. Н. Москвин</p>
+                            </div>
+                            <div class="card__content _meta">
+                                <div class="grouped">
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('video') }}<span>123</span>
+                                    </div>
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('user') }}<span>123</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="card">
+                            <div class="card__content mb-8">
+                                <div class="card__title">
+                                    Осень 2019
+                                </div>
+                                <p>Лектор: Д. Н. Москвин</p>
+                            </div>
+                            <div class="card__content _meta">
+                                <div class="grouped">
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('video') }}<span>123</span>
+                                    </div>
+                                    <div class="ui label _icon mb-0">
+                                        {{ macros.svg_inline('user') }}<span>123</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock content %}

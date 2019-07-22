@@ -1,5 +1,14 @@
 @mixin message-variant($message-fill, $color) {
   color: darken($color, 7.5%);
+  a {
+    color: darken($color, 7.5%);
+    border-bottom: $border-width solid rgba($color, .4);
+
+    &:hover {
+      color: darken($color, 22.5%);
+      border-bottom: $border-width solid $color;
+    }
+  }
 
   svg {
     fill: darken($color, 7.5%);
@@ -16,6 +25,15 @@
     color: white;
     svg {
       fill: $white;
+    }
+    a {
+      color: $white;
+      border-bottom: $border-width solid rgba($white, .6);
+
+      &:hover {
+        color: $white;
+        border-bottom: $border-width solid $white;
+      }
     }
   }
 }

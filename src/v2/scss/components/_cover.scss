@@ -13,7 +13,7 @@
   &._img {
     z-index: 1;
     background-position: center;
-    &:before {
+    &::before {
       content: "";
       z-index: -1;
       opacity: .9;
@@ -34,15 +34,22 @@
 .cover__content {
   padding: 80px 0;
 
+  > :last-child {
+    margin-bottom: 0;
+  }
+
   &._actions {
     padding: spacer("4x") 0;
     text-align: left;
   }
 }
 
+// Mix this class with h1-h6 tag, e.g. `<h1 class="cover__title">Title</h1>`
 .cover__title {
   max-width: 100%;
+}
 
+h1.cover__title {
   @include media-breakpoint-up(lg) {
     font-size: 3.5rem;
   }
