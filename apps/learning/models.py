@@ -186,7 +186,7 @@ class EnrollmentInvitation(models.Model):
     def get_absolute_url(self):
         return city_aware_reverse(
             "course_enroll_by_invitation",
-            kwargs={"token": self.token, **self.course.url_kwargs},
+            kwargs={"course_token": self.token, **self.course.url_kwargs},
             subdomain=settings.LMS_SUBDOMAIN)
 
     def is_active(self):
