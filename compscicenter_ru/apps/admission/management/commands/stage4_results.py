@@ -58,7 +58,6 @@ class Command(ValidateTemplatesMixin, CustomizeQueryMixin,
             self.validate_templates(campaigns, types=all_statuses)
 
             stats = Counter()
-            context = {'SUBJECT_CITY': campaign.city.name}
             for a in applicants.order_by('status').iterator():
                 template_name = self.get_template_name(campaign, a.status)
                 template = get_email_template(template_name)
@@ -71,7 +70,6 @@ class Command(ValidateTemplatesMixin, CustomizeQueryMixin,
                         recipients,
                         sender=header_from,
                         template=template,
-                        context=context,
                         render_on_delivery=True,
                         backend='ses',
                     )
