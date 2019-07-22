@@ -13,11 +13,6 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     Send notification to those who applied but haven't yet started the contest.
     """
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--city', type=str,
-            help='City code to restrict current campaigns')
-
     def handle(self, *args, **options):
         city_code = options["city"]
         campaigns = self.get_current_campaigns(city_code)

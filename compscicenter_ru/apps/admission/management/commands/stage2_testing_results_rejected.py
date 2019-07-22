@@ -18,9 +18,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     """
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--city', type=str,
-            help='City code to restrict current campaigns')
+        super().add_arguments(parser)
         parser.add_argument(
             '--skip-context', action='store_true',
             dest='skip_context',

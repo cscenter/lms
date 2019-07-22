@@ -17,7 +17,7 @@ class Command(CurrentCampaignsMixin, CustomizeQueryMixin, BaseCommand):
     """
 
     def add_arguments(self, parser):
-        CustomizeQueryMixin.add_arguments(self, parser)
+        super().add_arguments(parser)
         parser.add_argument(
             '--city', type=str,
             help='City code to restrict current campaigns')

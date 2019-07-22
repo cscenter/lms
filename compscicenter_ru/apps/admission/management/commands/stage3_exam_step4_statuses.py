@@ -19,9 +19,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
     """
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--city', type=str,
-            help='Current campaign city code')
+        super().add_arguments(parser)
         parser.add_argument(
             '--reject_value', type=Decimal,
             help='Set `rejected by exam` to applicants with exam score equal or'

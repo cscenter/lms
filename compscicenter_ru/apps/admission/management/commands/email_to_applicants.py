@@ -21,11 +21,8 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin,
     TEMPLATE_REGEXP = "{type}"
 
     def add_arguments(self, parser):
-        CustomizeQueryMixin.add_arguments(self, parser)
+        super().add_arguments(parser)
         # TODO: provide `context` field
-        parser.add_argument(
-            '--city', type=str,
-            help='City code to restrict current campaigns')
         parser.add_argument(
             '--template', type=str,
             help='Post office email template')

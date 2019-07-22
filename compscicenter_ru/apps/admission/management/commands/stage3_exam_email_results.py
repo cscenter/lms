@@ -13,9 +13,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     help = """Generate emails about exam results."""
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--city', type=str,
-            help='City code to restrict current campaigns')
+        super().add_arguments(parser)
         parser.add_argument(
             '--fail-only', action='store_true',
             dest="fail_only",

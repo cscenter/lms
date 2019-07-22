@@ -16,11 +16,6 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     TEMPLATE_TYPE = "offline-exam-checked"
     help = 'Generate mails about check completeness'
 
-    def add_arguments(self, parser):
-        parser.add_argument(
-            '--city', type=str,
-            help='City code to restrict current campaigns')
-
     def handle(self, *args, **options):
         city_code = options["city"]
         campaigns = self.get_current_campaigns(city_code)

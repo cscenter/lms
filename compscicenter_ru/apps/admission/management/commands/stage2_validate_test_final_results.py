@@ -21,11 +21,9 @@ class Command(CurrentCampaignsMixin, BaseCommand):
     )
 
     def add_arguments(self, parser):
+        super().add_arguments(parser)
         parser.add_argument('csv', metavar='CSV',
                             help='Path to csv with results')
-        parser.add_argument(
-            '--city', type=str,
-            help='City code to restrict current campaigns')
 
     def handle(self, *args, **options):
         csv_path = options["csv"]
