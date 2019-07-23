@@ -1,5 +1,8 @@
 from collections import OrderedDict
 from enum import Enum
+from typing import NamedTuple, List
+
+import attr
 
 from core.urls import reverse
 from courses.utils import get_term_index_academic_year_starts, get_term_by_index
@@ -71,3 +74,35 @@ class PublicRoute(Enum):
     @classmethod
     def choices(cls):
         return [(o.code, o.section_name) for o in cls.__members__.values()]
+
+
+@attr.s(auto_attribs=True, slots=True)
+class Tab:
+    target: str = attr.ib()
+    name: str = attr.ib()
+    active: bool = False
+    url: str = '#'
+
+
+class TabList:
+    def __init__(self, tabs: List[Tab] = None):
+        self._tabs = {t.target: t for t in tabs if t} if tabs else {}
+
+    def add(self, tab: Tab):
+        self._tabs[tab.target] = tab
+
+    def set_active(self, target) -> None:
+        for t in self._tabs.values():
+            t.active = False
+        if target in self._tabs:
+            # TODO: warn if tab not found
+            self._tabs[target].active = True
+
+    def __iter__(self):
+        return iter(self._tabs.values())
+
+    def items(self):
+        return self._tabs.items()
+
+    def __getitem__(self, item):
+        return self._tabs[item]

@@ -142,12 +142,13 @@ def test_github_id_validation():
 
 
 def test_get_abbreviated_short_name():
+    non_breaking_space = chr(160)
     user = UserFactory.build()
     user.username = "mikhail"
     user.first_name = "Misha"
     user.last_name = "Ivanov"
-    assert user.get_abbreviated_short_name() == "Ivanov M."
-    assert user.get_abbreviated_short_name(last_name_first=False) == "M. Ivanov"
+    assert user.get_abbreviated_short_name() == f"Ivanov{non_breaking_space}M."
+    assert user.get_abbreviated_short_name(last_name_first=False) == f"M.{non_breaking_space}Ivanov"
     user.first_name = ""
     assert user.get_abbreviated_short_name() == "Ivanov"
     user.last_name = ""

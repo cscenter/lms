@@ -38,19 +38,18 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         user = User(first_name=u"Анна", last_name=u"Иванова",
                     patronymic=u"Васильевна")
         self.assertEqual(user.get_abbreviated_name(),
-                         u"А. В. Иванова")
+                         u"А. В. Иванова")
         user = User(first_name=u"Анна", last_name=u"Иванова")
         self.assertEqual(user.get_abbreviated_name(),
-                         u"А. Иванова")
+                         u"А. Иванова")
 
     def test_short_name(self):
-        user = User(first_name=u"Анна", last_name=u"Иванова",
-                    patronymic=u"Васильевна")
-        self.assertEqual(user.get_short_name(),
-                         u"Анна Иванова")
+        user = User(first_name="Анна", last_name="Иванова",
+                    patronymic="Васильевна")
+        non_breaking_space = chr(160)
+        assert user.get_short_name() == "Анна Иванова"
         user = User(first_name=u"Анна", last_name=u"Иванова")
-        self.assertEqual(user.get_short_name(),
-                         u"Анна Иванова")
+        assert user.get_short_name() == "Анна Иванова"
 
     def test_to_string(self):
         user = User(first_name=u"Анна", last_name=u"Иванова",

@@ -69,6 +69,9 @@ urlpatterns += [
     path('projects/', views.ProjectsListView.as_view(), name="public_projects"),
     path('', include('publications.urls')),
 
+    path("courses/", include([
+        path("<slug:course_slug>/", views.MetaCourseDetailView.as_view(), name="meta_course_detail"),
+    ])),
     path('', include('courses.urls')),
 
     path('', include('admission.urls_application')),

@@ -9,6 +9,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.db.models import Prefetch
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -604,6 +605,15 @@ class CourseTeacher(models.Model):
     @property
     def is_lecturer(self):
         return bool(self.roles.lecturer)
+
+    @classmethod
+    def lecturers_prefetch(cls):
+        lecturer = cls.roles.lecturer
+        return Prefetch(
+            'course_teachers',
+            queryset=(cls.objects
+                      .filter(roles=lecturer)
+                      .select_related('teacher')))
 
     @staticmethod
     def grouped(course_teachers):

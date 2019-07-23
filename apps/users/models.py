@@ -573,7 +573,8 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
 
     def get_abbreviated_name(self):
         parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
-        abbrev_name = smart_text(". ".join(p for p in parts if p).strip())
+        nbs = chr(160)  # non-breaking space
+        abbrev_name = smart_text(f".{nbs}".join(p for p in parts if p).strip())
         return abbrev_name or self.username
 
     def get_abbreviated_short_name(self, last_name_first=True):
@@ -582,7 +583,8 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
             parts = [self.last_name, first_letter]
         else:
             parts = [first_letter, self.last_name]
-        return " ".join(parts).strip() or self.username
+        non_breaking_space = chr(160)
+        return non_breaking_space.join(parts).strip() or self.username
 
     def get_abbreviated_name_in_latin(self):
         """
