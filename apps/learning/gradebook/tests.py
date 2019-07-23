@@ -193,7 +193,7 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, CSCTestCase):
         self.doLogin(teacher)
         response = self.client.get(url)
         for student in students:
-            name = "{} {}.".format(student.last_name,
+            name = "{} {}.".format(student.last_name,
                                         student.first_name[0])
             self.assertContains(response, name)
         for as_ in as_online:
@@ -341,7 +341,7 @@ def test_empty_gradebook_view(client):
     client.login(teacher)
     response = client.get(co1.get_gradebook_url())
     for student in students:
-        name = "{} {}.".format(student.last_name, student.first_name[0])
+        name = "{} {}.".format(student.last_name, student.first_name[0])
         assert smart_bytes(name) in response.content
         enrollment = Enrollment.active.get(student=student, course=co1)
         field = 'final_grade_{}'.format(enrollment.pk)

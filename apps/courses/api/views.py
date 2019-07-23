@@ -86,12 +86,7 @@ class CourseVideoList(ListAPIView):
     serializer_class = CourseVideoSerializer
 
     def get_queryset(self):
-        lecturer = CourseTeacher.roles.lecturer
-        lecturers = Prefetch(
-            'course_teachers',
-            queryset=(CourseTeacher.objects
-                      .filter(roles=lecturer)
-                      .select_related('teacher')))
+        lecturers = CourseTeacher.lecturers_prefetch()
         return (Course.objects
                 .filter(is_published_in_video=True,
                         # Could be incorrect within one day since it doesn't

@@ -5,7 +5,7 @@ from django.core.cache import cache
 
 from core.urls import reverse
 from learning.tests.factories import AcademicDisciplineFactory, \
-    GraduateProfileFactory
+    GraduateProfileFactory, MetaCourseFactory, SemesterFactory, CourseFactory
 
 
 # TODO: test context
@@ -76,3 +76,23 @@ def test_alumni(client):
     response = client.get(url_alumni_all)
     json_data = response.context_data['app_data']
     assert json_data['props']['areas'] == [{'label': a.name, 'value': a.code}]
+
+
+@pytest.mark.django_db
+def test_meta_course_detail(client, settings):
+    mc = MetaCourseFactory()
+    co1, co2 = CourseFactory.create_batch(2, meta_course=mc, city=settings.DEFAULT_CITY_CODE)
+    response = client.get(mc.get_absolute_url())
+    assert response.status_code == 200
+    assert mc.name.encode() in response.content
+    assert mc.description.encode() in response.content
+    grouped_courses = response.context_data['grouped_courses']
+    assert len(grouped_courses) == 1
+    assert settings.DEFAULT_CITY_CODE in grouped_courses
+    assert {c.pk for c in grouped_courses[settings.DEFAULT_CITY_CODE]} == {co1.pk, co2.pk}
+    co2.city_id = "kzn"
+    co2.save()
+    response = client.get(mc.get_absolute_url())
+    grouped_courses = response.context_data['grouped_courses']
+    assert {c.pk for c in grouped_courses[settings.DEFAULT_CITY_CODE]} == {co1.pk}
+

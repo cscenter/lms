@@ -1,0 +1,77 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% import "compscicenter_ru/macros/_ui.jinja2" as ui_macros %}
+
+{% block title %}{{ meta_course.name }}{% endblock title %}
+
+{% block body_attrs %}class="_dark" data-init-sections="tabs"{% endblock body_attrs %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+
+{% block content %}
+<div class="container page-content">
+    <div class="row content-center no-gutters">
+        <div class="col-lg-9">
+            <div class="card">
+                <div class="card__header cover _img" style="background-image:url('{{ meta_course.get_cover_url() }}')">
+                    <div class="cover__content _big">
+                        <h2 class="cover__title">{{ meta_course.name }}</h2>
+                    </div>
+                </div>
+
+                {% if request.user.is_curator %}
+                    <div class="card__meta">
+                        <div class="message _info"><a href="{{ meta_course.get_update_url() }}">{% trans %}Edit Course Description{% endtrans %}</a></div>
+                    </div>
+                {% endif %}
+
+                <div class="card__content _big">
+                    {{ meta_course.description|markdown("course_description", 3600, meta_course.pk, meta_course.modified) }}
+                    <h2 class="mt-8">Прочтения курса</h2>
+
+                    {{ ui_macros.tabs(tabs) }}
+
+                    <div class="tab-content">
+                        {% for city_code, courses in grouped_courses.items() -%}
+                            {% with tab = tabs[city_code] %}
+                            <div class="tab-pane {% if tab.active %} show active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                            {% endwith %}
+                                <div class="message _warning mb-6">
+                                    asdf<p>Базовый курс для направлений <a href="#">Computer Science</a> и <a href="#">Data Science</a></p>
+                                </div>
+                                <div class="card-deck _three">
+                                    {% for course in courses -%}
+                                        <a href="{{ course.get_absolute_url() }}" class="card">
+                                            <div class="card__content mb-8">
+                                                <div class="card__title">{{ course.semester|capitalize }}</div>
+                                                {% with lecturers = course.course_teachers.all() %}
+                                                    {% if lecturers %}<p>Лекторы: {% for course_teacher in lecturers %}{{ course_teacher.teacher.get_abbreviated_name() }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+                                                {% endwith %}
+                                            </div>
+                                            <div class="card__content _meta">
+                                                <div class="grouped">
+                                                    <div class="ui label _icon mb-0">
+                                                        {{ macros.svg_inline('video') }}<span>123</span>
+                                                    </div>
+                                                    <div class="ui label _icon mb-0">
+                                                        {{ macros.svg_inline('user') }}<span>{{ course.learners_count }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    {%- endfor %}
+                                </div>
+                            </div>
+                        {%- endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

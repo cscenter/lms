@@ -4,7 +4,7 @@ import itertools
 import math
 import random
 from enum import Enum
-from typing import NamedTuple, Optional
+from typing import NamedTuple, Optional, List
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
@@ -22,11 +22,11 @@ from vanilla import TemplateView
 
 from announcements.models import Announcement
 from compscicenter_ru.serializers import CoursesSerializer
-from compscicenter_ru.utils import group_terms_by_academic_year
+from compscicenter_ru.utils import group_terms_by_academic_year, Tab, TabList
 from core.exceptions import Redirect
 from core.models import Faq
 from core.urls import reverse
-from courses.models import Course, Semester
+from courses.models import Course, Semester, MetaCourse, CourseTeacher
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index
@@ -534,4 +534,33 @@ class StudentProfileView(generic.DetailView):
             timeline[k] = list(g)
         context["timeline"] = timeline
         context["timeline_element_types"] = TimelineElementTypes
+        return context
+
+
+class MetaCourseDetailView(generic.DetailView):
+    model = MetaCourse
+    slug_url_kwarg = 'course_slug'
+    template_name = "compscicenter_ru/courses/meta_course_detail.html"
+    context_object_name = 'meta_course'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        branches = [code for code, _ in Branches.choices]
+        lecturers = CourseTeacher.lecturers_prefetch()
+        courses = (Course.objects
+                   .filter(meta_course=self.object,
+                           city_id__in=branches)
+                   .select_related("meta_course", "semester", "city")
+                   .prefetch_related(lecturers)
+                   .order_by('-city_id', '-semester__index'))
+        tabs: TabList = TabList()
+        grouped = {}
+        for city, g in itertools.groupby(courses, key=lambda c: c.city):
+            grouped[city.code] = list(g)
+            if grouped[city.code]:
+                tabs.add(Tab(target=city.code, name=city.name))
+        selected_tab = self.request.GET.get('city', Branches.SPB)
+        tabs.set_active(selected_tab)
+        context['tabs'] = tabs
+        context['grouped_courses'] = grouped
         return context

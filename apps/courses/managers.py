@@ -110,18 +110,21 @@ class CourseQuerySet(models.QuerySet):
             _q["city_id__exact"] = city_code
         return self.filter(Q(**_q) | Q(is_correspondence=True))
 
+    # FIXME: remove
     def in_center_branches(self):
         return self.filter(city_id__in=settings.CENTER_BRANCHES_CITY_CODES)
 
     def for_teacher(self, user):
         return self.filter(teachers=user)
 
+    # FIXME: remove
     def from_center_foundation(self):
         Semester = apps.get_model('courses', 'Semester')
         center_foundation_term_index = get_term_index(CENTER_FOUNDATION_YEAR,
                                                       SemesterTypes.AUTUMN)
         return self.filter(semester__index__gte=center_foundation_term_index)
 
+    # FIXME: remove
     def get_offerings_base_queryset(self):
         """Returns list of available courses for CS Center"""
         User = apps.get_model('users', 'User')
@@ -140,6 +143,7 @@ class CourseQuerySet(models.QuerySet):
                 .order_by('-semester__year', '-semester__index',
                           'meta_course__name'))
 
+    # TODO: relocate
     def reviews_for_course(self, co):
         return (self
                 .defer("description")
