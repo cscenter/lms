@@ -90,7 +90,7 @@ def test_update_derivable_fields(curator, client, mocker):
                               teachers=[teacher])
     cc1 = CourseClassFactory.create(course=co, video_url="")
     co.refresh_from_db()
-    assert not co.materials_video
+    assert not co.videos_count
     assert not co.materials_slides
     assert not co.materials_files
     slides_file = SimpleUploadedFile("slides.pdf", b"slides_content")
@@ -99,12 +99,12 @@ def test_update_derivable_fields(curator, client, mocker):
     form['slides'] = slides_file
     client.post(cc1.get_update_url(), form)
     co.refresh_from_db()
-    assert not co.materials_video
+    assert not co.videos_count
     assert co.materials_slides
     assert not co.materials_files
     cc2 = CourseClassFactory(course=co, video_url="youtuuube")
     co.refresh_from_db()
-    assert co.materials_video
+    assert co.videos_count
     # Slides were uploaded on first class
     assert co.materials_slides
     assert not co.materials_files

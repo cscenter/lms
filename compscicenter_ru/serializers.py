@@ -12,7 +12,7 @@ class CourseSerializer(serializers.Serializer):
             "name": obj.meta_course.name,
             "url": obj.get_absolute_url(),
             "is_open": obj.is_open,
-            "with_video": obj.materials_video,
+            "with_video": bool(obj.videos_count),
             "with_slides": obj.materials_slides,
             "with_files": obj.materials_files,
             "teachers": teachers

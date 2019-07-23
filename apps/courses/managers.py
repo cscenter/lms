@@ -135,7 +135,7 @@ class CourseQuerySet(models.QuerySet):
         return (self
                 .select_related('meta_course', 'semester')
                 .only("pk", "city_id", "is_open", "grading_type",
-                      "materials_video", "materials_slides", "materials_files",
+                      "videos_count", "materials_slides", "materials_files",
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type")
                 .from_center_foundation()
