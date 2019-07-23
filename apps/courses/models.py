@@ -307,7 +307,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
-    materials_video = models.BooleanField(default=False, editable=False)
+    videos_count = models.PositiveIntegerField(default=0, editable=False)
     materials_slides = models.BooleanField(default=False, editable=False)
     materials_files = models.BooleanField(default=False, editable=False)
     youtube_video_id = models.CharField(
@@ -319,7 +319,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     objects = CourseDefaultManager()
 
     derivable_fields = [
-        'materials_video',
+        'videos_count',
         'youtube_video_id',
         'materials_slides',
         'materials_files',
@@ -328,7 +328,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
 
     prefetch_before_compute_fields = {
         # TODO: remove default ordering for courseclass_set
-        'materials_video': ['courseclass_set'],
+        'videos_count': ['courseclass_set'],
         'materials_slides': ['courseclass_set']
     }
 
@@ -342,15 +342,14 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
         return "{0}, {1}".format(smart_text(self.meta_course),
                                  smart_text(self.semester))
 
-    def _compute_materials_video(self):
-        materials_video = False
+    def _compute_videos_count(self):
+        videos_count = 0
         for course_class in self.courseclass_set.all():
-            if course_class.video_url.strip() != "":
-                materials_video = True
-                break
+            if course_class.video_url:
+                videos_count += 1
 
-        if self.materials_video != materials_video:
-            self.materials_video = materials_video
+        if self.videos_count != videos_count:
+            self.videos_count = videos_count
             return True
 
         return False
@@ -501,7 +500,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
 
     @property
     def has_classes_with_video(self):
-        return self.materials_video
+        return self.videos_count
 
     @property
     def has_classes_with_slides(self):
@@ -768,6 +767,24 @@ class CourseClass(TimeStampedModel):
     def __str__(self):
         return smart_text(self.name)
 
+    def clean(self):
+        super(CourseClass, self).clean()
+        # ends_at should be later than starts_at
+        if self.starts_at and self.ends_at and self.starts_at >= self.ends_at:
+            raise ValidationError(_("Class should end after it started"))
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        if self.slides != self._get_track_field("slides"):
+            self.slides_url = ""
+        super().save(*args, **kwargs)
+        if self.slides and not self.slides_url:
+            maybe_upload_slides_yandex.delay(self.pk)
+        self._update_track_fields()
+        # TODO: make async
+        course = Course.objects.get(pk=self.course_id)
+        course.compute_fields(prefetch=True)
+
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
@@ -808,24 +825,6 @@ class CourseClass(TimeStampedModel):
 
     def _get_track_field(self, field):
         return getattr(self, '_original_{}'.format(field))
-
-    def clean(self):
-        super(CourseClass, self).clean()
-        # ends_at should be later than starts_at
-        if self.starts_at and self.ends_at and self.starts_at >= self.ends_at:
-            raise ValidationError(_("Class should end after it started"))
-
-    def save(self, *args, **kwargs):
-        created = self.pk is None
-        if self.slides != self._get_track_field("slides"):
-            self.slides_url = ""
-        super().save(*args, **kwargs)
-        if self.slides and not self.slides_url:
-            maybe_upload_slides_yandex.delay(self.pk)
-        self._update_track_fields()
-        # TODO: make async
-        course = Course.objects.get(pk=self.course_id)
-        course.compute_fields(prefetch=True)
 
     def video_iframe(self):
         return get_oembed_html(self.video_url, 'video_oembed',

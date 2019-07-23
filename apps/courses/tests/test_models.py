@@ -79,12 +79,12 @@ def test_course_derivable_fields():
     co = CourseFactory()
     assert not co.materials_files
     assert not co.materials_slides
-    assert not co.materials_video
+    assert not co.videos_count
     cc = CourseClassFactory(course=co, video_url="https://link/to/youtube")
     co.refresh_from_db()
     assert not co.materials_files
     assert not co.materials_slides
-    assert co.materials_video
+    assert co.videos_count
     _ = CourseClassAttachmentFactory(course_class=cc)
     co.refresh_from_db()
     assert co.materials_files
