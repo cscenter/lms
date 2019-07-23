@@ -307,6 +307,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)
+    # TODO: recalculate on deleting course class
     videos_count = models.PositiveIntegerField(default=0, editable=False)
     materials_slides = models.BooleanField(default=False, editable=False)
     materials_files = models.BooleanField(default=False, editable=False)
@@ -357,7 +358,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     def _compute_youtube_video_id(self):
         youtube_video_id = ''
         for course_class in self.courseclass_set.order_by('pk').all():
-            if course_class.video_url.strip() != "":
+            if course_class.video_url:
                 video_id = get_youtube_video_id(course_class.video_url)
                 if video_id is not None:
                     youtube_video_id = video_id
@@ -783,7 +784,12 @@ class CourseClass(TimeStampedModel):
         self._update_track_fields()
         # TODO: make async
         course = Course.objects.get(pk=self.course_id)
-        course.compute_fields(prefetch=True)
+        course.compute_fields(
+            'videos_count',
+            'youtube_video_id',
+            'materials_slides',
+            'materials_files',
+            prefetch=True)
 
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)

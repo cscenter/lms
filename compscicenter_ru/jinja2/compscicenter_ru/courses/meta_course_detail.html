@@ -8,7 +8,7 @@
 
 {% block sprites %}
     <script type="text/javascript">
-        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg") }}");
     </script>
 {% endblock sprites %}
 
@@ -26,49 +26,61 @@
 
                 {% if request.user.is_curator %}
                     <div class="card__meta">
-                        <div class="message _info"><a href="{{ meta_course.get_update_url() }}">{% trans %}Edit Course Description{% endtrans %}</a></div>
+                        <div class="message _info px-8"><a href="{{ meta_course.get_update_url() }}">{% trans %}Edit Course Description{% endtrans %}</a></div>
                     </div>
                 {% endif %}
 
                 <div class="card__content _big">
                     {{ meta_course.description|markdown("course_description", 3600, meta_course.pk, meta_course.modified) }}
-                    <h2 class="mt-8">Прочтения курса</h2>
-
-                    {{ ui_macros.tabs(tabs) }}
-
-                    <div class="tab-content">
-                        {% for city_code, courses in grouped_courses.items() -%}
-                            {% with tab = tabs[city_code] %}
-                            <div class="tab-pane {% if tab.active %} show active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
-                            {% endwith %}
-                                <div class="message _warning mb-6">
-                                    asdf<p>Базовый курс для направлений <a href="#">Computer Science</a> и <a href="#">Data Science</a></p>
-                                </div>
-                                <div class="card-deck _three">
-                                    {% for course in courses -%}
-                                        <a href="{{ course.get_absolute_url() }}" class="card">
-                                            <div class="card__content mb-8">
-                                                <div class="card__title">{{ course.semester|capitalize }}</div>
-                                                {% with lecturers = course.course_teachers.all() %}
-                                                    {% if lecturers %}<p>Лекторы: {% for course_teacher in lecturers %}{{ course_teacher.teacher.get_abbreviated_name() }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
-                                                {% endwith %}
-                                            </div>
-                                            <div class="card__content _meta">
-                                                <div class="grouped">
-                                                    <div class="ui label _icon mb-0">
-                                                        {{ macros.svg_inline('video') }}<span>123</span>
-                                                    </div>
-                                                    <div class="ui label _icon mb-0">
-                                                        {{ macros.svg_inline('user') }}<span>{{ course.learners_count }}</span>
+                    {% if tabs %}
+                        <h2 class="mt-8">Прочтения курса</h2>
+                        {{ ui_macros.tabs(tabs) }}
+                        <div class="tab-content">
+                            {% for city_code, courses in grouped_courses.items() -%}
+                                {% with tab = tabs[city_code] %}
+                                <div class="tab-pane {% if tab.active %} show active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                {% endwith %}
+                                    <div class="message _info mb-6">
+                                        {% if city_code in academic_disciplines %}
+                                            {% with ds = academic_disciplines[city_code] -%}
+                                                <p>Базовый курс для направлени{% if ds|length > 1 %}й{% else %}я{% endif %} {% for discipline in ds -%}
+                                                    <a href="{{ url('on_campus_program_detail', discipline_code=discipline.code) }}?branch={{ discipline.branch__code }}">{{ discipline.name }}</a>
+                                                {%- if not loop.last %}, {% endif %}{% endfor %}</p>
+                                            {%- endwith %}
+                                        {% else %}
+                                            <p>Курс по выбору</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-deck _three">
+                                        {% for course in courses -%}
+                                            <a href="{{ course.get_absolute_url() }}" class="card">
+                                                <div class="card__content mb-lg-8">
+                                                    <div class="card__title">{{ course.semester|capitalize }}</div>
+                                                    {% with lecturers = course.course_teachers.all() %}
+                                                        {% if lecturers %}<p>Лекторы: {% for course_teacher in lecturers %}{{ course_teacher.teacher.get_abbreviated_name() }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+                                                    {% endwith %}
+                                                </div>
+                                                <div class="card__content _meta">
+                                                    <div class="grouped">
+                                                        {% if course.is_published_in_video -%}
+                                                        <div class="ui label _icon mb-0">
+                                                            {{ macros.svg_inline('video') }}<span>{{ course.videos_count }}</span>
+                                                        </div>
+                                                        {%- endif %}
+                                                        {% if course.learners_count -%}
+                                                        <div class="ui label _icon mb-0">
+                                                            {{ macros.svg_inline('user') }}<span>{{ course.learners_count }}</span>
+                                                        </div>
+                                                        {%- endif %}
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </a>
-                                    {%- endfor %}
+                                            </a>
+                                        {%- endfor %}
+                                    </div>
                                 </div>
-                            </div>
-                        {%- endfor %}
-                    </div>
+                            {%- endfor %}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>

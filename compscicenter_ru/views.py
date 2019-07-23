@@ -3,6 +3,7 @@
 import itertools
 import math
 import random
+from collections import defaultdict
 from enum import Enum
 from typing import NamedTuple, Optional, List
 
@@ -11,7 +12,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q, Max
+from django.db.models import Q, Max, F
 from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import gettext, pgettext_lazy, ugettext_lazy as _
@@ -553,14 +554,32 @@ class MetaCourseDetailView(generic.DetailView):
                    .select_related("meta_course", "semester", "city")
                    .prefetch_related(lecturers)
                    .order_by('-city_id', '-semester__index'))
-        tabs: TabList = TabList()
+        tabs = TabList()
         grouped = {}
         for city, g in itertools.groupby(courses, key=lambda c: c.city):
             grouped[city.code] = list(g)
             if grouped[city.code]:
                 tabs.add(Tab(target=city.code, name=city.name))
-        selected_tab = self.request.GET.get('city', Branches.SPB)
-        tabs.set_active(selected_tab)
+        if tabs:
+            selected_tab = self.request.GET.get('city', Branches.SPB)
+            tabs.set_active(selected_tab)  # deactivates all other tabs
+            if selected_tab not in tabs:
+                first_tab = next(iter(tabs))
+                first_tab.active = True
+        # For each branch collect academic disciplines where this
+        # course is mandatory
+        academic_disciplines = {}
+        disciplines = (StudyProgram.objects
+                       .filter(course_groups__courses=self.object.pk)
+                       .annotate(name=F('academic_discipline__name_en'),
+                                 code=F('academic_discipline__code'))
+                       .values('branch__code', 'name', 'code')
+                       .distinct()
+                       .order_by('branch__code'))
+        for city_code, g in itertools.groupby(disciplines,
+                                              key=lambda c: c['branch__code']):
+            academic_disciplines[city_code] = list(g)
         context['tabs'] = tabs
+        context['academic_disciplines'] = academic_disciplines
         context['grouped_courses'] = grouped
         return context
