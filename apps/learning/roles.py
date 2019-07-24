@@ -27,6 +27,7 @@ class Roles(DjangoChoices):
         "learning.can_enroll_in_course",
     ))
     CURATOR = C(5, _('Curator'), permissions=(
+        "courses.change_metacourse",
         "courses.can_view_contacts",
         "courses.can_view_assignments",
         "learning.can_view_course_news",

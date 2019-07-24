@@ -77,7 +77,7 @@
                     {% endif %}
                 </div>
 
-                {% if request.user.is_curator %}
+                {% if request.user.has_perm("courses.change_metacourse") %}
                     <div class="card__meta">
                         <div class="message _warning px-8"><a href="{{ meta_course.get_update_url() }}">{% trans %}Edit Course Description{% endtrans %}</a></div>
                     </div>
