@@ -30,7 +30,8 @@ class RBACPermissions:
             for role in user.roles:
                 if role in role_registry:
                     permissions = role_registry[role]
-                    return permissions.test_rule(perm, user, *args, **kwargs)
+                    if permissions.rule_exists(perm):
+                        return permissions[perm].test(user, *args, **kwargs)
                 else:
                     logger.warning(f'Role {role} is not registered '
                                    f'but assigned to user {user}')
@@ -77,8 +78,6 @@ class RBACModelBackend(RBACPermissions):
         except UserModel.DoesNotExist:
             return None
         return user if self.user_can_authenticate(user) else None
-
-
 
 
 class YandexRuOAuth2Backend(BaseOAuth2):
