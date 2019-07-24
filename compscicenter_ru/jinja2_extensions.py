@@ -19,10 +19,10 @@ class UrlsExtension(Extension):
         environment.globals["url"] = self._url_reverse
         environment.globals["LMS_SUBDOMAIN"] = settings.LMS_SUBDOMAIN
 
-    def _url_reverse(self, name, subdomain=None, scheme=None, *args, **kwargs):
+    def _url_reverse(self, name, subdomain=None, scheme=None, **kwargs):
         try:
             return reverse(name, subdomain=subdomain, scheme=scheme,
-                           args=args, kwargs=kwargs)
+                           args=None, kwargs=kwargs)
         except NoReverseMatch as exc:
             logger.error('Error: %s', exc)
             if not JINJA2_MUTE_URLRESOLVE_EXCEPTIONS:

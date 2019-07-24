@@ -38,7 +38,7 @@
                                         {% if city_code in academic_disciplines %}
                                             {% with ds = academic_disciplines[city_code] -%}
                                                 <p>Базовый курс для направлени{% if ds|length > 1 %}й{% else %}я{% endif %} {% for discipline in ds -%}
-                                                    <a href="{{ url('on_campus_program_detail', discipline_code=discipline.code) }}?branch={{ discipline.branch__code }}">{{ discipline.name }}</a>
+                                                    <a class="text-nowrap" href="{{ url('on_campus_program_detail', discipline_code=discipline.code) }}?branch={{ discipline.branch__code }}">{{ discipline.name }}</a>
                                                 {%- if not loop.last %}, {% endif %}{% endfor %}.</p>
                                             {%- endwith %}
                                         {% else %}
@@ -77,9 +77,9 @@
                     {% endif %}
                 </div>
 
-                {% if request.user.has_perm("courses.change_metacourse") %}
+                {% if request.user.is_superuser %}
                     <div class="card__meta">
-                        <div class="message _warning px-8"><a href="{{ meta_course.get_update_url() }}">{% trans %}Edit Course Description{% endtrans %}</a></div>
+                        <div class="message _warning px-8"><a href="{{ url('admin:courses_metacourse_change', object_id=meta_course.pk) }}">{% trans %}Edit in Admin{% endtrans %}</a></div>
                     </div>
                 {% endif %}
 
