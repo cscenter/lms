@@ -714,5 +714,5 @@ class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
             term.courseofferings = []
             semester_list.insert(0, term)
         context["semester_list"] = [(a, s) for s, a in
-                                    courses.utils.grouper(semester_list, 2)]
+                                    courses.utils.chunks(semester_list, 2)]
         return context

@@ -24,17 +24,11 @@
                     </div>
                 </div>
 
-                {% if request.user.is_curator %}
-                    <div class="card__meta">
-                        <div class="message _info px-8"><a href="{{ meta_course.get_update_url() }}">{% trans %}Edit Course Description{% endtrans %}</a></div>
-                    </div>
-                {% endif %}
-
                 <div class="card__content _big">
                     {{ meta_course.description|markdown("course_description", 3600, meta_course.pk, meta_course.modified) }}
                     {% if tabs %}
                         <h2 class="mt-8">Прочтения курса</h2>
-                        {{ ui_macros.tabs(tabs) }}
+                        {{ ui_macros.tabs(tabs, modifiers='mb-2') }}
                         <div class="tab-content">
                             {% for city_code, courses in grouped_courses.items() -%}
                                 {% with tab = tabs[city_code] %}
@@ -45,7 +39,7 @@
                                             {% with ds = academic_disciplines[city_code] -%}
                                                 <p>Базовый курс для направлени{% if ds|length > 1 %}й{% else %}я{% endif %} {% for discipline in ds -%}
                                                     <a href="{{ url('on_campus_program_detail', discipline_code=discipline.code) }}?branch={{ discipline.branch__code }}">{{ discipline.name }}</a>
-                                                {%- if not loop.last %}, {% endif %}{% endfor %}</p>
+                                                {%- if not loop.last %}, {% endif %}{% endfor %}.</p>
                                             {%- endwith %}
                                         {% else %}
                                             <p>Курс по выбору</p>
@@ -82,6 +76,13 @@
                         </div>
                     {% endif %}
                 </div>
+
+                {% if request.user.is_curator %}
+                    <div class="card__meta">
+                        <div class="message _warning px-8"><a href="{{ meta_course.get_update_url() }}">{% trans %}Edit Course Description{% endtrans %}</a></div>
+                    </div>
+                {% endif %}
+
             </div>
         </div>
     </div>

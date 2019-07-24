@@ -257,7 +257,7 @@ class CoursesListView(generic.ListView):
             semester_list.insert(0, semester)
         # Hide empty pairs
         context["semester_list"] = [
-            (a, s) for s, a in courses.utils.grouper(semester_list, 2) if \
+            (a, s) for s, a in courses.utils.chunks(semester_list, 2) if \
             (a and a.courseofferings) or (s and s.courseofferings)
             ]
 

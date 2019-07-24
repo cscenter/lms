@@ -1,5 +1,7 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
+{% import "compscicenter_ru/macros/_ui.jinja2" as ui_macros %}
+
 {% block title %}Программы подготовки в {{ super() }}{% endblock title %}
 
 {% block body_attrs %}data-init-sections="tabs"{% endblock body_attrs %}
@@ -9,38 +11,34 @@
         <div class="row">
             <div class="col-lg-8">
                 <h1>Очное обучение в CS центре</h1>
-                <ul class="ui nav nav-tabs" role="tablist">
-                    {% for branch in programs %}
-                    <li class="nav-item">
-                        <a class="nav-link{% if selected_branch == branch.code %} active{% endif %}"
-                           data-toggle="tab" role="tab"
-                           data-target="#{{ branch.code }}" href="{{ request.path }}?branch={{ branch.code }}"
-                           aria-controls="{{ branch.code }}"
-                           aria-selected="{% if selected_branch == branch.code %}true{% else %}false{% endif %}">{{ branch.name }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
+
+                {{ ui_macros.tabs(tabs) }}
+
                 <div class="tab-content">
-                {% for branch, study_programs in programs.items() %}
-                    <div class="tab-pane {% if selected_branch == branch.code %} show active{% endif %}"
-                            id="{{ branch.code }}" role="tabpanel" aria-labelledby="{{ branch.code }}-tab">
+                {% for branch, current_programs in programs.items() %}
+                    {% with tab=tabs[branch.code] %}
+                    <div class="tab-pane {% if tab.active %} show active{% endif %}"
+                            id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
                         <div class="mb-6">{{ branch.description }}</div>
                         <h2>Программы обучения</h2>
-                        {% for program in study_programs %}
-                            <a class="card _program-card" href="{{ url('on_campus_program_detail', discipline_code=program.academic_discipline.code) }}" >
+                        {% for program in current_programs -%}
+                            {% with academic_discipline=program.academic_discipline %}
+                            <a class="card _program-card" href="{{ url('on_campus_program_detail', discipline_code=academic_discipline.code) }}" >
                                 <div class="card__img col-md-4">
-                                    {% if program.academic_discipline.cover %}<img src="{{ program.academic_discipline.cover.url }}" alt="">{% endif %}
+                                    {% if academic_discipline.cover %}<img src="{{ academic_discipline.cover.url }}" alt="">{% endif %}
                                 </div>
                                 <div class="card__content col-md">
-                                    <div class="card__title">{{ program.academic_discipline.name_en }}</div>
-                                    <p class="card__subtitle">{{ program.academic_discipline.name_ru }}</p>
+                                    <div class="card__title">{{ academic_discipline.name_en }}</div>
+                                    <p class="card__subtitle">{{ academic_discipline.name_ru }}</p>
                                     <p class="card__text">
                                         {{ program.academic_discipline.description }}
                                     </p>
                                 </div>
                             </a>
+                            {%- endwith %}
                         {% endfor %}
                     </div>
+                    {% endwith %}
                 {% endfor %}
                 </div>
             </div>
