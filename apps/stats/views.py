@@ -1,4 +1,3 @@
-import itertools
 import json
 from collections import OrderedDict
 
@@ -9,11 +8,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.models import Campaign, Interview, Comment
-from courses.models import Course, Semester
-from learning.settings import StudentStatuses, GradeTypes
 from core.settings.base import CENTER_FOUNDATION_YEAR
+from courses.models import Course, Semester
 from courses.settings import SemesterTypes
-from courses.utils import get_term_index
+from courses.utils import get_term_index, bucketize
+from learning.settings import StudentStatuses, GradeTypes
 from users.constants import Roles
 from users.mixins import CuratorOnlyMixin
 from users.models import User
@@ -31,22 +30,18 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
         # Terms grouped by year
         term_start = get_term_index(CENTER_FOUNDATION_YEAR,
                                     SemesterTypes.AUTUMN)
-        terms_grouped = itertools.groupby(
-            Semester.objects.only("pk", "type", "year")
-                    .filter(index__gte=term_start)
-                    .order_by("-index"),
-            key=lambda x: x.year)
-        context["terms"] = [(g_name, list(g)) for g_name, g in terms_grouped]
+        terms = (Semester.objects.only("pk", "type", "year")
+                 .filter(index__gte=term_start)
+                 .order_by("-index"))
+        context["terms"] = bucketize(terms, key=lambda x: x.year)
         # TODO: Если прикрутить REST API, то можно эту логику перенести
         # на клиент и сразу не грузить весь список курсов
         # Courses grouped by term
-        courses_grouped = itertools.groupby(
-            Course.objects
-                .filter(is_open=False)
-                .values("pk", "semester_id", "meta_course__name", "city_id")
-                .order_by("-semester_id", "meta_course__name"),
-            key=lambda x: x["semester_id"])
-        courses = {term_id: list(cs) for term_id, cs in courses_grouped}
+        courses = (Course.objects
+                   .filter(is_open=False)
+                   .values("pk", "semester_id", "meta_course__name", "city_id")
+                   .order_by("-semester_id", "meta_course__name"))
+        courses = bucketize(courses, key=lambda x: x["semester_id"])
         # Find selected course and term
         course_id = self.request.GET.get("course_session_id")
         try:
@@ -120,8 +115,7 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
         campaigns = list(Campaign.objects
                          .values("pk", "year", "city_id", "city__name")
                          .order_by("city_id", "-year"))
-        campaigns = {city_code: list(cs) for city_code, cs in
-                     itertools.groupby(campaigns, key=lambda c: c["city_id"])}
+        campaigns = bucketize(campaigns, key=lambda c: c["city_id"])
         # Find selected campaign
         campaign_id = self.request.GET.get("campaign")
         try:

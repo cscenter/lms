@@ -4,16 +4,14 @@ import re
 import uuid
 from collections import Counter
 from functools import wraps
-from itertools import groupby
 from typing import Optional
 from urllib import parse
 
-from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db import transaction, IntegrityError
-from django.db.models import Q, Avg, Value, Prefetch, F
+from django.db.models import Avg, Value, Prefetch, F
 from django.db.models.functions import Coalesce
 from django.db.transaction import atomic
 from django.http import HttpResponseRedirect, JsonResponse
@@ -62,6 +60,7 @@ from core.settings.base import DEFAULT_CITY_CODE
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown
+from courses.utils import bucketize
 from learning.settings import AcademicDegreeYears
 from tasks.models import Task
 from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
@@ -889,11 +888,7 @@ class InterviewAppointmentView(generic.TemplateView):
                     any_slot_is_empty = True
                 if slot.stream.with_assignments:
                     slot.start_at = calculate_time(slot.start_at, time_diff)
-            slots = groupby(slots, key=lambda s: s.stream)
-            grouped_slots = []
-            for stream_date, g in slots:
-                grouped_slots.append((stream_date, list(g)))
-            context["slots"] = grouped_slots
+            context["grouped_slots"] = bucketize(slots, key=lambda s: s.stream)
             if not any_slot_is_empty:
                 # TODO: Do something bad
                 pass

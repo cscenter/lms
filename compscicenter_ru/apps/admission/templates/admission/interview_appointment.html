@@ -28,12 +28,12 @@
                     <div class="form-group">
                         <p>Выберите из доступных вариантов время, в которое сможете подъехать:</p>
                             <div class="btn-group" data-toggle="buttons">
-                            {% for stream, slots_iterator in slots %}
+                            {% for stream, slots in grouped_slots.items %}
                                 <div class="info">
                                     <b>{{ stream.date|date:"j E" }}</b><br>
                                     <div class="margin-bottom-5">Место проведения: {{ stream.venue.address }}</div>
                                 </div>
-                                {% for slot in slots_iterator %}
+                                {% for slot in slots %}
                                     <label class="btn btn-default {% if not slot.is_empty %}disabled{% endif %}">
                                         <input type="radio" name="time" autocomplete="off" {% if not slot.is_empty %}disabled{% endif %} value="{{ slot.pk }}"> {{ slot.start_at }}
                                     </label>
