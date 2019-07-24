@@ -166,7 +166,7 @@ semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
                               term_types + r")$")
 
 
-def grouper(iterable, n, fillvalue=None):
+def chunks(iterable, n, fillvalue=None):
     """
     Collect data into fixed-length chunks or blocks:
     Example:
@@ -175,3 +175,25 @@ def grouper(iterable, n, fillvalue=None):
     """
     args = [iter(iterable)] * n
     return zip_longest(fillvalue=fillvalue, *args)
+
+
+# Inspired by iterutils
+def bucketize(iterable, key=None, value_transform=None):
+    """
+    Collect data into buckets from the iterable grouping values by key.
+
+    The *key* is a function computing a key value for each element.
+    If not specified or is ``None``, *key* defaults to an identity function and
+    returns the element unchanged.
+    The *value_transform* is a function modifying a value before adding
+    into bucket.
+    """
+    if key is None:
+        key = lambda x: x
+    if value_transform is None:
+        value_transform = lambda x: x
+    buckets = {}
+    for val in iterable:
+        bucket_key = key(val)
+        buckets.setdefault(bucket_key, []).append(value_transform(val))
+    return buckets

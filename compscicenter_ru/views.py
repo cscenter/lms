@@ -30,7 +30,7 @@ from core.urls import reverse
 from courses.models import Course, Semester, MetaCourse, CourseTeacher
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, \
-    get_term_index_academic_year_starts, get_term_by_index
+    get_term_index_academic_year_starts, get_term_by_index, bucketize
 from learning.models import Branch, Enrollment, GraduateProfile
 from learning.projects.constants import ProjectTypes
 from learning.projects.models import ProjectStudent
@@ -281,20 +281,25 @@ class OnCampusProgramsView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        study_programs = (StudyProgram.objects
-                          .filter(is_active=True,
-                                  branch__is_remote=False)
-                          .select_related("branch", "academic_discipline")
-                          .order_by("branch_id", "academic_discipline__name_ru"))
-        context["programs"] = self.group_programs_by_branch(study_programs)
-        context["selected_branch"] = self.request.GET.get('branch', Branches.SPB)
+        # Active programs grouped by branch
+        current_programs = (StudyProgram.objects
+                            .filter(is_active=True,
+                                    branch__is_remote=False)
+                            .select_related("branch", "academic_discipline")
+                            .order_by("branch_id",
+                                      "academic_discipline__name_ru"))
+        current_programs = bucketize(current_programs, key=lambda sp: sp.branch)
+        tabs = TabList()
+        selected_branch = self.request.GET.get('branch', Branches.SPB)
+        for branch in current_programs:
+            tab = Tab(target=branch.code, name=branch.name,
+                      url=f"{self.request.path}?branch={branch.code}")
+            if branch.code == selected_branch:
+                tab.active = True
+            tabs.add(tab)
+        context["tabs"] = tabs
+        context["programs"] = current_programs
         return context
-
-    def group_programs_by_branch(self, syllabus):
-        grouped = {}
-        for branch, g in itertools.groupby(syllabus, key=lambda sp: sp.branch):
-            grouped[branch] = list(g)
-        return grouped
 
 
 class OnCampusProgramDetailView(generic.TemplateView):
@@ -313,16 +318,27 @@ class OnCampusProgramDetailView(generic.TemplateView):
                          .first())
         if not study_program:
             raise Http404
-        context["study_program"] = study_program
-        # Testimonials
+
+        # Collect tabs with cities where academic discipline is presented
+        tabs = TabList()
+        branches = (Branch.objects
+                    .filter(study_programs__academic_discipline__code=discipline_code,
+                            study_programs__is_active=True,
+                            is_remote=False))
+        for branch in branches:
+            tab = Tab(target=branch.code, name=branch.name,
+                      url=f"{self.request.path}?branch={branch.code}")
+            if branch.code == selected_branch:
+                tab.active = True
+            tabs.add(tab)
+
         cache_key = f"{TESTIMONIALS_CACHE_KEY}_{discipline_code}"
-        context["testimonials"] = get_random_testimonials(
+        random_testimonials = get_random_testimonials(
             4, cache_key, academic_disciplines=discipline_code)
-        context["branches"] = (Branch.objects
-                               .filter(study_programs__academic_discipline__code=discipline_code,
-                                       study_programs__is_active=True,
-                                       is_remote=False))
-        context["selected_branch"] = selected_branch
+
+        context["study_program"] = study_program
+        context["tabs"] = tabs
+        context["testimonials"] = random_testimonials
         return context
 
 
@@ -546,6 +562,7 @@ class MetaCourseDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # Get related courses grouped by the city
         branches = [code for code, _ in Branches.choices]
         lecturers = CourseTeacher.lecturers_prefetch()
         courses = (Course.objects
@@ -554,21 +571,21 @@ class MetaCourseDetailView(generic.DetailView):
                    .select_related("meta_course", "semester", "city")
                    .prefetch_related(lecturers)
                    .order_by('-city_id', '-semester__index'))
+        grouped = bucketize(courses, key=lambda c: c.city.code)
+        # Aggregate tabs
         tabs = TabList()
-        grouped = {}
-        for city, g in itertools.groupby(courses, key=lambda c: c.city):
-            grouped[city.code] = list(g)
-            if grouped[city.code]:
-                tabs.add(Tab(target=city.code, name=city.name))
+        for city_code in grouped:
+            if grouped[city_code]:
+                tabs.add(Tab(target=city_code, name=Branches.values[city_code]))
         if tabs:
-            selected_tab = self.request.GET.get('city', Branches.SPB)
+            selected_tab = self.request.GET.get('branch', Branches.SPB)
             tabs.set_active(selected_tab)  # deactivates all other tabs
             if selected_tab not in tabs:
                 first_tab = next(iter(tabs))
                 first_tab.active = True
         # For each branch collect academic disciplines where this
-        # course is mandatory
-        academic_disciplines = {}
+        # course is core. "Core" means course is optional among group
+        # of courses but 1 course in a group is mandatory.
         disciplines = (StudyProgram.objects
                        .filter(course_groups__courses=self.object.pk)
                        .annotate(name=F('academic_discipline__name_en'),
@@ -576,10 +593,9 @@ class MetaCourseDetailView(generic.DetailView):
                        .values('branch__code', 'name', 'code')
                        .distinct()
                        .order_by('branch__code'))
-        for city_code, g in itertools.groupby(disciplines,
-                                              key=lambda c: c['branch__code']):
-            academic_disciplines[city_code] = list(g)
+        academic_disciplines = bucketize(disciplines,
+                                         key=lambda c: c['branch__code'])
         context['tabs'] = tabs
-        context['academic_disciplines'] = academic_disciplines
         context['grouped_courses'] = grouped
+        context['academic_disciplines'] = academic_disciplines
         return context

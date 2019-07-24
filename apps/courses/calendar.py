@@ -14,7 +14,7 @@ from rest_framework import serializers, fields
 
 from core.settings.base import FOUNDATION_YEAR
 from courses.settings import MONDAY_WEEKDAY
-from courses.utils import grouper
+from courses.utils import chunks
 
 __all__ = ('EventsCalendar', 'CalendarEvent', 'MonthEventsCalendar',
            'WeekEventsCalendar', 'CalendarQueryParams')
@@ -121,7 +121,7 @@ class EventsCalendar:
         by_week = []
         cal = Calendar(firstweekday=MONDAY_WEEKDAY)
         dates = cal.itermonthdates(year, month)
-        for full_week in grouper(dates, 7):
+        for full_week in chunks(dates, 7):
             iso_week_number = full_week[0].isocalendar()[1]
             week_days = []
             for day in full_week:
