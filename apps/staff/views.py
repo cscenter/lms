@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import itertools
 from collections import OrderedDict, defaultdict
 from typing import NamedTuple
 
@@ -21,31 +20,31 @@ from rest_framework.pagination import LimitOffsetPagination
 from vanilla import TemplateView
 
 import courses.utils
-from api.permissions import CuratorAccessPermission
-from core.templatetags.core_tags import tex
-from core.urls import reverse
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
+from api.permissions import CuratorAccessPermission
+from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR
+from core.templatetags.core_tags import tex
+from core.urls import reverse
+from courses.models import Course, Semester
+from courses.settings import SemesterTypes
+from courses.utils import get_current_term_pair, get_term_index, \
+    get_term_by_index, bucketize
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment
-from staff.forms import GraduationForm
-from study_programs.models import StudyProgram, StudyProgramCourseGroup
-from courses.models import Course, Semester
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import AcademicDegreeYears, StudentStatuses, \
     GradeTypes
-from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR
-from courses.settings import SemesterTypes
-from courses.utils import get_current_term_pair, get_term_index, \
-    get_term_by_index
-from users.constants import Roles
-from users.mixins import CuratorOnlyMixin
+from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams
+from study_programs.models import StudyProgram, StudyProgramCourseGroup
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
+from users.constants import Roles
 from users.filters import UserFilter
+from users.mixins import CuratorOnlyMixin
 from users.models import User, UserStatusLog
 
 
@@ -647,17 +646,10 @@ class SyllabusView(CuratorOnlyMixin, generic.TemplateView):
                                       .prefetch_related("courses")),
                         ))
                     .order_by("city_id", "academic_discipline__name_ru"))
-        context["programs"] = self.group_programs_by_city(syllabus)
+        context["programs"] = bucketize(syllabus, lambda sp: sp.city_id)
         # TODO: validate entry city
         context["selected_city"] = self.request.GET.get('city', 'spb')
         return context
-
-    def group_programs_by_city(self, syllabus):
-        grouped = {}
-        for city_id, g in itertools.groupby(syllabus,
-                                            key=lambda sp: sp.city_id):
-            grouped[city_id] = list(g)
-        return grouped
 
 
 class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):

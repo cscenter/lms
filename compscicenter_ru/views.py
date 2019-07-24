@@ -546,9 +546,7 @@ class StudentProfileView(generic.DetailView):
         for c in projects:
             timeline_elements.append(timeline_element_factory(c))
         timeline_elements.sort(key=lambda o: (o.term.index, o.type.value))
-        timeline = {}
-        for k, g in itertools.groupby(timeline_elements, key=lambda o: o.term):
-            timeline[k] = list(g)
+        timeline = bucketize(timeline_elements, key=lambda o: o.term)
         context["timeline"] = timeline
         context["timeline_element_types"] = TimelineElementTypes
         return context
