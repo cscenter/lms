@@ -15,7 +15,7 @@ from multiselectfield.db.fields import MSFList
 from ..admin import get_admin_url
 from ..utils import render_markdown
 
-numeric_test = re.compile("^\d+$")
+numeric_test = re.compile(r"^\d+$")
 register = Library()
 
 
