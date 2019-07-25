@@ -1,9 +1,12 @@
 """
 CS club app specific settings
 """
+import sys
 import django
 
 from core.settings.base import *
+
+sys.path.append(str(ROOT_DIR / "compsciclub_ru" / "apps"))
 
 PROJECT_DIR = Path(__file__).parents[1]
 
