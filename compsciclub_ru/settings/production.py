@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 from .base import *
 
@@ -14,11 +15,10 @@ DEFAULT_URL_SCHEME = 'https'  # default scheme for `core.urls.reverse`
 MEDIA_ROOT = str(Path('/shared', 'media'))
 
 # Logging-related stuff
-RAVEN_CONFIG = {
-    # Note(lebedev): see https://app.getsentry.com/cscenter/cscenter/docs/django
-    # for instructions.
-    "dsn": "https://8e585e0a766b4a8786870813ed7a4be4:143a5566340f4955a257151f2199c3e5@app.getsentry.com/13763"
-}
+sentry_sdk.init(
+    dsn="https://f2a254aefeae4aeaa09657771205672f@sentry.io/13763",
+    integrations=[DjangoIntegration()]
+)
 
 CACHES = {
     'default': {
@@ -27,25 +27,15 @@ CACHES = {
     }
 }
 
-INSTALLED_APPS += ['raven.contrib.django.raven_compat',]
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
-    'root': {
-        'level': 'WARNING',
-        'handlers': ['sentry'],
-    },
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
         },
     },
     'handlers': {
-        'sentry': {
-            'level': 'WARNING',
-            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
-        },
         'console': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
@@ -68,14 +58,9 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': True,
         },
-        'raven': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'sentry.errors': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
+        "rq.worker": {
+            "level": "WARNING",
+            "handlers": ["console"],
             'propagate': False,
         },
     },
