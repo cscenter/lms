@@ -61,8 +61,11 @@ class StudyProgram(TimeStampedModel):
                                verbose_name=_("Branch"),
                                related_name="study_programs",
                                on_delete=models.CASCADE)
-    academic_discipline = models.ForeignKey(AcademicDiscipline, verbose_name=_("Area of Study"),
-                                            on_delete=models.CASCADE)
+    academic_discipline = models.ForeignKey(
+        AcademicDiscipline,
+        verbose_name=_("Area of Study"),
+        related_query_name="study_program",
+        on_delete=models.CASCADE)
     is_active = models.BooleanField(
         _("Activity"),
         help_text=_("Show on syllabus page. Other activity flags for selected "
