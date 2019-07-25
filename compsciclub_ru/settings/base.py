@@ -34,7 +34,7 @@ INSTALLED_APPS += [
     'treemenus',
     'menu_extension',
     'international_schools.apps.Config',
-    'compsciclub_ru.apps.ProjectConfig',  # should be the last one
+    'compsciclub_ru.project_conf.ProjectConfig',  # should be the last one
 ]
 
 CACHES = {
