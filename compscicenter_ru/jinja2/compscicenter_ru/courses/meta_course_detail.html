@@ -35,10 +35,10 @@
                                 <div class="tab-pane {% if tab.active %} show active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
                                 {% endwith %}
                                     <div class="message _info mb-6">
-                                        {% if city_code in academic_disciplines %}
-                                            {% with ds = academic_disciplines[city_code] -%}
-                                                <p>Базовый курс для направлени{% if ds|length > 1 %}й{% else %}я{% endif %} {% for discipline in ds -%}
-                                                    <a class="text-nowrap" href="{{ url('on_campus_program_detail', discipline_code=discipline.code) }}?branch={{ discipline.branch__code }}">{{ discipline.name }}</a>
+                                        {% if city_code in study_programs %}
+                                            {% with sps = study_programs[city_code] -%}
+                                                <p>Базовый курс для направлени{% if sps|length > 1 %}й{% else %}я{% endif %} {% for study_program in sps -%}
+                                                    <a class="text-nowrap" href="{{ url('on_campus_program_detail', discipline_code=study_program.academic_discipline.code) }}?branch={{ study_program.branch.code }}">{{ study_program.academic_discipline.name }}</a>
                                                 {%- if not loop.last %}, {% endif %}{% endfor %}.</p>
                                             {%- endwith %}
                                         {% else %}

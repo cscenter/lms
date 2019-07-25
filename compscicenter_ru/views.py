@@ -39,6 +39,7 @@ from online_courses.models import OnlineCourse, OnlineCourseTuple
 from publications.models import ProjectPublication
 from stats.views import StudentsDiplomasStats
 from study_programs.models import StudyProgram, AcademicDiscipline
+from study_programs.services import get_study_programs
 from users.models import User, SHADCourseRecord
 from .filters import CoursesFilter
 
@@ -291,12 +292,15 @@ class OnCampusProgramsView(generic.TemplateView):
         current_programs = bucketize(current_programs, key=lambda sp: sp.branch)
         tabs = TabList()
         selected_branch = self.request.GET.get('branch', Branches.SPB)
-        for branch in current_programs:
+        for i, branch in enumerate(current_programs):
             tab = Tab(target=branch.code, name=branch.name,
                       url=f"{self.request.path}?branch={branch.code}")
-            if branch.code == selected_branch:
+            # Mark first tab as active by default
+            if i == 0:
                 tab.active = True
             tabs.add(tab)
+            if branch.code == selected_branch:
+                tabs.set_active(branch.code)
         context["tabs"] = tabs
         context["programs"] = current_programs
         return context
@@ -581,19 +585,9 @@ class MetaCourseDetailView(generic.DetailView):
             if selected_tab not in tabs:
                 first_tab = next(iter(tabs))
                 first_tab.active = True
-        # For each branch collect academic disciplines where this
-        # course is core. "Core" means course is optional among group
-        # of courses but 1 course in a group is mandatory.
-        disciplines = (StudyProgram.objects
-                       .filter(course_groups__courses=self.object.pk)
-                       .annotate(name=F('academic_discipline__name_en'),
-                                 code=F('academic_discipline__code'))
-                       .values('branch__code', 'name', 'code')
-                       .distinct()
-                       .order_by('branch__code'))
-        academic_disciplines = bucketize(disciplines,
-                                         key=lambda c: c['branch__code'])
         context['tabs'] = tabs
         context['grouped_courses'] = grouped
-        context['academic_disciplines'] = academic_disciplines
+        active_study_programs = get_study_programs(self.object.pk,
+                                                   filters=[Q(is_active=True)])
+        context['study_programs'] = active_study_programs
         return context
