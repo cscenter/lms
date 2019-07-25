@@ -14,8 +14,6 @@ if __name__ == "__main__":
     # On production use --settings to override default behavior
     os.environ.setdefault("DJANGO_SETTINGS_MODULE",
                           "compscicenter_ru.settings.local")
-    if os.environ.get("DJANGO_SETTINGS_MODULE").startswith("compsciclub_ru"):
-        sys.path.append(str(ROOT_DIR / "compsciclub_ru" / "apps"))
 
     from django.core.management import execute_from_command_line
 
