@@ -5,6 +5,7 @@ module          = {{ site_dir_name }}.wsgi:application
 virtualenv      = {{ virtualenv_root }}
 pythonpath      = %(chdir)
 pythonpath      = {{ repo_root }}
+pythonpath      = {{ repo_root }}/{{ site_dir_name }}/{{ apps_dir_name }}
 env             = DJANGO_SETTINGS_MODULE={{ site_dir_name }}.settings.{{ app_environment }}
 env             = PYTHONIOENCODING=UTF-8
 env             = LC_ALL=en_US.UTF-8

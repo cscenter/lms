@@ -111,8 +111,6 @@
     version: "{{ item.version }}"
     executable: pip{{ python_version }}
   with_items:
-    - name: ipython
-      version: "5.5.0"
     - name: virtualenv
       version: "16.7.0"
     - name: uwsgi
