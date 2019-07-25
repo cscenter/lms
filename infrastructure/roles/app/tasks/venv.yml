@@ -28,7 +28,7 @@
     state: absent
   when: venv_dir.stat.exists and python_venv_version_installed.stdout != python_version_installed.stdout
 
-- name: Install pipenv inside virtual environment
+- name: Install pipenv inside virtual environment. If the virtualenv does not exist, it will be created before installing packages
   become: yes
   become_user: "{{ site_user }}"
   pip:
