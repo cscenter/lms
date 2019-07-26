@@ -185,12 +185,6 @@ class AssignmentCommentTests(CSCTestCase):
         self.assertRegex(ac.attached_file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")
 
 
-class EnrollmentTests(CSCTestCase):
-    def test_clean(self):
-        e = EnrollmentFactory.create(student=UserFactory.create())
-        self.assertRaises(ValidationError, e.clean)
-
-
 class AssignmentNotificationTests(CSCTestCase):
     def test_clean(self):
         an = AssignmentNotificationFactory.create(

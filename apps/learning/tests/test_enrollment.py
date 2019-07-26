@@ -11,11 +11,10 @@ from core.constants import DATE_FORMAT_RU
 from core.timezone import now_local
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory, \
-    CourseNewsFactory, \
     AssignmentFactory
-from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, CourseNewsNotification
+from learning.models import Enrollment, StudentAssignment
 from learning.services import EnrollmentService, CourseCapacityFull
+from learning.settings import StudentStatuses
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory
 
@@ -23,67 +22,6 @@ from users.tests.factories import StudentFactory
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
 # TODO: Test volunteer can enroll!
 # TODO: вызывает запись на полный курс, смотрим, что после поднятия исключения CapacityFull созданный объект Enrollment не живёт в БД, т.к. транзакция откатывается
-
-
-@pytest.mark.django_db
-def test_unenrollment(client, assert_redirect):
-    s = StudentFactory.create(city_id='spb')
-    assert s.city_id is not None
-    client.login(s)
-    current_semester = SemesterFactory.create_current()
-    co = CourseFactory.create(semester=current_semester, city='spb')
-    as_ = AssignmentFactory.create_batch(3, course=co)
-    form = {'course_pk': co.pk}
-    # Enrollment already closed
-    today = timezone.now()
-    current_semester.enrollment_end_at = (today - datetime.timedelta(days=1)).date()
-    current_semester.save()
-    response = client.post(co.get_enroll_url(), form)
-    assert response.status_code == 403
-    current_semester.enrollment_end_at = (today + datetime.timedelta(days=1)).date()
-    current_semester.save()
-    response = client.post(co.get_enroll_url(), form, follow=True)
-    assert response.status_code == 200
-    assert Enrollment.objects.count() == 1
-    response = client.get(co.get_absolute_url())
-    assert smart_bytes("Unenroll") in response.content
-    assert smart_bytes(co) in response.content
-    assert Enrollment.objects.count() == 1
-    enrollment = Enrollment.objects.first()
-    assert not enrollment.is_deleted
-    client.post(co.get_unenroll_url(), form)
-    assert Enrollment.active.filter(student=s, course=co).count() == 0
-    assert Enrollment.objects.count() == 1
-    enrollment = Enrollment.objects.first()
-    enrollment_id = enrollment.pk
-    assert enrollment.is_deleted
-    # Make sure student progress won't been deleted
-    a_ss = (StudentAssignment.objects.filter(student=s,
-                                             assignment__course=co))
-    assert len(a_ss) == 3
-    # On re-enroll use old record
-    client.post(co.get_enroll_url(), form)
-    assert Enrollment.objects.count() == 1
-    enrollment = Enrollment.objects.first()
-    assert enrollment.pk == enrollment_id
-    assert not enrollment.is_deleted
-    # Check ongoing courses on student courses page are not empty
-    response = client.get(reverse("study:course_list"))
-    assert len(response.context['ongoing_rest']) == 0
-    assert len(response.context['ongoing_enrolled']) == 1
-    assert len(response.context['archive_enrolled']) == 0
-    # Check `back` url on unenroll action
-    url = co.get_unenroll_url() + "?back=study:course_list"
-    assert_redirect(client.post(url, form),
-                    reverse('study:course_list'))
-    assert set(a_ss) == set(StudentAssignment.objects
-                                  .filter(student=s,
-                                          assignment__course=co))
-    # Check courses on student courses page are empty
-    response = client.get(reverse("study:course_list"))
-    assert len(response.context['ongoing_rest']) == 1
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['archive_enrolled']) == 0
 
 
 @pytest.mark.django_db
@@ -100,7 +38,7 @@ def test_enrollment_capacity():
     # 1 active enrollment
     assert Enrollment.objects.count() == 1
     with pytest.raises(CourseCapacityFull):
-        EnrollmentService.enroll(student, course, reason='')
+        EnrollmentService.enroll(student, course, reason_entry='')
     # Make sure enrollment record created by enrollment service
     # was rollbacked by transaction context manager
     assert Enrollment.objects.count() == 1
@@ -116,7 +54,6 @@ def test_enrollment_capacity_view(client):
                                   is_open=True)
     response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Places available")) not in response.content
-    assert smart_bytes(_("No places available")) not in response.content
     course.capacity = 1
     course.save()
     response = client.get(course.get_absolute_url())
@@ -131,7 +68,7 @@ def test_enrollment_capacity_view(client):
     s2 = StudentFactory(city_id='spb')
     client.login(s2)
     response = client.get(course.get_absolute_url())
-    assert smart_bytes(_("No places available")) in response.content
+    assert smart_bytes(_("Enroll in")) not in response.content
     # POST request should be rejected
     response = client.post(course.get_enroll_url(), form)
     assert response.status_code == 302
@@ -149,6 +86,22 @@ def test_enrollment_capacity_view(client):
     assert course.learners_count == 0
     response = client.get(course.get_absolute_url())
     assert (smart_bytes(_("Places available")) + b": 2") in response.content
+
+
+@pytest.mark.django_db
+def test_enrollment_expelled_student(client):
+    s = StudentFactory(city_id='spb')
+    client.login(s)
+    current_semester = SemesterFactory.create_current()
+    course = CourseFactory.create(city_id='spb',
+                                  semester=current_semester,
+                                  is_open=False)
+    response = client.get(course.get_absolute_url())
+    assert smart_bytes(_("Enroll in")) in response.content
+    s.status = StudentStatuses.EXPELLED
+    s.save()
+    response = client.get(course.get_absolute_url())
+    assert smart_bytes(_("Enroll in")) not in response.content
 
 
 @pytest.mark.django_db
@@ -244,34 +197,64 @@ def test_enrollment_leave_reason(client):
 
 
 @pytest.mark.django_db
-def test_assignments(client):
-    """Create assignments for active enrollments only"""
-    ss = StudentFactory.create_batch(3)
+def test_unenrollment(client, assert_redirect):
+    s = StudentFactory.create(city_id='spb')
+    assert s.city_id is not None
+    client.login(s)
     current_semester = SemesterFactory.create_current()
-    co = CourseFactory.create(semester=current_semester)
-    for student in ss:
-        enrollment = EnrollmentFactory.create(student=student, course=co)
-    assert Enrollment.objects.count() == 3
-    assert StudentAssignment.objects.count() == 0
-    assignment = AssignmentFactory.create(course=co)
-    assert StudentAssignment.objects.count() == 3
-    enrollment.is_deleted = True
-    enrollment.save()
-    assignment = AssignmentFactory.create(course=co)
-    assert StudentAssignment.objects.count() == 5
-    assert StudentAssignment.objects.filter(student=enrollment.student,
-                                            assignment=assignment).count() == 0
-    # Check deadline notifications sent for active enrollments only
-    AssignmentNotification.objects.all().delete()
-    assignment.deadline_at = assignment.deadline_at - datetime.timedelta(days=1)
-    assignment.save()
-    active_students = Enrollment.active.count()
-    assert active_students == 2
-    assert AssignmentNotification.objects.count() == active_students
-    CourseNewsNotification.objects.all().delete()
-    assert CourseNewsNotification.objects.count() == 0
-    CourseNewsFactory.create(course=co)
-    assert CourseNewsNotification.objects.count() == active_students
+    co = CourseFactory.create(semester=current_semester, city='spb')
+    as_ = AssignmentFactory.create_batch(3, course=co)
+    form = {'course_pk': co.pk}
+    # Enrollment already closed
+    today = timezone.now()
+    current_semester.enrollment_end_at = (today - datetime.timedelta(days=1)).date()
+    current_semester.save()
+    response = client.post(co.get_enroll_url(), form)
+    assert response.status_code == 403
+    current_semester.enrollment_end_at = (today + datetime.timedelta(days=1)).date()
+    current_semester.save()
+    response = client.post(co.get_enroll_url(), form, follow=True)
+    assert response.status_code == 200
+    assert Enrollment.objects.count() == 1
+    response = client.get(co.get_absolute_url())
+    assert smart_bytes("Unenroll") in response.content
+    assert smart_bytes(co) in response.content
+    assert Enrollment.objects.count() == 1
+    enrollment = Enrollment.objects.first()
+    assert not enrollment.is_deleted
+    client.post(co.get_unenroll_url(), form)
+    assert Enrollment.active.filter(student=s, course=co).count() == 0
+    assert Enrollment.objects.count() == 1
+    enrollment = Enrollment.objects.first()
+    enrollment_id = enrollment.pk
+    assert enrollment.is_deleted
+    # Make sure student progress won't been deleted
+    a_ss = (StudentAssignment.objects.filter(student=s,
+                                             assignment__course=co))
+    assert len(a_ss) == 3
+    # On re-enroll use old record
+    client.post(co.get_enroll_url(), form)
+    assert Enrollment.objects.count() == 1
+    enrollment = Enrollment.objects.first()
+    assert enrollment.pk == enrollment_id
+    assert not enrollment.is_deleted
+    # Check ongoing courses on student courses page are not empty
+    response = client.get(reverse("study:course_list"))
+    assert len(response.context['ongoing_rest']) == 0
+    assert len(response.context['ongoing_enrolled']) == 1
+    assert len(response.context['archive_enrolled']) == 0
+    # Check `back` url on unenroll action
+    url = co.get_unenroll_url() + "?back=study:course_list"
+    assert_redirect(client.post(url, form),
+                    reverse('study:course_list'))
+    assert set(a_ss) == set(StudentAssignment.objects
+                                  .filter(student=s,
+                                          assignment__course=co))
+    # Check courses on student courses page are empty
+    response = client.get(reverse("study:course_list"))
+    assert len(response.context['ongoing_rest']) == 1
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['archive_enrolled']) == 0
 
 
 @pytest.mark.django_db
@@ -388,7 +371,7 @@ def test_enrollment_is_enrollment_open(client):
     assert co_spb.enrollment_is_open
     response = client.get(co_spb.get_absolute_url())
     assert smart_bytes("Enroll in") in response.content
-    # What if enrollment not stated yet
+    # What if enrollment not started yet
     term.enrollment_start_at = tomorrow.date()
     term.enrollment_end_at = tomorrow.date()
     term.save()

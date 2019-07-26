@@ -15,7 +15,7 @@ urlpatterns = [
         # [a-fA-F0-9]{40} because a bad activation key should still get
         # to the view; that way it can return a sensible "invalid key"
         # message instead of a confusing 404.
-        re_path(r'^(?P<token>\w+)/activate/(?P<activation_key>\w+)/$', v.InvitationActivationView.as_view(), name='activate'),
+        re_path(r'^(?P<token>[_\w-]+)/activate/(?P<activation_key>\w+)/$', v.InvitationActivationView.as_view(), name='activate'),
         path('activate/complete/', v.InvitationActivationCompleteView.as_view(), name='activation_complete'),
     ])),
 ]

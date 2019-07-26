@@ -5,6 +5,7 @@ import rules
 from auth.permissions import add_perm
 from core.utils import is_club_site
 from courses.models import Course
+from learning.models import EnrollmentInvitation
 from learning.utils import course_failed_by_student
 from learning.settings import StudentStatuses
 from users.constants import Roles as UserRoles
@@ -109,18 +110,25 @@ def course_access_role(*, course, user) -> CourseRole:
 
 
 @rules.predicate
-def can_view_course_news(user, course: Course):
+def view_course_news(user, course: Course):
     role = course_access_role(course=course, user=user)
     return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
 
 
 @rules.predicate
-def can_view_course_reviews(user, course: Course):
+def view_course_reviews(user, course: Course):
     return course.enrollment_is_open
 
 
+# FIXME: у студентов клуба не установлен город. чё делать?
+# FIXME: ваще надо на бранчу сравнивать для центра и по городу для клуба
+# FIXME: как добавить тест для клуба?
 @rules.predicate
-def can_enroll_in_course(user, course: Course):
+def enroll_in_course(user, course: Course):
+    # FIXME: не релевантно для клуба
+    if user.status == StudentStatuses.EXPELLED:
+        # Permissions of expelled students are restricted
+        return False
     if not course.enrollment_is_open:
         return False
     # If the student can't take this course remotely, check that the city
@@ -133,7 +141,28 @@ def can_enroll_in_course(user, course: Course):
     return True
 
 
-add_perm("learning.can_view_course_news", can_view_course_news)
+@rules.predicate
+def leave_course(user, course: Course):
+    # Student could unenroll before enrollment deadline
+    if not course.enrollment_is_open:
+        return False
+    enrollment = user.get_enrollment(course)
+    if not enrollment:
+        return False
+    return True
+
+
+@rules.predicate
+def enroll_in_course_by_invitation(user, enrollment_invitation):
+    if not enrollment_invitation.is_active:
+        return False
+    return enroll_in_course(user, enrollment_invitation.course)
+
+
+add_perm("learning.view_course_news", view_course_news)
 # TODO: Where should live permission below?
-add_perm("learning.can_view_course_reviews", can_view_course_reviews)
-add_perm("learning.can_enroll_in_course", can_enroll_in_course)
+add_perm("learning.view_course_reviews", view_course_reviews)
+add_perm("learning.enroll_in")  # Could enroll at least by one option below
+add_perm("learning.enroll_in_course", enroll_in_course)
+add_perm("learning.enroll_in_course_by_invitation", enroll_in_course_by_invitation)
+add_perm("learning.leave_course", leave_course)

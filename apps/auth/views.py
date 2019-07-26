@@ -27,7 +27,6 @@ class LoginView(generic.FormView):
         return super(LoginView, self).dispatch(*args, **kwargs)
 
     def form_valid(self, form):
-        # credentials were checked in AuthenticationForm.is_valid()
         auth.login(self.request, form.get_user())
         return HttpResponseRedirect(self.get_success_url())
 

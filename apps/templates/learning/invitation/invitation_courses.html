@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load static %}
+{% load call_method from core_tags %}
 
 {% block title %}Приглашение пройти курсы{% endblock title %}
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
@@ -18,16 +19,17 @@
                         <th class="actions" width="150"></th>
                     </thead>
                     <tbody>
-                    {% for invitation in invitations %}
-                        {% with course=invitation.course %}
+                    {% for course_invitation in invitations %}
+                        {% with course=course_invitation.course %}
                             <tr>
                                 <td style="vertical-align: middle">
                                     <a href="{{ course.get_absolute_url }}"
                                        class="title">{{ course.meta_course.name }}</a>
                                 </td>
                                 <td align="right">
-                                    {% if invitation.is_active %}
-                                        <a class="btn btn-primary" href="{{ invitation.get_absolute_url }}">Записаться</a>
+                                    {% call_method request.user "has_perm" "learning.enroll_in_course_by_invitation" course_invitation as has_perm %}
+                                    {% if has_perm %}
+                                        <form method="post" action="{{ course_invitation.get_absolute_url }}">{% csrf_token %}<button class="btn btn-primary" type="submit">Записаться</button></form>
                                     {% endif %}
                                 </td>
                             </tr>

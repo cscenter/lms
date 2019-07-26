@@ -72,6 +72,12 @@ class InvitationLoginView(InvitationParamMixin, LoginView):
         context["register_url"] = register_url
         return context
 
+    def form_valid(self, form):
+        # TODO: добавить группу Invited (если нет других? А как это определить)
+        # TODO: накинуть отделение из приглашения, если не установлен city_id
+        # TODO: всё-таки логировать входы из этой формы и при регистрации по определенному инвайту?
+        return super().form_valid(form)
+
     def get_success_url(self):
         return self.invitation.get_absolute_url()
 
@@ -119,7 +125,6 @@ class InvitationActivationCompleteView(TemplateView):
     template_name = 'learning/invitation/activation_complete.html'
 
 
-# FIXME: запретить активацию, если приглашение протухло
 class InvitationActivationView(InvitationParamMixin, ActivationView):
     template_name = 'learning/invitation/activation_fail.html'
 
@@ -134,21 +139,20 @@ class CourseInvitationEnrollView(CourseURLParamsMixin, GenericView):
         user = request.user
         qs = (EnrollmentInvitation.objects
               .select_related('invitation')
-              .filter(token=kwargs['course_token']))
+              .filter(token=kwargs['course_token'], course=self.course))
         course_invitation = get_object_or_404(qs)
         invitation = course_invitation.invitation
-        if course_invitation.course_id != self.course.pk:
-            raise Http404
-        if not course_invitation.is_active:
-            raise Http404
-        if not user.has_perm("learning.can_enroll_in_course", self.course):
+        if not user.has_perm("learning.enroll_in_course_by_invitation",
+                             course_invitation):
             if self.course.is_capacity_limited and not self.course.places_left:
                 msg = _("No places available, sorry")
                 messages.error(request, msg, extra_tags='timeout')
                 raise Redirect(to=invitation.get_absolute_url())
             return HttpResponseForbidden()
         try:
-            EnrollmentService.enroll(user, self.course, reason='')
+            EnrollmentService.enroll(user, self.course, reason_entry='')
+            msg = _("You are successfully enrolled in the course")
+            messages.success(self.request, msg, extra_tags='timeout')
             redirect_to = self.course.get_absolute_url()
         except AlreadyEnrolled:
             msg = _("You are already enrolled in the course")
@@ -159,6 +163,3 @@ class CourseInvitationEnrollView(CourseURLParamsMixin, GenericView):
             messages.error(request, msg, extra_tags='timeout')
             redirect_to = invitation.get_absolute_url()
         raise Redirect(to=redirect_to)
-
-
-        # TODO: приглашение не протухло, мы ещё тут. значит надо прочекать все права. Если ок - записываем на курс. Если не ок - редирект назад с ошибкой

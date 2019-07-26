@@ -9,6 +9,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import FormView
 
+from auth.mixins import PermissionRequiredMixin
 from core.constants import DATE_FORMAT_RU
 from core.exceptions import Redirect
 from core.urls import reverse
@@ -29,9 +30,7 @@ class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
                 .select_related("semester", "meta_course"))
 
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.has_perm("learning.can_enroll_in_course",
-                                     self.course):
-            # Student was unlucky enough or just slow, let them know
+        if not request.user.has_perm("learning.enroll_in_course", self.course):
             if self.course.is_capacity_limited and not self.course.places_left:
                 msg = _("No places available, sorry")
                 messages.error(self.request, msg, extra_tags='timeout')
@@ -40,9 +39,12 @@ class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        reason = form.cleaned_data["reason"].strip()
+        reason_entry = form.cleaned_data["reason"].strip()
         try:
-            EnrollmentService.enroll(self.request.user, self.course, reason)
+            EnrollmentService.enroll(self.request.user, self.course,
+                                     reason_entry=reason_entry)
+            msg = _("You are successfully enrolled in the course")
+            messages.success(self.request, msg, extra_tags='timeout')
         except AlreadyEnrolled:
             msg = _("You are already enrolled in the course")
             messages.warning(self.request, msg, extra_tags='timeout')
@@ -62,10 +64,14 @@ class CourseEnrollView(StudentOnlyMixin, CourseURLParamsMixin, FormView):
         return context
 
 
-class CourseUnenrollView(StudentOnlyMixin, CourseURLParamsMixin,
+class CourseUnenrollView(PermissionRequiredMixin, CourseURLParamsMixin,
                          generic.DeleteView):
     template_name = "learning/enrollment/enrollment_leave.html"
     context_object_name = "enrollment"
+    permission_required = 'learning.leave_course'
+
+    def get_permission_object(self):
+        return self.course
 
     def delete(self, request, *args, **kwargs):
         enrollment = self.get_object()
@@ -90,11 +96,8 @@ class CourseUnenrollView(StudentOnlyMixin, CourseURLParamsMixin,
         return HttpResponseRedirect(success_url)
 
     def get_object(self, queryset=None):
-        course = get_object_or_404(self.get_course_queryset())
         enrollment = get_object_or_404(
             Enrollment.active
-            .filter(student=self.request.user, course_id=course.pk)
+            .filter(student=self.request.user, course_id=self.course.pk)
             .select_related("course", "course__semester"))
-        if not course.enrollment_is_open:
-            raise PermissionDenied
         return enrollment

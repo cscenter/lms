@@ -58,7 +58,8 @@ class EnrollmentFactory(factory.DjangoModelFactory):
         model = Enrollment
 
     student = factory.SubFactory(StudentFactory)
-    course = factory.SubFactory(CourseFactory)
+    course = factory.SubFactory(CourseFactory,
+                                city_id=factory.SelfAttribute('..student.city_id'))
 
 
 class AssignmentNotificationFactory(factory.DjangoModelFactory):
