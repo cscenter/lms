@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseRedirect, Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from registration.backends.default.views import RegistrationView, ActivationView
 from vanilla import TemplateView, GenericView
@@ -97,6 +98,7 @@ class InvitationRegisterView(InvitationParamMixin, RegistrationView):
     def register(self, form):
         new_user = super().register(form)
         new_user.add_group(Roles.INVITED)
+        new_user.enrollment_year = timezone.now().year
         site = get_current_site(self.request)
         activation_url = reverse("invitation:activate", kwargs={
             "token": self.invitation.token,

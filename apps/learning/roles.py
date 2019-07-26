@@ -11,7 +11,7 @@ class Roles(DjangoChoices):
         "courses.can_view_assignments",
         "learning.view_course_news",
         "learning.view_course_reviews",
-        "learning.enroll_in",
+        "learning.view_own_enrollments",
         "learning.enroll_in_course",
         "learning.enroll_in_course_by_invitation",
         "learning.leave_course",
@@ -21,13 +21,15 @@ class Roles(DjangoChoices):
         "courses.can_view_assignments",
         "learning.view_course_news",
     ))
-    GRADUATE = C(3, _('Graduate'))
+    GRADUATE = C(3, _('Graduate'), permissions=(
+        "learning.view_own_enrollments",
+    ))
     VOLUNTEER = C(4, _('Volunteer'), permissions=(
         "courses.can_view_contacts",
         "courses.can_view_assignments",
         "learning.view_course_news",
         "learning.view_course_reviews",
-        "learning.enroll_in",
+        "learning.view_own_enrollments",
         "learning.enroll_in_course",
         "learning.enroll_in_course_by_invitation",
         "learning.leave_course",
@@ -44,7 +46,7 @@ class Roles(DjangoChoices):
         "courses.can_view_assignments",
         "learning.view_course_news",
         "learning.view_course_reviews",
-        "learning.enroll_in",
+        "learning.view_own_enrollments",
         "learning.enroll_in_course_by_invitation",
         "learning.leave_course",
     ))
@@ -54,6 +56,8 @@ role_registry.register(Roles.STUDENT,
                        Roles.get_choice(Roles.STUDENT).permissions)
 role_registry.register(Roles.TEACHER,
                        Roles.get_choice(Roles.TEACHER).permissions)
+role_registry.register(Roles.GRADUATE,
+                       Roles.get_choice(Roles.GRADUATE).permissions)
 role_registry.register(Roles.VOLUNTEER,
                        Roles.get_choice(Roles.VOLUNTEER).permissions)
 role_registry.register(Roles.CURATOR,
