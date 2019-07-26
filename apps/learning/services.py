@@ -70,5 +70,19 @@ class EnrollmentService:
             else:
                 if not created:
                     populate_assignments_for_student(enrollment)
-                # FIXME: это число могло измениться, если кто-то отписался от курса. Нужно отписку тоже поместить в транзакции
                 update_course_learners_count(course.pk)
+
+    @staticmethod
+    def leave(enrollment: Enrollment, reason_leave=''):
+        update_fields = ['is_deleted']
+        enrollment.is_deleted = True
+        if reason_leave:
+            timezone = enrollment.course.get_city_timezone()
+            today = now_local(timezone).strftime(DATE_FORMAT_RU)
+            enrollment.reason_leave = Concat(
+                Value(f'{today}\n{reason_leave}\n\n'),
+                F('reason_leave'),
+                output_field=TextField())
+            update_fields.append('reason_leave')
+        with transaction.atomic():
+            enrollment.save(update_fields=update_fields)

@@ -75,25 +75,13 @@ class CourseUnenrollView(PermissionRequiredMixin, CourseURLParamsMixin,
 
     def delete(self, request, *args, **kwargs):
         enrollment = self.get_object()
-        update_fields = {"is_deleted": True}
         reason_leave = request.POST.get("reason", "").strip()
-        if reason_leave:
-            today = now().strftime(DATE_FORMAT_RU)
-            if enrollment.reason_leave:
-                update_fields["reason_leave"] = Concat(
-                    F('reason_leave'),
-                    Value(f'\n------\n{today}\n{reason_leave}'),
-                    output_field=TextField())
-            else:
-                update_fields["reason_leave"] = f'{today}\n{reason_leave}'
-        for field_name, field_value in update_fields.items():
-            setattr(enrollment, field_name, field_value)
-        enrollment.save(update_fields=update_fields.keys())
+        EnrollmentService.leave(enrollment, reason_leave=reason_leave)
         if self.request.GET.get('back') == 'study:course_list':
-            success_url = reverse('study:course_list')
+            redirect_to = reverse('study:course_list')
         else:
-            success_url = enrollment.course.get_absolute_url()
-        return HttpResponseRedirect(success_url)
+            redirect_to = enrollment.course.get_absolute_url()
+        return HttpResponseRedirect(redirect_to)
 
     def get_object(self, queryset=None):
         enrollment = get_object_or_404(
