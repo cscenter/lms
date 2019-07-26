@@ -1,10 +1,13 @@
+import datetime
+
 import pytest
 
+from core.timezone import now_local
 from courses.models import Course
 from courses.tests.factories import CourseFactory, SemesterFactory
 from learning.permissions import course_access_role, CourseRole, \
     has_master_degree
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory
 from users.constants import Roles
 from users.models import ExtendedAnonymousUser, User
@@ -196,3 +199,64 @@ def test_course_access_role_student():
     assert role == CourseRole.STUDENT_RESTRICT
     role = course_access_role(course=course, user=student)
     assert role == CourseRole.STUDENT_RESTRICT
+
+
+@pytest.mark.django_db
+def test_enroll_in_course():
+    today = now_local(Branches.SPB)
+    yesterday = today - datetime.timedelta(days=1)
+    tomorrow = today + datetime.timedelta(days=1)
+    term = SemesterFactory.create_current(city_code=Branches.SPB,
+                                          enrollment_end_at=today.date())
+    course = CourseFactory(city=Branches.SPB, semester=term, is_open=False,
+                           completed_at=tomorrow.date(),
+                           is_correspondence=False,
+                           capacity=0)
+    assert course.enrollment_is_open
+    student = StudentFactory(city_id='spb')
+    assert student.status != StudentStatuses.EXPELLED
+    assert student.has_perm("learning.enroll_in_course", course)
+    # Enrollment is closed
+    course.semester.enrollment_end_at = yesterday.date()
+    assert not student.has_perm("learning.enroll_in_course", course)
+    course.semester.enrollment_end_at = today.date()
+    assert student.has_perm("learning.enroll_in_course", course)
+    # Student was expelled
+    student.status = StudentStatuses.EXPELLED
+    assert not student.has_perm("learning.enroll_in_course", course)
+    student.status = ''
+    assert student.has_perm("learning.enroll_in_course", course)
+    # Full course capacity
+    course.capacity = 1
+    course.learners_count = 1
+    assert not student.has_perm("learning.enroll_in_course", course)
+    course.learners_count = 0
+    assert student.has_perm("learning.enroll_in_course", course)
+    # Compare student and course cities
+    course.city_id = Branches.NSK
+    assert not student.has_perm("learning.enroll_in_course", course)
+    course.is_correspondence = True
+    assert student.has_perm("learning.enroll_in_course", course)
+
+
+@pytest.mark.django_db
+def test_leave_course():
+    today = now_local(Branches.SPB)
+    yesterday = today - datetime.timedelta(days=1)
+    future = today + datetime.timedelta(days=3)
+    term = SemesterFactory.create_current(enrollment_end_at=future.date())
+    enrollment = EnrollmentFactory(course__semester=term, course__is_open=False)
+    course = enrollment.course
+    student = enrollment.student
+    assert course.enrollment_is_open
+    assert student.has_perm("learning.leave_course", course)
+    course.semester.enrollment_end_at = yesterday.date()
+    assert not student.has_perm("learning.leave_course", course)
+    course.semester.enrollment_end_at = future.date()
+    assert student.has_perm("learning.leave_course", course)
+    # Student couldn't leave abandoned course
+    enrollment.is_deleted = True
+    enrollment.save()
+    student = User.objects.get(pk=student.pk)  # avoid cache
+    assert not student.has_perm("learning.leave_course", course)
+

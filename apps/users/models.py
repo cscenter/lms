@@ -638,17 +638,18 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         won't be refreshed if enrollment was deleted or changed after call.
         """
         from learning.models import Enrollment
-        if self.is_student or self.is_volunteer or self.is_graduate:
-            cache_key = self.ENROLLMENT_CACHE_KEY.format(course_id)
-            if not hasattr(self, cache_key):
-                e = (Enrollment.active
-                     .filter(student=self,
-                             course_id=course_id)
-                     .order_by()
-                     .first())
-                setattr(self, cache_key, e)
-            return getattr(self, cache_key)
-        return None
+        # Graduates had the ability to enroll in the past
+        if not self.has_perm("learning.enroll_in") and not self.is_graduate:
+            return None
+        cache_key = self.ENROLLMENT_CACHE_KEY.format(course_id)
+        if not hasattr(self, cache_key):
+            e = (Enrollment.active
+                 .filter(student=self,
+                         course_id=course_id)
+                 .order_by()
+                 .first())
+            setattr(self, cache_key, e)
+        return getattr(self, cache_key)
 
     # TODO: move to Project manager?
     def get_projects_queryset(self):

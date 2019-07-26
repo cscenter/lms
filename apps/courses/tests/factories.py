@@ -74,6 +74,7 @@ class CourseFactory(factory.DjangoModelFactory):
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
 
+    # FIXME: fix Course.get_city_timezone(), then replace with subfactory
     @factory.post_generation
     def city(self, create, extracted, **kwargs):
         """ Allow to pass City instance or PK """

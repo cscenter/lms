@@ -9,35 +9,44 @@ class Roles(DjangoChoices):
     STUDENT = C(1, _('Student'), permissions=(
         "courses.can_view_contacts",
         "courses.can_view_assignments",
-        "learning.can_view_course_news",
-        "learning.can_view_course_reviews",
-        "learning.can_enroll_in_course",
+        "learning.view_course_news",
+        "learning.view_course_reviews",
+        "learning.enroll_in",
+        "learning.enroll_in_course",
+        "learning.enroll_in_course_by_invitation",
+        "learning.leave_course",
     ))
     TEACHER = C(2, _('Teacher'), permissions=(
         "courses.can_view_contacts",
         "courses.can_view_assignments",
-        "learning.can_view_course_news",
+        "learning.view_course_news",
     ))
     GRADUATE = C(3, _('Graduate'))
     VOLUNTEER = C(4, _('Volunteer'), permissions=(
         "courses.can_view_contacts",
         "courses.can_view_assignments",
-        "learning.can_view_course_news",
-        "learning.can_view_course_reviews",
-        "learning.can_enroll_in_course",
+        "learning.view_course_news",
+        "learning.view_course_reviews",
+        "learning.enroll_in",
+        "learning.enroll_in_course",
+        "learning.enroll_in_course_by_invitation",
+        "learning.leave_course",
     ))
     CURATOR = C(5, _('Curator'), permissions=(
         "courses.change_metacourse",
         "courses.can_view_contacts",
         "courses.can_view_assignments",
-        "learning.can_view_course_news",
-        "learning.can_view_course_reviews"
+        "learning.view_course_news",
+        "learning.view_course_reviews",
     ))
     INVITED = C(11, _('Invited User'), permissions=(
         "courses.can_view_contacts",
         "courses.can_view_assignments",
-        "learning.can_view_course_news",
-        "learning.can_view_course_reviews"
+        "learning.view_course_news",
+        "learning.view_course_reviews",
+        "learning.enroll_in",
+        "learning.enroll_in_course_by_invitation",
+        "learning.leave_course",
     ))
 
 

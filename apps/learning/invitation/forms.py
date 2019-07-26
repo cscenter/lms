@@ -24,10 +24,12 @@ class InvitationRegistrationForm(RegistrationFormUniqueEmail):
 
     class Meta:
         model = User
-        fields = ("email", "last_name", "first_name", "patronymic")
+        fields = ("email", "last_name", "first_name", "patronymic", "gender")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['last_name'].required = True
+        self.fields['first_name'].required = True
         self.helper = FormHelper(self)
         self.helper.layout.append(
             FormActions(Submit('submit', _('Submit')))

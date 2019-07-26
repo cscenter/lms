@@ -35,7 +35,7 @@ class CourseNewsTab(CourseTab):
 
     @classmethod
     def is_enabled(cls, course, user):
-        return user.has_perm("learning.can_view_course_news", course)
+        return user.has_perm("learning.view_course_news", course)
 
     def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
         return CourseTabPanel(context={"items": get_course_news(**kwargs)})
@@ -50,7 +50,7 @@ class CourseReviewsTab(CourseTab):
 
     @classmethod
     def is_enabled(cls, course, user):
-        return user.has_perm("learning.can_view_course_reviews", course)
+        return user.has_perm("learning.view_course_reviews", course)
 
     def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
         return CourseTabPanel(context={"items": get_course_reviews(**kwargs)})

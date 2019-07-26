@@ -15,10 +15,11 @@ from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment, AssignmentAttachment
 from courses.tests.factories import SemesterFactory, CourseFactory, \
-    CourseTeacherFactory, AssignmentFactory
+    CourseTeacherFactory, AssignmentFactory, CourseNewsFactory
 from courses.utils import get_current_term_pair
 from learning.utils import course_failed_by_student
-from learning.models import StudentAssignment
+from learning.models import StudentAssignment, Enrollment, \
+    AssignmentNotification, CourseNewsNotification
 from learning.settings import StudentStatuses, GradeTypes
 from learning.tests.factories import EnrollmentFactory, \
     AssignmentCommentFactory, \
@@ -689,3 +690,34 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     client.login(project_reviewer)
     response = client.get(task_attachment_url)
     assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_create_assignment(client):
+    """Create assignments for active enrollments only"""
+    ss = StudentFactory.create_batch(3)
+    current_semester = SemesterFactory.create_current()
+    co = CourseFactory.create(semester=current_semester)
+    for student in ss:
+        enrollment = EnrollmentFactory.create(student=student, course=co)
+    assert Enrollment.objects.count() == 3
+    assert StudentAssignment.objects.count() == 0
+    assignment = AssignmentFactory.create(course=co)
+    assert StudentAssignment.objects.count() == 3
+    enrollment.is_deleted = True
+    enrollment.save()
+    assignment = AssignmentFactory.create(course=co)
+    assert StudentAssignment.objects.count() == 5
+    assert StudentAssignment.objects.filter(student=enrollment.student,
+                                            assignment=assignment).count() == 0
+    # Check deadline notifications sent for active enrollments only
+    AssignmentNotification.objects.all().delete()
+    assignment.deadline_at = assignment.deadline_at - datetime.timedelta(days=1)
+    assignment.save()
+    enrolled_students = Enrollment.active.count()
+    assert enrolled_students == 2
+    assert AssignmentNotification.objects.count() == enrolled_students
+    CourseNewsNotification.objects.all().delete()
+    assert CourseNewsNotification.objects.count() == 0
+    CourseNewsFactory.create(course=co)
+    assert CourseNewsNotification.objects.count() == enrolled_students

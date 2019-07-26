@@ -6,6 +6,7 @@ from core.constants import DATE_FORMAT_RU
 from core.db.expressions import SubqueryCount
 from core.timezone import now_local
 from courses.models import Course
+from django.utils.translation import ugettext_lazy as _
 from learning.models import Enrollment
 from learning.utils import populate_assignments_for_student, \
     update_course_learners_count
@@ -26,13 +27,14 @@ class CourseCapacityFull(EnrollmentError):
 
 class EnrollmentService:
     @staticmethod
-    def enroll(user: User, course: Course, reason: str):
-        if reason:
+    def enroll(user: User, course: Course, **attrs):
+        reason_entry = attrs.pop("reason_entry", None)
+        if reason_entry:
             timezone = course.get_city_timezone()
             today = now_local(timezone).strftime(DATE_FORMAT_RU)
-            reason = Concat(Value(f'{today}\n{reason}\n\n'),
-                            F('reason_entry'),
-                            output_field=TextField())
+            reason_entry = Concat(Value(f'{today}\n{reason_entry}\n\n'),
+                                  F('reason_entry'),
+                                  output_field=TextField())
         with transaction.atomic():
             enrollment, created = (Enrollment.objects.get_or_create(
                 student=user, course=course,
@@ -53,7 +55,9 @@ class EnrollmentService:
                 filters.append(Q(course__capacity__gt=learners_count))
             updated = (Enrollment.objects
                        .filter(*filters)
-                       .update(is_deleted=False, reason_entry=reason))
+                       .update(**attrs,
+                               is_deleted=False,
+                               reason_entry=reason_entry))
             if not updated:
                 # At this point we don't know the exact reason why row wasn't
                 # updated. It could happen if the enrollment state was

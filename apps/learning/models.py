@@ -160,11 +160,6 @@ class EnrollmentInvitation(models.Model):
         verbose_name=_("Course offering"),
         on_delete=models.CASCADE)
     token = models.CharField(verbose_name=_("Token"), max_length=128)
-    expire_at = models.DateTimeField(
-        _("Expire at"),
-        help_text=_("Leave blank to use course enrollment deadline from "
-                    "semester settings"),
-        null=True, blank=True)
 
     class Meta:
         verbose_name = _("Enrollment Invitation")
@@ -190,11 +185,7 @@ class EnrollmentInvitation(models.Model):
             subdomain=settings.LMS_SUBDOMAIN)
 
     def is_active(self):
-        if self.expire_at:
-            # FIXME: localize now_
-            return self.expire_at <= timezone.now()
-        else:
-            return self.course.enrollment_is_open
+        return self.course.enrollment_is_open
 
 
 class Invitation(TimeStampedModel):
