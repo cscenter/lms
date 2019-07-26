@@ -1,10 +1,8 @@
-from django.db.models import OuterRef
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.timezone import now
 
-from core.db.expressions import SubqueryCount
-from courses.models import Assignment, CourseNews, CourseTeacher, Course
+from courses.models import Assignment, CourseNews, CourseTeacher
 from learning.models import AssignmentComment, AssignmentNotification, \
     StudentAssignment, Enrollment, CourseNewsNotification
 from learning.settings import StudentStatuses
