@@ -638,8 +638,8 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         won't be refreshed if enrollment was deleted or changed after call.
         """
         from learning.models import Enrollment
-        # Graduates had the ability to enroll in the past
-        if not self.has_perm("learning.enroll_in") and not self.is_graduate:
+        # FIXME: Not sure it's a good place for checking permissions now it's just an optimization if we do check for request.user
+        if not self.has_perm("learning.view_own_enrollments"):
             return None
         cache_key = self.ENROLLMENT_CACHE_KEY.format(course_id)
         if not hasattr(self, cache_key):

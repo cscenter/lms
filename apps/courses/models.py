@@ -500,10 +500,6 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
         return self in cache.courseoffering_news
 
     @property
-    def has_classes_with_video(self):
-        return self.videos_count
-
-    @property
     def has_classes_with_slides(self):
         return self.materials_slides
 
