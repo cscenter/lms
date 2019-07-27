@@ -10,7 +10,7 @@ class MenuItem(_MenuItem):
         The last one in case of ambiguity.
     """
     for_staff = False
-    visible_to = None
+    permissions = None
     # Additional check that item should be selected
     # Affects the parent visibility if `MENU_SELECT_PARENTS` setting is enabled
     # FIXME: remove relative patterns support? Or add the same to the excluded_patterns?
@@ -25,10 +25,9 @@ class MenuItem(_MenuItem):
             self.excluded_patterns = [p.strip() for p in self.excluded_patterns]
 
     def check(self, request):
-        """Evaluate if we should be visible for this request"""
-        if self.visible_to is not None:
-            user_roles = request.user.roles
-            self.visible = bool(user_roles.intersection(self.visible_to))
+        """Update menu item visibility for this request"""
+        if self.permissions is not None:
+            self.visible = request.user.has_perms(self.permissions)
         if callable(self.check_func):
             self.visible = self.check_func(request)
         if self.for_staff and not request.user.is_curator:

@@ -28,10 +28,9 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Кодекс чести"), '/learning/hc/', weight=70),
             MenuItem(pgettext_lazy("menu", "Проекты организаторов"), '/learning/internships/', weight=80),
         ],
-        visible_to=[
-            Roles.STUDENT,
-            Roles.VOLUNTEER,
-        ],
+        permissions=(
+            "learning.view_study_menu",
+        ),
         css_classes='for-students'),
     MenuItem(
         pgettext_lazy("menu", "Преподавание"),
@@ -66,9 +65,9 @@ top_menu = [
                 reverse('teaching:gradebook_list'),
                 weight=50),
         ],
-        visible_to=[
-            Roles.TEACHER
-        ],
+        permissions=(
+            "learning.view_teaching_menu",
+        ),
         css_classes='for-teachers'),
     MenuItem(
         pgettext_lazy("menu", "Набор"),
@@ -79,9 +78,10 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Анкеты"), '/admission/applicants/', weight=20, for_staff=True),
             MenuItem(pgettext_lazy("menu", "Результаты"), '/admission/results/', weight=30, for_staff=True),
         ],
-        visible_to=[
-            Roles.INTERVIEWER
-        ]),
+        permissions=(
+            "learning.view_admission_menu",
+        ),
+    ),
     MenuItem(
         pgettext_lazy("menu", "Проекты"),
         reverse('projects:report_list_reviewers'),
@@ -92,9 +92,10 @@ top_menu = [
             MenuItem(pgettext_lazy("menu", "Все проекты"), '/projects/all/', weight=30, for_staff=True),
             MenuItem(pgettext_lazy("menu", "Все отчеты"), '/projects/reports-all/', weight=40, for_staff=True),
         ],
-        visible_to=[
-            Roles.PROJECT_REVIEWER
-        ]),
+        permissions=(
+            "learning.view_projects_menu",
+        ),
+    ),
     MenuItem(
         pgettext_lazy("menu", "Курирование"),
         reverse('staff:course_markssheet_staff_dispatch'),

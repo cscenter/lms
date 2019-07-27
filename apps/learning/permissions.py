@@ -5,9 +5,8 @@ import rules
 from auth.permissions import add_perm
 from core.utils import is_club_site
 from courses.models import Course
-from learning.models import EnrollmentInvitation
-from learning.utils import course_failed_by_student
 from learning.settings import StudentStatuses
+from learning.utils import course_failed_by_student
 from users.constants import Roles as UserRoles
 
 
@@ -159,6 +158,8 @@ def enroll_in_course_by_invitation(user, enrollment_invitation):
     return enroll_in_course(user, enrollment_invitation.course)
 
 
+add_perm("learning.view_study_menu")
+add_perm("learning.view_teaching_menu")
 add_perm("learning.view_course_news", view_course_news)
 # TODO: Where should live permission below?
 add_perm("learning.view_course_reviews", view_course_reviews)
