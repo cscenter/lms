@@ -35,10 +35,33 @@ from users.tests.factories import UserFactory, TeacherFactory, \
 # TODO: Преподавание -> Задания, добавить тест для deadline_local
 
 
-class StudentAssignmentListTests(GroupSecurityCheckMixin,
-                                 MyUtilitiesMixin, CSCTestCase):
+class StudentAssignmentListTests(MyUtilitiesMixin, CSCTestCase):
     url_name = 'study:assignment_list'
     groups_allowed = [Roles.STUDENT]
+
+    # FIXME: test permission instead and remove this test!
+    def test_group_security(self):
+        """
+        Checks if only users in groups listed in self.groups_allowed can
+        access the page which url is stored in self.url_name.
+        Also checks that curator can access any page
+        """
+        self.assertTrue(self.groups_allowed is not None)
+        self.assertTrue(self.url_name is not None)
+        self.assertLoginRedirect(reverse(self.url_name))
+        all_test_groups = [
+            [],
+            [Roles.TEACHER],
+            [Roles.STUDENT],
+            [Roles.GRADUATE]
+        ]
+        for groups in all_test_groups:
+            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
+            if any(group in self.groups_allowed for group in groups):
+                self.assertStatusCode(200, self.url_name)
+            else:
+                self.assertStatusCode(403, self.url_name)
+            self.client.logout()
 
     def test_list(self):
         u = StudentFactory()
@@ -564,10 +587,11 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Users without student role on current site has no access to the page
+    client.login(student)
     student.remove_group(Roles.VOLUNTEER)
     student.add_group(Roles.STUDENT, site_id=ANOTHER_DOMAIN_ID)
     response = client.get(url_learning_assignments)
-    assert response.status_code == 302
+    assert response.status_code == 403
 
 
 @pytest.mark.django_db
