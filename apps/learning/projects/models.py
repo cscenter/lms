@@ -117,6 +117,7 @@ class ReportingPeriod(models.Model):
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
+        to_field="code",
         related_name="+",  # Disable backwards relation
         on_delete=models.CASCADE,
         null=True,
@@ -282,7 +283,7 @@ class ReportingPeriod(models.Model):
         """
         Generate notifications for students without report.
         """
-        filters = {"student__branch_id": target_branch.pk}
+        filters = {"student__branch": target_branch}
         if self.project_type is not None:
             filters["project__project_type"] = self.project_type
         project_students = (ProjectStudent.objects

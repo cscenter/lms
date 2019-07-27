@@ -61,6 +61,7 @@ class Campaign(models.Model):
                              on_delete=models.PROTECT)
     branch = models.ForeignKey(Branch,
                                verbose_name=_("Branch"),
+                               to_field="code",
                                related_name="campaigns",
                                on_delete=models.PROTECT)
     online_test_max_score = models.SmallIntegerField(
