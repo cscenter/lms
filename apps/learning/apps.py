@@ -8,7 +8,8 @@ class LearningConfig(AppConfig):
 
     def ready(self):
         from . import signals
-        # Register app roles
+        # Register app permissions and roles
+        from . import permissions
         from . import roles
         # Register tabs
         from . import tabs

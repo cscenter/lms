@@ -7,6 +7,7 @@ from auth.registry import role_registry
 # TODO: Add description of each role
 class Roles(DjangoChoices):
     STUDENT = C(1, _('Student'), permissions=(
+        "learning.view_study_menu",
         "courses.can_view_contacts",
         "courses.can_view_assignments",
         "learning.view_course_news",
@@ -17,6 +18,7 @@ class Roles(DjangoChoices):
         "learning.leave_course",
     ))
     TEACHER = C(2, _('Teacher'), permissions=(
+        "learning.view_teaching_menu",
         "courses.can_view_contacts",
         "courses.can_view_assignments",
         "learning.view_course_news",
@@ -25,6 +27,7 @@ class Roles(DjangoChoices):
         "learning.view_own_enrollments",
     ))
     VOLUNTEER = C(4, _('Volunteer'), permissions=(
+        "learning.view_study_menu",
         "courses.can_view_contacts",
         "courses.can_view_assignments",
         "learning.view_course_news",
@@ -42,6 +45,7 @@ class Roles(DjangoChoices):
         "learning.view_course_reviews",
     ))
     INVITED = C(11, _('Invited User'), permissions=(
+        "learning.view_study_menu",
         "courses.can_view_contacts",
         "courses.can_view_assignments",
         "learning.view_course_news",

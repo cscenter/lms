@@ -9,4 +9,8 @@ class ProjectsConfig(AppConfig):
     REPORT_COMMENT_ATTACHMENT = 2
 
     def ready(self):
+        # Register app permissions and roles
+        from . import permissions
+        from . import roles
+        # Register signals
         from . import signals
