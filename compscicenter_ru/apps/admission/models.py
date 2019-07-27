@@ -230,12 +230,13 @@ class Applicant(TimeStampedModel):
         VOLUNTEER,
         WAITING_FOR_PAYMENT
     }
-    # Successful final states
+    # Successful final statuses after interview stage
     ACCEPT_STATUSES = {
         ACCEPT,
         ACCEPT_PAID,
         ACCEPT_IF,
         VOLUNTEER,
+        WAITING_FOR_PAYMENT,
     }
     STUDY_PROGRAM_DS = "ds"
     STUDY_PROGRAM_CS = "cs"
