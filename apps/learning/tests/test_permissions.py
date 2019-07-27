@@ -207,9 +207,8 @@ def test_enroll_in_course():
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(city_code=Branches.SPB,
-                                          enrollment_end_at=today.date())
+                                          enrollment_end_at=tomorrow.date())
     course = CourseFactory(city=Branches.SPB, semester=term, is_open=False,
-                           completed_at=tomorrow.date(),
                            is_correspondence=False,
                            capacity=0)
     assert course.enrollment_is_open
@@ -219,7 +218,7 @@ def test_enroll_in_course():
     # Enrollment is closed
     course.semester.enrollment_end_at = yesterday.date()
     assert not student.has_perm("learning.enroll_in_course", course)
-    course.semester.enrollment_end_at = today.date()
+    course.semester.enrollment_end_at = tomorrow.date()
     assert student.has_perm("learning.enroll_in_course", course)
     # Student was expelled
     student.status = StudentStatuses.EXPELLED
