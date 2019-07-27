@@ -7,6 +7,7 @@ from django.views import generic
 from isoweek import Week
 from vanilla import ListView
 
+from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.utils import is_club_site
 from courses.calendar import CalendarEvent
@@ -51,11 +52,12 @@ class CalendarPersonalView(CalendarFullView):
                                 for_student=self.request.user)
 
 
-class StudentAssignmentListView(StudentOnlyMixin, ListView):
+class StudentAssignmentListView(PermissionRequiredMixin, ListView):
     """ Show assignments from current semester only. """
     model = StudentAssignment
     context_object_name = 'assignment_list'
     template_name = "learning/study/assignment_list.html"
+    permission_required = "learning.view_own_assignments"
 
     def get_queryset(self):
         current_semester = Semester.get_current()

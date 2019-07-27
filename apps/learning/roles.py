@@ -13,6 +13,7 @@ class Roles(DjangoChoices):
         "learning.view_course_news",
         "learning.view_course_reviews",
         "learning.view_own_enrollments",
+        "learning.view_own_assignments",
         "learning.enroll_in_course",
         "learning.enroll_in_course_by_invitation",
         "learning.leave_course",
@@ -33,6 +34,7 @@ class Roles(DjangoChoices):
         "learning.view_course_news",
         "learning.view_course_reviews",
         "learning.view_own_enrollments",
+        "learning.view_own_assignments",
         "learning.enroll_in_course",
         "learning.enroll_in_course_by_invitation",
         "learning.leave_course",
@@ -51,6 +53,7 @@ class Roles(DjangoChoices):
         "learning.view_course_news",
         "learning.view_course_reviews",
         "learning.view_own_enrollments",
+        "learning.view_own_assignments",
         "learning.enroll_in_course_by_invitation",
         "learning.leave_course",
     ))

@@ -164,6 +164,7 @@ add_perm("learning.view_course_news", view_course_news)
 # TODO: Where should live permission below?
 add_perm("learning.view_course_reviews", view_course_reviews)
 add_perm("learning.view_own_enrollments")
+add_perm("learning.view_own_assignments")
 add_perm("learning.enroll_in_course", enroll_in_course)
 add_perm("learning.enroll_in_course_by_invitation", enroll_in_course_by_invitation)
 add_perm("learning.leave_course", leave_course)
