@@ -13,7 +13,7 @@ from courses.utils import get_term_index
 from users.constants import Roles
 from users.models import User
 
-
+# FIXME: replace with base implementation (both for CS club ans CS center [TODO: remove is_open=False, etc), then subclass
 class CourseList(ListAPIView):
     """Returns courses for CS Center"""
     pagination_class = None
@@ -21,10 +21,9 @@ class CourseList(ListAPIView):
 
     def get_queryset(self):
         return (Course.objects
-                .from_center_foundation()
-                .select_related("meta_course")
-                .exclude(semester__type=SemesterTypes.SUMMER)
                 .filter(is_open=False)
+                .exclude(semester__type=SemesterTypes.SUMMER)
+                .select_related("meta_course")
                 .only("meta_course_id", "meta_course__name", "semester__index")
                 .order_by("meta_course__name")
                 .distinct("meta_course__name"))

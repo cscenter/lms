@@ -117,32 +117,6 @@ class CourseQuerySet(models.QuerySet):
     def for_teacher(self, user):
         return self.filter(teachers=user)
 
-    # FIXME: remove
-    def from_center_foundation(self):
-        Semester = apps.get_model('courses', 'Semester')
-        center_foundation_term_index = get_term_index(CENTER_FOUNDATION_YEAR,
-                                                      SemesterTypes.AUTUMN)
-        return self.filter(semester__index__gte=center_foundation_term_index)
-
-    # FIXME: remove
-    def get_offerings_base_queryset(self):
-        """Returns list of available courses for CS Center"""
-        User = apps.get_model('users', 'User')
-        prefetch_teachers = Prefetch(
-            'teachers',
-            queryset=User.objects.only("id", "first_name", "last_name",
-                                       "patronymic"))
-        return (self
-                .select_related('meta_course', 'semester')
-                .only("pk", "city_id", "is_open", "grading_type",
-                      "videos_count", "materials_slides", "materials_files",
-                      "meta_course__name", "meta_course__slug",
-                      "semester__year", "semester__index", "semester__type")
-                .from_center_foundation()
-                .prefetch_related(prefetch_teachers)
-                .order_by('-semester__year', '-semester__index',
-                          'meta_course__name'))
-
     # TODO: relocate
     def reviews_for_course(self, co):
         return (self
