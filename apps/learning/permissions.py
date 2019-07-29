@@ -168,6 +168,7 @@ add_perm("learning.view_teaching_menu")
 add_perm("learning.view_course_news", view_course_news)
 # TODO: Where should live permission below?
 add_perm("learning.view_course_reviews", view_course_reviews)
+add_perm("study.view_library", is_not_expelled)
 add_perm("study.view_own_enrollments", is_not_expelled)
 add_perm("study.view_own_assignments", is_not_expelled)
 # FIXME: если такое же название дать преподу, то там нельзя чекать статус и вообще, это разные разделы же. Надо больше чекать прав. Мб view_teaching/view_study ?

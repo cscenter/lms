@@ -1,15 +1,16 @@
 from vanilla import DetailView, ListView
 
-from users.mixins import StudentOnlyMixin
+from auth.mixins import PermissionRequiredMixin
 from users.utils import get_student_city_code
 from .models import Stock, Borrow
 
 
 # TODO: filter by city
-class BookListView(StudentOnlyMixin, ListView):
+class BookListView(PermissionRequiredMixin, ListView):
     context_object_name = "stocks"
     http_method_names = ["head", "get", "options"]
     template_name = "library/stock_list.html"
+    permission_required = "study.view_library"
 
     def get_queryset(self):
         qs = (Stock.objects
@@ -29,10 +30,11 @@ class BookListView(StudentOnlyMixin, ListView):
         return context
 
 
-class BookDetailView(StudentOnlyMixin, DetailView):
+class BookDetailView(PermissionRequiredMixin, DetailView):
     context_object_name = "stock"
     http_method_names = ["head", "get", "options"]
     model = Stock
+    permission_required = "study.view_library"
 
     def get_queryset(self):
         qs = (Stock.objects
