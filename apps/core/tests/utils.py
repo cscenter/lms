@@ -1,11 +1,10 @@
-from importlib import import_module
 from urllib.parse import urlparse
 
 from django.conf import settings
 from django.test import Client, TestCase
 from django.utils.functional import Promise
 
-from compscicenter_ru.settings.base import LMS_SUBDOMAIN
+from compscicenter_ru.settings.test import LMS_SUBDOMAIN
 
 
 TEST_DOMAIN = 'compscicenter.ru'

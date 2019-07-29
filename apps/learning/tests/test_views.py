@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
+from urllib.parse import urlparse
 
 import pytest
 import pytz
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.urls import resolve
 from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
+from auth.mixins import PermissionRequiredMixin
 from core.tests.utils import CSCTestCase, ANOTHER_DOMAIN_ID
 from core.timezone import now_local
 from core.urls import city_aware_reverse, reverse
@@ -16,7 +19,6 @@ from courses.models import Course
 from courses.tests.factories import *
 from courses.utils import get_current_term_pair
 from learning.tests.factories import *
-from learning.tests.utils import check_url_security
 from users.constants import Roles
 from users.tests.factories import UserFactory, StudentFactory, TeacherFactory, \
     CuratorFactory
@@ -384,11 +386,11 @@ def test_events_smoke(client):
 
 
 @pytest.mark.django_db
-def test_student_courses_list(client, assert_login_redirect):
+def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     url = reverse('study:course_list')
-    check_url_security(client, assert_login_redirect,
-                       groups_allowed=[Roles.STUDENT],
-                       url=url)
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == "study.view_courses"
     student_spb = StudentFactory(city_id='spb')
     client.login(student_spb)
     response = client.get(url)

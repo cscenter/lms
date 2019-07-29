@@ -2,6 +2,7 @@ from urllib.parse import urlparse
 
 import pytest
 from django.contrib.sites.models import Site
+from django.urls import resolve
 from post_office.models import EmailTemplate
 from pytest_django.lazy_django import skip_if_no_django
 
@@ -51,6 +52,15 @@ def assert_login_redirect(client, settings, assert_redirect):
 @pytest.fixture(scope="function")
 def curator():
     return CuratorFactory()
+
+
+@pytest.fixture(scope="function")
+def lms_resolver(settings):
+    def wrapper(url):
+        rel_url = urlparse(url).path
+        lms_urlconf = settings.SUBDOMAIN_URLCONFS[settings.LMS_SUBDOMAIN]
+        return resolve(rel_url, urlconf=lms_urlconf)
+    return wrapper
 
 
 @pytest.fixture(scope="session", autouse=True)

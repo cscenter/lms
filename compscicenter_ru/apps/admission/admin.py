@@ -28,7 +28,7 @@ class CampaignListFilter(admin.SimpleListFilter):
     def lookups(self, request, model_admin):
         campaigns = (Campaign.objects
                      .select_related("branch")
-                     .order_by("-branch_id", "-year"))
+                     .order_by("-branch", "-year"))
         return [(c.pk, str(c)) for c in campaigns]
 
     def queryset(self, request, queryset):

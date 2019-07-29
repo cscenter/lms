@@ -1,4 +1,5 @@
 import re
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.urls import reverse as django_reverse

@@ -21,15 +21,16 @@ from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole
 from learning.views import AssignmentSubmissionBaseView
-from users.mixins import StudentOnlyMixin
 from users.utils import get_student_city_code
 
 
-class CalendarFullView(StudentOnlyMixin, MonthEventsCalendarView):
+class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
     """
     Shows all non-course events and classes in the city of
     the authenticated student.
     """
+    permission_required = "study.view_schedule"
+
     def get_default_timezone(self):
         return get_student_city_code(self.request)
 
@@ -57,7 +58,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, ListView):
     model = StudentAssignment
     context_object_name = 'assignment_list'
     template_name = "learning/study/assignment_list.html"
-    permission_required = "learning.view_own_assignments"
+    permission_required = "study.view_own_assignments"
 
     def get_queryset(self):
         current_semester = Semester.get_current()
@@ -147,9 +148,10 @@ class StudentAssignmentDetailView(AssignmentSubmissionBaseView):
         return self.student_assignment.get_student_url()
 
 
-class TimetableView(StudentOnlyMixin, WeekEventsView):
+class TimetableView(PermissionRequiredMixin, WeekEventsView):
     """Shows classes for courses which authorized student enrolled in"""
     template_name = "learning/study/timetable.html"
+    permission_required = "study.view_schedule"
 
     def get_default_timezone(self):
         return get_student_city_code(self.request)
@@ -168,9 +170,10 @@ class TimetableView(StudentOnlyMixin, WeekEventsView):
         return qs
 
 
-class UsefulListView(StudentOnlyMixin, generic.ListView):
+class UsefulListView(PermissionRequiredMixin, generic.ListView):
     context_object_name = "faq"
     template_name = "learning/study/useful.html"
+    permission_required = "study.view_faq"
 
     def get_queryset(self):
         return (Useful.objects
@@ -178,19 +181,21 @@ class UsefulListView(StudentOnlyMixin, generic.ListView):
                 .order_by("sort"))
 
 
-class InternshipListView(StudentOnlyMixin, generic.ListView):
+class InternshipListView(PermissionRequiredMixin, generic.ListView):
     context_object_name = "faq"
     template_name = "learning/study/internships.html"
+    permission_required = "study.view_internships"
 
     def get_queryset(self):
         return (Internship.objects
                 .order_by("sort"))
 
 
-class CourseListView(StudentOnlyMixin, generic.TemplateView):
+class CourseListView(PermissionRequiredMixin, generic.TemplateView):
     model = Course
     context_object_name = 'course_list'
     template_name = "learning/study/course_list.html"
+    permission_required = "study.view_courses"
 
     def get_context_data(self, **kwargs):
         city_code = get_student_city_code(self.request)

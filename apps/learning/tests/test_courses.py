@@ -2,11 +2,11 @@ import datetime
 
 import pytest
 import pytz
-from django.conf import settings
 
 from core.urls import reverse
 from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
     SemesterFactory, CourseFactory
+from learning.settings import StudentStatuses
 from users.tests.factories import TeacherFactory, StudentFactory
 
 
@@ -67,7 +67,7 @@ def test_course_is_correspondence(settings, client):
 
 
 @pytest.mark.django_db
-def test_course_list(client):
+def test_course_list(client, settings):
     student = StudentFactory(city_id=settings.DEFAULT_CITY_CODE)
     client.login(student)
     s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
@@ -76,3 +76,17 @@ def test_course_list(client):
     co_kzn = CourseFactory.create(semester=s, city="kzn")
     response = client.get(reverse('study:course_list'))
     assert len(response.context['ongoing_rest']) == 1
+
+
+@pytest.mark.django_db
+def test_student_status_expelled(client, settings):
+    student = StudentFactory(status=StudentStatuses.EXPELLED,
+                             city_id=settings.DEFAULT_CITY_CODE)
+    client.login(student)
+    url = reverse('study:course_list')
+    response = client.get(url)
+    assert response.status_code == 403
+    active_student = StudentFactory(city_id=settings.DEFAULT_CITY_CODE)
+    client.login(active_student)
+    response = client.get(url)
+    assert response.status_code == 200

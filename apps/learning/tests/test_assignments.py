@@ -25,7 +25,6 @@ from learning.tests.factories import EnrollmentFactory, \
     AssignmentCommentFactory, \
     StudentAssignmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
-from learning.tests.test_views import GroupSecurityCheckMixin
 from users.constants import Roles
 from users.tests.factories import UserFactory, TeacherFactory, \
     StudentFactory, VolunteerFactory, ProjectReviewerFactory, CuratorFactory

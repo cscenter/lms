@@ -86,7 +86,11 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
                 and request_user.city_code):
             tz_override = settings.TIME_ZONES[request_user.city_id]
         # TODO: set default value if `tz_override` is None
-        request_user_enrollment = request_user.get_enrollment(course.pk)
+
+        if request_user.has_perm("study.view_own_enrollments"):
+            request_user_enrollment = request_user.get_enrollment(course.pk)
+        else:
+            request_user_enrollment = None
         is_actual_teacher = course.is_actual_teacher(request_user)
         # Attach unread notifications count if request user in mailing list
         unread_news = None
