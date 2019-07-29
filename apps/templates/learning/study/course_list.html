@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load call_method from core_tags %}
 
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 
@@ -39,7 +40,8 @@
                 </td>
                 <td>
                     {% if course.survey_url %}<a class=" btn btn-sm btn-block btn-success" href="{{ course.survey_url }}" target="_blank">{% trans "Start survey!" %}</a>{% endif %}
-                    {% if course.enrollment_is_open %}
+                    {% call_method request.user "has_perm" "learning.leave_course" course as can_leave_course %}
+                    {% if can_leave_course %}
                     <a href="{{ course.get_unenroll_url }}?back=study:course_list"
                        class=" btn btn-sm btn-block btn-warning">{% trans "Leave course" %}
                     </a>
@@ -59,7 +61,8 @@
                 {% endfor %}
               </td>
               <td>
-                  {% if course.enrollment_is_open %}
+                {% call_method request.user "has_perm" "learning.enroll_in_course" course as can_enroll %}
+                  {% if can_enroll %}
                     <a href="{{ course.get_enroll_url }}" class="btn btn-default btn-sm btn-block">{% trans "Enroll" %}</a>
                   {% endif %}
               </td>

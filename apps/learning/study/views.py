@@ -1,7 +1,7 @@
 from typing import Iterable
 
 from django.conf import settings
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from isoweek import Week
@@ -21,6 +21,7 @@ from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole
 from learning.views import AssignmentSubmissionBaseView
+from users.models import User
 from users.utils import get_student_city_code
 
 
@@ -214,10 +215,16 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         # Hide summer courses on CS Club site until student enrolled in
         if is_club_site():
             in_current_term &= ~Q(semester__type=SemesterTypes.SUMMER)
+        prefetch_teachers = Prefetch(
+            'teachers',
+            queryset=User.objects.only("id", "first_name", "last_name",
+                                       "patronymic"))
         course_offerings = (Course.objects
-                            .get_offerings_base_queryset()
                             .in_city(city_code)
-                            .filter(in_current_term | enrolled_in))
+                            .filter(in_current_term | enrolled_in)
+                            .select_related('meta_course', 'semester')
+                            .prefetch_related(prefetch_teachers)
+                            .order_by('-semester__index', 'meta_course__name'))
         # 2. And split them by type.
         ongoing_enrolled, ongoing_rest, archive_enrolled = [], [], []
         for course in course_offerings:

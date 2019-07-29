@@ -12,7 +12,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q, Max, F
+from django.db.models import Q, Max, F, Prefetch
 from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import gettext, pgettext_lazy, ugettext_lazy as _
@@ -30,7 +30,8 @@ from core.urls import reverse
 from courses.models import Course, Semester, MetaCourse, CourseTeacher
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, \
-    get_term_index_academic_year_starts, get_term_by_index, bucketize
+    get_term_index_academic_year_starts, get_term_by_index, bucketize, \
+    get_term_index
 from learning.models import Branch, Enrollment, GraduateProfile
 from learning.projects.constants import ProjectTypes
 from learning.projects.models import ProjectStudent
@@ -359,8 +360,22 @@ class CourseOfferingsView(FilterMixin, TemplateView):
     template_name = "compscicenter_ru/course_offerings.html"
 
     def get_queryset(self):
+        prefetch_teachers = Prefetch(
+            'teachers',
+            queryset=User.objects.only("id", "first_name", "last_name",
+                                       "patronymic"))
+        center_foundation_term_index = get_term_index(
+            settings.CENTER_FOUNDATION_YEAR, SemesterTypes.AUTUMN)
         return (Course.objects
-                .get_offerings_base_queryset()
+                .select_related('meta_course', 'semester')
+                .only("pk", "city_id", "is_open", "grading_type",
+                      "videos_count", "materials_slides", "materials_files",
+                      "meta_course__name", "meta_course__slug",
+                      "semester__year", "semester__index", "semester__type")
+                .filter(semester__index__gte=center_foundation_term_index)
+                .prefetch_related(prefetch_teachers)
+                .order_by('-semester__year', '-semester__index',
+                          'meta_course__name')
                 .exclude(semester__type=SemesterTypes.SUMMER))
 
     def get_context_data(self, **kwargs):
