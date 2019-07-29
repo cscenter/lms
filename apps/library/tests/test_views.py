@@ -1,12 +1,28 @@
 import pytest
 from django.utils.encoding import smart_bytes
 
+from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
-from library.tests.factories import BorrowFactory
-from users.tests.factories import UserFactory, StudentFactory
+from library.tests.factories import BorrowFactory, StockFactory
+from users.tests.factories import UserFactory, StudentFactory, CuratorFactory
 
 
 # TODO: borrows tests. Например. Убедиться, что нельзя удалить книгу, если её кто-то занял из резерва.
+
+
+@pytest.mark.django_db
+def test_list_view_permissions(lms_resolver):
+    resolver = lms_resolver(reverse('library:book_list'))
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == "study.view_library"
+
+
+@pytest.mark.django_db
+def test_detail_view_permissions(lms_resolver):
+    stock = StockFactory()
+    resolver = lms_resolver(stock.get_absolute_url())
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == "study.view_library"
 
 
 @pytest.mark.django_db
@@ -34,7 +50,7 @@ def test_user_detail(client, curator):
 
 
 @pytest.mark.django_db
-def test_city_support(client, curator):
+def test_city_support(client):
     student = StudentFactory(city_id='spb')
     borrow_spb = BorrowFactory(student=student, stock__city_id='spb',
                                stock__copies=12)
@@ -44,6 +60,7 @@ def test_city_support(client, curator):
     borrow_spb.stock.refresh_from_db()
     assert borrow_spb.stock.available_copies == 11
     assert borrow_nsk.stock.available_copies == 41
+    curator = CuratorFactory()
     client.login(curator)
     url = reverse('library:book_list')
     response = client.get(url)

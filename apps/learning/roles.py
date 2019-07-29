@@ -17,6 +17,7 @@ class Roles(DjangoChoices):
         "study.view_courses",
         "study.view_schedule",
         "study.view_faq",
+        "study.view_library",
         "study.view_internships",
         "learning.enroll_in_course",
         "learning.enroll_in_course_by_invitation",
@@ -42,6 +43,7 @@ class Roles(DjangoChoices):
         "study.view_courses",
         "study.view_schedule",
         "study.view_faq",
+        "study.view_library",
         "study.view_internships",
         "learning.enroll_in_course",
         "learning.enroll_in_course_by_invitation",
@@ -53,6 +55,7 @@ class Roles(DjangoChoices):
         "courses.can_view_assignments",
         "learning.view_course_news",
         "learning.view_course_reviews",
+        "study.view_library",
     ))
     INVITED = C(11, _('Invited User'), permissions=(
         "learning.view_study_menu",
@@ -65,6 +68,7 @@ class Roles(DjangoChoices):
         "study.view_courses",
         "study.view_schedule",
         "study.view_faq",
+        "study.view_library",
         "study.view_internships",
         "learning.enroll_in_course_by_invitation",
         "learning.leave_course",
