@@ -2,6 +2,9 @@ import datetime
 
 import pytest
 from dateutil.relativedelta import relativedelta
+from django.utils.encoding import smart_bytes
+
+from auth.mixins import PermissionRequiredMixin
 from core.tests.utils import CSCTestCase
 from django.utils import timezone
 
@@ -11,10 +14,10 @@ from courses.tests.factories import CourseFactory, CourseClassFactory, \
 from learning.tests.factories import EventFactory, \
     EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
-from learning.tests.test_views import GroupSecurityCheckMixin
 from learning.tests.utils import flatten_calendar_month_events
 from users.constants import Roles
-from users.tests.factories import StudentFactory, TeacherFactory
+from users.tests.factories import StudentFactory, TeacherFactory, UserFactory, \
+    CuratorFactory
 
 
 # TODO: add test: kzn courses not shown on center site and spb on kzn
@@ -24,10 +27,34 @@ from users.tests.factories import StudentFactory, TeacherFactory
 # TODO: для СПБ не показываются события НСК (наоборот будет уже верно)
 
 
-class CalendarTeacherTests(GroupSecurityCheckMixin,
-                           MyUtilitiesMixin, CSCTestCase):
+class CalendarTeacherTests(MyUtilitiesMixin, CSCTestCase):
     url_name = 'teaching:calendar'
     groups_allowed = [Roles.TEACHER]
+
+    def test_group_security(self):
+        """
+        Checks if only users in groups listed in self.groups_allowed can
+        access the page which url is stored in self.url_name.
+        Also checks that curator can access any page
+        """
+        self.assertTrue(self.groups_allowed is not None)
+        self.assertTrue(self.url_name is not None)
+        self.assertLoginRedirect(reverse(self.url_name))
+        all_test_groups = [
+            [],
+            [Roles.TEACHER],
+            [Roles.STUDENT],
+            [Roles.GRADUATE]
+        ]
+        for groups in all_test_groups:
+            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
+            if any(group in self.groups_allowed for group in groups):
+                self.assertStatusCode(200, self.url_name)
+            else:
+                self.assertLoginRedirect(reverse(self.url_name))
+            self.client.logout()
+        self.doLogin(CuratorFactory(city_id='spb'))
+        self.assertStatusCode(200, self.url_name)
 
     def test_teacher_calendar(self):
         teacher = TeacherFactory(city_id='spb')
@@ -77,57 +104,61 @@ class CalendarTeacherTests(GroupSecurityCheckMixin,
         self.assertSameObjects(own_classes + others_classes + events, classes)
 
 
-class CalendarStudentTests(GroupSecurityCheckMixin,
-                           MyUtilitiesMixin, CSCTestCase):
-    url_name = 'study:calendar'
-    groups_allowed = [Roles.STUDENT]
+@pytest.mark.django_db
+def test_student_personal_calendar_view_permissions(lms_resolver):
+    resolver = lms_resolver(reverse('study:calendar'))
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == "study.view_schedule"
 
-    def test_student_calendar(self):
-        student = StudentFactory(city_id='spb')
-        self.doLogin(student)
-        co = CourseFactory.create()
-        co_other = CourseFactory.create()
-        e = EnrollmentFactory.create(course=co, student=student)
-        classes = flatten_calendar_month_events(
-            self.client.get(reverse(self.url_name)).context['calendar'])
-        self.assertEqual(0, len(classes))
-        this_month_date = (datetime.datetime.now()
-                           .replace(day=15,
-                                    tzinfo=timezone.utc))
-        own_classes = (
-            CourseClassFactory
-            .create_batch(3, course=co, date=this_month_date))
-        others_classes = (
-            CourseClassFactory
-            .create_batch(5, course=co_other, date=this_month_date))
-        # student should see only his own classes
-        resp = self.client.get(reverse(self.url_name))
-        classes = flatten_calendar_month_events(resp.context['calendar'])
-        self.assertSameObjects(own_classes, classes)
-        # but in full calendar all classes should be shown
-        classes = flatten_calendar_month_events(
-            self.client.get(reverse('study:calendar_full')).context['calendar'])
-        self.assertSameObjects(own_classes + others_classes, classes)
-        next_month_qstr = (
-            "?year={0}&month={1}"
-            .format(resp.context['calendar'].next_month.year,
-                    str(resp.context['calendar'].next_month.month)))
-        next_month_url = reverse(self.url_name) + next_month_qstr
-        self.assertContains(resp, next_month_qstr)
-        classes = flatten_calendar_month_events(
-            self.client.get(next_month_url).context['calendar'])
-        self.assertSameObjects([], classes)
-        next_month_date = this_month_date + relativedelta(months=1)
-        next_month_classes = (
-            CourseClassFactory
-            .create_batch(2, course=co, date=next_month_date))
-        classes = flatten_calendar_month_events(
-            self.client.get(next_month_url).context['calendar'])
-        self.assertSameObjects(next_month_classes, classes)
-        venue = VenueFactory(city_id=student.city_id)
-        events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
-        response = self.client.get(reverse(self.url_name))
-        assert response.status_code == 200
+
+@pytest.mark.django_db
+def test_student_personal_calendar_view(client):
+    calendar_url = reverse('study:calendar')
+    student = StudentFactory(city_id='spb')
+    client.login(student)
+    course = CourseFactory()
+    course_other = CourseFactory.create()
+    e = EnrollmentFactory.create(course=course, student=student)
+    classes = flatten_calendar_month_events(
+        client.get(calendar_url).context['calendar'])
+    assert len(classes) == 0
+    this_month_date = (datetime.datetime.now()
+                       .replace(day=15,
+                                tzinfo=timezone.utc))
+    own_classes = (
+        CourseClassFactory
+            .create_batch(3, course=course, date=this_month_date))
+    others_classes = (
+        CourseClassFactory
+            .create_batch(5, course=course_other, date=this_month_date))
+    # student should see only his own classes
+    response = client.get(calendar_url)
+    classes = flatten_calendar_month_events(response.context['calendar'])
+    assert set(own_classes) == set(classes)
+    # but in full calendar all classes should be shown
+    classes = flatten_calendar_month_events(
+        client.get(reverse('study:calendar_full')).context['calendar'])
+    assert set(own_classes + others_classes) == set(classes)
+    next_month_qstr = (
+        "?year={0}&month={1}"
+            .format(response.context['calendar'].next_month.year,
+                    str(response.context['calendar'].next_month.month)))
+    next_month_url = calendar_url + next_month_qstr
+    assert smart_bytes(next_month_qstr) in response.content
+    classes = flatten_calendar_month_events(
+        client.get(next_month_url).context['calendar'])
+    assert len(classes) == 0
+    next_month_date = this_month_date + relativedelta(months=1)
+    next_month_classes = (
+        CourseClassFactory
+            .create_batch(2, course=course, date=next_month_date))
+    classes = flatten_calendar_month_events(
+        client.get(next_month_url).context['calendar'])
+    assert set(next_month_classes) == set(classes)
+    venue = VenueFactory(city_id=student.city_id)
+    events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
+    response = client.get(calendar_url)
+    assert response.status_code == 200
 
 
 class CalendarFullSecurityTests(MyUtilitiesMixin, CSCTestCase):

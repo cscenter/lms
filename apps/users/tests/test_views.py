@@ -331,21 +331,3 @@ def test_student_should_have_enrollment_year(admin_client):
     assert response.status_code == 302
     user.refresh_from_db()
     assert user.groups.count() == 1
-
-
-@pytest.mark.django_db
-def test_expelled(client, settings):
-    """Center students and volunteers can't access student section
-    if there status equal expelled"""
-    student = StudentFactory(status=StudentStatuses.EXPELLED,
-                             city_id=settings.DEFAULT_CITY_CODE)
-    client.login(student)
-    url = reverse('study:course_list')
-    response = client.get(url)
-    assert response.status_code == 302
-    assert "login" in response["Location"]
-    # active student
-    active_student = StudentFactory(city_id=settings.DEFAULT_CITY_CODE)
-    client.login(active_student)
-    response = client.get(url)
-    assert response.status_code == 200

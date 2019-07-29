@@ -158,13 +158,23 @@ def enroll_in_course_by_invitation(user, enrollment_invitation):
     return enroll_in_course(user, enrollment_invitation.course)
 
 
+@rules.predicate
+def is_not_expelled(user):
+    return user.status != StudentStatuses.EXPELLED
+
+
 add_perm("learning.view_study_menu")
 add_perm("learning.view_teaching_menu")
 add_perm("learning.view_course_news", view_course_news)
 # TODO: Where should live permission below?
 add_perm("learning.view_course_reviews", view_course_reviews)
-add_perm("learning.view_own_enrollments")
-add_perm("learning.view_own_assignments")
+add_perm("study.view_own_enrollments", is_not_expelled)
+add_perm("study.view_own_assignments", is_not_expelled)
+# FIXME: если такое же название дать преподу, то там нельзя чекать статус и вообще, это разные разделы же. Надо больше чекать прав. Мб view_teaching/view_study ?
+add_perm("study.view_schedule", is_not_expelled)
+add_perm("study.view_courses", is_not_expelled)
+add_perm("study.view_internships", is_not_expelled)
+add_perm("study.view_faq", is_not_expelled)
 add_perm("learning.enroll_in_course", enroll_in_course)
 add_perm("learning.enroll_in_course_by_invitation", enroll_in_course_by_invitation)
 add_perm("learning.leave_course", leave_course)

@@ -93,7 +93,7 @@ class StudyProgram(TimeStampedModel):
             (StudyProgram.objects
              .filter(is_active=True,
                      academic_discipline_id=self.academic_discipline_id,
-                     branch_id=self.branch_id)
+                     branch=self.branch)
              .exclude(pk=self.pk)
              .update(is_active=False))
 

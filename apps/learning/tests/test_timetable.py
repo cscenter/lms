@@ -1,6 +1,7 @@
 import pytest
 from dateutil.relativedelta import relativedelta
 
+from auth.mixins import PermissionRequiredMixin
 from core.timezone import now_local
 from core.urls import reverse
 from courses.calendar import WeekEventsCalendar, MonthEventsCalendar
@@ -67,21 +68,11 @@ def test_teacher_timetable(client):
 
 
 @pytest.mark.django_db
-def test_student_timetable_security(client, assert_login_redirect):
-    allowed = [CuratorFactory, StudentFactory]
+def test_student_timetable_view_security(client, lms_resolver):
     timetable_url = reverse('study:timetable')
-    for factory_class in allowed:
-        user = factory_class(city_id='spb')
-        client.login(user)
-        response = client.get(timetable_url)
-        assert response.status_code == 200
-        client.logout()
-    denied = [TeacherFactory]
-    for factory_class in denied:
-        user = factory_class(city_id='spb')
-        client.login(user)
-        assert_login_redirect(timetable_url, method='get')
-        client.logout()
+    resolver = lms_resolver(timetable_url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == "study.view_schedule"
 
 
 @pytest.mark.django_db

@@ -287,7 +287,7 @@ class OnCampusProgramsView(generic.TemplateView):
                             .filter(is_active=True,
                                     branch__is_remote=False)
                             .select_related("branch", "academic_discipline")
-                            .order_by("branch_id",
+                            .order_by("branch",
                                       "academic_discipline__name_ru"))
         current_programs = bucketize(current_programs, key=lambda sp: sp.branch)
         tabs = TabList()
