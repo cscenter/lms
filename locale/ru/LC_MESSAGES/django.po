@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-07-17 12:54+0000\n"
-"PO-Revision-Date: 2019-07-17 12:56+0000\n"
+"PO-Revision-Date: 2019-07-30 11:18+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -934,13 +934,12 @@ msgstr "Добавить комментарий"
 
 #: apps/learning/forms.py:47
 msgid "Either text or file should be non-empty"
-msgstr "Требуется текст либо приложенный файл"
+msgstr "Требуется текст или приложенный файл"
 
 #: apps/learning/forms.py:71
-#, fuzzy
 #| msgid "Either text or file should be non-empty"
 msgid "Text should be non-empty"
-msgstr "Требуется текст либо приложенный файл"
+msgstr "Требуется текст"
 
 #: apps/learning/forms.py:99
 #, python-brace-format

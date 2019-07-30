@@ -13,7 +13,9 @@ class Roles(DjangoChoices):
         "learning.view_course_news",
         "learning.view_course_reviews",
         "study.view_own_enrollments",
-        "study.view_own_assignments",
+        "study.view_assignments",
+        "study.view_own_assignment",
+        "study.create_assignment_comment",
         "study.view_courses",
         "study.view_schedule",
         "study.view_faq",
@@ -28,9 +30,11 @@ class Roles(DjangoChoices):
         "courses.can_view_contacts",
         "courses.can_view_assignments",
         "learning.view_course_news",
+        "teaching.create_assignment_comment",
     ))
     GRADUATE = C(3, _('Graduate'), permissions=(
         "study.view_own_enrollments",
+        "study.view_own_assignment",
     ))
     VOLUNTEER = C(4, _('Volunteer'), permissions=(
         "learning.view_study_menu",
@@ -39,7 +43,9 @@ class Roles(DjangoChoices):
         "learning.view_course_news",
         "learning.view_course_reviews",
         "study.view_own_enrollments",
-        "study.view_own_assignments",
+        "study.view_assignments",
+        "study.view_own_assignment",
+        "study.create_assignment_comment",
         "study.view_courses",
         "study.view_schedule",
         "study.view_faq",
@@ -56,6 +62,7 @@ class Roles(DjangoChoices):
         "learning.view_course_news",
         "learning.view_course_reviews",
         "study.view_library",
+        "teaching.create_assignment_comment",
     ))
     INVITED = C(11, _('Invited User'), permissions=(
         "learning.view_study_menu",
@@ -64,7 +71,9 @@ class Roles(DjangoChoices):
         "learning.view_course_news",
         "learning.view_course_reviews",
         "study.view_own_enrollments",
-        "study.view_own_assignments",
+        "study.view_assignments",
+        "study.view_own_assignment",
+        "study.create_assignment_comment",
         "study.view_courses",
         "study.view_schedule",
         "study.view_faq",

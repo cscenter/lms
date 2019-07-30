@@ -1,12 +1,9 @@
 import logging
-from typing import Dict
 
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 
 from courses.models import Course
-from courses.utils import semester_slug_re
-
 
 logger = logging.getLogger(__name__)
 

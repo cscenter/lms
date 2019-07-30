@@ -147,9 +147,10 @@ def test_security_assignmentstudent_detail(client, assert_login_redirect):
                                    grade=GradeTypes.UNSATISFACTORY)
     a = AssignmentFactory(course=co)
     a_s = StudentAssignment.objects.get(student=student, assignment=a)
-    url = a_s.get_student_url()
+    student_url = a_s.get_student_url()
     client.login(student)
-    assert_login_redirect(url, method='get')
+    response = client.get(student_url)
+    assert response.status_code == 403
     # Teacher still can view student assignment
     client.login(teacher)
     response = client.get(a_s.get_teacher_url())

@@ -100,9 +100,8 @@
         {% endfor %}
         </ul>
       {% endif %}
-        {% if request.user.is_active_student or is_actual_teacher or request.user.is_curator %}
-            <div class="csc-well">{% crispy form %}</div>
-        {% endif %}
+
+        <div class="csc-well">{% crispy form %}</div>
     </div>
 
         <div class="col-xs-3">

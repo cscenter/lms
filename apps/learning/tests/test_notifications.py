@@ -58,6 +58,11 @@ class NotificationTests(CSCTestCase):
                .filter(assignment=a, student=student)
                .get())
         student_url = a_s.get_student_url()
+        student_create_comment_url = reverse("study:assignment_comment_create",
+                                             kwargs={"pk": a_s.pk})
+        teacher_create_comment_url = reverse(
+            "teaching:assignment_comment_create",
+            kwargs={"pk": a_s.pk})
         teacher_url = a_s.get_teacher_url()
         student_list_url = reverse('study:assignment_list', args=[])
         teacher_list_url = reverse('teaching:assignment_list', args=[])
@@ -67,7 +72,7 @@ class NotificationTests(CSCTestCase):
         # Post first comment on assignment
         assert not course_failed_by_student(co, student)
         self.client.login(student)
-        self.client.post(student_url, student_comment_dict)
+        self.client.post(student_create_comment_url, student_comment_dict)
         # FIXME(Dmitry): this should not affect this test, fix&remove
         self.client.get(student_url)
         self.assertEqual(2, (AssignmentNotification.objects
@@ -88,7 +93,7 @@ class NotificationTests(CSCTestCase):
         assert len(self._get_unread(teacher_list_url).assignments) == 1
 
         # One of teachers answered
-        self.client.post(teacher_url, teacher_comment_dict)
+        self.client.post(teacher_create_comment_url, teacher_comment_dict)
         unread_msgs_for_student = (AssignmentNotification.objects
                               .filter(user=student,
                                       is_unread=True,
@@ -97,7 +102,7 @@ class NotificationTests(CSCTestCase):
         assert unread_msgs_for_student == 1
         self.client.login(student)
         assert len(self._get_unread(student_list_url).assignments) == 1
-        self.client.post(student_url, student_comment_dict)
+        self.client.post(student_create_comment_url, student_comment_dict)
         unread_msgs_for_teacher1 = (AssignmentNotification.objects
                                     .filter(is_about_passed=False,
                                             user=teacher1,
@@ -151,8 +156,10 @@ def test_assignment_notify_teachers_public_form(client):
     assert not course_failed_by_student(co, student)
     client.login(student)
     sa = StudentAssignment.objects.get(assignment=assignment, student=student)
-    sa_url = sa.get_student_url()
-    client.post(sa_url, {'text': 'test first comment'})
+    student_create_comment_url = reverse("study:assignment_comment_create",
+                                         kwargs={"pk": sa.pk})
+    client.post(student_create_comment_url,
+                {'text': 'test first comment'})
     notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
     # 1 - about assignment creation and 3 for teachers
     assert len(notifications) == 4
@@ -160,7 +167,8 @@ def test_assignment_notify_teachers_public_form(client):
     AssignmentNotification.objects.all().delete()
     not_notify_teacher = assignment.notify_teachers.all()[0]
     assignment.notify_teachers.remove(not_notify_teacher)
-    client.post(sa_url, {'text': 'second comment from student'})
+    client.post(student_create_comment_url,
+                {'text': 'second comment from student'})
     notifications = [n.user.pk for n in AssignmentNotification.objects.all()]
     assert len(notifications) == 2
     assert not_notify_teacher not in notifications

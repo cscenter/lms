@@ -3,14 +3,16 @@ import logging
 import os
 import posixpath
 
-from braces.views import UserPassesTestMixin
-from django.db.models import Prefetch, prefetch_related_objects
+from django.contrib import messages
+from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Prefetch
 from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
-    HttpResponseForbidden, HttpResponseNotFound, JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+    HttpResponseForbidden, HttpResponseNotFound, JsonResponse, \
+    HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.views import generic
 from nbconvert import HTMLExporter
-from vanilla import CreateView, TemplateView
+from vanilla import TemplateView, CreateView
 
 from core import comment_persistence
 from core.utils import hashids
@@ -35,47 +37,65 @@ __all__ = (
 )
 
 
-class AssignmentSubmissionBaseView(UserPassesTestMixin, CreateView):
+class StudentAssignmentURLParamsMixin:
+    """
+    Fetches student assignment by URL params and attaches it to the view kwargs.
+    """
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.student_assignment: StudentAssignment = get_object_or_404(
+            self.get_student_assignment_queryset())
+
+    def get_student_assignment_queryset(self):
+        return (StudentAssignment.objects
+                .filter(pk=self.kwargs['pk'])
+                .select_related('student',
+                                'assignment',
+                                'assignment__course',
+                                'assignment__course__meta_course',
+                                'assignment__course__semester'))
+
+
+class AssignmentCommentBaseCreateView(StudentAssignmentURLParamsMixin,
+                                      CreateView):
+    http_method_names = ('post', 'put')
     model = AssignmentComment
     form_class = AssignmentCommentForm
 
-    def test_func(self, user):
-        return user.is_authenticated
+    def form_valid(self, form):
+        comment = form.save(commit=False)
+        comment.student_assignment = self.student_assignment
+        comment.author = self.request.user
+        comment.save()
+        comment_persistence.report_saved(comment.text)
+        return HttpResponseRedirect(self.get_success_url())
 
-    def dispatch(self, request, *args, **kwargs):
-        sa = (StudentAssignment.objects
-              .filter(pk=self.kwargs['pk'])
-              .select_related('student',
-                              'assignment',
-                              'assignment__course',
-                              'assignment__course__meta_course',
-                              'assignment__course__semester')
-              .first())
-        if not sa:
-            raise Http404
-        if not self.has_access(request.user, sa):
-            return self.handle_no_permission(request)
-        self.student_assignment = sa
-        return super().dispatch(request, *args, **kwargs)
+    def form_invalid(self, form):
+        msg = "<br>".join("<br>".join(errors) for errors in
+                          form.errors.values())
+        messages.error(self.request, "Данные не сохранены!<br>" + msg)
+        redirect_to = self.get_error_url()
+        return HttpResponseRedirect(redirect_to)
 
-    def has_access(self, user, student_assignment: StudentAssignment):
-        return False
+    def get_error_url(self):
+        return self.get_success_url()
 
-    @staticmethod
-    def _prefetch_data(student_assignment):
+
+class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
+                                   TemplateView):
+
+    def get_student_assignment_queryset(self):
+        qs = super().get_student_assignment_queryset()
         prefetch_comments = Prefetch('assignmentcomment_set',
                                      queryset=(AssignmentComment.objects
                                                .select_related('author')
                                                .order_by('created')))
-        prefetch_related_objects((student_assignment,),
-                                 prefetch_comments,
-                                 'assignment__course__teachers',
-                                 'assignment__assignmentattachment_set')
+        return qs.prefetch_related(prefetch_comments,
+                                   'assignment__course__teachers',
+                                   'assignment__assignmentattachment_set')
 
-    def get_context_data(self, form, **kwargs):
+    def get_context_data(self, **kwargs):
         sa = self.student_assignment
-        # Prefetch data here since no need to do it for valid POST submissions
-        self._prefetch_data(sa)
         # Not sure if it's the best place for this, but it's the simplest one
         user = self.request.user
         (AssignmentNotification.unread
@@ -89,21 +109,12 @@ class AssignmentSubmissionBaseView(UserPassesTestMixin, CreateView):
         first_comment_after_deadline = next(cs_after_deadline, None)
         context = {
             'a_s': sa,
-            'form': form,
             'timezone': sa.assignment.course.get_city_timezone(),
             'first_comment_after_deadline': first_comment_after_deadline,
             'one_teacher': sa.assignment.course.teachers.count() == 1,
             'hashes_json': comment_persistence.get_hashes_json()
         }
         return context
-
-    def form_valid(self, form):
-        comment = form.save(commit=False)
-        comment.student_assignment = self.student_assignment
-        comment.author = self.request.user
-        comment.save()
-        comment_persistence.report_saved(comment.text)
-        return redirect(self.get_success_url())
 
 
 class EventDetailView(generic.DetailView):

@@ -73,13 +73,6 @@ class EnrollmentAdmin(admin.ModelAdmin):
     grade_changed_local.admin_order_field = 'grade_changed'
     grade_changed_local.short_description = _("Enrollment|grade changed")
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'student':
-            kwargs['queryset'] = (User.objects
-                                  .has_role(Roles.STUDENT,
-                                            Roles.VOLUNTEER))
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
 
 class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     list_display = ['student', 'assignment', 'score', 'score_changed', 'state']
