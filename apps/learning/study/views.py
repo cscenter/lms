@@ -70,7 +70,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, ListView):
     model = StudentAssignment
     context_object_name = 'assignment_list'
     template_name = "learning/study/assignment_list.html"
-    permission_required = "study.view_assignments"
+    permission_required = "study.view_own_assignments"
 
     def get_queryset(self):
         current_semester = Semester.get_current()
