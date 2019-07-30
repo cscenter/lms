@@ -96,6 +96,12 @@ class Enrollment(TimeStampedModel):
     reason_leave = models.TextField(
         _("Leave reason"),
         blank=True)
+    invitation = models.ForeignKey(
+        'learning.Invitation',
+        verbose_name=_("Invitation"),
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True)
 
     objects = EnrollmentDefaultManager()
     active = EnrollmentActiveManager()

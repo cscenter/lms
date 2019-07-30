@@ -2,7 +2,7 @@ from django.conf.urls import include
 from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
-from learning.invitation.views import CourseInvitationEnrollView
+from learning.views import CourseInvitationEnrollView
 from learning.study.views import UsefulListView, InternshipListView, \
     HonorCodeView
 from .views import EventDetailView, CourseNewsNotificationUpdate, \

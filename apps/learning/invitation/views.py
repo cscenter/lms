@@ -2,24 +2,20 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
-from django.http import HttpResponseRedirect, Http404, HttpResponseForbidden
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from registration.backends.default.views import RegistrationView, ActivationView
-from vanilla import TemplateView, GenericView
+from vanilla import TemplateView
 
 from auth.tasks import send_activation_email, ActivationEmailContext
 from auth.views import LoginView
-from core.exceptions import Redirect
 from core.urls import reverse
-from courses.views.mixins import CourseURLParamsMixin
 from learning.invitation.forms import InvitationLoginForm, \
     InvitationRegistrationForm
-from learning.models import Invitation, EnrollmentInvitation
+from learning.models import Invitation
 from learning.roles import Roles
-from learning.services import EnrollmentService, AlreadyEnrolled, \
-    CourseCapacityFull
 
 
 class InvitationParamMixin:
@@ -134,34 +130,3 @@ class InvitationActivationView(InvitationParamMixin, ActivationView):
         messages.success(self.request, _("Учетная запись активирована."),
                          extra_tags='timeout')
         return self.invitation.get_absolute_url()
-
-
-class CourseInvitationEnrollView(CourseURLParamsMixin, GenericView):
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        qs = (EnrollmentInvitation.objects
-              .select_related('invitation')
-              .filter(token=kwargs['course_token'], course=self.course))
-        course_invitation = get_object_or_404(qs)
-        invitation = course_invitation.invitation
-        if not user.has_perm("learning.enroll_in_course_by_invitation",
-                             course_invitation):
-            if self.course.is_capacity_limited and not self.course.places_left:
-                msg = _("No places available, sorry")
-                messages.error(request, msg, extra_tags='timeout')
-                raise Redirect(to=invitation.get_absolute_url())
-            return HttpResponseForbidden()
-        try:
-            EnrollmentService.enroll(user, self.course, reason_entry='')
-            msg = _("You are successfully enrolled in the course")
-            messages.success(self.request, msg, extra_tags='timeout')
-            redirect_to = self.course.get_absolute_url()
-        except AlreadyEnrolled:
-            msg = _("You are already enrolled in the course")
-            messages.warning(request, msg, extra_tags='timeout')
-            redirect_to = self.course.get_absolute_url()
-        except CourseCapacityFull:
-            msg = _("No places available, sorry")
-            messages.error(request, msg, extra_tags='timeout')
-            redirect_to = invitation.get_absolute_url()
-        raise Redirect(to=redirect_to)

@@ -202,7 +202,7 @@ add_perm("learning.view_course_reviews", view_course_reviews)
 add_perm("study.view_library", is_not_expelled)
 add_perm("study.view_own_enrollments", is_not_expelled)
 # FIXME: возможно, view_assignments надо отдать куратору и преподавателю. А студенту явный view_own_assignments. Но, блин, этот дурацкий случай для отчисленных студентов :< И own ничего не чекает, никакой бизнес-логики на самом деле не приаттачено(((((((((
-add_perm("study.view_assignments", is_not_expelled)
+add_perm("study.view_own_assignments", is_not_expelled)
 add_perm("study.view_own_assignment", view_own_assignment)
 add_perm("study.view_schedule", is_not_expelled)
 add_perm("study.view_courses", is_not_expelled)
