@@ -3,8 +3,10 @@ from enum import Enum, auto
 import rules
 
 from auth.permissions import add_perm
+from core.exceptions import Redirect
 from core.utils import is_club_site
 from courses.models import Course
+from learning.models import StudentAssignment
 from learning.settings import StudentStatuses
 from learning.utils import course_failed_by_student
 from users.constants import Roles as UserRoles
@@ -163,6 +165,35 @@ def is_not_expelled(user):
     return user.status != StudentStatuses.EXPELLED
 
 
+@rules.predicate
+def create_assignment_comment(user, student_assignment: StudentAssignment):
+    if user.status == StudentStatuses.EXPELLED:
+        return False
+    return student_assignment.student_id == user.id
+
+
+@rules.predicate
+def view_own_assignment(user, student_assignment: StudentAssignment):
+    if user.id != student_assignment.student_id:
+        return False
+
+    course = student_assignment.assignment.course
+    is_student_expelled = (user.status == StudentStatuses.EXPELLED)
+    if not is_student_expelled and not course_failed_by_student(course, user):
+        return True
+    # If student failed the course or was expelled at all, deny
+    # access only when he has no submissions or positive
+    # grade on assignment
+    # XXX: Take into account only student comments since only
+    # they could be treated as `submission`.
+    return student_assignment.has_comments(user) or student_assignment.score
+
+
+@rules.predicate
+def create_assignment_comment_teacher(user, sa: StudentAssignment):
+    return user in sa.assignment.course.teachers.all()
+
+
 add_perm("learning.view_study_menu")
 add_perm("learning.view_teaching_menu")
 add_perm("learning.view_course_news", view_course_news)
@@ -170,12 +201,15 @@ add_perm("learning.view_course_news", view_course_news)
 add_perm("learning.view_course_reviews", view_course_reviews)
 add_perm("study.view_library", is_not_expelled)
 add_perm("study.view_own_enrollments", is_not_expelled)
-add_perm("study.view_own_assignments", is_not_expelled)
-# FIXME: если такое же название дать преподу, то там нельзя чекать статус и вообще, это разные разделы же. Надо больше чекать прав. Мб view_teaching/view_study ?
+# FIXME: возможно, view_assignments надо отдать куратору и преподавателю. А студенту явный view_own_assignments. Но, блин, этот дурацкий случай для отчисленных студентов :< И own ничего не чекает, никакой бизнес-логики на самом деле не приаттачено(((((((((
+add_perm("study.view_assignments", is_not_expelled)
+add_perm("study.view_own_assignment", view_own_assignment)
 add_perm("study.view_schedule", is_not_expelled)
 add_perm("study.view_courses", is_not_expelled)
 add_perm("study.view_internships", is_not_expelled)
 add_perm("study.view_faq", is_not_expelled)
+add_perm("study.create_assignment_comment", create_assignment_comment)
+add_perm("teaching.create_assignment_comment", create_assignment_comment_teacher)
 add_perm("learning.enroll_in_course", enroll_in_course)
 add_perm("learning.enroll_in_course_by_invitation", enroll_in_course_by_invitation)
 add_perm("learning.leave_course", leave_course)

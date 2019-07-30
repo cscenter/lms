@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 import datetime
 import logging
-from urllib.parse import urlparse
 
 import pytest
 import pytz
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.urls import resolve
 from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
@@ -18,6 +16,7 @@ from core.urls import city_aware_reverse, reverse
 from courses.models import Course
 from courses.tests.factories import *
 from courses.utils import get_current_term_pair
+from learning.settings import Branches
 from learning.tests.factories import *
 from users.constants import Roles
 from users.tests.factories import UserFactory, StudentFactory, TeacherFactory, \
@@ -32,7 +31,10 @@ from .mixins import *
 # TODO: test assignment deadline
 
 
-class GroupSecurityCheckMixin(MyUtilitiesMixin):
+class CourseListTeacherTests(MyUtilitiesMixin, CSCTestCase):
+    url_name = 'teaching:course_list'
+    groups_allowed = [Roles.TEACHER]
+
     def test_group_security(self):
         """
         Checks if only users in groups listed in self.groups_allowed can
@@ -57,12 +59,6 @@ class GroupSecurityCheckMixin(MyUtilitiesMixin):
             self.client.logout()
         self.doLogin(CuratorFactory(city_id='spb'))
         self.assertStatusCode(200, self.url_name)
-
-
-class CourseListTeacherTests(GroupSecurityCheckMixin,
-                             MyUtilitiesMixin, CSCTestCase):
-    url_name = 'teaching:course_list'
-    groups_allowed = [Roles.TEACHER]
 
 
 class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
@@ -170,9 +166,9 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = a_s.get_student_url()
-        assert self.client.get(url).status_code == 302
-        self.assertLoginRedirect(url)
+        student_url = a_s.get_student_url()
+        assert self.client.get(student_url).status_code == 302
+        self.assertLoginRedirect(student_url)
         test_groups = [
             [],
             [Roles.TEACHER],
@@ -180,18 +176,15 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
-            if not groups:
-                assert self.client.get(url).status_code == 302
-            else:
-                self.assertLoginRedirect(url)
+            assert self.client.get(student_url).status_code == 403
             self.doLogout()
         self.doLogin(student)
-        assert self.client.get(url).status_code == 200
+        assert self.client.get(student_url).status_code == 200
         # Change student to graduate, make sure they have access to HW
         student.groups.all().delete()
         student.add_group(Roles.GRADUATE)
         student.save()
-        self.assertEqual(200, self.client.get(url).status_code)
+        self.assertEqual(200, self.client.get(student_url).status_code)
 
     def test_assignment_contents(self):
         student = StudentFactory(city_id='spb')
@@ -234,18 +227,23 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = a_s.get_student_url()
+        student_url = a_s.get_student_url()
+        create_comment_url = reverse("study:assignment_comment_create",
+                                     kwargs={"pk": a_s.pk})
         comment_dict = {'text': "Test comment without file"}
         self.doLogin(student)
-        self.assertRedirects(self.client.post(url, comment_dict), url)
-        self.assertContains(self.client.get(url), comment_dict['text'])
+        self.assertRedirects(self.client.post(create_comment_url, comment_dict),
+                             student_url)
+        response = self.client.get(student_url)
+        assert smart_bytes(comment_dict['text']) in response.content
         f = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
         comment_dict = {'text': "Test comment with file",
                         'attached_file': f}
-        self.assertRedirects(self.client.post(url, comment_dict), url)
-        resp = self.client.get(url)
-        self.assertContains(resp, comment_dict['text'])
-        self.assertContains(resp, 'attachment1')
+        self.assertRedirects(self.client.post(create_comment_url, comment_dict),
+                             student_url)
+        response = self.client.get(student_url)
+        assert smart_bytes(comment_dict['text']) in response.content
+        assert smart_bytes('attachment1') in response.content
 
 
 class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
@@ -258,9 +256,9 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = a_s.get_teacher_url()
-        assert self.client.get(url).status_code == 302
-        self.assertLoginRedirect(url)
+        teacher_url = a_s.get_teacher_url()
+        assert self.client.get(teacher_url).status_code == 302
+        self.assertLoginRedirect(teacher_url)
         # Test GET
         test_groups = [
             [],
@@ -268,18 +266,16 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
             [Roles.STUDENT],
         ]
         for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups))
-            if groups == [Roles.TEACHER]:
-                self.assertLoginRedirect(url)
-            else:
-                assert self.client.get(url).status_code == 302
+            self.doLogin(UserFactory.create(groups=groups,
+                                            city_id=Branches.SPB))
+            response = self.client.get(teacher_url)
+            assert response.status_code == 403
             self.doLogout()
         self.doLogin(teacher)
-        self.assertEqual(200, self.client.get(url).status_code)
+        assert self.client.get(teacher_url).status_code == 200
         self.doLogout()
         self.doLogin(student)
-        assert self.client.get(url).status_code == 302
-        self.assertLoginRedirect(url)
+        assert self.client.get(teacher_url).status_code == 403
         self.doLogout()
         # Test POST
         grade_dict = {'grading_form': True, 'score': 3}
@@ -289,34 +285,34 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
             [Roles.STUDENT]
         ]
         for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups))
-            if groups == [Roles.TEACHER]:
-                self.assertPOSTLoginRedirect(url, grade_dict)
-            else:
-                assert self.client.get(url).status_code == 302
+            self.doLogin(UserFactory.create(groups=groups,
+                                            city_id=Branches.SPB))
+            assert self.client.get(teacher_url).status_code == 403
             self.doLogout()
 
     def test_comment(self):
         teacher = TeacherFactory()
-        student = StudentFactory()
-        co = CourseFactory.create(teachers=[teacher])
-        EnrollmentFactory.create(student=student, course=co)
-        a = AssignmentFactory.create(course=co)
+        enrollment = EnrollmentFactory(course__teachers=[teacher])
+        student = enrollment.student
+        a = AssignmentFactory.create(course=enrollment.course)
         a_s = (StudentAssignment.objects
                .filter(assignment=a, student=student)
                .get())
-        url = a_s.get_teacher_url()
-        comment_dict = {'text': "Test comment without file"}
+        teacher_url = a_s.get_teacher_url()
+        create_comment_url = reverse("teaching:assignment_comment_create",
+                                     kwargs={"pk": a_s.pk})
+        form_dict = {'text': "Test comment without file"}
         self.doLogin(teacher)
-        self.assertRedirects(self.client.post(url, comment_dict), url)
-        self.assertContains(self.client.get(url), comment_dict['text'])
+        self.assertRedirects(self.client.post(create_comment_url, form_dict), teacher_url)
+        response = self.client.get(teacher_url)
+        assert smart_bytes(form_dict['text']) in response.content
         f = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
-        comment_dict = {'text': "Test comment with file",
-                        'attached_file': f}
-        self.assertRedirects(self.client.post(url, comment_dict), url)
-        resp = self.client.get(url)
-        self.assertContains(resp, comment_dict['text'])
-        self.assertContains(resp, 'attachment1')
+        form_dict = {'text': "Test comment with file",
+                     'attached_file': f}
+        self.assertRedirects(self.client.post(create_comment_url, form_dict), teacher_url)
+        response = self.client.get(teacher_url)
+        assert smart_bytes(form_dict['text']) in response.content
+        assert smart_bytes('attachment1') in response.content
 
     def test_grading(self):
         teacher = TeacherFactory()
@@ -369,8 +365,6 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         assert self.client.get(url1).context['next_student_assignment'] == a_s2
         assert self.client.get(url2).context['next_student_assignment'] == a_s1
 
-
-# Ok, py.test starts here
 
 @pytest.mark.django_db
 def test_events_smoke(client):

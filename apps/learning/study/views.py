@@ -1,14 +1,20 @@
 from typing import Iterable
 
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.views import redirect_to_login
 from django.db.models import Q, Prefetch
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from isoweek import Week
-from vanilla import ListView
+from vanilla import ListView, CreateView
 
 from auth.mixins import PermissionRequiredMixin
+from core import comment_persistence
 from core.exceptions import Redirect
+from core.urls import reverse
 from core.utils import is_club_site
 from courses.calendar import CalendarEvent
 from courses.models import CourseClass, Semester, Course
@@ -17,10 +23,15 @@ from courses.utils import get_current_term_pair, get_term_index
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
 from learning.calendar import get_month_events
+from learning.forms import AssignmentCommentForm
 from learning.internships.models import Internship
-from learning.models import Useful, StudentAssignment, Enrollment
+from learning.models import Useful, StudentAssignment, Enrollment, \
+    AssignmentComment
 from learning.permissions import course_access_role, CourseRole
+from learning.roles import Roles
 from learning.views import AssignmentSubmissionBaseView
+from learning.views.views import StudentAssignmentURLParamsMixin, \
+    AssignmentCommentBaseCreateView
 from users.models import User
 from users.utils import get_student_city_code
 
@@ -59,7 +70,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, ListView):
     model = StudentAssignment
     context_object_name = 'assignment_list'
     template_name = "learning/study/assignment_list.html"
-    permission_required = "study.view_own_assignments"
+    permission_required = "study.view_assignments"
 
     def get_queryset(self):
         current_semester = Semester.get_current()
@@ -100,50 +111,43 @@ class StudentAssignmentListView(PermissionRequiredMixin, ListView):
         return context
 
 
-class StudentAssignmentDetailView(AssignmentSubmissionBaseView):
+class StudentAssignmentDetailView(PermissionRequiredMixin,
+                                  AssignmentSubmissionBaseView):
     template_name = "learning/study/student_assignment_detail.html"
 
-    def test_func(self, user):
-        # Expelled student can't send new submissions or comments
-        if self.request.method == "POST":
-            is_student = user.is_active_student
-        else:
-            is_student = user.is_student or user.is_volunteer
-        return (is_student or user.is_curator or user.is_graduate or
-                user.is_teacher)
-
-    def has_access(self, user, student_assignment):
-        sa = student_assignment
-        course = student_assignment.assignment.course
-        role = course_access_role(course=course, user=user)
-        if role == CourseRole.CURATOR:
+    def has_permission(self):
+        user = self.request.user
+        if user.has_perm("study.view_own_assignment", self.student_assignment):
             return True
-        elif role == CourseRole.TEACHER and user in course.teachers.all():
+        course = self.student_assignment.assignment.course
+        if Roles.TEACHER in user.roles and user in course.teachers.all():
             # Redirects actual course teacher to the teaching/ section
-            raise Redirect(to=sa.get_teacher_url())
-        elif sa.student == user:
-            if role == CourseRole.STUDENT_RESTRICT:
-                # If student failed the course or was expelled at all, deny
-                # access only when he has no submissions or positive
-                # grade on assignment
-                # XXX: Take into account only student comments since only
-                # they could be treated as `submission`.
-                return sa.has_comments(user) or sa.score
-            else:
-                return role == CourseRole.STUDENT_REGULAR
-        return False
+            raise Redirect(to=self.student_assignment.get_teacher_url())
 
-    def get_context_data(self, form, **kwargs):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         sa = self.student_assignment
         user = self.request.user
-        context = super().get_context_data(form, **kwargs)
+        form = AssignmentCommentForm()
+        form.helper.form_action = reverse(
+            'study:assignment_comment_create',
+            kwargs={'pk': sa.pk})
         # Update `text` label if student has no submissions yet
         if sa.assignment.is_online and not sa.has_comments(self.request.user):
-            context['form'].fields.get('text').label = _("Add solution")
+            form.fields.get('text').label = _("Add solution")
+        context['form'] = form
         # Format datetime for online courses in student timezone
         if sa.assignment.course.is_correspondence:
             context['timezone'] = settings.TIME_ZONES[user.city_id]
         return context
+
+
+class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
+                                         AssignmentCommentBaseCreateView):
+    permission_required = "study.create_assignment_comment"
+
+    def get_permission_object(self):
+        return self.student_assignment
 
     def get_success_url(self):
         return self.student_assignment.get_student_url()

@@ -1,16 +1,11 @@
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
-from django.db.models import F, Value, TextField
-from django.db.models.functions import Concat
 from django.http import HttpResponseForbidden, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
-from django.utils.timezone import now
+from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import FormView
 
 from auth.mixins import PermissionRequiredMixin
-from core.constants import DATE_FORMAT_RU
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin

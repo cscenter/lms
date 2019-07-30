@@ -11,6 +11,7 @@ from django.views import generic
 from django.views.generic.edit import BaseUpdateView
 from vanilla import TemplateView
 
+from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.settings.base import FOUNDATION_YEAR
 from core.timezone import Timezone, CityCode
@@ -23,12 +24,13 @@ from courses.utils import get_terms_for_calendar_month, get_term_index, \
     get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from learning.calendar import get_month_events
-from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
+from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
+    AssignmentCommentForm
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole
 from learning.views import AssignmentSubmissionBaseView
-from learning.views.views import logger
+from learning.views.views import logger, AssignmentCommentBaseCreateView
 from users.mixins import TeacherOnlyMixin
 from users.utils import get_teacher_city_code
 
@@ -404,17 +406,19 @@ class AssignmentDetailView(TeacherOnlyMixin, generic.DetailView):
         return context
 
 
-class StudentAssignmentDetailView(TeacherOnlyMixin,
+class StudentAssignmentDetailView(PermissionRequiredMixin,
                                   AssignmentSubmissionBaseView):
     template_name = "learning/teaching/student_assignment_detail.html"
 
-    def has_access(self, user, student_assignment):
-        role = course_access_role(course=student_assignment.assignment.course,
-                                  user=user)
+    def has_permission(self):
+        user = self.request.user
+        course = self.student_assignment.assignment.course
+        # FIXME: replace with `has_perm`
+        role = course_access_role(course=course, user=user)
         return role in (CourseRole.TEACHER, CourseRole.CURATOR)
 
-    def get_context_data(self, form, **kwargs):
-        context = super().get_context_data(form, **kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         user = self.request.user
         a_s = self.student_assignment
         course = a_s.assignment.course
@@ -434,10 +438,14 @@ class StudentAssignmentDetailView(TeacherOnlyMixin,
         context['score_form'] = AssignmentScoreForm(
             initial={'score': a_s.score},
             maximum_score=a_s.assignment.maximum_score)
+        form = AssignmentCommentForm()
+        form.helper.form_action = reverse(
+            'teaching:assignment_comment_create',
+            kwargs={'pk': a_s.pk})
+        context['form'] = form
         return context
 
     def post(self, request, *args, **kwargs):
-        # TODO: separated update view
         if 'grading_form' in request.POST:
             a_s = self.student_assignment
             form = AssignmentScoreForm(request.POST,
@@ -468,8 +476,14 @@ class StudentAssignmentDetailView(TeacherOnlyMixin,
                 # it shouldn't happen, after all.
                 return HttpResponseBadRequest(_("Grading form is invalid") +
                                               "{}".format(form.errors))
-        else:
-            return super().post(request, *args, **kwargs)
+
+
+class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
+                                         AssignmentCommentBaseCreateView):
+    permission_required = "teaching.create_assignment_comment"
+
+    def get_permission_object(self):
+        return self.student_assignment
 
     def get_success_url(self):
         return self.student_assignment.get_teacher_url()

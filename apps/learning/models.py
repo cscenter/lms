@@ -109,11 +109,6 @@ class Enrollment(TimeStampedModel):
         return "{0} - {1}".format(smart_text(self.course),
                                   smart_text(self.student.get_full_name()))
 
-    def clean(self):
-        has_perm = self.student.is_student or self.student.is_volunteer
-        if not has_perm:
-            raise ValidationError(_("Only students can enroll to courses"))
-
     def save(self, *args, **kwargs):
         created = self.pk is None
         super().save(*args, **kwargs)
