@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load core_tags %}
+{% load override_url %}
 {% load static %}
 {% load render_bundle from webpack_loader %}
 {% load markdown from core_tags %}
@@ -54,8 +55,8 @@
 
             <h2>{{ profile_user.first_name }} {{ profile_user.patronymic }}<br>{{ profile_user.last_name }}
                 {% if user.is_curator %}
-                    <a href="{% url 'admin:users_user_change' profile_user.pk %}"
-                       target="_blank"><i class="fa fa-pencil-square-o"></i></a> <a title="Войти под пользователем" class="loginas-user" href="{% url 'loginas-user-login' profile_user.pk %}"><i class="fa fa-ils" aria-hidden="true"></i></a>
+                    <a href="{% url 'admin:users_user_change' object_id=profile_user.pk %}"
+                       target="_blank"><i class="fa fa-pencil-square-o"></i></a> <a title="Войти под пользователем" class="loginas-user" href="{% url 'loginas-user-login' user_id=profile_user.pk %}"><i class="fa fa-ils" aria-hidden="true"></i></a>
                 {% endif %}</h2>
 
             {% if profile_user.is_graduate %}
@@ -180,7 +181,7 @@
                                 {% endfor %}
                             </ul>
                         {% endif %}
-                        <a href="{% url 'user_reference_add' profile_user.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
+                        <a href="{% url 'user_reference_add' pk=profile_user.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
                     {% endif %}
 
                     {% with borrows=profile_user.borrows.all %}
@@ -443,22 +444,19 @@
                         <tr>
                             <td>{% trans "Classes" %}:</td>
                             <td>
-                                <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_classes' user.pk %}"
-                                       disabled="disabled">
+                                <input type="text" value="{% url 'user_ical_classes' pk=user.pk %}" disabled="disabled">
                             </td>
                         </tr>
                         <tr>
                             <td>{% trans "Assignments" %}:</td>
                             <td>
-                                <input type="text" value="http://{{ request.get_host }}{% url 'user_ical_assignments' user.pk %}"
-                                       disabled="disabled">
+                                <input type="text" value="{% url 'user_ical_assignments' pk=user.pk %}" disabled="disabled">
                             </td>
                         </tr>
                         <tr>
                             <td>{% trans "Events" %}:</td>
                             <td>
-                                <input type="text" value="http://{{ request.get_host }}{% url 'ical_events' %}"
-                                       disabled="disabled">
+                                <input type="text" value="{% url 'ical_events' %}" disabled="disabled">
                             </td>
                         </tr>
                         </tbody>
