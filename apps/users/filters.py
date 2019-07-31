@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db.models import Count, Case, When, Q, Value, F
+from django_filters.constants import EMPTY_VALUES
 from django_filters.rest_framework import BaseInFilter, NumberFilter, \
     FilterSet, CharFilter
 
@@ -14,8 +15,12 @@ class NumberInFilter(BaseInFilter, NumberFilter):
 
 class RolesInFilter(NumberInFilter):
     def filter(self, qs, value):
-        qs = super().filter(qs, value)
-        return qs.filter(group__site_id=settings.SITE_ID)
+        if value in EMPTY_VALUES:
+            return qs
+        return (qs
+                .filter(group__site_id=settings.SITE_ID,
+                        group__role__in=value)
+                .distinct())
 
 
 class CharInFilter(BaseInFilter, CharFilter):
@@ -26,6 +31,7 @@ class UserFilter(FilterSet):
     FILTERING_GROUPS = [
         Roles.VOLUNTEER,
         Roles.STUDENT,
+        Roles.INVITED,
         Roles.GRADUATE,
         Roles.MASTERS_DEGREE,
     ]

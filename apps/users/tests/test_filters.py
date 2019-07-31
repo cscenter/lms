@@ -180,8 +180,10 @@ def test_student_search_by_groups(client, curator, search_url):
     # All users below are considered as `studying` due to empty status
     StudentFactory.create_batch(2, required_groups__site_id=ANOTHER_DOMAIN_ID,)
     students = StudentFactory.create_batch(3, enrollment_year=2011,
+                                              curriculum_year=2011,
                                               status="", city_id='spb')
     volunteers = VolunteerFactory.create_batch(4, enrollment_year=2011,
+                                               curriculum_year=2011,
                                                status="", city_id='spb')
     # Empty results if no query provided
     response = client.get(search_url)
@@ -194,14 +196,13 @@ def test_student_search_by_groups(client, curator, search_url):
     response = client.get("{}?{}".format(search_url, "status=studying&groups="))
     json_data = response.json()
     assert json_data["count"] == len(students) + len(volunteers)
-    url_show_club_students = "{}?{}".format(
-        search_url, "groups={}".format(Roles.STUDENT))
-    response = client.get(url_show_club_students)
-    json_data = response.json()
-    # FIXME: What should I do here to fix it???
-    pytest.xfail(reason='Groups are not restricted right now. '
-                        'Struggling with django_filters')
-    assert json_data["count"] == 0
+    graduated = GraduateFactory(enrollment_year=2012, curriculum_year=2012,
+                                status="")
+    graduated.add_group(Roles.STUDENT, site_id=ANOTHER_DOMAIN_ID)
+    url = f"{search_url}?status=studying&groups={Roles.STUDENT}&curriculum_year=2011,2012"
+    response = client.get(url)
+    # Fail in case of multiple joins with users_user_groups table
+    assert response.json()["count"] == len(students)
 
 
 @pytest.mark.django_db
