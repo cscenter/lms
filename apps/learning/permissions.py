@@ -3,7 +3,6 @@ from enum import Enum, auto
 import rules
 
 from auth.permissions import add_perm
-from core.exceptions import Redirect
 from core.utils import is_club_site
 from courses.models import Course
 from learning.models import StudentAssignment, CourseInvitation
