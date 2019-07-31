@@ -10,7 +10,7 @@ from core.exceptions import Redirect
 from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import CourseEnrollmentForm
-from learning.models import Enrollment, EnrollmentInvitation
+from learning.models import Enrollment, CourseInvitation
 from learning.services import EnrollmentService, AlreadyEnrolled, \
     CourseCapacityFull
 
@@ -94,11 +94,11 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
-        qs = (EnrollmentInvitation.objects
+        qs = (CourseInvitation.objects
               .select_related('invitation')
               .filter(token=kwargs['course_token'],
                       course=self.course))
-        self.course_invitation: EnrollmentInvitation = get_object_or_404(qs)
+        self.course_invitation: CourseInvitation = get_object_or_404(qs)
 
     def has_permission(self):
         if super().has_permission():

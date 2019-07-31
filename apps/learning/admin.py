@@ -10,7 +10,7 @@ from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import Course
-from learning.models import GraduateProfile, Invitation, EnrollmentInvitation
+from learning.models import GraduateProfile, Invitation, CourseInvitation
 from users.constants import Roles
 from users.models import User
 from .models import AssignmentComment, Enrollment, Event, Useful, Branch
@@ -112,7 +112,7 @@ class GraduateProfileAdmin(admin.ModelAdmin):
 
 
 class CourseInlineAdmin(admin.TabularInline):
-    model = EnrollmentInvitation
+    model = CourseInvitation
     readonly_fields = ('token', )
     raw_id_fields = ('course',)
     extra = 0
