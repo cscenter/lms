@@ -151,7 +151,7 @@ class Enrollment(TimeStampedModel):
         return self.GRADES.values[self.grade]
 
 
-class EnrollmentInvitation(models.Model):
+class CourseInvitation(models.Model):
     invitation = models.ForeignKey(
         'learning.Invitation',
         verbose_name=_("Course Invitation"),
@@ -194,7 +194,7 @@ class Invitation(TimeStampedModel):
     token = models.CharField(verbose_name=_("Token"), max_length=128)
     courses = models.ManyToManyField(
         'courses.Course',
-        through=EnrollmentInvitation,
+        through=CourseInvitation,
         verbose_name=_("Courses"))
 
     class Meta:

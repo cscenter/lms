@@ -6,7 +6,7 @@ from auth.permissions import add_perm
 from core.exceptions import Redirect
 from core.utils import is_club_site
 from courses.models import Course
-from learning.models import StudentAssignment
+from learning.models import StudentAssignment, CourseInvitation
 from learning.settings import StudentStatuses
 from learning.utils import course_failed_by_student
 from users.constants import Roles as UserRoles
@@ -154,10 +154,10 @@ def leave_course(user, course: Course):
 
 
 @rules.predicate
-def enroll_in_course_by_invitation(user, enrollment_invitation):
-    if not enrollment_invitation.is_active:
+def enroll_in_course_by_invitation(user, course_invitation: CourseInvitation):
+    if not course_invitation.is_active:
         return False
-    return enroll_in_course(user, enrollment_invitation.course)
+    return enroll_in_course(user, course_invitation.course)
 
 
 @rules.predicate

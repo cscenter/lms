@@ -18,6 +18,9 @@ from learning.settings import StudentStatuses
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory
 
+# TODO: запись кем-то без группы INVITED.
+# TODO: после регистрации у чуваков есть необходимые поля и группы. Нужно ли тестить отправку email? вроде как асинхронно высылается, значит надо (мб моки уже есть в текстах клуба, хз)
+
 
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
 # TODO: Test volunteer can enroll!

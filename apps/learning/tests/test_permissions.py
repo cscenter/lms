@@ -5,10 +5,9 @@ import pytest
 from core.timezone import now_local
 from courses.models import Course
 from courses.tests.factories import CourseFactory, SemesterFactory
-from learning.permissions import course_access_role, CourseRole, \
-    has_master_degree
+from learning.permissions import course_access_role, CourseRole
 from learning.settings import StudentStatuses, GradeTypes, Branches
-from learning.tests.factories import EnrollmentFactory
+from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
 from users.constants import Roles
 from users.models import ExtendedAnonymousUser, User
 from users.tests.factories import CuratorFactory, TeacherFactory, \
@@ -19,103 +18,6 @@ def delete_enrollment_cache(user: User, course: Course):
     cache_attr_name = user.ENROLLMENT_CACHE_KEY.format(course.pk)
     if hasattr(user, cache_attr_name):
         delattr(user, cache_attr_name)
-
-
-@pytest.mark.django_db
-def test_user_permissions():
-    """
-    Tests properties based on groups:
-        * is_student
-        * is_volunteer
-        * is_graduate
-        * is_teacher
-    """
-    user = User(username="foo", email="foo@localhost.ru")
-    user.save()
-    assert not user.is_student
-    assert not user.is_volunteer
-    assert not user.is_teacher
-    assert not user.is_graduate
-    user = User(username="bar", email="bar@localhost.ru")
-    user.save()
-    user.add_group(Roles.STUDENT)
-    assert user.is_student
-    assert not user.is_volunteer
-    assert not user.is_teacher
-    assert not user.is_graduate
-    user = User(username="baz", email="baz@localhost.ru")
-    user.save()
-    user.add_group(Roles.STUDENT)
-    user.add_group(Roles.TEACHER)
-    assert user.is_student
-    assert not user.is_volunteer
-    assert user.is_teacher
-    assert not user.is_graduate
-    user = User(username="baq", email="baq@localhost.ru")
-    user.save()
-    user.add_group(Roles.STUDENT)
-    user.add_group(Roles.TEACHER)
-    user.add_group(Roles.GRADUATE)
-    assert user.is_student
-    assert not user.is_volunteer
-    assert user.is_teacher
-    assert user.is_graduate
-    user = User(username="zoo", email="zoo@localhost.ru")
-    user.save()
-    user.add_group(Roles.STUDENT)
-    user.add_group(Roles.TEACHER)
-    user.add_group(Roles.GRADUATE)
-    user.add_group(Roles.VOLUNTEER)
-    assert user.is_student
-    assert user.is_volunteer
-    assert user.is_teacher
-    assert user.is_graduate
-
-
-@pytest.mark.django_db
-def test_anonymous_user_permissions(client):
-    response = client.get("/")
-    request_user = response.wsgi_request.user
-    assert not request_user.is_authenticated
-    assert not request_user.is_student
-    assert not request_user.is_volunteer
-    assert not has_master_degree(request_user)
-    assert not request_user.is_teacher
-    assert not request_user.is_graduate
-    assert not request_user.is_curator
-    assert not request_user.is_interviewer
-
-
-@pytest.mark.django_db
-def test_request_user_permissions(client):
-    # Active student
-    student = StudentFactory(status='')
-    client.login(student)
-    response = client.get("/")
-    request_user = response.wsgi_request.user
-    assert request_user.is_authenticated
-    assert request_user.is_student
-    assert not request_user.is_volunteer
-    assert request_user.is_active_student
-    assert not has_master_degree(request_user)
-    assert not request_user.is_teacher
-    assert not request_user.is_graduate
-    assert not request_user.is_curator
-    assert not request_user.is_interviewer
-    # Expelled student
-    student.status = StudentStatuses.EXPELLED
-    student.save()
-    response = client.get("/")
-    request_user = response.wsgi_request.user
-    assert request_user.is_authenticated
-    assert request_user.is_student
-    assert not request_user.is_volunteer
-    assert not request_user.is_active_student
-    assert not has_master_degree(request_user)
-    assert not request_user.is_teacher
-    assert not request_user.is_graduate
-    assert not request_user.is_curator
-    assert not request_user.is_interviewer
 
 
 @pytest.mark.django_db
@@ -212,7 +114,7 @@ def test_enroll_in_course():
                            is_correspondence=False,
                            capacity=0)
     assert course.enrollment_is_open
-    student = StudentFactory(city_id='spb')
+    student = StudentFactory(city_id=Branches.SPB)
     assert student.status != StudentStatuses.EXPELLED
     assert student.has_perm("learning.enroll_in_course", course)
     # Enrollment is closed
@@ -259,3 +161,28 @@ def test_leave_course():
     student = User.objects.get(pk=student.pk)  # avoid cache
     assert not student.has_perm("learning.leave_course", course)
 
+
+@pytest.mark.django_db
+def test_enroll_in_course_by_invitation():
+    today = now_local(Branches.SPB)
+    yesterday = today - datetime.timedelta(days=1)
+    tomorrow = today + datetime.timedelta(days=1)
+    term = SemesterFactory.create_current(city_code=Branches.SPB,
+                                          enrollment_end_at=tomorrow.date())
+    course = CourseFactory(city=Branches.SPB, semester=term, is_open=False,
+                           is_correspondence=False,
+                           capacity=0)
+    assert course.enrollment_is_open
+    student = StudentFactory(city_id=Branches.SPB)
+    assert student.has_perm("learning.enroll_in_course", course)
+    course_invitation = CourseInvitationFactory(course=course)
+    assert student.has_perm("learning.enroll_in_course_by_invitation",
+                            course_invitation)
+    # Invitation activity depends on semester settings.
+    # Also this condition checked internally in `learning.enroll_in_course`
+    # predicate
+    course.semester.enrollment_end_at = yesterday.date()
+    course.semester.save()
+    assert not course.enrollment_is_open
+    assert not student.has_perm("learning.enroll_in_course_by_invitation",
+                                course_invitation)

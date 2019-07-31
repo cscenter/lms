@@ -18,7 +18,7 @@ from learning.models import Invitation
 from learning.roles import Roles
 
 
-class InvitationParamMixin:
+class InvitationURLParamsMixin:
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         qs = (Invitation.objects
@@ -28,7 +28,7 @@ class InvitationParamMixin:
             raise Http404
 
 
-class InvitationView(InvitationParamMixin, TemplateView):
+class InvitationView(InvitationURLParamsMixin, TemplateView):
     template_name = "learning/invitation/invitation_courses.html"
 
     def get(self, request, *args, **kwargs):
@@ -45,13 +45,13 @@ class InvitationView(InvitationParamMixin, TemplateView):
                               .select_related('course',
                                               'course__meta_course',
                                               'course__semester'))
-        # TODO: Count how many active inviattions.
         return {
+            'view': self,
             'invitations': course_invitations,
         }
 
 
-class InvitationLoginView(InvitationParamMixin, LoginView):
+class InvitationLoginView(InvitationURLParamsMixin, LoginView):
     form_class = InvitationLoginForm
     template_name = "learning/invitation/auth.html"
 
@@ -79,7 +79,7 @@ class InvitationLoginView(InvitationParamMixin, LoginView):
         return self.invitation.get_absolute_url()
 
 
-class InvitationRegisterView(InvitationParamMixin, RegistrationView):
+class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
     form_class = InvitationRegistrationForm
     SEND_ACTIVATION_EMAIL = False  # Prevent sending email on request
     template_name = "learning/invitation/registration.html"
@@ -123,7 +123,7 @@ class InvitationActivationCompleteView(TemplateView):
     template_name = 'learning/invitation/activation_complete.html'
 
 
-class InvitationActivationView(InvitationParamMixin, ActivationView):
+class InvitationActivationView(InvitationURLParamsMixin, ActivationView):
     template_name = 'learning/invitation/activation_fail.html'
 
     def get_success_url(self, user):

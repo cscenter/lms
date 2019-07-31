@@ -8,15 +8,16 @@ from django.utils import timezone
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    CourseNewsNotification, Event, Branch, GraduateProfile
+    CourseNewsNotification, Event, Branch, GraduateProfile, Invitation, \
+    CourseInvitation
 from learning.settings import Branches
 from users.constants import Roles
 from users.tests.factories import UserFactory, StudentFactory
 
 __all__ = ('StudentAssignmentFactory',
-           'AssignmentCommentFactory', 'EnrollmentFactory',
-           'AssignmentNotificationFactory', 'BranchFactory',
-           'CourseNewsNotificationFactory', 'EventFactory',
+           'AssignmentCommentFactory', 'EnrollmentFactory', 'InvitationFactory',
+           'CourseInvitationFactory', 'AssignmentNotificationFactory',
+           'BranchFactory', 'CourseNewsNotificationFactory', 'EventFactory',
            'StudentAssignment', 'Enrollment', 'AssignmentComment', 'Branch',
            'GraduateProfileFactory')
 
@@ -60,6 +61,29 @@ class EnrollmentFactory(factory.DjangoModelFactory):
     student = factory.SubFactory(StudentFactory)
     course = factory.SubFactory(CourseFactory,
                                 city_id=factory.SelfAttribute('..student.city_id'))
+
+
+class InvitationFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Invitation
+
+    name = factory.Sequence(lambda n: "Invitation Name %03d" % n)
+
+    @factory.post_generation
+    def courses(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for course in extracted:
+                self.courses.add(course)
+
+
+class CourseInvitationFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CourseInvitation
+
+    course = factory.SubFactory(CourseFactory)
+    invitation = factory.SubFactory(InvitationFactory)
 
 
 class AssignmentNotificationFactory(factory.DjangoModelFactory):
