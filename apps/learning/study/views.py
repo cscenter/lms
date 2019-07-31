@@ -81,8 +81,6 @@ class StudentAssignmentListView(PermissionRequiredMixin, ListView):
                 .order_by('assignment__deadline_at',
                           'assignment__course__meta_course__name',
                           'pk')
-                # FIXME: this prefetch doesn't seem to work properly
-                .prefetch_related('assignmentnotification_set')
                 .select_related('assignment',
                                 'assignment__course',
                                 'assignment__course__meta_course',
@@ -102,11 +100,8 @@ class StudentAssignmentListView(PermissionRequiredMixin, ListView):
         archive.reverse()
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive
-        user = self.request.user
-        # Since this view for students only, check only city settings
-        tz_override = None
-        if user.city_code and (user.is_student or user.is_volunteer):
-            tz_override = settings.TIME_ZONES[user.city_code]
+        # FIXME: how to separate this logic for club and center sites?
+        tz_override = settings.TIME_ZONES.get(self.request.user.city_code)
         context["tz_override"] = tz_override
         return context
 

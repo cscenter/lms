@@ -22,6 +22,10 @@ class Branches(DjangoChoices):
                  timezone=pytz.timezone('Europe/Moscow'),
                  abbr=_("Distance"))
 
+    @classmethod
+    def get_timezone(cls, code):
+        return cls.get_choice(code).timezone if code in cls.values else None
+
 
 # FIXME: move to users?
 class AcademicDegreeYears(DjangoChoices):
