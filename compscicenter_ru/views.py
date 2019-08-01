@@ -32,6 +32,7 @@ from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index, bucketize, \
     get_term_index
+from courses.views.mixins import CourseURLParamsMixin
 from learning.models import Branch, Enrollment, GraduateProfile
 from learning.projects.constants import ProjectTypes
 from learning.projects.models import ProjectStudent
@@ -605,4 +606,32 @@ class MetaCourseDetailView(generic.DetailView):
         active_study_programs = get_study_programs(self.object.pk,
                                                    filters=[Q(is_active=True)])
         context['study_programs'] = active_study_programs
+        return context
+
+
+class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
+    model = MetaCourse
+    template_name = "compscicenter_ru/courses/course_detail.html"
+    context_object_name = 'course'
+
+    def get_course_queryset(self):
+        course_teachers = Prefetch('course_teachers',
+                                   queryset=(CourseTeacher.objects
+                                             .select_related("teacher")))
+        return (super().get_course_queryset()
+                .select_related('meta_course', 'semester', 'city')
+                .prefetch_related(course_teachers))
+
+    def get_object(self):
+        return self.course
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tabs = TabList([
+            Tab(target='about', name=_('About Course'), active=True),
+            Tab(target='video', name=_('Video Records')),
+        ])
+        context['tabs'] = tabs
+        context['teachers'] = bucketize(self.course.course_teachers.all(),
+                                        lambda t: t.is_lecturer)
         return context

@@ -14,10 +14,10 @@
 
 
 {% block content %}
-<div class="container page-content">
+<div class="container page-content p-xs-0">
     <div class="row content-center no-gutters">
         <div class="col-lg-9">
-            <div class="card">
+            <div class="card border-xs-0">
                 <div class="card__header cover _img" style="background-image:url('{{ meta_course.get_cover_url() }}')">
                     <div class="cover__content _big">
                         <h2 class="cover__title">{{ meta_course.name }}</h2>
@@ -25,7 +25,7 @@
                 </div>
 
                 <div class="card__content _big">
-                    {{ meta_course.description|markdown("course_description", 3600, meta_course.pk, meta_course.modified) }}
+                    {{ meta_course.description|markdown("meta_course_description", 3600, meta_course.pk, meta_course.modified) }}
                     {% if tabs %}
                         <h2 class="mt-8">Прочтения курса</h2>
                         {{ ui_macros.tabs(tabs, modifiers='mb-2') }}

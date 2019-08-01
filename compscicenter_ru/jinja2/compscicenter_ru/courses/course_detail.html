@@ -1,0 +1,69 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% import "compscicenter_ru/macros/_ui.jinja2" as ui_macros %}
+
+{% block title %}{{ course }}{% endblock title %}
+
+{% block body_attrs %}class="_dark" data-init-sections="tabs"{% endblock body_attrs %}
+
+
+{% block content %}
+<div class="container page-content p-xs-0">
+    <div class="row content-center no-gutters">
+        <div class="col-lg-9">
+            <div class="card border-xs-0">
+                <div class="card__header cover _img" style="background-image:url('{{ course.meta_course.get_cover_url() }}')">
+                    <nav class="cover__content py-4 text-left">
+                        <a href="{{ course.meta_course.get_absolute_url() }}" class="btn _extra-small _outline _white _rounded _m-collapse">{{ macros.svg_inline('arrow-left') }}<span>Описание курса</span></a>
+{#                        <div class="float-right">#}
+{#                            <a href="#" class="btn _extra-small _primary _rounded">Записаться на осень 2019</a>#}
+{#                        </div>#}
+                    </nav>
+                    <div class="cover__content _big">
+                        <h2 class="cover__title">{{ course.meta_course.name }}</h2>
+                    </div>
+                </div>
+
+                <div class="card__content _big">
+                    {{ ui_macros.tabs(tabs, modifiers='mb-2') }}
+
+                    <div class="tab-content">
+                        {% with tab = tabs['about'] %}
+                            <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                <h2>{% trans %}Description{% endtrans %}</h2>
+                                {% if course.description %}
+                                    {{ course.description|markdown("course_description", 3600, course.pk, course.modified) }}
+                                {% else %}
+                                    {{ course.meta_course.description|markdown("meta_course_description", 3600, course.meta_course.pk, course.meta_course.modified) }}
+                                {% endif %}
+                                <h2>{% trans %}Teachers{% endtrans %}</h2>
+                                {% with is_lecturer = true %}
+                                    <div class="user-cards">
+                                    {% for course_teacher in teachers[is_lecturer] %}
+                                        {% with teacher=course_teacher.teacher, im = course_teacher.teacher.get_thumbnail(use_stub=True, stub_official=True) %}
+                                            <a class="user-card" href="{{ teacher.teacher_profile_url() }}">
+                                                <div class="user-card__photo"><img src="{{ im.url }}"/></div>
+                                                <div class="user-card__details">
+                                                    {{ teacher.get_full_name() }}
+                                                    <div class="workplace">Лектор</div>
+                                                </div>
+                                            </a>
+                                        {% endwith %}
+                                    {% endfor %}
+                                    </div>
+                                {% endwith %}
+                            </div>
+                        {% endwith %}
+                    </div>
+                </div>
+
+                {% if request.user.is_superuser %}
+                    <div class="card__meta">
+                        <div class="message _warning px-8"><a href="{{ url('admin:courses_course_change', object_id=course.pk) }}">{% trans %}Edit in Admin{% endtrans %}</a></div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
