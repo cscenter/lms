@@ -1,0 +1,28 @@
+// Note: Can be easily replaced with `div.card>div.card__content._small>a.h4+p`. Let's leave this one for now.
+.text-note {
+  position: relative;
+  border: 1px solid $border-color;
+  border-radius: $border-radius-sm;
+  padding: spacer("4x");
+  margin-bottom: spacer("4x");
+
+  &::after {
+    content: " ";
+    width: 14px;
+    height: 14px;
+    background-image: url("/static/v2/img/icons/more-info-block_corner.svg");
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+  }
+
+  ._text {
+    margin: 0;
+    font-size: $font-size-sm;
+  }
+}
+
+.card.card-sm {
+  margin-bottom: 1rem;
+  font-size: $font-size-sm;
+}

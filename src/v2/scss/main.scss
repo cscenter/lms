@@ -1,7 +1,7 @@
 @import "bootstrap/scss/functions";
 @import "variables";
 @import "bootstrap/scss/mixins";
-@import "bootstrap/scss/reboot";
+@import "reboot";
 @import "bootstrap/scss/transitions";
 @import "bootstrap/scss/utilities/display";
 @import "bootstrap/scss/utilities/text"; // TODO: what exactly we use from here right now? Mb inline?
@@ -12,12 +12,14 @@
 @import "utils/spacing";
 @import "utils/text";
 @import "utils/float";
+@import "utils/borders";
 
 @import "components/sprites"; // Before: menu
 
 @import "layouts/menu";
 @import "layouts/base";
 
+@import "components/typography";  // After: reboot
 @import "components/forms";
 @import "components/labels";
 @import "components/notifications";
@@ -28,26 +30,28 @@
 @import "components/dropdown";
 @import "components/grid";
 @import "components/tooltips";
-@import "components/typography";  // After: reboot
-@import "components/misc";
 @import "components/pagination";
 @import "components/preloader";
-@import "components/nav-tabs";
+@import "components/tabs";
 @import "components/timeline";
 @import "components/sticky";
 @import "components/author";
 @import "components/message";
 @import "components/video";
 @import "components/cover";
+@import "components/list";
 
 @import "pages/index";
+@import "pages/alumni";
 @import "pages/team";
-@import "pages/programs_on_campus";
-@import "pages/program";
-@import "pages/principles";
+@import "pages/syllabus_programs";
+@import "pages/syllabus_program";
 @import "pages/online_courses";
 @import "pages/video_archive";
 @import "pages/faq";
 @import "pages/project";
 @import "pages/student_profile";
 @import "pages/announcement";
+// TODO: Remove styles below from production build
+@import "pages/about";
+@import "pages/principles";

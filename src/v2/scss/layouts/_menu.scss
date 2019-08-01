@@ -134,6 +134,10 @@ body {
   list-style: none;
   width: 100%; // ie 10 fix
 
+  .nav-item {
+    margin: 0;
+  }
+
   .nav-link {
     padding: $nav-link-padding-y $nav-link-padding-x;
   }

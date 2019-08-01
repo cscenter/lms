@@ -1,3 +1,12 @@
+.tab-content {
+  > .tab-pane {
+    display: none;
+  }
+  > .active {
+    display: block;
+  }
+}
+
 //TODO: Create mobile view
 .nav-tabs {
   display: flex;
@@ -16,7 +25,6 @@
   }
 
   .nav-item {
-    margin-bottom: -$border-width;
     margin-left: -$border-width;
     &:first-child {
       margin-left: 0;
@@ -60,4 +68,3 @@
     //@include border-top-radius(0);
   }
 }
-

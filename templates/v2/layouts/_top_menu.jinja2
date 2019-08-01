@@ -25,7 +25,7 @@
         </a>
 
         <div class="menu-desktop-wrapper">
-            <ul class="navbar-nav">
+            <ul class="ui navbar-nav">
                 {% for menu_item in menu -%}
                     <li class="nav-item">
                         <a class="nav-link {% if menu_item.selected %}_active{% endif %}" {% if menu_item.is_external %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.title }}</a>
@@ -89,7 +89,7 @@
     {%- if menu_item.selected and menu_item.children -%}
         <nav class="navbar navbar-submenu">
             <div class="container">
-                <ul class="navbar-nav">
+                <ul class="ui navbar-nav">
                     {% for second_level in menu_item.children %}
                         <li class="nav-item{% if second_level.selected %} _active{% endif %}">
                             <a class="nav-link" {% if second_level.is_external %}target="_blank"{% endif %} href="{{ second_level.url }}">{{ second_level.title }}</a>

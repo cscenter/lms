@@ -575,65 +575,6 @@
 
     {% include "v2/components/cards/_announcements.jinja2" %}
 
-    <div class="container page-content">
-        <h1>Card + Cover</h1>
-        <div class="row">
-            <div class="col-lg">
-                <div class="card">
-                    <div class="card__header cover _img"
-                         style="background-image:url('/static/v2/img/pages/syllabus/distance/algorythms-part1.png')">
-                        <div class="cover__content py-10 text-left">
-                            <h2 class="cover__title">Title</h2>
-                        </div>
-                    </div>
-                    <div class="card__content">
-                        <div class="card__title">
-                            Without border
-                        </div>
-                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
-                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
-                        будним вечерам и
-                        выходным.
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg">
-                <div class="card">
-                    <div class="card__header cover _img"
-                         style="background-image:url('/static/v2/img/pages/syllabus/distance/algorythms-part1.png')">
-                        <div class="cover__content text-left p-4">
-                            <h2 class="mb-2">Title</h2>
-                            <p>Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
-                                живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
-                                будним вечерам и
-                                выходным.</p>
-                        </div>
-                    </div>
-                    <div class="card__content">
-                        <div class="grouped">
-                            <div class="ui label _icon">
-                                {{ macros.svg_inline('location') }}<span>Санкт-Петербург, БЦ «Таймс»</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg">
-                <div class="card text-center">
-                    <div class="card__header cover _img" style="background-image:url('/static/v2/img/pages/syllabus/distance/algorythms-part1.png');">
-                        <div class="cover__content">
-                            <h2 class="cover__title">Заголовок</h2>
-                        </div>
-                    </div>
-                    <div class="card__content">
-                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
-                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
-                        будним вечерам и
-                        выходным.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include "v2/components/cards/_cover.jinja2" %}
 
 {% endblock content %}
