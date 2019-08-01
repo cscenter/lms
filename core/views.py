@@ -22,7 +22,7 @@ class AlumniView(TemplateView):
             "state": {
                 "area": self.kwargs.get("area", None),
                 "city": self.kwargs.get("city", None),
-                "year": self.kwargs.get("year", {"label": '2018', "value": 2018})
+                "year": self.kwargs.get("year", {"label": '2019', "value": 2019})
             },
             "props": {
                 "entry_url": '/ajax/alumni.json',
@@ -35,7 +35,7 @@ class AlumniView(TemplateView):
                     {"label": 'Разработка ПО', "value": 'se'},
                     {"label": 'Анализ данных', "value": 'ds'},
                 ],
-                "years": [{"label": y, "value": y} for y in reversed(range(2013, 2019))]
+                "years": [{"label": y, "value": y} for y in reversed(range(2013, 2020))]
             }
         }
         return {

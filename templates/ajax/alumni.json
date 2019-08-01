@@ -1,217 +1,138 @@
 {
   "data": [
     {
-      "id": 1642,
-      "name": "Александр Бзикадзе",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
-      "photo": null,
+      "id": 16,
+      "workplace": "test",
+      "student": {
+        "id": 3345,
+        "name": "Мария",
+        "surname": "Малых",
+        "patronymic": "Анатольевна",
+        "sex": "F",
+        "city": "nsk"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
       "areas": [
         "se"
       ]
     },
     {
-      "id": 894,
-      "name": "Даниил Бордынюк",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
+      "id": 17,
+      "student": {
+        "id": 3341,
+        "name": "Алексей",
+        "surname": "Мухин",
+        "patronymic": "Максимович",
+        "sex": "M",
+        "city": "nsk"
+      },
       "photo": "/media/user_card.jpg",
+      "year": 2019,
       "areas": [
+        "ds"
+      ]
+    },
+    {
+      "id": 12,
+      "student": {
+        "id": 1657,
+        "name": "Григорий",
+        "surname": "Каргин",
+        "patronymic": "Игоревич",
+        "sex": "M",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 23,
+      "student": {
+        "id": 1716,
+        "name": "Игорь",
+        "surname": "Рябцев",
+        "patronymic": "Александрович",
+        "sex": "M",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 26,
+      "student": {
+        "id": 1681,
+        "name": "Владислав",
+        "surname": "Танков",
+        "patronymic": "Дмитриевич",
+        "sex": "M",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 31,
+      "student": {
+        "id": 1804,
+        "name": "Ирина",
+        "surname": "Шквиро",
+        "patronymic": "Алексеевна",
+        "sex": "F",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 3,
+      "student": {
+        "id": 888,
+        "name": "Егор",
+        "surname": "Башарин",
+        "patronymic": "Валерьевич",
+        "sex": "M",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "ds",
         "se",
         "cs"
       ]
     },
+
     {
-      "id": 3297,
-      "name": "Кирилл Бродт",
-      "sex": "m",
-      "year": 2018,
-      "city": "nsk",
-      "photo": "/media/user_card.jpg",
-      "areas": [
-        "ds"
-      ]
-    },
-    {
-      "id": 923,
-      "name": "Дарья Васина",
-      "sex": "f",
-      "year": 2018,
-      "city": "spb",
-      "photo": null,
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 3298,
-      "name": "Роман Герасимов",
-      "sex": "m",
-      "year": 2018,
-      "city": "nsk",
-      "photo": "/media/user_card.jpg",
-      "areas": [
-        "ds"
-      ]
-    },
-    {
-      "id": 912,
-      "name": "Егор Голованов",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
-      "photo": null,
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 1633,
-      "name": "Станислав Гордеев",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
-      "photo": null,
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 893,
-      "name": "Павел Гуляев",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
-      "photo": "/media/user_card.jpg",
-      "areas": [
-        "ds"
-      ]
-    },
-    {
-      "id": 1717,
-      "name": "Олег Евсеев",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
-      "photo": "/media/user_card.jpg",
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 925,
-      "name": "Сергей Завгородний",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
-      "photo": null,
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 772,
-      "name": "Валентина Кирюшкина",
-      "sex": "f",
-      "year": 2018,
-      "city": "spb",
-      "photo": null,
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 1645,
-      "name": "Михаил Кормышов",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
-      "photo": null,
-      "areas": [
-        "ds",
-        "se"
-      ]
-    },
-    {
-      "id": 766,
-      "name": "Фёдор Корчажников",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
-      "photo": "/media/user_card.jpg",
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 1734,
-      "name": "Иван Кремнев",
-      "sex": "m",
-      "year": 2018,
-      "city": "spb",
-      "photo": null,
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 902,
-      "name": "Вячеслав Кукушкин",
-      "sex": "m",
-      "year": 2017,
-      "city": "spb",
-      "photo": "/media/user_card.jpg",
-      "areas": [
-        "ds",
-        "se"
-      ]
-    },
-    {
-      "id": 919,
-      "name": "Абдукодири Курбонзода",
-      "sex": "m",
-      "year": 2016,
-      "city": "spb",
-      "photo": "/media/user_card.jpg",
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 891,
-      "name": "Анастасия Лавренко",
-      "sex": "f",
-      "year": 2015,
-      "city": "spb",
-      "photo": null,
-      "areas": [
-        "ds",
-        "se"
-      ]
-    },
-    {
-      "id": 884,
-      "name": "Александр Лучко",
-      "sex": "m",
-      "year": 2014,
-      "city": "spb",
-      "photo": "/media/user_card.jpg",
-      "areas": [
-        "se"
-      ]
-    },
-    {
-      "id": 882,
-      "name": "Сергей Лучко",
-      "sex": "m",
-      "year": 2013,
-      "city": "spb",
-      "photo": "/media/user_card.jpg",
-      "areas": [
-        "se"
-      ]
+        "id": 9,
+        "student": {
+            "id": 892,
+            "name": "Павел",
+            "surname": "Жук",
+            "patronymic": "Павлович",
+            "sex": "M",
+            "city": "spb"
+        },
+        "photo": "/media/user_card.jpg",
+        "year": 2019,
+        "areas": [
+            "se"
+        ]
     }
+
+
   ]
 }
