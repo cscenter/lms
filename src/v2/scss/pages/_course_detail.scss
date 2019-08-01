@@ -1,0 +1,42 @@
+.list._playlist {
+  .list__item {
+    font-size: $font-size-base;
+    display: flex;
+    position: relative;
+    align-items: center;
+
+    &:hover {
+      background-color: $gray-lighter;
+    }
+
+    .item__text {
+      flex-shrink: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: spacer("2x");
+    }
+
+    .item__ordinal {
+      margin-right: spacer("1x");
+      color: $gray-light;
+    }
+
+    .item__icons {
+      position: relative;
+      top: -0.07em;
+      flex-shrink: 0;
+      min-width: 48px;
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .sprite-img {
+      margin-right: spacer("2x");
+      fill: $gray-light;
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+}

@@ -1,115 +1,72 @@
-$user-card-gutter-width: $grid-gutter-width / 2;
+.card._user {
+  border-radius: $border-radius-sm;
+  border: none;
 
-.user-cards {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: left;
-  margin: 0 #{-$user-card-gutter-width} 0 -#{$user-card-gutter-width};
-  &:after {
-    content: "";
-    flex: auto;
-  }
-}
+  .card__img {
+    position: relative;
+    padding-bottom: 139.75%;
+    margin-bottom: spacer("2x");
+    overflow: hidden;
+    background: $gray-lighter;
+    background-size: cover;
 
-.user-cards._team {
-
-  .user-card {
-    text-align: center;
-    width: percentage(12 / $grid-columns);
-    @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
-      width: percentage(6 / $grid-columns);
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
     }
-    @include media-breakpoint-up(sm) {
-      width: percentage(4 / $grid-columns);
+
+    &._b {
+      background-image: url("/static/v2/img/placeholder/boy.png");
     }
-    @include media-breakpoint-up(lg) {
-      width: percentage(4 / $grid-columns);
+
+    &._m {
+      background-image: url("/static/v2/img/placeholder/man.png");
+    }
+
+    &._g {
+      background-image: url("/static/v2/img/placeholder/girl.png");
+    }
+
+    &._w {
+      background-image: url("/static/v2/img/placeholder/woman.png");
     }
   }
 
-  .user-card__photo {
-    padding-bottom: 110.25%;
-  }
-}
-
-.user-card {
-  float: left; // for older browsers
-  vertical-align: top;
-  line-height: $line-height-sm;
-  margin-bottom: spacer("8x");
-  padding-left: $user-card-gutter-width;
-  padding-right: $user-card-gutter-width;
-
-  width: percentage(6 / $grid-columns);
-  @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
-    width: percentage(4 / $grid-columns);
-  }
-  @include media-breakpoint-up(sm) {
-    width: percentage(3 / $grid-columns);
-  }
-  @include media-breakpoint-up(lg) {
-    width: percentage(2 / $grid-columns);
+  .card__title {
+    font-size: $font-size-base;
   }
 }
 
 
-.user-card__photo {
-  position: relative;
-  margin: 0 auto spacer("1x");
-  padding-bottom: 139.75%; // calc((100% - #{$border-width} * 2) * 1.4
-  overflow: hidden;
-  background: $gray-lighter;
-  background-size: cover;
-
-  &._b {
-    background-image: url("/static/v2/img/placeholder/boy.png");
+.card-deck._users {
+  .card {
+      @include card-width(2);
+      @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
+        @include card-width(3);
+      }
+      // .cards-sm-4
+      @include media-breakpoint-up(sm) {
+        @include card-width(4);
+      }
+      // .cards-md-4
+      @include media-breakpoint-up(md) {
+        @include card-width(4);
+      }
+      // .cards-lg-6
+      @include media-breakpoint-up(lg) {
+        @include card-width(6);
+      }
   }
-
-  &._m {
-    background-image: url("/static/v2/img/placeholder/man.png");
-  }
-
-  &._g {
-    background-image: url("/static/v2/img/placeholder/girl.png");
-  }
-
-  &._w {
-    background-image: url("/static/v2/img/placeholder/woman.png");
-  }
-
-  img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
+  // Utils
+  &.cards-lg-4 {
+    .card {
+      @include media-breakpoint-up(lg) {
+        @include card-width(4);
+      }
+    }
   }
 }
-
-.user-card__details {
-  overflow: hidden;
-  @include font-smoothing();
-
-  .workplace {
-    color: $gray-dark;
-    font-size: $font-size-sm;
-  }
-}
-
-.achievements {
-  position: absolute;
-  top: 2px;
-  right: -2px;
-}
-
-.achievements__item {
-  margin-bottom: spacer("1x");
-  transition: all 200ms;
-  &:hover {
-    transform: scale(1.3);
-    transition: all 200ms ease;
-    padding-bottom: spacer("1x");
-  }
-}
-

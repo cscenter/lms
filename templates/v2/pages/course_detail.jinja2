@@ -63,21 +63,27 @@
                                         в&nbsp;частности,
                                         механизм классов типов.</p>
                                     <h2 class="mt-8">Преподаватели</h2>
-                                    <div class="user-cards">
-                                        <a class="user-card" href="/users/4/" id="user-card-4">
-                                            <div class="user-card__photo _w"></div>
-                                            <div class="user-card__details">Анна Ивановна Герасимова
-                                                <div class="workplace">Санкт-Петербургский государственный
-                                                    университет имени
-                                                    Ленина
-                                                </div>
-                                            </div>
+
+                                    <div class="card-deck _users cards-lg-4">
+                                        <a class="card _user" href="/users/4/" id="user-card-4">
+                                            <div class="card__img _w"></div>
+                                            <div class="card__title">Анна Ивановна Герасимова</div>
+                                            <div class="card__subtitle">Санкт-Петербургский государственный</div>
                                         </a>
-                                        <a class="user-card" href="/users/5/" id="user-card-5">
-                                            <div class="user-card__photo _m"></div>
-                                            <div class="user-card__details">test user2
-                                                <div class="workplace">Homeless</div>
-                                            </div>
+                                        <a class="card _user" href="/users/4/" id="user-card-4">
+                                            <div class="card__img _m"></div>
+                                            <div class="card__title">Александр Сергеевич Куликов</div>
+                                            <div class="card__subtitle">лектор</div>
+                                        </a>
+                                        <a class="card _user" href="/users/4/" id="user-card-4">
+                                            <div class="card__img _m"></div>
+                                            <div class="card__title">Помощник 1</div>
+                                            <div class="card__subtitle">Помогал с заданиями</div>
+                                        </a>
+                                        <a class="card _user" href="/users/4/" id="user-card-4">
+                                            <div class="card__img _w"></div>
+                                            <div class="card__title">Анна Ивановна Герасимова</div>
+                                            <div class="card__subtitle">Санкт-Петербургский государственный</div>
                                         </a>
                                     </div>
                                 </div>
@@ -86,51 +92,19 @@
                                 <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}"
                                      role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
                                     <h2>Список лекций</h2>
-                                    <ol class="ui items">
-                                        <li>
-                                            <a href="#" class="item">
-                                                <div class="item__title">
-                                                    <p class="item__text">
-                                                        <span class="item__rank">1.</span>Утечки ресурсов и как их
-                                                        избежать.
-                                                        RAII
-                                                    </p>
-                                                </div>
-                                                <div class="item__icons">
-                                                    {{ macros.svg_inline('video') }}
-                                                    {{ macros.svg_inline('slides') }}
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="item">
-                                                <div class="item__title">
-                                                    <p class="item__text">
-                                                        <span class="item__rank">2.</span>Удобные возможности новых
-                                                        стандартов.Удобные
-                                                        возможности новых стандартов.Удобные возможности новых
-                                                        стандартов
-                                                    </p>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="#" class="item">
-                                                <div class="item__title">
-                                                    <p class="item__text">
-                                                        <span class="item__rank">3.</span>Геометрическая вероятность
-                                                        и общее
-                                                        определение
-                                                        вероятности. Геометрическая вероятность и общее определение
-                                                        вероятности
-                                                    </p>
-                                                </div>
-                                                <div class="item__icons">
-                                                    {{ macros.svg_inline('video') }}
-                                                </div>
-                                            </a>
-                                        </li>
-                                    </ol>
+
+                                    <div class="ui list _divided _playlist">
+                                        <a href="#" class="list__item">
+                                            <span class="item__ordinal">1.</span><div class="item__text">Утечки ресурсов и как их избежать. ресурсов и как их из ресурсов и как их из RAII  как их избежать. ресурсов и как их из рес</div>
+                                            <div class="item__icons">
+                                                {{ macros.svg_inline('video') }}{{ macros.svg_inline('slides') }}
+                                            </div>
+                                        </a>
+                                        <a href="#" class="list__item">
+                                            <span class="item__ordinal">2.</span><div class="item__text">Лекция 2</div>
+                                            <div class="item__icons"></div>
+                                        </a>
+                                    </div>
                                 </div>
                             {% endwith %}
                         </div>
