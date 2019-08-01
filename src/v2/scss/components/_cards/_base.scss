@@ -79,7 +79,10 @@ $card-bg: $white !default;
   }
 
   &._big {
-    padding: spacer("8x");
+    padding: spacer("4x");
+    @include media-breakpoint-up(md) {
+      padding: spacer("8x");
+    }
   }
 
   // FIXME: middle bigger than default styles. Is it OK?
@@ -102,7 +105,7 @@ $card-bg: $white !default;
     &._big {
       padding: 80px spacer("4x");
       @include media-breakpoint-up(md) {
-      padding: 80px spacer("10x");
+      padding: 104px spacer("10x");
       }
     }
   }

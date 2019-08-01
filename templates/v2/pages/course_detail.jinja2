@@ -1,0 +1,142 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+
+{% block body_attrs %}data-init-sections="tabs" class="_dark"{% endblock body_attrs %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row content-center no-gutters">
+            <div class="col-lg-9">
+                <div class="card">
+                    <div class="card__header cover _img"
+                         style="background-image:url('/static/v2/img/pages/syllabus/distance/algorythms-part1.png')">
+                        <nav class="cover__content py-4 text-left">
+                            <a href="#"
+                               class="btn _extra-small _outline _white _rounded _m-collapse">{{ macros.svg_inline('arrow-left') }}<span>Описание курса</span></a>
+                            <div class="float-right">
+                                <a href="#" class="btn _extra-small _primary _rounded">Записаться на осень 2019</a>
+                            </div>
+                        </nav>
+                        <div class="cover__content _big">
+                            <h2 class="cover__title">Функциональное программирование</h2>
+                            <div class="content-center">
+                                <div class="groupped">
+                                    <a href="#" class="btn _white">Санкт-Петербург</a>
+                                    <a href="#" class="btn _white">Осень 2018</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card__content _big text-base">
+                        {% set course_tabs = [
+                    {'target': 'about', 'name': 'О курсе', 'active': true, 'url': '#'},
+                    {'target': 'videos', 'name': 'Видеозаписи курса', 'active': false, 'url': '#'}
+                    ] %}
+
+                        {{ macros.tabs(course_tabs, modifiers='mb-2') }}
+                        <div class="tab-content">
+                            {% with tab = course_tabs[0] %}
+                                <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}"
+                                     role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                    <h2 class="mt-4">Описание</h2>
+                                    <p>Курс знакомит слушателей с&nbsp;функциональными языками программирования и&nbsp;методами
+                                        программирования на&nbsp;этих языках.
+                                        Мы&nbsp;рассмотрим отличия функционального подхода к&nbsp;программированию
+                                        от&nbsp;традиционного
+                                        императивного, познакомимся с&nbsp;лямбда-исчислением, как теоретической
+                                        основой
+                                        функционального
+                                        программирования, изучим системы типов функциональных языков и&nbsp;алгоритм
+                                        вывода
+                                        типов
+                                        Хиндли-Дамаса-Милнера.
+                                    </p>
+                                    <p>
+                                        Мы&nbsp;познакомимся с&nbsp;языком программирования Haskell, изучим ленивую
+                                        и&nbsp;энергичную
+                                        семантики,
+                                        алгебраические типы данных и&nbsp;их&nbsp;использование для сопоставления с&nbsp;образцом.
+                                        Изучая систему
+                                        типов языка Haskell, мы&nbsp;обсудим параметрический и&nbsp;специальный
+                                        полиморфизм&nbsp;и,
+                                        в&nbsp;частности,
+                                        механизм классов типов.</p>
+                                    <h2 class="mt-8">Преподаватели</h2>
+                                    <div class="user-cards">
+                                        <a class="user-card" href="/users/4/" id="user-card-4">
+                                            <div class="user-card__photo _w"></div>
+                                            <div class="user-card__details">Анна Ивановна Герасимова
+                                                <div class="workplace">Санкт-Петербургский государственный
+                                                    университет имени
+                                                    Ленина
+                                                </div>
+                                            </div>
+                                        </a>
+                                        <a class="user-card" href="/users/5/" id="user-card-5">
+                                            <div class="user-card__photo _m"></div>
+                                            <div class="user-card__details">test user2
+                                                <div class="workplace">Homeless</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endwith %}
+                            {% with tab = course_tabs[1] %}
+                                <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}"
+                                     role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                    <h2>Список лекций</h2>
+                                    <ol class="ui items">
+                                        <li>
+                                            <a href="#" class="item">
+                                                <div class="item__title">
+                                                    <p class="item__text">
+                                                        <span class="item__rank">1.</span>Утечки ресурсов и как их
+                                                        избежать.
+                                                        RAII
+                                                    </p>
+                                                </div>
+                                                <div class="item__icons">
+                                                    {{ macros.svg_inline('video') }}
+                                                    {{ macros.svg_inline('slides') }}
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="item">
+                                                <div class="item__title">
+                                                    <p class="item__text">
+                                                        <span class="item__rank">2.</span>Удобные возможности новых
+                                                        стандартов.Удобные
+                                                        возможности новых стандартов.Удобные возможности новых
+                                                        стандартов
+                                                    </p>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="#" class="item">
+                                                <div class="item__title">
+                                                    <p class="item__text">
+                                                        <span class="item__rank">3.</span>Геометрическая вероятность
+                                                        и общее
+                                                        определение
+                                                        вероятности. Геометрическая вероятность и общее определение
+                                                        вероятности
+                                                    </p>
+                                                </div>
+                                                <div class="item__icons">
+                                                    {{ macros.svg_inline('video') }}
+                                                </div>
+                                            </a>
+                                        </li>
+                                    </ol>
+                                </div>
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

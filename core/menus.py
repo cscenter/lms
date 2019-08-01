@@ -29,7 +29,7 @@ class MenuItem(_MenuItem):
     def check(self, request):
         """Evaluate if we should be visible for this request"""
         if self.visible_to is not None:
-            user_groups = request.user.get_cached_groups()
+            user_groups = request.user.roles
             self.visible = bool(user_groups.intersection(self.visible_to))
         if callable(self.check_func):
             self.visible = self.check_func(request)
