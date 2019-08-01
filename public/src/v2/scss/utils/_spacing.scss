@@ -53,4 +53,11 @@
   }
 }
 
-
+// Special padding util for the smallest breakpoint.
+// Sometimes it's useful to alter default behavior on the mobile screen only.
+// For example, remove padding on `.container`
+.p-xs-0 {
+  @include media-breakpoint-down(xs) {
+    padding: 0!important;
+  }
+}

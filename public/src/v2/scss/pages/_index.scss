@@ -110,7 +110,7 @@ a.card {
     margin-top: 2rem;
 
     @include media-breakpoint-up(lg) {
-      background-image: linear-gradient(0deg, rgba(29, 29, 29, 0.00) 0%, rgba(29, 29, 29, 0.8) 100%);
+      background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.00) 0%, rgba(0, 0, 0, 0.50) 50%, rgba(0, 0, 0, 0.70) 100%);
       display: flex;
       flex-direction: column;
       position: absolute;
@@ -122,7 +122,7 @@ a.card {
 
       p {
         z-index: $zindex-cover;
-        padding: 0 120px;
+        padding: 0 120px 60px;
       }
 
       h1 {

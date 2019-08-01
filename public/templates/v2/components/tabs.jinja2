@@ -1,6 +1,6 @@
 {% extends "v2/layouts/inner.jinja2" %}
 
-{% block sprites %}{% include "sprites/achievements.svg" %}{% endblock sprites %}
+{% block body_attrs %}data-init-sections="tabs"{% endblock body_attrs %}
 
 {% block content %}
     <div class="container page-content">
@@ -29,7 +29,29 @@
 
         <div class="row">
             <div class="col-lg-9">
-                <h3>Tabs</h3>
+                <h3>Cities Example</h3>
+                {% set city_tabs = [
+                    {'target': 'spb', 'name': 'Санкт-Петербург', 'active': true, 'url': '#'},
+                    {'target': 'nsk', 'name': 'Новосибирск', 'active': false, 'url': '#'}
+                ] %}
+
+                <div class="mb-10">
+                    {{ macros.tabs(city_tabs, modifiers='mb-2') }}
+                    <div class="tab-content">
+                        {% with tab = city_tabs[0] %}
+                            <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                контент {{ tab.name }}
+                            </div>
+                        {% endwith %}
+                        {% with tab = city_tabs[1] %}
+                            <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                контент {{ tab.name }}
+                            </div>
+                        {% endwith %}
+                    </div>
+                </div>
+
+
                 <ul class="ui nav-tabs">
                     <li class="nav-item">
                         <a class="nav-link active" href="#">Санкт-Петербург</a>
