@@ -2,3 +2,23 @@
   text-align: center;
   margin-bottom: spacer("6x");
 }
+
+
+.card-deck._team {
+  .card {
+    @include card-width(1);
+    text-align: center;
+
+    @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
+      @include card-width(2);
+    }
+    // .cards-sm-4
+    @include media-breakpoint-up(sm) {
+      @include card-width(3);
+    }
+  }
+
+  .card__img {
+    padding-bottom: 110.25%;
+  }
+}

@@ -4,7 +4,7 @@ import LazyImage from "./LazyImage";
 
 class UserCard extends React.Component {
     static defaultProps = {
-        className: 'user-card'
+        className: 'card _user'
     };
 
     render() {
@@ -13,11 +13,9 @@ class UserCard extends React.Component {
             <a className={this.props.className}
                href={url}
                id={`user-card-${id}`}>
-                <LazyImage src={photo} alt={name} className={`user-card__photo`} />
-                <div className="user-card__details">
-                    {name}
-                    {workplace !== null ? <div className="workplace">{workplace}</div> : ""}
-                </div>
+                <LazyImage src={photo} alt={name} className={`card__img`} />
+                <div className="card__title">{name}</div>
+                {workplace !== null ? <div className="card__subtitle">{workplace}</div> : ""}
             </a>
         );
     }

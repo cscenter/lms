@@ -4,7 +4,7 @@ import UserCard from './UserCard';
 
 class UserCardList extends React.Component {
     static defaultProps = {
-        className: 'user-cards'
+        className: 'card-deck _users'
     };
 
     render() {

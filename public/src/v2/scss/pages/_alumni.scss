@@ -8,3 +8,20 @@
     font-size: 68px;
   }
 }
+
+// Alumni 2018
+.achievements {
+  position: absolute;
+  top: 2px;
+  right: -2px;
+}
+
+.achievements__item {
+  margin-bottom: spacer("1x");
+  transition: all 200ms;
+  &:hover {
+    transform: scale(1.3);
+    transition: all 200ms ease;
+    padding-bottom: spacer("1x");
+  }
+}
