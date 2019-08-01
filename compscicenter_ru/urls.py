@@ -13,6 +13,7 @@ from announcements.views import AnnouncementTagAutocomplete, \
     AnnouncementDetailView
 from compscicenter_ru import views
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
+from courses.urls import RE_COURSE_URI
 from htmlpages.views import flatpage
 from users.views import TeacherDetailView
 
@@ -71,6 +72,9 @@ urlpatterns += [
 
     path("courses/", include([
         path("<slug:course_slug>/", views.MetaCourseDetailView.as_view(), name="meta_course_detail"),
+        re_path(RE_COURSE_URI, include([
+            path("", views.CourseDetailView.as_view(), name="course_detail"),
+        ]), kwargs={"city_aware": True})
     ])),
     path('', include('courses.urls')),
 
