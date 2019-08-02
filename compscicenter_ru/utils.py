@@ -107,6 +107,9 @@ class TabList:
     def __getitem__(self, target):
         # TODO: support indexing by int since dict in python > 3.5 is ordered
         return self._tabs[target]
+
+    def __contains__(self, item):
+        return item in self._tabs
     
     def __len__(self):
         return len(self._tabs)

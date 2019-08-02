@@ -423,14 +423,17 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
             "city_code": self.get_city()
         }
 
-    def get_absolute_url(self):
+    def get_absolute_url(self, **kwargs):
+        options = {"subdomain": settings.LMS_SUBDOMAIN, **kwargs}
         return city_aware_reverse('course_detail',
-                                  kwargs=self.url_kwargs)
+                                  kwargs=self.url_kwargs,
+                                  **options)
 
     def get_url_for_tab(self, active_tab):
         kwargs = {**self.url_kwargs, "tab": active_tab}
         return city_aware_reverse("course_detail_with_active_tab",
-                                  kwargs=kwargs)
+                                  kwargs=kwargs,
+                                  subdomain=settings.LMS_SUBDOMAIN)
 
     def get_create_assignment_url(self):
         return city_aware_reverse("assignment_add",
@@ -581,7 +584,8 @@ def group_course_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
     all teacher roles.
     """
     # Make sure lecturers go first.
-    roles_in_priority = [TeacherRoles.LECTURER, *TeacherRoles.values.keys()]
+    roles_in_priority = [TeacherRoles.LECTURER, TeacherRoles.SEMINAR,
+                         *TeacherRoles.values.keys()]
     grouped = {role: [] for role in roles_in_priority}
     for teacher in teachers:
         for role in grouped:

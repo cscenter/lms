@@ -22,9 +22,9 @@ def test_course_is_correspondence(settings, client):
     teacher_nsk = TeacherFactory(city_id='nsk')
     student_spb = StudentFactory(city_id='spb')
     student_nsk = StudentFactory(city_id='nsk')
-    co = assignment.course
+    course = assignment.course
     # Unauthenticated user doesn't see tab
-    url = co.get_url_for_tab("assignments")
+    url = course.get_url_for_tab("assignments")
     response = client.get(url)
     assert response.status_code == 302
     # Any authenticated user for offline courses see timezone of the course
@@ -33,11 +33,11 @@ def test_course_is_correspondence(settings, client):
         response = client.get(url)
         assert response.status_code == 200
         assert response.context["tz_override"] is None
-    co.is_correspondence = True
-    co.save()
+    course.is_correspondence = True
+    course.save()
     client.logout()
-    response = client.get(co.get_absolute_url())
-    assert response.status_code == 200
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 302
     # Any authenticated user (this teacher is not actual teacher of the course)
     client.login(teacher_nsk)
     response = client.get(url)
@@ -52,7 +52,7 @@ def test_course_is_correspondence(settings, client):
     assert response.status_code == 200
     assert response.context["tz_override"] == settings.TIME_ZONES['spb']
     # Actual teacher of the course
-    CourseTeacherFactory(course=co, teacher=teacher_nsk)
+    CourseTeacherFactory(course=course, teacher=teacher_nsk)
     client.login(teacher_nsk)
     response = client.get(url)
     assert response.status_code == 200

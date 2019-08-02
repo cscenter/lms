@@ -76,6 +76,8 @@ def get_base_domain(notification):
             return "{}.compsciclub.ru".format(course.get_city())
     if isinstance(notification, AssignmentNotification):
         return f"{settings.LMS_SUBDOMAIN}.compscicenter.ru"
+    elif isinstance(notification, CourseNewsNotification):
+        return f"{settings.LMS_SUBDOMAIN}.compscicenter.ru"
     return "compscicenter.ru"
 
 

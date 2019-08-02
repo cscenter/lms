@@ -139,12 +139,3 @@ def test_course_assignment_timezone(settings, client):
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] is None
-
-
-@pytest.mark.django_db
-def test_course_redirect_old_links(settings, client):
-    course = CourseFactory()
-    course_detail_url = course.get_absolute_url()
-    response = client.get(f"{course_detail_url}?tab=about")
-    assert response.status_code == 302
-    assert response.url == course.get_url_for_tab('about')
