@@ -1,5 +1,7 @@
 import datetime
 import os.path
+from collections import defaultdict
+from typing import Iterable, Dict, List
 
 import pytz
 from bitfield import BitField
@@ -14,6 +16,7 @@ from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+from djchoices import ChoiceItem
 from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
@@ -23,7 +26,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local, TzAware
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids, get_youtube_video_id
-from courses.settings import ASSIGNMENT_TASK_ATTACHMENT
+from courses.settings import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
@@ -569,6 +572,26 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
         return self.__class__.objects.reviews_for_course(self)
 
 
+def group_course_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
+    """
+    Returns teachers grouped by the most priority role for a teacher.
+    Groups are also in priority order.
+
+    Set `multiple_roles=True` if you need to take into account
+    all teacher roles.
+    """
+    # Make sure lecturers go first.
+    roles_in_priority = [TeacherRoles.LECTURER, *TeacherRoles.values.keys()]
+    grouped = {role: [] for role in roles_in_priority}
+    for teacher in teachers:
+        for role in grouped:
+            if role in teacher.roles:
+                grouped[role].append(teacher)
+                if not multiple_roles:
+                    break
+    return {k: v for k, v in grouped.items() if v}
+
+
 class CourseTeacher(models.Model):
     teacher = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -577,11 +600,8 @@ class CourseTeacher(models.Model):
         Course,
         related_name="course_teachers",
         on_delete=models.CASCADE)
-    roles = BitField(flags=(
-        ('lecturer', _('Lecturer')),
-        ('reviewer', _('Reviewer')),
-        ('seminar', _('Seminarian')),
-    ), default=('lecturer',))
+    roles = BitField(flags=TeacherRoles.choices,
+                     default=(TeacherRoles.LECTURER,))
     notify_by_default = models.BooleanField(
         _("Notify by default"),
         help_text=(_("Add teacher to assignment notify settings by default")),

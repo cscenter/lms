@@ -1,8 +1,13 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
-{% import "compscicenter_ru/macros/_ui.jinja2" as ui_macros %}
+{% import "compscicenter_ru/macros/_nav.jinja2" as macros_nav %}
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
 
 {% block title %}{{ course }}{% endblock title %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.1/dist/katex.min.css" integrity="sha384-dbVIfZGuN1Yq7/1Ocstc1lUEm+AT+/rCkibIcC/OmWo5f0EA48Vf8CytHzGrSwbQ" crossorigin="anonymous">
+{% endblock stylesheets %}
 
 {% block body_attrs %}class="_dark" data-init-sections="tabs"{% endblock body_attrs %}
 
@@ -25,33 +30,29 @@
                 </div>
 
                 <div class="card__content _big">
-                    {{ ui_macros.tabs(tabs, modifiers='mb-2') }}
+                    {{ macros_nav.tabs(tabs, modifiers='mb-2') }}
 
                     <div class="tab-content">
                         {% with tab = tabs['about'] %}
                             <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
                                 <h2>{% trans %}Description{% endtrans %}</h2>
-                                {% if course.description %}
-                                    {{ course.description|markdown("course_description", 3600, course.pk, course.modified) }}
-                                {% else %}
-                                    {{ course.meta_course.description|markdown("meta_course_description", 3600, course.meta_course.pk, course.meta_course.modified) }}
-                                {% endif %}
+                                <div class="math-support">
+                                    {% if course.description -%}
+                                        {{ course.description|markdown("course_description", 3600, course.pk, course.modified) }}
+                                    {%- else -%}
+                                        {{ course.meta_course.description|markdown("meta_course_description", 3600, course.meta_course.pk, course.meta_course.modified) }}
+                                    {%- endif %}
+                                </div>
                                 <h2>{% trans %}Teachers{% endtrans %}</h2>
-                                {% with is_lecturer = true %}
-                                    <div class="user-cards">
-                                    {% for course_teacher in teachers[is_lecturer] %}
-                                        {% with teacher=course_teacher.teacher, im = course_teacher.teacher.get_thumbnail(use_stub=True, stub_official=True) %}
-                                            <a class="user-card" href="{{ teacher.teacher_profile_url() }}">
-                                                <div class="user-card__photo"><img src="{{ im.url }}"/></div>
-                                                <div class="user-card__details">
-                                                    {{ teacher.get_full_name() }}
-                                                    <div class="workplace">Лектор</div>
-                                                </div>
-                                            </a>
+                                <div class="card-deck _users cards-lg-4">
+                                {% for role, course_teachers in teachers.items() %}
+                                    {% for course_teacher in course_teachers %}
+                                        {% with teacher=course_teacher.teacher %}
+                                            {{ macros_cards.teacher_card_link(teacher, subtitle=role.label) }}
                                         {% endwith %}
                                     {% endfor %}
-                                    </div>
-                                {% endwith %}
+                                {% endfor %}
+                                </div>
                             </div>
                         {% endwith %}
                     </div>

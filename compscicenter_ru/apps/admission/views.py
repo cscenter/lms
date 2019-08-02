@@ -59,8 +59,7 @@ from core.models import University
 from core.settings.base import DEFAULT_CITY_CODE
 from core.timezone import now_local
 from core.urls import reverse
-from core.utils import render_markdown
-from courses.utils import bucketize
+from core.utils import render_markdown, bucketize
 from learning.settings import AcademicDegreeYears
 from tasks.models import Task
 from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin

@@ -1,5 +1,7 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
+
 {% block title %}Студенческие проекты - {{ super() }}{% endblock title %}
 
 {% block stylesheets %}
@@ -38,14 +40,14 @@
                     {% else %}
                         {% set subtitle = '' %}
                     {% endif %}
-                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros.author_card(user, subtitle) }}</div>
+                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros_cards.author_card(user, subtitle) }}</div>
                 {% endfor %}
             </div>
             {% set supervisors = project.get_supervisors() %}
             <h3>Руководител{% if supervisors|length > 1 %}и{% else %}ь{% endif %}</h3>
             <div class="row">
                 {% for s in supervisors %}
-                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros.supervisor_card(s) }}</div>
+                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros_cards.supervisor_card(s) }}</div>
                 {% endfor %}
             </div>
         </div>
@@ -60,7 +62,7 @@
                 <div class="row mb-3">
                     {% for pba in publication_authors %}
                         <div class="col-lg-4 mb-2">
-                        {{ macros.author_card(pba.user, '') }}
+                        {{ macros_cards.author_card(pba.user, '') }}
                         </div>
                     {% endfor %}
                 </div>

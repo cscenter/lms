@@ -11,7 +11,8 @@ from admission.models import Campaign, Interview, Comment
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.models import Course, Semester
 from courses.settings import SemesterTypes
-from courses.utils import get_term_index, bucketize
+from courses.utils import get_term_index
+from core.utils import bucketize
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import Roles
 from users.mixins import CuratorOnlyMixin

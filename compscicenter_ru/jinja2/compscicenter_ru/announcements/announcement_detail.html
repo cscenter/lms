@@ -1,5 +1,7 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
-{%- import "compscicenter_ru/announcements/macros.jinja2" as announcement_macros -%}
+
+{% import "compscicenter_ru/announcements/macros.jinja2" as announcement_macros %}
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
 
 {% block title %}{{ announcement.name }}{% endblock title %}
 
@@ -76,7 +78,7 @@
                             <h3>Лектор{% if speakers|length > 1 %}ы{% endif %}</h3>
                             {% for speaker in speakers %}
                                 <div class="mb-4">
-                                    {{ macros.speaker_card(speaker) }}
+                                    {{ macros_cards.speaker_card(speaker) }}
                                     {{ speaker.description }}
                                 </div>
                             {% endfor %}

@@ -1,7 +1,7 @@
 from typing import List
 
 from courses.models import MetaCourse
-from courses.utils import bucketize
+from core.utils import bucketize
 from study_programs.models import StudyProgram
 
 

@@ -1,6 +1,6 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
-{% import "compscicenter_ru/macros/_ui.jinja2" as ui_macros %}
+{% import "compscicenter_ru/macros/_nav.jinja2" as macros_nav %}
 
 {% block title %}{{ meta_course.name }}{% endblock title %}
 
@@ -28,7 +28,7 @@
                     {{ meta_course.description|markdown("meta_course_description", 3600, meta_course.pk, meta_course.modified) }}
                     {% if tabs %}
                         <h2 class="mt-8">Прочтения курса</h2>
-                        {{ ui_macros.tabs(tabs, modifiers='mb-2') }}
+                        {{ macros_nav.tabs(tabs, modifiers='mb-2') }}
                         <div class="tab-content">
                             {% for city_code, courses in grouped_courses.items() -%}
                                 {% with tab = tabs[city_code] %}

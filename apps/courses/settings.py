@@ -25,5 +25,14 @@ class ClassTypes(DjangoChoices):
     SEMINAR = C('seminar', _("Seminar"))
 
 
+class TeacherRoles(DjangoChoices):
+    """
+    This enum is used in the CourseTeacher.roles bitfield. Order is matter!
+    """
+    LECTURER = C('lecturer', _("Lecturer"))
+    REVIEWER = C('reviewer', _("Reviewer"))
+    SEMINAR = C('seminar', _("Seminarian"))
+
+
 # TODO: Make a redirect for old links and rewrite download view without this constant?
 ASSIGNMENT_TASK_ATTACHMENT = 0

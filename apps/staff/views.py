@@ -19,6 +19,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from vanilla import TemplateView
 
+import core.utils
 import courses.utils
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
@@ -29,7 +30,8 @@ from core.urls import reverse
 from courses.models import Course, Semester
 from courses.settings import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index, \
-    get_term_by_index, bucketize
+    get_term_by_index
+from core.utils import bucketize
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
@@ -706,5 +708,5 @@ class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
             term.courseofferings = []
             semester_list.insert(0, term)
         context["semester_list"] = [(a, s) for s, a in
-                                    courses.utils.chunks(semester_list, 2)]
+                                    core.utils.chunks(semester_list, 2)]
         return context

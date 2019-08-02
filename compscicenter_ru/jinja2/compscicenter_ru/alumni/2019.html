@@ -1,5 +1,7 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
+
 {% block body_attrs %}class="mb-0"{% endblock body_attrs %}
 
 {% block menu %}
@@ -25,14 +27,9 @@
 {% block content %}
     <div class="container page-content">
         <h1 class="text-center">Выпуск {{ graduation_year }} в лицах</h1>
-        <div class="user-cards">
+        <div class="card-deck _users">
             {% for graduate_profile in graduates -%}
-                <a class="user-card" href="{{ graduate_profile.get_absolute_url() }}" id="user-card-{{ graduate_profile.pk }}">
-                    <div class="user-card__photo">
-                        <img alt="{{ graduate_profile.student.get_full_name() }}" src="{{ graduate_profile.get_thumbnail().url }}">
-                    </div>
-                    <div class="user-card__details">{{ graduate_profile.student.get_short_name() }}</div>
-                </a>
+                {{ macros_cards.graduate_card_link(graduate_profile) }}
             {% endfor -%}
         </div>
     </div>
@@ -136,7 +133,7 @@
             <h1 class="text-center">Отзывы студентов</h1>
             <div class="card-columns _testimonials">
                 {% for graduate_profile in testimonials %}
-                    {{ macros.testimonial_card(graduate_profile) }}
+                    {{ macros_cards.testimonial_card(graduate_profile) }}
                 {% endfor %}
 
                 <a href="{{ url('testimonials') }}" class="btn _small _outline _rounded _gray mt-3">Все отзывы</a>
