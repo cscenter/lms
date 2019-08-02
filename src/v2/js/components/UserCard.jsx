@@ -8,14 +8,14 @@ class UserCard extends React.Component {
     };
 
     render() {
-        let {id, photo, name, url, workplace} = this.props;
+        let {id, photo, name, url, activities: subtitle} = this.props;
         return (
             <a className={this.props.className}
                href={url}
                id={`user-card-${id}`}>
                 <LazyImage src={photo} alt={name} className={`card__img`} />
                 <div className="card__title">{name}</div>
-                {workplace !== null ? <div className="card__subtitle">{workplace}</div> : ""}
+                {subtitle ? <div className="card__subtitle">{subtitle}</div> : ""}
             </a>
         );
     }
@@ -26,7 +26,7 @@ const propTypes = {
     name: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
     photo: PropTypes.string.isRequired,
-    workplace: PropTypes.string,
+    activities: PropTypes.string,
 };
 
 UserCard.propTypes = propTypes;

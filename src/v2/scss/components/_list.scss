@@ -31,12 +31,18 @@
 }
 
 ul,
-ol,
-dl {
+ol {
   @extend .list;
 
   li {
     @extend .list__item;
+  }
+}
+
+dl {
+  dt {
+    font-size: $h3-font-size;
+    font-weight: $font-weight-normal;
   }
 }
 
