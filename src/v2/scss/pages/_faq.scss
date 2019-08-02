@@ -3,16 +3,14 @@
   box-shadow: 0 1px 1px $gray-lighter;
 
   .card__header {
-    position: relative;
     cursor: pointer;
     text-align: left;
     padding: spacer("6x");
     padding-left: $padding-left;
-    background: none;
     font-size: $font-size-lg;
+
     &:hover,
     &:focus {
-      text-decoration: none;
       box-shadow: none;
 
       .sprite-img {
@@ -26,6 +24,8 @@
       position: absolute;
       top: 20px;
       left: 16px;
+      width: 32px !important;
+      height: 32px !important;
     }
 
     &[aria-expanded="true"] {
