@@ -2,60 +2,6 @@
 <svg aria-hidden="true" class="sprite-img _{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
 {%- endmacro %}
 
-{% macro _author_card(img_url, full_name, details, testimonial, modifiers) -%}
-    <div class="author{% if modifiers %} {{ modifiers }}{% endif %}">
-        {% if img_url %}
-            <img class="author__img" alt="{{ full_name }}" src="{{ img_url }}" />
-        {% endif %}
-        <div class="author__details">
-            <h4>{{ full_name }}</h4>
-            <span>{{ details }}</span>
-        </div>
-        {% if testimonial %}<div class="author__testimonial">{{ testimonial }}</div>{% endif %}
-    </div>
-{%- endmacro %}
-
-{% macro author_card(user, details, testimonial='', modifiers='') -%}
-    {% with im = user.get_thumbnail(user.ThumbnailSize.SQUARE, use_stub=False) %}
-        {% if im %}{% set img_url = im.url %}{% else %}{% set img_url = '' %}{% endif %}
-        {{ _author_card(im.url, user.get_short_name(), details, testimonial, modifiers) }}
-    {% endwith %}
-{%- endmacro %}
-
-{% macro supervisor_card(supervisor, details, modifiers='') -%}
-    {% if supervisor.gender == supervisor.GENDER_MALE %}
-        {% set img_url = static('v2/img/placeholder/man_150x150.png') %}
-    {% else %}
-        {% set img_url = static('v2/img/placeholder/woman_150x150.png') %}
-    {% endif %}
-    {{ _author_card(img_url, supervisor.full_name, supervisor.workplace, None, modifiers) }}
-{%- endmacro %}
-
-{% macro testimonial_card(graduate_profile) -%}
-<div class="card mb-2">
-    <div class="card__content _middle">
-        {% set parts = ["Выпуск ", graduate_profile.graduation_year, ", ", graduate_profile.academic_disciplines.all()|join(", ")] %}
-        {% with im = graduate_profile.get_thumbnail(graduate_profile.student.ThumbnailSize.SQUARE) %}
-            {{ _author_card(im.url,
-                            full_name=graduate_profile.student.get_short_name(),
-                            details=parts|join(''),
-                            testimonial=graduate_profile.testimonial|markdown(graduate_profile.TESTIMONIAL_CACHE_KEY, 3600, graduate_profile.pk, graduate_profile.modified),
-                            modifiers='_testimonial') }}
-        {% endwith %}
-    </div>
-</div>
-{%- endmacro %}
-
-{% macro speaker_card(speaker) -%}
-    {% with im = speaker.get_thumbnail(speaker.ThumbnailSize.SQUARE) %}
-        {{ _author_card(
-                im.url,
-                full_name=speaker.full_name,
-                details=speaker.workplace,
-                testimonial=None) }}
-    {% endwith %}
-{%- endmacro %}
-
 {% macro video_iframe(url, modifiers='') -%}
 <div class="video{% if modifiers %} {{ modifiers }}{% endif %}">
     <iframe class="embed _responsive" src="{{ url }}" width="560" height="315"  frameborder="0"  allowfullscreen></iframe>

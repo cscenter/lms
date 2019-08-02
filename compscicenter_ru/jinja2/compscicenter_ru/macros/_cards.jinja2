@@ -1,0 +1,83 @@
+{% macro _author_card(img_url, full_name, details, testimonial, modifiers) -%}
+    <div class="author{% if modifiers %} {{ modifiers }}{% endif %}">
+        {% if img_url %}
+            <img class="author__img" alt="{{ full_name }}" src="{{ img_url }}" />
+        {% endif %}
+        <div class="author__details">
+            <h4>{{ full_name }}</h4>
+            <span>{{ details }}</span>
+        </div>
+        {% if testimonial %}<div class="author__testimonial">{{ testimonial }}</div>{% endif %}
+    </div>
+{%- endmacro %}
+
+{% macro author_card(user, details, testimonial='', modifiers='') -%}
+    {% with im = user.get_thumbnail(user.ThumbnailSize.SQUARE, use_stub=False) %}
+        {% if im %}{% set img_url = im.url %}{% else %}{% set img_url = '' %}{% endif %}
+        {{ _author_card(im.url, user.get_short_name(), details, testimonial, modifiers) }}
+    {% endwith %}
+{%- endmacro %}
+
+{% macro supervisor_card(supervisor, details, modifiers='') -%}
+    {% if supervisor.gender == supervisor.GENDER_MALE %}
+        {% set img_url = static('v2/img/placeholder/man_150x150.png') %}
+    {% else %}
+        {% set img_url = static('v2/img/placeholder/woman_150x150.png') %}
+    {% endif %}
+    {{ _author_card(img_url, supervisor.full_name, supervisor.workplace, None, modifiers) }}
+{%- endmacro %}
+
+{% macro testimonial_card(graduate_profile) -%}
+<div class="card mb-2">
+    <div class="card__content _middle">
+        {% set parts = ["Выпуск ", graduate_profile.graduation_year, ", ", graduate_profile.academic_disciplines.all()|join(", ")] %}
+        {% with im = graduate_profile.get_thumbnail(graduate_profile.student.ThumbnailSize.SQUARE) %}
+            {{ _author_card(im.url,
+                            full_name=graduate_profile.student.get_short_name(),
+                            details=parts|join(''),
+                            testimonial=graduate_profile.testimonial|markdown(graduate_profile.TESTIMONIAL_CACHE_KEY, 3600, graduate_profile.pk, graduate_profile.modified),
+                            modifiers='_testimonial') }}
+        {% endwith %}
+    </div>
+</div>
+{%- endmacro %}
+
+{% macro speaker_card(speaker) -%}
+    {% with im = speaker.get_thumbnail(speaker.ThumbnailSize.SQUARE) %}
+        {{ _author_card(
+                im.url,
+                full_name=speaker.full_name,
+                details=speaker.workplace,
+                testimonial=None) }}
+    {% endwith %}
+{%- endmacro %}
+
+{% macro _user_card_link(url, image, title, subtitle=None, user_id=None) -%}
+    <a class="card _user" href="{{ url }}"{% if user_id %} id="user-card-{{ user_id }}"{% endif %}>
+        <div class="card__img"><img src="{{ image.url }}"/></div>
+        <div class="card__title">{{ title }}</div>
+        {% if subtitle %}<div class="card__subtitle">{{ subtitle }}</div>{% endif %}
+    </a>
+{%- endmacro %}
+
+
+{% macro teacher_card_link(user, subtitle) -%}
+    {% with im = user.get_thumbnail(use_stub=True, stub_official=True) -%}
+        {{ _user_card_link(
+            url=user.teacher_profile_url(),
+            image=im,
+            title=user.get_full_name(),
+            subtitle=subtitle) }}
+    {%- endwith %}
+{%- endmacro %}
+
+{% macro graduate_card_link(graduate_profile) -%}
+    {% with im = graduate_profile.get_thumbnail(use_stub=True, stub_official=False) -%}
+        {{ _user_card_link(
+            url=graduate_profile.get_absolute_url(),
+            image=im,
+            title=graduate_profile.student.get_short_name(),
+            user_id=graduate_profile.student_id) }}
+    {%- endwith %}
+{%- endmacro %}
+

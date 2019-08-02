@@ -27,11 +27,12 @@ from compscicenter_ru.utils import group_terms_by_academic_year, Tab, TabList
 from core.exceptions import Redirect
 from core.models import Faq
 from core.urls import reverse
-from courses.models import Course, Semester, MetaCourse, CourseTeacher
-from courses.settings import SemesterTypes
+from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
+    group_course_teachers
+from courses.settings import SemesterTypes, TeacherRoles
 from courses.utils import get_current_term_pair, \
-    get_term_index_academic_year_starts, get_term_by_index, bucketize, \
-    get_term_index
+    get_term_index_academic_year_starts, get_term_by_index, get_term_index
+from core.utils import bucketize
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import Branch, Enrollment, GraduateProfile
 from learning.projects.constants import ProjectTypes
@@ -628,10 +629,11 @@ class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         tabs = TabList([
-            Tab(target='about', name=_('About Course'), active=True),
+            Tab(target='about', name=_('About the Course'), active=True),
             Tab(target='video', name=_('Video Records')),
         ])
+        teachers = group_course_teachers(self.course.course_teachers.all())
         context['tabs'] = tabs
-        context['teachers'] = bucketize(self.course.course_teachers.all(),
-                                        lambda t: t.is_lecturer)
+        context['teachers'] = {TeacherRoles.get_choice(k): v for k, v in
+                               teachers.items()}
         return context

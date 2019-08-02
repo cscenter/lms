@@ -1,6 +1,6 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
-{% import "compscicenter_ru/macros/_ui.jinja2" as ui_macros %}
+{% import "compscicenter_ru/macros/_nav.jinja2" as macros_nav %}
 
 {% block title %}Программы подготовки в {{ super() }}{% endblock title %}
 
@@ -12,7 +12,7 @@
             <div class="col-lg-8">
                 <h1>Очное обучение в CS центре</h1>
 
-                {{ ui_macros.tabs(tabs) }}
+                {{ macros_nav.tabs(tabs) }}
 
                 <div class="tab-content">
                 {% for branch, current_programs in programs.items() %}

@@ -1,6 +1,7 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
-{% import "compscicenter_ru/macros/_ui.jinja2" as ui_macros %}
+{% import "compscicenter_ru/macros/_nav.jinja2" as macros_nav %}
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
 
 {% block title %}Программа подготовки в {{ super() }}{% endblock title %}
 
@@ -35,7 +36,7 @@
                 </p>
             </div>
             <div class="col-lg-12 text-center">
-                {{ ui_macros.tabs(tabs, modifiers='content-center mt-4') }}
+                {{ macros_nav.tabs(tabs, modifiers='content-center mt-4') }}
                 <ul class="ui nav nav-tabs content-center mt-4" role="tablist">
                     {% for branch in branches %}
                     <li class="nav-item">
@@ -93,7 +94,7 @@
             <h2 class="text-center">Отзывы студентов</h2>
             <div class="card-columns _testimonials">
                 {% for graduate_profile in testimonials %}
-                    {{ macros.testimonial_card(graduate_profile) }}
+                    {{ macros_cards.testimonial_card(graduate_profile) }}
                 {% endfor %}
             </div>
         </div>

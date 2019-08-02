@@ -17,6 +17,7 @@ from django_ical.views import ICalFeed
 from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
 
+import core.utils
 import courses.utils
 from core.settings.base import TIME_ZONES
 from core.timezone import Timezone, CityCode
@@ -257,7 +258,7 @@ class CoursesListView(generic.ListView):
             semester_list.insert(0, semester)
         # Hide empty pairs
         context["semester_list"] = [
-            (a, s) for s, a in courses.utils.chunks(semester_list, 2) if \
+            (a, s) for s, a in core.utils.chunks(semester_list, 2) if \
             (a and a.courseofferings) or (s and s.courseofferings)
             ]
 

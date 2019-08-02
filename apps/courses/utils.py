@@ -2,7 +2,6 @@ import datetime
 import re
 from calendar import monthrange
 from collections import namedtuple
-from itertools import zip_longest
 from typing import List, Tuple
 
 import pytz
@@ -164,36 +163,3 @@ def get_terms_for_calendar_month(year: int, month: int) -> List[TermTuple]:
 term_types = r"|".join(slug for slug, _ in SemesterTypes.choices)
 semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
                               term_types + r")$")
-
-
-def chunks(iterable, n, fillvalue=None):
-    """
-    Collect data into fixed-length chunks or blocks:
-    Example:
-        In: grouper('ABCDEFG', 3, 'x')
-        Out: ABC DEF Gxx
-    """
-    args = [iter(iterable)] * n
-    return zip_longest(fillvalue=fillvalue, *args)
-
-
-# Inspired by iterutils
-def bucketize(iterable, key=None, value_transform=None):
-    """
-    Collect data into buckets from the iterable grouping values by key.
-
-    The *key* is a function computing a key value for each element.
-    If not specified or is ``None``, *key* defaults to an identity function and
-    returns the element unchanged.
-    The *value_transform* is a function modifying a value before adding
-    into bucket.
-    """
-    if key is None:
-        key = lambda x: x
-    if value_transform is None:
-        value_transform = lambda x: x
-    buckets = {}
-    for val in iterable:
-        bucket_key = key(val)
-        buckets.setdefault(bucket_key, []).append(value_transform(val))
-    return buckets
