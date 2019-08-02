@@ -23,22 +23,22 @@ def test_course_news_tab_permissions(client):
     prev_term = SemesterFactory.create_prev(current_semester)
     news: CourseNews = CourseNewsFactory(course__city_id='spb',
                                          course__semester=current_semester)
-    co = news.course
+    course = news.course
     news_prev: CourseNews = CourseNewsFactory(course__city_id='spb',
-                                              course__meta_course=co.meta_course,
+                                              course__meta_course=course.meta_course,
                                               course__semester=prev_term)
     co_prev = news_prev.course
-    response = client.get(co.get_absolute_url())
-    assert "news" not in response.context['course_tabs']
+    response = client.get(course.get_absolute_url())
+    assert response.status_code == 302
     # By default student can't see the news until enroll in the course
     student_spb = StudentFactory(city_id='spb')
     client.login(student_spb)
-    response = client.get(co.get_absolute_url())
+    response = client.get(course.get_absolute_url())
     assert "news" not in response.context['course_tabs']
     response = client.get(co_prev.get_absolute_url())
     assert "news" not in response.context['course_tabs']
-    e_current = EnrollmentFactory(course=co, student=student_spb)
-    response = client.get(co.get_absolute_url())
+    e_current = EnrollmentFactory(course=course, student=student_spb)
+    response = client.get(course.get_absolute_url())
     assert "news" in response.context['course_tabs']
     # To see the news for completed course student should successfully pass it.
     e_prev = EnrollmentFactory(course=co_prev, student=student_spb)
@@ -53,12 +53,12 @@ def test_course_news_tab_permissions(client):
     client.login(teacher)
     response = client.get(co_prev.get_absolute_url())
     assert "news" not in response.context['course_tabs']
-    response = client.get(co.get_absolute_url())
+    response = client.get(course.get_absolute_url())
     assert "news" not in response.context['course_tabs']
     CourseTeacherFactory(course=co_prev, teacher=teacher)
     response = client.get(co_prev.get_absolute_url())
     assert "news" in response.context['course_tabs']
-    response = client.get(co.get_absolute_url())
+    response = client.get(course.get_absolute_url())
     assert "news" in response.context['course_tabs']
     co_other = CourseFactory(semester=current_semester)
     response = client.get(co_other.get_absolute_url())
@@ -73,13 +73,12 @@ def test_course_assignments_tab_permissions(client):
     a = AssignmentFactory(course__semester=prev_term,
                           course__meta_course=meta_course)
     co_prev = a.course
-    co = CourseFactory(meta_course=meta_course,
-                       semester=current_semester)
+    course = CourseFactory(meta_course=meta_course, semester=current_semester)
     teacher = TeacherFactory()
-    CourseTeacherFactory(teacher=teacher, course=co)
+    CourseTeacherFactory(teacher=teacher, course=course)
     # Unauthenticated user can't see tab at all
     response = client.get(co_prev.get_absolute_url())
-    assert "assignments" not in response.context['course_tabs']
+    assert response.status_code == 302
     # Teacher can see links to assignments from other course sessions
     client.login(teacher)
     response = client.get(co_prev.get_absolute_url())

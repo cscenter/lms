@@ -15,12 +15,13 @@ from core.urls import reverse
 from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
 from courses.forms import CourseEditDescrForm
-from courses.models import Course, CourseTeacher
-from courses.settings import SemesterTypes
+from courses.models import Course, CourseTeacher, group_course_teachers
+from courses.settings import SemesterTypes, TeacherRoles
 from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_term_index
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
+from learning.utils import split_on_condition
 from users.mixins import TeacherOnlyMixin
 from users.utils import get_user_city_code
 
@@ -34,15 +35,9 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
     context_object_name = 'course'
 
     def get(self, request, *args, **kwargs):
-        # Redirects old style link
-        if "tab" in request.GET:
-            try:
-                tab_name = request.GET["tab"]
-                url = reverse("course_detail_with_active_tab",
-                              kwargs={**kwargs, "tab": tab_name})
-            except NoReverseMatch:
-                url = reverse("course_detail", kwargs=kwargs)
-            return HttpResponseRedirect(url)
+        if not request.user.is_authenticated:
+            redirect_to = self.course.get_absolute_url(subdomain=None)
+            return HttpResponseRedirect(redirect_to)
         # Redirects to login page if tab is not visible to authenticated user
         context = self.get_context_data()
         # Redirects to club if course was created before center establishment.
@@ -69,11 +64,20 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
 
     def get_context_data(self, *args, **kwargs):
         course = self.course
-        teachers_by_role = course.get_grouped_teachers()
+        grouped = group_course_teachers(course.course_teachers
+                                        .order_by('teacher__last_name',
+                                                  'teacher__first_name'))
+        teachers = {'main': [], 'others': []}
+        for role, ts in grouped.items():
+            if role in (TeacherRoles.LECTURER, TeacherRoles.SEMINAR):
+                to_group = 'main'
+            else:
+                to_group = 'others'
+            teachers[to_group].extend(ts)
         context = {
             'course': course,
             'course_tabs': self.make_tabs(course),
-            'teachers': teachers_by_role,
+            'teachers': teachers,
             **self._get_additional_context(course)
         }
         return context

@@ -333,6 +333,8 @@ class CourseAssignmentsTab(CourseTab):
         return True
 
 
+# FIXME: remove html!
+# FIXME: move to utils? or services
 def get_course_classes(course, **kwargs) -> List[CourseClass]:
     """Get course classes with attached materials"""
     classes = []

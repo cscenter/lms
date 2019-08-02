@@ -2,7 +2,7 @@
 {% load tz %}
 {% load i18n %}
 {% load thumbnail %}
-{% load markdown call_method from core_tags %}
+{% load markdown call_method lookup from core_tags %}
 {% load render_bundle from webpack_loader %}
 {% load user_thumbnail from user_thumbnail %}
 
@@ -238,7 +238,7 @@
     {% endif %}
         <div class="o-users-vlist">
             <ul class="list-unstyled">
-                {% for course_teacher in teachers.lecturers %}
+                {% for course_teacher in teachers.main %}
                     {% with teacher=course_teacher.teacher %}
                     <li>
                         <a href="{{ teacher.teacher_profile_url }}">

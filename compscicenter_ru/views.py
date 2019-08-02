@@ -28,8 +28,8 @@ from core.exceptions import Redirect
 from core.models import Faq
 from core.urls import reverse
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
-    group_course_teachers
-from courses.settings import SemesterTypes, TeacherRoles
+    group_course_teachers, CourseClass
+from courses.settings import SemesterTypes, TeacherRoles, ClassTypes
 from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index, get_term_index
 from core.utils import bucketize
@@ -630,10 +630,15 @@ class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
         context = super().get_context_data(**kwargs)
         tabs = TabList([
             Tab(target='about', name=_('About the Course'), active=True),
-            Tab(target='video', name=_('Video Records')),
+            Tab(target='lectures', name=_('Lectures List')),
         ])
-        teachers = group_course_teachers(self.course.course_teachers.all())
+        teachers = group_course_teachers(self.course.course_teachers
+                                         .order_by('teacher__last_name',
+                                                   'teacher__first_name'))
         context['tabs'] = tabs
         context['teachers'] = {TeacherRoles.get_choice(k): v for k, v in
                                teachers.items()}
+        context['lectures'] = (self.course.courseclass_set
+                               .filter(type=ClassTypes.LECTURE)
+                               .order_by("date", "starts_at"))
         return context

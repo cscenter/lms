@@ -11,6 +11,11 @@
 
 {% block body_attrs %}class="_dark" data-init-sections="tabs"{% endblock body_attrs %}
 
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
 
 {% block content %}
 <div class="container page-content p-xs-0">
@@ -26,6 +31,7 @@
                     </nav>
                     <div class="cover__content _big">
                         <h2 class="cover__title">{{ course.meta_course.name }}</h2>
+                        <h2 class="cover__subtitle">{{ course.city }}, {{ course.semester }}</h2>
                     </div>
                 </div>
 
@@ -45,16 +51,34 @@
                                 </div>
                                 <h2>{% trans %}Teachers{% endtrans %}</h2>
                                 <div class="card-deck _users cards-lg-4">
-                                {% for role, course_teachers in teachers.items() %}
-                                    {% for course_teacher in course_teachers %}
-                                        {% with teacher=course_teacher.teacher %}
-                                            {{ macros_cards.teacher_card_link(teacher, subtitle=role.label) }}
-                                        {% endwith %}
-                                    {% endfor %}
-                                {% endfor %}
+                                    {% for role, course_teachers in teachers.items() -%}
+                                        {% for course_teacher in course_teachers -%}
+                                            {% with teacher=course_teacher.teacher %}
+                                                {{ macros_cards.teacher_card_link(teacher, subtitle=role.label) }}
+                                            {% endwith %}
+                                        {%- endfor %}
+                                    {%- endfor %}
                                 </div>
                             </div>
                         {% endwith %}
+
+                        {% if 'lectures' in tabs %}
+                            {% with tab = tabs['lectures'] %}
+                                <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                    <h2>{% trans %}Lectures List{% endtrans %}</h2>
+                                    <div class="ui list _divided _playlist">
+                                        {% for course_class in lectures %}
+                                            <a href="{{ course_class.get_absolute_url() }}" class="list__item">
+                                                <div class="item__text">{{ course_class.name }}</div>
+                                                <div class="item__icons">
+                                                    {%- if course_class.video_url %}{{ macros.svg_inline('video') }}{% endif %}{% if course_class.slides %}{{ macros.svg_inline('slides') }}{% endif -%}
+                                                </div>
+                                            </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endwith %}
+                        {% endif %}
                     </div>
                 </div>
 

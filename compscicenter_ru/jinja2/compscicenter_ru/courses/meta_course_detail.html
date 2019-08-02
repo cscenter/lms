@@ -47,7 +47,7 @@
                                     </div>
                                     <div class="card-deck _three">
                                         {% for course in courses -%}
-                                            <a href="{{ course.get_absolute_url() }}" class="card">
+                                            <a href="{{ course.get_absolute_url(subdomain=None) }}" class="card">
                                                 <div class="card__content mb-lg-8">
                                                     <div class="card__title">{{ course.semester|capitalize }}</div>
                                                     {% with lecturers = course.course_teachers.all() %}

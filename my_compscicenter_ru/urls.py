@@ -2,11 +2,13 @@ from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path
 from django.views.generic import TemplateView
 from loginas import urls as loginas_urls
 
 from announcements.views import AnnouncementTagAutocomplete
+from courses.urls import RE_COURSE_URI
+from courses.views import CourseDetailView
 from my_compscicenter_ru.views import IndexView
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 
@@ -21,6 +23,14 @@ urlpatterns = [
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
 
     path('', include('learning.urls')),
+
+    path("courses/", include([
+        re_path(RE_COURSE_URI, include([
+            path("", CourseDetailView.as_view(), name="course_detail"),
+            re_path(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$", CourseDetailView.as_view(), name="course_detail_with_active_tab"),
+        ]), kwargs={"city_aware": True})
+    ])),
+
     path("courses/", include('learning.invitation.urls')),
 
     path('', include('auth.urls')),

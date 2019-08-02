@@ -63,8 +63,8 @@ class CourseListTeacherTests(MyUtilitiesMixin, CSCTestCase):
 
 class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_basic_get(self):
-        co = CourseFactory.create()
-        assert 200 == self.client.get(co.get_absolute_url()).status_code
+        course = CourseFactory.create()
+        assert 302 == self.client.get(course.get_absolute_url()).status_code
         url = city_aware_reverse('course_detail', kwargs={
             "course_slug": "space-odyssey",
             "semester_year": 2010,
@@ -83,8 +83,6 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
         co_other = CourseFactory.create()
         url = co.get_absolute_url()
         ctx = self.client.get(url).context
-        self.assertEqual(None, ctx['request_user_enrollment'])
-        self.assertEqual(False, ctx['is_actual_teacher'])
         self.doLogin(student)
         ctx = self.client.get(url).context
         self.assertEqual(None, ctx['request_user_enrollment'])
@@ -116,13 +114,14 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
         teacher = TeacherFactory(city_id='spb')
         today = now_local(student.city_code).date()
         next_day = today + datetime.timedelta(days=1)
-        co = CourseFactory.create(teachers=[teacher],
-                                  semester=SemesterFactory.create_current(),
-                                  completed_at=next_day)
-        url = co.get_absolute_url()
-        EnrollmentFactory(student=student, course=co)
-        a = AssignmentFactory.create(course=co)
-        self.assertNotContains(self.client.get(url), a.title)
+        course = CourseFactory(teachers=[teacher],
+                               semester=SemesterFactory.create_current(),
+                               completed_at=next_day)
+        url = course.get_absolute_url()
+        EnrollmentFactory(student=student, course=course)
+        a = AssignmentFactory.create(course=course)
+        response = self.client.get(url)
+        assert response.status_code == 302
         self.doLogin(student)
         self.assertContains(self.client.get(url), a.title)
         a_s = StudentAssignment.objects.get(assignment=a, student=student)
