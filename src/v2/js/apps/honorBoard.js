@@ -24,7 +24,7 @@ export function launch() {
                 div.innerHTML = `<svg class="sprite-img _${code}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#${code}"></use></svg>`;
                 wrapper.appendChild(div);
             });
-            $(`#user-card-${userId} .user-card__photo`)[0].appendChild(wrapper);
+            $(`#user-card-${userId} .card__img`)[0].appendChild(wrapper);
         });
         $('[data-toggle="tooltip"]').tooltip({
             animation: false,

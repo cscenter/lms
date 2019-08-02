@@ -144,6 +144,19 @@ $(function () {
 
     // Replace data-src
     loadLazyImages();
+
+    // Render Latex
+    // FIXME: autoload css
+    const katexBlocks = document.getElementsByClassName('math-support');
+    if (katexBlocks.length > 0) {
+        import(/* webpackChunkName: "katex" */ 'katex')
+            .then(module => {
+                katexBlocks.forEach(function(mathBlock) {
+                    module.renderMath(mathBlock);
+                });
+            })
+            .catch(error => showComponentError(error));
+    }
 });
 
 
