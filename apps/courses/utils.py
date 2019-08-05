@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from core.settings.base import FOUNDATION_YEAR
 from core.timezone import Timezone, now_local, TzAware
-from courses.settings import SemesterTypes, \
+from courses.constants import SemesterTypes, \
     AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START, MONDAY_WEEKDAY
 
 # Helps to sort terms in chronological order

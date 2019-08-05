@@ -16,7 +16,7 @@ from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
 from courses.forms import CourseEditDescrForm
 from courses.models import Course, CourseTeacher, group_course_teachers
-from courses.settings import SemesterTypes, TeacherRoles
+from courses.constants import SemesterTypes, TeacherRoles
 from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_term_index
 from courses.views.mixins import CourseURLParamsMixin

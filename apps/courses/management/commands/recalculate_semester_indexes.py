@@ -4,7 +4,7 @@ from django.core.management import BaseCommand
 
 from courses.models import Semester
 from core.settings.base import FOUNDATION_YEAR
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import TERMS_INDEX_START
 
 

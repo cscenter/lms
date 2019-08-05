@@ -4,7 +4,7 @@ import pytest
 
 from core.tests.utils import ANOTHER_DOMAIN_ID
 from core.urls import reverse_lazy
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory
 from learning.settings import StudentStatuses, GradeTypes

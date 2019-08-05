@@ -18,7 +18,7 @@ from core.urls import reverse
 from core.utils import is_club_site
 from courses.calendar import CalendarEvent
 from courses.models import CourseClass, Semester, Course
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils

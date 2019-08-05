@@ -24,7 +24,7 @@ from core.timezone import Timezone, CityCode
 from core.urls import reverse
 from courses.calendar import CalendarEvent
 from courses.models import Course, Semester, CourseClass
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from learning.gallery.models import Image

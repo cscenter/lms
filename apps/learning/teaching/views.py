@@ -19,7 +19,7 @@ from core.urls import reverse
 from core.utils import render_markdown, is_club_site
 from courses.calendar import CalendarEvent
 from courses.models import CourseClass, Course, Assignment
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import get_terms_for_calendar_month, get_term_index, \
     get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView

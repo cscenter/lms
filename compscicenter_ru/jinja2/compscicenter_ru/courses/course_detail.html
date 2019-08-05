@@ -24,7 +24,7 @@
             <div class="card border-xs-0">
                 <div class="card__header cover _img" style="background-image:url('{{ course.meta_course.get_cover_url() }}')">
                     <nav class="cover__content py-4 text-left">
-                        <a href="{{ course.meta_course.get_absolute_url() }}" class="btn _extra-small _outline _white _rounded _m-collapse">{{ macros.svg_inline('arrow-left') }}<span>Описание курса</span></a>
+                        <a href="{{ course.meta_course.get_absolute_url() }}" class="btn _extra-small _outline _white _rounded _m-collapse">{{ macros.svg_inline('arrow-left') }}<span>Все прочтения</span></a>
 {#                        <div class="float-right">#}
 {#                            <a href="#" class="btn _extra-small _primary _rounded">Записаться на осень 2019</a>#}
 {#                        </div>#}
@@ -54,7 +54,7 @@
                                     {% for role, course_teachers in teachers.items() -%}
                                         {% for course_teacher in course_teachers -%}
                                             {% with teacher=course_teacher.teacher %}
-                                                {{ macros_cards.teacher_card_link(teacher, subtitle=role.label) }}
+                                                {{ macros_cards.teacher_card_link(teacher, subtitle=role.narrative) }}
                                             {% endwith %}
                                         {%- endfor %}
                                     {%- endfor %}
