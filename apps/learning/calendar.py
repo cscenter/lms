@@ -6,7 +6,7 @@ from django.db.models import Q
 from core.utils import is_club_site
 from courses.calendar import CalendarEvent
 from courses.models import CourseClass
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from learning.models import Event
 
 

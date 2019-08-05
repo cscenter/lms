@@ -26,14 +26,14 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local, TzAware
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids, get_youtube_video_id
-from courses.settings import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
+from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
 from .micawber_providers import get_oembed_html
-from .settings import SemesterTypes, ClassTypes
+from .constants import SemesterTypes, ClassTypes
 from .tasks import maybe_upload_slides_yandex
 
 

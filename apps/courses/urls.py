@@ -3,7 +3,7 @@ from django.urls import path, re_path
 
 from courses import views
 
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 
 _terms = r"|".join(slug for slug, _ in SemesterTypes.choices)
 semester_slug = r"(?P<semester_year>\d{4})-(?P<semester_type>" + _terms + r")"

@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from admission.models import Campaign, Interview, Comment
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.models import Course, Semester
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import get_term_index
 from core.utils import bucketize
 from learning.settings import StudentStatuses, GradeTypes

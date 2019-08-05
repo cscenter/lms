@@ -18,7 +18,7 @@ from core import comment_persistence
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from courses.models import AssignmentAttachment
-from courses.settings import ASSIGNMENT_TASK_ATTACHMENT
+from courses.constants import ASSIGNMENT_TASK_ATTACHMENT
 from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, AssignmentComment, \

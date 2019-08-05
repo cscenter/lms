@@ -6,7 +6,7 @@ from courses.tests.factories import CourseNewsFactory, SemesterFactory, CourseFa
     CourseClassFactory, CourseClassAttachmentFactory, MetaCourseFactory, \
     AssignmentFactory, AssignmentAttachmentFactory
 from courses.models import Semester, Course, Assignment
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import get_term_index, next_term_starts_at
 
 

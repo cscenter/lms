@@ -12,7 +12,7 @@ from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from courses.models import Course, CourseNews, MetaCourse, Venue, CourseClass, \
     Assignment
-from courses.settings import ClassTypes
+from courses.constants import ClassTypes
 from core.forms import CANCEL_SAVE_PAIR
 from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 

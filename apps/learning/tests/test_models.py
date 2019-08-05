@@ -18,7 +18,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFa
     AssignmentFactory
 from learning.models import StudentAssignment
 from courses.models import Semester, CourseNews
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import get_term_start
 from users.tests.factories import UserFactory, StudentFactory, \
     TeacherFactory

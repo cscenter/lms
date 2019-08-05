@@ -13,7 +13,7 @@ from isoweek import Week
 from rest_framework import serializers, fields
 
 from core.settings.base import FOUNDATION_YEAR
-from courses.settings import MONDAY_WEEKDAY
+from courses.constants import MONDAY_WEEKDAY
 from core.utils import chunks
 
 __all__ = ('EventsCalendar', 'CalendarEvent', 'MonthEventsCalendar',

@@ -8,7 +8,7 @@ from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.api.serializers import MetaCourseSerializer, TeacherSerializer, \
     CourseVideoSerializer
 from courses.models import Course, CourseTeacher
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import get_term_index
 from users.constants import Roles
 from users.models import User

@@ -25,7 +25,7 @@ from core.timezone import now_local
 from core.urls import reverse
 from core.utils import hashids
 from courses.models import Semester
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import get_current_term_index
 from learning.models import Branch
 from learning.projects.constants import ProjectTypes

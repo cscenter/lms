@@ -29,7 +29,7 @@ from core.models import Faq
 from core.urls import reverse
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
     group_course_teachers, CourseClass
-from courses.settings import SemesterTypes, TeacherRoles, ClassTypes
+from courses.constants import SemesterTypes, TeacherRoles, ClassTypes
 from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index, get_term_index
 from core.utils import bucketize

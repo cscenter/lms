@@ -28,7 +28,7 @@ from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR
 from core.templatetags.core_tags import tex
 from core.urls import reverse
 from courses.models import Course, Semester
-from courses.settings import SemesterTypes
+from courses.constants import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
 from core.utils import bucketize
