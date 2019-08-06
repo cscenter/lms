@@ -60,6 +60,10 @@ class Branch(models.Model):
         return self.name
 
     @property
+    def order(self):
+        return Branches.get_choice(self.code).order
+
+    @property
     def timezone(self):
         return Branches.get_choice(self.code).timezone
 

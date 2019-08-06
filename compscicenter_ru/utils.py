@@ -82,6 +82,7 @@ class Tab:
     name: str = attr.ib()
     active: bool = False
     url: str = '#'
+    order: int = 0
 
 
 class TabList:
@@ -98,11 +99,18 @@ class TabList:
             # TODO: warn if tab not found
             self._tabs[target].active = True
 
-    def __iter__(self):
-        return iter(self._tabs.values())
+    def sort(self, key=None):
+        """If **key** is None, sort by tab.order attribute"""
+        key = key or (lambda t: t.order)
+        new_order = list((key(t), t.target) for t in self._tabs.values())
+        new_order.sort()
+        self._tabs = {target: self._tabs[target] for _, target in new_order}
 
     def items(self):
         return self._tabs.items()
+
+    def __iter__(self):
+        return iter(self._tabs.values())
 
     def __getitem__(self, target):
         # TODO: support indexing by int since dict in python > 3.5 is ordered

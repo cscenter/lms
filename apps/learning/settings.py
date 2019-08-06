@@ -14,13 +14,16 @@ ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)
 class Branches(DjangoChoices):
     SPB = C("spb", _("Saint Petersburg"),
             timezone=pytz.timezone('Europe/Moscow'),
-            abbr=_("SPb"))
+            abbr=_("SPb"),
+            order=1)
     NSK = C("nsk", _("Novosibirsk"),
             timezone=pytz.timezone('Asia/Novosibirsk'),
-            abbr=_("Nsk"))
+            abbr=_("Nsk"),
+            order=2)
     DISTANCE = C("distance", _("Branches|Distance"),
                  timezone=pytz.timezone('Europe/Moscow'),
-                 abbr=_("Distance"))
+                 abbr=_("Distance"),
+                 order=3)
 
     @classmethod
     def get_timezone(cls, code):
