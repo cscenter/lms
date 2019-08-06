@@ -423,10 +423,16 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
             "city_code": self.get_city()
         }
 
-    def get_absolute_url(self, **kwargs):
+    def get_absolute_url(self, tab=None, **kwargs):
         options = {"subdomain": settings.LMS_SUBDOMAIN, **kwargs}
-        return city_aware_reverse('course_detail',
-                                  kwargs=self.url_kwargs,
+        if tab is None:
+            route_name = 'course_detail'
+            url_kwargs = self.url_kwargs
+        else:
+            route_name = 'course_detail_with_active_tab'
+            url_kwargs = {**self.url_kwargs, "tab": tab}
+        return city_aware_reverse(route_name,
+                                  kwargs=url_kwargs,
                                   **options)
 
     def get_url_for_tab(self, active_tab):
