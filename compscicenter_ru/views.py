@@ -296,14 +296,17 @@ class OnCampusProgramsView(generic.TemplateView):
         tabs = TabList()
         selected_branch = self.request.GET.get('branch', Branches.SPB)
         for i, branch in enumerate(current_programs):
-            tab = Tab(target=branch.code, name=branch.name,
-                      url=f"{self.request.path}?branch={branch.code}")
+            tab = Tab(target=branch.code,
+                      name=branch.name,
+                      url=f"{self.request.path}?branch={branch.code}",
+                      order=branch.order)
             # Mark first tab as active by default
             if i == 0:
                 tab.active = True
             tabs.add(tab)
             if branch.code == selected_branch:
                 tabs.set_active(branch.code)
+        tabs.sort()
         context["tabs"] = tabs
         context["programs"] = current_programs
         return context
@@ -334,10 +337,12 @@ class OnCampusProgramDetailView(generic.TemplateView):
                             is_remote=False))
         for branch in branches:
             tab = Tab(target=branch.code, name=branch.name,
-                      url=f"{self.request.path}?branch={branch.code}")
+                      url=f"{self.request.path}?branch={branch.code}",
+                      order=branch.order)
             if branch.code == selected_branch:
                 tab.active = True
             tabs.add(tab)
+        tabs.sort()
 
         cache_key = f"{TESTIMONIALS_CACHE_KEY}_{discipline_code}"
         random_testimonials = get_random_testimonials(
@@ -595,13 +600,16 @@ class MetaCourseDetailView(generic.DetailView):
         tabs = TabList()
         for city_code in grouped:
             if grouped[city_code]:
-                tabs.add(Tab(target=city_code, name=Branches.values[city_code]))
+                branch = Branches.get_choice(city_code)
+                tabs.add(Tab(target=branch.value, name=branch.label,
+                             order=branch.order))
         if tabs:
             selected_tab = self.request.GET.get('branch', Branches.SPB)
             tabs.set_active(selected_tab)  # deactivates all other tabs
             if selected_tab not in tabs:
                 first_tab = next(iter(tabs))
                 first_tab.active = True
+            tabs.sort()
         context['tabs'] = tabs
         context['grouped_courses'] = grouped
         active_study_programs = get_study_programs(self.object.pk,
