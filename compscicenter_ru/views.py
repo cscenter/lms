@@ -637,9 +637,17 @@ class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         tabs = TabList([
-            Tab(target='about', name=_('About the Course'), active=True),
-            Tab(target='lectures', name=_('Lectures List')),
+            Tab(target='about',
+                name=_('About the Course'),
+                url=self.course.get_absolute_url(subdomain=None),
+                active=True),
+            Tab(target='lectures',
+                name=_('Lectures List'),
+                url=self.course.get_absolute_url(tab='lectures',
+                                                 subdomain=None)),
         ])
+        show_tab = self.kwargs.get('tab', 'about')
+        tabs.set_active(show_tab)
         teachers = group_course_teachers(self.course.course_teachers
                                          .order_by('teacher__last_name',
                                                    'teacher__first_name'))
