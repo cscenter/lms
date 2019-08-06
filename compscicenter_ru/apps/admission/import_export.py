@@ -5,10 +5,10 @@ from decimal import Decimal
 
 from import_export import resources, fields, widgets
 from import_export.instance_loaders import CachedInstanceLoader
-from import_export.widgets import IntegerWidget, ForeignKeyWidget
+from import_export.widgets import IntegerWidget
 
 from admission.constants import ChallengeStatuses
-from admission.models import Applicant, Test, Exam
+from admission.models import Test, Exam
 
 
 # XXX: Not tested with django-import-export==1.0.1
@@ -20,7 +20,9 @@ class JsonFieldWidget(widgets.Widget):
         return super(JsonFieldWidget, self).clean(value)
 
     def render(self, value, obj=None):
-        return "\n".join("{}: {}".format(k, v) for k, v in value.items())
+        if value:
+            return "\n".join("{}: {}".format(k, v) for k, v in value.items())
+        return ""
 
 
 class ContestDetailsMixin:
