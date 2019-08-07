@@ -37,12 +37,12 @@
                                 <div class="grouped mb-4">
                                     {% if event_details.venue_id %}
                                         <div class="ui label _icon">
-                                            {{ macros.svg_inline('location') }}<span>{{ event_details.venue.address }}</span>
+                                            {{ macros.svg_icon('location') }}<span>{{ event_details.venue.address }}</span>
                                         </div>
                                     {% endif %}
                                     {% if event_details.starts_on %}
                                         <div class="ui label _icon">
-                                            {{ macros.svg_inline('calendar') }}{{ announcement_macros.event_dates(event_details) }}
+                                            {{ macros.svg_icon('calendar') }}{{ announcement_macros.event_dates(event_details) }}
                                         </div>
                                     {% endif %}
                                 </div>
@@ -53,12 +53,12 @@
                             <div class="grouped mb-4">
                                 {% if announcement.event_place %}
                                     <div class="ui label _icon">
-                                        {{ macros.svg_inline('location') }}<span>{{ announcement.event_place }}</span>
+                                        {{ macros.svg_icon('location') }}<span>{{ announcement.event_place }}</span>
                                     </div>
                                 {% endif %}
                                 {% if announcement.event_date_at %}
                                     <div class="ui label _icon">
-                                        {{ macros.svg_inline('calendar') }}<span>{{ announcement.event_date_at|date("j E Y H:i") }}</span>
+                                        {{ macros.svg_icon('calendar') }}<span>{{ announcement.event_date_at|date("j E Y H:i") }}</span>
                                     </div>
                                 {% endif %}
                             </div>

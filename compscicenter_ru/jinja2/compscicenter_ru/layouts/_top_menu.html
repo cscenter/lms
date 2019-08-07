@@ -44,7 +44,7 @@
 
         {% if not request.user.is_authenticated %}
             <a class="btn _outline _gray menu-btn-reg" href="{{ url('login', subdomain=request.subdomain) }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">
-                {{ macros.svg_inline('user-sign') }} Войти
+                {{ macros.svg_icon('user') }} Войти
             </a>
         {% else %}
             <a class="members-area" href="{{ url('index', subdomain=LMS_SUBDOMAIN) }}">{% trans %}Members Area{% endtrans %}</a>
@@ -54,7 +54,7 @@
                         {%- if im -%}
                             <img class="user-menu-img" src="{{ im.url }}" width="32" height="32" alt="{{ request.user.get_full_name() }}">
                         {%- else -%}
-                            {{ macros.svg_inline('user-sign') }}
+                            {{ macros.svg_icon('user') }}
                         {%- endif -%}
                     {%- endwith %}
                 </button>
@@ -73,7 +73,7 @@
         {% endif %}
     </div>
     <div class="menu-mobile-wrapper collapse" id="top-menu-mobile">
-        <ul class="container">
+        <ul class="ui container">
             {% for menu_item in menu -%}
                 <li>
                     {%- if menu_item.children -%}
@@ -82,7 +82,7 @@
                            data-toggle="collapse" aria-expanded="{% if menu_item.selected %}true{% else %}false{% endif %}"
                            data-target="#top-menu-item-{{ loop.index }}"
                            aria-controls="top-menu-item-{{ loop.index }}"
-                        >{{ menu_item.title }} {{ macros.svg_inline('arrow-bottom') }}</a>
+                        >{{ menu_item.title }} {{ macros.svg_icon('arrow-bottom') }}</a>
                         <div class="mobile-submenu collapse {% if menu_item.selected %}show{% endif %}" id="top-menu-item-{{ loop.index }}">
                             {% for item in menu_item.children -%}
                             <a class="mobile-submenu__item{% if item.is_external %} _external{% endif %}{% if item.selected %} _active{% endif %}" href="{{ item.url }}" {% if item.is_external %}target="_blank" rel="noopener"{% endif %}>{{ item.title }}</a>

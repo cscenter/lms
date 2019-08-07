@@ -13,7 +13,7 @@
                     {% for qa in faq %}
                         <div class="card _qa mb-4">
                             <button class="btn btn-link card__header" id="question-{{ qa.pk }}" aria-expanded="false">
-                                {{ macros.svg_inline('border-arrow-right') }}{{ qa.question }}
+                                {{ macros.svg_icon('border-arrow-right') }}{{ qa.question }}
                             </button>
                             <div class="collapse" id="answer-{{ qa.pk }}" aria-expanded="true">
                                 <div class="card__content">{{ qa.answer|safe }}</div>

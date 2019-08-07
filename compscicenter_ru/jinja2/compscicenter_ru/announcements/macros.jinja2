@@ -27,12 +27,12 @@
         <div class="grouped{% if card_type == 'h' %} mb-4{% endif %}">
             {% if event_details.venue %}
                 <div class="ui label _icon">
-                    {{ macros.svg_inline('location') }}<span>{{ event_details.venue.address }}</span>
+                    {{ macros.svg_icon('location') }}<span>{{ event_details.venue.address }}</span>
                 </div>
             {% endif %}
             {% if event_details.starts_on %}
                 <div class="ui label _icon">
-                    {{ macros.svg_inline('calendar') }}{{ event_dates(event_details) }}
+                    {{ macros.svg_icon('calendar') }}{{ event_dates(event_details) }}
                 </div>
             {% endif %}
         </div>

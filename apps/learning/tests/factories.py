@@ -68,6 +68,7 @@ class InvitationFactory(factory.DjangoModelFactory):
         model = Invitation
 
     name = factory.Sequence(lambda n: "Invitation Name %03d" % n)
+    branch = factory.SubFactory(BranchFactory)
 
     @factory.post_generation
     def courses(self, create, extracted, **kwargs):
