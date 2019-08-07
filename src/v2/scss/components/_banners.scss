@@ -1,22 +1,14 @@
 $top-banner-height: 64px;
 
-.top-banner {
+.top-banner-wrapper {
   background-color: darken($gray-darker, 10%);
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: $top-banner-height;
-  padding: 0;
-
-  svg {
-    display: none;
-    @include media-breakpoint-up(lg) {
-      display: inline-block;
-    }
-  }
 }
 
-.top-banner__text {
+.top-banner {
+  height: $top-banner-height;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: $white;
   text-align: center;
   font-size: $font-size-sm;
@@ -25,17 +17,16 @@ $top-banner-height: 64px;
     font-weight: $font-weight-normal;
     letter-spacing: 2px;
   }
-}
 
-.top-banner__link {
-  color: $white;
-  padding-bottom: 1px;
-  border-bottom: 1px solid transparentize($white, .5);
-  font-weight: $font-weight-normal;
-
-  &:hover {
-    border-bottom: 1px solid transparentize($teal, .5);
-    color: lighten($teal, 20%);
+  a {
+    color: $white;
+    padding-bottom: 1px;
+    border-bottom: 1px solid transparentize($white, .5);
+    font-weight: $font-weight-normal;
+    &:hover {
+      border-bottom: 1px solid transparentize($teal, .5);
+      color: lighten($teal, 20%);
+    }
   }
 }
 
@@ -44,11 +35,4 @@ $top-banner-height: 64px;
   @include media-breakpoint-up(lg) {
     height: 0;
   }
-}
-
-// hack
-._top-banner-kids {
-  margin-right: 5px;
-  position: relative;
-  bottom: -6px;
 }
