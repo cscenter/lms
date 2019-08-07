@@ -1,12 +1,15 @@
 $navbar-mobile-height: 48px;
-$nav-link-line-height: 32px;
 $nav-link-padding-x: spacer("2x");
 $nav-link-padding-y: spacer("2x");
 // logo, navbar-toggler, .nav-link and reg button should have the same size
-$nav-link-height: ($nav-link-line-height + #{$nav-link-padding-y} * 2);
-// Hack to show rows with menu items vertically closer to each other.
-// Remove if in fact it's not a problem
-$nav-link-real-line-height: 24px;
+
+// Avoid blinking effect on hovering two vertically adjacent links by replacing `line-height`
+// with `fixed line-height + vertical margin`. Vertical margin adds space between links and decrease a
+// chance of hovering 2 links at the same time
+$nav-link-expected-line-height: 24px;
+$__blinking-effect-fix: 4px;
+$nav-link-line-height: $nav-link-expected-line-height - $__blinking-effect-fix;
+$nav-link-margin: $__blinking-effect-fix / 2;
 
 $nav-link-mobile-padding-x: 16px;
 
@@ -14,6 +17,9 @@ $navbar-toggler-padding-y: $grid-gutter-width / 2 - 1;  // humburger size is 18p
 $navbar-toggler-padding-x: $grid-gutter-width / 2;
 $navbar-toggler-font-size: $font-size-lg;
 $navbar-toggler-border-radius: $border-radius;
+
+
+$menu-desktop-wrapper-margin: 2px;
 
 @import "hamburger";
 
@@ -62,7 +68,7 @@ body {
     width: 72px;
     @include media-breakpoint-up(lg) {
       height: 32px;
-      width: 88px;
+      width: 92px;
     }
   }
 }
@@ -116,8 +122,7 @@ body {
 }
 
 .menu-desktop-wrapper {
-  // Hack to show rows with menu items vertically closer to each other.
-  margin: (($nav-link-line-height - $nav-link-real-line-height) / 2) 0;
+  margin: $menu-desktop-wrapper-margin 0;
   display: none;
   @include media-breakpoint-up(lg) {
     display: flex;
@@ -149,12 +154,8 @@ body {
   }
 
   .nav-link {
-    $__blinking-effect-fix: 4px; // avoid blinking on hovering two vertically adjacent links
-    // Hack to show rows with menu items vertically closer to each other.
-    // Replace with $nav-link-line-height to render designed size
-    line-height: $nav-link-real-line-height - $__blinking-effect-fix;
-    margin: ($__blinking-effect-fix / 2);
-    //margin: 3px 1px; // hack
+    line-height: $nav-link-line-height;
+    margin: $nav-link-margin;
   }
 }
 
@@ -168,6 +169,9 @@ body {
 
   .sprite-img._arrow-bottom {
     fill: $white;
+    top: 0;
+    width: 1em;
+    height: 1em;
   }
 
   ul {
@@ -280,9 +284,9 @@ body {
 }
 
 .members-area {
-  padding: ($nav-link-padding-y / 2) ($nav-link-padding-x / 2);
-  margin: ($nav-link-padding-y / 2) 0 ($nav-link-padding-y / 2) auto;
-  line-height: $nav-link-line-height - 2 * $input-btn-border-width;
+  padding: $nav-link-padding-y $nav-link-padding-x;
+  margin: ($nav-link-margin + $menu-desktop-wrapper-margin) 0 ($nav-link-margin + $menu-desktop-wrapper-margin) auto;
+  line-height: $nav-link-line-height;
   color: $white!important;
   display: none;
   @include media-breakpoint-up(lg) {
@@ -293,7 +297,7 @@ body {
 .btn.menu-btn-reg {
   padding: ($nav-link-padding-y / 2) $nav-link-padding-x;
   margin: ($nav-link-padding-y / 2) 0 ($nav-link-padding-y / 2) auto;
-  line-height: $nav-link-line-height - 2 * $input-btn-border-width;
+  line-height: $nav-link-line-height + 2 * $input-btn-border-width + 8px;
   color: $white!important;
 }
 
@@ -301,8 +305,8 @@ body {
   margin-left: auto;
   margin-right: -$navbar-toggler-padding-x;
 
-  ._user-sign {
-    margin: 2px;
+  ._user {
+    margin-right: 4px;
   }
 
   &.show {
@@ -328,7 +332,11 @@ body {
     padding: $nav-link-padding-y $nav-link-padding-x;
 
     @include media-breakpoint-up(lg) {
-      line-height: $nav-link-line-height;
+      line-height: 30px;
+    }
+
+    .svg-icon {
+      fill: $white;
     }
 
     &:focus {

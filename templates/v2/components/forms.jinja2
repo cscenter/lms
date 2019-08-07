@@ -1,12 +1,12 @@
 {% extends "v2/layouts/inner.jinja2" %}
 
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
 
 {% block content %}
-    <div class="svg-inline">
-        {% include "sprites/common.svg" %}
-        {% include "sprites/index.svg" %}
-        {% include "sprites/ui.svg" %}
-    </div>
     <div class="container page-content">
         <h1 class="mt-5">Fields</h1>
         <div class="card _no-border">
@@ -42,7 +42,7 @@
                     <div class="field col-lg-4">
                         <div class="ui icon input">
                             <input type="text" placeholder="" value="Удалить контент">
-                            <i class="icon">{{ macros.svg_inline('cross') }}</i>
+                            <i class="icon">{{ macros.svg_icon('cross') }}</i>
                         </div>
                     </div>
                     <div class="field col-lg-4">
@@ -63,7 +63,7 @@
                     <div class="field col-lg-4">
                         <div class="ui icon input">
                             <input type="search" placeholder="Поиск">
-                            <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                            <i class="_search icon">{{ macros.svg_icon('search') }}</i>
                         </div>
                     </div>
                     <div class="field col-lg-4">
@@ -129,7 +129,7 @@
                                 <div class="field col-12">
                                     <div class="ui icon input">
                                         <input type="password" placeholder="Пароль">
-                                        <i class="_password-hidden icon">{{ macros.svg_inline('password-hidden') }}</i>
+                                        <i class="_password-hidden icon">{{ macros.svg_icon('password-hidden') }}</i>
                                     </div>
                                 </div>
                                 <div class="field col-lg-auto">

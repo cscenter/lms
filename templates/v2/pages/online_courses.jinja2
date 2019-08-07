@@ -2,10 +2,13 @@
 
 {% block body_attrs %}class="_dark"{% endblock body_attrs %}
 
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
 {% block content %}
-        <div class="svg-inline">
-        {% include "sprites/ui.svg" %}
-    </div>
 <div class="container page-content online-courses">
     <div class="row">
         <div class="col-lg-9 order-lg-1 order-2">
@@ -62,7 +65,7 @@
             <div class="field">
                 <div class="ui icon input">
                     <input type="search" placeholder="Поиск">
-                    <i class="_search icon">{{ macros.svg_inline('search') }}</i>
+                    <i class="_search icon">{{ macros.svg_icon('search') }}</i>
                 </div>
             </div>
             <div class="tags-group">

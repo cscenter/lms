@@ -33,10 +33,11 @@
 <div class="navbar-container">
     {% block top_banner %}
         {%- if is_admission_active -%}
-            <div class="top-banner">
+            <div class="top-banner-wrapper">
                 <div class="container">
-                    <div class="top-banner__text">
-                        {{ macros.svg_inline('top-banner-kids') }} До 14 апреля открыт <a class="top-banner__link" href="#">приём заявок</a> на очное обучение в центре
+                    <div class="top-banner">
+                        <img class="mr-2 d-none d-lg-inline-block" src="/static/v2/img/icons/top-banner-kids.svg" alt="csc-kids">
+                        <span>До 14 апреля открыт <a href="#">приём заявок</a> на очное обучение в центре</span>
                     </div>
                 </div>
             </div>
@@ -61,12 +62,12 @@
             <a href="/v2/pages/privacy/" class="footer__link">Конфиденциальность</a>
             <a href="mailto:info@compscicenter.ru" class="footer__link">info@compscicenter.ru</a>
             <div class="footer__social-media-icons">
-                <a target="_blank" rel="noopener" href="https://vk.com/compscicenter" title="Computer Science Center on VK.com">{{ macros.svg_inline('vk') }}</a>
-                <a target="_blank" rel="noopener" href="https://t.me/compscicenter_ru" title="Computer Science Center in Telegram">{{ macros.svg_inline('telegram') }}</a>
-                <a target="_blank" rel="noopener" href="https://instagram.com/compscicenter" title="Computer Science Center on Instagram">{{ macros.svg_inline('instagram') }}</a>
-                <a target="_blank" rel="noopener" href="https://twitter.com/compscicenter" title="Computer Science Center on Twitter">{{ macros.svg_inline('twitter') }}</a>
-                <a target="_blank" rel="noopener" href="https://www.facebook.com/CSCenter" title="{{ _('Computer Science Center on Facebook') }}">{{ macros.svg_inline('facebook') }}</a>
-                <a target="_blank" rel="noopener" href="https://www.youtube.com/c/compscicenterru" title="Computer Science Center on YouTube">{{ macros.svg_inline('youtube') }}</a>
+                <a target="_blank" rel="noopener" href="https://vk.com/compscicenter" title="Computer Science Center on VK.com">{{ macros.svg_icon('vk') }}</a>
+                <a target="_blank" rel="noopener" href="https://t.me/compscicenter_ru" title="Computer Science Center in Telegram">{{ macros.svg_icon('telegram') }}</a>
+                <a target="_blank" rel="noopener" href="https://instagram.com/compscicenter" title="Computer Science Center on Instagram">{{ macros.svg_icon('instagram') }}</a>
+                <a target="_blank" rel="noopener" href="https://twitter.com/compscicenter" title="Computer Science Center on Twitter">{{ macros.svg_icon('twitter') }}</a>
+                <a target="_blank" rel="noopener" href="https://www.facebook.com/CSCenter" title="{{ _('Computer Science Center on Facebook') }}">{{ macros.svg_icon('facebook') }}</a>
+                <a target="_blank" rel="noopener" href="https://www.youtube.com/c/compscicenterru" title="Computer Science Center on YouTube">{{ macros.svg_icon('youtube') }}</a>
             </div>
         </div>
         </div>
