@@ -74,9 +74,9 @@
                         {% for uri in links %}
                             <a href="{{ uri }}" target="_blank" rel="noopener">
                                 {%- if uri.startswith('https://github.com') -%}
-                                    {{ macros.svg_inline('github') }}
+                                    {{ macros.svg_icon('github') }}
                                 {%- elif uri.startswith('https://habr.com') -%}
-                                    {{ macros.svg_inline('habr') }}
+                                    {{ macros.svg_icon('habr') }}
                                 {%- endif -%}
                                 <span>{{ uri }}</span>
                             </a>

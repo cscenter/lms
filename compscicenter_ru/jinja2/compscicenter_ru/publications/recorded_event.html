@@ -13,7 +13,7 @@
                 {{ macros.video_iframe(url=recorded_event.video_url, modifiers='mb-6') }}
                 {% if recorded_event.slides_url %}
                     <div class="external-links mb-6">
-                        <a href="{{ recorded_event.slides_url }}" target="_blank" rel="noopener">{{ macros.svg_inline('slides') }}<span>Слайды с лекции</span></a>
+                        <a href="{{ recorded_event.slides_url }}" target="_blank" rel="noopener">{{ macros.svg_icon('slides') }}<span>Слайды с лекции</span></a>
                     </div>
                 {% endif %}
                 {% with speakers=recorded_event.speakers.all() %}
