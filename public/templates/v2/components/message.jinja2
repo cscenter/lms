@@ -2,13 +2,14 @@
 
 {% block body_attrs %}class="_nofooter"{% endblock body_attrs %}
 
-{% block sprites %}{% include "sprites/achievements.svg" %}{% endblock sprites %}
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/achievements.svg") }}");
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
 
 {% block content %}
-    <div class="svg-inline">
-        {% include "sprites/common.svg" %}
-        {% include "sprites/ui.svg" %}
-    </div>
     <div class="container page-content">
         <div class="row">
             <div class="col-12">
@@ -23,7 +24,7 @@ font-weight: bolder не работает, либо совсем не замет
                 <h1>Types</h1>
                 <div class="message">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Базовый стиль
@@ -36,7 +37,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _danger">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Внимание
@@ -47,7 +48,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _warning mb-4">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Системное сообщение
@@ -58,7 +59,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _success">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         У вас кое-что получается!
@@ -69,7 +70,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _info">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Информационное сообщение
@@ -82,7 +83,7 @@ font-weight: bolder не работает, либо совсем не замет
                 <h1>Bordered</h1>
                 <div class="message _danger _outline">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Внимание
@@ -91,7 +92,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _warning _outline mb-4">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Системное сообщение
@@ -100,7 +101,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _success _outline">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         У вас кое-что получается!
@@ -109,7 +110,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _info _outline">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Информационное сообщение
@@ -120,7 +121,7 @@ font-weight: bolder не работает, либо совсем не замет
                 <h1>Contrast</h1>
                 <div class="message _danger _inverted">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Внимание
@@ -129,7 +130,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _warning _inverted mb-4">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Системное сообщение
@@ -138,7 +139,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _success _inverted">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         У вас кое-что получается!
@@ -147,7 +148,7 @@ font-weight: bolder не работает, либо совсем не замет
                 </div>
                 <div class="message _info _inverted">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Информационное сообщение
@@ -158,7 +159,7 @@ font-weight: bolder не работает, либо совсем не замет
                 <h1>Shadowed</h1>
                 <div class="message _shadowed">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ macros.svg_inline('cross') }}</span>
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
                     </button>
                     <div class="message__header">
                         Внимание
@@ -191,7 +192,7 @@ font-weight: bolder не работает, либо совсем не замет
                                             <div class="field col-12">
                                                 <div class="ui icon input">
                                                     <input type="password" placeholder="Пароль">
-                                                    <i class="_password-hidden icon">{{ macros.svg_inline('password-hidden') }}</i>
+                                                    <i class="_password-hidden icon">{{ macros.svg_icon('password-hidden') }}</i>
                                                 </div>
                                             </div>
                                             <div class="field col-lg-auto">

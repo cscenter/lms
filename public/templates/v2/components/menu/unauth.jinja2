@@ -1,32 +1,5 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="utf-8">
-    <title>{% block title %}Цели и история центра{% endblock title %}</title>
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description"
-          content="Computer Science Center — объединённая инициатива Школы анализа данных, Computer Science клуба и JetBrains.">
-    <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk"/>
+{% extends "v2/layouts/inner.jinja2" %}
 
-    <link rel="shortcut icon" type="image/png" href="{{ static("v2/img/favicon.png") }}">
-    <link href="{{ static("v2/dist/css/main.css") }}" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:300,400&amp;subset=cyrillic" rel="stylesheet">
-
-    {% block stylesheets %} {% endblock stylesheets %}
-</head>
-
-{% import "v2/_macros.jinja2" as macros %}
-{% import "v2/components/menu/_macros.jinja2" as top_menu %}
-
-<body>
-<div class="svg-inline">{% include "sprites/common.svg" %}</div>
-
-
-
+{% block menu %}
 {{ top_menu.render(show_notification=False, show_login_button=True) }}
-
-{{ render_bundle('common', config='V2') }}
-{{ render_bundle('main', config='V2') }}
-</body>
-</html>
+{% endblock menu %}

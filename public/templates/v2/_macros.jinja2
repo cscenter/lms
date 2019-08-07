@@ -1,5 +1,9 @@
-{% macro svg_inline(id, modifiers='') -%}
+{% macro svg_image(id, modifiers='') -%}
 <svg class="sprite-img _{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
+{%- endmacro %}
+
+{% macro svg_icon(id, modifiers='') -%}
+<svg class="sprite-img svg-icon _{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
 {%- endmacro %}
 
 {% macro video_iframe(url="https://www.youtube.com/embed/A3SomwRa5iw", attrs={}) -%}
