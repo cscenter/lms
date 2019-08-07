@@ -196,6 +196,12 @@ class CourseInvitation(models.Model):
 class Invitation(TimeStampedModel):
     name = models.CharField(_("Name"), max_length=255)
     token = models.CharField(verbose_name=_("Token"), max_length=128)
+    branch = models.ForeignKey(
+        Branch,
+        verbose_name=_("Branch"),
+        to_field="code",
+        related_name="+",  # Disable backwards relation
+        on_delete=models.PROTECT)
     courses = models.ManyToManyField(
         'courses.Course',
         through=CourseInvitation,
