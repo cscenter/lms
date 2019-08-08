@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.sites.models import Site
+from django.utils import timezone
 
 from auth.tasks import ActivationEmailContext
 from core.urls import reverse
@@ -85,6 +86,8 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
     new_user = User.objects.get(email=test_email)
     assert not new_user.is_active
     assert Roles.INVITED in new_user.roles
+    assert new_user.enrollment_year == timezone.now().year
+    assert new_user.branch == invitation.branch
     assert mocked_task.delay.called
     called_args, called_kwargs = mocked_task.delay.call_args
     email_context, reg_profile_id = called_args
