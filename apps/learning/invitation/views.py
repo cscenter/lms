@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from registration import signals
 from registration.backends.default.views import RegistrationView, ActivationView
 from vanilla import TemplateView
 
@@ -81,7 +82,6 @@ class InvitationLoginView(InvitationURLParamsMixin, LoginView):
 
 class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
     form_class = InvitationRegistrationForm
-    SEND_ACTIVATION_EMAIL = False  # Prevent sending email on request
     template_name = "learning/invitation/registration.html"
 
     def get(self, request, *args, **kwargs):
@@ -92,10 +92,20 @@ class InvitationRegisterView(InvitationURLParamsMixin, RegistrationView):
         return self.render_to_response(context)
 
     def register(self, form):
-        new_user = super().register(form)
-        new_user.add_group(Roles.INVITED)
-        new_user.enrollment_year = timezone.now().year
         site = get_current_site(self.request)
+        new_user_instance = form.save(commit=False)
+        new_user_instance.enrollment_year = timezone.now().year
+        new_user_instance.branch = self.invitation.branch
+        new_user = self.registration_profile.objects.create_inactive_user(
+            new_user=new_user_instance,
+            site=site,
+            send_email=False,
+            request=self.request,
+        )
+        signals.user_registered.send(sender=self.__class__,
+                                     user=new_user,
+                                     request=self.request)
+        new_user.add_group(Roles.INVITED)
         activation_url = reverse("invitation:activate", kwargs={
             "token": self.invitation.token,
             "activation_key": new_user.registrationprofile.activation_key
