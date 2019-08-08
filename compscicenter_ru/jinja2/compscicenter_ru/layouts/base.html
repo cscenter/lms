@@ -26,10 +26,10 @@
     <div class="navbar-container">
         {% block top_banner %}
             {%- if is_admission_active -%}
-                <div class="top-banner">
+                <div class="top-banner-wrapper">
                     <div class="container">
-                        <div class="top-banner__text">
-                            {{ macros.svg_icon('top-banner-kids') }} До 13 апреля открыт <a class="top-banner__link" href="{{ url('application:form') }}">приём заявок</a> на обучение в центре
+                        <div class="top-banner">
+                            <img class="mr-2 d-none d-lg-inline-block" src="{{ static('v2/img/icons/top-banner-kids.svg') }}" alt="" /> <div>До 13 апреля открыт <a href="{{ url('application:form') }}">приём заявок</a> на обучение в центре</div>
                         </div>
                     </div>
                 </div>
