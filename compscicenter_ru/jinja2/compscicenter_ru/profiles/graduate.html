@@ -61,22 +61,22 @@
                         <div class="timeline__element">
                             <div class="timeline__content">
                                 <div class="timeline__date">{{ term|capfirst }}</div>
-                                <ul class="_unstyled">
+                                <ul class="ui">
                                     {% set ns = namespace(element_type=elements.0.type) %}
                                     {% for timeline_element in elements %}
                                         {% if timeline_element.type != ns.element_type %}
                                             {% if timeline_element.type == timeline_element_types.SHAD %}
                                                 </ul>
                                                 <span class="timeline__label">Курсы ШАД</span>
-                                                <ul class="_unstyled">
+                                                <ul class="ui">
                                             {% elif timeline_element.type == timeline_element_types.PRACTICE %}
                                                 </ul>
                                                 <span class="timeline__label">Практика</span>
-                                                <ul class="_unstyled">
+                                                <ul class="ui">
                                             {% elif timeline_element.type == timeline_element_types.RESEARCH %}
                                                 </ul>
                                                 <span class="timeline__label">Научно-исследовательская работа</span>
-                                                <ul class="_unstyled">
+                                                <ul class="ui">
                                             {% endif %}
                                             {% set ns.element_type = timeline_element.type %}
                                         {% endif %}
