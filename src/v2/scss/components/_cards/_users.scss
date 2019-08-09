@@ -1,6 +1,7 @@
 .card._user {
   border-radius: $border-radius-sm;
   border: none;
+  display: block;
 
   .card__img {
     position: relative;
