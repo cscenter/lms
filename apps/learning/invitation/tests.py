@@ -6,12 +6,13 @@ from auth.tasks import ActivationEmailContext
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.invitation.forms import InvitationRegistrationForm
-from learning.invitation.views import InvitationURLParamsMixin
+from learning.invitation.views import InvitationURLParamsMixin, \
+    complete_student_profile
 from learning.roles import Roles
 from learning.tests.factories import CourseInvitationFactory
 from users.constants import GenderTypes
 from users.models import User
-from users.tests.factories import UserFactory
+from users.tests.factories import UserFactory, StudentFactory
 
 
 @pytest.mark.django_db
@@ -32,10 +33,19 @@ def test_invitation_view(client, lms_resolver, assert_redirect, settings):
     user = UserFactory()
     client.login(user)
     response = client.get(url)
+    assert response.status_code == 302
+    # FIXME check url to complete profile view
+    complete_student_profile(user, invitation)
+    response = client.get(url)
     assert response.status_code == 200
     assert 'view' in response.context_data
     assert hasattr(response.context_data['view'], 'invitation')
     assert response.context_data['view'].invitation == invitation
+    # Make sure we select courses for target invitation only
+    CourseInvitationFactory()
+    response = client.get(url)
+    assert len(response.context_data['course_invitation_list']) == 1
+    assert response.context_data['course_invitation_list'][0] == course_invitation
 
 
 @pytest.mark.django_db
@@ -85,6 +95,7 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
     assert User.objects.filter(email=test_email).exists()
     new_user = User.objects.get(email=test_email)
     assert not new_user.is_active
+    assert new_user.last_name == 'Last Name'
     assert Roles.INVITED in new_user.roles
     assert new_user.enrollment_year == timezone.now().year
     assert new_user.branch == invitation.branch

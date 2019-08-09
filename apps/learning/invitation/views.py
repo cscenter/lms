@@ -2,7 +2,8 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
-from django.http import HttpResponseRedirect, Http404
+from django.db import transaction
+from django.http import HttpResponseRedirect, Http404, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -19,11 +20,39 @@ from learning.models import Invitation
 from learning.roles import Roles
 
 
+def is_student_profile_completed(user):
+    completed_profile = True
+    required_fields = ('branch_id',)
+    for field in required_fields:
+        if not getattr(user, field):
+            completed_profile = False
+            break
+    if not user.roles.intersection({Roles.INVITED, Roles.STUDENT,
+                                    Roles.VOLUNTEER}):
+        completed_profile = False
+    return completed_profile
+
+
+def complete_student_profile(user, invitation):
+    update_fields = []
+    if not user.enrollment_year:
+        user.enrollment_year = timezone.now().year
+        update_fields.append('enrollment_year')
+    if not user.branch_id:
+        user.branch = invitation.branch
+        update_fields.append('branch')
+    with transaction.atomic():
+        user.save(update_fields=update_fields)
+        if Roles.INVITED not in user.roles:
+            user.add_group(Roles.INVITED)
+
+
 class InvitationURLParamsMixin:
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         qs = (Invitation.objects
-              .filter(token=kwargs['token']))
+              .filter(token=kwargs['token'])
+              .select_related("branch"))
         self.invitation = get_object_or_404(qs)
         if not self.invitation.is_active:
             raise Http404
@@ -38,17 +67,22 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
                                 kwargs={"token": self.invitation.token},
                                 subdomain=settings.LMS_SUBDOMAIN)
             return HttpResponseRedirect(redirect_to=login_url)
+        if not is_student_profile_completed(request.user):
+            redirect_to = reverse("invitation:complete_profile",
+                                  kwargs={"token": self.invitation.token},
+                                  subdomain=settings.LMS_SUBDOMAIN)
+            return HttpResponseRedirect(redirect_to=redirect_to)
         context = self.get_context_data()
         return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
-        course_invitations = (self.invitation.courses.through.objects
+        course_invitations = (self.invitation.courseinvitation_set
                               .select_related('course',
                                               'course__meta_course',
                                               'course__semester'))
         return {
             'view': self,
-            'invitations': course_invitations,
+            'course_invitation_list': course_invitations,
         }
 
 
@@ -69,12 +103,6 @@ class InvitationLoginView(InvitationURLParamsMixin, LoginView):
                                subdomain=settings.LMS_SUBDOMAIN)
         context["register_url"] = register_url
         return context
-
-    def form_valid(self, form):
-        # TODO: добавить группу Invited (если нет других? А как это определить)
-        # TODO: накинуть отделение из приглашения, если не установлен city_id
-        # TODO: всё-таки логировать входы из этой формы и при регистрации по определенному инвайту?
-        return super().form_valid(form)
 
     def get_success_url(self):
         return self.invitation.get_absolute_url()
@@ -140,3 +168,25 @@ class InvitationActivationView(InvitationURLParamsMixin, ActivationView):
         messages.success(self.request, _("Учетная запись активирована."),
                          extra_tags='timeout')
         return self.invitation.get_absolute_url()
+
+
+class InvitationCompleteProfileView(InvitationURLParamsMixin,
+                                    TemplateView):
+    template_name = "learning/invitation/complete_profile.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if is_student_profile_completed(request.user):
+            return HttpResponseRedirect(self.invitation.get_absolute_url())
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        confirm = request.POST.get('confirm', None)
+        if not confirm:
+            return HttpResponseForbidden()
+        complete_student_profile(request.user, self.invitation)
+        return HttpResponseRedirect(self.invitation.get_absolute_url())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['invitation'] = self.invitation
+        return context
