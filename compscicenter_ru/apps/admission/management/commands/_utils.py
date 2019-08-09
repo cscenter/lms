@@ -15,33 +15,35 @@ class CurrentCampaignsMixin:
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument(
-            '--city', type=str,
-            help='City code to restrict current campaigns')
+            '--branch', type=str,
+            help='Branch code to restrict current campaigns')
 
-    def get_current_campaigns(self, city_code=None):
+    def get_current_campaigns(self, options, required=False):
+        branch_code = options["branch"]
+        if not branch_code and required:
+            available = (Campaign.objects
+                         .filter(current=True)
+                         .select_related('branch'))
+            campaigns = [c.branch.code for c in available]
+            msg = f"Provide the code of the campaign branch. Options: {campaigns}"
+            raise CommandError(msg)
+
         filter_params = {"current": True}
-        if city_code:
-            filter_params["city_id"] = city_code
+        if branch_code:
+            filter_params["branch"] = branch_code
         campaigns = (Campaign.objects
-                     .select_related("city")
+                     .select_related("branch")
                      .filter(**filter_params)
                      .all())
         self.stdout.write("Selected current campaigns ({} total):".format(
             len(campaigns)))
         for campaign in campaigns:
-            self.stdout.write(f"  {campaign} [{campaign.city_id}]")
+            self.stdout.write(f"  {campaign} [{campaign.branch}]")
         return campaigns
 
-    def get_current_campaign_ids(self, city_code=None):
-        return [c.pk for c in self.get_current_campaigns(city_code)]
-
-    @staticmethod
-    def get_branch_options():
-        """Returns all branches for current campaigns"""
-        available = (Campaign.objects
-                     .filter(current=True)
-                     .select_related('branch'))
-        return {c.branch.code for c in available}
+    # FIXME: remove?
+    def get_current_campaign_ids(self, options):
+        return [c.pk for c in self.get_current_campaigns(options)]
 
 
 class HandleErrorsMixin:
@@ -56,7 +58,7 @@ class HandleErrorsMixin:
 
 
 class ValidateTemplatesMixin:
-    TEMPLATE_REGEXP = "admission-{year}-{city_code}-{type}"
+    TEMPLATE_REGEXP = "admission-{year}-{branch_code}-{type}"
 
     def validate_templates(self, campaigns, types=None):
         # For each campaign check email template exists and
@@ -82,7 +84,7 @@ class ValidateTemplatesMixin:
     def get_template_name(self, campaign, suffix):
         return self.TEMPLATE_REGEXP.format(
             year=campaign.year,
-            city_code=campaign.city_id,
+            branch_code=campaign.branch.code,
             type=suffix
         )
 

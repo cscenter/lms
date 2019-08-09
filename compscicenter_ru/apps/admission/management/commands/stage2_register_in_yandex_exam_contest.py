@@ -18,13 +18,9 @@ class Command(CurrentCampaignsMixin, CustomizeQueryMixin, BaseCommand):
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
-        parser.add_argument(
-            '--city', type=str,
-            help='City code to restrict current campaigns')
 
     def handle(self, *args, **options):
-        city_code = options["city"]
-        campaigns = self.get_current_campaigns(city_code)
+        campaigns = self.get_current_campaigns(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return

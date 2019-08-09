@@ -20,8 +20,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
             help="Send emails only to those who didn't pass to the next stage")
 
     def handle(self, *args, **options):
-        city_code = options["city"] if options["city"] else None
-        campaigns = self.get_current_campaigns(city_code)
+        campaigns = self.get_current_campaigns(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return

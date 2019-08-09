@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, absolute_import
+from django.core.management import BaseCommand
 
-from django.core.management import BaseCommand, CommandError
-
-from ._utils import CurrentCampaignsMixin
 from admission.models import Applicant
+from ._utils import CurrentCampaignsMixin
 
 
 class Command(CurrentCampaignsMixin, BaseCommand):
     help = """Prints list of yandex ids who successfully passed test"""
 
     def handle(self, *args, **options):
-        city_code = options["city"]
-        campaigns = self.get_current_campaigns(city_code)
+        campaigns = self.get_current_campaigns(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return

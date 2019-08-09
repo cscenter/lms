@@ -15,7 +15,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin,
         Send notification to applicants from Saint-Petersburg who
         passed test with 5 or 6 score
 
-        ./manage.py email_to_applicants --city=spb --template=admission-2019-try-online -f online_test__score__in=[5,6]
+        ./manage.py email_to_applicants --branch=spb --template=admission-2019-try-online -f online_test__score__in=[5,6]
     """
     help = """Send notification to current campaigns applicants"""
     TEMPLATE_REGEXP = "{type}"
@@ -35,8 +35,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin,
         return template
 
     def handle(self, *args, **options):
-        city_code = options["city"]
-        campaigns = self.get_current_campaigns(city_code)
+        campaigns = self.get_current_campaigns(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return
