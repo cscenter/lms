@@ -34,7 +34,7 @@
         <div class="row">
             <div class="col-xs-3 form-group">
                 <select class="form-control selectpicker" id="term-filter">
-                    {% for year, group in terms %}
+                    {% for year, group in terms.items %}
 {#                        <optgroup label="{{ year }}">#}
                             {% for term in group %}
                                 <option value="{{ term.pk }}"
