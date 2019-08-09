@@ -11,3 +11,7 @@
     <iframe class="embed _responsive" src="{{ url }}" width="560" height="315"  frameborder="0"  allowfullscreen></iframe>
 </div>
 {%- endmacro %}
+
+{% macro scrollable(modifiers='mb-2') -%}
+    <div class="scrollable{% if modifiers %} {{ modifiers }}{% endif %}">{{ caller() }}</div>
+{%- endmacro %}

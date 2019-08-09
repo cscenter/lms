@@ -11,8 +11,7 @@
         <div class="row">
             <div class="col-lg-8">
                 <h1>Очное обучение в CS центре</h1>
-
-                {{ macros_nav.tabs(tabs) }}
+                {% call macros.scrollable() %}{{ macros_nav.tabs(tabs) }}{% endcall %}
 
                 <div class="tab-content">
                 {% for branch, current_programs in programs.items() %}

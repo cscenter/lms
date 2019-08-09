@@ -36,8 +36,7 @@
                 </div>
 
                 <div class="card__content _big">
-                    {{ macros_nav.tabs(tabs, modifiers='mb-2 browser-history') }}
-
+                    {% call macros.scrollable() %}{{ macros_nav.tabs(tabs, modifiers='browser-history') }}{% endcall %}
                     <div class="tab-content">
                         {% with tab = tabs['about'] %}
                             <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">

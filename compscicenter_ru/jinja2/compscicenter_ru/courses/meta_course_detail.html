@@ -28,7 +28,7 @@
                     {{ meta_course.description|markdown("meta_course_description", 3600, meta_course.pk, meta_course.modified) }}
                     {% if tabs %}
                         <h2 class="mt-8">Прочтения курса</h2>
-                        {{ macros_nav.tabs(tabs, modifiers='mb-2') }}
+                        {% call macros.scrollable() %}{{ macros_nav.tabs(tabs) }}{% endcall %}
                         <div class="tab-content">
                             {% for city_code, courses in grouped_courses.items() -%}
                                 {% with tab = tabs[city_code] %}

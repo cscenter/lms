@@ -36,7 +36,7 @@
                 </p>
             </div>
             <div class="col-lg-12 text-center">
-                {{ macros_nav.tabs(tabs, modifiers='content-center mt-4') }}
+                {% call macros.scrollable(modifiers='mt-4') %}{{ macros_nav.tabs(tabs, modifiers='content-center ') }}{% endcall %}
                 <ul class="ui nav nav-tabs content-center mt-4" role="tablist">
                     {% for branch in branches %}
                     <li class="nav-item">
