@@ -26,15 +26,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
                  ' below this value.')
 
     def handle(self, *args, **options):
-        if not options["city"]:
-            available = (Campaign.objects
-                         .filter(current=True)
-                         .select_related('branch'))
-            options = [c.branch.code for c in available]
-            msg = f"Provide campaign branch code. Available options: {options}"
-            raise CommandError(msg)
-        city_code = options["city"]
-        campaigns = self.get_current_campaigns(city_code)
+        campaigns = self.get_current_campaigns(options, required=True)
         assert len(campaigns) == 1
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")

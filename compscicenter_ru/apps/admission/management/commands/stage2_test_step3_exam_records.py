@@ -24,7 +24,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
 
     # TODO: Get contest_id from DB by yandex contest id value
     def handle(self, *args, **options):
-        campaigns = self.get_current_campaigns()
+        campaigns = self.get_current_campaigns(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return

@@ -13,12 +13,12 @@ from admission.models import Applicant
 
 class Command(ValidateTemplatesMixin, CustomizeQueryMixin,
               CurrentCampaignsMixin, BaseCommand):
-    TEMPLATE_REGEXP = "admission-{year}-{city_code}-results-{status}"
+    TEMPLATE_REGEXP = "admission-{year}-{branch_code}-results-{status}"
     help = """
     Generates emails with final decision based on applicant status.
 
     Example:
-        ./manage.py stage4_results --city=nsk -f="status__in=['volunteer']"
+        ./manage.py stage4_results --branch=nsk -f="status__in=['volunteer']"
     """
 
     def add_arguments(self, parser):
@@ -31,17 +31,12 @@ class Command(ValidateTemplatesMixin, CustomizeQueryMixin,
     def get_template_name(self, campaign, suffix):
         return self.TEMPLATE_REGEXP.format(
             year=campaign.year,
-            city_code=campaign.city_id,
+            branch_code=campaign.branch.code,
             status=suffix
         )
 
     def handle(self, *args, **options):
-        city_code = options["city"]
-        if not city_code:
-            options = self.get_branch_options()
-            msg = f"Provide campaign branch code. Available options: {options}"
-            raise CommandError(msg)
-        campaigns = self.get_current_campaigns(city_code)
+        campaigns = self.get_current_campaigns(options, required=True)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return

@@ -17,8 +17,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
     help = 'Generate mails about check completeness'
 
     def handle(self, *args, **options):
-        city_code = options["city"]
-        campaigns = self.get_current_campaigns(city_code)
+        campaigns = self.get_current_campaigns(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return

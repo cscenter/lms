@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from enum import Enum
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from post_office import mail
-from post_office.models import EmailTemplate, Email
+from post_office.models import Email
 from post_office.utils import get_email_template
 
-from ._utils import CurrentCampaignsMixin
 from admission.models import Campaign, Applicant
+from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin
 
 
 class NotificationType(Enum):
@@ -18,29 +18,19 @@ class NotificationType(Enum):
         return self.value
 
 
-class Command(CurrentCampaignsMixin, BaseCommand):
+class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
+    TEMPLATE_REGEXP = "admission-{year}-{branch_code}-stage1-{type}"
     help = """For each current campaign generates bunch of notifications"""
 
-    @staticmethod
-    def get_template_name(campaign, type):
-        return "admission-{}-{}-stage1-{}".format(campaign.year,
-                                                  campaign.city.code,
-                                                  type)
-
     def handle(self, *args, **options):
-        city_code = options["city"]
-        campaigns = self.get_current_campaigns(city_code)
+        campaigns = self.get_current_campaigns(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return
 
+        self.validate_templates(campaigns, types=[t for t in NotificationType])
+
         for campaign in campaigns:
-            # Check templates are exist before send any email
-            for type_ in NotificationType:
-                name = self.get_template_name(campaign, type_)
-                if not EmailTemplate.objects.filter(name=name).exists():
-                    raise CommandError(f"Abort. To continue create email "
-                                       f"template with name {name}")
             self.stdout.write(f"Process campaign {campaign}")
             self._prev_campaign(campaign)
             self._current_campaign(campaign)
@@ -52,7 +42,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
         form until deadline and visit open day.
         """
         prev_campaign = (Campaign.objects
-                         .filter(city_id=campaign.city_id,
+                         .filter(branch=campaign.branch,
                                  year__lt=campaign.year)
                          .order_by("-year")
                          .first())

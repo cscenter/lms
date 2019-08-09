@@ -27,8 +27,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
 
     def handle(self, *args, **options):
         csv_path = options["csv"]
-        city_code = options["city"] if options["city"] else None
-        campaign_ids = self.get_current_campaign_ids(city_code)
+        campaign_ids = self.get_current_campaign_ids(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return
