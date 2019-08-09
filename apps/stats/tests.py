@@ -14,10 +14,10 @@ from learning.settings import Branches
 @pytest.mark.django_db
 def test_application_form_stats_empty_results(client, curator):
     url = reverse("api:stats_admission_application_form_submission",
-                  kwargs={"city_code": Branches.SPB},
+                  kwargs={"branch_code": Branches.SPB},
                   subdomain=settings.LMS_SUBDOMAIN)
     start = datetime(year=2018, month=3, day=14, hour=11, tzinfo=pytz.UTC)
-    campaign = CampaignFactory(city_id=Branches.SPB,
+    campaign = CampaignFactory(branch__code=Branches.SPB,
                                application_starts_at=start,
                                application_ends_at=start + timedelta(hours=1),
                                year=2018)
@@ -37,9 +37,10 @@ def test_application_form_stats_empty_results(client, curator):
 @pytest.mark.django_db
 def test_application_form_stats(client, curator):
     url = reverse("api:stats_admission_application_form_submission",
-                  kwargs={"city_code": "spb"}, subdomain=settings.LMS_SUBDOMAIN)
+                  kwargs={"branch_code": Branches.SPB},
+                  subdomain=settings.LMS_SUBDOMAIN)
     start = datetime(year=2018, month=3, day=14, hour=11, tzinfo=pytz.UTC)
-    campaign = CampaignFactory(city_id='spb',
+    campaign = CampaignFactory(branch__code=Branches.SPB,
                                application_starts_at=start,
                                application_ends_at=start + timedelta(days=15),
                                year=2018)
@@ -59,7 +60,7 @@ def test_application_form_stats(client, curator):
     today = now_local(Branches.SPB)
     start = today - timedelta(days=2)
     current_campaign = CampaignFactory(
-        city_id='spb',
+        branch__code=Branches.SPB,
         current=True,
         application_starts_at=start,
         application_ends_at=today + timedelta(days=5),

@@ -26,7 +26,7 @@ def register_in_yandex_contest(applicant_id, language_code):
     Applicant = apps.get_model('admission', 'Applicant')
     applicant = (Applicant.objects
                  .filter(pk=applicant_id)
-                 .select_related("campaign", "online_test", "campaign__city")
+                 .select_related("campaign", "online_test", "campaign__branch")
                  .first())
     if not applicant.yandex_id:
         logger.error(f"Empty yandex login for applicant id = {applicant_id}")
@@ -48,13 +48,13 @@ def register_in_yandex_contest(applicant_id, language_code):
     mail.send(
         [applicant.email],
         sender='CS центр <info@compscicenter.ru>',
-        template=campaign.template_name,
+        template=campaign.template_registration,
         context={
             'FIRST_NAME': applicant.first_name,
             'SURNAME': applicant.surname,
             'PATRONYMIC': applicant.patronymic if applicant.patronymic else "",
             'EMAIL': applicant.email,
-            'CITY': applicant.campaign.city.name,
+            'BRANCH': applicant.campaign.branch.name,
             'PHONE': applicant.phone,
             'CONTEST_ID': online_test.yandex_contest_id,
             'YANDEX_LOGIN': applicant.yandex_id,

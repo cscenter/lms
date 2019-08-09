@@ -6,7 +6,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import CityAwareModelForm, CityAwareSplitDateTimeField
+from core.admin import TimezoneAwareModelForm, TimezoneAwareSplitDateTimeField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
@@ -231,7 +231,7 @@ class CourseClassForm(forms.ModelForm):
         return date
 
 
-class AssignmentForm(CityAwareModelForm):
+class AssignmentForm(TimezoneAwareModelForm):
     title = forms.CharField(
         label=_("Title"),
         widget=forms.TextInput(attrs={'autocomplete': 'off'}))
@@ -239,7 +239,7 @@ class AssignmentForm(CityAwareModelForm):
         label=_("Text"),
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=UbereditorWidget(attrs={'autofocus': 'autofocus'}))
-    deadline_at = CityAwareSplitDateTimeField(
+    deadline_at = TimezoneAwareSplitDateTimeField(
         label=_("Deadline"),
         input_date_formats=[DATE_FORMAT_RU],
         input_time_formats=[TIME_FORMAT_RU],

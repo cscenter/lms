@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for branch in Branch.objects.all():
-            today = now_local(branch.timezone).date()
+            today = now_local(branch.get_timezone()).date()
             # Reminds about start before period actually started
             start_on = today + timedelta(days=REPORTING_NOTIFY_BEFORE_START)
             # Reminds about deadline before period end

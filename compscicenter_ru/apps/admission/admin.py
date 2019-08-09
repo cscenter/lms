@@ -1,24 +1,43 @@
 from dal_select2.widgets import Select2Multiple
+from django import forms
+from django.contrib import admin
 from django.db import models
 from django.db.models import TextField
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
+from import_export.admin import ExportMixin, ImportExportMixin
 from import_export.formats.base_formats import CSV
 from jsonfield import JSONField
 from prettyjson import PrettyJSONWidget
-from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
-from import_export.admin import ExportMixin, ImportMixin, ImportExportMixin
 
-from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
-    CityAwareSplitDateTimeField, meta
-from core.widgets import AdminRichTextAreaWidget
-from core.utils import admin_datetime
 from admission.forms import InterviewStreamChangeForm
 from admission.import_export import OnlineTestRecordResource, \
     ExamRecordResource
 from admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
-    InterviewInvitation
+    InterviewInvitation, University
+from core.admin import TimezoneAwareModelForm, \
+    TimezoneAwareAdminSplitDateTimeWidget, \
+    TimezoneAwareSplitDateTimeField, meta
+from core.utils import admin_datetime
+from core.widgets import AdminRichTextAreaWidget
+
+
+class UniversityAdminForm(forms.ModelForm):
+    class Meta:
+        model = University
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['branch'].required = True
+
+
+class UniversityAdmin(admin.ModelAdmin):
+    form = UniversityAdminForm
+    list_editable = ['sort']
+    list_display = ('name', 'branch', 'sort')
+    list_filter = ('branch',)
 
 
 class CampaignListFilter(admin.SimpleListFilter):
@@ -39,13 +58,13 @@ class CampaignListFilter(admin.SimpleListFilter):
 
 
 class CampaignAdmin(admin.ModelAdmin):
-    form = CityAwareModelForm
+    form = TimezoneAwareModelForm
     list_display = ['year', 'branch', 'current']
     list_filter = ['branch']
     formfield_overrides = {
         models.DateTimeField: {
-            'widget': CityAwareAdminSplitDateTimeWidget,
-            'form_class': CityAwareSplitDateTimeField
+            'widget': TimezoneAwareAdminSplitDateTimeWidget,
+            'form_class': TimezoneAwareSplitDateTimeField
         },
     }
 
@@ -75,15 +94,13 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
         qs = super(OnlineTestAdmin, self).get_queryset(request)
         return qs.select_related('applicant',
                                  'applicant__campaign',
-                                 'applicant__campaign__city',
                                  'applicant__campaign__branch',)
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
             kwargs['queryset'] = (
                 Applicant.objects
-                         .select_related("campaign", "campaign__city",
-                                         "campaign__branch")
+                         .select_related("campaign", "campaign__branch")
                          .order_by("surname"))
         return (super(OnlineTestAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
@@ -108,16 +125,16 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
         return readonly_fields
 
     def get_queryset(self, request):
-        qs = super(ExamAdmin, self).get_queryset(request)
+        qs = super().get_queryset(request)
         return qs.select_related('applicant',
                                  'applicant__campaign',
-                                 'applicant__campaign__city')
+                                 'applicant__campaign__branch')
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'applicant':
             kwargs['queryset'] = (
                 Applicant.objects
-                         .select_related("campaign", "campaign__city")
+                         .select_related("campaign", "campaign__branch")
                          .order_by("surname"))
         return (super(ExamAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
@@ -138,7 +155,7 @@ class ApplicantAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'campaign':
-            kwargs['queryset'] = (Campaign.objects.select_related("city"))
+            kwargs['queryset'] = (Campaign.objects.select_related("branch"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
@@ -150,7 +167,7 @@ class InterviewAssignmentAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'campaign':
-            kwargs['queryset'] = (Campaign.objects.select_related("city"))
+            kwargs['queryset'] = (Campaign.objects.select_related("branch"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
@@ -163,16 +180,16 @@ class ContestAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'campaign':
-            kwargs['queryset'] = (Campaign.objects.select_related("city"))
+            kwargs['queryset'] = (Campaign.objects.select_related("branch"))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class InterviewAdmin(admin.ModelAdmin):
-    form = CityAwareModelForm
+    form = TimezoneAwareModelForm
     formfield_overrides = {
         models.DateTimeField: {
-            'widget': CityAwareAdminSplitDateTimeWidget,
-            'form_class': CityAwareSplitDateTimeField
+            'widget': TimezoneAwareAdminSplitDateTimeWidget,
+            'form_class': TimezoneAwareSplitDateTimeField
         }
     }
     list_display = ['get_date_local', 'applicant', 'status']
@@ -183,7 +200,7 @@ class InterviewAdmin(admin.ModelAdmin):
         if db_field.name == 'applicant':
             kwargs['queryset'] = (
                 Applicant.objects
-                         .select_related("campaign", "campaign__city")
+                         .select_related("campaign", "campaign__branch")
                          .order_by("surname"))
         return (super(InterviewAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
@@ -204,7 +221,7 @@ class InterviewCommentAdmin(admin.ModelAdmin):
             kwargs['queryset'] = (
                 Interview.objects.select_related("applicant",
                                                  "applicant__campaign",
-                                                 "applicant__campaign__city",))
+                                                 "applicant__campaign__branch",))
         return (super(InterviewCommentAdmin, self)
                 .formfield_for_foreignkey(db_field, request, **kwargs))
 
@@ -247,7 +264,7 @@ class InterviewSlotsInline(admin.TabularInline):
 # TODO: Как проверять, что потоки не пересекаются? Если совпадает место?
 class InterviewStreamAdmin(admin.ModelAdmin):
     form = InterviewStreamChangeForm
-    list_select_related = ['campaign', 'campaign__city']
+    list_select_related = ('campaign', 'campaign__branch')
     list_display = ["date", "campaign"]
     list_filter = [CampaignListFilter]
     inlines = [InterviewSlotsInline]
@@ -282,8 +299,8 @@ class InterviewStreamsInline(admin.TabularInline):
 
 class InterviewInvitationAdmin(admin.ModelAdmin):
     model = InterviewInvitation
-    list_select_related = ["applicant", "applicant__campaign__city"]
-    list_display = ['get_applicant', 'get_campaign_city', 'get_accepted']
+    list_select_related = ["applicant", "applicant__campaign__branch"]
+    list_display = ['get_applicant', 'get_campaign_branch', 'get_accepted']
     raw_id_fields = ("applicant", "interview")
     readonly_fields = ("secret_code",)
     # Is it possible to restrict streams values by applicant?
@@ -297,11 +314,12 @@ class InterviewInvitationAdmin(admin.ModelAdmin):
     def get_applicant(self, obj):
         return obj.applicant.get_full_name()
 
-    @meta(_("City"))
-    def get_campaign_city(self, obj):
-        return obj.applicant.campaign.city
+    @meta(_("Branch"))
+    def get_campaign_branch(self, obj):
+        return obj.applicant.campaign.branch
 
 
+admin.site.register(University, UniversityAdmin)
 admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Applicant, ApplicantAdmin)
 admin.site.register(Test, OnlineTestAdmin)

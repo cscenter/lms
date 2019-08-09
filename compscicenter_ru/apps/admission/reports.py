@@ -126,7 +126,7 @@ class AdmissionReport(ReportFileOutput):
     def get_filename(self):
         today = datetime.datetime.now()
         return "admission_{}_{}_report_{}".format(
-            self.campaign.city_id,
+            self.campaign.branch.code,
             self.campaign.year,
             formats.date_format(today, "SHORT_DATE_FORMAT")
         )

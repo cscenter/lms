@@ -1,11 +1,9 @@
-
-
-# Copied from learning/tests/test_reports.
 import pytest
 
+from admission.reports import AdmissionReport
 from admission.tests.factories import CampaignFactory, ApplicantFactory, \
     CommentFactory, InterviewFactory
-from admission.reports import AdmissionReport
+from learning.settings import Branches
 
 
 def check_value_for_header(report, header, row_index, expected_value):
@@ -22,7 +20,7 @@ def check_value_for_header(report, header, row_index, expected_value):
 
 @pytest.mark.django_db
 def test_report_smoke():
-    campaign = CampaignFactory(city_id="spb")
+    campaign = CampaignFactory(branch__code=Branches.SPB)
     applicant = ApplicantFactory(campaign=campaign)
     interview = InterviewFactory(applicant=applicant)
     CommentFactory(score=1, interview=interview)

@@ -10,10 +10,9 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 
-from core.models import University
 from core.widgets import DateTimeRangeWidget
 from admission.forms import ResultsModelForm
-from admission.models import Applicant, Interview, Campaign
+from admission.models import Applicant, Interview, Campaign, University
 
 
 # Fields
@@ -113,7 +112,7 @@ class InterviewsCuratorFilterForm(forms.Form):
         cleaned_data = self.cleaned_data
         campaign = cleaned_data.get('campaign')
         if campaign and cleaned_data.get('date'):
-            tz = campaign.get_city_timezone()
+            tz = campaign.get_timezone()
             date_slice = cleaned_data['date']
             start = date_slice.start
             stop = date_slice.stop
@@ -175,13 +174,13 @@ class ResultsFilter(django_filters.FilterSet):
         model = Applicant
         fields = ['status', 'university', 'course']
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, branch_code, **kwargs):
         super().__init__(*args, **kwargs)
-        # Get universities based on requested city
+        # Get universities based on requested branch
         qs = (University.objects
-              .filter(city_id=self.request.city_code)
-              .select_related("city")
-              .order_by("-city", "sort"))
+              .filter(branch=branch_code)
+              .select_related("branch")
+              .order_by("-branch", "sort"))
         university_choices = [(u.id, u.name) for u in qs.all()]
         self.filters['university'].extra["choices"] = university_choices
 

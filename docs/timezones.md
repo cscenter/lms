@@ -252,7 +252,7 @@ formfield_overrides = {
 3.2 У модели должны быть реализованы 2 метода:
 
 ```
-def get_city_timezone(self) -> datetime.tzinfo:
+def get_timezone(self) -> datetime.tzinfo:
     # 
     pass
 

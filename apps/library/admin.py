@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from django.contrib import admin
 from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _

@@ -1,6 +1,5 @@
 import datetime
 import random
-from itertools import count
 
 import factory
 import pytz
@@ -12,15 +11,14 @@ from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate
 from admission.api.serializers import ApplicantSerializer
 from admission.constants import WHERE_DID_YOU_LEARN, \
     APPOINTMENT_INVITATION_TEMPLATE, INTERVIEW_REMINDER_TEMPLATE
-from core.factories import UniversityFactory
-from core.models import City
 from admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment, \
-    InterviewSlot, InterviewStream, InterviewInvitation
+    InterviewSlot, InterviewStream, InterviewInvitation, University
 from admission.signals import post_save_interview
 from courses.tests.factories import VenueFactory
 from learning.models import Branch
 from learning.settings import AcademicDegreeYears
+from learning.tests.factories import BranchFactory
 from users.constants import Roles
 from users.tests.factories import UserFactory, add_user_groups
 
@@ -31,13 +29,20 @@ class FuzzyTime(FuzzyNaiveDateTime):
         return dt.time()
 
 
+class UniversityFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = University
+
+    name = factory.Sequence(lambda n: "University name %03d" % n)
+    branch = factory.SubFactory(BranchFactory)
+
+
 class CampaignFactory(factory.DjangoModelFactory):
     class Meta:
         model = Campaign
 
     year = factory.LazyAttribute(lambda o: o.application_ends_at.year)
-    city = factory.Iterator(City.objects.all())
-    branch = factory.Iterator(Branch.objects.all())
+    branch = factory.SubFactory(BranchFactory)
     online_test_max_score = FuzzyInteger(30, 40)
     online_test_passing_score = FuzzyInteger(20, 25)
     exam_max_score = FuzzyInteger(30, 40)
@@ -171,8 +176,7 @@ class InterviewStreamFactory(factory.DjangoModelFactory):
         model = InterviewStream
 
     #
-    venue = factory.SubFactory(VenueFactory,
-                               city=factory.SelfAttribute('..campaign.city'))
+    venue = factory.SubFactory(VenueFactory)
     campaign = factory.SubFactory(CampaignFactory)
     date = FuzzyDate(datetime.date(2011, 1, 1))
     # 13:00 - 15:00

@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
 from core.timezone import city_aware_to_naive, naive_to_city_aware
-from .models import City, Faq, FaqCategory, University
+from .models import City, Faq, FaqCategory
 
 # Hide applications in the admin
 admin.site.unregister(Group)
@@ -138,12 +138,6 @@ def meta(text=None, **kwargs):
     return decorator
 
 
-class UniversityAdmin(admin.ModelAdmin):
-    list_editable = ['sort']
-    list_display = ['name', 'city', 'sort']
-    list_filter = ['city']
-
-
 class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
 
@@ -158,7 +152,6 @@ class FaqAdmin(admin.ModelAdmin):
     list_display = ['question', 'sort']
 
 
-admin.site.register(University, UniversityAdmin)
 admin.site.register(City, CityAdmin)
 admin.site.register(Faq, FaqAdmin)
 admin.site.register(FaqCategory, FaqCategoryAdmin)
@@ -168,21 +161,22 @@ admin.site.register(FaqCategory, FaqCategoryAdmin)
 
 
 # FIXME: restrict fields?
-class CityAwareModelForm(forms.ModelForm):
+class TimezoneAwareModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """
         Attach model instance to all `AdminSplitDateTime` widgets.
-        This allow to get city code inside widget and make datetime city aware.
+        This allow to get city code inside widget and make datetime
+        in a given time zone aware.
         """
         super().__init__(*args, **kwargs)
         for field_name, field_data in self.fields.items():
             if isinstance(field_data, forms.SplitDateTimeField):
-                if not isinstance(field_data, CityAwareSplitDateTimeField):
+                if not isinstance(field_data, TimezoneAwareSplitDateTimeField):
                     raise TypeError("`%s` field must be subclassed from "
                                     "CustomSplitDateTimeField" % field_name)
                 widget = field_data.widget
                 if isinstance(widget, widgets.AdminSplitDateTime) and \
-                        not isinstance(widget, CityAwareAdminSplitDateTimeWidget):
+                        not isinstance(widget, TimezoneAwareAdminSplitDateTimeWidget):
                     raise TypeError("`%s` field widget must be subclassed from "
                                     "BaseCityAwareSplitDateTimeWidget" % field_name)
                 else:
@@ -193,19 +187,19 @@ class CityAwareModelForm(forms.ModelForm):
         If city aware field was changed - fix timezone for all datetime fields.
         """
         if self.instance.city_aware_field_name in self.changed_data:
-            city_timezone = self.instance.get_city_timezone()
+            tz = self.instance.get_timezone()
             for field_name, field_data in self.fields.items():
-                if isinstance(field_data, CityAwareSplitDateTimeField):
+                if isinstance(field_data, TimezoneAwareSplitDateTimeField):
                     value = self.cleaned_data[field_name]
                     if isinstance(value, datetime.datetime):
                         value = value.replace(tzinfo=None)
-                        value = timezone.make_aware(value, city_timezone)
+                        value = timezone.make_aware(value, tz)
                         self.cleaned_data[field_name] = value
                         setattr(self.instance, field_name, value)
         return super().save(commit)
 
 
-class CityAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
+class TimezoneAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
     def decompress(self, value):
         if value:
             value = city_aware_to_naive(value, self.instance)
@@ -213,7 +207,7 @@ class CityAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
         return [None, None]
 
 
-class CityAwareSplitDateTimeField(forms.SplitDateTimeField):
+class TimezoneAwareSplitDateTimeField(forms.SplitDateTimeField):
     def compress(self, data_list):
         if data_list:
             # Raise a validation error if time or date is empty

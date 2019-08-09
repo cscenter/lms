@@ -21,6 +21,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
+from core.mixins import TimezoneAwareMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids
@@ -39,7 +40,9 @@ from users.thumbnails import UserThumbnailMixin
 logger = logging.getLogger(__name__)
 
 
-class Branch(models.Model):
+class Branch(TimezoneAwareMixin, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+
     code = models.CharField(
         _("Code"),
         choices=Branches.choices,
@@ -63,8 +66,7 @@ class Branch(models.Model):
     def order(self):
         return Branches.get_choice(self.code).order
 
-    @property
-    def timezone(self):
+    def get_timezone(self):
         return Branches.get_choice(self.code).timezone
 
     @property
@@ -72,7 +74,9 @@ class Branch(models.Model):
         return Branches.get_choice(self.code).abbr
 
 
-class Enrollment(TimeStampedModel):
+class Enrollment(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'course'
+
     GRADES = GradeTypes
 
     student = models.ForeignKey(
@@ -129,17 +133,13 @@ class Enrollment(TimeStampedModel):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
     @property
     def city_aware_field_name(self):
         return self.__class__.course.field.name
 
     def grade_changed_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.grade_changed, timezone=tz)
 
     @property
@@ -234,7 +234,9 @@ class Invitation(TimeStampedModel):
         return False
 
 
-class StudentAssignment(TimeStampedModel):
+class StudentAssignment(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'assignment'
+
     class CommentAuthorTypes(DjangoChoices):
         NOBODY = ChoiceItem(0)
         STUDENT = ChoiceItem(1)
@@ -311,10 +313,6 @@ class StudentAssignment(TimeStampedModel):
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
-
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
 
     @property
     def city_aware_field_name(self):
@@ -395,7 +393,9 @@ def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):
     return f"{sa.assignment.files_root}/user_{sa.student_id}/{filename}"
 
 
-class AssignmentComment(TimeStampedModel):
+class AssignmentComment(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'student_assignment'
+
     student_assignment = models.ForeignKey(
         'StudentAssignment',
         verbose_name=_("AssignmentComment|student_assignment"),
@@ -427,17 +427,13 @@ class AssignmentComment(TimeStampedModel):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
     @property
     def city_aware_field_name(self):
         return self.__class__.student_assignment.field.name
 
     def created_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
     def get_update_url(self):
@@ -462,7 +458,9 @@ class AssignmentComment(TimeStampedModel):
         return (now() - self.created).total_seconds() > 600
 
 
-class AssignmentNotification(TimeStampedModel):
+class AssignmentNotification(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'student_assignment'
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         verbose_name=_("User"),
@@ -504,17 +502,13 @@ class AssignmentNotification(TimeStampedModel):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
     @property
     def city_aware_field_name(self):
         return self.__class__.student_assignment.field.name
 
     def created_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
 

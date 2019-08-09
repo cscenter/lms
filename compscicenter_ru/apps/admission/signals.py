@@ -15,12 +15,12 @@ APPLICANT_FINAL_STATES = (Applicant.ACCEPT,
 
 @receiver(post_save, sender=Campaign)
 def post_save_campaign(sender, instance, created, *args, **kwargs):
-    """Make sure we have only one active campaign for a city in a moment."""
+    """Make sure we have only one active campaign for a branch in a moment."""
     campaign = instance
     # OK to update on each model change
     if campaign.current:
         (Campaign.objects
-         .filter(city=campaign.city)
+         .filter(branch=campaign.branch)
          .exclude(pk=campaign.pk)
          .update(current=False))
 

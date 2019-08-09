@@ -3,8 +3,8 @@ from django.db.models import Count, DateTimeField
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
-    CityAwareSplitDateTimeField
+from core.admin import TimezoneAwareModelForm, TimezoneAwareAdminSplitDateTimeWidget, \
+    TimezoneAwareSplitDateTimeField
 from core.filters import AdminRelatedDropdownFilter
 from core.urls import reverse
 from surveys.constants import STATUS_PUBLISHED
@@ -36,11 +36,11 @@ class FormAdmin(admin.ModelAdmin):
 
 
 class CourseSurveyAdmin(admin.ModelAdmin):
-    form = CityAwareModelForm
+    form = TimezoneAwareModelForm
     formfield_overrides = {
         DateTimeField: {
-            'widget': CityAwareAdminSplitDateTimeWidget,
-            'form_class': CityAwareSplitDateTimeField
+            'widget': TimezoneAwareAdminSplitDateTimeWidget,
+            'form_class': TimezoneAwareSplitDateTimeField
         }
     }
     list_display = ("course", "get_city", "type",

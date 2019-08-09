@@ -30,7 +30,7 @@ class EnrollmentService:
     def enroll(user: User, course: Course, **attrs):
         reason_entry = attrs.pop("reason_entry", None)
         if reason_entry:
-            timezone = course.get_city_timezone()
+            timezone = course.get_timezone()
             today = now_local(timezone).strftime(DATE_FORMAT_RU)
             reason_entry = Concat(Value(f'{today}\n{reason_entry}\n\n'),
                                   F('reason_entry'),
@@ -77,7 +77,7 @@ class EnrollmentService:
         update_fields = ['is_deleted']
         enrollment.is_deleted = True
         if reason_leave:
-            timezone = enrollment.course.get_city_timezone()
+            timezone = enrollment.course.get_timezone()
             today = now_local(timezone).strftime(DATE_FORMAT_RU)
             enrollment.reason_leave = Concat(
                 Value(f'{today}\n{reason_leave}\n\n'),

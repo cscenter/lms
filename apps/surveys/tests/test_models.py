@@ -13,7 +13,7 @@ from surveys.tests.factories import CourseSurveyFactory
 @pytest.mark.django_db
 def test_course_survey_is_active():
     course = CourseFactory(city_id=Branches.SPB)
-    today = now_local(course.get_city_timezone())
+    today = now_local(course.get_timezone())
     cs = CourseSurveyFactory(course=course, form__status=STATUS_PUBLISHED)
     assert cs.is_active
     cs.expire_at = today + timedelta(hours=2)
@@ -34,7 +34,7 @@ def test_get_active():
     cs = CourseSurveyFactory(course=course, form__status=STATUS_PUBLISHED)
     active_cs = CourseSurvey.get_active(course)
     assert active_cs == cs
-    today = now_local(course.get_city_timezone())
+    today = now_local(course.get_timezone())
     cs.expire_at = today + timedelta(days=1)
     cs.save()
     active_cs = CourseSurvey.get_active(course)

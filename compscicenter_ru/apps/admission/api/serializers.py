@@ -4,9 +4,8 @@ from rest_framework.fields import empty
 from rest_framework.validators import UniqueTogetherValidator
 
 from admission.constants import WHERE_DID_YOU_LEARN
-from admission.models import Applicant, Campaign
+from admission.models import Applicant, Campaign, University
 from admission.tasks import register_in_yandex_contest
-from core.models import University
 
 
 class ActiveCampaignField(serializers.PrimaryKeyRelatedField):
@@ -117,9 +116,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
                 if attr in attrs:
                     del attrs[attr]
         if attrs.get('university_other'):
-            # FIXME: how to remove city_id from here?
             university, created = University.objects.get_or_create(
-                city_id=campaign.city_id,
                 abbr="other",
                 defaults={"name": "Другое"})
             attrs['university'] = university
