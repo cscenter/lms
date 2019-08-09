@@ -41,13 +41,22 @@ $pagination-disabled-border-color: $gray-lighter;
     background-color: $pagination-bg;
     border: $pagination-border-width solid $pagination-border-color;
 
+    .svg-icon {
+      fill: $gray-darker;
+      width: 1em;
+      height: 1em;
+    }
+
     &:hover {
       z-index: 2;
       color: $pagination-hover-color;
       text-decoration: none;
       background-color: $pagination-hover-bg;
       border-color: $pagination-hover-border-color;
-      fill: $teal;
+
+      .svg-icon {
+        fill: $teal;
+      }
     }
 
     &:focus {

@@ -1,0 +1,15 @@
+.scrollable {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  -ms-overflow-style: -ms-autohiding-scrollbar; //For all IE
+  padding: 0 0 spacer("2x") 0;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gray-light;
+    border-radius: 4px;
+  }
+}
