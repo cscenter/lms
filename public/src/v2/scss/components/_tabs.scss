@@ -11,18 +11,7 @@
 .ui.nav-tabs {
   display: flex;
   flex-wrap: nowrap;
-  padding: 0 0 spacer("2x") 0;
-  margin-bottom: spacer("4x");
   list-style: none;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  &::-webkit-scrollbar {
-    height: 4px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: $gray-light;
-    border-radius: 4px;
-  }
 
   .nav-item {
     margin-left: -$border-width;
