@@ -198,6 +198,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
     permission_required = "study.view_courses"
 
     def get_context_data(self, **kwargs):
+        # FIXME: нужно брать от
         city_code = get_student_city_code(self.request)
         # Student enrollments
         student_enrollments = (Enrollment.active

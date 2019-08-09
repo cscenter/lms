@@ -14,7 +14,7 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment
 from learning.services import EnrollmentService, CourseCapacityFull
-from learning.settings import StudentStatuses
+from learning.settings import StudentStatuses, Branches
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory
 
@@ -286,38 +286,38 @@ def test_reenrollment(client):
 
 @pytest.mark.django_db
 def test_enrollment_in_other_city(client):
-    tomorrow = now_local('spb') + datetime.timedelta(days=1)
+    tomorrow = now_local(Branches.SPB) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    co_spb = CourseFactory(city='spb', semester=term, is_open=False)
-    assert co_spb.enrollment_is_open
-    student_spb = StudentFactory(city_id='spb')
-    student_nsk = StudentFactory(city_id='nsk')
-    form = {'course_pk': co_spb.pk}
+    course_spb = CourseFactory(city=Branches.SPB, semester=term, is_open=False)
+    assert course_spb.enrollment_is_open
+    student_spb = StudentFactory(branch__code=Branches.SPB)
+    student_nsk = StudentFactory(branch__code=Branches.NSK)
     client.login(student_spb)
-    response = client.post(co_spb.get_enroll_url(), form)
+    form = {'course_pk': course_spb.pk}
+    response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 302
     assert Enrollment.objects.count() == 1
     client.login(student_nsk)
-    response = client.post(co_spb.get_enroll_url(), form)
+    response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 403
     assert Enrollment.objects.count() == 1
     student = StudentFactory(city_id=None)
     client.login(student)
-    response = client.post(co_spb.get_enroll_url(), form)
+    response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 302
     assert response.url == '/'
     assert Enrollment.objects.count() == 1
     # Check button visibility
     Enrollment.objects.all().delete()
     client.login(student_spb)
-    response = client.get(co_spb.get_absolute_url())
+    response = client.get(course_spb.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
     buttons = (html.find("div", {"class": "o-buttons-vertical"})
                .find_all(attrs={'class': 'btn'}))
     assert any("Enroll in" in s.text for s in buttons)
     for user in [student_nsk, student]:
         client.login(user)
-        response = client.get(co_spb.get_absolute_url())
+        response = client.get(course_spb.get_absolute_url())
         assert smart_bytes("Enroll in") not in response.content
 
 

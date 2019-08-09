@@ -12,14 +12,14 @@
     <div class="container">
         <div class="panel">
             <div class="panel-body">
-                {% if invitations %}
+                {% if course_invitation_list %}
                 <table class="table" width="100%">
                     <thead>
                         <th>Курс</th>
                         <th class="actions" width="150"></th>
                     </thead>
                     <tbody>
-                    {% for course_invitation in invitations %}
+                    {% for course_invitation in course_invitation_list %}
                         {% with course=course_invitation.course %}
                             <tr>
                                 <td style="vertical-align: middle">

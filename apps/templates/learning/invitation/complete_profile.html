@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Complete Profile Confirmation" %}{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-8 col-xs-offset-2">
+                <h3>Обновление профиля студента</h3>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    Ваш профиль будет привязан к отделению "{{ invitation.branch }}".<br>
+                    Если есть неточность в данных, напишите на <a href="mailto:curators@compscicenter.ru">curators@compscicenter.ru</a><br>
+                    <button class="mt-10 btn btn-primary" type="submit" name="confirm" value="Y">Всё верно, продолжить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
