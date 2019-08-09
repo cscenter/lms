@@ -12,8 +12,8 @@
     <div class="nav-tabs-horizontal nav-tabs-inverse">
         <ul class="nav nav-tabs nav-tabs-solid" role="tablist">
             {% for campaign in active_campaigns %}
-                <li role="presentation" {% if selected_campaign.branch.code == campaign.branch.code %} class="active"{% endif %}>
-                    <a href="{% url "admission:interview_results_by_city" campaign.city.code %}">{{ campaign }}</a>
+                <li role="presentation" {% if selected_campaign.branch == campaign.branch %} class="active"{% endif %}>
+                    <a href="{% url "admission:branch_interview_results" campaign.branch.code %}">{{ campaign }}</a>
                 </li>
             {% endfor %}
         </ul>

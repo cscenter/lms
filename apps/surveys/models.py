@@ -13,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from post_office import mail
 from post_office.models import EmailTemplate
 
+from core.mixins import TimezoneAwareMixin
 from core.timezone import now_local
 from core.urls import reverse, city_aware_reverse
 from courses.models import Course
@@ -239,7 +240,9 @@ class Form(AbstractForm):
             )
 
 
-class CourseSurvey(models.Model):
+class CourseSurvey(TimezoneAwareMixin, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = 'course'
+
     MIDDLE = 'middle'
     FINAL = 'final'
     TYPES = (
@@ -286,17 +289,13 @@ class CourseSurvey(models.Model):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
     @property
     def city_aware_field_name(self):
         return self.__class__.course.field.name
 
     def expire_at_local(self, tz=None, format=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         dt = localtime(self.expire_at, timezone=tz)
         return formats.date_format(dt, format) if format else dt
 
@@ -343,7 +342,7 @@ class CourseSurvey(models.Model):
 
     @property
     def is_active(self):
-        today = now_local(self.course.get_city_timezone())
+        today = now_local(self.course.get_timezone())
         expired = self.expire_at is not None and self.expire_at <= today
         return self.is_published and not expired
 
@@ -353,7 +352,7 @@ class CourseSurvey(models.Model):
     @classmethod
     def get_active(cls, course: Course) -> Optional["CourseSurvey"]:
         """Get the latest active survey for the course"""
-        today = now_local(course.get_city_timezone())
+        today = now_local(course.get_timezone())
         return (cls.objects
                 .filter(Q(expire_at__gt=today) | Q(expire_at__isnull=True),
                         course=course,

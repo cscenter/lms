@@ -109,7 +109,7 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
         first_comment_after_deadline = next(cs_after_deadline, None)
         context = {
             'a_s': sa,
-            'timezone': sa.assignment.course.get_city_timezone(),
+            'timezone': sa.assignment.course.get_timezone(),
             'first_comment_after_deadline': first_comment_after_deadline,
             'one_teacher': sa.assignment.course.teachers.count() == 1,
             'hashes_json': comment_persistence.get_hashes_json()

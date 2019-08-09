@@ -11,13 +11,13 @@ from courses.utils import get_term_index, next_term_starts_at
 
 
 @pytest.mark.django_db
-def test_news_get_city_timezone(settings):
+def test_news_get_timezone(settings):
     news = CourseNewsFactory(course__city_id='nsk')
-    assert news.get_city_timezone() == settings.TIME_ZONES['nsk']
+    assert news.get_timezone() == settings.TIME_ZONES['nsk']
     news.course.city_id = 'spb'
     news.course.save()
     news.refresh_from_db()
-    assert news.get_city_timezone() == settings.TIME_ZONES['spb']
+    assert news.get_timezone() == settings.TIME_ZONES['spb']
 
 
 @pytest.mark.django_db
@@ -131,7 +131,7 @@ class CourseTests(CSCTestCase):
                                  semester=semester)
         assert not co.completed_at
         co.save()
-        next_term_dt = next_term_starts_at(semester.index, co.get_city_timezone())
+        next_term_dt = next_term_starts_at(semester.index, co.get_timezone())
         assert co.completed_at == next_term_dt.date()
 
 

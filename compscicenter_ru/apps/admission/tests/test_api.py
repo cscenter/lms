@@ -5,9 +5,9 @@ from datetime import timedelta
 
 import pytest
 
-from admission.tests.factories import CampaignFactory, ApplicantFactory
+from admission.tests.factories import CampaignFactory, ApplicantFactory, \
+    UniversityFactory
 from admission.views import SESSION_LOGIN_KEY
-from core.factories import UniversityFactory
 from core.timezone import now_local
 from core.urls import reverse
 from learning.settings import Branches
@@ -18,7 +18,7 @@ from learning.tests.factories import BranchFactory
 def test_application_form_inactive_or_past_campaign(client):
     url = reverse("api:applicant_create")
     today = now_local(Branches.SPB)
-    campaign = CampaignFactory(current=True, city_id=Branches.SPB,
+    campaign = CampaignFactory(current=True, branch__code=Branches.SPB,
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))
     form_data = {
@@ -39,7 +39,7 @@ def test_application_form_preferred_study_programs(client):
     """`preferred_study_programs` is mandatory for on-campus branches"""
     url = reverse("api:applicant_create")
     today = now_local(Branches.SPB)
-    campaign = CampaignFactory(current=True, city_id=Branches.SPB,
+    campaign = CampaignFactory(current=True, branch__code=Branches.SPB,
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))
     university = UniversityFactory()
@@ -48,7 +48,8 @@ def test_application_form_preferred_study_programs(client):
         university=university)
     if "preferred_study_programs" in form_data:
         del form_data["preferred_study_programs"]
-    assert not campaign.city.is_online_branch, "preferred_study_programs has no sense for distance branch"
+    # preferred_study_programs are not specified for the distance branch
+    assert campaign.branch.code != Branches.DISTANCE
     # Yandex.Login stored in client session and will override form value
     # in any case
     session = client.session
@@ -66,7 +67,6 @@ def test_application_form_living_place(client):
     today = now_local(Branches.SPB)
     branch = BranchFactory(code=Branches.DISTANCE, is_remote=True)
     campaign = CampaignFactory(current=True,
-                               city_id=Branches.SPB,
                                branch=branch,
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))

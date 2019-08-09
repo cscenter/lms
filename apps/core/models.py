@@ -32,10 +32,6 @@ class City(models.Model):
     def __str__(self):
         return smart_text(self.name)
 
-    @property
-    def is_online_branch(self):
-        return self.code == "online"
-
     def get_timezone(self):
         if self.code == "online":
             return settings.TIME_ZONES["spb"]
@@ -75,23 +71,3 @@ class Faq(models.Model):
 
     def __str__(self):
         return smart_text(self.question)
-
-
-class University(models.Model):
-    name = models.CharField(_("University"),
-                            max_length=255,
-                            help_text=_("Perhaps also the faculty."))
-    abbr = models.CharField(_("University abbreviation"), max_length=100,
-                            blank=True, null=True)
-    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    city = models.ForeignKey(City,
-                             verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE,
-                             on_delete=models.CASCADE)
-
-    class Meta:
-        verbose_name = _("University")
-        verbose_name_plural = _("Universities")
-
-    def __str__(self):
-        return smart_text(self.name)

@@ -19,7 +19,7 @@ from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 
 from core.db.models import ScoreField
-from core.mixins import DerivableFieldsMixin
+from core.mixins import DerivableFieldsMixin, TimezoneAwareMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local
 from core.urls import reverse
@@ -204,7 +204,7 @@ class ReportingPeriod(models.Model):
         return f"{self.term}, {start_on}-{end_on}{suffix}"
 
     def is_started(self, project: "Project"):
-        today = now_local(project.branch.timezone).date()
+        today = now_local(project.branch.get_timezone()).date()
         return today >= self.start_on
 
     @property
@@ -312,8 +312,9 @@ class ReportingPeriod(models.Model):
                 data=context,)
 
 
-class ProjectStudent(models.Model):
+class ProjectStudent(TimezoneAwareMixin, models.Model):
     """Intermediate model for project students"""
+    TIMEZONE_AWARE_FIELD_NAME = 'project'
     # TODO: переименовать `GRADES`, создать ProjectGradeTypes (в settings.py)
     GRADES = GradeTypes
     student = models.ForeignKey(settings.AUTH_USER_MODEL,
@@ -352,10 +353,6 @@ class ProjectStudent(models.Model):
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
-
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
 
     @property
     def city_aware_field_name(self):
@@ -436,7 +433,9 @@ class Supervisor(models.Model):
         return self.full_name
 
 
-class Project(TimeStampedModel):
+class Project(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+
     class Statuses(DjangoChoices):
         CANCELED = C('canceled', _("Canceled"))
         CONTINUED = C('continued', _("Continued without intermediate results"))
@@ -540,12 +539,8 @@ class Project(TimeStampedModel):
     def get_city(self):
         return self.city_id
 
-    def get_city_timezone(self):
+    def get_timezone(self):
         return settings.TIME_ZONES[self.city_id]
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.city.field.name
 
     def get_absolute_url(self):
         return reverse('projects:project_detail', args=[self.pk])
@@ -579,7 +574,9 @@ def report_file_name(self, filename):
                         filename)
 
 
-class Report(DerivableFieldsMixin, TimeStampedModel):
+class Report(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'project_student'
+
     SENT = 'sent'
     REVIEW = 'review'
     SUMMARY = 'rating'  # Summarize
@@ -717,17 +714,13 @@ class Report(DerivableFieldsMixin, TimeStampedModel):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
     @property
     def city_aware_field_name(self):
         return self.__class__.project_student.field.name
 
     def created_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
     def get_absolute_url(self):
@@ -944,7 +937,9 @@ def report_comment_attachment_upload_to(self, filename):
     )
 
 
-class ReportComment(TimeStampedModel):
+class ReportComment(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'report'
+
     report = models.ForeignKey(Report, on_delete=models.PROTECT)
     text = models.TextField(
         _("ReportComment|text"),
@@ -972,17 +967,13 @@ class ReportComment(TimeStampedModel):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
     @property
     def city_aware_field_name(self):
         return self.__class__.report.field.name
 
     def created_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
     @property

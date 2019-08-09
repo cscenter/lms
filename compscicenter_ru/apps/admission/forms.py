@@ -15,7 +15,6 @@ from django_filters.conf import settings as filters_settings
 
 from admission.models import Interview, Comment, Applicant, \
     InterviewAssignment, InterviewSlot, InterviewStream
-from core.models import City
 from core.timezone import now_local
 from core.urls import reverse
 from core.views import ReadOnlyFieldsMixin
@@ -27,8 +26,8 @@ class InterviewForm(forms.ModelForm):
     assignments = forms.ModelMultipleChoiceField(
         label=Interview.assignments.field.verbose_name,
         queryset=(InterviewAssignment.objects
-                  .select_related("campaign", "campaign__city")
-                  .order_by("-campaign__year", "campaign__city_id", "name")),
+                  .select_related("campaign", "campaign__branch")
+                  .order_by("-campaign__year", "campaign__branch_id", "name")),
         widget=forms.CheckboxSelectMultiple(),
         required=False,
     )
@@ -52,7 +51,7 @@ class InterviewForm(forms.ModelForm):
     @staticmethod
     def build_data(applicant, slot):
         date = datetime.combine(slot.stream.date, slot.start_at)
-        date = timezone.make_aware(date, applicant.get_city_timezone())
+        date = timezone.make_aware(date, applicant.get_timezone())
         return {
             'applicant': applicant.pk,
             'status': Interview.APPROVED,
@@ -100,7 +99,7 @@ class InterviewFromStreamForm(forms.Form):
             self.fields['slot'].queryset = (InterviewSlot.objects
                                             .select_related("stream")
                                             .filter(stream_id__in=stream_ids))
-        today = now_local(branch.timezone).date()
+        today = now_local(branch.get_timezone()).date()
         self.fields['streams'].queryset = (InterviewStream.objects
                                            .filter(campaign__branch=branch,
                                                    date__gt=today)
@@ -126,8 +125,8 @@ class InterviewAssignmentsForm(forms.ModelForm):
     assignments = forms.ModelMultipleChoiceField(
         label=Interview.assignments.field.verbose_name,
         queryset=(InterviewAssignment.objects
-                  .select_related("campaign", "campaign__city")
-                  .order_by("-campaign__year", "campaign__city_id", "name")),
+                  .select_related("campaign", "campaign__branch")
+                  .order_by("-campaign__year", "campaign__branch_id", "name")),
         widget=forms.CheckboxSelectMultiple(),
         required=False,
     )

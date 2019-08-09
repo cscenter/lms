@@ -419,58 +419,6 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
         return self.status == StudentStatuses.EXPELLED
 
     @staticmethod
-    def create_student_from_applicant(applicant):
-        """
-        Create new model or override existent with data from applicant form.
-        """
-        from admission.models import Applicant
-        try:
-            user = User.objects.get(email=applicant.email)
-        except User.DoesNotExist:
-            username = applicant.email.split("@", maxsplit=1)[0]
-            if User.objects.filter(username=username).exists():
-                username = User.generate_random_username(attempts=5)
-            if not username:
-                raise RuntimeError(
-                    "Всё плохо. Имя {} уже занято. Cлучайное имя сгенерировать "
-                    "не удалось".format(username))
-            random_password = User.objects.make_random_password()
-            user = User.objects.create_user(username=username,
-                                            email=applicant.email,
-                                            password=random_password)
-        if applicant.status == Applicant.VOLUNTEER:
-            user.add_group(Roles.VOLUNTEER)
-        else:
-            user.add_group(Roles.STUDENT)
-        user.add_group(Roles.STUDENT, site_id=settings.CLUB_SITE_ID)
-        # Migrate data from application form to user profile
-        same_attrs = [
-            "first_name",
-            "patronymic",
-            "phone"
-        ]
-        for attr_name in same_attrs:
-            setattr(user, attr_name, getattr(applicant, attr_name))
-        try:
-            user.stepic_id = int(applicant.stepic_id)
-        except (TypeError, ValueError):
-            pass
-        user.last_name = applicant.surname
-        user.enrollment_year = user.curriculum_year = timezone.now().year
-        # Looks like the same fields below
-        user.yandex_id = applicant.yandex_id if applicant.yandex_id else ""
-        # For github store part after github.com/
-        if applicant.github_id:
-            user.github_id = applicant.github_id.split("github.com/",
-                                                       maxsplit=1)[-1]
-        user.workplace = applicant.workplace if applicant.workplace else ""
-        user.uni_year_at_enrollment = applicant.course
-        user.city_id = applicant.campaign.city_id
-        user.university = applicant.university.name
-        user.save()
-        return user
-
-    @staticmethod
     def generate_random_username(length=30,
                                  chars=ascii_lowercase + digits,
                                  split=4,

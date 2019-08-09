@@ -11,7 +11,10 @@ from core.urls import reverse
 from courses.tests.factories import VenueFactory
 
 
-# FIXME: этот тест нужно переписать на city aware datetime field, изначально тест и был так написан, но потом был удалён invitation.stream
+# FIXME: этот тест нужно переписать на tz aware datetime field, изначально тест и был так написан, но потом был удалён invitation.stream
+from learning.settings import Branches
+
+
 @pytest.mark.django_db
 def test_model(settings):
     """
@@ -48,15 +51,15 @@ def test_model(settings):
 
 
 @pytest.mark.django_db
-def test_get_city_timezone(settings):
+def test_get_timezone(settings):
     date = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    interview = InterviewFactory(applicant__campaign__city_id='nsk', date=date)
-    assert interview.applicant.campaign.city_id == 'nsk'
-    assert interview.get_city_timezone() == settings.TIME_ZONES['nsk']
-    interview.applicant.campaign.city_id = 'spb'
+    interview = InterviewFactory(applicant__campaign__branch__code=Branches.NSK,
+                                 date=date)
+    assert interview.get_timezone() == settings.TIME_ZONES[Branches.NSK]
+    interview.applicant.campaign.branch_id = Branches.SPB
     interview.applicant.campaign.save()
     interview.refresh_from_db()
-    assert interview.get_city_timezone() == settings.TIME_ZONES['spb']
+    assert interview.get_timezone() == settings.TIME_ZONES[Branches.SPB]
 
 
 @pytest.mark.skip("Нужно обязательно переписать этот тест на другое поле, которое точно не изменится :<")
@@ -148,7 +151,7 @@ def test_admin_view(settings, admin_client):
     time_input = widget.find('input', {"name": 'expired_at_1'})
     assert time_input.get('value') == '10:00:00'
     assert invitation.expired_at.hour == 3
-    # Empty city aware field (`stream` for `InterviewInvitation`)
+    # Empty timezone aware field (`stream` for `InterviewInvitation`)
     add_url = reverse('admin:admission_interviewinvitation_add')
     form_data['stream'] = ''
     response = admin_client.post(add_url, form_data, follow=True)
@@ -164,15 +167,14 @@ def test_interview_list(settings, client, curator):
     client.login(curator)
     settings.LANGUAGE_CODE = 'ru'
     # Add interview for msk timezone
-    interview = InterviewFactory(date=datetime.datetime(2017, 1, 1,
-                                                        15, 0, 0, 0,
-                                                        tzinfo=pytz.UTC),
-                                 applicant__campaign__city_id='spb')
-    assert interview.applicant.campaign.city_id == 'spb'
+    date_at = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    interview = InterviewFactory(date=date_at,
+                                 applicant__campaign__branch__code=Branches.SPB)
+    assert interview.applicant.campaign.branch.code == Branches.SPB
     # We set naive datetime which should been interpreted as UTC
     assert interview.date.hour == 15
     msk_interview_date_in_utc = interview.date
-    msk_tz = interview.get_city_timezone()
+    msk_tz = interview.get_timezone()
     localized = msk_interview_date_in_utc.astimezone(msk_tz)
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == '18:00'  # expected UTC+3
@@ -186,11 +188,11 @@ def test_interview_list(settings, client, curator):
     interview = InterviewFactory(date=datetime.datetime(2017, 1, 1,
                                                         12, 0, 0, 0,
                                                         tzinfo=pytz.UTC))
-    interview.applicant.campaign.city_id = 'nsk'
+    interview.applicant.campaign.branch_id = Branches.NSK
     interview.applicant.campaign.save()
     interview.refresh_from_db()
     interview_date_in_utc = interview.date
-    tz = interview.get_city_timezone()
+    tz = interview.get_timezone()
     localized = interview_date_in_utc.astimezone(tz)
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "19:00"  # expected UTC + 7
@@ -206,12 +208,11 @@ def test_interview_detail(settings, client, curator):
     settings.LANGUAGE_CODE = 'ru'
     client.login(curator)
     # Add interview for msk timezone
-    interview = InterviewFactory(date=datetime.datetime(2017, 1, 1,
-                                                        15, 0, 0, 0,
-                                                        tzinfo=pytz.UTC),
-                                 applicant__campaign__city_id='nsk')
+    dt_at = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    interview = InterviewFactory(date=dt_at,
+                                 applicant__campaign__branch__code=Branches.NSK)
     date_in_utc = interview.date
-    localized = date_in_utc.astimezone(settings.TIME_ZONES['nsk'])
+    localized = date_in_utc.astimezone(settings.TIME_ZONES[Branches.NSK])
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "22:00"
     response = client.get(interview.get_absolute_url())
@@ -219,9 +220,9 @@ def test_interview_detail(settings, client, curator):
     assert any(time_str in s.string for s in
                html.find_all('div', {"class": "date"}))
     # Make sure timezone doesn't cached on view lvl
-    interview.applicant.campaign.city_id = 'spb'
+    interview.applicant.campaign.branch_id = Branches.SPB
     interview.applicant.campaign.save()
-    localized = date_in_utc.astimezone(settings.TIME_ZONES['spb'])
+    localized = date_in_utc.astimezone(settings.TIME_ZONES[Branches.SPB])
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "18:00"
     response = client.get(interview.get_absolute_url())

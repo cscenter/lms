@@ -6,8 +6,8 @@ from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
-    CityAwareSplitDateTimeField
+from core.admin import TimezoneAwareModelForm, TimezoneAwareAdminSplitDateTimeWidget, \
+    TimezoneAwareSplitDateTimeField
 from core.compat import Django21BitFieldCheckboxSelectMultiple
 from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget
@@ -126,7 +126,7 @@ class VenueAdmin(admin.ModelAdmin):
     list_select_related = ["city"]
 
 
-class AssignmentAdminForm(CityAwareModelForm):
+class AssignmentAdminForm(TimezoneAwareModelForm):
     class Meta:
         model = Assignment
         fields = '__all__'
@@ -154,8 +154,8 @@ class AssignmentAdmin(admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
         db_models.DateTimeField: {
-            'widget': CityAwareAdminSplitDateTimeWidget,
-            'form_class': CityAwareSplitDateTimeField
+            'widget': TimezoneAwareAdminSplitDateTimeWidget,
+            'form_class': TimezoneAwareSplitDateTimeField
         },
     }
     list_display = ['id', 'title', 'course', 'created_local',

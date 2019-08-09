@@ -38,13 +38,13 @@ STATUSES = [Applicant.ACCEPT,
 
 
 class CampaignsStagesByYears(ReadOnlyModelViewSet):
-    """Admission stages by years for provided city."""
+    """Admission stages by years for provided branch."""
     permission_classes = [CuratorAccessPermission]
 
     def list(self, request, *args, **kwargs):
-        city_code = self.kwargs.get('city_code')
+        branch_code = self.kwargs.get('branch_code')
         applicants = (Applicant.objects
-                      .filter(campaign__city_id=city_code)
+                      .filter(campaign__branch=branch_code)
                       .values('campaign_id', 'campaign__year')
                       .annotate(application_form=Count("campaign_id"),
                                 testing=TestingCountAnnotation,
@@ -94,7 +94,7 @@ class ApplicationFormSubmissionByDays(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         campaigns = (Campaign.objects
-                     .filter(city_id=self.kwargs['city_code'], year__gte=2017))
+                     .filter(branch=self.kwargs['branch_code'], year__gte=2017))
         data = self.get_stat(campaigns)
         return Response(data)
 
@@ -111,7 +111,7 @@ class ApplicationFormSubmissionByDays(ListAPIView):
 
     def get_stat(self, campaigns):
         active_campaign = next((c for c in campaigns if c.current), None)
-        campaigns_tz = campaigns[0].get_city_timezone() if campaigns else None
+        campaigns_tz = campaigns[0].get_timezone() if campaigns else None
         filters = self.get_filters(campaigns)
         qs = (Applicant.objects
               .filter(filters)
@@ -145,7 +145,7 @@ class ApplicationFormSubmissionByDays(ListAPIView):
             # For current campaign calculate partial sums until today
             if active_campaign and active_campaign.year == year:
                 start = active_campaign.application_starts_at_local().date()
-                today = now_local(active_campaign.get_city_timezone()).date()
+                today = now_local(active_campaign.get_timezone()).date()
                 index = min(index, (today - start).days + 1)
             # Partial sums
             for i in range(1, index):
@@ -165,9 +165,9 @@ class CampaignStatsApplicantsResults(ListRenderersMixin, PandasView):
     pandas_serializer_class = CampaignResultsTimelineSerializer
 
     def get_queryset(self):
-        city_code = self.kwargs.get('city_code')
+        branch_code = self.kwargs.get('branch_code')
         qs = (Applicant.objects
-              .filter(campaign__city_id=city_code,
+              .filter(campaign__branch=branch_code,
                       status__in=STATUSES)
               .values('campaign__year', 'status')
               .annotate(total=Count("status"))

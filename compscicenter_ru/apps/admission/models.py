@@ -11,7 +11,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, \
     MaxValueValidator
 from django.db import models, transaction
-from django.db.models import query, Q
+from django.db.models import query, Q, FieldDoesNotExist
 from django.utils import timezone, numberformat
 from django.utils.encoding import smart_text
 from django.utils.formats import date_format, time_format
@@ -28,12 +28,12 @@ from admission.utils import slot_range
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
 from core.db.models import ScoreField
-from core.models import City, University
+from core.mixins import TimezoneAwareMixin
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
 from courses.models import Venue
 from learning.models import Branch
-from learning.settings import AcademicDegreeYears
+from learning.settings import AcademicDegreeYears, Branches
 from users.constants import Roles
 
 
@@ -50,15 +50,13 @@ def validate_template_name(value):
         )
 
 
-class Campaign(models.Model):
+class Campaign(TimezoneAwareMixin, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = 'branch'
+
     year = models.PositiveSmallIntegerField(
         _("Campaign|Year"),
         validators=[MinValueValidator(CENTER_FOUNDATION_YEAR)],
         default=current_year)
-    # FIXME: sync branch and city values, then remove `city`
-    city = models.ForeignKey(City, default=settings.DEFAULT_CITY_CODE,
-                             verbose_name=_("City"),
-                             on_delete=models.PROTECT)
     branch = models.ForeignKey(Branch,
                                verbose_name=_("Branch"),
                                to_field="code",
@@ -119,25 +117,14 @@ class Campaign(models.Model):
     def __str__(self):
         return smart_text(_("{}, {}").format(self.branch.name, self.year))
 
-    # FIXME: Rename to get_branch_timezone
-    def get_city_timezone(self):
-        # FIXME return self.city.get_timezone()
-        if self.city_id == "online":
-            return settings.TIME_ZONES["spb"]
-        return settings.TIME_ZONES[self.city_id]
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.city.field.name
-
     def application_starts_at_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.application_starts_at, timezone=tz)
 
     def application_ends_at_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.application_ends_at, timezone=tz)
 
     def clean(self):
@@ -166,13 +153,36 @@ class Campaign(models.Model):
                 .filter(current=True,
                         application_starts_at__lte=two_days_ago,
                         application_ends_at__gt=today)
-                .select_related('city', 'branch')
+                .select_related('branch')
                 .order_by('id'))
 
     @property
     def is_active(self):
         today = timezone.now()
         return self.current and today <= self.application_ends_at
+
+
+class University(models.Model):
+    name = models.CharField(_("University"),
+                            max_length=255,
+                            help_text=_("Perhaps also the faculty."))
+    abbr = models.CharField(_("University abbreviation"), max_length=100,
+                            blank=True, null=True)
+    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
+    branch = models.ForeignKey(Branch,
+                               verbose_name=_("Branch"),
+                               to_field="code",
+                               related_name="+",
+                               null=True,
+                               blank=True,
+                               on_delete=models.PROTECT)
+
+    class Meta:
+        verbose_name = _("University")
+        verbose_name_plural = _("Universities")
+
+    def __str__(self):
+        return smart_text(self.name)
 
 
 class ApplicantQuerySet(models.QuerySet):
@@ -188,7 +198,9 @@ ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
     ApplicantQuerySet)
 
 
-class Applicant(TimeStampedModel):
+class Applicant(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'campaign'
+
     REJECTED_BY_TEST = 'rejected_test'
     PERMIT_TO_EXAM = 'permit_to_exam'
     REJECTED_BY_EXAM = 'rejected_exam'
@@ -463,17 +475,9 @@ class Applicant(TimeStampedModel):
         testing = Test(applicant=self, status=Test.NEW)
         testing.save()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.campaign.field.name
-
     def created_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
     def get_full_name(self):
@@ -485,8 +489,8 @@ class Applicant(TimeStampedModel):
             self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
 
     def get_living_place_display(self):
-        if not self.living_place and self.campaign.city_id in ('spb', 'nsk'):
-            return self.campaign.city.name
+        if not self.living_place and self.campaign.branch_id in (Branches.SPB, Branches.NSK):
+            return self.campaign.branch.name
         return self.living_place
 
     @classmethod
@@ -646,7 +650,7 @@ class YandexContestIntegration(models.Model):
                         obj=cls,
                         id='admission.E002',
                     ))
-        except cls.DoesNotExist:
+        except FieldDoesNotExist:
             errors.append(
                 checks.Error(
                     f'`{cls.__name__}` is a subclass of YandexContestIntegration'
@@ -880,7 +884,9 @@ class InterviewAssignment(models.Model):
         return smart_text(self.name)
 
 
-class Interview(TimeStampedModel):
+class Interview(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'applicant'
+
     APPROVAL = 'approval'
     APPROVED = 'waiting'
     DEFERRED = 'deferred'
@@ -927,17 +933,8 @@ class Interview(TimeStampedModel):
 
     def date_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.date, timezone=tz)
-
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
-    @property
-    def city_aware_field_name(self):
-        # TODO: store venue in this model?
-        return self.__class__.applicant.field.name
 
     def clean(self):
         if self.status != self.APPROVAL and not self.date:
@@ -1021,7 +1018,8 @@ class Comment(TimeStampedModel):
                                            self.interview.applicant.get_full_name()))
 
 
-class InterviewStream(TimeStampedModel):
+class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'venue'
     # Extract this value from interview datetime before sending notification
     # to applicant
     WITH_ASSIGNMENTS_TIMEDELTA = datetime.timedelta(minutes=30)
@@ -1067,15 +1065,6 @@ class InterviewStream(TimeStampedModel):
                      for start_at, end_at
                      in slot_range(self.start_at, self.end_at, step)]
             InterviewSlot.objects.bulk_create(slots)
-
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        # self.venue.get_city_timezone()
-        return next_in_city_aware_mro.get_city_timezone()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.venue.field.name
 
     def __str__(self):
         return "{}, {}-{}".format(
@@ -1163,7 +1152,7 @@ class InterviewInvitation(TimeStampedModel):
     expired_at = models.DateTimeField(
         _("Expired at"),
         # FIXME: get timezone from applicant
-        help_text=_("Time in UTC since information about city timezone "
+        help_text=_("Time in UTC since information about the timezone "
                     "stored in m2m relationship"))
     interview = models.ForeignKey(
         Interview,

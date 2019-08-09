@@ -2,7 +2,6 @@ import datetime
 
 import pytest
 from bs4 import BeautifulSoup
-from django.apps import apps
 from django.utils import timezone, formats
 from django.utils.timezone import now
 from post_office.models import Email
@@ -13,12 +12,10 @@ from admission.models import Applicant, Interview, InterviewInvitation
 from admission.tests.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
-from core.models import City
-from core.settings.base import DEFAULT_CITY_CODE
 from core.timezone import now_local
 from core.urls import reverse
 from learning.models import Branch
-from learning.settings import Branches
+from learning.settings import Branches, DEFAULT_BRANCH_CODE
 from users.tests.factories import UserFactory
 
 
@@ -48,13 +45,12 @@ def test_application_form_availability(client):
 @pytest.mark.django_db
 def test_simple_interviews_list(client, curator, settings):
     settings.LANGUAGE_CODE = 'ru'
-    curator.city_id = 'nsk'
     curator.branch = Branch.objects.get(code=Branches.NSK)
     curator.save()
     client.login(curator)
     interviewer = InterviewerFactory()
     branch = Branch.objects.get(code=Branches.NSK)
-    campaign = CampaignFactory(current=True, city_id='nsk', branch=branch)
+    campaign = CampaignFactory(current=True, branch=branch)
     today_local_nsk = now_local(Branches.get_choice(Branches.NSK).timezone)
     today_local_nsk_date = formats.date_format(today_local_nsk,
                                                "SHORT_DATE_FORMAT")
@@ -190,10 +186,10 @@ def test_autoupdate_applicant_status_from_final():
 @pytest.mark.django_db
 def test_interview_results_dispatch_view(curator, client):
     # Not enough permissions if you are not a curator
-    city1, city2 = City.objects.all()[:2]
-    curator.city = city1
+    branch1, branch2 = Branch.objects.all()[:2]
+    curator.branch = branch1
     curator.save()
-    user = UserFactory(is_staff=False, city=city1)
+    user = UserFactory(is_staff=False, branch=branch1)
     client.login(user)
     url = reverse('admission:interview_results_dispatch')
     response = client.get(url, follow=True)
@@ -203,15 +199,15 @@ def test_interview_results_dispatch_view(curator, client):
     # No active campaigns at this moment.
     client.login(curator)
     response = client.get(url, follow=True)
-    # Redirect to default city
+    # Redirect to the default branch view
     redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission:interview_results_by_city",
-                                   kwargs={"city_code": DEFAULT_CITY_CODE})
+    assert redirect_url == reverse("admission:branch_interview_results",
+                                   kwargs={"branch_code": DEFAULT_BRANCH_CODE})
     # And then to applicants list page
     redirect_url, status_code = response.redirect_chain[1]
     assert redirect_url == reverse("admission:applicants")
-    # Create campaign, but not with curator default city value
-    campaign1 = CampaignFactory.create(city=city2, current=False)
+    # Create campaign with a branch different from curator branch value
+    campaign1 = CampaignFactory.create(branch=branch2, current=False)
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[1]
     assert redirect_url == reverse("admission:applicants")
@@ -221,21 +217,21 @@ def test_interview_results_dispatch_view(curator, client):
     # Now curator should see this active campaign tab
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission:interview_results_by_city",
-                                   kwargs={"city_code": city2.pk})
-    # Create campaign for curator default city, but not active
-    campaign2 = CampaignFactory.create(city=city1, current=False)
+    assert redirect_url == reverse("admission:branch_interview_results",
+                                   kwargs={"branch_code": branch2.code})
+    # Create inactive campaign with a branch equal curator branch setting value
+    campaign2 = CampaignFactory(branch=branch1, current=False)
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission:interview_results_by_city",
-                                   kwargs={"city_code": city2.pk})
+    assert redirect_url == reverse("admission:branch_interview_results",
+                                   kwargs={"branch_code": branch2.code})
     # Make it active
     campaign2.current = True
     campaign2.save()
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission:interview_results_by_city",
-                                   kwargs={"city_code": city1.pk})
+    assert redirect_url == reverse("admission:branch_interview_results",
+                                   kwargs={"branch_code": branch1.code})
 
 
 @pytest.mark.django_db
@@ -287,7 +283,7 @@ def test_invitation_creation(curator, client, settings):
 @pytest.mark.django_db
 def test_create_interview_from_slot(curator, client, settings):
     settings.LANGUAGE_CODE = 'ru'
-    campaign = CampaignFactory(branch__code='nsk', city_id='nsk')
+    campaign = CampaignFactory(branch__code=Branches.NSK)
     applicant = ApplicantFactory(campaign=campaign)
     tomorrow_utc = now() + datetime.timedelta(days=2)
     interviewer = InterviewerFactory()

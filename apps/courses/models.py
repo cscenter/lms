@@ -21,7 +21,7 @@ from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from core.mixins import DerivableFieldsMixin
+from core.mixins import DerivableFieldsMixin, TimezoneAwareMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local, TzAware
 from core.urls import reverse, city_aware_reverse
@@ -140,7 +140,9 @@ class Semester(models.Model):
             return self.year - 1
 
 
-class Venue(models.Model):
+class Venue(TimezoneAwareMixin, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+
     INTERVIEW = 'interview'
     LECTURE = 'lecture'
     UNSPECIFIED = 0  # BitField uses BigIntegerField internal
@@ -181,12 +183,8 @@ class Venue(models.Model):
         verbose_name = _("Venue")
         verbose_name_plural = _("Venues")
 
-    def get_city_timezone(self):
+    def get_timezone(self):
         return settings.TIME_ZONES[self.city_id]
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.city.field.name
 
     def __str__(self):
         return "{0}".format(smart_text(self.name))
@@ -251,7 +249,9 @@ class MetaCourse(TimeStampedModel):
             return staticfiles_storage.url('v2/img/placeholder/meta_course.png')
 
 
-class Course(TimeStampedModel, DerivableFieldsMixin):
+class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+
     meta_course = models.ForeignKey(
         MetaCourse,
         verbose_name=_("Course"),
@@ -407,7 +407,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
         # Make sure `self.completed_at` always has value
         if self.semester_id and not self.completed_at:
             index = get_term_index(self.semester.year, self.semester.type)
-            next_term_dt = next_term_starts_at(index, self.get_city_timezone())
+            next_term_dt = next_term_starts_at(index, self.get_timezone())
             self.completed_at = next_term_dt.date()
         super().save(*args, **kwargs)
 
@@ -499,12 +499,8 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
     def get_city(self):
         return self.city_id
 
-    def get_city_timezone(self):
+    def get_timezone(self):
         return settings.TIME_ZONES[self.city_id]
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.city.field.name
 
     def has_unread(self):
         from notifications.middleware import get_unread_notifications_cache
@@ -521,11 +517,11 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
 
     @property
     def is_completed(self):
-        return self.completed_at <= now_local(self.get_city_timezone()).date()
+        return self.completed_at <= now_local(self.get_timezone()).date()
 
     @property
     def in_current_term(self):
-        current_term_index = get_current_term_index(self.get_city_timezone())
+        current_term_index = get_current_term_index(self.get_timezone())
         return self.semester.index == current_term_index
 
     @property
@@ -534,7 +530,7 @@ class Course(TimeStampedModel, DerivableFieldsMixin):
             return True
         if self.is_completed:
             return False
-        city_tz = self.get_city_timezone()
+        city_tz = self.get_timezone()
         today = now_local(city_tz).date()
         start_at = self.semester.enrollment_start_at
         return start_at <= today <= self.semester.enrollment_end_at
@@ -661,7 +657,9 @@ class CourseTeacher(models.Model):
         return ts
 
 
-class CourseNews(TimeStampedModel):
+class CourseNews(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'course'
+
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course"),
@@ -687,10 +685,6 @@ class CourseNews(TimeStampedModel):
     def get_city(self):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
-
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
 
     @property
     def city_aware_field_name(self):
@@ -718,7 +712,7 @@ class CourseNews(TimeStampedModel):
 
     def created_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
 
@@ -745,7 +739,9 @@ def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
                         "slides", filename)
 
 
-class CourseClass(TimeStampedModel):
+class CourseClass(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'course'  # or venue?
+
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course"),
@@ -821,10 +817,6 @@ class CourseClass(TimeStampedModel):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
     @property
     def city_aware_field_name(self):
         return self.__class__.course.field.name
@@ -888,7 +880,9 @@ def course_class_attachment_upload_to(instance: "CourseClassAttachment",
                         "materials", filename)
 
 
-class CourseClassAttachment(TimeStampedModel):
+class CourseClassAttachment(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'course_class'
+
     course_class = models.ForeignKey(
         CourseClass,
         verbose_name=_("Class"),
@@ -915,10 +909,6 @@ class CourseClassAttachment(TimeStampedModel):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
     @property
     def city_aware_field_name(self):
         return self.__class__.course_class.field.name
@@ -935,7 +925,9 @@ class CourseClassAttachment(TimeStampedModel):
         return os.path.basename(self.material.name)
 
 
-class Assignment(TimeStampedModel):
+class Assignment(TimezoneAwareMixin, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = 'course'
+
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course offering"),
@@ -985,22 +977,18 @@ class Assignment(TimeStampedModel):
         next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
         return next_in_city_aware_mro.get_city()
 
-    def get_city_timezone(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city_timezone()
-
     @property
     def city_aware_field_name(self):
         return self.__class__.course.field.name
 
     def deadline_at_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.deadline_at, timezone=tz)
 
     def created_local(self, tz=None):
         if not tz:
-            tz = self.get_city_timezone()
+            tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
     def get_teacher_url(self):

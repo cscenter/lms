@@ -48,19 +48,17 @@ from admission.forms import InterviewCommentForm, \
     ResultsModelForm, InterviewAssignmentsForm, InterviewFromStreamForm
 from admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign, InterviewAssignment, InterviewSlot, \
-    InterviewInvitation, InterviewStream
+    InterviewInvitation, InterviewStream, University
 from admission.serializers import InterviewSlotSerializer
-from admission.services import create_invitation
+from admission.services import create_invitation, create_student_from_applicant
 from admission.utils import generate_interview_reminder, \
     calculate_time
 from api.permissions import CuratorAccessPermission
 from auth.backends import YandexRuOAuth2Backend
-from core.models import University
-from core.settings.base import DEFAULT_CITY_CODE
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown, bucketize
-from learning.settings import AcademicDegreeYears
+from learning.settings import AcademicDegreeYears, DEFAULT_BRANCH_CODE
 from tasks.models import Task
 from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import User
@@ -149,7 +147,8 @@ class ApplicationFormView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         active_campaigns = (Campaign.get_active()
-                            .annotate(value=F('city_id'), label=F('city__name'))
+                            .annotate(value=F('branch_id'),
+                                      label=F('branch__name'))
                             .values('value', 'label', 'id'))
         show_form = len(active_campaigns) > 0
         context["show_form"] = show_form
@@ -157,7 +156,7 @@ class ApplicationFormView(TemplateView):
             universities = (University.objects
                             .exclude(abbr='other')
                             .annotate(value=F('id'), label=F('name'))
-                            .values('value', 'label', 'city_id')
+                            .values('value', 'label', 'branch_id')
                             .order_by("name"))
             courses = [{"value": k, "label": str(v)} for k, v in
                        AcademicDegreeYears.values.items()]
@@ -191,7 +190,7 @@ class ApplicantContextMixin:
         context = {}
         applicant = get_object_or_404(
             Applicant.objects
-                     .select_related("exam", "campaign", "campaign__city",
+                     .select_related("exam", "campaign", "campaign__branch",
                                      "online_test", "university")
                      .filter(pk=applicant_id))
         context["applicant"] = applicant
@@ -337,7 +336,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
         applicant_id = self.kwargs.get(self.pk_url_kwarg, None)
         return (Applicant.objects
                 .select_related("exam", "online_test", "campaign",
-                                "campaign__city")
+                                "campaign__branch")
                 .get(pk=applicant_id))
 
     def get_context_data(self, **kwargs):
@@ -468,9 +467,9 @@ def get_default_campaign_for_user(user: User) -> Optional[Campaign]:
                             .only("pk", "branch"))
     try:
         campaign = next(c for c in active_campaigns
-                        if c.branch.code == user.city_id)
+                        if c.branch.code == user.branch_id)
     except StopIteration:
-        # Get any campaign if in the user city no active campaigns
+        # Get any campaign if no active campaign found for the user branch
         campaign = next((c for c in active_campaigns), None)
     return campaign
 
@@ -497,7 +496,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                 messages.error(self.request, "Нет активных кампаний по набору.")
                 today_local = timezone.now()  # stub
             else:
-                today_local = now_local(campaign.branch.timezone)
+                today_local = now_local(campaign.branch.get_timezone())
             date = formats.date_format(today_local, "SHORT_DATE_FORMAT")
             params = parse.urlencode({
                 'campaign': campaign.pk,
@@ -579,7 +578,7 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                                        .select_related("interviewer")))))
         context = self.get_applicant_context(self.request, interview.applicant_id)
         # Activate timezone for the whole detail view
-        timezone.activate(context['applicant'].get_city_timezone())
+        timezone.activate(context['applicant'].get_timezone())
         context.update({
             "interview": interview,
             "assignments_form": InterviewAssignmentsForm(instance=interview),
@@ -677,16 +676,14 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
 class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         """Based on user settings, get preferred page address and redirect"""
-        cs = (Campaign.objects
-              .filter(current=True)
-              .values_list("city_id", flat=True))
-        preferred_city = self.request.user.city_id
-        if preferred_city in cs:
-            city_redirect_to = preferred_city
-        else:
-            city_redirect_to = next(cs.iterator(), DEFAULT_CITY_CODE)
-        return reverse("admission:interview_results_by_city", kwargs={
-            "city_code": city_redirect_to
+        branches = (Campaign.objects
+                    .filter(current=True)
+                    .values_list("branch_id", flat=True))
+        branch_code = self.request.user.branch_id
+        if branch_code not in branches:
+            branch_code = next(branches.iterator(), DEFAULT_BRANCH_CODE)
+        return reverse("admission:branch_interview_results", kwargs={
+            "branch_code": branch_code
         })
 
 
@@ -706,9 +703,9 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
                                  .filter(current=True)
                                  .select_related("branch"))
         try:
-            city_code = self.kwargs["city_code"]
+            branch_code = self.kwargs["branch_code"]
             self.selected_campaign = next(c for c in self.active_campaigns
-                                          if c.city.code == city_code)
+                                          if c.branch.code == branch_code)
         except StopIteration:
             messages.error(self.request,
                            "Активная кампания по набору не найдена")
@@ -735,6 +732,11 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
     def get_factory_kwargs(self):
         kwargs = super().get_factory_kwargs()
         kwargs["extra"] = 0
+        return kwargs
+
+    def get_filterset_kwargs(self, filterset_class):
+        kwargs = super().get_filterset_kwargs(filterset_class)
+        kwargs['branch_code'] = self.kwargs["branch_code"]
         return kwargs
 
     def get_formset_kwargs(self):
@@ -815,7 +817,7 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
                            extra_tags='timeout')
             return HttpResponseRedirect(reverse("admission:applicants"))
         try:
-            user = User.create_student_from_applicant(applicant)
+            user = create_student_from_applicant(applicant)
         except User.MultipleObjectsReturned:
             messages.error(
                 self.request,

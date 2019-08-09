@@ -80,8 +80,8 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         campaigns, selected_campaign_id = self.get_campaigns()
-        cities, selected_city_code = self.get_cities(campaigns,
-                                                     selected_campaign_id)
+        branches, selected_branch_code = self.get_cities(campaigns,
+                                                         selected_campaign_id)
         interviewers, selected_interviewer = self.get_interviewers()
 
         interviewer_stats = selected_interviewer and (Comment.objects
@@ -93,12 +93,12 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
                              "interview__applicant__user")
              .prefetch_related("interview__applicant__user__groups"))
         context = {
-            "cities": cities,
+            "cities": branches,
             "campaigns": campaigns,
             "interviewers": interviewers,
             "data": {
                 "selected": {
-                    "city_code": selected_city_code,
+                    "city_code": selected_branch_code,
                     "campaign_id": selected_campaign_id,
                     "interviewer_id": selected_interviewer
                 },
@@ -107,36 +107,36 @@ class StatsAdmissionView(CuratorOnlyMixin, generic.TemplateView):
             "json_data": json.dumps({
                 "campaigns": campaigns,
                 "campaignId": selected_campaign_id,
-                "cityCode": selected_city_code
+                "cityCode": selected_branch_code
             })
         }
         return context
 
     def get_campaigns(self):
         campaigns = list(Campaign.objects
-                         .values("pk", "year", "city_id", "city__name")
-                         .order_by("city_id", "-year"))
-        campaigns = bucketize(campaigns, key=lambda c: c["city_id"])
+                         .values("pk", "year", "branch_id", "branch__name")
+                         .order_by("branch_id", "-year"))
+        campaigns = bucketize(campaigns, key=lambda c: c["branch_id"])
         # Find selected campaign
         campaign_id = self.request.GET.get("campaign")
         try:
             campaign_id = int(campaign_id)
         except TypeError:
-            city_code = next(iter(campaigns))
-            campaign_id = campaigns[city_code][0]["pk"]
+            branch_code = next(iter(campaigns))
+            campaign_id = campaigns[branch_code][0]["pk"]
         return campaigns, campaign_id
 
     @staticmethod
     def get_cities(campaigns, selected_campaign_id):
-        cities = OrderedDict()
-        selected_city_code = None
-        for by_city in campaigns.values():
-            for c in by_city:
-                cities[c["city_id"]] = c["city__name"]
-                if c["pk"] == selected_campaign_id:
-                    selected_city_code = c["city_id"]
+        branches = OrderedDict()
+        selected_branch_code = None
+        for by_branch in campaigns.values():
+            for b in by_branch:
+                branches[b["branch_id"]] = b["branch__name"]
+                if b["pk"] == selected_campaign_id:
+                    selected_branch_code = b["branch_id"]
                     break
-        return cities, selected_city_code
+        return branches, selected_branch_code
 
     def get_interviewers(self):
         selected_interviewer = self.request.GET.get("interviewer", '')

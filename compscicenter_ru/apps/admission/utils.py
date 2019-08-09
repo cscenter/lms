@@ -45,7 +45,7 @@ def generate_interview_reminder(interview, slot) -> None:
             sender='info@compscicenter.ru',
             template=campaign.template_interview_reminder,
             context={
-                "SUBJECT_CITY": campaign.city.name,
+                "SUBJECT_CITY": campaign.branch.name,
                 "DATE": meeting_at.strftime(DATE_FORMAT_RU),
                 "TIME": meeting_at.strftime("%H:%M"),
                 "DIRECTIONS": slot.stream.venue.directions
@@ -91,7 +91,7 @@ def generate_interview_feedback_email(interview) -> None:
             sender='info@compscicenter.ru',
             template=template,
             context={
-                "SUBJECT_CITY": interview.applicant.campaign.city.name,
+                "SUBJECT_CITY": interview.applicant.campaign.branch.name,
             },
             # Render on delivery, we have no really big amount of
             # emails to think about saving CPU time

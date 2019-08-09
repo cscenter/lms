@@ -24,6 +24,8 @@ class CurrentCityMiddleware:
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         url_aware_of_the_city = bool(view_kwargs.get("city_aware", False))
+        url_aware_of_the_branch = bool(view_kwargs.get("branch_aware", False))
+        url_timezone_aware = url_aware_of_the_city or url_aware_of_the_branch
         if url_aware_of_the_city and not is_club_site():
             # No need in delimiter if we always explicitly set city code
             use_delimiter = view_kwargs.get("use_delimiter", True)
@@ -38,6 +40,9 @@ class CurrentCityMiddleware:
                                                           not delimiter):
                 # None-empty delimiter if valid city code provided
                 raise Http404
+        elif url_aware_of_the_branch:
+            # FIXME: pure hack for admission interview results
+            city_code = view_kwargs["branch_code"]
         else:
             if url_aware_of_the_city:
                 # FIXME: Подразумевается, что никогда не используем в url?

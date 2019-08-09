@@ -9,6 +9,7 @@ from admission.services import create_invitation
 from admission.tests.factories import InterviewFactory, InterviewerFactory, \
     CommentFactory, InterviewStreamFactory, ApplicantFactory
 from admission.models import Interview, InterviewInvitation
+from learning.settings import Branches
 
 
 @pytest.mark.django_db
@@ -27,7 +28,7 @@ def test_create_invitation(mocker):
                                     with_assignments=False,
                                     campaign__current=True)
     applicant = ApplicantFactory(campaign=stream.campaign)
-    tz = stream.venue.get_city_timezone()
+    tz = stream.venue.get_timezone()
     tomorrow_begin = datetime.datetime.combine(tomorrow,
                                                datetime.datetime.min.time())
     tomorrow_begin_local = tz.localize(tomorrow_begin)
@@ -44,7 +45,7 @@ def test_create_invitation(mocker):
 def test_generate_interview_feedback_email():
     email_qs = Email.objects.filter(template__name=INTERVIEW_FEEDBACK_TEMPLATE)
     interview = InterviewFactory(status=Interview.APPROVED,
-                                 applicant__campaign__city_id='spb')
+                                 applicant__campaign__branch_id=Branches.SPB)
     assert Email.objects.count() == 0
     interview.status = Interview.COMPLETED
     interview.save()

@@ -68,7 +68,7 @@
                       <span class="assignment-attachment"><i class="fa fa-file"></i></span> <a href="{{ comment.attached_file_url }}">{{ comment.attached_file_name }}</a>
 
                   {% endif %}
-                  <span class="metainfo pull-right">{{ comment.created|timezone:project.get_city_timezone|date:"d.m.Y H:i" }}</span>
+                  <span class="metainfo pull-right">{{ comment.created|timezone:project.get_timezone|date:"d.m.Y H:i" }}</span>
                 </div>
               </div>
             </li>

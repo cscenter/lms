@@ -1,8 +1,9 @@
 import logging
 
 from django.contrib.contenttypes.models import ContentType
+from django.core import checks
 from django.db import models
-from django.db.models import prefetch_related_objects
+from django.db.models import prefetch_related_objects, FieldDoesNotExist
 
 from .tasks import compute_model_field
 
@@ -79,3 +80,59 @@ class DerivableFieldsMixin:
 
         for field in derivable_fields:
             compute_model_field.delay(content_type.id, self.pk, field)
+
+
+class TimezoneAwareMixin:
+    SELF_AWARE = object()
+    """
+    `TIMEZONE_AWARE_FIELD_NAME = SELF_AWARE` is a special case that means
+    current model has all needed data for retrieving timezone value
+    """
+    def get_timezone(self):
+        next_in_tz_aware_mro = getattr(self, self.get_tz_aware_field_name())
+        return next_in_tz_aware_mro.get_timezone()
+
+    @classmethod
+    def get_tz_aware_field_name(cls):
+        return getattr(cls, cls.TIMEZONE_AWARE_FIELD_NAME).field.name
+
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        errors.extend(cls._check_tz_aware_field_declared())
+        return errors
+
+    @classmethod
+    def _check_tz_aware_field_declared(cls):
+        errors = []
+        if not hasattr(cls, "TIMEZONE_AWARE_FIELD_NAME"):
+            errors.append(
+                checks.Error(
+                    f'`{cls} is a subclass of TimezoneAwareMixin but no '
+                    f'timezone aware information was provided',
+                    hint=f'define {cls.__name__}.TIMEZONE_AWARE_FIELD_NAME attribute value',
+                    obj=cls,
+                    id='timezone.E001',
+                ))
+        else:
+            tz_aware_field_name = cls.TIMEZONE_AWARE_FIELD_NAME
+            if tz_aware_field_name is not cls.SELF_AWARE:
+                try:
+                    tz_aware_field = cls._meta.get_field(tz_aware_field_name)
+                    if not issubclass(tz_aware_field.model, TimezoneAwareMixin):
+                        errors.append(
+                            checks.Error(
+                                f"`{cls}`.{tz_aware_field} is not a subclass of TimezoneAwareMixin",
+                                hint=f'Make {tz_aware_field} a subclass of TimezoneAwareMixin',
+                                obj=cls,
+                                id='timezone.E003',
+                            ))
+                except FieldDoesNotExist:
+                    errors.append(
+                        checks.Error(
+                            f"`{tz_aware_field_name}` is not a valid name for timezone aware field",
+                            hint=f'Make sure `{cls.__name__}.TIMEZONE_AWARE_FIELD_NAME` value matches the real field name',
+                            obj=cls,
+                            id='timezone.E002',
+                        ))
+        return errors

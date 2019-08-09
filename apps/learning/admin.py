@@ -4,8 +4,8 @@ from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import CityAwareModelForm, CityAwareAdminSplitDateTimeWidget, \
-    CityAwareSplitDateTimeField, RelatedSpecMixin
+from core.admin import TimezoneAwareModelForm, TimezoneAwareAdminSplitDateTimeWidget, \
+    TimezoneAwareSplitDateTimeField, RelatedSpecMixin
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
@@ -44,11 +44,11 @@ class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
 
 
 class EnrollmentAdmin(admin.ModelAdmin):
-    form = CityAwareModelForm
+    form = TimezoneAwareModelForm
     formfield_overrides = {
         db_models.DateTimeField: {
-            'widget': CityAwareAdminSplitDateTimeWidget,
-            'form_class': CityAwareSplitDateTimeField
+            'widget': TimezoneAwareAdminSplitDateTimeWidget,
+            'form_class': TimezoneAwareSplitDateTimeField
         }
     }
     list_display = ['student', 'course', 'is_deleted', 'grade',
