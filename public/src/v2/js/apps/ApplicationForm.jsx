@@ -505,7 +505,7 @@ ApplicationFormPage.propTypes = {
     universities: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.number.isRequired,
         label: PropTypes.string.isRequired,
-        city_id: PropTypes.string.isRequired
+        branch_id: PropTypes.string.isRequired
     })).isRequired,
     courses: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
