@@ -165,13 +165,13 @@ def test_enrollment_reason_entry(client):
 
 @pytest.mark.django_db
 def test_enrollment_leave_reason(client):
-    student = StudentFactory(city_id='spb')
+    student = StudentFactory(city_id=Branches.SPB, branch__code=Branches.SPB)
     client.login(student)
     today = now_local(student.city_code)
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    co = CourseFactory.create(semester=current_semester, city_id='spb')
+    co = CourseFactory.create(semester=current_semester, city_id=Branches.SPB)
     form = {'course_pk': co.pk}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
@@ -179,9 +179,8 @@ def test_enrollment_leave_reason(client):
     form['reason'] = 'foo'
     client.post(co.get_unenroll_url(), form)
     assert Enrollment.active.count() == 0
-    today = now().strftime(DATE_FORMAT_RU)
     e = Enrollment.objects.first()
-    assert today in e.reason_leave
+    assert today.strftime(DATE_FORMAT_RU) in e.reason_leave
     assert 'foo' in e.reason_leave
     # Enroll for the second time and leave with another reason
     client.post(co.get_enroll_url(), form)

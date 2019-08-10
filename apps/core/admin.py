@@ -186,7 +186,7 @@ class TimezoneAwareModelForm(forms.ModelForm):
         """
         If city aware field was changed - fix timezone for all datetime fields.
         """
-        if self.instance.city_aware_field_name in self.changed_data:
+        if self.instance.get_tz_aware_field_name() in self.changed_data:
             tz = self.instance.get_timezone()
             for field_name, field_data in self.fields.items():
                 if isinstance(field_data, TimezoneAwareSplitDateTimeField):

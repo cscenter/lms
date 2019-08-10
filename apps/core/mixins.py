@@ -89,11 +89,11 @@ class TimezoneAwareMixin:
     current model knows how to get timezone without using mro call chain
     """
     def get_timezone(self):
-        next_in_tz_aware_mro = getattr(self, self._get_tz_aware_field_name())
+        next_in_tz_aware_mro = getattr(self, self.get_tz_aware_field_name())
         return next_in_tz_aware_mro.get_timezone()
 
     @classmethod
-    def _get_tz_aware_field_name(cls):
+    def get_tz_aware_field_name(cls):
         return getattr(cls, cls.TIMEZONE_AWARE_FIELD_NAME).field.name
 
     @classmethod
