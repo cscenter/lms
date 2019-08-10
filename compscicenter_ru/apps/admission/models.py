@@ -1212,7 +1212,7 @@ class InterviewInvitation(TimeStampedModel):
             }
             streams.append(s)
         context = {
-            "BRANCH": streams[0]["city"],
+            "CITY": streams[0]["city"],
             "SECRET_LINK": self.get_absolute_url(),
             "STREAMS": streams
         }
