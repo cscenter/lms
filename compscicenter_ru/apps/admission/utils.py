@@ -45,6 +45,7 @@ def generate_interview_reminder(interview, slot) -> None:
             sender='info@compscicenter.ru',
             template=campaign.template_interview_reminder,
             context={
+                # FIXME: replace with venue.city_id
                 "SUBJECT_CITY": campaign.branch.name,
                 "DATE": meeting_at.strftime(DATE_FORMAT_RU),
                 "TIME": meeting_at.strftime("%H:%M"),
