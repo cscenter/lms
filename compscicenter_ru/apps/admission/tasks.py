@@ -1,14 +1,13 @@
 import logging
 
 from django.apps import apps
-from django.db.models import Q
 from django.utils import translation, timezone
 from django_rq import job
-from post_office import mail
 
 from admission.models import Test, Contest
-from api.providers.yandex_contest import YandexContestAPIException, \
-    YandexContestAPI, RegisterStatus, ContestAPIError
+from admission.services import EmailQueueService
+from api.providers.yandex_contest import YandexContestAPI, RegisterStatus, \
+    ContestAPIError
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +25,7 @@ def register_in_yandex_contest(applicant_id, language_code):
     Applicant = apps.get_model('admission', 'Applicant')
     applicant = (Applicant.objects
                  .filter(pk=applicant_id)
-                 .select_related("campaign", "online_test", "campaign__branch")
+                 .select_related("campaign", "campaign__branch", "online_test")
                  .first())
     if not applicant.yandex_id:
         logger.error(f"Empty yandex login for applicant id = {applicant_id}")
@@ -39,29 +38,13 @@ def register_in_yandex_contest(applicant_id, language_code):
     api = YandexContestAPI(access_token=campaign.access_token,
                            refresh_token=campaign.refresh_token)
     try:
-        online_test.register_in_contest(api, applicant)
+        online_test.register_in_contest(api)
     except ContestAPIError as e:
         if e.code == RegisterStatus.BAD_TOKEN:
             notify_admin_bad_token(campaign.pk)
         logger.error(f"Yandex.Contest api request error [id = {applicant_id}]")
         raise
-    mail.send(
-        [applicant.email],
-        sender='CS центр <info@compscicenter.ru>',
-        template=campaign.template_registration,
-        context={
-            'FIRST_NAME': applicant.first_name,
-            'SURNAME': applicant.surname,
-            'PATRONYMIC': applicant.patronymic if applicant.patronymic else "",
-            'EMAIL': applicant.email,
-            'BRANCH': applicant.campaign.branch.name,
-            'PHONE': applicant.phone,
-            'CONTEST_ID': online_test.yandex_contest_id,
-            'YANDEX_LOGIN': applicant.yandex_id,
-        },
-        render_on_delivery=False,
-        backend='ses',
-    )
+    EmailQueueService.new_registration(applicant)
 
 
 # FIXME: надо отлавливать все timeout'ы при запросе, т.к. в этом случае поле processed_at не будет обновлено и будет попадать в очередь задач на исполнение

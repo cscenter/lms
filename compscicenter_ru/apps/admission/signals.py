@@ -4,7 +4,7 @@ from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
 
 from admission.models import Applicant, Interview, Comment, Campaign
-from admission.services import EmailService
+from admission.services import EmailQueueService
 
 APPLICANT_FINAL_STATES = (Applicant.ACCEPT,
                           Applicant.VOLUNTEER,
@@ -33,7 +33,7 @@ def post_save_interview(sender, instance, created, *args, **kwargs):
         interview.delete_reminder()
         interview.delete_feedback()
     elif interview.status == Interview.COMPLETED:
-        EmailService.generate_interview_feedback_email(interview)
+        EmailQueueService.generate_interview_feedback_email(interview)
 
 
 # TODO: add tests
@@ -82,7 +82,7 @@ def post_save_interview_comment(sender, instance, created, *args, **kwargs):
     interviewers = interview.interviewers.all()
     __sync_applicant_status(interview, check_comments=True)
     if interview.status == Interview.COMPLETED:
-        EmailService.generate_interview_feedback_email(interview)
+        EmailQueueService.generate_interview_feedback_email(interview)
     if comment.interviewer not in interviewers and comment.interviewer.is_curator:
         interview.interviewers.add(comment.interviewer)
 
