@@ -5,7 +5,6 @@ from users.utils import get_student_city_code
 from .models import Stock, Borrow
 
 
-# TODO: filter by city
 class BookListView(PermissionRequiredMixin, ListView):
     context_object_name = "stocks"
     http_method_names = ["head", "get", "options"]
@@ -14,12 +13,12 @@ class BookListView(PermissionRequiredMixin, ListView):
 
     def get_queryset(self):
         qs = (Stock.objects
-              .select_related("city", "book")
+              .select_related("branch", "book")
               .prefetch_related("borrows", "borrows__student"))
-        # For students show books from the city of learning
+        # Students can see books from there branch only
         if not self.request.user.is_curator:
-            city_code = get_student_city_code(self.request)
-            qs = qs.filter(city_id=city_code)
+            branch_code = get_student_city_code(self.request)
+            qs = qs.filter(branch=branch_code)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -40,8 +39,8 @@ class BookDetailView(PermissionRequiredMixin, DetailView):
         qs = (Stock.objects
               .select_related("book")
               .prefetch_related("borrows"))
-        # For students show books from the city of learning
+        # Students can see books from there branch only
         if not self.request.user.is_curator:
-            city_code = get_student_city_code(self.request)
-            qs = qs.filter(city_id=city_code)
+            branch_code = get_student_city_code(self.request)
+            qs = qs.filter(branch=branch_code)
         return qs

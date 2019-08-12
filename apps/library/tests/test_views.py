@@ -3,6 +3,7 @@ from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from core.urls import reverse
+from learning.settings import Branches
 from library.tests.factories import BorrowFactory, StockFactory
 from users.tests.factories import UserFactory, StudentFactory, CuratorFactory
 
@@ -50,12 +51,14 @@ def test_user_detail(client, curator):
 
 
 @pytest.mark.django_db
-def test_city_support(client):
-    student = StudentFactory(city_id='spb')
-    borrow_spb = BorrowFactory(student=student, stock__city_id='spb',
+def test_branch_support(client):
+    student = StudentFactory(branch__code=Branches.SPB)
+    borrow_spb = BorrowFactory(student=student,
+                               stock__branch__code=Branches.SPB,
                                stock__copies=12)
     assert borrow_spb.stock.available_copies == 11
-    borrow_nsk = BorrowFactory(student=student, stock__city_id='nsk',
+    borrow_nsk = BorrowFactory(student=student,
+                               stock__branch__code=Branches.NSK,
                                stock__copies=42)
     borrow_spb.stock.refresh_from_db()
     assert borrow_spb.stock.available_copies == 11
@@ -65,10 +68,10 @@ def test_city_support(client):
     url = reverse('library:book_list')
     response = client.get(url)
     assert len(response.context['stocks']) == 2
-    assert smart_bytes("Город") in response.content
-    assert smart_bytes("spb") in response.content
-    assert smart_bytes("nsk") in response.content
+    assert smart_bytes("Отделение") in response.content
+    assert smart_bytes(str(Branches.get_choice(Branches.SPB).abbr)) in response.content
+    assert smart_bytes(str(Branches.get_choice(Branches.NSK).abbr)) in response.content
     client.login(student)
     response = client.get(url)
     assert len(response.context['stocks']) == 1
-    assert smart_bytes("Город") not in response.content
+    assert smart_bytes("Отделение") not in response.content

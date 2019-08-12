@@ -18,7 +18,7 @@
             {% if stocks %}
 
                 <p>
-                    Чтобы взять книгу, нужно написать на {% if user.city_id == 'nsk' %}<a href="mailto:curators-nsk@compscicenter.ru">curators-nsk@compscicenter.ru</a>{% else %}<a href="mailto:curators@compscicenter.ru">curators@compscicenter.ru</a>{% endif %} письмо
+                    Чтобы взять книгу, нужно написать на {% if user.branch_id == 'nsk' %}<a href="mailto:curators-nsk@compscicenter.ru">curators-nsk@compscicenter.ru</a>{% else %}<a href="mailto:curators@compscicenter.ru">curators@compscicenter.ru</a>{% endif %} письмо
                     о своём желании с указанием автора книги и её названия.<br>
                     Обратите внимание: мы не можем выдать книги, которые сейчас читают другие студенты.
                 </p>
@@ -30,7 +30,7 @@
                         <th>{% trans "Book|author"|capfirst %}</th>
                         <th>{% trans "Book|read by"|capfirst %}</th>
                         <th>{% trans "Book|number of copies left"|capfirst %}</th>
-                        {% if user.is_curator %}<th>Город</th>{% endif %}
+                        {% if user.is_curator %}<th>Отделение</th>{% endif %}
                     </tr>
                     </thead>
                     <tbody>
@@ -50,7 +50,7 @@
                                 {% endif %}
                             </td>
                             <td>{{ stock.available_copies }}</td>
-                            {% if user.is_curator %}<td>{{ stock.city.abbr }}</td>{% endif %}
+                            {% if user.is_curator %}<td>{{ stock.branch.abbr }}</td>{% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>

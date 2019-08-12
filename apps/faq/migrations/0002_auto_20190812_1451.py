@@ -4,24 +4,27 @@ from django.db import migrations
 
 
 def copy_data(apps, schema_editor):
-    CoreFaq = apps.get_model('core', 'Faq')
-    CoreFaqCategory = apps.get_model('core', 'FaqCategory')
-    Question = apps.get_model('faq', 'Question')
-    Category = apps.get_model('faq', 'Category')
-    for fc in CoreFaqCategory.objects.all():
-        c, _ = Category.objects.get_or_create(
-            name=fc.name,
-            sort=fc.sort,
-            site=fc.site)
-    for cf in CoreFaq.objects.all():
-        c, _ = Question.objects.get_or_create(
-            question=cf.question,
-            answer=cf.answer,
-            sort=cf.sort,
-            site=cf.site)
-        for cat in cf.categories.all():
-            cc = Category.objects.get(name=cat.name)
-            c.categories.add(cc)
+    try:
+        CoreFaq = apps.get_model('core', 'Faq')
+        CoreFaqCategory = apps.get_model('core', 'FaqCategory')
+        Question = apps.get_model('faq', 'Question')
+        Category = apps.get_model('faq', 'Category')
+        for fc in CoreFaqCategory.objects.all():
+            c, _ = Category.objects.get_or_create(
+                name=fc.name,
+                sort=fc.sort,
+                site=fc.site)
+        for cf in CoreFaq.objects.all():
+            c, _ = Question.objects.get_or_create(
+                question=cf.question,
+                answer=cf.answer,
+                sort=cf.sort,
+                site=cf.site)
+            for cat in cf.categories.all():
+                cc = Category.objects.get(name=cat.name)
+                c.categories.add(cc)
+    except LookupError:
+        pass
 
 
 class Migration(migrations.Migration):
