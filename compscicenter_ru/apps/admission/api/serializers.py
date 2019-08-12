@@ -117,7 +117,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
                     del attrs[attr]
         if attrs.get('university_other'):
             university, created = University.objects.get_or_create(
-                abbr="other",
+                abbr="other", branch_id=None,
                 defaults={"name": "Другое"})
             attrs['university'] = university
         # TODO: if where_did_you_learn.other selected, where_did_you_learn_other should be provided?
