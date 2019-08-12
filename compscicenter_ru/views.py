@@ -25,7 +25,7 @@ from announcements.models import Announcement
 from compscicenter_ru.serializers import CoursesSerializer
 from compscicenter_ru.utils import group_terms_by_academic_year, Tab, TabList
 from core.exceptions import Redirect
-from core.models import Faq
+from faq.models import Question
 from core.urls import reverse
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
     group_course_teachers, CourseClass
@@ -120,7 +120,9 @@ class QAListView(generic.ListView):
     template_name = "compscicenter_ru/faq.html"
 
     def get_queryset(self):
-        return Faq.objects.filter(site=settings.CENTER_SITE_ID).order_by("sort")
+        return (Question.objects
+                .filter(site=settings.SITE_ID)
+                .order_by("sort"))
 
 
 class EnrollmentChecklistView(generic.TemplateView):
