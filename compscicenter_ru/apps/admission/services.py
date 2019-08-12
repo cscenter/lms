@@ -37,7 +37,7 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant):
     with transaction.atomic():
         invitation.save()
         invitation.streams.add(*streams)
-        EmailService.generate_interview_invitation(invitation)
+        EmailQueueService.generate_interview_invitation(invitation)
 
 
 def create_student_from_applicant(applicant):
@@ -91,7 +91,30 @@ def create_student_from_applicant(applicant):
     return user
 
 
-class EmailService:
+class EmailQueueService:
+    """
+    Adds email to the db queue instead of sending email directly.
+    """
+    @staticmethod
+    def new_registration(applicant: Applicant) -> Email:
+        return mail.send(
+            [applicant.email],
+            sender='CS центр <info@compscicenter.ru>',
+            template=applicant.campaign.template_registration,
+            context={
+                'FIRST_NAME': applicant.first_name,
+                'SURNAME': applicant.surname,
+                'PATRONYMIC': applicant.patronymic if applicant.patronymic else "",
+                'EMAIL': applicant.email,
+                'BRANCH': applicant.campaign.branch.name,
+                'PHONE': applicant.phone,
+                'CONTEST_ID': applicant.online_test.yandex_contest_id,
+                'YANDEX_LOGIN': applicant.yandex_id,
+            },
+            render_on_delivery=False,
+            backend='ses',
+        )
+
     @staticmethod
     def generate_interview_invitation(interview_invitation) -> Email:
         streams = []

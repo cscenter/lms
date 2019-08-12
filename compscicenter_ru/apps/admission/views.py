@@ -51,7 +51,7 @@ from admission.models import Interview, Comment, Contest, Test, Exam, \
     InterviewInvitation, InterviewStream, University
 from admission.serializers import InterviewSlotSerializer
 from admission.services import create_invitation, create_student_from_applicant, \
-    EmailService
+    EmailQueueService
 from admission.utils import calculate_time
 from api.permissions import CuratorAccessPermission
 from auth.backends import YandexRuOAuth2Backend
@@ -400,7 +400,7 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                 sid = transaction.savepoint()
                 interview = self.object = form.save()
                 slot_has_taken = InterviewSlot.objects.lock(slot, interview)
-                EmailService.generate_interview_reminder(interview, slot)
+                EmailQueueService.generate_interview_reminder(interview, slot)
                 if not slot_has_taken:
                     transaction.savepoint_rollback(sid)
                     messages.error(
@@ -918,7 +918,7 @@ class InterviewAppointmentView(generic.TemplateView):
                 sid = transaction.savepoint()
                 interview = form.save()
                 slot_has_taken = InterviewSlot.objects.lock(slot, interview)
-                EmailService.generate_interview_reminder(interview, slot)
+                EmailQueueService.generate_interview_reminder(interview, slot)
                 # Mark invitation as accepted
                 (InterviewInvitation.objects
                  .filter(pk=invitation.pk)
