@@ -137,26 +137,6 @@ def meta(text=None, **kwargs):
         return func
     return decorator
 
-
-class CityAdmin(TranslationAdmin, admin.ModelAdmin):
-    pass
-
-
-class FaqCategoryAdmin(admin.ModelAdmin):
-    list_filter = ['site']
-    list_display = ['name', 'sort']
-
-
-class FaqAdmin(admin.ModelAdmin):
-    list_filter = ['site']
-    list_display = ['question', 'sort']
-
-
-admin.site.register(City, CityAdmin)
-admin.site.register(Faq, FaqAdmin)
-admin.site.register(FaqCategory, FaqCategoryAdmin)
-
-
 # TIMEZONE SUPPORT
 
 
@@ -222,3 +202,24 @@ class TimezoneAwareSplitDateTimeField(forms.SplitDateTimeField):
             city_aware = naive_to_city_aware(result, self.widget.instance)
             return city_aware
         return None
+
+
+# Models
+
+class CityAdmin(TranslationAdmin, admin.ModelAdmin):
+    pass
+
+
+class FaqCategoryAdmin(admin.ModelAdmin):
+    list_filter = ['site']
+    list_display = ['name', 'sort']
+
+
+class FaqAdmin(admin.ModelAdmin):
+    list_filter = ['site']
+    list_display = ['question', 'sort']
+
+
+admin.site.register(City, CityAdmin)
+admin.site.register(Faq, FaqAdmin)
+admin.site.register(FaqCategory, FaqCategoryAdmin)
