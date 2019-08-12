@@ -5,7 +5,7 @@ from django_filters.widgets import RangeWidget
 from webpack_loader import utils
 
 from core.constants import DATE_FORMAT_RU
-from core.timezone import city_aware_to_naive
+from core.timezone import aware_to_naive
 
 
 class UbereditorWidget(forms.Textarea):
@@ -70,7 +70,7 @@ class TimeInputAsTextInput(forms.TimeInput):
 class CityAwareSplitDateTimeWidget(forms.MultiWidget):
     """Using bootstrap datetime picker for assignment form"""
     supports_microseconds = False
-    template_name = "widgets/city_aware_split_datetime.html"
+    template_name = "widgets/timezone_aware_split_datetime.html"
 
     def __init__(self, attrs=None, date_format=None, time_format=None):
         attrs = {"class": "form-control"}
@@ -82,6 +82,6 @@ class CityAwareSplitDateTimeWidget(forms.MultiWidget):
 
     def decompress(self, value):
         if value:
-            value = city_aware_to_naive(value, self.instance)
+            value = aware_to_naive(value, self.instance)
             return [value.date(), value.time().replace(microsecond=0)]
         return [None, None]

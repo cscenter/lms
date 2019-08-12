@@ -15,7 +15,7 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.timezone import city_aware_to_naive, naive_to_city_aware
+from core.timezone import aware_to_naive, naive_to_aware
 from .models import City, Faq, FaqCategory
 
 # Hide applications in the admin
@@ -145,26 +145,27 @@ class TimezoneAwareModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """
         Attach model instance to all `AdminSplitDateTime` widgets.
-        This allow to get city code inside widget and make datetime
+        This allows to get timezone inside widget and makes a datetime
         in a given time zone aware.
         """
         super().__init__(*args, **kwargs)
         for field_name, field_data in self.fields.items():
             if isinstance(field_data, forms.SplitDateTimeField):
                 if not isinstance(field_data, TimezoneAwareSplitDateTimeField):
-                    raise TypeError("`%s` field must be subclassed from "
-                                    "CustomSplitDateTimeField" % field_name)
+                    raise TypeError(f"`{field_name}` must be subclassed from "
+                                    f"{TimezoneAwareSplitDateTimeField}")
                 widget = field_data.widget
                 if isinstance(widget, widgets.AdminSplitDateTime) and \
                         not isinstance(widget, TimezoneAwareAdminSplitDateTimeWidget):
-                    raise TypeError("`%s` field widget must be subclassed from "
-                                    "BaseCityAwareSplitDateTimeWidget" % field_name)
+                    raise TypeError(f"`{field_name}` widget must be subclassed "
+                                    f"from {TimezoneAwareAdminSplitDateTimeWidget}")
                 else:
                     widget.instance = self.instance
 
     def save(self, commit=True):
         """
-        If city aware field was changed - fix timezone for all datetime fields.
+        Update value for all related datetime fields if timezone aware field
+        was changed.
         """
         if self.instance.get_tz_aware_field_name() in self.changed_data:
             tz = self.instance.get_timezone()
@@ -182,7 +183,7 @@ class TimezoneAwareModelForm(forms.ModelForm):
 class TimezoneAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
     def decompress(self, value):
         if value:
-            value = city_aware_to_naive(value, self.instance)
+            value = aware_to_naive(value, self.instance)
             return [value.date(), value.time().replace(microsecond=0)]
         return [None, None]
 
@@ -199,7 +200,7 @@ class TimezoneAwareSplitDateTimeField(forms.SplitDateTimeField):
                 raise ValidationError(self.error_messages['invalid_time'],
                                       code='invalid_time')
             result = datetime.datetime.combine(*data_list)
-            city_aware = naive_to_city_aware(result, self.widget.instance)
+            city_aware = naive_to_aware(result, self.widget.instance)
             return city_aware
         return None
 

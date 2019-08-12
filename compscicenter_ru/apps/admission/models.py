@@ -28,7 +28,7 @@ from admission.utils import slot_range
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
 from core.db.models import ScoreField
-from core.mixins import TimezoneAwareMixin
+from core.mixins import TimezoneAwareModel
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
 from courses.models import Venue
@@ -50,7 +50,7 @@ def validate_template_name(value):
         )
 
 
-class Campaign(TimezoneAwareMixin, models.Model):
+class Campaign(TimezoneAwareModel, models.Model):
     TIMEZONE_AWARE_FIELD_NAME = 'branch'
 
     year = models.PositiveSmallIntegerField(
@@ -198,7 +198,7 @@ ApplicantSubscribedManager = _ApplicantSubscribedManager.from_queryset(
     ApplicantQuerySet)
 
 
-class Applicant(TimezoneAwareMixin, TimeStampedModel):
+class Applicant(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'campaign'
 
     REJECTED_BY_TEST = 'rejected_test'
@@ -884,7 +884,7 @@ class InterviewAssignment(models.Model):
         return smart_text(self.name)
 
 
-class Interview(TimezoneAwareMixin, TimeStampedModel):
+class Interview(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'applicant'
 
     APPROVAL = 'approval'
@@ -1018,7 +1018,7 @@ class Comment(TimeStampedModel):
                                            self.interview.applicant.get_full_name()))
 
 
-class InterviewStream(TimezoneAwareMixin, TimeStampedModel):
+class InterviewStream(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'venue'
     # Extract this value from interview datetime before sending notification
     # to applicant
