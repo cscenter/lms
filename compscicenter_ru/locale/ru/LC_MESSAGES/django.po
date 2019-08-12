@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-02 13:51+0000\n"
-"PO-Revision-Date: 2019-08-02 13:59+0000\n"
+"POT-Creation-Date: 2019-08-12 11:27+0000\n"
+"PO-Revision-Date: 2019-08-12 11:28+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -28,9 +28,9 @@ msgid "Announcement Details"
 msgstr "Детали анонса"
 
 #: compscicenter_ru/apps/announcements/apps.py:7
-#: compscicenter_ru/apps/announcements/models.py:91
-msgid "Announcements"
-msgstr "Анонсы"
+#| msgid "Announcement Details"
+msgid "Announcements of events"
+msgstr "Анонсы мероприятий"
 
 #: compscicenter_ru/apps/announcements/models.py:18
 msgid "Modifier"
@@ -106,6 +106,10 @@ msgstr "Действия"
 #: compscicenter_ru/apps/announcements/models.py:90
 msgid "Announcement"
 msgstr "Анонс"
+
+#: compscicenter_ru/apps/announcements/models.py:91
+msgid "Announcements"
+msgstr "Анонсы"
 
 #: compscicenter_ru/apps/announcements/models.py:108
 msgid "Venue"
@@ -290,14 +294,11 @@ msgid "Novosibirsk"
 msgstr "Новосибирск"
 
 #: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:51
-#| msgctxt "menu"
-#| msgid "Teachers"
 msgid "Teachers"
 msgstr "Преподаватели"
 
 #: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:67
-#: compscicenter_ru/views.py:633
-#| msgid "Lecturers"
+#: compscicenter_ru/views.py:645
 msgid "Lectures List"
 msgstr "Список лекций"
 
@@ -626,26 +627,25 @@ msgstr "Аккаунты"
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: compscicenter_ru/views.py:389
+#: compscicenter_ru/views.py:394
 msgctxt "adjective"
 msgid "autumn"
 msgstr "осенний"
 
-#: compscicenter_ru/views.py:390
+#: compscicenter_ru/views.py:395
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
 
-#: compscicenter_ru/views.py:453
+#: compscicenter_ru/views.py:458
 msgid "Course"
 msgstr "Курс"
 
-#: compscicenter_ru/views.py:454
+#: compscicenter_ru/views.py:459
 msgid "Lecture"
 msgstr "Лекция"
 
-#: compscicenter_ru/views.py:632
-#| msgid "About Lecturer"
+#: compscicenter_ru/views.py:641
 msgid "About the Course"
 msgstr "О курсе"
 
