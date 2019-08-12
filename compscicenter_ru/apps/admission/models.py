@@ -1199,28 +1199,3 @@ class InterviewInvitation(TimeStampedModel):
             "year": self.applicant.campaign.year,
             "secret_code": str(self.secret_code).replace("-", "")
         })
-
-    def send_email(self):
-        streams = []
-        for stream in self.streams.select_related("venue").all():
-            s = {
-                "city": stream.venue.city.name,
-                "date": date_format(stream.date, "j E"),
-                "office": stream.venue.name,
-                "with_assignments": stream.with_assignments,
-                "directions": stream.venue.directions,
-            }
-            streams.append(s)
-        context = {
-            "CITY": streams[0]["city"],
-            "SECRET_LINK": self.get_absolute_url(),
-            "STREAMS": streams
-        }
-        return mail.send(
-            [self.applicant.email],
-            sender='CS центр <info@compscicenter.ru>',
-            template=self.applicant.campaign.template_appointment,
-            context=context,
-            render_on_delivery=False,
-            backend='ses',
-        )
