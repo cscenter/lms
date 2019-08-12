@@ -7,29 +7,28 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
+from core.mixins import TimezoneAwareModel
 
-def city_aware_to_naive(value, instance):
+
+def aware_to_naive(value, instance: TimezoneAwareModel):
     """
-    Convert aware datetime to naive for display.
+    Make an aware datetime.datetime naive in a time zone of the given instance
     """
     if settings.USE_TZ and value is not None and timezone.is_aware(value):
-        if not hasattr(instance, "get_timezone"):
-            raise NotImplementedError("Implement `get_timezone` method "
-                                      "for %s model" % str(instance.__class__))
         instance_timezone = instance.get_timezone()
         return timezone.make_naive(value, instance_timezone)
     return value
 
 
-def naive_to_city_aware(value, instance):
+def naive_to_aware(value, instance: TimezoneAwareModel):
     """
-    When time zone support is enabled, convert naive datetime to aware.
+    Make a naive datetime.datetime in a given instance time zone aware.
     """
     if settings.USE_TZ and value is not None and timezone.is_naive(value):
         try:
             instance_tz = instance.get_timezone()
         except ObjectDoesNotExist:
-            # Until city aware field is empty, we can't determine timezone
+            # Can't retrieve timezone until timezone aware field is empty
             instance_tz = pytz.UTC
         try:
             return timezone.make_aware(value, instance_tz)

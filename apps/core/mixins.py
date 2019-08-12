@@ -82,7 +82,7 @@ class DerivableFieldsMixin:
             compute_model_field.delay(content_type.id, self.pk, field)
 
 
-class TimezoneAwareMixin:
+class TimezoneAwareModel:
     SELF_AWARE = object()
     """
     `TIMEZONE_AWARE_FIELD_NAME = SELF_AWARE` is a special case when
@@ -116,7 +116,7 @@ class TimezoneAwareMixin:
                 ))
         else:
             tz_aware_field_name = cls.TIMEZONE_AWARE_FIELD_NAME
-            if tz_aware_field_name is not TimezoneAwareMixin.SELF_AWARE:
+            if tz_aware_field_name is not TimezoneAwareModel.SELF_AWARE:
                 tz_aware_field = None
                 try:
                     tz_aware_field = cls._meta.get_field(tz_aware_field_name)
@@ -129,7 +129,7 @@ class TimezoneAwareMixin:
                             id='timezone.E002',
                         ))
                 if tz_aware_field is not None:
-                    if not issubclass(tz_aware_field.related_model, TimezoneAwareMixin):
+                    if not issubclass(tz_aware_field.related_model, TimezoneAwareModel):
                         errors.append(
                             checks.Error(
                                 f"`{cls}`.{tz_aware_field} is not a subclass of TimezoneAwareMixin",
@@ -158,7 +158,7 @@ class TimezoneAwareMixin:
         errors = []
         next_cls = cls
         next_field_name = next_cls.TIMEZONE_AWARE_FIELD_NAME
-        while next_field_name is not TimezoneAwareMixin.SELF_AWARE:
+        while next_field_name is not TimezoneAwareModel.SELF_AWARE:
             try:
                 next_field = next_cls._meta.get_field(next_field_name)
                 next_cls = next_field.related_model
@@ -181,7 +181,7 @@ class TimezoneAwareMixin:
                         id='timezone.E006',
                     ))
                 break
-            if next_cls is TimezoneAwareMixin:
+            if next_cls is TimezoneAwareModel:
                 errors.append(
                     checks.Error(
                         f"`{cls.__name__}` is not terminated properly",

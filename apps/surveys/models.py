@@ -13,7 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from post_office import mail
 from post_office.models import EmailTemplate
 
-from core.mixins import TimezoneAwareMixin
+from core.mixins import TimezoneAwareModel
 from core.timezone import now_local
 from core.urls import reverse, city_aware_reverse
 from courses.models import Course
@@ -240,7 +240,7 @@ class Form(AbstractForm):
             )
 
 
-class CourseSurvey(TimezoneAwareMixin, models.Model):
+class CourseSurvey(TimezoneAwareModel, models.Model):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
 
     MIDDLE = 'middle'

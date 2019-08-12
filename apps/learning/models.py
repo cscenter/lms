@@ -21,7 +21,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
-from core.mixins import TimezoneAwareMixin
+from core.mixins import TimezoneAwareModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids
@@ -40,8 +40,8 @@ from users.thumbnails import UserThumbnailMixin
 logger = logging.getLogger(__name__)
 
 
-class Branch(TimezoneAwareMixin, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+class Branch(TimezoneAwareModel, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
 
     code = models.CharField(
         _("Code"),
@@ -74,7 +74,7 @@ class Branch(TimezoneAwareMixin, models.Model):
         return Branches.get_choice(self.code).abbr
 
 
-class Enrollment(TimezoneAwareMixin, TimeStampedModel):
+class Enrollment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
 
     GRADES = GradeTypes
@@ -234,7 +234,7 @@ class Invitation(TimeStampedModel):
         return False
 
 
-class StudentAssignment(TimezoneAwareMixin, TimeStampedModel):
+class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
 
     class CommentAuthorTypes(DjangoChoices):
@@ -393,7 +393,7 @@ def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):
     return f"{sa.assignment.files_root}/user_{sa.student_id}/{filename}"
 
 
-class AssignmentComment(TimezoneAwareMixin, TimeStampedModel):
+class AssignmentComment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'student_assignment'
 
     student_assignment = models.ForeignKey(
@@ -458,7 +458,7 @@ class AssignmentComment(TimezoneAwareMixin, TimeStampedModel):
         return (now() - self.created).total_seconds() > 600
 
 
-class AssignmentNotification(TimezoneAwareMixin, TimeStampedModel):
+class AssignmentNotification(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'student_assignment'
 
     user = models.ForeignKey(

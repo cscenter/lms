@@ -21,7 +21,7 @@ from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from core.mixins import DerivableFieldsMixin, TimezoneAwareMixin
+from core.mixins import DerivableFieldsMixin, TimezoneAwareModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local, TzAware
 from core.urls import reverse, city_aware_reverse
@@ -140,8 +140,8 @@ class Semester(models.Model):
             return self.year - 1
 
 
-class Venue(TimezoneAwareMixin, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+class Venue(TimezoneAwareModel, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
 
     INTERVIEW = 'interview'
     LECTURE = 'lecture'
@@ -249,8 +249,8 @@ class MetaCourse(TimeStampedModel):
             return staticfiles_storage.url('v2/img/placeholder/meta_course.png')
 
 
-class Course(TimezoneAwareMixin, TimeStampedModel, DerivableFieldsMixin):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
 
     meta_course = models.ForeignKey(
         MetaCourse,
@@ -657,7 +657,7 @@ class CourseTeacher(models.Model):
         return ts
 
 
-class CourseNews(TimezoneAwareMixin, TimeStampedModel):
+class CourseNews(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
 
     course = models.ForeignKey(
@@ -739,7 +739,7 @@ def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
                         "slides", filename)
 
 
-class CourseClass(TimezoneAwareMixin, TimeStampedModel):
+class CourseClass(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'  # or venue?
 
     course = models.ForeignKey(
@@ -880,7 +880,7 @@ def course_class_attachment_upload_to(instance: "CourseClassAttachment",
                         "materials", filename)
 
 
-class CourseClassAttachment(TimezoneAwareMixin, TimeStampedModel):
+class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course_class'
 
     course_class = models.ForeignKey(
@@ -925,7 +925,7 @@ class CourseClassAttachment(TimezoneAwareMixin, TimeStampedModel):
         return os.path.basename(self.material.name)
 
 
-class Assignment(TimezoneAwareMixin, TimeStampedModel):
+class Assignment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
 
     course = models.ForeignKey(

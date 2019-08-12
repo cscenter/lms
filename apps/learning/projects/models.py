@@ -19,7 +19,7 @@ from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 
 from core.db.models import ScoreField
-from core.mixins import DerivableFieldsMixin, TimezoneAwareMixin
+from core.mixins import DerivableFieldsMixin, TimezoneAwareModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
 from core.timezone import now_local
 from core.urls import reverse
@@ -312,7 +312,7 @@ class ReportingPeriod(models.Model):
                 data=context,)
 
 
-class ProjectStudent(TimezoneAwareMixin, models.Model):
+class ProjectStudent(TimezoneAwareModel, models.Model):
     """Intermediate model for project students"""
     TIMEZONE_AWARE_FIELD_NAME = 'project'
     # TODO: переименовать `GRADES`, создать ProjectGradeTypes (в settings.py)
@@ -433,8 +433,8 @@ class Supervisor(models.Model):
         return self.full_name
 
 
-class Project(TimezoneAwareMixin, TimeStampedModel):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareMixin.SELF_AWARE
+class Project(TimezoneAwareModel, TimeStampedModel):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
 
     class Statuses(DjangoChoices):
         CANCELED = C('canceled', _("Canceled"))
@@ -574,7 +574,7 @@ def report_file_name(self, filename):
                         filename)
 
 
-class Report(TimezoneAwareMixin, DerivableFieldsMixin, TimeStampedModel):
+class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'project_student'
 
     SENT = 'sent'
@@ -937,7 +937,7 @@ def report_comment_attachment_upload_to(self, filename):
     )
 
 
-class ReportComment(TimezoneAwareMixin, TimeStampedModel):
+class ReportComment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'report'
 
     report = models.ForeignKey(Report, on_delete=models.PROTECT)
