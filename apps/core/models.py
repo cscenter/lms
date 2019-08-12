@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.db import models
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
@@ -37,37 +36,3 @@ class City(models.Model):
             return settings.TIME_ZONES["spb"]
         return settings.TIME_ZONES[self.code]
 
-
-class FaqCategory(models.Model):
-    name = models.CharField(_("Category name"), max_length=255)
-    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID, on_delete=models.PROTECT)
-
-    class Meta:
-        ordering = ["sort"]
-        verbose_name = _("FAQ category")
-        verbose_name_plural = _("FAQ categories")
-
-    def __str__(self):
-        return smart_text(self.name)
-
-
-class Faq(models.Model):
-    question = models.CharField(_("Question"), max_length=255)
-    answer = models.TextField(_("Answer"))
-    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    site = models.ForeignKey(Site, verbose_name=_("Site"), default=settings.CENTER_SITE_ID, on_delete=models.PROTECT)
-    categories = models.ManyToManyField(
-        FaqCategory,
-        verbose_name=_("Categories"),
-        related_name='categories',
-        blank=True)
-
-    class Meta:
-        db_table = 'faq'
-        ordering = ["sort"]
-        verbose_name = _("FAQ")
-        verbose_name_plural = _("Questions&Answers")
-
-    def __str__(self):
-        return smart_text(self.question)
