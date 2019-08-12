@@ -47,5 +47,7 @@ class StockAdmin(RelatedSpecMixin, admin.ModelAdmin):
 class BorrowAdmin(admin.ModelAdmin):
     list_display = ('stock', 'student', 'borrowed_on')
     list_filter = ('stock__branch',)
+    search_fields = ('student__last_name', 'student__first_name',
+                     'stock__book__title')
     raw_id_fields = ('stock', 'student')
 
