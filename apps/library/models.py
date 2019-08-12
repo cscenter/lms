@@ -6,8 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 from sorl.thumbnail import ImageField
 from taggit.managers import TaggableManager
 
-from core.models import City
 from core.urls import reverse
+from learning.models import Branch
 
 
 class Book(models.Model):
@@ -33,19 +33,23 @@ class Stock(models.Model):
     book = models.ForeignKey(Book, verbose_name=_("Book"),
                              related_name="stocks",
                              on_delete=models.CASCADE)
-    city = models.ForeignKey(City, verbose_name=_("City"),
-                             on_delete=models.CASCADE)
+    branch = models.ForeignKey(
+        Branch,
+        verbose_name=_("Branch"),
+        to_field="code",
+        related_name="+",  # Disable backwards relation
+        on_delete=models.CASCADE)
     copies = models.PositiveSmallIntegerField(
         _("Book|number of copies"), default=1)
 
     class Meta:
-        unique_together = [['book', 'city']]
+        unique_together = [['book', 'branch']]
         ordering = ["book__title"]
         verbose_name = _("Stock")
         verbose_name_plural = _("Stocks")
 
     def __str__(self):
-        return "{0.book} \"{0.city}\"".format(self)
+        return "{0.book} [{0.branch}]".format(self)
 
     def get_absolute_url(self):
         return reverse("library:book_detail",
@@ -70,8 +74,8 @@ class Borrow(models.Model):
     borrowed_on = models.DateField(_("Borrow|borrowed on"))
 
     class Meta:
-        verbose_name = _("borrow")
-        verbose_name_plural = _("borrows")
+        verbose_name = _("Borrowed Book")
+        verbose_name_plural = _("Borrowed Books")
         ordering = ["borrowed_on"]
 
     def __str__(self):

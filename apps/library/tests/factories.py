@@ -3,7 +3,7 @@ import datetime
 import factory
 from factory.fuzzy import FuzzyInteger, FuzzyDate
 
-from core.factories import CityFactory
+from learning.tests.factories import BranchFactory
 from library.models import Book, Stock, Borrow
 from users.tests.factories import UserFactory
 
@@ -21,7 +21,7 @@ class StockFactory(factory.DjangoModelFactory):
         model = Stock
 
     book = factory.SubFactory(BookFactory)
-    city = factory.SubFactory(CityFactory)
+    branch = factory.SubFactory(BranchFactory)
     copies = FuzzyInteger(0, 42)
 
 

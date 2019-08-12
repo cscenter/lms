@@ -10,27 +10,31 @@ from .models import Book, Borrow, Stock
 class BorrowInline(admin.TabularInline):
     # TODO: limit choices
     model = Borrow
-    extra = 1
+    extra = 0
+    raw_id_fields = ("student",)
 
 
+@admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
     list_display = ["author", "title"]
     list_display_links = ["author", "title"]
     list_filter = ["tags"]
     list_select_related = True
+    search_fields = ("title", "author")
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
 
 
+@admin.register(Stock)
 class StockAdmin(RelatedSpecMixin, admin.ModelAdmin):
-    list_display = ["book", "city", "copies", "copies_left"]
+    list_display = ["book", "branch", "copies", "copies_left"]
     list_display_links = ["book"]
-    list_filter = ["city"]
-    list_select_related = ["book", "city"]
+    autocomplete_fields = ["book"]
+    list_filter = ["branch"]
     inlines = [BorrowInline]
     related_spec = {
-        'select': ['book', 'city'],
+        'select': ['book', 'branch'],
         'prefetch': ['borrows']
     }
 
@@ -39,5 +43,9 @@ class StockAdmin(RelatedSpecMixin, admin.ModelAdmin):
         return instance.available_copies
 
 
-admin.site.register(Book, BookAdmin)
-admin.site.register(Stock, StockAdmin)
+@admin.register(Borrow)
+class BorrowAdmin(admin.ModelAdmin):
+    list_display = ('stock', 'student', 'borrowed_on')
+    list_filter = ('stock__branch',)
+    raw_id_fields = ('stock', 'student')
+

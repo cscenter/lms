@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-08-12 15:01+0000\n"
-"PO-Revision-Date: 2019-08-12 15:01+0000\n"
+"POT-Creation-Date: 2019-08-12 15:30+0000\n"
+"PO-Revision-Date: 2019-08-12 15:30+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -114,7 +114,7 @@ msgstr "Отмена"
 msgid "Save"
 msgstr "Сохранить"
 
-#: apps/core/models.py:10
+#: apps/core/models.py:9
 msgid ""
 "How to style text read <a href=\"/commenting-the-right-way/\" "
 "target=\"_blank\">here</a>. Partially HTML is enabled too."
@@ -123,7 +123,7 @@ msgstr ""
 "оформлению можно найти <a href=\"/commenting-the-right-way/\" "
 "target=\"_blank\">по ссылке</a>."
 
-#: apps/core/models.py:13
+#: apps/core/models.py:12
 msgid ""
 "How to style text read <a href=\"/commenting-the-right-way/\" "
 "target=\"_blank\">here</a>."
@@ -131,76 +131,27 @@ msgstr ""
 "Как правильно оформлять текст, читайте <a href=\"/commenting-the-right-"
 "way/\" target=\"_blank\">по ссылке</a>."
 
-#: apps/core/models.py:20 apps/learning/models.py:47
+#: apps/core/models.py:19 apps/learning/models.py:47
 msgid "Code"
 msgstr "Код"
 
-#: apps/core/models.py:23
+#: apps/core/models.py:22
 msgid "City name"
 msgstr "Название города"
 
-#: apps/core/models.py:24
+#: apps/core/models.py:23
 msgid "Abbreviation"
 msgstr "Аббревиатура"
 
-#: apps/core/models.py:29 apps/courses/models.py:151
+#: apps/core/models.py:28 apps/courses/models.py:151
 #: apps/courses/models.py:307 apps/library/models.py:36
 #: apps/study_programs/models.py:57 apps/templates/courses/meta_detail.html:30
 msgid "City"
 msgstr "Город"
 
-#: apps/core/models.py:30
+#: apps/core/models.py:29
 msgid "Cities"
 msgstr "Города"
-
-#: apps/core/models.py:42 apps/learning/internships/models.py:10
-msgid "Category name"
-msgstr "Название категории"
-
-#: apps/core/models.py:43 apps/core/models.py:58 apps/faq/models.py:10
-#: apps/faq/models.py:26 apps/learning/internships/models.py:11
-#: apps/learning/internships/models.py:29 apps/learning/models.py:587
-#: apps/staff/models.py:12
-msgid "Sort order"
-msgstr "Сортировка"
-
-#: apps/core/models.py:44 apps/core/models.py:59 apps/faq/models.py:11
-#: apps/faq/models.py:27 apps/learning/internships/models.py:12
-#: apps/learning/models.py:588 apps/users/models.py:133
-msgid "Site"
-msgstr "Сайт"
-
-#: apps/core/models.py:48
-msgid "FAQ category"
-msgstr "Раздел для FAQ"
-
-#: apps/core/models.py:49
-msgid "FAQ categories"
-msgstr "Разделы для FAQ"
-
-#: apps/core/models.py:56 apps/faq/models.py:24 apps/faq/models.py:37
-#: apps/learning/internships/models.py:27 apps/learning/models.py:585
-#: apps/staff/models.py:10
-msgid "Question"
-msgstr "Вопрос"
-
-#: apps/core/models.py:57 apps/faq/models.py:25
-#: apps/learning/internships/models.py:28 apps/learning/models.py:586
-#: apps/staff/models.py:11
-msgid "Answer"
-msgstr "Ответ"
-
-#: apps/core/models.py:62 apps/faq/models.py:17 apps/faq/models.py:31
-msgid "Categories"
-msgstr "Категории"
-
-#: apps/core/models.py:69 apps/faq/apps.py:7
-msgid "FAQ"
-msgstr "FAQ"
-
-#: apps/core/models.py:70
-msgid "Questions&Answers"
-msgstr "FAQ"
 
 #: apps/core/settings/base.py:31 apps/learning/settings.py:18
 msgid "Saint Petersburg"
@@ -857,18 +808,48 @@ msgstr "Новость успешно добавлена"
 msgid "News wasn't created. Try again."
 msgstr "Новость не была создана! Неизвестная ошибка."
 
+#: apps/faq/apps.py:7
+msgid "FAQ"
+msgstr "FAQ"
+
 #: apps/faq/models.py:9 apps/learning/gallery/models.py:63
 #: apps/learning/models.py:197
 msgid "Name"
 msgstr "Имя"
 
+#: apps/faq/models.py:10 apps/faq/models.py:26
+#: apps/learning/internships/models.py:11
+#: apps/learning/internships/models.py:29 apps/learning/models.py:587
+#: apps/staff/models.py:12
+msgid "Sort order"
+msgstr "Сортировка"
+
+#: apps/faq/models.py:11 apps/faq/models.py:27
+#: apps/learning/internships/models.py:12 apps/learning/models.py:588
+#: apps/users/models.py:133
+msgid "Site"
+msgstr "Сайт"
+
 #: apps/faq/models.py:16
-#| msgid "Categories"
 msgid "Category"
 msgstr "Категория"
 
+#: apps/faq/models.py:17 apps/faq/models.py:31
+msgid "Categories"
+msgstr "Категории"
+
+#: apps/faq/models.py:24 apps/faq/models.py:37
+#: apps/learning/internships/models.py:27 apps/learning/models.py:585
+#: apps/staff/models.py:10
+msgid "Question"
+msgstr "Вопрос"
+
+#: apps/faq/models.py:25 apps/learning/internships/models.py:28
+#: apps/learning/models.py:586 apps/staff/models.py:11
+msgid "Answer"
+msgstr "Ответ"
+
 #: apps/faq/models.py:38
-#| msgid "Question"
 msgid "Questions"
 msgstr "Вопросы"
 
@@ -1032,6 +1013,10 @@ msgstr "Успешно импортировано оценок: {}"
 #: apps/learning/internships/apps.py:7 apps/learning/internships/models.py:40
 msgid "Internships"
 msgstr "Стажировки"
+
+#: apps/learning/internships/models.py:10
+msgid "Category name"
+msgstr "Название категории"
 
 #: apps/learning/internships/models.py:19
 msgid "Internship Category"
@@ -1523,7 +1508,7 @@ msgstr "Вы успешно записались на курс"
 msgid "You are already enrolled in the course"
 msgstr "Вы уже записаны на этот курс"
 
-#: apps/library/admin.py:37
+#: apps/library/admin.py:39
 msgid "Copies available"
 msgstr "Доступно"
 
@@ -1580,12 +1565,14 @@ msgid "Borrow|borrowed on"
 msgstr "Взято"
 
 #: apps/library/models.py:73
-msgid "borrow"
-msgstr "Взятие"
+#| msgid "Borrow|borrowed on"
+msgid "Borrowed Book"
+msgstr "Взятая книга"
 
 #: apps/library/models.py:74
-msgid "borrows"
-msgstr "Взятия"
+#| msgid "Borrow|borrowed on"
+msgid "Borrowed Books"
+msgstr "Взятые книги"
 
 #: apps/library/templates/library/stock_detail.html:31
 #: apps/library/templates/library/stock_list.html:31
@@ -2778,6 +2765,24 @@ msgstr ""
 msgctxt "menu"
 msgid "Пересечения"
 msgstr ""
+
+#~ msgid "Book Borrow"
+#~ msgstr "Взятая книга"
+
+#~ msgid "Book Borrows"
+#~ msgstr "Взятые книги"
+
+#~ msgid "FAQ category"
+#~ msgstr "Раздел для FAQ"
+
+#~ msgid "FAQ categories"
+#~ msgstr "Разделы для FAQ"
+
+#~ msgid "Questions&Answers"
+#~ msgstr "FAQ"
+
+#~ msgid "borrow"
+#~ msgstr "Взятие"
 
 #~ msgid "Perhaps also the faculty."
 #~ msgstr "Университет и иногда факультет"
