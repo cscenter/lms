@@ -5,7 +5,7 @@ from datetime import timedelta
 from django.core.management import BaseCommand
 
 from core.timezone import now_local
-from learning.models import Branch
+from core.models import Branch
 from learning.projects.constants import REPORTING_NOTIFY_BEFORE_START, \
     REPORTING_NOTIFY_BEFORE_DEADLINE
 from learning.projects.models import ReportingPeriod

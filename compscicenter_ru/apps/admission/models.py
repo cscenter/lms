@@ -32,7 +32,7 @@ from core.mixins import TimezoneAwareModel
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
 from courses.models import Venue
-from learning.models import Branch
+from core.models import Branch
 from learning.settings import AcademicDegreeYears, Branches
 from users.constants import Roles
 

@@ -15,7 +15,7 @@ from admission.tests.factories import ApplicantFactory, InterviewFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
 from core.timezone import now_local
 from core.urls import reverse
-from learning.models import Branch
+from core.models import Branch
 from learning.settings import Branches, DEFAULT_BRANCH_CODE
 from users.tests.factories import UserFactory, CuratorFactory
 

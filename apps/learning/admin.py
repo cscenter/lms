@@ -13,7 +13,8 @@ from courses.models import Course
 from learning.models import GraduateProfile, Invitation, CourseInvitation
 from users.constants import Roles
 from users.models import User
-from .models import AssignmentComment, Enrollment, Event, Useful, Branch
+from .models import AssignmentComment, Enrollment, Event, Useful
+from core.models import Branch
 
 
 class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):

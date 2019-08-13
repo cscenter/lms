@@ -22,56 +22,21 @@ from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
 from core.mixins import TimezoneAwareModel
-from core.models import LATEX_MARKDOWN_HTML_ENABLED
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Venue, \
-    Assignment, Semester
-from courses.utils import date_to_term_pair, get_term_index
+    Assignment
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
     GraduateProfileActiveManager
-from learning.settings import GradingSystems, GradeTypes, Branches
+from learning.settings import GradingSystems, GradeTypes
 from learning.utils import populate_assignments_for_student
 from users.constants import ThumbnailSizes
 from users.thumbnails import UserThumbnailMixin
 
 logger = logging.getLogger(__name__)
-
-
-class Branch(TimezoneAwareModel, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
-
-    code = models.CharField(
-        _("Code"),
-        choices=Branches.choices,
-        max_length=8,
-        unique=True)
-    name = models.CharField(_("Branch|Name"), max_length=255)
-    is_remote = models.BooleanField(_("Distance Branch"), default=False)
-    description = models.TextField(
-        _("Description"),
-        help_text=_("Branch|Description"),
-        blank=True)
-
-    class Meta:
-        verbose_name = _("Branch")
-        verbose_name_plural = _("Branches")
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def order(self):
-        return Branches.get_choice(self.code).order
-
-    def get_timezone(self):
-        return Branches.get_choice(self.code).timezone
-
-    @property
-    def abbr(self):
-        return Branches.get_choice(self.code).abbr
 
 
 class Enrollment(TimezoneAwareModel, TimeStampedModel):

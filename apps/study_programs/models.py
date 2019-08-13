@@ -8,9 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from core.models import City
+from core.models import City, Branch
 from courses.models import MetaCourse
-from learning.models import Branch
 
 
 class AcademicDiscipline(models.Model):

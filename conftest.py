@@ -8,10 +8,9 @@ from pytest_django.lazy_django import skip_if_no_django
 
 from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
     INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
-from core.models import City
+from core.models import City, Branch
 from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase, \
     ANOTHER_DOMAIN, TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID
-from learning.models import Branch
 from learning.settings import Branches
 from notifications.models import Type
 from users.tests.factories import CuratorFactory

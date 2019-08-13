@@ -8,8 +8,9 @@ from django.utils import timezone
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
-    CourseNewsNotification, Event, Branch, GraduateProfile, Invitation, \
+    CourseNewsNotification, Event, GraduateProfile, Invitation, \
     CourseInvitation
+from core.models import Branch
 from learning.settings import Branches
 from users.constants import Roles
 from users.tests.factories import UserFactory, StudentFactory
@@ -18,7 +19,7 @@ __all__ = ('StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentFactory', 'InvitationFactory',
            'CourseInvitationFactory', 'AssignmentNotificationFactory',
            'BranchFactory', 'CourseNewsNotificationFactory', 'EventFactory',
-           'StudentAssignment', 'Enrollment', 'AssignmentComment', 'Branch',
+           'StudentAssignment', 'Enrollment', 'AssignmentComment',
            'GraduateProfileFactory')
 
 

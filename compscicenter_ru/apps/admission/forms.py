@@ -19,7 +19,7 @@ from core.timezone import now_local
 from core.urls import reverse
 from core.views import ReadOnlyFieldsMixin
 from core.widgets import UbereditorWidget
-from learning.models import Branch
+from core.models import Branch
 
 
 class InterviewForm(forms.ModelForm):
