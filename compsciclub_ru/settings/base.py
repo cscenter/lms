@@ -100,3 +100,15 @@ INCLUDE_AUTH_URLS = False
 REGISTRATION_FORM = 'compsciclub_ru.forms.RegistrationUniqueEmailAndUsernameForm'
 
 ADMIN_REORDER = []
+
+
+# FIXME: disable for all shared applications
+MIGRATION_MODULES = {
+    "core": None,
+    "learning": None,
+    "users": None,
+    "courses": None,
+    "study_programs": None,
+    "gallery": None,
+    "library": None,
+}
