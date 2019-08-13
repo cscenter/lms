@@ -281,18 +281,6 @@ class CourseSurvey(TimezoneAwareModel, models.Model):
         city = self.course.city
         return f"{self.course}, {city} [{self.type}]"
 
-    def get_city(self):
-        return self.course.city
-    get_city.short_description = _("City")
-
-    def get_city_code(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.course.field.name
-
     def expire_at_local(self, tz=None, format=None):
         if not tz:
             tz = self.get_timezone()
@@ -323,7 +311,7 @@ class CourseSurvey(TimezoneAwareModel, models.Model):
             "course_slug": course.meta_course.slug,
             "semester_type": course.semester.type,
             "semester_year": course.semester.year,
-            "city_code": course.get_city(),
+            "city_code": course.city_id,
             "slug": self.form.slug
         }
         return city_aware_reverse('surveys:form_detail', kwargs=kwargs)

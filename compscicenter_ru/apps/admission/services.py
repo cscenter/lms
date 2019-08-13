@@ -15,6 +15,7 @@ from admission.models import InterviewStream, InterviewInvitation, \
     Applicant
 from admission.utils import logger
 from core.constants import DATE_FORMAT_RU
+from core.tests.utils import ANOTHER_DOMAIN_ID
 from learning.roles import Roles
 from users.models import User
 
@@ -66,7 +67,7 @@ def create_student_from_applicant(applicant):
         user.add_group(Roles.VOLUNTEER)
     else:
         user.add_group(Roles.STUDENT)
-    user.add_group(Roles.STUDENT, site_id=settings.CLUB_SITE_ID)
+    user.add_group(Roles.STUDENT, site_id=ANOTHER_DOMAIN_ID)
     # Copy data from application form to the user profile
     same_attrs = [
         "first_name",

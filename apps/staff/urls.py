@@ -1,6 +1,5 @@
 from django.conf.urls import include, url
 
-# FIXME: guess it's better inherit these views
 from django.urls import path
 
 from learning.gradebook.views import GradeBookTeacherView
