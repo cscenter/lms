@@ -75,7 +75,7 @@ def course_form_builder(survey: CourseSurvey):
     if course.online_course_url:
         templates.append(FormTemplates.ONLINE_COURSE)
 
-    today_local = now_local(course.get_city())
+    today_local = now_local(course.get_timezone())
     form_templates = Form.objects.filter(status=STATUS_TEMPLATE,
                                          slug__in=templates)
     for form_template in form_templates:

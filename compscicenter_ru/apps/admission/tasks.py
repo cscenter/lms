@@ -17,7 +17,6 @@ def notify_admin_bad_token(campaign_id):
     pass
 
 
-# FIXME: Add tests, c'mon
 @job('high')
 def register_in_yandex_contest(applicant_id, language_code):
     """Register user in Yandex.Contest, then send email with summary"""

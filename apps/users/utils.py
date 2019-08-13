@@ -1,9 +1,11 @@
 import logging
 from typing import Optional
 
+from djchoices import ChoiceItem
+
 from core.timezone import CityCode
 from core.utils import is_club_site
-
+from learning.settings import Branches
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +28,16 @@ def get_student_city_code(request) -> CityCode:
     Note: For student is critical to have valid city value in settings.
     """
     return get_user_city_code(request)
+
+
+# FIXME: если юзер берётся из request.user, то для него должно перетираться значение бранчи. МОжно ввести аттрибут _branch_code и его предзаполнять.
+# А метод get_user_branch его использовать (перенести его в модель User). settings.GET_BRANCH_FROM_SUBDOMAIN
+def get_user_branch(user) -> Optional[ChoiceItem]:
+    """Avoids fetching data from DB"""
+    if user.branch_id:
+        return Branches.get_choice(user.branch_id)
+    return None
+
 
 
 def get_teacher_city_code(request) -> CityCode:

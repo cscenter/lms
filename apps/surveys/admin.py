@@ -43,7 +43,7 @@ class CourseSurveyAdmin(admin.ModelAdmin):
             'form_class': TimezoneAwareSplitDateTimeField
         }
     }
-    list_display = ("course", "get_city", "type",
+    list_display = ("course", "type",
                     "get_form_actions", "get_survey_actions", "expire_at")
     list_filter = (
         'course__city',
