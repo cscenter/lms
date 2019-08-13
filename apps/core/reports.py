@@ -64,8 +64,8 @@ class ReportFileOutput:
         workbook.close()
         output.seek(0)
 
-        if settings.DEBUG:
-            return self.debug_response()
+        # if settings.DEBUG:
+        #     return self.debug_response()
 
         content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         response = HttpResponse(output.read(), content_type=content_type)

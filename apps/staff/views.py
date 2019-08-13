@@ -37,7 +37,7 @@ from learning.models import Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import AcademicDegreeYears, StudentStatuses, \
-    GradeTypes
+    GradeTypes, Branches
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams
@@ -107,8 +107,8 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "prev_term": {"year": prev_term_year, "type": prev_term},
             "campaigns": (Campaign.objects
                           .select_related("branch")
-                          .order_by("-city__name", "-year")),
-            "center_branches": settings.CITIES
+                          .order_by("-branch__name", "-year")),
+            "center_branches": Branches.choices
         }
         return context
 

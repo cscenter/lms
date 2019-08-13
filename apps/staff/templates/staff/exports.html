@@ -15,7 +15,7 @@
                     <h4 class="list-group-item-heading">Будут выпускаться</h4><br>
                     <p>Форма сгенерирует профили будущих выпускников. После добавления направлений обучения, отзывов и т.д., их нужно дополнительно активировать для показа на странице выпуска.</p>
                     {% crispy alumni_profiles_form %}
-                    {% for code, name in center_branches.items %}
+                    {% for code, name in center_branches %}
                         <b>{{ name }}</b>: <a href="{% url 'staff:exports_students_diplomas_tex' code %}">TeX</a> или <a href="{% url 'staff:exports_students_diplomas_csv' code %}">CSV</a><br><a href="{% url 'staff:exports_alumni_stats' code %}">Статистика</a><br>
                     {% endfor %}
                 </div>
