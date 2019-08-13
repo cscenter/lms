@@ -494,14 +494,6 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
     def teacher_profile_url(self):
         return reverse('teacher_detail', args=[self.pk])
 
-    def get_applicant_form_url(self):
-        try:
-            applicant_form_url = reverse("admission:applicant_detail",
-                                         args=[self.applicant.pk])
-        except ObjectDoesNotExist:
-            applicant_form_url = None
-        return applicant_form_url
-
     def get_full_name(self, last_name_first=False):
         """
         Returns first name, last name and patronymic, with a space in between

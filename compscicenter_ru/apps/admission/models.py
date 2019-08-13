@@ -440,7 +440,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         default=False,
         db_index=True,
         help_text=_("Unsubscribe from future notifications"))
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET(models.SET_NULL),
         null=True,

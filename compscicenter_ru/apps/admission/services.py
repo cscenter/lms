@@ -40,6 +40,11 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant):
         EmailQueueService.generate_interview_invitation(invitation)
 
 
+class UsernameError(Exception):
+    """Raise this exception if fail to create a unique username"""
+    pass
+
+
 def create_student_from_applicant(applicant):
     """
     Create new model or override existent with data from applicant form.
@@ -51,9 +56,8 @@ def create_student_from_applicant(applicant):
         if User.objects.filter(username=username).exists():
             username = User.generate_random_username(attempts=5)
         if not username:
-            raise RuntimeError(
-                "Всё плохо. Имя {} уже занято. Cлучайное имя сгенерировать "
-                "не удалось".format(username))
+            raise UsernameError(f"Имя {username} уже занято. "
+                                f"Cлучайное имя сгенерировать не удалось")
         random_password = User.objects.make_random_password()
         user = User.objects.create_user(username=username,
                                         email=applicant.email,
@@ -63,7 +67,7 @@ def create_student_from_applicant(applicant):
     else:
         user.add_group(Roles.STUDENT)
     user.add_group(Roles.STUDENT, site_id=settings.CLUB_SITE_ID)
-    # Migrate data from application form to user profile
+    # Copy data from application form to the user profile
     same_attrs = [
         "first_name",
         "patronymic",
