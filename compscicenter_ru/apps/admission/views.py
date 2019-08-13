@@ -51,7 +51,7 @@ from admission.models import Interview, Comment, Contest, Test, Exam, \
     InterviewInvitation, InterviewStream, University
 from admission.serializers import InterviewSlotSerializer
 from admission.services import create_invitation, create_student_from_applicant, \
-    EmailQueueService
+    EmailQueueService, UsernameError
 from admission.utils import calculate_time
 from api.permissions import CuratorAccessPermission
 from auth.backends import YandexRuOAuth2Backend
@@ -807,7 +807,6 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
 
     @atomic
     def post(self, request, *args, **kwargs):
-        # TODO: add tests
         applicant_pk = kwargs.get("pk")
         back_url = reverse("admission:applicants")
         try:
@@ -821,11 +820,9 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
         except User.MultipleObjectsReturned:
             messages.error(
                 self.request,
-                "Всё плохо. Найдено несколько пользователей "
-                "с email {}".format(applicant.email))
+                f"Найдено несколько пользователей с email {applicant.email}")
             return HttpResponseRedirect(back_url)
-        except RuntimeError as e:
-            # username already taken, failed to create the new unique one
+        except UsernameError as e:
             messages.error(self.request, e.args[0])
             return HttpResponseRedirect(back_url)
         # Link applicant and user

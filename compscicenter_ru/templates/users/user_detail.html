@@ -161,11 +161,13 @@
                             <td>{{ stats.in_term.total }} (на курсы Клуба/Центра/ШАД)</td>
                         </tr>
                         <tr>
-                            <td>Ссылка на анкету</td>
+                            <td>Анкеты</td>
                             <td>
-                                {% if profile_user.applicant %}
-                                    <a target="_blank" href="{{ profile_user.get_applicant_form_url }}">#{{ profile_user.applicant.pk }}</a>
-                                {% else %} Анкета не найдена{% endif %}
+                                {% for applicant in profile_user.applicant_set.all %}
+                                    <a target="_blank" href="{{ applicant.get_absolute_url }}">#{{ applicant.pk }}</a>{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                    Анкета не найдена
+                                {% endfor %}
                             </td>
                         </tr>
                     </table>

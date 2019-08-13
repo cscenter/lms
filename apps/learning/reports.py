@@ -201,12 +201,11 @@ class ProgressReport(ReportFileOutput):
             else:
                 row.extend([''])
 
-    def get_applicant_form_absolute_url(self, student):
-        applicant_form_url = student.get_applicant_form_url()
-        if applicant_form_url:
-            return self.request.build_absolute_uri(applicant_form_url)
-        else:
-            return ""
+    def get_applicant_forms(self, student):
+        urls = []
+        for a in student.applicant_set.all():
+            urls.append(a.get_absolute_url())
+        return "\r\n".join(urls)
 
 
 class ProgressReportForDiplomas(ProgressReport):
@@ -261,7 +260,7 @@ class ProgressReportForDiplomas(ProgressReport):
             student.university,
             " и ".join(s.name for s in disciplines),
             self.passed_courses_total(student),
-            self.get_applicant_form_absolute_url(student),
+            self.get_applicant_forms(student),
         ]
         self._export_row_append_courses(row, student)
         self._export_row_append_shad_courses(row, student)
@@ -297,7 +296,7 @@ class ProgressReportFull(ProgressReport):
                           Roles.GRADUATE,
                           Roles.VOLUNTEER)
                 .students_info()
-                .select_related("applicant"))
+                .prefetch_related("applicant_set"))
 
     @property
     def static_headers(self):
@@ -369,7 +368,7 @@ class ProgressReportFull(ProgressReport):
             student.comment_changed_at.strftime(dt_format),
             student.workplace,
             self.request.build_absolute_uri(student.get_absolute_url()),
-            self.get_applicant_form_absolute_url(student),
+            self.get_applicant_forms(student),
             total_success_passed,
         ]
         self._export_row_append_courses(row, student)

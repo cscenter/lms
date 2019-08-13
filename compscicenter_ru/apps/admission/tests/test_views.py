@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 from bs4 import BeautifulSoup
+from django.contrib.messages import get_messages
 from django.utils import timezone, formats
 from django.utils.timezone import now
 from post_office.models import Email
@@ -16,7 +17,7 @@ from core.timezone import now_local
 from core.urls import reverse
 from learning.models import Branch
 from learning.settings import Branches, DEFAULT_BRANCH_CODE
-from users.tests.factories import UserFactory
+from users.tests.factories import UserFactory, CuratorFactory
 
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
@@ -400,3 +401,26 @@ def test_create_interview_with_invitation_view(curator, client, settings):
     response = client.post(invitation.get_absolute_url(), form_data, follow=True)
     message = list(response.context['messages'])[0]
     assert 'error' in message.tags
+
+
+@pytest.mark.django_db
+def test_create_student_from_applicant(client, curator, assert_redirect):
+    applicant = ApplicantFactory()
+    applicant_reapplied = ApplicantFactory(email=applicant.email)
+    client.login(curator)
+    assert not applicant.user_id
+    response = client.post(reverse("admission:applicant_create_user",
+                                   kwargs={"pk": applicant.pk}))
+    assert response.status_code == 302
+    applicant.refresh_from_db()
+    assert applicant.user_id
+    admin_url = reverse("admin:users_user_change", args=[applicant.user_id])
+    assert_redirect(response, admin_url)
+    # Student who was expelled in the first semester still could reapply
+    # on general terms
+    response = client.post(reverse("admission:applicant_create_user",
+                                   kwargs={"pk": applicant_reapplied.pk}))
+    assert response.status_code == 302
+    applicant_reapplied.refresh_from_db()
+    assert applicant_reapplied.user_id == applicant.user_id
+    assert_redirect(response, admin_url)

@@ -14,8 +14,7 @@ from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase, \
 from learning.models import Branch
 from learning.settings import Branches
 from notifications.models import Type
-from users.constants import Roles
-from users.tests.factories import UserFactory, CuratorFactory
+from users.tests.factories import CuratorFactory
 
 
 @pytest.fixture()
@@ -51,7 +50,11 @@ def assert_login_redirect(client, settings, assert_redirect):
 
 @pytest.fixture(scope="function")
 def curator():
-    return CuratorFactory()
+    # Sequences are resetting for each test, don't rely on there values here
+    return CuratorFactory(email='curators@test.ru',
+                          first_name='Global',
+                          username='curator',
+                          last_name='Curator')
 
 
 @pytest.fixture(scope="function")
