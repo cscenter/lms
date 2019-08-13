@@ -7,7 +7,7 @@ from sorl.thumbnail import ImageField
 from taggit.managers import TaggableManager
 
 from core.urls import reverse
-from learning.models import Branch
+from core.models import Branch
 
 
 class Book(models.Model):

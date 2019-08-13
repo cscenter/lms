@@ -543,7 +543,8 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
 
     def get_queryset(self):
         q = (Interview.objects
-             .select_related("applicant", "applicant__campaign")
+             .select_related("applicant", "applicant__campaign",
+                             "applicant__campaign__branch")
              .prefetch_related("interviewers")
              .annotate(average=Coalesce(Avg('comments__score'), Value(0)))
              .order_by("date", "pk"))

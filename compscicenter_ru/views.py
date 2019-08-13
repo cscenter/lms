@@ -34,7 +34,8 @@ from courses.utils import get_current_term_pair, \
     get_term_index_academic_year_starts, get_term_by_index, get_term_index
 from core.utils import bucketize
 from courses.views.mixins import CourseURLParamsMixin
-from learning.models import Branch, Enrollment, GraduateProfile
+from learning.models import Enrollment, GraduateProfile
+from core.models import Branch
 from learning.projects.constants import ProjectTypes
 from learning.projects.models import ProjectStudent
 from learning.settings import Branches

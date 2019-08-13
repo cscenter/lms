@@ -189,7 +189,7 @@ class StudentProfile(models.Model):
         blank=True,
         null=True)
     branch = models.ForeignKey(
-        "learning.Branch",
+        "core.Branch",
         verbose_name=_("Branch"),
         to_field="code",
         related_name="+",  # Disable backwards relation

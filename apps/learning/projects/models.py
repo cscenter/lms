@@ -20,14 +20,13 @@ from model_utils.models import TimeStampedModel
 
 from core.db.models import ScoreField
 from core.mixins import DerivableFieldsMixin, TimezoneAwareModel
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Branch
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import hashids
 from courses.models import Semester
 from courses.constants import SemesterTypes
 from courses.utils import get_current_term_index
-from learning.models import Branch
 from learning.projects.constants import ProjectTypes
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
