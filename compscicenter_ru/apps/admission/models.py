@@ -489,7 +489,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
             self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
 
     def get_living_place_display(self):
-        if not self.living_place and self.campaign.branch_id in (Branches.SPB, Branches.NSK):
+        if not self.living_place and not self.campaign.branch.is_remote:
             return self.campaign.branch.name
         return self.living_place
 
