@@ -47,13 +47,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.sites',
-    'core.storage.StaticFilesConfig',  # custom list of ignore patterns
     'django.contrib.humanize',
 
-    'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
     'loginas',
     'registration',
-    'users.apps.UsersConfig',
     'sorl.thumbnail',
     'crispy_forms',
     'formtools',
@@ -61,7 +58,6 @@ INSTALLED_APPS = [
     'micawber.contrib.mcdjango',
     'dbbackup',
     'simple_history',
-
     'import_export',
     'pipeline',
     'bootstrap_pagination',
@@ -71,8 +67,13 @@ INSTALLED_APPS = [
     'webpack_loader',
     'django_filters',
     'rest_framework',  # what about club site?
+    'captcha',
+    'taggit',
 
+    'core.storage.StaticFilesConfig',  # custom list of ignore patterns
     'core',
+    'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
+    'users.apps.UsersConfig',
     'htmlpages',
     'courses.apps.CoursesConfig',
     'study_programs.apps.StudyProgramsConfig',
@@ -82,9 +83,7 @@ INSTALLED_APPS = [
     'notifications.apps.NotificationsConfig',
     'api.apps.APIConfig',
     # FIXME: quick fix, error on user detail page
-    'taggit',  # used by library app only
     'library.apps.LibraryConfig',
-    'captcha',
 ]
 
 # oEmbed
