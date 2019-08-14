@@ -5,17 +5,11 @@ from import_export import resources, fields, widgets
 from projects.models import ProjectStudent
 
 
-class CityWidget(widgets.Widget):
-    def render(self, value, obj=None):
-        """Don't forget to `select_related` city_id"""
-        return str(settings.CITIES.get(value.project.city_id, value))
-
-
 class ProjectStudentAdminRecordResource(resources.ModelResource):
     semester = fields.Field(column_name='Семестр',
                             attribute='project__semester')
-    city = fields.Field(column_name='Город', attribute='project__city_id',
-                        widget=CityWidget)
+    branch = fields.Field(column_name='Отделение',
+                          attribute='project__branch')
     project = fields.Field(column_name='Проект', attribute='project')
     student = fields.Field(column_name='Студент', attribute='student')
     total_score = fields.Field(column_name='Суммарный балл',
@@ -41,6 +35,7 @@ class ProjectStudentAdminRecordResource(resources.ModelResource):
             "presentation_grade",
             "supervisor_grade",
             "is_external",
-            "city",
+            "branch",
         )
         export_order = fields
+

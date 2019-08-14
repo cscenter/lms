@@ -8,6 +8,7 @@ from import_export.admin import ExportMixin
 
 from core.admin import meta
 from core.filters import AdminRelatedDropdownFilter
+from core.utils import queryset_iterator
 from projects.import_export import ProjectStudentAdminRecordResource
 from projects.models import Project, ProjectStudent, Report, Review, \
     ReportComment, Supervisor, ReportingPeriod, PracticeCriteria
@@ -125,13 +126,21 @@ class ReviewAdmin(admin.ModelAdmin):
 class ProjectStudentAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = ProjectStudentAdminRecordResource
     list_display = ('student', 'project', 'get_project_semester', 'final_grade')
-    list_filter = ('project__city', 'project__semester')
+    list_filter = ('project__branch', 'project__semester')
     search_fields = ["project__name"]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return qs.select_related("student", "project",
                                  "project__semester")
+
+    def get_export_queryset(self, request):
+        # django-import-export 1.2.0 uses queryset .iterator() internally and
+        # breaks .prefetch_related() optimization
+        # https://github.com/django-import-export/django-import-export/issues/774
+        return queryset_iterator(super().get_export_queryset(request)
+                                 .select_related("project__branch")
+                                 .prefetch_related("reports"))
 
     @meta(_("Semester"), admin_order_field="project__semester")
     def get_project_semester(self, obj):
