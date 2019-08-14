@@ -9,7 +9,7 @@ from pytest_django.lazy_django import skip_if_no_django
 from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
     INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
 from core.models import City, Branch
-from core.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory, CityFactory
 from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase, \
     ANOTHER_DOMAIN, TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID
 from learning.settings import Branches
@@ -94,45 +94,25 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
                 site.save()
 
         # Create cities
-        City.objects.update_or_create(
-            code="spb",
-            defaults={
-                "name": "Saint Petersburg",
-                "abbr": "spb"
-            }
-        )
-
-        City.objects.update_or_create(
-            code="kzn",
-            defaults={
-                "name": "Kazan",
-                "abbr": "kzn"
-            }
-        )
-
-        City.objects.update_or_create(
-            code="nsk",
-            defaults={
-                "name": "Novosibirsk",
-                "abbr": "nsk"
-            }
-        )
+        city_spb = CityFactory(name="Saint Petersburg", code="spb", abbr="spb")
+        city_nsk = CityFactory(name="Novosibirsk", code="nsk", abbr="nsk")
+        city_kzn = CityFactory(name="Kazan", code="kzn", abbr="kzn")
 
         BranchFactory(code=Branches.SPB,
                       site=Site.objects.get(id=TEST_DOMAIN_ID),
                       name="Санкт-Петербург",
-                      is_remote=False)
+                      city=city_spb)
 
         BranchFactory(code=Branches.NSK,
                       site=Site.objects.get(id=TEST_DOMAIN_ID),
                       name="Новосибирск",
                       time_zone='Asia/Novosibirsk',
-                      is_remote=False)
+                      city=city_nsk)
 
         BranchFactory(code=Branches.DISTANCE,
                       site=Site.objects.get(id=TEST_DOMAIN_ID),
                       name="Заочное",
-                      is_remote=True)
+                      city=None)
 
         from notifications import NotificationTypes
         for t in NotificationTypes:
