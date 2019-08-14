@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-14 15:46+0000\n"
-"PO-Revision-Date: 2019-08-14 15:47+0000\n"
+"PO-Revision-Date: 2019-08-14 16:06+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -290,7 +290,7 @@ msgstr ""
 #: compscicenter_ru/apps/admission/models.py:167
 #| msgid "University"
 msgid "University abbreviation"
-msgstr "Вуз"
+msgstr "Аббревиатура"
 
 #: compscicenter_ru/apps/admission/models.py:169
 msgid "Sort order"
@@ -299,7 +299,7 @@ msgstr ""
 #: compscicenter_ru/apps/admission/models.py:179
 #| msgid "University"
 msgid "Universities"
-msgstr "Вуз"
+msgstr "Университеты"
 
 #: compscicenter_ru/apps/admission/models.py:218
 msgid "Rejected by test"
