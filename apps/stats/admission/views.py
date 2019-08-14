@@ -44,7 +44,7 @@ class CampaignsStagesByYears(ReadOnlyModelViewSet):
     def list(self, request, *args, **kwargs):
         branch_code = self.kwargs.get('branch_code')
         applicants = (Applicant.objects
-                      .filter(campaign__branch=branch_code)
+                      .filter(campaign__branch__code=branch_code)
                       .values('campaign_id', 'campaign__year')
                       .annotate(application_form=Count("campaign_id"),
                                 testing=TestingCountAnnotation,
@@ -94,7 +94,8 @@ class ApplicationFormSubmissionByDays(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         campaigns = (Campaign.objects
-                     .filter(branch=self.kwargs['branch_code'], year__gte=2017))
+                     .filter(branch__code=self.kwargs['branch_code'],
+                             year__gte=2017))
         data = self.get_stat(campaigns)
         return Response(data)
 
@@ -167,7 +168,7 @@ class CampaignStatsApplicantsResults(ListRenderersMixin, PandasView):
     def get_queryset(self):
         branch_code = self.kwargs.get('branch_code')
         qs = (Applicant.objects
-              .filter(campaign__branch=branch_code,
+              .filter(campaign__branch__code=branch_code,
                       status__in=STATUSES)
               .values('campaign__year', 'status')
               .annotate(total=Count("status"))

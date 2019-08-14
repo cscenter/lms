@@ -45,7 +45,7 @@ def test_create_invitation(mocker):
 def test_generate_interview_feedback_email():
     email_qs = Email.objects.filter(template__name=INTERVIEW_FEEDBACK_TEMPLATE)
     interview = InterviewFactory(status=Interview.APPROVED,
-                                 applicant__campaign__branch_id=Branches.SPB)
+                                 applicant__campaign__branch__code=Branches.SPB)
     assert Email.objects.count() == 0
     interview.status = Interview.COMPLETED
     interview.save()

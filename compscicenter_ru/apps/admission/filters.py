@@ -178,7 +178,7 @@ class ResultsFilter(django_filters.FilterSet):
         super().__init__(*args, **kwargs)
         # Get universities based on requested branch
         qs = (University.objects
-              .filter(branch=branch_code)
+              .filter(branch__code=branch_code)
               .select_related("branch")
               .order_by("-branch", "sort"))
         university_choices = [(u.id, u.name) for u in qs.all()]

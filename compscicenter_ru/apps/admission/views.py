@@ -679,8 +679,8 @@ class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
         """Based on user settings, get preferred page address and redirect"""
         branches = (Campaign.objects
                     .filter(current=True)
-                    .values_list("branch_id", flat=True))
-        branch_code = self.request.user.branch_id
+                    .values_list("branch__code", flat=True))
+        branch_code = self.request.user.branch.code
         if branch_code not in branches:
             branch_code = next(branches.iterator(), DEFAULT_BRANCH_CODE)
         return reverse("admission:branch_interview_results", kwargs={

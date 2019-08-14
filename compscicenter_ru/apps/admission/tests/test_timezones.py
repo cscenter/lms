@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from admission.tests.factories import InterviewFactory, \
     InterviewStreamFactory, InterviewInvitationFactory
 from core.admin import get_admin_url
+from core.models import Branch
 from core.urls import reverse
 from courses.tests.factories import VenueFactory
 
@@ -56,7 +57,7 @@ def test_get_timezone(settings):
     interview = InterviewFactory(applicant__campaign__branch__code=Branches.NSK,
                                  date=date)
     assert interview.get_timezone() == settings.TIME_ZONES[Branches.NSK]
-    interview.applicant.campaign.branch_id = Branches.SPB
+    interview.applicant.campaign.branch_id = Branch.objects.get(code=Branches.SPB)
     interview.applicant.campaign.save()
     interview.refresh_from_db()
     assert interview.get_timezone() == settings.TIME_ZONES[Branches.SPB]
@@ -188,7 +189,7 @@ def test_interview_list(settings, client, curator):
     interview = InterviewFactory(date=datetime.datetime(2017, 1, 1,
                                                         12, 0, 0, 0,
                                                         tzinfo=pytz.UTC))
-    interview.applicant.campaign.branch_id = Branches.NSK
+    interview.applicant.campaign.branch_id = Branch.objects.get(code=Branches.NSK)
     interview.applicant.campaign.save()
     interview.refresh_from_db()
     interview_date_in_utc = interview.date
@@ -220,7 +221,7 @@ def test_interview_detail(settings, client, curator):
     assert any(time_str in s.string for s in
                html.find_all('div', {"class": "date"}))
     # Make sure timezone doesn't cached on view lvl
-    interview.applicant.campaign.branch_id = Branches.SPB
+    interview.applicant.campaign.branch_id = Branch.objects.get(code=Branches.SPB)
     interview.applicant.campaign.save()
     localized = date_in_utc.astimezone(settings.TIME_ZONES[Branches.SPB])
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
