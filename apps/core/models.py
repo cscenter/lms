@@ -58,7 +58,9 @@ class Branch(TimezoneAwareModel, models.Model):
         db_index=True)
     name = models.CharField(_("Branch|Name"), max_length=255)
     order = models.PositiveIntegerField(verbose_name=_('Order'), default=0)
-    is_remote = models.BooleanField(_("Distance Branch"), default=False)
+    city = models.ForeignKey(City, verbose_name=_("Branch Location"),
+                             blank=True, null=True,
+                             on_delete=models.PROTECT)
     site = models.ForeignKey(Site, verbose_name=_("Site"),
                              default=settings.SITE_ID,
                              on_delete=models.CASCADE)

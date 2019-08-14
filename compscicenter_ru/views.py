@@ -290,8 +290,8 @@ class OnCampusProgramsView(generic.TemplateView):
         context = super().get_context_data(**kwargs)
         # Active programs grouped by branch
         current_programs = (StudyProgram.objects
-                            .filter(is_active=True,
-                                    branch__is_remote=False)
+                            .filter(is_active=True)
+                            .exclude(branch__city=None)
                             .select_related("branch", "academic_discipline")
                             .order_by("branch",
                                       "academic_discipline__name_ru"))
@@ -324,8 +324,8 @@ class OnCampusProgramDetailView(generic.TemplateView):
         study_program = (StudyProgram.objects
                          .filter(academic_discipline__code=discipline_code,
                                  branch__code=selected_branch,
-                                 branch__is_remote=False,
                                  is_active=True)
+                         .exclude(branch__city=None)
                          .prefetch_core_courses_groups()
                          .select_related("branch", "academic_discipline")
                          .first())
@@ -336,8 +336,8 @@ class OnCampusProgramDetailView(generic.TemplateView):
         tabs = TabList()
         branches = (Branch.objects
                     .filter(study_programs__academic_discipline__code=discipline_code,
-                            study_programs__is_active=True,
-                            is_remote=False))
+                            study_programs__is_active=True)
+                    .exclude(city=None))
         for branch in branches:
             tab = Tab(target=branch.code, name=branch.name,
                       url=f"{self.request.path}?branch={branch.code}",

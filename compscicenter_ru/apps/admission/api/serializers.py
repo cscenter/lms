@@ -91,7 +91,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
                     campaign = (self.fields['campaign']
                                 .get_queryset()
                                 .get(pk=data['campaign']))
-                    if not campaign.branch.is_remote:
+                    if campaign.branch.city_id:
                         field = self.fields["preferred_study_programs"]
                         field.required = True
                         field.allow_empty = False

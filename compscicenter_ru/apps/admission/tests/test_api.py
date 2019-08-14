@@ -65,12 +65,11 @@ def test_application_form_living_place(client):
     """`living_place` is mandatory for distance branch"""
     url = reverse("api:applicant_create")
     today = now_local(Branches.SPB)
-    branch = BranchFactory(code=Branches.DISTANCE, is_remote=True)
+    branch = BranchFactory(code=Branches.DISTANCE, city=None)
     campaign = CampaignFactory(current=True,
                                branch=branch,
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))
-    assert campaign.branch.is_remote
     university = UniversityFactory()
     form_data = ApplicantFactory.build_application_form(
         campaign=campaign,
