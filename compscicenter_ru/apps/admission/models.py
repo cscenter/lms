@@ -161,6 +161,12 @@ class Campaign(TimezoneAwareModel, models.Model):
 
 
 class University(models.Model):
+    """
+    Some universities are interesting for statistics. To avoid typos,
+    different word order, abbreviations, letter case and
+    many more things which could prevent accurately aggregate data, store
+    target universities for each branch in this model.
+    """
     name = models.CharField(_("University"),
                             max_length=255,
                             help_text=_("Perhaps also the faculty."))
