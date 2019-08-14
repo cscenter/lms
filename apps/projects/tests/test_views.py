@@ -8,11 +8,11 @@ from core.timezone import now_local
 from core.urls import reverse_lazy, reverse
 from courses.tests.factories import SemesterFactory
 from courses.utils import get_current_term_pair
-from learning.projects.forms import ReportForm, PracticeCriteriaForm, \
+from projects.forms import ReportForm, PracticeCriteriaForm, \
     ReportReviewForm
-from learning.projects.models import Report, ProjectStudent, Review, \
+from projects.models import Report, ProjectStudent, Review, \
     PracticeCriteria
-from learning.projects.tests.factories import ProjectFactory, ReportFactory, \
+from projects.tests.factories import ProjectFactory, ReportFactory, \
     ReportingPeriodFactory, ReviewFactory, \
     ReviewPracticeCriteriaFactory, review_form_factory
 from learning.settings import StudentStatuses, GradeTypes, Branches
@@ -334,7 +334,7 @@ def test_reportpage_permissions(client, curator):
 @pytest.mark.django_db
 def test_reportpage_update_permissions():
     """Check report updating restricted to curators only"""
-    from learning.projects.views import (ReportUpdateStatusView,
+    from projects.views import (ReportUpdateStatusView,
         ReportCuratorAssessmentView)
     from users.mixins import CuratorOnlyMixin
     assert issubclass(ReportCuratorAssessmentView, CuratorOnlyMixin)
@@ -496,7 +496,7 @@ def test_review_notifications(client, curator, assert_login_redirect):
 @pytest.mark.django_db
 def test_reportpage_summarize_notifications(client, curator):
     from users.mixins import CuratorOnlyMixin
-    from learning.projects.views import ReportCuratorSummarizeView
+    from projects.views import ReportCuratorSummarizeView
     assert issubclass(ReportCuratorSummarizeView, CuratorOnlyMixin)
     curator.add_group(Roles.PROJECT_REVIEWER)
     curator2 = CuratorFactory.create()

@@ -27,7 +27,7 @@ from core.utils import hashids
 from courses.models import Semester
 from courses.constants import SemesterTypes
 from courses.utils import get_current_term_index
-from learning.projects.constants import ProjectTypes
+from projects.constants import ProjectTypes
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
 from users.constants import Roles, GenderTypes
@@ -257,7 +257,7 @@ class ReportingPeriod(models.Model):
         return final_grade
 
     def get_report_form(self, **kwargs):
-        from learning.projects.forms import ReportForm
+        from projects.forms import ReportForm
         return ReportForm(initial={"reporting_period": self.id},
                           **kwargs)
 

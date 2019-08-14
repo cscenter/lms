@@ -7,10 +7,10 @@ from django.core import management
 from django.core.management import CommandError
 
 from courses.tests.factories import SemesterFactory
-from learning.projects.constants import ProjectTypes, \
+from projects.constants import ProjectTypes, \
     REPORTING_NOTIFY_BEFORE_START, REPORTING_NOTIFY_BEFORE_DEADLINE
-from learning.projects.models import ProjectStudent
-from learning.projects.tests.factories import ReportingPeriodFactory, \
+from projects.models import ProjectStudent
+from projects.tests.factories import ReportingPeriodFactory, \
     ProjectStudentFactory, ProjectFactory
 from notifications.models import Notification
 

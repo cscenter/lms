@@ -6,7 +6,7 @@ from django.db.models import Count, Prefetch, Value, When, Q, F, Case
 from learning.models import Enrollment
 from study_programs.models import StudyProgram
 from courses.models import Semester
-from learning.projects.models import ProjectStudent
+from projects.models import ProjectStudent
 from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.models import User, SHADCourseRecord, OnlineCourseRecord

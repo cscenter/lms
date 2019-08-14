@@ -8,8 +8,8 @@ from import_export.admin import ExportMixin
 
 from core.admin import meta
 from core.filters import AdminRelatedDropdownFilter
-from learning.projects.import_export import ProjectStudentAdminRecordResource
-from learning.projects.models import Project, ProjectStudent, Report, Review, \
+from projects.import_export import ProjectStudentAdminRecordResource
+from projects.models import Project, ProjectStudent, Report, Review, \
     ReportComment, Supervisor, ReportingPeriod, PracticeCriteria
 from users.constants import Roles
 from users.models import User

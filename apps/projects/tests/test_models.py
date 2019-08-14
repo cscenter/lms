@@ -5,10 +5,10 @@ import math
 import pytest
 
 from courses.tests.factories import SemesterFactory
-from learning.projects.constants import ProjectTypes
-from learning.projects.models import ReportingPeriod, \
+from projects.constants import ProjectTypes
+from projects.models import ReportingPeriod, \
     ReportingPeriodKey, PracticeCriteria
-from learning.projects.tests.factories import ReportFactory, ReviewFactory, \
+from projects.tests.factories import ReportFactory, ReviewFactory, \
     ReportingPeriodFactory, ProjectStudentFactory
 from learning.settings import Branches, GradeTypes
 from core.tests.factories import BranchFactory

@@ -37,7 +37,7 @@ INSTALLED_APPS += [
     'menu',
     'post_office',
     'django_jinja',
-    'learning.projects.apps.ProjectsConfig',
+    'projects.apps.ProjectsConfig',
     'stats.apps.StatisticsConfig',
     'admission.apps.AdmissionConfig',
     'staff',

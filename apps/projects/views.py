@@ -29,12 +29,12 @@ from core.utils import hashids
 from core.views import LoginRequiredMixin
 from courses.models import Semester
 from courses.utils import get_current_term_index
-from learning.projects.constants import ProjectTypes
-from learning.projects.filters import ProjectsFilter, CurrentTermProjectsFilter
-from learning.projects.forms import ReportCommentForm, ReportReviewForm, \
+from projects.constants import ProjectTypes
+from projects.filters import ProjectsFilter, CurrentTermProjectsFilter
+from projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportStatusForm, ReportSummarizeForm, ReportForm, \
     ReportCuratorAssessmentForm, StudentResultsModelForm, PracticeCriteriaForm
-from learning.projects.models import Project, ProjectStudent, Report, \
+from projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review, ReportingPeriod, ReportingPeriodKey, PracticeCriteria
 from notifications import NotificationTypes
 from notifications.signals import notify

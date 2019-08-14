@@ -1,7 +1,7 @@
 from django.conf.urls import include
 from django.urls import path
 
-from learning.projects import views
+from projects import views
 
 app_name = 'projects'
 

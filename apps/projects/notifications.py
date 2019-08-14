@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from core.urls import reverse
-from learning.projects.models import ReportComment, Report
+from projects.models import ReportComment, Report
 from notifications import NotificationTypes
 from notifications.decorators import register
 from notifications.service import NotificationService

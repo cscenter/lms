@@ -9,8 +9,8 @@ from model_utils.models import TimeStampedModel
 
 from core.urls import reverse
 from core.utils import ru_en_mapping
-from learning.projects.constants import ProjectTypes
-from learning.projects.models import Project, Supervisor
+from projects.constants import ProjectTypes
+from projects.models import Project, Supervisor
 from users.constants import ThumbnailSizes, GenderTypes
 from users.models import User
 from users.thumbnails import UserThumbnailMixin

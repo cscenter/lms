@@ -29,7 +29,7 @@ class UserQuerySet(query.QuerySet):
         from learning.models import Enrollment
         from courses.models import Semester
         from courses.models import Course
-        from learning.projects.models import ProjectStudent
+        from projects.models import ProjectStudent
 
         filters = filters or {}
         if isinstance(filters, dict):

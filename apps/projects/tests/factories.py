@@ -2,8 +2,8 @@ import factory
 from factory.fuzzy import FuzzyInteger, FuzzyChoice
 
 from courses.tests.factories import SemesterFactory
-from learning.projects.forms import ReportReviewForm, PracticeCriteriaForm
-from learning.projects.models import Project, ProjectStudent, Report, Review, \
+from projects.forms import ReportReviewForm, PracticeCriteriaForm
+from projects.models import Project, ProjectStudent, Report, Review, \
     ReportingPeriod, PracticeCriteria
 from core.tests.factories import BranchFactory
 from users.tests.factories import UserFactory, StudentFactory

@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
-from learning.projects.models import ProjectStudent, Report, Project, Review, \
+from projects.models import ProjectStudent, Report, Project, Review, \
     ReportComment
 from learning.settings import GradeTypes
 from users.constants import Roles
@@ -57,7 +57,7 @@ def post_save_project_student(sender, instance, *args, **kwargs):
 
 @receiver(post_save, sender=Project)
 def post_save_project(sender, instance, created, *args, **kwargs):
-    from learning.projects.tasks import (
+    from projects.tasks import (
         download_presentation_from_yandex_disk_supervisor as job_ya_supervisor,
         download_presentation_from_yandex_disk_students as job_ya_students)
     if created:

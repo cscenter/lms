@@ -5,7 +5,7 @@ from django.core.management import BaseCommand
 from django.core.management import CommandError
 
 from courses.models import Semester
-from learning.projects.models import ProjectStudent, ReportingPeriod, \
+from projects.models import ProjectStudent, ReportingPeriod, \
     ReportingPeriodKey
 from learning.settings import GradeTypes
 
