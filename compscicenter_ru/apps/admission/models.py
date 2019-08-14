@@ -59,7 +59,6 @@ class Campaign(TimezoneAwareModel, models.Model):
         default=current_year)
     branch = models.ForeignKey(Branch,
                                verbose_name=_("Branch"),
-                               to_field="code",
                                related_name="campaigns",
                                on_delete=models.PROTECT)
     online_test_max_score = models.SmallIntegerField(
@@ -171,7 +170,6 @@ class University(models.Model):
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     branch = models.ForeignKey(Branch,
                                verbose_name=_("Branch"),
-                               to_field="code",
                                related_name="+",
                                null=True,
                                blank=True,

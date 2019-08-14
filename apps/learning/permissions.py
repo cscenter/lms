@@ -134,7 +134,7 @@ def enroll_in_course(user, course: Course):
     # If the student can't take this course remotely, check that the city
     # of the student and the city match
     # FIXME: на сайте клуба user.city_id надо заменить на request.city_code :< Как потестировать ещё предикаты сайта клуба?
-    if not course.is_correspondence and user.branch_id != course.get_city():
+    if not course.is_correspondence and user.branch.code != course.city_id:
         return False
     if course.is_capacity_limited and not course.places_left:
         return False

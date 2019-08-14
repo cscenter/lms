@@ -164,7 +164,6 @@ class Invitation(TimeStampedModel):
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
-        to_field="code",
         related_name="+",  # Disable backwards relation
         on_delete=models.PROTECT)
     courses = models.ManyToManyField(

@@ -58,7 +58,6 @@ class StudyProgram(TimeStampedModel):
                              on_delete=models.CASCADE)
     branch = models.ForeignKey(Branch,
                                verbose_name=_("Branch"),
-                               to_field="code",
                                related_name="study_programs",
                                on_delete=models.CASCADE)
     academic_discipline = models.ForeignKey(

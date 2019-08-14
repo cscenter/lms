@@ -191,7 +191,6 @@ class StudentProfile(models.Model):
     branch = models.ForeignKey(
         "core.Branch",
         verbose_name=_("Branch"),
-        to_field="code",
         related_name="+",  # Disable backwards relation
         on_delete=models.SET_NULL,
         null=True,

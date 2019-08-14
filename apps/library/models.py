@@ -36,7 +36,6 @@ class Stock(models.Model):
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
-        to_field="code",
         related_name="+",  # Disable backwards relation
         on_delete=models.CASCADE)
     copies = models.PositiveSmallIntegerField(

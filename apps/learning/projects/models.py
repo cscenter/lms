@@ -116,7 +116,6 @@ class ReportingPeriod(models.Model):
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
-        to_field="code",
         related_name="+",  # Disable backwards relation
         on_delete=models.CASCADE,
         null=True,
@@ -453,7 +452,6 @@ class Project(TimezoneAwareModel, TimeStampedModel):
                              on_delete=models.CASCADE)
     branch = models.ForeignKey(
         Branch,
-        to_field="code",
         verbose_name=_("Branch"),
         related_name="+",  # Disable backwards relation
         on_delete=models.CASCADE,

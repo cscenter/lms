@@ -18,7 +18,7 @@ class BookListView(PermissionRequiredMixin, ListView):
         # Students can see books from there branch only
         if not self.request.user.is_curator:
             branch_code = get_student_city_code(self.request)
-            qs = qs.filter(branch=branch_code)
+            qs = qs.filter(branch__code=branch_code)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -42,5 +42,5 @@ class BookDetailView(PermissionRequiredMixin, DetailView):
         # Students can see books from there branch only
         if not self.request.user.is_curator:
             branch_code = get_student_city_code(self.request)
-            qs = qs.filter(branch=branch_code)
+            qs = qs.filter(branch__code=branch_code)
         return qs
