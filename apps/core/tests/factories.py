@@ -53,6 +53,6 @@ class VenueFactory(factory.DjangoModelFactory):
     class Meta:
         model = Venue
 
-    city = factory.Iterator(City.objects.all())
+    city = factory.SubFactory(CityFactory, code=Branches.SPB)
     name = factory.Sequence(lambda n: "Test venue %03d" % n)
     description = factory.Sequence(lambda n: "special venue for tests %03d" % n)

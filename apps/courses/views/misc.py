@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.db.models import Q
 from django.views import generic
 
@@ -11,7 +10,6 @@ class VenueListView(generic.ListView):
 
     def get_queryset(self):
         return (Venue.objects
-                .filter(sites__pk=settings.SITE_ID)
                 .filter(Q(city_id=self.request.city_code) |
                         Q(city__isnull=True)))
 
