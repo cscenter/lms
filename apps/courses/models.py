@@ -1,12 +1,10 @@
 import datetime
 import os.path
-from collections import defaultdict
-from typing import Iterable, Dict, List
+from typing import Dict, List
 
 import pytz
 from bitfield import BitField
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -16,13 +14,12 @@ from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
-from djchoices import ChoiceItem
 from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.mixins import DerivableFieldsMixin, TimezoneAwareModel
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, City
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Branch
 from core.timezone import now_local, TzAware
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids, get_youtube_video_id
@@ -30,10 +27,10 @@ from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
+from .constants import SemesterTypes, ClassTypes
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
 from .micawber_providers import get_oembed_html
-from .constants import SemesterTypes, ClassTypes
 from .tasks import maybe_upload_slides_yandex
 
 
@@ -151,7 +148,6 @@ class Venue(TimezoneAwareModel, models.Model):
                              verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE,
                              on_delete=models.PROTECT)
-    sites = models.ManyToManyField(Site)
     name = models.CharField(_("Venue|Name"), max_length=140)
     address = models.CharField(
         _("Venue|Address"),
