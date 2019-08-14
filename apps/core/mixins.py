@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from django.contrib.contenttypes.models import ContentType
@@ -88,7 +89,7 @@ class TimezoneAwareModel:
     `TIMEZONE_AWARE_FIELD_NAME = SELF_AWARE` is a special case when
     current model knows how to get timezone without using mro call chain
     """
-    def get_timezone(self):
+    def get_timezone(self) -> datetime.tzinfo:
         next_in_tz_aware_mro = getattr(self, self.get_tz_aware_field_name())
         return next_in_tz_aware_mro.get_timezone()
 

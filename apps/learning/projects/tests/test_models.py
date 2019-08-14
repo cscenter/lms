@@ -11,7 +11,7 @@ from learning.projects.models import ReportingPeriod, \
 from learning.projects.tests.factories import ReportFactory, ReviewFactory, \
     ReportingPeriodFactory, ProjectStudentFactory
 from learning.settings import Branches, GradeTypes
-from learning.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory
 from users.tests.factories import ProjectReviewerFactory
 
 

@@ -18,7 +18,7 @@ from admission.signals import post_save_interview
 from courses.tests.factories import VenueFactory
 from core.models import Branch
 from learning.settings import AcademicDegreeYears
-from learning.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory
 from users.constants import Roles
 from users.tests.factories import UserFactory, add_user_groups
 

@@ -3,7 +3,7 @@ import datetime
 import factory
 from factory.fuzzy import FuzzyInteger, FuzzyDate
 
-from learning.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory
 from library.models import Book, Stock, Borrow
 from users.tests.factories import UserFactory
 

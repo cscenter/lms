@@ -4,37 +4,6 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def create_branches(apps, schema_editor):
-    Branch = apps.get_model('learning', 'Branch')
-
-    branch, _ = Branch.objects.get_or_create(
-        code='spb',
-        defaults={
-            "name": 'Санкт-Петербург',
-            "is_remote": False,
-            "timezone_id": "spb"
-        }
-    )
-
-    branch, _ = Branch.objects.get_or_create(
-        code='nsk',
-        defaults={
-            "name": 'Новосибирск',
-            "is_remote": False,
-            "timezone_id": "nsk"
-        }
-    )
-
-    branch, _ = Branch.objects.get_or_create(
-        code='distance',
-        defaults={
-            "name": 'Заочное',
-            "is_remote": True,
-            "timezone_id": "spb"
-        }
-    )
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
