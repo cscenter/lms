@@ -22,11 +22,10 @@ from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
 from core.mixins import TimezoneAwareModel
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Venue
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids
-from courses.models import Course, CourseNews, Venue, \
-    Assignment
+from courses.models import Course, CourseNews, Assignment
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \

@@ -3,12 +3,13 @@ import factory
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
-from core.models import City, Branch
+from core.models import City, Branch, Venue
 from core.tests.utils import ANOTHER_DOMAIN, TEST_DOMAIN
 from learning.settings import Branches
 
-__all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory', 'SiteFactory',
-           'Site', 'City', 'EmailTemplate', 'Branch',)
+__all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory',
+           'SiteFactory', 'VenueFactory', 'Venue', 'Site', 'City',
+           'EmailTemplate', 'Branch',)
 
 
 class SiteFactory(factory.DjangoModelFactory):
@@ -46,3 +47,12 @@ class BranchFactory(factory.DjangoModelFactory):
     class Meta:
         model = Branch
         django_get_or_create = ('code',)
+
+
+class VenueFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Venue
+
+    city = factory.Iterator(City.objects.all())
+    name = factory.Sequence(lambda n: "Test venue %03d" % n)
+    description = factory.Sequence(lambda n: "special venue for tests %03d" % n)

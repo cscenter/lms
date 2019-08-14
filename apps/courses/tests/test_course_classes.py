@@ -17,7 +17,8 @@ from core.urls import reverse
 from courses.forms import CourseClassForm
 from courses.models import CourseClass
 from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
-    CourseFactory, VenueFactory, SemesterFactory, CourseClassAttachmentFactory
+    CourseFactory, SemesterFactory, CourseClassAttachmentFactory
+from core.tests.factories import VenueFactory
 from users.tests.factories import TeacherFactory
 
 

@@ -9,8 +9,7 @@ from admission.tests.factories import InterviewFactory, \
 from core.admin import get_admin_url
 from core.models import Branch
 from core.urls import reverse
-from courses.tests.factories import VenueFactory
-
+from core.tests.factories import VenueFactory
 
 # FIXME: этот тест нужно переписать на tz aware datetime field, изначально тест и был так написан, но потом был удалён invitation.stream
 from learning.settings import Branches

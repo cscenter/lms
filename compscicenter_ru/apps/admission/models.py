@@ -31,8 +31,7 @@ from core.db.models import ScoreField
 from core.mixins import TimezoneAwareModel
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
-from courses.models import Venue
-from core.models import Branch
+from core.models import Branch, Venue
 from learning.settings import AcademicDegreeYears, Branches
 from users.constants import Roles
 

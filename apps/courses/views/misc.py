@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.views import generic
 
-from courses.models import Venue
+from core.models import Venue
 
 
 class VenueListView(generic.ListView):

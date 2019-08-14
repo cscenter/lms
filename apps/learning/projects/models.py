@@ -454,8 +454,7 @@ class Project(TimezoneAwareModel, TimeStampedModel):
         Branch,
         verbose_name=_("Branch"),
         related_name="+",  # Disable backwards relation
-        on_delete=models.CASCADE,
-        default=Branches.SPB)
+        on_delete=models.CASCADE)
     is_external = models.BooleanField(
         _("External project"),
         default=False)

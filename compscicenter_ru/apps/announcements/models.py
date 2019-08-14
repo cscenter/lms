@@ -104,7 +104,7 @@ class AnnouncementEventDetails(models.Model):
                                         primary_key=True,
                                         on_delete=models.CASCADE)
     venue = models.ForeignKey(
-        'courses.Venue',
+        'core.Venue',
         verbose_name=_("Venue"),
         on_delete=models.SET_NULL,
         blank=True,

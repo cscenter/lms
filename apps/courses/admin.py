@@ -6,12 +6,13 @@ from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.admin import TimezoneAwareModelForm, TimezoneAwareAdminSplitDateTimeWidget, \
+from core.admin import TimezoneAwareModelForm, \
+    TimezoneAwareAdminSplitDateTimeWidget, \
     TimezoneAwareSplitDateTimeField
 from core.compat import Django21BitFieldCheckboxSelectMultiple
 from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import CourseTeacher, Course, CourseClassAttachment, Venue, \
+from courses.models import CourseTeacher, Course, CourseClassAttachment, \
     Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
     AssignmentAttachment
 from users.constants import Roles
@@ -110,22 +111,6 @@ class CourseNewsAdmin(admin.ModelAdmin):
     created_local.short_description = _("Created")
 
 
-class VenueAdminForm(forms.ModelForm):
-    class Meta:
-        model = Venue
-        fields = '__all__'
-        widgets = {
-            'description': AdminRichTextAreaWidget(),
-            'flags': Django21BitFieldCheckboxSelectMultiple()
-        }
-
-
-class VenueAdmin(admin.ModelAdmin):
-    form = VenueAdminForm
-    list_display = ['name', 'city']
-    list_select_related = ["city"]
-
-
 class AssignmentAdminForm(TimezoneAwareModelForm):
     class Meta:
         model = Assignment
@@ -205,7 +190,6 @@ class AssignmentAdmin(admin.ModelAdmin):
     deadline_at_local.short_description = _("Assignment|deadline")
 
 
-admin.site.register(Venue, VenueAdmin)
 admin.site.register(MetaCourse, MetaCourseAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Semester, SemesterAdmin)
