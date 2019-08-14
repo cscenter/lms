@@ -1,7 +1,6 @@
 import factory
 
-from core.factories import CityFactory
-from learning.tests.factories import BranchFactory
+from core.tests.factories import CityFactory, BranchFactory
 from study_programs.models import AcademicDiscipline, StudyProgram, \
     StudyProgramCourseGroup
 

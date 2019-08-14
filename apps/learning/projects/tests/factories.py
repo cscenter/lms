@@ -5,7 +5,7 @@ from courses.tests.factories import SemesterFactory
 from learning.projects.forms import ReportReviewForm, PracticeCriteriaForm
 from learning.projects.models import Project, ProjectStudent, Report, Review, \
     ReportingPeriod, PracticeCriteria
-from learning.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory
 from users.tests.factories import UserFactory, StudentFactory
 
 

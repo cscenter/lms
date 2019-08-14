@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
 from core.timezone import aware_to_naive, naive_to_aware
-from .models import City
+from .models import City, Branch
 
 # Hide applications in the admin
 admin.site.unregister(Group)
@@ -207,7 +207,12 @@ class TimezoneAwareSplitDateTimeField(forms.SplitDateTimeField):
 
 # Models
 
+@admin.register(City)
 class CityAdmin(TranslationAdmin, admin.ModelAdmin):
     pass
 
-admin.site.register(City, CityAdmin)
+
+@admin.register(Branch)
+class BranchAdmin(admin.ModelAdmin):
+    list_display = ('name', 'code', 'order', 'is_remote')
+    list_filter = ('site',)

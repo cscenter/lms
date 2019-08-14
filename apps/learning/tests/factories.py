@@ -5,31 +5,21 @@ import datetime
 import factory
 from django.utils import timezone
 
+from core.tests.factories import BranchFactory
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseNewsNotification, Event, GraduateProfile, Invitation, \
     CourseInvitation
-from core.models import Branch
-from learning.settings import Branches
 from users.constants import Roles
 from users.tests.factories import UserFactory, StudentFactory
 
 __all__ = ('StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentFactory', 'InvitationFactory',
            'CourseInvitationFactory', 'AssignmentNotificationFactory',
-           'BranchFactory', 'CourseNewsNotificationFactory', 'EventFactory',
+           'CourseNewsNotificationFactory', 'EventFactory',
            'StudentAssignment', 'Enrollment', 'AssignmentComment',
            'GraduateProfileFactory')
-
-
-class BranchFactory(factory.DjangoModelFactory):
-    name = factory.Sequence(lambda n: "Branch %03d" % n)
-    code = factory.Iterator(x for x, _ in Branches.choices)
-
-    class Meta:
-        model = Branch
-        django_get_or_create = ('code',)
 
 
 # FIXME: create enrollment

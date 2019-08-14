@@ -11,7 +11,7 @@ from admission.views import SESSION_LOGIN_KEY
 from core.timezone import now_local
 from core.urls import reverse
 from learning.settings import Branches
-from learning.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory
 
 
 @pytest.mark.django_db

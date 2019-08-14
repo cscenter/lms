@@ -9,6 +9,7 @@ from pytest_django.lazy_django import skip_if_no_django
 from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
     INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
 from core.models import City, Branch
+from core.tests.factories import BranchFactory
 from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase, \
     ANOTHER_DOMAIN, TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID
 from learning.settings import Branches
@@ -117,29 +118,21 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             }
         )
 
-        branch, _ = Branch.objects.update_or_create(
-            code=Branches.SPB,
-            defaults={
-                "name": 'Санкт-Петербург',
-                "is_remote": False,
-            }
-        )
+        BranchFactory(code=Branches.SPB,
+                      site=Site.objects.get(id=TEST_DOMAIN_ID),
+                      name="Санкт-Петербург",
+                      is_remote=False)
 
-        branch, _ = Branch.objects.update_or_create(
-            code=Branches.NSK,
-            defaults={
-                "name": 'Новосибирск',
-                "is_remote": False,
-            }
-        )
+        BranchFactory(code=Branches.NSK,
+                      site=Site.objects.get(id=TEST_DOMAIN_ID),
+                      name="Новосибирск",
+                      time_zone='Asia/Novosibirsk',
+                      is_remote=False)
 
-        branch, _ = Branch.objects.update_or_create(
-            code=Branches.DISTANCE,
-            defaults={
-                "name": 'Заочное',
-                "is_remote": True,
-            }
-        )
+        BranchFactory(code=Branches.DISTANCE,
+                      site=Site.objects.get(id=TEST_DOMAIN_ID),
+                      name="Заочное",
+                      is_remote=True)
 
         from notifications import NotificationTypes
         for t in NotificationTypes:

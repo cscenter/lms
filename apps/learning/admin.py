@@ -1,20 +1,16 @@
 from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import TimezoneAwareModelForm, TimezoneAwareAdminSplitDateTimeWidget, \
+from core.admin import TimezoneAwareModelForm, \
+    TimezoneAwareAdminSplitDateTimeWidget, \
     TimezoneAwareSplitDateTimeField, RelatedSpecMixin
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from courses.models import Course
 from learning.models import GraduateProfile, Invitation, CourseInvitation
-from users.constants import Roles
-from users.models import User
 from .models import AssignmentComment, Enrollment, Event, Useful
-from core.models import Branch
 
 
 class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
@@ -101,10 +97,6 @@ class UsefulAdmin(admin.ModelAdmin):
     list_display = ['question', 'sort']
 
 
-class BranchAdmin(admin.ModelAdmin):
-    list_display = ('name', 'is_remote')
-
-
 class GraduateProfileAdmin(admin.ModelAdmin):
     list_display = ('student', 'graduation_year')
     list_filter = ('graduation_year',)
@@ -136,5 +128,4 @@ admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(Invitation, InvitationAdmin)
 admin.site.register(Event, NonCourseEventAdmin)
 admin.site.register(Useful, UsefulAdmin)
-admin.site.register(Branch, BranchAdmin)
 admin.site.register(GraduateProfile, GraduateProfileAdmin)
