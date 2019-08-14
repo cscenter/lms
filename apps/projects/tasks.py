@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 @job('default')
 def download_presentation_from_yandex_disk_supervisor(project_id, retries=3):
     """Download supervisor presentation to local storage by public link"""
-    from learning.projects.models import project_presentation_files
+    from projects.models import project_presentation_files
     Project = apps.get_model('projects', 'Project')
     project = Project.objects.get(pk=project_id)
     file_path = _download_presentation(
@@ -32,7 +32,7 @@ def download_presentation_from_yandex_disk_supervisor(project_id, retries=3):
 @job('default')
 def download_presentation_from_yandex_disk_students(project_id, retries=3):
     """Download participants presentation to local storage by public link"""
-    from learning.projects.models import project_presentation_files
+    from projects.models import project_presentation_files
     Project = apps.get_model('projects', 'Project')
     project = Project.objects.get(pk=project_id)
     file_path = _download_presentation(

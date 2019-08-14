@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class ProjectsConfig(AppConfig):
-    name = 'learning.projects'
+    name = 'projects'
     verbose_name = _("Student Projects")
     REPORT_ATTACHMENT = 1
     REPORT_COMMENT_ATTACHMENT = 2

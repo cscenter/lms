@@ -8,7 +8,7 @@ from core import comment_persistence
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.urls import reverse_lazy
 from core.widgets import UbereditorWidget
-from learning.projects.models import ReportComment, Review, Report, \
+from projects.models import ReportComment, Review, Report, \
     ProjectStudent, PracticeCriteria
 
 

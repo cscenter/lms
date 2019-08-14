@@ -4,7 +4,7 @@ import django.core.validators
 from django.db import migrations, models
 import django.db.models.deletion
 import django.utils.timezone
-import learning.projects.models
+import projects.models
 import model_utils.fields
 
 
@@ -25,11 +25,11 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(max_length=255, verbose_name='StudentProject|Name')),
                 ('description', models.TextField(blank=True, help_text='How to style text read <a href="/commenting-the-right-way/" target="_blank">here</a>. Partially HTML is enabled too.', verbose_name='Description')),
                 ('supervisor', models.CharField(help_text='Format: Last_name First_name Patronymic, Organization', max_length=255, verbose_name='StudentProject|Supervisor')),
-                ('supervisor_presentation', models.FileField(blank=True, upload_to=learning.projects.models.project_presentation_files, verbose_name='Supervisor presentation')),
+                ('supervisor_presentation', models.FileField(blank=True, upload_to=projects.models.project_presentation_files, verbose_name='Supervisor presentation')),
                 ('supervisor_presentation_url', models.URLField(blank=True, help_text='Supported public link to Yandex.Disk only', null=True, verbose_name='Link to supervisor presentation')),
                 ('supervisor_presentation_slideshare_url', models.URLField(blank=True, null=True, verbose_name='SlideShare URL for supervisor presentation')),
                 ('project_type', models.CharField(choices=[('practice', 'StudentProject|Practice'), ('research', 'StudentProject|Research')], max_length=10, verbose_name='StudentProject|Type')),
-                ('presentation', models.FileField(blank=True, upload_to=learning.projects.models.project_presentation_files, verbose_name='Participants presentation')),
+                ('presentation', models.FileField(blank=True, upload_to=projects.models.project_presentation_files, verbose_name='Participants presentation')),
                 ('presentation_url', models.URLField(blank=True, help_text='Supported public link to Yandex.Disk only', null=True, verbose_name='Link to participants presentation')),
                 ('presentation_slideshare_url', models.URLField(blank=True, null=True, verbose_name='SlideShare URL for participants presentation')),
                 ('is_external', models.BooleanField(default=False, verbose_name='External project')),
@@ -68,7 +68,7 @@ class Migration(migrations.Migration):
                 ('score_plans', models.PositiveSmallIntegerField(blank=True, choices=[(0, '0 - Much less than what has already been done, or the student does not understand them'), (1, '1 - It seems to have plans of normal size, but does not understand what to do.'), (2, '2 - All right with them')], null=True, verbose_name='Future plan')),
                 ('status', models.CharField(choices=[('sent', 'Sent'), ('review', 'Review'), ('rating', 'Waiting for final score'), ('completed', 'Completed')], default='sent', max_length=15, verbose_name='Status')),
                 ('text', models.TextField(blank=True, help_text='How to style text read <a href="/commenting-the-right-way/" target="_blank">here</a>. Partially HTML is enabled too.', verbose_name='Description')),
-                ('file', models.FileField(blank=True, null=True, upload_to=learning.projects.models.report_file_name, verbose_name='Report file')),
+                ('file', models.FileField(blank=True, null=True, upload_to=projects.models.report_file_name, verbose_name='Report file')),
                 ('score_activity', models.PositiveSmallIntegerField(blank=True, choices=[(0, 'Poor commit history'), (1, 'Normal activity')], null=True, validators=[django.core.validators.MaxValueValidator(1)], verbose_name='Student activity in cvs')),
                 ('score_activity_note', models.TextField(blank=True, null=True, verbose_name='Note for criterion `score_activity`')),
                 ('score_quality', models.PositiveSmallIntegerField(blank=True, choices=[(0, 'Bad report quality and unrelated comments'), (1, 'Bad report quality, but sensible comments'), (2, 'Good report quality and sensible comments')], null=True, validators=[django.core.validators.MaxValueValidator(2)], verbose_name="Report's quality")),
@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
                 ('created', model_utils.fields.AutoCreatedField(default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', model_utils.fields.AutoLastModifiedField(default=django.utils.timezone.now, editable=False, verbose_name='modified')),
                 ('text', models.TextField(blank=True, help_text='LaTeX+Markdown is enabled', verbose_name='ReportComment|text')),
-                ('attached_file', models.FileField(blank=True, upload_to=learning.projects.models.report_comment_attachment_upload_to)),
+                ('attached_file', models.FileField(blank=True, upload_to=projects.models.report_comment_attachment_upload_to)),
             ],
             options={
                 'verbose_name': 'Report comment',

@@ -6,9 +6,9 @@ from django.core.management import BaseCommand
 
 from core.timezone import now_local
 from core.models import Branch
-from learning.projects.constants import REPORTING_NOTIFY_BEFORE_START, \
+from projects.constants import REPORTING_NOTIFY_BEFORE_START, \
     REPORTING_NOTIFY_BEFORE_DEADLINE
-from learning.projects.models import ReportingPeriod
+from projects.models import ReportingPeriod
 from notifications import NotificationTypes
 
 

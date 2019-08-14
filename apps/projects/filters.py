@@ -10,8 +10,8 @@ from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from learning.projects.constants import ProjectTypes
-from learning.projects.models import Project, ProjectStudent
+from projects.constants import ProjectTypes
+from projects.models import Project, ProjectStudent
 from learning.settings import GradeTypes
 from users.constants import Roles
 from users.models import User

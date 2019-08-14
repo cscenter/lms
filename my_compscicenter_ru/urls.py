@@ -40,7 +40,7 @@ urlpatterns = [
     path('staff/', include("staff.urls")),
     path('stats/', include("stats.urls")),
     path('surveys/', include("surveys.urls")),
-    path('', include('learning.projects.urls')),
+    path('', include('projects.urls')),
 
     path('', include('admission.urls')),
 

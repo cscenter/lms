@@ -36,8 +36,8 @@ from core.utils import bucketize
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import Enrollment, GraduateProfile
 from core.models import Branch
-from learning.projects.constants import ProjectTypes
-from learning.projects.models import ProjectStudent
+from projects.constants import ProjectTypes
+from projects.models import ProjectStudent
 from learning.settings import Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
 from publications.models import ProjectPublication

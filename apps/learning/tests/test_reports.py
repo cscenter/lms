@@ -5,7 +5,7 @@ from django.utils.encoding import smart_bytes
 
 from core.urls import reverse
 from courses.utils import get_term_by_index
-from learning.projects.tests.factories import ProjectFactory
+from projects.tests.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
 from learning.settings import GradingSystems, StudentStatuses, GradeTypes

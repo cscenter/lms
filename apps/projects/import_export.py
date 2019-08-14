@@ -2,7 +2,7 @@
 from django.conf import settings
 from import_export import resources, fields, widgets
 
-from learning.projects.models import ProjectStudent
+from projects.models import ProjectStudent
 
 
 class CityWidget(widgets.Widget):
