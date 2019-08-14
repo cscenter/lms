@@ -81,7 +81,10 @@ class Branch(TimezoneAwareModel, models.Model):
         verbose_name_plural = _("Branches")
 
     def __str__(self):
-        return f"{self.name} [{self.site}]"
+        if self.site_id != settings.SITE_ID:
+            return f"{self.name} [{self.site}]"
+        else:
+            return self.name
 
     def get_timezone(self) -> datetime.tzinfo:
         return self._timezone

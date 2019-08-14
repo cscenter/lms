@@ -219,9 +219,9 @@ def queryset_iterator(queryset, chunk_size=1000):
     Memory efficient iteration over a Django Queryset ordered by the
     primary key.
 
-    Django normally loads all objects into it's memory when iterating over
+    Django normally loads all objects into memory when iterating over
     a queryset (even with .iterator, although in that case it's not Django
-    holding it in it's memory, but your database client)
+    holding data in memory, but your database client)
 
     Note:
         Does not support ordered query sets.
