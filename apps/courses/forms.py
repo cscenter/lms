@@ -7,10 +7,10 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from core.admin import TimezoneAwareModelForm, TimezoneAwareSplitDateTimeField
-from core.models import LATEX_MARKDOWN_HTML_ENABLED
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Venue
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
-from courses.models import Course, CourseNews, MetaCourse, Venue, CourseClass, \
+from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
     Assignment
 from courses.constants import ClassTypes
 from core.forms import CANCEL_SAVE_PAIR

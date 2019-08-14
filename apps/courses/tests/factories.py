@@ -4,15 +4,15 @@ import factory
 from django.utils import timezone
 
 from core.models import City
-from core.tests.factories import BranchFactory
+from core.tests.factories import VenueFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
-    AssignmentAttachment, Venue
+    AssignmentAttachment
 from courses.utils import get_current_term_pair, get_term_by_index
 from users.tests.factories import TeacherFactory
 
 __all__ = (
-    "MetaCourseFactory", "SemesterFactory", "VenueFactory", "CourseFactory",
+    "MetaCourseFactory", "SemesterFactory", "CourseFactory",
     "CourseNewsFactory", "AssignmentFactory", "CourseTeacherFactory",
     "CourseClassFactory", "CourseClassAttachmentFactory",
     "AssignmentAttachmentFactory"
@@ -56,15 +56,6 @@ class SemesterFactory(factory.DjangoModelFactory):
         """Get or create term model which following this one"""
         year, prev_term = get_term_by_index(term.index - 1)
         return cls.create(year=year, type=prev_term)
-
-
-class VenueFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = Venue
-
-    city = factory.Iterator(City.objects.all())
-    name = factory.Sequence(lambda n: "Test venue %03d" % n)
-    description = factory.Sequence(lambda n: "special venue for tests %03d" % n)
 
 
 class CourseFactory(factory.DjangoModelFactory):

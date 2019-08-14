@@ -15,10 +15,9 @@ from admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment, \
     InterviewSlot, InterviewStream, InterviewInvitation, University
 from admission.signals import post_save_interview
-from courses.tests.factories import VenueFactory
 from core.models import Branch
 from learning.settings import AcademicDegreeYears
-from core.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory, VenueFactory
 from users.constants import Roles
 from users.tests.factories import UserFactory, add_user_groups
 

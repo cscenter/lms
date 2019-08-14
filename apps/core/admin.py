@@ -15,7 +15,11 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
+from core.compat import Django21BitFieldCheckboxSelectMultiple
+from core.models import Venue
+
 from core.timezone import aware_to_naive, naive_to_aware
+from core.widgets import AdminRichTextAreaWidget
 from .models import City, Branch
 
 # Hide applications in the admin
@@ -216,3 +220,20 @@ class CityAdmin(TranslationAdmin, admin.ModelAdmin):
 class BranchAdmin(admin.ModelAdmin):
     list_display = ('name', 'code', 'order', 'city')
     list_filter = ('site',)
+
+
+class VenueAdminForm(forms.ModelForm):
+    class Meta:
+        model = Venue
+        fields = '__all__'
+        widgets = {
+            'description': AdminRichTextAreaWidget(),
+            'flags': Django21BitFieldCheckboxSelectMultiple()
+        }
+
+
+@admin.register(Venue)
+class VenueAdmin(admin.ModelAdmin):
+    form = VenueAdminForm
+    list_display = ('name', 'city')
+    list_select_related = ("city",)

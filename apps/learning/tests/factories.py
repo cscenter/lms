@@ -5,7 +5,7 @@ import datetime
 import factory
 from django.utils import timezone
 
-from core.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory, VenueFactory
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \

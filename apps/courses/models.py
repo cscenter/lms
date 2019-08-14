@@ -19,7 +19,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.mixins import DerivableFieldsMixin, TimezoneAwareModel
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Branch
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Venue
 from core.timezone import now_local, TzAware
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids, get_youtube_video_id
@@ -135,58 +135,6 @@ class Semester(models.Model):
             return self.year
         else:
             return self.year - 1
-
-
-class Venue(TimezoneAwareModel, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
-
-    INTERVIEW = 'interview'
-    LECTURE = 'lecture'
-    UNSPECIFIED = 0  # BitField uses BigIntegerField internal
-
-    city = models.ForeignKey(City, null=True, blank=True,
-                             verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE,
-                             on_delete=models.PROTECT)
-    name = models.CharField(_("Venue|Name"), max_length=140)
-    address = models.CharField(
-        _("Venue|Address"),
-        help_text=(_("Should be resolvable by Google Maps")),
-        max_length=500,
-        blank=True)
-    description = models.TextField(
-        _("Description"),
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    directions = models.TextField(
-        _("Directions"),
-        blank=True,
-        null=True)
-    flags = BitField(
-        verbose_name=_("Flags"),
-        flags=(
-            (LECTURE, _('Class')),
-            (INTERVIEW, _('Interview')),
-        ),
-        default=(LECTURE,),
-        help_text=(_("Set purpose of this place")))
-    is_preferred = models.BooleanField(
-        _("Preferred"),
-        help_text=(_("Will be displayed on top of the venue list")),
-        default=False)
-
-    class Meta:
-        ordering = ["-is_preferred", "name"]
-        verbose_name = _("Venue")
-        verbose_name_plural = _("Venues")
-
-    def get_timezone(self):
-        return settings.TIME_ZONES[self.city_id]
-
-    def __str__(self):
-        return "{0}".format(smart_text(self.name))
-
-    def get_absolute_url(self):
-        return reverse('venue_detail', args=[self.pk])
 
 
 def meta_course_cover_upload_to(instance: "MetaCourse", filename) -> str:

@@ -9,8 +9,8 @@ from core.tests.utils import CSCTestCase
 from django.utils import timezone
 
 from core.urls import reverse
-from courses.tests.factories import CourseFactory, CourseClassFactory, \
-    VenueFactory
+from courses.tests.factories import CourseFactory, CourseClassFactory
+from core.tests.factories import VenueFactory
 from learning.tests.factories import EventFactory, \
     EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
