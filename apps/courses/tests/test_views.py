@@ -9,6 +9,8 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils import formats
 
+from core.tests.factories import VenueFactory
+from core.urls import reverse
 from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
 from users.constants import Roles
@@ -139,3 +141,11 @@ def test_course_assignment_timezone(settings, client):
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] is None
+
+
+@pytest.mark.django_db
+def test_venue_list(client):
+    v = VenueFactory(city__code=settings.DEFAULT_CITY_CODE)
+    response = client.get(reverse('venue_list'))
+    assert response.status_code == 200
+    assert v in list(response.context_data['object_list'])
