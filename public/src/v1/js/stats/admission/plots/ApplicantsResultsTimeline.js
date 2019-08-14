@@ -44,14 +44,14 @@ export default class ApplicantsResultsTimeline {
             },
             data: this.state.data
         });
-        let promise = options.apiRequest || this.getStats(options.cityCode);
+        let promise = options.apiRequest || this.getStats(options.branchId);
         promise
             .then(this.convertData)
             .done(this.reflow);
     }
 
-    getStats(cityCode) {
-        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](cityCode);
+    getStats(branchId) {
+        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](branchId);
         return $.getJSON(dataURL);
     }
 
