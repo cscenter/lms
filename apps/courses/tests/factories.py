@@ -4,6 +4,7 @@ import factory
 from django.utils import timezone
 
 from core.models import City
+from core.tests.factories import BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, Venue

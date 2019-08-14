@@ -161,6 +161,12 @@ class CourseClassForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         course = kwargs.pop('course', None)
         assert course is not None
+        super().__init__(*args, **kwargs)
+        self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
+            city_id=course.city_id)
+        self.instance.course = course
+
+        self.helper = FormHelper(self)
         if "instance" in kwargs:
             remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
                 "".join("<li>{}</li>".format(
@@ -171,7 +177,6 @@ class CourseClassForm(forms.ModelForm):
                         in kwargs["instance"].courseclassattachment_set.all()))
         else:
             remove_links = ""
-        self.helper = FormHelper()
         self.helper.layout = Layout(
             Div(Div('type', css_class='col-xs-2'),
                 Div('venue', css_class='col-xs-3'),
@@ -202,10 +207,7 @@ class CourseClassForm(forms.ModelForm):
                 CANCEL_SAVE_PAIR
             )
         )
-        super().__init__(*args, **kwargs)
-        self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
-            city_id=course.city_id)
-        self.instance.course = course
+
 
     class Meta:
         model = CourseClass
