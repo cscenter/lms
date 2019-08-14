@@ -68,7 +68,6 @@ INSTALLED_APPS = [
     'prettyjson',
     'mptt',
     'django_rq',
-    'django_js_reverse',
     'webpack_loader',
     'django_filters',
     'rest_framework',  # what about club site?
@@ -87,11 +86,6 @@ INSTALLED_APPS = [
     'library.apps.LibraryConfig',
     'captcha',
 ]
-
-# django-js-reverse settings
-JS_REVERSE_JS_VAR_NAME = 'URLS'
-JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['api']
-JS_REVERSE_OUTPUT_PATH = str(APPS_DIR / "assets" / "js" / "vendor")
 
 # oEmbed
 MICAWBER_PROVIDERS = "courses.micawber_providers.oembed_providers"

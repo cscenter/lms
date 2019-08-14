@@ -34,17 +34,17 @@
     <form action="" method="GET" id="campaigns-filter-form">
         <div class="row">
             <div class="col-xs-5 form-group">
-                <select name="city_code" class="form-control selectpicker" id="city-filter">
-                    {% for city_code, city_name in cities.items %}
-                        <option value="{{ city_code }}"
-                                {% if data.selected.city_code == city_code %}selected="selected"{% endif %}
-                                {% if campaigns|lookup:city_code|length == 0 %}disabled{% endif %}>{{ city_name }}</option>
+                <select class="form-control selectpicker" id="branch-filter">
+                    {% for branch in branches.values %}
+                        <option value="{{ branch.id }}"
+                                {% if data.selected.branch == branch %}selected="selected"{% endif %}
+                                {% if campaigns|lookup:branch|length == 0 %}disabled{% endif %}>{{ branch.name }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-xs-5 form-group">
                 <select name="campaign" class="form-control selectpicker" id="campaign-filter">
-                    {% for c in campaigns|lookup:data.selected.city_code %}
+                    {% for c in campaigns|lookup:data.selected.branch %}
                         <option {% if data.selected.campaign_id == c.pk %}selected="selected"{% endif %} value="{{ c.pk }}">{{ c.year }}</option>
                     {% endfor %}
                 </select>
@@ -57,7 +57,7 @@
         </div>
     </form>
 
-    <h3>Город / {% for c in campaigns|lookup:data.selected.city_code %}{% if c.pk == data.selected.campaign_id %}{{ c.city__name }}{% endif %}{% endfor %}</h3>
+    <h3>Город / {% for c in campaigns|lookup:data.selected.branch %}{% if c.pk == data.selected.campaign_id %}{{ c.branch.name }}{% endif %}{% endfor %}</h3>
     <div class="panel">
         <div class="panel-body">
             <h5 class="text-uppercase">Этапы</h5>
@@ -95,7 +95,7 @@
         </div>
     </div>
 
-    <h3>Набор / {% for c in campaigns|lookup:data.selected.city_code %}{% if c.pk == data.selected.campaign_id %}{{ c.city__name }}, {{ c.year }}{% endif %}{% endfor %}</h3>
+    <h3>Набор / {% for c in campaigns|lookup:data.selected.branch %}{% if c.pk == data.selected.campaign_id %}{{ c.branch.name }}, {{ c.year }}{% endif %}{% endfor %}</h3>
     <div class="panel">
         <div class="panel-body">
             <h5 class="text-uppercase">Этапы</h5>
@@ -149,9 +149,6 @@
         <div class="panel-body">
             <h5 class="text-uppercase">Оценки собеседующих</h5>
             <form action="" method="GET" id="interviewers-filter-form">
-                {% if request.GET.city_code %}
-                    <input type="hidden" name="city_code" value="{{ request.GET.city_code }}">
-                {% endif %}
                 {% if request.GET.campaign %}
                     <input type="hidden" name="campaign" value="{{ request.GET.campaign }}">
                 {% endif %}
