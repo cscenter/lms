@@ -13,14 +13,14 @@ from learning.settings import Branches
 
 @pytest.mark.django_db
 def test_application_form_stats_empty_results(client, curator):
-    url = reverse("api:stats_admission_application_form_submission",
-                  kwargs={"branch_code": Branches.SPB},
-                  subdomain=settings.LMS_SUBDOMAIN)
     start = datetime(year=2018, month=3, day=14, hour=11, tzinfo=pytz.UTC)
     campaign = CampaignFactory(branch__code=Branches.SPB,
                                application_starts_at=start,
                                application_ends_at=start + timedelta(hours=1),
                                year=2018)
+    url = reverse("api:stats_admission_application_form_submission",
+                  kwargs={"branch_id": campaign.branch.id},
+                  subdomain=settings.LMS_SUBDOMAIN)
     client.login(curator)
     response = client.get(url)
     assert response.status_code == 200
@@ -36,14 +36,14 @@ def test_application_form_stats_empty_results(client, curator):
 
 @pytest.mark.django_db
 def test_application_form_stats(client, curator):
-    url = reverse("api:stats_admission_application_form_submission",
-                  kwargs={"branch_code": Branches.SPB},
-                  subdomain=settings.LMS_SUBDOMAIN)
     start = datetime(year=2018, month=3, day=14, hour=11, tzinfo=pytz.UTC)
     campaign = CampaignFactory(branch__code=Branches.SPB,
                                application_starts_at=start,
                                application_ends_at=start + timedelta(days=15),
                                year=2018)
+    url = reverse("api:stats_admission_application_form_submission",
+                  kwargs={"branch_id": campaign.branch_id},
+                  subdomain=settings.LMS_SUBDOMAIN)
     ApplicantFactory(campaign=campaign, created=start - timedelta(hours=1))
     ApplicantFactory.create_batch(3,
                                   campaign=campaign,

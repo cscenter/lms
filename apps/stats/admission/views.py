@@ -42,9 +42,9 @@ class CampaignsStagesByYears(ReadOnlyModelViewSet):
     permission_classes = [CuratorAccessPermission]
 
     def list(self, request, *args, **kwargs):
-        branch_code = self.kwargs.get('branch_code')
+        branch_id = self.kwargs.get('branch_id')
         applicants = (Applicant.objects
-                      .filter(campaign__branch__code=branch_code)
+                      .filter(campaign__branch=branch_id)
                       .values('campaign_id', 'campaign__year')
                       .annotate(application_form=Count("campaign_id"),
                                 testing=TestingCountAnnotation,
@@ -94,7 +94,7 @@ class ApplicationFormSubmissionByDays(ListAPIView):
 
     def list(self, request, *args, **kwargs):
         campaigns = (Campaign.objects
-                     .filter(branch__code=self.kwargs['branch_code'],
+                     .filter(branch_id=self.kwargs['branch_id'],
                              year__gte=2017))
         data = self.get_stat(campaigns)
         return Response(data)
@@ -166,9 +166,9 @@ class CampaignStatsApplicantsResults(ListRenderersMixin, PandasView):
     pandas_serializer_class = CampaignResultsTimelineSerializer
 
     def get_queryset(self):
-        branch_code = self.kwargs.get('branch_code')
+        branch_id = self.kwargs.get('branch_id')
         qs = (Applicant.objects
-              .filter(campaign__branch__code=branch_code,
+              .filter(campaign__branch_id=branch_id,
                       status__in=STATUSES)
               .values('campaign__year', 'status')
               .annotate(total=Count("status"))

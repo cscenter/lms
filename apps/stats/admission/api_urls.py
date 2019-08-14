@@ -12,7 +12,7 @@ from stats.admission.views import CampaignsStagesByYears, \
 
 urlpatterns = [
     # Stages
-    url(r'^cities/(?P<branch_code>\w+)/stages/$',
+    url(r'^branches/(?P<branch_id>\w+)/stages/$',
         CampaignsStagesByYears.as_view({'get': 'list'}),
         name='stats_admission_campaigns_stages_by_year'),
     url(r'^campaigns/(?P<campaign_id>\d+)/stages/by-university/$',
@@ -22,8 +22,8 @@ urlpatterns = [
         CampaignStagesByCourses.as_view({'get': 'list'}),
         name='stats_admission_campaign_stages_by_course'),
     # Applicants
-    url(r'^cities/(?P<branch_code>\w+)/applicants/$', CampaignStatsApplicantsResults.as_view(), name='stats_admission_campaign_applicants_results'),
-    url(r'^cities/(?P<branch_code>\w+)/applicants/form-submissions/', ApplicationFormSubmissionByDays.as_view(), name='stats_admission_application_form_submission'),
+    url(r'^branches/(?P<branch_id>\d+)/applicants/$', CampaignStatsApplicantsResults.as_view(), name='stats_admission_campaign_applicants_results'),
+    url(r'^branches/(?P<branch_id>\d+)/applicants/form-submissions/', ApplicationFormSubmissionByDays.as_view(), name='stats_admission_application_form_submission'),
     url(r'^campaigns/(?P<campaign_id>\d+)/applicants/by-university/$',
         CampaignResultsByUniversities.as_view(),
         name='stats_admission_campaign_applicants_by_university'),
