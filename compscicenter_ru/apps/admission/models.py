@@ -28,7 +28,7 @@ from admission.utils import slot_range
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
 from core.db.models import ScoreField
-from core.mixins import TimezoneAwareModel
+from core.timezone import TimezoneAwareModel
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
 from core.models import Branch, Venue

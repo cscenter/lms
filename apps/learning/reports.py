@@ -13,7 +13,7 @@ from courses.models import Semester
 from learning.permissions import has_master_degree
 from projects.models import ReportComment, ProjectStudent
 from learning.settings import StudentStatuses, GradeTypes
-from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from learning.utils import grade_to_mark
 from users.constants import Roles
 from users.models import User, SHADCourseRecord

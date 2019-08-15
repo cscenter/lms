@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 from operator import attrgetter
 from typing import List, Optional
 
-from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 from django.utils.formats import date_format
@@ -14,7 +13,7 @@ from admission.constants import INVITATION_EXPIRED_IN_HOURS, \
 from admission.models import InterviewStream, InterviewInvitation, \
     Applicant
 from admission.utils import logger
-from core.constants import DATE_FORMAT_RU
+from core.timezone.constants import DATE_FORMAT_RU
 from core.tests.utils import ANOTHER_DOMAIN_ID
 from learning.roles import Roles
 from users.models import User

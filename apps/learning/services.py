@@ -2,11 +2,10 @@ from django.db import transaction
 from django.db.models import Q, OuterRef, Value, F, TextField
 from django.db.models.functions import Concat
 
-from core.constants import DATE_FORMAT_RU
+from core.timezone.constants import DATE_FORMAT_RU
 from core.db.expressions import SubqueryCount
 from core.timezone import now_local
 from courses.models import Course
-from django.utils.translation import ugettext_lazy as _
 from learning.models import Enrollment
 from learning.utils import populate_assignments_for_student, \
     update_course_learners_count

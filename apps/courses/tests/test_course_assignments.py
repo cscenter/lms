@@ -3,7 +3,7 @@ import pytest
 from django.forms import model_to_dict
 from django.utils.encoding import smart_bytes
 
-from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment
 from courses.tests.factories import CourseFactory, AssignmentFactory

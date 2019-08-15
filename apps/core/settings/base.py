@@ -25,6 +25,7 @@ DEBUG = MODELTRANSLATION_DEBUG = True
 THUMBNAIL_DEBUG = False
 
 DEFAULT_CITY_CODE = "spb"
+DEFAULT_TIMEZONE = pytz.timezone("Europe/Moscow")
 CENTER_BRANCHES_CITY_CODES = ['spb', 'nsk']
 
 CITIES = {

@@ -21,7 +21,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
-from core.mixins import TimezoneAwareModel
+from core.timezone import TimezoneAwareModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Venue
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids

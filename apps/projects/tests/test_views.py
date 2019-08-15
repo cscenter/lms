@@ -4,6 +4,7 @@ import pytest
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 
+from core.tests.utils import now_for_branch
 from core.timezone import now_local
 from core.urls import reverse_lazy, reverse
 from courses.tests.factories import SemesterFactory
@@ -88,9 +89,8 @@ def test_project_reviewer_only_mixin_security(client, curator):
 def test_reviewer_list(client, curator):
     """Test GET-filter `show` works"""
     reviewer = ProjectReviewerFactory.create()
-    year, term_type = get_current_term_pair('spb')
-    semester = SemesterFactory(year=year, type=term_type)
-    semester_prev = SemesterFactory(year=year - 1, type=term_type)
+    semester = SemesterFactory.create_current(for_branch=Branches.SPB)
+    semester_prev = SemesterFactory.create_prev(semester)
     client.login(reviewer)
     student = StudentFactory()
     response = client.get(URL_REPORTS)
@@ -140,13 +140,12 @@ def test_create_project_presentations(client):
 
 @pytest.mark.django_db
 def test_project_detail_unauth(client):
-    """Make sure unauth user never see report form with any status"""
+    """Make sure anonymous user has no permissions to access a report form"""
     student = StudentFactory()
-    year, term_type = get_current_term_pair('spb')
-    semester = SemesterFactory(year=year, type=term_type)
+    current_semester = SemesterFactory.create_current(for_branch=Branches.SPB)
     reviewer = ProjectReviewerFactory()
     project = ProjectFactory.create(students=[student], reviewers=[reviewer],
-                                    semester=semester)
+                                    semester=current_semester)
     response = client.get(project.get_absolute_url())
     assert smart_bytes("Следить за проектом") not in response.content
     assert "can_enroll" in response.context
@@ -175,7 +174,7 @@ def test_project_detail_student_participant(client):
     response = client.get(project.get_absolute_url())
     assert "can_enroll" in response.context
     assert response.context["can_enroll"] is False
-    today = now_local(Branches.SPB).date()
+    today = now_for_branch(Branches.SPB).date()
     rp = ReportingPeriodFactory(start_on=today + timedelta(days=1),
                                 end_on=today + timedelta(days=2),
                                 term=semester, branch=None)
@@ -221,7 +220,7 @@ def test_project_detail_student_participant_notifications(client, curator):
     # This curator not in reviewers group and doesn't receive notifications
     curator2 = CuratorFactory()
     semester = SemesterFactory.create_current()
-    today = now_local(Branches.SPB).date()
+    today = now_for_branch(Branches.SPB).date()
     rp = ReportingPeriodFactory(term=semester, start_on=today, branch=None,
                                 end_on=today + timedelta(days=1))
     student = StudentFactory(branch__code=Branches.SPB)
@@ -242,9 +241,8 @@ def test_project_detail_student_participant_notifications(client, curator):
 def test_project_detail_reviewer(client, curator):
     reviewer = ProjectReviewerFactory()
     client.login(reviewer)
-    year, term_type = get_current_term_pair('spb')
-    semester = SemesterFactory(year=year, type=term_type)
-    semester_prev = SemesterFactory(year=year - 1, type=term_type)
+    semester = SemesterFactory.create_current(for_branch=Branches.SPB)
+    semester_prev = SemesterFactory.create_prev(semester)
     student = StudentFactory(branch__code=Branches.SPB)
     project = ProjectFactory(students=[student], semester=semester_prev)
     url = project.get_absolute_url()
@@ -267,9 +265,8 @@ def test_project_detail_reviewer(client, curator):
 
 @pytest.mark.django_db
 def test_reviewer_project_enroll(client, curator):
-    year, term_type = get_current_term_pair('spb')
-    semester = SemesterFactory(year=year, type=term_type)
-    semester_prev = SemesterFactory(year=year - 1, type=term_type)
+    semester = SemesterFactory.create_current(for_branch=Branches.SPB)
+    semester_prev = SemesterFactory.create_prev(semester)
     student = StudentFactory()
     old_project = ProjectFactory(students=[student], semester=semester_prev)
     url_for_old = reverse("projects:reviewer_project_enroll",
@@ -348,8 +345,7 @@ def test_report_notifications(client, curator):
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
     client.login(reviewer1)
-    year, term_type = get_current_term_pair('spb')
-    semester = SemesterFactory(year=year, type=term_type)
+    semester = SemesterFactory.create_current(for_branch=Branches.SPB)
     student1, student2 = StudentFactory.create_batch(2, branch__code=Branches.SPB)
     project = ProjectFactory(students=[student1, student2],
                              semester=semester,
@@ -502,8 +498,7 @@ def test_reportpage_summarize_notifications(client, curator):
     curator2 = CuratorFactory.create()
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
     client.login(reviewer1)
-    year, term_type = get_current_term_pair('spb')
-    semester = SemesterFactory(year=year, type=term_type)
+    semester = SemesterFactory.create_current(for_branch=Branches.SPB)
     student1, student2 = StudentFactory.create_batch(2)
     project = ProjectFactory(students=[student1, student2],
                              semester=semester,

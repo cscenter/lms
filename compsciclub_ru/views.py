@@ -64,9 +64,6 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
                    .in_city(self.request.city_code))
         return (CalendarEvent(e) for e in classes)
 
-    def get_default_timezone(self) -> Union[Timezone, CityCode]:
-        return self.request.city_code
-
 
 class IndexView(generic.TemplateView):
     template_name = "compsciclub_ru/index.html"
@@ -75,7 +72,7 @@ class IndexView(generic.TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         try:
             # All club courses in MSK timezone
-            year, term_type = get_current_term_pair('spb')
+            year, term_type = get_current_term_pair()
             if term_type == SemesterTypes.SUMMER:
                 term_type = SemesterTypes.AUTUMN
             featured_term = Semester.objects.get(year=year, type=term_type)

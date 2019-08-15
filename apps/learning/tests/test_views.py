@@ -3,17 +3,14 @@ import datetime
 import logging
 
 import pytest
-import pytz
-from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
 from auth.mixins import PermissionRequiredMixin
-from core.tests.utils import CSCTestCase, ANOTHER_DOMAIN_ID
+from core.tests.utils import CSCTestCase
 from core.timezone import now_local
 from core.urls import city_aware_reverse, reverse
-from courses.models import Course
 from courses.tests.factories import *
 from courses.utils import get_current_term_pair
 from learning.settings import Branches
@@ -112,7 +109,7 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_assignment_list(self):
         student = StudentFactory(city_id='spb')
         teacher = TeacherFactory(city_id='spb')
-        today = now_local(student.city_code).date()
+        today = now_local(student.get_timezone()).date()
         next_day = today + datetime.timedelta(days=1)
         course = CourseFactory(teachers=[teacher],
                                semester=SemesterFactory.create_current(),
@@ -391,7 +388,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(response.context['ongoing_rest']) == 0
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['archive_enrolled']) == 0
-    now_year, now_season = get_current_term_pair(student_spb.city_id)
+    now_year, now_season = get_current_term_pair(student_spb.get_timezone())
     current_term_spb = SemesterFactory.create(year=now_year, type=now_season)
     cos = CourseFactory.create_batch(4, semester=current_term_spb,
                                      city_id='spb', is_open=False)
@@ -412,8 +409,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(cos_available) == len(response.context['ongoing_rest'])
     assert set(cos_available) == set(response.context['ongoing_rest'])
     # Add co from other city
-    now_year, now_season = get_current_term_pair('nsk')
-    current_term_nsk = SemesterFactory.create(year=now_year, type=now_season)
+    current_term_nsk = SemesterFactory.create_current(for_branch=Branches.NSK)
     co_nsk = CourseFactory.create(semester=current_term_nsk,
                                   city_id='nsk', is_open=False)
     response = client.get(url)
@@ -438,80 +434,6 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(response.context['ongoing_rest']) == 2
     assert set(response.context['ongoing_rest']) == {co_nsk, co_open}
     assert len(response.context['archive_enrolled']) == 0
-
-
-@pytest.mark.django_db
-@pytest.mark.urls('compsciclub_ru.urls')
-@pytest.mark.skip('Для этого теста нужно полностью подменять конфиг')
-def test_student_courses_list_csclub(client, settings, mocker):
-    settings.SITE_ID = settings.CLUB_SITE_ID
-    settings.SUBDOMAIN_URLCONFS = {None: settings.ROOT_URLCONF}
-    # Fix year and term
-    mocked_timezone = mocker.patch('django.utils.timezone.now')
-    now_fixed = datetime.datetime(2016, month=3, day=8, tzinfo=pytz.utc)
-    mocked_timezone.return_value = now_fixed
-    now_year, now_season = get_current_term_pair(settings.DEFAULT_CITY_CODE)
-    assert now_season == "spring"
-    url = reverse('study:course_list')
-    student = StudentFactory(required_groups__site_id=ANOTHER_DOMAIN_ID,
-                             city_id='spb')
-    client.login(student)
-    response = client.get(url)
-    assert response.status_code == 200
-    # Make sure in tests we fallback to default city which is 'spb'
-    assert response.context['request'].city_code == 'spb'
-    # Show only open courses
-    current_term = SemesterFactory.create_current(
-        city_code=settings.DEFAULT_CITY_CODE)
-    assert current_term.type == "spring"
-    settings.SITE_ID = settings.CENTER_SITE_ID
-    co = CourseFactory.create(semester__type=now_season,
-                              semester__year=now_year, city_id='nsk',
-                              is_open=False)
-    settings.SITE_ID = settings.CLUB_SITE_ID
-    # compsciclub.ru can't see center courses with default manager
-    assert Course.objects.count() == 0
-    response = client.get(url)
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['ongoing_rest']) == 0
-    assert len(response.context['archive_enrolled']) == 0
-    settings.SITE_ID = settings.CENTER_SITE_ID
-    co.is_open = True
-    co.save()
-    settings.SITE_ID = settings.CLUB_SITE_ID
-    assert Course.objects.count() == 1
-    response = client.get(url)
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['ongoing_rest']) == 0
-    assert len(response.context['archive_enrolled']) == 0
-    co.city_id = 'spb'
-    co.save()
-    response = client.get(url)
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['ongoing_rest']) == 1
-    assert set(response.context['ongoing_rest']) == {co}
-    assert len(response.context['archive_enrolled']) == 0
-    # Summer courses are hidden for compsciclub.ru
-    summer_semester = SemesterFactory.create(year=now_year - 1, type='summer')
-    co.semester = summer_semester
-    co.save()
-    settings.SITE_ID = settings.CENTER_SITE_ID
-    co_active = CourseFactory.create(semester__type=now_season,
-                                     semester__year=now_year,
-                                     city_id='spb',
-                                     is_open=True)
-    settings.SITE_ID = settings.CLUB_SITE_ID
-    response = client.get(url)
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['ongoing_rest']) == 1
-    assert set(response.context['ongoing_rest']) == {co_active}
-    assert len(response.context['archive_enrolled']) == 0
-    # But student can see them in list if they already enrolled
-    EnrollmentFactory.create(student=student, course=co)
-    response = client.get(url)
-    assert len(response.context['ongoing_rest']) == 1
-    assert len(response.context['archive_enrolled']) == 1
-    assert set(response.context['archive_enrolled']) == {co}
 
 
 @pytest.mark.django_db

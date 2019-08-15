@@ -5,6 +5,8 @@ import core.mixins
 from django.db import migrations, models
 import django.db.models.deletion
 
+import core.timezone.models
+
 
 class Migration(migrations.Migration):
 
@@ -31,7 +33,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Venues',
                 'ordering': ['-is_preferred', 'name'],
             },
-            bases=(core.mixins.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
         ),
     ]
 

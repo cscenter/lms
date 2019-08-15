@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-import datetime
-
 import pytz
 from bitfield import BitField
 from django.conf import settings
@@ -10,8 +7,7 @@ from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
-from core.mixins import TimezoneAwareModel
-from core.timezone import Timezone
+from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from learning.settings import Branches
 

@@ -1,5 +1,4 @@
 import datetime
-from typing import NewType, Union
 
 import pytz
 from django.conf import settings
@@ -7,7 +6,8 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from core.mixins import TimezoneAwareModel
+from core.timezone.models import TimezoneAwareModel
+from core.timezone.typing import Timezone
 
 
 def aware_to_naive(value, instance: TimezoneAwareModel):
@@ -20,6 +20,7 @@ def aware_to_naive(value, instance: TimezoneAwareModel):
     return value
 
 
+# FIXME: not generic, move to admin.py
 def naive_to_aware(value, instance: TimezoneAwareModel):
     """
     Make a naive datetime.datetime in a given instance time zone aware.
@@ -45,12 +46,5 @@ def naive_to_aware(value, instance: TimezoneAwareModel):
     return value
 
 
-CityCode = NewType('CityCode', str)
-Timezone = NewType('Timezone', datetime.tzinfo)
-TzAware = Union[Timezone, CityCode]
-
-
-def now_local(tz_aware: TzAware) -> datetime.datetime:
-    if not isinstance(tz_aware, datetime.tzinfo):
-        tz_aware = settings.TIME_ZONES[tz_aware]
-    return timezone.localtime(timezone.now(), timezone=tz_aware)
+def now_local(tz: Timezone) -> datetime.datetime:
+    return timezone.localtime(timezone.now(), timezone=tz)

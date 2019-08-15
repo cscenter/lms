@@ -19,17 +19,17 @@ from djchoices import DjangoChoices, C
 from model_utils.models import TimeStampedModel
 
 from core.db.models import ScoreField
-from core.mixins import DerivableFieldsMixin, TimezoneAwareModel
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Branch
-from core.timezone import now_local
+from core.mixins import DerivableFieldsMixin
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch
+from core.timezone import now_local, TimezoneAwareModel
 from core.urls import reverse
 from core.utils import hashids
-from courses.models import Semester
 from courses.constants import SemesterTypes
+from courses.models import Semester
 from courses.utils import get_current_term_index
-from projects.constants import ProjectTypes
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
+from projects.constants import ProjectTypes
 from users.constants import Roles, GenderTypes
 
 CURATOR_SCORE_FIELDS = [
@@ -348,14 +348,6 @@ class ProjectStudent(TimezoneAwareModel, models.Model):
         return "{0} [{1}]".format(smart_text(self.project),
                                   smart_text(self.student))
 
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.project.field.name
-
     def get_report(self, reporting_period: ReportingPeriod):
         for report in self.reports.all():
             if report.reporting_period_id == reporting_period.pk:
@@ -529,9 +521,6 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     def __str__(self):
         return smart_text(self.name)
 
-    def get_city(self):
-        return self.city_id
-
     def get_absolute_url(self):
         return reverse('projects:project_detail', args=[self.pk])
 
@@ -699,14 +688,6 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.project_student.student)
-
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.project_student.field.name
 
     def created_local(self, tz=None):
         if not tz:
@@ -952,14 +933,6 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
         return ("Comment to {0} by {1}"
                 .format(smart_text(self.report),
                         smart_text(self.author.get_full_name())))
-
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.report.field.name
 
     def created_local(self, tz=None):
         if not tz:

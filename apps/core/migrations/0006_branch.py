@@ -3,6 +3,8 @@
 import core.mixins
 from django.db import migrations, models
 
+import core.timezone.models
+
 
 class Migration(migrations.Migration):
 
@@ -27,7 +29,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Branch',
                 'verbose_name_plural': 'Branches',
             },
-            bases=(core.mixins.TimezoneAwareModel, models.Model),
+            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
         ),
         # migrations.DeleteModel(
         #     name='Branch',

@@ -6,6 +6,7 @@ import pytz
 from django.conf import settings
 
 from admission.tests.factories import ApplicantFactory, CampaignFactory
+from core.tests.utils import now_for_branch
 from core.timezone import now_local
 from core.urls import reverse
 from learning.settings import Branches
@@ -57,7 +58,7 @@ def test_application_form_stats(client, curator):
     assert data["2018"][0] == 3
     assert data["2018"][1] == 4
     # Test partial sums with active campaign
-    today = now_local(Branches.SPB)
+    today = now_for_branch(Branches.SPB)
     start = today - timedelta(days=2)
     current_campaign = CampaignFactory(
         branch__code=Branches.SPB,

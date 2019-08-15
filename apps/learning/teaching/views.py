@@ -267,9 +267,6 @@ class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
     calendar_type = "teacher"
     template_name = "learning/teaching/timetable.html"
 
-    def get_default_timezone(self):
-        return get_teacher_city_code(self.request)
-
     def get_events(self, year, month, **kwargs):
         qs = (CourseClass.objects
               .for_timetable()
@@ -283,9 +280,6 @@ class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
     Shows all non-course events and classes filtered by the cities where
     authorized teacher has taught.
     """
-
-    def get_default_timezone(self) -> Union[Timezone, CityCode]:
-        return get_teacher_city_code(self.request)
 
     def get_teacher_cities(self, year, month):
         default_city = get_teacher_city_code(self.request)
@@ -496,8 +490,8 @@ class GradeBookListView(TeacherOnlyMixin, GradeBookListBaseView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # FIXME: Is it ok to use 'spb' here?
-        current_year, term_type = get_current_term_pair('spb')
+        tz = self.request.user.get_timezone()
+        current_year, term_type = get_current_term_pair(tz)
         current_term_index = get_term_index(current_year, term_type)
         co_count = 0
         # Redirect teacher to the appropriate gradebook page if he has only

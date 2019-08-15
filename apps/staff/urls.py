@@ -6,7 +6,7 @@ from learning.gradebook.views import GradeBookTeacherView
 from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
     ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
-    ProgressReportForSemesterView, TotalStatisticsView, AdmissionReportView, \
+    ProgressReportForSemesterView, AdmissionReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
     CourseParticipantsIntersectionView, SyllabusView, \
     WillGraduateStatsReportView, SurveySubmissionsReportView, \
@@ -83,11 +83,6 @@ urlpatterns = [
             ProgressReportForSemesterView.as_view(output_format="xlsx"),
             name='exports_students_sheet_filter_by_semester_xlsx'),
     ])),
-
-    # TODO: not implemented
-    url(r'^statistics/csv/$',
-        TotalStatisticsView.as_view(),
-        name='total_statistics_csv'),
 ]
 
 

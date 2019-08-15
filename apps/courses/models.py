@@ -18,9 +18,9 @@ from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from core.mixins import DerivableFieldsMixin, TimezoneAwareModel
+from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Venue
-from core.timezone import now_local, TzAware
+from core.timezone import now_local, TzAware, Timezone, TimezoneAwareModel
 from core.urls import reverse, city_aware_reverse
 from core.utils import hashids, get_youtube_video_id
 from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
@@ -92,16 +92,15 @@ class Semester(models.Model):
         return next_term_starts_at(self.index) - datetime.timedelta(days=1)
 
     @classmethod
-    def get_current(cls, tz_aware: TzAware = settings.DEFAULT_CITY_CODE):
-        year, term_type = get_current_term_pair(tz_aware)
-        obj, created = cls.objects.get_or_create(year=year,
-                                                 type=term_type)
+    def get_current(cls, tz: Timezone = settings.DEFAULT_TIMEZONE):
+        year, term_type = get_current_term_pair(tz)
+        obj, created = cls.objects.get_or_create(year=year, type=term_type)
         if created:
             obj.save()
         return obj
 
-    def is_current(self, tz_aware: TzAware = settings.DEFAULT_CITY_CODE):
-        year, term = get_current_term_pair(tz_aware)
+    def is_current(self, tz: Timezone = settings.DEFAULT_TIMEZONE):
+        year, term = get_current_term_pair(tz)
         return year == self.year and term == self.type
 
     def save(self, *args, **kwargs):
@@ -443,7 +442,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     def get_city(self):
         return self.city_id
 
-    def get_timezone(self):
+    def get_timezone(self) -> Timezone:
         return settings.TIME_ZONES[self.city_id]
 
     def has_unread(self):
@@ -474,8 +473,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
             return True
         if self.is_completed:
             return False
-        city_tz = self.get_timezone()
-        today = now_local(city_tz).date()
+        today = now_local(self.get_timezone()).date()
         start_at = self.semester.enrollment_start_at
         return start_at <= today <= self.semester.enrollment_end_at
 
