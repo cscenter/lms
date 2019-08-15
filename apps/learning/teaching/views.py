@@ -1,5 +1,4 @@
 from collections import OrderedDict
-from typing import Union
 from urllib.parse import urlencode
 
 from django.contrib import messages
@@ -14,12 +13,11 @@ from vanilla import TemplateView
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.settings.base import FOUNDATION_YEAR
-from core.timezone import Timezone, CityCode
 from core.urls import reverse
 from core.utils import render_markdown, is_club_site
 from courses.calendar import CalendarEvent
-from courses.models import CourseClass, Course, Assignment
 from courses.constants import SemesterTypes
+from courses.models import CourseClass, Course, Assignment
 from courses.utils import get_terms_for_calendar_month, get_term_index, \
     get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView

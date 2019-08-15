@@ -91,6 +91,7 @@ class Semester(models.Model):
     def ends_at(self):
         return next_term_starts_at(self.index) - datetime.timedelta(days=1)
 
+    # FIXME: move to manager
     @classmethod
     def get_current(cls, tz: Timezone = settings.DEFAULT_TIMEZONE):
         year, term_type = get_current_term_pair(tz)
