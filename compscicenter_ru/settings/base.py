@@ -160,7 +160,7 @@ FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
 
 LOCALE_PATHS += [
     str(PROJECT_DIR / "locale"),
-    str(APPS_DIR / "learning" / "projects" / "locale"),
+    str(APPS_DIR / "projects" / "locale"),
     str(PROJECT_DIR / "apps" / "admission" / "locale"),
     str(APPS_DIR / "surveys" / "locale"),
 ]

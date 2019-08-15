@@ -14,7 +14,7 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment
 from learning.services import EnrollmentService, CourseCapacityFull
-from learning.settings import StudentStatuses, Branches
+from learning.settings import StudentStatuses, Branches, DEFAULT_BRANCH_CODE
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory
 
@@ -200,11 +200,11 @@ def test_enrollment_leave_reason(client):
 
 @pytest.mark.django_db
 def test_unenrollment(client, assert_redirect):
-    s = StudentFactory.create(city_id='spb')
+    s = StudentFactory.create(branch__code=DEFAULT_BRANCH_CODE)
     assert s.city_id is not None
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    co = CourseFactory.create(semester=current_semester, city='spb')
+    co = CourseFactory.create(semester=current_semester)
     as_ = AssignmentFactory.create_batch(3, course=co)
     form = {'course_pk': co.pk}
     # Enrollment already closed
@@ -285,9 +285,9 @@ def test_reenrollment(client):
 
 @pytest.mark.django_db
 def test_enrollment_in_other_city(client):
-    tomorrow = now_local(Branches.SPB) + datetime.timedelta(days=1)
+    tomorrow = now_local(DEFAULT_BRANCH_CODE) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    course_spb = CourseFactory(city=Branches.SPB, semester=term, is_open=False)
+    course_spb = CourseFactory(semester=term, is_open=False)
     assert course_spb.enrollment_is_open
     student_spb = StudentFactory(branch__code=Branches.SPB)
     student_nsk = StudentFactory(branch__code=Branches.NSK)
@@ -348,12 +348,11 @@ def test_enrollment_is_enrollment_open(client):
     today = now_local('spb')
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(city_code='spb',
-                                          enrollment_end_at=today.date())
-    co_spb = CourseFactory(city='spb', semester=term, is_open=False,
+    term = SemesterFactory.create_current(enrollment_end_at=today.date())
+    co_spb = CourseFactory(semester=term, is_open=False,
                            completed_at=tomorrow.date())
     assert co_spb.enrollment_is_open
-    student_spb = StudentFactory(city_id='spb')
+    student_spb = StudentFactory(branch__code=Branches.SPB)
     client.login(student_spb)
     response = client.get(co_spb.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")

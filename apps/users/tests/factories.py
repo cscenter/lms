@@ -2,7 +2,8 @@
 
 import factory
 
-from learning.settings import GradeTypes
+from core.settings.base import DEFAULT_CITY_CODE
+from learning.settings import GradeTypes, DEFAULT_BRANCH_CODE
 from users.constants import Roles, GenderTypes
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord, UserGroup
@@ -80,9 +81,9 @@ class CuratorFactory(UserFactory):
 
 class StudentFactory(UserFactory):
     enrollment_year = 2015
-    city_id = 'spb'
+    city_id = DEFAULT_CITY_CODE
     branch = factory.SubFactory('learning.tests.factories.BranchFactory',
-                                code='spb')
+                                code=DEFAULT_BRANCH_CODE)
 
     @factory.post_generation
     def required_groups(self, create, extracted, **kwargs):
@@ -103,7 +104,7 @@ class TeacherFactory(UserFactory):
 
 class VolunteerFactory(UserFactory):
     branch = factory.SubFactory('learning.tests.factories.BranchFactory',
-                                code='spb')
+                                code=DEFAULT_BRANCH_CODE)
 
     @factory.post_generation
     def _add_required_groups(self, create, extracted, **kwargs):

@@ -68,12 +68,11 @@ def test_course_is_correspondence(settings, client):
 
 @pytest.mark.django_db
 def test_course_list(client, settings):
-    student = StudentFactory(city_id=settings.DEFAULT_CITY_CODE)
+    student = StudentFactory(branch__code=settings.DEFAULT_CITY_CODE)
     client.login(student)
-    s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-    co = CourseFactory.create(semester=s,
-                              city=settings.DEFAULT_CITY_CODE)
-    co_kzn = CourseFactory.create(semester=s, city="kzn")
+    s = SemesterFactory.create_current()
+    co = CourseFactory.create(semester=s)
+    co_kzn = CourseFactory.create(semester=s, city__code="kzn")
     response = client.get(reverse('study:course_list'))
     assert len(response.context['ongoing_rest']) == 1
 

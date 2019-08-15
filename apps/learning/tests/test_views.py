@@ -157,7 +157,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
         teacher = TeacherFactory()
         student = StudentFactory(city_id='spb')
-        s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+        s = SemesterFactory.create_current()
         co = CourseFactory(city_id='spb', semester=s,
                            teachers=[teacher])
         EnrollmentFactory.create(student=student, course=co)

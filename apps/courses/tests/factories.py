@@ -1,14 +1,16 @@
 import datetime
 
 import factory
+from django.conf import settings
 from django.utils import timezone
 
 from core.models import City
-from core.tests.factories import VenueFactory
+from core.tests.factories import VenueFactory, CityFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment
 from courses.utils import get_current_term_pair, get_term_by_index
+from learning.settings import Branches, DEFAULT_BRANCH_CODE
 from users.tests.factories import TeacherFactory
 
 __all__ = (
@@ -39,8 +41,9 @@ class SemesterFactory(factory.DjangoModelFactory):
     @classmethod
     def create_current(cls, **kwargs):
         """Get or create semester for current term"""
-        city_code = kwargs.pop('city_code', 'spb')
-        year, type = get_current_term_pair(city_code)
+        branch_code = kwargs.pop('for_branch', DEFAULT_BRANCH_CODE)
+        tz = Branches.get_choice(branch_code).timezone
+        year, type = get_current_term_pair(tz)
         kwargs.pop('year', None)
         kwargs.pop('type', None)
         return cls.create(year=year, type=type, **kwargs)
@@ -65,18 +68,7 @@ class CourseFactory(factory.DjangoModelFactory):
     meta_course = factory.SubFactory(MetaCourseFactory)
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
-
-    # FIXME: fix Course.get_timezone(), then replace with subfactory
-    @factory.post_generation
-    def city(self, create, extracted, **kwargs):
-        """ Allow to pass City instance or PK """
-        if not create:
-            return
-        if extracted:
-            if isinstance(extracted, City):
-                self.city = extracted
-            else:
-                self.city = City.objects.get(pk=extracted)
+    city = factory.SubFactory(CityFactory, code=settings.DEFAULT_CITY_CODE)
 
     @factory.post_generation
     def teachers(self, create, extracted, **kwargs):

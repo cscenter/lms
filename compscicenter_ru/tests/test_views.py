@@ -47,7 +47,7 @@ def test_meta_course_detail(client):
     assert response.status_code == 200
     assert not response.context_data['grouped_courses']
     # Add 2 courses to the same branch
-    co1, co2 = CourseFactory.create_batch(2, meta_course=mc, city=Branches.SPB)
+    co1, co2 = CourseFactory.create_batch(2, meta_course=mc)
     response = client.get(mc.get_absolute_url())
     assert response.status_code == 200
     assert mc.name.encode() in response.content

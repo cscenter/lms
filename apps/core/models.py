@@ -11,6 +11,7 @@ from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 
 from core.mixins import TimezoneAwareModel
+from core.timezone import Timezone
 from core.urls import reverse
 from learning.settings import Branches
 
@@ -86,7 +87,7 @@ class Branch(TimezoneAwareModel, models.Model):
         else:
             return self.name
 
-    def get_timezone(self) -> datetime.tzinfo:
+    def get_timezone(self) -> Timezone:
         return self._timezone
 
     @cached_property

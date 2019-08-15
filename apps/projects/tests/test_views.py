@@ -164,7 +164,7 @@ def test_project_detail_unauth(client):
 @pytest.mark.django_db
 def test_project_detail_student_participant(client):
     from datetime import timedelta
-    semester = SemesterFactory.create_current(city_code=Branches.SPB)
+    semester = SemesterFactory.create_current(for_branch=Branches.SPB)
     semester_prev = SemesterFactory.create_prev(semester)
     student = StudentFactory()
     reviewer = ProjectReviewerFactory()
@@ -224,7 +224,7 @@ def test_project_detail_student_participant_notifications(client, curator):
     today = now_local(Branches.SPB).date()
     rp = ReportingPeriodFactory(term=semester, start_on=today, branch=None,
                                 end_on=today + timedelta(days=1))
-    student = StudentFactory(city_id='spb')
+    student = StudentFactory(branch__code=Branches.SPB)
     reviewer = ProjectReviewerFactory()
     project = ProjectFactory(students=[student], reviewers=[reviewer],
                              semester=semester, branch__code=Branches.SPB)
@@ -245,7 +245,7 @@ def test_project_detail_reviewer(client, curator):
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
     semester_prev = SemesterFactory(year=year - 1, type=term_type)
-    student = StudentFactory(city_id='spb')
+    student = StudentFactory(branch__code=Branches.SPB)
     project = ProjectFactory(students=[student], semester=semester_prev)
     url = project.get_absolute_url()
     response = client.get(url)
@@ -350,7 +350,7 @@ def test_report_notifications(client, curator):
     client.login(reviewer1)
     year, term_type = get_current_term_pair('spb')
     semester = SemesterFactory(year=year, type=term_type)
-    student1, student2 = StudentFactory.create_batch(2, city_id='spb')
+    student1, student2 = StudentFactory.create_batch(2, branch__code=Branches.SPB)
     project = ProjectFactory(students=[student1, student2],
                              semester=semester,
                              reviewers=[reviewer1, reviewer2])

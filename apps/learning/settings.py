@@ -11,6 +11,7 @@ ASSIGNMENT_COMMENT_ATTACHMENT = 1
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)
 
 
+# FIXME: move to the core settings?
 DEFAULT_BRANCH_CODE = "spb"
 
 
