@@ -1,30 +1,25 @@
 # -*- coding: utf-8 -*-
-import factory
 import pytest
 from django.utils.encoding import smart_bytes
-from django.utils.timezone import now
 
 from core.tests.utils import now_for_branch
-from core.timezone import now_local
 from core.urls import reverse_lazy, reverse
 from courses.tests.factories import SemesterFactory
-from courses.utils import get_current_term_pair
+from learning.settings import GradeTypes, Branches
+from notifications.models import Notification
 from projects.forms import ReportForm, PracticeCriteriaForm, \
     ReportReviewForm
 from projects.models import Report, ProjectStudent, Review, \
-    PracticeCriteria
+    PracticeCriteria, Project
 from projects.tests.factories import ProjectFactory, ReportFactory, \
     ReportingPeriodFactory, ReviewFactory, \
-    ReviewPracticeCriteriaFactory, review_form_factory
-from learning.settings import StudentStatuses, GradeTypes, Branches
-from notifications.models import Notification
+    review_form_factory
 from users.constants import Roles
 from users.tests.factories import StudentFactory, ProjectReviewerFactory, \
     UserFactory, CuratorFactory
 
 URL_REPORTS = reverse_lazy("projects:report_list_reviewers")
 URL_PROJECTS = reverse_lazy("projects:current_term_projects")
-URL_ALL_PROJECTS = reverse_lazy("projects:all_projects")
 
 
 @pytest.mark.django_db
@@ -51,21 +46,6 @@ def test_user_detail(client):
 
 
 @pytest.mark.django_db
-def test_staff_diplomas_view(curator, client):
-    student = StudentFactory(enrollment_year='2013',
-                                   status=StudentStatuses.WILL_GRADUATE)
-    semester1 = SemesterFactory.create(year=2014, type='spring')
-    p = ProjectFactory.create(students=[student], semester=semester1)
-    sp = p.projectstudent_set.all()[0]
-    sp.final_grade = GradeTypes.GOOD
-    sp.save()
-    client.login(curator)
-    response = client.get(reverse('staff:exports_students_diplomas_tex',
-                                  kwargs={"city_code": "spb"}))
-    assert smart_bytes(p.name) in response.content
-
-
-@pytest.mark.django_db
 def test_project_reviewer_only_mixin_security(client, curator):
     response = client.get(URL_REPORTS)
     assert response.status_code == 302
@@ -85,40 +65,51 @@ def test_project_reviewer_only_mixin_security(client, curator):
 
 
 @pytest.mark.django_db
-@pytest.mark.skip
-def test_reviewer_list(client, curator):
-    """Test GET-filter `show` works"""
-    reviewer = ProjectReviewerFactory.create()
+def test_current_term_projects(client):
+    current_term_projects_url = reverse("projects:current_term_projects")
     semester = SemesterFactory.create_current(for_branch=Branches.SPB)
     semester_prev = SemesterFactory.create_prev(semester)
+    reviewer = ProjectReviewerFactory()
     client.login(reviewer)
-    student = StudentFactory()
-    response = client.get(URL_REPORTS)
+    response = client.get(current_term_projects_url)
     assert response.status_code == 200
-    assert len(response.context["reports"]) == 0
-    # Enroll on project from prev term
+    assert len(response.context["projects"]) == 0
+    # Create project from the prev term
+    student = StudentFactory()
     project = ProjectFactory(students=[student], reviewers=[reviewer],
                              semester=semester_prev)
-    response = client.get(URL_REPORTS)
+    response = client.get(current_term_projects_url)
     assert response.status_code == 200
-    assert len(response.context["reports"]) == 0
-    # Enroll on project from current term
-    ProjectFactory.create(students=[student], reviewers=[reviewer],
-                          semester=semester)
-    response = client.get(URL_REPORTS)
-    assert len(response.context["reports"]) == 1
-    # With ?show=available filter show projects from current term to reviewers
-    response = client.get(URL_PROJECTS)
-    assert len(response.context["reports"]) == 1
-    curator.add_group(Roles.PROJECT_REVIEWER)
+    assert len(response.context["projects"]) == 0
+    # Create the first project from the current term
+    ProjectFactory.create(students=[student], semester=semester)
+    response = client.get(current_term_projects_url)
+    assert len(response.context["projects"]) == 1
+    # Inactive project from the current term should be hidden on
+    # the available projects page
+    ProjectFactory.create(semester=semester, status=Project.Statuses.CANCELED)
+    response = client.get(current_term_projects_url)
+    assert len(response.context["projects"]) == 1
+
+
+@pytest.mark.django_db
+def test_all_projects_view(client, curator, assert_login_redirect):
+    current_term_projects_url = reverse("projects:current_term_projects")
+    all_projects_url = reverse("projects:all_projects")
+    semester = SemesterFactory.create_current(for_branch=Branches.SPB)
+    semester_prev = SemesterFactory.create_prev(semester)
+    reviewer = ProjectReviewerFactory()
+    client.login(reviewer)
+    assert_login_redirect(all_projects_url, method='get')
+    project_prev = ProjectFactory(semester=semester_prev)
+    project = ProjectFactory(semester=semester)
     client.login(curator)
-    # Redirects to list with all reports
-    response = client.get(URL_REPORTS, follow=True)
-    assert len(response.context["reports"]) == 1
-    response = client.get(URL_PROJECTS)
-    assert len(response.context["reports"]) == 1
-    response = client.get(URL_ALL_PROJECTS)
-    assert len(response.context["reports"]) == 2
+    response = client.get(current_term_projects_url)
+    assert response.status_code == 200
+    assert len(response.context["projects"]) == 1
+    response = client.get(all_projects_url)
+    assert response.status_code == 200
+    assert len(response.context["projects"]) == 2
 
 
 @pytest.mark.django_db

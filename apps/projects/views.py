@@ -6,10 +6,10 @@ from itertools import groupby
 from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
-from django.forms import modelformset_factory, inlineformset_factory
+from django.forms import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseForbidden, \
     HttpResponseRedirect
 from django.http.response import HttpResponseBadRequest
@@ -23,12 +23,13 @@ from vanilla.model_views import CreateView
 
 from core import comment_persistence
 from core.exceptions import Redirect
-from core.timezone import now_local
 from core.urls import reverse, reverse_lazy
 from core.utils import hashids
 from core.views import LoginRequiredMixin
 from courses.models import Semester
 from courses.utils import get_current_term_index
+from notifications import NotificationTypes
+from notifications.signals import notify
 from projects.constants import ProjectTypes
 from projects.filters import ProjectsFilter, CurrentTermProjectsFilter
 from projects.forms import ReportCommentForm, ReportReviewForm, \
@@ -36,8 +37,6 @@ from projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportCuratorAssessmentForm, StudentResultsModelForm, PracticeCriteriaForm
 from projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review, ReportingPeriod, ReportingPeriodKey, PracticeCriteria
-from notifications import NotificationTypes
-from notifications.signals import notify
 from users.constants import Roles, GenderTypes
 from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
@@ -71,8 +70,8 @@ class ReportListViewMixin:
     template_name = "learning/projects/reports.html"
 
     def get_queryset(self):
-        # FIXME: respect timezone. Hard coded city code
-        current_term_index = get_current_term_index()
+        tz = self.request.user.get_timezone()
+        current_term_index = get_current_term_index(tz)
         qs = (Report.objects
               .filter(project_student__project__semester__index=current_term_index)
                 # FIXME: replace with custom manager
@@ -126,21 +125,25 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
     context_object_name = "projects"
     template_name = "learning/projects/available.html"
 
+    def get(self, request, *args, **kwargs):
+        if not request.user.is_curator:
+            return super().get(request, *args, **kwargs)
+        filterset_class = self.get_filterset_class()
+        self.filterset = self.get_filterset(filterset_class)
+        self.object_list = self.filterset.qs
+        context = self.get_context_data(filter=self.filterset,
+                                        object_list=self.object_list)
+        return self.render_to_response(context)
+
     def get_queryset(self):
-        # FIXME: Respect timezone, hard coded city code
-        current_term_index = get_current_term_index()
-        qs = (Project.objects
+        tz = self.request.user.get_timezone()
+        current_term_index = get_current_term_index(tz)
+        qs = (Project.active
               .filter(semester__index=current_term_index)
-              .exclude(status=Project.Statuses.CANCELED)
               .select_related("semester")
               .prefetch_related("students", "reviewers", "supervisors")
               .annotate(reviewers_cnt=Count("reviewers"))
-              .annotate(
-                have_reviewers=Case(
-                    When(reviewers_cnt__gt=0, then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField()))
-              .order_by("have_reviewers", "name", "pk"))
+              .order_by("reviewers_cnt", "name", "pk"))
         if not self.request.user.is_curator:
             qs = qs.filter(project_type=ProjectTypes.practice)
         return qs
@@ -153,16 +156,6 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
         else:
             context["filter"] = ""
         return context
-
-    def get(self, request, *args, **kwargs):
-        if not request.user.is_curator:
-            return super().get(request, *args, **kwargs)
-        filterset_class = self.get_filterset_class()
-        self.filterset = self.get_filterset(filterset_class)
-        self.object_list = self.filterset.qs
-        context = self.get_context_data(filter=self.filterset,
-                                        object_list=self.object_list)
-        return self.render_to_response(context)
 
 
 class ProjectListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
@@ -322,37 +315,26 @@ class ProjectResultsView(CuratorOnlyMixin, BaseModelFormSetView):
 
 class ProjectPrevNextView(generic.RedirectView):
     """
-    Based on `direction` get prev or next project relative to passed project id
+    Redirects to the prev/next project based on `direction` value.
     """
     direction = None
 
-    # TODO: add tests
-    def get_queryset(self):
-        # FIXME: Respect timezone, hard coded city code
-        # FIXME: get timezone by project_id
-        current_term_index = get_current_term_index()
-        qs = (Project.objects
-              .filter(semester__index=current_term_index)
-              .exclude(status=Project.Statuses.CANCELED)
+    def get_redirect_url(self, *args, **kwargs):
+        project_id = self.kwargs["project_id"]
+        project = get_object_or_404(Project.objects.filter(pk=project_id))
+
+        # Projects without reviewers go first
+        qs = (Project.active
+              .filter(semester_id=project.semester_id)
+              .exclude(pk=project.pk)
               .annotate(reviewers_cnt=Count("reviewers"))
-              .annotate(
-                have_reviewers=Case(
-                    When(reviewers_cnt__gt=0, then=Value(1)),
-                    default=Value(0),
-                    output_field=BooleanField())
-              )
               .values_list("pk", flat=True)
-              .order_by("have_reviewers", "name", "pk"))
+              .order_by("reviewers_cnt", "name", "pk"))
         if not self.request.user.is_curator:
             qs = qs.filter(project_type=ProjectTypes.practice)
-        return qs
-
-    def get_redirect_url(self, *args, **kwargs):
-        project_id = int(self.kwargs.get("project_id"))
-        # Not so many projects to care about performance
-        qs = self.get_queryset()
         if self.direction == "prev":
             qs = qs.reverse()
+        # FIXME: use window function rank instead of iteration over all projects
         next_project_id, first, prev_id = (None,) * 3
         for p in qs:
             if prev_id == project_id:

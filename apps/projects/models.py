@@ -11,6 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, transaction
+from django.db.models import Case, BooleanField, Count, Value, When
 from django.db.models import Q, F
 from django.utils import timezone, formats
 from django.utils.encoding import smart_text
@@ -423,6 +424,20 @@ class Supervisor(models.Model):
         return self.full_name
 
 
+class ProjectQuerySet(models.QuerySet):
+    pass
+
+
+class _ProjectActiveManager(models.Manager):
+    def get_queryset(self):
+        return (super().get_queryset()
+                .exclude(status=Project.Statuses.CANCELED))
+
+
+ProjectDefaultManager = models.Manager.from_queryset(ProjectQuerySet)
+ProjectActiveManager = _ProjectActiveManager.from_queryset(ProjectQuerySet)
+
+
 class Project(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'branch'
 
@@ -500,6 +515,9 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     presentation_slideshare_url = models.URLField(
         _("SlideShare URL for participants presentation"),
         null=True, blank=True)
+
+    objects = ProjectDefaultManager()
+    active = ProjectActiveManager()
 
     class Meta:
         verbose_name = _("Student project")
