@@ -214,24 +214,35 @@ ru_en_mapping = {ord(k): v for k, v in _ru_en_mapping.items()}
 
 
 # FIXME: add tests!
-def queryset_iterator(queryset, chunk_size=1000):
+def queryset_iterator(queryset, chunk_size=1000, use_offset=False):
     """
-    Memory efficient iteration over a Django Queryset ordered by the
-    primary key.
+    Memory efficient iteration over a Django queryset with
+    `prefetch_related` support.
 
-    Django normally loads all objects into memory when iterating over
-    a queryset (even with .iterator, although in that case it's not Django
-    holding data in memory, but your database client)
+    Django normally loads all objects into memory when iterating over a
+    queryset, which could lead to excessive memory consumption. It's possible
+    to avoid doing any caching at the QuerySet level by using `.iterator()`
+    method but this causes `prefetch_related` to be ignored and N+1 problem
+    as a result.
 
-    Note:
-        Does not support ordered query sets.
+    Default implementation overrides ordering with primary key.
+    Note that `use_offset=True` preserve original queryset ordering, but
+    limit/offset pagination could be slow.
     """
-    queryset = queryset.order_by('pk')
-    limits = queryset.aggregate(min=Min('pk'), max=Max('pk'))
-    if limits['min']:
-        for pk in range(limits['min'], limits['max'] + 1, chunk_size):
-            for row in queryset.filter(pk__gte=pk)[:chunk_size]:
+    if use_offset:
+        if not queryset.ordered:
+            queryset = queryset.order_by('pk')
+        total = queryset.count()
+        for i in range(0, total, chunk_size):
+            for row in queryset[i:i + chunk_size]:
                 yield row
+    else:
+        queryset = queryset.order_by('pk')
+        limits = queryset.aggregate(min=Min('pk'), max=Max('pk'))
+        if limits['min']:
+            for pk in range(limits['min'], limits['max'] + 1, chunk_size):
+                for row in queryset.filter(pk__gte=pk)[:chunk_size]:
+                    yield row
 
 
 def get_youtube_video_id(video_url):
