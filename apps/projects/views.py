@@ -45,7 +45,7 @@ from users.models import User
 
 __all__ = (
     'ReportListReviewerView', 'ReportListCuratorView', 'CurrentTermProjectsView',
-    'ProjectListView', 'ProjectDetailView', 'ProjectPrevNextView',
+    'ProjectListView', 'ProjectDetailView',
     'ProjectResultsView', 'ProjectPrevNextView', 'ProjectEnrollView',
     'ReportUpdateStatusView', 'ReportCuratorAssessmentView',
     'ReportCuratorSummarizeView', 'ReportView', 'ReportAttachmentDownloadView',
@@ -72,7 +72,7 @@ class ReportListViewMixin:
 
     def get_queryset(self):
         # FIXME: respect timezone. Hard coded city code
-        current_term_index = get_current_term_index('spb')
+        current_term_index = get_current_term_index()
         qs = (Report.objects
               .filter(project_student__project__semester__index=current_term_index)
                 # FIXME: replace with custom manager
@@ -128,7 +128,7 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
 
     def get_queryset(self):
         # FIXME: Respect timezone, hard coded city code
-        current_term_index = get_current_term_index('spb')
+        current_term_index = get_current_term_index()
         qs = (Project.objects
               .filter(semester__index=current_term_index)
               .exclude(status=Project.Statuses.CANCELED)
@@ -325,10 +325,12 @@ class ProjectPrevNextView(generic.RedirectView):
     Based on `direction` get prev or next project relative to passed project id
     """
     direction = None
+
     # TODO: add tests
     def get_queryset(self):
         # FIXME: Respect timezone, hard coded city code
-        current_term_index = get_current_term_index('spb')
+        # FIXME: get timezone by project_id
+        current_term_index = get_current_term_index()
         qs = (Project.objects
               .filter(semester__index=current_term_index)
               .exclude(status=Project.Statuses.CANCELED)

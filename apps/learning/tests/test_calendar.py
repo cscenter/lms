@@ -114,7 +114,7 @@ def test_student_personal_calendar_view_permissions(lms_resolver):
 @pytest.mark.django_db
 def test_student_personal_calendar_view(client):
     calendar_url = reverse('study:calendar')
-    student = StudentFactory(city_id='spb')
+    student = StudentFactory()
     client.login(student)
     course = CourseFactory()
     course_other = CourseFactory.create()
@@ -125,12 +125,8 @@ def test_student_personal_calendar_view(client):
     this_month_date = (datetime.datetime.now()
                        .replace(day=15,
                                 tzinfo=timezone.utc))
-    own_classes = (
-        CourseClassFactory
-            .create_batch(3, course=course, date=this_month_date))
-    others_classes = (
-        CourseClassFactory
-            .create_batch(5, course=course_other, date=this_month_date))
+    own_classes = CourseClassFactory.create_batch(3, course=course, date=this_month_date)
+    others_classes = CourseClassFactory.create_batch(5, course=course_other, date=this_month_date)
     # student should see only his own classes
     response = client.get(calendar_url)
     classes = flatten_calendar_month_events(response.context['calendar'])

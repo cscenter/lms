@@ -4,8 +4,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django_filters.widgets import RangeWidget
 from webpack_loader import utils
 
-from core.constants import DATE_FORMAT_RU
-from core.timezone import aware_to_naive
+from core.timezone.constants import DATE_FORMAT_RU
+from core.timezone.utils import aware_to_naive
 
 
 class UbereditorWidget(forms.Textarea):

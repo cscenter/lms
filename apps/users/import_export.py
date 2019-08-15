@@ -108,6 +108,6 @@ class UserRecordResource(resources.ModelResource):
         if not instance.username:
             instance.username = instance.email.split('@')[0]
         if not instance.enrollment_year:
-            instance.enrollment_year = now_local(instance.city_id).year
+            instance.enrollment_year = now_local(instance.get_timezone()).year
         instance.status = ''
         instance.set_password(raw_password=None)

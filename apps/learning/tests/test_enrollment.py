@@ -4,10 +4,10 @@ import pytest
 from bs4 import BeautifulSoup
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
-from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from core.constants import DATE_FORMAT_RU
+from core.timezone.constants import DATE_FORMAT_RU
+from core.tests.utils import now_for_branch
 from core.timezone import now_local
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory, \
@@ -111,7 +111,7 @@ def test_enrollment_expelled_student(client):
 def test_enrollment(client):
     student1, student2 = StudentFactory.create_batch(2, city_id='spb')
     client.login(student1)
-    today = now_local(student1.city_code)
+    today = now_local(student1.get_timezone())
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
@@ -141,9 +141,9 @@ def test_enrollment(client):
 
 @pytest.mark.django_db
 def test_enrollment_reason_entry(client):
-    student = StudentFactory(city_id='spb')
+    student = StudentFactory(branch__code=Branches.SPB)
     client.login(student)
-    today = now_local(student.city_code)
+    today = now_local(student.get_timezone())
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
@@ -167,7 +167,7 @@ def test_enrollment_reason_entry(client):
 def test_enrollment_leave_reason(client):
     student = StudentFactory(city_id=Branches.SPB, branch__code=Branches.SPB)
     client.login(student)
-    today = now_local(student.city_code)
+    today = now_local(student.get_timezone())
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
@@ -285,7 +285,7 @@ def test_reenrollment(client):
 
 @pytest.mark.django_db
 def test_enrollment_in_other_city(client):
-    tomorrow = now_local(DEFAULT_BRANCH_CODE) + datetime.timedelta(days=1)
+    tomorrow = now_for_branch(DEFAULT_BRANCH_CODE) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
     course_spb = CourseFactory(semester=term, is_open=False)
     assert course_spb.enrollment_is_open
@@ -323,7 +323,7 @@ def test_enrollment_in_other_city(client):
 @pytest.mark.django_db
 def test_correspondence_courses(client):
     """Make sure students from any city can enroll in online course"""
-    tomorrow = now_local('spb') + datetime.timedelta(days=1)
+    tomorrow = now_for_branch(Branches.SPB) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
     co_spb = CourseFactory(city_id='spb',
                            semester=term,
@@ -345,7 +345,7 @@ def test_correspondence_courses(client):
 
 @pytest.mark.django_db
 def test_enrollment_is_enrollment_open(client):
-    today = now_local('spb')
+    today = now_for_branch(Branches.SPB)
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=today.date())

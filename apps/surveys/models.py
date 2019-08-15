@@ -13,8 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from post_office import mail
 from post_office.models import EmailTemplate
 
-from core.mixins import TimezoneAwareModel
-from core.timezone import now_local
+from core.timezone import now_local, TimezoneAwareModel
 from core.urls import reverse, city_aware_reverse
 from courses.models import Course
 from learning.models import Enrollment

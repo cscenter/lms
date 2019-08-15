@@ -2,6 +2,7 @@ import datetime
 
 import pytest
 
+from core.tests.utils import now_for_branch
 from core.timezone import now_local
 from courses.models import Course
 from courses.tests.factories import CourseFactory, SemesterFactory
@@ -106,7 +107,7 @@ def test_course_access_role_student():
 
 @pytest.mark.django_db
 def test_enroll_in_course():
-    today = now_local(Branches.SPB)
+    today = now_for_branch(Branches.SPB)
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(for_branch=DEFAULT_BRANCH_CODE,
@@ -143,7 +144,7 @@ def test_enroll_in_course():
 
 @pytest.mark.django_db
 def test_leave_course():
-    today = now_local(Branches.SPB)
+    today = now_for_branch(Branches.SPB)
     yesterday = today - datetime.timedelta(days=1)
     future = today + datetime.timedelta(days=3)
     term = SemesterFactory.create_current(enrollment_end_at=future.date())
@@ -165,7 +166,7 @@ def test_leave_course():
 
 @pytest.mark.django_db
 def test_enroll_in_course_by_invitation():
-    today = now_local(Branches.SPB)
+    today = now_for_branch(Branches.SPB)
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(for_branch=DEFAULT_BRANCH_CODE,

@@ -6,7 +6,8 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import TimezoneAwareModelForm, TimezoneAwareSplitDateTimeField
+from core.timezone.admin import TimezoneAwareModelForm, \
+    TimezoneAwareSplitDateTimeField
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Venue
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
@@ -14,7 +15,7 @@ from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
     Assignment
 from courses.constants import ClassTypes
 from core.forms import CANCEL_SAVE_PAIR
-from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')

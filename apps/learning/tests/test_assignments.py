@@ -11,7 +11,7 @@ from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
-from core.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment, AssignmentAttachment
 from courses.tests.factories import SemesterFactory, CourseFactory, \
@@ -20,7 +20,7 @@ from courses.utils import get_current_term_pair
 from learning.utils import course_failed_by_student
 from learning.models import StudentAssignment, Enrollment, \
     AssignmentNotification, CourseNewsNotification
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, \
     AssignmentCommentFactory, \
     StudentAssignmentFactory
@@ -64,8 +64,7 @@ class StudentAssignmentListTests(MyUtilitiesMixin, CSCTestCase):
 
     def test_list(self):
         u = StudentFactory()
-        now_year, now_season = get_current_term_pair('spb')
-        s = SemesterFactory.create(year=now_year, type=now_season)
+        s = SemesterFactory.create_current(for_branch=Branches.SPB)
         co = CourseFactory.create(semester=s)
         as1 = AssignmentFactory.create_batch(2, course=co)
         self.doLogin(u)
@@ -102,8 +101,8 @@ class StudentAssignmentListTests(MyUtilitiesMixin, CSCTestCase):
         self.assertSameObjects([(StudentAssignment.objects
                                  .get(assignment=a, student=u)) for a in as_olds],
                                 resp.context['assignment_list_archive'])
-        # Now add assignment from old semester
-        old_s = SemesterFactory.create(year=now_year - 1, type=now_season)
+        # Now add assignment from the past semester
+        old_s = SemesterFactory.create_prev(s)
         old_co = CourseFactory.create(semester=old_s)
         as_past = AssignmentFactory(course=old_co)
         resp = self.client.get(reverse(self.url_name))
@@ -114,8 +113,7 @@ class StudentAssignmentListTests(MyUtilitiesMixin, CSCTestCase):
         which student already leave
         """
         u = StudentFactory()
-        now_year, now_season = get_current_term_pair('spb')
-        s = SemesterFactory.create(year=now_year, type=now_season)
+        s = SemesterFactory.create_current(for_branch=Branches.SPB)
         # Create open co to pass enrollment limit
         co = CourseFactory.create(semester=s, is_open=True)
         as1 = AssignmentFactory.create_batch(2, course=co)
@@ -204,8 +202,7 @@ def test_studentassignment_last_comment_from():
     """`last_comment_from` attribute is updated by signal"""
     teacher = TeacherFactory.create()
     student = StudentFactory.create()
-    now_year, now_season = get_current_term_pair('spb')
-    s = SemesterFactory.create(year=now_year, type=now_season)
+    s = SemesterFactory.create_current(for_branch=Branches.SPB)
     co = CourseFactory.create(city_id='spb', semester=s,
                               teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
@@ -288,8 +285,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, CSCTestCase):
     def test_details(self):
         teacher = TeacherFactory()
         student = StudentFactory()
-        now_year, now_season = get_current_term_pair('spb')
-        s = SemesterFactory.create(year=now_year, type=now_season)
+        s = SemesterFactory.create_current(for_branch=Branches.SPB)
         co = CourseFactory.create(semester=s, teachers=[teacher])
         a = AssignmentFactory.create(course=co)
         self.doLogin(teacher)
@@ -336,8 +332,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
         TEACHER_ASSIGNMENTS_PAGE = reverse(self.url_name)
         teacher = TeacherFactory()
         students = StudentFactory.create_batch(3)
-        now_year, now_season = get_current_term_pair('spb')
-        s = SemesterFactory.create(year=now_year, type=now_season)
+        s = SemesterFactory.create_current(for_branch=Branches.SPB)
         # some other teacher's course offering
         co_other = CourseFactory.create(semester=s)
         AssignmentFactory.create_batch(2, course=co_other)
@@ -540,7 +535,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Test `upcoming` block
-    now_year, _ = get_current_term_pair('spb')
+    now_year, _ = get_current_term_pair(settings.TIME_ZONES['spb'])
     dt = dt.replace(year=now_year + 1, month=2, hour=14)
     assignment.deadline_at = dt
     assignment.save()

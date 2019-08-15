@@ -24,6 +24,7 @@ import courses.utils
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
 from api.permissions import CuratorAccessPermission
+from core.models import Branch
 from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR
 from core.templatetags.core_tags import tex
 from core.urls import reverse
@@ -37,7 +38,7 @@ from learning.models import Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import AcademicDegreeYears, StudentStatuses, \
-    GradeTypes, Branches
+    GradeTypes, Branches, DEFAULT_BRANCH_CODE
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams
@@ -96,7 +97,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/exports.html"
 
     def get_context_data(self, **kwargs):
-        current_term = get_current_term_pair(settings.DEFAULT_CITY_CODE)
+        current_term = get_current_term_pair()
         current_term_index = get_term_index(current_term.year, current_term.type)
         prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
         graduation_form = GraduationForm()
@@ -431,24 +432,24 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         query_params = FacesQueryParams(data=request.GET)
         if not query_params.is_valid():
             return HttpResponseRedirect(request.path)
-        city_code = query_params.validated_data.get('city')
-        if not city_code:
-            # FIXME: add to util
-            city_code = getattr(self.request.user, "city_id",
-                                settings.DEFAULT_CITY_CODE)
+        branch_code = query_params.validated_data.get('branch',
+                                                      DEFAULT_BRANCH_CODE)
+        branch = get_object_or_404(Branch.objects
+                                   .filter(code=branch_code,
+                                           site_id=settings.SITE_ID))
         enrollment_year = query_params.validated_data.get('year')
         if not enrollment_year:
-            enrollment_year, _ = get_current_term_pair(city_code)
-        context = self.get_context_data(city_code, enrollment_year, **kwargs)
+            enrollment_year, _ = get_current_term_pair(branch.get_timezone())
+        context = self.get_context_data(branch, enrollment_year, **kwargs)
         return self.render_to_response(context)
 
-    def get_context_data(self, city_code, enrollment_year, **kwargs):
-        current_year, _ = get_current_term_pair(city_code)
+    def get_context_data(self, branch, enrollment_year, **kwargs):
+        current_year, _ = get_current_term_pair(branch.get_timezone())
         context = {
-            'students': self.get_queryset(city_code, enrollment_year),
+            'students': self.get_queryset(branch, enrollment_year),
             "years": reversed(range(CENTER_FOUNDATION_YEAR, current_year + 1)),
             "current_year": enrollment_year,
-            "current_city": city_code
+            "current_branch": branch
         }
         return context
 
@@ -457,11 +458,11 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
             self.template_name = "staff/student_faces_printable.html"
         return super(StudentFacesView, self).get_template_names()
 
-    def get_queryset(self, city_code, enrollment_year):
+    def get_queryset(self, branch, enrollment_year):
         roles = (Roles.STUDENT, Roles.VOLUNTEER)
         qs = (User.objects
               .has_role(*roles)
-              .filter(city_id=city_code,
+              .filter(branch=branch,
                       enrollment_year=enrollment_year)
               .distinct()
               .prefetch_related("groups"))
@@ -490,7 +491,7 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
     template_name = "staff/courses_intersection.html"
 
     def get_context_data(self, **kwargs):
-        year, term = get_current_term_pair('spb')
+        year, term = get_current_term_pair()
         current_term_index = get_term_index(year, term)
         all_courses_in_term = (Course.objects
                                .filter(semester__index=current_term_index)
@@ -530,76 +531,6 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
             }
         }
         return context
-
-
-# XXX: Not implemented
-# TODO: remove
-class TotalStatisticsView(CuratorOnlyMixin, generic.base.View):
-    http_method_names = ['get']
-
-    def get(self, request, *args, **kwargs):
-        current_year, season = get_current_term_pair('spb')
-        start_semester_index = get_term_index(2011, SemesterTypes.AUTUMN)
-        end_semester_index = get_term_index(current_year, season)
-        semesters = Semester.objects.filter(index__gte=start_semester_index,
-                                            index__lte=end_semester_index)
-        # Ok, additional query for counting acceptances due to no FK on enrollment_year field. Append it to autumn season
-        query = (User.objects.exclude(enrollment_year__isnull=True)
-                 .values("enrollment_year")
-                 .annotate(acceptances=Count("enrollment_year"))
-                 .order_by("enrollment_year"))
-        acceptances = defaultdict(int)
-        for row in query:
-            acceptances[row["enrollment_year"]] = row["acceptances"]
-
-        query = (User.objects.exclude(graduation_year__isnull=True)
-                 .values("graduation_year")
-                 .annotate(graduated=Count("graduation_year"))
-                 .order_by("graduation_year"))
-        graduated = defaultdict(int)
-        for row in query:
-            graduated[row["graduation_year"]] = row["graduated"]
-        # TODO: graduated and acceptances in 1 query with Django ORM?
-
-        # FIXME: Expressional conditions don't group by items?
-        # Stats for expelled students
-        query = (UserStatusLog.objects.values("semester")
-                 .annotate(expelled=Count("student", distinct=True))
-                 .filter(status=StudentStatuses.EXPELLED)
-                 .order_by("status"))
-        expelled = defaultdict(int)
-        for row in query:
-            expelled[row["semester"]] = row["expelled"]
-        # TODO: Investigate how to aggregate stats for expelled and will_graduate in 1 query
-
-        # Stats for expelled students
-        query = (UserStatusLog.objects
-                 .values("semester")
-                 .annotate(will_graduate=Count("student", distinct=True))
-                 .filter(status=StudentStatuses.WILL_GRADUATE)
-                 .order_by("status"))
-        will_graduate = defaultdict(int)
-        for row in query:
-            will_graduate[row["semester"]] = row["will_graduate"]
-
-        statistics = OrderedDict()
-        for semester in semesters:
-            acceptances_cnt, graduated_cnt = 0, 0
-            if semester.type == SemesterTypes.AUTUMN:
-                acceptances_cnt = acceptances[semester.year]
-            elif semester.type == SemesterTypes.SPRING:
-                graduated_cnt = graduated[semester.year]
-            statistics[semester.pk] = {
-                "semester": semester,
-                "acceptances": acceptances_cnt,
-                "graduated": graduated_cnt,
-                "expelled": expelled[semester.pk],
-                "will_graduate": will_graduate[semester.pk],
-            }
-        print(statistics)
-
-
-        return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
 
 
 def autograde_projects(request):

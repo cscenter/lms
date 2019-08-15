@@ -175,7 +175,7 @@ class TeachersView(TemplateView):
 
     def get_context_data(self, **kwargs):
         # Get terms in last 3 academic years.
-        year, term_type = get_current_term_pair(settings.DEFAULT_CITY_CODE)
+        year, term_type = get_current_term_pair()
         term_index = get_term_index_academic_year_starts(year, term_type)
         term_index -= 2 * len(SemesterTypes.choices)
         app_data = {

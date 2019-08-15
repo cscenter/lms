@@ -43,12 +43,8 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
     """
     permission_required = "study.view_schedule"
 
-    def get_default_timezone(self):
-        return get_student_city_code(self.request)
-
     def get_events(self, year, month, **kwargs):
-        student_city_code = self.get_default_timezone()
-        return get_month_events(year, month, [student_city_code])
+        return get_month_events(year, month, [self.request.user.city_code])
 
 
 class CalendarPersonalView(CalendarFullView):
@@ -60,8 +56,7 @@ class CalendarPersonalView(CalendarFullView):
     template_name = "learning/calendar.html"
 
     def get_events(self, year, month, **kwargs):
-        student_city_code = self.get_default_timezone()
-        return get_month_events(year, month, [student_city_code],
+        return get_month_events(year, month, [self.request.user.city_code],
                                 for_student=self.request.user)
 
 
@@ -153,9 +148,6 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
     template_name = "learning/study/timetable.html"
     permission_required = "study.view_schedule"
 
-    def get_default_timezone(self):
-        return get_student_city_code(self.request)
-
     def get_events(self, iso_year, iso_week,
                    **kwargs) -> Iterable[CalendarEvent]:
         # TODO: Add NonCourseEvents like in a calendar view?
@@ -208,7 +200,8 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
                                      'course__grading_type'))
         student_enrolled_in = {e.course_id: e for e in student_enrollments}
         # 1. Union courses from current term and which student enrolled in
-        current_year, current_term = get_current_term_pair(city_code)
+        tz = self.request.user.get_timezone()
+        current_year, current_term = get_current_term_pair(tz)
         current_term_index = get_term_index(current_year, current_term)
         in_current_term = Q(semester__index=current_term_index)
         enrolled_in = Q(id__in=list(student_enrolled_in))

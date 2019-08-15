@@ -26,6 +26,8 @@ from sorl.thumbnail import ImageField
 from auth.permissions import all_permissions
 from compscicenter_ru.utils import PublicRoute
 from core.models import LATEX_MARKDOWN_ENABLED, City
+from core.settings.base import DEFAULT_CITY_CODE, DEFAULT_TIMEZONE
+from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping
 from courses.models import Semester
@@ -220,8 +222,10 @@ class StudentProfile(models.Model):
         abstract = True
 
 
-class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
-           AbstractBaseUser):
+class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
+           UserThumbnailMixin, AbstractBaseUser):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
+
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
     ENROLLMENT_CACHE_KEY = "_student_enrollment_{}"
@@ -412,6 +416,9 @@ class User(LearningPermissionsMixin, StudentProfile, UserThumbnailMixin,
     def city_code(self):
         city_code = getattr(self, "city_id", None)
         return city_code if city_code else None
+
+    def get_timezone(self) -> Timezone:
+        return settings.TIME_ZONES.get(self.city_id, DEFAULT_TIMEZONE)
 
     @property
     def is_expelled(self):

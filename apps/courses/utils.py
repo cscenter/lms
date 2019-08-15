@@ -8,7 +8,7 @@ import pytz
 from dateutil import parser as dparser
 from django.utils import timezone
 
-from core.settings.base import FOUNDATION_YEAR
+from core.settings.base import FOUNDATION_YEAR, DEFAULT_TIMEZONE
 from core.timezone import Timezone, now_local, TzAware
 from courses.constants import SemesterTypes, \
     AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START, MONDAY_WEEKDAY
@@ -19,28 +19,28 @@ TERMS_INDEX_START = 1
 TermTuple = namedtuple('TermTuple', ['year', 'type'])
 
 
-def get_current_term_pair(tz_aware: TzAware) -> TermTuple:
-    dt_local = now_local(tz_aware)
+def get_current_term_pair(tz: Timezone = DEFAULT_TIMEZONE) -> TermTuple:
+    dt_local = now_local(tz)
     return date_to_term_pair(dt_local)
 
 
-def date_to_term_pair(date):
-    assert timezone.is_aware(date)
-    year = date.year
+def date_to_term_pair(dt: datetime.datetime) -> TermTuple:
+    assert timezone.is_aware(dt)
+    year = dt.year
     # Term start should be aware of the same timezone as `date`
     _convert = convert_term_parts_to_datetime
-    spring_term_start = _convert(year, SPRING_TERM_START, date.tzinfo)
-    autumn_term_start = _convert(year, AUTUMN_TERM_START, date.tzinfo)
-    summer_term_start = _convert(year, SUMMER_TERM_START, date.tzinfo)
+    spring_term_start = _convert(year, SPRING_TERM_START, dt.tzinfo)
+    autumn_term_start = _convert(year, AUTUMN_TERM_START, dt.tzinfo)
+    summer_term_start = _convert(year, SUMMER_TERM_START, dt.tzinfo)
 
-    if spring_term_start <= date < summer_term_start:
+    if spring_term_start <= dt < summer_term_start:
         current_term = SemesterTypes.SPRING
-    elif summer_term_start <= date < autumn_term_start:
+    elif summer_term_start <= dt < autumn_term_start:
         current_term = SemesterTypes.SUMMER
     else:
         current_term = SemesterTypes.AUTUMN
         # Fix year inaccuracy, when spring semester starts later than 1 jan
-        if date.month <= spring_term_start.month:
+        if dt.month <= spring_term_start.month:
             year -= 1
     return TermTuple(year, current_term)
 
@@ -65,13 +65,14 @@ def get_term_start(year, term_type, tz: Timezone) -> datetime.datetime:
 
 
 def next_term_starts_at(term_index=None,
-                        tz_aware=pytz.UTC) -> datetime.datetime:
+                        tz: Timezone = pytz.UTC) -> datetime.datetime:
     if not term_index:
-        term_index = get_current_term_index(tz_aware)
+        term_index = get_current_term_index(tz)
     year, next_term = get_term_by_index(term_index + 1)
-    return get_term_start(year, next_term, tz_aware)
+    return get_term_start(year, next_term, tz)
 
 
+# FIXME: pass in TermTuple, then allow to pass in datetime
 def get_term_index(target_year, target_term_type):
     """Calculate consecutive term number from spring term of FOUNDATION_YEAR"""
     if target_year < FOUNDATION_YEAR:
@@ -88,8 +89,8 @@ def get_term_index(target_year, target_term_type):
     return year_portion + term_portion
 
 
-def get_current_term_index(tz_aware: TzAware):
-    return get_term_index(*get_current_term_pair(tz_aware))
+def get_current_term_index(tz: Timezone = DEFAULT_TIMEZONE):
+    return get_term_index(*get_current_term_pair(tz))
 
 
 def get_term_index_academic_year_starts(year: int, term_type):

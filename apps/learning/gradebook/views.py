@@ -37,7 +37,8 @@ class GradeBookListBaseView(generic.ListView):
 
     def get_queryset(self):
         # FIXME: Is it ok to use 'spb' here?
-        current_year, term_type = get_current_term_pair('spb')
+        tz = self.request.user.get_timezone()
+        current_year, term_type = get_current_term_pair(tz)
         term_index = get_term_index(current_year, term_type)
         # Skip to the spring semester
         # FIXME: why?!

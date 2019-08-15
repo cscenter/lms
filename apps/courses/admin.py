@@ -6,9 +6,8 @@ from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.admin import TimezoneAwareModelForm, \
-    TimezoneAwareAdminSplitDateTimeWidget, \
-    TimezoneAwareSplitDateTimeField
+from core.timezone.admin import TimezoneAwareModelForm, \
+    TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.compat import Django21BitFieldCheckboxSelectMultiple
 from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget

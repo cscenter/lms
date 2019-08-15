@@ -76,7 +76,7 @@ def test_get_current_semester_pair(settings, mocker):
     msk_tz = pytz.timezone("Europe/Moscow")
     mocked_timezone.return_value = msk_tz.localize(
         datetime.datetime(2014, 4, 1, 12, 0))
-    assert (2014, 'spring') == get_current_term_pair('spb')
+    assert (2014, 'spring') == get_current_term_pair(msk_tz)
     mocked_timezone.return_value = msk_tz.localize(
         datetime.datetime(2015, 11, 1, 12, 0))
-    assert (2015, 'autumn') == get_current_term_pair('spb')
+    assert (2015, 'autumn') == get_current_term_pair(msk_tz)

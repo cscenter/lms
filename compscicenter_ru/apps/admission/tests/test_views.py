@@ -13,6 +13,7 @@ from admission.models import Applicant, Interview, InterviewInvitation
 from admission.tests.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
+from core.tests.utils import now_for_branch
 from core.timezone import now_local
 from core.urls import reverse
 from core.models import Branch
@@ -52,7 +53,7 @@ def test_simple_interviews_list(client, curator, settings):
     interviewer = InterviewerFactory()
     branch = Branch.objects.get(code=Branches.NSK)
     campaign = CampaignFactory(current=True, branch=branch)
-    today_local_nsk = now_local(Branches.get_choice(Branches.NSK).timezone)
+    today_local_nsk = now_for_branch(Branches.NSK)
     today_local_nsk_date = formats.date_format(today_local_nsk,
                                                "SHORT_DATE_FORMAT")
     interview1, interview2, interview3 = InterviewFactory.create_batch(3,

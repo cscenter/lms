@@ -8,7 +8,7 @@ import pytz
 from django.core import mail, management
 from subdomains.utils import get_domain
 
-from core.constants import DATE_FORMAT_RU
+from core.timezone.constants import DATE_FORMAT_RU
 from core.tests.utils import CSCTestCase, TEST_DOMAIN, ANOTHER_DOMAIN_ID
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
