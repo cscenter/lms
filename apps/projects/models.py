@@ -432,7 +432,7 @@ class Supervisor(models.Model):
 
 
 class Project(TimezoneAwareModel, TimeStampedModel):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
+    TIMEZONE_AWARE_FIELD_NAME = 'branch'
 
     class Statuses(DjangoChoices):
         CANCELED = C('canceled', _("Canceled"))
@@ -447,9 +447,6 @@ class Project(TimezoneAwareModel, TimeStampedModel):
         choices=ProjectTypes.choices,
         verbose_name=_("StudentProject|Type"),
         max_length=10)
-    city = models.ForeignKey(City, verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE,
-                             on_delete=models.CASCADE)
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
@@ -535,9 +532,6 @@ class Project(TimezoneAwareModel, TimeStampedModel):
     def get_city(self):
         return self.city_id
 
-    def get_timezone(self):
-        return settings.TIME_ZONES[self.city_id]
-
     def get_absolute_url(self):
         return reverse('projects:project_detail', args=[self.pk])
 
@@ -556,7 +550,7 @@ class Project(TimezoneAwareModel, TimeStampedModel):
 
     def is_active(self):
         """Check project is from current term"""
-        current_term_index = get_current_term_index(self.city_id)
+        current_term_index = get_current_term_index(self.branch.get_timezone())
         return not self.is_canceled and self.semester.index == current_term_index
 
 

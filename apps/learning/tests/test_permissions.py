@@ -6,7 +6,8 @@ from core.timezone import now_local
 from courses.models import Course
 from courses.tests.factories import CourseFactory, SemesterFactory
 from learning.permissions import course_access_role, CourseRole
-from learning.settings import StudentStatuses, GradeTypes, Branches
+from learning.settings import StudentStatuses, GradeTypes, Branches, \
+    DEFAULT_BRANCH_CODE
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
 from users.constants import Roles
 from users.models import ExtendedAnonymousUser, User
@@ -108,9 +109,9 @@ def test_enroll_in_course():
     today = now_local(Branches.SPB)
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(city_code=Branches.SPB,
+    term = SemesterFactory.create_current(for_branch=DEFAULT_BRANCH_CODE,
                                           enrollment_end_at=tomorrow.date())
-    course = CourseFactory(city=Branches.SPB, semester=term, is_open=False,
+    course = CourseFactory(semester=term, is_open=False,
                            is_correspondence=False,
                            capacity=0)
     assert course.enrollment_is_open
@@ -167,9 +168,9 @@ def test_enroll_in_course_by_invitation():
     today = now_local(Branches.SPB)
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(city_code=Branches.SPB,
+    term = SemesterFactory.create_current(for_branch=DEFAULT_BRANCH_CODE,
                                           enrollment_end_at=tomorrow.date())
-    course = CourseFactory(city=Branches.SPB, semester=term, is_open=False,
+    course = CourseFactory(semester=term, is_open=False,
                            is_correspondence=False,
                            capacity=0)
     assert course.enrollment_is_open

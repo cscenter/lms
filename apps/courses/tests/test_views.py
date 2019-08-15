@@ -88,8 +88,7 @@ def test_update_derivable_fields(curator, client, mocker):
     """Derivable fields should be recalculated on updating course class"""
     mocker.patch("courses.tasks.maybe_upload_slides_yandex.delay")
     teacher = TeacherFactory()
-    co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                              teachers=[teacher])
+    co = CourseFactory.create(teachers=[teacher])
     cc1 = CourseClassFactory.create(course=co, video_url="")
     co.refresh_from_db()
     assert not co.videos_count

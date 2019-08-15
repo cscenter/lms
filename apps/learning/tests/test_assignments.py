@@ -290,8 +290,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, CSCTestCase):
         student = StudentFactory()
         now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
-        co = CourseFactory.create(city='spb', semester=s,
-                                  teachers=[teacher])
+        co = CourseFactory.create(semester=s, teachers=[teacher])
         a = AssignmentFactory.create(course=co)
         self.doLogin(teacher)
         url = a.get_teacher_url()
@@ -340,15 +339,14 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
         now_year, now_season = get_current_term_pair('spb')
         s = SemesterFactory.create(year=now_year, type=now_season)
         # some other teacher's course offering
-        co_other = CourseFactory.create(city='spb', semester=s)
+        co_other = CourseFactory.create(semester=s)
         AssignmentFactory.create_batch(2, course=co_other)
         self.doLogin(teacher)
         # no course offerings yet, return 302
         resp = self.client.get(TEACHER_ASSIGNMENTS_PAGE)
         self.assertEqual(302, resp.status_code)
         # Create co, assignments and enroll students
-        co = CourseFactory.create(city='spb', semester=s,
-                                  teachers=[teacher])
+        co = CourseFactory.create(semester=s, teachers=[teacher])
         for student1 in students:
             EnrollmentFactory.create(student=student1, course=co)
         assignment = AssignmentFactory.create(course=co)
@@ -439,7 +437,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
 def test_assignment_public_form_for_teachers(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
     teacher = TeacherFactory()
-    co_in_spb = CourseFactory(city='spb', teachers=[teacher])
+    co_in_spb = CourseFactory(teachers=[teacher])
     client.login(teacher)
     form_data = {
         "title": "title",

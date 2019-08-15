@@ -52,11 +52,9 @@ def test_course_class_detail_security(client, assert_login_redirect):
 @pytest.mark.django_db
 def test_course_class_create(client):
     teacher = TeacherFactory()
-    s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-    co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                              teachers=[teacher], semester=s)
-    co_other = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                    semester=s)
+    s = SemesterFactory.create_current()
+    co = CourseFactory.create(teachers=[teacher], semester=s)
+    co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
     venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
     form.update({'venue': venue.pk})
@@ -76,11 +74,9 @@ def test_course_class_create(client):
 @pytest.mark.django_db
 def test_course_class_create_and_add(client, assert_redirect):
     teacher = TeacherFactory()
-    s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-    co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                              teachers=[teacher], semester=s)
-    co_other = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                                    semester=s)
+    s = SemesterFactory.create_current()
+    co = CourseFactory.create(teachers=[teacher], semester=s)
+    co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
     venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
     form.update({'venue': venue.pk, '_addanother': True})
@@ -108,9 +104,8 @@ def test_course_class_create_and_add(client, assert_redirect):
 @pytest.mark.django_db
 def test_course_class_update(client, assert_redirect):
     teacher = TeacherFactory()
-    s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-    co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                              teachers=[teacher], semester=s)
+    s = SemesterFactory.create_current()
+    co = CourseFactory.create(teachers=[teacher], semester=s)
     cc = CourseClassFactory.create(course=co)
     url = cc.get_update_url()
     client.login(teacher)
@@ -125,9 +120,8 @@ def test_course_class_update(client, assert_redirect):
 @pytest.mark.django_db
 def test_course_class_update_and_add(client, assert_redirect):
     teacher = TeacherFactory()
-    s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-    co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                              teachers=[teacher], semester=s)
+    s = SemesterFactory.create_current()
+    co = CourseFactory.create(teachers=[teacher], semester=s)
     cc = CourseClassFactory.create(course=co)
     url = cc.get_update_url()
     client.login(teacher)
@@ -146,9 +140,8 @@ def test_course_class_update_and_add(client, assert_redirect):
 @pytest.mark.django_db
 def test_course_class_delete(client, assert_redirect, assert_login_redirect):
     teacher = TeacherFactory()
-    s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-    co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                              teachers=[teacher], semester=s)
+    s = SemesterFactory.create_current()
+    co = CourseFactory.create(teachers=[teacher], semester=s)
     cc = CourseClassFactory.create(course=co)
     class_delete_url = cc.get_delete_url()
     assert_login_redirect(class_delete_url)
@@ -165,7 +158,7 @@ def test_course_class_delete(client, assert_redirect, assert_login_redirect):
 @pytest.mark.django_db
 def test_course_class_back_variable(client, assert_redirect):
     teacher = TeacherFactory()
-    s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
+    s = SemesterFactory.create_current()
     co = CourseFactory.create(teachers=[teacher], semester=s)
     cc = CourseClassFactory.create(course=co)
     class_update_url = cc.get_update_url()
@@ -183,9 +176,8 @@ def test_course_class_back_variable(client, assert_redirect):
 @pytest.mark.django_db
 def test_course_class_attachment_links(client, assert_redirect):
     teacher = TeacherFactory()
-    s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-    co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                              teachers=[teacher], semester=s)
+    s = SemesterFactory.create_current()
+    co = CourseFactory.create(teachers=[teacher], semester=s)
     cc = CourseClassFactory.create(course=co)
     cca1 = CourseClassAttachmentFactory.create(
         course_class=cc, material__filename="foobar1.pdf")
@@ -220,9 +212,8 @@ def test_course_class_attachments(client, assert_redirect,
     settings.DEBUG = False
 
     teacher = TeacherFactory()
-    s = SemesterFactory.create_current(city_code=settings.DEFAULT_CITY_CODE)
-    co = CourseFactory.create(city=settings.DEFAULT_CITY_CODE,
-                              teachers=[teacher], semester=s)
+    s = SemesterFactory.create_current()
+    co = CourseFactory.create(teachers=[teacher], semester=s)
     cc = CourseClassFactory.create(course=co)
     f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
     f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")

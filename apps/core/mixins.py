@@ -118,6 +118,14 @@ class TimezoneAwareModel:
         else:
             tz_aware_field_name = cls.TIMEZONE_AWARE_FIELD_NAME
             if tz_aware_field_name is not TimezoneAwareModel.SELF_AWARE:
+                if 'get_timezone' in cls.__dict__:
+                    errors.append(
+                        checks.Error(
+                            f"class {cls.__name__} overrides `get_timezone` method",
+                            hint=f'Remove `get_timezone` method from {cls} or mark this class as time zone self aware',
+                            obj=cls,
+                            id='timezone.E005',
+                        ))
                 tz_aware_field = None
                 try:
                     tz_aware_field = cls._meta.get_field(tz_aware_field_name)
@@ -170,7 +178,7 @@ class TimezoneAwareModel:
                         f"Runtime error on detecting cycle and termination for `{cls.__name__}` class.",
                         hint=f'Fix timezone.XXX errors for {next_cls} class',
                         obj=cls,
-                        id='timezone.E005',
+                        id='timezone.E006',
                     ))
                 break
             if next_cls is cls:
@@ -179,7 +187,7 @@ class TimezoneAwareModel:
                         f"Cycle detected for `{cls.__name__}` class in `get_timezone` mro chain",
                         hint=f'`get_timezone` method for {next_cls} class should terminate.',
                         obj=cls,
-                        id='timezone.E006',
+                        id='timezone.E007',
                     ))
                 break
             if next_cls is TimezoneAwareModel:
@@ -188,7 +196,7 @@ class TimezoneAwareModel:
                         f"`{cls.__name__}` is not terminated properly",
                         hint=f'Define SELF_AWARE model in mro call chain for {cls}',
                         obj=cls,
-                        id='timezone.E007',
+                        id='timezone.E008',
                     ))
                 break
         return errors

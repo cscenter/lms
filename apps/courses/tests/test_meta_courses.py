@@ -12,10 +12,8 @@ from users.tests.factories import UserFactory
 @pytest.mark.django_db
 def test_meta_course_detail(client):
     mc = MetaCourseFactory.create()
-    co1 = CourseFactory(meta_course=mc,
-                        city=settings.DEFAULT_CITY_CODE)
-    co2 = CourseFactory(meta_course=mc,
-                        city=settings.DEFAULT_CITY_CODE)
+    co1 = CourseFactory(meta_course=mc)
+    co2 = CourseFactory(meta_course=mc)
     response = client.get(mc.get_absolute_url())
     assert response.status_code == 200
     assert mc.name.encode() in response.content
