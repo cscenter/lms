@@ -111,6 +111,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'django.utils.autoreload': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         "notifications.notifier": {
             'level': 'DEBUG',
             'handlers': ['console'],
