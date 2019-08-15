@@ -213,7 +213,6 @@ _ru_en_mapping = {
 ru_en_mapping = {ord(k): v for k, v in _ru_en_mapping.items()}
 
 
-# FIXME: add tests!
 def queryset_iterator(queryset, chunk_size=1000, use_offset=False):
     """
     Memory efficient iteration over a Django queryset with
@@ -226,9 +225,12 @@ def queryset_iterator(queryset, chunk_size=1000, use_offset=False):
     as a result.
 
     Default implementation overrides ordering with primary key.
-    Note that `use_offset=True` preserve original queryset ordering, but
+    Note that `use_offset=True` preserves original queryset ordering, but
     limit/offset pagination could be slow.
     """
+    if chunk_size <= 0:
+        return
+
     if use_offset:
         if not queryset.ordered:
             queryset = queryset.order_by('pk')

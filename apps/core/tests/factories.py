@@ -39,9 +39,10 @@ class EmailTemplateFactory(factory.DjangoModelFactory):
 
 class BranchFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Branch %03d" % n)
-    code = factory.Iterator(x for x, _ in Branches.choices)
+    code = factory.Sequence(lambda n: "b%03d" % n)
     site = factory.SubFactory(SiteFactory)
     city = factory.SubFactory(CityFactory)
+    order = factory.Sequence(lambda n: n)
     time_zone = 'Europe/Moscow'
 
     class Meta:
