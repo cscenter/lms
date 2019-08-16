@@ -2,15 +2,17 @@ import datetime
 
 import factory
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.utils import timezone
 
 from core.models import City
-from core.tests.factories import VenueFactory, CityFactory
+from core.tests.factories import VenueFactory, CityFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment
 from courses.utils import get_current_term_pair, get_term_by_index
-from learning.settings import Branches, DEFAULT_BRANCH_CODE
+from learning.settings import Branches
+from core.settings.base import DEFAULT_BRANCH_CODE
 from users.tests.factories import TeacherFactory
 
 __all__ = (
@@ -69,6 +71,8 @@ class CourseFactory(factory.DjangoModelFactory):
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
     city = factory.SubFactory(CityFactory, code=settings.DEFAULT_CITY_CODE)
+    branch = factory.SubFactory(BranchFactory,
+                                code=settings.DEFAULT_BRANCH_CODE)
 
     @factory.post_generation
     def teachers(self, create, extracted, **kwargs):

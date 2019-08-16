@@ -27,8 +27,13 @@ DATABASES = {
     }
 }
 
+TEST_DOMAIN = 'compscicenter.ru'
+TEST_DOMAIN_ID = 1
+ANOTHER_DOMAIN = 'compsciclub.ru'
+ANOTHER_DOMAIN_ID = 2
+SITE_ID = TEST_DOMAIN_ID
+ALLOWED_HOSTS = [f".{TEST_DOMAIN}", f".{ANOTHER_DOMAIN}"]
 
-ALLOWED_HOSTS = [".compscicenter.ru", ".compsciclub.ru"]
 # This makes tests almost 2x faster; we don't need strong security and DEBUG
 # during tests
 PASSWORD_HASHERS = [
@@ -49,4 +54,3 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.cached_db_kvstore.KVStore'
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
-

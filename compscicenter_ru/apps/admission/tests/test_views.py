@@ -17,7 +17,8 @@ from core.tests.utils import now_for_branch
 from core.timezone import now_local
 from core.urls import reverse
 from core.models import Branch
-from learning.settings import Branches, DEFAULT_BRANCH_CODE
+from learning.settings import Branches
+from core.settings.base import DEFAULT_BRANCH_CODE
 from users.tests.factories import UserFactory, CuratorFactory
 
 
@@ -47,11 +48,12 @@ def test_application_form_availability(client):
 @pytest.mark.django_db
 def test_simple_interviews_list(client, curator, settings):
     settings.LANGUAGE_CODE = 'ru'
-    curator.branch = Branch.objects.get(code=Branches.NSK)
+    curator.branch = Branch.objects.get(code=Branches.NSK,
+                                        site_id=settings.SITE_ID)
     curator.save()
     client.login(curator)
     interviewer = InterviewerFactory()
-    branch = Branch.objects.get(code=Branches.NSK)
+    branch = Branch.objects.get(code=Branches.NSK, site_id=settings.SITE_ID)
     campaign = CampaignFactory(current=True, branch=branch)
     today_local_nsk = now_for_branch(Branches.NSK)
     today_local_nsk_date = formats.date_format(today_local_nsk,

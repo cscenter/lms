@@ -1,5 +1,5 @@
 import pytest
-from core.tests.utils import TEST_DOMAIN
+from compscicenter_ru.settings.test import TEST_DOMAIN
 from users.models import ExtendedAnonymousUser
 from users.tests.factories import StudentFactory
 

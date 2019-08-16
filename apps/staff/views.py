@@ -25,7 +25,8 @@ from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
 from api.permissions import CuratorAccessPermission
 from core.models import Branch
-from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR
+from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR, \
+    DEFAULT_BRANCH_CODE
 from core.templatetags.core_tags import tex
 from core.urls import reverse
 from courses.models import Course, Semester
@@ -38,7 +39,7 @@ from learning.models import Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import AcademicDegreeYears, StudentStatuses, \
-    GradeTypes, Branches, DEFAULT_BRANCH_CODE
+    GradeTypes, Branches
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import factory
+from django.conf import settings
+from django.contrib.sites.models import Site
 
-from core.settings.base import DEFAULT_CITY_CODE
-from learning.settings import GradeTypes, DEFAULT_BRANCH_CODE
+from core.settings.base import DEFAULT_CITY_CODE, DEFAULT_BRANCH_CODE
+from learning.settings import GradeTypes
 from users.constants import Roles, GenderTypes
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
     OnlineCourseRecord, UserGroup

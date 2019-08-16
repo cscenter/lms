@@ -1,12 +1,9 @@
 import datetime
-from typing import Union
 
-import django_rq
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
-from django.db.models import Prefetch, Case, When, Value
+from django.db.models import Prefetch
 from django.http import Http404
 from django.shortcuts import redirect
 from django.utils.timezone import now
@@ -18,19 +15,17 @@ from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
 
 import core.utils
-import courses.utils
+from auth.tasks import send_activation_email, ActivationEmailContext
 from core.settings.base import TIME_ZONES
-from core.timezone import Timezone, CityCode
 from core.urls import reverse
 from courses.calendar import CalendarEvent
-from courses.models import Course, Semester, CourseClass
 from courses.constants import SemesterTypes
+from courses.models import Course, Semester, CourseClass
 from courses.utils import get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from learning.gallery.models import Image
 from users.constants import Roles
 from users.models import User
-from auth.tasks import send_activation_email, ActivationEmailContext
 
 
 class AsyncEmailRegistrationView(RegistrationView):
@@ -53,7 +48,7 @@ class AsyncEmailRegistrationView(RegistrationView):
 
 
 class CalendarClubScheduleView(MonthEventsCalendarView):
-    """Shows all classes from public courses."""
+    """Shows classes from public courses."""
     calendar_type = "public_full"
     template_name = "learning/calendar.html"
 
@@ -61,7 +56,7 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
         classes = (CourseClass.objects
                    .for_calendar()
                    .in_month(year, month)
-                   .in_city(self.request.city_code))
+                   .in_branches(self.request.branch.id))
         return (CalendarEvent(e) for e in classes)
 
 
@@ -84,7 +79,7 @@ class IndexView(generic.TemplateView):
                                                .order_by('date', 'starts_at'))
             courses = list(
                 Course.objects
-                .in_city(self.request.city_code)
+                .in_branches(self.request.branch.id)
                 .filter(is_open=True, semester=featured_term.pk)
                 .select_related('meta_course', 'semester')
                 .prefetch_related(
@@ -116,10 +111,9 @@ class TeachersView(generic.ListView):
 
     @property
     def get_queryset(self):
-        lecturers = list(Course
-                         .objects
-                         .filter(is_open=True,
-                                 city__pk=self.request.city_code)
+        lecturers = list(Course.objects
+                         .in_branches(self.request.branch.id)
+                         .filter(is_open=True)
                          .distinct()
                          .values_list("teachers__pk", flat=True))
         return (User.objects
@@ -134,7 +128,7 @@ class TeacherDetailView(DetailView):
 
     def get_queryset(self):
         co_queryset = (Course.objects
-                       .in_city(self.request.city_code)
+                       .in_branches(self.request.branch.id)
                        .filter(is_open=True)
                        .select_related('semester', 'meta_course'))
         return (get_user_model()._default_manager
@@ -184,6 +178,7 @@ class ClubClassesFeed(ICalFeed):
     def items(self):
         return (CourseClass.objects
                 .filter(course__is_open=True,
+                        # FIXME: Why it is restricted by SPB?
                         course__city__code="spb")
                 .select_related('venue',
                                 'course',
@@ -229,7 +224,7 @@ class CoursesListView(generic.ListView):
 
     def get_queryset(self):
         courses_qs = (Course.objects
-                      .in_city(self.request.city_code)
+                      .in_branches(self.request.branch.id)
                       .select_related('meta_course')
                       .prefetch_related('teachers')
                       .order_by('meta_course__name'))

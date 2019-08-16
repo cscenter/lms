@@ -58,7 +58,8 @@ from auth.backends import YandexRuOAuth2Backend
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown, bucketize
-from learning.settings import AcademicDegreeYears, DEFAULT_BRANCH_CODE
+from learning.settings import AcademicDegreeYears
+from core.settings.base import DEFAULT_BRANCH_CODE
 from tasks.models import Task
 from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import User

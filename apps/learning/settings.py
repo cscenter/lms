@@ -11,10 +11,6 @@ ASSIGNMENT_COMMENT_ATTACHMENT = 1
 ENROLLMENT_DURATION = getattr(settings, 'ENROLLMENT_DURATION', 45)
 
 
-# FIXME: move to the core settings?
-DEFAULT_BRANCH_CODE = "spb"
-
-
 class Branches(DjangoChoices):
     SPB = C("spb", _("Saint Petersburg"),
             timezone=pytz.timezone('Europe/Moscow'),

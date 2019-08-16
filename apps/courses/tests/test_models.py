@@ -90,10 +90,20 @@ def test_course_derivable_fields():
     assert co.materials_files
 
 
+@pytest.mark.django_db
+def test_course_completed_at_default_value():
+    semester = SemesterFactory(year=2017, type=SemesterTypes.AUTUMN)
+    course = CourseFactory.build(semester=semester)
+    assert not course.completed_at
+    course = CourseFactory.create(semester=semester)
+    next_term_dt = next_term_starts_at(semester.index, course.get_timezone())
+    assert course.completed_at == next_term_dt.date()
+
+
 class CourseTests(CSCTestCase):
     def test_in_current_term(self):
         """
-        In near future only one course should be "ongoing".
+        In the near future only one course should be "ongoing".
         """
         import datetime
         from django.utils import timezone
@@ -123,16 +133,6 @@ class CourseTests(CSCTestCase):
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = old_now
-
-    def test_completed_at_default(self):
-        semester = SemesterFactory(year=2017, type=SemesterTypes.AUTUMN)
-        meta_course = MetaCourseFactory()
-        co = CourseFactory.build(meta_course=meta_course,
-                                 semester=semester)
-        assert not co.completed_at
-        co.save()
-        next_term_dt = next_term_starts_at(semester.index, co.get_timezone())
-        assert co.completed_at == next_term_dt.date()
 
 
 class CourseClassTests(CSCTestCase):

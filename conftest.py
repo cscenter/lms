@@ -8,10 +8,10 @@ from pytest_django.lazy_django import skip_if_no_django
 
 from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
     INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
-from core.models import City, Branch
+from compscicenter_ru.settings.test import TEST_DOMAIN, TEST_DOMAIN_ID, \
+    ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID
 from core.tests.factories import BranchFactory, CityFactory
-from core.tests.utils import TestClient, TEST_DOMAIN, CSCTestCase, \
-    ANOTHER_DOMAIN, TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID
+from core.tests.utils import TestClient, CSCTestCase
 from learning.settings import Branches
 from notifications.models import Type
 from users.tests.factories import CuratorFactory
@@ -98,21 +98,26 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
         city_nsk = CityFactory(name="Novosibirsk", code="nsk", abbr="nsk")
         city_kzn = CityFactory(name="Kazan", code="kzn", abbr="kzn")
 
-        BranchFactory(code=Branches.SPB,
-                      site=Site.objects.get(id=TEST_DOMAIN_ID),
-                      name="Санкт-Петербург",
-                      city=city_spb)
-
-        BranchFactory(code=Branches.NSK,
-                      site=Site.objects.get(id=TEST_DOMAIN_ID),
-                      name="Новосибирск",
-                      time_zone='Asia/Novosibirsk',
-                      city=city_nsk)
+        for site_id in (TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID):
+            BranchFactory(code=Branches.SPB,
+                          site=Site.objects.get(id=site_id),
+                          name="Санкт-Петербург",
+                          city=city_spb)
+            BranchFactory(code=Branches.NSK,
+                          site=Site.objects.get(id=site_id),
+                          name="Новосибирск",
+                          time_zone='Asia/Novosibirsk',
+                          city=city_nsk)
 
         BranchFactory(code=Branches.DISTANCE,
                       site=Site.objects.get(id=TEST_DOMAIN_ID),
                       name="Заочное",
                       city=None)
+
+        BranchFactory(code=Branches.NSK,
+                      site=Site.objects.get(id=ANOTHER_DOMAIN_ID),
+                      name="Казань",
+                      city=city_kzn)
 
         from notifications import NotificationTypes
         for t in NotificationTypes:

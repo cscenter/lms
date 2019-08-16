@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from core.tests.utils import ANOTHER_DOMAIN_ID
+from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from core.urls import reverse_lazy
 from courses.constants import SemesterTypes
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \

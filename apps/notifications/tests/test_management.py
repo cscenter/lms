@@ -3,7 +3,7 @@ from io import StringIO as OutputIO
 import pytest
 from django.core import mail, management
 
-from core.tests.utils import ANOTHER_DOMAIN_ID
+from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from learning.models import AssignmentNotification
 from learning.tests.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory

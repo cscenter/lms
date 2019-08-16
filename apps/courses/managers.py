@@ -68,6 +68,11 @@ class CourseClassQuerySet(query.QuerySet):
                              course__is_correspondence=False) |
                            Q(course__is_correspondence=True))
 
+    def in_branches(self, *branches: List[int]):
+        return self.filter(Q(course__branch_id__in=branches,
+                             course__is_correspondence=False) |
+                           Q(course__is_correspondence=True))
+
     def in_month(self, year, month):
         date_start, date_end = get_boundaries(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
@@ -109,6 +114,11 @@ class CourseQuerySet(models.QuerySet):
         else:
             _q["city_id__exact"] = city_code
         return self.filter(Q(**_q) | Q(is_correspondence=True))
+
+    # FIXME: accept PK's or Branch objects?
+    def in_branches(self, *branches: List[int]):
+        return self.filter(Q(branch_id__in=branches, is_correspondence=False) |
+                           Q(is_correspondence=True))
 
     # FIXME: remove
     def in_center_branches(self):

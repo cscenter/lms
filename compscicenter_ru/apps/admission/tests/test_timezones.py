@@ -56,7 +56,8 @@ def test_get_timezone(settings):
     interview = InterviewFactory(applicant__campaign__branch__code=Branches.NSK,
                                  date=date)
     assert interview.get_timezone() == settings.TIME_ZONES[Branches.NSK]
-    interview.applicant.campaign.branch_id = Branch.objects.get(code=Branches.SPB)
+    branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
+    interview.applicant.campaign.branch = branch_spb
     interview.applicant.campaign.save()
     interview.refresh_from_db()
     assert interview.get_timezone() == settings.TIME_ZONES[Branches.SPB]
@@ -188,7 +189,8 @@ def test_interview_list(settings, client, curator):
     interview = InterviewFactory(date=datetime.datetime(2017, 1, 1,
                                                         12, 0, 0, 0,
                                                         tzinfo=pytz.UTC))
-    interview.applicant.campaign.branch_id = Branch.objects.get(code=Branches.NSK)
+    branch_nsk = Branch.objects.get(code=Branches.NSK, site_id=settings.SITE_ID)
+    interview.applicant.campaign.branch_id = branch_nsk
     interview.applicant.campaign.save()
     interview.refresh_from_db()
     interview_date_in_utc = interview.date
@@ -220,7 +222,8 @@ def test_interview_detail(settings, client, curator):
     assert any(time_str in s.string for s in
                html.find_all('div', {"class": "date"}))
     # Make sure timezone doesn't cached on view lvl
-    interview.applicant.campaign.branch_id = Branch.objects.get(code=Branches.SPB)
+    branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
+    interview.applicant.campaign.branch = branch_spb
     interview.applicant.campaign.save()
     localized = date_in_utc.astimezone(settings.TIME_ZONES[Branches.SPB])
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)

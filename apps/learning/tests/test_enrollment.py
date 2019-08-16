@@ -14,7 +14,8 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment
 from learning.services import EnrollmentService, CourseCapacityFull
-from learning.settings import StudentStatuses, Branches, DEFAULT_BRANCH_CODE
+from learning.settings import StudentStatuses, Branches
+from core.settings.base import DEFAULT_BRANCH_CODE
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory
 
@@ -93,16 +94,18 @@ def test_enrollment_capacity_view(client):
 
 @pytest.mark.django_db
 def test_enrollment_expelled_student(client):
-    s = StudentFactory(city_id='spb')
-    client.login(s)
-    current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(city_id='spb',
-                                  semester=current_semester,
-                                  is_open=False)
+    student = StudentFactory(branch__code=Branches.SPB)
+    client.login(student)
+    tomorrow = now_local(student.get_timezone()) + datetime.timedelta(days=1)
+    current_semester = SemesterFactory.create_current(
+        enrollment_end_at=tomorrow.date())
+    course = CourseFactory(semester=current_semester,
+                           is_open=False)
     response = client.get(course.get_absolute_url())
+    assert response.status_code == 200
     assert smart_bytes(_("Enroll in")) in response.content
-    s.status = StudentStatuses.EXPELLED
-    s.save()
+    student.status = StudentStatuses.EXPELLED
+    student.save()
     response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Enroll in")) not in response.content
 
