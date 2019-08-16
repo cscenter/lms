@@ -19,6 +19,7 @@ BRANCH_CACHE = {}
 
 # FIXME: Move to `checks` module like in django.contrib.admin.checks.check_dependencies
 # FIXME: также проверять порядок middleware (до contrib.sites)
+# FIXME: надо убедиться, что site_id domain value и get_host() совпадают. Как это делать?
 REQUIRED_SETTINGS = [
     "SITE_ID",
     "DEFAULT_BRANCH_CODE",

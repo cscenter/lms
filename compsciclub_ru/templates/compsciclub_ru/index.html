@@ -5,12 +5,12 @@
 {% get_current_language as LANGUAGE_CODE %}
 
 {% block content %}
-<div class="banner _{{ request.city_code|slugify }}">{% if request.city_code == 'spb' %}<div id="copyright">{% trans "Author photo" %}: <a target="_blank" href="https://commons.wikimedia.org/wiki/User:Andrey.Salnikov">{% trans "Andrey Salnikov" %}</a></div>{% endif %}</div>
+<div class="banner _{{ request.branch.code|slugify }}">{% if request.branch.code == 'spb' %}<div id="copyright">{% trans "Author photo" %}: <a target="_blank" href="https://commons.wikimedia.org/wiki/User:Andrey.Salnikov">{% trans "Andrey Salnikov" %}</a></div>{% endif %}</div>
 
 
 <div class="container">
   <div class="font-bigger">
-  {% if request.city_code == 'spb' %}
+  {% if request.branch.code == 'spb' %}
       {% blocktrans %}
       The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
     {% endblocktrans %}
@@ -57,7 +57,7 @@
       {% if LANGUAGE_CODE == 'ru' %}
           <div class="font-bigger">
           Если вы не нашли интересный курс выше, смотрите видеозаписи прошлых лет (раздел <a href="/courses/">Курсы</a>) или онлайн-курсы <a href="https://compscicenter.ru/online/">Computer Science центра</a>.
-          {% if request.city_code == 'spb' %}
+          {% if request.branch.code == 'spb' %}
               Систематическое двухлетнее образование по теоретической информатике, программированию и анализу данных можно получить в <a href="https://compscicenter.ru/">Computer Science центре</a>.
           {% else %}
               Систематическое двухлетнее образование по теоретической информатике, программированию и анализу данных можно получить в <a href="https://yandexdataschool.ru/">Школе анализа данных Яндекса</a>.

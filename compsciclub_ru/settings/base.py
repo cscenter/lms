@@ -34,7 +34,6 @@ MIDDLEWARE = [
 ]
 
 INSTALLED_APPS += [
-    # FIXME: create separated dir for project specific apps
     'treemenus',
     'menu_extension',
     'international_schools.apps.Config',
@@ -74,7 +73,7 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
-                'core.context_processors.cities',
+                'compsciclub_ru.context_processors.get_branches',
                 'core.context_processors.subdomain',
             ),
             'debug': DEBUG
