@@ -15,6 +15,7 @@ APPS_DIR = ROOT_DIR / "apps"
 
 MEDIA_ROOT = str(ROOT_DIR / "media")
 MEDIA_URL = "/media/"
+ADMIN_URL = '/narnia/'
 
 # FIXME: or 755?
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
@@ -25,6 +26,7 @@ DEBUG = MODELTRANSLATION_DEBUG = True
 THUMBNAIL_DEBUG = False
 
 DEFAULT_CITY_CODE = "spb"
+DEFAULT_BRANCH_CODE = "spb"
 DEFAULT_TIMEZONE = pytz.timezone("Europe/Moscow")
 CENTER_BRANCHES_CITY_CODES = ['spb', 'nsk']
 

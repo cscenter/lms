@@ -14,7 +14,7 @@ from admission.models import InterviewStream, InterviewInvitation, \
     Applicant
 from admission.utils import logger
 from core.timezone.constants import DATE_FORMAT_RU
-from core.tests.utils import ANOTHER_DOMAIN_ID
+from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from learning.roles import Roles
 from users.models import User
 

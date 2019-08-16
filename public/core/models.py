@@ -1,7 +1,10 @@
 from typing import Optional
 
+import pytz
 from django.contrib.auth.models import AnonymousUser, AbstractUser
 from django.utils.encoding import smart_text
+
+from core.timezone import Timezone
 
 
 class PermissionMixin:
@@ -56,6 +59,9 @@ class ExtAnonymousUser(PermissionMixin, AnonymousUser):
 
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         return None
+
+    def get_timezone(self) -> Timezone:
+        return pytz.UTC
 
 
 class User(PermissionMixin, AbstractUser):

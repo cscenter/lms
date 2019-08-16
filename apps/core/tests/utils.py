@@ -4,13 +4,11 @@ from django.conf import settings
 from django.test import Client, TestCase
 from django.utils.functional import Promise
 
-from compscicenter_ru.settings.test import LMS_SUBDOMAIN
-from learning.settings import Branches, DEFAULT_BRANCH_CODE
+from learning.settings import Branches
+from core.settings.base import DEFAULT_BRANCH_CODE
 
-TEST_DOMAIN = 'compscicenter.ru'
-TEST_DOMAIN_ID = 1
-ANOTHER_DOMAIN = 'compsciclub.ru'
-ANOTHER_DOMAIN_ID = 2
+
+_SERVER_NAME = f"{settings.LMS_SUBDOMAIN}.{settings.TEST_DOMAIN}"
 
 
 class TestClient(Client):
@@ -27,7 +25,7 @@ class TestClient(Client):
         env = super()._base_environ(**request)
         if 'SERVER_NAME' not in request:
             # Override default server name `testserver`
-            env['SERVER_NAME'] = TEST_DOMAIN
+            env['SERVER_NAME'] = settings.TEST_DOMAIN
         return env
 
     def get(self, path, *args, **kwargs):
@@ -43,8 +41,8 @@ class TestClient(Client):
             if isinstance(path, Promise):
                 path = str(path)
             parsed_url = urlparse(path)
-            if parsed_url.netloc.startswith(LMS_SUBDOMAIN):
-                kwargs["SERVER_NAME"] = f"{LMS_SUBDOMAIN}.{TEST_DOMAIN}"
+            if parsed_url.netloc.startswith(settings.LMS_SUBDOMAIN):
+                kwargs["SERVER_NAME"] = _SERVER_NAME
         return super().get(path, *args, **kwargs)
 
     def post(self, path, *args, **kwargs):
@@ -71,8 +69,8 @@ class TestClient(Client):
             if isinstance(path, Promise):
                 path = str(path)
             parsed_url = urlparse(path)
-            if parsed_url.netloc.startswith(LMS_SUBDOMAIN):
-                kwargs["SERVER_NAME"] = f"{LMS_SUBDOMAIN}.{TEST_DOMAIN}"
+            if parsed_url.netloc.startswith(settings.LMS_SUBDOMAIN):
+                kwargs["SERVER_NAME"] = _SERVER_NAME
         return super().post(path, *args, **kwargs)
 
 

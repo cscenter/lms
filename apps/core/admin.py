@@ -145,7 +145,7 @@ class CityAdmin(TranslationAdmin, admin.ModelAdmin):
 
 @admin.register(Branch)
 class BranchAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code', 'order', 'city')
+    list_display = ('name', 'code', 'site', 'order', 'city')
     list_filter = ('site',)
 
 

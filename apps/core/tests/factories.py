@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import factory
+from django.conf import settings
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
 from core.models import City, Branch, Venue
-from core.tests.utils import ANOTHER_DOMAIN, TEST_DOMAIN
+from compscicenter_ru.settings.test import TEST_DOMAIN, ANOTHER_DOMAIN
 from learning.settings import Branches
 
 __all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory',
@@ -40,14 +41,15 @@ class EmailTemplateFactory(factory.DjangoModelFactory):
 class BranchFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Branch %03d" % n)
     code = factory.Sequence(lambda n: "b%03d" % n)
-    site = factory.SubFactory(SiteFactory)
+    site = factory.SubFactory(SiteFactory,
+                              domain=factory.LazyAttribute(lambda o: settings.TEST_DOMAIN))
     city = factory.SubFactory(CityFactory)
     order = factory.Sequence(lambda n: n)
     time_zone = 'Europe/Moscow'
 
     class Meta:
         model = Branch
-        django_get_or_create = ('code',)
+        django_get_or_create = ('code', 'site')
 
 
 class VenueFactory(factory.DjangoModelFactory):

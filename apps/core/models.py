@@ -1,7 +1,11 @@
+from typing import NamedTuple
+
 import pytz
 from bitfield import BitField
+from django.apps import apps
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -10,6 +14,21 @@ from django.utils.translation import ugettext_lazy as _
 from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from learning.settings import Branches
+
+BRANCH_CACHE = {}
+
+# FIXME: Move to `checks` module like in django.contrib.admin.checks.check_dependencies
+# FIXME: также проверять порядок middleware (до contrib.sites)
+REQUIRED_SETTINGS = [
+    "SITE_ID",
+    "DEFAULT_BRANCH_CODE",
+    "DEFAULT_TIMEZONE",
+]
+for attr in REQUIRED_SETTINGS:
+    if not hasattr(settings, attr):
+        raise ImproperlyConfigured(
+            f"Please add {attr!r} to the project's settings")
+
 
 LATEX_MARKDOWN_HTML_ENABLED = _(
     "How to style text read <a href=\"/commenting-the-right-way/\" "
@@ -47,6 +66,48 @@ class City(models.Model):
         return settings.TIME_ZONES[self.code]
 
 
+class BranchNaturalKey(NamedTuple):
+    code: str
+    site_id: int
+
+
+class BranchManager(models.Manager):
+    use_in_migrations = True
+
+    def _get_branch_by_natural_key(self, key: BranchNaturalKey):
+        if key not in BRANCH_CACHE:
+            BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
+        return BRANCH_CACHE[key]
+
+    def _get_branch_by_request(self, request):
+        sub_domain = request.get_host().rsplit(request.site.domain, 1)[0][:-1]
+        branch_code = sub_domain.lower() or settings.DEFAULT_BRANCH_CODE
+        key = BranchNaturalKey(code=branch_code, site_id=request.site.id)
+        if key not in BRANCH_CACHE:
+            BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
+        return BRANCH_CACHE[key]
+
+    def get_current(self, request=None, site_id: int = settings.SITE_ID):
+        """
+        Returns the Branch based on the subdomain of the `request.site`, where
+        subdomain is a branch code (e.g. nsk.example.com)
+        If request is not provided, returns the Branch based on the
+        DEFAULT_BRANCH_CODE value in the project's settings.
+        """
+        if request:
+            return self._get_branch_by_request(request)
+        else:
+            return self._get_branch_by_natural_key(
+                BranchNaturalKey(code=settings.DEFAULT_BRANCH_CODE,
+                                 site_id=site_id))
+
+    @staticmethod
+    def clear_cache():
+        """Clear the ``Branch`` object cache."""
+        global BRANCH_CACHE
+        BRANCH_CACHE = {}
+
+
 class Branch(TimezoneAwareModel, models.Model):
     TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
 
@@ -69,6 +130,8 @@ class Branch(TimezoneAwareModel, models.Model):
         help_text=_("Branch|Description"),
         blank=True)
 
+    objects = BranchManager()
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=('code', 'site'),
@@ -82,6 +145,11 @@ class Branch(TimezoneAwareModel, models.Model):
             return f"{self.name} [{self.site}]"
         else:
             return self.name
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        super(Branch, self).save(*args, **kwargs)
+        Branch.objects.clear_cache()
 
     def get_timezone(self) -> Timezone:
         return self._timezone

@@ -59,7 +59,7 @@ class CourseAdminForm(forms.ModelForm):
 
 
 class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
-    list_filter = ['city', 'semester']
+    list_filter = ['branch', 'city', 'semester']
     list_display = ['meta_course', 'semester', 'is_published_in_video',
                     'is_open']
     inlines = (CourseTeacherInline,)

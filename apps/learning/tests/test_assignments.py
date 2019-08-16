@@ -5,7 +5,8 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
-from core.tests.utils import CSCTestCase, ANOTHER_DOMAIN_ID
+from core.tests.utils import CSCTestCase
+from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from django.utils import timezone, formats
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now

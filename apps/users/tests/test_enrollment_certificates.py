@@ -5,7 +5,8 @@ import pytest
 from bs4 import BeautifulSoup
 from django.utils.translation import ugettext as _
 
-from core.tests.utils import CSCTestCase, ANOTHER_DOMAIN_ID
+from core.tests.utils import CSCTestCase
+from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from core.urls import reverse
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory

@@ -1,3 +1,4 @@
+import logging
 from enum import Enum, auto
 
 import rules
@@ -9,6 +10,9 @@ from learning.models import StudentAssignment, CourseInvitation
 from learning.settings import StudentStatuses
 from learning.utils import course_failed_by_student
 from users.constants import Roles as UserRoles
+
+
+logger = logging.getLogger(__name__)
 
 
 class LearningPermissionsMixin:
@@ -127,14 +131,16 @@ def view_course_reviews(user, course: Course):
 def enroll_in_course(user, course: Course):
     # FIXME: не релевантно для клуба
     if user.status == StudentStatuses.EXPELLED:
-        # Permissions of expelled students are restricted
+        logger.debug("Permissions of expelled students are restricted")
         return False
     if not course.enrollment_is_open:
+        logger.debug("Enrollment is closed")
         return False
     # If the student can't take this course remotely, check that the city
     # of the student and the city match
-    # FIXME: на сайте клуба user.city_id надо заменить на request.city_code :< Как потестировать ещё предикаты сайта клуба?
-    if not course.is_correspondence and user.branch.code != course.city_id:
+    if not course.is_correspondence and user.branch_id != course.branch_id:
+        logger.debug("Student with branch % could not enroll in the course "
+                     "with branch %", user.branch_id, course.branch_id)
         return False
     if course.is_capacity_limited and not course.places_left:
         return False

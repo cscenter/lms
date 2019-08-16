@@ -1,7 +1,7 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from core.tests.utils import ANOTHER_DOMAIN_ID, TEST_DOMAIN_ID
+from compscicenter_ru.settings.test import TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID
 from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
