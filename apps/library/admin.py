@@ -32,11 +32,12 @@ class StockAdmin(RelatedSpecMixin, admin.ModelAdmin):
     list_display_links = ["book"]
     autocomplete_fields = ["book"]
     list_filter = ["branch"]
-    inlines = [BorrowInline]
+    search_fields = ('book__title',)
     related_spec = {
         'select': ['book', 'branch'],
         'prefetch': ['borrows']
     }
+    inlines = [BorrowInline]
 
     @meta(_("Copies available"))
     def copies_left(self, instance):
