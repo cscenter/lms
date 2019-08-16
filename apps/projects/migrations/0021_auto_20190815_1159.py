@@ -8,7 +8,7 @@ def sync_branch(apps, schema_editor):
     Branch = apps.get_model('core', 'Branch')
     for o in Project.objects.all():
         if o.city_id:
-            o.branch = Branch.objects.get(code=o.city_id)
+            o.branch = Branch.objects.get(code=o.city_id, site_id=1)
             o.save(update_fields=['branch'])
 
 

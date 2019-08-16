@@ -95,6 +95,9 @@ class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
         return None
 
+    def get_timezone(self) -> Timezone:
+        return settings.DEFAULT_TIMEZONE
+
 
 class Group(models.Model):
     """

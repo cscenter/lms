@@ -13,7 +13,7 @@ from courses.tests.factories import CourseFactory
 def test_current_city_middleware(rf, settings, mocker):
     domain = "kzn.compsciclub.ru"
     request = rf.request()
-    request.site = mocker.Mock(spec=Site)
+    request.site = Site.objects.get(id=settings.SITE_ID)
     request.site.domain = domain
     request.META['HTTP_HOST'] = "{}:8000".format(domain)
     request.path = '/'

@@ -3,7 +3,7 @@ from django.http.response import Http404, HttpResponseRedirect
 
 from core.exceptions import Redirect
 from core.utils import is_club_site
-from .context_processors import cities
+from compsciclub_ru.context_processors import get_branches
 
 
 class CurrentCityMiddleware:
@@ -54,7 +54,7 @@ class CurrentCityMiddleware:
                 current = sub_domain[0].lower()
             else:
                 current = None
-            for city in cities(request)['CITY_LIST']:
+            for city in get_branches(request)['BRANCH_LIST']:
                 if city.code == current:
                     city_code = current
                     break
