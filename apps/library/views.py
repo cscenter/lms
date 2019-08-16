@@ -1,7 +1,6 @@
 from vanilla import DetailView, ListView
 
 from auth.mixins import PermissionRequiredMixin
-from users.utils import get_student_city_code
 from .models import Stock, Borrow
 
 
@@ -17,8 +16,7 @@ class BookListView(PermissionRequiredMixin, ListView):
               .prefetch_related("borrows", "borrows__student"))
         # Students can see books from there branch only
         if not self.request.user.is_curator:
-            branch_code = get_student_city_code(self.request)
-            qs = qs.filter(branch__code=branch_code)
+            qs = qs.filter(branch_id=self.request.user.branch_id)
         return qs
 
     def get_context_data(self, **kwargs):
@@ -41,6 +39,5 @@ class BookDetailView(PermissionRequiredMixin, DetailView):
               .prefetch_related("borrows"))
         # Students can see books from there branch only
         if not self.request.user.is_curator:
-            branch_code = get_student_city_code(self.request)
-            qs = qs.filter(branch__code=branch_code)
+            qs = qs.filter(branch_id=self.request.user.branch_id)
         return qs
