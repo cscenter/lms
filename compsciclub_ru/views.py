@@ -5,11 +5,8 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
 from django.db.models import Prefetch
 from django.http import Http404
-from django.shortcuts import redirect
 from django.utils.timezone import now
 from django.views import generic
-# TODO: (XXX) Dont' forget to remove it after old.* termination.
-from django.views.decorators.csrf import requires_csrf_token
 from django_ical.views import ICalFeed
 from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
@@ -148,11 +145,6 @@ class TeacherDetailView(DetailView):
         if not teacher.is_teacher:
             raise Http404
         return context
-
-
-@requires_csrf_token
-def custom_page_not_found(request, exception, template_name='404.html'):
-    return redirect('http://old.compsciclub.ru' + request.path)
 
 
 class ClubClassesFeed(ICalFeed):

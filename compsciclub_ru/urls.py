@@ -84,5 +84,3 @@ urlpatterns += i18n_patterns(
     url(r'^(?P<url>.*/)$', views.flatpage, name='html_pages'),
     prefix_default_language=False
 )
-
-handler404 = 'compsciclub_ru.views.custom_page_not_found'
