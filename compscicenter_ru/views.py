@@ -589,21 +589,21 @@ class MetaCourseDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Get related courses grouped by the city
+        # Collect courses including compsciclub.ru records
         branches = [code for code, _ in Branches.choices]
         lecturers = CourseTeacher.lecturers_prefetch()
         courses = (Course.objects
                    .filter(meta_course=self.object,
-                           city_id__in=branches)
-                   .select_related("meta_course", "semester", "city")
+                           branch__code__in=branches)
+                   .select_related("meta_course", "semester", "branch")
                    .prefetch_related(lecturers)
-                   .order_by('-city_id', '-semester__index'))
-        grouped = bucketize(courses, key=lambda c: c.city.code)
+                   .order_by('-semester__index'))
+        grouped = bucketize(courses, key=lambda c: c.branch.code)
         # Aggregate tabs
         tabs = TabList()
-        for city_code in grouped:
-            if grouped[city_code]:
-                branch = Branches.get_choice(city_code)
+        for branch_code in grouped:
+            if grouped[branch_code]:
+                branch = Branches.get_choice(branch_code)
                 tabs.add(Tab(target=branch.value, name=branch.label,
                              order=branch.order))
         if tabs:
@@ -631,7 +631,7 @@ class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
                                    queryset=(CourseTeacher.objects
                                              .select_related("teacher")))
         return (super().get_course_queryset()
-                .select_related('meta_course', 'semester', 'city')
+                .select_related('meta_course', 'semester', 'branch')
                 .prefetch_related(course_teachers))
 
     def get_object(self):
