@@ -15,7 +15,7 @@ const fn = {
                 .filter(key => curriculumYears[key])
                 .join(",");
 
-            let selectedCities = Object.keys(branches)
+            let selectedBranches = Object.keys(branches)
                 .filter(key => branches[key])
                 .join(",");
 
@@ -35,7 +35,7 @@ const fn = {
                 url: ENTRY_POINT,
                 data: {
                     name: queryName,
-                    cities: selectedCities,
+                    branches: selectedBranches,
                     curriculum_year: selectedYears,
                     groups: selectedGroups,
                     status: selectedStatuses,
@@ -79,7 +79,7 @@ const fn = {
                 queryName = $(this).val();
                 query();
             })
-            .on('change', '[name="cities"]', function (e) {
+            .on('change', '[name="branches"]', function (e) {
                 branches[$(this).val()] = this.checked;
                 query();
             })
