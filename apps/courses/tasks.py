@@ -11,8 +11,7 @@ def maybe_upload_slides_yandex(class_pk):
     CourseClass = apps.get_model('courses', 'CourseClass')
     instance = CourseClass.objects.get(pk=class_pk)
     course = instance.course
-    academic_year = course.semester.get_academic_year()
     upload_slides(
         instance.slides.file,
         posixpath.join(course.meta_course.slug, instance.slides_file_name),
-        academic_year)
+        course.semester.academic_year)

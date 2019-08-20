@@ -9,5 +9,5 @@ urlpatterns = [
     url(RE_COURSE_URI + r"(?P<survey_form_slug>[-\w]+)/", include([
         url(r"^$", views.CourseSurveyDetailView.as_view(), name='form_detail'),
         url(r"^success/$", views.CourseSurveyFormSuccessView.as_view(), name='form_success'),
-    ]), kwargs={"city_aware": True})
+    ]))
 ]

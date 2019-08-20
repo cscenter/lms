@@ -70,12 +70,3 @@ class RelatedSpec(CSCTestCase):
         test_obj.select_related.assert_called_once_with(*list_select)
         test_obj.prefetch_related.assert_called_once_with(*list_prefetch)
 
-
-@pytest.mark.django_db
-def test_middleware_center_site(client, settings):
-    """Make sure we have attached `city_code` attr to each request object"""
-    assert settings.SITE_ID == settings.CENTER_SITE_ID
-    url = reverse('index')
-    response = client.get(url)
-    assert hasattr(response.wsgi_request, 'city_code')
-    assert response.wsgi_request.city_code == settings.DEFAULT_CITY_CODE

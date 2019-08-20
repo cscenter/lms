@@ -24,8 +24,7 @@ def test_create_reference(client, assert_redirect):
     """Check FIO substitute in signature input field
        Check redirect to reference detail after form submit
     """
-    user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-    user = User.objects.create_user(**user_data)
+    user = UserFactory()
     UserFactory.reset_sequence(1)
     curator = CuratorFactory()
     client.login(curator)

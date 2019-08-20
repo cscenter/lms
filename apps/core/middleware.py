@@ -1,73 +1,13 @@
 import logging
 
 from django.conf import settings
-from django.http.response import Http404, HttpResponseRedirect, \
+from django.http.response import HttpResponseRedirect, \
     HttpResponseNotFound
 
-from compsciclub_ru.context_processors import get_branches
 from core.exceptions import Redirect
 from core.models import Branch
-from core.utils import is_club_site
 
 logger = logging.getLogger(__name__)
-
-
-class CurrentCityMiddleware:
-    """
-    Attach city code to request object:
-        * On compsciclub.ru always resolve city from sub domain
-        * If view contains `city_aware` keyword argument, get city code from
-          URL parameters
-        * If not, try to cast sub domain to city code.
-        * Otherwise, fallback to `settings.DEFAULT_CITY_CODE`. It makes
-          sense in case of `www` or empty sub domain.
-    """
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        return self.get_response(request)
-
-    def process_view(self, request, view_func, view_args, view_kwargs):
-        url_aware_of_the_city = bool(view_kwargs.get("city_aware", False))
-        url_aware_of_the_branch = bool(view_kwargs.get("branch_aware", False))
-        url_timezone_aware = url_aware_of_the_city or url_aware_of_the_branch
-        if url_aware_of_the_city and not is_club_site():
-            # No need in delimiter if we always explicitly set city code
-            use_delimiter = view_kwargs.get("use_delimiter", True)
-            delimiter = view_kwargs.get("city_delimiter", None)
-            city_code = view_kwargs["city_code"]
-            if not city_code:
-                if use_delimiter and delimiter:
-                    # For the default city delimiter must be empty
-                    raise Http404
-                city_code = settings.DEFAULT_CITY_CODE
-            elif city_code not in settings.TIME_ZONES or (use_delimiter and
-                                                          not delimiter):
-                # None-empty delimiter if valid city code provided
-                raise Http404
-        elif url_aware_of_the_branch:
-            # FIXME: pure hack for admission interview results
-            city_code = view_kwargs["branch_code"]
-        else:
-            if url_aware_of_the_city:
-                # FIXME: Подразумевается, что никогда не используем в url?
-                if view_kwargs["city_code"] or view_kwargs["city_delimiter"]:
-                    raise Http404
-            # Assume we have only 1 lvl sub domains
-            sub_domain = request.get_host().rsplit('.', 2)[:-2]
-            if sub_domain:
-                current = sub_domain[0].lower()
-            else:
-                current = None
-            for city in get_branches(request)['BRANCH_LIST']:
-                if city.code == current:
-                    city_code = current
-                    break
-            else:
-                city_code = settings.DEFAULT_CITY_CODE
-        request.city_code = city_code
-        return None
 
 
 class RedirectMiddleware:

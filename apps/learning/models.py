@@ -23,7 +23,7 @@ from sorl.thumbnail import ImageField
 from core.db.models import ScoreField, PrettyJSONField
 from core.timezone import TimezoneAwareModel
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Venue
-from core.urls import reverse, city_aware_reverse
+from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Assignment
 from learning import settings as learn_conf
@@ -93,14 +93,6 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
         if created or not self.is_deleted:
             populate_assignments_for_student(self)
 
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.course.field.name
-
     def grade_changed_local(self, tz=None):
         if not tz:
             tz = self.get_timezone()
@@ -148,7 +140,7 @@ class CourseInvitation(models.Model):
         super().save(**kwargs)
 
     def get_absolute_url(self):
-        return city_aware_reverse(
+        return branch_aware_reverse(
             "course_enroll_by_invitation",
             kwargs={"course_token": self.token, **self.course.url_kwargs},
             subdomain=settings.LMS_SUBDOMAIN)
@@ -273,14 +265,6 @@ class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
         return "{0} - {1}".format(smart_text(self.assignment),
                                   smart_text(self.student.get_full_name()))
 
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.assignment.field.name
-
     def get_teacher_url(self):
         return reverse('teaching:student_assignment_detail',
                        kwargs={"pk": self.pk})
@@ -386,14 +370,6 @@ class AssignmentComment(TimezoneAwareModel, TimeStampedModel):
             smart_text(self.student_assignment.assignment),
             smart_text(self.student_assignment.student.get_full_name())))
 
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.student_assignment.field.name
-
     def created_local(self, tz=None):
         if not tz:
             tz = self.get_timezone()
@@ -460,14 +436,6 @@ class AssignmentNotification(TimezoneAwareModel, TimeStampedModel):
         return ("notification for {0} on {1}"
                 .format(smart_text(self.user.get_full_name()),
                         smart_text(self.student_assignment)))
-
-    def get_city(self):
-        next_in_city_aware_mro = getattr(self, self.city_aware_field_name)
-        return next_in_city_aware_mro.get_city()
-
-    @property
-    def city_aware_field_name(self):
-        return self.__class__.student_assignment.field.name
 
     def created_local(self, tz=None):
         if not tz:

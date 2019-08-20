@@ -168,11 +168,11 @@ def revoke_add_patch_set_permission(client, project_name):
 
 
 def get_project_name(course):
-    city_code = course.get_city()
+    branch_code = course.branch.code
     course_name = course.meta_course.slug.replace("-", "_")
     if course.is_correspondence:
         return f"{course_name}_{course.semester.year}"
-    return f"{city_code}/{course_name}_{course.semester.year}"
+    return f"{branch_code}/{course_name}_{course.semester.year}"
 
 
 def get_reviewers_group_name(course):

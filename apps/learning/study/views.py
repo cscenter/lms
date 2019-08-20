@@ -44,7 +44,7 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
     permission_required = "study.view_schedule"
 
     def get_events(self, year, month, **kwargs):
-        return get_month_events(year, month, [self.request.user.city_code])
+        return get_month_events(year, month, [self.request.user.branch.city_id])
 
 
 class CalendarPersonalView(CalendarFullView):
@@ -56,7 +56,7 @@ class CalendarPersonalView(CalendarFullView):
     template_name = "learning/calendar.html"
 
     def get_events(self, year, month, **kwargs):
-        return get_month_events(year, month, [self.request.user.city_code],
+        return get_month_events(year, month, [self.request.user.branch.city_id],
                                 for_student=self.request.user)
 
 

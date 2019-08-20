@@ -236,5 +236,5 @@ class CalendarQueryParams(serializers.Serializer):
     def validate_year(self, value):
         today = timezone.now()
         if value > today.year + 1:
-            raise ValidationError("Year value too big")
+            raise ValidationError("Year value is too big")
         return value

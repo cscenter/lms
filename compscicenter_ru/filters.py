@@ -9,6 +9,7 @@ from courses.models import Course, Semester
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.constants import SemesterTypes
 from courses.utils import get_term_index, semester_slug_re
+from learning.settings import Branches
 from users.utils import get_user_city_code
 
 
@@ -36,7 +37,7 @@ CITIES = [
 ]
 
 
-class CityChoiceFilter(ChoiceFilter):
+class BranchChoiceFilter(ChoiceFilter):
     def filter(self, qs, value):
         """
         Returns union of offline courses and all correspondence courses
@@ -67,37 +68,32 @@ class CoursesFilter(FilterSet):
     Note: `semester` query value is only validated. This field used in
     filtering on client side only.
     """
-    city = CityChoiceFilter(field_name="city_id", empty_label=None,
-                            choices=CITIES)
+    branch = BranchChoiceFilter(field_name="branch__code", empty_label=None,
+                                choices=Branches.choices)
     semester = SemesterSlugFilter(method='semester_slug_filter')
 
     class Meta:
         model = Course
-        fields = ['city', 'semester']
+        fields = ['branch', 'semester']
 
     def __init__(self, data=None, queryset=None, request=None, **kwargs):
         """
-        Since we always should have some value for `city`, resolve it in
-        next order:
+        Resolves `branch` value in the next order:
             * query value
-            * valid city code from user settings
-            * default city code (spb)
+            * valid branch code from user settings
+            * default branch code
         """
         if data is not None:
             data = data.copy()  # get a mutable copy of the QueryDict
         else:
             data = QueryDict(mutable=True)
-        # Provide initial city based on user settings
-        city_code = data.pop("city", None)
-        if not city_code and get_user_city_code(request):
-            user_city = get_user_city_code(request)
-            if user_city in settings.CENTER_BRANCHES_CITY_CODES:
-                city_code = [user_city]
-        # Show default for unauthenticated users or users without valid
-        # city code in their settings
-        if not city_code:
-            city_code = [settings.DEFAULT_CITY_CODE]
-        data.setlist("city", city_code)
+        branch_code = data.pop("branch", None)
+        if not branch_code and hasattr(request.user, "branch"):
+            branch_code = [request.user.branch.code]
+        # For unauthenticated users or users without valid branch code
+        if not branch_code:
+            branch_code = [settings.DEFAULT_BRANCH_CODE]
+        data.setlist("branch", branch_code)
         super().__init__(data=data, queryset=queryset, request=request, **kwargs)
 
     def semester_slug_filter(self, queryset, name, value):

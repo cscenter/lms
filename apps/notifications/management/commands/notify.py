@@ -56,10 +56,9 @@ LEARNING_PARTICIPANTS_CENTER = {
 }
 
 
-def get_base_domain(notification):
+def _get_base_domain(notification):
     """
-    XXX: we resolve notifications for students or teachers only.
-    Don't care about interviewers or project reviewers.
+    This method should resolve notifications for students or teachers only.
     """
     receiver = notification.user
     if isinstance(notification, AssignmentNotification):
@@ -70,10 +69,10 @@ def get_base_domain(notification):
         raise NotImplementedError()
     user_roles = receiver.roles
     if not user_roles.intersection(LEARNING_PARTICIPANTS_CENTER):
-        if course.get_city() == "spb":
+        if course.branch.code == "spb":
             return "compsciclub.ru"
         else:
-            return "{}.compsciclub.ru".format(course.get_city())
+            return "{}.compsciclub.ru".format(course.branch.code)
     if isinstance(notification, AssignmentNotification):
         return f"{settings.LMS_SUBDOMAIN}.compscicenter.ru"
     elif isinstance(notification, CourseNewsNotification):
@@ -141,7 +140,7 @@ def get_assignment_notification_template(notification: AssignmentNotification):
 
 
 def get_assignment_notification_context(notification: AssignmentNotification):
-    base_domain = get_base_domain(notification)
+    base_domain = _get_base_domain(notification)
     a_s = notification.student_assignment
     tz_override = None
     u = notification.user
@@ -165,7 +164,7 @@ def get_assignment_notification_context(notification: AssignmentNotification):
 
 
 def get_course_news_notification_context(notification: CourseNewsNotification):
-    base_domain = get_base_domain(notification)
+    base_domain = _get_base_domain(notification)
     course = notification.course_offering_news.course
     context = {
         'course_link': replace_hostname(course.get_absolute_url(), base_domain),

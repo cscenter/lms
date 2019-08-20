@@ -21,7 +21,7 @@ from courses.models import CourseClass, Course, Assignment
 from courses.utils import get_terms_for_calendar_month, get_term_index, \
     get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
-from learning.calendar import get_month_events
+from learning.calendar import get_month_events, get_cities_for_teacher
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
     AssignmentCommentForm
 from learning.gradebook.views import GradeBookListBaseView
@@ -278,26 +278,8 @@ class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
     Shows all non-course events and classes filtered by the cities where
     authorized teacher has taught.
     """
-
-    def get_teacher_cities(self, year, month):
-        default_city = get_teacher_city_code(self.request)
-        if is_club_site():
-            return [default_city]
-        # Collect all the cities where authorized teacher taught.
-        terms_in_month = get_terms_for_calendar_month(year, month)
-        term_indexes = [get_term_index(*term) for term in terms_in_month]
-        cities = list(Course.objects
-                      .filter(semester__index__in=term_indexes)
-                      .for_teacher(self.request.user)
-                      .values_list("city_id", flat=True)
-                      .order_by('city_id')
-                      .distinct())
-        if not cities:
-            cities = [default_city]
-        return cities
-
     def get_events(self, year, month, **kwargs):
-        cities = self.get_teacher_cities(year, month)
+        cities = get_cities_for_teacher(self.request.user, year, month)
         return get_month_events(year, month, cities)
 
 
@@ -310,7 +292,7 @@ class CalendarPersonalView(CalendarFullView):
     template_name = "learning/calendar.html"
 
     def get_events(self, year, month, **kwargs):
-        cities = self.get_teacher_cities(year, month)
+        cities = get_cities_for_teacher(self.request.user, year, month)
         return get_month_events(year, month, cities,
                                 for_teacher=self.request.user)
 

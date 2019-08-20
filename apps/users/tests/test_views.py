@@ -9,6 +9,7 @@ from django.forms.models import model_to_dict
 from django.utils.encoding import smart_text, smart_bytes
 
 from core.admin import get_admin_url
+from core.tests.factories import BranchFactory
 from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.tests.factories import CourseFactory
@@ -68,7 +69,8 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
 
     def test_login_works(self):
         good_user_attrs = factory.build(dict, FACTORY_CLASS=UserFactory)
-        good_user = User.objects.create_user(**good_user_attrs)
+        good_user_attrs["branch"] = BranchFactory()
+        good_user = UserFactory(**good_user_attrs)
         # graduated students redirected to LOGIN_REDIRECT_URL
         add_user_groups(good_user, [Roles.GRADUATE])
         self.assertNotIn('_auth_user_id', self.client.session)
@@ -84,6 +86,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
 
     def test_auth_restriction_works(self):
         user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
+        user_data["branch"] = BranchFactory()
         user = User.objects.create_user(**user_data)
         url = reverse('teaching:assignment_list')
         self.assertLoginRedirect(url)
@@ -108,9 +111,8 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(resp.status_code, 200)
 
     def test_logout_works(self):
-        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = User.objects.create_user(**user_data)
-        login = self.client.login(None, **user_data)
+        user = UserFactory()
+        login = self.client.login(user)
         self.assertTrue(login)
         self.assertIn('_auth_user_id', self.client.session)
         resp = self.client.get(reverse('logout'))
@@ -119,9 +121,8 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.assertNotIn('_auth_user_id', self.client.session)
 
     def test_logout_redirect_works(self):
-        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        User.objects.create_user(**user_data)
-        login = self.client.login(None, **user_data)
+        user = UserFactory()
+        login = self.client.login(user)
         resp = self.client.get(reverse('logout'),
                                {'next': reverse('video_list')})
         self.assertRedirects(resp, reverse('video_list'), status_code=302)
@@ -139,10 +140,9 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
 
     def test_short_bio(self):
         """
-        get_short_bio should split bio on first paragraph
+        `get_short_bio` split bio on the first paragraph
         """
-        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = User.objects.create_user(**user_data)
+        user = UserFactory()
         user.bio = "Some small text"
         self.assertEqual(user.get_short_bio(), "Some small text")
         user.bio = """Some large text.
@@ -151,8 +151,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(user.get_short_bio(), "Some large text.")
 
     def test_teacher_detail_view(self):
-        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = User.objects.create_user(**user_data)
+        user = UserFactory()
         resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 404)
         add_user_groups(user, [Roles.TEACHER])
@@ -162,8 +161,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(resp.context['teacher'], user)
 
     def test_user_detail_view(self):
-        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = User.objects.create_user(**user_data)
+        user = UserFactory()
         response = self.client.get(user.get_absolute_url())
         assert response.status_code == 404
         user.add_group(Roles.STUDENT)
@@ -178,9 +176,8 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         profiles
         """
         test_review = "CSC are the bollocks"
-        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user = User.objects.create_user(**user_data)
-        self.client.login(None, **user_data)
+        user = UserFactory()
+        self.client.login(user)
         response = self.client.post(user.get_update_profile_url(),
                                     {'testimonial': test_review})
         self.assertRedirects(response, reverse('user_detail', args=[user.pk]),
