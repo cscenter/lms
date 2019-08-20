@@ -2,7 +2,7 @@ import _debounce from 'lodash-es/debounce';
 
 const ENTRY_POINT = $('.user-search #ajax-uri').val();
 let queryName = "";
-let cities = {};
+let branches = {};
 let curriculumYears = {};
 let groups = {};
 let status = {};
@@ -15,8 +15,8 @@ const fn = {
                 .filter(key => curriculumYears[key])
                 .join(",");
 
-            let selectedCities = Object.keys(cities)
-                .filter(key => cities[key])
+            let selectedCities = Object.keys(branches)
+                .filter(key => branches[key])
                 .join(",");
 
             let selectedStatuses = Object.keys(status)
@@ -80,7 +80,7 @@ const fn = {
                 query();
             })
             .on('change', '[name="cities"]', function (e) {
-                cities[$(this).val()] = this.checked;
+                branches[$(this).val()] = this.checked;
                 query();
             })
             .on('change', '[name="curriculum_year_cb"]', function (e) {
