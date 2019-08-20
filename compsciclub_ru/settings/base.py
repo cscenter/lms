@@ -29,7 +29,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'notifications.middleware.UnreadNotificationsCacheMiddleware',
     'core.middleware.CurrentCityMiddleware',
-    'compsciclub_ru.middleware.CurrentBranchMiddleware',
+    'core.middleware.CurrentBranchMiddleware',
     'core.middleware.RedirectMiddleware',
 ]
 

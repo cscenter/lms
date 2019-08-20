@@ -2,6 +2,7 @@ from django.conf.urls import include, url
 from django.urls import path, re_path
 from django.views.generic.base import RedirectView
 
+from courses.urls import RE_COURSE_URI
 from learning.gradebook import views as gv
 from learning.teaching.views import TimetableView as TeacherTimetable, \
     AssignmentCommentUpdateView, AssignmentDetailView, AssignmentListView, \
@@ -10,10 +11,9 @@ from learning.teaching.views import TimetableView as TeacherTimetable, \
     StudentAssignmentCommentCreateView
 from learning.api.views import CourseNewsUnreadNotificationsView
 
-COURSE_URI = r'^(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/'
-
 
 app_name = 'teaching'
+
 urlpatterns = [
     # Redirects with relative url since RedirectView uses django's `
     # reverse` implementation
@@ -34,10 +34,9 @@ urlpatterns = [
     ])),
     path('marks/', include([
         path('', GradeBookListView.as_view(), name='gradebook_list'),
-        # FIXME: make compatible with RE_COURSE_URI
-        re_path(COURSE_URI, include([
-            path('', gv.GradeBookTeacherView.as_view(), name='gradebook'),
-            path('csv/', gv.GradeBookTeacherCSVView.as_view(), name='gradebook_csv'),
+        re_path(RE_COURSE_URI, include([
+            path('', gv.GradeBookView.as_view(), name='gradebook'),
+            path('csv/', gv.GradeBookCSVView.as_view(), name='gradebook_csv'),
         ])),
         path('<int:course_id>/import/stepic', gv.AssignmentScoresImportByStepikIDView.as_view(), name='gradebook_csv_import_stepic'),
         path('<int:course_id>/import/yandex', gv.AssignmentScoresImportByYandexLoginView.as_view(), name='gradebook_csv_import_yandex'),

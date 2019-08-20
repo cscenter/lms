@@ -17,20 +17,6 @@ from learning.settings import Branches
 
 BRANCH_CACHE = {}
 
-# FIXME: Move to `checks` module like in django.contrib.admin.checks.check_dependencies
-# FIXME: также проверять порядок middleware (до contrib.sites)
-# FIXME: надо убедиться, что site_id domain value и get_host() совпадают. Как это делать?
-REQUIRED_SETTINGS = [
-    "SITE_ID",
-    "DEFAULT_BRANCH_CODE",
-    "DEFAULT_TIMEZONE",
-]
-for attr in REQUIRED_SETTINGS:
-    if not hasattr(settings, attr):
-        raise ImproperlyConfigured(
-            f"Please add {attr!r} to the project's settings")
-
-
 LATEX_MARKDOWN_HTML_ENABLED = _(
     "How to style text read <a href=\"/commenting-the-right-way/\" "
     "target=\"_blank\">here</a>. Partially HTML is enabled too.")
@@ -75,7 +61,8 @@ class BranchNaturalKey(NamedTuple):
 class BranchManager(models.Manager):
     use_in_migrations = True
 
-    def _get_branch_by_natural_key(self, key: BranchNaturalKey):
+    def get_by_natural_key(self, code, site_id):
+        key = BranchNaturalKey(code=code, site_id=site_id)
         if key not in BRANCH_CACHE:
             BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
         return BRANCH_CACHE[key]
@@ -83,6 +70,8 @@ class BranchManager(models.Manager):
     def _get_branch_by_request(self, request):
         sub_domain = request.get_host().rsplit(request.site.domain, 1)[0][:-1]
         branch_code = sub_domain.lower() or settings.DEFAULT_BRANCH_CODE
+        if branch_code == "www":
+            branch_code = settings.DEFAULT_BRANCH_CODE
         key = BranchNaturalKey(code=branch_code, site_id=request.site.id)
         if key not in BRANCH_CACHE:
             BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
@@ -98,9 +87,8 @@ class BranchManager(models.Manager):
         if request:
             return self._get_branch_by_request(request)
         else:
-            return self._get_branch_by_natural_key(
-                BranchNaturalKey(code=settings.DEFAULT_BRANCH_CODE,
-                                 site_id=site_id))
+            return self.get_by_natural_key(settings.DEFAULT_BRANCH_CODE,
+                                           site_id)
 
     @staticmethod
     def clear_cache():

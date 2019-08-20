@@ -10,6 +10,8 @@ from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.utils.encoding import smart_bytes, force_bytes
 
+from auth.mixins import PermissionRequiredMixin
+from auth.permissions import all_permissions
 from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory, \
@@ -17,41 +19,50 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory
 from learning.gradebook.imports import AssignmentGradesImport
-from learning.gradebook.views import _get_course
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GradingSystems, \
     StudentStatuses, GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import Roles
-from users.tests.factories import TeacherFactory, UserFactory, StudentFactory
+from users.tests.factories import TeacherFactory, UserFactory, StudentFactory, \
+    CuratorFactory
 
 
 # TODO: test redirect to gradebook for teachers if only 1 course in current term
 
+
 @pytest.mark.django_db
-def test__get_course(client, curator):
-    """Testing `views.gradebook._get_course` method"""
-    teacher1, teacher2 = TeacherFactory.create_batch(2)
-    course = CourseFactory.create(teachers=[teacher1])
-    filters = {}
-    co = _get_course(filters, teacher1)  # KeyError
-    assert co is None
-    filters = {
-        "city": 42,  # Attribute error
-        "course_slug": course.meta_course.slug,
-        "semester_type": course.semester.type,
-        "semester_year": course.semester.year,
-    }
-    co = _get_course(filters, teacher1)  # Attribute error
-    assert co is None
-    filters["city"] = course.city_id
-    co = _get_course(filters, teacher1)
-    assert co == course
-    co = _get_course(filters, teacher2)
-    assert co is None
-    co = _get_course(filters, curator)
-    assert co == course
+def test_view_gradebook_permission():
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    assert teacher.has_perm("teaching.view_own_gradebook", course)
+    assert not teacher_other.has_perm("teaching.view_own_gradebook", course)
+    e = EnrollmentFactory(course=course)
+    assert not e.student.has_perm("teaching.view_own_gradebook", course)
+    assert not UserFactory().has_perm("teaching.view_own_gradebook", course)
+    curator = CuratorFactory()
+    assert not curator.has_perm("teaching.view_own_gradebook", course)
+    assert curator.has_perm("teaching.view_gradebook")
+
+
+@pytest.mark.django_db
+def test_gradebook_view_security(client, lms_resolver):
+    course = CourseFactory()
+    resolver = lms_resolver(course.get_gradebook_url())
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == "teaching.view_own_gradebook"
+    assert resolver.func.view_class.permission_required in all_permissions
+
+
+@pytest.mark.django_db
+def test_gradebook_csv_view_security(client, lms_resolver):
+    course = CourseFactory()
+    resolver = lms_resolver(course.get_gradebook_csv_url())
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == "teaching.view_own_gradebook"
+    assert resolver.func.view_class.permission_required in all_permissions
 
 
 @pytest.mark.django_db
@@ -128,27 +139,6 @@ def test_recalculate_course_grading_system(client):
 
 
 class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
-    def test_security(self):
-        teacher = TeacherFactory()
-        student = StudentFactory()
-        co = CourseFactory.create(teachers=[teacher])
-        a1, a2 = AssignmentFactory.create_batch(2, course=co)
-        EnrollmentFactory.create(student=student, course=co)
-        url = co.get_gradebook_url(format="csv")
-        self.assertLoginRedirect(url)
-        test_groups = [
-            [],
-            [Roles.STUDENT],
-        ]
-        for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups))
-        self.doLogin(TeacherFactory())
-        self.assertEqual(404, self.client.get(url).status_code)
-        self.doLogin(student)
-        self.assertLoginRedirect(url)
-        self.doLogin(teacher)
-        self.assertEqual(200, self.client.get(url).status_code)
-
     def test_csv(self):
         teacher = TeacherFactory()
         student1, student2 = StudentFactory.create_batch(2)
@@ -375,30 +365,6 @@ def test_total_score(client):
     response = client.get(co.get_gradebook_url())
     head_student = next(iter(response.context['gradebook'].students.values()))
     assert head_student.total_score == expected_total_score
-
-
-@pytest.mark.django_db
-def test_security(client, settings, assert_login_redirect):
-    teacher = TeacherFactory()
-    student = StudentFactory()
-    co = CourseFactory.create(teachers=[teacher])
-    a1, a2 = AssignmentFactory.create_batch(2, course=co)
-    EnrollmentFactory.create(student=student, course=co)
-    url = co.get_gradebook_url()
-    assert_login_redirect(url, method='get')
-    test_groups = [
-        [],
-        [Roles.STUDENT],
-    ]
-    for groups in test_groups:
-        client.login(UserFactory.create(groups=groups))
-    # Raise 404 if teacher not in teaching staff of the course
-    client.login(TeacherFactory())
-    assert client.get(url).status_code == 404
-    client.login(student)
-    assert_login_redirect(url, method='get')
-    client.login(teacher)
-    assert client.get(url).status_code == 200
 
 
 @pytest.mark.django_db

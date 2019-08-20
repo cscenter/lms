@@ -13,16 +13,18 @@ from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from vanilla import FormView
 
+from auth.mixins import PermissionRequiredMixin
 from courses.models import Course, Semester, Assignment
 from courses.constants import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
+from courses.views.mixins import CourseURLParamsMixin
 from learning.gradebook import GradeBookFormFactory, gradebook_data
 from learning.gradebook.imports import AssignmentGradesImport
 from users.mixins import TeacherOnlyMixin
 
 __all__ = [
-    "GradeBookTeacherView",
-    "GradeBookTeacherCSVView", "AssignmentScoresImportByStepikIDView",
+    "GradeBookView",
+    "GradeBookCSVView", "AssignmentScoresImportByStepikIDView",
     "AssignmentScoresImportByYandexLoginView"
 ]
 
@@ -59,33 +61,23 @@ class GradeBookListBaseView(generic.ListView):
                     )))
 
 
-def _get_course(get_params, user) -> Optional[Course]:
-    try:
-        filter_kwargs = dict(
-            city=get_params['city'].lower(),
-            meta_course__slug=get_params['course_slug'],
-            semester__type=get_params['semester_type'],
-            semester__year=int(get_params['semester_year'])
-        )
-        if not user.is_curator:
-            filter_kwargs["teachers"] = user
-        return (Course.objects
-                .select_related('semester', 'meta_course')
-                .get(**filter_kwargs))
-    except (ValueError, KeyError, AttributeError, ObjectDoesNotExist):
-        return None
-
-
-class GradeBookTeacherView(TeacherOnlyMixin, FormView):
+class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
     is_for_staff = False
     user_type = 'teacher'
     template_name = "learning/gradebook/form.html"
     context_object_name = 'assignment_list'
+    permission_required = "teaching.view_own_gradebook"
+
+    def get_permission_object(self):
+        return self.course
+
+    def get_course_queryset(self):
+        return (super().get_course_queryset()
+                .select_related('semester', 'meta_course'))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.data = None
-        self.course = None
         self.is_for_staff = kwargs.get('is_for_staff', False)
 
     def get_form(self, data=None, files=None, **kwargs):
@@ -97,10 +89,6 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
         return cls(data=data, files=files, **kwargs)
 
     def get_form_class(self):
-        if self.course is None:
-            self.course = _get_course(self.kwargs, self.request.user)
-        if self.course is None:
-            raise Http404('Course offering not found')
         self.data = gradebook_data(self.course)
         return GradeBookFormFactory.build_form_class(self.data)
 
@@ -164,15 +152,16 @@ class GradeBookTeacherView(TeacherOnlyMixin, FormView):
         return context
 
 
-class GradeBookTeacherCSVView(TeacherOnlyMixin, generic.base.View):
+class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
+                       generic.base.View):
     http_method_names = ['get']
+    permission_required = "teaching.view_own_gradebook"
+
+    def get_permission_object(self):
+        return self.course
 
     def get(self, request, *args, **kwargs):
-        course = _get_course(self.kwargs, request.user)
-        if course is None:
-            raise Http404('Course not found')
-
-        data = gradebook_data(course)
+        data = gradebook_data(self.course)
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         filename = "{}-{}-{}.csv".format(kwargs['course_slug'],
                                          kwargs['semester_year'],

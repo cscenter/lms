@@ -29,10 +29,9 @@ def check_value_for_header(report, header, row_index, expected_value):
 
 
 @pytest.mark.django_db
-def test_report_common(rf):
+def test_report_common():
     def get_progress_report():
-        return ProgressReportFull(honest_grade_system=True,
-                                  request=rf.request())
+        return ProgressReportFull(honest_grade_system=True)
     teacher = TeacherFactory.create()
     s = SemesterFactory.create_current()
     co1, co2, co3 = CourseFactory.create_batch(3, semester=s,
@@ -115,14 +114,13 @@ def test_report_common(rf):
 
 
 @pytest.mark.django_db
-def test_report_full(rf):
+def test_report_full():
     """
     Looks the same as diplomas report, but including online courses, some
     additional info (like total successful passed courses)
     """
     def get_progress_report():
-        return ProgressReportFull(honest_grade_system=True,
-                                  request=rf.request())
+        return ProgressReportFull(honest_grade_system=True)
 
     teacher = TeacherFactory.create()
     students = StudentFactory.create_batch(3)
@@ -175,11 +173,10 @@ def test_report_full(rf):
 
 
 @pytest.mark.django_db
-def test_report_for_target_term(rf):
+def test_report_for_target_term():
     def get_progress_report(term):
         return ProgressReportForSemester(term,
-                                         honest_grade_system=True,
-                                         request=rf.request())
+                                         honest_grade_system=True)
     teacher = TeacherFactory.create()
     s = SemesterFactory.create_current()
     prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
@@ -285,9 +282,7 @@ def test_report_for_target_term(rf):
 
 
 @pytest.mark.django_db
-def test_report_diplomas_csv(rf):
-    request = rf.get(reverse('staff:exports_students_diplomas_csv',
-                             kwargs={"city_code": "spb"}))
+def test_report_diplomas_csv():
     teacher = TeacherFactory.create()
     student1, student2, student3 = StudentFactory.create_batch(
         3, city_id="spb")
@@ -302,7 +297,7 @@ def test_report_diplomas_csv(rf):
                                         grade=GradeTypes.GOOD)
     EnrollmentFactory.create(student=student2, course=co1, grade=GradeTypes.GOOD)
     # Will graduate only student1 now
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     assert len(progress_report.data) == 1
     # This value will not change during all tests
     STATIC_HEADERS_CNT = len(progress_report.static_headers)
@@ -311,30 +306,30 @@ def test_report_diplomas_csv(rf):
     # student2 will graduate too. He enrolled to the same course as student1
     student2.status = StudentStatuses.WILL_GRADUATE
     student2.save()
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     assert len(progress_report.data) == 2
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Enroll student2 to new course without any grade
     co2 = CourseFactory.create(semester=s, teachers=[teacher])
     e_s2_co2 = EnrollmentFactory.create(student=student2, course=co2)
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Now change grade to unsatisfied and check again
     e_s2_co2.grade = GradeTypes.UNSATISFACTORY
     e_s2_co2.save()
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Set success grade value
     e_s2_co2.grade = GradeTypes.GOOD
     e_s2_co2.save()
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 4
     # Grade should be printed with `default` grading type style
     e_s1_co1.grade = GradeTypes.CREDIT
     e_s1_co1.save()
     co1.grading_type = GradingSystems.BINARY
     co1.save()
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     assert progress_report.data[0].pk == student1.pk
     grade_values = [d.get("grade", "") for d
                     in progress_report.data[0].courses.values()]
@@ -342,55 +337,52 @@ def test_report_diplomas_csv(rf):
     # Add enrollment for previous term. It should be appeared if grade OK
     EnrollmentFactory.create(student=student1, course=co_prev1,
                              grade=GradeTypes.GOOD)
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 6
     # Add shad course
     SHADCourseRecordFactory(student=student1, grade=GradeTypes.GOOD)
     # This one shouldn't be in report due to grade value
     SHADCourseRecordFactory(student=student1, grade=GradeTypes.NOT_GRADED)
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     # +3 headers for 1 shad course
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 9
     # Online course not included
     OnlineCourseRecordFactory.create(student=student1)
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 9
     ProjectFactory.create(students=[student1, student2])
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     # +4 headers for project
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 13
 
     student1.city_id = "nsk"
     student1.save()
-    progress_report = ProgressReportForDiplomas(request=request)
+    progress_report = ProgressReportForDiplomas()
     assert len(progress_report.data) == 2
 
 
 @pytest.mark.django_db
-def test_report_diplomas_by_city(rf):
-    stub_request = rf.get("/")
+def test_report_diplomas_by_city():
     s1, s2, s3 = StudentFactory.create_batch(3, city_id="spb")
     s1.status = StudentStatuses.WILL_GRADUATE
     s1.save()
     s2.status = StudentStatuses.WILL_GRADUATE
     s2.save()
-    progress_report = ProgressReportForDiplomas(request=stub_request)
+    progress_report = ProgressReportForDiplomas()
     assert len(progress_report.data) == 2
     progress_report = ProgressReportForDiplomas(
-        request=stub_request,
         qs_filters={"filters": {"city_id": "spb"}})
     assert len(progress_report.data) == 2
     progress_report = ProgressReportForDiplomas(
-        request=stub_request,
         qs_filters={"filters": {"city_id": "nsk"}})
     assert len(progress_report.data) == 0
     s3.status = StudentStatuses.WILL_GRADUATE
     s3.city_id = "nsk"
     s3.save()
     progress_report = ProgressReportForDiplomas(
-        request=stub_request, qs_filters={"filters": {"city_id": "spb"}})
+        qs_filters={"filters": {"city_id": "spb"}})
     assert len(progress_report.data) == 2
     progress_report = ProgressReportForDiplomas(
-        request=stub_request, qs_filters={"filters": {"city_id": "nsk"}})
+        qs_filters={"filters": {"city_id": "nsk"}})
     assert len(progress_report.data) == 1
     assert progress_report.data[0].pk == s3.pk

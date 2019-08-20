@@ -31,6 +31,7 @@ class Roles(DjangoChoices):
         "courses.can_view_assignments",
         "learning.view_course_news",
         "teaching.create_assignment_comment",
+        "teaching.view_own_gradebook",
     ))
     GRADUATE = C(3, _('Graduate'), permissions=(
         "study.view_own_enrollments",
@@ -63,6 +64,7 @@ class Roles(DjangoChoices):
         "learning.view_course_reviews",
         "study.view_library",
         "teaching.create_assignment_comment",
+        "teaching.view_gradebook",
     ))
     INVITED = C(11, _('Invited User'), permissions=(
         "learning.view_study_menu",

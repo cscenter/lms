@@ -18,7 +18,7 @@
 {# Note: Feel the fear below. #}
 {% block content %}
     <div class="container">
-    <h3>{{ city }}</h3>
+    <h3>{{ branch }}</h3>
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
 {% for s in students %}\diploma{{ '{' }}{{ s.pk }}{{ '}' }}{{ '{' }}{{s.first_name}}{{ '}' }}{{ '{' }}{{s.patronymic}}{{ '}' }}{{ '{' }}{{s.last_name}}{{ '}' }}{{ '{' }}{% if s.gender == 'F' %}a{% endif %}{{ '}' }}
 {{ '{' }}направлени{{ s.graduate_profile.academic_disciplines.all|pluralize:"ю,ям" }} {% for program in s.graduate_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.index != forloop.last %} и {% endif %}{% endfor %}{{ '}' }}

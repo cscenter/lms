@@ -7,7 +7,6 @@ from functools import wraps
 from typing import Optional
 from urllib import parse
 
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db import transaction, IntegrityError
@@ -55,15 +54,15 @@ from admission.services import create_invitation, create_student_from_applicant,
 from admission.utils import calculate_time
 from api.permissions import CuratorAccessPermission
 from auth.backends import YandexRuOAuth2Backend
+from core.settings.base import DEFAULT_BRANCH_CODE
 from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown, bucketize
+from core.views import RequestBranchMixin
 from learning.settings import AcademicDegreeYears
-from core.settings.base import DEFAULT_BRANCH_CODE
 from tasks.models import Task
 from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
 from users.models import User
-from users.utils import get_user_city_code
 from .tasks import import_testing_results
 
 STRATEGY = 'social_django.strategy.DjangoStrategy'
@@ -312,11 +311,8 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
                     .order_by("-id")
                     .first())
             if task:
-                dt = task.processed_at
-                city_code = get_user_city_code(self.request)
-                if city_code:
-                    tz = settings.TIME_ZONES[city_code]
-                    dt = timezone.localtime(dt, timezone=tz)
+                tz = self.request.user.get_timezone()
+                dt = timezone.localtime(task.processed_at, timezone=tz)
                 import_testing_results_btn_state = {
                     "date": formats.date_format(dt, "SHORT_DATETIME_FORMAT"),
                     "status": "Успешно" if not task.is_failed() else "Ошибка"
@@ -685,11 +681,12 @@ class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
         if branch_code not in branches:
             branch_code = next(branches.iterator(), DEFAULT_BRANCH_CODE)
         return reverse("admission:branch_interview_results", kwargs={
-            "branch_code": branch_code
+            "branch_code": branch_code,
         })
 
 
-class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
+class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
+                           RequestBranchMixin, TemplateResponseMixin,
                            BaseModelFormSetView):
     """
     We can have multiple interviews for applicant
@@ -705,9 +702,8 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin, TemplateResponseMixin,
                                  .filter(current=True)
                                  .select_related("branch"))
         try:
-            branch_code = self.kwargs["branch_code"]
             self.selected_campaign = next(c for c in self.active_campaigns
-                                          if c.branch.code == branch_code)
+                                          if c.branch == request.branch)
         except StopIteration:
             messages.error(self.request,
                            "Активная кампания по набору не найдена")

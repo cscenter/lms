@@ -27,14 +27,12 @@
                     <table class="table" width="100%">
                         <tr class="active">
                             <th>{% trans "Semester" %}</th>
-                            {% if show_city %}<th width="20%">{% trans "City" %}</th>{% endif %}
                         </tr>
                         {% for course in courses %}
                             <tr>
                                 <td>
                                     <a href="{{ course.get_absolute_url }}">{{ course.semester }}</a> {% if course.is_correspondence %}<span class="text-muted">{% trans "Online Course" %}</span>{% endif %}
                                 </td>
-                                {% if show_city %}<td>{{ course.city }}</td>{% endif %}
                             </tr>
                         {% endfor %}
                     </table>

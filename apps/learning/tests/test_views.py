@@ -107,33 +107,33 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(True, ctx['is_actual_teacher'])
 
     def test_assignment_list(self):
-        student = StudentFactory(city_id='spb')
-        teacher = TeacherFactory(city_id='spb')
+        student = StudentFactory()
+        teacher = TeacherFactory()
         today = now_local(student.get_timezone()).date()
         next_day = today + datetime.timedelta(days=1)
         course = CourseFactory(teachers=[teacher],
                                semester=SemesterFactory.create_current(),
                                completed_at=next_day)
-        url = course.get_absolute_url()
+        course_url = course.get_absolute_url()
         EnrollmentFactory(student=student, course=course)
         a = AssignmentFactory.create(course=course)
-        response = self.client.get(url)
+        response = self.client.get(course_url)
         assert response.status_code == 302
         self.doLogin(student)
-        self.assertContains(self.client.get(url), a.title)
+        self.assertContains(self.client.get(course_url), a.title)
         a_s = StudentAssignment.objects.get(assignment=a, student=student)
-        self.assertContains(self.client.get(url), a_s.get_student_url())
+        self.assertContains(self.client.get(course_url), a_s.get_student_url())
         a_s.delete()
         with LogCapture(level=logging.INFO) as l:
-            self.assertEqual(200, self.client.get(url).status_code)
+            self.assertEqual(200, self.client.get(course_url).status_code)
             l.check(('learning.tabs',
                      'INFO',
                      f"no StudentAssignment for "
                      f"student ID {student.pk}, assignment ID {a.pk}"))
         self.client.logout()
         self.doLogin(teacher)
-        self.assertContains(self.client.get(url), a.title)
-        self.assertContains(self.client.get(url), a.get_teacher_url())
+        self.assertContains(self.client.get(course_url), a.title)
+        self.assertContains(self.client.get(course_url), a.get_teacher_url())
 
 
 class CourseEditDescrTests(MyUtilitiesMixin, CSCTestCase):

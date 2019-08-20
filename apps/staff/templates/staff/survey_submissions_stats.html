@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="container">
-    <h2 class="content-title">{{ survey.course }}<br><small>{{ survey.course.city }} / {{ survey.get_type_display }} опрос</small></h2>
+    <h2 class="content-title">{{ survey.course }}<br><small>{{ survey.course.branch }} / {{ survey.get_type_display }} опрос</small></h2>
     <div>Всего отзывов: {{ total_submissions }}</div>
     {% for field, stats in data.items %}
         {% if field.field_type == field.TYPES.RADIO_MULTIPLE or field.field_type == field.TYPES.CHECKBOX_MULTIPLE or field.field_type == field.TYPES.CHECKBOX_MULTIPLE_WITH_NOTE %}

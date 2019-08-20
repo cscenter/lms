@@ -1,6 +1,6 @@
 import factory
 
-from core.tests.factories import CityFactory, BranchFactory
+from core.tests.factories import BranchFactory
 from study_programs.models import AcademicDiscipline, StudyProgram, \
     StudyProgramCourseGroup
 
@@ -18,7 +18,6 @@ class StudyProgramFactory(factory.DjangoModelFactory):
         model = StudyProgram
 
     year = 2018
-    city = factory.SubFactory(CityFactory)
     academic_discipline = factory.SubFactory(AcademicDisciplineFactory)
     branch = factory.SubFactory(BranchFactory)
 

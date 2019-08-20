@@ -4,13 +4,30 @@ import types
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import redirect_to_login
+from django.core.exceptions import ImproperlyConfigured
 from django.http import JsonResponse
-from django.shortcuts import render_to_response
 from django.utils.encoding import smart_text
 from django.views import generic
 from vanilla import CreateView
 
+from core.models import Branch
 from .utils import render_markdown
+
+
+class RequestBranchMixin:
+    """
+    This view mixin sets `branch` attribute to request object based on
+    `request.site` and non-empty `branch_code` view keyword argument
+    """
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        branch_code = kwargs.get("branch_code", None)
+        if not branch_code:
+            raise ImproperlyConfigured(
+                f"{self.__class__} is subclass of RequestBranchMixin but "
+                f"`branch_code` view keyword argument is not specified or empty")
+        request.branch = Branch.objects.get_by_natural_key(branch_code,
+                                                           request.site.id)
 
 
 class ReadOnlyFieldsMixin:

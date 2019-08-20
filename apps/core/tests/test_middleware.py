@@ -1,98 +1,58 @@
-from urllib.parse import urlparse
+from functools import partial
 
 import pytest
-
 from django.contrib.sites.models import Site
 from django.http.response import Http404
 
-from core.middleware import CurrentCityMiddleware
-from courses.tests.factories import CourseFactory
+from core.middleware import BranchViewMiddleware
+from core.models import Branch
+from core.tests.factories import BranchFactory
+from learning.settings import Branches
 
 
 @pytest.mark.django_db
-def test_current_city_middleware(rf, settings, mocker):
-    domain = "kzn.compsciclub.ru"
+def test_branch_view_middleware(rf, settings, mocker):
+    branch = BranchFactory(code='xxx')
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    branch_nsk_other = BranchFactory(code=Branches.NSK,
+                                     site_id=settings.ANOTHER_DOMAIN_ID)
     request = rf.request()
     request.site = Site.objects.get(id=settings.SITE_ID)
-    request.site.domain = domain
-    request.META['HTTP_HOST'] = "{}:8000".format(domain)
+    request.META['HTTP_HOST'] = "{}:8000".format(request.site.domain)
     request.path = '/'
-    assert not hasattr(request, "city_code")
-    middleware = CurrentCityMiddleware(mocker.stub(name='get_response'))
-    # No `city_aware` keyword, so parse sub domain
-    middleware.process_view(request, view_func=lambda: "", view_args=[], view_kwargs={})
-    assert hasattr(request, "city_code")
-    assert request.city_code == "kzn"
-    # Set default host
-    domain = "compscicenter.ru"
-    request.site.domain = domain
-    request.META['HTTP_HOST'] = "{}:8000".format(domain)
-    delattr(request, "city_code")
-    middleware.process_view(request, view_func=lambda: "", view_args=[], view_kwargs={})
-    assert request.city_code == "spb"
-    assert settings.DEFAULT_CITY_CODE == "spb"
+    assert not hasattr(request, "branch")
+    # Required `branch_code_request` and `branch_trailing_slash`
+    # named arguments not found
+    middleware = BranchViewMiddleware(mocker.stub(name='get_response'))
+    process_view = partial(middleware.process_view, view_func=lambda: "",
+                           view_args=[])
+    process_view(request, view_kwargs={})
+    assert not hasattr(request, "branch")
+    # `branch_trailing_slash`is omitted
+    process_view(request, view_kwargs={"branch_code_request": branch.code})
+    assert not hasattr(request, "branch")
+    response = process_view(request, view_kwargs={
+        "branch_code_request": branch.code,
+        "branch_trailing_slash": ""})
+    assert response.status_code == 404
+    assert not hasattr(request, "branch")
+    process_view(request, view_kwargs={"branch_code_request": branch.code,
+                                       "branch_trailing_slash": "/"})
+    assert request.branch == branch
+    process_view(request, view_kwargs={"branch_code_request": branch_nsk.code,
+                                       "branch_trailing_slash": "/"})
+    assert request.branch == branch_nsk
+    process_view(request, view_kwargs={"branch_code_request": Branches.NSK,
+                                       "branch_trailing_slash": "/"})
+    assert request.branch == branch_nsk
 
-    co = CourseFactory(city_id="kzn", meta_course__slug="test")
-    parsed_url = urlparse(co.get_absolute_url())
-    assert parsed_url.path == "/courses/test/kzn/{}/".format(co.semester.slug)
-    request.path = co.get_absolute_url()
-    # Without `city_aware` url keyword we still should parse sub domain
-    delattr(request, "city_code")
-    middleware.process_view(request, view_func=lambda: "", view_args=[],
-                            view_kwargs={})
-    assert request.city_code == "spb"
-    # Now set `city_aware`
-    assert co.city_id == "kzn"
-    view_kwargs = dict(city_aware=True, city_code="kzn", city_delimiter="/")
-    middleware.process_view(request, view_func=lambda: "", view_args=[],
-                            view_kwargs=view_kwargs)
-    assert request.city_code == "kzn"
-    # Test corner cases
-    with pytest.raises(Http404):
-        # Delimiter can't be empty for non-default city code
-        view_kwargs = dict(city_aware=True, city_code="kzn", city_delimiter="")
-        assert view_kwargs["city_code"] != settings.DEFAULT_CITY_CODE
-        middleware.process_view(request, view_func=lambda: "", view_args=[],
-                                view_kwargs=view_kwargs)
-    with pytest.raises(Http404):
-        # Delimiter should be empty for default city code
-        view_kwargs = dict(city_aware=True, city_code="", city_delimiter="/")
-        middleware.process_view(request, view_func=lambda: "",
-                                view_args=[], view_kwargs=view_kwargs)
-    domain = "kzn.compscicenter.ru"
-    request.site.domain = domain
-    request.META['HTTP_HOST'] = "{}:8000".format(domain)
-    # Return default city code if `city_aware=True`
-    view_kwargs = dict(city_aware=True, city_code="", city_delimiter="")
-    middleware.process_view(request, view_func=lambda: "",
-                            view_args=[], view_kwargs=view_kwargs)
-    assert request.city_code == settings.DEFAULT_CITY_CODE
-    # Unknown city_code passed, raise 404
-    view_kwargs = dict(city_aware=True, city_code="wtf", city_delimiter="/")
-    with pytest.raises(Http404):
-        middleware.process_view(request, view_func=lambda: "",
-                                view_args=[], view_kwargs=view_kwargs)
-    # For wrong sub domain fallback to default city, makes sense for `www`.
-    # In fact, we should fail on dns level if something like
-    # `wtf.compscicenter.ru` were provided
-    domain = "nsk.compscicenter.ru"
-    request.site.domain = domain
-    request.META['HTTP_HOST'] = "{}:8000".format(domain)
-    view_kwargs = dict(city_aware=False, city_code="kzn", city_delimiter="/")
-    middleware.process_view(request, view_func=lambda: "",
-                            view_args=[], view_kwargs=view_kwargs)
-    assert request.city_code == "nsk"
-    # For compsciclub.ru always resolve sub domain
-    settings.SITE_ID = settings.CLUB_SITE_ID
-    domain = "kzn.compsciclub.ru"
-    request.site.domain = domain
-    request.META['HTTP_HOST'] = "{}:8000".format(domain)
-    view_kwargs = dict(city_aware=True, city_code="nsk", city_delimiter="/")
-    with pytest.raises(Http404):
-        # We don't support `city_code` for compsciclub.ru , it must be empty
-        middleware.process_view(request, view_func=lambda: "",
-                                view_args=[], view_kwargs=view_kwargs)
-    view_kwargs = dict(city_aware=True, city_code="", city_delimiter="")
-    middleware.process_view(request, view_func=lambda: "",
-                            view_args=[], view_kwargs=view_kwargs)
-    assert request.city_code == "kzn"
+    response = process_view(request, view_kwargs={
+        "branch_code_request": 'unknown',
+        "branch_trailing_slash": "/"})
+    assert response.status_code == 404
+    delattr(request, "branch")
+    process_view(request, view_kwargs={"branch_code_request": "",
+                                       "branch_trailing_slash": ""})
+    default_branch = Branch.objects.get(code=settings.DEFAULT_BRANCH_CODE,
+                                        site_id=settings.SITE_ID)
+    assert request.branch == default_branch

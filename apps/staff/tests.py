@@ -19,5 +19,5 @@ def test_staff_diplomas_view(curator, client):
     sp.save()
     client.login(curator)
     response = client.get(reverse('staff:exports_students_diplomas_tex',
-                                  kwargs={"city_code": "spb"}))
+                                  kwargs={"branch_id": student.branch_id}))
     assert smart_bytes(p.name) in response.content

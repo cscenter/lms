@@ -277,8 +277,8 @@ class CourseSurvey(TimezoneAwareModel, models.Model):
         unique_together = [('course', 'type')]
 
     def __str__(self):
-        city = self.course.city
-        return f"{self.course}, {city} [{self.type}]"
+        branch = self.course.branch
+        return f"{self.course}, {branch} [{self.type}]"
 
     def expire_at_local(self, tz=None, format=None):
         if not tz:
@@ -307,11 +307,8 @@ class CourseSurvey(TimezoneAwareModel, models.Model):
     def get_absolute_url(self, course: Course = None):
         course = course or self.course
         kwargs = {
-            "course_slug": course.meta_course.slug,
-            "semester_type": course.semester.type,
-            "semester_year": course.semester.year,
-            "city_code": course.city_id,
-            "slug": self.form.slug
+            **course.url_kwargs,
+            "survey_form_slug": self.form.slug
         }
         return city_aware_reverse('surveys:form_detail', kwargs=kwargs)
 

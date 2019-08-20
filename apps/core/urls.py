@@ -1,11 +1,9 @@
 import re
-from urllib.parse import urlparse
 
 from django.conf import settings
 from django.urls import reverse as django_reverse
 from django.utils.functional import lazy
 from subdomains.utils import reverse as subdomain_reverse
-
 
 from core.utils import is_club_site
 
@@ -39,5 +37,13 @@ def city_aware_reverse(viewname, subdomain=None, scheme=None, args=None,
         kwargs["city_code"] = ""
     if kwargs["city_code"]:
         kwargs["city_delimiter"] = "/"
+    return reverse(viewname, subdomain=subdomain, scheme=scheme, args=args,
+                   kwargs=kwargs, current_app=current_app)
+
+
+def branch_aware_reverse(viewname, subdomain=None, scheme=None, args=None,
+                         kwargs=None, current_app=None):
+    slash = "" if kwargs["branch_code_request"] else "/"
+    kwargs["branch_trailing_slash"] = slash
     return reverse(viewname, subdomain=subdomain, scheme=scheme, args=args,
                    kwargs=kwargs, current_app=current_app)
