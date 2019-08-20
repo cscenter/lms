@@ -1,26 +1,24 @@
 from django.conf.urls import include, url
-
 from django.urls import path
 
-from learning.gradebook.views import GradeBookTeacherView
+from learning.gradebook.views import GradeBookView
 from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
     ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
     ProgressReportForSemesterView, AdmissionReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
-    CourseParticipantsIntersectionView, SyllabusView, \
-    WillGraduateStatsReportView, SurveySubmissionsReportView, \
+    CourseParticipantsIntersectionView, WillGraduateStatsReportView, \
+    SurveySubmissionsReportView, \
     SurveySubmissionsStatsView, GradeBookListView, create_alumni_profiles
 
 app_name = 'staff'
 urlpatterns = [
-    url(r'^syllabus/$', SyllabusView.as_view(), name='syllabus'),
     url(r'^warehouse/$', HintListView.as_view(), name='staff_warehouse'),
     url(r'^course-marks/$',
         GradeBookListView.as_view(),
         name='course_markssheet_staff_dispatch'),
-    url(r'^course-marks/(?P<city>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
-        GradeBookTeacherView.as_view(is_for_staff=True),
+    url(r'^course-marks/(?P<city_code>[-\w]+)/(?P<course_slug>[-\w]+)/(?P<semester_year>\d+)-(?P<semester_type>\w+)/$',
+        GradeBookView.as_view(is_for_staff=True, permission_required="teaching.view_gradebook"),
         name='course_markssheet_staff'),
     url(r'^student-search/$',
         StudentSearchView.as_view(),
@@ -28,9 +26,7 @@ urlpatterns = [
     url(r'^faces/interviewers/$',
         InterviewerFacesView.as_view(),
         name='interviewer_faces'),
-    url(r'^faces/$',
-        StudentFacesView.as_view(),
-        name='student_faces'),
+    url(r'^faces/$', StudentFacesView.as_view(), name='student_faces'),
     path('commands/create_alumni_profiles/', create_alumni_profiles, name='create_alumni_profiles'),
     url(r'^projects/autograde/$',
         autograde_projects,
@@ -43,20 +39,12 @@ urlpatterns = [
         name='student_search_json'),
 
     url(r'^exports/', include([
-        url(r'^$',
-            ExportsView.as_view(),
-            name='exports'),
-        url(r'^alumni/', include([
-            url(r'^(?P<city_code>nsk|distance|spb|)/stats/$',
-                StudentsDiplomasStatsView.as_view(),
-                name='exports_alumni_stats'),
-            url(r'^(?P<city_code>nsk|distance|spb|)/tex/$',
-                StudentsDiplomasTexView.as_view(),
-                name='exports_students_diplomas_tex'),
-            url(r'^(?P<city_code>nsk|distance|spb|)/csv/$',
-                StudentsDiplomasCSVView.as_view(),
-                name='exports_students_diplomas_csv'),
-        ]), kwargs={"city_aware": True, "use_delimiter": False}),
+        url(r'^$', ExportsView.as_view(), name='exports'),
+        url(r'^alumni/(?P<branch_id>\d+)/', include([
+            url(r'^stats/$', StudentsDiplomasStatsView.as_view(), name='exports_alumni_stats'),
+            url(r'^tex/$', StudentsDiplomasTexView.as_view(), name='exports_students_diplomas_tex'),
+            url(r'^csv/$', StudentsDiplomasCSVView.as_view(), name='exports_students_diplomas_csv'),
+        ])),
         url(r'^sheet/csv/$',
             ProgressReportFullView.as_view(output_format="csv"),
             name='exports_sheet_all_students_csv'),

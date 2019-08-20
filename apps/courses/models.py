@@ -422,22 +422,11 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
             url_name = "teaching:gradebook_csv"
         else:
             url_name = "teaching:gradebook"
-        return reverse(url_name,
-                       kwargs={
-                           "course_slug": self.meta_course.slug,
-                           "city": self.get_city(),
-                           "semester_type": self.semester.type,
-                           "semester_year": self.semester.year,
-                       })
+        return city_aware_reverse(url_name, kwargs=self.url_kwargs)
     # TODO: Merge with `get_gradebook_url` after migrating to jinja2
     def get_gradebook_csv_url(self):
-        return reverse("teaching:gradebook_csv",
-                       kwargs={
-                           "course_slug": self.meta_course.slug,
-                           "city": self.get_city(),
-                           "semester_type": self.semester.type,
-                           "semester_year": self.semester.year,
-                       })
+        return city_aware_reverse("teaching:gradebook_csv",
+                                  kwargs=self.url_kwargs)
 
     def get_course_news_notifications_url(self):
         return city_aware_reverse('course_news_notifications_read',

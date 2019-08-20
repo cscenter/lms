@@ -10,15 +10,13 @@ logger = logging.getLogger(__name__)
 
 class CourseURLParamsMixin:
     """
-    Makes sure `request.city_code` set by `core.middleware.CurrentCityMiddleware`
-    is fulfilled from the request url query params.
     Provides a basic queryset for the course.
     """
     def setup(self, request, *args, **kwargs):
-        if not kwargs['city_aware']:
-            logger.warning("For this view `request.city_code` should be "
-                           "populated from the GET-parameters")
-            return HttpResponseBadRequest()
+        # TODO: move to RequestBranchRequired mixin?
+        if not hasattr(request, "branch"):
+            logger.error(f"{self.__class__} needs `request.branch` value")
+            # request.branch = None
         super().setup(request, *args, **kwargs)
         self.course: Course = get_object_or_404(self.get_course_queryset())
 

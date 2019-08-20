@@ -25,13 +25,13 @@
                  autofocus autocomplete="off">
         </div>
         <div class="form-group">
-          <label>Город</label><br>
+          <label>Отделение</label><br>
           <div class="btn-group btn-group-sm" data-toggle="buttons">
-            {% for city_code, city_name in cities.items %}
+            {% for branch_id, branch_name in branches.items %}
               <label class="btn btn-default">
-                <input type="checkbox" name="cities"
-                       value="{{ city_code }}"
-                       autocomplete="off">{{ city_name }}
+                <input type="checkbox" name="branches"
+                       value="{{ branch_id }}"
+                       autocomplete="off">{{ branch_name }}
               </label>
             {% endfor %}
           </div>

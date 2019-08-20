@@ -139,8 +139,8 @@ def enroll_in_course(user, course: Course):
     # If the student can't take this course remotely, check that the city
     # of the student and the city match
     if not course.is_correspondence and user.branch_id != course.branch_id:
-        logger.debug("Student with branch % could not enroll in the course "
-                     "with branch %", user.branch_id, course.branch_id)
+        logger.debug("Student with branch %s could not enroll in the course "
+                     "with branch %s", user.branch_id, course.branch_id)
         return False
     if course.is_capacity_limited and not course.places_left:
         return False
@@ -199,6 +199,11 @@ def create_assignment_comment_teacher(user, sa: StudentAssignment):
     return user in sa.assignment.course.teachers.all()
 
 
+@rules.predicate
+def view_own_gradebook(user, course: Course):
+    return user in course.teachers.all()
+
+
 add_perm("learning.view_study_menu")
 add_perm("learning.view_teaching_menu")
 add_perm("learning.view_course_news", view_course_news)
@@ -213,6 +218,8 @@ add_perm("study.view_schedule", is_not_expelled)
 add_perm("study.view_courses", is_not_expelled)
 add_perm("study.view_internships", is_not_expelled)
 add_perm("study.view_faq", is_not_expelled)
+add_perm("teaching.view_gradebook")
+add_perm("teaching.view_own_gradebook", view_own_gradebook)
 add_perm("study.create_assignment_comment", create_assignment_comment)
 add_perm("teaching.create_assignment_comment", create_assignment_comment_teacher)
 add_perm("learning.enroll_in_course", enroll_in_course)

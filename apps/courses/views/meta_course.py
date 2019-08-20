@@ -1,6 +1,5 @@
 from django.views import generic
 
-from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from courses.forms import CourseForm
 from courses.models import Course, MetaCourse
@@ -19,14 +18,9 @@ class MetaCourseDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         courses = (Course.objects
                    .select_related("meta_course", "semester", "city")
-                   .filter(meta_course=self.object))
-        # Separate by city only on compsciclub.ru
-        if is_club_site():
-            courses = courses.in_city(self.request.city_code)
-        else:
-            courses = courses.in_center_branches()
+                   .filter(meta_course=self.object,
+                           branch=self.request.branch))
         context['courses'] = courses
-        context["show_city"] = not is_club_site()
         return context
 
 

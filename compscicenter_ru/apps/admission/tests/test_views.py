@@ -188,9 +188,9 @@ def test_autoupdate_applicant_status_from_final():
 
 
 @pytest.mark.django_db
-def test_interview_results_dispatch_view(curator, client):
+def test_interview_results_dispatch_view(curator, client, settings):
     # Not enough permissions if you are not a curator
-    branch1, branch2 = Branch.objects.all()[:2]
+    branch1, branch2 = Branch.objects.filter(site_id=settings.SITE_ID)[:2]
     curator.branch = branch1
     curator.save()
     user = UserFactory(is_staff=False, branch=branch1)

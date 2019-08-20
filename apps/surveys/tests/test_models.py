@@ -12,7 +12,7 @@ from surveys.tests.factories import CourseSurveyFactory
 
 @pytest.mark.django_db
 def test_course_survey_is_active():
-    course = CourseFactory(city_id=Branches.SPB)
+    course = CourseFactory(branch__code=Branches.SPB)
     today = now_local(course.get_timezone())
     cs = CourseSurveyFactory(course=course, form__status=STATUS_PUBLISHED)
     assert cs.is_active
@@ -28,7 +28,7 @@ def test_course_survey_is_active():
 
 @pytest.mark.django_db
 def test_get_active():
-    course = CourseFactory(city_id=Branches.SPB)
+    course = CourseFactory(branch__code=Branches.SPB)
     active_cs = CourseSurvey.get_active(course)
     assert active_cs is None
     cs = CourseSurveyFactory(course=course, form__status=STATUS_PUBLISHED)
@@ -63,7 +63,7 @@ def test_get_active():
 
 @pytest.mark.django_db
 def test_final_survey_builder_field_label():
-    course = CourseFactory(city_id=Branches.SPB)
+    course = CourseFactory(branch__code=Branches.SPB)
     cs = CourseSurveyFactory(course=course, type=CourseSurvey.MIDDLE,
                              # Create form with a form builder
                              form_id=None)
@@ -79,7 +79,7 @@ def test_final_survey_builder_field_label():
 
 @pytest.mark.django_db
 def test_final_survey_builder_field_choice_label():
-    course = CourseFactory(city_id=Branches.SPB)
+    course = CourseFactory(branch__code=Branches.SPB)
     cs = CourseSurveyFactory(course=course, type=CourseSurvey.MIDDLE,
                              # Create form with a form builder
                              form_id=None)

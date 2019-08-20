@@ -74,7 +74,7 @@ INSTALLED_APPS = [
     'taggit',
 
     'core.storage.StaticFilesConfig',  # custom list of ignore patterns
-    'core',
+    'core.apps.CoreConfig',
     'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
     'users.apps.UsersConfig',
     'htmlpages',

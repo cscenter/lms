@@ -1,14 +1,13 @@
-from django.conf import settings
+from django.core.validators import MinValueValidator
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
-
 from django.db.models import query, Prefetch
 from django.utils.encoding import smart_text
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from core.models import City, Branch
+from core.models import Branch
 from courses.models import MetaCourse
 
 
@@ -52,10 +51,6 @@ class StudyProgramQuerySet(query.QuerySet):
 class StudyProgram(TimeStampedModel):
     year = models.PositiveSmallIntegerField(
         _("Year"), validators=[MinValueValidator(1990)])
-    city = models.ForeignKey(City,
-                             verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE,
-                             on_delete=models.CASCADE)
     branch = models.ForeignKey(Branch,
                                verbose_name=_("Branch"),
                                related_name="study_programs",
@@ -68,7 +63,7 @@ class StudyProgram(TimeStampedModel):
     is_active = models.BooleanField(
         _("Activity"),
         help_text=_("Show on syllabus page. Other activity flags for selected "
-                    "city and academic discipline will be deactivated."),
+                    "branch and academic discipline will be deactivated."),
         default=True)
     description = models.TextField(
         _("StudyProgram|description"),
@@ -87,7 +82,7 @@ class StudyProgram(TimeStampedModel):
         super().save(**kwargs)
         if self.is_active:
             # Deactivate other records with the same academic
-            # discipline and city
+            # discipline and branch
             (StudyProgram.objects
              .filter(is_active=True,
                      academic_discipline_id=self.academic_discipline_id,

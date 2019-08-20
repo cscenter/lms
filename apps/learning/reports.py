@@ -33,12 +33,11 @@ class ProgressReport(ReportFileOutput):
 
     __metaclass__ = ABCMeta
 
-    def __init__(self, honest_grade_system=False, request=None, qs_filters=None):
+    def __init__(self, honest_grade_system=False, qs_filters=None):
         # Max count values among all students
         self.shads_max = 0
         self.online_courses_max = 0
         self.projects_max = 0
-        self.request = request
         qs_filters = qs_filters or {}
         students_data = self.get_queryset(**qs_filters)
         # Collect course headers and prepare enrollments info
@@ -367,7 +366,7 @@ class ProgressReportFull(ProgressReport):
             student.comment,
             student.comment_changed_at.strftime(dt_format),
             student.workplace,
-            self.request.build_absolute_uri(student.get_absolute_url()),
+            student.get_absolute_url(),
             self.get_applicant_forms(student),
             total_success_passed,
         ]
@@ -392,12 +391,11 @@ class ProgressReportForSemester(ProgressReport):
 
     UNSUCCESSFUL_GRADES = [GradeTypes.NOT_GRADED, GradeTypes.UNSATISFACTORY]
 
-    def __init__(self, term, honest_grade_system=False, request=None,
-                 qs_filters=None):
+    def __init__(self, term, honest_grade_system=False, qs_filters=None):
         self.target_semester = term
         qs_filters = qs_filters or {}
         qs_filters["semester"] = self.target_semester
-        super().__init__(honest_grade_system, request, qs_filters)
+        super().__init__(honest_grade_system, qs_filters)
 
     @staticmethod
     def get_queryset(**kwargs):
@@ -547,7 +545,7 @@ class ProgressReportForSemester(ProgressReport):
             student.comment,
             student.comment_changed_at.strftime(dt_format),
             student.workplace,
-            self.request.build_absolute_uri(student.get_absolute_url()),
+            student.get_absolute_url(),
             success_total_lt_target_semester,
             success_total_eq_target_semester,
             enrollments_eq_target_semester

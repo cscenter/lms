@@ -84,7 +84,7 @@ class UserDetailView(generic.DetailView):
                 classes_total=Count('course__courseclass'))
         filters = {"city_code": settings.CENTER_BRANCHES_CITY_CODES}
         if is_club_site():
-            filters["city_code"] = self.request.city_code
+            filters["branch"] = self.request.branch
         co_queryset = (Course.objects
                        .in_city(**filters)
                        .select_related('semester', 'meta_course'))
@@ -140,7 +140,7 @@ class UserDetailView(generic.DetailView):
                         .select_related("academic_discipline")
                         .prefetch_core_courses_groups()
                         .filter(year=profile_user.curriculum_year,
-                                city_id=profile_user.city_id))
+                                branch_id=profile_user.branch_id))
         context['syllabus'] = syllabus
         return context
 

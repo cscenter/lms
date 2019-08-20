@@ -3,6 +3,8 @@ import datetime
 import pytest
 from django.core.cache import cache
 
+from core.models import Branch
+from core.tests.factories import CityFactory, BranchFactory
 from core.urls import reverse
 from learning.settings import Branches
 from learning.tests.factories import GraduateProfileFactory, MetaCourseFactory, CourseFactory
@@ -41,13 +43,12 @@ def test_alumni(client):
 
 
 @pytest.mark.django_db
-def test_meta_course_detail(client):
+def test_meta_course_detail(client, settings):
     mc = MetaCourseFactory()
     response = client.get(mc.get_absolute_url())
     assert response.status_code == 200
     assert not response.context_data['grouped_courses']
-    # Add 2 courses to the same branch
-    co1, co2 = CourseFactory.create_batch(2, meta_course=mc)
+    course1, course2 = CourseFactory.create_batch(2, meta_course=mc)
     response = client.get(mc.get_absolute_url())
     assert response.status_code == 200
     assert mc.name.encode() in response.content
@@ -55,18 +56,22 @@ def test_meta_course_detail(client):
     grouped_courses = response.context_data['grouped_courses']
     assert len(grouped_courses) == 1
     assert Branches.SPB in grouped_courses
-    assert {c.pk for c in grouped_courses[Branches.SPB]} == {co1.pk, co2.pk}
+    assert {c.pk for c in grouped_courses[Branches.SPB]} == {course1.pk,
+                                                             course2.pk}
     assert 'tabs' in response.context_data
     assert len(response.context_data['tabs']) == 1
     # Relocate 1 course to the city out of the cs center branches
-    co2.city_id = "kzn"
-    co2.save()
+    city = CityFactory(code='xxx')
+    branch = BranchFactory(city=city)
+    course2.branch = branch
+    course2.save()
     response = client.get(mc.get_absolute_url())
     grouped_courses = response.context_data['grouped_courses']
-    assert {c.pk for c in grouped_courses[Branches.SPB]} == {co1.pk}
+    assert {c.pk for c in grouped_courses[Branches.SPB]} == {course1.pk}
     # Return to another cs center branch
-    co2.city_id = Branches.NSK
-    co2.save()
+    course2.branch = Branch.objects.get(code=Branches.NSK,
+                                        site_id=settings.SITE_ID)
+    course2.save()
     response = client.get(mc.get_absolute_url())
     assert len(response.context_data['tabs']) == 2
     assert len(response.context_data['grouped_courses']) == 2

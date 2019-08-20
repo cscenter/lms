@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from typing import NamedTuple
 
 from django.conf import settings
 from django.contrib import messages
 from django.core.management import CommandError
 from django.core.management import call_command
-from django.db.models import Count, Prefetch
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.db.models import Prefetch
+from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
@@ -20,7 +20,6 @@ from rest_framework.pagination import LimitOffsetPagination
 from vanilla import TemplateView
 
 import core.utils
-import courses.utils
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
 from api.permissions import CuratorAccessPermission
@@ -29,27 +28,25 @@ from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR, \
     DEFAULT_BRANCH_CODE
 from core.templatetags.core_tags import tex
 from core.urls import reverse
-from courses.models import Course, Semester
 from courses.constants import SemesterTypes
+from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
-from core.utils import bucketize
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import AcademicDegreeYears, StudentStatuses, \
-    GradeTypes, Branches
+    GradeTypes
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams
-from study_programs.models import StudyProgram, StudyProgramCourseGroup
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.constants import Roles
 from users.filters import UserFilter
 from users.mixins import CuratorOnlyMixin
-from users.models import User, UserStatusLog
+from users.models import User
 
 
 class StudentOffsetPagination(LimitOffsetPagination):
@@ -74,12 +71,12 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         # TODO: rewrite with django-filters
+        branches = (Branch.objects
+                    .filter(site_id=settings.SITE_ID)
+                    .order_by('order'))
         context = {
             'json_api_uri': reverse('staff:student_search_json'),
-            'cities': OrderedDict({
-                'spb': 'Санкт-Петербург',
-                'nsk': 'Новосибирск'
-            }),
+            'branches': {b.pk: b.name for b in branches},
             'curriculum_years': (User.objects
                                  .values_list('curriculum_year',
                                               flat=True)
@@ -110,7 +107,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "campaigns": (Campaign.objects
                           .select_related("branch")
                           .order_by("-branch__name", "-year")),
-            "center_branches": Branches.choices
+            "branches": Branch.objects.filter(site_id=settings.SITE_ID)
         }
         return context
 
@@ -119,9 +116,9 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
     BAD_GRADES = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
 
-    def get_context_data(self, city_code, **kwargs):
+    def get_context_data(self, branch_id, **kwargs):
         filters = {
-            "city_id": city_code,
+            "branch_id": branch_id,
             "status": StudentStatuses.WILL_GRADUATE
         }
         students = (User.objects
@@ -258,7 +255,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                 elif s.max_courses_in_term > most_courses_in_term_student.max_courses_in_term:
                     most_courses_in_term_students = {s}
         context = {
-            'city': settings.CITIES[city_code],
+            "branch": Branch.objects.get(pk=branch_id),
             'less_failed_courses': less_failed_courses,
             'most_failed_courses': most_failed_courses,
             'all_three_practicies_are_internal': all_three_practicies_are_internal,
@@ -284,8 +281,8 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
 class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
-    def get_context_data(self, city_code, **kwargs):
-        filters = {"city_id": city_code}
+    def get_context_data(self, branch_id, **kwargs):
+        filters = {"branch_id": branch_id}
         students = ProgressReportForDiplomas.get_queryset(filters=filters)
 
         class DiplomaCourse(NamedTuple):
@@ -330,7 +327,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             delattr(student, "shads")
 
         context = {
-            "city": settings.CITIES[city_code],
+            "branch": Branch.objects.get(pk=branch_id),
             "students": students
         }
         return context
@@ -339,9 +336,9 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
 class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
-    def get(self, request, city_code, *args, **kwargs):
+    def get(self, request, branch_id, *args, **kwargs):
         qs_filters = {
-            "filters": {"city_id": city_code}
+            "filters": {"branch_id": branch_id}
         }
         progress_report = ProgressReportForDiplomas(request=request,
                                                     qs_filters=qs_filters)
@@ -426,7 +423,7 @@ class HintListView(CuratorOnlyMixin, generic.ListView):
 
 
 class StudentFacesView(CuratorOnlyMixin, TemplateView):
-    """Show students faces with names to memorize newbies"""
+    """Photo + names to memorize newbies"""
     template_name = "staff/student_faces.html"
 
     def get(self, request, *args, **kwargs):
@@ -562,28 +559,6 @@ def create_alumni_profiles(request):
     else:
         messages.error(request, str('Неверный формат даты выпуска'))
     return HttpResponseRedirect(reverse("staff:exports"))
-
-
-class SyllabusView(CuratorOnlyMixin, generic.TemplateView):
-    template_name = "staff/syllabus.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        syllabus = (StudyProgram.objects
-                    .filter(year=2017)
-                    .select_related("academic_discipline")
-                    .prefetch_related(
-                        Prefetch(
-                            'course_groups',
-                            queryset=(StudyProgramCourseGroup
-                                      .objects
-                                      .prefetch_related("courses")),
-                        ))
-                    .order_by("city_id", "academic_discipline__name_ru"))
-        context["programs"] = bucketize(syllabus, lambda sp: sp.city_id)
-        # TODO: validate entry city
-        context["selected_city"] = self.request.GET.get('city', 'spb')
-        return context
 
 
 class SurveySubmissionsReportView(CuratorOnlyMixin, generic.base.View):

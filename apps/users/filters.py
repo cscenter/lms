@@ -41,7 +41,7 @@ class UserFilter(FilterSet):
     _lexeme_trans_map = dict((ord(c), None) for c in '*|&:')
 
     name = CharFilter(method='name_filter')
-    cities = CharInFilter(field_name='city_id')
+    branches = CharInFilter(field_name='branch_id')
     curriculum_year = NumberInFilter(field_name='curriculum_year')
     # TODO: Restrict choices
     groups = RolesInFilter(field_name='group__role', distinct=True)
@@ -51,7 +51,7 @@ class UserFilter(FilterSet):
 
     class Meta:
         model = User
-        fields = ("name", "cities", "curriculum_year", "groups", "status",
+        fields = ("name", "branches", "curriculum_year", "groups", "status",
                   "cnt_enrollments",)
 
     def __init__(self, data, **kwargs):

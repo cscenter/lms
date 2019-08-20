@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin as _PermissionRequiredMixin
 
 
+# FIXME: check that perms registered in all_permissions?
 class PermissionRequiredMixin(_PermissionRequiredMixin):
     """
     CBV mixin to provide object-level permission checking to views. Best used

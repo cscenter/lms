@@ -3,11 +3,12 @@ import datetime
 import pytest
 
 from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
+from core.tests.factories import BranchFactory
 from core.urls import reverse_lazy
 from courses.constants import SemesterTypes
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from users.constants import Roles
 from users.tests.factories import UserFactory, VolunteerFactory, \
@@ -181,10 +182,10 @@ def test_student_search_by_groups(client, curator, search_url):
     StudentFactory.create_batch(2, required_groups__site_id=ANOTHER_DOMAIN_ID,)
     students = StudentFactory.create_batch(3, enrollment_year=2011,
                                               curriculum_year=2011,
-                                              status="", city_id='spb')
+                                              status="")
     volunteers = VolunteerFactory.create_batch(4, enrollment_year=2011,
                                                curriculum_year=2011,
-                                               status="", city_id='spb')
+                                               status="")
     # Empty results if no query provided
     response = client.get(search_url)
     assert response.json()["count"] == 0
@@ -206,52 +207,56 @@ def test_student_search_by_groups(client, curator, search_url):
 
 
 @pytest.mark.django_db
-def test_student_search_by_city(client, curator, search_url):
+def test_student_search_by_branch(client, curator, search_url):
     client.login(curator)
-    _ = UserFactory.create(city_id='spb')  # random user
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    _ = UserFactory.create(branch=branch_spb)  # random user
     students_spb = StudentFactory.create_batch(3,
-        enrollment_year=2011, status="", city_id='spb')
+        enrollment_year=2011, status="", branch=branch_spb)
     students_nsk = StudentFactory.create_batch(2,
-        enrollment_year=2011, status="", city_id='nsk')
+        enrollment_year=2011, status="", branch=branch_nsk)
     # Send empty query
-    response = client.get("{}?{}".format(search_url, "cities="))
+    response = client.get("{}?{}".format(search_url, "branches="))
     assert response.json()["count"] == 0
-    response = client.get("{}?{}".format(search_url, "cities=spb"))
+    response = client.get("{}?branches={}".format(search_url, branch_spb.pk))
     json_data = response.json()
     assert json_data["count"] == len(students_spb)
     assert {s.pk for s in students_spb} == {r["pk"] for r in json_data["results"]}
-    response = client.get("{}?{}".format(search_url, "cities=spb,nsk"))
+    response = client.get(f"{search_url}?branches={branch_spb.pk},{branch_nsk.pk}")
     json_data = response.json()
     assert json_data["count"] == len(students_spb) + len(students_nsk)
     # Test another query format supported by Django
-    response = client.get("{}?{}".format(search_url, "cities[]=spb&cities[]=nsk"))
+    response = client.get(f"{search_url}?branches[]={branch_spb.pk},branches[]={branch_nsk.pk}")
     json_data = response.json()
     assert json_data["count"] == len(students_spb) + len(students_nsk)
     # All with status `studying`
-    response = client.get("{}?{}".format(search_url, "status=studying&cities="))
+    response = client.get(f"{search_url}?status=studying&branches=")
     json_data = response.json()
     assert json_data["count"] == len(students_spb) + len(students_nsk)
 
 
 @pytest.mark.django_db
 def test_student_by_virtual_status_studying(client, curator, search_url):
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
     client.login(curator)
     students_spb = StudentFactory.create_batch(4,
-        enrollment_year=2011, status="", city_id='spb')
+        enrollment_year=2011, status="", branch=branch_spb)
     students_nsk = StudentFactory.create_batch(7,
-        enrollment_year=2011, status="", city_id='nsk')
+        enrollment_year=2011, status="", branch=branch_nsk)
     volunteers = VolunteerFactory.create_batch(
-        3, enrollment_year=2011, status="", city_id='spb')
+        3, enrollment_year=2011, status="", branch=branch_spb)
     graduated_on = datetime.date(year=2017, month=1, day=1)
     graduated = GraduateFactory.create_batch(
-        5, city_id='spb', status='', enrollment_year=2011,
+        5, branch=branch_spb, status='', enrollment_year=2011,
         graduate_profile__graduated_on=graduated_on)
     response = client.get("{}?{}".format(search_url, "status=studying"))
     json_data = response.json()
     total_studying = len(students_spb) + len(students_nsk) + len(volunteers)
     assert json_data["count"] == total_studying
     expelled = StudentFactory.create_batch(
-        2, enrollment_year=2011, status="expelled", city_id='spb')
+        2, enrollment_year=2011, status="expelled", branch=branch_spb)
     # If no groups specified - `GRADUATE_CENTER` group excluded from results
     response = client.get("{}?{}".format(search_url, "status=studying"))
     json_data = response.json()
