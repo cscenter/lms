@@ -5,7 +5,7 @@ from typing import NamedTuple, List
 import attr
 
 from core.urls import reverse
-from courses.utils import get_term_index_academic_year_starts, get_term_by_index
+from courses.utils import first_term_in_academic_year, get_term_by_index
 
 
 def group_terms_by_academic_year(courses):
@@ -26,9 +26,7 @@ def group_terms_by_academic_year(courses):
     for course in courses:
         term = course.semester
         if term != prev_visited:
-            idx = get_term_index_academic_year_starts(term.year, term.type)
-            academic_year, _ = get_term_by_index(idx)
-            terms.setdefault(academic_year, []).append(term.type)
+            terms.setdefault(term.academic_year, []).append(term.type)
             prev_visited = term
     return terms
 

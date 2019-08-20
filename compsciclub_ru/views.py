@@ -217,7 +217,7 @@ class CoursesListView(generic.ListView):
     def get_queryset(self):
         courses_qs = (Course.objects
                       .in_branches(self.request.branch.id)
-                      .select_related('meta_course')
+                      .select_related('meta_course', 'branch')
                       .prefetch_related('teachers')
                       .order_by('meta_course__name'))
         courses_set = Prefetch('course_set',

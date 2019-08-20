@@ -14,7 +14,7 @@ from post_office import mail
 from post_office.models import EmailTemplate
 
 from core.timezone import now_local, TimezoneAwareModel
-from core.urls import reverse, city_aware_reverse
+from core.urls import reverse, branch_aware_reverse
 from courses.models import Course
 from learning.models import Enrollment
 from surveys.constants import FIELD_TYPES, MULTIPLE_CHOICE_FIELD_TYPES, \
@@ -310,7 +310,7 @@ class CourseSurvey(TimezoneAwareModel, models.Model):
             **course.url_kwargs,
             "survey_form_slug": self.form.slug
         }
-        return city_aware_reverse('surveys:form_detail', kwargs=kwargs)
+        return branch_aware_reverse('surveys:form_detail', kwargs=kwargs)
 
     def get_report_url(self, output_format: str):
         return reverse("staff:exports_report_survey_submissions",

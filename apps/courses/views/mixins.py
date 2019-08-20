@@ -28,7 +28,7 @@ class CourseURLParamsMixin:
         captured from the URL.
         """
         return (Course.objects
-                .in_city(self.request.city_code)
+                .in_branches(self.request.branch.pk)
                 .filter(semester__type=self.kwargs['semester_type'],
                         semester__year=self.kwargs['semester_year'],
                         meta_course__slug=self.kwargs['course_slug']))

@@ -5,7 +5,7 @@ import pytz
 
 from courses.constants import SemesterTypes
 from courses.utils import get_term_index, get_term_by_index, \
-    get_term_index_academic_year_starts, get_current_term_pair, \
+    first_term_in_academic_year, get_current_term_pair, \
     TERMS_INDEX_START
 from core.settings.base import FOUNDATION_YEAR
 
@@ -57,16 +57,16 @@ def test_get_term_by_index():
 def test_get_term_index_academic_year_starts():
     # Indexing starts from 1 of foundation year spring.
     with pytest.raises(ValueError):
-        get_term_index_academic_year_starts(FOUNDATION_YEAR,
+        first_term_in_academic_year(FOUNDATION_YEAR,
+                                    SemesterTypes.SPRING)
+    assert 3 == first_term_in_academic_year(FOUNDATION_YEAR,
+                                            SemesterTypes.AUTUMN)
+    assert 3 == first_term_in_academic_year(FOUNDATION_YEAR + 1,
                                             SemesterTypes.SPRING)
-    assert 3 == get_term_index_academic_year_starts(FOUNDATION_YEAR,
-                                                    SemesterTypes.AUTUMN)
-    assert 3 == get_term_index_academic_year_starts(FOUNDATION_YEAR + 1,
-                                                    SemesterTypes.SPRING)
-    assert 6 == get_term_index_academic_year_starts(FOUNDATION_YEAR + 1,
-                                                    SemesterTypes.AUTUMN)
-    assert 6 == get_term_index_academic_year_starts(FOUNDATION_YEAR + 2,
-                                                    SemesterTypes.SUMMER)
+    assert 6 == first_term_in_academic_year(FOUNDATION_YEAR + 1,
+                                            SemesterTypes.AUTUMN)
+    assert 6 == first_term_in_academic_year(FOUNDATION_YEAR + 2,
+                                            SemesterTypes.SUMMER)
 
 
 @pytest.mark.django_db

@@ -21,7 +21,7 @@
             <ul>
             {% for co in semester.courseofferings %}
               <li>
-                <a href="{% url 'staff:course_markssheet_staff' co.get_city co.meta_course.slug co.semester.year co.semester.type %}">{{ co.meta_course.name }}</a>
+                <a href="{% url 'staff:course_markssheet_staff' co.branch.code co.meta_course.slug co.semester.year co.semester.type %}">{{ co.meta_course.name }}</a>
               </li>
             {% endfor %}
             </ul>

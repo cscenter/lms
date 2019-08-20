@@ -32,6 +32,8 @@ class UserFactory(factory.DjangoModelFactory):
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
+    branch = factory.SubFactory('core.tests.factories.BranchFactory',
+                                code=DEFAULT_BRANCH_CODE)
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
@@ -84,8 +86,6 @@ class CuratorFactory(UserFactory):
 class StudentFactory(UserFactory):
     enrollment_year = 2015
     city_id = DEFAULT_CITY_CODE
-    branch = factory.SubFactory('learning.tests.factories.BranchFactory',
-                                code=DEFAULT_BRANCH_CODE)
 
     @factory.post_generation
     def required_groups(self, create, extracted, **kwargs):
@@ -105,7 +105,7 @@ class TeacherFactory(UserFactory):
 
 
 class VolunteerFactory(UserFactory):
-    branch = factory.SubFactory('learning.tests.factories.BranchFactory',
+    branch = factory.SubFactory('core.tests.factories.BranchFactory',
                                 code=DEFAULT_BRANCH_CODE)
 
     @factory.post_generation

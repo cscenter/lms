@@ -31,7 +31,7 @@ from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
     group_course_teachers, CourseClass
 from courses.constants import SemesterTypes, TeacherRoles, ClassTypes
 from courses.utils import get_current_term_pair, \
-    get_term_index_academic_year_starts, get_term_by_index, get_term_index
+    first_term_in_academic_year, get_term_by_index, get_term_index
 from core.utils import bucketize
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import Enrollment, GraduateProfile
@@ -176,7 +176,7 @@ class TeachersView(TemplateView):
     def get_context_data(self, **kwargs):
         # Get terms in last 3 academic years.
         year, term_type = get_current_term_pair()
-        term_index = get_term_index_academic_year_starts(year, term_type)
+        term_index = first_term_in_academic_year(year, term_type)
         term_index -= 2 * len(SemesterTypes.choices)
         app_data = {
             "state": {
@@ -377,11 +377,12 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         center_foundation_term_index = get_term_index(
             settings.CENTER_FOUNDATION_YEAR, SemesterTypes.AUTUMN)
         return (Course.objects
-                .select_related('meta_course', 'semester')
-                .only("pk", "city_id", "is_open", "grading_type",
+                .select_related('meta_course', 'semester', 'branch')
+                .only("pk", "branch_id", "is_open", "grading_type",
                       "videos_count", "materials_slides", "materials_files",
                       "meta_course__name", "meta_course__slug",
-                      "semester__year", "semester__index", "semester__type")
+                      "semester__year", "semester__index", "semester__type",
+                      "branch__code")
                 .filter(semester__index__gte=center_foundation_term_index)
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',
@@ -405,20 +406,20 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         else:
             active_year = active_academic_year
         active_slug = "{}-{}".format(active_year, active_type)
-        active_city = filterset.data['city']
+        active_branch = filterset.data['branch']
         serializer = CoursesSerializer(courses)
         courses = serializer.data
         context = {
             "TERM_TYPES": term_options,
-            "cities": filterset.form.fields['city'].choices,
+            "branches": filterset.form.fields['branch'].choices,
             "terms": terms,
             "courses": courses,
-            "active_city": active_city,
+            "active_branch": active_branch,
             "active_academic_year": active_academic_year,
             "active_type": active_type,
             "active_slug": active_slug,
             "json": JSONRenderer().render({
-                "city": filterset.data['city'],
+                "branch": filterset.data['branch'],
                 "initialFilterState": {
                     "academicYear": active_academic_year,
                     "selectedTerm": active_type,
@@ -439,16 +440,16 @@ class CourseOfferingsView(FilterMixin, TemplateView):
             term_year, term_type = valid_slug.split("-")
             term_year = int(term_year)
         else:
-            # By default, return academic year and term type for latest
-            # available CO.
+            # By default, return academic year and term type for the latest
+            # available course.
             if courses:
-                # Note: may hit db if `filters.qs` not cached
+                # Note: may hit db if `filters.qs` is not cached
                 term = courses[0].semester
                 term_year = term.year
                 term_type = term.type
             else:
                 return None
-        idx = get_term_index_academic_year_starts(term_year, term_type)
+        idx = first_term_in_academic_year(term_year, term_type)
         academic_year, _ = get_term_by_index(idx)
         return academic_year, term_type
 

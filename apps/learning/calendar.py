@@ -5,8 +5,9 @@ from django.db.models import Q
 
 from core.utils import is_club_site
 from courses.calendar import CalendarEvent
-from courses.models import CourseClass
+from courses.models import CourseClass, Course
 from courses.constants import SemesterTypes
+from courses.utils import get_terms_for_calendar_month, get_term_index
 from learning.models import Event
 
 
@@ -40,3 +41,20 @@ def get_month_events(year, month, cities, for_teacher=None, for_student=None):
         (CalendarEvent(e) for e in classes),
         (LearningCalendarEvent(e) for e in study_events)
     )
+
+
+def get_cities_for_teacher(user, year, month):
+    """
+    Returns all cities where user has been participated as a teacher
+    """
+    term_indexes = [get_term_index(*term) for term in
+                    get_terms_for_calendar_month(year, month)]
+    cities = list(Course.objects
+                  .filter(semester__index__in=term_indexes,
+                          teachers=user)
+                  .exclude(branch__city_id__isnull=True)
+                  .values_list("branch__city_id", flat=True)
+                  .distinct())
+    if not cities and user.branch.city_id:
+        cities = [user.branch.city_id]
+    return cities

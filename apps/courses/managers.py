@@ -64,7 +64,7 @@ class CourseClassQuerySet(query.QuerySet):
         return self.in_cities([city_code])
 
     def in_cities(self, city_codes: List[str]):
-        return self.filter(Q(course__city_id__in=city_codes,
+        return self.filter(Q(venue__city_id__in=city_codes,
                              course__is_correspondence=False) |
                            Q(course__is_correspondence=True))
 
@@ -134,7 +134,7 @@ class CourseQuerySet(models.QuerySet):
                 .select_related("semester")
                 .filter(meta_course_id=co.meta_course_id,
                         semester__index__lte=co.semester.index)
-                .in_city(co.get_city())
+                .in_branches(co.branch_id)
                 .exclude(reviews__isnull=True)
                 .exclude(reviews__exact='')
                 .order_by("-semester__index"))

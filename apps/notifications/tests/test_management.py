@@ -7,7 +7,7 @@ from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from learning.models import AssignmentNotification
 from learning.tests.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
-from notifications.management.commands.notify import get_base_domain
+from notifications.management.commands.notify import _get_base_domain
 from users.constants import Roles
 from users.tests.factories import UserFactory, StudentFactory, TeacherFactory
 
@@ -57,23 +57,23 @@ def test_notify_get_base_url():
     """Site domain in notifications depends on recipient user groups"""
     user = UserFactory(groups=[Roles.STUDENT])
     notification = AssignmentNotificationFactory(user=user)
-    assert get_base_domain(notification) == "my.compscicenter.ru"
+    assert _get_base_domain(notification) == "my.compscicenter.ru"
     user = StudentFactory()
     notification = AssignmentNotificationFactory(user=user)
-    assert get_base_domain(notification) == "my.compscicenter.ru"
+    assert _get_base_domain(notification) == "my.compscicenter.ru"
     notification.user = StudentFactory(
         required_groups__site_id=ANOTHER_DOMAIN_ID
     )
-    assert get_base_domain(notification) == "compsciclub.ru"
+    assert _get_base_domain(notification) == "compsciclub.ru"
     notification.user = UserFactory(groups=[Roles.STUDENT,
                                             Roles.TEACHER])
-    assert get_base_domain(notification) == "my.compscicenter.ru"
+    assert _get_base_domain(notification) == "my.compscicenter.ru"
     notification.user = TeacherFactory(
         required_groups__site_id=ANOTHER_DOMAIN_ID
     )
-    assert get_base_domain(notification) == "compsciclub.ru"
+    assert _get_base_domain(notification) == "compsciclub.ru"
     notification.user = TeacherFactory(
         required_groups__site_id=ANOTHER_DOMAIN_ID,
         groups=[Roles.GRADUATE],
     )
-    assert get_base_domain(notification) == "my.compscicenter.ru"
+    assert _get_base_domain(notification) == "my.compscicenter.ru"

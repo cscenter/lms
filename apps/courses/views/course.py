@@ -4,26 +4,21 @@ from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
-from django.urls import NoReverseMatch
 from django.views import generic
 from vanilla import DetailView
 
 from core.exceptions import Redirect
 from core.settings.base import CENTER_FOUNDATION_YEAR
-from core.urls import reverse
 from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
+from courses.constants import SemesterTypes, TeacherRoles
 from courses.forms import CourseEditDescrForm
 from courses.models import Course, CourseTeacher, group_course_teachers
-from courses.constants import SemesterTypes, TeacherRoles
 from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_term_index
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
-from learning.utils import split_on_condition
 from users.mixins import TeacherOnlyMixin
-from users.utils import get_user_city_code
 
 __all__ = ('CourseDetailView', 'CourseEditView')
 
@@ -111,7 +106,6 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
             if cs:
                 survey_url = cs.get_absolute_url(course=course)
         return {
-            'user_city': get_user_city_code(self.request),
             'tz_override': tz_override,
             'request_user_enrollment': request_user_enrollment,
             # TODO: move to user method

@@ -16,7 +16,7 @@ urlpatterns = [
             path("enroll/invitation/<str:course_token>/", CourseInvitationEnrollView.as_view(), name="course_enroll_by_invitation"),
             path("students/", CourseStudentsView.as_view(), name="course_students"),
             path("news/notifications/", CourseNewsNotificationUpdate.as_view(), name="course_news_notifications_read"),
-        ]), kwargs={"city_aware": True}),
+        ])),
     ])),
 
     path('teaching/', include('learning.teaching.urls')),

@@ -25,16 +25,6 @@ def test_enrolled_on_the_course():
 
 
 @pytest.mark.django_db
-def test_user_city_code(client, settings):
-    student = StudentFactory.create(city_id='kzn')
-    response = client.get('/')
-    assert response.wsgi_request.user.city_code is None
-    client.login(student)
-    response = client.get('/')
-    assert response.wsgi_request.user.city_code == 'kzn'
-
-
-@pytest.mark.django_db
 def test_user_add_group(settings):
     settings.SITE_ID = TEST_DOMAIN_ID
     user = User(username="foo", email="foo@localhost.ru")

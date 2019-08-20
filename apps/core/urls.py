@@ -29,21 +29,12 @@ else:
 reverse_lazy = lazy(reverse, str)
 
 
-def city_aware_reverse(viewname, subdomain=None, scheme=None, args=None,
-                       kwargs=None, current_app=None):
-    assert "city_code" in kwargs
-    kwargs["city_delimiter"] = ""
-    if kwargs["city_code"] == settings.DEFAULT_CITY_CODE or is_club_site():
-        kwargs["city_code"] = ""
-    if kwargs["city_code"]:
-        kwargs["city_delimiter"] = "/"
-    return reverse(viewname, subdomain=subdomain, scheme=scheme, args=args,
-                   kwargs=kwargs, current_app=current_app)
-
-
 def branch_aware_reverse(viewname, subdomain=None, scheme=None, args=None,
                          kwargs=None, current_app=None):
-    slash = "" if kwargs["branch_code_request"] else "/"
+    assert "branch_code_request" in kwargs
+    if kwargs["branch_code_request"] == settings.DEFAULT_BRANCH_CODE:
+        kwargs["branch_code_request"] = ""
+    slash = "/" if kwargs["branch_code_request"] else ""
     kwargs["branch_trailing_slash"] = slash
     return reverse(viewname, subdomain=subdomain, scheme=scheme, args=args,
                    kwargs=kwargs, current_app=current_app)

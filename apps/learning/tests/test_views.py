@@ -10,7 +10,7 @@ from testfixtures import LogCapture
 from auth.mixins import PermissionRequiredMixin
 from core.tests.utils import CSCTestCase
 from core.timezone import now_local
-from core.urls import city_aware_reverse, reverse
+from core.urls import branch_aware_reverse, reverse
 from courses.tests.factories import *
 from courses.utils import get_current_term_pair
 from learning.settings import Branches
@@ -62,11 +62,11 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_basic_get(self):
         course = CourseFactory.create()
         assert 302 == self.client.get(course.get_absolute_url()).status_code
-        url = city_aware_reverse('course_detail', kwargs={
+        url = branch_aware_reverse('course_detail', kwargs={
             "course_slug": "space-odyssey",
             "semester_year": 2010,
             "semester_type": "autumn",
-            "city_code": ""
+            "branch_code_request": ""
         })
         assert self.client.get(url).status_code == 404
 
