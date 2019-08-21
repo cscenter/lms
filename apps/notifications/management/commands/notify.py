@@ -147,7 +147,7 @@ def get_assignment_notification_context(notification: AssignmentNotification):
     # Override timezone to enrolled students if course is online
     if a_s.assignment.course.is_correspondence and (
             u.is_student or u.is_volunteer):
-        tz_override = settings.TIME_ZONES[notification.user.city_code]
+        tz_override = notification.user.get_timezone()
     context = {
         'a_s_link_student': replace_hostname(a_s.get_student_url(), base_domain),
         'a_s_link_teacher': replace_hostname(a_s.get_teacher_url(), base_domain),
@@ -187,7 +187,7 @@ class Command(BaseCommand):
         notifications_assignments = (
             AssignmentNotification.objects
             .filter(is_unread=True, is_notified=False)
-            .select_related("user")
+            .select_related("user", "user__branch")
             .prefetch_related(
                 "user__groups",
                 'student_assignment',

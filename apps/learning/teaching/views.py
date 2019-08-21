@@ -14,11 +14,11 @@ from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.settings.base import FOUNDATION_YEAR
 from core.urls import reverse
-from core.utils import render_markdown, is_club_site
+from core.utils import render_markdown
 from courses.calendar import CalendarEvent
 from courses.constants import SemesterTypes
 from courses.models import CourseClass, Course, Assignment
-from courses.utils import get_terms_for_calendar_month, get_term_index, \
+from courses.utils import get_term_index, \
     get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
 from learning.calendar import get_month_events, get_cities_for_teacher
@@ -30,7 +30,6 @@ from learning.permissions import course_access_role, CourseRole
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import logger, AssignmentCommentBaseCreateView
 from users.mixins import TeacherOnlyMixin
-from users.utils import get_teacher_city_code
 
 
 # Note: Wow, looks like a shit

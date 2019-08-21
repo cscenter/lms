@@ -1,39 +1,30 @@
 from typing import Iterable
 
 from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth.views import redirect_to_login
 from django.db.models import Q, Prefetch
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from isoweek import Week
-from vanilla import ListView, CreateView
+from vanilla import ListView
 
 from auth.mixins import PermissionRequiredMixin
-from core import comment_persistence
 from core.exceptions import Redirect
 from core.urls import reverse
 from core.utils import is_club_site
 from courses.calendar import CalendarEvent
-from courses.models import CourseClass, Semester, Course
 from courses.constants import SemesterTypes
+from courses.models import CourseClass, Semester, Course
 from courses.utils import get_current_term_pair, get_term_index
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
 from learning.calendar import get_month_events
 from learning.forms import AssignmentCommentForm
 from learning.internships.models import Internship
-from learning.models import Useful, StudentAssignment, Enrollment, \
-    AssignmentComment
-from learning.permissions import course_access_role, CourseRole
+from learning.models import Useful, StudentAssignment, Enrollment
 from learning.roles import Roles
 from learning.views import AssignmentSubmissionBaseView
-from learning.views.views import StudentAssignmentURLParamsMixin, \
-    AssignmentCommentBaseCreateView
+from learning.views.views import AssignmentCommentBaseCreateView
 from users.models import User
-from users.utils import get_student_city_code
 
 
 class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
@@ -95,9 +86,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, ListView):
         archive.reverse()
         context['assignment_list_open'] = open_
         context['assignment_list_archive'] = archive
-        # FIXME: how to separate this logic for club and center sites?
-        tz_override = settings.TIME_ZONES.get(self.request.user.city_code)
-        context["tz_override"] = tz_override
+        context["tz_override"] = self.request.user.get_timezone()
         return context
 
 

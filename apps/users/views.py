@@ -8,12 +8,11 @@ from django.conf import settings
 from django.contrib import auth
 from django.db import transaction
 from django.db.models import Prefetch, Count
-from django.http import Http404, HttpResponseBadRequest, \
+from django.http import HttpResponseBadRequest, \
     JsonResponse
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from vanilla import DetailView
 
 from ajaxuploader.backends import ProfileImageUploadBackend
 from ajaxuploader.handlers import MemoryImageUploadHandler, \
@@ -33,31 +32,6 @@ from users.models import SHADCourseRecord
 from users.thumbnails import get_user_thumbnail, photo_thumbnail_cropbox
 from .forms import UserProfileForm, EnrollmentCertificateCreateForm
 from .models import User, EnrollmentCertificate
-
-
-class TeacherDetailView(DetailView):
-    template_name = "users/teacher_detail.html"
-    context_object_name = 'teacher'
-
-    def get_queryset(self, *args, **kwargs):
-        filters = {"city_code": settings.CENTER_BRANCHES_CITY_CODES}
-        if is_club_site():
-            filters["city_code"] = self.request.city_code
-        co_queryset = (Course.objects
-                       .in_city(**filters)
-                       .select_related('semester', 'meta_course'))
-        return (User.objects
-                .prefetch_related(
-                    Prefetch('teaching_set',
-                             queryset=co_queryset.all(),
-                             to_attr='course_offerings')))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        teacher = context[self.context_object_name]
-        if not teacher.is_teacher:
-            raise Http404
-        return context
 
 
 class UserDetailView(generic.DetailView):

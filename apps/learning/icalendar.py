@@ -96,10 +96,7 @@ class UserEventsICalendar(ABC):
             self.cal.add_component(evt)
 
     def get_timezone(self, user: User):
-        city_code = user.city_code
-        if not city_code:
-            city_code = settings.DEFAULT_CITY_CODE
-        return settings.TIME_ZONES[city_code]
+        return user.get_timezone()
 
     def get_description(self, **kwargs):
         return ""
