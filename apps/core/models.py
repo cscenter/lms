@@ -30,13 +30,17 @@ TIMEZONES = (
 )
 
 
-class City(models.Model):
+class City(TimezoneAwareModel, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
+
     code = models.CharField(
         _("Code"),
         max_length=6,
         primary_key=True)
     name = models.CharField(_("City name"), max_length=255)
     abbr = models.CharField(_("Abbreviation"), max_length=20)
+    time_zone = models.CharField(verbose_name=_("Timezone"), max_length=63,
+                                 choices=tuple(zip(TIMEZONES, TIMEZONES)))
 
     class Meta:
         ordering = ["name"]
@@ -46,10 +50,12 @@ class City(models.Model):
     def __str__(self):
         return smart_text(self.name)
 
-    def get_timezone(self):
-        if self.code == "online":
-            return settings.TIME_ZONES["spb"]
-        return settings.TIME_ZONES[self.code]
+    def get_timezone(self) -> Timezone:
+        return self._timezone
+
+    @cached_property
+    def _timezone(self):
+        return pytz.timezone(self.time_zone)
 
 
 class BranchNaturalKey(NamedTuple):
@@ -152,13 +158,13 @@ class Branch(TimezoneAwareModel, models.Model):
 
 
 class Location(TimezoneAwareModel, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
+    TIMEZONE_AWARE_FIELD_NAME = 'city'
 
     INTERVIEW = 'interview'
     LECTURE = 'lecture'
     UNSPECIFIED = 0  # BitField uses BigIntegerField internal
 
-    city = models.ForeignKey(City, null=True, blank=True,
+    city = models.ForeignKey(City,
                              verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE,
                              on_delete=models.PROTECT)
@@ -183,18 +189,11 @@ class Location(TimezoneAwareModel, models.Model):
         ),
         default=(LECTURE,),
         help_text=(_("Set purpose of this place")))
-    is_preferred = models.BooleanField(
-        _("Preferred"),
-        help_text=(_("Will be displayed on top of the location list")),
-        default=False)
 
     class Meta:
-        ordering = ["-is_preferred", "name"]
-        verbose_name = _("Location")
+        ordering = ("name",)
+        verbose_name = _("Location|Name")
         verbose_name_plural = _("Locations")
-
-    def get_timezone(self):
-        return settings.TIME_ZONES[self.city_id]
 
     def __str__(self):
         return "{0}".format(smart_text(self.name))

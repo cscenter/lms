@@ -56,8 +56,8 @@ def test_course_class_create(client):
     co = CourseFactory.create(teachers=[teacher], semester=s)
     co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    venue = LocationFactory(city__code=settings.DEFAULT_CITY_CODE)
-    form.update({'venue': venue.pk})
+    location = LocationFactory(city__code=settings.DEFAULT_CITY_CODE)
+    form.update({'venue': location.pk})
     del form['slides']
     url = co.get_create_class_url()
     client.login(teacher)
@@ -78,8 +78,8 @@ def test_course_class_create_and_add(client, assert_redirect):
     co = CourseFactory.create(teachers=[teacher], semester=s)
     co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    venue = LocationFactory(city__code=settings.DEFAULT_CITY_CODE)
-    form.update({'venue': venue.pk, '_addanother': True})
+    location = LocationFactory(city__code=settings.DEFAULT_CITY_CODE)
+    form.update({'venue': location.pk, '_addanother': True})
     del form['slides']
     client.login(teacher)
     url = co.get_create_class_url()
@@ -298,11 +298,11 @@ def test_course_class_form_available(client, curator, settings):
     next_day = today + datetime.timedelta(days=1)
     co.completed_at = next_day
     co.save()
-    venue = LocationFactory(city=co.city)
+    location = LocationFactory(city=co.city)
     date_format = CourseClassForm.base_fields['date'].widget.format
     form = {
         "type": "lecture",
-        "venue": venue.pk,
+        "venue": location.pk,
         "name": "Test class",
         "date": next_day.strftime(date_format),
         "starts_at": "17:20",

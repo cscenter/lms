@@ -163,4 +163,5 @@ class LocationAdminForm(forms.ModelForm):
 class LocationAdmin(admin.ModelAdmin):
     form = LocationAdminForm
     list_display = ('name', 'city')
+    list_filter = ('city',)
     list_select_related = ("city",)

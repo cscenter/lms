@@ -69,9 +69,9 @@ def test_admin_view(settings, admin_client):
     # Datetime widget depends on locale, change it
     settings.LANGUAGE_CODE = 'ru'
     invitation = InterviewInvitationFactory()
-    venue_in_spb = LocationFactory(city_id='spb')
-    venue_in_nsk = LocationFactory(city_id='nsk')
-    invitation.stream.venue = venue_in_spb
+    location_in_spb = LocationFactory(city_id='spb')
+    location_in_nsk = LocationFactory(city_id='nsk')
+    invitation.stream.venue = location_in_spb
     invitation.stream.save()
     stream_for_spb = invitation.stream
     form_data = {
@@ -102,7 +102,7 @@ def test_admin_view(settings, admin_client):
     date_input = widget.find('input', {"name": 'expired_at_0'})
     assert date_input.get('value') == '29.06.2017'
     # Update stream value with another city
-    stream_for_nsk = InterviewStreamFactory(venue=venue_in_nsk)
+    stream_for_nsk = InterviewStreamFactory(venue=location_in_nsk)
     form_data['stream'] = stream_for_nsk.pk
     response = admin_client.post(admin_url, form_data)
     assert response.status_code == 302
