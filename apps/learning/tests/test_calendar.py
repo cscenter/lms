@@ -11,6 +11,7 @@ from django.utils import timezone
 from core.urls import reverse
 from courses.tests.factories import CourseFactory, CourseClassFactory
 from core.tests.factories import VenueFactory
+from learning.settings import Branches
 from learning.tests.factories import EventFactory, \
     EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
@@ -22,8 +23,6 @@ from users.tests.factories import StudentFactory, TeacherFactory, UserFactory, \
 
 # TODO: add test: kzn courses not shown on center site and spb on kzn
 # TODO: add test: summer courses not shown on club site on main page
-
-# TODO: убедиться, что город берётся из настроек для студента (get_student_city_code
 # TODO: для СПБ не показываются события НСК (наоборот будет уже верно)
 
 
@@ -47,19 +46,19 @@ class CalendarTeacherTests(MyUtilitiesMixin, CSCTestCase):
             [Roles.GRADUATE]
         ]
         for groups in all_test_groups:
-            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
+            self.doLogin(UserFactory(groups=groups, branch__code=Branches.SPB))
             if any(group in self.groups_allowed for group in groups):
                 self.assertStatusCode(200, self.url_name)
             else:
                 self.assertLoginRedirect(reverse(self.url_name))
             self.client.logout()
-        self.doLogin(CuratorFactory(city_id='spb'))
+        self.doLogin(CuratorFactory(branch__code=Branches.SPB))
         self.assertStatusCode(200, self.url_name)
 
     def test_teacher_calendar(self):
-        teacher = TeacherFactory(city_id='spb')
-        other_teacher = TeacherFactory(city_id='spb')
-        self.doLogin(teacher)
+        teacher_spb = TeacherFactory(branch__code=Branches.SPB)
+        other_teacher = TeacherFactory(branch__code=Branches.SPB)
+        self.doLogin(teacher_spb)
         response = self.client.get(reverse(self.url_name))
         classes = flatten_calendar_month_events(response.context['calendar'])
         assert len(classes) == 0
@@ -67,13 +66,13 @@ class CalendarTeacherTests(MyUtilitiesMixin, CSCTestCase):
                            .replace(day=15, tzinfo=timezone.utc))
         own_classes = (
             CourseClassFactory
-            .create_batch(3, course__teachers=[teacher],
+            .create_batch(3, course__teachers=[teacher_spb],
                           date=this_month_date))
         others_classes = (
             CourseClassFactory
             .create_batch(5, course__teachers=[other_teacher],
                           date=this_month_date))
-        venue = VenueFactory(city_id=teacher.city_id)
+        venue = VenueFactory(city_id=teacher_spb.branch.city_id)
         events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
         # teacher should see only his own classes and non-course events
         resp = self.client.get(reverse(self.url_name))
@@ -93,7 +92,7 @@ class CalendarTeacherTests(MyUtilitiesMixin, CSCTestCase):
         next_month_date = this_month_date + relativedelta(months=1)
         next_month_classes = (
             CourseClassFactory
-            .create_batch(2, course__teachers=[teacher],
+            .create_batch(2, course__teachers=[teacher_spb],
                           date=next_month_date))
         classes = flatten_calendar_month_events(
             self.client.get(next_month_url).context['calendar'])
@@ -114,11 +113,11 @@ def test_student_personal_calendar_view_permissions(lms_resolver):
 @pytest.mark.django_db
 def test_student_personal_calendar_view(client):
     calendar_url = reverse('study:calendar')
-    student = StudentFactory()
-    client.login(student)
+    student_spb = StudentFactory(branch__code=Branches.SPB)
+    client.login(student_spb)
     course = CourseFactory()
     course_other = CourseFactory.create()
-    e = EnrollmentFactory.create(course=course, student=student)
+    e = EnrollmentFactory.create(course=course, student=student_spb)
     classes = flatten_calendar_month_events(
         client.get(calendar_url).context['calendar'])
     assert len(classes) == 0
@@ -151,7 +150,7 @@ def test_student_personal_calendar_view(client):
     classes = flatten_calendar_month_events(
         client.get(next_month_url).context['calendar'])
     assert set(next_month_classes) == set(classes)
-    venue = VenueFactory(city_id=student.city_id)
+    venue = VenueFactory(city_id=student_spb.branch.city_id)
     events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
     response = client.get(calendar_url)
     assert response.status_code == 200
@@ -163,13 +162,12 @@ class CalendarFullSecurityTests(MyUtilitiesMixin, CSCTestCase):
     "full calendar" are done in CalendarTeacher/CalendarStudent tests
     """
     def test_full_calendar_security(self):
-        u = StudentFactory(city_id='spb')
+        u = StudentFactory(branch__code=Branches.SPB)
         url = 'study:calendar_full'
         self.assertLoginRedirect(reverse(url))
         self.doLogin(u)
         self.assertStatusCode(200, url)
         self.client.logout()
-        # For teacher role we can skip city setting
         u = TeacherFactory()
         self.doLogin(u)
         url = 'teaching:calendar_full'
@@ -179,7 +177,7 @@ class CalendarFullSecurityTests(MyUtilitiesMixin, CSCTestCase):
 @pytest.mark.django_db
 def test_correspondence_courses_in_a_full_calendar(client):
     """Make sure correspondence courses are visible in a full calendar"""
-    student = StudentFactory(city_id='spb')
+    student = StudentFactory(branch__code=Branches.SPB)
     client.login(student)
     this_month_date = datetime.datetime.utcnow()
     CourseClassFactory.create_batch(
@@ -187,7 +185,7 @@ def test_correspondence_courses_in_a_full_calendar(client):
     classes = flatten_calendar_month_events(
         client.get(reverse("study:calendar_full")).context['calendar'])
     assert len(classes) == 3
-    teacher = TeacherFactory(city_id='spb')
+    teacher = TeacherFactory(branch__code=Branches.SPB)
     client.login(teacher)
     classes = flatten_calendar_month_events(
         client.get(reverse("teaching:calendar_full")).context['calendar'])

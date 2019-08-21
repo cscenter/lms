@@ -56,7 +56,7 @@ def test_course_class_create(client):
     co = CourseFactory.create(teachers=[teacher], semester=s)
     co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
+    venue = VenueFactory(city__code=settings.DEFAULT_CITY_CODE)
     form.update({'venue': venue.pk})
     del form['slides']
     url = co.get_create_class_url()
@@ -78,7 +78,7 @@ def test_course_class_create_and_add(client, assert_redirect):
     co = CourseFactory.create(teachers=[teacher], semester=s)
     co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    venue = VenueFactory.create(city_id=settings.DEFAULT_CITY_CODE)
+    venue = VenueFactory(city__code=settings.DEFAULT_CITY_CODE)
     form.update({'venue': venue.pk, '_addanother': True})
     del form['slides']
     client.login(teacher)
@@ -269,7 +269,7 @@ def test_course_class_form_available(client, curator, settings):
     """Test form availability based on `is_completed` value"""
     # XXX: Date widget depends on locale
     settings.LANGUAGE_CODE = 'ru'
-    teacher = TeacherFactory(city_id='spb')
+    teacher = TeacherFactory()
     semester = SemesterFactory.create_current()
     co = CourseFactory(semester=semester, teachers=[teacher])
     course_class_add_url = co.get_create_class_url()

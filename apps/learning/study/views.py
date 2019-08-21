@@ -190,8 +190,6 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
     permission_required = "study.view_courses"
 
     def get_context_data(self, **kwargs):
-        # FIXME: нужно брать от
-        city_code = get_student_city_code(self.request)
         # Student enrollments
         student_enrollments = (Enrollment.active
                                .filter(student_id=self.request.user)
@@ -213,7 +211,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
             queryset=User.objects.only("id", "first_name", "last_name",
                                        "patronymic"))
         course_offerings = (Course.objects
-                            .in_city(city_code)
+                            .in_branches(self.request.user.branch_id)
                             .filter(in_current_term | enrolled_in)
                             .select_related('meta_course', 'semester')
                             .prefetch_related(prefetch_teachers)

@@ -5,14 +5,15 @@ from core.admin import get_admin_url
 from core.urls import reverse
 from courses.models import Assignment
 from courses.tests.factories import CourseFactory
+from learning.settings import Branches
 
 
 @pytest.mark.django_db
 def test_assignment_admin_view(settings, admin_client):
     # Datetime widget formatting depends on locale, change it
     settings.LANGUAGE_CODE = 'ru'
-    co_in_spb = CourseFactory(city_id='spb')
-    co_in_nsk = CourseFactory(city_id='nsk')
+    co_in_spb = CourseFactory(branch__code=Branches.SPB)
+    co_in_nsk = CourseFactory(branch__code=Branches.NSK)
     form_data = {
         "course": "",
         "deadline_at_0": "29.06.2017",
@@ -24,7 +25,7 @@ def test_assignment_admin_view(settings, admin_client):
         "weight": "1.00",
         "_continue": "save_and_continue"
     }
-    # Test with empty city aware field
+    # Test with empty branch aware field
     add_url = reverse('admin:courses_assignment_add')
     response = admin_client.post(add_url, form_data)
     assert response.status_code == 200

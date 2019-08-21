@@ -57,12 +57,6 @@ class UserGroupForm(forms.ModelForm):
             if user.enrollment_year is None:
                 msg = _("Enrollment year should be provided for students")
                 self.add_error(None, ValidationError(msg))
-        if role in {Roles.STUDENT,
-                    Roles.VOLUNTEER,
-                    Roles.GRADUATE}:
-            if not user.city_id:
-                msg = _("Provide city for student")
-                self.add_error(None, ValidationError(msg))
         if role == Roles.VOLUNTEER:
             if user.enrollment_year is None:
                 msg = _("CSCUser|enrollment year should be provided for "

@@ -80,18 +80,16 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
 
     def _get_additional_context(self, course, **kwargs):
         request_user = self.request.user
+        is_actual_teacher = course.is_actual_teacher(request_user)
         # For correspondence course try to override timezone
         tz_override = None
-        if (not course.is_actual_teacher(request_user) and course.is_correspondence
-                and request_user.city_code):
-            tz_override = settings.TIME_ZONES[request_user.city_id]
-        # TODO: set default value if `tz_override` is None
+        if course.is_correspondence and not is_actual_teacher:
+            tz_override = request_user.get_timezone()
 
         if request_user.has_perm("study.view_own_enrollments"):
             request_user_enrollment = request_user.get_enrollment(course.pk)
         else:
             request_user_enrollment = None
-        is_actual_teacher = course.is_actual_teacher(request_user)
         # Attach unread notifications count if request user in mailing list
         unread_news = None
         if request_user_enrollment or is_actual_teacher:

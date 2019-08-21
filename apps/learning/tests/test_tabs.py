@@ -9,7 +9,7 @@ from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
 from courses.models import CourseNews
 from learning.tabs import CourseReviewsTab
 from learning.tests.factories import EnrollmentFactory
-from learning.settings import GradeTypes
+from learning.settings import GradeTypes, Branches
 from users.tests.factories import StudentFactory, TeacherFactory, \
     VolunteerFactory
 
@@ -21,17 +21,17 @@ from users.tests.factories import StudentFactory, TeacherFactory, \
 def test_course_news_tab_permissions(client):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
-    news: CourseNews = CourseNewsFactory(course__city_id='spb',
+    news: CourseNews = CourseNewsFactory(course__branch__code=Branches.SPB,
                                          course__semester=current_semester)
     course = news.course
-    news_prev: CourseNews = CourseNewsFactory(course__city_id='spb',
+    news_prev: CourseNews = CourseNewsFactory(course__branch__code=Branches.SPB,
                                               course__meta_course=course.meta_course,
                                               course__semester=prev_term)
     co_prev = news_prev.course
     response = client.get(course.get_absolute_url())
     assert response.status_code == 302
     # By default student can't see the news until enroll in the course
-    student_spb = StudentFactory(city_id='spb')
+    student_spb = StudentFactory(branch__code=Branches.SPB)
     client.login(student_spb)
     response = client.get(course.get_absolute_url())
     assert "news" not in response.context['course_tabs']

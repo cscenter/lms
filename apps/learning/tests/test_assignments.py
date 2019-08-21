@@ -5,6 +5,8 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+
+from core.tests.factories import BranchFactory
 from core.tests.utils import CSCTestCase
 from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from django.utils import timezone, formats
@@ -56,7 +58,7 @@ class StudentAssignmentListTests(MyUtilitiesMixin, CSCTestCase):
             [Roles.GRADUATE]
         ]
         for groups in all_test_groups:
-            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
+            self.doLogin(UserFactory.create(groups=groups))
             if any(group in self.groups_allowed for group in groups):
                 self.assertStatusCode(200, self.url_name)
             else:
@@ -204,10 +206,9 @@ def test_studentassignment_last_comment_from():
     teacher = TeacherFactory.create()
     student = StudentFactory.create()
     s = SemesterFactory.create_current(for_branch=Branches.SPB)
-    co = CourseFactory.create(city_id='spb', semester=s,
-                              teachers=[teacher])
-    EnrollmentFactory.create(student=student, course=co)
-    assignment = AssignmentFactory.create(course=co)
+    course = CourseFactory.create(semester=s, teachers=[teacher])
+    EnrollmentFactory.create(student=student, course=course)
+    assignment = AssignmentFactory.create(course=course)
     sa = StudentAssignment.objects.get(assignment=assignment)
     # Nobody comments yet
     assert sa.last_comment_from == StudentAssignment.CommentAuthorTypes.NOBODY
@@ -274,7 +275,7 @@ class AssignmentTeacherDetailsTest(MyUtilitiesMixin, CSCTestCase):
             [Roles.STUDENT],
         ]
         for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
+            self.doLogin(UserFactory.create(groups=groups))
             if groups == [Roles.TEACHER]:
                 self.assertEqual(403, self.client.get(url).status_code)
             else:
@@ -316,7 +317,7 @@ class AssignmentTeacherListTests(MyUtilitiesMixin, CSCTestCase):
             [Roles.GRADUATE]
         ]
         for groups in all_test_groups:
-            user = UserFactory.create(groups=groups, city_id='spb')
+            user = UserFactory.create(groups=groups)
             self.doLogin(user)
             if any(group in self.groups_allowed for group in groups):
                 co = CourseFactory.create(teachers=[user])
@@ -463,7 +464,7 @@ def test_assignment_public_form_for_teachers(settings, client):
     time_input = widget.find('input', {"name": 'deadline_at_1'})
     assert time_input.get('value') == '00:00'
     # Clone CO from msk
-    co_in_nsk = CourseFactory(city_id='nsk',
+    co_in_nsk = CourseFactory(branch__code=Branches.NSK,
                               meta_course=co_in_spb.meta_course,
                               teachers=[teacher])
     add_url = co_in_nsk.get_create_assignment_url()
@@ -483,7 +484,7 @@ def test_assignment_deadline_display_for_teacher(settings, client):
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherFactory()
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course__city_id='spb',
+                                   course__branch__code=Branches.SPB,
                                    course__teachers=[teacher])
     url_for_teacher = assignment.get_teacher_url()
     client.login(teacher)
@@ -517,10 +518,10 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     # assignments page since course offering semester set to current
     current_term = SemesterFactory.create_current()
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course__city_id='spb',
+                                   course__branch__code=Branches.SPB,
                                    course__is_correspondence=False,
                                    course__semester_id=current_term.pk)
-    student = StudentFactory(city_id='spb')
+    student = StudentFactory(branch__code=Branches.SPB)
     sa = StudentAssignmentFactory(assignment=assignment, student=student)
     client.login(student)
     url_learning_assignments = reverse('study:assignment_list')
@@ -536,7 +537,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Test `upcoming` block
-    now_year, _ = get_current_term_pair(settings.TIME_ZONES['spb'])
+    now_year, _ = get_current_term_pair(Branches.get_timezone(Branches.SPB))
     dt = dt.replace(year=now_year + 1, month=2, hour=14)
     assignment.deadline_at = dt
     assignment.save()
@@ -554,7 +555,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     # center students
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     assignment_nsk = AssignmentFactory(deadline_at=dt,
-                                       course__city_id='nsk',
+                                       course__branch__code=Branches.NSK,
                                        course__is_correspondence=True,
                                        course__semester=current_term)
     StudentAssignmentFactory(assignment=assignment_nsk, student=student)
@@ -591,9 +592,10 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
 @pytest.mark.django_db
 def test_first_comment_after_deadline(client):
     dt = datetime.datetime(2017, 1, 1, 23, 58, 0, 0, tzinfo=pytz.UTC)
+    branch = BranchFactory(code=Branches.SPB)
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course__city_id='spb')
-    sa = StudentAssignmentFactory(assignment=assignment, student__city_id='spb')
+                                   course__branch=branch)
+    sa = StudentAssignmentFactory(assignment=assignment, student__branch=branch)
     student = sa.student
     EnrollmentFactory(student=student, course=assignment.course)
     comment = AssignmentCommentFactory.create(student_assignment=sa,
@@ -673,7 +675,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     task_attachment_url = a_attachment.file_url()
     response = client.get(task_attachment_url)
     assert response.status_code == 302  # LoginRequiredMixin
-    student_spb = StudentFactory(city_id='spb')
+    student_spb = StudentFactory(branch__code=Branches.SPB)
     client.login(student_spb)
     response = client.get(task_attachment_url)
     assert response.status_code == 403  # not enrolled in
@@ -685,7 +687,7 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     response = client.get(task_attachment_url)
     assert response.status_code == 403  # expelled
     # Should be the same for volunteer
-    volunteer_spb = VolunteerFactory(city_id='spb')
+    volunteer_spb = VolunteerFactory(branch__code=Branches.SPB)
     response = client.get(task_attachment_url)
     assert response.status_code == 403
     client.login(volunteer_spb)

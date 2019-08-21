@@ -209,11 +209,10 @@ class ProgressReport(ReportFileOutput):
 
 class ProgressReportForDiplomas(ProgressReport):
     @staticmethod
-    def get_queryset(**kwargs):
+    def get_queryset(**filters):
         """
         Explicitly exclude rows with bad grades (or without) on query level.
         """
-        filters = kwargs.pop("filters", {})
         filters = {
             "status": StudentStatuses.WILL_GRADUATE,
             **filters

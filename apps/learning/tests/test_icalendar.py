@@ -6,6 +6,7 @@ from icalendar import Calendar, Event
 from core.urls import reverse
 from courses.tests.factories import CourseFactory, CourseClassFactory, \
     AssignmentFactory
+from learning.settings import Branches
 from learning.tests.factories import EnrollmentFactory, EventFactory
 from users.constants import Roles
 from users.models import User
@@ -18,8 +19,8 @@ from users.tests.factories import UserFactory, StudentFactory
 
 @pytest.mark.django_db
 def test_smoke(client, curator, settings):
-    """Make sure that any user can view icalendar. We have no secret link now"""
-    student = StudentFactory(city_id='kzn')
+    """Any user can view icalendar since these urls are not secret"""
+    student = StudentFactory()
     response = client.get(student.get_classes_icalendar_url())
     assert response.status_code == 200
     response = client.get(student.get_assignments_icalendar_url())
@@ -28,9 +29,7 @@ def test_smoke(client, curator, settings):
 
 @pytest.mark.django_db
 def test_classes(client):
-    user = UserFactory(groups=[Roles.STUDENT,
-                               Roles.TEACHER],
-                       city_id='spb')
+    user = UserFactory(groups=[Roles.STUDENT, Roles.TEACHER])
     client.login(user)
     fname = 'csc_classes.ics'
     # Empty calendar
@@ -56,7 +55,7 @@ def test_classes(client):
 @pytest.mark.django_db
 def test_assignments(client):
     user = UserFactory(groups=[Roles.STUDENT, Roles.TEACHER],
-                       city_id='spb')
+                       branch__code=Branches.SPB)
     client.login(user)
     fname = 'csc_assignments.ics'
     # Empty calendar

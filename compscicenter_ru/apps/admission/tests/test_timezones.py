@@ -40,7 +40,7 @@ def test_model(settings):
     assert invitation.expired_at.hour == HOUR
     assert invitation.expired_at.minute == 0
     # Update with nsk timezone
-    nsk_timezone = settings.TIME_ZONES['nsk']
+    nsk_timezone = Branches.get_timezone(Branches.NSK)
     value = invitation.expired_at.replace(tzinfo=None)
     invitation.expired_at = nsk_timezone.localize(value)
     invitation.save()
@@ -55,12 +55,12 @@ def test_get_timezone(settings):
     date = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     interview = InterviewFactory(applicant__campaign__branch__code=Branches.NSK,
                                  date=date)
-    assert interview.get_timezone() == settings.TIME_ZONES[Branches.NSK]
+    assert interview.get_timezone() == Branches.get_timezone(Branches.NSK)
     branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
     interview.applicant.campaign.branch = branch_spb
     interview.applicant.campaign.save()
     interview.refresh_from_db()
-    assert interview.get_timezone() == settings.TIME_ZONES[Branches.SPB]
+    assert interview.get_timezone() == Branches.get_timezone(Branches.SPB)
 
 
 @pytest.mark.skip("Нужно обязательно переписать этот тест на другое поле, которое точно не изменится :<")
@@ -214,7 +214,7 @@ def test_interview_detail(settings, client, curator):
     interview = InterviewFactory(date=dt_at,
                                  applicant__campaign__branch__code=Branches.NSK)
     date_in_utc = interview.date
-    localized = date_in_utc.astimezone(settings.TIME_ZONES[Branches.NSK])
+    localized = date_in_utc.astimezone(Branches.get_timezone(Branches.NSK))
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "22:00"
     response = client.get(interview.get_absolute_url())
@@ -225,7 +225,7 @@ def test_interview_detail(settings, client, curator):
     branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
     interview.applicant.campaign.branch = branch_spb
     interview.applicant.campaign.save()
-    localized = date_in_utc.astimezone(settings.TIME_ZONES[Branches.SPB])
+    localized = date_in_utc.astimezone(Branches.get_timezone(Branches.SPB))
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "18:00"
     response = client.get(interview.get_absolute_url())

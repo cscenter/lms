@@ -6,18 +6,18 @@ from django.utils import timezone
 from django.utils.encoding import smart_bytes
 from django.utils.translation import ugettext as _
 
-from core.timezone.constants import DATE_FORMAT_RU
 from core.tests.utils import now_for_branch
 from core.timezone import now_local
+from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment
 from learning.services import EnrollmentService, CourseCapacityFull
 from learning.settings import StudentStatuses, Branches
-from core.settings.base import DEFAULT_BRANCH_CODE
 from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory
+
 
 # TODO: запись кем-то без группы INVITED.
 # TODO: после регистрации у чуваков есть необходимые поля и группы. Нужно ли тестить отправку email? вроде как асинхронно высылается, значит надо (мб моки уже есть в текстах клуба, хз)
@@ -30,9 +30,9 @@ from users.tests.factories import StudentFactory
 
 @pytest.mark.django_db
 def test_enrollment_capacity():
-    student = StudentFactory(city_id='spb')
+    student = StudentFactory()
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(city_id='spb',
+    course = CourseFactory.create(branch=student.branch,
                                   semester=current_semester,
                                   capacity=1,
                                   is_open=True)
@@ -50,10 +50,10 @@ def test_enrollment_capacity():
 
 @pytest.mark.django_db
 def test_enrollment_capacity_view(client):
-    s = StudentFactory(city_id='spb')
+    s = StudentFactory()
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(city_id='spb',
+    course = CourseFactory.create(branch=s.branch,
                                   semester=current_semester,
                                   is_open=True)
     response = client.get(course.get_absolute_url())
@@ -69,7 +69,7 @@ def test_enrollment_capacity_view(client):
     course.refresh_from_db()
     assert course.learners_count == 1
     assert course.places_left == 0
-    s2 = StudentFactory(city_id='spb')
+    s2 = StudentFactory(branch=course.branch)
     client.login(s2)
     response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Enroll in")) not in response.content
@@ -112,19 +112,19 @@ def test_enrollment_expelled_student(client):
 
 @pytest.mark.django_db
 def test_enrollment(client):
-    student1, student2 = StudentFactory.create_batch(2, city_id='spb')
+    student1, student2 = StudentFactory.create_batch(2)
     client.login(student1)
     today = now_local(student1.get_timezone())
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    co = CourseFactory.create(semester=current_semester, city_id='spb')
-    url = co.get_enroll_url()
-    form = {'course_pk': co.pk}
+    course = CourseFactory(semester=current_semester, branch=student1.branch)
+    url = course.get_enroll_url()
+    form = {'course_pk': course.pk}
     response = client.post(url, form)
     assert response.status_code == 302
-    assert 1 == Enrollment.active.filter(student=student1, course=co).count()
-    as_ = AssignmentFactory.create_batch(3, course=co)
+    assert 1 == Enrollment.active.filter(student=student1, course=course).count()
+    as_ = AssignmentFactory.create_batch(3, course=course)
     assert set((student1.pk, a.pk) for a in as_) == set(StudentAssignment.objects
                           .filter(student=student1)
                           .values_list('student', 'assignment'))
@@ -133,7 +133,7 @@ def test_enrollment(client):
     url = co_other.get_enroll_url()
     response = client.post(url, form)
     assert response.status_code == 302
-    assert co.enrollment_set.count() == 1
+    assert course.enrollment_set.count() == 1
     # Try to enroll to old CO
     old_semester = SemesterFactory.create(year=2010)
     old_co = CourseFactory.create(semester=old_semester)
@@ -144,37 +144,37 @@ def test_enrollment(client):
 
 @pytest.mark.django_db
 def test_enrollment_reason_entry(client):
-    student = StudentFactory(branch__code=Branches.SPB)
+    student = StudentFactory()
     client.login(student)
     today = now_local(student.get_timezone())
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    co = CourseFactory.create(semester=current_semester, city_id='spb')
-    form = {'course_pk': co.pk, 'reason': 'foo'}
-    client.post(co.get_enroll_url(), form)
+    course = CourseFactory(semester=current_semester, branch=student.branch)
+    form = {'course_pk': course.pk, 'reason': 'foo'}
+    client.post(course.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
     date = today.strftime(DATE_FORMAT_RU)
     assert Enrollment.objects.first().reason_entry == f'{date}\nfoo\n\n'
-    client.post(co.get_unenroll_url(), form)
+    client.post(course.get_unenroll_url(), form)
     assert Enrollment.active.count() == 0
     assert Enrollment.objects.first().reason_entry == f'{date}\nfoo\n\n'
     # Enroll for the second time, first entry reason should be saved
     form['reason'] = 'bar'
-    client.post(co.get_enroll_url(), form)
+    client.post(course.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
     assert Enrollment.objects.first().reason_entry == f'{date}\nbar\n\n{date}\nfoo\n\n'
 
 
 @pytest.mark.django_db
 def test_enrollment_leave_reason(client):
-    student = StudentFactory(city_id=Branches.SPB, branch__code=Branches.SPB)
+    student = StudentFactory()
     client.login(student)
     today = now_local(student.get_timezone())
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    co = CourseFactory.create(semester=current_semester, city_id=Branches.SPB)
+    co = CourseFactory(semester=current_semester, branch=student.branch)
     form = {'course_pk': co.pk}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
@@ -203,42 +203,41 @@ def test_enrollment_leave_reason(client):
 
 @pytest.mark.django_db
 def test_unenrollment(client, assert_redirect):
-    s = StudentFactory.create(branch__code=DEFAULT_BRANCH_CODE)
-    assert s.city_id is not None
+    s = StudentFactory()
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    co = CourseFactory.create(semester=current_semester)
-    as_ = AssignmentFactory.create_batch(3, course=co)
-    form = {'course_pk': co.pk}
+    course = CourseFactory.create(semester=current_semester, branch=s.branch)
+    as_ = AssignmentFactory.create_batch(3, course=course)
+    form = {'course_pk': course.pk}
     # Enrollment already closed
     today = timezone.now()
     current_semester.enrollment_end_at = (today - datetime.timedelta(days=1)).date()
     current_semester.save()
-    response = client.post(co.get_enroll_url(), form)
+    response = client.post(course.get_enroll_url(), form)
     assert response.status_code == 403
     current_semester.enrollment_end_at = (today + datetime.timedelta(days=1)).date()
     current_semester.save()
-    response = client.post(co.get_enroll_url(), form, follow=True)
+    response = client.post(course.get_enroll_url(), form, follow=True)
     assert response.status_code == 200
     assert Enrollment.objects.count() == 1
-    response = client.get(co.get_absolute_url())
+    response = client.get(course.get_absolute_url())
     assert smart_bytes("Unenroll") in response.content
-    assert smart_bytes(co) in response.content
+    assert smart_bytes(course) in response.content
     assert Enrollment.objects.count() == 1
     enrollment = Enrollment.objects.first()
     assert not enrollment.is_deleted
-    client.post(co.get_unenroll_url(), form)
-    assert Enrollment.active.filter(student=s, course=co).count() == 0
+    client.post(course.get_unenroll_url(), form)
+    assert Enrollment.active.filter(student=s, course=course).count() == 0
     assert Enrollment.objects.count() == 1
     enrollment = Enrollment.objects.first()
     enrollment_id = enrollment.pk
     assert enrollment.is_deleted
     # Make sure student progress won't been deleted
     a_ss = (StudentAssignment.objects.filter(student=s,
-                                             assignment__course=co))
+                                             assignment__course=course))
     assert len(a_ss) == 3
     # On re-enroll use old record
-    client.post(co.get_enroll_url(), form)
+    client.post(course.get_enroll_url(), form)
     assert Enrollment.objects.count() == 1
     enrollment = Enrollment.objects.first()
     assert enrollment.pk == enrollment_id
@@ -249,12 +248,12 @@ def test_unenrollment(client, assert_redirect):
     assert len(response.context['ongoing_enrolled']) == 1
     assert len(response.context['archive_enrolled']) == 0
     # Check `back` url on unenroll action
-    url = co.get_unenroll_url() + "?back=study:course_list"
+    url = course.get_unenroll_url() + "?back=study:course_list"
     assert_redirect(client.post(url, form),
                     reverse('study:course_list'))
     assert set(a_ss) == set(StudentAssignment.objects
                                   .filter(student=s,
-                                          assignment__course=co))
+                                          assignment__course=course))
     # Check courses on student courses page are empty
     response = client.get(reverse("study:course_list"))
     assert len(response.context['ongoing_rest']) == 1
@@ -265,10 +264,9 @@ def test_unenrollment(client, assert_redirect):
 @pytest.mark.django_db
 def test_reenrollment(client):
     """Create assignments for student if they left the course and come back"""
-    s = StudentFactory(city_id='spb')
-    assignment = AssignmentFactory(course__is_open=True,
-                                   course__city_id='spb')
-    course = assignment.course
+    s = StudentFactory()
+    course = CourseFactory(branch=s.branch, is_open=True)
+    assignment = AssignmentFactory(course=course)
     e = EnrollmentFactory(student=s, course=course)
     assert not e.is_deleted
     assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
@@ -287,10 +285,22 @@ def test_reenrollment(client):
 
 
 @pytest.mark.django_db
-def test_enrollment_in_other_city(client):
-    tomorrow = now_for_branch(DEFAULT_BRANCH_CODE) + datetime.timedelta(days=1)
+def test_student_middleware(client):
+    student = StudentFactory(branch_id=None)
+    client.login(student)
+    course_spb = CourseFactory(branch__code=Branches.SPB)
+    form = {'course_pk': course_spb.pk}
+    response = client.post(course_spb.get_enroll_url(), form)
+    assert response.status_code == 302
+    assert response.url == '/'
+
+
+@pytest.mark.django_db
+def test_enrollment_in_other_branch(client):
+    tomorrow = now_for_branch(Branches.SPB) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    course_spb = CourseFactory(semester=term, is_open=False)
+    course_spb = CourseFactory(semester=term, is_open=False,
+                               branch__code=Branches.SPB)
     assert course_spb.enrollment_is_open
     student_spb = StudentFactory(branch__code=Branches.SPB)
     student_nsk = StudentFactory(branch__code=Branches.NSK)
@@ -303,12 +313,7 @@ def test_enrollment_in_other_city(client):
     response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 403
     assert Enrollment.objects.count() == 1
-    student = StudentFactory(city_id=None)
-    client.login(student)
-    response = client.post(course_spb.get_enroll_url(), form)
-    assert response.status_code == 302
-    assert response.url == '/'
-    assert Enrollment.objects.count() == 1
+    student = StudentFactory(branch_id=None)
     # Check button visibility
     Enrollment.objects.all().delete()
     client.login(student_spb)
@@ -328,13 +333,13 @@ def test_correspondence_courses(client):
     """Make sure students from any city can enroll in online course"""
     tomorrow = now_for_branch(Branches.SPB) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    co_spb = CourseFactory(city_id='spb',
+    co_spb = CourseFactory(branch__code=Branches.SPB,
                            semester=term,
                            is_open=False,
                            is_correspondence=True)
     assert co_spb.enrollment_is_open
-    student_spb = StudentFactory(city_id='spb')
-    student_nsk = StudentFactory(city_id='nsk')
+    student_spb = StudentFactory()
+    student_nsk = StudentFactory()
     form = {'course_pk': co_spb.pk}
     client.login(student_spb)
     response = client.post(co_spb.get_enroll_url(), form)

@@ -9,51 +9,52 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
 from django.utils import formats
 
+from core.models import Branch
 from core.tests.factories import VenueFactory
 from core.urls import reverse
 from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
+from learning.settings import Branches
 from users.constants import Roles
-from users.tests.factories import TeacherFactory
+from users.tests.factories import TeacherFactory, CuratorFactory
 
 
 def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:
     return tz.localize(datetime.datetime(2017, 1, 1)).utcoffset()
 
 
-SPB_OFFSET = get_timezone_gmt_offset(settings.TIME_ZONES['spb'])
-NSK_OFFSET = get_timezone_gmt_offset(settings.TIME_ZONES['nsk'])
+SPB_OFFSET = get_timezone_gmt_offset(Branches.get_timezone(Branches.SPB))
+NSK_OFFSET = get_timezone_gmt_offset(Branches.get_timezone(Branches.NSK))
 
 
 @pytest.mark.django_db
-def test_course_news(settings, client, curator):
-    client.login(curator)
+def test_course_news(settings, client):
     settings.LANGUAGE_CODE = 'ru'
-    news = CourseNewsFactory(
-        course__city_id='spb',
-        created=datetime.datetime(2017, 1, 13, 20, 0, 0, 0,
-                                  tzinfo=pytz.UTC))
-    course = news.course
-    date_in_utc = news.created
-    localized = date_in_utc.astimezone(settings.TIME_ZONES['spb'])
-    assert localized.utcoffset() == datetime.timedelta(
+    curator = CuratorFactory()
+    client.login(curator)
+    course = CourseFactory(branch__code=Branches.SPB)
+    created_utc = datetime.datetime(2017, 1, 13, 20, 0, 0, 0, tzinfo=pytz.UTC)
+    news = CourseNewsFactory(course=course, created=created_utc)
+    created_local = created_utc.astimezone(Branches.get_timezone(Branches.SPB))
+    assert created_local.utcoffset() == datetime.timedelta(
         seconds=SPB_OFFSET.total_seconds())
-    assert localized.hour == 23
-    date_str = "{:02d}".format(localized.day)
+    assert created_local.hour == 23
+    date_str = "{:02d}".format(created_local.day)
     assert date_str == "13"
     response = client.get(course.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
     assert any(date_str in s.string for s in
                html.find_all('div', {"class": "date"}))
-    # For NSK we should live in the next day
-    course.city_id = 'nsk'
+    # In NSK we live in the next day
+    course.branch = Branch.objects.get_by_natural_key(Branches.NSK,
+                                                      settings.SITE_ID)
     course.save()
-    localized = date_in_utc.astimezone(settings.TIME_ZONES['nsk'])
-    assert localized.utcoffset() == datetime.timedelta(
+    created_local = created_utc.astimezone(Branches.get_timezone(Branches.NSK))
+    assert created_local.utcoffset() == datetime.timedelta(
         seconds=NSK_OFFSET.total_seconds())
-    assert localized.hour == 3
-    assert localized.day == 14
-    date_str = "{:02d}".format(localized.day)
+    assert created_local.hour == 3
+    assert created_local.day == 14
+    date_str = "{:02d}".format(created_local.day)
     assert date_str == "14"
     response = client.get(course.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
@@ -67,7 +68,7 @@ def test_course_assignment_deadline_l10n(settings, client):
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherFactory()
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course__city_id='spb',
+                                   course__branch__code=Branches.SPB,
                                    course__teachers=[teacher])
     co = assignment.course
     client.login(teacher)
@@ -117,27 +118,27 @@ def test_course_assignment_timezone(settings, client):
     Course teacher always must see the timezone of the course,
     even if he studying in CS Center.
     """
-    teacher_nsk = TeacherFactory(city_id='nsk')
     # 12 january 2017 23:59 (local time)
     deadline_at = datetime.datetime(2017, 1, 12, 23, 59, 0, 0,
                                     tzinfo=pytz.UTC)
     assignment = AssignmentFactory(deadline_at=deadline_at,
-                                   course__city_id='spb',
+                                   course__branch__code=Branches.SPB,
                                    course__is_correspondence=True)
-    co = assignment.course
+    course = assignment.course
+    assignments_tab_url = course.get_url_for_tab("assignments")
+    teacher_nsk = TeacherFactory(branch__code=Branches.NSK)
     client.login(teacher_nsk)
-    url = co.get_url_for_tab("assignments")
-    response = client.get(url)
+    response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] == settings.TIME_ZONES['nsk']
+    assert response.context["tz_override"] == Branches.get_timezone(Branches.NSK)
     teacher_nsk.add_group(Roles.STUDENT)
-    response = client.get(url)
+    response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] == settings.TIME_ZONES['nsk']
+    assert response.context["tz_override"] == Branches.get_timezone(Branches.NSK)
     # Don't override timezone if current authenticated user is actual teacher of
     # the course
-    CourseTeacherFactory(course=co, teacher=teacher_nsk)
-    response = client.get(url)
+    CourseTeacherFactory(course=course, teacher=teacher_nsk)
+    response = client.get(assignments_tab_url)
     assert response.status_code == 200
     assert response.context["tz_override"] is None
 

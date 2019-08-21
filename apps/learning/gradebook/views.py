@@ -34,7 +34,7 @@ class GradeBookListBaseView(generic.ListView):
 
     def get_course_queryset(self):
         return (Course.objects
-                .select_related("meta_course")
+                .select_related("meta_course", "branch")
                 .order_by("meta_course__name"))
 
     def get_queryset(self):
@@ -116,7 +116,11 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
         messages.success(self.request,
                          _('Gradebook successfully saved.'),
                          extra_tags='timeout')
-        return self.data.course.get_gradebook_url(for_curator=self.is_for_staff)
+        if self.is_for_staff:
+            params = {"url_name": "staff:course_markssheet_staff"}
+        else:
+            params = {}
+        return self.data.course.get_gradebook_url(**params)
 
     def form_invalid(self, form):
         """
@@ -136,16 +140,14 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         context["gradebook"] = self.data
-        # List of user gradebooks
         # TODO: Move to the model
         filter_kwargs = {}
         if not self.request.user.is_curator:
             filter_kwargs["teachers"] = self.request.user
         courses = (Course.objects
                    .filter(**filter_kwargs)
-                   .order_by('-semester__index',
-                             '-pk')
-                   .select_related('semester', 'meta_course'))
+                   .order_by('-semester__index', '-pk')
+                   .select_related('semester', 'meta_course', 'branch'))
         context['course_offering_list'] = courses
         context['user_type'] = self.user_type
 

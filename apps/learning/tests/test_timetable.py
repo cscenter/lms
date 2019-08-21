@@ -24,14 +24,14 @@ def test_teacher_timetable_security(curator, client, assert_login_redirect):
     allowed = [CuratorFactory, TeacherFactory]
     timetable_url = reverse('teaching:timetable')
     for factory_class in allowed:
-        user = factory_class(city_id='spb')
+        user = factory_class()
         client.login(user)
         response = client.get(timetable_url)
         assert response.status_code == 200
         client.logout()
     denied = [StudentFactory, GraduateFactory, VolunteerFactory]
     for factory_class in denied:
-        user = factory_class(city_id='spb')
+        user = factory_class()
         client.login(user)
         assert_login_redirect(timetable_url, method='get')
         client.logout()
@@ -81,7 +81,7 @@ def test_student_timetable_view_security(client, lms_resolver):
 def test_student_timetable(client):
     student = StudentFactory()
     client.login(student)
-    co = CourseFactory.create(city_id='spb')
+    co = CourseFactory.create(branch=student.branch)
     e = EnrollmentFactory.create(course=co, student=student)
     timetable_url = reverse('study:timetable')
     response = client.get(timetable_url)

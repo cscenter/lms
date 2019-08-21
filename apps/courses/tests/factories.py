@@ -1,18 +1,17 @@
 import datetime
 
 import factory
+import pytz
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.utils import timezone
 
-from core.models import City
+from core.settings.base import DEFAULT_BRANCH_CODE
 from core.tests.factories import VenueFactory, CityFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment
 from courses.utils import get_current_term_pair, get_term_by_index
 from learning.settings import Branches
-from core.settings.base import DEFAULT_BRANCH_CODE
 from users.tests.factories import TeacherFactory
 
 __all__ = (
@@ -149,8 +148,8 @@ class AssignmentFactory(factory.DjangoModelFactory):
         model = Assignment
 
     course = factory.SubFactory(CourseFactory)
-    deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
-                   + datetime.timedelta(days=1))
+    deadline_at = factory.Faker('date_time_between', start_date="+1d",
+                                end_date="+10d", tzinfo=pytz.UTC)
     is_online = True
     title = factory.Sequence(lambda n: "Test assignment %03d" % n)
     text = "This is a text for a test assignment"

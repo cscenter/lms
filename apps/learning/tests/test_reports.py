@@ -3,14 +3,16 @@
 import pytest
 from django.utils.encoding import smart_bytes
 
-from core.urls import reverse
+from core.models import Branch
+from core.tests.factories import BranchFactory
 from courses.utils import get_term_by_index
-from projects.tests.factories import ProjectFactory
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester
-from learning.settings import GradingSystems, StudentStatuses, GradeTypes
+from learning.settings import GradingSystems, StudentStatuses, GradeTypes, \
+    Branches
 from learning.tests.factories import SemesterFactory, CourseFactory, \
     EnrollmentFactory
+from projects.tests.factories import ProjectFactory
 from users.constants import Roles
 from users.tests.factories import SHADCourseRecordFactory, \
     OnlineCourseRecordFactory, TeacherFactory, StudentFactory
@@ -282,10 +284,10 @@ def test_report_for_target_term():
 
 
 @pytest.mark.django_db
-def test_report_diplomas_csv():
+def test_report_diplomas_csv(settings):
     teacher = TeacherFactory.create()
     student1, student2, student3 = StudentFactory.create_batch(
-        3, city_id="spb")
+        3, branch__code=Branches.SPB)
     s = SemesterFactory.create_current()
     prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
     prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
@@ -355,34 +357,41 @@ def test_report_diplomas_csv():
     # +4 headers for project
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 13
 
-    student1.city_id = "nsk"
+    student1.branch = Branch.objects.get_by_natural_key(Branches.NSK,
+                                                        settings.SITE_ID)
     student1.save()
     progress_report = ProgressReportForDiplomas()
     assert len(progress_report.data) == 2
 
 
 @pytest.mark.django_db
-def test_report_diplomas_by_city():
-    s1, s2, s3 = StudentFactory.create_batch(3, city_id="spb")
+def test_report_diplomas_by_branch():
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    s1, s2, s3 = StudentFactory.create_batch(3, branch=branch_spb)
     s1.status = StudentStatuses.WILL_GRADUATE
     s1.save()
     s2.status = StudentStatuses.WILL_GRADUATE
     s2.save()
     progress_report = ProgressReportForDiplomas()
     assert len(progress_report.data) == 2
-    progress_report = ProgressReportForDiplomas(
-        qs_filters={"filters": {"city_id": "spb"}})
+    progress_report = ProgressReportForDiplomas(qs_filters={
+        "branch_id": branch_spb.pk
+    })
     assert len(progress_report.data) == 2
-    progress_report = ProgressReportForDiplomas(
-        qs_filters={"filters": {"city_id": "nsk"}})
+    progress_report = ProgressReportForDiplomas(qs_filters={
+        "branch_id": branch_nsk.pk
+    })
     assert len(progress_report.data) == 0
     s3.status = StudentStatuses.WILL_GRADUATE
-    s3.city_id = "nsk"
+    s3.branch = branch_nsk
     s3.save()
-    progress_report = ProgressReportForDiplomas(
-        qs_filters={"filters": {"city_id": "spb"}})
+    progress_report = ProgressReportForDiplomas(qs_filters={
+        "branch_id": branch_spb.pk
+    })
     assert len(progress_report.data) == 2
-    progress_report = ProgressReportForDiplomas(
-        qs_filters={"filters": {"city_id": "nsk"}})
+    progress_report = ProgressReportForDiplomas(qs_filters={
+        "branch_id": branch_nsk.pk
+    })
     assert len(progress_report.data) == 1
     assert progress_report.data[0].pk == s3.pk

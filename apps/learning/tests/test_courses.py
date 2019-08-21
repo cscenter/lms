@@ -4,9 +4,8 @@ import pytest
 import pytz
 
 from core.urls import reverse
-from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
-    SemesterFactory, CourseFactory
-from learning.settings import StudentStatuses
+from courses.tests.factories import CourseTeacherFactory, AssignmentFactory
+from learning.settings import StudentStatuses, Branches
 from users.tests.factories import TeacherFactory, StudentFactory
 
 
@@ -17,11 +16,11 @@ def test_course_is_correspondence(settings, client):
     deadline_at = datetime.datetime(2017, 1, 12, 23, 59, 0, 0,
                                     tzinfo=pytz.UTC)
     assignment = AssignmentFactory(deadline_at=deadline_at,
-                                   course__city_id='spb',
+                                   course__branch__code=Branches.SPB,
                                    course__is_correspondence=False)
-    teacher_nsk = TeacherFactory(city_id='nsk')
-    student_spb = StudentFactory(city_id='spb')
-    student_nsk = StudentFactory(city_id='nsk')
+    teacher_nsk = TeacherFactory(branch__code=Branches.NSK)
+    student_spb = StudentFactory(branch__code=Branches.SPB)
+    student_nsk = StudentFactory(branch__code=Branches.NSK)
     course = assignment.course
     # Unauthenticated user doesn't see tab
     url = course.get_url_for_tab("assignments")
@@ -57,35 +56,16 @@ def test_course_is_correspondence(settings, client):
     response = client.get(url)
     assert response.status_code == 200
     assert response.context["tz_override"] is None
-    # Teacher without city, fallback to course offering timezone
-    teacher = TeacherFactory()
-    assert teacher.city_id is None
-    client.login(teacher)
-    response = client.get(url)
-    assert response.status_code == 200
-    assert response.context["tz_override"] is None
-
-
-@pytest.mark.django_db
-def test_course_list(client, settings):
-    student = StudentFactory(branch__code=settings.DEFAULT_CITY_CODE)
-    client.login(student)
-    s = SemesterFactory.create_current()
-    co = CourseFactory.create(semester=s)
-    co_kzn = CourseFactory.create(semester=s, city__code="kzn")
-    response = client.get(reverse('study:course_list'))
-    assert len(response.context['ongoing_rest']) == 1
 
 
 @pytest.mark.django_db
 def test_student_status_expelled(client, settings):
-    student = StudentFactory(status=StudentStatuses.EXPELLED,
-                             city_id=settings.DEFAULT_CITY_CODE)
+    student = StudentFactory(status=StudentStatuses.EXPELLED)
     client.login(student)
     url = reverse('study:course_list')
     response = client.get(url)
     assert response.status_code == 403
-    active_student = StudentFactory(city_id=settings.DEFAULT_CITY_CODE)
+    active_student = StudentFactory()
     client.login(active_student)
     response = client.get(url)
     assert response.status_code == 200

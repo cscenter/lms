@@ -52,9 +52,11 @@
                       {% regroup course_offering_list by semester as co_by_semester %}
                       {% for cos in co_by_semester %}
                       <li role="presentation" class="dropdown-header">{{ cos.grouper }}</li>
-                      {% for co in cos.list %}
-                      <li role="presentation"><a role="menuitem" tabindex="-1" href="{{ co.get_gradebook_url }}">{{ co.meta_course }}</a></li>
-                      {% endfor %}
+                      {% for course in cos.list %}<li role="presentation">{% if view.is_for_staff %}
+                          <a href="{% call_method course 'get_gradebook_url' url_name='staff:course_markssheet_staff' %}">{{ course.meta_course }}</a>
+                      {% else %}
+                          <a role="menuitem" tabindex="-1" href="{{ course.get_gradebook_url }}">{{ course.meta_course }}</a>
+                      {% endif %}</li>{% endfor %}
                       {% endfor %}
                     </ul>
                 </div>
