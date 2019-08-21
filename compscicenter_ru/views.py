@@ -19,7 +19,7 @@ from django.utils.translation import gettext, pgettext_lazy, ugettext_lazy as _
 from django.views import generic
 from django_filters.views import FilterMixin
 from rest_framework.renderers import JSONRenderer
-from vanilla import TemplateView
+from vanilla import TemplateView, DetailView
 
 from announcements.models import Announcement
 from compscicenter_ru.serializers import CoursesSerializer
@@ -32,7 +32,7 @@ from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
 from courses.constants import SemesterTypes, TeacherRoles, ClassTypes
 from courses.utils import get_current_term_pair, \
     first_term_in_academic_year, get_term_by_index, get_term_index
-from core.utils import bucketize
+from core.utils import bucketize, is_club_site
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import Enrollment, GraduateProfile
 from core.models import Branch
@@ -661,4 +661,28 @@ class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
         context['lectures'] = (self.course.courseclass_set
                                .filter(type=ClassTypes.LECTURE)
                                .order_by("date", "starts_at"))
+        return context
+
+
+class TeacherDetailView(DetailView):
+    template_name = "users/teacher_detail.html"
+    context_object_name = 'teacher'
+
+    def get_queryset(self, *args, **kwargs):
+        branches = [code for code, _ in Branches.choices]
+        courses = (Course.objects
+                   .filter(branch__code__in=branches)
+                   .select_related('semester', 'meta_course', 'branch')
+                   .order_by('-semester__index'))
+        return (User.objects
+                .prefetch_related(
+                    Prefetch('teaching_set',
+                             queryset=courses,
+                             to_attr='course_offerings')))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        teacher = context[self.context_object_name]
+        if not teacher.is_teacher:
+            raise Http404
         return context

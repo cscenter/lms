@@ -15,7 +15,7 @@ from compscicenter_ru import views
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.urls import RE_COURSE_URI
 from htmlpages.views import flatpage
-from users.views import TeacherDetailView
+from compscicenter_ru.views import TeacherDetailView
 
 admin.autodiscover()
 
