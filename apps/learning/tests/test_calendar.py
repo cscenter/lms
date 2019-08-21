@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from core.urls import reverse
 from courses.tests.factories import CourseFactory, CourseClassFactory
-from core.tests.factories import VenueFactory
+from core.tests.factories import LocationFactory
 from learning.settings import Branches
 from learning.tests.factories import EventFactory, \
     EnrollmentFactory
@@ -72,7 +72,7 @@ class CalendarTeacherTests(MyUtilitiesMixin, CSCTestCase):
             CourseClassFactory
             .create_batch(5, course__teachers=[other_teacher],
                           date=this_month_date))
-        venue = VenueFactory(city_id=teacher_spb.branch.city_id)
+        venue = LocationFactory(city_id=teacher_spb.branch.city_id)
         events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
         # teacher should see only his own classes and non-course events
         resp = self.client.get(reverse(self.url_name))
@@ -150,7 +150,7 @@ def test_student_personal_calendar_view(client):
     classes = flatten_calendar_month_events(
         client.get(next_month_url).context['calendar'])
     assert set(next_month_classes) == set(classes)
-    venue = VenueFactory(city_id=student_spb.branch.city_id)
+    venue = LocationFactory(city_id=student_spb.branch.city_id)
     events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
     response = client.get(calendar_url)
     assert response.status_code == 200

@@ -22,7 +22,7 @@ from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
 from core.timezone import TimezoneAwareModel
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Venue
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
 from courses.models import Course, CourseNews, Assignment
@@ -474,7 +474,7 @@ class CourseNewsNotification(TimeStampedModel):
 class Event(TimeStampedModel):
     objects = EventQuerySet.as_manager()
     venue = models.ForeignKey(
-        Venue,
+        Location,
         verbose_name=_("CourseClass|Venue"),
         on_delete=models.PROTECT)
     name = models.CharField(_("CourseClass|Name"), max_length=255)

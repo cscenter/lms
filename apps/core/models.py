@@ -151,7 +151,7 @@ class Branch(TimezoneAwareModel, models.Model):
         return Branches.get_choice(self.code).abbr
 
 
-class Venue(TimezoneAwareModel, models.Model):
+class Location(TimezoneAwareModel, models.Model):
     TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
 
     INTERVIEW = 'interview'
@@ -162,9 +162,9 @@ class Venue(TimezoneAwareModel, models.Model):
                              verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE,
                              on_delete=models.PROTECT)
-    name = models.CharField(_("Venue|Name"), max_length=140)
+    name = models.CharField(_("Location|Name"), max_length=140)
     address = models.CharField(
-        _("Venue|Address"),
+        _("Address"),
         help_text=(_("Should be resolvable by Google Maps")),
         max_length=500,
         blank=True)
@@ -185,13 +185,13 @@ class Venue(TimezoneAwareModel, models.Model):
         help_text=(_("Set purpose of this place")))
     is_preferred = models.BooleanField(
         _("Preferred"),
-        help_text=(_("Will be displayed on top of the venue list")),
+        help_text=(_("Will be displayed on top of the location list")),
         default=False)
 
     class Meta:
         ordering = ["-is_preferred", "name"]
-        verbose_name = _("Venue")
-        verbose_name_plural = _("Venues")
+        verbose_name = _("Location")
+        verbose_name_plural = _("Locations")
 
     def get_timezone(self):
         return settings.TIME_ZONES[self.city_id]

@@ -31,7 +31,7 @@ from core.db.models import ScoreField
 from core.timezone import TimezoneAwareModel
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.urls import reverse
-from core.models import Branch, Venue
+from core.models import Branch, Location
 from learning.settings import AcademicDegreeYears, Branches
 from users.constants import Roles
 
@@ -1036,7 +1036,7 @@ class InterviewStream(TimezoneAwareModel, TimeStampedModel):
         default=30)
     # TODO: do not change if some slots already was taken
     venue = models.ForeignKey(
-        Venue,
+        Location,
         verbose_name=_("Interview venue"),
         on_delete=models.PROTECT,
         related_name="streams")

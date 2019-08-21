@@ -5,6 +5,7 @@ from model_utils.models import TimeStampedModel
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase, TagBase
 
+from core.models import Location
 from core.urls import reverse
 from core.utils import ru_en_mapping
 
@@ -104,7 +105,7 @@ class AnnouncementEventDetails(models.Model):
                                         primary_key=True,
                                         on_delete=models.CASCADE)
     venue = models.ForeignKey(
-        'core.Venue',
+        Location,
         verbose_name=_("Venue"),
         on_delete=models.SET_NULL,
         blank=True,

@@ -18,7 +18,7 @@ from courses.forms import CourseClassForm
 from courses.models import CourseClass
 from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory, SemesterFactory, CourseClassAttachmentFactory
-from core.tests.factories import VenueFactory
+from core.tests.factories import LocationFactory
 from users.tests.factories import TeacherFactory
 
 
@@ -42,7 +42,7 @@ def test_course_class_detail_security(client, assert_login_redirect):
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    form.update({'venue': VenueFactory.create().pk})
+    form.update({'venue': LocationFactory.create().pk})
     del form['slides']
     url = co.get_create_class_url()
     assert_login_redirect(url, method='get')
@@ -56,7 +56,7 @@ def test_course_class_create(client):
     co = CourseFactory.create(teachers=[teacher], semester=s)
     co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    venue = VenueFactory(city__code=settings.DEFAULT_CITY_CODE)
+    venue = LocationFactory(city__code=settings.DEFAULT_CITY_CODE)
     form.update({'venue': venue.pk})
     del form['slides']
     url = co.get_create_class_url()
@@ -78,7 +78,7 @@ def test_course_class_create_and_add(client, assert_redirect):
     co = CourseFactory.create(teachers=[teacher], semester=s)
     co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    venue = VenueFactory(city__code=settings.DEFAULT_CITY_CODE)
+    venue = LocationFactory(city__code=settings.DEFAULT_CITY_CODE)
     form.update({'venue': venue.pk, '_addanother': True})
     del form['slides']
     client.login(teacher)
@@ -298,7 +298,7 @@ def test_course_class_form_available(client, curator, settings):
     next_day = today + datetime.timedelta(days=1)
     co.completed_at = next_day
     co.save()
-    venue = VenueFactory(city=co.city)
+    venue = LocationFactory(city=co.city)
     date_format = CourseClassForm.base_fields['date'].widget.format
     form = {
         "type": "lecture",

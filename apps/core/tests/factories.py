@@ -4,12 +4,12 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
-from core.models import City, Branch, Venue
+from core.models import City, Branch, Location
 from compscicenter_ru.settings.test import TEST_DOMAIN, ANOTHER_DOMAIN
 from learning.settings import Branches
 
 __all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory',
-           'SiteFactory', 'VenueFactory', 'Venue', 'Site', 'City',
+           'SiteFactory', 'LocationFactory', 'Location', 'Site', 'City',
            'EmailTemplate', 'Branch',)
 
 
@@ -52,10 +52,10 @@ class BranchFactory(factory.DjangoModelFactory):
         django_get_or_create = ('code', 'site')
 
 
-class VenueFactory(factory.DjangoModelFactory):
+class LocationFactory(factory.DjangoModelFactory):
     class Meta:
-        model = Venue
+        model = Location
 
     city = factory.SubFactory(CityFactory, code=Branches.SPB)
-    name = factory.Sequence(lambda n: "Test venue %03d" % n)
-    description = factory.Sequence(lambda n: "special venue for tests %03d" % n)
+    name = factory.Sequence(lambda n: "Location %03d" % n)
+    description = factory.Sequence(lambda n: "location for tests %03d" % n)

@@ -11,7 +11,7 @@ from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
 from core.compat import Django21BitFieldCheckboxSelectMultiple
-from core.models import Venue
+from core.models import Location
 from core.widgets import AdminRichTextAreaWidget
 from .models import City, Branch
 
@@ -149,9 +149,9 @@ class BranchAdmin(admin.ModelAdmin):
     list_filter = ('site',)
 
 
-class VenueAdminForm(forms.ModelForm):
+class LocationAdminForm(forms.ModelForm):
     class Meta:
-        model = Venue
+        model = Location
         fields = '__all__'
         widgets = {
             'description': AdminRichTextAreaWidget(),
@@ -159,8 +159,8 @@ class VenueAdminForm(forms.ModelForm):
         }
 
 
-@admin.register(Venue)
-class VenueAdmin(admin.ModelAdmin):
-    form = VenueAdminForm
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    form = LocationAdminForm
     list_display = ('name', 'city')
     list_select_related = ("city",)
