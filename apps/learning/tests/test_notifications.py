@@ -8,6 +8,7 @@ import pytz
 from django.core import mail, management
 from subdomains.utils import get_domain
 
+from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU
 from core.tests.utils import CSCTestCase
 from compscicenter_ru.settings.test import TEST_DOMAIN, ANOTHER_DOMAIN_ID
@@ -17,7 +18,7 @@ from courses.models import CourseTeacher, Assignment
 from courses.tests.factories import CourseFactory, AssignmentFactory
 from learning.utils import course_failed_by_student
 from learning.models import AssignmentNotification
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import *
 from notifications.management.commands.notify import \
     get_assignment_notification_context, get_course_news_notification_context
@@ -240,8 +241,9 @@ def test_new_assignment_create_notification_context(settings):
     settings.DEFAULT_URL_SCHEME = 'https'
     current_domain = get_domain()
     assert current_domain == TEST_DOMAIN
-    course = CourseFactory(city_id='spb')
-    enrollment = EnrollmentFactory(course=course, student__city_id='spb')
+    branch_spb = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(branch=branch_spb)
+    enrollment = EnrollmentFactory(course=course, student__branch=branch_spb)
     student = enrollment.student
     assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 1
@@ -269,8 +271,8 @@ def test_new_course_news_notification_context(settings):
     settings.DEFAULT_URL_SCHEME = 'https'
     current_domain = get_domain()
     assert current_domain == TEST_DOMAIN
-    course = CourseFactory(city_id='spb')
-    student = StudentFactory()
+    course = CourseFactory()
+    student = StudentFactory(branch=course.branch)
     enrollment = EnrollmentFactory(course=course, student=student)
     cn = CourseNewsNotificationFactory(course_offering_news__course=course,
                                        user=student)
@@ -286,7 +288,9 @@ def test_new_course_news_notification_context(settings):
 @pytest.mark.django_db
 def test_new_assignment_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
-    sa = StudentAssignmentFactory(assignment__course__city_id='spb')
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    sa = StudentAssignmentFactory(assignment__course__branch=branch_spb)
     assignment = sa.assignment
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
     assignment.deadline_at = dt
@@ -302,7 +306,7 @@ def test_new_assignment_timezone(settings):
     assert len(mail.outbox) == 1
     assert dt_str in mail.outbox[0].body
     # Test with another timezone
-    sa.assignment.course.city_id = 'nsk'
+    sa.assignment.course.branch = branch_nsk
     sa.assignment.course.save()
     AssignmentNotificationFactory(is_about_creation=True, user=sa.student,
                                   student_assignment=sa)
@@ -315,7 +319,7 @@ def test_new_assignment_timezone(settings):
 
 @pytest.mark.django_db
 def test_create_deadline_change_notification(settings):
-    co = CourseFactory(city_id='spb')
+    co = CourseFactory()
     e1, e2 = EnrollmentFactory.create_batch(2, course=co)
     s1 = e1.student
     s1.status = StudentStatuses.EXPELLED
@@ -331,7 +335,9 @@ def test_create_deadline_change_notification(settings):
 @pytest.mark.django_db
 def test_deadline_changed_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
-    sa = StudentAssignmentFactory(assignment__course__city_id='spb')
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    sa = StudentAssignmentFactory(assignment__course__branch=branch_spb)
     assignment = sa.assignment
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
     assignment.deadline_at = dt
@@ -347,7 +353,7 @@ def test_deadline_changed_timezone(settings):
     assert len(mail.outbox) == 1
     assert dt_str in mail.outbox[0].body
     # Test with other timezone
-    sa.assignment.course.city_id = 'nsk'
+    sa.assignment.course.branch = branch_nsk
     sa.assignment.course.save()
     AssignmentNotificationFactory(is_about_deadline=True, user=sa.student,
                                   student_assignment=sa)

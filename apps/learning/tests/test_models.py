@@ -10,6 +10,7 @@ from django.core.exceptions import ValidationError
 from core.tests.utils import CSCTestCase
 from django.utils.encoding import smart_text
 
+from learning.settings import Branches
 from learning.tests.factories import StudentAssignmentFactory, AssignmentCommentFactory, \
     EnrollmentFactory, AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
@@ -261,8 +262,8 @@ def test_course_enrollment_is_open(settings, mocker):
     assert term.year == year
     term_start_dt = get_term_start(year, term_type, pytz.UTC)
     assert term.enrollment_start_at == term_start_dt.date()
-    co_spb = CourseFactory.create(semester=term, city_id='spb',
-                                  is_open=False)
+    co_spb = CourseFactory(semester=term, branch__code=Branches.SPB,
+                           is_open=False)
     # We are inside enrollment period right now
     assert co_spb.enrollment_is_open
     # `completed_at` has more priority than term settings
@@ -310,12 +311,12 @@ def test_score_field():
 @pytest.mark.django_db
 def test_course_get_reviews(settings):
     meta_course1, meta_course2 = MetaCourseFactory.create_batch(2)
-    CourseFactory(meta_course=meta_course1, city_id='spb',
+    CourseFactory(meta_course=meta_course1, branch__code=Branches.SPB,
                   semester__year=2015, reviews='aaa')
-    CourseFactory(meta_course=meta_course2, city_id='spb',
+    CourseFactory(meta_course=meta_course2, branch__code=Branches.SPB,
                   semester__year=2015, reviews='zzz')
-    co = CourseFactory(meta_course=meta_course1, city_id='spb',
+    co = CourseFactory(meta_course=meta_course1, branch__code=Branches.SPB,
                        semester__year=2016, reviews='bbb')
-    CourseFactory(meta_course=meta_course1, city_id='nsk',
+    CourseFactory(meta_course=meta_course1, branch__code=Branches.NSK,
                   semester__year=2016, reviews='ccc')
     assert len(co.get_reviews()) == 2

@@ -21,7 +21,7 @@ from learning.gradebook import gradebook_data, BaseGradebookForm, \
 from learning.gradebook.imports import AssignmentGradesImport
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GradingSystems, \
-    StudentStatuses, GradeTypes
+    StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import Roles
@@ -198,38 +198,37 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, CSCTestCase):
                 self.assertIn(response.context['form'].GRADE_PREFIX + str(a_s.pk),
                               response.context['form'].fields)
 
-    def test_save_markssheet(self):
-        teacher = TeacherFactory()
-        self.doLogin(teacher)
-        students = StudentFactory.create_batch(2)
-        co = CourseFactory.create(teachers=[teacher])
-        for student in students:
-            EnrollmentFactory.create(student=student, course=co)
-        a1, a2 = AssignmentFactory.create_batch(2, course=co,
-                                                is_online=False)
-        url = co.get_gradebook_url()
-        form = {}
-        pairs = zip([StudentAssignment.objects.get(student=student, assignment=a)
-                     for student in students
-                     for a in [a1, a2]],
-            [2, 3, 4, 5])
-        for submission, grade in pairs:
-            enrollment = Enrollment.active.get(student=submission.student,
-                                               course=co)
-            field_name = BaseGradebookForm.GRADE_PREFIX + str(submission.pk)
-            form[field_name] = grade
-            field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(enrollment.pk)
-            form["initial-" + field_name] = GradeTypes.NOT_GRADED
-            form[field_name] = GradeTypes.GOOD
-        self.assertRedirects(self.client.post(url, form), url)
-        for a_s, grade in pairs:
-            self.assertEqual(grade, (StudentAssignment.objects
-                                     .get(pk=a_s.pk)
-                                     .score))
-        for student in students:
-            self.assertEqual('good', (Enrollment.active
-                                      .get(student=student, course=co)
-                                      .grade))
+
+@pytest.mark.django_db
+def test_save_gradebook(client, assert_redirect):
+    teacher = TeacherFactory()
+    client.login(teacher)
+    students = StudentFactory.create_batch(2)
+    course = CourseFactory(teachers=[teacher])
+    for student in students:
+        EnrollmentFactory.create(student=student, course=course)
+    a1, a2 = AssignmentFactory.create_batch(2, course=course, is_online=False)
+    teacher_gradebook_url = course.get_gradebook_url()
+    form = {}
+    pairs = zip([StudentAssignment.objects.get(student=student, assignment=a)
+                 for student in students
+                 for a in [a1, a2]],
+        [2, 3, 4, 5])
+    for submission, grade in pairs:
+        enrollment = Enrollment.active.get(student=submission.student,
+                                           course=course)
+        field_name = BaseGradebookForm.GRADE_PREFIX + str(submission.pk)
+        form[field_name] = grade
+        field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(enrollment.pk)
+        form["initial-" + field_name] = GradeTypes.NOT_GRADED
+        form[field_name] = GradeTypes.GOOD
+    assert_redirect(client.post(teacher_gradebook_url, form),
+                    teacher_gradebook_url)
+    for a_s, grade in pairs:
+        assert grade == StudentAssignment.objects.get(pk=a_s.pk).score
+    for student in students:
+        assert 'good' == Enrollment.active.get(student=student,
+                                               course=course).grade
 
 
 @pytest.mark.django_db
@@ -585,7 +584,7 @@ def test_gradebook_view_form_conflict(client):
 def test_gradebook_import_assignments_from_csv_security(client):
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
-    student_spb = StudentFactory(city_id='spb')
+    student_spb = StudentFactory(branch__code=Branches.SPB)
     EnrollmentFactory.create(student=student_spb, course=co)
     assignments = AssignmentFactory.create_batch(3, course=co,
                                                  is_online=False)
@@ -637,12 +636,12 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
 def test_gradebook_import_assignments_from_csv(client, tmpdir):
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
-    student1 = StudentFactory(city_id='spb', yandex_id='yandex1',
-                                    stepic_id='1')
-    student2 = StudentFactory(city_id='spb', yandex_id='yandex2',
-                                    stepic_id='2')
-    student3 = StudentFactory(city_id='spb', yandex_id='custom_one',
-                                    stepic_id='3')
+    student1 = StudentFactory(branch__code=Branches.SPB, yandex_id='yandex1',
+                              stepic_id='1')
+    student2 = StudentFactory(branch__code=Branches.SPB, yandex_id='yandex2',
+                              stepic_id='2')
+    student3 = StudentFactory(branch__code=Branches.SPB, yandex_id='custom_one',
+                              stepic_id='3')
     for s in [student1, student2, student3]:
         EnrollmentFactory.create(student=s, course=co)
     assignment = AssignmentFactory.create(course=co, is_online=False,

@@ -8,6 +8,7 @@ from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
 from auth.mixins import PermissionRequiredMixin
+from core.tests.factories import BranchFactory
 from core.tests.utils import CSCTestCase
 from core.timezone import now_local
 from core.urls import branch_aware_reverse, reverse
@@ -48,13 +49,13 @@ class CourseListTeacherTests(MyUtilitiesMixin, CSCTestCase):
             [Roles.GRADUATE]
         ]
         for groups in all_test_groups:
-            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
+            self.doLogin(UserFactory.create(groups=groups))
             if any(group in self.groups_allowed for group in groups):
                 self.assertStatusCode(200, self.url_name)
             else:
                 self.assertLoginRedirect(reverse(self.url_name))
             self.client.logout()
-        self.doLogin(CuratorFactory(city_id='spb'))
+        self.doLogin(CuratorFactory())
         self.assertStatusCode(200, self.url_name)
 
 
@@ -153,9 +154,9 @@ class CourseEditDescrTests(MyUtilitiesMixin, CSCTestCase):
 class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_security(self):
         teacher = TeacherFactory()
-        student = StudentFactory(city_id='spb')
+        student = StudentFactory()
         s = SemesterFactory.create_current()
-        co = CourseFactory(city_id='spb', semester=s,
+        co = CourseFactory(branch=student.branch, semester=s,
                            teachers=[teacher])
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
@@ -171,7 +172,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
             [Roles.STUDENT],
         ]
         for groups in test_groups:
-            self.doLogin(UserFactory.create(groups=groups, city_id='spb'))
+            self.doLogin(UserFactory.create(groups=groups))
             assert self.client.get(student_url).status_code == 403
             self.doLogout()
         self.doLogin(student)
@@ -183,9 +184,9 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(200, self.client.get(student_url).status_code)
 
     def test_assignment_contents(self):
-        student = StudentFactory(city_id='spb')
+        student = StudentFactory()
         semester = SemesterFactory.create_current()
-        co = CourseFactory.create(city_id='spb', semester=semester)
+        co = CourseFactory(branch=student.branch, semester=semester)
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects
@@ -196,10 +197,10 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertContains(self.client.get(url), a.text)
 
     def test_teacher_redirect_to_appropriate_link(self):
-        student = StudentFactory(city_id='spb')
+        student = StudentFactory()
         teacher = TeacherFactory()
         semester = SemesterFactory.create_current()
-        co = CourseFactory(city_id='spb', teachers=[teacher],
+        co = CourseFactory(branch=student.branch, teachers=[teacher],
                            semester=semester)
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
@@ -215,9 +216,9 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         self.assertRedirects(self.client.get(url), expected_url)
 
     def test_comment(self):
-        student = StudentFactory(city_id='spb')
+        student = StudentFactory()
         # Create open reading to make sure student has access to CO
-        co = CourseFactory(city_id='spb', is_open=True)
+        co = CourseFactory(branch=student.branch, is_open=True)
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects
@@ -263,7 +264,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups,
-                                            city_id=Branches.SPB))
+                                            branch__code=Branches.SPB))
             response = self.client.get(teacher_url)
             assert response.status_code == 403
             self.doLogout()
@@ -282,7 +283,7 @@ class ASTeacherDetailTests(MyUtilitiesMixin, CSCTestCase):
         ]
         for groups in test_groups:
             self.doLogin(UserFactory.create(groups=groups,
-                                            city_id=Branches.SPB))
+                                            branch__code=Branches.SPB))
             assert self.client.get(teacher_url).status_code == 403
             self.doLogout()
 
@@ -381,7 +382,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     resolver = lms_resolver(url)
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
     assert resolver.func.view_class.permission_required == "study.view_courses"
-    student_spb = StudentFactory(city_id='spb')
+    student_spb = StudentFactory(branch__code=Branches.SPB)
     client.login(student_spb)
     response = client.get(url)
     assert response.status_code == 200
@@ -391,7 +392,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     now_year, now_season = get_current_term_pair(student_spb.get_timezone())
     current_term_spb = SemesterFactory.create(year=now_year, type=now_season)
     cos = CourseFactory.create_batch(4, semester=current_term_spb,
-                                     city_id='spb', is_open=False)
+                                     branch=student_spb.branch, is_open=False)
     cos_available = cos[:2]
     cos_enrolled = cos[2:]
     prev_year = now_year - 1
@@ -408,18 +409,18 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert set(cos_archived) == set(response.context['archive_enrolled'])
     assert len(cos_available) == len(response.context['ongoing_rest'])
     assert set(cos_available) == set(response.context['ongoing_rest'])
-    # Add co from other city
+    # Add courses from other branch
     current_term_nsk = SemesterFactory.create_current(for_branch=Branches.NSK)
     co_nsk = CourseFactory.create(semester=current_term_nsk,
-                                  city_id='nsk', is_open=False)
+                                  branch__code=Branches.NSK, is_open=False)
     response = client.get(url)
     assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
     assert len(cos_available) == len(response.context['ongoing_rest'])
     assert len(cos_archived) == len(response.context['archive_enrolled'])
     # Test for student from nsk
-    student_nsk = StudentFactory(city_id='nsk')
+    student_nsk = StudentFactory(branch__code=Branches.NSK)
     client.login(student_nsk)
-    CourseFactory.create(semester__year=prev_year, city_id='nsk',
+    CourseFactory.create(semester__year=prev_year, branch=student_nsk.branch,
                          is_open=False)
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
@@ -428,7 +429,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(response.context['archive_enrolled']) == 0
     # Add open reading, it should be available on compscicenter.ru
     co_open = CourseFactory.create(semester=current_term_nsk,
-                                   city_id='nsk', is_open=True)
+                                   branch=student_nsk.branch, is_open=True)
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 2

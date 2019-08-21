@@ -283,7 +283,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, branch_id, **kwargs):
         filters = {"branch_id": branch_id}
-        students = ProgressReportForDiplomas.get_queryset(filters=filters)
+        students = ProgressReportForDiplomas.get_queryset(**filters)
 
         class DiplomaCourse(NamedTuple):
             type: str
@@ -337,11 +337,9 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     http_method_names = ['get']
 
     def get(self, request, branch_id, *args, **kwargs):
-        qs_filters = {
-            "filters": {"branch_id": branch_id}
-        }
-        progress_report = ProgressReportForDiplomas(request=request,
-                                                    qs_filters=qs_filters)
+        progress_report = ProgressReportForDiplomas(qs_filters={
+            "branch_id": branch_id
+        })
         return progress_report.output_csv()
 
 
@@ -350,8 +348,7 @@ class ProgressReportFullView(CuratorOnlyMixin, generic.base.View):
     output_format = None
 
     def get(self, request, *args, **kwargs):
-        progress_report = ProgressReportFull(honest_grade_system=True,
-                                             request=request)
+        progress_report = ProgressReportFull(honest_grade_system=True)
         if self.output_format == "csv":
             return progress_report.output_csv()
         elif self.output_format == "xlsx":
@@ -378,8 +375,7 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
         except (KeyError, ValueError):
             return HttpResponseBadRequest()
         progress_report = ProgressReportForSemester(semester,
-                                                    honest_grade_system=True,
-                                                    request=request)
+                                                    honest_grade_system=True)
         if self.output_format == "csv":
             return progress_report.output_csv()
         elif self.output_format == "xlsx":

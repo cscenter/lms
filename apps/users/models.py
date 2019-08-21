@@ -32,7 +32,8 @@ from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping
 from courses.models import Semester
 from learning.permissions import LearningPermissionsMixin
-from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeYears
+from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeYears, \
+    Branches
 from learning.utils import is_negative_grade
 from users.constants import GROUPS_IMPORT_TO_GERRIT, Roles, \
     SHADCourseGradeTypes, GenderTypes
@@ -421,7 +422,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
         return city_code if city_code else None
 
     def get_timezone(self) -> Timezone:
-        return settings.TIME_ZONES.get(self.city_id, DEFAULT_TIMEZONE)
+        return self.branch.get_timezone()
 
     @property
     def is_expelled(self):

@@ -2,10 +2,8 @@ from typing import NamedTuple
 
 import pytz
 from bitfield import BitField
-from django.apps import apps
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -15,6 +13,7 @@ from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from learning.settings import Branches
 
+# FIXME: тут хранятся бранчи  по натуральному ключу и лучше перенести этот кэш в middleware. А хочется ещё и по id
 BRANCH_CACHE = {}
 
 LATEX_MARKDOWN_HTML_ENABLED = _(

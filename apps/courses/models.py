@@ -198,7 +198,7 @@ class MetaCourse(TimeStampedModel):
 
 
 class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
-    TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
+    TIMEZONE_AWARE_FIELD_NAME = 'branch'
 
     meta_course = models.ForeignKey(
         MetaCourse,
@@ -292,7 +292,12 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         ordering = ["-semester", "meta_course__created"]
         verbose_name = _("Course offering")
         verbose_name_plural = _("Course offerings")
-        unique_together = [('meta_course', 'semester', 'city')]
+        constraints = [
+            models.UniqueConstraint(
+                fields=('meta_course', 'semester', 'branch'),
+                name='unique_course_for_branch_in_a_term'
+            ),
+        ]
 
     def __str__(self):
         return "{0}, {1}".format(smart_text(self.meta_course),
@@ -419,13 +424,10 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
                                     kwargs=self.url_kwargs,
                                     subdomain=settings.LMS_SUBDOMAIN)
 
-    def get_gradebook_url(self, for_curator=False, format=None):
-        if for_curator:
-            url_name = "staff:course_markssheet_staff"
-        elif format == "csv":
-            url_name = "teaching:gradebook_csv"
-        else:
-            url_name = "teaching:gradebook"
+    def get_gradebook_url(self, url_name=None, format=None):
+        url_name = url_name or "teaching:gradebook"
+        if format == "csv":
+            url_name = f"{url_name}_csv"
         return branch_aware_reverse(url_name, kwargs=self.url_kwargs)
     # TODO: Merge with `get_gradebook_url` after migrating to jinja2
     def get_gradebook_csv_url(self):
@@ -436,9 +438,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         return branch_aware_reverse('course_news_notifications_read',
                                     kwargs=self.url_kwargs,
                                     subdomain=settings.LMS_SUBDOMAIN)
-
-    def get_timezone(self) -> Timezone:
-        return settings.TIME_ZONES[self.city_id]
 
     def has_unread(self):
         from notifications.middleware import get_unread_notifications_cache
@@ -651,7 +650,7 @@ def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
     more than one class of the same type in a day.
 
     Format:
-        courses/<term_slug>/<city>-<course_slug>/slides/<generated_filename>
+        courses/<term_slug>/<branch_code>-<course_slug>/slides/<generated_filename>
 
     Example:
         courses/2018-autumn/spb-data-bases/slides/data_bases_lecture_231217.pdf
@@ -664,7 +663,7 @@ def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
     course_prefix = course_slug.replace("-", "_")
     filename = f"{course_prefix}_{instance.type}_{class_date}{ext}".lower()
     return os.path.join("courses", course.semester.slug,
-                        f"{course.city_id}-{course_slug}",
+                        f"{course.branch.code}-{course_slug}",
                         "slides", filename)
 
 
@@ -787,7 +786,7 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
 def course_class_attachment_upload_to(instance: "CourseClassAttachment",
                                       filename) -> str:
     """
-    Path format: courses/<term_slug>/<city>-<course_slug>/materials/<filename>
+    Format: courses/<term_slug>/<branch_code>-<course_slug>/materials/<filename>
 
     Example:
         courses/2018-autumn/spb-data-bases/materials/Лекция_1.pdf
@@ -797,7 +796,7 @@ def course_class_attachment_upload_to(instance: "CourseClassAttachment",
     filename = filename.replace(" ", "_")
     # TODO: transliterate?
     return os.path.join("courses", course.semester.slug,
-                        f"{course.city_id}-{course_slug}",
+                        f"{course.branch.code}-{course_slug}",
                         "materials", filename)
 
 

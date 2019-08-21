@@ -9,11 +9,12 @@ from django.forms.models import model_to_dict
 from django.utils.encoding import smart_text, smart_bytes
 
 from core.admin import get_admin_url
+from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.tests.factories import CourseFactory
-from learning.settings import StudentStatuses, GradeTypes
+from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import GraduateProfileFactory
 from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import Roles
@@ -94,7 +95,8 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         assert response.status_code == 200
         self.assertLoginRedirect(url)
         add_user_groups(user, [Roles.STUDENT])
-        user.city_id = 'spb'
+        user.branch = Branch.objects.get_by_natural_key(Branches.SPB,
+                                                        settings.SITE_ID)
         user.save()
         response = self.client.post(reverse('login'), user_data)
         assert response.status_code == 302
@@ -305,7 +307,7 @@ def test_student_should_have_enrollment_year(admin_client):
     response = admin_client.post(admin_url, form_data)
     assert response.status_code == 200
 
-    # Empty user.city_id and enrollment_year
+    # Empty enrollment_year
     def get_user_group_formset(response):
         form = None
         for inline_formset_obj in response.context['inline_admin_formsets']:
@@ -316,14 +318,6 @@ def test_student_should_have_enrollment_year(admin_client):
     assert user_group_form, "Inline form for UserGroup is missing"
     assert not user_group_form.is_valid()
     form_data.update({'enrollment_year': 2010})
-    response = admin_client.post(admin_url, form_data)
-    assert response.status_code == 200
-    user_group_form = get_user_group_formset(response)
-    assert user_group_form, "Inline form for UserGroup is missing"
-    assert not user_group_form.is_valid()
-    user.refresh_from_db()
-    assert user.groups.count() == 0
-    form_data.update({'city': 'spb'})
     response = admin_client.post(admin_url, form_data)
     assert response.status_code == 302
     user.refresh_from_db()

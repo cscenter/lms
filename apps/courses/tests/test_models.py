@@ -1,5 +1,7 @@
 import pytest
 from django.core.exceptions import ValidationError
+
+from core.models import Branch
 from core.tests.utils import CSCTestCase
 
 from courses.tests.factories import CourseNewsFactory, SemesterFactory, CourseFactory, \
@@ -8,16 +10,18 @@ from courses.tests.factories import CourseNewsFactory, SemesterFactory, CourseFa
 from courses.models import Semester, Course, Assignment
 from courses.constants import SemesterTypes
 from courses.utils import get_term_index, next_term_starts_at
+from learning.settings import Branches
 
 
 @pytest.mark.django_db
 def test_news_get_timezone(settings):
-    news = CourseNewsFactory(course__city_id='nsk')
-    assert news.get_timezone() == settings.TIME_ZONES['nsk']
-    news.course.city_id = 'spb'
+    news = CourseNewsFactory(course__branch__code=Branches.NSK)
+    assert news.get_timezone() == Branches.get_timezone(Branches.NSK)
+    news.course.branch = Branch.objects.get(code=Branches.SPB,
+                                            site_id=settings.SITE_ID)
     news.course.save()
     news.refresh_from_db()
-    assert news.get_timezone() == settings.TIME_ZONES['spb']
+    assert news.get_timezone() == Branches.get_timezone(Branches.SPB)
 
 
 @pytest.mark.django_db
@@ -109,27 +113,22 @@ class CourseTests(CSCTestCase):
         from django.utils import timezone
         future_year = datetime.datetime.now().year + 20
         some_year = future_year - 5
-        semesters = [Semester(year=year,
-                              type=t)
+        semesters = [SemesterFactory(year=year, type=t)
                      for t in ['spring', 'autumn']
                      for year in range(2010, future_year)]
-        # Save semesters in db dut to django 1.8 not supported build strategy
-        # with SubFactory
-        for semester in semesters:
-            semester.save()
         old_now = timezone.now
         timezone.now = lambda: (datetime.datetime(some_year, 4, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((Course(meta_course=MetaCourseFactory(name="Test course"),
-                                semester=semester)
-                         .in_current_term)
+        meta_course = MetaCourseFactory()
+        n_ongoing = sum(CourseFactory(meta_course=meta_course,
+                                      semester=semester).in_current_term
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = lambda: (datetime.datetime(some_year, 11, 8, 0, 0, 0)
                                 .replace(tzinfo=timezone.utc))
-        n_ongoing = sum((Course(meta_course=MetaCourseFactory(name="Test course"),
-                                semester=semester)
-                         .in_current_term)
+        meta_course = MetaCourseFactory()
+        n_ongoing = sum(CourseFactory(meta_course=meta_course,
+                                      semester=semester).in_current_term
                         for semester in semesters)
         self.assertEqual(n_ongoing, 1)
         timezone.now = old_now
@@ -165,10 +164,9 @@ class AssignmentTest(CSCTestCase):
     def test_is_open(self):
         import datetime
         from django.utils import timezone
-        a = AssignmentFactory.create()
+        a = AssignmentFactory()
         self.assertTrue(a.is_open)
-        a.deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
-                         - datetime.timedelta(days=1))
+        a.deadline_at = timezone.now() - datetime.timedelta(days=2)
         self.assertFalse(a.is_open)
 
 

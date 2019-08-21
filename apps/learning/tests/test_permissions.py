@@ -176,7 +176,7 @@ def test_enroll_in_course_by_invitation():
                            is_correspondence=False,
                            capacity=0)
     assert course.enrollment_is_open
-    student = StudentFactory(city_id=Branches.SPB)
+    student = StudentFactory(branch=course.branch)
     assert student.has_perm("learning.enroll_in_course", course)
     course_invitation = CourseInvitationFactory(course=course)
     assert student.has_perm("learning.enroll_in_course_by_invitation",
