@@ -72,8 +72,9 @@ class CalendarTeacherTests(MyUtilitiesMixin, CSCTestCase):
             CourseClassFactory
             .create_batch(5, course__teachers=[other_teacher],
                           date=this_month_date))
-        venue = LocationFactory(city_id=teacher_spb.branch.city_id)
-        events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
+        location = LocationFactory(city_id=teacher_spb.branch.city_id)
+        events = EventFactory.create_batch(2, date=this_month_date,
+                                           venue=location)
         # teacher should see only his own classes and non-course events
         resp = self.client.get(reverse(self.url_name))
         classes = flatten_calendar_month_events(resp.context['calendar'])
@@ -150,8 +151,8 @@ def test_student_personal_calendar_view(client):
     classes = flatten_calendar_month_events(
         client.get(next_month_url).context['calendar'])
     assert set(next_month_classes) == set(classes)
-    venue = LocationFactory(city_id=student_spb.branch.city_id)
-    events = EventFactory.create_batch(2, date=this_month_date, venue=venue)
+    location = LocationFactory(city_id=student_spb.branch.city_id)
+    events = EventFactory.create_batch(2, date=this_month_date, venue=location)
     response = client.get(calendar_url)
     assert response.status_code == 200
 
