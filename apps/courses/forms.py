@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from core.timezone.admin import TimezoneAwareModelForm, \
     TimezoneAwareSplitDateTimeField
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Venue
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
@@ -115,7 +115,7 @@ class CourseNewsForm(forms.ModelForm):
 
 class CourseClassForm(forms.ModelForm):
     venue = forms.ModelChoiceField(
-        queryset=Venue.objects.all(),
+        queryset=Location.objects.all(),
         label=_("Venue"),
         empty_label=None)
     type = forms.ChoiceField(

@@ -5,7 +5,7 @@ import datetime
 import factory
 from django.utils import timezone
 
-from core.tests.factories import BranchFactory, VenueFactory
+from core.tests.factories import BranchFactory, LocationFactory
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
@@ -98,7 +98,7 @@ class EventFactory(factory.DjangoModelFactory):
     class Meta:
         model = Event
 
-    venue = factory.SubFactory(VenueFactory)
+    venue = factory.SubFactory(LocationFactory)
     name = factory.Sequence(lambda n: "Test event %03d" % n)
     description = factory.Sequence(lambda n: "Test event description %03d" % n)
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)

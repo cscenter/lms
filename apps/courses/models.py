@@ -19,7 +19,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.mixins import DerivableFieldsMixin
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Venue, Branch
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Location, Branch
 from core.timezone import now_local, TzAware, Timezone, TimezoneAwareModel
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids, get_youtube_video_id
@@ -675,7 +675,7 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
     venue = models.ForeignKey(
-        Venue,
+        Location,
         verbose_name=_("CourseClass|Venue"),
         on_delete=models.PROTECT)
     type = models.CharField(

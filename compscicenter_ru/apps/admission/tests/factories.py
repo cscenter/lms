@@ -17,7 +17,7 @@ from admission.models import Campaign, Applicant, Contest, Test, \
 from admission.signals import post_save_interview
 from core.models import Branch
 from learning.settings import AcademicDegreeYears
-from core.tests.factories import BranchFactory, VenueFactory
+from core.tests.factories import BranchFactory, LocationFactory
 from users.constants import Roles
 from users.tests.factories import UserFactory, add_user_groups
 
@@ -175,7 +175,7 @@ class InterviewStreamFactory(factory.DjangoModelFactory):
         model = InterviewStream
 
     #
-    venue = factory.SubFactory(VenueFactory)
+    venue = factory.SubFactory(LocationFactory)
     campaign = factory.SubFactory(CampaignFactory)
     date = FuzzyDate(datetime.date(2011, 1, 1))
     # 13:00 - 15:00
