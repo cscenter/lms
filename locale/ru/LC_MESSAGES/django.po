@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-21 15:17+0000\n"
-"PO-Revision-Date: 2019-08-21 15:27+0000\n"
+"PO-Revision-Date: 2019-08-22 14:16+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -1368,7 +1368,7 @@ msgstr "Нск"
 
 #: apps/learning/settings.py:23
 msgid "Branches|Distance"
-msgstr "Заочное"
+msgstr "Заочное отделение"
 
 #: apps/learning/settings.py:25
 msgid "Distance"
