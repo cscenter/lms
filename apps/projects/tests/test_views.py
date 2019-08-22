@@ -2,6 +2,7 @@
 import pytest
 from django.utils.encoding import smart_bytes
 
+from core.tests.factories import BranchFactory
 from core.tests.utils import now_for_branch
 from core.urls import reverse_lazy, reverse
 from courses.tests.factories import SemesterFactory
@@ -252,6 +253,21 @@ def test_project_detail_reviewer(client, curator):
     current_project.save()
     response = client.get(url)
     assert smart_bytes("Следить за проектом") not in response.content
+
+
+@pytest.mark.django_db
+def test_project_detail_reporting_periods(client, curator):
+    branch_spb = BranchFactory(code=Branches.SPB)
+    current_term = SemesterFactory.create_current()
+    active_period = ReportingPeriodFactory(term=current_term,
+                                           branch=branch_spb,
+                                           score_excellent=10, score_good=6,
+                                           score_pass=3)
+    project = ProjectFactory(semester=current_term, branch=branch_spb)
+    response = client.get(project.get_absolute_url())
+    assert response.status_code == 200
+    assert len(response.context_data["reporting_periods"]) == 1
+    assert response.context_data["reporting_periods"][0] == active_period
 
 
 @pytest.mark.django_db

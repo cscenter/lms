@@ -10,7 +10,7 @@ semester_slug = r"(?P<semester_year>\d{4})-(?P<semester_type>" + _terms + r")"
 
 
 # FIXME: move to settings, replace with branch code (for cs center) But how? :<
-RE_COURSE_URI = r"^(?P<course_slug>[-\w]+)/(?P<branch_code_request>nsk|kzn|spb|)(?P<branch_trailing_slash>/?)" + semester_slug + r"/"
+RE_COURSE_URI = r"^(?P<course_slug>[-\w]+)/(?P<branch_code_request>nsk|kzn|spb|distance|)(?P<branch_trailing_slash>/?)" + semester_slug + r"/"
 
 
 urlpatterns = [

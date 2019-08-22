@@ -64,6 +64,7 @@ class ReportingPeriodDict(dict):
         for period in queryset:
             branches = []
             if period.branch_id is None:
+                # FIXME: restrict by site, code is not unique anymore
                 for branch_code, _ in Branches.choices:
                     branches.append(branch_code)
             else:
@@ -537,7 +538,7 @@ class Project(TimezoneAwareModel, TimeStampedModel):
         return instance
 
     def __str__(self):
-        return smart_text(self.name)
+        return f"{self.name}, {self.semester}"
 
     def get_absolute_url(self):
         return reverse('projects:project_detail', args=[self.pk])
