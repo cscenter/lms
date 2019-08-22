@@ -8,6 +8,7 @@ from django.http import Http404
 from django.utils.timezone import now
 from django.views import generic
 from django_ical.views import ICalFeed
+from registration import signals
 from registration.backends.default.views import RegistrationView
 from vanilla import DetailView
 
@@ -27,12 +28,20 @@ from users.models import User
 
 class AsyncEmailRegistrationView(RegistrationView):
     """Send activation email using redis queue"""
-    # Create inactive user without sending email
-    SEND_ACTIVATION_EMAIL = False
-
     def register(self, form):
-        new_user = super().register(form)
         site = get_current_site(self.request)
+        new_user_instance = form.save(commit=False)
+        new_user_instance.branch = self.request.branch
+        new_user = self.registration_profile.objects.create_inactive_user(
+            new_user=new_user_instance,
+            site=site,
+            send_email=False,
+            request=self.request,
+        )
+        signals.user_registered.send(sender=self.__class__,
+                                     user=new_user,
+                                     request=self.request)
+        new_user.add_group(Roles.STUDENT)
         activation_url = reverse("registration_activate", kwargs={
             "activation_key": new_user.registrationprofile.activation_key
         })

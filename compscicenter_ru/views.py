@@ -36,6 +36,7 @@ from core.utils import bucketize, is_club_site
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import Enrollment, GraduateProfile
 from core.models import Branch
+from learning.roles import Roles
 from projects.constants import ProjectTypes
 from projects.models import ProjectStudent
 from learning.settings import Branches
@@ -675,14 +676,8 @@ class TeacherDetailView(DetailView):
                    .select_related('semester', 'meta_course', 'branch')
                    .order_by('-semester__index'))
         return (User.objects
+                .filter(group__role=Roles.TEACHER)
                 .prefetch_related(
                     Prefetch('teaching_set',
                              queryset=courses,
                              to_attr='course_offerings')))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        teacher = context[self.context_object_name]
-        if not teacher.is_teacher:
-            raise Http404
-        return context
