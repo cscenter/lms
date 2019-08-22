@@ -12,7 +12,11 @@ def fix_branches(apps, schema_editor):
             site_id = settings.CLUB_SITE_ID
         else:
             site_id = settings.CENTER_SITE_ID
-        branch = Branch.objects.get(code=c.city_id, site_id=site_id)
+        if c.city_id == 'online':
+            code = 'distance'
+        else:
+            code = c.city_id
+        branch = Branch.objects.get(code=code, site_id=site_id)
         c.branch = branch
         c.save(update_fields=['branch'])
 
