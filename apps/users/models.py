@@ -198,9 +198,7 @@ class StudentProfile(models.Model):
         "core.Branch",
         verbose_name=_("Branch"),
         related_name="+",  # Disable backwards relation
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True)
+        on_delete=models.PROTECT,)
     university = models.CharField(
         _("University"),
         max_length=255,

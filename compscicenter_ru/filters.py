@@ -5,6 +5,7 @@ from django.http import QueryDict
 from django.utils.translation import ugettext_lazy as _
 from django_filters import FilterSet, Filter, ChoiceFilter
 
+from core.models import Branch
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.constants import SemesterTypes
 from courses.models import Course
@@ -44,7 +45,8 @@ class BranchChoiceFilter(ChoiceFilter):
         """
         if value == self.null_value:
             value = None
-        qs = qs.in_city(value)
+        branch = Branch.objects.get_by_natural_key(value, settings.SITE_ID)
+        qs = qs.in_branches(branch.pk)
         return qs.distinct() if self.distinct else qs
 
 
