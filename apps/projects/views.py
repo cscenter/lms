@@ -267,7 +267,7 @@ class ProjectDetailView(CreateView):
         can_send_report = (project_student and
                            not project_student.has_final_grade())
         # FIXME: только для залогиненных.
-        key = ReportingPeriodKey(project.branch_id, project.project_type)
+        key = ReportingPeriodKey(project.branch.code, project.project_type)
         reporting_periods = (ReportingPeriod.get_periods(term_id=project.semester_id)
                              .get(key, []))
         reports = Report.objects.filter(project_student__project=project)
