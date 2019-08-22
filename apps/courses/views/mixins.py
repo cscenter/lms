@@ -1,5 +1,7 @@
 import logging
 
+from django.conf import settings
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 
@@ -8,9 +10,8 @@ from courses.models import Course
 logger = logging.getLogger(__name__)
 
 
-# FIXME: move to courses.settings
 # Don't bind a course lookup with `request.site` if set to False.
-COURSE_FRIENDLY_URL_USE_SITE = False
+COURSE_FRIENDLY_URL_USE_SITE = getattr(settings, "COURSE_FRIENDLY_URL_USE_SITE", True)
 
 
 class CourseURLParamsMixin:
@@ -51,7 +52,9 @@ class CourseURLParamsMixin:
             course = self._get_course_by_branch_id()
         else:
             courses = list(self.get_course_queryset()
-                           .filter(branch__code=self.request.branch.code)
+                           .filter(Q(branch__code=self.request.branch.code,
+                                     is_correspondence=False) |
+                                   Q(is_correspondence=True))
                            .order_by())
             if not courses:
                 raise Http404
@@ -66,7 +69,7 @@ class CourseURLParamsMixin:
     def _get_course_by_branch_id(self):
         return get_object_or_404(self.get_course_queryset()
                                  .in_branches(self.request.branch.pk)
-                                 .get())
+                                 .filter())
 
     def get_course_queryset(self):
         """

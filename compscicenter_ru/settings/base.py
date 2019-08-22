@@ -15,6 +15,11 @@ SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
     LMS_SUBDOMAIN: 'my_compscicenter_ru.urls',
 }
+
+# Don't bind a course lookup with `request.site`
+COURSE_FRIENDLY_URL_USE_SITE = False
+
+
 PROJECT_DIR = Path(__file__).parents[1]
 
 MIDDLEWARE = [
