@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.forms import SlugField
 from django.http import QueryDict
 from django.utils.translation import ugettext_lazy as _
@@ -45,8 +46,8 @@ class BranchChoiceFilter(ChoiceFilter):
         """
         if value == self.null_value:
             value = None
-        branch = Branch.objects.get_by_natural_key(value, settings.SITE_ID)
-        qs = qs.in_branches(branch.pk)
+        qs = qs.filter(Q(branch__code=value, is_correspondence=False) |
+                       Q(is_correspondence=True))
         return qs.distinct() if self.distinct else qs
 
 
