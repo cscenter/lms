@@ -677,6 +677,7 @@ class TeacherDetailView(DetailView):
                    .order_by('-semester__index'))
         return (User.objects
                 .filter(group__role=Roles.TEACHER)
+                .distinct()
                 .prefetch_related(
                     Prefetch('teaching_set',
                              queryset=courses,
