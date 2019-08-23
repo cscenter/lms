@@ -32,12 +32,11 @@ class CalendarWeek:
     days: List[CalendarDay] = attr.ib()
 
 
+# TODO: Month calendar has event interface, but timetable is not. Do not use for timetable right now?
 @attr.s
 class CalendarEvent:
     """
-    Wrapper for course events to make them look consistent.
-
-    Support: course classes, non-course events
+    Wrapper for course events. Supports course classes, non-course events
     """
     event = attr.ib()
 
@@ -67,7 +66,6 @@ class CalendarEvent:
 
     @property
     def description(self):
-        # In case of course class event it returns class name
         return self.event.name
 
 
@@ -152,7 +150,6 @@ class MonthEventsCalendar(EventsCalendar):
         self.year = year
         self.month = month
         self._date = datetime.date(year, month, 1)
-        # TODO: Filter out events from the month or date range for full weeks range?
         self._add_events((e for e in events if
                           e.date.month == month and e.date.year == year))
 
@@ -176,9 +173,7 @@ class MonthEventsCalendar(EventsCalendar):
         return super().by_week(self.year, self.month)
 
     def days(self) -> List[CalendarDay]:
-        """Returns attached events in the month grouped by day"""
-        # FIXME: contains days from all full weeks in the month
-        # FIXME: сейчас используется на странице препода (там list view), кажется, в таком случае показывать предыдущие даты не совсем уместно
+        """Returns events grouped by day"""
         cal = Calendar(firstweekday=MONDAY_WEEKDAY)
         dates = cal.itermonthdates(self.year, self.month)
         first = last = next(dates)

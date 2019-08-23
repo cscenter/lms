@@ -21,7 +21,7 @@ from courses.models import CourseClass, Course, Assignment
 from courses.utils import get_term_index, \
     get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
-from learning.calendar import get_month_events, get_cities_for_teacher
+from learning.calendar import get_teacher_month_events
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
     AssignmentCommentForm
 from learning.gradebook.views import GradeBookListBaseView
@@ -278,8 +278,7 @@ class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
     authorized teacher has taught.
     """
     def get_events(self, year, month, **kwargs):
-        cities = get_cities_for_teacher(self.request.user, year, month)
-        return get_month_events(year, month, cities)
+        return get_teacher_month_events(self.request.user, year, month)
 
 
 class CalendarPersonalView(CalendarFullView):
@@ -291,9 +290,8 @@ class CalendarPersonalView(CalendarFullView):
     template_name = "learning/calendar.html"
 
     def get_events(self, year, month, **kwargs):
-        cities = get_cities_for_teacher(self.request.user, year, month)
-        return get_month_events(year, month, cities,
-                                for_teacher=self.request.user)
+        return get_teacher_month_events(self.request.user, year, month,
+                                        personal=True)
 
 
 class CourseListView(TeacherOnlyMixin, generic.ListView):

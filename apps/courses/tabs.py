@@ -340,7 +340,7 @@ def get_course_classes(course, **kwargs) -> List[CourseClass]:
     classes = []
     course_classes_qs = (
         course.courseclass_set
-            .select_related("venue")
+            .select_related("venue", "venue__location")
             .annotate(attachments_cnt=Count('courseclassattachment'))
             .annotate(has_attachments=Case(
                 When(attachments_cnt__gt=0, then=Value(True)),

@@ -38,36 +38,6 @@ from users.thumbnails import UserThumbnailMixin
 logger = logging.getLogger(__name__)
 
 
-class LearningSpace(TimezoneAwareModel, models.Model):
-    TIMEZONE_AWARE_FIELD_NAME = 'location'
-
-    location = models.ForeignKey(
-        Location,
-        verbose_name=_("Location|Name"),
-        related_name="learning_spaces",
-        null=True, blank=True,
-        on_delete=models.PROTECT)
-    branch = models.ForeignKey(
-        Branch,
-        verbose_name=_("Branch"),
-        related_name="learning_spaces",
-        on_delete=models.PROTECT)
-    name = models.CharField(
-        verbose_name=_("Name"),
-        max_length=140,
-        help_text=_("Overrides location name"),
-        blank=True)
-    description = models.TextField(
-        _("Description"),
-        blank=True,
-        help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    order = models.PositiveIntegerField(verbose_name=_('Order'), default=100)
-
-    class Meta:
-        verbose_name = _("Learning Space")
-        verbose_name_plural = _("Learning Spaces")
-
-
 class Enrollment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
 
@@ -502,10 +472,15 @@ class CourseNewsNotification(TimeStampedModel):
 
 
 class Event(TimeStampedModel):
-    objects = EventQuerySet.as_manager()
+    branch = models.ForeignKey(
+        Branch,
+        verbose_name=_("Branch"),
+        related_name="+",  # Disable backwards relation
+        on_delete=models.CASCADE)
     venue = models.ForeignKey(
         Location,
         verbose_name=_("CourseClass|Venue"),
+        null=True, blank=True,
         on_delete=models.PROTECT)
     name = models.CharField(_("CourseClass|Name"), max_length=255)
     description = models.TextField(
@@ -515,6 +490,8 @@ class Event(TimeStampedModel):
     date = models.DateField(_("Date"))
     starts_at = models.TimeField(_("Starts at"))
     ends_at = models.TimeField(_("Ends at"))
+
+    objects = EventQuerySet.as_manager()
 
     class Meta:
         ordering = ("-date", "-starts_at", "name")

@@ -13,7 +13,7 @@ from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseTeacher, Course, CourseClassAttachment, \
     Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
-    AssignmentAttachment
+    AssignmentAttachment, LearningSpace
 from users.constants import Roles
 from users.models import User
 
@@ -69,6 +69,12 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     form = CourseAdminForm
 
 
+class LearningSpaceAdmin(admin.ModelAdmin):
+    list_filter = ('branch',)
+    list_display = ['location', 'order']
+    list_select_related = ('location',)
+
+
 class CourseClassAttachmentAdmin(admin.ModelAdmin):
     list_filter = ['course_class']
     list_display = ['course_class', '__str__']
@@ -81,9 +87,10 @@ class CourseClassAttachmentInline(admin.TabularInline):
 class CourseClassAdmin(admin.ModelAdmin):
     save_as = True
     date_hierarchy = 'date'
-    list_filter = ['type', 'venue']
+    list_filter = ['type']
     search_fields = ['course__meta_course__name']
     list_display = ['id', 'name', 'course', 'date', 'venue', 'type']
+    raw_id_fields = ['venue']
     inlines = [CourseClassAttachmentInline]
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
@@ -192,6 +199,7 @@ class AssignmentAdmin(admin.ModelAdmin):
 admin.site.register(MetaCourse, MetaCourseAdmin)
 admin.site.register(Course, CourseAdmin)
 admin.site.register(Semester, SemesterAdmin)
+admin.site.register(LearningSpace, LearningSpaceAdmin)
 admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseClassAttachment, CourseClassAttachmentAdmin)
 admin.site.register(CourseNews, CourseNewsAdmin)

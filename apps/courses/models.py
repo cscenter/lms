@@ -20,7 +20,7 @@ from sorl.thumbnail import ImageField
 
 from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Location, Branch
-from core.timezone import now_local, TzAware, Timezone, TimezoneAwareModel
+from core.timezone import now_local, Timezone, TimezoneAwareModel
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids, get_youtube_video_id
 from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
@@ -32,6 +32,43 @@ from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
 from .micawber_providers import get_oembed_html
 from .tasks import maybe_upload_slides_yandex
+
+
+class LearningSpace(TimezoneAwareModel, models.Model):
+    TIMEZONE_AWARE_FIELD_NAME = 'location'
+
+    location = models.ForeignKey(
+        Location,
+        verbose_name=_("Location|Name"),
+        related_name="learning_spaces",
+        null=True, blank=True,
+        on_delete=models.PROTECT)
+    branch = models.ForeignKey(
+        Branch,
+        verbose_name=_("Branch"),
+        related_name="learning_spaces",
+        on_delete=models.PROTECT)
+    name = models.CharField(
+        verbose_name=_("Name"),
+        max_length=140,
+        help_text=_("Overrides location name"),
+        blank=True)
+    description = models.TextField(
+        _("Description"),
+        blank=True,
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    order = models.PositiveIntegerField(verbose_name=_('Order'), default=100)
+
+    class Meta:
+        verbose_name = _("Learning Space")
+        verbose_name_plural = _("Learning Spaces")
+
+    def __str__(self):
+        return self.name if self.name else str(self.location)
+
+    @property
+    def address(self):
+        return self.location.address
 
 
 class Semester(models.Model):
@@ -675,7 +712,7 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Course"),
         on_delete=models.PROTECT)
     venue = models.ForeignKey(
-        Location,
+        LearningSpace,
         verbose_name=_("CourseClass|Venue"),
         on_delete=models.PROTECT)
     type = models.CharField(

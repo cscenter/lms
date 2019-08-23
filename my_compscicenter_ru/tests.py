@@ -2,6 +2,7 @@ import factory
 import pytest
 from django.contrib.sites.models import Site
 
+from core.tests.factories import BranchFactory
 from core.urls import reverse
 from users.constants import Roles
 from users.models import User
@@ -17,6 +18,7 @@ def test_login_restrictions(client, settings):
     new_site = Site(domain='foo.bar.baz', name='foo_bar_baz')
     new_site.save()
     user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
+    user_data["branch"] = BranchFactory()
     student = User.objects.create_user(**user_data)
     # Try to login without groups at all
     response = client.post(reverse('login'), user_data)

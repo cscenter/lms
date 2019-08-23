@@ -113,7 +113,7 @@
                               {{ class.name }}</a><span class="text-muted">, {% if class.type == 'lecture'%}{% trans 'Lecture'|lower %}{% else %}{% trans 'Seminar'|lower %}</span>{% endif %}
                           </td>
                           <td>
-                            <a href="{{ class.venue.get_absolute_url }}">{{ class.venue }}</a>
+                            <a href="{{ class.venue.location.get_absolute_url }}">{{ class.venue.location.name }}</a>
                           </td>
                           <td>
                             {{ class.materials_str|safe }}

@@ -3,7 +3,7 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.http import Http404
 from django.utils.timezone import now
 from django.views import generic
@@ -60,6 +60,7 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
 
     def get_events(self, year, month, **kwargs):
         classes = (CourseClass.objects
+                   .filter(~Q(course__semester__type=SemesterTypes.SUMMER))
                    .for_calendar()
                    .in_month(year, month)
                    .in_branches(self.request.branch.id))

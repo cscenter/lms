@@ -285,17 +285,6 @@ def test_reenrollment(client):
 
 
 @pytest.mark.django_db
-def test_student_middleware(client):
-    student = StudentFactory(branch_id=None)
-    client.login(student)
-    course_spb = CourseFactory(branch__code=Branches.SPB)
-    form = {'course_pk': course_spb.pk}
-    response = client.post(course_spb.get_enroll_url(), form)
-    assert response.status_code == 302
-    assert response.url == '/'
-
-
-@pytest.mark.django_db
 def test_enrollment_in_other_branch(client):
     tomorrow = now_for_branch(Branches.SPB) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
@@ -313,7 +302,7 @@ def test_enrollment_in_other_branch(client):
     response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 403
     assert Enrollment.objects.count() == 1
-    student = StudentFactory(branch_id=None)
+    student = StudentFactory(branch__code='xxx')
     # Check button visibility
     Enrollment.objects.all().delete()
     client.login(student_spb)

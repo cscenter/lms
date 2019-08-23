@@ -9,14 +9,8 @@ from core.timezone.admin import TimezoneAwareModelForm, \
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from learning.models import GraduateProfile, Invitation, CourseInvitation, \
-    LearningSpace
+from learning.models import GraduateProfile, Invitation, CourseInvitation
 from .models import AssignmentComment, Enrollment, Event, Useful
-
-
-class LearningSpaceAdmin(admin.ModelAdmin):
-    list_filter = ('branch',)
-    list_display = ['location', 'order']
 
 
 class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
@@ -92,10 +86,11 @@ class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
             return ['score_changed', 'state']
 
 
-class NonCourseEventAdmin(admin.ModelAdmin):
+class EventAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
-    list_filter = ['venue']
+    list_filter = ['branch']
     list_display = ['name', 'date', 'venue']
+    list_select_related = ('venue',)
 
 
 class UsefulAdmin(admin.ModelAdmin):
@@ -129,10 +124,9 @@ class InvitationAdmin(admin.ModelAdmin):
     get_link.short_description = _("Invitation Link")
 
 
-admin.site.register(LearningSpace, LearningSpaceAdmin)
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(Invitation, InvitationAdmin)
-admin.site.register(Event, NonCourseEventAdmin)
+admin.site.register(Event, EventAdmin)
 admin.site.register(Useful, UsefulAdmin)
 admin.site.register(GraduateProfile, GraduateProfileAdmin)

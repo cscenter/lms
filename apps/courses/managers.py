@@ -54,19 +54,11 @@ class CourseClassQuerySet(query.QuerySet):
     def for_calendar(self):
         return (self
                 .select_related('course', 'course__meta_course',
-                                'course__semester')
+                                'course__semester', 'course__branch')
                 .order_by('date', 'starts_at'))
 
     def for_timetable(self):
-        return self.for_calendar().select_related('venue')
-
-    def in_city(self, city_code):
-        return self.in_cities([city_code])
-
-    def in_cities(self, city_codes: List[str]):
-        return self.filter(Q(venue__city_id__in=city_codes,
-                             course__is_correspondence=False) |
-                           Q(course__is_correspondence=True))
+        return self.for_calendar().select_related('venue', 'venue__location')
 
     def in_branches(self, *branches: List[int]):
         return self.filter(Q(course__branch_id__in=branches,
@@ -107,14 +99,6 @@ class _CourseDefaultManager(models.Manager):
 
 
 class CourseQuerySet(models.QuerySet):
-    def in_city(self, city_code):
-        _q = {"is_correspondence": False}
-        if isinstance(city_code, (list, tuple)):
-            _q["city_id__in"] = city_code
-        else:
-            _q["city_id__exact"] = city_code
-        return self.filter(Q(**_q) | Q(is_correspondence=True))
-
     # FIXME: accept PK's or Branch objects?
     def in_branches(self, *branches: List[int]):
         return self.filter(Q(branch_id__in=branches, is_correspondence=False) |

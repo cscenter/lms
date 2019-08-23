@@ -1,4 +1,6 @@
+from abc import ABC, abstractmethod
 from itertools import chain
+from typing import Iterable
 
 import attr
 from django.db.models import Q
@@ -18,29 +20,45 @@ class LearningCalendarEvent(CalendarEvent):
         return self.event.name
 
 
-def get_month_events(year, month, cities, for_teacher=None, for_student=None):
-    study_events = (Event.objects
-                    .for_calendar()
+def get_month_events(year, month, base_events_qs, base_course_class_qs):
+    study_events = (base_events_qs
                     .in_month(year, month)
-                    .in_cities(cities))
-
-    classes = (CourseClass.objects
+                    .order_by('date', 'starts_at'))
+    classes = (base_course_class_qs
                .for_calendar()
-               .in_month(year, month)
-               .in_cities(cities))
-
-    if for_teacher:
-        classes = classes.for_teacher(for_teacher)
-    elif for_student:
-        classes = classes.for_student(for_student)
-    elif is_club_site():
-        # Hide summer classes on full calendar
-        classes = classes.filter(~Q(course__semester__type=SemesterTypes.SUMMER))
-
+               .in_month(year, month))
     return chain(
         (CalendarEvent(e) for e in classes),
         (LearningCalendarEvent(e) for e in study_events)
     )
+
+
+def get_student_month_events(user, year, month, personal=False):
+    """
+    Returns non course events and course classes in the student's home
+    branch. Set `personal=True` if needs to filter out classes by courses
+    which student enrolled in.
+    """
+    branches = [user.branch_id]
+    events_qs = Event.objects.filter(branch_id__in=branches)
+    classes_qs = CourseClass.objects.in_branches(*branches)
+    if personal:
+        classes_qs = classes_qs.for_student(user)
+    return get_month_events(year, month, events_qs, classes_qs)
+
+
+def get_teacher_month_events(user, year, month, personal=False):
+    """
+    Returns non course events and course classes for branches where
+    user has been participated as a teacher. Set `personal=True` if
+    needs to filter out classes by courses taught by the user.
+    """
+    branches = get_branches_for_teacher(user, year, month)
+    events_qs = Event.objects.filter(branch_id__in=branches)
+    classes_qs = CourseClass.objects.in_branches(*branches)
+    if personal:
+        classes_qs = classes_qs.for_teacher(user)
+    return get_month_events(year, month, events_qs, classes_qs)
 
 
 def get_cities_for_teacher(user, year, month):
@@ -58,3 +76,19 @@ def get_cities_for_teacher(user, year, month):
     if not cities and user.branch.city_id:
         cities = [user.branch.city_id]
     return cities
+
+
+def get_branches_for_teacher(user, year, month):
+    """
+    Returns all branches where user has been participated as a teacher
+    """
+    term_indexes = [get_term_index(*term) for term in
+                    get_terms_for_calendar_month(year, month)]
+    branches = set(Course.objects
+                   .filter(semester__index__in=term_indexes,
+                           teachers=user)
+                   .values_list("branch_id", flat=True)
+                   .distinct())
+    branches.add(user.branch_id)
+    print(branches)
+    return branches

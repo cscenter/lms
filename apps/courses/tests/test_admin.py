@@ -6,10 +6,13 @@ from core.urls import reverse
 from courses.models import Assignment
 from courses.tests.factories import CourseFactory
 from learning.settings import Branches
+from users.tests.factories import CuratorFactory
 
 
 @pytest.mark.django_db
-def test_assignment_admin_view(settings, admin_client):
+def test_assignment_admin_view(settings, client):
+    curator = CuratorFactory()
+    client.login(curator)
     # Datetime widget formatting depends on locale, change it
     settings.LANGUAGE_CODE = 'ru'
     co_in_spb = CourseFactory(branch__code=Branches.SPB)
@@ -27,7 +30,7 @@ def test_assignment_admin_view(settings, admin_client):
     }
     # Test with empty branch aware field
     add_url = reverse('admin:courses_assignment_add')
-    response = admin_client.post(add_url, form_data)
+    response = client.post(add_url, form_data)
     assert response.status_code == 200
     widget_html = response.context['adminform'].form['deadline_at'].as_widget()
     widget = BeautifulSoup(widget_html, "html.parser")
@@ -35,7 +38,7 @@ def test_assignment_admin_view(settings, admin_client):
     assert time_input.get('value') == '00:00:00'
     # Send valid data
     form_data["course"] = co_in_spb.pk
-    response = admin_client.post(add_url, form_data, follow=True)
+    response = client.post(add_url, form_data, follow=True)
     assert response.status_code == 200
     message = list(response.context['messages'])[0]
     assert 'success' in message.tags
@@ -48,7 +51,7 @@ def test_assignment_admin_view(settings, admin_client):
     assert assignment.deadline_at.minute == 0
     # Admin widget shows localized time
     change_url = get_admin_url(assignment)
-    response = admin_client.get(change_url)
+    response = client.get(change_url)
     widget_html = response.context['adminform'].form['deadline_at'].as_widget()
     widget = BeautifulSoup(widget_html, "html.parser")
     time_input = widget.find('input', {"name": 'deadline_at_1'})
@@ -56,7 +59,7 @@ def test_assignment_admin_view(settings, admin_client):
     date_input = widget.find('input', {"name": 'deadline_at_0'})
     assert date_input.get('value') == '29.06.2017'
     # We can't update course offering through admin interface
-    response = admin_client.post(change_url, form_data)
+    response = client.post(change_url, form_data)
     assert response.status_code == 302
     assignment.refresh_from_db()
     assert assignment.course_id == co_in_spb.pk
@@ -64,9 +67,9 @@ def test_assignment_admin_view(settings, admin_client):
     assignment.course = co_in_nsk
     assignment.save()
     form_data["deadline_at_1"] = "00:00:00"
-    response = admin_client.post(change_url, form_data)
+    response = client.post(change_url, form_data)
     assignment.refresh_from_db()
-    response = admin_client.get(change_url)
+    response = client.get(change_url)
     widget_html = response.context['adminform'].form['deadline_at'].as_widget()
     widget = BeautifulSoup(widget_html, "html.parser")
     time_input = widget.find('input', {"name": 'deadline_at_1'})
@@ -77,10 +80,10 @@ def test_assignment_admin_view(settings, admin_client):
     assignment.course = co_in_spb
     assignment.save()
     form_data["deadline_at_1"] = "06:00:00"
-    response = admin_client.post(change_url, form_data)
+    response = client.post(change_url, form_data)
     assert response.status_code == 302
     assignment.refresh_from_db()
-    response = admin_client.get(change_url)
+    response = client.get(change_url)
     widget_html = response.context['adminform'].form['deadline_at'].as_widget()
     widget = BeautifulSoup(widget_html, "html.parser")
     time_input = widget.find('input', {"name": 'deadline_at_1'})
@@ -92,10 +95,10 @@ def test_assignment_admin_view(settings, admin_client):
     assignment.course = co_in_nsk
     assignment.save()
     form_data["deadline_at_1"] = "10:00:00"
-    response = admin_client.post(change_url, form_data)
+    response = client.post(change_url, form_data)
     assert response.status_code == 302
     assignment.refresh_from_db()
-    response = admin_client.get(change_url)
+    response = client.get(change_url)
     widget_html = response.context['adminform'].form['deadline_at'].as_widget()
     widget = BeautifulSoup(widget_html, "html.parser")
     time_input = widget.find('input', {"name": 'deadline_at_1'})
