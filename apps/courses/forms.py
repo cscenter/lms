@@ -12,7 +12,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
-    Assignment
+    Assignment, LearningSpace
 from courses.constants import ClassTypes
 from core.forms import CANCEL_SAVE_PAIR
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
@@ -115,7 +115,7 @@ class CourseNewsForm(forms.ModelForm):
 
 class CourseClassForm(forms.ModelForm):
     venue = forms.ModelChoiceField(
-        queryset=Location.objects.all(),
+        queryset=LearningSpace.objects.all(),
         label=_("Venue"),
         empty_label=None)
     type = forms.ChoiceField(
@@ -164,7 +164,7 @@ class CourseClassForm(forms.ModelForm):
         assert course is not None
         super().__init__(*args, **kwargs)
         self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
-            city_id=course.city_id)
+            branch_id=course.branch_id)
         self.instance.course = course
 
         self.helper = FormHelper(self)
@@ -208,7 +208,6 @@ class CourseClassForm(forms.ModelForm):
                 CANCEL_SAVE_PAIR
             )
         )
-
 
     class Meta:
         model = CourseClass

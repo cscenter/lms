@@ -17,7 +17,7 @@ from courses.models import CourseClass, Semester, Course
 from courses.utils import get_current_term_pair, get_term_index
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
-from learning.calendar import get_month_events
+from learning.calendar import get_student_month_events
 from learning.forms import AssignmentCommentForm
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
@@ -35,7 +35,7 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
     permission_required = "study.view_schedule"
 
     def get_events(self, year, month, **kwargs):
-        return get_month_events(year, month, [self.request.user.branch.city_id])
+        return get_student_month_events(self.request.user, year, month)
 
 
 class CalendarPersonalView(CalendarFullView):
@@ -47,8 +47,27 @@ class CalendarPersonalView(CalendarFullView):
     template_name = "learning/calendar.html"
 
     def get_events(self, year, month, **kwargs):
-        return get_month_events(year, month, [self.request.user.branch.city_id],
-                                for_student=self.request.user)
+        return get_student_month_events(self.request.user, year, month,
+                                        personal=True)
+
+
+class TimetableView(PermissionRequiredMixin, WeekEventsView):
+    """Shows classes for courses which authorized student enrolled in"""
+    template_name = "learning/study/timetable.html"
+    permission_required = "study.view_schedule"
+
+    def get_events(self, iso_year, iso_week,
+                   **kwargs) -> Iterable[CalendarEvent]:
+        # TODO: Add NonCourseEvents like in a calendar view?
+        return (CalendarEvent(e) for e in self._get_classes(iso_year, iso_week))
+
+    def _get_classes(self, iso_year, iso_week):
+        w = Week(iso_year, iso_week)
+        qs = (CourseClass.objects
+              .for_timetable()
+              .filter(date__range=[w.monday(), w.sunday()])
+              .for_student(self.request.user))
+        return qs
 
 
 class StudentAssignmentListView(PermissionRequiredMixin, ListView):
@@ -130,25 +149,6 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
 
     def get_success_url(self):
         return self.student_assignment.get_student_url()
-
-
-class TimetableView(PermissionRequiredMixin, WeekEventsView):
-    """Shows classes for courses which authorized student enrolled in"""
-    template_name = "learning/study/timetable.html"
-    permission_required = "study.view_schedule"
-
-    def get_events(self, iso_year, iso_week,
-                   **kwargs) -> Iterable[CalendarEvent]:
-        # TODO: Add NonCourseEvents like in a calendar view?
-        return (CalendarEvent(e) for e in self._get_classes(iso_year, iso_week))
-
-    def _get_classes(self, iso_year, iso_week):
-        w = Week(iso_year, iso_week)
-        qs = (CourseClass.objects
-              .for_timetable()
-              .filter(date__range=[w.monday(), w.sunday()])
-              .for_student(self.request.user))
-        return qs
 
 
 class UsefulListView(PermissionRequiredMixin, generic.ListView):

@@ -2,6 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from compscicenter_ru.settings.test import TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID
+from core.tests.factories import BranchFactory
 from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
@@ -27,14 +28,14 @@ def test_enrolled_on_the_course():
 @pytest.mark.django_db
 def test_user_add_group(settings):
     settings.SITE_ID = TEST_DOMAIN_ID
-    user = User(username="foo", email="foo@localhost.ru")
+    user = UserFactory()
     user.save()
     user.add_group(Roles.STUDENT)
     assert user.groups.count() == 1
     user_group = user.groups.first()
     assert user_group.site_id == TEST_DOMAIN_ID
     settings.SITE_ID = ANOTHER_DOMAIN_ID
-    user = User(username="bar", email="bar@localhost.ru")
+    user = UserFactory()
     user.save()
     user.add_group(Roles.STUDENT)
     assert user.groups.count() == 1
@@ -44,7 +45,7 @@ def test_user_add_group(settings):
 
 @pytest.mark.django_db
 def test_user_add_group_already_exists():
-    user = User(username="foo", email="foo@localhost.ru")
+    user = UserFactory()
     user.save()
     user.add_group(Roles.STUDENT)
     assert user.groups.count() == 1
@@ -55,7 +56,7 @@ def test_user_add_group_already_exists():
 @pytest.mark.django_db
 def test_user_remove_group():
     """Test subsequent calls with the same role"""
-    user = User(username="foo", email="foo@localhost.ru")
+    user = UserFactory()
     user.save()
     user.remove_group(Roles.STUDENT)
     user.remove_group(Roles.STUDENT)
@@ -110,8 +111,10 @@ def test_passed_courses():
     assert stats['passed']['total'] == 2
 
 
+@pytest.mark.django_db
 def test_github_id_validation():
     user = UserFactory.build()
+    user.branch = BranchFactory()
     with pytest.raises(ValidationError):
         user.github_id = "mikhail--m"
         user.clean_fields()

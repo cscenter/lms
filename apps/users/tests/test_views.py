@@ -133,11 +133,12 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         """
         yandex_id can be exctracted from email if email is on @yandex.ru
         """
+        branch = BranchFactory()
         user = User.objects.create_user("testuser1", "foo@bar.net",
-                                           "test123foobar@!")
+                                        "test123foobar@!", branch=branch)
         self.assertFalse(user.yandex_id)
         user = User.objects.create_user("testuser2", "foo@yandex.ru",
-                                           "test123foobar@!")
+                                        "test123foobar@!", branch=branch)
         self.assertEqual(user.yandex_id, "foo")
 
     def test_short_bio(self):
@@ -278,12 +279,13 @@ def test_shads(client):
 
 
 @pytest.mark.django_db
-def test_student_should_have_enrollment_year(admin_client):
+def test_student_should_have_enrollment_year(client):
     """
     If user set "student" group (pk=1 in initial_data fixture), they
     should also provide an enrollment year, otherwise they should get
     ValidationError
     """
+    client.login(CuratorFactory())
     user = UserFactory(photo='/a/b/c')
     assert user.groups.count() == 0
     form_data = {k: v for k, v in model_to_dict(user).items() if v is not None}
@@ -304,7 +306,7 @@ def test_student_should_have_enrollment_year(admin_client):
         'groups-0-site': settings.SITE_ID,
     })
     admin_url = get_admin_url(user)
-    response = admin_client.post(admin_url, form_data)
+    response = client.post(admin_url, form_data)
     assert response.status_code == 200
 
     # Empty enrollment_year
@@ -318,7 +320,7 @@ def test_student_should_have_enrollment_year(admin_client):
     assert user_group_form, "Inline form for UserGroup is missing"
     assert not user_group_form.is_valid()
     form_data.update({'enrollment_year': 2010})
-    response = admin_client.post(admin_url, form_data)
+    response = client.post(admin_url, form_data)
     assert response.status_code == 302
     user.refresh_from_db()
     assert user.groups.count() == 1

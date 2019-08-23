@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import NamedTuple, Dict, Union
 
 import pytz
 from bitfield import BitField
@@ -13,8 +13,11 @@ from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from learning.settings import Branches
 
-# FIXME: тут хранятся бранчи  по натуральному ключу и лучше перенести этот кэш в middleware. А хочется ещё и по id
-BRANCH_CACHE = {}
+
+BranchKey = Union[int, "BranchNaturalKey"]
+
+BRANCH_CACHE: Dict[BranchKey, "Branch"] = {}
+
 
 LATEX_MARKDOWN_HTML_ENABLED = _(
     "How to style text read <a href=\"/commenting-the-right-way/\" "

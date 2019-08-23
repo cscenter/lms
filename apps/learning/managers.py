@@ -38,18 +38,6 @@ StudentAssignmentManager = _StudentAssignmentDefaultManager.from_queryset(
 
 
 class EventQuerySet(query.QuerySet):
-    def for_calendar(self):
-        if is_club_site():
-            return self.none()
-        return (self
-                .order_by('date', 'starts_at'))
-
-    def for_city(self, city_code):
-        return self.filter(venue__city_id=city_code)
-
-    def in_cities(self, city_codes: List[str]):
-        return self.filter(venue__city_id__in=city_codes)
-
     def in_month(self, year, month):
         date_start, date_end = get_boundaries(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)

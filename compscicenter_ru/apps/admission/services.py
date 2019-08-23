@@ -61,7 +61,8 @@ def create_student_from_applicant(applicant):
         random_password = User.objects.make_random_password()
         user = User.objects.create_user(username=username,
                                         email=applicant.email,
-                                        password=random_password)
+                                        password=random_password,
+                                        branch=applicant.campaign.branch)
     if applicant.status == Applicant.VOLUNTEER:
         user.add_group(Roles.VOLUNTEER)
     else:

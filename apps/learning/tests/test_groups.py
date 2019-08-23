@@ -4,7 +4,7 @@ from learning.permissions import has_master_degree
 from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.models import User
-from users.tests.factories import StudentFactory
+from users.tests.factories import StudentFactory, UserFactory
 
 
 @pytest.mark.django_db
@@ -16,29 +16,25 @@ def test_user_permissions():
         * is_graduate
         * is_teacher
     """
-    user = User(username="foo", email="foo@localhost.ru")
-    user.save()
+    user = UserFactory()
     assert not user.is_student
     assert not user.is_volunteer
     assert not user.is_teacher
     assert not user.is_graduate
-    user = User(username="bar", email="bar@localhost.ru")
-    user.save()
+    user = UserFactory()
     user.add_group(Roles.STUDENT)
     assert user.is_student
     assert not user.is_volunteer
     assert not user.is_teacher
     assert not user.is_graduate
-    user = User(username="baz", email="baz@localhost.ru")
-    user.save()
+    user = UserFactory()
     user.add_group(Roles.STUDENT)
     user.add_group(Roles.TEACHER)
     assert user.is_student
     assert not user.is_volunteer
     assert user.is_teacher
     assert not user.is_graduate
-    user = User(username="baq", email="baq@localhost.ru")
-    user.save()
+    user = UserFactory()
     user.add_group(Roles.STUDENT)
     user.add_group(Roles.TEACHER)
     user.add_group(Roles.GRADUATE)
@@ -46,8 +42,7 @@ def test_user_permissions():
     assert not user.is_volunteer
     assert user.is_teacher
     assert user.is_graduate
-    user = User(username="zoo", email="zoo@localhost.ru")
-    user.save()
+    user = UserFactory()
     user.add_group(Roles.STUDENT)
     user.add_group(Roles.TEACHER)
     user.add_group(Roles.GRADUATE)

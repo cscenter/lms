@@ -56,12 +56,9 @@ class UserDetailView(generic.DetailView):
         elif self.request.user.is_curator:
             enrollments_queryset = enrollments_queryset.annotate(
                 classes_total=Count('course__courseclass'))
-        filters = {"city_code": settings.CENTER_BRANCHES_CITY_CODES}
-        if is_club_site():
-            filters["branch"] = self.request.branch
-        co_queryset = (Course.objects
-                       .in_city(**filters)
-                       .select_related('semester', 'meta_course'))
+        co_queryset = Course.objects.select_related('semester', 'meta_course')
+        if hasattr(self.request, "branch"):
+            co_queryset = co_queryset.in_branches(self.request.branch)
         prefetch_list = [
             Prefetch('teaching_set', queryset=co_queryset.all()),
             Prefetch('shadcourserecord_set', queryset=shad_courses_queryset),

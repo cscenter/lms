@@ -17,7 +17,8 @@ from core.urls import reverse
 from courses.forms import CourseClassForm
 from courses.models import CourseClass
 from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
-    CourseFactory, SemesterFactory, CourseClassAttachmentFactory
+    CourseFactory, SemesterFactory, CourseClassAttachmentFactory, \
+    LearningSpaceFactory
 from core.tests.factories import LocationFactory
 from users.tests.factories import TeacherFactory
 
@@ -53,21 +54,21 @@ def test_course_class_detail_security(client, assert_login_redirect):
 def test_course_class_create(client):
     teacher = TeacherFactory()
     s = SemesterFactory.create_current()
-    co = CourseFactory.create(teachers=[teacher], semester=s)
+    course = CourseFactory.create(teachers=[teacher], semester=s)
     co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    location = LocationFactory(city__code=settings.DEFAULT_CITY_CODE)
-    form.update({'venue': location.pk})
+    venue = LearningSpaceFactory(branch=course.branch)
+    form.update({'venue': venue.pk})
     del form['slides']
-    url = co.get_create_class_url()
+    url = course.get_create_class_url()
     client.login(teacher)
     # should save with course = co
     assert client.post(url, form).status_code == 302
-    assert CourseClass.objects.filter(course=co).count() == 1
+    assert CourseClass.objects.filter(course=course).count() == 1
     assert CourseClass.objects.filter(course=co_other).count() == 0
     assert CourseClass.objects.filter(course=form['course']).count() == 0
-    assert form['name'] == CourseClass.objects.get(course=co).name
-    form.update({'course': co.pk})
+    assert form['name'] == CourseClass.objects.get(course=course).name
+    form.update({'course': course.pk})
     assert client.post(url, form).status_code == 302
 
 
@@ -75,28 +76,28 @@ def test_course_class_create(client):
 def test_course_class_create_and_add(client, assert_redirect):
     teacher = TeacherFactory()
     s = SemesterFactory.create_current()
-    co = CourseFactory.create(teachers=[teacher], semester=s)
-    co_other = CourseFactory.create(semester=s)
+    course = CourseFactory.create(teachers=[teacher], semester=s)
+    course_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    location = LocationFactory(city__code=settings.DEFAULT_CITY_CODE)
+    location = LearningSpaceFactory(branch=course.branch)
     form.update({'venue': location.pk, '_addanother': True})
     del form['slides']
     client.login(teacher)
-    url = co.get_create_class_url()
+    url = course.get_create_class_url()
     # should save with course = co
     response = client.post(url, form)
-    expected_url = co.get_create_class_url()
+    expected_url = course.get_create_class_url()
     assert response.status_code == 302
     assert_redirect(response, expected_url)
-    assert CourseClass.objects.filter(course=co).count() == 1
-    assert CourseClass.objects.filter(course=co_other).count() == 0
+    assert CourseClass.objects.filter(course=course).count() == 1
+    assert CourseClass.objects.filter(course=course_other).count() == 0
     assert CourseClass.objects.filter(course=form['course']).count() == 0
-    assert form['name'] == CourseClass.objects.get(course=co).name
-    form.update({'course': co.pk})
+    assert form['name'] == CourseClass.objects.get(course=course).name
+    form.update({'course': course.pk})
     assert client.post(url, form).status_code == 302
     del form['_addanother']
     response = client.post(url, form)
-    assert CourseClass.objects.filter(course=co).count() == 3
+    assert CourseClass.objects.filter(course=course).count() == 3
     last_added_class = CourseClass.objects.order_by("-id").first()
     assert_redirect(response, last_added_class.get_absolute_url())
 
@@ -159,18 +160,18 @@ def test_course_class_delete(client, assert_redirect, assert_login_redirect):
 def test_course_class_back_variable(client, assert_redirect):
     teacher = TeacherFactory()
     s = SemesterFactory.create_current()
-    co = CourseFactory.create(teachers=[teacher], semester=s)
-    cc = CourseClassFactory.create(course=co)
+    course = CourseFactory.create(teachers=[teacher], semester=s)
+    cc = CourseClassFactory(course=course)
     class_update_url = cc.get_update_url()
     client.login(teacher)
     form = model_to_dict(cc)
     del form['slides']
     form['name'] += " foobar"
-    assert_redirect(client.post(class_update_url, form),
-                    cc.get_absolute_url())
+    response = client.post(class_update_url, form)
+    assert_redirect(response, cc.get_absolute_url())
     url = "{}?back=course".format(class_update_url)
     assert_redirect(client.post(url, form),
-                    co.get_absolute_url())
+                    course.get_absolute_url())
 
 
 @pytest.mark.django_db
@@ -271,8 +272,8 @@ def test_course_class_form_available(client, curator, settings):
     settings.LANGUAGE_CODE = 'ru'
     teacher = TeacherFactory()
     semester = SemesterFactory.create_current()
-    co = CourseFactory(semester=semester, teachers=[teacher])
-    course_class_add_url = co.get_create_class_url()
+    course = CourseFactory(semester=semester, teachers=[teacher])
+    course_class_add_url = course.get_create_class_url()
     response = client.get(course_class_add_url)
     assert response.status_code == 302
     client.login(teacher)
@@ -281,8 +282,8 @@ def test_course_class_form_available(client, curator, settings):
     # Check form visible
     assert smart_bytes("submit-id-save") in response.content
     # Course completed, form invisible for teacher
-    co.completed_at = now().date()
-    co.save()
+    course.completed_at = now().date()
+    course.save()
     response = client.get(course_class_add_url)
     assert smart_bytes("Курс завершён") in response.content
     client.login(curator)
@@ -296,13 +297,13 @@ def test_course_class_form_available(client, curator, settings):
     # Check we can post form if course is active
     today = now_local(teacher.get_timezone()).date()
     next_day = today + datetime.timedelta(days=1)
-    co.completed_at = next_day
-    co.save()
-    location = LocationFactory(city=co.city)
+    course.completed_at = next_day
+    course.save()
+    venue = LearningSpaceFactory(branch=course.branch)
     date_format = CourseClassForm.base_fields['date'].widget.format
     form = {
         "type": "lecture",
-        "venue": location.pk,
+        "venue": venue.pk,
         "name": "Test class",
         "date": next_day.strftime(date_format),
         "starts_at": "17:20",

@@ -2,6 +2,7 @@ import pytest
 
 from users.constants import Roles
 from users.models import User
+from users.tests.factories import UserFactory
 
 
 @pytest.mark.django_db
@@ -11,16 +12,16 @@ def test_user_permissions():
         * is_curator_of_projects
         * is_project_reviewer
     """
-    user = User(username="foo", email="foo@localhost.ru")
+    user = UserFactory()
     user.save()
     assert not user.is_curator_of_projects
     assert not user.is_project_reviewer
-    user = User(username="bar", email="bar@localhost.ru")
+    user = UserFactory()
     user.save()
     user.add_group(Roles.CURATOR_PROJECTS)
     assert user.is_curator_of_projects
     assert not user.is_project_reviewer
-    user = User(username="baz", email="baz@localhost.ru")
+    user = UserFactory()
     user.save()
     user.add_group(Roles.PROJECT_REVIEWER)
     user.add_group(Roles.CURATOR_PROJECTS)
