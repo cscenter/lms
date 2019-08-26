@@ -83,7 +83,8 @@ def course_form_builder(survey: CourseSurvey):
         for field in fields:
             # Crunch: For correspondence course hide questions about
             # offline lectures
-            if course.is_correspondence and field.name in OFFLINE_COURSES_Q:
+            if (course.additional_branches.exists() and
+                    field.name in OFFLINE_COURSES_Q):
                 continue
             source_field_choices = list(field.choices.all())
             # Mutate original field

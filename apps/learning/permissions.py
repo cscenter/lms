@@ -124,24 +124,20 @@ def view_course_reviews(user, course: Course):
     return course.enrollment_is_open
 
 
-# FIXME: у студентов клуба не установлен город. чё делать?
-# FIXME: ваще надо на бранчу сравнивать для центра и по городу для клуба
-# FIXME: как добавить тест для клуба?
 @rules.predicate
 def enroll_in_course(user, course: Course):
-    # FIXME: не релевантно для клуба
     if user.status == StudentStatuses.EXPELLED:
         logger.debug("Permissions of expelled students are restricted")
         return False
     if not course.enrollment_is_open:
         logger.debug("Enrollment is closed")
         return False
-    # If the student can't take this course remotely, check that the city
-    # of the student and the city match
-    if not course.is_correspondence and user.branch_id != course.branch_id:
-        logger.debug("Student with branch %s could not enroll in the course "
-                     "with branch %s", user.branch_id, course.branch_id)
-        return False
+    # Check that course is available for student branch
+    if course.branch_id != user.branch_id:
+        if user.branch not in course.additional_branches.all():
+            logger.debug("Student with branch %s could not enroll in the "
+                         "course %s", user.branch_id, course)
+            return False
     if course.is_capacity_limited and not course.places_left:
         return False
     return True

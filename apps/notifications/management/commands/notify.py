@@ -221,12 +221,11 @@ class Command(BaseCommand):
                                 .unread()
                                 .filter(public=True, emailed=False)
                                 .select_related("recipient"))
-        # FIXME: I was wrong. It's hard to understand and debug. Refactor
+        # FIXME: Refactor
         # id => code
         types_map = {v: k for k, v in
                      apps.get_app_config('notifications').type_map.items()}
         # TODO: skip EMPTY type notifications?
-        # TODO: What if recipient have no email?
         for notification in unread_notifications:
             try:
                 code = types_map[notification.type_id]

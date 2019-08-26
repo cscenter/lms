@@ -1,14 +1,15 @@
+import re
+
 import pytest
 from django.core.exceptions import ValidationError
 
 from core.models import Branch
-from core.tests.utils import CSCTestCase
-
-from courses.tests.factories import CourseNewsFactory, SemesterFactory, CourseFactory, \
+from courses.constants import SemesterTypes
+from courses.models import Semester, Assignment
+from courses.tests.factories import CourseNewsFactory, SemesterFactory, \
+    CourseFactory, \
     CourseClassFactory, CourseClassAttachmentFactory, MetaCourseFactory, \
     AssignmentFactory, AssignmentAttachmentFactory
-from courses.models import Semester, Course, Assignment
-from courses.constants import SemesterTypes
 from courses.utils import get_term_index, next_term_starts_at
 from learning.settings import Branches
 
@@ -104,74 +105,81 @@ def test_course_completed_at_default_value():
     assert course.completed_at == next_term_dt.date()
 
 
-class CourseTests(CSCTestCase):
-    def test_in_current_term(self):
-        """
-        In the near future only one course should be "ongoing".
-        """
-        import datetime
-        from django.utils import timezone
-        future_year = datetime.datetime.now().year + 20
-        some_year = future_year - 5
-        semesters = [SemesterFactory(year=year, type=t)
-                     for t in ['spring', 'autumn']
-                     for year in range(2010, future_year)]
-        old_now = timezone.now
-        timezone.now = lambda: (datetime.datetime(some_year, 4, 8, 0, 0, 0)
-                                .replace(tzinfo=timezone.utc))
-        meta_course = MetaCourseFactory()
-        n_ongoing = sum(CourseFactory(meta_course=meta_course,
-                                      semester=semester).in_current_term
-                        for semester in semesters)
-        self.assertEqual(n_ongoing, 1)
-        timezone.now = lambda: (datetime.datetime(some_year, 11, 8, 0, 0, 0)
-                                .replace(tzinfo=timezone.utc))
-        meta_course = MetaCourseFactory()
-        n_ongoing = sum(CourseFactory(meta_course=meta_course,
-                                      semester=semester).in_current_term
-                        for semester in semesters)
-        self.assertEqual(n_ongoing, 1)
-        timezone.now = old_now
+@pytest.mark.django_db
+def test_in_current_term(client):
+    """
+    In the near future only one course should be "ongoing".
+    """
+    import datetime
+    from django.utils import timezone
+    future_year = datetime.datetime.now().year + 20
+    some_year = future_year - 5
+    semesters = [SemesterFactory(year=year, type=t)
+                 for t in ['spring', 'autumn']
+                 for year in range(2010, future_year)]
+    old_now = timezone.now
+    timezone.now = lambda: (datetime.datetime(some_year, 4, 8, 0, 0, 0)
+                            .replace(tzinfo=timezone.utc))
+    meta_course = MetaCourseFactory()
+    n_ongoing = sum(CourseFactory(meta_course=meta_course,
+                                  semester=semester).in_current_term
+                    for semester in semesters)
+    assert n_ongoing == 1
+    timezone.now = lambda: (datetime.datetime(some_year, 11, 8, 0, 0, 0)
+                            .replace(tzinfo=timezone.utc))
+    meta_course = MetaCourseFactory()
+    n_ongoing = sum(CourseFactory(meta_course=meta_course,
+                                  semester=semester).in_current_term
+                    for semester in semesters)
+    assert n_ongoing == 1
+    timezone.now = old_now
 
 
-class CourseClassTests(CSCTestCase):
-    def test_start_end_validation(self):
-        time1 = "13:00"
-        time2 = "14:20"
-        cc = CourseClassFactory.create(starts_at=time1, ends_at=time2)
-        self.assertEqual(None, cc.clean())
-        cc = CourseClassFactory.create(starts_at=time2, ends_at=time1)
-        self.assertRaises(ValidationError, cc.clean)
-
-    def test_display_prop(self):
-        cc = CourseClassFactory.create(type='lecture')
-        self.assertEqual("Lecture", cc.get_type_display())
+@pytest.mark.django_db
+def test_course_class_start_end_validation():
+    time1 = "13:00"
+    time2 = "14:20"
+    cc = CourseClassFactory.create(starts_at=time1, ends_at=time2)
+    assert cc.clean() is None
+    cc = CourseClassFactory.create(starts_at=time2, ends_at=time1)
+    with pytest.raises(ValidationError):
+        cc.clean()
 
 
-class AssignmentTest(CSCTestCase):
-    def test_clean(self):
-        co1 = CourseFactory.create()
-        co2 = CourseFactory.create()
-        a = AssignmentFactory.create(course=co1)
-        a_copy = Assignment.objects.filter(pk=a.pk).get()
-        a_copy.course = co2
-        self.assertRaises(ValidationError, a_copy.clean)
-        a_copy.course = co1
-        a_copy.save()
-        a_copy.passing_score = a.maximum_score + 1
-        self.assertRaises(ValidationError, a_copy.clean)
-
-    def test_is_open(self):
-        import datetime
-        from django.utils import timezone
-        a = AssignmentFactory()
-        self.assertTrue(a.is_open)
-        a.deadline_at = timezone.now() - datetime.timedelta(days=2)
-        self.assertFalse(a.is_open)
+@pytest.mark.django_db
+def test_course_class_display_prop():
+    cc = CourseClassFactory.create(type='lecture')
+    assert cc.get_type_display() == "Lecture"
 
 
-class AssignmentAttachmentTest(CSCTestCase):
-    def test_attached_file_name(self):
-        fname = "foobar.pdf"
-        aa = AssignmentAttachmentFactory.create(attachment__filename=fname)
-        self.assertRegex(aa.file_name, "^foobar(_[0-9a-zA-Z]+)?.pdf$")
+@pytest.mark.django_db
+def test_assignment_clean():
+    co1 = CourseFactory.create()
+    co2 = CourseFactory.create()
+    a = AssignmentFactory.create(course=co1)
+    a_copy = Assignment.objects.filter(pk=a.pk).get()
+    a_copy.course = co2
+    with pytest.raises(ValidationError):
+        a_copy.clean()
+    a_copy.course = co1
+    a_copy.save()
+    a_copy.passing_score = a.maximum_score + 1
+    with pytest.raises(ValidationError):
+        a_copy.clean()
+
+
+@pytest.mark.django_db
+def test_assignment_is_open():
+    import datetime
+    from django.utils import timezone
+    a = AssignmentFactory()
+    assert a.is_open
+    a.deadline_at = timezone.now() - datetime.timedelta(days=2)
+    assert not a.is_open
+
+
+@pytest.mark.django_db
+def test_assignment_attached_file_name():
+    fname = "foobar.pdf"
+    aa = AssignmentAttachmentFactory.create(attachment__filename=fname)
+    assert re.match("^foobar(_[0-9a-zA-Z]+)?.pdf$", aa.file_name)

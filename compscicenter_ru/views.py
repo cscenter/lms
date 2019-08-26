@@ -449,7 +449,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                 term_year = term.year
                 term_type = term.type
             else:
-                return None
+                term_year, term_type = get_current_term_pair()
         idx = first_term_in_academic_year(term_year, term_type)
         academic_year, _ = get_term_by_index(idx)
         return academic_year, term_type

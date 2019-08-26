@@ -46,9 +46,11 @@ class BranchChoiceFilter(ChoiceFilter):
         """
         if value == self.null_value:
             value = None
-        qs = qs.filter(Q(branch__code=value, is_correspondence=False) |
-                       Q(is_correspondence=True))
-        return qs.distinct() if self.distinct else qs
+        branch = Branch.objects.get(code=value, site_id=settings.SITE_ID)
+        qs = (qs.available_in(branch=branch.pk)
+              .distinct('semester__index', 'meta_course__name', 'pk')
+              .order_by('-semester__index', 'meta_course__name', 'pk'))
+        return qs
 
 
 class SemesterSlugField(SlugField):

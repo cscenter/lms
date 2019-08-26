@@ -19,6 +19,12 @@ def create_branches(apps, schema_editor):
                                  name='Казань', city_id='kzn', time_zone='Europe/Moscow', defaults={"order": 30})
     Branch.objects.get_or_create(code='spb', site_id=settings.CLUB_SITE_ID,
                                  name='Санкт-Петербург', city_id='spb', time_zone='Europe/Moscow', defaults={"order": 10})
+    Branch.objects.get_or_create(code='spb', site_id=settings.CENTER_SITE_ID,
+                                 name='Санкт-Петербург', city_id='spb', time_zone='Europe/Moscow', defaults={"order": 10})
+    Branch.objects.get_or_create(code='nsk', site_id=settings.CENTER_SITE_ID,
+                                 name='Новосибирск', city_id='nsk', time_zone='Asia/Novosibirsk', defaults={"order": 20})
+    Branch.objects.get_or_create(code='distance', site_id=settings.CENTER_SITE_ID,
+                                 name='Заочное отделение', time_zone='Europe/Moscow', defaults={"order": 10})
 
 
 class Migration(migrations.Migration):

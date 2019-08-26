@@ -83,6 +83,14 @@ class CourseFactory(factory.DjangoModelFactory):
                               teacher=teacher,
                               notify_by_default=True).save()
 
+    @factory.post_generation
+    def additional_branches(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for branch in extracted:
+                self.additional_branches.add(branch)
+
 
 class CourseTeacherFactory(factory.DjangoModelFactory):
     class Meta:

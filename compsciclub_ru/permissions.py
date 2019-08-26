@@ -13,10 +13,7 @@ def course_is_open(user, course):
 def enroll_in_course(user, course: Course):
     if not course.enrollment_is_open:
         return False
-    # If the student can't take this course remotely, check that the city
-    # of the student and the city match
-    # FIXME: что-то надо с этим сделать
-    if not course.is_correspondence and user.branch_id != course.branch_id:
+    if user.branch_id != course.branch_id:
         return False
     if course.is_capacity_limited and not course.places_left:
         return False

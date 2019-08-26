@@ -68,7 +68,7 @@ class CourseAdminForm(forms.ModelForm):
 
 
 class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
-    list_filter = ['branch', 'city', 'semester']
+    list_filter = ['branch', 'semester']
     list_display = ['meta_course', 'semester', 'is_published_in_video',
                     'is_open']
     inlines = (CourseTeacherInline,)
@@ -76,6 +76,7 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
     form = CourseAdminForm
+    filter_horizontal = ('additional_branches', )
 
 
 class LearningSpaceAdmin(admin.ModelAdmin):
