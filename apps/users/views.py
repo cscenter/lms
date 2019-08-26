@@ -58,7 +58,7 @@ class UserDetailView(generic.DetailView):
                 classes_total=Count('course__courseclass'))
         co_queryset = Course.objects.select_related('semester', 'meta_course')
         if hasattr(self.request, "branch"):
-            co_queryset = co_queryset.in_branches(self.request.branch)
+            co_queryset = co_queryset.filter(branch=self.request.branch)
         prefetch_list = [
             Prefetch('teaching_set', queryset=co_queryset.all()),
             Prefetch('shadcourserecord_set', queryset=shad_courses_queryset),
