@@ -84,7 +84,8 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
         is_actual_teacher = course.is_actual_teacher(request_user)
         # For correspondence course try to override timezone
         tz_override = None
-        if len(course.additional_branches.all()) and not is_actual_teacher:
+        # FIXME: cache additional branch count?
+        if not is_actual_teacher and len(course.additional_branches.all()):
             tz_override = request_user.get_timezone()
 
         if request_user.has_perm("study.view_own_enrollments"):

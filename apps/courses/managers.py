@@ -107,8 +107,8 @@ class CourseQuerySet(models.QuerySet):
     def available_in(self, branch: int):
         return (self.filter(Q(branch_id=branch) |
                             Q(additional_branches=branch))
-                .distinct('id')
-                .order_by())
+                .distinct('semester__index', 'meta_course__name', 'pk')
+                .order_by('-semester__index', 'meta_course__name', 'pk'))
 
     # FIXME: remove
     def in_center_branches(self):
@@ -116,18 +116,6 @@ class CourseQuerySet(models.QuerySet):
 
     def for_teacher(self, user):
         return self.filter(teachers=user)
-
-    # TODO: relocate
-    def reviews_for_course(self, co):
-        return (self
-                .defer("description")
-                .select_related("semester")
-                .filter(meta_course_id=co.meta_course_id,
-                        semester__index__lte=co.semester.index)
-                .in_branches(co.branch_id)
-                .exclude(reviews__isnull=True)
-                .exclude(reviews__exact='')
-                .order_by("-semester__index"))
 
 
 CourseDefaultManager = _CourseDefaultManager.from_queryset(CourseQuerySet)

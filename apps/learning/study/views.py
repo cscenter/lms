@@ -199,11 +199,10 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
             queryset=User.objects.only("id", "first_name", "last_name",
                                        "patronymic"))
         course_offerings = (Course.objects
-                            .in_branches(self.request.user.branch_id)
+                            .available_in(self.request.user.branch_id)
                             .filter(in_current_term | enrolled_in)
                             .select_related('meta_course', 'semester')
-                            .prefetch_related(prefetch_teachers)
-                            .order_by('-semester__index', 'meta_course__name'))
+                            .prefetch_related(prefetch_teachers))
         # 2. And split them by type.
         ongoing_enrolled, ongoing_rest, archive_enrolled = [], [], []
         for course in course_offerings:
