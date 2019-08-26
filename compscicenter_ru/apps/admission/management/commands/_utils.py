@@ -30,7 +30,7 @@ class CurrentCampaignsMixin:
 
         filter_params = {"current": True}
         if branch_code:
-            filter_params["branch"] = branch_code
+            filter_params["branch__code"] = branch_code
         campaigns = (Campaign.objects
                      .select_related("branch")
                      .filter(**filter_params)
