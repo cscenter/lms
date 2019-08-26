@@ -13,7 +13,7 @@ from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseTeacher, Course, CourseClassAttachment, \
     Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
-    AssignmentAttachment, LearningSpace
+    AssignmentAttachment, LearningSpace, CourseReview
 from users.constants import Roles
 from users.models import User
 
@@ -27,6 +27,15 @@ class MetaCourseAdmin(TranslationAdmin, admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
+
+
+class CourseReviewAdmin(admin.ModelAdmin):
+    search_fields = ('course__meta_course__name',)
+    list_display = ('course', 'author')
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
+    raw_id_fields = ('author', 'course')
 
 
 class CourseTeacherInline(admin.TabularInline):
@@ -196,12 +205,13 @@ class AssignmentAdmin(admin.ModelAdmin):
     deadline_at_local.short_description = _("Assignment|deadline")
 
 
+admin.site.register(CourseReview, CourseReviewAdmin)
 admin.site.register(MetaCourse, MetaCourseAdmin)
-admin.site.register(Course, CourseAdmin)
 admin.site.register(Semester, SemesterAdmin)
+admin.site.register(Course, CourseAdmin)
+admin.site.register(CourseNews, CourseNewsAdmin)
 admin.site.register(LearningSpace, LearningSpaceAdmin)
 admin.site.register(CourseClass, CourseClassAdmin)
 admin.site.register(CourseClassAttachment, CourseClassAttachmentAdmin)
-admin.site.register(CourseNews, CourseNewsAdmin)
 admin.site.register(Assignment, AssignmentAdmin)
 admin.site.register(AssignmentAttachment, AssignmentAttachmentAdmin)

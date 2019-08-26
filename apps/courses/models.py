@@ -630,6 +630,32 @@ class CourseTeacher(models.Model):
         return ts
 
 
+class CourseReview(TimeStampedModel):
+    course = models.ForeignKey(
+        Course,
+        related_name="reviews_new",
+        on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author"),
+        blank=True, null=True,
+        on_delete=models.CASCADE)
+    text = models.TextField(
+        verbose_name=_("CourseReview|text"),
+        help_text=LATEX_MARKDOWN_HTML_ENABLED)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=('course', 'author'),
+                                    name='one_author_review_per_course'),
+        ]
+        verbose_name = _("Course Review")
+        verbose_name_plural = _("Course Reviews")
+
+    def __str__(self):
+        return f"{self.course} [{self.pk}]"
+
+
 class CourseNews(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
 
