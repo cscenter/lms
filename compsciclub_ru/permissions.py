@@ -13,8 +13,10 @@ def course_is_open(user, course):
 def enroll_in_course(user, course: Course):
     if not course.enrollment_is_open:
         return False
-    if user.branch_id != course.branch_id:
-        return False
+    # Check that course is available for student branch
+    if course.branch_id != user.branch_id:
+        if user.branch not in course.additional_branches.all():
+            return False
     if course.is_capacity_limited and not course.places_left:
         return False
     return True
