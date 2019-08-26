@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 from core.models import Branch
+from core.tests.factories import BranchFactory
 from core.tests.utils import now_for_branch
 from core.timezone import now_local
 from courses.models import Course
@@ -113,34 +114,37 @@ def test_enroll_in_course():
     tomorrow = today_local + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(for_branch=DEFAULT_BRANCH_CODE,
                                           enrollment_end_at=tomorrow.date())
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(semester=term, is_open=False,
-                           is_correspondence=False,
-                           capacity=0)
+                           capacity=0, branch=branch_spb)
     assert course.enrollment_is_open
-    student = StudentFactory(branch__code=Branches.SPB)
-    assert student.status != StudentStatuses.EXPELLED
-    assert student.has_perm("learning.enroll_in_course", course)
+    student_spb = StudentFactory(branch=branch_spb)
+    assert student_spb.status != StudentStatuses.EXPELLED
+    assert student_spb.has_perm("learning.enroll_in_course", course)
     # Enrollment is closed
     course.semester.enrollment_end_at = yesterday.date()
-    assert not student.has_perm("learning.enroll_in_course", course)
+    assert not student_spb.has_perm("learning.enroll_in_course", course)
     course.semester.enrollment_end_at = tomorrow.date()
-    assert student.has_perm("learning.enroll_in_course", course)
+    assert student_spb.has_perm("learning.enroll_in_course", course)
     # Student was expelled
-    student.status = StudentStatuses.EXPELLED
-    assert not student.has_perm("learning.enroll_in_course", course)
-    student.status = ''
-    assert student.has_perm("learning.enroll_in_course", course)
+    student_spb.status = StudentStatuses.EXPELLED
+    assert not student_spb.has_perm("learning.enroll_in_course", course)
+    student_spb.status = ''
+    assert student_spb.has_perm("learning.enroll_in_course", course)
     # Full course capacity
     course.capacity = 1
     course.learners_count = 1
-    assert not student.has_perm("learning.enroll_in_course", course)
+    assert not student_spb.has_perm("learning.enroll_in_course", course)
     course.learners_count = 0
-    assert student.has_perm("learning.enroll_in_course", course)
-    # Compare student and course cities
-    course.branch = Branch.objects.filter(code=Branches.NSK).first()
-    assert not student.has_perm("learning.enroll_in_course", course)
-    course.is_correspondence = True
-    assert student.has_perm("learning.enroll_in_course", course)
+    assert student_spb.has_perm("learning.enroll_in_course", course)
+    # Compare student and course branches
+    course.branch = branch_nsk
+    course.save()
+    assert not student_spb.has_perm("learning.enroll_in_course", course)
+    course.additional_branches.add(branch_spb)
+    course.refresh_from_db()
+    assert student_spb.has_perm("learning.enroll_in_course", course)
 
 
 @pytest.mark.django_db
@@ -170,10 +174,10 @@ def test_enroll_in_course_by_invitation():
     today = now_for_branch(Branches.SPB)
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(for_branch=DEFAULT_BRANCH_CODE,
+    branch_spb = BranchFactory(code=Branches.SPB)
+    term = SemesterFactory.create_current(for_branch=branch_spb.code,
                                           enrollment_end_at=tomorrow.date())
-    course = CourseFactory(semester=term, is_open=False,
-                           is_correspondence=False,
+    course = CourseFactory(semester=term, is_open=False, branch=branch_spb,
                            capacity=0)
     assert course.enrollment_is_open
     student = StudentFactory(branch=course.branch)

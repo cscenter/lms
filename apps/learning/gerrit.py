@@ -2,6 +2,7 @@ import copy
 import logging
 
 from django.conf import settings
+from django.db.models import prefetch_related_objects
 
 from api.providers.gerrit import Gerrit
 from learning.models import Enrollment
@@ -170,7 +171,7 @@ def revoke_add_patch_set_permission(client, project_name):
 def get_project_name(course):
     branch_code = course.branch.code
     course_name = course.meta_course.slug.replace("-", "_")
-    if course.is_correspondence:
+    if course.additional_branches.all():
         return f"{course_name}_{course.semester.year}"
     return f"{branch_code}/{course_name}_{course.semester.year}"
 
@@ -196,6 +197,7 @@ def init_project_for_course(course, skip_users=False):
     enrolled student create gerrit group and add them to the students group
     5. Grant students access to the personal sandbox
     """
+    prefetch_related_objects([course], 'additional_branches')
     # TODO: sync ldap accounts first
     client = Gerrit(settings.GERRIT_API_URI,
                     auth=(settings.GERRIT_CLIENT_USERNAME,
@@ -307,7 +309,7 @@ def add_student_to_project(client: Gerrit, student: User, course: Course,
     client.include_group(project_students_group_uuid, student_group_uuid)
     # Create personal branch
     git_branch_name = student.get_abbreviated_name_in_latin()
-    if course.is_correspondence:
+    if course.additional_branches.all():
         git_branch_name = f"{student.branch.code}/{git_branch_name}"
     client.create_git_branch(project_name, git_branch_name, {
         "revision": "master"

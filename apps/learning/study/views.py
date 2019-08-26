@@ -134,9 +134,8 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         if sa.assignment.is_online and not sa.has_comments(self.request.user):
             form.fields.get('text').label = _("Add solution")
         context['form'] = form
-        # Format datetime for online courses in student timezone
-        if sa.assignment.course.is_correspondence:
-            context['timezone'] = self.request.user.get_timezone()
+        # Format datetime in student timezone
+        context['timezone'] = self.request.user.get_timezone()
         return context
 
 

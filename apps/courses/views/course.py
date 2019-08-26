@@ -53,7 +53,8 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
                                              .select_related("teacher")))
         return (super().get_course_queryset()
                 .select_related('meta_course', 'semester', 'city')
-                .prefetch_related(course_teachers))
+                .prefetch_related(course_teachers,
+                                  "additional_branches"))
 
     def get_object(self):
         return self.course
@@ -83,7 +84,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
         is_actual_teacher = course.is_actual_teacher(request_user)
         # For correspondence course try to override timezone
         tz_override = None
-        if course.is_correspondence and not is_actual_teacher:
+        if len(course.additional_branches.all()) and not is_actual_teacher:
             tz_override = request_user.get_timezone()
 
         if request_user.has_perm("study.view_own_enrollments"):

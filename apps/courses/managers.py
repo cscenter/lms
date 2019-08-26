@@ -104,6 +104,12 @@ class CourseQuerySet(models.QuerySet):
         return self.filter(Q(branch_id__in=branches, is_correspondence=False) |
                            Q(is_correspondence=True))
 
+    def available_in(self, branch: int):
+        return (self.filter(Q(branch_id=branch) |
+                            Q(additional_branches=branch))
+                .distinct('id')
+                .order_by())
+
     # FIXME: remove
     def in_center_branches(self):
         return self.filter(city_id__in=settings.CENTER_BRANCHES_CITY_CODES)

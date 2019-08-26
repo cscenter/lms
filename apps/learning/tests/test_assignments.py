@@ -512,14 +512,13 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
     FORMAT_DATE_PART = 'd E Y'
     FORMAT_TIME_PART = 'H:i'
-    # This day will be in archive block (1 jan 2017 15:00)
+    # This day will be in archive block (1 jan 2017 15:00 in UTC)
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     # Assignment will be created with the past date, but we will see it on
     # assignments page since course offering semester set to current
     current_term = SemesterFactory.create_current()
     assignment = AssignmentFactory(deadline_at=dt,
                                    course__branch__code=Branches.SPB,
-                                   course__is_correspondence=False,
                                    course__semester_id=current_term.pk)
     student = StudentFactory(branch__code=Branches.SPB)
     sa = StudentAssignmentFactory(assignment=assignment, student=student)
@@ -551,23 +550,21 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     html = BeautifulSoup(response.content, "html.parser")
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
-    # Make course online, now deadlines depends on user timezone for
-    # center students
+    # Deadlines depends on authenticated user timezone
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     assignment_nsk = AssignmentFactory(deadline_at=dt,
                                        course__branch__code=Branches.NSK,
-                                       course__is_correspondence=True,
                                        course__semester=current_term)
     StudentAssignmentFactory(assignment=assignment_nsk, student=student)
     client.login(student)
     response = client.get(url_learning_assignments)
     assert len(response.context["assignment_list"]) == 2
-    assert response.context["tz_override"] == settings.TIME_ZONES['spb']
+    assert response.context["tz_override"] == Branches.get_timezone(Branches.SPB)
     year_part = formats.date_format(assignment_nsk.deadline_at_local(),
                                     FORMAT_DATE_PART)
     assert year_part == "01 января 2017"
     time_part = formats.date_format(
-        assignment_nsk.deadline_at_local(tz=settings.TIME_ZONES['spb']),
+        assignment_nsk.deadline_at_local(tz=Branches.get_timezone(Branches.SPB)),
         FORMAT_TIME_PART)
     assert time_part == "18:00"
     html = BeautifulSoup(response.content, "html.parser")

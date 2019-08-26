@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.encoding import smart_bytes
 from django.utils.translation import ugettext as _
 
+from core.tests.factories import BranchFactory
 from core.tests.utils import now_for_branch
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
@@ -318,24 +319,30 @@ def test_enrollment_in_other_branch(client):
 
 
 @pytest.mark.django_db
-def test_correspondence_courses(client):
-    """Make sure students from any city can enroll in online course"""
+def test_view_course_additional_branches(client):
+    """
+    Student attached to the  `branch` that doesn't match main course branch
+    but listed in course.additional_branches could enroll in this course
+    """
     tomorrow = now_for_branch(Branches.SPB) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    co_spb = CourseFactory(branch__code=Branches.SPB,
-                           semester=term,
-                           is_open=False,
-                           is_correspondence=True)
-    assert co_spb.enrollment_is_open
-    student_spb = StudentFactory()
-    student_nsk = StudentFactory()
-    form = {'course_pk': co_spb.pk}
+    course_spb = CourseFactory(branch__code=Branches.SPB,
+                               semester=term,
+                               is_open=False)
+    assert course_spb.enrollment_is_open
+    student_spb = StudentFactory(branch=course_spb.branch)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    student_nsk = StudentFactory(branch=branch_nsk)
+    form = {'course_pk': course_spb.pk}
     client.login(student_spb)
-    response = client.post(co_spb.get_enroll_url(), form)
+    response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 302
     assert Enrollment.objects.count() == 1
     client.login(student_nsk)
-    response = client.post(co_spb.get_enroll_url(), form)
+    response = client.post(course_spb.get_enroll_url(), form)
+    assert response.status_code == 403
+    course_spb.additional_branches.add(branch_nsk)
+    response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 302
     assert Enrollment.objects.count() == 2
 

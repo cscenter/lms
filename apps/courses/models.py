@@ -292,6 +292,13 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
                                verbose_name=_("Branch"),
                                related_name="courses",
                                on_delete=models.PROTECT)
+    additional_branches = models.ManyToManyField(
+        Branch,
+        verbose_name=_("Additional Branches"),
+        related_name='additional_branches',
+        help_text=_("Branches where the course is also available for "
+                    "enrollment"),
+        blank=True)
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)

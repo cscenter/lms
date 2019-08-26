@@ -10,7 +10,7 @@ from django.forms import model_to_dict
 from django.utils import formats
 
 from core.models import Branch
-from core.tests.factories import LocationFactory
+from core.tests.factories import LocationFactory, BranchFactory
 from core.urls import reverse
 from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
@@ -115,18 +115,18 @@ def test_update_derivable_fields(curator, client, mocker):
 @pytest.mark.django_db
 def test_course_assignment_timezone(settings, client):
     """
-    Course teacher always must see the timezone of the course,
-    even if he studying in CS Center.
+    Course teacher always must see assignments in the timezone of the course
     """
-    # 12 january 2017 23:59 (local time)
+    # 12 january 2017 23:59 (time in UTC)
     deadline_at = datetime.datetime(2017, 1, 12, 23, 59, 0, 0,
                                     tzinfo=pytz.UTC)
-    assignment = AssignmentFactory(deadline_at=deadline_at,
-                                   course__branch__code=Branches.SPB,
-                                   course__is_correspondence=True)
-    course = assignment.course
-    assignments_tab_url = course.get_url_for_tab("assignments")
-    teacher_nsk = TeacherFactory(branch__code=Branches.NSK)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    course_spb = CourseFactory(branch=branch_spb)
+    course_spb.additional_branches.add(branch_nsk)
+    assignment = AssignmentFactory(deadline_at=deadline_at, course=course_spb)
+    assignments_tab_url = course_spb.get_url_for_tab("assignments")
+    teacher_nsk = TeacherFactory(branch=branch_nsk)
     client.login(teacher_nsk)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
@@ -135,9 +135,9 @@ def test_course_assignment_timezone(settings, client):
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
     assert response.context["tz_override"] == Branches.get_timezone(Branches.NSK)
-    # Don't override timezone if current authenticated user is actual teacher of
-    # the course
-    CourseTeacherFactory(course=course, teacher=teacher_nsk)
+    # Don't override timezone if current authenticated user is an actual
+    # teacher of the course
+    CourseTeacherFactory(course=course_spb, teacher=teacher_nsk)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
     assert response.context["tz_override"] is None
