@@ -269,10 +269,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("LaTeX+Markdown+HTML is enabled; empty description "
                     "will be replaced by course description"),
         blank=True)
-    reviews = models.TextField(
-        _("Course reviews"),
-        null=True,
-        blank=True)
     survey_url = models.URLField(
         _("Survey URL"),
         blank=True,
@@ -545,10 +541,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
             slot.append(t)
         return ts
 
-    def get_reviews(self):
-        """Collect reviews from passed courses"""
-        return self.__class__.objects.reviews_for_course(self)
-
 
 def group_course_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
     """
@@ -633,7 +625,7 @@ class CourseTeacher(models.Model):
 class CourseReview(TimeStampedModel):
     course = models.ForeignKey(
         Course,
-        related_name="reviews_new",
+        related_name="reviews",
         on_delete=models.CASCADE)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
