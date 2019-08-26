@@ -4,7 +4,7 @@ from typing import List, Optional
 from django.db.models import Prefetch
 from django.utils.translation import ugettext_noop
 
-from courses.models import Assignment
+from courses.models import Assignment, CourseReview
 from courses.tabs import CourseTab, CourseTabPanel
 from courses.tabs_registry import register
 from learning.permissions import course_access_role, CourseRole
@@ -78,7 +78,12 @@ def get_course_news(course, **kwargs):
 
 
 def get_course_reviews(course, **kwargs):
-    return course.get_reviews()
+    reviews = []
+    for r in (CourseReview.objects
+              .filter(course__meta_course_id=course.meta_course_id)):
+        r.course = course
+        reviews.append(r)
+    return reviews
 
 
 def get_course_assignments(course, user, user_role=None) -> List[Assignment]:

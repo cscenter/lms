@@ -18,7 +18,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFa
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment
-from courses.models import Semester, CourseNews
+from courses.models import Semester, CourseNews, CourseReview
 from courses.constants import SemesterTypes
 from courses.utils import get_term_start
 from users.tests.factories import UserFactory, StudentFactory, \
@@ -306,17 +306,3 @@ def test_score_field():
     sa.save()
     sa.refresh_from_db()
     assert str(sa.score) == '20.5'
-
-
-@pytest.mark.django_db
-def test_course_get_reviews(settings):
-    meta_course1, meta_course2 = MetaCourseFactory.create_batch(2)
-    CourseFactory(meta_course=meta_course1, branch__code=Branches.SPB,
-                  semester__year=2015, reviews='aaa')
-    CourseFactory(meta_course=meta_course2, branch__code=Branches.SPB,
-                  semester__year=2015, reviews='zzz')
-    co = CourseFactory(meta_course=meta_course1, branch__code=Branches.SPB,
-                       semester__year=2016, reviews='bbb')
-    CourseFactory(meta_course=meta_course1, branch__code=Branches.NSK,
-                  semester__year=2016, reviews='ccc')
-    assert len(co.get_reviews()) == 2

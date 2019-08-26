@@ -5,9 +5,10 @@ from django.utils import timezone
 from django.utils.encoding import smart_bytes
 
 from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
-    CourseTeacherFactory, CourseFactory, MetaCourseFactory, AssignmentFactory
-from courses.models import CourseNews
-from learning.tabs import CourseReviewsTab
+    CourseTeacherFactory, CourseFactory, MetaCourseFactory, AssignmentFactory, \
+    CourseReviewFactory
+from courses.models import CourseNews, CourseReview
+from learning.tabs import CourseReviewsTab, get_course_reviews
 from learning.tests.factories import EnrollmentFactory
 from learning.settings import GradeTypes, Branches
 from users.tests.factories import StudentFactory, TeacherFactory, \
@@ -102,8 +103,8 @@ def test_course_reviews_tab_permissions(client, curator):
     prev_term = SemesterFactory.create_prev(current_term)
     course = CourseFactory(semester=current_term)
     prev_course = CourseFactory(semester=prev_term,
-                                meta_course=course.meta_course,
-                                reviews='Very good')
+                                meta_course=course.meta_course)
+    CourseReview(course=prev_course, text='Very good').save()
     assert course.enrollment_is_open
     student = StudentFactory()
     client.login(student)
@@ -117,3 +118,22 @@ def test_course_reviews_tab_permissions(client, curator):
     current_term.save()
     assert not course.enrollment_is_open
     assert not CourseReviewsTab.is_enabled(course, curator)
+
+
+@pytest.mark.django_db
+def test_get_course_reviews(settings):
+    meta_course1, meta_course2 = MetaCourseFactory.create_batch(2)
+    c1 = CourseFactory(meta_course=meta_course1, branch__code=Branches.SPB,
+                       semester__year=2015)
+    c2 = CourseFactory(meta_course=meta_course1, branch__code=Branches.SPB,
+                       semester__year=2016)
+    cr1 = CourseReviewFactory(course=c1)
+    cr2 = CourseReviewFactory(course=c2)
+    c3 = CourseFactory(meta_course=meta_course1, branch__code=Branches.NSK,
+                       semester__year=2016)
+    c4 = CourseFactory(meta_course=meta_course2, branch__code=Branches.SPB,
+                       semester__year=2015)
+    cr3 = CourseReviewFactory(course=c3)
+    CourseReview(course=c4, text='zzz').save()
+    assert len(get_course_reviews(c1)) == 3
+    assert set(get_course_reviews(c1)) == {cr1, cr2, cr3}

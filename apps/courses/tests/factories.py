@@ -9,7 +9,7 @@ from core.settings.base import DEFAULT_BRANCH_CODE
 from core.tests.factories import LocationFactory, CityFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
-    AssignmentAttachment, LearningSpace
+    AssignmentAttachment, LearningSpace, CourseReview
 from courses.utils import get_current_term_pair, get_term_by_index
 from learning.settings import Branches
 from users.tests.factories import TeacherFactory
@@ -18,7 +18,7 @@ __all__ = (
     "MetaCourseFactory", "SemesterFactory", "CourseFactory",
     "CourseNewsFactory", "AssignmentFactory", "CourseTeacherFactory",
     "CourseClassFactory", "CourseClassAttachmentFactory",
-    "AssignmentAttachmentFactory"
+    "AssignmentAttachmentFactory", "CourseReviewFactory",
 )
 
 
@@ -91,6 +91,14 @@ class CourseTeacherFactory(factory.DjangoModelFactory):
     teacher = factory.SubFactory(TeacherFactory)
     course = factory.SubFactory(CourseFactory)
     roles = CourseTeacher.roles.lecturer
+
+
+class CourseReviewFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = CourseReview
+
+    course = factory.SubFactory(CourseFactory)
+    text = factory.Sequence(lambda n: ("Course Review %03d" % n))
 
 
 class CourseNewsFactory(factory.DjangoModelFactory):
