@@ -29,11 +29,7 @@
                             <th>{% trans "Semester" %}</th>
                         </tr>
                         {% for course in courses %}
-                            <tr>
-                                <td>
-                                    <a href="{{ course.get_absolute_url }}">{{ course.semester }}</a> {% if course.is_correspondence %}<span class="text-muted">{% trans "Online Course" %}</span>{% endif %}
-                                </td>
-                            </tr>
+                            <tr><td><a href="{{ course.get_absolute_url }}">{{ course.semester }}</a></td></tr>
                         {% endfor %}
                     </table>
                 {% else %}

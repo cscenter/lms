@@ -282,7 +282,7 @@ def init_project_for_course(course, skip_users=False):
     # For each enrolled student create separated branch
     enrollments = (Enrollment.active
                    .filter(course_id=course.pk)
-                   .select_related("student"))
+                   .select_related("student", "student__branch"))
     for e in enrollments:
         add_student_to_project(client, e.student, course,
                                project_students_group_uuid)
@@ -308,8 +308,7 @@ def add_student_to_project(client: Gerrit, student: User, course: Course,
     # Create personal branch
     git_branch_name = student.get_abbreviated_name_in_latin()
     if course.is_correspondence:
-        assert student.city_id is not None
-        git_branch_name = f"{student.city_id}/{git_branch_name}"
+        git_branch_name = f"{student.branch.code}/{git_branch_name}"
     client.create_git_branch(project_name, git_branch_name, {
         "revision": "master"
     })
@@ -367,7 +366,7 @@ def add_users_to_project_by_email(course: Course, emails):
     enrollments = (Enrollment.active
                    .filter(course_id=course.pk,
                            student__email__in=emails)
-                   .select_related("student"))
+                   .select_related("student", "student__branch"))
     for e in enrollments:
         add_student_to_project(client, e.student, course,
                                project_students_group_uuid)

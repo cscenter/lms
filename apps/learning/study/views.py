@@ -136,7 +136,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['form'] = form
         # Format datetime for online courses in student timezone
         if sa.assignment.course.is_correspondence:
-            context['timezone'] = settings.TIME_ZONES[user.city_id]
+            context['timezone'] = self.request.user.get_timezone()
         return context
 
 
