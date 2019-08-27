@@ -41,9 +41,10 @@ def get_student_month_events(user, year, month, personal=False):
     """
     branches = [user.branch_id]
     events_qs = Event.objects.filter(branch_id__in=branches)
-    classes_qs = CourseClass.objects.in_branches(*branches)
     if personal:
-        classes_qs = classes_qs.for_student(user)
+        classes_qs = CourseClass.objects.for_student(user)
+    else:
+        classes_qs = CourseClass.objects.in_branches(*branches)
     return get_month_events(year, month, events_qs, classes_qs)
 
 
@@ -55,9 +56,10 @@ def get_teacher_month_events(user, year, month, personal=False):
     """
     branches = get_branches_for_teacher(user, year, month)
     events_qs = Event.objects.filter(branch_id__in=branches)
-    classes_qs = CourseClass.objects.in_branches(*branches)
     if personal:
-        classes_qs = classes_qs.for_teacher(user)
+        classes_qs = CourseClass.objects.for_teacher(user)
+    else:
+        classes_qs = CourseClass.objects.in_branches(*branches)
     return get_month_events(year, month, events_qs, classes_qs)
 
 
@@ -90,5 +92,4 @@ def get_branches_for_teacher(user, year, month):
                    .values_list("branch_id", flat=True)
                    .distinct())
     branches.add(user.branch_id)
-    print(branches)
     return branches

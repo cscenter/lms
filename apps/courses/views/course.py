@@ -108,7 +108,6 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
         return {
             'tz_override': tz_override,
             'request_user_enrollment': request_user_enrollment,
-            # TODO: move to user method
             'is_actual_teacher': is_actual_teacher,
             'unread_news': unread_news,
             'survey_url': survey_url,
