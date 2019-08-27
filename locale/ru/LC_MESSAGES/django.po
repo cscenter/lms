@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-27 09:21+0000\n"
-"PO-Revision-Date: 2019-08-27 10:58+0000\n"
+"PO-Revision-Date: 2019-08-27 12:41+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -1950,6 +1950,9 @@ msgid ""
 "%(site_name)s. If this wasn't you, please ignore this email\n"
 "and your address will be removed from our records.\n"
 msgstr ""
+"\n"
+"Вы (или кто-то выдающий себя за вас) оставили заявку на регистрацию учетной записи на %(site_name)s. Если это были не вы, то проигнорируйте\n"
+"это сообщение, и ваш почтовый адрес будет удален из наших записей.\n"
 
 #: apps/templates/emails/activation_email_body.txt:7
 #, python-format
