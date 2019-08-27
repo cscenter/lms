@@ -34,7 +34,8 @@ class UserProfileForm(forms.ModelForm):
             club_fields = ['first_name', 'last_name', 'patronymic']
             show_fields = club_fields + show_fields
         else:
-            show_fields.append('index_redirect')
+            for field_name in ('index_redirect', 'social_networks'):
+                show_fields.append(field_name)
         to_delete = []
         for field_name in self.fields:
             if field_name not in show_fields:
@@ -49,10 +50,11 @@ class UserProfileForm(forms.ModelForm):
         model = User
         fields = ('phone', 'workplace', 'bio', 'yandex_id', 'github_id',
                   'stepic_id', 'private_contacts', 'first_name', 'last_name',
-                  'patronymic', 'index_redirect')
+                  'patronymic', 'index_redirect', 'social_networks')
         widgets = {
             'bio': UbereditorWidget,
-            'private_contacts': UbereditorWidget
+            'private_contacts': UbereditorWidget,
+            'social_networks': UbereditorWidget,
         }
         help_texts = {
             'bio': "{}. {}".format(
