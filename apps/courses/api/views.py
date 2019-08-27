@@ -91,7 +91,6 @@ class CourseVideoList(ListAPIView):
                         # Could be incorrect within one day since it doesn't
                         # check timezone
                         completed_at__lte=now().date())
-                .in_center_branches()
                 .order_by('-semester__year', 'semester__type')
                 .select_related('meta_course', 'semester')
                 .prefetch_related(lecturers))

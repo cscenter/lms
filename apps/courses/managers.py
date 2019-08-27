@@ -99,20 +99,11 @@ class _CourseDefaultManager(models.Manager):
 
 
 class CourseQuerySet(models.QuerySet):
-    # FIXME: accept PK's or Branch objects?
-    def in_branches(self, *branches: List[int]):
-        return self.filter(Q(branch_id__in=branches, is_correspondence=False) |
-                           Q(is_correspondence=True))
-
     def available_in(self, branch: int):
         return (self.filter(Q(branch_id=branch) |
                             Q(additional_branches=branch))
                 .distinct('semester__index', 'meta_course__name', 'pk')
                 .order_by('-semester__index', 'meta_course__name', 'pk'))
-
-    # FIXME: remove
-    def in_center_branches(self):
-        return self.filter(city_id__in=settings.CENTER_BRANCHES_CITY_CODES)
 
     def for_teacher(self, user):
         return self.filter(teachers=user)

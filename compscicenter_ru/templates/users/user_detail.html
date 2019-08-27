@@ -135,8 +135,8 @@
                 <div class="tab-pane" role="tabpanel" id="for-curator-tab">
                     <table class="table table-condensed table-striped">
                         <tr>
-                            <td>Город обучения</td>
-                            <td>{% if profile_user.city_id %}{{ profile_user.city.name }}{% else %}—{% endif %}</td>
+                            <td>Отделение</td>
+                            <td>{{ profile_user.branch }}</td>
                         </tr>
                         <tr>
                             <td>Статус</td>
@@ -157,7 +157,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td>Записей в этом семестре</td>
+                            <td>Записей за семестр [{{ current_semester }}]</td>
                             <td>{{ stats.in_term.total }} (на курсы Клуба/Центра/ШАД)</td>
                         </tr>
                         <tr>
