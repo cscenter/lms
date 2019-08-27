@@ -27,9 +27,14 @@
                                        class="title">{{ course.meta_course.name }}</a>
                                 </td>
                                 <td align="right">
-                                    {% call_method request.user "has_perm" "learning.enroll_in_course_by_invitation" course_invitation as has_perm %}
-                                    {% if has_perm %}
-                                        <form method="post" action="{{ course_invitation.get_absolute_url }}">{% csrf_token %}<button class="btn btn-primary" type="submit">Записаться</button></form>
+                                    {% call_method request.user "has_perm" "learning.leave_course" course as can_leave_course %}
+                                    {% if can_leave_course %}
+                                        <a href="{{ course.get_unenroll_url }}" class="btn btn-danger btn-block">{% trans "Unenroll from the course" %}</a>
+                                    {% else %}
+                                        {% call_method request.user "has_perm" "learning.enroll_in_course_by_invitation" course_invitation as has_perm %}
+                                        {% if has_perm %}
+                                            <form method="post" action="{{ course_invitation.get_absolute_url }}">{% csrf_token %}<button class="btn btn-primary" type="submit">Записаться</button></form>
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                             </tr>
