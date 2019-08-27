@@ -311,6 +311,13 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
         _("stepik.org ID"),
         blank=True,
         null=True)
+    social_networks = models.TextField(
+        _("Social Networks"),
+        help_text=("{}; {}"
+                   .format(_("LaTeX+Markdown is enabled"),
+                           _("will be shown to curators only"))),
+        blank=True,
+        null=True)
     private_contacts = models.TextField(
         _("Contact information"),
         help_text=("{}; {}"
