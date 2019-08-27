@@ -598,6 +598,13 @@ class SurveySubmissionsStatsView(CuratorOnlyMixin, TemplateView):
 class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
     template_name = "staff/gradebook_list.html"
 
+    def get_term_threshold(self):
+        latest_term = Semester.objects.order_by("-index").first()
+        term_index = latest_term.index
+        if latest_term == SemesterTypes.AUTUMN:
+            term_index += 1
+        return term_index
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         semester_list = list(context["semester_list"])

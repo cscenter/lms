@@ -37,21 +37,23 @@ class GradeBookListBaseView(generic.ListView):
                 .select_related("meta_course", "branch")
                 .order_by("meta_course__name"))
 
-    def get_queryset(self):
+    def get_term_threshold(self):
         # FIXME: Is it ok to use 'spb' here?
         tz = self.request.user.get_timezone()
-        current_year, term_type = get_current_term_pair(tz)
-        term_index = get_term_index(current_year, term_type)
+        current_year, current_term = get_current_term_pair(tz)
+        term_index = get_term_index(current_year, current_term)
         # Skip to the spring semester
-        # FIXME: why?!
-        if term_type == SemesterTypes.AUTUMN:
+        if current_term == SemesterTypes.AUTUMN:
             spring_order = SemesterTypes.get_choice(SemesterTypes.SPRING).order
             autumn_order = SemesterTypes.get_choice(SemesterTypes.AUTUMN).order
-            # How many terms between spring and autumn
+            # How many terms are between spring and autumn
             spring_autumn_gap = autumn_order - spring_order - 1
             term_index += spring_autumn_gap
+        return term_index
+
+    def get_queryset(self):
         return (Semester.objects
-                .filter(index__lte=term_index)
+                .filter(index__lte=self.get_term_threshold())
                 .exclude(type=SemesterTypes.SUMMER)
                 .prefetch_related(
                     Prefetch(
