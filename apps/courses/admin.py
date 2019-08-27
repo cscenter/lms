@@ -20,6 +20,7 @@ from users.models import User
 
 class SemesterAdmin(admin.ModelAdmin):
     ordering = ('-index',)
+    readonly_fields = ('starts_at', 'ends_at')
 
 
 class MetaCourseAdmin(TranslationAdmin, admin.ModelAdmin):

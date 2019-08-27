@@ -78,6 +78,14 @@ class Semester(models.Model):
     type = models.CharField(max_length=100,
                             verbose_name=_("Semester|type"),
                             choices=SemesterTypes.choices)
+    starts_at = models.DateTimeField(
+        verbose_name=_("Semester|StartsAt"),
+        help_text=_("Datetime in UTC and is predefined."),
+        editable=False)
+    ends_at = models.DateTimeField(
+        verbose_name=_("Semester|EndsAt"),
+        help_text=_("Datetime in UTC and is predefined."),
+        editable=False)
     enrollment_start_at = models.DateField(
         _("Enrollment start at"),
         blank=True,
@@ -115,20 +123,6 @@ class Semester(models.Model):
     def slug(self):
         return "{0}-{1}".format(self.year, self.type)
 
-    @cached_property
-    def starts_at(self):
-        """
-        Term start point in datetime format.
-
-        Helps to validate class date range in `CourseClassForm`
-        """
-        return get_term_start(self.year, self.type, pytz.UTC)
-
-    @cached_property
-    def ends_at(self):
-        return next_term_starts_at(self.index) - datetime.timedelta(days=1)
-
-    # FIXME: move to manager
     @classmethod
     def get_current(cls, tz: Timezone = settings.DEFAULT_TIMEZONE):
         year, term_type = get_current_term_pair(tz)
@@ -143,6 +137,8 @@ class Semester(models.Model):
 
     def save(self, *args, **kwargs):
         self.index = get_term_index(self.year, self.type)
+        self.starts_at = get_term_start(self.year, self.type, pytz.UTC)
+        self.ends_at = next_term_starts_at(self.index) - datetime.timedelta(days=1)
         # Enrollment period starts from the beginning of the term by default
         if not self.enrollment_start_at:
             start_at = get_term_start(self.year, self.type, pytz.UTC).date()
