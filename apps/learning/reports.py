@@ -342,8 +342,10 @@ class ProgressReportFull(ProgressReport):
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
         if hasattr(student, "graduate_profile"):
             disciplines = student.graduate_profile.academic_disciplines.all()
+            graduation_year = student.graduate_profile.graduation_year
         else:
             disciplines = []
+            graduation_year = ""
         row = [
             student.last_name,
             student.first_name,
@@ -357,7 +359,7 @@ class ProgressReportFull(ProgressReport):
             student.get_uni_year_at_enrollment_display(),
             student.enrollment_year,
             student.curriculum_year,
-            student.graduation_year,
+            graduation_year,
             student.yandex_login,
             " и ".join(s.name for s in disciplines),
             student.get_status_display(),
@@ -521,8 +523,10 @@ class ProgressReportForSemester(ProgressReport):
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
         if hasattr(student, "graduate_profile"):
             disciplines = student.graduate_profile.academic_disciplines.all()
+            graduation_year = student.graduate_profile.graduation_year
         else:
             disciplines = []
+            graduation_year = ""
         row = [
             student.last_name,
             student.first_name,
@@ -536,7 +540,7 @@ class ProgressReportForSemester(ProgressReport):
             student.get_uni_year_at_enrollment_display(),
             student.enrollment_year,
             student.curriculum_year,
-            student.graduation_year,
+            graduation_year,
             student.yandex_login,
             " и ".join(s.name for s in disciplines),
             student.get_status_display(),
