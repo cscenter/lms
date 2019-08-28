@@ -188,7 +188,6 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         response = self.client.get(reverse('user_detail', args=[user.pk]))
         assert smart_bytes(test_review) not in response.content
         add_user_groups(user, [Roles.GRADUATE])
-        user.graduation_year = 2014
         user.save()
         GraduateProfileFactory(student=user)
         response = self.client.post(user.get_update_profile_url(),

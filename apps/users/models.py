@@ -183,12 +183,6 @@ class StudentProfile(models.Model):
         validators=[MinValueValidator(1990)],
         blank=True,
         null=True)
-    # FIXME: remove
-    graduation_year = models.PositiveSmallIntegerField(
-        _("CSCUser|graduation year"),
-        blank=True,
-        validators=[MinValueValidator(1990)],
-        null=True)
     curriculum_year = models.PositiveSmallIntegerField(
         _("CSCUser|Curriculum year"),
         validators=[MinValueValidator(2000)],
