@@ -76,7 +76,7 @@ Requirements:
                 areas = []
                 for program in study_programs:
                     if (program.year != student.curriculum_year or
-                            program.city_id != student.city_id):
+                            program.branch_id != student.branch_id):
                         continue
                     # Student should have at least 1 passed course in each group
                     groups_total = len(program.course_groups.all())

@@ -88,11 +88,10 @@ class EnrollmentCertificateCreateForm(forms.ModelForm):
         fields = ['signature', 'note']
 
 
-# FIXME: move to admin module
 class UserCreationForm(_UserCreationForm):
     class Meta:
         model = User
-        fields = ('username', 'email')
+        fields = ('username', 'email', 'branch', 'gender')
 
 
 class UserChangeForm(_UserChangeForm):

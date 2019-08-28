@@ -89,7 +89,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     photo = PhotoSerializerField(User.ThumbnailSize.BASE)
     activities = serializers.CharField(source="workplace")
-    city = serializers.CharField(source="city_id")
+    branch = serializers.CharField(source="branch.code")
     courses = CourseRelatedField(
         source="courseteacher_set", many=True, read_only=True,
         help_text="List of meta course ids. May contain duplicates")
@@ -98,7 +98,7 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'name', 'activities', 'city', 'photo',
+        fields = ('id', 'name', 'activities', 'branch', 'photo',
                   'courses', 'latest_session')
 
     def get_name(self, obj):

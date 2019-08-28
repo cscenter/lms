@@ -28,7 +28,7 @@ def test_teachers_list(client):
     assert course1.meta_course_id in response.data[0]["courses"]
     assert course2.meta_course_id in response.data[0]["courses"]
     assert response.data[0]["latest_session"] == course2.semester.index
-    assert response.data[0]["city"] == t1.city_id
+    assert response.data[0]["branch"] == t1.branch.code
 
 
 @pytest.mark.django_db

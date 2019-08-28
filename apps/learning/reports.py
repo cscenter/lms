@@ -294,6 +294,7 @@ class ProgressReportFull(ProgressReport):
                           Roles.GRADUATE,
                           Roles.VOLUNTEER)
                 .students_info()
+                .select_related('branch')
                 .prefetch_related("applicant_set"))
 
     @property
@@ -302,7 +303,7 @@ class ProgressReportFull(ProgressReport):
             'Фамилия',
             'Имя',
             'Отчество',
-            'Город',
+            'Отделение',
             'Вольнослушатель',
             'Магистратура',
             'Почта',
@@ -350,7 +351,7 @@ class ProgressReportFull(ProgressReport):
             student.last_name,
             student.first_name,
             student.patronymic,
-            student.city_id,
+            student.branch,
             "+" if student.is_volunteer else "",
             "+" if has_master_degree(student) else "",
             student.email,
@@ -404,6 +405,7 @@ class ProgressReportForSemester(ProgressReport):
         filters = kwargs.pop("filters", {})
         return (User.objects
                 .has_role(Roles.STUDENT, Roles.VOLUNTEER)
+                .select_related('branch')
                 .students_info(filters=filters,
                                exclude={"status": StudentStatuses.EXPELLED},
                                semester=semester))
@@ -466,7 +468,7 @@ class ProgressReportForSemester(ProgressReport):
             'Фамилия',
             'Имя',
             'Отчество',
-            'Город',
+            'Отделение',
             'Вольнослушатель',
             'Магистратура',
             'Почта',
@@ -531,7 +533,7 @@ class ProgressReportForSemester(ProgressReport):
             student.last_name,
             student.first_name,
             student.patronymic,
-            student.city_id,
+            student.branch,
             "+" if student.is_volunteer else "",
             "+" if has_master_degree(student) else "",
             student.email,
@@ -663,7 +665,7 @@ class WillGraduateStatsReport(ReportFileOutput):
             projects_in_spring = sum(
                 int(p.final_grade in GradeTypes.satisfactory_grades) for p in projects_qs)
             row = [
-                student.city.name,
+                student.branch.name,
                 student.get_abbreviated_short_name(),
                 comments_after_23_total,
                 comments_total,
@@ -695,6 +697,7 @@ class WillGraduateStatsReport(ReportFileOutput):
         ]
         qs = (User.objects
               .filter(status=StudentStatuses.WILL_GRADUATE)
+              .select_related('branch')
               .prefetch_related(*prefetch_list))
         return qs
 

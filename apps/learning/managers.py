@@ -82,7 +82,7 @@ class _GraduateProfileActiveManager(models.Manager):
                       "photo",
                       "testimonial",
                       "student_id",
-                      "student__city_id",
+                      "student__branch__city_id",
                       "student__photo",
                       "student__cropbox_data",
                       "student__first_name",

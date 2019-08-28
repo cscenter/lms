@@ -19,12 +19,12 @@ class StudentSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     name = serializers.CharField(source="first_name")
     surname = serializers.CharField(source="last_name")
-    city = serializers.CharField(source="city_id")
+    branch = serializers.CharField(source="branch.code")
     sex = serializers.CharField(source="gender")
 
     class Meta:
         model = User
-        fields = ('id', 'name', 'surname', 'patronymic', 'sex', 'city')
+        fields = ('id', 'name', 'surname', 'patronymic', 'sex', 'branch')
 
 
 # TODO: add detail_url?

@@ -17,7 +17,7 @@ from courses.tests.factories import CourseFactory
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import GraduateProfileFactory
 from learning.tests.mixins import MyUtilitiesMixin
-from users.constants import Roles
+from users.constants import Roles, GenderTypes
 from users.forms import UserCreationForm
 from users.models import User, UserGroup
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
@@ -202,19 +202,22 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         It should be impossible to create users with equal names
         """
         user = UserFactory()
+        branch = BranchFactory()
         form_data = {'username': user.username,
                      'email': user.email,
+                     'gender': GenderTypes.MALE,
+                     'branch': branch.pk,
                      'password1': "test123foobar@!",
                      'password2': "test123foobar@!"}
         form = UserCreationForm(data=form_data)
-        self.assertFalse(form.is_valid())
+        assert not form.is_valid()
         new_user = UserFactory.build()
         form_data.update({
             'username': new_user.username,
             'email': new_user.email
         })
         form = UserCreationForm(data=form_data)
-        self.assertTrue(form.is_valid())
+        assert form.is_valid()
 
     @unittest.skip("not implemented")
     def test_completed_courses(self):

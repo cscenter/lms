@@ -39,8 +39,9 @@ class LecturerList(ListAPIView):
         queryset = (User.objects
                     .has_role(Roles.TEACHER)
                     .filter(courseteacher__roles=lecturer)
+                    .select_related('branch')
                     .only("pk", "first_name", "last_name", "patronymic",
-                          "cropbox_data", "photo", "city_id", "gender",
+                          "cropbox_data", "photo", "branch__code", "gender",
                           "workplace")
                     .distinct())
         course = self.request.query_params.get('course', None)

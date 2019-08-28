@@ -52,7 +52,7 @@ class EnrollmentFactory(factory.DjangoModelFactory):
 
     student = factory.SubFactory(StudentFactory)
     course = factory.SubFactory(CourseFactory,
-                                city_id=factory.SelfAttribute('..student.city_id'))
+                                branch_id=factory.SelfAttribute('..student.branch_id'))
 
 
 class InvitationFactory(factory.DjangoModelFactory):
