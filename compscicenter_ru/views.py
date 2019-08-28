@@ -52,6 +52,15 @@ from .filters import CoursesFilter
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
 
 
+def _get_branch_choices():
+    """Restrict displayed branches on /alumni/ and /teachers/ pages"""
+    choices = []
+    for branch_code in (Branches.SPB, Branches.NSK):
+        branch = Branches.get_choice(branch_code)
+        choices.append({"label": str(branch.label), "value": branch.value})
+    return choices
+
+
 def get_random_testimonials(count, cache_key, **filters):
     """Returns reviews from graduated students with photo"""
     testimonials = cache.get(cache_key)
@@ -181,14 +190,13 @@ class TeachersView(TemplateView):
         term_index -= 2 * len(SemesterTypes.choices)
         app_data = {
             "state": {
-                "city": self.kwargs.get("city", None),
+                "branch": self.kwargs.get("city", None),
             },
             "props": {
-                "entry_url": reverse("api:teachers"),
-                "courses_url": reverse("api:courses"),
-                "cities": [{"label": str(v), "value": k} for k, v
-                           in settings.CITIES.items()],
-                "term_index": term_index,
+                "entryURL": reverse("api:teachers"),
+                "coursesURL": reverse("api:courses"),
+                "branchOptions": _get_branch_choices(),
+                "termIndex": term_index,
             }
         }
         return {"app_data": app_data}
@@ -271,14 +279,13 @@ class AlumniView(TemplateView):
             "state": {
                 "year": year,
                 "area": area,
-                "city": self.kwargs.get("city", None),
+                "branch": self.kwargs.get("city", None),
             },
             "props": {
-                "entry_url": reverse("api:alumni"),
-                "cities": [{"label": str(v), "value": k} for k, v
-                           in settings.CITIES.items()],
-                "areas": areas,
-                "years": years
+                "entryURL": reverse("api:alumni"),
+                "branchOptions": _get_branch_choices(),
+                "areaOptions": areas,
+                "yearOptions": years
             }
         }
         return {"app_data": app_data}
@@ -541,7 +548,7 @@ class StudentProfileView(generic.DetailView):
     context_object_name = "student"
 
     def get_queryset(self):
-        return User.objects.select_related("graduate_profile")
+        return User.objects.select_related("branch", "graduate_profile")
 
     def get_template_names(self):
         if hasattr(self.object, 'graduate_profile'):

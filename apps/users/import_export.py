@@ -82,7 +82,7 @@ class UserRecordResource(resources.ModelResource):
         model = User
         fields = (
             'email', 'username', 'status', 'last_name', 'first_name',
-            'patronymic', 'gender', 'city', 'phone', 'university', 'course',
+            'patronymic', 'gender', 'branch', 'phone', 'university', 'course',
             'comment', 'yandex_login', 'stepic_id', 'github_login'
         )
         export_order = fields
@@ -101,8 +101,8 @@ class UserRecordResource(resources.ModelResource):
             dataset.append_col(lambda row: '', header='groups')
 
     def before_import_row(self, row, **kwargs):
-        if not row.get('city'):
-            raise ValidationError("Value for `city` column is mandatory")
+        if not row.get('branch'):
+            raise ValidationError("Value for `branch` column is mandatory")
 
     def before_save_instance(self, instance, using_transactions, dry_run):
         if not instance.username:

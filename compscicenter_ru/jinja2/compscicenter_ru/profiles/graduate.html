@@ -53,7 +53,7 @@
                         </div>
                         <div class="timeline__content">
                             <div class="timeline__date _important">31 июля {{ student.enrollment_year }} года</div>
-                            <h3>Зачислен{% if student.gender == student.GENDER_FEMALE %}а{% endif %} в CS центр{% if student.city_id == 'spb' %} в Санкт-Петербурге{% elif student.city_id == 'nsk' %} в Новосибирске{% endif %}</h3>
+                            <h3>Зачислен{% if student.gender == student.GENDER_FEMALE %}а{% endif %} в CS центр{% if student.branch.city_id == 'spb' %} в Санкт-Петербурге{% elif student.branch.city_id == 'nsk' %} в Новосибирске{% endif %}</h3>
                         </div>
                     </div>
 

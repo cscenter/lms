@@ -77,7 +77,8 @@ class UserAdmin(_UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'password1', 'password2'),
+            'fields': ('username', 'email', 'password1', 'password2',
+                       'gender', 'branch'),
         }),
     )
     form = UserChangeForm
@@ -89,7 +90,7 @@ class UserAdmin(_UserAdmin):
                        'last_login', 'date_joined']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
                     'is_staff']
-    list_filter = ['is_active', 'city', 'group__site', 'group__role',
+    list_filter = ['is_active', 'branch', 'group__site', 'group__role',
                    'is_staff', 'is_superuser']
     filter_horizontal = []
 
@@ -101,7 +102,7 @@ class UserAdmin(_UserAdmin):
         (None, {'fields': ('username', 'email', 'password')}),
         (_('Personal info'), {
             'fields': ['last_name', 'first_name', 'patronymic', 'workplace',
-                       'gender', 'branch', 'city', 'photo', 'bio',
+                       'gender', 'branch', 'photo', 'bio',
                        'private_contacts', 'social_networks']}),
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
@@ -132,7 +133,7 @@ class UserAdmin(_UserAdmin):
 class SHADCourseRecordAdmin(admin.ModelAdmin):
     list_display = ["name", "student", "grade"]
     list_filter = [
-        "student__city",
+        "student__branch",
         ("semester", AdminRelatedDropdownFilter)
     ]
 

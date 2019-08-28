@@ -188,11 +188,6 @@ class StudentProfile(models.Model):
         validators=[MinValueValidator(2000)],
         blank=True,
         null=True)
-    branch = models.ForeignKey(
-        "core.Branch",
-        verbose_name=_("Branch"),
-        related_name="+",  # Disable backwards relation
-        on_delete=models.PROTECT,)
     university = models.CharField(
         _("University"),
         max_length=255,
@@ -279,10 +274,11 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
         _("CSCUser|note"),
         help_text=_("LaTeX+Markdown is enabled"),
         blank=True)
-    city = models.ForeignKey(City, verbose_name=_("Default city"),
-                             help_text=_("CSCUser|city"),
-                             blank=True, null=True,
-                             on_delete=models.SET_NULL)
+    branch = models.ForeignKey(
+        "core.Branch",
+        verbose_name=_("Branch"),
+        related_name="+",  # Disable backwards relation
+        on_delete=models.PROTECT,)
     yandex_login = models.CharField(
         _("Yandex Login"),
         max_length=80,
