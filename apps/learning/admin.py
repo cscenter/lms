@@ -52,7 +52,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
                     'grade_changed_local']
     ordering = ['-pk']
     list_filter = [
-        'course__city_id',
+        'course__branch',
         ('course__semester', AdminRelatedDropdownFilter)
     ]
     search_fields = ['course__meta_course__name']
