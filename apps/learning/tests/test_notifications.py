@@ -292,25 +292,25 @@ def test_new_assignment_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    sa = StudentAssignmentFactory(assignment__course__branch=branch_spb)
-    assignment = sa.assignment
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    assignment.deadline_at = dt
-    assignment.save()
+    assignment = AssignmentFactory(course__branch=branch_spb, deadline_at=dt)
+    student = StudentFactory(branch=branch_spb)
+    sa = StudentAssignmentFactory(assignment=assignment, student=student)
     dt_local = assignment.deadline_at_local()
     assert dt_local.hour == 18
     dt_str = "18:00 04 февраля"
-    AssignmentNotificationFactory(is_about_creation=True, user=sa.student,
+    AssignmentNotificationFactory(is_about_creation=True, user=student,
                                   student_assignment=sa)
     out = StringIO()
     mail.outbox = []
     management.call_command("notify", stdout=out)
     assert len(mail.outbox) == 1
     assert dt_str in mail.outbox[0].body
-    # Test with another timezone
-    sa.assignment.course.branch = branch_nsk
-    sa.assignment.course.save()
-    AssignmentNotificationFactory(is_about_creation=True, user=sa.student,
+    # If student is enrolled in the course, show assignments in the
+    # timezone of the student.
+    student.branch = branch_nsk
+    student.save()
+    AssignmentNotificationFactory(is_about_creation=True, user=student,
                                   student_assignment=sa)
     out = StringIO()
     mail.outbox = []
@@ -339,11 +339,10 @@ def test_deadline_changed_timezone(settings):
     settings.LANGUAGE_CODE = 'ru'
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    sa = StudentAssignmentFactory(assignment__course__branch=branch_spb)
-    assignment = sa.assignment
+    student = StudentFactory(branch=branch_spb)
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    assignment.deadline_at = dt
-    assignment.save()
+    assignment = AssignmentFactory(course__branch=branch_spb, deadline_at=dt)
+    sa = StudentAssignmentFactory(assignment=assignment, student=student)
     dt_local = assignment.deadline_at_local()
     assert dt_local.hour == 18
     dt_str = "18:00 04 февраля"
@@ -354,7 +353,10 @@ def test_deadline_changed_timezone(settings):
     management.call_command("notify", stdout=out)
     assert len(mail.outbox) == 1
     assert dt_str in mail.outbox[0].body
-    # Test with other timezone
+    # If student is enrolled in the course, show assignments in the
+    # timezone of the student.
+    student.branch = branch_nsk
+    student.save()
     sa.assignment.course.branch = branch_nsk
     sa.assignment.course.save()
     AssignmentNotificationFactory(is_about_deadline=True, user=sa.student,
