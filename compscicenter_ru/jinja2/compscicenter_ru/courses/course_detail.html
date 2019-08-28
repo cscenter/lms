@@ -61,20 +61,24 @@
                             </div>
                         {% endwith %}
 
-                        {% if 'lectures' in tabs %}
-                            {% with tab = tabs['lectures'] %}
+                        {% if 'classes' in tabs %}
+                            {% with tab = tabs['classes'] %}
                                 <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
-                                    <h2>{% trans %}Lectures List{% endtrans %}</h2>
-                                    <div class="ui list _divided _playlist">
-                                        {% for course_class in lectures %}
-                                            <a href="{{ course_class.get_absolute_url() }}" class="list__item">
-                                                <div class="item__text">{{ course_class.name }}</div>
-                                                <div class="item__icons">
-                                                    {%- if course_class.video_url %}{{ macros.svg_icon('video') }}{% endif %}{% if course_class.slides %}{{ macros.svg_icon('slides') }}{% endif -%}
-                                                </div>
-                                            </a>
-                                        {% endfor %}
-                                    </div>
+                                    {% if classes %}
+                                        <h2>{% trans %}Lectures List{% endtrans %}</h2>
+                                        <div class="ui list _divided _playlist">
+                                            {% for course_class in classes %}
+                                                <a href="{{ course_class.get_absolute_url() }}" class="list__item">
+                                                    <div class="item__text">{{ course_class.name }}</div>
+                                                    <div class="item__icons">
+                                                        {%- if course_class.video_url %}{{ macros.svg_icon('video') }}{% endif %}{% if course_class.slides %}{{ macros.svg_icon('slides') }}{% endif -%}
+                                                    </div>
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        Лекций не найдено.
+                                    {% endif %}
                                 </div>
                             {% endwith %}
                         {% endif %}

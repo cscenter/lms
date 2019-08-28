@@ -472,11 +472,11 @@ class CourseVideoListView(TemplateView):
         ]
         app_data = {
             "props": {
-                "entry_url": [
+                "entryURL": [
                     reverse("api:course_video_records"),
                     reverse("api:recorded_events_videos"),
                 ],
-                "videoTypes": video_types
+                "videoOptions": video_types
             },
             "state": {
                 "videoTypes": [item["value"] for item in video_types]
@@ -653,9 +653,9 @@ class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
                 name=_('About the Course'),
                 url=self.course.get_absolute_url(subdomain=None),
                 active=True),
-            Tab(target='lectures',
+            Tab(target='classes',
                 name=_('Lectures List'),
-                url=self.course.get_absolute_url(tab='lectures',
+                url=self.course.get_absolute_url(tab='classes',
                                                  subdomain=None)),
         ])
         show_tab = self.kwargs.get('tab', 'about')
@@ -666,9 +666,9 @@ class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
         context['tabs'] = tabs
         context['teachers'] = {TeacherRoles.get_choice(k): v for k, v in
                                teachers.items()}
-        context['lectures'] = (self.course.courseclass_set
-                               .filter(type=ClassTypes.LECTURE)
-                               .order_by("date", "starts_at"))
+        context['classes'] = (self.course.courseclass_set
+                              .filter(type=ClassTypes.LECTURE)
+                              .order_by("date", "starts_at"))
         return context
 
 
