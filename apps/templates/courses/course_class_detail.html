@@ -32,7 +32,7 @@
         </tr>
         <tr>
           <td>{% trans "Where" %}:</td>
-          <td><a href="{{ course_class.venue.get_absolute_url }}">{{ course_class.venue.name }}</a></td>
+          <td><a href="{{ course_class.venue.location.get_absolute_url }}">{{ course_class.venue }}</a></td>
         </tr>
         {% if course_class.slides %}
         <tr>
