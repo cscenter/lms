@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from core.settings.base import DEFAULT_BRANCH_CODE
-from core.tests.factories import LocationFactory, CityFactory, BranchFactory
+from core.tests.factories import LocationFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, LearningSpace, CourseReview
@@ -69,7 +69,6 @@ class CourseFactory(factory.DjangoModelFactory):
     meta_course = factory.SubFactory(MetaCourseFactory)
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
-    city = factory.SubFactory(CityFactory, code=settings.DEFAULT_CITY_CODE)
     branch = factory.SubFactory(BranchFactory,
                                 code=settings.DEFAULT_BRANCH_CODE)
 

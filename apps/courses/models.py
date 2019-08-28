@@ -19,7 +19,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.mixins import DerivableFieldsMixin
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, City, Location, Branch
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location, Branch
 from core.timezone import now_local, Timezone, TimezoneAwareModel
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids, get_youtube_video_id
@@ -278,9 +278,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("This course offering will be available on Computer"
                     "Science Club website so anyone can join"),
         default=False)
-    city = models.ForeignKey(City, verbose_name=_("City"),
-                             default=settings.DEFAULT_CITY_CODE,
-                             on_delete=models.PROTECT)
     branch = models.ForeignKey(Branch,
                                verbose_name=_("Branch"),
                                related_name="courses",

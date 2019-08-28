@@ -52,7 +52,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
                                    queryset=(CourseTeacher.objects
                                              .select_related("teacher")))
         return (super().get_course_queryset()
-                .select_related('meta_course', 'semester', 'city')
+                .select_related('meta_course', 'semester', 'branch')
                 .prefetch_related(course_teachers,
                                   "additional_branches"))
 
