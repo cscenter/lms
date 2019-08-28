@@ -458,7 +458,8 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
               .has_role(*roles)
               .filter(branch=branch,
                       enrollment_year=enrollment_year)
-              .distinct()
+              .distinct('last_name', 'first_name', 'pk')
+              .order_by('last_name', 'first_name', 'pk')
               .prefetch_related("groups"))
         if "print" in self.request.GET:
             qs = qs.exclude(status=StudentStatuses.EXPELLED)
