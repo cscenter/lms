@@ -74,7 +74,7 @@ urlpatterns += [
         path("<slug:course_slug>/", views.MetaCourseDetailView.as_view(), name="meta_course_detail"),
         re_path(RE_COURSE_URI, include([
             path("", views.CourseDetailView.as_view(), name="course_detail"),
-            re_path(r"^(?P<tab>lectures|about)/$", views.CourseDetailView.as_view(), name="course_detail_with_active_tab"),
+            re_path(r"^(?P<tab>classes|about)/$", views.CourseDetailView.as_view(), name="course_detail_with_active_tab"),
         ]))
     ])),
     path('', include('courses.urls')),

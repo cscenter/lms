@@ -72,7 +72,7 @@ class CourseVideoSerializer(CourseSerializer):
         fields = ('id', 'name', 'preview_url', 'url', 'type', 'year', 'speakers')
 
     def get_url(self, obj: Course):
-        return obj.get_url_for_tab('classes')
+        return obj.get_absolute_url(tab='classes', subdomain=None)
 
     def get_year(self, obj: Course):
         return obj.semester.year
