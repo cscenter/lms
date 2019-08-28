@@ -129,17 +129,17 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
                                {'next': reverse('video_list')})
         self.assertRedirects(resp, reverse('video_list'), status_code=302)
 
-    def test_yandex_id_from_email(self):
+    def test_yandex_login_from_email(self):
         """
-        yandex_id can be exctracted from email if email is on @yandex.ru
+        yandex_login can be exctracted from email if email is on @yandex.ru
         """
         branch = BranchFactory()
         user = User.objects.create_user("testuser1", "foo@bar.net",
                                         "test123foobar@!", branch=branch)
-        self.assertFalse(user.yandex_id)
+        self.assertFalse(user.yandex_login)
         user = User.objects.create_user("testuser2", "foo@yandex.ru",
                                         "test123foobar@!", branch=branch)
-        self.assertEqual(user.yandex_id, "foo")
+        self.assertEqual(user.yandex_login, "foo")
 
     def test_short_bio(self):
         """

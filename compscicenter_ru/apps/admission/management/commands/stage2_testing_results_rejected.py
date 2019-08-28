@@ -50,7 +50,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                                   Q(online_test__score__isnull=True))
                           .values("pk",
                                   "online_test__score",
-                                  "yandex_id",
+                                  "yandex_login",
                                   "email"))
             total = 0
             generated = 0
@@ -64,7 +64,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                         score = int(a["online_test__score"])
                     assert score < testing_passing_score
                     context = {
-                        'LOGIN': a["yandex_id"],
+                        'LOGIN': a["yandex_login"],
                         'SCORE': score,
                     }
                 recipients = [a["email"]]

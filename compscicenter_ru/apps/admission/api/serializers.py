@@ -32,7 +32,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
     # without full information about applicant.
     has_job = serializers.BooleanField(label='Вы сейчас работаете?')
     # FIXME: Replace with hidden field since real value stores in session
-    yandex_id = serializers.CharField(max_length=80)
+    yandex_login = serializers.CharField(max_length=80)
 
     class Meta:
         model = Applicant
@@ -41,7 +41,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
             "surname", "first_name", "patronymic",
             "email", "phone",
             # Accounts
-            "stepic_id", "github_id", "yandex_id",
+            "stepic_id", "github_login", "yandex_login",
             # Education
             "university", "university_other", "faculty", "course",
             # Work
@@ -126,5 +126,5 @@ class ApplicantSerializer(serializers.ModelSerializer):
     def validate_stepic_id(self, value):
         return value.rsplit("/", maxsplit=1)[-1]
 
-    def validate_github_id(self, value):
+    def validate_github_login(self, value):
         return value.rsplit("/", maxsplit=1)[-1]

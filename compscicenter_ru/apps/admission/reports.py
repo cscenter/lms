@@ -96,7 +96,7 @@ class AdmissionReport(ReportFileOutput):
         exclude_applicant_fields = {
             'modified',
             'uuid',
-            'yandex_id_normalize',
+            'yandex_login_q',
             'campaign',
             'user'
         }

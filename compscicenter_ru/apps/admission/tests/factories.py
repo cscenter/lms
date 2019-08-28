@@ -68,7 +68,7 @@ class ApplicantFactory(factory.DjangoModelFactory):
     email = factory.Sequence(lambda n: "user%03d@foobar.net" % n)
     phone = factory.Sequence(lambda n: '123-555-%04d' % n)
     university = factory.SubFactory(UniversityFactory)
-    yandex_id = factory.Sequence(lambda n: "yandex_login_%03d" % n)
+    yandex_login = factory.Sequence(lambda n: "yandex_login_%03d" % n)
     faculty = factory.Sequence(lambda n: "faculty_%03d" % n)
     course = factory.fuzzy.FuzzyChoice([x for x, _ in
                                         AcademicDegreeYears.choices])

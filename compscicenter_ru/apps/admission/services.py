@@ -83,11 +83,11 @@ def create_student_from_applicant(applicant):
     user.last_name = applicant.surname
     user.enrollment_year = user.curriculum_year = timezone.now().year
     # Looks like the same fields below
-    user.yandex_id = applicant.yandex_id if applicant.yandex_id else ""
+    user.yandex_login = applicant.yandex_login if applicant.yandex_login else ""
     # For github store part after github.com/
-    if applicant.github_id:
-        user.github_id = applicant.github_id.split("github.com/",
-                                                   maxsplit=1)[-1]
+    if applicant.github_login:
+        user.github_login = applicant.github_login.split("github.com/",
+                                                      maxsplit=1)[-1]
     user.workplace = applicant.workplace if applicant.workplace else ""
     user.uni_year_at_enrollment = applicant.course
     user.branch = applicant.campaign.branch
@@ -114,7 +114,7 @@ class EmailQueueService:
                 'BRANCH': applicant.campaign.branch.name,
                 'PHONE': applicant.phone,
                 'CONTEST_ID': applicant.online_test.yandex_contest_id,
-                'YANDEX_LOGIN': applicant.yandex_id,
+                'YANDEX_LOGIN': applicant.yandex_login,
             },
             render_on_delivery=False,
             backend='ses',

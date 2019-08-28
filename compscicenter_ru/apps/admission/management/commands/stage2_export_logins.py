@@ -25,7 +25,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk,
                                   online_test__score__gte=passing_score)
-                          .values("id", "yandex_id",
+                          .values("id", "yandex_login",
                                   "exam__yandex_contest_id")
                           .order_by("exam__yandex_contest_id"))
             contest_id = object()
@@ -36,6 +36,6 @@ class Command(CurrentCampaignsMixin, BaseCommand):
                 if a["exam__yandex_contest_id"] != contest_id:
                     contest_id = a["exam__yandex_contest_id"]
                     self.stdout.write("CONTEST ID #{}:".format(contest_id))
-                self.stdout.write(a["yandex_id"])
+                self.stdout.write(a["yandex_login"])
             self.stdout.write("")
         self.stdout.write("Done")

@@ -71,7 +71,7 @@ class OnlineTestRecordResource(ContestDetailsMixin,
     # Note: It returns __str__ representation of `applicant` attribute
     fio = fields.Field(column_name='fio', attribute='applicant')
     yandex_login = fields.Field(column_name='yandex_login',
-                                attribute='applicant__yandex_id')
+                                attribute='applicant__yandex_login')
     status = fields.Field(column_name='status', attribute='status',
                           default=ChallengeStatuses.MANUAL)
 

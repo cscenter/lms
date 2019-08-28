@@ -18,9 +18,9 @@ class ApplicantCreateAPIView(CreateAPIView):
             data = data.copy()
             yandex_login = self.request.session.get(SESSION_LOGIN_KEY, None)
             if yandex_login:
-                data["yandex_id"] = yandex_login
-            elif "yandex_id" in data:
-                del data["yandex_id"]
+                data["yandex_login"] = yandex_login
+            elif "yandex_login" in data:
+                del data["yandex_login"]
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)

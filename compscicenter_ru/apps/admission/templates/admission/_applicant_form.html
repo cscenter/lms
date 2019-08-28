@@ -4,7 +4,7 @@
     {% elif field.name == 'position' and not applicant_form.has_job.value %}
     {% else %}
     <dt>{{ field.label_tag }}</dt>
-    {% if field.name == 'github_id' %}
+    {% if field.name == 'github_login' %}
         <dd>{% if field.value %}{{ field.value }} <a class="text-muted" target="_blank" href="https://github.com/{{ field.value }}"><i class="fa fa-github-alt" aria-hidden="true"></i></a>{% else %}<не указано>{% endif %}</dd>
     {% elif field.name == 'course' %}
         <dd>{{ applicant_form.instance.get_course_display }}</dd>
