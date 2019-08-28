@@ -48,8 +48,8 @@ class StudentMeta:
         return self._enrollment.student.username
 
     @property
-    def yandex_id(self):
-        return self._enrollment.student.yandex_id
+    def yandex_login(self):
+        return self._enrollment.student.yandex_login
 
     def get_absolute_url(self):
         return self._enrollment.student.get_absolute_url()

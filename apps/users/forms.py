@@ -27,7 +27,7 @@ class UserProfileForm(forms.ModelForm):
 
         self.helper = FormHelper()
         show_fields = ['phone', 'workplace', 'bio',
-                       'yandex_id', 'github_id', 'stepic_id',
+                       'yandex_login', 'github_login', 'stepic_id',
                        'private_contacts']
 
         if is_club_site():
@@ -48,7 +48,7 @@ class UserProfileForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('phone', 'workplace', 'bio', 'yandex_id', 'github_id',
+        fields = ('phone', 'workplace', 'bio', 'yandex_login', 'github_login',
                   'stepic_id', 'private_contacts', 'first_name', 'last_name',
                   'patronymic', 'index_redirect', 'social_networks')
         widgets = {
@@ -64,8 +64,8 @@ class UserProfileForm(forms.ModelForm):
                 "{}; {}"
                 .format(LATEX_MARKDOWN_ENABLED,
                         _("will be shown only to logged-in users"))),
-            'yandex_id': _("<b>YANDEX.ID</b>@yandex.ru"),
-            'github_id': "github.com/<b>GITHUB-ID</b>",
+            'yandex_login': _("<b>YANDEX.ID</b>@yandex.ru"),
+            'github_login': "github.com/<b>GITHUB-ID</b>",
             'stepic_id': _("stepik.org/users/<b>USER_ID</b>"),
             'workplace': _("Specify one or more jobs (comma-separated)")
         }

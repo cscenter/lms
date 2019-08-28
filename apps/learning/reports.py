@@ -358,7 +358,7 @@ class ProgressReportFull(ProgressReport):
             student.enrollment_year,
             student.curriculum_year,
             student.graduation_year,
-            student.yandex_id,
+            student.yandex_login,
             " и ".join(s.name for s in disciplines),
             student.get_status_display(),
             '',  # FIXME: error in student.status_changed_at field
@@ -537,7 +537,7 @@ class ProgressReportForSemester(ProgressReport):
             student.enrollment_year,
             student.curriculum_year,
             student.graduation_year,
-            student.yandex_id,
+            student.yandex_login,
             " и ".join(s.name for s in disciplines),
             student.get_status_display(),
             '',  # FIXME: error with student.status_changed_at

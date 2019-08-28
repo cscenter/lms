@@ -53,7 +53,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                           .values("pk",
                                   "online_test__score",
                                   "exam__yandex_contest_id",
-                                  "yandex_id",
+                                  "yandex_login",
                                   "email",
                                   "status"))
             total = 0
@@ -64,7 +64,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                 if not options['skip_context']:
                     score = int(a["online_test__score"])
                     context = {
-                        'LOGIN': a["yandex_id"],
+                        'LOGIN': a["yandex_login"],
                         'SCORE': score,
                         'CONTEST_ID': a["exam__yandex_contest_id"],
                     }

@@ -147,13 +147,13 @@
         <table class="table table-condensed table-striped">
         <tr>
             <td>Yandex</td>
-            <td>{{ profile_user.yandex_id|default:"—" }}</td>
+            <td>{{ profile_user.yandex_login|default:"—" }}</td>
         </tr>
         <tr>
 
             <td>Github</td>
-            <td>{% if profile_user.github_id %}
-                  <a href="https://github.com/{{ profile_user.github_id }}" target="_blank">{{ profile_user.github_id }}</a>
+            <td>{% if profile_user.github_login %}
+                  <a href="https://github.com/{{ profile_user.github_login }}" target="_blank">{{ profile_user.github_login }}</a>
                 {% else %}
                   —
                 {% endif %}

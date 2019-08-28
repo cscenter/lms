@@ -112,26 +112,26 @@ def test_passed_courses():
 
 
 @pytest.mark.django_db
-def test_github_id_validation():
+def test_github_login_validation():
     user = UserFactory.build()
     user.branch = BranchFactory()
     with pytest.raises(ValidationError):
-        user.github_id = "mikhail--m"
+        user.github_login = "mikhail--m"
         user.clean_fields()
     with pytest.raises(ValidationError):
-        user.github_id = "mikhailm-"
+        user.github_login = "mikhailm-"
         user.clean_fields()
     with pytest.raises(ValidationError):
-        user.github_id = "mikhailm--"
+        user.github_login = "mikhailm--"
         user.clean_fields()
     with pytest.raises(ValidationError):
-        user.github_id = "-mikhailm"
+        user.github_login = "-mikhailm"
         user.clean_fields()
-    user.github_id = "mikhailm"
+    user.github_login = "mikhailm"
     user.clean_fields()
-    user.github_id = "mikhail-m"
+    user.github_login = "mikhail-m"
     user.clean_fields()
-    user.github_id = "m-i-k-h-a-i-l-m"
+    user.github_login = "m-i-k-h-a-i-l-m"
     user.clean_fields()
 
 

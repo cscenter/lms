@@ -289,16 +289,12 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
                              help_text=_("CSCUser|city"),
                              blank=True, null=True,
                              on_delete=models.SET_NULL)
-    # FIXME: why not null? The same for github_id
-    yandex_id = models.CharField(
-        _("Yandex ID"),
+    yandex_login = models.CharField(
+        _("Yandex Login"),
         max_length=80,
-        validators=[RegexValidator(regex="^[^@]*$",
-                                   message=_("Only the part before "
-                                             "\"@yandex.ru\" is expected"))],
         blank=True)
-    github_id = models.CharField(
-        _("Github ID"),
+    github_login = models.CharField(
+        _("Github Login"),
         max_length=80,
         validators=[GITHUB_LOGIN_VALIDATOR],
         blank=True)
@@ -365,10 +361,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
         verbose_name = _("CSCUser|user")
         verbose_name_plural = _("CSCUser|users")
 
-    def clean(self):
-        super().clean()
-        self.email = self.__class__.objects.normalize_email(self.email)
-
     def get_group_permissions(self, obj=None):
         return PermissionsMixin.get_group_permissions(self, obj)
 
@@ -392,10 +384,17 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
     def save(self, **kwargs):
         created = self.pk is None
         password_changed = self._password is not None
-        if self.email and not self.yandex_id:
+        self.email = self.__class__.objects.normalize_email(self.email)
+        if self.email and not self.yandex_login:
             username, domain = self.email.split("@", 1)
             if domain in YANDEX_DOMAINS:
-                self.yandex_id = username
+                self.yandex_login = username
+        if self.yandex_login:
+            suffixes = tuple(f"@{d}" for d in YANDEX_DOMAINS)
+            if self.yandex_login.endswith(suffixes):
+                username, domain = self.yandex_login.rsplit("@", 1)
+                self.yandex_login = username
+
         super().save(**kwargs)
         # Schedules redis queue task to update user password in gerrit's
         # LDAP database if password was changed.

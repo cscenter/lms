@@ -73,7 +73,7 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OnlineTestRecordResource
     list_display = ['__str__', 'score', 'get_campaign', 'yandex_contest_id']
     list_filter = ['applicant__campaign']
-    search_fields = ['applicant__yandex_id', 'applicant__surname',
+    search_fields = ['applicant__yandex_login', 'applicant__surname',
                      'applicant__first_name', 'applicant__email']
     raw_id_fields = ['applicant']
     formfield_overrides = {
@@ -110,7 +110,7 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_class = ExamRecordResource
     raw_id_fields = ("applicant",)
     list_display = ('__str__', 'score', 'yandex_contest_id', 'status')
-    search_fields = ['applicant__yandex_id', 'applicant__surname',
+    search_fields = ['applicant__yandex_login', 'applicant__surname',
                      'applicant__first_name', 'yandex_contest_id']
     list_filter = ['applicant__campaign']
     formfield_overrides = {
@@ -141,12 +141,12 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
 
 
 class ApplicantAdmin(admin.ModelAdmin):
-    list_display = ('id', 'yandex_id', 'surname', 'first_name', 'campaign',
+    list_display = ('id', 'yandex_login', 'surname', 'first_name', 'campaign',
                     'created_local')
     list_filter = [CampaignListFilter, 'status']
-    search_fields = ('yandex_id', 'yandex_id_normalize', 'stepic_id',
+    search_fields = ('yandex_login', 'yandex_login_q', 'stepic_id',
                      'first_name', 'surname', 'email', 'phone')
-    readonly_fields = ['yandex_id_normalize']
+    readonly_fields = ['yandex_login_q']
 
     def created_local(self, obj):
         return admin_datetime(obj.created_local())

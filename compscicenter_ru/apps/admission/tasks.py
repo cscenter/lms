@@ -26,7 +26,7 @@ def register_in_yandex_contest(applicant_id, language_code):
                  .filter(pk=applicant_id)
                  .select_related("campaign", "campaign__branch", "online_test")
                  .first())
-    if not applicant.yandex_id:
+    if not applicant.yandex_login:
         logger.error(f"Empty yandex login for applicant id = {applicant_id}")
         raise AttributeError("Empty yandex id")
     online_test = applicant.online_test

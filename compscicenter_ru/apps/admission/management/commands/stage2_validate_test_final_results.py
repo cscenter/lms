@@ -66,7 +66,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
                 total = int(Decimal(row['total'].replace(',', '.')))
                 yandex_login = row['yandex_login']
                 a = Applicant.objects.filter(campaign__in=campaign_ids,
-                                             yandex_id=yandex_login)
+                                             yandex_login=yandex_login)
                 applicant = None
                 exists = a.exists()
                 if exists:

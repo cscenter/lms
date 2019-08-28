@@ -83,7 +83,7 @@ class UserRecordResource(resources.ModelResource):
         fields = (
             'email', 'username', 'status', 'last_name', 'first_name',
             'patronymic', 'gender', 'city', 'phone', 'university', 'course',
-            'comment', 'yandex_id', 'stepic_id', 'github_id'
+            'comment', 'yandex_login', 'stepic_id', 'github_login'
         )
         export_order = fields
         # m2m relationships won't be processed if imported fields

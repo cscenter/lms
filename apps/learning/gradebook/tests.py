@@ -636,11 +636,11 @@ def test_gradebook_import_assignments_from_csv_smoke(client, mocker):
 def test_gradebook_import_assignments_from_csv(client, tmpdir):
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
-    student1 = StudentFactory(branch__code=Branches.SPB, yandex_id='yandex1',
+    student1 = StudentFactory(branch__code=Branches.SPB, yandex_login='yandex1',
                               stepic_id='1')
-    student2 = StudentFactory(branch__code=Branches.SPB, yandex_id='yandex2',
+    student2 = StudentFactory(branch__code=Branches.SPB, yandex_login='yandex2',
                               stepic_id='2')
-    student3 = StudentFactory(branch__code=Branches.SPB, yandex_id='custom_one',
+    student3 = StudentFactory(branch__code=Branches.SPB, yandex_login='custom_one',
                               stepic_id='3')
     for s in [student1, student2, student3]:
         EnrollmentFactory.create(student=s, course=co)
@@ -667,7 +667,7 @@ header1,header2,total
     #
     tmp_file = tmpdir.join("csv").join("grades_yandex_logins.csv")
     tmp_file.write("""
-yandex_id,header2,total
+yandex_login,header2,total
 yandex1,1,10
 yandex2,2,20
 yandex3,3,30

@@ -229,4 +229,4 @@ class AssignmentScoresImportByStepikIDView(AssignmentGradesImportBaseView):
 class AssignmentScoresImportByYandexLoginView(AssignmentGradesImportBaseView):
     def import_grades_for_assignment(self, assignment):
         csv_file = self.request.FILES['csv_file']
-        return AssignmentGradesImport(assignment, csv_file, "yandex_id").process()
+        return AssignmentGradesImport(assignment, csv_file, "yandex_login").process()

@@ -216,7 +216,7 @@ class ApplicantReadOnlyForm(ReadOnlyFieldsMixin, forms.ModelForm):
     class Meta:
         model = Applicant
         exclude = ("campaign", "first_name", "patronymic", "surname",
-                   "status", "yandex_id_normalize", "user",
+                   "status", "yandex_login_q", "user",
                    "university_other", "contest_id", "participant_id",
                    "is_unsubscribed", "university2")
 

@@ -46,7 +46,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
             applicants = (Applicant.objects
                           .filter(campaign_id=campaign.pk,
                                   online_test__score__gte=passing_score)
-                          .values("id", "yandex_id"))
+                          .values("id", "yandex_login"))
             for a in applicants:
                 contest_id = next(contests)
                 try:

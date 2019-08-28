@@ -300,22 +300,22 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         max_length=255,
         blank=True,
         null=True)
-    yandex_id = models.CharField(
-        _("Yandex ID"),
+    yandex_login = models.CharField(
+        _("Yandex Login"),
         max_length=80,
-        help_text=_("Applicant|yandex_id"),
+        help_text=_("Applicant|yandex_login"),
         null=True,
         blank=True)
-    yandex_id_normalize = models.CharField(
-        _("Yandex ID normalisation"),
+    yandex_login_q = models.CharField(
+        _("Yandex Login (normalized)"),
         max_length=80,
         help_text=_("Applicant|yandex_id_normalization"),
         null=True,
         blank=True)
-    github_id = models.CharField(
-        _("Github ID"),
+    github_login = models.CharField(
+        _("Github Login"),
         max_length=255,
-        help_text=_("Applicant|github_id"),
+        help_text=_("Applicant|github_login"),
         null=True,
         blank=True)
 
@@ -461,8 +461,8 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
     @transaction.atomic
     def save(self, **kwargs):
         created = self.pk is None
-        if self.yandex_id:
-            self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
+        if self.yandex_login:
+            self.yandex_login_q = self.yandex_login.lower().replace('-', '.')
         super().save(**kwargs)
         if created:
             self._assign_testing()
@@ -488,8 +488,8 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         return smart_text(" ".join(part for part in parts if part).strip())
 
     def clean(self):
-        if self.yandex_id:
-            self.yandex_id_normalize = self.yandex_id.lower().replace('-', '.')
+        if self.yandex_login:
+            self.yandex_login_q = self.yandex_login.lower().replace('-', '.')
 
     def get_living_place_display(self):
         if not self.living_place and self.campaign.branch.city_id:
@@ -526,8 +526,8 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
             conditions.append(Q(phone=self.phone))
         if self.stepic_id:
             conditions.append(Q(stepic_id=self.stepic_id))
-        if self.yandex_id_normalize:
-            conditions.append(Q(yandex_id_normalize=self.yandex_id_normalize))
+        if self.yandex_login_q:
+            conditions.append(Q(yandex_login_q=self.yandex_login_q))
         q = conditions.pop()
         for c in conditions:
             q |= c
@@ -671,7 +671,7 @@ class YandexContestIntegration(models.Model):
         """
         applicant = self.applicant
         try:
-            status_code, data = api.register_in_contest(applicant.yandex_id,
+            status_code, data = api.register_in_contest(applicant.yandex_login,
                                                         self.yandex_contest_id)
         except YandexContestError:
             raise
@@ -687,7 +687,7 @@ class YandexContestIntegration(models.Model):
                           .filter(yandex_contest_id=self.yandex_contest_id,
                                   contest_status_code=RegisterStatus.CREATED,
                                   applicant__campaign_id=applicant.campaign_id,
-                                  applicant__yandex_id=applicant.yandex_id)
+                                  applicant__yandex_login=applicant.yandex_login)
                           .exclude(contest_participant_id__isnull=True)
                           .only("contest_participant_id")
                           .first())
@@ -746,7 +746,7 @@ class YandexContestIntegration(models.Model):
                     yandex_login = row['participantInfo']['login']
                     participant_id = row['participantInfo']['id']
                     updated = (cls.objects
-                               .filter(Q(applicant__yandex_id=yandex_login) |
+                               .filter(Q(applicant__yandex_login=yandex_login) |
                                        Q(contest_participant_id=participant_id),
                                        applicant__campaign_id=contest.campaign_id,
                                        yandex_contest_id=contest.contest_id,
