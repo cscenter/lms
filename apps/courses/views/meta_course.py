@@ -17,9 +17,10 @@ class MetaCourseDetailView(generic.DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         courses = (Course.objects
-                   .select_related("meta_course", "semester", "city")
                    .filter(meta_course=self.object,
-                           branch=self.request.branch))
+                           branch=self.request.branch)
+                   .select_related("meta_course", "semester", "branch")
+                   .order_by('-semester__index'))
         context['courses'] = courses
         return context
 

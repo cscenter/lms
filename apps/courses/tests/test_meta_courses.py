@@ -1,10 +1,8 @@
 import factory
 import pytest
-from django.conf import settings
 
 from courses.models import MetaCourse
-from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
-    CourseFactory
+from courses.tests.factories import MetaCourseFactory, CourseFactory
 from users.constants import Roles
 from users.tests.factories import UserFactory
 
