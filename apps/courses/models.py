@@ -278,9 +278,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("This course offering will be available on Computer"
                     "Science Club website so anyone can join"),
         default=False)
-    is_correspondence = models.BooleanField(
-        _("Correspondence course"),
-        default=False)
     city = models.ForeignKey(City, verbose_name=_("City"),
                              default=settings.DEFAULT_CITY_CODE,
                              on_delete=models.PROTECT)

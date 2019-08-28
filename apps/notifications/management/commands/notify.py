@@ -144,9 +144,8 @@ def get_assignment_notification_context(notification: AssignmentNotification):
     a_s = notification.student_assignment
     tz_override = None
     u = notification.user
-    # Override timezone to enrolled students if course is online
-    if a_s.assignment.course.is_correspondence and (
-            u.is_student or u.is_volunteer):
+    # Override timezone for enrolled students
+    if u.is_student or u.is_volunteer:
         tz_override = notification.user.get_timezone()
     context = {
         'a_s_link_student': replace_hostname(a_s.get_student_url(), base_domain),

@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from core.urls import reverse
 from courses.tests.factories import CourseFactory, CourseClassFactory
-from core.tests.factories import LocationFactory
+from core.tests.factories import LocationFactory, BranchFactory
 from learning.settings import Branches
 from learning.tests.factories import EventFactory, \
     EnrollmentFactory
@@ -181,12 +181,16 @@ def test_correspondence_courses_in_a_full_calendar(client):
     student = StudentFactory(branch__code=Branches.SPB)
     client.login(student)
     this_month_date = datetime.datetime.utcnow()
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    course = CourseFactory(branch=branch_spb)
+    course.additional_branches.add(branch_nsk)
     CourseClassFactory.create_batch(
-            3, course__is_correspondence=True, date=this_month_date)
+            3, course=course, date=this_month_date)
     classes = flatten_calendar_month_events(
         client.get(reverse("study:calendar_full")).context['calendar'])
     assert len(classes) == 3
-    teacher = TeacherFactory(branch__code=Branches.SPB)
+    teacher = TeacherFactory(branch=branch_spb)
     client.login(teacher)
     classes = flatten_calendar_month_events(
         client.get(reverse("teaching:calendar_full")).context['calendar'])

@@ -14,7 +14,6 @@ from users.tests.factories import UserFactory, StudentFactory, TeacherFactory
 
 @pytest.mark.django_db
 def test_notifications(client, settings):
-    # FIXME: Make this as a default setting for test env?
     settings.DEFAULT_URL_SCHEME = 'https'
     out = OutputIO()
     mail.outbox = []
