@@ -51,7 +51,6 @@ class PermissionMixin:
 
 class ExtAnonymousUser(PermissionMixin, AnonymousUser):
     group = []
-    city_code = None
     index_redirect = None
 
     def __str__(self):

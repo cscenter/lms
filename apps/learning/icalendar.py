@@ -4,7 +4,6 @@ from itertools import chain, repeat
 
 import pytz
 from dateutil.relativedelta import relativedelta
-from django.conf import settings
 from django.contrib.sites.models import Site
 from django.utils import timezone
 from icalendar import vText, vUri, Calendar, Event as ICalendarEvent, \
@@ -32,14 +31,11 @@ def generate_vtimezone(tz: pytz.timezone):
 
 class UserEventsICalendar(ABC):
     """
-    Generates iCalendar for requested user. Supports only one time zone.
+    Generates iCalendar for requested user in the timezone of the
+    requested user. Supports only one time zone.
 
     Timezone should be consistent across all events (although iCalendar
-    specification allows multiple VTIMEZONE's). With this assumption we rely on
-        * requested user timezone for classes and assignments and on
-        * requesting user timezone for non-course events
-    (it's much easier to calculate event timezone based on user data than
-    on event location)
+    specification allows multiple VTIMEZONE's).
     """
     TEACHER_EVENT = 'teaching'
     STUDENT_EVENT = 'learning'
@@ -58,24 +54,20 @@ class UserEventsICalendar(ABC):
     def __init__(self, site: Site, user: User, abs_url_builder, events=None,
                  **kwargs):
         """
-        On August 2017 we haven't stable library for conversion `pytz.timezone`
-        object to `VTIMEZONE` component.
-        Even http://tzurl.org/ project which provided full (since 1970)
-        VTIMEZONE implementation have bug for Moscow timezone.
+        Creates VTIMEZONE component like in a google calendar.
 
         Google calendar doesn't provide "honest" implementation
         (based on RFC) for `VTIMEZONE` component. Just a stub with current
         daylight/standard offsets. Also, it has custom `X-WR-TIMEZONE` header
-        with timezone info.
-        The same for Outlook.
+        with timezone info. The same for Outlook.
 
-        Since we haven't recurrent events in our icalendar's and no
-        daylight/standard transitions for SPB, KZN, NSK, let's manually
-        create VTIMEZONE components like in google calendar. fck t
+        Note:
+            http://tzurl.org/ project implements conversion of IANA
+            tzdata into iCalendar VTIMEZONE objects.
         """
         self.site = site
         self.user = user
-        self.timezone = self.get_timezone(user)
+        self.timezone = user.get_timezone()
         self.abs_url_builder = abs_url_builder
         cal = Calendar()
         cal.add('prodid', f"-//{site.name} Calendar//{site.domain}//")
@@ -94,9 +86,6 @@ class UserEventsICalendar(ABC):
             for k, v in event.items():
                 evt.add(k, v)
             self.cal.add_component(evt)
-
-    def get_timezone(self, user: User):
-        return user.get_timezone()
 
     def get_description(self, **kwargs):
         return ""
@@ -118,7 +107,9 @@ class UserClassesICalendar(UserEventsICalendar):
     def get_events(self):
         localize = self.timezone.localize
         cc_related = ['venue',
+                      'venue__location',
                       'course',
+                      'course__branch',
                       'course__semester',
                       'course__meta_course']
         as_teacher = (CourseClass.objects
@@ -133,7 +124,7 @@ class UserClassesICalendar(UserEventsICalendar):
                      zip(repeat(self.STUDENT_EVENT), as_student))
         for cc_type, cc in data:
             uid = f"courseclasses-{cc.pk}-{cc_type}@compscicenter.ru"
-            url = self.abs_url_builder(cc.get_absolute_url())
+            url = cc.get_absolute_url()
             if cc.description.strip():
                 description = "{}\n\n{}".format(cc.description, url)
             else:
@@ -212,9 +203,8 @@ class UserAssignmentsICalendar(UserEventsICalendar):
             yield event
 
 
-# FIXME: Filter events by requesting user location?
 class EventsICalendar(UserEventsICalendar):
-    """Shows all events in the timezone of the requesting user"""
+    """Study events in the timezone of the requesting user"""
     file_name = "csc_events.ics"
     title = "События CSC"
 
@@ -226,6 +216,8 @@ class EventsICalendar(UserEventsICalendar):
         qs = (Event.objects
               .filter(date__gt=timezone.now())
               .select_related('venue'))
+        if hasattr(self.user, "branch_id") and self.user.branch_id:
+            qs = qs.filter(branch_id=self.user.branch_id)
         for nce in qs:
             uid = "noncourseevents-{}@compscicenter.ru".format(nce.pk)
             url = self.abs_url_builder(nce.get_absolute_url())

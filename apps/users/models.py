@@ -405,11 +405,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
         sid = site_id or settings.SITE_ID
         self.groups.filter(user=self, role=role, site_id=sid).delete()
 
-    @property
-    def city_code(self):
-        city_code = getattr(self, "city_id", None)
-        return city_code if city_code else None
-
     def get_timezone(self) -> Timezone:
         return self.branch.get_timezone()
 
