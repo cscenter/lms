@@ -228,6 +228,10 @@ CENTER_FOUNDATION_YEAR = 2011
 NOCAPTCHA = True
 RECAPTCHA_USE_SSL = True
 
+# Determine if we should apply 'selected' to parents when one of their
+# children is the 'selected' menu
+MENU_SELECT_PARENTS = True
+
 # CKEDITOR Settings
 CKEDITOR_UPLOAD_PATH = "uploads/"  # /media/uploads/*
 CKEDITOR_IMAGE_BACKEND = "pillow"

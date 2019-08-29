@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "03d35e709c0efb1a7fba9e80467760b2b3637ea70d9b0bafb596f257725bcba8"
+            "sha256": "d17ad4fdf5353b310995b7568bbb41aa5411e080dbd5ca61e68a6dbd5261593c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -455,11 +455,6 @@
             ],
             "index": "pypi",
             "version": "==1.1.0"
-        },
-        "django-treemenus": {
-            "editable": true,
-            "git": "https://github.com/pacahon/django-treemenus.git",
-            "ref": "8d4c92b5fa14a7713d76f24f2e08d1c47eaa0795"
         },
         "django-vanilla-views": {
             "hashes": [
