@@ -5,7 +5,6 @@ from django.contrib.sites.models import Site
 from post_office.models import EmailTemplate
 
 from core.models import City, Branch, Location
-from compscicenter_ru.settings.test import TEST_DOMAIN, ANOTHER_DOMAIN
 from learning.settings import Branches
 
 __all__ = ('CityFactory', 'EmailTemplateFactory', 'BranchFactory',
@@ -18,7 +17,7 @@ class SiteFactory(factory.DjangoModelFactory):
         model = Site
         django_get_or_create = ('domain',)
 
-    domain = factory.Iterator(x for x in (TEST_DOMAIN, ANOTHER_DOMAIN))
+    domain = factory.Iterator(x for x in (settings.TEST_DOMAIN, settings.ANOTHER_DOMAIN))
     name = factory.Sequence(lambda n: "Site Name %03d" % n)
 
 

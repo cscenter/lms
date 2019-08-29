@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 
 import pytest
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.urls import resolve
 from post_office.models import EmailTemplate
@@ -8,8 +9,6 @@ from pytest_django.lazy_django import skip_if_no_django
 
 from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
     INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
-from compscicenter_ru.settings.test import TEST_DOMAIN, TEST_DOMAIN_ID, \
-    ANOTHER_DOMAIN, ANOTHER_DOMAIN_ID
 from core.tests.factories import BranchFactory, CityFactory
 from core.tests.utils import TestClient, CSCTestCase
 from learning.settings import Branches
@@ -78,8 +77,8 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         # Create site objects with respect to AutoField
         domains = [
-            (TEST_DOMAIN_ID, TEST_DOMAIN),
-            (ANOTHER_DOMAIN_ID, ANOTHER_DOMAIN),
+            (settings.TEST_DOMAIN_ID, settings.TEST_DOMAIN),
+            (settings.ANOTHER_DOMAIN_ID, settings.ANOTHER_DOMAIN),
         ]
         for site_id, domain in domains:
             try:
@@ -98,7 +97,7 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
         city_nsk = CityFactory(name="Novosibirsk", code="nsk", abbr="nsk")
         city_kzn = CityFactory(name="Kazan", code="kzn", abbr="kzn")
 
-        for site_id in (TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID):
+        for site_id in (settings.TEST_DOMAIN_ID, settings.ANOTHER_DOMAIN_ID):
             BranchFactory(code=Branches.SPB,
                           site=Site.objects.get(id=site_id),
                           name="Санкт-Петербург",
@@ -110,12 +109,12 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
                           city=city_nsk)
 
         BranchFactory(code=Branches.DISTANCE,
-                      site=Site.objects.get(id=TEST_DOMAIN_ID),
+                      site=Site.objects.get(id=settings.TEST_DOMAIN_ID),
                       name="Заочное",
                       city=None)
 
         BranchFactory(code=Branches.NSK,
-                      site=Site.objects.get(id=ANOTHER_DOMAIN_ID),
+                      site=Site.objects.get(id=settings.ANOTHER_DOMAIN_ID),
                       name="Казань",
                       city=city_kzn)
 

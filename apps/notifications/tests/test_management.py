@@ -3,7 +3,6 @@ from io import StringIO as OutputIO
 import pytest
 from django.core import mail, management
 
-from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from learning.models import AssignmentNotification
 from learning.tests.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
@@ -52,7 +51,7 @@ def test_notifications(client, settings):
 
 
 @pytest.mark.django_db
-def test_notify_get_base_url():
+def test_notify_get_base_url(settings):
     """Site domain in notifications depends on recipient user groups"""
     user = UserFactory(groups=[Roles.STUDENT])
     notification = AssignmentNotificationFactory(user=user)
@@ -61,18 +60,18 @@ def test_notify_get_base_url():
     notification = AssignmentNotificationFactory(user=user)
     assert _get_base_domain(notification) == "my.compscicenter.ru"
     notification.user = StudentFactory(
-        required_groups__site_id=ANOTHER_DOMAIN_ID
+        required_groups__site_id=settings.ANOTHER_DOMAIN_ID
     )
     assert _get_base_domain(notification) == "compsciclub.ru"
     notification.user = UserFactory(groups=[Roles.STUDENT,
                                             Roles.TEACHER])
     assert _get_base_domain(notification) == "my.compscicenter.ru"
     notification.user = TeacherFactory(
-        required_groups__site_id=ANOTHER_DOMAIN_ID
+        required_groups__site_id=settings.ANOTHER_DOMAIN_ID
     )
     assert _get_base_domain(notification) == "compsciclub.ru"
     notification.user = TeacherFactory(
-        required_groups__site_id=ANOTHER_DOMAIN_ID,
+        required_groups__site_id=settings.ANOTHER_DOMAIN_ID,
         groups=[Roles.GRADUATE],
     )
     assert _get_base_domain(notification) == "my.compscicenter.ru"

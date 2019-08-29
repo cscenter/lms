@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 
 from core.tests.factories import BranchFactory
 from core.tests.utils import CSCTestCase
-from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from django.utils import timezone, formats
 from django.utils.encoding import smart_bytes
 from django.utils.timezone import now
@@ -581,7 +580,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     # Users without student role on current site has no access to the page
     client.login(student)
     student.remove_group(Roles.VOLUNTEER)
-    student.add_group(Roles.STUDENT, site_id=ANOTHER_DOMAIN_ID)
+    student.add_group(Roles.STUDENT, site_id=settings.ANOTHER_DOMAIN_ID)
     response = client.get(url_learning_assignments)
     assert response.status_code == 403
 

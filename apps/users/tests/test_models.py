@@ -1,7 +1,6 @@
 import pytest
 from django.core.exceptions import ValidationError
 
-from compscicenter_ru.settings.test import TEST_DOMAIN_ID, ANOTHER_DOMAIN_ID
 from core.tests.factories import BranchFactory
 from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import SemesterFactory, CourseFactory
@@ -27,20 +26,20 @@ def test_enrolled_on_the_course():
 
 @pytest.mark.django_db
 def test_user_add_group(settings):
-    settings.SITE_ID = TEST_DOMAIN_ID
+    settings.SITE_ID = settings.TEST_DOMAIN_ID
     user = UserFactory()
     user.save()
     user.add_group(Roles.STUDENT)
     assert user.groups.count() == 1
     user_group = user.groups.first()
-    assert user_group.site_id == TEST_DOMAIN_ID
-    settings.SITE_ID = ANOTHER_DOMAIN_ID
+    assert user_group.site_id == settings.TEST_DOMAIN_ID
+    settings.SITE_ID = settings.ANOTHER_DOMAIN_ID
     user = UserFactory()
     user.save()
     user.add_group(Roles.STUDENT)
     assert user.groups.count() == 1
     user_group = user.groups.first()
-    assert user_group.site_id == ANOTHER_DOMAIN_ID
+    assert user_group.site_id == settings.ANOTHER_DOMAIN_ID
 
 
 @pytest.mark.django_db

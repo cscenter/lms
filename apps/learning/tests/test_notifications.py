@@ -11,7 +11,7 @@ from subdomains.utils import get_domain
 from core.tests.factories import BranchFactory
 from core.timezone.constants import DATE_FORMAT_RU
 from core.tests.utils import CSCTestCase
-from compscicenter_ru.settings.test import TEST_DOMAIN, ANOTHER_DOMAIN_ID
+
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
 from courses.models import CourseTeacher, Assignment
@@ -242,7 +242,7 @@ def test_new_assignment_create_notification_context(settings):
     settings.SITE_ID = 1
     settings.DEFAULT_URL_SCHEME = 'https'
     current_domain = get_domain()
-    assert current_domain == TEST_DOMAIN
+    assert current_domain == settings.TEST_DOMAIN
     branch_spb = BranchFactory(code=Branches.SPB)
     course = CourseFactory(branch=branch_spb)
     enrollment = EnrollmentFactory(course=course, student__branch=branch_spb)
@@ -272,7 +272,7 @@ def test_new_course_news_notification_context(settings):
     settings.SITE_ID = 1
     settings.DEFAULT_URL_SCHEME = 'https'
     current_domain = get_domain()
-    assert current_domain == TEST_DOMAIN
+    assert current_domain == settings.TEST_DOMAIN
     course = CourseFactory()
     student = StudentFactory(branch=course.branch)
     enrollment = EnrollmentFactory(course=course, student=student)
@@ -282,7 +282,7 @@ def test_new_course_news_notification_context(settings):
     assert context['course_link'] == course.get_absolute_url()
     cn = CourseNewsNotificationFactory(
         course_offering_news__course=course,
-        user=StudentFactory(required_groups__site_id=ANOTHER_DOMAIN_ID,))
+        user=StudentFactory(required_groups__site_id=settings.ANOTHER_DOMAIN_ID,))
     context = get_course_news_notification_context(cn)
     assert context['course_link'].startswith('https://compsciclub.ru')
 
