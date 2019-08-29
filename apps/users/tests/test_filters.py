@@ -226,10 +226,6 @@ def test_student_search_by_branch(client, curator, search_url):
     response = client.get(f"{search_url}?branches={branch_spb.pk},{branch_nsk.pk}")
     json_data = response.json()
     assert json_data["count"] == len(students_spb) + len(students_nsk)
-    # Test another query format supported by Django
-    response = client.get(f"{search_url}?branches[]={branch_spb.pk},branches[]={branch_nsk.pk}")
-    json_data = response.json()
-    assert json_data["count"] == len(students_spb) + len(students_nsk)
     # All with status `studying`
     response = client.get(f"{search_url}?status=studying&branches=")
     json_data = response.json()
@@ -274,9 +270,9 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
     response = client.get(url)
     assert response.json()["count"] == len(volunteers)
     # Edge case - show `studying` among graduated
-    query = "status=studying&groups={}".format(Roles.GRADUATE)
-    response = client.get("{}?{}".format(search_url, query))
-    assert response.json()["count"] == 0
+    url = f"{search_url}?status=studying&groups={Roles.GRADUATE}"
+    response = client.get(url)
+    assert response.status_code == 400
     # If some group added except graduate group - concat results
     query = "status=studying&groups={},{}".format(Roles.VOLUNTEER,
                                                   Roles.GRADUATE)
@@ -288,4 +284,3 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
                                                   Roles.MASTERS_DEGREE)
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == len(graduated)
-
