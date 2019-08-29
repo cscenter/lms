@@ -51,7 +51,7 @@
         <div class="form-group">
           <label>{% trans "Groups" %}</label><br>
           <div class="btn-group btn-group-sm" data-toggle="buttons">
-            {% for group_id, group_name in groups.items %}
+            {% for group_id, group_name in groups %}
               <label class="btn btn-default">
                 <input type="checkbox" name="group"
                        value="{{ group_id }}"

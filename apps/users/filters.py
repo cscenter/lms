@@ -1,6 +1,10 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db.models import Count, Case, When, Q, Value, F
+from django.forms import SelectMultiple, forms
+from django_filters import MultipleChoiceFilter
 from django_filters.constants import EMPTY_VALUES
+from django_filters.fields import MultipleChoiceField
 from django_filters.rest_framework import BaseInFilter, NumberFilter, \
     FilterSet, CharFilter
 
@@ -13,7 +17,52 @@ class NumberInFilter(BaseInFilter, NumberFilter):
     pass
 
 
-class RolesInFilter(NumberInFilter):
+class CharInFilter(BaseInFilter, CharFilter):
+    pass
+
+
+class SelectMultipleCSVSupport(SelectMultiple):
+    """
+    1. Values can be provided as csv string:  ?foo=bar,baz
+    2. Values can be provided as query array: ?foo=bar&foo=baz
+
+    Note: Duplicate and empty values are skipped from results
+    """
+
+    def value_from_datadict(self, data, files, name):
+        value = super().value_from_datadict(data, files, name)
+        if isinstance(value, str):
+            ret = {x.strip() for x in value.rstrip(',').split(',') if x}
+        elif value is not None and len(value) > 0:
+            ret = set()
+            for csv in value:
+                ret.update({x.strip() for x in
+                           csv.rstrip(',').split(',') if x})
+        else:
+            ret = []
+        return list(ret)
+
+
+class MultipleChoiceCSVField(MultipleChoiceField):
+    widget = SelectMultipleCSVSupport
+
+
+class RolesInFilter(MultipleChoiceFilter):
+    field_class = MultipleChoiceCSVField
+
+    choices = [
+        (Roles.STUDENT, Roles.values[Roles.STUDENT]),
+        (Roles.VOLUNTEER, Roles.values[Roles.VOLUNTEER]),
+        (Roles.INVITED, Roles.values[Roles.INVITED]),
+        (Roles.GRADUATE, Roles.values[Roles.GRADUATE]),
+        (Roles.MASTERS_DEGREE, Roles.values[Roles.MASTERS_DEGREE]),
+    ]
+
+    def __init__(self, choices=None, *args, **kwargs):
+        if choices is not None:
+            self.choices = choices
+        super().__init__(choices=self.choices, *args, **kwargs)
+
     def filter(self, qs, value):
         if value in EMPTY_VALUES:
             return qs
@@ -23,19 +72,20 @@ class RolesInFilter(NumberInFilter):
                 .distinct())
 
 
-class CharInFilter(BaseInFilter, CharFilter):
-    pass
+class UserFilterForm(forms.Form):
+    def clean(self):
+        cleaned_data = super().clean()
+        if ("studying" in cleaned_data["status"] and
+                cleaned_data['groups'] == [str(Roles.GRADUATE)]):
+            raise ValidationError("Graduates are not studying")
+        if "groups" not in self.changed_data and len(self.changed_data):
+            groups = [v for v, _ in RolesInFilter.choices]
+            if "studying" in cleaned_data["status"]:
+                groups.remove(Roles.GRADUATE)
+            cleaned_data['groups'] = groups
 
 
 class UserFilter(FilterSet):
-    FILTERING_GROUPS = [
-        Roles.VOLUNTEER,
-        Roles.STUDENT,
-        Roles.INVITED,
-        Roles.GRADUATE,
-        Roles.MASTERS_DEGREE,
-    ]
-
     ENROLLMENTS_MAX = 12
 
     _lexeme_trans_map = dict((ord(c), None) for c in '*|&:')
@@ -43,43 +93,22 @@ class UserFilter(FilterSet):
     name = CharFilter(method='name_filter')
     branches = CharInFilter(field_name='branch_id')
     curriculum_year = NumberInFilter(field_name='curriculum_year')
-    # TODO: Restrict choices
-    groups = RolesInFilter(field_name='group__role', distinct=True)
-    # TODO: TypedChoiceFilter?
-    status = CharFilter(method='status_filter')
-    cnt_enrollments = CharFilter(method='cnt_enrollments_filter')
+    groups = RolesInFilter(label='Roles', field_name='group__role',
+                           distinct=True)
+    # FIXME: choice validation
+    status = CharFilter(label='Student Status', method='status_filter')
+    cnt_enrollments = CharFilter(label='Enrollments',
+                                 method='cnt_enrollments_filter')
 
     class Meta:
+        form = UserFilterForm
         model = User
         fields = ("name", "branches", "curriculum_year", "groups", "status",
                   "cnt_enrollments",)
 
-    def __init__(self, data, **kwargs):
-        self.empty_query = not data or all(not v for v in data.values())
-        # FIXME: what about groups[] ?
-        if not self.empty_query and data:
-            data = data.copy()
-            # Skip invalid values
-            query = {int(g) for g in data.get("groups", "").split(",") if g}
-            # Note: can failed with ValueError. Should validate values first
-            groups = set(self.FILTERING_GROUPS) & query
-            # Specify superset for `groups` filter field if no values provided
-            if not groups:
-                groups = self.FILTERING_GROUPS[:]
-                if "studying" in data.get("status", []):
-                    groups.remove(Roles.GRADUATE)
-            # Special case - show `studying` among graduated
-            only_graduate_selected = (groups == {Roles.GRADUATE})
-            if "studying" in data.get("status", []) and only_graduate_selected:
-                self.empty_query = True
-            else:
-                # FIXME: BaseInFilter doesn't understand foo[]=&foo[]=
-                data.setlist("groups", [",".join(str(g) for g in groups)])
-        super().__init__(data, **kwargs)
-
     @property
     def qs(self):
-        if self.empty_query:
+        if not self.form.changed_data:
             return self.queryset.none()
         return super().qs
 
@@ -110,7 +139,6 @@ class UserFilter(FilterSet):
             # No need to filter online courses by grade
             Count("onlinecourserecord", distinct=True)
         )
-
         condition = Q(courses_cnt__in=value_list)
         if any(value > self.ENROLLMENTS_MAX for value in value_list):
             condition |= Q(courses_cnt__gt=self.ENROLLMENTS_MAX)
