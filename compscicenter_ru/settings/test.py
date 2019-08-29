@@ -39,9 +39,6 @@ ALLOWED_HOSTS = [f".{TEST_DOMAIN}", f".{ANOTHER_DOMAIN}"]
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
 ]
-DEBUG = False
-for template in TEMPLATES:
-    template['OPTIONS']['debug'] = DEBUG
 
 MEDIA_ROOT = '/tmp/django_test_media/'
 
@@ -54,3 +51,11 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.cached_db_kvstore.KVStore'
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
+# FIXME: remove
+REDIS_PASSWORD = None
+THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
+for queue in RQ_QUEUES.values():
+    if 'PASSWORD' in queue:
+        queue['PASSWORD'] = REDIS_PASSWORD
+

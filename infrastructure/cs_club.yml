@@ -32,8 +32,7 @@
         nginx_configs:
           - "{{ main_domain }}"
         certbot_config_dir: "/etc/letsencrypt/live/compsciclub.ru"
-        rq_workers:
-          - club
+        rq_workers: []
         rq_workers_target_service_name: "rqworker_csclub"
         processes_num: 3
         log_to_file: no

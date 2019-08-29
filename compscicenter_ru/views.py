@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import itertools
 import math
 import random
-from collections import defaultdict
 from enum import Enum
-from typing import NamedTuple, Optional, List
+from typing import NamedTuple, Optional
 
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q, Max, F, Prefetch
+from django.db.models import Q, Max, Prefetch
 from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import gettext, pgettext_lazy, ugettext_lazy as _
@@ -25,22 +23,22 @@ from announcements.models import Announcement
 from compscicenter_ru.serializers import CoursesSerializer
 from compscicenter_ru.utils import group_terms_by_academic_year, Tab, TabList
 from core.exceptions import Redirect
-from faq.models import Question
+from core.models import Branch
 from core.urls import reverse
-from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
-    group_course_teachers, CourseClass
+from core.utils import bucketize
 from courses.constants import SemesterTypes, TeacherRoles, ClassTypes
+from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
+    group_course_teachers
 from courses.utils import get_current_term_pair, \
     first_term_in_academic_year, get_term_by_index, get_term_index
-from core.utils import bucketize, is_club_site
 from courses.views.mixins import CourseURLParamsMixin
+from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
-from core.models import Branch
 from learning.roles import Roles
-from projects.constants import ProjectTypes
-from projects.models import ProjectStudent
 from learning.settings import Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
+from projects.constants import ProjectTypes
+from projects.models import ProjectStudent
 from publications.models import ProjectPublication
 from stats.views import StudentsDiplomasStats
 from study_programs.models import StudyProgram, AcademicDiscipline

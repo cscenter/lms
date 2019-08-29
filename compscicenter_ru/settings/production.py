@@ -5,10 +5,6 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 from .base import *
 
-DEBUG = False
-for template in TEMPLATES:
-    template['OPTIONS']['debug'] = DEBUG
-
 ALLOWED_HOSTS = [".compscicenter.ru"]
 DEFAULT_URL_SCHEME = 'https'  # default scheme for `core.urls.reverse`
 
@@ -121,13 +117,6 @@ LDAP_SYNC_PASSWORD = True
 GERRIT_API_URI = "https://review.compscicenter.ru/a/"
 GERRIT_CLIENT_USERNAME = "admin"
 GERRIT_CLIENT_HTTP_PASSWORD = "vV/rlPcuR3fTSv1ns3k3RT5xUV78qKhAMT/Xqf71Yg"
-
-REDIS_PASSWORD = '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN'
-THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
-for queue in RQ_QUEUES.values():
-    if 'PASSWORD' in queue:
-        queue['PASSWORD'] = REDIS_PASSWORD
-
 
 RECAPTCHA_PUBLIC_KEY = '6Ld2I7UUAAAAAMXFidlDOGnTTFQ3Zv3IhOcXbYoa'
 RECAPTCHA_PRIVATE_KEY = '6Ld2I7UUAAAAAAD8zdSGOJ3bDMYJN0q23nzArzjd'

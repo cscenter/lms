@@ -1,5 +1,13 @@
 from .base import *
 
+DEBUG = MODELTRANSLATION_DEBUG = True
+for template in TEMPLATES:
+    template['OPTIONS']['debug'] = DEBUG
+    if 'auto_reload' in template['OPTIONS']:
+        template['OPTIONS']['auto_reload'] = DEBUG
+
+
+
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware'
@@ -35,6 +43,15 @@ FLAMES_DIR = APPS_DIR.parent / "flame_graph"
 
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
+
+
+# FIXME: remove after replacing value with env var
+REDIS_PASSWORD = None
+THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
+for queue in RQ_QUEUES.values():
+    if 'PASSWORD' in queue:
+        queue['PASSWORD'] = REDIS_PASSWORD
+
 
 THUMBNAIL_DEBUG = True
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'

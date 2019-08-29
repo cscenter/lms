@@ -1,6 +1,12 @@
-import sys
-
 from .base import *
+
+DEBUG = True
+MODELTRANSLATION_DEBUG = True
+for template in TEMPLATES:
+    template['OPTIONS']['debug'] = DEBUG
+    if 'auto_reload' in template['OPTIONS']:
+        template['OPTIONS']['auto_reload'] = DEBUG
+
 
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 MIDDLEWARE = [

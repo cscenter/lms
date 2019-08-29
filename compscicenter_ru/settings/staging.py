@@ -1,8 +1,5 @@
 from .base import *
 
-DEBUG = False
-for template in TEMPLATES:
-    template['OPTIONS']['debug'] = DEBUG
 ALLOWED_HOSTS = [".dev.compscicenter.ru"]
 DEFAULT_URL_SCHEME = 'http'
 
@@ -31,7 +28,7 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 1025
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Don't use https for dev env
+# Don't use https for staging env
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_DOMAIN = '.dev.compscicenter.ru'

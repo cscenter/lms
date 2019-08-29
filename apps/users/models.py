@@ -9,7 +9,6 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser, PermissionsMixin, \
     _user_has_perm
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
@@ -24,21 +23,19 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from auth.permissions import all_permissions
+from auth.tasks import update_password_in_gerrit
 from compscicenter_ru.utils import PublicRoute
-from core.models import LATEX_MARKDOWN_ENABLED, City
-from core.settings.base import DEFAULT_CITY_CODE, DEFAULT_TIMEZONE
+from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping
 from courses.models import Semester
 from learning.permissions import LearningPermissionsMixin
-from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeYears, \
-    Branches
+from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeYears
 from learning.utils import is_negative_grade
 from users.constants import GROUPS_IMPORT_TO_GERRIT, Roles, \
     SHADCourseGradeTypes, GenderTypes
 from users.fields import MonitorStatusField
-from auth.tasks import update_password_in_gerrit
 from users.thumbnails import UserThumbnailMixin
 from .managers import CustomUserManager
 
@@ -86,7 +83,6 @@ class UserStatusLog(models.Model):
 
 
 class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):
-    city_code = None
     index_redirect = None
     roles = set()
 

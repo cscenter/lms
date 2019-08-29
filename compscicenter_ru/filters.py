@@ -32,12 +32,6 @@ def validate_semester_slug(value):
         raise ValidationError("CS Center has no offerings for this period")
 
 
-CITIES = [
-    ('spb', _("Saint Petersburg")),
-    ('nsk', _("Novosibirsk"))
-]
-
-
 class BranchChoiceFilter(ChoiceFilter):
     def filter(self, qs, value):
         """

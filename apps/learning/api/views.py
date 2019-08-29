@@ -1,14 +1,14 @@
-from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from api.pagination import StandardPagination
 from api.permissions import CuratorAccessPermission
-from learning.api.serializers import AlumniSerializer, TestimonialCardSerializer, \
+from learning.api.serializers import AlumniSerializer, \
+    TestimonialCardSerializer, \
     CourseNewsNotificationSerializer
 from learning.models import CourseNewsNotification, GraduateProfile
 from study_programs.models import AcademicDiscipline
-from users.models import User
 
 
 class AlumniList(ListAPIView):
@@ -29,7 +29,10 @@ class AlumniList(ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         data = {
             "data": serializer.data,
-            "cities": settings.CITIES,
+            "cities": {
+                "spb": _("Saint Petersburg"),
+                "nsk": _("Novosibirsk")
+            },
             "areas": areas,
         }
         return Response(data)

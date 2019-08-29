@@ -1,5 +1,6 @@
 import datetime
 
+import pytz
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
@@ -14,7 +15,6 @@ from vanilla import DetailView
 
 import core.utils
 from auth.tasks import send_activation_email, ActivationEmailContext
-from core.settings.base import TIME_ZONES
 from core.urls import reverse
 from courses.calendar import CalendarEvent
 from courses.constants import SemesterTypes
@@ -24,6 +24,9 @@ from courses.views.calendar import MonthEventsCalendarView
 from learning.gallery.models import Image
 from users.constants import Roles
 from users.models import User
+
+
+_TIME_ZONE = pytz.timezone('Europe/Moscow')
 
 
 class AsyncEmailRegistrationView(RegistrationView):
@@ -209,11 +212,11 @@ class ClubClassesFeed(ICalFeed):
         return item.get_absolute_url()
 
     def item_start_datetime(self, item):
-        tz = TIME_ZONES['spb']
+        tz = _TIME_ZONE
         return tz.localize(datetime.datetime.combine(item.date, item.starts_at))
 
     def item_end_datetime(self, item):
-        tz = TIME_ZONES['spb']
+        tz = _TIME_ZONE
         return tz.localize(datetime.datetime.combine(item.date, item.ends_at))
 
     def item_created(self, item):

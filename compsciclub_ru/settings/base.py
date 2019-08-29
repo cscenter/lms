@@ -1,5 +1,5 @@
 """
-CS club app specific settings
+Project settings
 """
 import sys
 import django
@@ -87,8 +87,6 @@ SECRET_KEY = 'chf0ao=9=ihflu_ln2&z+jke)*cx=k0e3mzuq+pc+x+6@vxrj9'
 ALLOWED_HOSTS = []
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compsciclub.ru'
-
-GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
 
 NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
 NEWRELIC_ENV = 'development'
