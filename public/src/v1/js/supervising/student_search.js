@@ -59,6 +59,9 @@ const fn = {
                 });
                 h += "</table>";
                 $("#user-table-container").html(h);
+            }).fail(function(jqXHR) {
+                $("#user-num-container").html(`Найдено: 0`).show();
+                $("#user-table-container").html(`Ошибка запроса:<code>${jqXHR.responseText}</code>`);
             });
         };
         query = _debounce(query, 200);
