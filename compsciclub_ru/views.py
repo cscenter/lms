@@ -178,13 +178,18 @@ class ClubClassesFeed(ICalFeed):
                           '/'.join("%s,%s" % (key, val) for key, val in
                                    kwargs.items()))
 
-    def items(self):
+    def get_object(self, request, *args, **kwargs):
+        # Expect request as the second parameter on method items
+        return request
+
+    def items(self, request):
         return (CourseClass.objects
                 .filter(course__is_open=True,
-                        # FIXME: Why it is restricted by SPB?
-                        course__city__code="spb")
+                        course__branch=request.branch)
                 .select_related('venue',
+                                'venue__location',
                                 'course',
+                                'course__branch',
                                 'course__semester',
                                 'course__meta_course'))
 
