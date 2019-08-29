@@ -35,7 +35,7 @@ update-app-nginx-config:
 update-app-uwsgi-config:
 	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="uwsgi" --skip-tags="nginx-role" -v
 
-# FIXME: Certificate generation use `creates` which doesn't depend on domain list. Even with hash check it could be broken when needs to add `--expand` key
+# FIXME: Certificate generation uses `creates` which doesn't depend on domain list. Even with hash check it could be broken when needs to add `--expand` key
 update-app-certificate:
 	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="certbot" --skip-tags="nginx-role" -v
 

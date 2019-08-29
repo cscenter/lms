@@ -6,6 +6,5 @@ aws_ec2_user: ubuntu
 aws_ec2_root_user: root
 admin_email: webmaster@compscicenter.ru
 python_version: 3.7
-python_pkg: python{{ python_version }}
 certbot_script: /opt/certbot-auto
 enable_https: yes

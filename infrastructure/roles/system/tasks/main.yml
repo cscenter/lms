@@ -27,7 +27,7 @@
 
 - name: Unlock python package for upgrade if it was hold before.
   dpkg_selections:
-    name: "{{ python_pkg }}"
+    name: "python{{ python_version }}"
     selection: install
 
 - name: Apt dependencies
@@ -35,7 +35,6 @@
     name:
       - openssl
       - python-setuptools
-  #    - python-dev
       - git
       - ntp
       - zsh
@@ -54,14 +53,14 @@
       - libmagic-dev
       - libcurl4-gnutls-dev
       - libgnutls28-dev
-      - "{{ python_pkg }}"
-      - "{{ python_pkg }}-dev"
+      - "python{{ python_version }}"
+      - "python{{ python_version }}-dev"
       - python-pycurl
       # LDAP support
       - ldap-utils
       - libldap2-dev
       - libsasl2-dev
-      # - libssl-dev not sure we need this package to install python-ldap with pip
+      # - libssl-dev not sure we need this package to install python-ldap via pip
     state: present
 
 - name: Register system python3 version
@@ -101,11 +100,12 @@
            dest=/tmp/get-pip.py
   when: pip_version_output is failed
 
-- name: install pip for {{ python_pkg }}
-  command: "{{ python_pkg }} /tmp/get-pip.py"
+# Note: It places executable under /usr/bin/
+- name: install pip for python{{ python_version }}
+  command: "python{{ python_version }} /tmp/get-pip.py"
   when: pip_version_output is failed
 
-- name: Globally install {{ python_pkg }} dependencies
+- name: Globally install python{{ python_version }} dependencies
   pip:
     name: "{{ item.name }}"
     version: "{{ item.version }}"

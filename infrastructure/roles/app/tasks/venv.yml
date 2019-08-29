@@ -3,7 +3,7 @@
 
 - name: Check if python is installed
   package:
-    name: "{{ python_pkg }}"
+    name: "python{{ python_version }}"
     state: present
   check_mode: true
   register: python_installed
@@ -19,7 +19,7 @@
   when: venv_dir.stat.exists
 
 - name: Get current python 3.x version
-  shell: "{{ python_pkg }} --version 2>&1"
+  shell: "python{{ python_version }} --version 2>&1"
   register: python_version_installed
 
 - name: Remove venv if version has changed
@@ -34,7 +34,7 @@
   pip:
     name: "pipenv"
     virtualenv: "{{ virtualenv_root }}"
-    virtualenv_python: "{{ python_pkg }}"
+    virtualenv_python: "python{{ python_version }}"
 
 - name: Install requirements
   environment:
@@ -47,5 +47,5 @@
 
 - name: Prevent python from being upgraded with `apt-get upgrade` (it can broke venv)
   dpkg_selections:
-    name: "{{ python_pkg }}"
+    name: "python{{ python_version }}"
     selection: hold

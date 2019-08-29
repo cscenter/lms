@@ -80,7 +80,6 @@
         exact_count: 1
         count_tag:
           Name: "{{ aws_ec2_instance_tag }}"
-        # TODO: add tag:Name to the root device
         volumes:
           - device_name: /dev/sda1
             volume_size: "{{ aws_ec2_instance_volume_size }}"
@@ -133,7 +132,7 @@
       tags:
         - snapshot
 
-    - name: Find newest backup snapshot
+    - name: Find the newest backup snapshot
       set_fact: newest_snapshot={{ snapshots_data.snapshots | sort(attribute='start_time') | last }}
       when: aws_ec2_prev_host_tag is defined and attach_second_volume and snapshots_data.snapshots | length > 0
       tags:
@@ -161,6 +160,7 @@
       tags:
         - additional-volume
 
+    # FIXME: move to the separated playbook
     - name: EBS volumes backup automation
       import_role:
         name: backup_ebs

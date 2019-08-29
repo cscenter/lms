@@ -25,22 +25,21 @@ See `Makefile` how to run ansible playbooks. But read [Before to start](#before-
 
 ### provison.yml
 
-Launch EC2 instance with `{{ aws_ec2_host }}` tag:Name (configured AWS security groups, additional EBS volume with LVM support and 
+Launch EC2 instance with tag:Name equal to `{{ aws_ec2_host }}` (configured AWS security groups, additional EBS volume with LVM support and 
 backup automation using AWS Lambda).
 
 ```bash
 make provision
 ```
 
-
 ### setup.yml
 
-Part of the provision (but can be used independently). 
+Part of the provision (but can be used independently).
 
 * Install and configure system dependencies.
-    This actions should be idempotent, so you can modify `setup.yml` and rerun playbook as you wish. 
+    This action should be idempotent, so you can modify `setup.yml` and rerun playbook as you wish. 
 * Deploys applications to the new instance if `--tags=app-deployment'` provided (application deployment 
-    disabled by default since it has a good change to break application)
+    is disabled by default since it has a good change to break application)
 
 ```bash
 make setup
@@ -97,8 +96,8 @@ df -h
 # Как пересоздать машину
 
 * TODO: Ставим заглушку на основном сайте, чтобы не было изменений с начала пересоздания машины.
-* Создаём свежий бэкап диска, на котором хранится папка media/ Добавляем ему необходимые теги. Смотри task `ec2_vol` в `provision.yml`
-* Делаем бэкап БД. Смотри команду `make dbbackup`
+* Создаём свежий бэкап диска, на котором хранится папка media/ Добавляем ему необходимые теги. См. task `ec2_vol` в `provision.yml`
+* Делаем бэкап БД. См. команду `make dbbackup`
 
 Note: Кластер postgresql по идее лежит тоже на диске рядом с `media/` и можно было бы попробовать переиспользовать его, 
 но сейчас БД создаётся с нуля, этот сценарий универсальный и подходит для машин без дополнительного диска.
@@ -126,7 +125,7 @@ sudo -u postgres psql
     GRANT ALL privileges ON DATABASE cscdb TO csc;
 ```
 
-* Если всё ок, перенаправляем поток на новую машину и запускаем уже с установкой сертификатов
+* Если всё ок, перенаправляем трафик на новую машину и запускаем уже с установкой сертификатов
 
 FIXME: как избежать downtime'а тут? Копировать сертификаты со старой машины??
 
