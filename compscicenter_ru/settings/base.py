@@ -104,7 +104,6 @@ TEMPLATES = [
                 "jinja2.ext.with_",
                 "jinja2.ext.i18n",
                 "jinja2.ext.autoescape",
-                "pipeline.jinja2.PipelineExtension",
                 "django_jinja.builtins.extensions.CsrfExtension",
                 "django_jinja.builtins.extensions.CacheExtension",
                 "django_jinja.builtins.extensions.TimezoneExtension",
