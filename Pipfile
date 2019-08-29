@@ -108,7 +108,6 @@ django-extra-views = "==0.12.0"
 django-braces = "==1.13.0"
 django-taggit = "==1.1.0"
 sqlparse = "==0.3.0"
-django-pipeline = "==1.6.14"
 django-loginas = "==0.3.6"
 django-treemenus = {editable = true,git = "https://github.com/pacahon/django-treemenus.git"}
 django-webpack-loader = "==0.6.0"
@@ -121,6 +120,7 @@ django-simple-menu = "*"
 django-ckeditor = "==5.7.1"
 rules = "*"
 django-simple-history = "*"
+django-static-compress = "==1.2.1"
 
 [requires]
 python_version = "3.6"

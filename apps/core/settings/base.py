@@ -55,7 +55,6 @@ INSTALLED_APPS = [
     'dbbackup',
     'simple_history',
     'import_export',
-    'pipeline',
     'bootstrap_pagination',
     'prettyjson',
     'mptt',
@@ -156,10 +155,11 @@ STATIC_ROOT = str(APPS_DIR / "static")
 STATICFILES_DIRS = [
     str(APPS_DIR / "assets"),
 ]
-
-# See django-pipeline for details
-PIPELINE = {}
-STATICFILES_STORAGE = 'core.storage.PipelineCachedGZIPedStorage'
+STATICFILES_STORAGE = 'static_compress.storage.CompressedManifestStaticFilesStorage'
+STATIC_COMPRESS_FILE_EXTS = ['css', 'js', 'svg']
+STATIC_COMPRESS_METHODS = ['gz+zlib']
+STATIC_COMPRESS_KEEP_ORIGINAL = True
+STATIC_COMPRESS_MIN_SIZE_KB = 30
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
