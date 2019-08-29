@@ -3,10 +3,10 @@ import re
 import factory
 import pytest
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.utils.translation import ugettext as _
 
 from core.tests.utils import CSCTestCase
-from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from core.urls import reverse
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory
@@ -120,7 +120,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
 
     def test_student_login_without_appropriate_role(self):
         """Test login on site without appropriate role on current site"""
-        student = StudentFactory(required_groups__site_id=ANOTHER_DOMAIN_ID,)
+        student = StudentFactory(required_groups__site_id=settings.ANOTHER_DOMAIN_ID,)
         self.doLogin(student)
         login_data = {
             'username': student.username,

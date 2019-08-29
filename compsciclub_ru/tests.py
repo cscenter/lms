@@ -2,20 +2,13 @@
 import datetime
 
 import pytest
-import pytz
-from django.conf import settings
 from django.utils.encoding import smart_bytes
 
 from core.tests.utils import now_for_branch
-from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
-from core.timezone import now_local
 from core.urls import reverse
-from courses.models import Course
 from courses.tests.factories import SemesterFactory, CourseFactory
-from courses.utils import get_current_term_pair
 from learning.models import Enrollment
 from learning.settings import Branches
-from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory
 
 

@@ -2,7 +2,6 @@ import datetime
 
 import pytest
 
-from compscicenter_ru.settings.test import ANOTHER_DOMAIN_ID
 from core.tests.factories import BranchFactory
 from core.urls import reverse_lazy
 from courses.constants import SemesterTypes
@@ -21,7 +20,7 @@ def search_url():
 
 
 @pytest.mark.django_db
-def test_student_search(client, curator, search_url):
+def test_student_search(client, curator, search_url, settings):
     """Simple test cases to make sure, multi values still works"""
     # XXX: `name` filter not tested now due to postgres specific syntax
     student = StudentFactory(enrollment_year=2011,
@@ -38,7 +37,7 @@ def test_student_search(client, curator, search_url):
                    first_name='Иван')
     StudentFactory(enrollment_year=2011,
                    last_name='Сидоров',
-                   required_groups__site_id=ANOTHER_DOMAIN_ID,
+                   required_groups__site_id=settings.ANOTHER_DOMAIN_ID,
                    first_name='Сидор')
     volunteer = VolunteerFactory(enrollment_year=2011, status="")
 
@@ -176,10 +175,10 @@ def test_student_search_enrollments(client, curator, search_url):
 
 
 @pytest.mark.django_db
-def test_student_search_by_groups(client, curator, search_url):
+def test_student_search_by_groups(client, curator, search_url, settings):
     client.login(curator)
     # All users below are considered as `studying` due to empty status
-    StudentFactory.create_batch(2, required_groups__site_id=ANOTHER_DOMAIN_ID,)
+    StudentFactory.create_batch(2, required_groups__site_id=settings.ANOTHER_DOMAIN_ID,)
     students = StudentFactory.create_batch(3, enrollment_year=2011,
                                               curriculum_year=2011,
                                               status="")
@@ -199,7 +198,7 @@ def test_student_search_by_groups(client, curator, search_url):
     assert json_data["count"] == len(students) + len(volunteers)
     graduated = GraduateFactory(enrollment_year=2012, curriculum_year=2012,
                                 status="")
-    graduated.add_group(Roles.STUDENT, site_id=ANOTHER_DOMAIN_ID)
+    graduated.add_group(Roles.STUDENT, site_id=settings.ANOTHER_DOMAIN_ID)
     url = f"{search_url}?status=studying&groups={Roles.STUDENT}&curriculum_year=2011,2012"
     response = client.get(url)
     # Fail in case of multiple joins with users_user_groups table
