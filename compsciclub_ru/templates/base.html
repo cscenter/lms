@@ -64,7 +64,7 @@
         {% if LANGUAGE_CODE == language.code %}<span>{{ language.name_local }}</span>{% else %}<a  href="/{% if language.code != 'ru' %}{{ language.code }}/{% endif %}">{{ language.name_local }}</a>{% endif %}{% endfor %}</span>
     </div>
 
-    {% include "base_menu.html" %}
+    {% include "_top_menu.html" %}
 
     {% block content_top %}{% endblock content_top %}
     {% block content %}

@@ -200,10 +200,6 @@ LDAP_SYNC_PASSWORD = False
 # Stub
 ADMIN_REORDER = []
 
-# Determine if we should apply 'selected' to parents when one of their
-# children is the 'selected' menu
-MENU_SELECT_PARENTS = True
-
 # Share this cookie between subdomains
 SESSION_COOKIE_NAME = "cscsessionid"
 SESSION_COOKIE_DOMAIN = ".compscicenter.ru"
