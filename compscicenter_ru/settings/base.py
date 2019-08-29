@@ -1,5 +1,5 @@
 """
-CS center app specific settings
+Project settings
 """
 import django
 
@@ -72,7 +72,6 @@ SOCIAL_AUTH_YANDEXRU_SECRET = "***REMOVED***"
 # Note: we prevent calling pipeline for this backend
 SOCIAL_AUTH_YANDEXRU_PIPELINE = []
 
-# Add site specific templates
 TEMPLATES = [
     {
         "BACKEND": "django_jinja.backend.Jinja2",
@@ -81,7 +80,6 @@ TEMPLATES = [
             django.__path__[0] + '/forms/jinja2',
             str(ROOT_DIR / "compscicenter_ru" / "jinja2"),
             str(ROOT_DIR / "my_compscicenter_ru" / "jinja2"),
-            # FIXME: move to apps/jinja2 ?
             str(APPS_DIR / "core" / "jinja2"),
             str(APPS_DIR / "surveys" / "jinja2"),
             # svg inline support
@@ -175,8 +173,6 @@ ALLOWED_HOSTS = []
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'noreply@compscicenter.ru'
 
-GFORM_CALLBACK_SECRET = "X64WDCbOSgwJSgSsHroTHVX/TWo5wzddRkH+eRjCvrA="
-
 NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
 NEWRELIC_ENV = 'development'
 
@@ -205,68 +201,13 @@ LDAP_SYNC_PASSWORD = False
 # Stub
 ADMIN_REORDER = []
 
-
+# Determine if we should apply 'selected' to parents when one of their
+# children is the 'selected' menu
 MENU_SELECT_PARENTS = True
 
 # Share this cookie between subdomains
 SESSION_COOKIE_NAME = "cscsessionid"
 SESSION_COOKIE_DOMAIN = ".compscicenter.ru"
-
-
-# CKEDITOR Settings
-CKEDITOR_UPLOAD_PATH = "uploads/"  # /media/uploads/*
-CKEDITOR_IMAGE_BACKEND = "pillow"
-CKEDITOR_ALLOW_NONIMAGE_FILES = False
-CKEDITOR_CONFIGS = {
-    'default': {
-        'skin': 'moono-lisa',
-        'contentsCss': [],
-        'toolbar_YouCustomToolbarConfig': [
-            {'name': 'document',
-             'items': ['Source', '-', 'Preview', 'Maximize']},
-            {'name': 'basicstyles',
-             'items': ['Bold', 'Italic', 'Underline', 'RemoveFormat']},
-            {'name': 'paragraph',
-             'items': ['NumberedList', 'BulletedList']},
-            {'name': 'insert', 'items': ['Image', 'Table', 'CodeSnippet']},
-            {'name': 'styles', 'items': ['Format']},
-            {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
-            {'name': 'clipboard',
-             'items': ['-', 'Undo', 'Redo']},
-            '/',  # put this to force next toolbar on new line
-        ],
-        'toolbar': 'YouCustomToolbarConfig',  # put selected toolbar config here
-        # 'toolbarGroups': [{ 'name': 'document', 'groups': [ 'mode', 'document', 'doctools' ] }],
-        # 'height': 291,
-        'extraAllowedContent': 'figure(*); figcaption(figure-caption); div(*)[data-*]; span(*); p(*); th(*); td(*); section(*); ul(*); li(*); iframe[*](embed, _responsive); h1(*); h2(*)',
-        'format_tags': 'p;h1;h2;h3;h4;h5',
-        'width': 'calc(100% - 2px)',
-        'filebrowserWindowHeight': 725,
-        'filebrowserWindowWidth': 940,
-        # 'toolbarCanCollapse': True,
-        # 'mathJaxLib': '//cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML',
-        'tabSpaces': 4,
-        'extraPlugins': ','.join(
-            [
-                'div',
-                'autolink',
-                'autoembed',
-                'embedsemantic',
-                'autogrow',
-                # 'devtools',
-                'widget',
-                'lineutils',
-                'clipboard',
-                'dialog',
-                'dialogui',
-                'elementspath',
-                'uploadimage',
-                'codesnippet',
-                # 'image2',
-                # 'uploadwidget',
-            ]),
-    }
-}
 
 # Registration partially used on my.* (see `learning/invitation`)
 INCLUDE_REGISTER_URL = False

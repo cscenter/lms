@@ -5,10 +5,6 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 from .base import *
 
-DEBUG = False
-for template in TEMPLATES:
-    template['OPTIONS']['debug'] = DEBUG
-
 ALLOWED_HOSTS = [".compsciclub.ru"]
 DEFAULT_URL_SCHEME = 'https'  # default scheme for `core.urls.reverse`
 
@@ -95,13 +91,6 @@ DBBACKUP_S3_ACCESS_KEY = 'AKIAJWPKEDQ6YJEPKFFQ'
 DBBACKUP_S3_SECRET_KEY = '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'
 
 NEWRELIC_ENV = 'production'
-
-REDIS_PASSWORD = '***REMOVED***'
-THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
-for queue in RQ_QUEUES.values():
-    if 'PASSWORD' in queue:
-        queue['PASSWORD'] = REDIS_PASSWORD
-
 
 # Recaptcha settings
 RECAPTCHA_PUBLIC_KEY = '6Lc_7AsTAAAAAOoC9MhVSoJ6O-vILaGgDEgtLBty'

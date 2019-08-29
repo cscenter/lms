@@ -39,9 +39,6 @@ ALLOWED_HOSTS = [f".{TEST_DOMAIN}", f".{ANOTHER_DOMAIN}"]
 PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.MD5PasswordHasher',
 ]
-DEBUG = False
-for template in TEMPLATES:
-    template['OPTIONS']['debug'] = DEBUG
 
 MEDIA_ROOT = '/tmp/django_test_media/'
 

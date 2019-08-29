@@ -2,13 +2,11 @@
 Django settings shared between projects.
 
 For more information on this file, see
-https://docs.djangoproject.com/en/2.1/topics/settings/
+https://docs.djangoproject.com/en/2.2/topics/settings/
 """
 from pathlib import Path
 
 import pytz
-
-from django.utils.translation import ugettext_lazy as _
 
 ROOT_DIR = Path(__file__).parents[3]
 APPS_DIR = ROOT_DIR / "apps"
@@ -21,19 +19,14 @@ ADMIN_URL = '/narnia/'
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
 FILE_UPLOAD_PERMISSIONS = 0o664
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = MODELTRANSLATION_DEBUG = True
+DEBUG = False
+MODELTRANSLATION_DEBUG = False
 THUMBNAIL_DEBUG = False
 
 DEFAULT_CITY_CODE = "spb"
 DEFAULT_BRANCH_CODE = "spb"
 DEFAULT_TIMEZONE = pytz.timezone("Europe/Moscow")
-CENTER_BRANCHES_CITY_CODES = ['spb', 'nsk']
 
-CITIES = {
-    "spb": _("Saint Petersburg"),
-    "nsk": _("Novosibirsk")
-}
 CLUB_DOMAIN = 'compsciclub.ru'
 CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
@@ -85,7 +78,6 @@ INSTALLED_APPS = [
     'learning.gallery.apps.GalleryConfig',
     'notifications.apps.NotificationsConfig',
     'api.apps.APIConfig',
-    # FIXME: quick fix, error on user detail page
     'library.apps.LibraryConfig',
 ]
 
@@ -120,8 +112,7 @@ DATABASES = {
         }
 }
 
-# Internationalization
-# https://docs.djangoproject.com/en/1.6/topics/i18n/
+# i18n, l10n
 LANGUAGE_CODE = 'ru'
 LANGUAGES = [
     ('ru', "Russian"),
@@ -132,23 +123,15 @@ USE_L10N = True
 LOCALE_PATHS = [
     str(ROOT_DIR / "locale"),
 ]
-
 USE_TZ = True
 TIME_ZONE = 'UTC'
-# Better to move timezone values to `City` model and cache it later
-TIME_ZONES = {
-    'spb': pytz.timezone('Europe/Moscow'),
-    'nsk': pytz.timezone('Asia/Novosibirsk'),
-    'kzn': pytz.timezone('Europe/Moscow'),
-    'online': pytz.timezone('Europe/Moscow'),
-}
+
 
 AUTH_USER_MODEL = "users.User"
 AUTHENTICATION_BACKENDS = (
     "auth.backends.RBACModelBackend",
 )
 CAN_LOGIN_AS = lambda request, target_user: request.user.is_curator
-
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -177,27 +160,13 @@ STATICFILES_DIRS = [
 # See django-pipeline for details
 PIPELINE = {}
 STATICFILES_STORAGE = 'core.storage.PipelineCachedGZIPedStorage'
-
 STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-
-HASHIDS_SALT = "***REMOVED***"
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000
-
-# SORL settings
-THUMBNAIL_DUMMY = True
-THUMBNAIL_PRESERVE_FORMAT = True
-# Lets store keys in redis and share them between csclub and cscenter sites
-# It's safe while we store images in shared directory
-THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
-REDIS_PASSWORD = None
-THUMBNAIL_REDIS_HOST = '127.0.0.1'
-THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
-
 # Make sure settings are the same as in ansible configuration
+REDIS_PASSWORD = '***REMOVED***'
 RQ_QUEUES = {
     'default': {
         'HOST': '127.0.0.1',
@@ -211,13 +180,18 @@ RQ_QUEUES = {
         'DB': 0,
         'PASSWORD': REDIS_PASSWORD,
     },
-    'club': {
-        'HOST': '127.0.0.1',
-        'PORT': 6379,
-        'DB': 0,
-        'PASSWORD': REDIS_PASSWORD,
-    },
 }
+
+HASHIDS_SALT = "***REMOVED***"
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000
+
+# sorl-thumbnails app settings
+THUMBNAIL_DUMMY = True
+THUMBNAIL_PRESERVE_FORMAT = True
+THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
+THUMBNAIL_REDIS_HOST = '127.0.0.1'
+THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
+
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -253,3 +227,59 @@ CENTER_FOUNDATION_YEAR = 2011
 # Recaptcha settings
 NOCAPTCHA = True
 RECAPTCHA_USE_SSL = True
+
+# CKEDITOR Settings
+CKEDITOR_UPLOAD_PATH = "uploads/"  # /media/uploads/*
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_ALLOW_NONIMAGE_FILES = False
+CKEDITOR_CONFIGS = {
+    'default': {
+        'skin': 'moono-lisa',
+        'contentsCss': [],
+        'toolbar_YouCustomToolbarConfig': [
+            {'name': 'document',
+             'items': ['Source', '-', 'Preview', 'Maximize']},
+            {'name': 'basicstyles',
+             'items': ['Bold', 'Italic', 'Underline', 'RemoveFormat']},
+            {'name': 'paragraph',
+             'items': ['NumberedList', 'BulletedList']},
+            {'name': 'insert', 'items': ['Image', 'Table', 'CodeSnippet']},
+            {'name': 'styles', 'items': ['Format']},
+            {'name': 'links', 'items': ['Link', 'Unlink', 'Anchor']},
+            {'name': 'clipboard',
+             'items': ['-', 'Undo', 'Redo']},
+            '/',  # put this to force next toolbar on new line
+        ],
+        'toolbar': 'YouCustomToolbarConfig',  # put selected toolbar config here
+        # 'toolbarGroups': [{ 'name': 'document', 'groups': [ 'mode', 'document', 'doctools' ] }],
+        # 'height': 291,
+        'extraAllowedContent': 'figure(*); figcaption(figure-caption); div(*)[data-*]; span(*); p(*); th(*); td(*); section(*); ul(*); li(*); iframe[*](embed, _responsive); h1(*); h2(*)',
+        'format_tags': 'p;h1;h2;h3;h4;h5',
+        'width': 'calc(100% - 2px)',
+        'filebrowserWindowHeight': 725,
+        'filebrowserWindowWidth': 940,
+        # 'toolbarCanCollapse': True,
+        # 'mathJaxLib': '//cdn.mathjax.org/mathjax/2.2-latest/MathJax.js?config=TeX-AMS_HTML',
+        'tabSpaces': 4,
+        'extraPlugins': ','.join(
+            [
+                'div',
+                'autolink',
+                'autoembed',
+                'embedsemantic',
+                'autogrow',
+                # 'devtools',
+                'widget',
+                'lineutils',
+                'clipboard',
+                'dialog',
+                'dialogui',
+                'elementspath',
+                'uploadimage',
+                'codesnippet',
+                # 'image2',
+                # 'uploadwidget',
+            ]),
+    }
+}
+
