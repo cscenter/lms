@@ -94,7 +94,8 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
 
         # Create cities
         city_spb = CityFactory(name="Saint Petersburg", code="spb", abbr="spb")
-        city_nsk = CityFactory(name="Novosibirsk", code="nsk", abbr="nsk")
+        city_nsk = CityFactory(name="Novosibirsk", code="nsk", abbr="nsk",
+                               time_zone='Asia/Novosibirsk',)
         city_kzn = CityFactory(name="Kazan", code="kzn", abbr="kzn")
 
         for site_id in (settings.TEST_DOMAIN_ID, settings.ANOTHER_DOMAIN_ID):

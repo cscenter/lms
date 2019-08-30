@@ -29,6 +29,7 @@ class CityFactory(factory.DjangoModelFactory):
     code = factory.Sequence(lambda n: "%03d" % n)
     name = factory.Sequence(lambda n: "City name %03d" % n)
     abbr = factory.Sequence(lambda n: "%03d" % n)
+    time_zone = 'Europe/Moscow'
 
 
 class EmailTemplateFactory(factory.DjangoModelFactory):
