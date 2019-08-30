@@ -85,14 +85,14 @@ class IndexView(generic.TemplateView):
             today = now().date()
             # TODO: add cache, limit classes returned values by 1
             courseclass_queryset = (CourseClass.objects
-                                               .filter(date__gte=today)
-                                               .order_by('date', 'starts_at'))
+                                    .filter(date__gte=today)
+                                    .order_by('date', 'starts_at'))
             courses = list(
                 Course.objects
                 .filter(is_open=True,
                         branch_id=self.request.branch.id,
                         semester=featured_term.pk)
-                .select_related('meta_course', 'semester')
+                .select_related('meta_course', 'semester', 'branch')
                 .prefetch_related(
                     'teachers',
                     Prefetch(

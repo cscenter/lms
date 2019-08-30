@@ -1,5 +1,7 @@
 import re
 
+from django.conf import settings
+from django.utils.translation import get_language
 from menu import MenuItem as _MenuItem
 
 
@@ -13,7 +15,6 @@ class MenuItem(_MenuItem):
     permissions = None
     # Additional check that item should be selected
     # Affects the parent visibility if `MENU_SELECT_PARENTS` setting is enabled
-    # FIXME: remove relative patterns support? Or add the same to the excluded_patterns?
     selected_patterns = None
     excluded_patterns = None
 
@@ -36,7 +37,7 @@ class MenuItem(_MenuItem):
     def match_url(self, request):
         """match url determines if this is selected"""
         matched = False
-        url = self.url
+        url = str(self.url)
         # Relative URL means related view available on any subdomain
         if not url.startswith('http'):
             # For a correct comparison menu url with current path append scheme
