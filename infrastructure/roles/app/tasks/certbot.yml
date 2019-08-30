@@ -1,4 +1,7 @@
 ---
+- name: Download and install certbot
+  get_url: url=https://dl.eff.org/certbot-auto dest={{ certbot_script }} mode=0755
+
 - name: LetsEncrypt Certbot directory exists
   file:
     path: "{{ repo_root }}/.well-known/acme-challenge"
@@ -12,7 +15,7 @@
 
 - debug: msg="{{ enable_https }}"
 
-- name: Generate certificates
+- name: Generate certificate
   command: >
     {{ certbot_script }} certonly --webroot
     --noninteractive --agree-tos
@@ -26,8 +29,7 @@
     creates: "{{ certbot_config_dir }}"
 
 # Note: the `.` special character matches any character except newlines.
-# Note: Make sure nginx configs were copied to `dest` (see `nginx.yml`)
-- name: Uncomment `ssl_certificate` and `ssl_certificate_key`
+- name: Uncomment `ssl_certificate` and `ssl_certificate_key` directives
   replace:
     dest: "/etc/nginx/sites-available/{{ nginx_domain }}.conf"
     regexp: '^(\s*)# ssl_certificate(.*);$'
@@ -44,7 +46,7 @@
 
 - meta: flush_handlers
 
-- name: Ensure a cron job to auto-renew the cert exists
+- name: Ensure a cron job to auto-renew the certificate exists
   cron:
     name: "daily auto renew cert for {{ main_domain }}"
     special_time: daily

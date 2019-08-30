@@ -66,9 +66,6 @@
     - nginx
     - certbot
 
-# Note: if `https_enabled` is set to True, this command is idempotent only
-#  in combination with task which uncomment `ssl_certificate` and
-#  `ssl_certificate_key` lines (see in certbot.yml)
 - name: Copy nginx configs
   template:
     src: "{{ nginx_domain }}/nginx.conf.jinja2"
@@ -81,7 +78,7 @@
   tags:
     - nginx
 
-- name: Symlink nginx config
+- name: Symlink nginx configs
   file:
     src: "/etc/nginx/sites-available/{{ nginx_domain }}.conf"
     dest: "/etc/nginx/sites-enabled/{{ nginx_domain }}.conf"

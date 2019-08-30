@@ -18,6 +18,7 @@
   file:
     path: "{{ nginx_tls_path }}"
     state: directory
+  when: enable_https
   tags:
     - nginx
     - tls
@@ -27,6 +28,7 @@
     src: "{{ item.from }}"
     dest: "{{ nginx_tls_path }}/{{ item.to }}"
     mode: 0400
+  when: enable_https
   with_items:
     - from: tls_dhparams.pem
       to: dhparam.pem
@@ -43,12 +45,14 @@
 - name: Generate an OpenSSL private key
   openssl_privatekey:
     path: "{{ nginx_tls_path }}/snakeoil-key.pem"
+  when: enable_https
 
 - name: Generate an OpenSSL CSR
   openssl_csr:
     path: "{{ nginx_tls_path }}/snakeoil.csr"
     privatekey_path: "{{ nginx_tls_path }}/snakeoil-key.pem"
-    common_name: "compscicenter.ru"
+    common_name: "example.com"
+  when: enable_https
 
 - name: Generate a Self Signed OpenSSL certificate
   openssl_certificate:
@@ -56,6 +60,7 @@
     privatekey_path: "{{ nginx_tls_path }}/snakeoil-key.pem"
     csr_path: "{{ nginx_tls_path }}/snakeoil.csr"
     provider: selfsigned
+  when: enable_https
 
 - name: Copy nginx configuration for handling requests with wrong Host header
   template:
@@ -64,6 +69,4 @@
   notify: reload_nginx
   tags:
     - nginx
-
-- name: Download and install certbot
-  get_url: url=https://dl.eff.org/certbot-auto dest={{ certbot_script }} mode=0755
+  when: enable_https

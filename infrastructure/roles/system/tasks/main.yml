@@ -83,12 +83,10 @@
   command: "/usr/bin/python3 /tmp/get-pip.py"
   when: system_python3_pip_version_output is failed
 
-
 - name: Install Ansible dependency for generating certificates
   pip:
     name: pyopenssl
     executable: pip{{ system_python3_version.stdout }}
-
 
 - name: Get pip{{ python_version }} version
   command: pip{{ python_version }} --version

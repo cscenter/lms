@@ -69,6 +69,7 @@ server {
     server_name www.{{ main_domain }};
 
     # Uncomment lines below after certbot will generate new certificates
+    #
     # ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
     # ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};
     # Fetch OCSP records from URL in ssl_certificate and cache them
@@ -89,7 +90,7 @@ server {
 
     {% if enable_https -%}
         {% filter indent(width=4) %}
-            {% include 'compscicenter.ru/_nginx.ssl.jinja2' %}
+            {% include '_nginx.ssl.jinja2' %}
         {% endfilter %}
     {% endif %}
 

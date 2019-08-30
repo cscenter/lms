@@ -17,14 +17,14 @@
         name: lvm
       vars:
         lvm_volumes:
-        - vg_name: vg_data
-          lv_name: lv_media
-          # Keep in sync with values from provision.yml
-          block_device_name: "/dev/xvdf"
-          filesystem: ext4
-          filesystem_mkfs_opts: ""
-          mount: /shared
-          mount_opts: "errors=remount-ro,noatime,barrier=0"
+          - vg_name: vg_data
+            lv_name: lv_media
+            # Keep in sync with values from provision.yml
+            block_device_name: "/dev/xvdf"
+            filesystem: ext4
+            filesystem_mkfs_opts: ""
+            mount: /shared
+            mount_opts: "errors=remount-ro,noatime,barrier=0"
       tags:
         - lvm-role
         - always
