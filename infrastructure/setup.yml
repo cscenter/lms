@@ -33,7 +33,7 @@
       import_role:
         name: postgres
       vars:
-        setup_cluster: yes
+        pg_setup_cluster: yes
         pg_cluster_dir: "/shared/db/data"
       tags:
         - postgres-role

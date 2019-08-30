@@ -9,8 +9,3 @@
   service: name=uwsgi state=reloaded
   become: yes
   become_method: sudo
-
-- name: restart ntp
-  service:
-    name: "{{ ntp_daemon }}"
-    state: restarted

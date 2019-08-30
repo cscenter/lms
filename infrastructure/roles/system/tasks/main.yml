@@ -36,7 +36,6 @@
       - openssl
       - python-setuptools
       - git
-      - ntp
       - zsh
       - tmux
       - htop
@@ -158,7 +157,8 @@
     - "{{ aws_ec2_user }}"
 
 - name: Setup ntpd
-  import_tasks: ntp.yml
+  import_role:
+    name: ntp
   tags:
     - ntpd
     - ntp
