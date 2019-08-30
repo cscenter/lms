@@ -120,6 +120,7 @@ django-ckeditor = "==5.7.1"
 rules = "*"
 django-simple-history = "*"
 django-static-compress = "==1.2.1"
+django-environ = "*"
 
 [requires]
 python_version = "3.6"
