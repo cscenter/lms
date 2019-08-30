@@ -81,6 +81,7 @@ def create_survey_email_templates(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
+
     dependencies = [
         ('surveys', '0001_initial'),
     ]
