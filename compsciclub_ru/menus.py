@@ -2,8 +2,7 @@ from django.utils.translation import pgettext_lazy
 from menu import Menu
 
 from core.menu import MenuItem
-from core.urls import reverse
-
+from core.urls import reverse, reverse_lazy
 
 compsciclub_ru_menu = [
     MenuItem(
@@ -18,12 +17,12 @@ compsciclub_ru_menu = [
     ),
     MenuItem(
         "Курсы",
-        reverse('course_list'),
+        reverse_lazy('course_list'),
         weight=30
     ),
     MenuItem(
         "Преподаватели",
-        reverse('teachers'),
+        reverse_lazy('teachers'),
         weight=40
     ),
     MenuItem(
@@ -33,7 +32,7 @@ compsciclub_ru_menu = [
     ),
     MenuItem(
         pgettext_lazy("menu", "Обучение"),
-        reverse('study:assignment_list'),
+        reverse_lazy('study:assignment_list'),
         weight=60,
         children=[
             MenuItem(pgettext_lazy("menu", "Задания"), '/learning/assignments/', weight=10, budge='assignments_student'),
@@ -48,12 +47,12 @@ compsciclub_ru_menu = [
     ),
     MenuItem(
         pgettext_lazy("menu", "Преподавание"),
-        reverse('teaching:assignment_list'),
+        reverse_lazy('teaching:assignment_list'),
         weight=60,
         children=[
             MenuItem(
                 pgettext_lazy("menu", "Задания"),
-                reverse('teaching:assignment_list'),
+                reverse_lazy('teaching:assignment_list'),
                 weight=10,
                 budge='assignments_teacher',
                 selected_patterns=[
@@ -62,21 +61,21 @@ compsciclub_ru_menu = [
                 ]),
             MenuItem(
                 pgettext_lazy("menu", "Расписание"),
-                reverse('teaching:timetable'),
+                reverse_lazy('teaching:timetable'),
                 weight=20,
                 selected_patterns=[r"^/teaching/calendar/"]),
             MenuItem(
                 pgettext_lazy("menu", "Календарь"),
-                reverse('teaching:calendar_full'),
+                reverse_lazy('teaching:calendar_full'),
                 weight=30),
             MenuItem(
                 pgettext_lazy("menu", "Мои курсы"),
-                reverse("teaching:course_list"),
+                reverse_lazy("teaching:course_list"),
                 weight=40,
                 budge='courseoffering_news'),
             MenuItem(
                 pgettext_lazy("menu", "Ведомости"),
-                reverse('teaching:gradebook_list'),
+                reverse_lazy('teaching:gradebook_list'),
                 weight=50),
         ],
         permissions=(
@@ -94,12 +93,12 @@ compsciclub_en_menu = [
     ),
     MenuItem(
         "Courses",
-        reverse('course_list'),
+        reverse_lazy('course_list'),
         weight=20
     ),
     MenuItem(
         "Lecturers",
-        reverse('teachers'),
+        reverse_lazy('teachers'),
         weight=30
     ),
     MenuItem(
@@ -108,7 +107,6 @@ compsciclub_en_menu = [
         weight=40
     ),
 ]
-
 
 for item in compsciclub_ru_menu:
     Menu.add_item("compsciclub_ru", item)
