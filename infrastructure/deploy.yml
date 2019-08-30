@@ -29,14 +29,13 @@
     become: yes
     become_user: "{{ site_user }}"
 
-  - name: Read current Pipfile.lock data into memory
-    slurp:
-      path: '{{ repo_root }}/Pipfile.lock'
-    register: pipfile_lock_data
+  - name: Read current Pipfile.lock hash into memory
+    command: jq ._meta.hash {{ repo_root }}/Pipfile.lock
+    register: pipfile_lock_hash
 
   - name: Get current Pipfile.lock hash
     set_fact:
-      pipfile_lock_hash: "{{ pipfile_lock_data.content | b64decode | from_json | json_query('_meta.hash.sha256') }}"
+      pipfile_lock_hash: "{{ pipfile_lock_hash.stdout | from_json | json_query('sha256') }}"
 
   - name: Try to fetch file with Pipfile.lock hash value from the previous deploy
     fetch:

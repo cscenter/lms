@@ -33,6 +33,7 @@
 - name: Apt dependencies
   apt:
     name:
+      - jq
       - openssl
       - python-setuptools
       - git
