@@ -41,6 +41,7 @@ class UserDetailView(generic.DetailView):
     def get_queryset(self, *args, **kwargs):
         enrollments_queryset = (Enrollment.active
                                 .select_related('course',
+                                                'course__branch',
                                                 'course__semester',
                                                 'course__meta_course',)
                                 .order_by("course"))
@@ -56,7 +57,8 @@ class UserDetailView(generic.DetailView):
         elif self.request.user.is_curator:
             enrollments_queryset = enrollments_queryset.annotate(
                 classes_total=Count('course__courseclass'))
-        co_queryset = Course.objects.select_related('semester', 'meta_course')
+        co_queryset = Course.objects.select_related('semester',
+                                                    'meta_course', 'branch')
         if hasattr(self.request, "branch"):
             co_queryset = co_queryset.filter(branch=self.request.branch)
         prefetch_list = [
