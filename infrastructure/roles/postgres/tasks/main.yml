@@ -4,7 +4,7 @@
 
 - name: Add PPA
   apt_repository:
-    repo: "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main"
+    repo: "deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main"
     update_cache: yes
 
 - name: Globally install psycopg2 (used to make sure db user exists)
@@ -22,7 +22,7 @@
 
 - name: Ensure the PostgreSQL service is running
   systemd:
-    name: postgresql.service
+    name: postgresql@{{ pg_version }}-{{ pg_cluster_name }}.service
     state: started
     enabled: yes
 
@@ -30,7 +30,7 @@
   become: yes
   become_method: sudo
   ignore_errors: yes
-  shell: "pg_dropcluster --stop {{ pg_version }} main"
+  shell: "pg_dropcluster --stop {{ pg_version }} {{ pg_cluster_name }}"
   when: pg_setup_cluster
 
 - name: Change postgres data storage | Drop target cluster directory if exists
@@ -46,6 +46,6 @@
   become: yes
   become_method: sudo
   ignore_errors: yes
-  shell: "pg_createcluster -d {{ pg_cluster_dir }} --start -e UTF-8 {{ pg_version }} main"
+  shell: "pg_createcluster -d {{ pg_cluster_dir }} --start -e UTF-8 {{ pg_version }} {{ pg_cluster_name }}"
   notify: restart postgres
   when: pg_setup_cluster

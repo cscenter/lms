@@ -27,6 +27,7 @@ And setup postgres databases:
 CREATE DATABASE cscdb;
 CREATE USER csc WITH password 'FooBar';
 GRANT ALL privileges ON DATABASE cscdb TO csc;
+
 CREATE DATABASE test_cscdb;
 ALTER DATABASE test_cscdb OWNER TO csc;
 ALTER USER csc with CREATEDB;
