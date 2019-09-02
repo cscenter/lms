@@ -43,7 +43,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
                                    SemesterTypes.AUTUMN)
             if co.semester.index < index:
                 parsed = urlparse(co.get_absolute_url())
-                url = get_club_domain(co.city.code) + parsed.path
+                url = get_club_domain(co.branch.code) + parsed.path
                 return HttpResponseRedirect(url)
         return self.render_to_response(context)
 
