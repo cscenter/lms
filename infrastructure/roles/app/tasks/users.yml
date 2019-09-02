@@ -28,7 +28,7 @@
 
 - name: Ensure ssh key is present
   copy:
-    src: "deploy_ssh_key"
+    content: "{{ deploy_ssh_key }}"
     dest: "/home/{{ site_user }}/.ssh/id_rsa"
     mode: 0400
     owner: "{{ site_user }}"

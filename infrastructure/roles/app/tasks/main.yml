@@ -16,7 +16,6 @@
     - site_dir_name
     - apps_dir_name
     - app_environment
-    - repo_url
     - db_name
     - db_user
     - db_user_password
@@ -29,6 +28,8 @@
     - processes_num
     - log_to_file
     - enable_https
+    - repo_url
+    - deploy_ssh_key
   tags:
     - always
 
