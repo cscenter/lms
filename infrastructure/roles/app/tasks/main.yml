@@ -1,35 +1,9 @@
 ---
-
-- name: Check mandatory variables before doing anything
+- name: Check app required variables
   fail:
     msg: "Variable '{{ item }}' is not defined"
   when: item not in vars
-  loop:
-    - main_domain
-    - site_user
-    - site_user_group
-    - repo_root
-    - virtualenv_root
-    - media_root
-    - static_root
-    - backup_root
-    - site_dir_name
-    - apps_dir_name
-    - app_environment
-    - db_name
-    - db_user
-    - db_user_password
-    - setup_cronjobs
-    - certbot_domains
-    - nginx_configs
-    - certbot_config_dir
-    - rq_workers
-    - rq_workers_target_service_name
-    - processes_num
-    - log_to_file
-    - enable_https
-    - repo_url
-    - deploy_ssh_key
+  loop: "{{ app_required_vars }}"
   tags:
     - always
 
