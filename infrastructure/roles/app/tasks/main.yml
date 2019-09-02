@@ -91,8 +91,18 @@
     - nginx
   when: nginx_status.stat.exists
 
+- debug: msg="{{ enable_https }}"
+
 - name: Configure certbot to auto-renew tls certificates
-  import_tasks: certbot.yml
+  import_role:
+    name: certbot
+  tags:
+    - certbot
+  vars:
+    - certbot_acme_challenge_user: "{{ site_user }}"
+    - certbot_admin_email: "{{ admin_email }}"
+    - certbot_webroot_path: "{{ repo_root }}"
+    - certbot_nginx_configs: "{{ nginx_configs }}"
   when: nginx_status.stat.exists and enable_https
 
 - name: Ensure Nginx is started

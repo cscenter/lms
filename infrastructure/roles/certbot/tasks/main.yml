@@ -1,0 +1,70 @@
+---
+- name: Check required variables
+  fail: msg="Variable '{{ item }}' is not defined"
+  when: item not in vars
+  loop: "{{ certbot_required_vars }}"
+  tags:
+    - always
+
+- name: Download and install certbot
+  get_url: url=https://dl.eff.org/certbot-auto dest={{ certbot_script }} mode=0755
+
+- name: LetsEncrypt Certbot directory exists
+  file:
+    path: "{{ repo_root }}/.well-known/acme-challenge"
+    state: directory
+    recurse: yes
+    owner: "{{ certbot_acme_challenge_user }}"
+    group: "{{ certbot_acme_challenge_user }}"
+  tags:
+    - certbot
+    - tls
+
+- name: Generate certificate
+  command: >
+    {{ certbot_script }} certonly --webroot
+    --noninteractive --agree-tos
+    --email {{ certbot_admin_email }}
+    -w {{ certbot_webroot_path }}
+    -d {{ certbot_domains|join(' -d ') }}
+  tags:
+    - certbot
+    - tls
+  args:
+    creates: "{{ certbot_config_dir }}"
+
+- name: Uncomment `ssl_certificate` and `ssl_certificate_key` directives
+  replace:
+    dest: "/etc/nginx/sites-available/{{ nginx_domain }}.conf"
+    # Note: the `.` special character matches any character except newlines
+    regexp: '^(\s*)# ssl_certificate(.*);$'
+    replace: '\1ssl_certificate\2;'
+    backup: no
+  notify: reload_nginx
+  loop: "{{ certbot_nginx_configs }}"
+  loop_control:
+    loop_var: nginx_domain
+  tags:
+    - certbot
+    - tls
+    - nginx
+
+- meta: flush_handlers
+
+- name: Ensure a cron job to auto-renew the certificate exists
+  cron:
+    name: "re-creating and updating existing certificate"
+    special_time: daily
+    job: >
+      {{ certbot_script }} certonly --webroot
+      --noninteractive --agree-tos --quiet
+      --email {{ certbot_admin_email }}
+      -w {{ certbot_webroot_path }}
+      -d {{ certbot_domains|join(' -d ') }}
+      --deploy-hook 'service nginx reload'
+      --no-self-upgrade
+    state: present
+  when: certbot_auto_renew
+  tags:
+    - certbot
+    - tls
