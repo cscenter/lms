@@ -13,7 +13,7 @@ before_install:
   - sudo cp /etc/postgresql/{10,11}/main/pg_hba.conf
   - sudo service postgresql restart 11
 install:
-  - PYCURL_SSL_LIBRARY=openssl pip3 install --user pycurl
+  - PYCURL_SSL_LIBRARY=openssl pip3 install pycurl
   - pip3 install pipenv
   - pipenv sync --dev
   - pip3 list
