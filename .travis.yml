@@ -2,9 +2,9 @@ sudo: false
 language: python
 dist: trusty
 python:
-  - "3.6"
+  - "3.7"
 addons:
-  postgresql: '9.6'
+  postgresql: '11'
 install:
   - pip install pipenv
   - pipenv sync --dev
