@@ -5,12 +5,21 @@ python:
   - "3.7"
 addons:
   postgresql: '11'
+before_install:
+  - sudo service postgresql stop
+  - sudo apt-get --yes remove postgresql\*
+  - sudo apt-get install -y postgresql-11 postgresql-client-11
+  - sudo sed -e 's/^port.*/port = 5432/' /etc/postgresql/11/main/postgresql.conf
+  - sudo cp /etc/postgresql/{10,11}/main/pg_hba.conf
+  - sudo service postgresql restart 11
 install:
   - pip3 install pipenv
   - pipenv sync --dev
 before_script:
   - cp compscicenter_ru/settings/.env.example compscicenter_ru/settings/.env
-  - psql -c 'create database travis_ci_test;' -U postgres
+  - psql --version
+  - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
+  - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
   - python manage.py migrate --noinput --settings=compscicenter_ru.settings.test
 script:
   - pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
