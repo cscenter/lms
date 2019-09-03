@@ -1,20 +1,31 @@
 # -*- coding: utf-8 -*-
+import logging
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 from .base import *
 
-ALLOWED_HOSTS = [".compscicenter.ru"]
-DEFAULT_URL_SCHEME = 'https'  # default scheme for `core.urls.reverse`
+# Default scheme for `core.urls.reverse`
+DEFAULT_URL_SCHEME = "https"
 
 MEDIA_ROOT = str(Path('/shared', 'media'))
 
-# Logging-related stuff
-sentry_sdk.init(
-    dsn="***REMOVED***",
-    integrations=[DjangoIntegration()]
+# Sentry
+SENTRY_DSN = env("SENTRY_DSN")
+SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
+
+sentry_logging = LoggingIntegration(
+    level=logging.INFO,        # Capture info and above as breadcrumbs
+    event_level=logging.ERROR  # Send errors as events
 )
+
+sentry_sdk.init(
+    dsn=SENTRY_DSN,
+    integrations=[sentry_logging, DjangoIntegration()]
+)
+
 
 CACHES['default'] = {
     'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
@@ -38,29 +49,27 @@ LOGGING = {
     },
     'loggers': {
         'django.db.backends': {
-            'level': 'ERROR',
             'handlers': ['console'],
+            'level': 'ERROR',
             'propagate': False,
         },
         'django.request': {
-            'level': 'ERROR',
             'handlers': ['console'],
+            'level': 'ERROR',
             'propagate': True,
         },
         "rq.worker": {
-            "level": "WARNING",
             "handlers": ["console"],
+            "level": "WARNING",
             'propagate': False,
         },
         "post_office": {
-            "level": "ERROR",
             "handlers": ["console"],
+            "level": "ERROR",
             "propagate": False,
         },
     },
 }
-
-EMAIL_HOST_PASSWORD = '***REMOVED***'
 
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = None
@@ -68,35 +77,23 @@ CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_DOMAIN = '.compscicenter.ru'
 
 
-# -- learning
-SLIDESHARE_API_KEY = "E3GDS7t4"
-SLIDESHARE_SECRET = "fnk6fOLp"
-SLIDESHARE_USERNAME = "compscicenter"
-SLIDESHARE_PASSWORD = "vorobey"
-
-YANDEX_DISK_USERNAME = "csc-slides@yandex.ru"
-YANDEX_DISK_PASSWORD = "***REMOVED***"
-
-
 # django-dbbackup settings
 DBBACKUP_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-DBBACKUP_STORAGE_OPTIONS = {
-    'location': '',
-    'bucket_name': 'cscenter',
-    'region_name': 'eu-central-1',
-    'access_key': '***REMOVED***',
-    'secret_key': '***REMOVED***',
-    'default_acl': None,
-}
 DBBACKUP_TMP_DIR = '/shared/backup_tmp'
 DBBACKUP_DATE_FORMAT = '%d-%m-%Y-%H'
 DBBACKUP_FILENAME_TEMPLATE = 'backups/{servername}/{datetime}/{content_type}.{extension}'
 DBBACKUP_MEDIA_FILENAME_TEMPLATE = 'backups/{servername}/{datetime}/{content_type}.{extension}'
-
-NEWRELIC_ENV = 'production'
-
-AWS_SES_ACCESS_KEY_ID = '***REMOVED***'
-AWS_SES_SECRET_ACCESS_KEY = '***REMOVED***'
+# Credentials for user with access to S3 bucket
+DBBACKUP_S3_ACCESS_KEY = env.str('DBBACKUP_S3_ACCESS_KEY')
+DBBACKUP_S3_SECRET_KEY = env.str('DBBACKUP_S3_SECRET_KEY')
+DBBACKUP_STORAGE_OPTIONS = {
+    'location': '',
+    'bucket_name': 'cscenter',
+    'region_name': 'eu-central-1',
+    'access_key': DBBACKUP_S3_ACCESS_KEY,
+    'secret_key': DBBACKUP_S3_SECRET_KEY,
+    'default_acl': None,
+}
 
 POST_OFFICE = {
     'LOG_LEVEL': 1,  # Log only failed emails
@@ -106,17 +103,3 @@ POST_OFFICE = {
         'LOG_LEVEL': 1
     }
 }
-
-LDAP_CLIENT_URI = "ldap://review.compscicenter.ru:389"
-LDAP_DB_SUFFIX = "dc=review,dc=compscicenter,dc=ru"
-LDAP_CLIENT_USERNAME = "admin"
-LDAP_CLIENT_PASSWORD = "***REMOVED***"
-LDAP_TLS_TRUSTED_CA_CERT_FILE = str(PROJECT_DIR / "LDAPTrustedCA.crt")
-LDAP_SYNC_PASSWORD = True
-
-GERRIT_API_URI = "https://review.compscicenter.ru/a/"
-GERRIT_CLIENT_USERNAME = "admin"
-GERRIT_CLIENT_HTTP_PASSWORD = "***REMOVED***"
-
-RECAPTCHA_PUBLIC_KEY = '***REMOVED***'
-RECAPTCHA_PRIVATE_KEY = '***REMOVED***'

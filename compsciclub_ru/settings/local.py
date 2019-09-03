@@ -1,48 +1,22 @@
 from .base import *
 
-DEBUG = True
-MODELTRANSLATION_DEBUG = True
-for template in TEMPLATES:
-    template['OPTIONS']['debug'] = DEBUG
-    if 'auto_reload' in template['OPTIONS']:
-        template['OPTIONS']['auto_reload'] = DEBUG
-
-
 DEBUG_TOOLBAR_PATCH_SETTINGS = False
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware'
 ] + MIDDLEWARE
 INTERNAL_IPS = ["127.0.0.1", "::1"]
 
-INSTALLED_APPS += ['fixture_media',
-                   'debug_toolbar',
-                   'django_extensions',
-                   'template_timings_panel',
-                   'rosetta']
-
-ALLOWED_HOSTS = ['.club.ru', '127.0.0.1', 'localhost']
-
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.versions.VersionsPanel',
-    'debug_toolbar.panels.timer.TimerPanel',
-    'debug_toolbar.panels.settings.SettingsPanel',
-    'debug_toolbar.panels.headers.HeadersPanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
-    'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.signals.SignalsPanel',
-    'debug_toolbar.panels.logging.LoggingPanel',
-    'debug_toolbar.panels.redirects.RedirectsPanel',
+INSTALLED_APPS += [
+    'fixture_media',
+    'debug_toolbar',
+    'django_extensions',
+    'template_timings_panel',
+    'rosetta'
 ]
+
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_CODE = 'ru'
 ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
 
-THUMBNAIL_DEBUG = True
-
-EMAIL_HOST = '127.0.0.1'
-EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 1025
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
@@ -137,7 +111,5 @@ LOGGING = {
 
 
 FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)
-
-THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.cached_db_kvstore.KVStore'
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']

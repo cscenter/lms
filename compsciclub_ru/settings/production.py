@@ -1,19 +1,28 @@
 # -*- coding: utf-8 -*-
+import logging
 
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.logging import LoggingIntegration
 
 from .base import *
 
-ALLOWED_HOSTS = [".compsciclub.ru"]
 DEFAULT_URL_SCHEME = 'https'  # default scheme for `core.urls.reverse`
 
 MEDIA_ROOT = str(Path('/shared', 'media'))
 
-# Logging-related stuff
+# Sentry
+SENTRY_DSN = env("SENTRY_DSN")
+SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
+
+sentry_logging = LoggingIntegration(
+    level=logging.INFO,        # Capture info and above as breadcrumbs
+    event_level=logging.ERROR  # Send errors as events
+)
+
 sentry_sdk.init(
-    dsn="***REMOVED***",
-    integrations=[DjangoIntegration()]
+    dsn=SENTRY_DSN,
+    integrations=[sentry_logging, DjangoIntegration()]
 )
 
 CACHES = {
@@ -62,36 +71,7 @@ LOGGING = {
     },
 }
 
-EMAIL_HOST_PASSWORD = 'XgpWN4CzBGqCbNsb8'
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
-# -- learning
-SLIDESHARE_API_KEY = "E3GDS7t4"
-SLIDESHARE_SECRET = "fnk6fOLp"
-SLIDESHARE_USERNAME = "compscicenter"
-SLIDESHARE_PASSWORD = "vorobey"
-
-YANDEX_DISK_USERNAME = "csc-slides@yandex.ru"
-YANDEX_DISK_PASSWORD = "***REMOVED***"
-
-
-# django-dbbackup settings
-DBBACKUP_CLEANUP_KEEP = 30
-DBBACKUP_CLEANUP_KEEP_MEDIA = 30
-CSC_TMP_BACKUP_DIR = "/tmp/csclub_backup"
-DBBACKUP_BACKUP_DIRECTORY = CSC_TMP_BACKUP_DIR
-
-DBBACKUP_S3_BUCKET = 'csclub'
-DBBACKUP_S3_DIRECTORY = 'cscweb_backups'
-DBBACKUP_S3_DOMAIN = 's3.eu-central-1.amazonaws.com'
-# Access Key for csclub backup user
-DBBACKUP_S3_ACCESS_KEY = 'AKIAJWPKEDQ6YJEPKFFQ'
-DBBACKUP_S3_SECRET_KEY = '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'
-
-NEWRELIC_ENV = 'production'
-
-# Recaptcha settings
-RECAPTCHA_PUBLIC_KEY = '6Lc_7AsTAAAAAOoC9MhVSoJ6O-vILaGgDEgtLBty'
-RECAPTCHA_PRIVATE_KEY = '6Lc_7AsTAAAAAJeq5ZzlUQC471py3sq404u8DYqr'

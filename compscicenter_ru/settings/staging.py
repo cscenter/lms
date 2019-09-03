@@ -7,7 +7,7 @@ MEDIA_ROOT = str(Path('/shared', 'media'))
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'test_cscdb',
         'USER': 'csc',
         'PASSWORD': 'FooBar',
@@ -21,8 +21,8 @@ CACHES['default'] = {
     'LOCATION': '/tmp/django_cache'
 }
 
+# FIXME: create separated .env for staging
 THUMBNAIL_DEBUG = False
-
 EMAIL_HOST = '127.0.0.1'
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 1025

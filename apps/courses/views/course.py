@@ -37,6 +37,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
         # Redirects to login page if tab is not visible to authenticated user
         context = self.get_context_data()
         # Redirects to club if course was created before center establishment.
+        # FIXME: remove or separate
         co = context[self.context_object_name]
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
             index = get_term_index(CENTER_FOUNDATION_YEAR,

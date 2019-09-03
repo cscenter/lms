@@ -201,8 +201,9 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         course_offerings = (Course.objects
                             .available_in(self.request.user.branch_id)
                             .filter(in_current_term | enrolled_in)
-                            .select_related('meta_course', 'semester')
-                            .prefetch_related(prefetch_teachers))
+                            .select_related('meta_course', 'semester', 'branch')
+                            .prefetch_related(prefetch_teachers,
+                                              "additional_branches"))
         # 2. And split them by type.
         ongoing_enrolled, ongoing_rest, archive_enrolled = [], [], []
         for course in course_offerings:
