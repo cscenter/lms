@@ -15,5 +15,6 @@ local/
 .pytest_cache/
 coverage_html/
 .coverage
+.env
 # TODO: replace public/ with submodule, add to ignore here
 *-debug.log

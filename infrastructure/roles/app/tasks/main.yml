@@ -31,6 +31,15 @@
     dest: "/home/{{ site_user }}/site/repo"
     key_file: "/home/{{ site_user }}/.ssh/id_rsa"
 
+- name: Create .env file
+  template:
+    src: "env-file.jinja2"
+    dest: "{{ repo_root }}/{{ site_dir_name }}/settings/.env"
+    owner: "{{ site_user }}"
+    force: yes
+    mode: 0400
+
+
 - name: Ensure directory for file-based cache exists
   file: path=/tmp/django_cache mode=777 state=directory
 
@@ -85,7 +94,7 @@
     - nginx
   when: nginx_status.stat.exists
 
-- name: Install app dependencies
+- name: Install python dependencies
   import_tasks: venv.yml
   notify: restart_uwsgi
   tags:
@@ -114,7 +123,7 @@
     state: directory
     owner: "ubuntu"
     group: "{{ site_user_group }}"
-    mode: 0775
+    mode: "{{ media_directory_permissions }}"
   when: not media_root_stat.stat.exists
 
 - name: Restore file and dir owners if "{{ media_root }}" were exist before
@@ -125,14 +134,14 @@
 
 # Note: not idempotent
 - name: Ensure directories are {{ media_directory_permissions }}
-  command: find {{ media_root }} -type d -exec chmod {{ media_directory_permissions }} {} \;
+  command: find {{ media_root }} -type d -exec chmod 0{{ media_directory_permissions }} {} \;
   become: yes
   run_once: yes
   when: media_root_stat.stat.exists
 
 # Note: not idempotent
 - name: Ensure files are {{ media_file_permissions }}
-  command: find {{ media_root }} -type f -exec chmod {{ media_file_permissions }} {} \;
+  command: find {{ media_root }} -type f -exec chmod 0{{ media_file_permissions }} {} \;
   become: yes
   run_once: yes
   when: media_root_stat.stat.exists

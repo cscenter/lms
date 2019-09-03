@@ -45,7 +45,7 @@
   become: yes
   become_user: "{{ site_user }}"
 
-- name: Prevent python from being upgraded with `apt-get upgrade` (it can broke venv)
+- name: Prevent python from being upgraded with `apt-get upgrade` (it can break venv)
   dpkg_selections:
     name: "python{{ python_version }}"
     selection: hold

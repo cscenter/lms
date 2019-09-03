@@ -1,7 +1,7 @@
 ---
-# media/ directory permissions. Should be synced with django settings
-media_directory_permissions: "0775"
-media_file_permissions: "0664"
+# Note: permissions for media directory should be defined in str format
+media_directory_permissions: "755"
+media_file_permissions: "664"
 # TODO: share values below with certbot role
 certbot_cert_filename: fullchain.pem
 certbot_privkey_filename: privkey.pem
@@ -32,3 +32,4 @@ app_required_vars:
   - enable_https
   - repo_url
   - deploy_ssh_key
+  - app_environement

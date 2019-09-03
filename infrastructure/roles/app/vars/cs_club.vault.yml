@@ -1,0 +1,44 @@
+---
+db_name: cscdb
+db_user: csc
+db_user_password: FooBar
+app_environement:
+  DJANGO_SECRET_KEY: "chf0ao=9=ihflu_ln2&z+jke)*cx=k0e3mzuq+pc+x+6@vxrj9"
+  DJANGO_EMAIL_HOST_PASSWORD: "XgpWN4CzBGqCbNsb8"
+  DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS: "{{ '0o'|join(media_directory_permissions) | int(default=493, base=8) }}"
+  DATABASE_URL: "postgresql://csc:FooBar@127.0.0.1:5432/cscdb"
+  REDIS_PASSWORD: "3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN"
+  HASHIDS_SALT: "^TimUbi)AUwc>]B-`g2"
+  YANDEX_DISK_USERNAME: "csc-slides@yandex.ru"
+  YANDEX_DISK_PASSWORD: "deelthisat"
+  RECAPTCHA_PUBLIC_KEY: "6Lc_7AsTAAAAAOoC9MhVSoJ6O-vILaGgDEgtLBty"
+  RECAPTCHA_PRIVATE_KEY: "6Lc_7AsTAAAAAJeq5ZzlUQC471py3sq404u8DYqr"
+  SENTRY_DSN: "https://f2a254aefeae4aeaa09657771205672f@sentry.io/13763"
+deploy_ssh_key: |
+  -----BEGIN RSA PRIVATE KEY-----
+  MIIEowIBAAKCAQEAxG7bqot6KC5Jww3wqILoaeWGFOro7v865HEr9+I0inzq0N9O
+  i3gs8gC6e2qm8g0vvxijdo0VvdJHRVo6eQB0pywNS8xhzxnDfLVZ+cwMiA2loc9b
+  IdGjOYEMxQVyxMU6TCRs9ydIpwKU/p8bx+qtxEdKqa249L63FtBxH+90g4KwtoQn
+  KktawqyIXF9QKaDNYtuCppP9CmAVRWMTOLQWzXMORdq/hglYtnooO5+Lb/B6eYS1
+  HIZynRubqHkJDdSWOSIQ7ovVwMylWSkYAjZXGH+uJdKv8CekW+DVnMcO0y4M8Xks
+  q9zo+9NML8UbOOX6HuAGOU1BFNT7obIHZV8miQIDAQABAoIBAF0cU0Gm9ZOARXSQ
+  8gdebf5sTr8xjpJjJy5LutS4Q8F1bvTtNNUFdQCNedeweUv5Fi3V5v316F1fBGuK
+  Vncu0RzA09ifG6nIg5JkgC7ZGwOOvHlTydXhAibq1fu6FmnRN04KYiBRXa3Umn2L
+  O+bqhc2pIWoGr8pLcIv+5/CEV81R2qCB+khRJGm4SdaHBoFUjtpphSi1+1y92dMF
+  b2caCBDbNt3+2T/GMI8G+Xj8YU8LW/B1miVrdJnFQEQ/wYS/cfxz7cQbPZh30mOH
+  BTUpndbDEj7NyRFYAbhey0Cq+sVhlRzaXBFKG2w0pRBhTNoD+b84M9Rx8R6BRFRq
+  ab2035ECgYEA+7WAlhzybUGyxgyGqrmj9YDt44OFR3P9qCp+/yzIMwt+CerkijnE
+  qrr+WCyPsWq35iAvEiGc0SvPMKhb4Ck8sdBicJ4SZ/nt8fxk1TBOc7Rpp8ZjffQ9
+  R9WrkfzY63NTTfUguIrPSyZU3j5tH90x1pmT7QZqHFZPhTLfXT6DrB0CgYEAx8gf
+  cE0DHmGMN8krEf+mFTG4fRNsbEV9vV8Ql27n+28xTPaRDPAKwrj+GooU4mO4iMfI
+  A4VPyIKhTlW6LF/oozvP7tUPbhemoaqhZXzHqrD08kIQXp11f5G3WRrKSYKDJpGd
+  ft6n3rPtuBOfUgg+DvmM6Wvuj4Qyt+Am/cc+IF0CgYB98tcRxhBEPUCQOwpTeSqi
+  mM3wLwpMs6x0Ljd3xdezOwfpPID47WkMKR9FzZ5lH0o/u1DyWKFYRPyak1PNubSm
+  IOhxA5egMX4vvKRTzKUk3lyT2ABGsSTMwgzkssl0HzPK6WJjFQoex2JmBoSiEhNz
+  F0veqXwFC+ckdk0wIizOvQKBgAxxiJPEGDeiN8uZuhcK51tWl3ki5pPv2B8ddrkX
+  7VcZ2+ZBTVOS9/ic8SbSBu766xmJ6AlgGlIQ4N8yM8Bj0Oep6A+mManXy0cyi474
+  sK8PCpK0TrS19gWWG+du5b6iZGzYkQi/8ZDLgDkA7+F6JfNk08QONvO1djtBuOwB
+  pvr5AoGBALZ0UeFUnbwLyaA3Q8GAwlDGrHwLyfJ8Ct9gCZW2GwC4FxB7N/xGqD9J
+  raUaWa85AZ3xRIDUa+mzeVoNfg7w9eJiYBjZsObFFc6uc4DoXvxBydE7Q76Q5dp1
+  H42VlZIYR4tVpKSeLLDyv5HtQ0gmIl6N6QCssFPrtbOliUoHieuI
+  -----END RSA PRIVATE KEY-----

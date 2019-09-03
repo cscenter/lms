@@ -9,6 +9,12 @@
     site_user: cscenter
     main_domain: "{% if site_user == 'cscenter' %}compscicenter.ru{% else %}compsciclub.ru{% endif %}"
     site_dir_name: "{{ main_domain|replace('.', '_') }}"
+    media_directory_permissions: "775"
+    repo_root: "/home/{{ site_user }}/site/repo"
+    virtualenv_root: "/home/{{ site_user }}/site/env"
+    cached_pipfile_lock_hash_file: ".cached_pipfile_lock_hash_file"
+    # Default value when fail on fetching from the remote server
+    local_pipfile_lock_hash: ""
 
   tasks:
   - name: Check site_user value
@@ -16,18 +22,25 @@
       msg: "`site_user` var should be one of [cscenter, csclub]"
     when: site_user != "cscenter" and site_user != "csclub"
 
-  - name: Set variables
-    set_fact:
-      repo_root: "/home/{{ site_user }}/site/repo"
-      virtualenv_root: "/home/{{ site_user }}/site/env"
-      cached_pipfile_lock_hash_file: ".cached_pipfile_lock_hash_file"
-      # Default value when fail on fetching from the remote server
-      local_pipfile_lock_hash: ""
+  - name: Include vars
+    block:
+      - include_vars: roles/app/vars/cs_center.vault.yml
+        when: site_user == "cscenter"
+      - include_vars: roles/app/vars/cs_club.vault.yml
+        when: site_user == "csclub"
 
   - name: Get stuff from git
     git: repo={{ repo_url }} dest={{ repo_root }}
     become: yes
     become_user: "{{ site_user }}"
+
+  - name: Update .env file
+    template:
+      src: "env-file.jinja2"
+      dest: "{{ repo_root }}/{{ site_dir_name }}/settings/.env"
+      owner: "{{ site_user }}"
+      force: yes
+      mode: 0400
 
   - name: Read current Pipfile.lock hash into memory
     command: jq ._meta.hash {{ repo_root }}/Pipfile.lock
