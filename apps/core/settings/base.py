@@ -9,25 +9,18 @@ from pathlib import Path
 import pytz
 
 ROOT_DIR = Path(__file__).parents[3]
-APPS_DIR = ROOT_DIR / "apps"
+SHARED_APPS_DIR = ROOT_DIR / "apps"
 
 MEDIA_ROOT = str(ROOT_DIR / "media")
 MEDIA_URL = "/media/"
 ADMIN_URL = '/narnia/'
-
-# FIXME: or 755?
-FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o775
-FILE_UPLOAD_PERMISSIONS = 0o664
-
-DEBUG = False
-MODELTRANSLATION_DEBUG = False
-THUMBNAIL_DEBUG = False
 
 DEFAULT_CITY_CODE = "spb"
 DEFAULT_BRANCH_CODE = "spb"
 DEFAULT_TIMEZONE = pytz.timezone("Europe/Moscow")
 
 CLUB_DOMAIN = 'compsciclub.ru'
+# FIXME: remove
 CENTER_SITE_ID = 1
 CLUB_SITE_ID = 2
 
@@ -52,7 +45,6 @@ INSTALLED_APPS = [
     'formtools',
     'bootstrap3',
     'micawber.contrib.mcdjango',
-    'dbbackup',
     'simple_history',
     'import_export',
     'bootstrap_pagination',
@@ -65,7 +57,8 @@ INSTALLED_APPS = [
     'captcha',
     'taggit',
 
-    'core.storage.StaticFilesConfig',  # custom list of ignore patterns
+    # django.contrib.static with customized list of ignore patterns
+    'core.storage.StaticFilesConfig',
     'core.apps.CoreConfig',
     'auth.apps.AuthConfig',  # custom `User` model is defined in `users` app
     'users.apps.UsersConfig',
@@ -89,28 +82,6 @@ MICAWBER_DEFAULT_SETTINGS = {
     'height': 487
 }
 
-# Email settings
-EMAIL_HOST = 'smtp.yandex.ru'
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER = 'dummy@dummy'
-EMAIL_HOST_PASSWORD = 'dummy_password'
-EMAIL_PORT = 465
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-# Database
-# https://docs.djangoproject.com/en/1.6/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'cscdb',
-        'USER': 'csc',
-        'PASSWORD': 'FooBar',
-        'HOST': 'localhost',
-        'PORT': ''
-        }
-}
-
 # i18n, l10n
 LANGUAGE_CODE = 'ru'
 LANGUAGES = [
@@ -130,7 +101,7 @@ AUTH_USER_MODEL = "users.User"
 AUTHENTICATION_BACKENDS = (
     "auth.backends.RBACModelBackend",
 )
-CAN_LOGIN_AS = lambda request, target_user: request.user.is_curator
+CAN_LOGIN_AS = lambda request, target_user: request.user.is_superuser
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
@@ -138,22 +109,13 @@ LOGINAS_FROM_USER_SESSION_FLAG = "loginas_from_user"
 
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-# use dummy values to avoid accidental messing of real data
-YANDEX_DISK_USERNAME = "dummy_ya_username"
-YANDEX_DISK_PASSWORD = "dummy_ya_password"
 YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/"
 
-# special user with access to S3 bucket
-DBBACKUP_S3_ACCESS_KEY = 'dummy_s3_access_key'
-DBBACKUP_S3_SECRET_KEY = 'dummy_s3_secret_key'
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.6/howto/static-files/
+# https://docs.djangoproject.com/en/2.2/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = str(APPS_DIR / "static")
+STATIC_ROOT = str(SHARED_APPS_DIR / "static")
 STATICFILES_DIRS = [
-    str(APPS_DIR / "assets"),
+    str(SHARED_APPS_DIR / "assets"),
 ]
 STATICFILES_STORAGE = 'static_compress.storage.CompressedManifestStaticFilesStorage'
 STATIC_COMPRESS_FILE_EXTS = ['css', 'js', 'svg']
@@ -165,33 +127,7 @@ STATICFILES_FINDERS = [
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 ]
 
-# Make sure settings are the same as in ansible configuration
-REDIS_PASSWORD = '3MUvZ/wV{6e86jq@x4uA%RDn9KbrV#WU]A=L76J@Q9iCa*9+vN'
-RQ_QUEUES = {
-    'default': {
-        'HOST': '127.0.0.1',
-        'PORT': 6379,
-        'DB': 0,
-        'PASSWORD': REDIS_PASSWORD,
-    },
-    'high': {
-        'HOST': '127.0.0.1',
-        'PORT': 6379,
-        'DB': 0,
-        'PASSWORD': REDIS_PASSWORD,
-    },
-}
-
-HASHIDS_SALT = "^TimUbi)AUwc>]B-`g2"
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000
-
-# sorl-thumbnails app settings
-THUMBNAIL_DUMMY = True
-THUMBNAIL_PRESERVE_FORMAT = True
-THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
-THUMBNAIL_REDIS_HOST = '127.0.0.1'
-THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
-
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
@@ -223,10 +159,6 @@ DATE_FORMAT = 'j E Y'
 FOUNDATION_YEAR = 2007
 CENTER_FOUNDATION_YEAR = 2011
 
-
-# Recaptcha settings
-NOCAPTCHA = True
-RECAPTCHA_USE_SSL = True
 
 # Determine if we should apply 'selected' to parents when one of their
 # children is the 'selected' menu
@@ -286,4 +218,3 @@ CKEDITOR_CONFIGS = {
             ]),
     }
 }
-

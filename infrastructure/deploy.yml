@@ -22,11 +22,13 @@
       msg: "`site_user` var should be one of [cscenter, csclub]"
     when: site_user != "cscenter" and site_user != "csclub"
 
-  - name: Include vars
+  - name: Include secrets
     block:
-      - include_vars: roles/app/vars/cs_center.vault.yml
+      - name: Include secrets for .env
+        include_vars: roles/app/vars/cs_center.vault.yml
         when: site_user == "cscenter"
-      - include_vars: roles/app/vars/cs_club.vault.yml
+      - name: Include secrets for .env
+        include_vars: roles/app/vars/cs_club.vault.yml
         when: site_user == "csclub"
 
   - name: Get stuff from git
@@ -41,6 +43,8 @@
       owner: "{{ site_user }}"
       force: yes
       mode: 0400
+    become: yes
+    become_user: "{{ site_user }}"
 
   - name: Read current Pipfile.lock hash into memory
     command: jq ._meta.hash {{ repo_root }}/Pipfile.lock

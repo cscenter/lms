@@ -1,7 +1,5 @@
 ## Dev setup
 
- 
-* Install python3.6, pip3, virtualenv
 * Install system dependencies
 ```bash
 # Fox linux users
@@ -33,32 +31,17 @@ ALTER DATABASE test_cscdb OWNER TO csc;
 ALTER USER csc with CREATEDB;
 ```
 
-* Load sql data from the dump
+* Run migrations
 ```bash
 # Or simply run migrations to generate an empty database
 $ python manage.py migrate --settings=compscicenter_ru.settings.local
 ```
-* Create virtualenv for the project and activate it
+
+* Create `.env` file and place it under `compscicenter_ru/settings/` directory. The easiest way is to copy and rename `.env.example` which could be find in the target directory.
+
+* Create virtualenv for the project, activate it and install all python dependencies with pipenv (see Pipenv.lock in the root dir)
 
 
-* To serving static, install grunt with npm locally
-
-```bash
-# put grunt cmd in system path
-npm install -g grunt-cli
-# go to project root dir and install grunt locally
-npm install --save-dev grunt load-grunt-tasks grunt-contrib-concat grunt-contrib-uglify grunt-sass grunt-contrib-watch
-# to compile scss -> css with libsass
-npm install -g node-sass
-```
-* run dev server 
-```
-./manage.py runserver --settings=compscicenter_ru.settings.local
-# or run make cmd from project root dir
-make
-# or
-./manage.py gruntserver
-```
 
 ## Production setup
 

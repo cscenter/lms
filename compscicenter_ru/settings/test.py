@@ -1,15 +1,23 @@
 from .base import *
 
-# Test settings
+DEBUG = False
+MODELTRANSLATION_DEBUG = False
+THUMBNAIL_DEBUG = False
+for template in TEMPLATES:
+    template['OPTIONS']['debug'] = DEBUG
+    if 'auto_reload' in template['OPTIONS']:
+        template['OPTIONS']['auto_reload'] = DEBUG
+
+
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-TEST_DISCOVER_TOP_LEVEL = str(APPS_DIR)
-TEST_DISCOVER_ROOT = str(APPS_DIR)
+TEST_DISCOVER_TOP_LEVEL = str(SHARED_APPS_DIR)
+TEST_DISCOVER_ROOT = str(SHARED_APPS_DIR)
 TEST_DISCOVER_PATTERN = "test_*"
 
 # django-coverage settings
 
-COVERAGE_REPORT_HTML_OUTPUT_DIR = str(APPS_DIR / "coverage")
+COVERAGE_REPORT_HTML_OUTPUT_DIR = str(SHARED_APPS_DIR / "coverage")
 COVERAGE_USE_STDOUT = True
 COVERAGE_MODULE_EXCLUDES = ['tests$', 'settings$', 'urls$', 'locale$',
                             'common.views.test', '__init__', 'django',
@@ -18,7 +26,7 @@ COVERAGE_PATH_EXCLUDES = [r'.svn', r'fixtures', r'node_modules']
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": "travis_ci_test",
         "USER": "postgres",
         "PASSWORD": "",
@@ -51,11 +59,3 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.cached_db_kvstore.KVStore'
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
-
-# FIXME: remove
-REDIS_PASSWORD = None
-THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
-for queue in RQ_QUEUES.values():
-    if 'PASSWORD' in queue:
-        queue['PASSWORD'] = REDIS_PASSWORD
-

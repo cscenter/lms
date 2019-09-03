@@ -3,13 +3,13 @@ from .base import *
 # Test settings
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
-TEST_DISCOVER_TOP_LEVEL = str(APPS_DIR)
-TEST_DISCOVER_ROOT = str(APPS_DIR)
+TEST_DISCOVER_TOP_LEVEL = str(SHARED_APPS_DIR)
+TEST_DISCOVER_ROOT = str(SHARED_APPS_DIR)
 TEST_DISCOVER_PATTERN = "test_*"
 
 # django-coverage settings
 
-COVERAGE_REPORT_HTML_OUTPUT_DIR = str(APPS_DIR / "coverage")
+COVERAGE_REPORT_HTML_OUTPUT_DIR = str(SHARED_APPS_DIR / "coverage")
 COVERAGE_USE_STDOUT = True
 COVERAGE_MODULE_EXCLUDES = ['tests$', 'settings$', 'urls$', 'locale$',
                             'common.views.test', '__init__', 'django',
