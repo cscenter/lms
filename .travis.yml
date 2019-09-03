@@ -9,6 +9,7 @@ install:
   - pip install pipenv
   - pipenv sync --dev
 before_script:
+  - cp compscicenter_ru/settings/.env.example compscicenter_ru/settings/.env
   - psql -c 'create database travis_ci_test;' -U postgres
   - python manage.py migrate --noinput --settings=compscicenter_ru.settings.test
 script:
