@@ -9,12 +9,13 @@ before_install:
   - sudo service postgresql stop
   - sudo apt-get --yes remove postgresql\*
   - sudo apt-get install -y postgresql-11 postgresql-client-11
-  - sudo sed -e 's/^port.*/port = 5432/' /etc/postgresql/11/main/postgresql.conf
+  - sudo sed -i.bak -e 's/^port.*/port = 5432/' /etc/postgresql/11/main/postgresql.conf
   - sudo cp /etc/postgresql/{10,11}/main/pg_hba.conf
   - sudo service postgresql restart 11
 install:
   - pip3 install pipenv
   - pipenv sync --dev
+  - pip3 list
 before_script:
   - cp compscicenter_ru/settings/.env.example compscicenter_ru/settings/.env
   - psql --version
