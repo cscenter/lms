@@ -7,8 +7,10 @@ from django.utils.functional import Promise
 from learning.settings import Branches
 from core.settings.base import DEFAULT_BRANCH_CODE
 
-
-_SERVER_NAME = f"{settings.LMS_SUBDOMAIN}.{settings.TEST_DOMAIN}"
+if settings.LMS_SUBDOMAIN:
+    _SERVER_NAME = f"{settings.LMS_SUBDOMAIN}.{settings.TEST_DOMAIN}"
+else:
+    _SERVER_NAME = settings.TEST_DOMAIN
 
 
 class TestClient(Client):
@@ -41,7 +43,7 @@ class TestClient(Client):
             if isinstance(path, Promise):
                 path = str(path)
             parsed_url = urlparse(path)
-            if parsed_url.netloc.startswith(settings.LMS_SUBDOMAIN):
+            if settings.LMS_SUBDOMAIN and parsed_url.netloc.startswith(settings.LMS_SUBDOMAIN):
                 kwargs["SERVER_NAME"] = _SERVER_NAME
         return super().get(path, *args, **kwargs)
 
@@ -69,7 +71,7 @@ class TestClient(Client):
             if isinstance(path, Promise):
                 path = str(path)
             parsed_url = urlparse(path)
-            if parsed_url.netloc.startswith(settings.LMS_SUBDOMAIN):
+            if settings.LMS_SUBDOMAIN and parsed_url.netloc.startswith(settings.LMS_SUBDOMAIN):
                 kwargs["SERVER_NAME"] = _SERVER_NAME
         return super().post(path, *args, **kwargs)
 

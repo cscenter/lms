@@ -232,6 +232,8 @@ YANDEX_DISK_PASSWORD = env.str('YANDEX_DISK_PASSWORD')
 NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
 NEWRELIC_ENV = env.str('NEWRELIC_ENV', default='production')
 
+# s3boto3.S3Boto3Storage: all files will inherit the bucket’s ACL
+AWS_DEFAULT_ACL = None
 
 AWS_SES_ACCESS_KEY_ID = env.str('AWS_SES_ACCESS_KEY_ID')
 AWS_SES_SECRET_ACCESS_KEY = env.str('AWS_SES_SECRET_ACCESS_KEY')
