@@ -11,13 +11,21 @@
     aws_ec2_prev_host_tag: "cscweb_new"
     aws_ec2_host: tag_Name_{{ aws_ec2_instance_tag }}
     aws_ec2_region: eu-central-1
-    aws_ec2_instance_type: t2.medium
-    aws_ec2_instance_volume_size: 10
+    aws_ec2_instance_type: t3.medium
+    aws_ec2_instance_volume_size: 16
     aws_ec2_keypair: csc
     # Ubuntu 16.04 hvm ssd
     aws_ec2_image: ami-0565af6e282977273
+    aws_ec2_cpu_credit_specification: standard
+    aws_ec2_root_device_name: /dev/sda1
     attach_second_volume: yes
     second_volume_size: 30
+    # The device names that you specify in a block device mapping are renamed
+    # using NVMe device names (/dev/nvme[0-26]n1). The block device driver
+    # can assign NVMe device names in a different order than you specified
+    # for the volumes in the block device mapping.
+    # The device name is available through the NVMe controller vendor-specific extension
+    # $ sudo apt-get install nvme-cli && sudo nvme id-ctrl -v /dev/nvme1n1
     second_volume_device_name: "/dev/xvdf"
     security_groups:
       - name: ssh
@@ -67,23 +75,22 @@
       with_items: "{{ security_groups }}"
 
     - name: Launch instance
-      ec2:
+      ec2_instance:
+        name: "{{ aws_ec2_instance_tag }}"
         region: "{{ aws_ec2_region }}"
-        keypair: "{{ aws_ec2_keypair }}"
+        key_name: "{{ aws_ec2_keypair }}"
         instance_type: "{{ aws_ec2_instance_type }}"
-        image: "{{ aws_ec2_image }}"
-        group:
+        image_id: "{{ aws_ec2_image_id }}"
+        cpu_credit_specification: "{{ aws_ec2_cpu_credit_specification }}"
+        termination_protection: yes
+        security_groups:
           - web
           - ssh
-        instance_tags:
-          Name: "{{ aws_ec2_instance_tag }}"
-        exact_count: 1
-        count_tag:
-          Name: "{{ aws_ec2_instance_tag }}"
         volumes:
-          - device_name: /dev/sda1
-            volume_size: "{{ aws_ec2_instance_volume_size }}"
-            volume_type: gp2
+          - device_name: "{{ aws_ec2_root_device_name }}"
+            ebs:
+              volume_size: "{{ aws_ec2_instance_volume_size }}"
+              delete_on_termination: true
         wait: true
       register: ec2
 
@@ -93,33 +100,32 @@
 
     - name: Ensure root volume for launched instances is tagged
       ec2_tag:
-        region: "{{ item.region }}"
+        region: "{{ aws_ec2_region }}"
         # Note: Make sure to use the save device name as in `ec2` task
-        resource: '{{ item.block_device_mapping["/dev/sda1"]["volume_id"] }}'
+        resource: '{{ item.1.ebs.volume_id }}'
         state: present
         tags:
           Name: "{{ aws_ec2_instance_tag }}"
-      # FIXME: tagged_instances or instances?
-      loop: "{{ ec2.instances }}"
+      loop: "{{ ec2.instances | subelements('block_device_mappings') }}"
 
     - name: display an IP of newly launched instance
       debug:
-        msg: "{{ ec2.instances[0].public_ip }}"
+        msg: "{{ ec2.instances[0].public_ip_address }}"
       when: ec2.instances|length > 0
 
     - name: display an id of newly launched instance
       debug:
-        msg: "{{ ec2.instances[0].id }}"
+        msg: "{{ ec2.instances[0].instance_id }}"
       when: ec2.instances|length > 0
 
     - name: wait for SSH to become available
       local_action:
-        wait_for host="{{ ec2.instances[0].public_ip }}" port=22 timeout=600
+        wait_for host="{{ ec2.instances[0].public_ip_address }}" port=22 timeout=600
       when: ec2.instances|length > 0
 
     - name: add launched instances to host group
-      local_action: add_host hostname={{ item.public_ip }} groupname={{ aws_ec2_host }}
-      loop: "{{ ec2.tagged_instances }}"
+      local_action: add_host hostname={{ item.public_ip_address }} groupname={{ aws_ec2_host }}
+      loop: "{{ ec2.instances }}"
 
     - name: Get info about all related backup snapshots
       ec2_snapshot_facts:
@@ -147,7 +153,7 @@
       ec2_vol:
         region: "{{ aws_ec2_region }}"
         snapshot: "{{ snapshot_id|default(omit) }}"
-        instance: "{{ ec2.tagged_instances[0].id }}"
+        instance: "{{ ec2.tagged_instances[0].instance_id }}"
         volume_size: "{{ second_volume_size }}"
         volume_type: gp2
         device_name: "{{ second_volume_device_name }}"

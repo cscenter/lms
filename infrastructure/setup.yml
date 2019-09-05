@@ -39,7 +39,7 @@
         - postgres-role
         - always
 
-    - name: Setup nginx and certbot services
+    - name: Setup nginx services
       import_role:
         name: nginx
       tags:
