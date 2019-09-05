@@ -62,7 +62,6 @@ urlpatterns += [
 
     path('api/', include('api.frontend_urls')),
 
-    path('courses/', views.CourseOfferingsView.as_view(), name="course_list"),
     # Place tags-autocomplete under `announcements` namespace
     path("", include(([
         path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
@@ -70,6 +69,7 @@ urlpatterns += [
     path('projects/', views.ProjectsListView.as_view(), name="public_projects"),
     path('', include('publications.urls')),
 
+    path('courses/', views.CourseOfferingsView.as_view(), name="course_list"),
     path("courses/", include([
         path("<slug:course_slug>/", views.MetaCourseDetailView.as_view(), name="meta_course_detail"),
         re_path(RE_COURSE_URI, include([
