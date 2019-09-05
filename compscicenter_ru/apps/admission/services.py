@@ -71,7 +71,6 @@ def create_student_from_applicant(applicant):
     # Copy data from application form to the user profile
     same_attrs = [
         "first_name",
-        "patronymic",
         "phone"
     ]
     for attr_name in same_attrs:
@@ -81,6 +80,7 @@ def create_student_from_applicant(applicant):
     except (TypeError, ValueError):
         pass
     user.last_name = applicant.surname
+    user.patronymic = applicant.patronymic if applicant.patronymic else ""
     user.enrollment_year = user.curriculum_year = timezone.now().year
     # Looks like the same fields below
     user.yandex_login = applicant.yandex_login if applicant.yandex_login else ""
