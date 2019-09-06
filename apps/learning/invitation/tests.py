@@ -7,7 +7,7 @@ from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.invitation.forms import InvitationRegistrationForm
 from learning.invitation.views import InvitationURLParamsMixin, \
-    complete_student_profile
+    complete_student_profile, student_profile_is_valid
 from learning.roles import Roles
 from learning.tests.factories import CourseInvitationFactory
 from users.constants import GenderTypes
@@ -33,6 +33,7 @@ def test_invitation_view(client, lms_resolver, assert_redirect, settings):
     user = UserFactory()
     client.login(user)
     response = client.get(url)
+    assert not student_profile_is_valid(user, invitation)
     assert response.status_code == 302
     # FIXME check url to complete profile view
     complete_student_profile(user, invitation)

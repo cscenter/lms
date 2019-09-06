@@ -9,7 +9,7 @@ urlpatterns = [
     path("invitation/", include([
         path('<str:token>/', v.InvitationView.as_view(), name="course_list"),
         path('<str:token>/login/', v.InvitationLoginView.as_view(), name="login"),
-        path('<str:token>/complete-profile/', v.InvitationCompleteProfileView.as_view(), name="complete_profile"),
+        path('<str:token>/update-profile/', v.InvitationCompleteProfileView.as_view(), name="complete_profile"),
         path('<str:token>/register/', v.InvitationRegisterView.as_view(), name="registration"),
         path('register/complete/', v.InvitationRegisterCompleteView.as_view(), name="registration_complete"),
         # Activation keys get matched by \w+ instead of the more specific
