@@ -68,17 +68,17 @@ class Connection:
             logger.error(f"Unable to change password for {user}. {e}")
         return False
 
-    def set_password_hash(self, user, password_hash) -> bool:
+    def set_password_hash(self, uid, password_hash) -> bool:
         """
         Modify `userPassword` attribute in synchronous mode for provided user
         """
         try:
-            dn = f'uid={user},ou=users,{self._suffix}'
+            dn = f'uid={uid},ou=users,{self._suffix}'
             mod_list = [(ldap.MOD_REPLACE, 'userPassword', password_hash)]
             self._connection.modify_s(dn, modlist=mod_list)
             return True
         except ldap.LDAPError as e:
-            logger.error(f"Unable to change password for {user}. {e}")
+            logger.error(f"Unable to change password for {uid}. {e}")
         return False
 
 

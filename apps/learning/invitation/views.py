@@ -20,17 +20,15 @@ from learning.models import Invitation
 from learning.roles import Roles
 
 
-def is_student_profile_completed(user):
-    completed_profile = True
-    required_fields = ('branch_id',)
-    for field in required_fields:
-        if not getattr(user, field):
-            completed_profile = False
-            break
+def student_profile_is_valid(user, invitation):
+    if invitation.branch_id != user.branch_id:
+        return False
+    if not user.enrollment_year:
+        return False
     if not user.roles.intersection({Roles.INVITED, Roles.STUDENT,
                                     Roles.VOLUNTEER}):
-        completed_profile = False
-    return completed_profile
+        return False
+    return True
 
 
 def complete_student_profile(user, invitation):
@@ -38,7 +36,7 @@ def complete_student_profile(user, invitation):
     if not user.enrollment_year:
         user.enrollment_year = timezone.now().year
         update_fields.append('enrollment_year')
-    if not user.branch_id:
+    if user.branch_id != invitation.branch_id:
         user.branch = invitation.branch
         update_fields.append('branch')
     with transaction.atomic():
@@ -67,7 +65,7 @@ class InvitationView(InvitationURLParamsMixin, TemplateView):
                                 kwargs={"token": self.invitation.token},
                                 subdomain=settings.LMS_SUBDOMAIN)
             return HttpResponseRedirect(redirect_to=login_url)
-        if not is_student_profile_completed(request.user):
+        if not student_profile_is_valid(request.user, self.invitation):
             redirect_to = reverse("invitation:complete_profile",
                                   kwargs={"token": self.invitation.token},
                                   subdomain=settings.LMS_SUBDOMAIN)
@@ -175,7 +173,7 @@ class InvitationCompleteProfileView(InvitationURLParamsMixin,
     template_name = "learning/invitation/complete_profile.html"
 
     def dispatch(self, request, *args, **kwargs):
-        if is_student_profile_completed(request.user):
+        if student_profile_is_valid(request.user, self.invitation):
             return HttpResponseRedirect(self.invitation.get_absolute_url())
         return super().dispatch(request, *args, **kwargs)
 
