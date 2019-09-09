@@ -3,7 +3,6 @@
     .control__input {
       &:checked ~ .control__indicator {
         background: $control-checked-bg url("/static/v2/img/icons/checkmark.svg") no-repeat center;
-        background-size: 135%;
       }
     }
 

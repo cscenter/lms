@@ -6,6 +6,7 @@
 
 .card-deck._team {
   .card {
+    margin-bottom: spacer("6x");
     @include card-width(1);
     text-align: center;
 

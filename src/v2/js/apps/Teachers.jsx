@@ -43,9 +43,9 @@ class App extends React.Component {
         });
     };
 
-    handleCityChange = (city) => {
+    handleBranchChange = (branch) => {
         this.setState({
-            city: city
+            branch: branch
         });
     };
 
@@ -84,8 +84,8 @@ class App extends React.Component {
     };
 
     getFilterState(state) {
-        let {query, city, course} = state;
-        let filterState = {query, city, course};
+        let {query, branch, course} = state;
+        let filterState = {query, branch, course};
         Object.keys(filterState).map((k) => {
             if (k === "course" && filterState[k] !== null) {
                 filterState[k] = filterState[k]["value"];
@@ -105,7 +105,7 @@ class App extends React.Component {
         console.debug("Teachers: fetch", this.props, payload);
         this.serverRequest = $.ajax({
             type: "GET",
-            url: this.props.entry_url,
+            url: this.props.entryURL,
             dataType: "json",
             data: payload
         }).done((data) => {
@@ -127,7 +127,7 @@ class App extends React.Component {
         console.debug("Teachers: load course list options");
         $.ajax({
             type: "GET",
-            url: select.props.entry_url,
+            url: select.props.entryURL,
             dataType: "json"
         }).done((data) => {
             let options = [];
@@ -149,13 +149,13 @@ class App extends React.Component {
             showBodyPreloader();
         }
         //TODO: prevent rerendering if query < 3 symbols
-        const {query, city, course, recentOnly} = this.state;
-        const {term_index, cities} = this.props;
+        const {query, branch, course, recentOnly} = this.state;
+        const {termIndex, branchOptions} = this.props;
         let filteredItems = this.state.items.filter(function(item) {
-            let cityCondition = (city !== null) ? item.city === city.value : true;
+            let branchCondition = (branch !== null) ? item.branch === branch.value : true;
             let courseCondition = (course !== null) ? item.courses.has(course.value) : true;
-            let activityCondition = recentOnly ? item.latest_session >= term_index: true;
-            return cityCondition && courseCondition && activityCondition &&
+            let activityCondition = recentOnly ? item.latest_session >= termIndex: true;
+            return branchCondition && courseCondition && activityCondition &&
                    _includes(item.name.toLowerCase(), query.toLowerCase());
         });
 
@@ -173,13 +173,13 @@ class App extends React.Component {
                     </div>
                     <div className="col-lg-3 mb-4">
                         <Select
-                            onChange={this.handleCityChange}
-                            value={city}
-                            name="city"
+                            onChange={this.handleBranchChange}
+                            value={branch}
+                            name="branch"
                             isClearable={true}
                             placeholder="Город"
-                            options={cities}
-                            key="city"
+                            options={branchOptions}
+                            key="branch"
                         />
                     </div>
                     <div className="col-lg-3 mb-4">
@@ -191,7 +191,7 @@ class App extends React.Component {
                             placeholder="Предмет"
                             key="course"
                             handleLoadOptions={this.handleLoadCourseOptions}
-                            entry_url={this.props.courses_url}
+                            entryURL={this.props.coursesURL}
                             ref={this.CourseSelect}
                         />
                     </div>
@@ -221,7 +221,13 @@ class App extends React.Component {
 }
 
 const propTypes = {
-    entry_url: PropTypes.string.isRequired,
+    entryURL: PropTypes.string.isRequired,
+    coursesURL: PropTypes.string.isRequired,
+    termIndex: PropTypes.number.isRequired,
+    branchOptions: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired
+    })).isRequired,
 };
 
 App.propTypes = propTypes;

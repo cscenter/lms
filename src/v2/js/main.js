@@ -149,7 +149,7 @@ $(function () {
     // FIXME: autoload css
     const katexBlocks = document.getElementsByClassName('math-support');
     if (katexBlocks.length > 0) {
-        import(/* webpackChunkName: "katex" */ 'katex')
+        import(/* webpackChunkName: "katex" */ 'katex_renderer')
             .then(module => {
                 katexBlocks.forEach(function(mathBlock) {
                     module.renderMath(mathBlock);

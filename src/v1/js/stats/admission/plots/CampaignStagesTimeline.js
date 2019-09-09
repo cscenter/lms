@@ -6,7 +6,7 @@ import i18n from 'stats/i18n';
 
 
 /**
- * Renders plot with stages statistics by years for provided city
+ * Renders plot with stages statistics by years for target branch
  */
 export default class CampaignStagesTimeline {
     static ENTRY_POINT_URL = "api:stats_admission_campaigns_stages_by_year";
@@ -36,14 +36,14 @@ export default class CampaignStagesTimeline {
             bindto: this.id,
             data: this.state.data
         });
-        let promise = options.apiRequest || this.getStats(options.cityCode);
+        let promise = options.apiRequest || this.getStats(options.branchId);
         promise
             .then(this.convertData)
             .done(this.reflow);
     }
 
-    getStats(cityCode) {
-        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](cityCode);
+    getStats(branchId) {
+        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](branchId);
         return $.getJSON(dataURL);
     }
 

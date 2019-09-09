@@ -110,15 +110,6 @@ code {
   }
 }
 
-table:not(.ui) tr {
-  border-bottom: $border-width solid $gray-light;
-
-  th,
-  td {
-    padding-right: 1.5rem;
-  }
-}
-
 mark {
   background-color: $teal;
 }

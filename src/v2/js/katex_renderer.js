@@ -1,5 +1,5 @@
 import katex from "katex";
-import renderMathInElement from "katex/dist/contrib/auto-render.mjs";
+import renderMathInElement from "katex/dist/contrib/auto-render.js";
 
 let katexOptions = {
     delimiters: [

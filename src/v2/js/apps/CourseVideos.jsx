@@ -104,7 +104,7 @@ class CourseVideosPage extends React.Component {
 
     fetch = (payload = null) => {
         console.debug("CourseVideosPage: fetch", this.props, payload);
-        this.requests = this.props.entry_url.map(entryURL => $.ajax({
+        this.requests = this.props.entryURL.map(entryURL => $.ajax({
             type: "GET",
             url: entryURL,
             dataType: "json",
@@ -148,7 +148,7 @@ class CourseVideosPage extends React.Component {
     }
 
     getVideoTypeLabel(videoType) {
-        for (const x of this.props.videoTypes) {
+        for (const x of this.props.videoOptions) {
             if (x.value === videoType) {
                 return x.label
             }
@@ -157,7 +157,8 @@ class CourseVideosPage extends React.Component {
     }
 
     render() {
-        const {q, year, videoTypes} = this.state;
+        const {q, year, yearOptions, videoTypes} = this.state;
+        const {videoOptions} = this.props;
         let filteredItems = this.state.items.filter(function (item) {
             let yearCondition = (year !== null) ? item.year === year.value : true;
             let videoTypesCondition = videoTypes.includes(item.type);
@@ -215,13 +216,13 @@ class CourseVideosPage extends React.Component {
                                     name="year"
                                     isClearable={true}
                                     placeholder="Год прочтения"
-                                    options={this.state.yearOptions}
+                                    options={yearOptions}
                                     key="year"
                                 />
                             </div>
                             <div className="field">
                                 <div className="grouped inline">
-                                    {this.props.videoTypes.map((item) =>
+                                    {videoOptions.map((item) =>
                                         <Checkbox
                                             name="videoTypes"
                                             key={item.value}
@@ -242,8 +243,8 @@ class CourseVideosPage extends React.Component {
 }
 
 const propTypes = {
-    entry_url: PropTypes.arrayOf(PropTypes.string).isRequired,
-    videoTypes: PropTypes.arrayOf(PropTypes.shape({
+    entryURL: PropTypes.arrayOf(PropTypes.string).isRequired,
+    videoOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired
     })),

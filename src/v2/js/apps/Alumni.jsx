@@ -1,5 +1,6 @@
 import React, {Fragment} from 'react';
-import { withTranslation } from 'react-i18next';
+import * as PropTypes from 'prop-types';
+import {withTranslation} from 'react-i18next';
 import i18next from 'i18next';
 
 import _throttle from 'lodash-es/throttle';
@@ -43,9 +44,9 @@ class Alumni extends React.Component {
         });
     };
 
-    handleCityChange = (city) => {
+    handleBranchChange = (branch) => {
         this.setState({
-            city: city
+            branch: branch
         });
     };
 
@@ -72,8 +73,8 @@ class Alumni extends React.Component {
     };
 
     getFilterState(state) {
-        let {year, city} = state;
-        return {year, city};
+        let {year, branch} = state;
+        return {year, branch};
     }
 
     getRequestPayload(filterState) {
@@ -91,7 +92,7 @@ class Alumni extends React.Component {
         console.debug("Alumni: fetch", this.props, payload);
         this.serverRequest = $.ajax({
             type: "GET",
-            url: this.props.entry_url,
+            url: this.props.entryURL,
             dataType: "json",
             data: payload
         }).done((result) => {
@@ -112,14 +113,14 @@ class Alumni extends React.Component {
         if (this.state.loading) {
             showBodyPreloader();
         }
-        const {year, city, area} = this.state;
-        const {t, years, cities, areas} = this.props;
+        const {year, branch, area} = this.state;
+        const {t, yearOptions, branchOptions, areaOptions} = this.props;
 
         let filteredItems = this.state.items.filter(function(item) {
-            let cityCondition = (city !== null) ? item.student.city === city.value : true;
+            let branchCondition = (branch !== null) ? item.student.branch === branch.value : true;
             let areaCondition = (area !== null) ? item.areas.includes(area.value) : true;
             let yearCondition = (year !== null) ? item.year === year.value : true;
-            return cityCondition && areaCondition && yearCondition;
+            return branchCondition && areaCondition && yearCondition;
         });
 
         return (
@@ -133,7 +134,7 @@ class Alumni extends React.Component {
                             name="year"
                             isClearable={false}
                             placeholder="Год выпуска"
-                            options={years}
+                            options={yearOptions}
                             key="year"
                         />
                     </div>
@@ -144,19 +145,19 @@ class Alumni extends React.Component {
                             name="area"
                             placeholder={t("Направление")}
                             isClearable={true}
-                            options={areas}
+                            options={areaOptions}
                             key="area"
                         />
                     </div>
                     <div className="col-lg-3 mb-4">
                         <Select
-                            onChange={this.handleCityChange}
-                            value={city}
-                            name="city"
+                            onChange={this.handleBranchChange}
+                            value={branch}
+                            name="branch"
                             isClearable={true}
                             placeholder={i18next.t("Город")}
-                            options={cities}
-                            key="city"
+                            options={branchOptions}
+                            key="branch"
                         />
                     </div>
                 </div>
@@ -169,5 +170,25 @@ class Alumni extends React.Component {
         );
     }
 }
+
+const propTypes = {
+    entryURL: PropTypes.string.isRequired,
+    coursesURL: PropTypes.string.isRequired,
+    termIndex: PropTypes.number.isRequired,
+    branchOptions: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired
+    })).isRequired,
+    areaOptions: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired
+    })).isRequired,
+    yearOptions: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired
+    })).isRequired,
+};
+
+Alumni.propTypes = propTypes;
 
 export default withTranslation()(Alumni);
