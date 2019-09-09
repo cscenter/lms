@@ -2,7 +2,7 @@ import _debounce from 'lodash-es/debounce';
 
 const ENTRY_POINT = $('.user-search #ajax-uri').val();
 let queryName = "";
-let cities = {};
+let branches = {};
 let curriculumYears = {};
 let groups = {};
 let status = {};
@@ -15,8 +15,8 @@ const fn = {
                 .filter(key => curriculumYears[key])
                 .join(",");
 
-            let selectedCities = Object.keys(cities)
-                .filter(key => cities[key])
+            let selectedBranches = Object.keys(branches)
+                .filter(key => branches[key])
                 .join(",");
 
             let selectedStatuses = Object.keys(status)
@@ -35,7 +35,7 @@ const fn = {
                 url: ENTRY_POINT,
                 data: {
                     name: queryName,
-                    cities: selectedCities,
+                    branches: selectedBranches,
                     curriculum_year: selectedYears,
                     groups: selectedGroups,
                     status: selectedStatuses,
@@ -59,6 +59,9 @@ const fn = {
                 });
                 h += "</table>";
                 $("#user-table-container").html(h);
+            }).fail(function(jqXHR) {
+                $("#user-num-container").html(`Найдено: 0`).show();
+                $("#user-table-container").html(`Ошибка запроса:<code>${jqXHR.responseText}</code>`);
             });
         };
         query = _debounce(query, 200);
@@ -79,8 +82,8 @@ const fn = {
                 queryName = $(this).val();
                 query();
             })
-            .on('change', '[name="cities"]', function (e) {
-                cities[$(this).val()] = this.checked;
+            .on('change', '[name="branches"]', function (e) {
+                branches[$(this).val()] = this.checked;
                 query();
             })
             .on('change', '[name="curriculum_year_cb"]', function (e) {

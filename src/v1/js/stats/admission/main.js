@@ -9,20 +9,20 @@ import CampaignResultsApplicants from "./plots/CampaignResultsApplicants";
 import {getTemplate} from "stats/utils";
 
 // DOM elements
-let cityFilter = $('#city-filter');
+let branchFilter = $('#branch-filter');
 let campaignFilter = $('#campaign-filter');
 let campaignFilterForm = $('#campaigns-filter-form');
 
  function renderPlots (jsonData) {
     let options = {
         campaignId: jsonData.campaignId,
-        cityCode: jsonData.cityCode,
+        branchId: jsonData.branchId,
         templates: {
             select: getTemplate("plot-filter-select-template"),
             submitButton: getTemplate("plot-filter-submit-button")
         },
     };
-    // By city
+    // By branch
     new CampaignStagesTimeline('#plot-campaigns-stages-timeline', options);
     new ApplicationFormSubmissionTimeline('#plot-application-timeline', options);
     new ApplicantsResultsTimeline('#plot-applicants-results-timeline', options);
@@ -38,14 +38,14 @@ function initFilter() {
     campaignFilter.on('change', function () {
         $('button[type=submit]', campaignFilterForm).removeAttr('disabled');
     });
-    cityFilter.on('change', function () {
-        const cityCode = $(this).val();
-        const items = jsonData.campaigns[cityCode];
+    branchFilter.on('change', function () {
+        const branchId = $(this).val();
+        const items = jsonData.campaigns[branchId];
         campaignFilter.empty();
         items.forEach(function (item) {
             let opt = document.createElement('option');
-            opt.value = item['pk'];
-            opt.innerHTML = item['year'];
+            opt.value = item.id;
+            opt.innerHTML = item.year;
             campaignFilter.get(0).appendChild(opt);
         });
         campaignFilter.selectpicker('refresh');

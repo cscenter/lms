@@ -235,8 +235,8 @@ class ApplicationFormPage extends React.Component {
                             </div>
                         </div>
                         <div className="field col-lg-4">
-                            <label htmlFor="github_id">Логин на GitHub</label>
-                            <Input name="github_id" id="github_id" placeholder="ХХХХ" onChange={this.handleInputChange} />
+                            <label htmlFor="github_login">Логин на GitHub</label>
+                            <Input name="github_login" id="github_login" placeholder="ХХХХ" onChange={this.handleInputChange} />
                             <div className="help-text">
                                 https://github.com/xxxx, логин — это xxxx
                             </div>
@@ -505,7 +505,7 @@ ApplicationFormPage.propTypes = {
     universities: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.number.isRequired,
         label: PropTypes.string.isRequired,
-        city_id: PropTypes.string.isRequired
+        branch_id: PropTypes.string.isRequired
     })).isRequired,
     courses: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,

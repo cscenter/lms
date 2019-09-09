@@ -44,14 +44,14 @@ export default class ApplicationFormSubmissionTimeline {
             },
             data: this.state.data
         });
-        let promise = options.apiRequest || this.getStats(options.cityCode);
+        let promise = options.apiRequest || this.getStats(options.branchId);
         promise
             .then(this.convertData)
             .done(this.reflow);
     }
 
-    getStats(cityCode) {
-        let dataURL = `/api/v1/stats/admission/cities/${cityCode}/applicants/form-submissions/`;
+    getStats(branchId) {
+        let dataURL = `/api/v1/stats/admission/branches/${branchId}/applicants/form-submissions/`;
         return $.getJSON(dataURL);
     }
 

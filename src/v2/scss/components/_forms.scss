@@ -24,12 +24,12 @@ $input-plaintext-color: $body-color !default;
 
 $control-bg: $white;
 $control-bg-hover: $input-border-color-hover;
-$control-checked-bg: $gray-dark;
-$control-disabled-bg: $gray-light;
+$control-checked-bg: $teal;
+$control-disabled-bg: rgba($gray-disabled, .5);
 $control-color: $black;
-$control-border-width: 2px;
+$control-border-width: 1px;
 $control-border-color: $input-border-color;
-$control-size: 24px;
+$control-size: 20px;
 
 $input-height-border: $input-border-width * 2 !default;
 
@@ -52,7 +52,6 @@ $form-feedback-invalid-color: $red;
   label {
     display: block;
     font-size: $font-size-content-base;
-    font-weight: $font-weight-normal;
     vertical-align: top;
   }
 }

@@ -1,0 +1,329 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/common.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row no-gutters">
+            <div class="col-lg-8">
+                <h2>Базовый table без дополнительных классов</h2>
+                <div class="scrollable">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Преподаватели</th>
+                            <th class="icons">Материалы</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <td scope="row" colspan="2">Итого</td>
+                            <td>140 курсов</td>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <tr>
+                            <td><a href="https://compscicenter.ru/courses/csseminar/2019-spring/"
+                                   class="__course">Computer
+                                Science семинар</a></td>
+                            <td>
+                                <a href="https://compscicenter.ru/teachers/5545/">A.&nbsp;Lubotzky</a>,
+                                <a href="https://compscicenter.ru/teachers/5442/">Y.&nbsp;Dodis</a>,
+                                <a href="https://compscicenter.ru/teachers/5198/">А.&nbsp;Крайнов</a>
+                            </td>
+                            <td class="_icons">
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a
+                                    href="https://compscicenter.ru/courses/deep-learning-simplified/nsk/2019-spring/"
+                                    class="__course">Deep Learning на пальцах</a></td>
+                            <td>
+                                <a href="https://compscicenter.ru/teachers/5228/">С.&nbsp;М.&nbsp;Козлов</a>,
+                                <a href="https://compscicenter.ru/teachers/3297/">К.&nbsp;В.&nbsp;Бродт</a>,
+                                <a href="https://compscicenter.ru/teachers/3402/">М.&nbsp;И.&nbsp;Вахрушев</a>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://compscicenter.ru/courses/algorithms-2/2019-spring/">Алгоритмы
+                                и структуры данных, часть 2</a></td>
+                            <td>
+                                <a href="https://compscicenter.ru/teachers/5506/">А.&nbsp;Мишунин</a>,
+                                <a href="https://compscicenter.ru/teachers/560/">С.&nbsp;И.&nbsp;Грязнов</a>,
+                                <a href="https://compscicenter.ru/teachers/4050/">А.&nbsp;В.&nbsp;Гардер</a>,
+                                <a href="https://compscicenter.ru/teachers/1645/">М.&nbsp;Д.&nbsp;Кормышов</a>,
+                                <a href="https://compscicenter.ru/teachers/32/">А.&nbsp;В.&nbsp;Смаль</a>
+                            </td>
+                            <td class="_icons">{{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}</td>
+                        </tr>
+                        </tbody>
+                        <caption>Таблица 1. Базовые курсы программы</caption>
+                    </table>
+                </div>
+                <h2 class="mt-10">Таблица c вертикальными рамками .table._celled</h2>
+                <div class="scrollable">
+                    <table class="table _celled">
+                        <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Преподаватели</th>
+                            <th class="icons">Материалы</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <td scope="row" colspan="2">Итого</td>
+                            <td>140 курсов</td>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <tr>
+                            <td><a href="https://compscicenter.ru/courses/csseminar/2019-spring/"
+                                   class="__course">Computer
+                                Science семинар</a></td>
+                            <td>
+                                <a href="https://compscicenter.ru/teachers/5545/">A.&nbsp;Lubotzky</a>,
+                                <a href="https://compscicenter.ru/teachers/5442/">Y.&nbsp;Dodis</a>,
+                                <a href="https://compscicenter.ru/teachers/5198/">А.&nbsp;Крайнов</a>
+                            </td>
+                            <td>
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a
+                                    href="https://compscicenter.ru/courses/deep-learning-simplified/nsk/2019-spring/"
+                                    class="__course">Deep Learning на пальцах</a></td>
+                            <td>
+                                <a href="https://compscicenter.ru/teachers/5228/">С.&nbsp;М.&nbsp;Козлов</a>,
+                                <a href="https://compscicenter.ru/teachers/3297/">К.&nbsp;В.&nbsp;Бродт</a>,
+                                <a href="https://compscicenter.ru/teachers/3402/">М.&nbsp;И.&nbsp;Вахрушев</a>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://compscicenter.ru/courses/algorithms-2/2019-spring/">Алгоритмы
+                                и структуры данных, часть 2</a></td>
+                            <td>
+                                <a href="https://compscicenter.ru/teachers/5506/">А.&nbsp;Мишунин</a>,
+                                <a href="https://compscicenter.ru/teachers/560/">С.&nbsp;И.&nbsp;Грязнов</a>,
+                                <a href="https://compscicenter.ru/teachers/4050/">А.&nbsp;В.&nbsp;Гардер</a>,
+                                <a href="https://compscicenter.ru/teachers/1645/">М.&nbsp;Д.&nbsp;Кормышов</a>,
+                                <a href="https://compscicenter.ru/teachers/32/">А.&nbsp;В.&nbsp;Смаль</a>
+                            </td>
+                            <td>{{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}</td>
+                        </tr>
+                        </tbody>
+                        <caption>Таблица 1. Базовые курсы программы</caption>
+                    </table>
+                </div>
+                <h2 class="mt-10">Таблица с одинаковой шириной колонок и вертикальными рамками
+                    .table._fixed._celled</h2>
+                <div class="scrollable">
+                    <table class="table _fixed _celled">
+                        <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Преподаватели</th>
+                            <th class="icons">Материалы</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <td scope="row" colspan="2">Итого</td>
+                            <td>140 курсов</td>
+                        </tr>
+                        </tfoot>
+                        <tbody>
+                        <tr>
+                            <td><a href="https://compscicenter.ru/courses/csseminar/2019-spring/"
+                                   class="__course">Computer
+                                Science семинар</a></td>
+                            <td>
+                                <a href="https://compscicenter.ru/teachers/5545/">A.&nbsp;Lubotzky</a>,
+                                <a href="https://compscicenter.ru/teachers/5442/">Y.&nbsp;Dodis</a>,
+                                <a href="https://compscicenter.ru/teachers/5198/">А.&nbsp;Крайнов</a>
+                            </td>
+                            <td>
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a
+                                    href="https://compscicenter.ru/courses/deep-learning-simplified/nsk/2019-spring/"
+                                    class="__course">Deep Learning на пальцах</a></td>
+                            <td>
+                                <a href="https://compscicenter.ru/teachers/5228/">С.&nbsp;М.&nbsp;Козлов</a>,
+                                <a href="https://compscicenter.ru/teachers/3297/">К.&nbsp;В.&nbsp;Бродт</a>,
+                                <a href="https://compscicenter.ru/teachers/3402/">М.&nbsp;И.&nbsp;Вахрушев</a>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><a href="https://compscicenter.ru/courses/algorithms-2/2019-spring/">Алгоритмы
+                                и структуры данных, часть 2</a></td>
+                            <td>
+                                <a href="https://compscicenter.ru/teachers/5506/">А.&nbsp;Мишунин</a>,
+                                <a href="https://compscicenter.ru/teachers/560/">С.&nbsp;И.&nbsp;Грязнов</a>,
+                                <a href="https://compscicenter.ru/teachers/4050/">А.&nbsp;В.&nbsp;Гардер</a>,
+                                <a href="https://compscicenter.ru/teachers/1645/">М.&nbsp;Д.&nbsp;Кормышов</a>,
+                                <a href="https://compscicenter.ru/teachers/32/">А.&nbsp;В.&nbsp;Смаль</a>
+                            </td>
+                            <td>{{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}</td>
+                        </tr>
+                        </tbody>
+                        <caption>Таблица 1. Базовые курсы программы</caption>
+                    </table>
+                </div>
+                <h2 class="mt-10">div.table > div.table__row>.div.table__cell</h2>
+                <div class="scrollable">
+                    <div class="table">
+                        <div class="table__row _head">
+                            <div class="table__cell">Название</div>
+                            <div class="table__cell">Преподаватели</div>
+                            <div class="table__cell">Материалы</div>
+                        </div>
+                        <div class="table__row">
+                            <div class="table__cell"><a href="https://compscicenter.ru/courses/csseminar/2019-spring/"
+                                                        class="__course">Computer
+                                Science семинар</a></div>
+                            <div class="table__cell">
+                                <a href="https://compscicenter.ru/teachers/5545/">A.&nbsp;Lubotzky</a>,
+                                <a href="https://compscicenter.ru/teachers/5442/">Y.&nbsp;Dodis</a>,
+                                <a href="https://compscicenter.ru/teachers/5198/">А.&nbsp;Крайнов</a>
+                            </div>
+                            <div class="table__cell">
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                            </div>
+                        </div>
+                        <div class="table__row">
+                            <div class="table__cell"><a
+                                    href="https://compscicenter.ru/courses/deep-learning-simplified/nsk/2019-spring/"
+                                    class="__course">Deep Learning на пальцах</a></div>
+                            <div class="table__cell">
+                                <a href="https://compscicenter.ru/teachers/5228/">С.&nbsp;М.&nbsp;Козлов</a>,
+                                <a href="https://compscicenter.ru/teachers/3297/">К.&nbsp;В.&nbsp;Бродт</a>,
+                                <a href="https://compscicenter.ru/teachers/3402/">М.&nbsp;И.&nbsp;Вахрушев</a>
+                            </div>
+                            <div class="table__cell">
+                            </div>
+                        </div>
+                        <div class="table__row">
+                            <div class="table__cell"><a
+                                    href="https://compscicenter.ru/courses/algorithms-2/2019-spring/">Алгоритмы
+                                и структуры данных, часть 2</a></div>
+                            <div class="table__cell">
+                                <a href="https://compscicenter.ru/teachers/5506/">А.&nbsp;Мишунин</a>,
+                                <a href="https://compscicenter.ru/teachers/560/">С.&nbsp;И.&nbsp;Грязнов</a>,
+                                <a href="https://compscicenter.ru/teachers/4050/">А.&nbsp;В.&nbsp;Гардер</a>,
+                                <a href="https://compscicenter.ru/teachers/1645/">М.&nbsp;Д.&nbsp;Кормышов</a>,
+                                <a href="https://compscicenter.ru/teachers/32/">А.&nbsp;В.&nbsp;Смаль</a>
+                            </div>
+                            <div class="table__cell">{{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}
+                                {{ macros.svg_icon('video') }}</div>
+                        </div>
+                        <div class="table__caption">
+                            Таблица 1. Базовые курсы программы
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-10">
+        <div class="row p-4 p-sm-0">
+            <h2>Таблица адаптируемая под мобильные устройства <br> div.table._m-wide > div.table__row>.div.table__cell</h2>
+        </div>
+    </div>
+    <div class="container p-xs-0">
+        <div class="row">
+            <div class="table _mobile">
+                <div class="table__row _head">
+                    <div class="table__cell">Название</div>
+                    <div class="table__cell">Преподаватели</div>
+                    <div class="table__cell">Материалы</div>
+                </div>
+                <div class="table__row">
+                    <div class="table__cell"><a href="https://compscicenter.ru/courses/csseminar/2019-spring/"
+                                                class="__course">Computer
+                        Science семинар</a></div>
+                    <div class="table__cell">
+                        <a href="https://compscicenter.ru/teachers/5545/">A.&nbsp;Lubotzky</a>,
+                        <a href="https://compscicenter.ru/teachers/5442/">Y.&nbsp;Dodis</a>,
+                        <a href="https://compscicenter.ru/teachers/5198/">А.&nbsp;Крайнов</a>
+                    </div>
+                    <div class="table__cell">
+                        {{ macros.svg_icon('video') }}
+                        Видео
+                    </div>
+                </div>
+                <div class="table__row">
+                    <div class="table__cell"><a
+                            href="https://compscicenter.ru/courses/deep-learning-simplified/nsk/2019-spring/"
+                            class="__course">Deep Learning на пальцах</a></div>
+                    <div class="table__cell">
+                        <a href="https://compscicenter.ru/teachers/5228/">С.&nbsp;М.&nbsp;Козлов</a>,
+                        <a href="https://compscicenter.ru/teachers/3297/">К.&nbsp;В.&nbsp;Бродт</a>,
+                        <a href="https://compscicenter.ru/teachers/3402/">М.&nbsp;И.&nbsp;Вахрушев</a>
+                    </div>
+                    <div class="table__cell">
+                    </div>
+                </div>
+                <div class="table__row">
+                    <div class="table__cell"><a href="https://compscicenter.ru/courses/algorithms-2/2019-spring/">Алгоритмы
+                        и структуры данных, часть 2</a></div>
+                    <div class="table__cell">
+                        <a href="https://compscicenter.ru/teachers/5506/">А.&nbsp;Мишунин</a>,
+                        <a href="https://compscicenter.ru/teachers/560/">С.&nbsp;И.&nbsp;Грязнов</a>,
+                        <a href="https://compscicenter.ru/teachers/4050/">А.&nbsp;В.&nbsp;Гардер</a>,
+                        <a href="https://compscicenter.ru/teachers/1645/">М.&nbsp;Д.&nbsp;Кормышов</a>,
+                        <a href="https://compscicenter.ru/teachers/32/">А.&nbsp;В.&nbsp;Смаль</a>
+                    </div>
+                    <div class="table__cell">{{ macros.svg_icon('video') }}
+                        {{ macros.svg_icon('video') }}
+                        {{ macros.svg_icon('video') }}
+                        {{ macros.svg_icon('video') }}
+                        {{ macros.svg_icon('video') }}
+                        {{ macros.svg_icon('video') }}</div>
+                </div>
+                <div class="table__caption px-8 px-sm-0">
+                    Таблица 1. Базовые курсы программы
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

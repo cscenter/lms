@@ -9,6 +9,8 @@
   margin: 0 0 spacer("4x") 0;
   cursor: pointer;
   position: relative;
+  line-height: 1.2;
+  font-size: $font-size-base;
 
   &:hover {
     .control__indicator {
@@ -38,8 +40,8 @@
 
     &:focus {
       ~ .control__indicator {
-        border-color: $control-bg-hover;
-        opacity: .8;
+        border: none;
+        box-shadow: inset 0 0 2px 1px rgba($gray-darker, .5);
       }
     }
   }
@@ -56,10 +58,8 @@
   }
 
   .control__description {
-    margin: 0 0 0 spacer("8x");
+    margin: 0 0 0 26px;
     display: inline-block;
-    line-height: 1.375;
-    font-size: $font-size-content-base;
     color: $control-color;
   }
 
