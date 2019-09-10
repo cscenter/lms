@@ -37,7 +37,7 @@ from learning.models import Enrollment
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport
 from learning.settings import AcademicDegreeYears, StudentStatuses, \
-    GradeTypes
+    GradeTypes, Branches
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import UserSearchSerializer, FacesQueryParams
@@ -442,7 +442,8 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
             'students': self.get_queryset(branch, enrollment_year),
             "years": reversed(range(CENTER_FOUNDATION_YEAR, current_year + 1)),
             "current_year": enrollment_year,
-            "current_branch": branch
+            "current_branch": branch,
+            "branches": Branches
         }
         return context
 
