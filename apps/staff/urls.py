@@ -2,7 +2,7 @@ from django.conf.urls import include, url
 from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
-from learning.gradebook.views import GradeBookView
+from learning.gradebook.views import GradeBookView, GradeBookCSVView
 from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
     ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
@@ -16,11 +16,12 @@ app_name = 'staff'
 
 urlpatterns = [
     url(r'^warehouse/$', HintListView.as_view(), name='staff_warehouse'),
-    url(r'^course-marks/$',
-        GradeBookListView.as_view(),
-        name='course_markssheet_staff_dispatch'),
     url(r'^course-marks/', include([
-        re_path(RE_COURSE_URI + r'$', GradeBookView.as_view(is_for_staff=True, permission_required="teaching.view_gradebook"), name='course_markssheet_staff'),
+        path('', GradeBookListView.as_view(), name='gradebook_list'),
+        re_path(RE_COURSE_URI, include([
+            path('', GradeBookView.as_view(is_for_staff=True, permission_required="teaching.view_gradebook"), name='gradebook'),
+            path('csv/', GradeBookCSVView.as_view(permission_required="teaching.view_gradebook"), name='gradebook_csv'),
+        ])),
     ])),
     url(r'^student-search/$',
         StudentSearchView.as_view(),

@@ -98,10 +98,10 @@ top_menu = [
     ),
     MenuItem(
         pgettext_lazy("menu", "Курирование"),
-        reverse('staff:course_markssheet_staff_dispatch'),
+        reverse('staff:gradebook_list'),
         weight=40,
         children=[
-            MenuItem(pgettext_lazy("menu", "Ведомости"), reverse('staff:course_markssheet_staff_dispatch'), weight=10),
+            MenuItem(pgettext_lazy("menu", "Ведомости"), reverse('staff:gradebook_list'), weight=10),
             MenuItem(pgettext_lazy("menu", "Поиск студентов"), reverse('staff:student_search'), weight=20),
             MenuItem(pgettext_lazy("menu", "Файлы"), reverse('staff:exports'), weight=30),
             MenuItem(pgettext_lazy("menu", "Полезное"), reverse('staff:staff_warehouse'), weight=40),

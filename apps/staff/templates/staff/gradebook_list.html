@@ -22,7 +22,7 @@
             <ul>
             {% for course in semester.courseofferings %}
               <li>
-                <a href="{% call_method course 'get_gradebook_url' url_name='staff:course_markssheet_staff' %}">{{ course.meta_course.name }}</a>
+                <a href="{% call_method course 'get_gradebook_url' url_name='staff:gradebook' %}">{{ course.meta_course.name }}</a>
               </li>
             {% endfor %}
             </ul>
