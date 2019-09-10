@@ -84,7 +84,7 @@
                 {% with tab=course_tabs.reviews %}
                     <div class="tab-pane {% if tab.is_default %}active{% endif %}" role="tabpanel" id="course-{{ tab.type }}">
                         {% for review in tab.tab_panel.context.items %}
-                            <h4>{{ review.coruse.semester|title }}</h4>
+                            <h4>{{ review.course.semester|title }}, {{ review.course.branch.name }}</h4>
                               {% markdown 3600 "course_reviews" review.pk review.modified %}
                                 {{ review.text }}
                               {% endmarkdown %}
