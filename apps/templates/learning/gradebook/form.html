@@ -24,7 +24,7 @@
                 {% if request.resolver_match.url_name == 'gradebook' and 'teaching' in request.resolver_match.namespaces %}
                 <a href="{% url 'teaching:gradebook_list' %}"><span class="fa fa-angle-left"></span></a>
                 {% else %}
-                <a href="{% url 'staff:course_markssheet_staff_dispatch' %}"><span class="fa fa-angle-left"></span></a>
+                <a href="{% url 'staff:gradebook_list' %}"><span class="fa fa-angle-left"></span></a>
                 {% endif %}
                   {% trans "Marks sheet" %}<br><a class="small" href="{{ gradebook.course.get_absolute_url }}">{{ gradebook.course }}</a>
               </h2>
@@ -33,7 +33,7 @@
                   <button type="submit" class="btn btn-primary pull-right" id="marks-sheet-save">{% trans "Save" %}</button>
                 </div>
                 <div class="btn-group">
-                  <a href="{{ gradebook.course.get_gradebook_csv_url }}"
+                  <a href="{% if view.is_for_staff %}{% call_method gradebook.course 'get_gradebook_url' url_name='staff:gradebook' format='csv' %}{% else %}{% call_method gradebook.course 'get_gradebook_url' url_name='teaching:gradebook' format='csv' %}{% endif %}"
                      target="_blank"
                      class="btn btn-default marks-sheet-csv-link" role="button" data-toggle="tooltip"><i class="fa fa-download"></i> Сохранить .csv</a>
                 </div>
@@ -53,7 +53,7 @@
                       {% for cos in co_by_semester %}
                       <li role="presentation" class="dropdown-header">{{ cos.grouper }}</li>
                       {% for course in cos.list %}<li role="presentation">{% if view.is_for_staff %}
-                          <a href="{% call_method course 'get_gradebook_url' url_name='staff:course_markssheet_staff' %}">{{ course.meta_course }}</a>
+                          <a href="{% call_method course 'get_gradebook_url' url_name='staff:gradebook' %}">{{ course.meta_course }}</a>
                       {% else %}
                           <a role="menuitem" tabindex="-1" href="{{ course.get_gradebook_url }}">{{ course.meta_course }}</a>
                       {% endif %}</li>{% endfor %}

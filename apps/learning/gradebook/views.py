@@ -119,7 +119,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
                          _('Gradebook successfully saved.'),
                          extra_tags='timeout')
         if self.is_for_staff:
-            params = {"url_name": "staff:course_markssheet_staff"}
+            params = {"url_name": "staff:gradebook"}
         else:
             params = {}
         return self.data.course.get_gradebook_url(**params)
@@ -174,7 +174,14 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
             filename)
 
         writer = csv.writer(response)
-        writer.writerow(data.get_headers())
+        headers = [
+            _("Last name"),
+            _("First name"),
+            _("Final grade"),
+            _("Total"),
+            *(a.title for a in data.assignments.values())
+        ]
+        writer.writerow(headers)
         for student in data.students.values():
             writer.writerow(
                 itertools.chain(

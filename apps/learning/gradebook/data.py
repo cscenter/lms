@@ -48,6 +48,10 @@ class StudentMeta:
         return self._enrollment.student.username
 
     @property
+    def email(self):
+        return self._enrollment.student.email
+
+    @property
     def yandex_login(self):
         return self._enrollment.student.yandex_login
 
@@ -122,16 +126,6 @@ class GradeBookData:
         # First 3 columns in gradebook table, see `pages/_gradebook.scss`
         magic = 150 + 140 + 66
         return len(self.assignments) * self.ASSIGNMENT_COLUMN_WIDTH + magic
-
-    # TODO: add link to assignment and reuse in template
-    def get_headers(self):
-        static_headers = [
-            _("Last name"),
-            _("First name"),
-            _("Final grade"),
-            _("Total")
-        ]
-        return static_headers + [a.title for a in self.assignments.values()]
 
 
 def gradebook_data(course: Course) -> GradeBookData:

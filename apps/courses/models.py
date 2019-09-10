@@ -454,15 +454,10 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
                                     kwargs=self.url_kwargs,
                                     subdomain=settings.LMS_SUBDOMAIN)
 
-    def get_gradebook_url(self, url_name=None, format=None):
-        url_name = url_name or "teaching:gradebook"
+    def get_gradebook_url(self, url_name="teaching:gradebook", format=None):
         if format == "csv":
             url_name = f"{url_name}_csv"
         return branch_aware_reverse(url_name, kwargs=self.url_kwargs)
-    # TODO: Merge with `get_gradebook_url` after migrating to jinja2
-    def get_gradebook_csv_url(self):
-        return branch_aware_reverse("teaching:gradebook_csv",
-                                  kwargs=self.url_kwargs)
 
     def get_course_news_notifications_url(self):
         return branch_aware_reverse('course_news_notifications_read',
