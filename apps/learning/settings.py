@@ -29,6 +29,9 @@ class Branches(DjangoChoices):
     def get_timezone(cls, code):
         return cls.get_choice(code).timezone if code in cls.values else None
 
+    def __iter__(self):
+        return iter(self._fields.values())
+
 
 # FIXME: move to users?
 class AcademicDegreeYears(DjangoChoices):
