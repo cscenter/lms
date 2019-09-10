@@ -39,6 +39,7 @@ class ProjectStudentInline(admin.TabularInline):
 
 class ProjectsInline(admin.TabularInline):
     model = Project.supervisors.through
+    raw_id_fields = ('project',)
     extra = 0
 
 
