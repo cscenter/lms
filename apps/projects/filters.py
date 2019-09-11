@@ -5,11 +5,13 @@ from distutils.util import strtobool
 import django_filters
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit, Row
+from django.conf import settings
 from django.db.models import Case, Count, F, When, Value, Sum, IntegerField
 from django.db.models import Q
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
+from core.models import Branch
 from projects.constants import ProjectTypes
 from projects.models import Project, ProjectStudent
 from learning.settings import GradeTypes
@@ -39,19 +41,24 @@ class ProjectsFilter(django_filters.FilterSet):
                   .distinct())
     )
 
-    supervisor = django_filters.CharFilter(lookup_expr='icontains',
-                                           label=_("Supervisor"))
+    supervisors = django_filters.CharFilter(lookup_expr='icontains',
+                                            field_name="supervisors__last_name",
+                                            label=_("Supervisor (Last name)"))
 
-    # FIXME: do I really need to define this attribute?
-    projectstudent__final_grade = django_filters.ChoiceFilter(
+    final_grade = django_filters.ChoiceFilter(
         choices=ProjectStudent._meta.get_field('final_grade').choices,
         lookup_expr='exact',
+        field_name='projectstudent__final_grade',
         label=_("Final grade"))
+
+    branch = django_filters.ModelChoiceFilter(
+        label=_("Branch"),
+        queryset=Branch.objects.filter(site_id=settings.SITE_ID))
 
     class Meta:
         model = Project
-        fields = ['semester', 'is_external', 'supervisor', 'students',
-                  'projectstudent__final_grade']
+        fields = ('branch', 'semester', 'is_external', 'supervisors', 'students',
+                  'final_grade')
 
     @property
     def form(self):
@@ -65,13 +72,14 @@ class ProjectsFilter(django_filters.FilterSet):
                 self._form.fields[attr].help_text = ""
             self._form.helper.layout = Layout(
                 Row(
-                    Div('semester', css_class="col-xs-4"),
-                    Div('is_external', css_class="col-xs-4"),
-                    Div('supervisor', css_class="col-xs-4"),
+                    Div('branch', css_class="col-xs-3"),
+                    Div('semester', css_class="col-xs-3"),
+                    Div('is_external', css_class="col-xs-3"),
+                    Div('final_grade', css_class="col-xs-3"),
                 ),
                 Row(
+                    Div('supervisors', css_class="col-xs-4"),
                     Div('students', css_class="col-xs-4"),
-                    Div('projectstudent__final_grade', css_class="col-xs-4"),
                     Div(Submit('', _('Filter'), css_class="btn-block -inline-submit"),
                         css_class="col-xs-4")
                 ),
