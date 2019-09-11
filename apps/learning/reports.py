@@ -160,9 +160,11 @@ class ProgressReport(ReportFileOutput):
             [None] * (self.projects_max - len(student.projects_through)))
         for ps in student.projects_through:
             if ps is not None:
+                supervisors = [s.get_abbreviated_name() for s in
+                               ps.project.supervisors.all()]
                 row.extend([ps.project.name,
                             ps.get_final_grade_display(),
-                            ps.project.supervisor,
+                            supervisors,
                             ps.project.semester])
             else:
                 row.extend(['', '', '', ''])

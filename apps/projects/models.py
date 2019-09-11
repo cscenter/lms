@@ -405,7 +405,7 @@ class Supervisor(models.Model):
     GENDER_FEMALE = GenderTypes.FEMALE
     first_name = models.CharField(
         verbose_name=_("First Name"),
-        max_length=255)
+        max_length=45)
     last_name = models.CharField(_('Last Name'), max_length=150)
     patronymic = models.CharField(
         _("Patronymic"),
@@ -431,7 +431,13 @@ class Supervisor(models.Model):
 
     @property
     def full_name(self):
-        return f"{self.last_name} {self.first_name}"
+        parts = (self.first_name, self.patronymic, self.last_name)
+        return " ".join(p for p in parts if p).strip()
+
+    def get_abbreviated_name(self):
+        parts = (self.first_name[:1], self.patronymic[:1], self.last_name)
+        nbs = chr(160)  # non-breaking space
+        return smart_text(f".{nbs}".join(p for p in parts if p).strip())
 
 
 class ProjectQuerySet(models.QuerySet):
@@ -498,10 +504,6 @@ class Project(TimezoneAwareModel, TimeStampedModel):
         Supervisor,
         verbose_name=_("Supervisors"),
         related_name='projects')
-    supervisor = models.CharField(
-        verbose_name=_("StudentProject|Supervisor"),
-        max_length=255,
-        help_text=_("Format: Last_name First_name Patronymic, Organization"))
     supervisor_presentation = models.FileField(
         _("Supervisor presentation"),
         blank=True,

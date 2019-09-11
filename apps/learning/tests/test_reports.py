@@ -12,7 +12,8 @@ from learning.settings import GradingSystems, StudentStatuses, GradeTypes, \
     Branches
 from learning.tests.factories import SemesterFactory, CourseFactory, \
     EnrollmentFactory
-from projects.tests.factories import ProjectFactory
+from projects.filters import SupervisorGradeFilter
+from projects.tests.factories import ProjectFactory, SupervisorFactory
 from users.constants import Roles
 from users.tests.factories import SHADCourseRecordFactory, \
     OnlineCourseRecordFactory, TeacherFactory, StudentFactory
@@ -45,6 +46,8 @@ def test_report_common():
     shad1 = SHADCourseRecordFactory(student=student1, grade=GradeTypes.GOOD)
     shad2 = SHADCourseRecordFactory(student=student2, grade=GradeTypes.GOOD)
     p = ProjectFactory.create(students=[student1], semester=s)
+    supervisor = SupervisorFactory()
+    p.supervisors.add(supervisor.pk)
     ps = p.projectstudent_set.all()[0]  # 1 student attached
     ps.final_grade = GradeTypes.EXCELLENT
     ps.save()
@@ -64,8 +67,9 @@ def test_report_common():
                            student1_row_index, p.name)
     check_value_for_header(progress_report, 'Проект 1, оценка',
                            student1_row_index, ps.get_final_grade_display())
+    supervisors = [s.get_abbreviated_name() for s in p.supervisors.all()]
     check_value_for_header(progress_report, 'Проект 1, руководитель(и)',
-                           student1_row_index, p.supervisor)
+                           student1_row_index, supervisors)
     check_value_for_header(progress_report, 'Проект 1, семестр',
                            student1_row_index, p.semester)
     check_value_for_header(progress_report, 'Проект 1, название',

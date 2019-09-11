@@ -4,8 +4,9 @@ from factory.fuzzy import FuzzyInteger, FuzzyChoice
 from courses.tests.factories import SemesterFactory
 from projects.forms import ReportReviewForm, PracticeCriteriaForm
 from projects.models import Project, ProjectStudent, Report, Review, \
-    ReportingPeriod, PracticeCriteria
+    ReportingPeriod, PracticeCriteria, Supervisor
 from core.tests.factories import BranchFactory
+from users.constants import GenderTypes
 from users.tests.factories import UserFactory, StudentFactory
 
 
@@ -19,6 +20,17 @@ class ReportingPeriodFactory(factory.DjangoModelFactory):
     end_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)
 
 
+class SupervisorFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = Supervisor
+
+    first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
+    last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
+    patronymic = factory.Sequence(lambda n: "Sergeevich%03d" % n)
+    occupation = factory.Sequence(lambda n: "Occupation%03d" % n)
+    gender = factory.Iterator([GenderTypes.MALE, GenderTypes.FEMALE])
+
+
 class ProjectFactory(factory.DjangoModelFactory):
     class Meta:
         model = Project
@@ -26,7 +38,6 @@ class ProjectFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Test student project %03d" % n)
     description = factory.Sequence(lambda n: ("Test student project "
                                               "description %03d" % n))
-    supervisor = factory.Sequence(lambda n: "Test supervisor %03d" % n)
     project_type = 'practice'
     semester = factory.SubFactory(SemesterFactory)
     branch = factory.SubFactory(BranchFactory)
