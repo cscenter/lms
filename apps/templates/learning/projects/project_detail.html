@@ -209,7 +209,7 @@
                     <div class="card-body p-15">
                         {% for s in project.supervisors.all %}
                             {{ s.full_name }}
-                            <div class="text-muted">{{ s.workplace }}</div>
+                            <div class="text-muted">{{ s.occupation }}</div>
                         {% endfor %}
                     </div>
                 </div>

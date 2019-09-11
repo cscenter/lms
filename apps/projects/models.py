@@ -403,10 +403,15 @@ def project_presentation_files(self, filename):
 class Supervisor(models.Model):
     GENDER_MALE = GenderTypes.MALE
     GENDER_FEMALE = GenderTypes.FEMALE
-    full_name = models.CharField(
-        verbose_name=_("Full Name"),
+    first_name = models.CharField(
+        verbose_name=_("First Name"),
         max_length=255)
-    workplace = models.CharField(
+    last_name = models.CharField(_('Last Name'), max_length=150)
+    patronymic = models.CharField(
+        _("Patronymic"),
+        max_length=100,
+        blank=True)
+    occupation = models.CharField(
         _("Workplace"),
         max_length=200,
         blank=True)
@@ -420,9 +425,13 @@ class Supervisor(models.Model):
         verbose_name_plural = _("Supervisors")
 
     def __str__(self):
-        if self.workplace:
-            return f"{self.full_name} /{self.workplace}/"
+        if self.occupation:
+            return f"{self.full_name} /{self.occupation}/"
         return self.full_name
+
+    @property
+    def full_name(self):
+        return f"{self.last_name} {self.first_name}"
 
 
 class ProjectQuerySet(models.QuerySet):
