@@ -234,7 +234,9 @@ class ReportFilter(django_filters.ChoiceFilter):
 
 
 class CurrentTermProjectsFilter(django_filters.FilterSet):
-
+    branch = django_filters.ModelChoiceFilter(
+        label=_("Branch"),
+        queryset=Branch.objects.filter(site_id=settings.SITE_ID))
     participant_slides = SlidesStatusFilter(
         label=_("Participants presentation"), help_text="")
     supervisor_grade = SupervisorGradeFilter(label=_("Supervisor grade"),
@@ -251,6 +253,7 @@ class CurrentTermProjectsFilter(django_filters.FilterSet):
     class Meta:
         model = Project
         fields = [
+            'branch',
             'supervisor_grade',
             'presentation_grade',
             'final_grade',
@@ -271,12 +274,13 @@ class CurrentTermProjectsFilter(django_filters.FilterSet):
                 self._form.fields[attr].help_text = ""
             self._form.helper.layout = Layout(
                 Row(
+                    Div('branch', css_class="col-xs-3"),
                     Div('report', css_class="col-xs-3"),
                     Div('participant_slides', css_class="col-xs-3"),
                     Div('final_grade', css_class="col-xs-3"),
-                    Div('project_type', css_class="col-xs-3"),
                 ),
                 Row(
+                    Div('project_type', css_class="col-xs-3"),
                     Div('supervisor_grade', css_class="col-xs-3"),
                     Div('presentation_grade', css_class="col-xs-3"),
                     Div(Submit('', _('Filter'),
