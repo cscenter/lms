@@ -79,7 +79,8 @@ class UserQuerySet(query.QuerySet):
                     queryset=(ProjectStudent.objects
                               .select_related('project', 'project__semester')
                               .order_by('project__semester__index',
-                                        'project__name')),
+                                        'project__name')
+                              .prefetch_related("project__supervisors")),
                     to_attr='projects_through'
                 ),
                 Prefetch(

@@ -34,7 +34,7 @@ formatter = SQLFormatter('[%(duration).3f] %(statement)s')
 sql_console_handler.setFormatter(formatter)
 logger = logging.getLogger('django.db.backends')
 logger.addHandler(sql_console_handler)
-# Debug queries
+# ...debug queries...
 logger.removeHandler(sql_console_handler)
 # Run rqworker on Mac OS High Sierra
 OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES ./manage.py rqworker default hight
