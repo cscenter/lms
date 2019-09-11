@@ -28,7 +28,6 @@ class UserQuerySet(query.QuerySet):
 
         from .models import User, SHADCourseRecord
         from learning.models import Enrollment
-        from courses.models import Semester, Course
         from projects.models import ProjectStudent
 
         # Note: Show lecturers first, then seminarians, then others
@@ -54,16 +53,12 @@ class UserQuerySet(query.QuerySet):
         shad_qs = SHADCourseRecord.objects.get_queryset()
         if exclude_grades:
             shad_qs = shad_qs.exclude(grade__in=exclude_grades)
-
         if before_term:
-            shad_qs = shad_qs.filter(
-                semester__index__lte=before_term.index
-            )
+            shad_qs = shad_qs.filter(semester__index__lte=before_term.index)
 
         return (
             self
             .select_related('graduate_profile')
-            .order_by('last_name', 'first_name', 'pk')
             .prefetch_related(
                 'groups',
                 Prefetch(
@@ -93,6 +88,7 @@ class UserQuerySet(query.QuerySet):
                     to_attr='online_courses'
                 ),
             )
+            .order_by('last_name', 'first_name', 'pk')
             .distinct()
         )
 
