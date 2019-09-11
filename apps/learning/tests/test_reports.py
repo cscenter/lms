@@ -124,6 +124,7 @@ def test_report_full():
     def get_progress_report():
         return ProgressReportFull(honest_grade_system=True)
 
+    STATIC_HEADERS_CNT = len(get_progress_report().generate_headers())
     teacher = TeacherFactory.create()
     students = StudentFactory.create_batch(3)
     s = SemesterFactory.create_current()
@@ -134,7 +135,6 @@ def test_report_full():
     student1.save()
     EnrollmentFactory.create(student=student1, course=co1, grade=GradeTypes.GOOD)
     progress_report = get_progress_report()
-    STATIC_HEADERS_CNT = len(progress_report.static_headers)
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # Without grade included too
     EnrollmentFactory.create(student=student2, course=co2,
@@ -176,11 +176,13 @@ def test_report_full():
 
 @pytest.mark.django_db
 def test_report_for_target_term():
+
     def get_progress_report(term):
         return ProgressReportForSemester(term,
                                          honest_grade_system=True)
     teacher = TeacherFactory.create()
     s = SemesterFactory.create_current()
+    STATIC_HEADERS_CNT = len(get_progress_report(s).generate_headers())
     prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
     prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
     co_active = CourseFactory.create(semester=s, teachers=[teacher])
@@ -204,7 +206,6 @@ def test_report_for_target_term():
     student3.add_group(Roles.GRADUATE)
     progress_report = get_progress_report(prev_s)
     assert len(progress_report.data) == 2
-    STATIC_HEADERS_CNT = len(progress_report.static_headers)
     CENTER_CLUB_COURSES_HEADERS_CNT = 1
     # `co_active` headers not in report for passed term
     assert len(progress_report.headers) == (STATIC_HEADERS_CNT +
@@ -289,6 +290,7 @@ def test_report_diplomas_csv(settings):
     student1, student2, student3 = StudentFactory.create_batch(
         3, branch__code=Branches.SPB)
     s = SemesterFactory.create_current()
+    STATIC_HEADERS_CNT = len(ProgressReportForDiplomas().generate_headers())
     prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
     prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
     co_prev1 = CourseFactory.create(semester=prev_s, teachers=[teacher])
@@ -301,8 +303,6 @@ def test_report_diplomas_csv(settings):
     # Will graduate only student1 now
     progress_report = ProgressReportForDiplomas()
     assert len(progress_report.data) == 1
-    # This value will not change during all tests
-    STATIC_HEADERS_CNT = len(progress_report.static_headers)
     # No we have 1 passed enrollment for student1, so +2 headers except static
     assert len(progress_report.headers) == STATIC_HEADERS_CNT + 2
     # student2 will graduate too. He enrolled to the same course as student1

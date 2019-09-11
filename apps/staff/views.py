@@ -13,7 +13,7 @@ from django.http import HttpResponseRedirect
 from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
-from django.views import generic
+from django.views import generic, View
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
@@ -33,9 +33,10 @@ from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index, \
     get_term_by_index
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import Enrollment
+from learning.models import Enrollment, Invitation
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
-    ProgressReportForSemester, WillGraduateStatsReport
+    ProgressReportForSemester, WillGraduateStatsReport, \
+    ProgressReportForInvitation
 from learning.settings import AcademicDegreeYears, StudentStatuses, \
     GradeTypes, Branches
 from staff.forms import GraduationForm
@@ -116,15 +117,13 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     BAD_GRADES = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
 
     def get_context_data(self, branch_id, **kwargs):
-        filters = {
-            "branch_id": branch_id,
-            "status": StudentStatuses.WILL_GRADUATE
-        }
         students = (User.objects
                     .has_role(Roles.STUDENT,
                               Roles.GRADUATE,
                               Roles.VOLUNTEER)
-                    .students_info(filters=filters))
+                    .student_progress()
+                    .filter(branch_id=branch_id,
+                            status=StudentStatuses.WILL_GRADUATE))
 
         unique_teachers = set()
         total_hours = 0
@@ -277,6 +276,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         return context
 
 
+# FIXME: можно ли это объединить с csv/xlsx импортами?
 class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
@@ -333,8 +333,6 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
 
 
 class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
-    http_method_names = ['get']
-
     def get(self, request, branch_id, *args, **kwargs):
         progress_report = ProgressReportForDiplomas(qs_filters={
             "branch_id": branch_id
@@ -343,24 +341,19 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
 
 
 class ProgressReportFullView(CuratorOnlyMixin, generic.base.View):
-    http_method_names = ['get']
-    output_format = None
-
-    def get(self, request, *args, **kwargs):
+    def get(self, request, output_format, *args, **kwargs):
         progress_report = ProgressReportFull(honest_grade_system=True)
-        if self.output_format == "csv":
+        if output_format == "csv":
             return progress_report.output_csv()
-        elif self.output_format == "xlsx":
+        elif output_format == "xlsx":
             return progress_report.output_xlsx()
         else:
-            raise ValueError("ProgressReportFullView: undefined output format")
+            return HttpResponseBadRequest(f"{output_format} format "
+                                          f"is not supported")
 
 
 class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
-    http_method_names = ['get']
-    output_format = None
-
-    def get(self, request, *args, **kwargs):
+    def get(self, request, output_format, *args, **kwargs):
         # Validate year and term GET params
         try:
             term_year = int(self.kwargs['term_year'])
@@ -375,13 +368,27 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
             return HttpResponseBadRequest()
         progress_report = ProgressReportForSemester(semester,
                                                     honest_grade_system=True)
-        if self.output_format == "csv":
+        if output_format == "csv":
             return progress_report.output_csv()
-        elif self.output_format == "xlsx":
+        elif output_format == "xlsx":
             return progress_report.output_xlsx()
         else:
-            raise ValueError("ProgressReportForSemesterView: output "
-                             "format not provided")
+            return HttpResponseBadRequest(f"{output_format} format "
+                                          f"is not supported")
+
+
+class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
+    def get(self, request, output_format, invitation_id, *args, **kwargs):
+        invitation = get_object_or_404(Invitation.objects
+                                       .filter(pk=invitation_id))
+        progress_report = ProgressReportForInvitation(invitation)
+        if output_format == "csv":
+            return progress_report.output_csv()
+        elif output_format == "xlsx":
+            return progress_report.output_xlsx()
+        else:
+            return HttpResponseBadRequest(f"{output_format} format "
+                                          f"is not supported")
 
 
 class AdmissionReportView(CuratorOnlyMixin, generic.base.View):
@@ -399,8 +406,6 @@ class AdmissionReportView(CuratorOnlyMixin, generic.base.View):
 
 
 class WillGraduateStatsReportView(CuratorOnlyMixin, generic.base.View):
-    http_method_names = ['get']
-
     def get(self, *args, output_format, **kwargs):
         report = WillGraduateStatsReport()
         if output_format == "csv":
