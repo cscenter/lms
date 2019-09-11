@@ -18,7 +18,7 @@ COVERAGE_PATH_EXCLUDES = [r'.svn', r'fixtures', r'node_modules']
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": "travis_ci_test",
         "USER": "postgres",
         "PASSWORD": "",
