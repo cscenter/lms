@@ -182,7 +182,7 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
                         .has_role(Roles.STUDENT,
                                   Roles.GRADUATE,
                                   Roles.VOLUNTEER)
-                        .students_info(exclude_grades=[
+                        .student_progress(exclude_grades=[
                             GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED
                         ])
                         .get(pk=self.object.student.pk))

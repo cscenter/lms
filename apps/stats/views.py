@@ -158,10 +158,10 @@ class StudentsDiplomasStats(APIView):
                    Q(graduate_profile__graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
             filters = filters | Q(status=StudentStatuses.WILL_GRADUATE)
-        students = User.objects.students_info(
-            filters=filters,
-            exclude_grades=[GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
-        )
+        students = (User.objects
+                    .student_progress(exclude_grades=[GradeTypes.UNSATISFACTORY,
+                                                      GradeTypes.NOT_GRADED])
+                    .filter(filters))
         unique_teachers = set()
         hours = 0
         enrollments_total = 0
