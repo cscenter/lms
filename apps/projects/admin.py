@@ -46,8 +46,8 @@ class ProjectsInline(admin.TabularInline):
 @admin.register(Supervisor)
 class SupervisorAdmin(admin.ModelAdmin):
     model = Supervisor
-    list_display = ("full_name", "workplace")
-    search_fields = ("full_name",)
+    list_display = ("last_name", "first_name", "occupation")
+    search_fields = ("last_name",)
     inlines = (ProjectsInline,)
 
     class Media:
