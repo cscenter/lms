@@ -2,9 +2,12 @@ from typing import List
 
 from django.conf import settings
 from django.contrib.auth.models import UserManager
-from django.db.models import Prefetch, query, Q
+from django.db.models import Prefetch, query, Q, Window, Case, When, Value, \
+    IntegerField, Max, F
+from django.db.models.functions import Rank
 
 from courses.models import CourseTeacher
+from learning.settings import GradeTypes
 
 
 class UserQuerySet(query.QuerySet):
@@ -38,10 +41,12 @@ class UserQuerySet(query.QuerySet):
             },
             order_by=["-is_lecturer", "-is_seminarian", "last_name", "first_name"]
         )
+
         enrollment_qs = (Enrollment.active
                          .select_related("course", "course__meta_course",
                                          "course__semester")
                          .order_by('course__meta_course__name')
+                         .annotate(grade_weight=GradeTypes.to_int_case_expr())
                          .prefetch_related(Prefetch("course__teachers",
                                                     queryset=teachers_qs)))
         if before_term:

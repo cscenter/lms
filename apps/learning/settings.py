@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytz
 from django.conf import settings
+from django.db.models import Case, When, Value, IntegerField
 
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
@@ -70,3 +71,15 @@ class GradeTypes(DjangoChoices):
     EXCELLENT = C('excellent', _("Excellent"))
 
     satisfactory_grades = {CREDIT.value, GOOD.value, EXCELLENT.value}
+
+    @classmethod
+    def to_int_case_expr(cls):
+        """Returns Case expression for comparing grades"""
+        return Case(
+            When(grade=cls.EXCELLENT, then=Value(4)),
+            When(grade=cls.GOOD, then=Value(3)),
+            When(grade=cls.CREDIT, then=Value(2)),
+            When(grade=cls.UNSATISFACTORY, then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField()
+        )
