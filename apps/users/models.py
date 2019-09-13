@@ -199,6 +199,11 @@ class StudentProfile(models.Model):
         help_text=_("at enrollment"),
         null=True,
         blank=True)
+    academic_disciplines = models.ManyToManyField(
+        'study_programs.AcademicDiscipline',
+        verbose_name=_("Fields of study"),
+        help_text=_("Academic disciplines from which student plans to graduate"),
+        blank=True)
 
     class Meta:
         abstract = True
