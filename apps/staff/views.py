@@ -381,11 +381,12 @@ class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
     def get(self, request, output_format, invitation_id, *args, **kwargs):
         invitation = get_object_or_404(Invitation.objects
                                        .filter(pk=invitation_id))
-        progress_report = ProgressReportForInvitation(invitation)
+        report = ProgressReportForInvitation(invitation)
+        filename = report.get_filename()
         if output_format == "csv":
-            return progress_report.output_csv()
+            return DataFrameResponse.as_csv(report.generate(), filename)
         elif output_format == "xlsx":
-            return progress_report.output_xlsx()
+            return DataFrameResponse.as_xlsx(report.generate(), filename)
         else:
             return HttpResponseBadRequest(f"{output_format} format "
                                           f"is not supported")
