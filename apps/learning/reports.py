@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-
+import io
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from operator import attrgetter
 from typing import List
 
 from django.db.models import Q, Prefetch, Count
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.utils import formats
-from pandas import DataFrame
+from pandas import DataFrame, ExcelWriter
 
 from admission.models import Applicant
 from core.reports import ReportFileOutput
@@ -29,6 +29,19 @@ class DataFrameResponse:
                                 content_type='text/csv; charset=utf-8')
         response['Content-Disposition'] = \
             'attachment; filename="{}.csv"'.format(filename)
+        return response
+
+    @staticmethod
+    def as_xlsx(df: DataFrame, filename):
+        output = io.BytesIO()
+        writer = ExcelWriter(output, engine='xlsxwriter')
+        df.to_excel(writer, index=False)
+        writer.save()
+        output.seek(0)
+        content_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        response = HttpResponse(output.read(), content_type=content_type)
+        response['Content-Disposition'] = \
+            'attachment; filename="{}.xlsx"'.format(filename)
         return response
 
 
@@ -214,7 +227,7 @@ class ProgressReportForDiplomas(ProgressReport):
             'Университет',
             'Направления выпуска',
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
-            'Ссылка на анкету',
+            'Анкеты',
             *self.get_courses_headers(self._all_courses),
             *self.generate_shad_courses_headers(self._shads_max),
             *self.generate_projects_headers(self._projects_max),
@@ -279,10 +292,11 @@ class ProgressReportFull(ProgressReport):
     def _generate_headers(self):
         return [
             'ID',
+            'Отделение',
             'Фамилия',
             'Имя',
             'Отчество',
-            'Отделение',
+            'Профиль на сайте',
             'Вольнослушатель',
             'Магистратура',
             'Почта',
@@ -299,8 +313,7 @@ class ProgressReportFull(ProgressReport):
             'Комментарий',
             'Дата последнего изменения комментария',
             'Работа',
-            'Ссылка на профиль',
-            'Ссылка на анкету',
+            'Анкеты',
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
             *self.get_courses_headers(self._all_courses),
             *self.generate_projects_headers(self._projects_max),
@@ -319,17 +332,18 @@ class ProgressReportFull(ProgressReport):
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
         # FIXME: кажется, тут надо брать из профиля студента, только для дипломов у выпускника
         if hasattr(student, "graduate_profile"):
-            disciplines = student.graduate_profile.academic_disciplines.all()
+            disciplines = student.graduate_profile.academic_disciplines
             graduation_year = student.graduate_profile.graduation_year
         else:
-            disciplines = []
+            disciplines = student.academic_disciplines
             graduation_year = ""
         return [
             student.pk,
+            student.branch,
             student.last_name,
             student.first_name,
             student.patronymic,
-            student.branch,
+            student.get_absolute_url(),
             "+" if student.is_volunteer else "",
             "+" if has_master_degree(student) else "",
             student.email,
@@ -340,13 +354,12 @@ class ProgressReportFull(ProgressReport):
             student.curriculum_year,
             graduation_year,
             student.yandex_login,
-            " и ".join(s.name for s in disciplines),
+            " и ".join(s.name for s in disciplines.all()),
             student.get_status_display(),
             '',  # FIXME: error in student.status_changed_at field
             student.comment,
             student.comment_changed_at.strftime(dt_format),
             student.workplace,
-            student.get_absolute_url(),
             self.links_to_application_forms(student),
             total_success_passed,
             *self._export_courses(student),
@@ -377,9 +390,10 @@ class ProgressReportForSemester(ProgressReport):
     def get_queryset(self):
         return (User.objects
                 .has_role(Roles.STUDENT, Roles.VOLUNTEER)
-                .select_related('branch')
+                .exclude(status=StudentStatuses.EXPELLED)
                 .student_progress(before_term=self.target_semester)
-                .exclude(status=StudentStatuses.EXPELLED))
+                .select_related('branch')
+                .prefetch_related('academic_disciplines'))
 
     def before_process_row(self, student):
         student.enrollments_eq_target_semester = 0
@@ -405,7 +419,7 @@ class ProgressReportForSemester(ProgressReport):
         # During one term student can't enroll on 1 course twice, for
         # previous terms we assume they can't do that.
         for shad in student.shads:
-            if shad.semester == self.target_semester:
+            if shad.semester_id == self.target_semester.pk:
                 student.shad_eq_target_semester += 1
                 if shad.grade not in self.UNSUCCESSFUL_GRADES:
                     student.success_shad_eq_target_semester += 1
@@ -441,10 +455,11 @@ class ProgressReportForSemester(ProgressReport):
     def _generate_headers(self):
         return [
             'ID',
+            'Отделение',
             'Фамилия',
             'Имя',
             'Отчество',
-            'Отделение',
+            'Профиль на сайте',
             'Вольнослушатель',
             'Магистратура',
             'Почта',
@@ -453,7 +468,6 @@ class ProgressReportForSemester(ProgressReport):
             'Курс (на момент поступления)',
             'Год поступления',
             'Год программы обучения',
-            'Год выпуска',
             'Яндекс ID',
             'Направления обучения',
             'Статус',
@@ -461,7 +475,6 @@ class ProgressReportForSemester(ProgressReport):
             'Комментарий',
             'Дата последнего изменения комментария',
             'Работа',
-            'Ссылка на профиль',
             'Успешно сдано (Центр/Клуб/ШАД/Онлайн) до семестра "%s"' % self.target_semester,
             'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % self.target_semester,
             'Записей на курсы (Центр/Клуб/ШАД) за семестр "%s"' % self.target_semester,
@@ -491,18 +504,13 @@ class ProgressReportForSemester(ProgressReport):
             student.shad_eq_target_semester
         )
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
-        if hasattr(student, "graduate_profile"):
-            disciplines = student.graduate_profile.academic_disciplines.all()
-            graduation_year = student.graduate_profile.graduation_year
-        else:
-            disciplines = []
-            graduation_year = ""
         return [
             student.pk,
+            student.branch,
             student.last_name,
             student.first_name,
             student.patronymic,
-            student.branch,
+            student.get_absolute_url(),
             "+" if student.is_volunteer else "",
             "+" if has_master_degree(student) else "",
             student.email,
@@ -511,15 +519,13 @@ class ProgressReportForSemester(ProgressReport):
             student.get_uni_year_at_enrollment_display(),
             student.enrollment_year,
             student.curriculum_year,
-            graduation_year,
             student.yandex_login,
-            " и ".join(s.name for s in disciplines),
+            " и ".join(s.name for s in student.academic_disciplines.all()),
             student.get_status_display(),
             '',  # FIXME: error with student.status_changed_at
             student.comment,
             student.comment_changed_at.strftime(dt_format),
             student.workplace,
-            student.get_absolute_url(),
             success_total_lt_target_semester,
             success_total_eq_target_semester,
             enrollments_eq_target_semester,
@@ -545,10 +551,11 @@ class ProgressReportForInvitation(ProgressReportForSemester):
                             .values('student_id'))
         return (User.objects
                 .has_role(Roles.INVITED)
-                .select_related('branch')
-                .student_progress(before_term=self.target_semester)
+                .exclude(status=StudentStatuses.EXPELLED)
                 .filter(pk__in=invited_students)
-                .exclude(status=StudentStatuses.EXPELLED))
+                .student_progress(before_term=self.target_semester)
+                .select_related('branch')
+                .prefetch_related('academic_disciplines'))
 
 
 class WillGraduateStatsReport(ReportFileOutput):

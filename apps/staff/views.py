@@ -366,11 +366,12 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
             semester = get_object_or_404(Semester, **filters)
         except (KeyError, ValueError):
             return HttpResponseBadRequest()
-        progress_report = ProgressReportForSemester(semester)
+        report = ProgressReportForSemester(semester)
+        filename = report.get_filename()
         if output_format == "csv":
-            return progress_report.output_csv()
+            return DataFrameResponse.as_csv(report.generate(), filename)
         elif output_format == "xlsx":
-            return progress_report.output_xlsx()
+            return DataFrameResponse.as_xlsx(report.generate(), filename)
         else:
             return HttpResponseBadRequest(f"{output_format} format "
                                           f"is not supported")
