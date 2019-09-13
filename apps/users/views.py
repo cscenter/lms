@@ -188,12 +188,13 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
                         .get(pk=self.object.student.pk))
         enrollments = OrderedDict()
         # Among enrollments for the same course get one with the highest grade
-        for e in student_info.enrollments:
+        student_info.enrollments_progress.sort(key=lambda e: e.course.meta_course.name)
+        for e in student_info.enrollments_progress:
             if e.created > self.object.created:
                 continue
             meta_course_id = e.course.meta_course_id
             if meta_course_id in enrollments:
-                if e.grade > enrollments[meta_course_id].grade:
+                if e.grade_weight > enrollments[meta_course_id].grade_weight:
                     enrollments[meta_course_id] = e
             else:
                 enrollments[meta_course_id] = e

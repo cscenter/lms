@@ -12,8 +12,6 @@ from xlsxwriter import Workbook
 
 class ReportFileOutput:
     """Methods to output csv and xlsx"""
-    headers = None
-    data = None
 
     __metaclass__ = ABCMeta
 

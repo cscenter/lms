@@ -28,8 +28,8 @@
        {{ '{' }}{{ course.teachers }}{{ '}' }}
 {% endspaceless %}{% if forloop.last %}
 {% endif %}{% endfor %}{{ '}' }}
-{{ '{' }}{% if s.projects_through|length > 0 %}
-{% for ps in s.projects_through %}{% with project=ps.project %}{% spaceless %}
+{{ '{' }}{% if s.projects_progress|length > 0 %}
+{% for ps in s.projects_progress %}{% with project=ps.project %}{% spaceless %}
 \{% if project.project_type == 'research' %}theory{% else %}practice{% endif %}{{ '{' }}{{project.supervisor}}{{ '}' }}
          {{ '{' }}{{project.name|tex}}{{ '}' }}{{ '{' }}{{project.semester}}{{ '}' }}{{ '{' }}{{ps.get_final_grade_display|lower}}{{ '}' }}{% endspaceless %}
 {% endwith %}{% endfor %}{% endif %}{{ '}' }}

@@ -2,9 +2,7 @@ from typing import List
 
 from django.conf import settings
 from django.contrib.auth.models import UserManager
-from django.db.models import Prefetch, query, Q, Window, Case, When, Value, \
-    IntegerField, Max, F
-from django.db.models.functions import Rank
+from django.db.models import Prefetch, query
 
 from courses.models import CourseTeacher
 from learning.settings import GradeTypes
@@ -45,10 +43,17 @@ class UserQuerySet(query.QuerySet):
         enrollment_qs = (Enrollment.active
                          .select_related("course", "course__meta_course",
                                          "course__semester")
-                         .order_by('course__meta_course__name')
                          .annotate(grade_weight=GradeTypes.to_int_case_expr())
+                         .only('pk', 'student_id', 'grade',
+                               'course__semester_id',
+                               'course__meta_course_id',
+                               'course__meta_course__name',
+                               'course__meta_course__name_ru',
+                               'course__is_open',
+                               'course__grading_type',)
                          .prefetch_related(Prefetch("course__teachers",
-                                                    queryset=teachers_qs)))
+                                                    queryset=teachers_qs))
+                         )
         if before_term:
             enrollment_qs = enrollment_qs.filter(
                 course__semester__index__lte=before_term.index)
@@ -63,38 +68,35 @@ class UserQuerySet(query.QuerySet):
 
         return (
             self
-            .select_related('graduate_profile')
             .prefetch_related(
                 'groups',
-                Prefetch(
-                    'graduate_profile__academic_disciplines',
-                ),
-                Prefetch(
-                    'enrollment_set',
-                    queryset=enrollment_qs,
-                    to_attr='enrollments'
-                ),
+                Prefetch('enrollment_set',
+                         queryset=enrollment_qs,
+                         to_attr="enrollments_progress"),
                 Prefetch(
                     'projectstudent_set',
                     queryset=(ProjectStudent.objects
                               .select_related('project', 'project__semester')
+                              .only('pk', 'project_id', 'student_id',
+                                    'final_grade', 'project__project_type',
+                                    'project__name', 'project__is_external',
+                                    'project__status',
+                                    'project__semester__index',
+                                    'project__semester__year',
+                                    'project__semester__type',)
                               .order_by('project__semester__index',
                                         'project__name')
                               .prefetch_related("project__supervisors")),
-                    to_attr='projects_through'
+                    to_attr='projects_progress'
                 ),
-                Prefetch(
-                    'shadcourserecord_set',
-                    queryset=shad_qs,
-                    to_attr='shads'
-                ),
-                Prefetch(
-                    'onlinecourserecord_set',
-                    to_attr='online_courses'
-                ),
+                Prefetch('shadcourserecord_set',
+                         queryset=shad_qs,
+                         to_attr='shads'),
+                Prefetch('onlinecourserecord_set',
+                         to_attr='online_courses'),
             )
             .order_by('last_name', 'first_name', 'pk')
-            .distinct()
+            .distinct('last_name', 'first_name', 'pk')
         )
 
 
