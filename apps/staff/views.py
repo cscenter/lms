@@ -36,7 +36,7 @@ from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment, Invitation
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
-    ProgressReportForInvitation
+    ProgressReportForInvitation, DataFrameResponse
 from learning.settings import AcademicDegreeYears, StudentStatuses, \
     GradeTypes, Branches
 from staff.forms import GraduationForm
@@ -179,7 +179,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             internal_projects_in_first_two_years_of_learning = 0
             enrollment_term_index = get_term_index(s.enrollment_year,
                                                    SemesterTypes.AUTUMN)
-            for ps in s.projects_through:
+            for ps in s.projects_progress:
                 if ps.final_grade in self.BAD_GRADES or ps.project.is_canceled:
                     continue
                 unique_projects.add(ps.project)
@@ -281,8 +281,8 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, branch_id, **kwargs):
-        filters = {"branch_id": branch_id}
-        students = ProgressReportForDiplomas.get_queryset(**filters)
+        students = (ProgressReportForDiplomas().get_queryset()
+                    .filter(branch_id=branch_id))
 
         class DiplomaCourse(NamedTuple):
             type: str
@@ -298,10 +298,10 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
                     ps.final_grade != GradeTypes.UNSATISFACTORY)
 
         for student in students:
-            student.projects_through = list(filter(is_project_active,
-                                                   student.projects_through))
+            student.projects_progress = list(filter(is_project_active,
+                                                    student.projects_progress))
             courses = []
-            for e in student.enrollments:
+            for e in student.enrollments_progress:
                 course = DiplomaCourse(
                     type="course",
                     name=tex(e.course.meta_course.name),
@@ -322,7 +322,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
                 courses.append(course)
             courses.sort(key=lambda c: c.name)
             student.courses = courses
-            delattr(student, "enrollments")
+            delattr(student, "enrollments_progress")
             delattr(student, "shads")
 
         context = {
@@ -334,19 +334,19 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
 
 class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, branch_id, *args, **kwargs):
-        progress_report = ProgressReportForDiplomas(qs_filters={
-            "branch_id": branch_id
-        })
-        return progress_report.output_csv()
+        report = ProgressReportForDiplomas()
+        df = report.generate(report.get_queryset().filter(branch_id=branch_id))
+        return DataFrameResponse.as_csv(df, report.get_filename())
 
 
 class ProgressReportFullView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, output_format, *args, **kwargs):
-        progress_report = ProgressReportFull(honest_grade_system=True)
+        report = ProgressReportFull(grade_getter="grade_honest")
         if output_format == "csv":
-            return progress_report.output_csv()
+            return DataFrameResponse.as_csv(report.generate(),
+                                            report.get_filename())
         elif output_format == "xlsx":
-            return progress_report.output_xlsx()
+            return report.output_xlsx()
         else:
             return HttpResponseBadRequest(f"{output_format} format "
                                           f"is not supported")
@@ -366,8 +366,7 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
             semester = get_object_or_404(Semester, **filters)
         except (KeyError, ValueError):
             return HttpResponseBadRequest()
-        progress_report = ProgressReportForSemester(semester,
-                                                    honest_grade_system=True)
+        progress_report = ProgressReportForSemester(semester)
         if output_format == "csv":
             return progress_report.output_csv()
         elif output_format == "xlsx":

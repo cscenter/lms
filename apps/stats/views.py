@@ -170,9 +170,9 @@ class StudentsDiplomasStats(APIView):
         excellent_total = 0
         good_total = 0
         for s in students:
-            for ps in s.projects_through:
+            for ps in s.projects_progress:
                 unique_projects.add(ps.project_id)
-            for enrollment in s.enrollments:
+            for enrollment in s.enrollments_progress:
                 enrollments_total += 1
                 if enrollment.grade == GradeTypes.EXCELLENT:
                     excellent_total += 1
