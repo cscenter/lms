@@ -145,9 +145,11 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                     .has_role(Roles.STUDENT,
                               Roles.GRADUATE,
                               Roles.VOLUNTEER)
-                    .student_progress()
                     .filter(branch_id=branch_id,
-                            status=StudentStatuses.WILL_GRADUATE))
+                            status=StudentStatuses.WILL_GRADUATE)
+                    .student_progress()
+                    .order_by('last_name', 'first_name', 'pk')
+                    .distinct('last_name', 'first_name', 'pk'))
 
         unique_teachers = set()
         total_hours = 0

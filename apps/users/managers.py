@@ -69,7 +69,6 @@ class UserQuerySet(query.QuerySet):
         return (
             self
             .prefetch_related(
-                'groups',
                 Prefetch('enrollment_set',
                          queryset=enrollment_qs,
                          to_attr="enrollments_progress"),
@@ -95,8 +94,6 @@ class UserQuerySet(query.QuerySet):
                 Prefetch('onlinecourserecord_set',
                          to_attr='online_courses'),
             )
-            .order_by('last_name', 'first_name', 'pk')
-            .distinct('last_name', 'first_name', 'pk')
         )
 
 

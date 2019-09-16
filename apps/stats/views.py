@@ -161,7 +161,9 @@ class StudentsDiplomasStats(APIView):
         students = (User.objects
                     .student_progress(exclude_grades=[GradeTypes.UNSATISFACTORY,
                                                       GradeTypes.NOT_GRADED])
-                    .filter(filters))
+                    .filter(filters)
+                    .order_by('last_name', 'first_name', 'pk')
+                    .distinct('last_name', 'first_name', 'pk'))
         unique_teachers = set()
         hours = 0
         enrollments_total = 0

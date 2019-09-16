@@ -6,7 +6,7 @@ from operator import attrgetter
 from typing import List
 
 from django.db.models import Q, Prefetch, Count
-from django.http import HttpResponse, StreamingHttpResponse
+from django.http import HttpResponse
 from django.utils import formats
 from pandas import DataFrame, ExcelWriter
 
@@ -86,6 +86,7 @@ class ProgressReport:
 
     def generate(self, queryset=None) -> DataFrame:
         students = queryset if queryset is not None else self.get_queryset()
+
         # Aggregate max number of courses for each type. Result headers
         # depend on these values.
         shad_max, online_max, projects_max = 0, 0, 0
@@ -211,11 +212,13 @@ class ProgressReportForDiplomas(ProgressReport):
                 .has_role(Roles.STUDENT,
                           Roles.GRADUATE,
                           Roles.VOLUNTEER)
+                .filter(status=StudentStatuses.WILL_GRADUATE)
                 .student_progress(exclude_grades=[GradeTypes.UNSATISFACTORY,
                                                   GradeTypes.NOT_GRADED])
-                .filter(status=StudentStatuses.WILL_GRADUATE)
                 .select_related('graduate_profile')
-                .prefetch_related('graduate_profile__academic_disciplines'))
+                .prefetch_related('graduate_profile__academic_disciplines')
+                .order_by('last_name', 'first_name', 'pk')
+                .distinct('last_name', 'first_name', 'pk'))
 
     def _generate_headers(self):
         return [
@@ -279,14 +282,17 @@ class ProgressReportFull(ProgressReport):
         if base_queryset is None:
             base_queryset = (User.objects
                              .has_role(Roles.STUDENT,
-                                 Roles.GRADUATE,
-                                 Roles.VOLUNTEER))
+                                       Roles.GRADUATE,
+                                       Roles.VOLUNTEER)
+                             .order_by('last_name', 'first_name', 'pk')
+                             .distinct('last_name', 'first_name', 'pk'))
         return (base_queryset
                 .student_progress()
                 .select_related('branch', 'graduate_profile')
                 .defer('graduate_profile__testimonial', 'private_contacts',
                        'social_networks', 'bio')
                 .prefetch_related(
+                    'groups',
                     Prefetch('applicant_set',
                              queryset=Applicant.objects.only('pk', 'user_id')),
                     'academic_disciplines',
@@ -396,7 +402,9 @@ class ProgressReportForSemester(ProgressReport):
                 .exclude(status=StudentStatuses.EXPELLED)
                 .student_progress(before_term=self.target_semester)
                 .select_related('branch')
-                .prefetch_related('academic_disciplines'))
+                .prefetch_related('groups', 'academic_disciplines')
+                .order_by('last_name', 'first_name', 'pk')
+                .distinct('last_name', 'first_name', 'pk'))
 
     def before_process_row(self, student):
         student.enrollments_eq_target_semester = 0
@@ -558,7 +566,9 @@ class ProgressReportForInvitation(ProgressReportForSemester):
                 .filter(pk__in=invited_students)
                 .student_progress(before_term=self.target_semester)
                 .select_related('branch')
-                .prefetch_related('academic_disciplines'))
+                .prefetch_related('groups', 'academic_disciplines')
+                .order_by('last_name', 'first_name', 'pk')
+                .distinct('last_name', 'first_name', 'pk'))
 
 
 class WillGraduateStatsReport(ReportFileOutput):
