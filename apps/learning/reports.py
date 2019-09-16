@@ -275,11 +275,13 @@ class ProgressReportForDiplomas(ProgressReport):
 
 
 class ProgressReportFull(ProgressReport):
-    def get_queryset(self):
-        return (User.objects
-                .has_role(Roles.STUDENT,
-                          Roles.GRADUATE,
-                          Roles.VOLUNTEER)
+    def get_queryset(self, base_queryset=None):
+        if base_queryset is None:
+            base_queryset = (User.objects
+                             .has_role(Roles.STUDENT,
+                                 Roles.GRADUATE,
+                                 Roles.VOLUNTEER))
+        return (base_queryset
                 .student_progress()
                 .select_related('branch', 'graduate_profile')
                 .defer('graduate_profile__testimonial', 'private_contacts',
@@ -287,6 +289,7 @@ class ProgressReportFull(ProgressReport):
                 .prefetch_related(
                     Prefetch('applicant_set',
                              queryset=Applicant.objects.only('pk', 'user_id')),
+                    'academic_disciplines',
                     'graduate_profile__academic_disciplines'))
 
     def _generate_headers(self):

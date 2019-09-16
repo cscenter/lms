@@ -11,7 +11,7 @@ from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, 
     CourseParticipantsIntersectionView, WillGraduateStatsReportView, \
     SurveySubmissionsReportView, \
     SurveySubmissionsStatsView, GradeBookListView, create_alumni_profiles, \
-    InvitationStudentsProgressReportView
+    InvitationStudentsProgressReportView, StudentSearchCSVView
 
 app_name = 'staff'
 
@@ -26,6 +26,9 @@ urlpatterns = [
 
     path('student-search/', StudentSearchView.as_view(), name='student_search'),
     path('student-search.json', StudentSearchJSONView.as_view(), name='student_search_json'),
+    # Note: CSV view doesn't use pagination
+    path('student-search.csv', StudentSearchCSVView.as_view(), name='student_search_csv'),
+
 
     path('faces/', StudentFacesView.as_view(), name='student_faces'),
     path('faces/interviewers/', InterviewerFacesView.as_view(), name='interviewer_faces'),
