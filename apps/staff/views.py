@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic, View
 from django_filters.rest_framework import DjangoFilterBackend
+from django_filters.views import BaseFilterView
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
 from vanilla import TemplateView
@@ -65,6 +66,25 @@ class StudentSearchJSONView(ListAPIView):
         return (User.objects
                 .only('username', 'first_name', 'last_name', 'pk')
                 .order_by('last_name', 'first_name'))
+
+
+class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
+    context_object_name = 'applicants'
+    model = User
+    filterset_class = UserFilter
+
+    def get(self, request, *args, **kwargs):
+        filterset_class = self.get_filterset_class()
+        self.filterset = self.get_filterset(filterset_class)
+
+        if not self.filterset.is_bound or self.filterset.is_valid() or not self.get_strict():
+            queryset = self.filterset.qs
+        else:
+            queryset = self.filterset.queryset.none()
+        report = ProgressReportFull(grade_getter="grade_honest")
+        custom_qs = report.get_queryset(base_queryset=queryset)
+        return DataFrameResponse.as_csv(report.generate(queryset=custom_qs),
+                                        report.get_filename())
 
 
 class StudentSearchView(CuratorOnlyMixin, TemplateView):
