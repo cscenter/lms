@@ -67,6 +67,9 @@ server {
         gzip on;
         expires 6h;
         add_header Cache-Control public,max-age=21600;
+        {% filter indent(width=4) %}
+            {% include '_nginx.hsts.jinja2' %}
+        {% endfilter %}
 
         location /media/assignments/ {
             internal;
@@ -83,6 +86,9 @@ server {
         gzip_types text/css text/javascript application/javascript;
         expires 1M;
         add_header Cache-Control public,max-age=2592000;
+        {% filter indent(width=4) %}
+            {% include '_nginx.hsts.jinja2' %}
+        {% endfilter %}
     }
 
     location = /en/raa18/ {
@@ -105,6 +111,9 @@ server {
     # Django
     location / {
         add_header Cache-Control no-cache,no-store,must-revalidate;
+        {% filter indent(width=4) %}
+            {% include '_nginx.hsts.jinja2' %}
+        {% endfilter %}
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
         gzip on;
         # Serve 30x statuses with nginx

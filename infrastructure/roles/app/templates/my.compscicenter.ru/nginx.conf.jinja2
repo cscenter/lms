@@ -37,6 +37,10 @@ server {
         add_header X-Frame-Options $frame_options;
         add_header Cache-Control no-cache,no-store,must-revalidate;
 
+        {% filter indent(width=4) %}
+            {% include '_nginx.hsts.jinja2' %}
+        {% endfilter %}
+
         # FIXME(Dmitry): this makes TLS vulnerable to BREACH attack
         gzip on;
         # Serve 30x statuses with nginx
