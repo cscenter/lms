@@ -100,6 +100,9 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
         graduation_form = GraduationForm()
         graduation_form.helper.form_action = reverse('staff:create_alumni_profiles')
+        invitations = core.utils.bucketize(Invitation.objects
+                                           .order_by('branch', 'name'),
+                                           key=lambda i: i.branch)
         context = {
             "alumni_profiles_form": graduation_form,
             "current_term": current_term,
@@ -107,6 +110,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "campaigns": (Campaign.objects
                           .select_related("branch")
                           .order_by("-branch__name", "-year")),
+            "invitations": invitations,
             "branches": Branch.objects.filter(site_id=settings.SITE_ID)
         }
         return context
