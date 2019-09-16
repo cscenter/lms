@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db.models import prefetch_related_objects
 
 from api.providers.gerrit import Gerrit
+from core.models import Branch
 from learning.models import Enrollment
 from courses.models import Course, CourseTeacher
 from users.models import User
@@ -328,7 +329,8 @@ def add_test_student_to_project(client: Gerrit, course: Course,
         Make sure LDAP account for test student exist.
     """
     logger.debug("Add test student to the project")
-    student = User(username='student', city_id='spb')
+    branch = Branch.objects.get_by_natural_key('spb', site_id=settings.SITE_ID)
+    student = User(username='student', branch=branch)
     student.email = 'student'  # hack `.ldap_username`
     add_student_to_project(client, student, course,
                            project_students_group_uuid)
