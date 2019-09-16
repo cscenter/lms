@@ -14,6 +14,8 @@
       {% blocktrans %}
       The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
     {% endblocktrans %}
+  {% elif request.branch.code == 'nsk' and LANGUAGE_CODE == 'ru' %}
+      Computer Science клуб — это открытые лекции и курсы. В клубе любой желающий может познакомиться с классическими результатами, современным положением дел и открытыми задачами в различных областях Computer Science. Вход на лекции свободный, посещать курсы можно начать в любое время. Зарегистрируйтесь на интересные вам курсы, чтобы получать уведомления по ним (если у вас нет пропуска в НГУ, то зарегистрируйтесь хотя бы за два дня с реальными именем и фамилией в профиле и возьмите с собой паспорт для прохода в здание).
   {% else %}
       {% blocktrans %}
       The main goal of the Club is to provide undergraduate and graduate students, as well as professionals, access to high quality education in the area of Computer Science. Attendance is open to everyone and is free of charge.
