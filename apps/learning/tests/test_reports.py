@@ -48,7 +48,7 @@ def test_report_common():
     ps.save()
     progress_report = get_progress_report()
     assert len(progress_report.columns) == (STATIC_HEADERS_CNT +
-                                            len(ProgressReport.get_courses_headers({c.pk: "" for c in (co1, co2)})) +
+                                            len(ProgressReport.get_courses_headers({c.meta_course_id: c.meta_course for c in (co1, co2)})) +
                                             len(ProgressReport.generate_shad_courses_headers(1)) +
                                             len(ProgressReport.generate_projects_headers(1)))
 

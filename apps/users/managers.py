@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth.models import UserManager
 from django.db.models import Prefetch, query
 
-from courses.models import CourseTeacher
 from learning.settings import GradeTypes
 
 
@@ -27,33 +26,15 @@ class UserQuerySet(query.QuerySet):
             before_term: Get records before this term (inclusive)
         """
 
-        from .models import User, SHADCourseRecord
+        from .models import SHADCourseRecord
         from learning.models import Enrollment
         from projects.models import ProjectStudent
 
-        # Note: Show lecturers first, then seminarians, then others
-        teachers_qs = User.objects.extra(
-            select={
-                'is_lecturer': '"%s"."roles" & %s' % (CourseTeacher._meta.db_table, int(CourseTeacher.roles.lecturer)),
-                'is_seminarian': '"%s"."roles" & %s' % (CourseTeacher._meta.db_table, int(CourseTeacher.roles.seminar)),
-            },
-            order_by=["-is_lecturer", "-is_seminarian", "last_name", "first_name"]
-        )
-
         enrollment_qs = (Enrollment.active
-                         .select_related("course", "course__meta_course",
-                                         "course__semester")
+                         .select_related('course')
                          .annotate(grade_weight=GradeTypes.to_int_case_expr())
-                         .only('pk', 'student_id', 'grade',
-                               'course__semester_id',
-                               'course__meta_course_id',
-                               'course__meta_course__name',
-                               'course__meta_course__name_ru',
-                               'course__is_open',
-                               'course__grading_type',)
-                         .prefetch_related(Prefetch("course__teachers",
-                                                    queryset=teachers_qs))
-                         )
+                         .only('pk', 'created', 'student_id', 'course_id',
+                               'grade'))
         if before_term:
             enrollment_qs = enrollment_qs.filter(
                 course__semester__index__lte=before_term.index)
