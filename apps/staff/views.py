@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.management import CommandError
 from django.core.management import call_command
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponseForbidden
@@ -121,6 +121,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         graduation_form = GraduationForm()
         graduation_form.helper.form_action = reverse('staff:create_alumni_profiles')
         invitations = core.utils.bucketize(Invitation.objects
+                                           .select_related('branch')
                                            .order_by('branch', 'name'),
                                            key=lambda i: i.branch)
         context = {
@@ -307,8 +308,12 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, branch_id, **kwargs):
-        students = (ProgressReportForDiplomas().get_queryset()
+        report = ProgressReportForDiplomas()
+        students = (report.get_queryset()
                     .filter(branch_id=branch_id))
+        courses_qs = (report.get_courses_queryset(students)
+                      .annotate(classes_total=Count('courseclass')))
+        courses = {c.pk: c for c in courses_qs}
 
         class DiplomaCourse(NamedTuple):
             type: str
@@ -326,28 +331,28 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
         for student in students:
             student.projects_progress = list(filter(is_project_active,
                                                     student.projects_progress))
-            courses = []
+            student_courses = []
             for e in student.enrollments_progress:
-                course = DiplomaCourse(
+                course = courses[e.course_id]
+                diploma_course = DiplomaCourse(
                     type="course",
-                    name=tex(e.course.meta_course.name),
+                    name=tex(course.meta_course.name),
                     teachers=", ".join(t.get_abbreviated_name() for t in
-                                       e.course.teachers.all()),
+                                       course.teachers.all()),
                     final_grade=str(e.grade_honest).lower(),
-                    # FIXME: db hit for each record
-                    class_count=e.course.courseclass_set.count() * 2
+                    class_count=course.classes_total * 2
                 )
-                courses.append(course)
+                student_courses.append(diploma_course)
             for c in student.shads:
-                course = DiplomaCourse(
+                diploma_course = DiplomaCourse(
                     type="shad",
                     name=tex(c.name),
                     teachers=c.teachers,
                     final_grade=str(c.grade_display).lower(),
                 )
-                courses.append(course)
-            courses.sort(key=lambda c: c.name)
-            student.courses = courses
+                student_courses.append(diploma_course)
+            student_courses.sort(key=lambda c: c.name)
+            student.courses = student_courses
             delattr(student, "enrollments_progress")
             delattr(student, "shads")
 
@@ -368,11 +373,11 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
 class ProgressReportFullView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, output_format, *args, **kwargs):
         report = ProgressReportFull(grade_getter="grade_honest")
+        filename = report.get_filename()
         if output_format == "csv":
-            return DataFrameResponse.as_csv(report.generate(),
-                                            report.get_filename())
+            return DataFrameResponse.as_csv(report.generate(), filename)
         elif output_format == "xlsx":
-            return report.output_xlsx()
+            return DataFrameResponse.as_xlsx(report.generate(), filename)
         else:
             return HttpResponseBadRequest(f"{output_format} format "
                                           f"is not supported")

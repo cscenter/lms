@@ -24,6 +24,7 @@ from courses.models import Course, Semester
 from learning.forms import TestimonialForm
 from learning.models import StudentAssignment, \
     Enrollment
+from learning.reports import ProgressReport
 from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
 from users.constants import Roles
@@ -186,6 +187,10 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
                             GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED
                         ])
                         .get(pk=self.object.student.pk))
+        courses_qs = (ProgressReport().get_courses_queryset((student_info,)))
+        courses = {c.pk: c for c in courses_qs}
+        for e in student_info.enrollments_progress:
+            e.course = courses[e.course_id]
         enrollments = OrderedDict()
         # Among enrollments for the same course get one with the highest grade
         student_info.enrollments_progress.sort(key=lambda e: e.course.meta_course.name)
