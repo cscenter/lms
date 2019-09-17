@@ -11,9 +11,9 @@ ssh -p 29418 admin@review.compscicenter.ru gerrit flush-caches --cache projects
 Убедиться, что для преподавателей и студентов созданы ldap-аккаунты. Далее
 
 ```python
-from learning.models import CourseOffering
+from learning.models import Course
 from learning.gerrit import *
-co = CourseOffering.objects.get(pk=1)
+co = Course.objects.get(pk=1)
 init_project_for_course(co)
 
 ```
@@ -36,6 +36,37 @@ git pull origin refs/meta/config
 git push origin HEAD:refs/meta/config
 ```
 
+### Edit project configuration (example: add new label)
+```bash
+git clone ssh://admin@review.compscicenter.ru:29418/<PROJECT_NAME>.git
+git fetch origin refs/meta/config:refs/remotes/origin/meta/config
+git checkout meta/config
+```
+Edit project.config
+```
+[label "Verified"]
+        function = MaxWithBlock
+        value = -1 Fails
+        value =  0 No score
+        value = +1 Verified
+        copyAllScoresIfNoCodeChange = true
+        defaultValue = 0
+[access "refs/heads/*"]
+        label-Verified = -1..+1 group Non-Interactive Users
+```
+Make sure target group in a `groups` file (UUID can be viewed in gerrit UI)
+```text
+e88b5ea24c4f9488b8908632c03bf517e0707474	Non-Interactive Users
+```
+Now save changes
+```bash
+git commit -a -m "Added label - Verified"
+git push origin meta/config:meta/config
+```
+You may need to fix author and committer
+```bash
+git -c "user.name=admin" -c "user.email=webmaster@compscicenter.ru" commit --amend --reuse-message=HEAD --author="admin <webmaster@compscicenter.ru>"
+```
 
 ## Для студента
 
