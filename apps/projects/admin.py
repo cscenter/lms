@@ -27,11 +27,12 @@ class ProjectStudentInline(admin.TabularInline):
     show_change_link = True
     fields = ('student', 'supervisor_grade', 'supervisor_review',
               'presentation_grade', 'final_grade')
+    raw_id_fields = ('student',)
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = (User.objects
-                                  .has_role(Roles.STUDENT,
+                                  .has_role(Roles.STUDENT, Roles.VOLUNTEER,
                                             Roles.GRADUATE)
                                   .distinct())
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
