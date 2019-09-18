@@ -79,6 +79,7 @@ class ProjectAdmin(admin.ModelAdmin):
             'widget': Select2Multiple(attrs={"data-width": 'style'})
         }
     }
+    raw_id_fields = ('parent',)
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "reviewers":
