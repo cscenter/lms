@@ -141,6 +141,7 @@ class SHADCourseRecordAdmin(admin.ModelAdmin):
         if db_field.name == "student":
             kwargs["queryset"] = User.objects.filter(group__role__in=[
                 Roles.STUDENT,
+                Roles.GRADUATE,
                 Roles.VOLUNTEER]).distinct()
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
