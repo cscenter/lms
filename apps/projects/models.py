@@ -467,6 +467,13 @@ class Project(TimezoneAwareModel, TimeStampedModel):
         CONTINUED = C('continued', _("Continued without intermediate results"))
 
     name = models.CharField(_("StudentProject|Name"), max_length=255)
+    parent = models.ForeignKey(
+        'self',
+        verbose_name=_("Continuation of Work"),
+        help_text=_("Select a project that is the continuation of the current one."),
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True)
     semester = models.ForeignKey(
         Semester,
         on_delete=models.CASCADE,
