@@ -118,6 +118,7 @@
                     <form method="post" action="{{ report.get_review_url }}">
                         {% crispy review_criteria_form %}
                         {% crispy review_form %}
+                        <p class="text-muted mt-5">После завершения проверки комментарии будут недоступны.</p>
                     </form>
                 </div>
             </div>
