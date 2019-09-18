@@ -67,7 +67,7 @@ ResultsFormSet = modelformset_factory(
 
 class ReportListViewMixin:
     context_object_name = "reports"
-    template_name = "learning/projects/reports.html"
+    template_name = "projects/reports.html"
 
     def get_queryset(self):
         tz = self.request.user.get_timezone()
@@ -123,7 +123,7 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
     paginate_by = 50
     filterset_class = CurrentTermProjectsFilter
     context_object_name = "projects"
-    template_name = "learning/projects/available.html"
+    template_name = "projects/available.html"
 
     def get(self, request, *args, **kwargs):
         if not request.user.is_curator:
@@ -163,7 +163,7 @@ class ProjectListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
     paginate_by = 50
     filterset_class = ProjectsFilter
     context_object_name = "projects"
-    template_name = "learning/projects/all.html"
+    template_name = "projects/all.html"
 
     def get_queryset(self):
         queryset = (Project.objects
@@ -180,7 +180,7 @@ class ProjectListView(CuratorOnlyMixin, BaseFilterView, generic.ListView):
 
 class StudentProjectsView(StudentOnlyMixin, generic.ListView):
     context_object_name = "projects"
-    template_name = "learning/projects/student_projects.html"
+    template_name = "projects/student_projects.html"
 
     def get_queryset(self):
         return (ProjectStudent.objects
@@ -193,7 +193,7 @@ class ProjectDetailView(CreateView):
     model = Report
     form_class = ReportForm
     context_object_name = "report"
-    template_name = "learning/projects/project_detail.html"
+    template_name = "projects/project_detail.html"
 
     def get(self, request, *args, **kwargs):
         project = self.get_project()
@@ -383,7 +383,7 @@ class ReportView(FormMixin, generic.DetailView):
     model = Report
     http_method_names = ["get", "post", "put"]
     context_object_name = "report"
-    template_name = "learning/projects/report.html"
+    template_name = "projects/report.html"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
