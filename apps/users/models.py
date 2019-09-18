@@ -733,12 +733,12 @@ class SHADCourseRecord(TimeStampedModel):
         'courses.Semester',
         verbose_name=_("Semester"),
         on_delete=models.PROTECT)
-
     grade = models.CharField(
         max_length=100,
         verbose_name=_("Enrollment|grade"),
         choices=SHADCourseGradeTypes.choices,
         default=SHADCourseGradeTypes.NOT_GRADED)
+    anytask_url = models.URLField(_("Anytask URL"), blank=True, null=True)
 
     class Meta:
         ordering = ["name"]

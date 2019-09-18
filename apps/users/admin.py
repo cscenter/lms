@@ -7,8 +7,8 @@ from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ImportMixin
 
 from core.admin import RelatedSpecMixin
-from core.widgets import AdminRichTextAreaWidget
 from core.filters import AdminRelatedDropdownFilter
+from core.widgets import AdminRichTextAreaWidget
 from users.constants import Roles
 from users.forms import UserCreationForm, UserChangeForm
 from .import_export import UserRecordResource
