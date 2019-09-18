@@ -24,7 +24,6 @@ from courses.models import Course, Semester
 from learning.forms import TestimonialForm
 from learning.models import StudentAssignment, \
     Enrollment
-from learning.reports import ProgressReport
 from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
 from users.constants import Roles
@@ -179,6 +178,7 @@ class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
     template_name = "users/reference_detail.html"
 
     def get_context_data(self, **kwargs):
+        from learning.reports import ProgressReport
         student_info = (User.objects
                         .has_role(Roles.STUDENT,
                                   Roles.GRADUATE,

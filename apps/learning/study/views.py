@@ -1,5 +1,6 @@
 from typing import Iterable
 
+from django.apps import apps
 from django.conf import settings
 from django.db.models import Q, Prefetch
 from django.utils.translation import ugettext_lazy as _
@@ -24,8 +25,6 @@ from learning.models import Useful, StudentAssignment, Enrollment
 from learning.roles import Roles
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentBaseCreateView
-from projects.models import ProjectStudent, ReportingPeriod, ReportingPeriodKey, \
-    Project
 from users.models import User
 
 
@@ -116,20 +115,23 @@ class StudentAssignmentListView(PermissionRequiredMixin, ListView):
         context["tz_override"] = user.get_timezone()
         # Collect all related reporting periods in current term for the student
         reporting_periods = {}
-        student_projects = set(ProjectStudent.objects
-                               .select_related('project', 'project__branch')
-                               .filter(project__semester=term,
-                                       student_id=user.pk)
-                               .exclude(project__status=Project.Statuses.CANCELED))
-        if student_projects:
-            periods = ReportingPeriod.get_periods(term=term)
-            for sp in student_projects:
-                sp.project.semester = term
-                key = ReportingPeriodKey(sp.project.branch.code,
-                                         sp.project.project_type)
-                if key in periods:
-                    reporting_periods[sp] = periods[key]
-        context["reporting_periods_by_project"] = reporting_periods
+        if apps.is_installed("projects"):
+            from projects.models import ProjectStudent, ReportingPeriod, \
+                ReportingPeriodKey, Project
+            student_projects = set(ProjectStudent.objects
+                                   .select_related('project', 'project__branch')
+                                   .filter(project__semester=term,
+                                           student_id=user.pk)
+                                   .exclude(project__status=Project.Statuses.CANCELED))
+            if student_projects:
+                periods = ReportingPeriod.get_periods(term=term)
+                for sp in student_projects:
+                    sp.project.semester = term
+                    key = ReportingPeriodKey(sp.project.branch.code,
+                                             sp.project.project_type)
+                    if key in periods:
+                        reporting_periods[sp] = periods[key]
+            context["reporting_periods_by_project"] = reporting_periods
         return context
 
 
