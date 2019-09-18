@@ -91,11 +91,17 @@
                     <ul class="list-unstyled">
                         <li class="list-group-item">
                             <h4 class="list-group-item-heading">Жизнь в репозитории</h4>
-                            <p class="list-group-item-text">{{ report.get_score_activity_display|default:"Нет оценки" }}</p>
+                            <p class="list-group-item-text">
+                                {{ report.get_score_activity_display|default:"Нет оценки" }}<br>
+                                Комментарий: {{ report.score_activity_note|default:"-" }}
+                            </p>
                         </li>
                         <li class="list-group-item">
                             <h4 class="list-group-item-heading">Качество отчета</h4>
-                            <p class="list-group-item-text">{{ report.get_score_quality_display|default:"Нет оценки" }}</p>
+                            <p class="list-group-item-text">
+                                {{ report.get_score_quality_display|default:"Нет оценки" }}<br>
+                                Комментарий: {{ report.score_quality_note|default:"-" }}
+                            </p>
                         </li>
                     </ul>
                     {% endif %}
@@ -119,7 +125,7 @@
             <div class="card">
                 <div class="card-header ch-alt"><h2>Ваша итоговая оценка</h2></div>
                 <div class="card-body card-padding -preliminary-scores">
-                    {% include "learning/projects/_report_preliminary_assessment.html" with review=own_review %}
+                    {% include "projects/_report_preliminary_assessment.html" with review=own_review %}
                 </div>
             </div>
         {% endif %}
@@ -134,7 +140,7 @@
                     </a>
                     <div class="panel-collapse collapse" id="project-review-{{ review.pk }}" aria-expanded="false">
                         <div class="panel-body -preliminary-scores">
-                            {% include "learning/projects/_report_preliminary_assessment.html" %}
+                            {% include "projects/_report_preliminary_assessment.html" %}
                         </div>
                     </div>
                 </div>
