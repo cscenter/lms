@@ -2,12 +2,17 @@ import datetime
 
 import pytest
 
+from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.tests.factories import *
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.permissions import course_access_role, CourseRole
 from learning.settings import GradeTypes, StudentStatuses, Branches
 from learning.tests.factories import *
+from projects.constants import ProjectTypes
+from projects.models import ReportingPeriodKey
+from projects.tests.factories import ReportingPeriodFactory, \
+    ProjectStudentFactory, ProjectFactory
 from users.tests.factories import *
 from users.tests.factories import StudentFactory
 
@@ -169,3 +174,55 @@ def test_course_list(client, settings):
     course_nsk = CourseFactory(semester=s, branch__code=Branches.NSK)
     response = client.get(reverse('study:course_list'))
     assert len(response.context['ongoing_rest']) == 1
+
+
+@pytest.mark.django_db
+def test_student_assignment_projects_block(client):
+    url = reverse("study:assignment_list")
+    branch_spb = BranchFactory(code=Branches.SPB)
+    current_term = SemesterFactory.create_current()
+    student = StudentFactory(branch=branch_spb)
+    sa = StudentAssignmentFactory(assignment__course__semester=current_term,
+                                  student=student)
+    client.login(student)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert "reporting_periods_by_project" in response.context_data
+    assert not response.context_data["reporting_periods_by_project"]
+    # Assign project to the student and add reporting period
+    start_on = current_term.starts_at.date()
+    end_on = start_on + datetime.timedelta(days=3)
+    rp_all = ReportingPeriodFactory(term=current_term,
+                                    start_on=start_on,
+                                    end_on=end_on,
+                                    project_type=None)
+    project = ProjectFactory(branch=branch_spb,
+                             semester=current_term,
+                             project_type=ProjectTypes.practice)
+    ps = ProjectStudentFactory(student=student, project=project)
+    ProjectStudentFactory(project=project)  # another random student
+    response = client.get(url)
+    assert response.status_code == 200
+    periods = response.context_data["reporting_periods_by_project"]
+    assert len(periods) == 1
+    assert ps in periods
+    assert len(periods[ps]) == 1
+    assert rp_all in periods[ps]
+    # Make sure projects from the prev term is not listed
+    prev_term = SemesterFactory.create_prev(current_term)
+    ps_old = ProjectStudentFactory(student=student,
+                                   project__branch=branch_spb,
+                                   project__semester=prev_term)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert len(response.context_data["reporting_periods_by_project"]) == 1
+    # Add another reporting period
+    rp_practice = ReportingPeriodFactory(term=current_term,
+                                         start_on=end_on + datetime.timedelta(days=1),
+                                         end_on=end_on + datetime.timedelta(days=3),
+                                         project_type=project.project_type)
+    response = client.get(url)
+    assert response.status_code == 200
+    periods = response.context_data["reporting_periods_by_project"]
+    assert len(periods) == 1
+    assert len(periods[ps]) == 2

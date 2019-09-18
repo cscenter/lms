@@ -79,14 +79,18 @@ class ReportingPeriodDict(dict):
                         periods[k] = [period]
                     else:
                         # Replace period if new one is more precise
+                        same_range_any = False
                         for i, p in enumerate(periods[k]):
                             ranges_eq = (p.start_on == period.start_on and
                                          p.end_on == period.end_on)
                             if ranges_eq and period.weight > p.weight:
                                 periods[k][i] = period
                                 break
+                            elif ranges_eq:
+                                same_range_any = True
                         else:
-                            periods[k].append(period)
+                            if not same_range_any:
+                                periods[k].append(period)
         return periods
 
     def for_branch(self, branch: Branch):
@@ -241,7 +245,8 @@ class ReportingPeriod(models.Model):
     def get_periods(cls, **filters) -> ReportingPeriodDict:
         qs = (cls.objects
               .filter(**filters)
-              .select_related("branch"))
+              .select_related("branch")
+              .order_by('-end_on'))
         return ReportingPeriodDict.from_queryset(qs)
 
     def score_to_grade(self, score, project):
