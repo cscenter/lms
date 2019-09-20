@@ -8,6 +8,7 @@ from core.urls import reverse_lazy, reverse
 from courses.tests.factories import SemesterFactory
 from learning.settings import GradeTypes, Branches
 from notifications.models import Notification
+from projects.constants import ProjectTypes
 from projects.forms import ReportForm, PracticeCriteriaForm, \
     ReportReviewForm
 from projects.models import Report, ProjectStudent, Review, \
@@ -150,6 +151,59 @@ def test_project_detail_unauth(client):
     form = {"text": "report text content"}
     response = client.post(project.get_absolute_url(), form)
     assert response.status_code == 403  # Not student participant
+
+
+@pytest.mark.django_db
+def test_next_project_redirect(client):
+    project = ProjectFactory(project_type=ProjectTypes.practice)
+    response = client.get(project.get_next_project_url())
+    assert response.status_code == 302
+    assert response.url == project.get_absolute_url()
+    # Add project, new order [project, project2]
+    project2 = ProjectFactory(semester=project.semester,
+                              project_type=project.project_type)
+    response = client.get(project.get_next_project_url())
+    assert response.url == project2.get_absolute_url()
+    response = client.get(project2.get_next_project_url())
+    assert response.url == project.get_absolute_url()
+    project3 = ProjectFactory(semester=project.semester,
+                              project_type=project.project_type)
+    response = client.get(project2.get_next_project_url())
+    assert response.url == project3.get_absolute_url()
+    # Add reviewer, now order should be [project2, project3, project]
+    ProjectReviewerFactory(project=project)
+    response = client.get(project.get_next_project_url())
+    assert response.url == project2.get_absolute_url()
+    # Canceled project should be excluded
+    project2.status = Project.Statuses.CANCELED
+    project2.save()
+    response = client.get(project.get_next_project_url())
+    assert response.url == project3.get_absolute_url()
+
+
+@pytest.mark.django_db
+def test_prev_project_redirect(client):
+    project = ProjectFactory(project_type=ProjectTypes.practice)
+    response = client.get(project.get_prev_project_url())
+    assert response.status_code == 302
+    assert response.url == project.get_absolute_url()
+    # Add project, new order [project, project2]
+    project2 = ProjectFactory(semester=project.semester,
+                              project_type=project.project_type)
+    response = client.get(project.get_prev_project_url())
+    assert response.url == project2.get_absolute_url()
+    # Add project, new order [project, project2, project3]
+    project3 = ProjectFactory(semester=project.semester,
+                              project_type=project.project_type)
+    response = client.get(project2.get_prev_project_url())
+    assert response.url == project.get_absolute_url()
+    response = client.get(project.get_prev_project_url())
+    assert response.url == project3.get_absolute_url()
+    # Canceled project should be excluded
+    project3.status = Project.Statuses.CANCELED
+    project3.save()
+    response = client.get(project.get_prev_project_url())
+    assert response.url == project2.get_absolute_url()
 
 
 @pytest.mark.django_db

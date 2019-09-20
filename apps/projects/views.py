@@ -8,10 +8,12 @@ from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.db import transaction
-from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
+from django.db.models import Case, BooleanField, Prefetch, Count, Value, When, \
+    Window, F, Q
+from django.db.models.functions import FirstValue, LastValue, Lead, Lag
 from django.forms import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseForbidden, \
-    HttpResponseRedirect
+    HttpResponseRedirect, HttpResponseNotFound
 from django.http.response import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
@@ -322,32 +324,31 @@ class ProjectPrevNextView(generic.RedirectView):
     direction = None
 
     def get_redirect_url(self, *args, **kwargs):
-        project_id = self.kwargs["project_id"]
-        project = get_object_or_404(Project.objects.filter(pk=project_id))
-
-        # Projects without reviewers go first
-        qs = (Project.active
-              .filter(semester_id=project.semester_id)
-              .exclude(pk=project.pk)
-              .annotate(reviewers_cnt=Count("reviewers"))
-              .values_list("pk", flat=True)
-              .order_by("reviewers_cnt", "name", "pk"))
+        project = get_object_or_404(Project.objects
+                                    .filter(pk=self.kwargs["project_id"]))
+        filters = [Q(semester_id=project.semester_id)]
         if not self.request.user.is_curator:
-            qs = qs.filter(project_type=ProjectTypes.practice)
-        if self.direction == "prev":
-            qs = qs.reverse()
-        # FIXME: use window function rank instead of iteration over all projects
-        next_project_id, first, prev_id = (None,) * 3
+            filters.append(Q(project_type=ProjectTypes.practice))
+        # Projects without reviewers go first
+        if self.direction == "next":
+            window = {'order_by': [F("reviewers_cnt"), F("name"), F("id")]}
+        else:
+            window = {'order_by': [F("reviewers_cnt"), F("name").desc(),
+                                   F("id").desc()]}
+        qs = (Project.active
+              .filter(*filters)
+              .annotate(reviewers_cnt=Count("reviewers"),
+                        next=Window(expression=Lead('id'), **window),
+                        default=Window(expression=FirstValue('id'), **window))
+              .values_list("id", "next", "default", named=True))
+        # Note: Django 2.2 doesn't allow filtering subquery. Instead of using
+        # raw query or other workarounds, simply iterate over all records as
+        # the overhead is negligible.
         for p in qs:
-            if prev_id == project_id:
-                next_project_id = p
-                break
-            if first is None:
-                # Rotate if we didn't find next project
-                next_project_id = p
-                first = p
-            prev_id = p
-        return reverse("projects:project_detail", args=[next_project_id])
+            if p.id == project.pk:
+                next_id = p.next if p.next is not None else p.default
+                return reverse("projects:project_detail", args=[next_id])
+        raise Http404
 
 
 class ProjectEnrollView(ProjectReviewerGroupOnlyMixin, generic.View):

@@ -9,7 +9,7 @@ from projects.constants import ProjectTypes
 from projects.models import ReportingPeriod, \
     ReportingPeriodKey, PracticeCriteria
 from projects.tests.factories import ReportFactory, ReviewFactory, \
-    ReportingPeriodFactory, ProjectStudentFactory
+    ReportingPeriodFactory, ProjectStudentFactory, ProjectFactory
 from learning.settings import Branches, GradeTypes
 from core.tests.factories import BranchFactory
 from users.tests.factories import ProjectReviewerFactory
