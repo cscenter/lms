@@ -175,17 +175,12 @@ class AssignmentAdmin(admin.ModelAdmin):
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "notify_teachers":
-            qs = (CourseTeacher.objects
-                  .select_related("teacher", "course"))
+            qs = CourseTeacher.objects.select_related("teacher", "course")
             try:
-                assignment_pk = request.resolver_match.args[0]
-                a = (Assignment.objects
-                     .prefetch_related("course__course_teachers")
-                     .get(pk=assignment_pk))
-                teachers = [t.pk for t in a.course.teachers.all()]
-                qs = qs.filter(teacher__in=teachers,
-                               course=a.course)
-            except IndexError:
+                assignment_id = request.resolver_match.kwargs['object_id']
+                a = Assignment.objects.get(pk=assignment_id)
+                qs = qs.filter(course_id=a.course_id)
+            except KeyError:
                 pass
             kwargs["queryset"] = qs.order_by("course_id").distinct()
         return super().formfield_for_manytomany(db_field, request, **kwargs)
