@@ -15,11 +15,12 @@ urlpatterns = [
         path('<int:pk>/results', views.ProjectResultsView.as_view(), name='project_results_update'),
         path('<int:pk>/enroll', views.ProjectEnrollView.as_view(), name='reviewer_project_enroll'),
         path('<int:project_pk>/reports/<int:report_id>/', include([
+            path('', views.ReportView.as_view(), name='project_report'),
             path('update/', views.ReportUpdateStatusView.as_view(), name='project_report_update'),
             path('curator_assess/', views.ReportCuratorAssessmentView.as_view(), name='project_report_curator_assessment'),
             path('summarize/', views.ReportCuratorSummarizeView.as_view(), name='project_report_summarize'),
             path('review/', views.ProcessReviewFormView.as_view(), name='project_report_upsert_review'),
-            path('', views.ReportView.as_view(), name='project_report'),
+            path('comments/<int:comment_id>/update/', views.ReportCommentUpdateView.as_view(), name='report_comment_edit'),
         ])),
         path('prev/<int:project_id>)/', views.ProjectPrevNextView.as_view(direction="prev"), name='project_detail_prev'),
         path('next/<int:project_id>/', views.ProjectPrevNextView.as_view(direction="next"), name='project_detail_next'),

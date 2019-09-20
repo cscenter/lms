@@ -7,10 +7,20 @@
 {% load static %}
 {% load tz %}
 {% load user_thumbnail from user_thumbnail %}
+{% load render_bundle from webpack_loader %}
 
 {% block hightlight_styles %}
 <link href="{% static "v1/css/vendor/highlight-styles/github.css" %}" rel="stylesheet">
 {% endblock hightlight_styles %}
+
+{% block javascripts %}
+    {#    TODO: append instead of replace #}
+    <script type="text/javascript">
+        CSC.config.localStorage.hashes = {{ clean_comments_json|safe }};
+    </script>
+    {% render_bundle 'learning' 'js' %}
+{% endblock javascripts %}
+
 
 {% block content %}{% localtime off %}
     {% with student=report.project_student.student project=report.project_student.project %}
@@ -56,7 +66,12 @@
         <ul class="comment-list">
             {% for comment in comments %}
             <li class="{% if comment.author == student %}student{% else %}reviewer{% endif %}">
-              <div class="csc-well assignment-comment">
+                {% call_method request.user "has_perm" "projects.change_own_reportcomment" comment as can_change_own_comment %}
+                {% call_method request.user "has_perm" "projects.change_reportcomment" as can_change_all_comments %}
+              <div class="csc-well assignment-comment" {% if can_change_own_comment or can_change_all_comments %}data-id="{{ comment.pk }}"{% endif %}>
+                {% if can_change_own_comment or can_change_all_comments %}
+                    <a href="{% url "projects:report_comment_edit" project.pk report.pk comment.pk %}" class="__edit pull-right">{% if user.is_curator %}#{{ comment.pk }}{% else %}<i class="fa fa-pencil" aria-hidden="true"></i>{% endif %}</a>
+                {% endif %}
                 <h5 class="assignment">{{ comment.author.get_full_name }}</h5>
                 <div class="ubertext">
                   {% markdown 3600 "assignment_comment" comment.pk comment.modified %}
@@ -256,9 +271,19 @@
   </div>
 </div>
     {% endwith %}
-
-    <script type="text/javascript">
-{#    TODO: append instead of replace #}
-        CSC.config.localStorage.hashes = {{ clean_comments_json|safe }};
-    </script>
+<div id='update-comment-model-form' class='modal' tabindex='-1' role='dialog'>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Редактировать комментарий</h4>
+                <p class="text-muted">
+                    Возможность редактирования сохраняется в течение 10 мин. после его создания.<br>
+                    Пожалуйста, не меняйте смысл комментария, т.к. студент потенциально мог его прочитать в текущей версии и начать отвечать.<br>В таком случае лучше написать новый.
+                </p>
+            </div>
+            <div class="inner"></div>
+        </div>
+    </div>
+</div>
 {% endlocaltime off %}{% endblock content %}

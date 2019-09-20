@@ -1,0 +1,12 @@
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+<form action="{% url "projects:report_comment_edit" view.kwargs.project_pk  comment.report_id comment.pk %}" method="POST">
+<div class="modal-body">
+    {% crispy form form.helper %}
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">{% trans "Close" %}</button>
+    <button type="submit" class="btn btn-primary">Обновить</button>
+</div>
+</form>
