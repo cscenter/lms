@@ -30,7 +30,7 @@ from courses.models import Semester
 from courses.utils import get_current_term_index
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
-from projects.constants import ProjectTypes
+from projects.constants import ProjectTypes, EDITING_REPORT_COMMENT_AVAIL
 from users.constants import Roles, GenderTypes
 
 CURATOR_SCORE_FIELDS = [
@@ -980,6 +980,12 @@ class ReportComment(TimezoneAwareModel, TimeStampedModel):
         if not tz:
             tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
+
+    @property
+    def is_stale_for_editing(self):
+        """Editing comment is available for 10 min period only"""
+        diff = timezone.now() - self.created
+        return diff.total_seconds() > EDITING_REPORT_COMMENT_AVAIL
 
     @property
     def attached_file_name(self):

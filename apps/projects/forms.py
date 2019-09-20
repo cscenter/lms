@@ -136,6 +136,29 @@ class ReportCommentForm(forms.ModelForm):
         return comment
 
 
+class ReportCommentModalForm(forms.ModelForm):
+    text = forms.CharField(
+        label="",
+        help_text=_(LATEX_MARKDOWN_ENABLED),
+        required=False,
+        widget=UbereditorWidget(attrs={'data-quicksend': 'true'}))
+
+    class Meta:
+        model = ReportComment
+        fields = ['text']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if not cleaned_data.get("text"):
+            raise forms.ValidationError(_("Text should be non-empty"))
+        return cleaned_data
+
+
 class ReportReviewForm(forms.ModelForm):
     prefix = "review_form"
 

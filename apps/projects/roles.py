@@ -7,9 +7,11 @@ from auth.registry import role_registry
 class Roles(DjangoChoices):
     PROJECT_REVIEWER = C(9, _('Project reviewer'), permissions=(
         "learning.view_projects_menu",
+        "projects.change_own_reportcomment",
     ))
     CURATOR_PROJECTS = C(10, _('Curator of projects'), permissions=(
         "learning.view_projects_menu",
+        "projects.change_reportcomment",
     ))
 
 

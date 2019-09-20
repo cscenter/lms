@@ -147,17 +147,17 @@
 </div>
 
 {#  XXX: Due to bug with `fade` class and `shown.bs.modal` event put this html code here  #}
-    <div id='submission-comment-model-form' class='modal' tabindex='-1' role='dialog'>
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Редактировать комментарий</h4>
-                    <p class="text-muted">Пожалуйста, не меняйте смысл комментария, т.к. студент потенциально мог его прочитать в текущей версии и начать отвечать.<br>В таком случае лучше написать новый.</p>
-                </div>
-                <div class="inner"></div>
+<div id='update-comment-model-form' class='modal' tabindex='-1' role='dialog'>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Редактировать комментарий</h4>
+                <p class="text-muted">Пожалуйста, не меняйте смысл комментария, т.к. студент потенциально мог его прочитать в текущей версии и начать отвечать.<br>В таком случае лучше написать новый.</p>
             </div>
+            <div class="inner"></div>
         </div>
     </div>
+</div>
 {% endlocaltime off %}
 {% endblock content %}

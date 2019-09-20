@@ -6,13 +6,13 @@ from itertools import groupby
 from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied
 from django.db import transaction
 from django.db.models import Case, BooleanField, Prefetch, Count, Value, When
 from django.forms import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseForbidden, \
     HttpResponseRedirect
-from django.http.response import HttpResponseBadRequest
+from django.http.response import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic, View
@@ -21,10 +21,11 @@ from django_filters.views import BaseFilterView, FilterMixin
 from extra_views.formsets import BaseModelFormSetView
 from vanilla.model_views import CreateView
 
+from auth.mixins import PermissionRequiredMixin
 from core import comment_persistence
 from core.exceptions import Redirect
 from core.urls import reverse, reverse_lazy
-from core.utils import hashids
+from core.utils import hashids, render_markdown
 from core.views import LoginRequiredMixin
 from courses.models import Semester
 from courses.utils import get_current_term_index
@@ -34,7 +35,8 @@ from projects.constants import ProjectTypes
 from projects.filters import ProjectsFilter, CurrentTermProjectsFilter
 from projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportStatusForm, ReportSummarizeForm, ReportForm, \
-    ReportCuratorAssessmentForm, StudentResultsModelForm, PracticeCriteriaForm
+    ReportCuratorAssessmentForm, StudentResultsModelForm, PracticeCriteriaForm, \
+    ReportCommentModalForm
 from projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review, ReportingPeriod, ReportingPeriodKey, PracticeCriteria
 from users.constants import Roles, GenderTypes
@@ -566,6 +568,42 @@ class ReportView(FormMixin, generic.DetailView):
                 "report_id": self.object.pk
             }
         )
+
+
+# TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
+# FIXME: replace with vanilla view
+class ReportCommentUpdateView(PermissionRequiredMixin, generic.UpdateView):
+    model = ReportComment
+    pk_url_kwarg = 'comment_id'
+    context_object_name = "comment"
+    template_name = "projects/modal_update_report_comment.html"
+    form_class = ReportCommentModalForm
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.object = self.get_object()
+
+    def has_permission(self):
+        if self.request.user.has_perm("projects.change_own_reportcomment",
+                                      self.object):
+            return True
+        return self.request.user.has_perm("projects.change_reportcomment")
+
+    def form_valid(self, form):
+        self.object = form.save()
+        html = render_markdown(self.object.text)
+        return JsonResponse({"success": 1,
+                             "id": self.object.pk,
+                             "html": html})
+
+    def form_invalid(self, form):
+        return JsonResponse({"success": 0, "errors": form.errors})
+
+    def get(self, request, *args, **kwargs):
+        return super(BaseUpdateView, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return super(BaseUpdateView, self).post(request, *args, **kwargs)
 
 
 class ProcessReviewFormView(LoginRequiredMixin, ModelFormMixin, View):
