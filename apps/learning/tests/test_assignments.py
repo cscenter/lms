@@ -29,7 +29,8 @@ from learning.tests.factories import EnrollmentFactory, \
 from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import Roles
 from users.tests.factories import UserFactory, TeacherFactory, \
-    StudentFactory, VolunteerFactory, ProjectReviewerFactory, CuratorFactory
+    StudentFactory, VolunteerFactory, CuratorFactory
+from projects.tests.factories import ProjectReviewerFactory
 
 
 # TODO: assignment submission page - comments localisation, assignment created localization

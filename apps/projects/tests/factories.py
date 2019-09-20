@@ -4,10 +4,19 @@ from factory.fuzzy import FuzzyInteger, FuzzyChoice
 from courses.tests.factories import SemesterFactory
 from projects.forms import ReportReviewForm, PracticeCriteriaForm
 from projects.models import Project, ProjectStudent, Report, Review, \
-    ReportingPeriod, PracticeCriteria, Supervisor
+    ReportingPeriod, PracticeCriteria, Supervisor, ReportComment
 from core.tests.factories import BranchFactory
-from users.constants import GenderTypes
-from users.tests.factories import UserFactory, StudentFactory
+from users.constants import GenderTypes, Roles
+from users.tests.factories import UserFactory, StudentFactory, add_user_groups
+
+
+class ProjectReviewerFactory(UserFactory):
+    @factory.post_generation
+    def _add_required_groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        required_groups = [Roles.PROJECT_REVIEWER]
+        add_user_groups(self, required_groups)
 
 
 class ReportingPeriodFactory(factory.DjangoModelFactory):
@@ -79,12 +88,21 @@ class ReportFactory(factory.DjangoModelFactory):
     score_quality = FuzzyChoice([v for v, _ in Report.QUALITY])
 
 
+class ReportCommentFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = ReportComment
+
+    report = factory.SubFactory(ReportFactory)
+    author = factory.SubFactory(UserFactory)
+    text = factory.Sequence(lambda n: "Comment %03d" % n)
+
+
 class ReviewFactory(factory.DjangoModelFactory):
     class Meta:
         model = Review
 
     report = factory.SubFactory(ReportFactory)
-    reviewer = factory.SubFactory(UserFactory)
+    reviewer = factory.SubFactory(ProjectReviewerFactory)
 
     @factory.post_generation
     def criteria(self, create, extracted, **kwargs):
