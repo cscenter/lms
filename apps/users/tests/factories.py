@@ -11,7 +11,7 @@ from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
 __all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
            'StudentFactory', 'TeacherFactory', 'VolunteerFactory',
-           'ProjectReviewerFactory', 'OnlineCourseRecordFactory',
+           'OnlineCourseRecordFactory',
            'SHADCourseRecordFactory', 'EnrollmentCertificateFactory')
 
 
@@ -110,15 +110,6 @@ class VolunteerFactory(UserFactory):
         if not create:
             return
         required_groups = [Roles.VOLUNTEER]
-        add_user_groups(self, required_groups)
-
-
-class ProjectReviewerFactory(UserFactory):
-    @factory.post_generation
-    def _add_required_groups(self, create, extracted, **kwargs):
-        if not create:
-            return
-        required_groups = [Roles.PROJECT_REVIEWER]
         add_user_groups(self, required_groups)
 
 

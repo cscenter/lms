@@ -2,6 +2,7 @@
 import pytest
 from django.utils.encoding import smart_bytes
 
+from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
 from core.tests.utils import now_for_branch
 from core.urls import reverse_lazy, reverse
@@ -15,10 +16,9 @@ from projects.models import Report, ProjectStudent, Review, \
     PracticeCriteria, Project
 from projects.tests.factories import ProjectFactory, ReportFactory, \
     ReportingPeriodFactory, ReviewFactory, \
-    review_form_factory
+    review_form_factory, ReportCommentFactory, ProjectReviewerFactory
 from users.constants import Roles
-from users.tests.factories import StudentFactory, ProjectReviewerFactory, \
-    UserFactory, CuratorFactory
+from users.tests.factories import StudentFactory, UserFactory, CuratorFactory
 
 URL_REPORTS = reverse_lazy("projects:report_list_reviewers")
 URL_PROJECTS = reverse_lazy("projects:current_term_projects")
@@ -585,6 +585,21 @@ def test_reportpage_summarize_notifications(client, curator):
     response = client.post(url, form)
     assert Notification.objects.count() == 1
     assert Notification.objects.all()[0].recipient == student1
+
+
+@pytest.mark.django_db
+def test_report_comment_update(lms_resolver, client, assert_login_redirect):
+    comment = ReportCommentFactory()
+    url = reverse("projects:report_comment_edit", kwargs={
+        'project_pk': comment.report.project_student.project_id,
+        'report_id': comment.report_id,
+        'comment_id': comment.pk
+    })
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    # FIXME: Вот это нужно раскомментировать, когда появится поддержка Rules для Permission. View тоже надо подправить (заменить has_permission на permission_required)
+    # assert resolver.func.view_class.permission_required == "projects.change_reportcomment"
+    assert_login_redirect(url, method='get')
 
 
 
