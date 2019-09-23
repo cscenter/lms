@@ -293,6 +293,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
         _("stepik.org ID"),
         blank=True,
         null=True)
+    anytask_url = models.URLField(_("Anytask URL"), blank=True, null=True)
     social_networks = models.TextField(
         _("Social Networks"),
         help_text=("{}; {}"
@@ -738,7 +739,6 @@ class SHADCourseRecord(TimeStampedModel):
         verbose_name=_("Enrollment|grade"),
         choices=SHADCourseGradeTypes.choices,
         default=SHADCourseGradeTypes.NOT_GRADED)
-    anytask_url = models.URLField(_("Anytask URL"), blank=True, null=True)
 
     class Meta:
         ordering = ["name"]
