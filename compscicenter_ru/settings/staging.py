@@ -1,7 +1,6 @@
 from .base import *
 
 ALLOWED_HOSTS = [".dev.compscicenter.ru"]
-DEFAULT_URL_SCHEME = 'http'
 
 MEDIA_ROOT = str(Path('/shared', 'media'))
 

@@ -126,12 +126,12 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
             'username': student.username,
             'password': student.raw_password
         }
-        response = self.client.post(reverse('login'), login_data)
+        response = self.client.post(reverse('auth:login'), login_data)
         form = response.context['form']
         self.assertFalse(form.is_valid())
         # can't login message in __all__
         self.assertIn("__all__", form.errors)
         student.add_group(Roles.STUDENT)
         student.save()
-        response = self.client.post(reverse('login'), login_data)
+        response = self.client.post(reverse('auth:login'), login_data)
         self.assertEqual(response.status_code, 302)

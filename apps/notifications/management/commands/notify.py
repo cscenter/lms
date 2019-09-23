@@ -2,7 +2,6 @@
 
 import logging
 from datetime import datetime
-from urllib.parse import urlparse
 
 from django.apps import apps
 from django.conf import settings
@@ -13,6 +12,7 @@ from django.utils import translation
 from django.utils.encoding import smart_text
 from django.utils.html import strip_tags, linebreaks
 
+from core.urls import replace_hostname
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
 from users.constants import Roles
@@ -78,19 +78,6 @@ def _get_base_domain(notification):
     elif isinstance(notification, CourseNewsNotification):
         return f"{settings.LMS_SUBDOMAIN}.compscicenter.ru"
     return "compscicenter.ru"
-
-
-def replace_hostname(url, new_hostname):
-    """
-    `core.urls.reverse` returns domain based on settings.SITE_ID value, but
-    management command could be run from different envs
-    (e.g. send notification for compsciclub.ru)
-    """
-    parsed = urlparse(url)
-    replaced = parsed._replace(netloc=new_hostname,
-                               # FIXME: Default value for scheme on server side?
-                               scheme='https')
-    return replaced.geturl()
 
 
 def report(f, s):

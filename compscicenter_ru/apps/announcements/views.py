@@ -1,7 +1,6 @@
 from dal import autocomplete
 from django.contrib.auth.mixins import PermissionRequiredMixin, \
     LoginRequiredMixin
-from django.utils import timezone
 from django_jinja.views.generic import DetailView
 
 from announcements.models import Announcement, AnnouncementTag

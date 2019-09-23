@@ -10,7 +10,7 @@ class IndexView(View):
     def get(self, request, *args, **kwargs):
         user = request.user
         if not user.is_authenticated:
-            redirect_to = reverse('login', subdomain=settings.LMS_SUBDOMAIN)
+            redirect_to = reverse('auth:login')
         else:
             redirect_to = user.get_absolute_url(
                 subdomain=settings.LMS_SUBDOMAIN)

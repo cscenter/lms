@@ -2,6 +2,7 @@ from crispy_forms.bootstrap import FormActions
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Submit
 from django import forms
+from django.conf import settings
 from django.contrib.auth.forms import PasswordResetForm, AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.utils import translation
@@ -14,11 +15,18 @@ from core.urls import reverse
 class UserPasswordResetForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
+        # XXX: separate configuration for public domain and lms (they
+        # should have different SITE_ID), then it should be possible to
+        # remove logic below
+        domain = context['domain']
+        if (settings.LMS_SUBDOMAIN and settings.RESTRICT_LOGIN_TO_LMS and
+                not domain.startswith(settings.LMS_SUBDOMAIN)):
+            domain = f"{settings.LMS_SUBDOMAIN}.{domain}"
         ctx = {
             'site_name': context['site_name'],
             'email': context['email'],
             'protocol': context['protocol'],
-            'domain': context['domain'],
+            'domain': domain,
             'uid': context['uid'],
             'token': context['token'],
         }
@@ -44,7 +52,7 @@ class LoginForm(AuthenticationForm):
         # because of URL name resolutions quirks
         self.fields['password'].help_text = (
             _("You can also <a href=\"{0}\">restore your password</a>")
-            .format(reverse('password_reset')))
+            .format(reverse('auth:password_reset')))
         self.helper = FormHelper()
         self.helper.form_class = 'form-horizontal'
         self.helper.label_class = 'col-xs-2'

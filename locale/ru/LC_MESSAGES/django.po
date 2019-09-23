@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-09-13 13:40+0000\n"
-"PO-Revision-Date: 2019-09-13 13:42+0000\n"
+"PO-Revision-Date: 2019-09-23 13:12+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -2278,7 +2278,7 @@ msgstr "Пароль успешно изменён"
 
 #: apps/templates/registration/password_reset_confirm.html:8
 msgid "Password change"
-msgstr "Пароль изменён"
+msgstr "Изменение пароля"
 
 #: apps/templates/registration/password_reset_confirm.html:18
 msgid "Sorry, the link is invalid"

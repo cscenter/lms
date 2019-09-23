@@ -8,6 +8,7 @@ from django.template import loader
 from django.utils import translation
 from django_rq import job
 
+from core.urls import reverse, replace_hostname
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,12 @@ activation_email_body = getattr(settings, 'ACTIVATION_EMAIL_BODY',
 def send_restore_password_email(context, from_email, to_email, language_code):
     translation.activate(language_code)
     # Email subject *must not* contain newlines
+    reset_url = reverse('auth:password_reset_confirm', kwargs={
+        'uidb64': context['uid'],
+        'token': context['token']
+    })
+    reset_url = replace_hostname(reset_url, context['domain'])
+    context['reset_url'] = reset_url
     subject = loader.render_to_string(subject_template_name, context)
     subject = ''.join(subject.splitlines())
     body = loader.render_to_string(EMAIL_RESTORE_PASSWORD_TEMPLATE, context)

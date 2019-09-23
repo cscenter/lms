@@ -30,9 +30,9 @@
             <a class="btn" href="{{ user.get_absolute_url }}">
                 <i class="fa fa-user"></i> Профиль
             </a>
-            <a class="btn" href="{% url 'logout' %}"><i class="fa fa-sign-out"></i> Выйти</a>
+            <a class="btn" href="{% url 'auth:logout' %}"><i class="fa fa-sign-out"></i> Выйти</a>
         {% else %}
-            <a href="{% url 'login' %}" class="login-link">
+            <a href="{% url 'auth:login' %}" class="login-link">
               {% trans "Login" %}
             </a>
             <a href="{% url 'registration_register' %}" class="reg">
