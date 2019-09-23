@@ -3,10 +3,11 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as _UserAdmin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ImportMixin
 
-from core.admin import RelatedSpecMixin
+from core.admin import RelatedSpecMixin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.widgets import AdminRichTextAreaWidget
 from users.constants import Roles
@@ -107,7 +108,7 @@ class UserAdmin(_UserAdmin):
         (_('Permissions'), {'fields': ['is_active', 'is_staff', 'is_superuser',
                                        ]}),
         (_('External services'), {'fields': ['yandex_login', 'stepic_id',
-                                             'github_login']}),
+                                             'github_login', 'anytask_url']}),
         (_('Student info record'),
          {'fields': ['status', 'enrollment_year', 'curriculum_year',
                      'university', 'uni_year_at_enrollment', 'phone']}),
@@ -137,6 +138,9 @@ class SHADCourseRecordAdmin(admin.ModelAdmin):
         ("semester", AdminRelatedDropdownFilter)
     ]
 
+    def get_readonly_fields(self, request, obj=None):
+        return ('anytask_url',) if obj else []
+
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
         if db_field.name == "student":
             kwargs["queryset"] = User.objects.filter(group__role__in=[
@@ -144,6 +148,13 @@ class SHADCourseRecordAdmin(admin.ModelAdmin):
                 Roles.GRADUATE,
                 Roles.VOLUNTEER]).distinct()
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
+
+    @meta(_("Anytask"))
+    def anytask_url(self, obj):
+        if obj.student_id and obj.student.anytask_url:
+            url = obj.student.anytask_url
+            return mark_safe(f"<a target='_blank' href='{url}'>Открыть профиль в новом окне</a>")
+        return "-"
 
 
 class UserRecordResourceAdmin(ImportMixin, UserAdmin):
