@@ -59,7 +59,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.assertEqual(smart_text(user), user.get_full_name(True))
 
     def test_login_page(self):
-        response = self.client.get(reverse('login'))
+        response = self.client.get(reverse('auth:login'))
         soup = BeautifulSoup(response.content, "html.parser")
         maybe_form = soup.find_all("form")
         self.assertEqual(len(maybe_form), 1)
@@ -77,11 +77,11 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.assertNotIn('_auth_user_id', self.client.session)
         bad_user = copy.copy(good_user_attrs)
         bad_user['password'] = "BAD"
-        resp = self.client.post(reverse('login'), bad_user)
+        resp = self.client.post(reverse('auth:login'), bad_user)
         self.assertNotIn('_auth_user_id', self.client.session)
         self.assertEqual(resp.status_code, 200)
         assert len(resp.context['form'].errors) > 0
-        resp = self.client.post(reverse('login'), good_user_attrs)
+        resp = self.client.post(reverse('auth:login'), good_user_attrs)
         self.assertRedirects(resp, settings.LOGIN_REDIRECT_URL)
         self.assertIn('_auth_user_id', self.client.session)
 
@@ -91,14 +91,14 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         user = User.objects.create_user(**user_data)
         url = reverse('teaching:assignment_list')
         self.assertLoginRedirect(url)
-        response = self.client.post(reverse('login'), user_data)
+        response = self.client.post(reverse('auth:login'), user_data)
         assert response.status_code == 200
         self.assertLoginRedirect(url)
         add_user_groups(user, [Roles.STUDENT])
         user.branch = Branch.objects.get_by_natural_key(Branches.SPB,
                                                         settings.SITE_ID)
         user.save()
-        response = self.client.post(reverse('login'), user_data)
+        response = self.client.post(reverse('auth:login'), user_data)
         assert response.status_code == 302
         resp = self.client.get(reverse('teaching:assignment_list'))
         self.assertLoginRedirect(url)
@@ -117,7 +117,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         login = self.client.login(user)
         self.assertTrue(login)
         self.assertIn('_auth_user_id', self.client.session)
-        resp = self.client.get(reverse('logout'))
+        resp = self.client.get(reverse('auth:logout'))
         self.assertRedirects(resp, settings.LOGOUT_REDIRECT_URL,
                              status_code=302)
         self.assertNotIn('_auth_user_id', self.client.session)
@@ -125,9 +125,9 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
     def test_logout_redirect_works(self):
         user = UserFactory()
         login = self.client.login(user)
-        resp = self.client.get(reverse('logout'),
-                               {'next': reverse('video_list')})
-        self.assertRedirects(resp, reverse('video_list'), status_code=302)
+        resp = self.client.get(reverse('auth:logout'),
+                               {'next': "/abc"})
+        self.assertRedirects(resp, "/abc", status_code=302)
 
     def test_yandex_login_from_email(self):
         """

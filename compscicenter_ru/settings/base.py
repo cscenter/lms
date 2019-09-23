@@ -19,8 +19,9 @@ DEBUG = MODELTRANSLATION_DEBUG = env.bool('DEBUG', default=False)
 WSGI_APPLICATION = 'compscicenter_ru.wsgi.application'
 ROOT_URLCONF = 'compscicenter_ru.urls'
 LMS_SUBDOMAIN = 'my'
+RESTRICT_LOGIN_TO_LMS = True
 REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
-                                 'surveys', 'library', 'admission')
+                                 'surveys', 'library', 'admission', 'auth')
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
     LMS_SUBDOMAIN: 'my_compscicenter_ru.urls',

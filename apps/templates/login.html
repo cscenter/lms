@@ -32,7 +32,7 @@
                         <input class="form-control" type="password" name="{{ form.password.name }}" required="" {% if form.username.value %}value="{{ form.password.value }}"{% endif %}
                                placeholder="{{ form.password.label }}" id="{{ form.password.id_for_label }}" tabindex="4"
                                autocomplete="off">
-                        <a class="forgot" title="{% trans "Password Reset" %}" href="{% url 'password_reset' %}" tabindex="5">{% trans "Forgot?" %}</a>
+                        <a class="forgot" title="{% trans "Password Reset" %}" href="{% url 'auth:password_reset' %}" tabindex="5">{% trans "Forgot?" %}</a>
                         <span class="error-message">{{ form.password.errors }}{% for error in form.non_field_errors  %}{{ error }}<br>{% endfor %}</span>
                     </label>
                     <input type="submit" class="btn btn-primary sign-up-in" value="{% trans "Sign in" %}" tabindex="6">

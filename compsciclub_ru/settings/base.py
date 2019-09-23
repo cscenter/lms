@@ -29,6 +29,7 @@ DATABASES = {
 
 ROOT_URLCONF = 'compsciclub_ru.urls'
 LMS_SUBDOMAIN = None
+RESTRICT_LOGIN_TO_LMS = True
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF
 }
