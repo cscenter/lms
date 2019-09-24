@@ -8,7 +8,7 @@ class UserCard extends React.Component {
     };
 
     render() {
-        let {id, photo, name, url, activities: subtitle} = this.props;
+        let {id, photo, name, url, occupation: subtitle} = this.props;
         return (
             <a className={this.props.className}
                href={url}
@@ -26,7 +26,7 @@ const propTypes = {
     name: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,
     photo: PropTypes.string.isRequired,
-    activities: PropTypes.string,
+    occupation: PropTypes.string,
 };
 
 UserCard.propTypes = propTypes;

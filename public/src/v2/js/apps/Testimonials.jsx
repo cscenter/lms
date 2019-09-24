@@ -1,7 +1,7 @@
 // TODO: add translation support (error msg)
 
 import FontFaceObserver from 'fontfaceobserver';
-import createHistory from "history/createBrowserHistory"
+import { createBrowserHistory } from "history";
 import Masonry from 'masonry-layout';
 import $ from 'jquery';
 import React from 'react';
@@ -15,7 +15,7 @@ import {MOBILE_VIEWPORT_MAX, showErrorNotification, showBodyPreloader,
 
 const MASONRY_ENABLED = (window.screen.availWidth >= MOBILE_VIEWPORT_MAX);
 
-const history = createHistory();
+const history = createBrowserHistory();
 
 
 class App extends React.Component {

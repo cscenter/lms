@@ -5,7 +5,7 @@ import $ from 'jquery';
 import * as PropTypes from 'prop-types';
 import {showNotification, showErrorNotification} from "utils";
 import Select from "components/Select";
-import {Creatable as CreatableSelect} from 'react-select';
+import CreatableSelect from 'react-select/creatable';
 import Input from "components/Input";
 import Checkbox from "components/Checkbox";
 import RadioGroup from 'components/RadioGroup';
