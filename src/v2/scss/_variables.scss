@@ -319,9 +319,11 @@ $nav-divider-margin-y:              spacer("2x") !default;
 $zindex-dropdown:                   1000 !default;
 $zindex-sticky:                     1020 !default;
 $zindex-cover:                      1030 !default;
-$zindex-modal-backdrop:             1040 !default;
-$zindex-modal:                      1050 !default;
-$zindex-popover:                    1060 !default;
-$zindex-tooltip:                    1070 !default;
-$zindex-preloader:                  1080;
-$zindex-menu:                       1100;
+$zindex-menu:                       1040;
+$zindex-preloader:                  1050;
+$zindex-modal-backdrop:             1060;
+$zindex-modal:                      1070;
+$zindex-popover:                    1080;
+$zindex-tooltip:                    1090;
+$zindex-close:                      1100;
+

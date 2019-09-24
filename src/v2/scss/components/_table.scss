@@ -123,9 +123,15 @@ thead, thead > tr {
 
     @include media-breakpoint-up(md) {
       display: table-cell;
-      border: $border-width solid $gray-lighter;
+      border-top: $border-width solid $gray-lighter;
       padding: spacer("3x");
-    }
+      &:first-child {
+        padding-top: spacer("3x");
+      }
 
+      &:last-child {
+        padding-bottom: spacer("3x");
+      }
+    }
   }
 }

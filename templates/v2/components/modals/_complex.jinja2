@@ -1,0 +1,44 @@
+<div class="page-dimmer show">
+            <div class="modal" id="exampleModalComplex" tabindex="-1" role="dialog" aria-hidden="true">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                </button>
+                <div class="modal__header">
+                    <h1 class="modal__title mb-4">Импортировать баллы по stepik.org ID</h1>
+                    <p class="m-0">Будьте внимательны, изменения нельзя будет отменить</p>
+                </div>
+                <div class="modal__content">
+                    <form class="form ui form__transparent">
+                        <div class="field">
+                            <div class="ui input">
+                                <label>Выбрать задание</label>
+                                <input type="text" placeholder="Логин">
+                            </div>
+                            <div class="help-text">
+                                Оценки будут импортированы для выбранного задания
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Выбрать задание</label>
+                            <div class="ui input custom-file">
+                                <input type="file" class="custom-file-input" id="customFile" multiple>
+                                <label class="custom-file-label" for="customFile">Загрузить файл</label>
+                            </div>
+                            <p class="help-text">
+                                Значения должны быть разделены запятой. Первая строка - заголовки
+                            </p>
+                        </div>
+                        <p><code>stepic_id,total  </br>1,7</code></p>
+                    </form>
+                </div>
+                <div class="modal__footer">
+                    <div class="buttons">
+                        <button type="button" class="btn _gray _outline" data-dismiss="modal">
+                            Отменить
+                        </button>
+                        <button type="button" class="btn _success">Сохранить</button>
+                        <button type="button" class="btn _danger">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        </div>

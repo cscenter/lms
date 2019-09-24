@@ -238,14 +238,15 @@ a.card {
   margin-bottom: spacer("4x");
   background-size: cover;
   @include media-breakpoint-down(md) {
-    text-align: center;
     align-items: center;
   }
+
   &__text {
     color: $white;
     margin: spacer("4x") 0;
     overflow: hidden;
     width: 100%; //fix for IE
+    max-height: 336px;
 
     &--dark {
       color: $gray-darker;
@@ -288,7 +289,7 @@ a.card {
   }
 
   &--full-size {
-      height: 512px;
+    height: 512px;
     @include media-breakpoint-down(md) {
       justify-content: space-between;
     }
@@ -319,14 +320,14 @@ a.card {
     .social-media__text {
       max-height: 96px;
     }
-    &:after {
-      content: '';
+    &::after {
+      content: "";
       position: absolute;
       right: 16px;
-      bottom: 0px;
+      bottom: 0;
       width: 150px;
       height: 96px;
-      background: linear-gradient(to right, rgba($gray-lighter, 0.2), $gray-lighter);
+      background: linear-gradient(to right, rgba($gray-lighter, .2), $gray-lighter);
       @include media-breakpoint-up(lg) {
         height: 104px;
       }
