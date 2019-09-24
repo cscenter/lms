@@ -11,7 +11,9 @@ class GroupSerializer(serializers.ModelSerializer):
 
 
 class ParticipantsStatsSerializer(serializers.Serializer):
-    groups = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    # FIXME: groups -> roles
+    groups = serializers.SlugRelatedField(many=True, read_only=True,
+                                          slug_field='role')
     curriculum_year = serializers.IntegerField(read_only=True)
 
     def create(self, validated_data):
@@ -22,7 +24,8 @@ class ParticipantsStatsSerializer(serializers.Serializer):
 
 
 class StudentSerializer(serializers.ModelSerializer):
-    groups = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+    groups = serializers.SlugRelatedField(many=True, read_only=True,
+                                          slug_field='role')
 
     class Meta:
         model = User
