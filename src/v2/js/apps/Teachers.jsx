@@ -123,7 +123,7 @@ class App extends React.Component {
         });
     };
 
-    handleLoadCourseOptions(select, callback) {
+    handleLoadCourseOptions(select) {
         console.debug("Teachers: load course list options");
         $.ajax({
             type: "GET",
@@ -138,11 +138,11 @@ class App extends React.Component {
                 optionsLoaded: true,
                 options,
                 isLoading: false
-            })
+            });
         }).fail(() => {
             showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
         });
-    };
+    }
 
     render() {
         if (this.state.loading) {

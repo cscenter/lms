@@ -31,16 +31,18 @@ const fn = {
                 .filter(key => groups[key])
                 .join(",");
 
+            let queryData = {
+                name: queryName,
+                branches: selectedBranches,
+                curriculum_year: selectedYears,
+                groups: selectedGroups,
+                status: selectedStatuses,
+                cnt_enrollments: selectedEnrollmentsCount,
+            };
+
             $.ajax({
                 url: ENTRY_POINT,
-                data: {
-                    name: queryName,
-                    branches: selectedBranches,
-                    curriculum_year: selectedYears,
-                    groups: selectedGroups,
-                    status: selectedStatuses,
-                    cnt_enrollments: selectedEnrollmentsCount,
-                },
+                data: queryData,
                 dataType: "json",
                 traditional: true
             }).done(function (data) {
@@ -49,6 +51,9 @@ const fn = {
                     found = `Показано: 500 из ${data.count}`;
                 } else {
                     found = `Найдено: ${data.count}`;
+                }
+                if (parseInt(data.count) > 0) {
+                    found += ` <a target="_blank" href="/staff/student-search.csv?${$.param(queryData)}">скачать csv</a>`;
                 }
                 $("#user-num-container").html(found).show();
                 let h = "<table class='table table-condensed'>";
