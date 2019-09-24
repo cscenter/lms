@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import Prefetch
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -5,12 +6,12 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from rest_pandas import PandasView
 
 from api.permissions import CuratorAccessPermission
+from courses.models import Assignment
 from learning.models import StudentAssignment, \
     Enrollment
-from courses.models import Assignment
 from stats.renderers import ListRenderersMixin
 from users.constants import Roles
-from users.models import User, Group
+from users.models import User, UserGroup
 from .pandas_serializers import ParticipantsByYearPandasSerializer, \
     ParticipantsByGroupPandasSerializer
 from .serializers import ParticipantsStatsSerializer, \
@@ -34,13 +35,14 @@ class CourseParticipantsStatsByGroup(ListRenderersMixin, PandasView):
         course_id = self.kwargs['course_id']
         return (User.objects
                 .only("curriculum_year")
-                .filter(
-                    enrollment__is_deleted=False,
-                    enrollment__course_id=course_id)
+                .filter(enrollment__is_deleted=False,
+                        enrollment__course_id=course_id)
                 .prefetch_related(
                     Prefetch(
                         "groups",
-                        queryset=Group.objects.filter(pk__in=groups)
+                        queryset=(UserGroup.objects
+                                  .filter(role__in=groups,
+                                          site_id=settings.SITE_ID))
                     )
                 )
                 .order_by())
@@ -61,7 +63,13 @@ class CourseParticipantsStatsByYear(ListRenderersMixin, PandasView):
                 .filter(
                     enrollment__is_deleted=False,
                     enrollment__course_id=course_id)
-                .prefetch_related("groups")
+                .prefetch_related(
+                    Prefetch(
+                        "groups",
+                        queryset=(UserGroup.objects
+                                  .filter(site_id=settings.SITE_ID))
+                    )
+                )
                 .order_by())
 
 
