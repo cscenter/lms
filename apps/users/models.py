@@ -24,7 +24,7 @@ from sorl.thumbnail import ImageField
 
 from auth.permissions import all_permissions
 from auth.tasks import update_password_in_gerrit
-from compscicenter_ru.utils import PublicRoute
+from my_compscicenter_ru.utils import PublicRoute
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse

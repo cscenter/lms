@@ -6,16 +6,15 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.views.generic import RedirectView, TemplateView
 from loginas import urls as loginas_urls
-from registration.backends.default.views import ActivationView, \
-    ResendActivationView
 
+import my_compscicenter_ru.views
 from announcements.views import AnnouncementTagAutocomplete, \
     AnnouncementDetailView
 from compscicenter_ru import views
+from compscicenter_ru.views import TeacherDetailView
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.urls import RE_COURSE_URI
 from htmlpages.views import flatpage
-from compscicenter_ru.views import TeacherDetailView
 
 admin.autodiscover()
 
@@ -68,8 +67,8 @@ urlpatterns += [
     path('projects/', views.ProjectsListView.as_view(), name="public_projects"),
     path('', include('publications.urls')),
 
-    path('courses/', views.CourseOfferingsView.as_view(), name="course_list"),
     path("courses/", include([
+        path("", my_compscicenter_ru.views.CourseOfferingsView.as_view(), name="course_list"),
         path("<slug:course_slug>/", views.MetaCourseDetailView.as_view(), name="meta_course_detail"),
         re_path(RE_COURSE_URI, include([
             path("", views.CourseDetailView.as_view(), name="course_detail"),

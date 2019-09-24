@@ -1,16 +1,14 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from django.forms import SlugField
 from django.http import QueryDict
-from django.utils.translation import ugettext_lazy as _
-from django_filters import FilterSet, Filter, ChoiceFilter
+from django_filters import FilterSet, ChoiceFilter, Filter
 
 from core.models import Branch
 from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.constants import SemesterTypes
 from courses.models import Course
-from courses.utils import get_term_index, semester_slug_re
+from courses.utils import semester_slug_re, get_term_index
 from learning.settings import Branches
 
 
