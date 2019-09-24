@@ -3,7 +3,7 @@
   max-height: 3000px;
   transition: max-height .25s ease-in, opacity .25s ease-in;
 
-  &.hidden {
+  &.hide {
     margin: 0!important;
     max-height: 0;
     overflow: hidden;

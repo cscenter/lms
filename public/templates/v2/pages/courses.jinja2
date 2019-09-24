@@ -1,8 +1,229 @@
 {% extends "v2/layouts/inner.jinja2" %}
 
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/index.svg") }}");
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/common.svg") }}");
+    </script>
+{% endblock sprites %}
 {% block content %}
-    <div class="container page-content">
-        <a href="/v2/pages/meta_course/">Страница курса</a><br>
-        <a href="/v2/pages/course_detail/">Страница прочтения курса</a>
+    <div class="container page-content pt-0 pt-sm-10 p-xs-0">
+        <div class="row no-gutters">
+            <div class="col-lg-9">
+                <div class="card pt-2">
+                    <div class="card__content p-4 p-md-8">
+                        <h1>Курсы центра</h1>
+                        <form action="">
+                            <div class="row">
+                                <div class="field col-12 col-lg-9 mb-3">
+                                    <div class="ui icon input">
+                                        <input type="search" placeholder="Поиск по названию курса">
+                                        <i class="_search icon">{{ macros.svg_icon('search') }}</i>
+                                    </div>
+                                </div>
+                                <div class="buttons col-12 d-lg-none mb-4">
+                                    <a href="#"
+                                       class="btn _light _extra-small">Санкт-Петербург {{ macros.svg_icon('arrow-bottom') }}</a>
+                                    <button type="button" class="btn _light _extra-small" data-toggle="modal"
+                                            data-target="#exampleModalFilter">
+                                        Фильтры
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card__content p-0">
+                        <div class="table _mobile _courses">
+                            <div class="table__row _head">
+                                <div class="table__cell">Название</div>
+                                <div class="table__cell">Преподаватели</div>
+                                <div class="table__cell">Материалы</div>
+                            </div>
+                            <div class="table__row">
+                                <div class="table__cell"><a href="https://compscicenter.ru/courses/csseminar/2019-spring/"
+                                       class="__course">Computer
+                                    Science семинар</a></div>
+                                <div class="table__cell">
+                                    <a href="https://compscicenter.ru/teachers/5545/">A.&nbsp;Lubotzky</a>,
+                                    <a href="https://compscicenter.ru/teachers/5442/">Y.&nbsp;Dodis</a>,
+                                    <a href="https://compscicenter.ru/teachers/5198/">А.&nbsp;Крайнов</a>
+                                </div>
+                                <div class="table__cell">
+                                    {{ macros.svg_icon('video') }}
+                                    {{ macros.svg_icon('video') }}
+                                </div>
+                            </div>
+                            <div class="table__row">
+                                <div class="table__cell"><a
+                                        href="https://compscicenter.ru/courses/deep-learning-simplified/nsk/2019-spring/"
+                                        class="__course">Deep Learning на пальцах</a></div>
+                                <div class="table__cell">
+                                    <a href="https://compscicenter.ru/teachers/5228/">С.&nbsp;М.&nbsp;Козлов</a>,
+                                    <a href="https://compscicenter.ru/teachers/3297/">К.&nbsp;В.&nbsp;Бродт</a>,
+                                    <a href="https://compscicenter.ru/teachers/3402/">М.&nbsp;И.&nbsp;Вахрушев</a>
+                                </div>
+                                <div class="table__cell">
+                                </div>
+                            </div>
+                            <div class="table__row">
+                                <div class="table__cell"><a href="https://compscicenter.ru/courses/algorithms-2/2019-spring/">Алгоритмы
+                                    и структуры данных, часть 2</a></div>
+                                <div class="table__cell">
+                                    <a href="https://compscicenter.ru/teachers/5506/">А.&nbsp;Мишунин</a>,
+                                    <a href="https://compscicenter.ru/teachers/560/">С.&nbsp;И.&nbsp;Грязнов</a>,
+                                    <a href="https://compscicenter.ru/teachers/4050/">А.&nbsp;В.&nbsp;Гардер</a>,
+                                    <a href="https://compscicenter.ru/teachers/1645/">М.&nbsp;Д.&nbsp;Кормышов</a>,
+                                    <a href="https://compscicenter.ru/teachers/32/">А.&nbsp;В.&nbsp;Смаль</a>
+                                </div>
+                                <div class="table__cell"></div>
+                            </div>
+                            <div class="table__row">
+                                <div class="table__cell"><a
+                                        href="https://compscicenter.ru/courses/fourie-analysis/2019-spring/">Анализ
+                                    булевых функций</a></div>
+                                <div class="table__cell">
+                                    <a href="https://compscicenter.ru/teachers/818/">В.&nbsp;В.&nbsp;Подольский</a>
+                                </div>
+                                <div class="table__cell">
+                                    {{ macros.svg_icon('video') }}
+                                </div>
+                            </div>
+                            <div class="table__row">
+                                <div class="table__cell"><a
+                                        href="https://compscicenter.ru/courses/data-mining-python/2019-spring/">Анализ
+                                    данных на Python в примерах и задачах. Часть&nbsp;1</a>
+                                </div>
+                                <div class="table__cell">
+                                    <a href="https://compscicenter.ru/teachers/1716/">И.&nbsp;А.&nbsp;Рябцев</a>,
+                                    <a href="https://compscicenter.ru/teachers/618/">В.&nbsp;Л.&nbsp;Аббакумов</a>
+                                </div>
+                                <div class="table__cell">
+                                    {{ macros.svg_icon('video') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 pl-6 mt-10">
+                <form class="ui form __no-border _right-side-filter d-none d-lg-block" action="">
+                    <div class="grouped mb-6">
+                        <h4>Отделение</h4>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Санкт-Петербург</span>
+                        </label>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Новосибирск</span>
+                        </label>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Заочное обучение</span>
+                        </label>
+                    </div>
+                    <div class="field mb-6">
+                        <div class="ui input">
+                            <label for="">Год</label>
+                            <input placeholder="2019">
+                        </div>
+                    </div>
+                    <div class="grouped mb-6">
+                        <h4>Семестр</h4>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Осенний</span>
+                        </label>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Весенний</span>
+                        </label>
+                    </div>
+                    <div class="grouped mb-6">
+                        <h4>Базовые курсы программ</h4>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Software Engineering</span>
+                        </label>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Data Science</span>
+                        </label>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Computer Science</span>
+                        </label>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="page-dimmer">
+            <div class="modal _fullscreen" id="exampleModalCover" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-menu navbar navbar-main">
+                    <div class="container">
+                        <button type="button" class="modal__close" data-dismiss="modal" aria-label="Close">
+                            {{ macros.svg_icon('cross') }}
+                        </button>
+                        <span>Фильтры</span>
+                        <button class="btn _white _outline _rounded _extra-small ml-auto">Сбросить</button>
+                    </div>
+                </div>
+                <div class="modal__content">
+                    <div class="container">
+                        <form class="ui form __no-border" action="">
+                            <div class="field mb-6">
+                                <div class="ui input">
+                                    <label for="">Год</label>
+                                    <input placeholder="2019">
+                                </div>
+                            </div>
+                            <div class="grouped mb-6">
+                                <h4>Семестр</h4>
+                                <label class="ui option checkbox">
+                                    <input type="checkbox" class="control__input">
+                                    <span class="control__indicator"></span>
+                                    <span class="control__description">Осенний</span>
+                                </label>
+                                <label class="ui option checkbox">
+                                    <input type="checkbox" class="control__input">
+                                    <span class="control__indicator"></span>
+                                    <span class="control__description">Весенний</span>
+                                </label>
+                            </div>
+                            <div class="grouped mb-6">
+                                <h4>Базовые курсы программ</h4>
+                                <label class="ui option checkbox">
+                                    <input type="checkbox" class="control__input">
+                                    <span class="control__indicator"></span>
+                                    <span class="control__description">Software Engineering</span>
+                                </label>
+                                <label class="ui option checkbox">
+                                    <input type="checkbox" class="control__input">
+                                    <span class="control__indicator"></span>
+                                    <span class="control__description">Data Science</span>
+                                </label>
+                                <label class="ui option checkbox">
+                                    <input type="checkbox" class="control__input">
+                                    <span class="control__indicator"></span>
+                                    <span class="control__description">Computer Science</span>
+                                </label>
+                            </div>
+                            <button type="button" class="btn _primary _m-wide">Показать результаты</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 {% endblock content %}

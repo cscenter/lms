@@ -76,7 +76,7 @@ $form-feedback-invalid-color: $red;
       margin-bottom: spacer("10x");
     }
 
-    &.hidden {
+    &.hide {
       margin-bottom: 0;
     }
   }
@@ -129,7 +129,7 @@ $form-feedback-invalid-color: $red;
 .field {
   margin-bottom: spacer("6x");
 
-  &.hidden {
+  &.hide {
     margin-bottom: 0;
   }
 }

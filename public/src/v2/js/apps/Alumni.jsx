@@ -56,11 +56,11 @@ class Alumni extends React.Component {
         const newPayload = this.getRequestPayload(filterState);
         console.debug("Alumni: newPayload", newPayload);
         this.fetch(newPayload);
-    };
+    }
 
     componentWillUnmount() {
         this.serverRequest.abort();
-    };
+    }
 
     componentDidUpdate(prevProps, prevState) {
         if (this.state.loading) {
@@ -70,7 +70,7 @@ class Alumni extends React.Component {
         } else {
             hideBodyPreloader();
         }
-    };
+    }
 
     getFilterState(state) {
         let {year, branch} = state;
@@ -173,8 +173,6 @@ class Alumni extends React.Component {
 
 const propTypes = {
     entryURL: PropTypes.string.isRequired,
-    coursesURL: PropTypes.string.isRequired,
-    termIndex: PropTypes.number.isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired
@@ -184,7 +182,7 @@ const propTypes = {
         label: PropTypes.string.isRequired
     })).isRequired,
     yearOptions: PropTypes.arrayOf(PropTypes.shape({
-        value: PropTypes.string.isRequired,
+        value: PropTypes.number.isRequired,
         label: PropTypes.string.isRequired
     })).isRequired,
 };

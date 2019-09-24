@@ -1,0 +1,21 @@
+.table._courses {
+  border: none;
+
+  .table__row {
+    .table__cell {
+      padding-left: spacer("4x");
+    }
+  }
+
+  @include media-breakpoint-up(md) {
+    .table__row {
+      .table__cell:first-child {
+        padding-left: spacer("8x");
+      }
+
+      .table__cell:last-child {
+        padding-right: spacer("8x");
+      }
+    }
+  }
+}

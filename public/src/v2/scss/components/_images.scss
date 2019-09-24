@@ -10,6 +10,7 @@ $figure-caption-color:              $gray-dark;
 
 .img-fluid {
   @include img-fluid;
+  width: 100%;
 }
 
 //
