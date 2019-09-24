@@ -259,7 +259,7 @@ class AlumniView(TemplateView):
             last_graduation_year = d['year'] if d['year'] else first_graduation
             cache.set(cache_key, last_graduation_year, 86400 * 31)
         years_range = range(first_graduation, last_graduation_year + 1)
-        years = [{"label": y, "value": y} for y in reversed(years_range)]
+        years = [{"label": str(y), "value": y} for y in reversed(years_range)]
         year = self.kwargs.get("year")
         if year not in years_range:
             year = last_graduation_year

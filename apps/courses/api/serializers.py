@@ -88,7 +88,7 @@ class TeacherSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
     name = serializers.SerializerMethodField()
     photo = PhotoSerializerField(User.ThumbnailSize.BASE)
-    activities = serializers.CharField(source="workplace")
+    occupation = serializers.CharField(source="workplace")
     branch = serializers.CharField(source="branch.code")
     courses = CourseRelatedField(
         source="courseteacher_set", many=True, read_only=True,
@@ -98,7 +98,7 @@ class TeacherSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'name', 'activities', 'branch', 'photo',
+        fields = ('id', 'name', 'occupation', 'branch', 'photo',
                   'courses', 'latest_session')
 
     def get_name(self, obj):
