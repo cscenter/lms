@@ -9,7 +9,7 @@ from loginas import urls as loginas_urls
 from announcements.views import AnnouncementTagAutocomplete
 from courses.urls import RE_COURSE_URI
 from courses.views import CourseDetailView
-from my_compscicenter_ru.views import IndexView
+from my_compscicenter_ru.views import IndexView, CourseOfferingsView
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 
 admin.autodiscover()
@@ -24,13 +24,13 @@ urlpatterns = [
 
     path('', include('learning.urls')),
 
-    path("courses/", include([
+    path('courses/', include([
+        path('', CourseOfferingsView.as_view(), name="course_list"),
         re_path(RE_COURSE_URI, include([
-            path("", CourseDetailView.as_view(), name="course_detail"),
+            path('', CourseDetailView.as_view(), name="course_detail"),
             re_path(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$", CourseDetailView.as_view(), name="course_detail_with_active_tab"),
         ]))
     ])),
-
     path("courses/", include('learning.invitation.urls')),
 
     path('', include('auth.urls')),

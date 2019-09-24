@@ -3,7 +3,6 @@ from menu import Menu
 
 from core.menu import MenuItem
 from core.urls import reverse
-from users.constants import Roles
 
 top_menu = [
     MenuItem(
