@@ -1,10 +1,12 @@
-from typing import Optional
+import datetime
+from typing import Optional, NewType
 
 import pytz
 from django.contrib.auth.models import AnonymousUser, AbstractUser
 from django.utils.encoding import smart_text
 
-from core.timezone import Timezone
+
+Timezone = NewType('Timezone', datetime.tzinfo)
 
 
 class PermissionMixin:

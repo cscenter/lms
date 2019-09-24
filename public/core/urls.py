@@ -21,7 +21,7 @@ from django.http import JsonResponse, HttpResponse
 from django.urls import path, include
 from django.views import generic
 
-from core.views import NotyView, AlumniView, TeachersView
+from .views import NotyView, AlumniView, TeachersView
 
 
 class HtmlView(generic.TemplateView):
