@@ -25,7 +25,7 @@ def test_alumni(client):
     response = client.get(url_alumni_all)
     assert response.status_code == 200
     json_data = response.context_data['app_data']
-    assert json_data['props']['yearOptions'] == [{'label': 2013, 'value': 2013}]
+    assert json_data['props']['yearOptions'] == [{'label': '2013', 'value': 2013}]
     assert not json_data['props']['areaOptions']
     graduated_on = datetime.date(year=2015, month=1, day=1)
     graduated = GraduateProfileFactory(graduated_on=graduated_on)
