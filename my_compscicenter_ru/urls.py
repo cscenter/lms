@@ -18,7 +18,8 @@ admin.autodiscover()
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('robots.txt', TemplateView.as_view(template_name="my_compscicenter_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
-    path('api/', include('api.backend_urls')),
+    path('api/', include('stats.api_urls')),
+
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
 

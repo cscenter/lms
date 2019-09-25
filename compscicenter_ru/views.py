@@ -167,7 +167,7 @@ class TestimonialsListView(TemplateView):
                 },
                 "props": {
                     "page_size": page_size,
-                    "entry_url": reverse("api:testimonials"),
+                    "entry_url": reverse("learning-api:v2:testimonials"),
                     "total": total,
                 }
             }
@@ -187,8 +187,8 @@ class TeachersView(TemplateView):
                 "branch": self.kwargs.get("city", None),
             },
             "props": {
-                "entryURL": reverse("api:teachers"),
-                "coursesURL": reverse("api:courses"),
+                "entryURL": reverse("public-api:v2:teachers"),
+                "coursesURL": reverse("public-api:v2:teachers_courses"),
                 "branchOptions": _get_branch_choices(),
                 "termIndex": term_index,
             }
@@ -276,7 +276,7 @@ class AlumniView(TemplateView):
                 "branch": self.kwargs.get("city", None),
             },
             "props": {
-                "entryURL": reverse("api:alumni"),
+                "entryURL": reverse("learning-api:v2:alumni"),
                 "branchOptions": _get_branch_choices(),
                 "areaOptions": areas,
                 "yearOptions": years
@@ -378,8 +378,8 @@ class CourseVideoListView(TemplateView):
         app_data = {
             "props": {
                 "entryURL": [
-                    reverse("api:course_video_records"),
-                    reverse("api:recorded_events_videos"),
+                    reverse("public-api:v2:course_videos"),
+                    reverse("public-api:v2:recorded_events_videos"),
                 ],
                 "videoOptions": video_types
             },
@@ -603,11 +603,10 @@ class CourseOfferingsView(TemplateView):
         app_data = {
             "props": {
                 "entryURL": [
-                    reverse("api:course_list"),
+                    "",
                 ],
             },
             "state": {
-                "videoTypes": [item["value"] for item in video_types]
             },
         }
         return {"app_data": app_data}

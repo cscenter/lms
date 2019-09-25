@@ -19,7 +19,6 @@ from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
 from multiselectfield import MultiSelectField
-from post_office import mail
 from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
@@ -28,11 +27,10 @@ from admission.utils import slot_range
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
 from core.db.models import ScoreField
-from core.timezone import TimezoneAwareModel
-from core.settings.base import CENTER_FOUNDATION_YEAR
-from core.urls import reverse
 from core.models import Branch, Location
-from learning.settings import AcademicDegreeYears, Branches
+from core.timezone import TimezoneAwareModel
+from core.urls import reverse
+from learning.settings import AcademicDegreeYears
 from users.constants import Roles
 
 
@@ -54,7 +52,7 @@ class Campaign(TimezoneAwareModel, models.Model):
 
     year = models.PositiveSmallIntegerField(
         _("Campaign|Year"),
-        validators=[MinValueValidator(CENTER_FOUNDATION_YEAR)],
+        validators=[MinValueValidator(settings.CENTER_FOUNDATION_YEAR)],
         default=current_year)
     branch = models.ForeignKey(Branch,
                                verbose_name=_("Branch"),

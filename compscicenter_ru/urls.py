@@ -7,7 +7,6 @@ from django.urls import path, re_path
 from django.views.generic import RedirectView, TemplateView
 from loginas import urls as loginas_urls
 
-import my_compscicenter_ru.views
 from announcements.views import AnnouncementTagAutocomplete, \
     AnnouncementDetailView
 from compscicenter_ru import views
@@ -58,7 +57,8 @@ urlpatterns += [
     path('students/<int:student_id>/', views.StudentProfileView.as_view(), name='student_profile'),
     path('', include('users.urls')),
 
-    path('api/', include('api.frontend_urls')),
+    path('api/', include('learning.api.urls', namespace='learning-api')),
+    path('api/', include('compscicenter_ru.api.urls')),
 
     # Place tags-autocomplete under `announcements` namespace
     path("", include(([
@@ -68,7 +68,7 @@ urlpatterns += [
     path('', include('publications.urls')),
 
     path("courses/", include([
-        path("", my_compscicenter_ru.views.CourseOfferingsView.as_view(), name="course_list"),
+        path("", views.CourseOfferingsView.as_view(), name="course_list"),
         path("<slug:course_slug>/", views.MetaCourseDetailView.as_view(), name="meta_course_detail"),
         re_path(RE_COURSE_URI, include([
             path("", views.CourseDetailView.as_view(), name="course_detail"),

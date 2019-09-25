@@ -1,16 +1,11 @@
 from typing import List
 
-from django.apps import apps
-from django.conf import settings
-
 from django.db import models
 from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
     Value, IntegerField
 
 from core.utils import is_club_site
-from core.settings.base import CENTER_FOUNDATION_YEAR
-from courses.constants import SemesterTypes
-from courses.utils import get_term_index, get_boundaries
+from courses.utils import get_boundaries
 
 
 class CourseTeacherQuerySet(query.QuerySet):

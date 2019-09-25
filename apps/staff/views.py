@@ -25,8 +25,7 @@ from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
 from api.permissions import CuratorAccessPermission
 from core.models import Branch
-from core.settings.base import FOUNDATION_YEAR, CENTER_FOUNDATION_YEAR, \
-    DEFAULT_BRANCH_CODE
+from core.settings.base import FOUNDATION_YEAR, DEFAULT_BRANCH_CODE
 from core.templatetags.core_tags import tex
 from core.urls import reverse
 from courses.constants import SemesterTypes
@@ -477,7 +476,8 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         current_year, _ = get_current_term_pair(branch.get_timezone())
         context = {
             'students': self.get_queryset(branch, enrollment_year),
-            "years": reversed(range(CENTER_FOUNDATION_YEAR, current_year + 1)),
+            "years": reversed(range(settings.CENTER_FOUNDATION_YEAR,
+                                    current_year + 1)),
             "current_year": enrollment_year,
             "current_branch": branch,
             "branches": Branches

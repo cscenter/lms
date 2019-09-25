@@ -5,7 +5,6 @@ from django.http import QueryDict
 from django_filters import FilterSet, ChoiceFilter, Filter
 
 from core.models import Branch
-from core.settings.base import CENTER_FOUNDATION_YEAR
 from courses.constants import SemesterTypes
 from courses.models import Course
 from courses.utils import semester_slug_re, get_term_index
@@ -17,14 +16,14 @@ def validate_semester_slug(value):
     if not match:
         raise ValidationError("Semester slug should be YEAR-TERM_TYPE format")
     term_year = int(match.group("term_year"))
-    if term_year < CENTER_FOUNDATION_YEAR:
+    if term_year < settings.CENTER_FOUNDATION_YEAR:
         raise ValidationError("Wrong semester year")
     term_type = match.group("term_type")
     # More strict rules for term types
     if term_type not in [SemesterTypes.AUTUMN, SemesterTypes.SPRING]:
         raise ValidationError("Supported semester types: [autumn, spring]")
     term_index = get_term_index(term_year, term_type)
-    first_term_index = get_term_index(CENTER_FOUNDATION_YEAR,
+    first_term_index = get_term_index(settings.CENTER_FOUNDATION_YEAR,
                                       SemesterTypes.AUTUMN)
     if term_index < first_term_index:
         raise ValidationError("CS Center has no offerings for this period")
