@@ -17,7 +17,7 @@ from core.tests.factories import BranchFactory
 
 @pytest.mark.django_db
 def test_application_form_inactive_or_past_campaign(client):
-    url = reverse("api:applicant_create")
+    url = reverse("public-api:v2:applicant_create")
     today = now_for_branch(Branches.SPB)
     campaign = CampaignFactory(current=True, branch__code=Branches.SPB,
                                application_starts_at=today - timedelta(days=2),
@@ -38,7 +38,7 @@ def test_application_form_inactive_or_past_campaign(client):
 @pytest.mark.django_db
 def test_application_form_preferred_study_programs(client):
     """`preferred_study_programs` is mandatory for on-campus branches"""
-    url = reverse("api:applicant_create")
+    url = reverse("public-api:v2:applicant_create")
     today = now_for_branch(Branches.SPB)
     campaign = CampaignFactory(current=True, branch__code=Branches.SPB,
                                application_starts_at=today - timedelta(days=2),
@@ -64,7 +64,7 @@ def test_application_form_preferred_study_programs(client):
 @pytest.mark.django_db
 def test_application_form_living_place(client):
     """`living_place` is mandatory for distance branch"""
-    url = reverse("api:applicant_create")
+    url = reverse("public-api:v2:applicant_create")
     today = now_for_branch(Branches.SPB)
     branch = BranchFactory(code=Branches.DISTANCE, city=None)
     campaign = CampaignFactory(current=True,

@@ -11,7 +11,7 @@ from users.tests.factories import TeacherFactory
 
 @pytest.mark.django_db
 def test_teachers_list(client):
-    url = reverse("api:teachers")
+    url = reverse("public-api:v2:teachers")
     t1, t2 = TeacherFactory.create_batch(2)
     term = SemesterFactory.create_current()
     next_term = SemesterFactory.create_next(term)
@@ -33,7 +33,7 @@ def test_teachers_list(client):
 
 @pytest.mark.django_db
 def test_courses(client):
-    url = reverse("api:courses")
+    url = reverse("public-api:v2:teachers_courses")
     c = CourseFactory()
     response = client.get(url)
     assert response.status_code == 200
@@ -43,7 +43,7 @@ def test_courses(client):
 
 @pytest.mark.django_db
 def test_video_list(client):
-    url = reverse("api:course_video_records")
+    url = reverse("public-api:v2:course_videos")
     CourseFactory.create_batch(2, is_published_in_video=False)
     with_video = CourseFactory.create_batch(5,
                                             is_published_in_video=True)

@@ -157,6 +157,7 @@ WEBPACK_LOADER = {
 DATE_FORMAT = 'j E Y'
 
 # Presume foundation year starts from spring term
+# FIXME: separate between club and cscenter projects?
 FOUNDATION_YEAR = 2007
 CENTER_FOUNDATION_YEAR = 2011
 

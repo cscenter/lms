@@ -8,7 +8,6 @@ from django.views import generic
 from vanilla import DetailView
 
 from core.exceptions import Redirect
-from core.settings.base import CENTER_FOUNDATION_YEAR
 from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
 from courses.constants import SemesterTypes, TeacherRoles
@@ -40,7 +39,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
         # FIXME: remove or separate
         co = context[self.context_object_name]
         if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
-            index = get_term_index(CENTER_FOUNDATION_YEAR,
+            index = get_term_index(settings.CENTER_FOUNDATION_YEAR,
                                    SemesterTypes.AUTUMN)
             if co.semester.index < index:
                 parsed = urlparse(co.get_absolute_url())

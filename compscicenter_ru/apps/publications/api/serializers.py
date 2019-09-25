@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from courses.api.serializers import CourseVideoSerializer
+from compscicenter_ru.api.serializers import CourseVideoSerializer
 from publications.models import RecordedEvent, Speaker
 
 

@@ -1,36 +1,35 @@
+from django.conf import settings
 from django.db.models import Prefetch
 from django.http import HttpResponseBadRequest
 from django.utils.timezone import now
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
-from core.settings.base import CENTER_FOUNDATION_YEAR
-from courses.api.serializers import MetaCourseSerializer, TeacherSerializer, \
-    CourseVideoSerializer
-from courses.models import Course, CourseTeacher
 from courses.constants import SemesterTypes
+from courses.models import Course, CourseTeacher, MetaCourse
 from courses.utils import get_term_index
 from users.constants import Roles
 from users.models import User
+from .serializers import TeacherCourseSerializer, TeacherSerializer, \
+    CourseVideoSerializer
 
-# FIXME: replace with base implementation (both for CS club ans CS center [TODO: remove is_open=False, etc), then subclass
-class CourseList(ListAPIView):
-    """Returns courses for CS Center"""
+
+class TeacherCourseList(ListAPIView):
     pagination_class = None
-    serializer_class = MetaCourseSerializer
+    serializer_class = TeacherCourseSerializer
 
     def get_queryset(self):
         return (Course.objects
                 .filter(is_open=False)
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related("meta_course")
-                .only("meta_course_id", "meta_course__name", "semester__index")
+                .only("meta_course_id", "meta_course__name")
                 .order_by("meta_course__name")
                 .distinct("meta_course__name"))
 
 
 class LecturerList(ListAPIView):
-    """Returns list of CS Center lecturers"""
+    """Returns lecturers"""
     pagination_class = None
     serializer_class = TeacherSerializer
 
@@ -46,7 +45,7 @@ class LecturerList(ListAPIView):
                     .distinct())
         course = self.request.query_params.get('course', None)
         if course:
-            term_index = get_term_index(CENTER_FOUNDATION_YEAR,
+            term_index = get_term_index(settings.CENTER_FOUNDATION_YEAR,
                                         SemesterTypes.AUTUMN)
             queryset = queryset.filter(
                 courseteacher__course__meta_course_id=course,

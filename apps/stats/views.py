@@ -1,6 +1,6 @@
 import json
-from collections import OrderedDict
 
+from django.conf import settings
 from django.db.models import Q
 from django.utils.timezone import now
 from django.views import generic
@@ -8,11 +8,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.models import Campaign, Interview, Comment
-from core.settings.base import CENTER_FOUNDATION_YEAR
-from courses.models import Course, Semester
-from courses.constants import SemesterTypes
-from courses.utils import get_term_index
 from core.utils import bucketize
+from courses.constants import SemesterTypes
+from courses.models import Course, Semester
+from courses.utils import get_term_index
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import Roles
 from users.mixins import CuratorOnlyMixin
@@ -29,7 +28,7 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(StatsLearningView, self).get_context_data(**kwargs)
         # Terms grouped by year
-        term_start = get_term_index(CENTER_FOUNDATION_YEAR,
+        term_start = get_term_index(settings.CENTER_FOUNDATION_YEAR,
                                     SemesterTypes.AUTUMN)
         terms = (Semester.objects.only("pk", "type", "year")
                  .filter(index__gte=term_start)

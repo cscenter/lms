@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from courses.models import Course, CourseTeacher, Semester
 from users.api.serializers import PhotoSerializerField
-from users.constants import ThumbnailSizes
 from users.models import User
 
 
@@ -28,18 +27,6 @@ class SemesterSerializer(serializers.ModelSerializer):
 
     def get_name(self, obj: Semester):
         return str(obj)
-
-
-class MetaCourseSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="meta_course_id")
-    name = serializers.SerializerMethodField()
-
-    def get_name(self, obj: Course):
-        return obj.meta_course.name
-
-    class Meta:
-        model = Course
-        fields = ('id', 'name')
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -109,3 +96,15 @@ class TeacherSerializer(serializers.ModelSerializer):
         for t in obj.courseteacher_set.all():
             last = max(last, t.course.semester.index)
         return last
+
+
+class TeacherCourseSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source="meta_course_id")
+    name = serializers.SerializerMethodField()
+
+    def get_name(self, obj: Course):
+        return obj.meta_course.name
+
+    class Meta:
+        model = Course
+        fields = ('id', 'name')
