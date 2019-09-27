@@ -14,16 +14,12 @@ from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic, View
-from django_filters.rest_framework import DjangoFilterBackend
 from django_filters.views import BaseFilterView
-from rest_framework.generics import ListAPIView
-from rest_framework.pagination import LimitOffsetPagination
 from vanilla import TemplateView
 
 import core.utils
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
-from api.permissions import CuratorAccessPermission
 from core.models import Branch
 from core.settings.base import FOUNDATION_YEAR, DEFAULT_BRANCH_CODE
 from core.templatetags.core_tags import tex
@@ -41,30 +37,13 @@ from learning.settings import AcademicDegreeYears, StudentStatuses, \
     GradeTypes, Branches
 from staff.forms import GraduationForm
 from staff.models import Hint
-from staff.serializers import UserSearchSerializer, FacesQueryParams
+from staff.serializers import FacesQueryParams
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.constants import Roles
 from users.filters import UserFilter
 from users.mixins import CuratorOnlyMixin
 from users.models import User
-
-
-class StudentOffsetPagination(LimitOffsetPagination):
-    default_limit = 500
-
-
-class StudentSearchJSONView(ListAPIView):
-    permission_classes = [CuratorAccessPermission]
-    serializer_class = UserSearchSerializer
-    pagination_class = StudentOffsetPagination
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = UserFilter
-
-    def get_queryset(self):
-        return (User.objects
-                .only('username', 'first_name', 'last_name', 'pk')
-                .order_by('last_name', 'first_name'))
 
 
 class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):

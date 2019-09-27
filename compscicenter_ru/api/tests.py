@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from core.urls import reverse
 from courses.models import CourseTeacher
 from courses.tests.factories import SemesterFactory, CourseFactory
+from learning.tests.factories import GraduateProfileFactory
 from users.tests.factories import TeacherFactory
 
 
@@ -57,3 +58,11 @@ def test_video_list(client):
     response = client.get(url)
     assert response.status_code == 200
     assert len(response.data) == 5
+
+
+@pytest.mark.django_db
+def test_api_testimonials_smoke(client):
+    GraduateProfileFactory(testimonial='test', photo='stub.JPG')
+    response = client.get(reverse("public-api:v2:testimonials"))
+    assert response.status_code == 200
+    assert len(response.data['results']) == 1

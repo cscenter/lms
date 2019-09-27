@@ -57,7 +57,6 @@ urlpatterns += [
     path('students/<int:student_id>/', views.StudentProfileView.as_view(), name='student_profile'),
     path('', include('users.urls')),
 
-    path('api/', include('learning.api.urls', namespace='learning-api')),
     path('api/', include('compscicenter_ru.api.urls')),
 
     # Place tags-autocomplete under `announcements` namespace

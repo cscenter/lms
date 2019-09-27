@@ -3,8 +3,7 @@ from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
 from learning.gradebook.views import GradeBookView, GradeBookCSVView
-from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, \
-    ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
+from staff.views import HintListView, StudentSearchView, ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
     ProgressReportForSemesterView, AdmissionReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
@@ -12,6 +11,7 @@ from staff.views import HintListView, StudentSearchView, StudentSearchJSONView, 
     SurveySubmissionsReportView, \
     SurveySubmissionsStatsView, GradeBookListView, create_alumni_profiles, \
     InvitationStudentsProgressReportView, StudentSearchCSVView
+from staff.api.views import StudentSearchJSONView
 
 app_name = 'staff'
 
