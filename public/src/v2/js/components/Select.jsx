@@ -1,5 +1,5 @@
 import SelectBase from 'react-select';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import React from 'react';
 
 
@@ -24,7 +24,7 @@ export const SelectDefaultProps = {
 class Select extends React.Component {
 
     handleChange = (e) => {
-        this.props.onChange(e);
+        this.props.onChange(e, this.props.name);
     };
 
     render() {

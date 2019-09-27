@@ -14,6 +14,7 @@ import {
     showBodyPreloader,
     showErrorNotification
 } from "../utils";
+import {onSelectChange} from "components/utils";
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
@@ -32,23 +33,7 @@ class Alumni extends React.Component {
         this.fetch = _throttle(this.fetch, 300);
     }
 
-    handleYearChange = (year) => {
-        this.setState({
-            year: year
-        });
-    };
-
-    handleAreaChange = (areaCode) => {
-        this.setState({
-            area: areaCode
-        });
-    };
-
-    handleBranchChange = (branch) => {
-        this.setState({
-            branch: branch
-        });
-    };
+    handleSelectChange = onSelectChange.bind(this);
 
     componentDidMount() {
         const filterState = this.getFilterState(this.state);
@@ -129,7 +114,7 @@ class Alumni extends React.Component {
                 <div className="row mb-4">
                     <div className="col-lg-2 mb-4">
                         <Select
-                            onChange={this.handleYearChange}
+                            onChange={this.handleSelectChange}
                             value={year}
                             name="year"
                             isClearable={false}
@@ -140,7 +125,7 @@ class Alumni extends React.Component {
                     </div>
                     <div className="col-lg-3 mb-4">
                         <Select
-                            onChange={this.handleAreaChange}
+                            onChange={this.handleSelectChange}
                             value={area}
                             name="area"
                             placeholder={t("Направление")}
@@ -151,7 +136,7 @@ class Alumni extends React.Component {
                     </div>
                     <div className="col-lg-3 mb-4">
                         <Select
-                            onChange={this.handleBranchChange}
+                            onChange={this.handleSelectChange}
                             value={branch}
                             name="branch"
                             isClearable={true}

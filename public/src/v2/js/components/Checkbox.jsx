@@ -1,8 +1,7 @@
 import _isNil from 'lodash-es/isNil';
 import React from 'react';
 import classNames from 'classnames';
-import PropTypes from 'prop-types';
-import Input from "./Input";
+import * as PropTypes from 'prop-types';
 
 
 class Checkbox extends React.Component {

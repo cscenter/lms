@@ -13,6 +13,11 @@ import {
 import Select from "../components/Select";
 import LazyImage from "../components/LazyImage";
 import Checkbox from "../components/Checkbox";
+import {
+    onMultipleCheckboxChange,
+    onSearchInputChange,
+    onSelectChange
+} from "components/utils";
 
 
 export let polyfills = [
@@ -27,7 +32,7 @@ class CourseVideosPage extends React.Component {
         this.state = {
             "loading": true,
             "items": [],
-            "q": "",  // query string
+            "courseNameQuery": "",
             "year": null,
             "yearOptions": [],
             "videoTypes": [],
@@ -36,36 +41,11 @@ class CourseVideosPage extends React.Component {
         this.fetch = _throttle(this.fetch, 300);
     }
 
-    handleSearchInputChange = (value) => {
-        this.setState({
-            q: value,
-        });
-    };
+    handleMultipleCheckboxChange = onMultipleCheckboxChange.bind(this);
 
-    handleYearChange = (year) => {
-        this.setState({
-            year: year
-        });
-    };
+    handleSelectChange = onSelectChange.bind(this);
 
-    // FIXME: Duplicated. Move to utility method?
-    /**
-     * Handle state for multiple checkboxes with the same name
-     * @param event
-     */
-    handleMultipleCheckboxChange = (event) => {
-        const {name, value} = event.target;
-        let selectedCheckboxes = this.state[name] || [];
-        if (event.target.checked === true) {
-            selectedCheckboxes.push(value);
-        } else {
-            let valueIndex = selectedCheckboxes.indexOf(value);
-            selectedCheckboxes.splice(valueIndex, 1);
-        }
-        this.setState({
-            [name]: selectedCheckboxes
-        });
-    };
+    handleSearchInputChange = onSearchInputChange.bind(this);
 
     componentDidMount = () => {
         const filterState = this.getFilterState(this.state);
@@ -157,13 +137,13 @@ class CourseVideosPage extends React.Component {
     }
 
     render() {
-        const {q, year, yearOptions, videoTypes} = this.state;
+        const {courseNameQuery, year, yearOptions, videoTypes} = this.state;
         const {videoOptions} = this.props;
         let filteredItems = this.state.items.filter(function (item) {
             let yearCondition = (year !== null) ? item.year === year.value : true;
             let videoTypesCondition = videoTypes.includes(item.type);
             return yearCondition && videoTypesCondition &&
-                _includes(item.name.toLowerCase(), q.toLowerCase());
+                _includes(item.name.toLowerCase(), courseNameQuery.toLowerCase());
         });
 
         return (
@@ -203,17 +183,18 @@ class CourseVideosPage extends React.Component {
                         <div className="ui form">
                             <div className="field">
                                 <SearchInput
+                                    name="courseNameQuery"
                                     handleSearch={this.handleSearchInputChange}
-                                    query={q}
+                                    query={courseNameQuery}
                                     placeholder="Название курса"
                                     icon="search"
                                 />
                             </div>
                             <div className="field mb-2">
                                 <Select
-                                    onChange={this.handleYearChange}
-                                    value={year}
                                     name="year"
+                                    onChange={this.handleSelectChange}
+                                    value={year}
                                     isClearable={true}
                                     placeholder="Год прочтения"
                                     options={yearOptions}

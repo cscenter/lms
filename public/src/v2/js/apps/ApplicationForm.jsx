@@ -3,14 +3,18 @@ import React, {Fragment} from 'react';
 import 'bootstrap/js/src/tooltip';
 import $ from 'jquery';
 import * as PropTypes from 'prop-types';
-import {showNotification, showErrorNotification} from "utils";
-import Select from "components/Select";
+import {showErrorNotification, showNotification} from "utils";
+import Select, {SelectDefaultProps} from "components/Select";
 import CreatableSelect from 'react-select/creatable';
 import Input from "components/Input";
 import Checkbox from "components/Checkbox";
 import RadioGroup from 'components/RadioGroup';
 import RadioOption from 'components/RadioOption';
-import {SelectDefaultProps} from "components/Select";
+import {
+    onMultipleCheckboxChange,
+    onInputChange,
+    onSelectChange
+} from "components/utils";
 
 
 class ApplicationFormPage extends React.Component {
@@ -22,6 +26,12 @@ class ApplicationFormPage extends React.Component {
             ...props.initialState
         };
     }
+
+    handleMultipleCheckboxChange = onMultipleCheckboxChange.bind(this);
+
+    handleInputChange = onInputChange.bind(this);
+
+    handleSelectChange = onSelectChange.bind(this);
 
     componentDidMount = () => {
         this.setState({loading: false});
@@ -54,46 +64,6 @@ class ApplicationFormPage extends React.Component {
         let name = "";
         const settings = `height=${height},width=${width},left=${leftOffset},top=${topOffset},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=yes,directories=no,status=yes`;
         window.open(url, name, settings);
-    };
-
-    handleInputChange = (event) => {
-        const target = event.target;
-        const value = target.type === 'checkbox' ? target.checked : target.value;
-        const name = target.name;
-
-        this.setState({
-            [name]: value
-        });
-    };
-
-    /**
-     * Handle state for multiple checkboxes with the same name
-     * @param event
-     */
-    handleMultipleCheckboxChange = (event) => {
-        const {name, value} = event.target;
-        let selectedCheckboxes = this.state[name] || [];
-        if (event.target.checked === true) {
-            selectedCheckboxes.push(value);
-        } else {
-            let valueIndex = selectedCheckboxes.indexOf(value);
-            selectedCheckboxes.splice(valueIndex, 1);
-        }
-        this.setState({
-            [name]: selectedCheckboxes
-        });
-    };
-
-    handleUniversityChange = (university) => {
-        this.setState({
-            university: university
-        });
-    };
-
-    handleCourseChange = (option) => {
-        this.setState({
-            course: option
-        });
     };
 
     handleAccessYandexLogin = (event) => {
@@ -274,7 +244,7 @@ class ApplicationFormPage extends React.Component {
                                     required
                                     {...SelectDefaultProps}
                                     isClearable={true}
-                                    onChange={this.handleUniversityChange}
+                                    onChange={(option) => this.handleSelectChange(option, "university")}
                                     name="university"
                                     placeholder="---"
                                     options={universities}
@@ -297,7 +267,7 @@ class ApplicationFormPage extends React.Component {
                                 <label htmlFor="">Курс</label>
                                 <Select
                                     required
-                                    onChange={this.handleCourseChange}
+                                    onChange={this.handleSelectChange}
                                     name="course"
                                     isClearable={true}
                                     placeholder="---"

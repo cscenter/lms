@@ -5,7 +5,7 @@ import { createBrowserHistory } from "history";
 import Masonry from 'masonry-layout';
 import $ from 'jquery';
 import React from 'react';
-import _debounce from 'lodash-es/debounce';
+import _throttle from 'lodash-es/debounce';
 
 import Pagination from 'components/Pagination';
 import TestimonialCard from 'components/TestimonialCard';
@@ -29,7 +29,7 @@ class App extends React.Component {
         };
         // bind function in constructor instead of render (https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md)
         this.onChangePage = this.onChangePage.bind(this);
-        this.fetch = _debounce(this.fetch, 300);
+        this.fetch = _throttle(this.fetch, 300);
     }
 
     componentDidMount = () => {

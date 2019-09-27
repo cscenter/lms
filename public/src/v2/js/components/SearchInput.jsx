@@ -19,6 +19,7 @@ function InputIcon(props) {
 
 class SearchInput extends React.Component {
     static defaultProps = {
+        placeholder: '',
         query: ''
     };
 
@@ -31,23 +32,28 @@ class SearchInput extends React.Component {
         this.handleChangeDebounced = _debounce(this.props.handleSearch, 200);
     }
 
+    componentWillUnmount() {
+        this.handleChangeDebounced.cancel();
+    }
+
     handleChange = (e) => {
         this.setState({query: e.target.value}, () => {
-            this.handleChangeDebounced(this.state.query);
+            this.handleChangeDebounced(this.state.query, this.props.name);
         });
     };
 
     render() {
-        const {icon} = this.props;
+        const {icon, placeholder, name} = this.props;
         const iconClass = icon !== null ? "icon" : "";
         return (
             <div className={`ui ${iconClass} input`}>
                 <input
-                    name="query"
                     type="text"
                     autoComplete="off"
+                    name={name}
                     value={this.state.query}
                     onChange={this.handleChange}
+                    placeholder={placeholder}
                 />
                 <InputIcon icon={icon}/>
             </div>
@@ -57,7 +63,8 @@ class SearchInput extends React.Component {
 
 SearchInput.propTypes = {
     handleSearch: PropTypes.func.isRequired,
-    query: PropTypes.string.isRequired
+    name: PropTypes.string.isRequired,
+    query: PropTypes.string.isRequired,
 };
 
 export default SearchInput;

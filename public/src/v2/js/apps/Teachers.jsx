@@ -15,6 +15,10 @@ import {
     showErrorNotification,
     loadIntersectionObserverPolyfill
 } from "utils";
+import {
+    onSearchInputChange,
+    onSelectChange
+} from "components/utils";
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
@@ -37,27 +41,15 @@ class App extends React.Component {
         this.CourseSelect = React.createRef();
     }
 
-    handleSearchInputChange = (value) => {
-        this.setState({
-            query: value,
-        });
-    };
+    handleSearchInputChange = onSearchInputChange.bind(this);
 
-    handleBranchChange = (branch) => {
-        this.setState({
-            branch: branch
-        });
-    };
-
-    handleCourseChange = (course) => {
-        this.setState({
-            course: course
-        });
-    };
+    handleSelectChange = onSelectChange.bind(this);
 
     handleRecentCheckboxChange = () => {
-        this.setState({
-            recentOnly: !this.state.recentOnly
+        this.setState(state => {
+            return {
+                recentOnly: !state.recentOnly
+            }
         });
     };
 
@@ -167,13 +159,14 @@ class App extends React.Component {
                         <SearchInput
                             handleSearch={this.handleSearchInputChange}
                             query={query}
+                            name="query"
                             placeholder="Поиск"
                             icon="search"
                         />
                     </div>
                     <div className="col-lg-3 mb-4">
                         <Select
-                            onChange={this.handleBranchChange}
+                            onChange={this.handleSelectChange}
                             value={branch}
                             name="branch"
                             isClearable={true}
@@ -184,7 +177,7 @@ class App extends React.Component {
                     </div>
                     <div className="col-lg-3 mb-4">
                         <SelectLazyOptions
-                            onChange={this.handleCourseChange}
+                            onChange={this.handleSelectChange}
                             value={course}
                             name="course"
                             isClearable={true}

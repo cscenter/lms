@@ -185,13 +185,3 @@ fieldset {
 .input.free-answer {
   margin-top: spacer("2x");
 }
-
-.ui.form._right-side-filter {
-  margin-bottom: spacer("4x");
-  @include media-breakpoint-up(lg) {
-    margin-left: spacer("4x");
-  }
-  .field {
-    margin-bottom: spacer("4x");
-  }
-}
