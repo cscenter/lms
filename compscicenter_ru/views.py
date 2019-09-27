@@ -167,7 +167,7 @@ class TestimonialsListView(TemplateView):
                 },
                 "props": {
                     "page_size": page_size,
-                    "entry_url": reverse("learning-api:v2:testimonials"),
+                    "entry_url": reverse("public-api:v2:testimonials"),
                     "total": total,
                 }
             }
@@ -276,7 +276,7 @@ class AlumniView(TemplateView):
                 "branch": self.kwargs.get("city", None),
             },
             "props": {
-                "entryURL": reverse("learning-api:v2:alumni"),
+                "entryURL": reverse("public-api:v2:alumni"),
                 "branchOptions": _get_branch_choices(),
                 "areaOptions": areas,
                 "yearOptions": years
@@ -600,13 +600,28 @@ class CourseOfferingsView(TemplateView):
     template_name = "compscicenter_ru/courses/course_list.html"
 
     def get_context_data(self, **kwargs):
+        branches = [{"label": str(l), "value": v} for v, l in Branches.choices]
+        academic_disciplines = [{'label': a.name, 'value': a.code} for a in
+                                AcademicDiscipline.objects.all()]
+        current, term = get_current_term_pair()
+        years = [{"label": str(y), "value": y} for y in
+                 range(current, settings.CENTER_FOUNDATION_YEAR - 1, -1)]
+        semesters = [
+            {'value': SemesterTypes.AUTUMN, 'label': str(_('Autumn|adjective'))},
+            {'value': SemesterTypes.SPRING, 'label': str(_('Spring|adjective'))}
+        ]
         app_data = {
-            "props": {
-                "entryURL": [
-                    "",
-                ],
+            'props': {
+                'entryURL': [reverse('public-api:v2:course_list')],
+                'branchOptions': branches,
+                'yearOptions': years,
+                'academicDisciplinesOptions': academic_disciplines,
+                'semesterOptions': semesters
             },
-            "state": {
+            'state': {
+                'year': years[0],
+                'branch': branches[0]['value'],
+                'semesters': [term],
             },
         }
         return {"app_data": app_data}

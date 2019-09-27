@@ -435,11 +435,3 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(response.context['ongoing_rest']) == 2
     assert set(response.context['ongoing_rest']) == {co_nsk, co_open}
     assert len(response.context['archive_enrolled']) == 0
-
-
-@pytest.mark.django_db
-def test_api_testimonials_smoke(client):
-    GraduateProfileFactory(testimonial='test', photo='stub.JPG')
-    response = client.get(reverse("api:v2:testimonials"))
-    assert response.status_code == 200
-    assert len(response.data['results']) == 1
