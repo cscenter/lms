@@ -3,7 +3,7 @@ $input-disabled-bg: $gray-disabled;
 $input-outerheight: 48px;
 $input-line-height: calculate-input-line-height($input-outerheight, spacer("3x"));
 
-$input-color: $gray-darker;
+$input-color: $black;
 $input-border-color: darken($gray-lighter, 10%);
 $input-border-color-hover: $gray-dark;
 $input-border-width: $input-btn-border-width !default;
@@ -51,8 +51,11 @@ $form-feedback-invalid-color: $red;
 .ui.form {
   label {
     display: block;
-    font-size: $font-size-content-base;
     vertical-align: top;
+
+    &.h4 {
+      margin-bottom: spacer("3x");
+    }
   }
 }
 
@@ -83,7 +86,6 @@ $form-feedback-invalid-color: $red;
 
   label {
     display: block;
-    font-size: $font-size-content-base;
     font-weight: $font-weight-normal;
     vertical-align: top;
   }
@@ -146,8 +148,8 @@ fieldset {
 }
 
 .title-label {
-  font-size: $font-size-content-base;
-  margin-bottom: spacer("4x");
+  font-size: $h4-font-size;
+  margin-bottom: spacer("3x");
 }
 
 .card._survey {

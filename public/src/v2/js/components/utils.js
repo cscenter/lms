@@ -1,18 +1,23 @@
 /**
  * Handle state for multiple checkboxes with the same name
- * @param event
  */
-export function onMultipleCheckboxChange(event) {
-    const {name, value} = event.target;
-    let selectedCheckboxes = this.state[name] || [];
-    if (event.target.checked === true) {
-        selectedCheckboxes.push(value);
-    } else {
-        let valueIndex = selectedCheckboxes.indexOf(value);
-        selectedCheckboxes.splice(valueIndex, 1);
-    }
-    this.setState({
-        [name]: selectedCheckboxes
+export function onMultipleCheckboxChange(event, {applyPatch = null} = {}) {
+    const {name, value, checked} = event.target;
+    this.setState((state) => {
+        let selectedCheckboxes = state[name] || [];
+        if (checked === true) {
+            selectedCheckboxes.push(value);
+        } else {
+            let valueIndex = selectedCheckboxes.indexOf(value);
+            selectedCheckboxes.splice(valueIndex, 1);
+        }
+        const patch = {
+            [name]: selectedCheckboxes
+        };
+        if (applyPatch !== null) {
+            Object.assign(patch, applyPatch({...state, ...patch}));
+        }
+        return patch;
     });
 }
 
@@ -21,41 +26,37 @@ export function onMultipleCheckboxChange(event) {
  * Handle state for SearchInput component
  * @param value {string} Query
  * @param name {string} input name
+ * @param patchFn {Object}
  */
-export function onSearchInputChange(value, name) {
-    this.setState({
-        [name]: value
-    });
-}
-
-/**
- * Handle state for input
- * @param event
- */
-export function onInputChange(event) {
-    const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
-    const name = target.name;
-
-    this.setState({
-        [name]: value
-    });
-}
-
-/**
- * Handle state for input
- * @param event
- */
-export function onInputChangeLoading(event) {
-    const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
-    const name = target.name;
-    // FIXME: combine with onInputChange
-    this.setState(state => {
-        return {
-            [name]: value,
-            loading: state[name] !== value
+export function onSearchInputChange(value, name,
+                                    {applyPatch = null} = {}) {
+    this.setState((state) => {
+        const patch = {
+            [name]: value
+        };
+        if (applyPatch !== null) {
+            Object.assign(patch, applyPatch({...state, ...patch}));
         }
+        return patch;
+    });
+}
+
+/**
+ * Handle state for input
+ */
+export function onInputChange(event, {applyPatch = null} = {}) {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState((state) => {
+        const patch = {
+            [name]: value
+        };
+        if (applyPatch !== null) {
+            Object.assign(patch, applyPatch({...state, ...patch}));
+        }
+        return patch;
     });
 }
 
@@ -64,24 +65,15 @@ export function onInputChangeLoading(event) {
  * @param option {Object.<value, label>} Selected
  * @param name {string} select name attribute value
  */
-export function onSelectChange(option, name) {
-    this.setState({
-        [name]: option
-    });
-}
-
-
-/**
- * Handle state for react-select component.
- * Set `loading` flag to true if a new value differ from previous
- * @param option {Object.<value, label>} Selected
- * @param name {string} select name attribute value
- */
-export function onSelectChangeLoading(option, name) {
-    this.setState(state => {
-        return {
-            [name]: option,
-            loading: state[name] !== option
+// FIXME: нельзя менять состояние связанного селекта :<
+export function onSelectChange(option, name, {applyPatch = null} = {}) {
+    this.setState((state) => {
+        const patch = {
+            [name]: option
+        };
+        if (applyPatch !== null) {
+            Object.assign(patch, applyPatch({...state, ...patch}));
         }
+        return patch;
     });
 }

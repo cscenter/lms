@@ -4,6 +4,18 @@
   .table__row {
     .table__cell {
       padding-left: spacer("4x");
+      &:first-child {
+        @include media-breakpoint-up(md) {
+          width: 50%;
+        }
+      }
+
+      &._teachers {
+        a {
+          color: $black;
+          font-size: $font-size-sm;
+        }
+      }
     }
   }
 

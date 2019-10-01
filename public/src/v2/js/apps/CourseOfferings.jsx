@@ -1,13 +1,13 @@
 import React, {Fragment} from 'react';
 
-import _throttle from 'lodash-es/throttle';
 import _includes from 'lodash-es/includes';
+import _partialRight from 'lodash-es/partialRight';
 import $ from 'jquery';
 import * as PropTypes from 'prop-types';
 import SearchInput from 'components/SearchInput';
 import {
     hideBodyPreloader,
-    loadIntersectionObserverPolyfill,
+    loadIntersectionObserverPolyfill, showBodyPreloader,
     showErrorNotification
 } from "utils";
 import Select from "components/Select";
@@ -16,10 +16,10 @@ import RadioGroup from "components/RadioGroup";
 import RadioOption from "components/RadioOption";
 import Icon from "components/Icon";
 import {
+    onInputChange,
     onMultipleCheckboxChange,
     onSearchInputChange,
-    onInputChangeLoading,
-    onSelectChangeLoading
+    onSelectChange
 } from "components/utils";
 
 
@@ -40,28 +40,61 @@ class CourseOfferings extends React.Component {
         this.state = {
             "loading": true,
             "items": [],
+            "filteredItems": new Set(),
             "courseNameQuery": "",
-            "year": null,
+            "academicYear": null,
+            "academicYearOptions": this.getYearOptions(props.initialState.branch),
             "branch": null,
             "semesters": semesters,
-            "academicDisciplines": [],
             ...props.initialState
         };
-        this.fetch = _throttle(this.fetch, 300);
     }
 
-    handleInputChange = onInputChangeLoading.bind(this);
+    getYearOptions(branchName) {
+        let academicYearOptions = [];
+        const branch = this.props.branchOptions.find((option) => {
+            if (option.value === branchName) {
+                return option;
+            }
+        });
+        if (branch !== undefined) {
+            for (let y = this.props.currentYear; y >= branch.established; --y) {
+                academicYearOptions.push({value: y, label: `${y}/${y + 1}`});
+            }
+        }
+        return academicYearOptions;
+    }
 
-    handleSearchInputChange = onSearchInputChange.bind(this);
+    handleSearchInputChange = _partialRight(
+        onSearchInputChange,
+        {applyPatch: this.filteredItemsPatch.bind(this)}
+    ).bind(this);
 
-    handleSelectChange = onSelectChangeLoading.bind(this);
+    handleInputChange = _partialRight(
+        onInputChange,
+        {applyPatch: this.checkYearOption.bind(this)}
+    ).bind(this);
 
+    handleSelectChange = onSelectChange.bind(this);
+
+    handleMultipleCheckboxChange = _partialRight(
+        onMultipleCheckboxChange,
+        {applyPatch: this.filteredItemsPatch.bind(this)}
+    ).bind(this);
 
     /**
-     * Handle state for multiple checkboxes with the same name
-     * @param event
+     * Update state value if current `academicYear` is not present in
+     * selected branch.
      */
-    handleMultipleCheckboxChange = onMultipleCheckboxChange.bind(this);
+    checkYearOption(state, name = 'academicYear') {
+        const options = this.getYearOptions(state.branch);
+        // FIXME: compare by values!
+        console.log(options, state.academicYear, options.includes(state.academicYear));
+        if (!options.includes(state.academicYear)) {
+            return {[name]: options[0]}
+        }
+        return {}
+    }
 
     componentDidMount = () => {
         const payload = this.getRequestPayload(this.state);
@@ -77,7 +110,7 @@ class CourseOfferings extends React.Component {
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.state.loading || prevState.year !== this.state.year || prevState.branch !== this.state.branch) {
+        if (this.state.loading || prevState.academicYear !== this.state.academicYear || prevState.branch !== this.state.branch) {
             const payload = this.getRequestPayload(this.state);
             this.fetch(payload);
         } else {
@@ -88,7 +121,7 @@ class CourseOfferings extends React.Component {
     getRequestPayload(state) {
         // FIXME: Convert null and undefined to empty string
         return {
-            'year': state.year.value,
+            'academic_year': state.academicYear.value,
             'branch': state.branch,
         };
     }
@@ -104,40 +137,62 @@ class CourseOfferings extends React.Component {
 
         Promise.all(this.requests)
             .then((iterables) => {
-                let data = [];
+                let items = [];
+                let years = new Set();
                 for (const d of iterables) {
-                    data = data.concat(d);
+                    items = items.concat(d);
                 }
-                this.setState({
-                    loading: false,
-                    items: data,
+                this.setState( (state) => {
+                    return {
+                        loading: false,
+                        items: items,
+                        academicYearOptions: this.getYearOptions(state.branch),
+                        filteredItems: this.filterItems(items, state)
+                    };
                 });
             }).catch((reason) => {
             showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
         });
     };
 
+    filterItems(items, state) {
+        let filteredItems = new Set();
+        const {academicYear, courseNameQuery, semesters} = state;
+        for (const item of items) {
+            let yearCondition = (academicYear !== null) ?
+                item.semester.academic_year === academicYear.value :
+                true;
+            let semesterCondition = semesters.includes(item.semester.type);
+            if (yearCondition && semesterCondition &&
+                _includes(item.name.toLowerCase(), courseNameQuery.toLowerCase())) {
+                filteredItems.add(item.id);
+            }
+        }
+        return filteredItems;
+    }
+
+    filteredItemsPatch(state, name = 'filteredItems') {
+        return {[name]: this.filterItems(state.items, state)}
+    };
+
     render() {
         const {
-            courseNameQuery,
-            year,
-            branch,
-            academicDisciplines,
-            semesters,
-            items
-        } = this.state;
-        const {
             branchOptions,
-            yearOptions,
             semesterOptions,
-            academicDisciplinesOptions
         } = this.props;
-        let filteredItems = items.filter(function (item) {
-            let yearCondition = (year !== null) ? item.semester.year === year.value : true;
-            let semesterCondition = semesters.includes(item.semester.type);
-            return yearCondition && semesterCondition &&
-                _includes(item.name.toLowerCase(), courseNameQuery.toLowerCase());
-        });
+        const {
+            academicYearOptions,
+            courseNameQuery,
+            academicYear,
+            branch,
+            semesters,
+            items,
+            filteredItems
+        } = this.state;
+
+        if (this.state.loading) {
+            showBodyPreloader();
+        }
 
         return (
             <Fragment>
@@ -158,19 +213,17 @@ class CourseOfferings extends React.Component {
                                     </div>
                                 </div>
                             </div>
-                            <div className="card__content p-0">
+                            <div className={`card__content p-0`}>
                                 {
-                                    !this.state.loading && filteredItems.length > 0 &&
-                                        <div className="card__content p-0">
-                                            <CourseList items={filteredItems} />
-                                        </div>
-                                }
-                                {
-                                    !this.state.loading && filteredItems.length <= 0
-                                        ? <div className="card__content _big pt-0">Выберите другие параметры фильтрации.</div>
-                                        : ""
+                                    !this.state.loading &&
+                                    <CourseList items={items} filteredItems={filteredItems} />
                                 }
                             </div>
+                            {
+                                !this.state.loading && filteredItems.size <= 0
+                                    ? <div className="card__content _big pt-0">Выберите другие параметры фильтрации.</div>
+                                    : ""
+                            }
                         </div>
                     </div>
 
@@ -188,14 +241,14 @@ class CourseOfferings extends React.Component {
                             </div>
                             <div className="field">
                                 <div className="ui select">
-                                    <label className='h4' htmlFor="">Год</label>
+                                    <label className='h4' htmlFor="">Учебный год</label>
                                     <Select
                                         onChange={this.handleSelectChange}
-                                        value={year}
-                                        name="year"
+                                        value={academicYear}
+                                        name="academicYear"
                                         isClearable={false}
-                                        placeholder="Год прочтения"
-                                        options={yearOptions}
+                                        placeholder="Учебный год"
+                                        options={academicYearOptions}
                                         key="year"
                                     />
                                 </div>
@@ -215,21 +268,6 @@ class CourseOfferings extends React.Component {
                                     )}
                                 </div>
                             </div>
-                            <div className="field">
-                                <label className='h4'>Базовые курсы программ</label>
-                                <div className="grouped">
-                                    {academicDisciplinesOptions.map((option) =>
-                                        <Checkbox
-                                            name="academicDisciplines"
-                                            key={option.value}
-                                            value={option.value}
-                                            checked={academicDisciplines.includes(option.value)}
-                                            onChange={this.handleMultipleCheckboxChange}
-                                            label={option.label}
-                                        />
-                                    )}
-                                </div>
-                            </div>
                         </form>
                     </div>
                 </div>
@@ -242,17 +280,10 @@ const propTypes = {
     entryURL: PropTypes.arrayOf(PropTypes.string).isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
-        label: PropTypes.string.isRequired
-    })).isRequired,
-    yearOptions: PropTypes.arrayOf(PropTypes.shape({
-        value: PropTypes.number.isRequired,
-        label: PropTypes.string.isRequired
+        label: PropTypes.string.isRequired,
+        established: PropTypes.number.isRequired,
     })).isRequired,
     semesterOptions: PropTypes.arrayOf(PropTypes.shape({
-        value: PropTypes.string.isRequired,
-        label: PropTypes.string.isRequired
-    })).isRequired,
-    academicDisciplinesOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired
     })).isRequired,
@@ -272,6 +303,7 @@ const propTypes = {
             id: PropTypes.number.isRequired,
             index: PropTypes.number.isRequired,
             year: PropTypes.number.isRequired,
+            academic_year: PropTypes.number.isRequired,
             type: PropTypes.oneOf(['autumn', 'spring']).isRequired,
         }).isRequired,
         materials: PropTypes.shape({
@@ -293,7 +325,10 @@ class CourseList extends React.Component {
     };
 
     render() {
-        const {className, items} = this.props;
+        const {className, items, filteredItems} = this.props;
+        if (filteredItems.size <= 0) {
+            return "";
+        }
         return (
             <div className={className}>
                 <div className="table__row _head">
@@ -301,13 +336,15 @@ class CourseList extends React.Component {
                     <div className="table__cell">Преподаватели</div>
                     <div className="table__cell">Материалы</div>
                 </div>
-                {items.map(item =>
+                {items
+                    .filter(function(item) {return filteredItems.has(item.id)})
+                    .map(item =>
                     <div className="table__row" key={`course-${item.id}`}>
                         <div className="table__cell">
                             <a href={item.url}
                                className="__course">{item.name}</a>
                         </div>
-                        <div className="table__cell">
+                        <div className="table__cell _teachers">
                             {item.teachers.map((teacher, i, arr) =>
                                 <Fragment key={`teacher-${teacher.id}`}>
                                     <a href={`/teachers/${teacher.id}/`}>{teacher.name}</a>{arr.length - 1 !== i ? ", " : ""}

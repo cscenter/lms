@@ -18,5 +18,9 @@
   },
   "include": [
     "src/v2/js"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/*.spec.ts"
   ]
 }
