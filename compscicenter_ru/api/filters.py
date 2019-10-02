@@ -1,42 +1,42 @@
 from django import forms
 from django.conf import settings
+from django.db.models import Q
 from django.http import QueryDict
-from django_filters import FilterSet, Filter, ChoiceFilter
+from django_filters import FilterSet, Filter
+from django_filters.constants import EMPTY_VALUES
 
+from courses.constants import SemesterTypes
 from courses.models import Course
+from courses.utils import get_term_index
 from learning.settings import Branches
 from my_compscicenter_ru.filters import BranchChoiceFilter
-from study_programs.models import StudyProgramCourseGroup
 
 
 class IntegerFilter(Filter):
     field_class = forms.IntegerField
 
 
-class CoreCourseFilter(FilterSet):
-    branch = ChoiceFilter(
-        field_name="studyprogramcoursegroup__study_program__branch__code",
-        empty_label=None,
-        choices=Branches.choices)
-    year = IntegerFilter(
-        field_name='studyprogramcoursegroup__study_program__year',
-        min_value=settings.CENTER_FOUNDATION_YEAR)
-
-    class Meta:
-        model = StudyProgramCourseGroup.courses.through
-        fields = ('branch', 'year',)
+class AcademicYearFilter(IntegerFilter):
+    def filter(self, qs, value):
+        if value in EMPTY_VALUES:
+            return qs
+        if self.distinct:
+            qs = qs.distinct()
+        term_index = get_term_index(value, SemesterTypes.AUTUMN)
+        return self.get_method(qs)(Q(semester__index=term_index) |
+                                   Q(semester__index=term_index + 1))
 
 
 class CourseFilter(FilterSet):
     branch = BranchChoiceFilter(field_name="branch__code", empty_label=None,
                                 choices=Branches.choices)
     # TODO: restrict max value
-    year = IntegerFilter(field_name='semester__year',
-                         min_value=settings.CENTER_FOUNDATION_YEAR)
+    academic_year = AcademicYearFilter(label='Academic Year',
+                                       min_value=settings.CENTER_FOUNDATION_YEAR)
 
     class Meta:
         model = Course
-        fields = ('branch', 'year')
+        fields = ('branch', 'academic_year')
 
     def __init__(self, data=None, queryset=None, request=None, **kwargs):
         """

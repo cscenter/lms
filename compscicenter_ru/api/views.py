@@ -12,13 +12,13 @@ from courses.constants import SemesterTypes
 from courses.models import Course, CourseTeacher
 from courses.utils import get_term_index
 from learning.models import GraduateProfile
-from study_programs.models import AcademicDiscipline, StudyProgramCourseGroup
+from study_programs.models import AcademicDiscipline
 from users.constants import Roles
 from users.models import User
-from .filters import CourseFilter, CoreCourseFilter
+from .filters import CourseFilter
 from .serializers import TeacherCourseSerializer, TeacherSerializer, \
     CourseVideoSerializer, AlumniSerializer, TestimonialCardSerializer, \
-    CourseSerializer, CoreCourseSerializer
+    CourseSerializer
 
 
 class TeacherCourseList(ListAPIView):
@@ -156,26 +156,6 @@ class TestimonialList(ListAPIView):
             "areas": areas
         }
         return Response(data)
-
-
-class CoreCourseList(ListAPIView):
-    pagination_class = None
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = CoreCourseFilter
-    serializer_class = CoreCourseSerializer
-
-    def get_queryset(self):
-        return (StudyProgramCourseGroup.courses.through.objects
-                .select_related('studyprogramcoursegroup',
-                                'studyprogramcoursegroup__study_program',
-                                'studyprogramcoursegroup__study_program__branch')
-                .only('id',
-                      'metacourse_id',
-                      'studyprogramcoursegroup_id',
-                      'studyprogramcoursegroup__study_program__academic_discipline_id',
-                      'studyprogramcoursegroup__study_program__year',
-                      'studyprogramcoursegroup__study_program__branch__id',
-                      'studyprogramcoursegroup__study_program__branch__code'))
 
 
 class CourseList(ListAPIView):

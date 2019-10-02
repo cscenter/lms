@@ -10,7 +10,6 @@ urlpatterns = [
     path('v2/', include(([
         path('applicants/', ApplicantCreateAPIView.as_view(), name='applicant_create'),
         path('alumni/', v.AlumniList.as_view(), name='alumni'),
-        path('study-programs/courses/', v.CoreCourseList.as_view(), name='study_programs_courses'),
         path('courses/', v.CourseList.as_view(), name='course_list'),
         path('courses/videos/', v.CourseVideoList.as_view(), name='course_videos'),
         path('recorded-events/videos/', RecordedEventList.as_view(), name='recorded_events_videos'),

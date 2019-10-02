@@ -113,6 +113,7 @@ class Branch(TimezoneAwareModel, models.Model):
         max_length=8,
         db_index=True)
     name = models.CharField(_("Branch|Name"), max_length=255)
+    established = models.PositiveIntegerField(_('Established'))
     order = models.PositiveIntegerField(verbose_name=_('Order'), default=0)
     city = models.ForeignKey(City, verbose_name=_("Branch Location"),
                              blank=True, null=True,
