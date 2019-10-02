@@ -44,7 +44,9 @@ export function onSearchInputChange(value, name,
 /**
  * Handle state for input
  */
-export function onInputChange(event, {applyPatch = null} = {}) {
+export function onInputChange(event,
+                              {applyPatch = null,
+                              setStateCallback = undefined} = {}) {
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
@@ -57,7 +59,7 @@ export function onInputChange(event, {applyPatch = null} = {}) {
             Object.assign(patch, applyPatch({...state, ...patch}));
         }
         return patch;
-    });
+    }, setStateCallback);
 }
 
 /**
@@ -66,7 +68,11 @@ export function onInputChange(event, {applyPatch = null} = {}) {
  * @param name {string} select name attribute value
  */
 // FIXME: нельзя менять состояние связанного селекта :<
-export function onSelectChange(option, name, {applyPatch = null} = {}) {
+export function onSelectChange(option,
+                               name, {
+                                   applyPatch = null,
+                                   setStateCallback = undefined
+                               } = {}) {
     this.setState((state) => {
         const patch = {
             [name]: option
@@ -75,5 +81,5 @@ export function onSelectChange(option, name, {applyPatch = null} = {}) {
             Object.assign(patch, applyPatch({...state, ...patch}));
         }
         return patch;
-    });
+    }, setStateCallback);
 }

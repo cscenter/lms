@@ -2,9 +2,11 @@ import React, {Fragment} from 'react';
 
 import _includes from 'lodash-es/includes';
 import _partialRight from 'lodash-es/partialRight';
+import _isEqual from 'lodash-es/isEqual';
 import $ from 'jquery';
 import * as PropTypes from 'prop-types';
 import SearchInput from 'components/SearchInput';
+import { createBrowserHistory } from "history";
 import {
     hideBodyPreloader,
     loadIntersectionObserverPolyfill, showBodyPreloader,
@@ -26,6 +28,22 @@ import {
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
 ];
+
+// TODO: Share between components
+const history = createBrowserHistory();
+
+
+function FilterState(state) {
+    // FIXME: Convert null and undefined to empty string
+    this.academicYear = state.academicYear;
+    this.branch = state.branch;
+}
+FilterState.prototype.getPayload = function () {
+    return {
+        'academic_year': this.academicYear.value,
+        'branch': this.branch,
+    };
+};
 
 
 class CourseOfferings extends React.Component {
@@ -70,17 +88,49 @@ class CourseOfferings extends React.Component {
         {applyPatch: this.filteredItemsPatch.bind(this)}
     ).bind(this);
 
-    handleInputChange = _partialRight(
+    handleBranchChange = _partialRight(
         onInputChange,
-        {applyPatch: this.checkYearOption.bind(this)}
+        {
+            applyPatch: this.checkYearOption.bind(this),
+            setStateCallback: this.historyPush.bind(this)
+        }
     ).bind(this);
 
-    handleSelectChange = onSelectChange.bind(this);
+    handleAcademicYearChange = _partialRight(
+        onSelectChange,
+        {setStateCallback: this.historyPush.bind(this)}
+    ).bind(this);
 
     handleMultipleCheckboxChange = _partialRight(
         onMultipleCheckboxChange,
         {applyPatch: this.filteredItemsPatch.bind(this)}
     ).bind(this);
+
+    getHistoryState(location, initialState) {
+        if (!location.state) {
+            return new FilterState(initialState);
+        } else {
+            return new FilterState(location.state);
+        }
+    }
+
+    /**
+     * Push new browser history if filterState was updated
+     */
+    historyPush() {
+        const filterState = new FilterState(this.state);
+        const payload = filterState.getPayload();
+        const historyState = this.getHistoryState(history.location,
+                                                  this.props.initialState);
+        if (!_isEqual(filterState, historyState)) {
+            console.debug(`History.push: new filter state `, JSON.stringify(filterState));
+            history.push({
+                pathname: history.location.pathname,
+                search: `?branch=${payload.branch}&academic_year=${payload.academic_year}`,
+                state: filterState
+            });
+        }
+    }
 
     /**
      * Update state value if current `academicYear` is not present in
@@ -88,20 +138,35 @@ class CourseOfferings extends React.Component {
      */
     checkYearOption(state, name = 'academicYear') {
         const options = this.getYearOptions(state.branch);
-        // FIXME: compare by values!
-        console.log(options, state.academicYear, options.includes(state.academicYear));
-        if (!options.includes(state.academicYear)) {
+        let hasOption = options.find((element) => {
+            if (_isEqual(element, state.academicYear)) {
+                return element;
+            }
+        });
+        if (hasOption === undefined) {
             return {[name]: options[0]}
         }
         return {}
     }
 
     componentDidMount = () => {
-        const payload = this.getRequestPayload(this.state);
-        this.fetch(payload);
+        this.fetch((new FilterState(this.state)).getPayload());
+        // FIXME: Do we need ref for this?
+        this.unlistenHistory = history.listen((location, action) => {
+            const currentState = new FilterState(this.state);
+            const historyState = this.getHistoryState(location,
+                                                      this.props.initialState);
+            console.debug('History.listen: current state', JSON.stringify(currentState));
+            console.debug('History.listen: history state', JSON.stringify(historyState));
+            if (!_isEqual(currentState, historyState)) {
+                console.debug(`History.listen: new state`, JSON.stringify(historyState));
+                this.setState(historyState);
+            }
+        });
     };
 
     componentWillUnmount = function () {
+        this.unlistenHistory();
         if (this.requests) {
             for (const request of this.requests) {
                 request.abort();
@@ -110,20 +175,14 @@ class CourseOfferings extends React.Component {
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (this.state.loading || prevState.academicYear !== this.state.academicYear || prevState.branch !== this.state.branch) {
-            const payload = this.getRequestPayload(this.state);
+        const prevFilterState = new FilterState(prevState);
+        const filterState = new FilterState(this.state);
+        if (this.state.loading || !_isEqual(prevFilterState, filterState)) {
+            const payload = filterState.getPayload();
             this.fetch(payload);
         } else {
             hideBodyPreloader();
         }
-    }
-
-    getRequestPayload(state) {
-        // FIXME: Convert null and undefined to empty string
-        return {
-            'academic_year': state.academicYear.value,
-            'branch': state.branch,
-        };
     }
 
     fetch = (payload = null) => {
@@ -211,6 +270,17 @@ class CourseOfferings extends React.Component {
                                             icon="search"
                                         />
                                     </div>
+
+                                    <div className="buttons col-12 d-lg-none mb-4">
+                                        <a href="#" className="btn _light _extra-small">Санкт-Петербург <Icon id={'arrow-bottom'}/></a>
+                                        <button type="button"
+                                                className="btn _light _extra-small"
+                                                data-toggle="modal"
+                                                data-target="#exampleModalFilter">
+                                            Фильтры
+                                        </button>
+                                    </div>
+
                                 </div>
                             </div>
                             <div className={`card__content p-0`}>
@@ -231,7 +301,7 @@ class CourseOfferings extends React.Component {
                         <form className="ui form pl-6 mt-10 ml-lg-4 d-none d-lg-block">
                             <div className="field">
                                 <label className='h4'>Отделение</label>
-                                <RadioGroup required name="branch" className="" onChange={this.handleInputChange} selected={`branch-${branch}`}>
+                                <RadioGroup required name="branch" className="" onChange={this.handleBranchChange} selected={`branch-${branch}`}>
                                     {branchOptions.map((item) =>
                                         <RadioOption  key={item.value} id={`branch-${item.value}`} value={item.value}>
                                             {item.label}
@@ -243,7 +313,7 @@ class CourseOfferings extends React.Component {
                                 <div className="ui select">
                                     <label className='h4' htmlFor="">Учебный год</label>
                                     <Select
-                                        onChange={this.handleSelectChange}
+                                        onChange={this.handleAcademicYearChange}
                                         value={academicYear}
                                         name="academicYear"
                                         isClearable={false}
@@ -278,6 +348,14 @@ class CourseOfferings extends React.Component {
 
 const propTypes = {
     entryURL: PropTypes.arrayOf(PropTypes.string).isRequired,
+    // history api depends on initial state
+    initialState: PropTypes.shape({
+        branch: PropTypes.string.isRequired,
+        academicYear: PropTypes.shape({
+            value: PropTypes.number.isRequired,
+            label: PropTypes.string.isRequired
+        }).isRequired
+    }).isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired,
