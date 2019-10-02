@@ -10,7 +10,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q, Max, Prefetch
+from django.db.models import Q, Max, Prefetch, F
 from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import gettext, ugettext_lazy as _
@@ -600,28 +600,38 @@ class CourseOfferingsView(TemplateView):
     template_name = "compscicenter_ru/courses/course_list.html"
 
     def get_context_data(self, **kwargs):
-        branches = [{"label": str(l), "value": v} for v, l in Branches.choices]
-        academic_disciplines = [{'label': a.name, 'value': a.code} for a in
-                                AcademicDiscipline.objects.all()]
-        current, term = get_current_term_pair()
-        years = [{"label": str(y), "value": y} for y in
-                 range(current, settings.CENTER_FOUNDATION_YEAR - 1, -1)]
+        year, term = get_current_term_pair()
+        academic_year = year if term == SemesterTypes.AUTUMN else year - 1
+        branches = list(Branch.objects
+                        .filter(site_id=settings.SITE_ID,
+                                established__lte=academic_year)
+                        .annotate(value=F('code'), label=F('name'))
+                        .values('value', 'label', 'established'))
         semesters = [
             {'value': SemesterTypes.AUTUMN, 'label': str(_('Autumn|adjective'))},
             {'value': SemesterTypes.SPRING, 'label': str(_('Spring|adjective'))}
         ]
+        # Get state based on URL params
+        branch_query = self.request.GET.get("branch", branches[0]['value'])
+        branch = next((b for b in branches if b['value'] == branch_query), None)
+        if not branch:
+            raise Http404
+        try:
+            year = int(self.request.GET.get("academic_year", year))
+            if year > academic_year or year < branch['established']:
+                raise ValueError("Invalid academic year")
+        except ValueError:
+            raise Http404
         app_data = {
             'props': {
                 'entryURL': [reverse('public-api:v2:course_list')],
+                'currentYear': academic_year,
                 'branchOptions': branches,
-                'yearOptions': years,
-                'academicDisciplinesOptions': academic_disciplines,
                 'semesterOptions': semesters
             },
             'state': {
-                'year': years[0],
-                'branch': branches[0]['value'],
-                'semesters': [term],
+                'branch': branch['value'],
+                'academicYear': {"value": year, "label": f"{year}/{year + 1}"},
             },
         }
         return {"app_data": app_data}

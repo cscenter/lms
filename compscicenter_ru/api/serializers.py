@@ -30,7 +30,7 @@ class SemesterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Semester
-        fields = ("id", "index", "year", "type")
+        fields = ("id", "index", "year", "academic_year", "type")
 
     def get_name(self, obj: Semester):
         return str(obj)
@@ -49,24 +49,6 @@ class CourseTeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseTeacher
         fields = ("id", "name")
-
-
-class StudyProgramSerializer(serializers.ModelSerializer):
-    academic_discipline = serializers.CharField(source='academic_discipline_id')
-    branch = BranchSerializer()
-
-    class Meta:
-        model = StudyProgram
-        fields = ('academic_discipline', 'branch', 'year')
-
-
-class CoreCourseSerializer(serializers.ModelSerializer):
-    program = StudyProgramSerializer(source='studyprogramcoursegroup.study_program')
-    id = serializers.IntegerField(source='metacourse_id')
-
-    class Meta:
-        model = StudyProgramCourseGroup.courses.through
-        fields = ('id', 'program')
 
 
 class CourseSerializer(serializers.ModelSerializer):
