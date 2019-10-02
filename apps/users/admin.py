@@ -137,17 +137,10 @@ class SHADCourseRecordAdmin(admin.ModelAdmin):
         "student__branch",
         ("semester", AdminRelatedDropdownFilter)
     ]
+    raw_id_fields = ('student',)
 
     def get_readonly_fields(self, request, obj=None):
         return ('anytask_url',) if obj else []
-
-    def formfield_for_foreignkey(self, db_field, *args, **kwargs):
-        if db_field.name == "student":
-            kwargs["queryset"] = User.objects.filter(group__role__in=[
-                Roles.STUDENT,
-                Roles.GRADUATE,
-                Roles.VOLUNTEER]).distinct()
-        return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
     @meta(_("Anytask"))
     def anytask_url(self, obj):
