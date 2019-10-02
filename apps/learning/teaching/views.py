@@ -393,15 +393,15 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         user = self.request.user
         a_s = self.student_assignment
         course = a_s.assignment.course
-        next_ungraded = (StudentAssignment.objects
+        ungraded_base = (StudentAssignment.objects
                          .filter(score__isnull=True,
                                  first_student_comment_at__isnull=False,
                                  assignment__course=course,
                                  assignment__course__teachers=user)
-                         .exclude(pk=a_s.pk)
                          .order_by('assignment__deadline_at', 'pk')
-                         .only('pk')
-                         .first())
+                         .only('pk'))
+        next_ungraded = (ungraded_base.filter(pk__gt=a_s.pk).first() or
+                         ungraded_base.filter(pk__lt=a_s.pk).first())
         context['next_student_assignment'] = next_ungraded
         context['is_actual_teacher'] = user in course.teachers.all()
         context['score_form'] = AssignmentScoreForm(
