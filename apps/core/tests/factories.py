@@ -46,6 +46,7 @@ class BranchFactory(factory.DjangoModelFactory):
     city = factory.SubFactory(CityFactory)
     order = factory.Sequence(lambda n: n)
     time_zone = 'Europe/Moscow'
+    established = 2013
 
     class Meta:
         model = Branch

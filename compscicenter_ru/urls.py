@@ -32,7 +32,6 @@ urlpatterns += [
     path('team/', views.TeamView.as_view(), name='team'),
     path('teachers/', views.TeachersView.as_view(), name='teachers'),
     path('teachers/<int:pk>/', views.TeacherDetailView.as_view(), name='teacher_detail'),
-    path('teachers2/<int:pk>/', views.TeacherDetailView2.as_view(), name='teacher_detail2'),
     path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
     # Editing courses/
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),

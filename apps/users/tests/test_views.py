@@ -161,7 +161,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         user.save()
         resp = self.client.get(user.teacher_profile_url())
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.context['teacher'], user)
+        self.assertEqual(resp.context_data['teacher'], user)
 
     def test_user_detail_view(self):
         user = UserFactory()
