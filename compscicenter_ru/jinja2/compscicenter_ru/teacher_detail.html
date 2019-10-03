@@ -1,64 +1,73 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
-{% block title %}Преподаватель CS центра {{ teacher.get_full_name() }}{% endblock title %}
+{% block title %}Преподаватель {{ teacher.get_full_name() }}{% endblock title %}
 
 {% block sprites %}
     <script type="text/javascript">
-        // (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
     </script>
 {% endblock sprites %}
 
 {% block content %}
     <div class="container-fluid _dark py-10 px-0">
         <div class="container">
-            <div class="row no-gutters text-center text-sm-left">
-                <div class="col-12 col-sm-auto">
+            <div class="row no-gutters">
+                <div class="col-12 col-sm-auto text-center">
                     {% with im = teacher.get_thumbnail(teacher.ThumbnailSize.BASE, use_stub=True, stub_official=True) -%}
                         <img class="img-rounded-corners" alt="{{ teacher.get_full_name() }}" src="{{ im.url }}" width="{{ im.width }}">
                     {% endwith -%}
                 </div>
                 <div class="col-12 col-sm pl-0 pl-sm-8 mt-8 mt-sm-0">
                     <h1 class="mb-1">{{ teacher.get_full_name() }}</h1>
-                    <p class="text-muted">FIXME: Преподаватель в Санкт-Петербурге</p>
-                    {% if teacher.workplace %}<p class="text-muted">{{ teacher.workplace }}</p>{% endif %}
+                    <p class="text-muted">Преподаватель{% if teacher.workplace %}, {{ teacher.workplace }}{% endif %}</p>
                     {% if teacher.bio %}
-                        <h2 class="visually-hidden">О преподавателе</h2>
                         {{ teacher.bio|markdown("user_note", 3600, teacher.pk, teacher.modified) }}
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    <div class="container page-content">
-        <div class="row">
-            <div class="col-lg-12">
-                <section class="content-block">
-                    <h2>FIXME: Прочтения курсов</h2>
-                    <div class="card-deck _three">
-                        <a href="#" class="card">
-                            <div class="card__content mb-8">
-                                <div class="card__title mb-2">
-                                    Алгоритмы и структуры данных, часть 1
-                                </div>
-                                <div class="card__subtitle">Санкт-Петербург, Новосибирск, Заочное отделение</div>
-                            </div>
-                            <div class="card__content _meta">
-                                <div class="grouped">
-                                    <div class="ui label _icon mb-0">
-                                        {{ macros.svg_icon('time') }}<span>Весна 2017</span>
+    {% if teacher.course_offerings %}
+        <div class="container page-content">
+            <div class="row">
+                <div class="col-lg-12">
+                    <section class="content-block">
+                        <h2>Прочтения курсов</h2>
+                        <div class="card-deck _three">
+                            {% for course in teacher.course_offerings %}
+                                <a href="{{ course.get_absolute_url() }}" class="ui card">
+                                    <div class="card__content mb-8">
+                                        <div class="card__title mb-2">
+                                            {{ course.meta_course.name }}
+                                        </div>
+                                        <div class="card__subtitle">{{ course.branch.name }}{% if course.additional_branches.all() -%}
+                                            {% for branch in course.additional_branches.all() -%}
+                                                {% if branch.name != course.branch.name %}, {{ branch }}{% endif -%}
+                                            {% endfor %}{% endif %}</div>
                                     </div>
-                                    <div class="ui label _icon mb-0">
-                                        {{ macros.svg_icon('video') }}<span>123</span>
+                                    <div class="card__content _meta">
+                                        <div class="grouped">
+                                            <div class="ui label _icon mb-0">
+                                                {{ macros.svg_icon('time') }}<span>{{ course.semester|title }}</span>
+                                            </div>
+                                            {%- if course.videos_count %}
+                                                <div class="ui label _icon mb-0">
+                                                    {{ macros.svg_icon('video') }}<span>{{ course.videos_count }}</span>
+                                                </div>
+                                            {%- endif %}
+                                            {% if course.learners_count -%}
+                                            <div class="ui label _icon mb-0">
+                                                {{ macros.svg_icon('user') }}<span>{{ course.learners_count }}</span>
+                                            </div>
+                                            {%- endif %}
+                                        </div>
                                     </div>
-                                    <div class="ui label _icon mb-0">
-                                        {{ macros.svg_icon('user') }}<span>123</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </section>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </section>
+                </div>
             </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock content %}

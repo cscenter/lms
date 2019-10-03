@@ -601,11 +601,13 @@ class TeacherDetailView2(DetailView):
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
+        # Prefetch both center and club courses
         branches = [code for code, _ in Branches.choices]
         courses = (Course.objects
                    .filter(branch__code__in=branches)
                    .select_related('semester', 'meta_course', 'branch')
-                   .order_by('-semester__index'))
+                   .order_by('-semester__index')
+                   .prefetch_related('additional_branches'))
         return (User.objects
                 .filter(group__role=Roles.TEACHER)
                 .distinct()
