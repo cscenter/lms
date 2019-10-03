@@ -10,11 +10,11 @@
 <div class="col-xs-9 profile-body">
     <h2 class="content-title">{{ teacher.get_full_name }}</h2>
     {% if teacher.workplace %}<p>{{ teacher.workplace }}</p>{% endif %}
-    {% if teacher.note %}
+    {% if teacher.bio %}
         <div class="about-me">
             <div class="ubertext">
               {% markdown 3600 "user_note" teacher.pk teacher.modified %}
-                {{ teacher.note }}
+                {{ teacher.bio }}
               {% endmarkdown %}
             </div>
         </div>

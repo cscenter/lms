@@ -596,6 +596,25 @@ class TeacherDetailView(DetailView):
                              to_attr='course_offerings')))
 
 
+class TeacherDetailView2(DetailView):
+    template_name = "compscicenter_ru/teacher_detail.html"
+    context_object_name = 'teacher'
+
+    def get_queryset(self, *args, **kwargs):
+        branches = [code for code, _ in Branches.choices]
+        courses = (Course.objects
+                   .filter(branch__code__in=branches)
+                   .select_related('semester', 'meta_course', 'branch')
+                   .order_by('-semester__index'))
+        return (User.objects
+                .filter(group__role=Roles.TEACHER)
+                .distinct()
+                .prefetch_related(
+                    Prefetch('teaching_set',
+                             queryset=courses,
+                             to_attr='course_offerings')))
+
+
 class CourseOfferingsView(TemplateView):
     template_name = "compscicenter_ru/courses/course_list.html"
 

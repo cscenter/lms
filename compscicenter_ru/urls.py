@@ -10,7 +10,6 @@ from loginas import urls as loginas_urls
 from announcements.views import AnnouncementTagAutocomplete, \
     AnnouncementDetailView
 from compscicenter_ru import views
-from compscicenter_ru.views import TeacherDetailView
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.urls import RE_COURSE_URI
 from htmlpages.views import flatpage
@@ -32,7 +31,8 @@ urlpatterns += [
     path('history/', TemplateView.as_view(template_name='compscicenter_ru/history.html'), name='history'),
     path('team/', views.TeamView.as_view(), name='team'),
     path('teachers/', views.TeachersView.as_view(), name='teachers'),
-    path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
+    path('teachers/<int:pk>/', views.TeacherDetailView.as_view(), name='teacher_detail'),
+    path('teachers2/<int:pk>/', views.TeacherDetailView2.as_view(), name='teacher_detail2'),
     path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
     # Editing courses/
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
