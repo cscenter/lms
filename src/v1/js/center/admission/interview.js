@@ -12,39 +12,31 @@ function initInterviewCommentForm() {
     // Stupid defense from stale sessions
     commentForm.submit(function (e) {
         e.preventDefault();
-        const data = commentForm.serializeArray();
         $.ajax({
-            url: commentForm.attr("action"),
-            data: data,
-            dataType: 'json',
             type: 'POST',
+            url: commentForm.attr("action"),
+            data: commentForm.serialize(),
+            dataType: 'json',
         }).done(function (data) {
+            // FIXME: update #comments block instead of reload after migrating to react
             // Form was valid and saved, reload the page
-            if (data.success === "true") {
-                // swal({
-                //     title: "Данные сохранены",
-                //     text: "Страница будет перезагружена\nTODO: перезагрузка будет убрана в ближайшее время!",
-                //     type: "success"
-                // }, function(){ window.location.reload(); }
-                // );
-                // FIXME: Убрать перезагрузку?
-                createNotification("Комментарий успешно сохранён. Страница будет перезагружена");
-                setTimeout(function() {window.location.reload();}, 500);
-                // FIXME: update #comments block instead of reload!
-            } else {
+            createNotification("Комментарий успешно сохранён. Страница будет перезагружена");
+            setTimeout(function() {window.location.reload();}, 500);
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            if (jqXHR.status === 400) {
                 swal({
-                    title: "Ошибка валидации",
-                    text: "Укажите оценку перед сохранением.",
+                    title: "",
+                    text: jqXHR.responseJSON.errors,
                     type: "warning",
                     confirmButtonText: "Хорошо"
                 });
+            } else {
+                swal({
+                    title: "Всё плохо!",
+                    text: "Пожалуйста, скопируйте результаты своей работы и попробуйте перезагрузить страницу.",
+                    type: "error"
+                });
             }
-        }).fail(function (data) {
-            swal({
-                title: "Всё плохо!",
-                text: "Пожалуйста, скопируйте результаты своей работы и попробуйте перезагрузить страницу.",
-                type: "error"
-            });
         });
     })
 }

@@ -1,0 +1,8 @@
+/* Hide model object title in inline form */
+.inline-group .tabular tr.has_original td {
+    padding-top: 10px;
+}
+
+.original {
+    display: none;
+}
