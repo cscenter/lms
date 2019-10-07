@@ -1,0 +1,575 @@
+
+@import "variables";
+@import "../bootstrap.custom";
+@import "../jgrowl.customize";
+@import "../bootstrap.sweetalerts/sweet-alert-combine";
+@import "top_menu";
+
+@import "utilities/spacing";
+
+// Material design elements based on bootstrap
+@import "components/labels";
+//@import "components/page_aside";
+@import "material_design";
+
+
+@import "components/inputs";
+@import "components/buttons";
+@import "components/widgets";
+@import "components/badges";
+@import "components/wizards";
+@import "components/tabs";
+@import "components/toolbars";
+@import "components/panels";
+@import "components/pagination";
+@import "components/loading";
+@import "components/links";
+@import "components/lists";
+@import "components/cards";
+@import "components/breadcrumbs";
+@import "components/pager";
+@import "components/comment";
+@import "components/hr";
+@import "components/editor";
+
+// TODO: separate pages from common bundle (teacher bundle, student bundle?)
+@import "pages/open_in_nsk";
+@import "pages/courses";
+@import "pages/application";
+@import "pages/login";
+@import "pages/online_courses_page";
+@import "pages/index";
+@import "pages/testimonials";
+@import "pages/gradebook";
+@import "pages/courses_list_student";
+@import "pages/student_submission_comments";
+@import "pages/alumni";
+@import "pages/alumni_by_year";
+@import "pages/admission";
+@import "pages/projects_examples";
+@import "pages/projects";
+@import "pages/_assignments";
+@import "pages/calendar";
+@import "pages/teachers_list";
+@import "pages/user_profile";
+@import "pages/staff";
+@import "pages/course_offering";
+
+
+@import "pages/courses_experiment";
+
+.__one-line-slash {
+  background: #d1e0e8;
+  font-size: 24px;
+  padding: 2px 0 5px 10px;
+  display: inline-block;
+  margin-right: 20px;
+
+  &:after {
+    content: "\00a0";
+    height: 0;
+    width: 0;
+    font-size: 24px;
+    display: inline-block;
+    background: #fff;
+    border-right: 22px solid rgba(0, 0, 0, 0);
+    border-top: 33px solid #d1e0e8;
+    margin-top: -2px;
+    position: absolute;
+  }
+}
+
+
+.asteriskField {
+  color: $color-red;
+}
+
+// FIXME: It's bad to override styles in this way :<
+.form-control {
+  box-shadow: none;
+  padding: 8px 12px;
+
+  &:focus {
+    box-shadow: none;
+  }
+}
+
+#div_id_starts_at, #div_id_ends_at {
+  max-width: 134px;
+
+  .table-condensed td {
+    padding: 3px;
+  }
+
+  .bootstrap-datetimepicker-widget.dropdown-menu {
+    width: 14em;
+  }
+}
+
+
+page[size="A4"] {
+  background: white;
+  width: 210mm;
+  height: 296mm; /* smthg wrong with 297mm */
+  padding: 2cm 2cm 2cm 2cm;
+  display: block;
+  margin: 0 auto 0.5cm auto;
+  font: 12pt 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+  position: relative;
+  line-height: 18pt;
+}
+
+
+.bg-gray {
+  background-color: $background-grey;
+}
+.bg-white {
+  background-color: $background-white;
+}
+
+
+.modal-content {
+  border-radius: 3px;
+}
+
+.page-header {
+  margin-top: 0;
+
+  h1, h2, h3, h4, h5 {
+      margin-top: 0;
+  }
+}
+
+.center-header {
+    @extend .page-header;
+    text-align: center;
+    margin-top: 40px;
+
+    h1 {
+        text-align: center;
+
+    }
+
+    &._supported {
+        margin-bottom: 40px;
+    }
+
+    a {
+        text-transform: uppercase;
+    }
+}
+
+.content-title {
+  margin-top: 0!important;
+}
+
+// TODO: move somewhere. Replace in admission.scss div.square with this styles?
+div.square-photo-stub {
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  @extend .bg-info;
+  color: #333;
+}
+
+input.form-control[type=file] {
+  line-height: 1;
+  height: auto;
+}
+
+blockquote {
+  font-size: 14px;
+}
+
+h1.bigger-margin {
+  margin-top: 40px !important;
+  margin-bottom: 20px !important;
+}
+
+
+h3 {
+  &.title-inverse {
+    color: $color-gray-48;
+    font-weight: normal;
+  }
+}
+
+h4.bigger-margin {
+  margin-top: 20px !important;
+  margin-bottom: 20px !important;
+}
+
+h4.no-top-margin {
+  margin-top: 0 !important;
+}
+
+// Container modifications
+.container {
+  width: $min-width;
+}
+.container-wide {
+    width: 90% !important;
+    min-width: $min-width;
+}
+.container-responsive {
+  min-width: $min-width;
+}
+@media (min-width: $container-large-desktop) {
+  .container-responsive {
+    width: $container-large-desktop;
+  }
+}
+
+body {
+  margin-bottom: 90px;
+  /* min-height: 100%; */
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  min-width: 940px;
+  margin-bottom: 0;
+  background-color: $background-grey;
+  border-top: 1px solid $color-gray-90;
+  line-height: 60px;
+  color: #9B9B9B;
+  margin-top: 75px;
+
+  .social {
+    text-align: right;
+
+    a {
+      text-align: center;
+      color: #9B9B9B;
+      padding: 0 0 0 12px;
+
+      &:hover {
+        color: #777;
+      }
+    }
+
+    i {
+      vertical-align: middle;
+    }
+  }
+}
+
+.callout h1 {
+  margin-top: 50px;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  text-align: justify;
+}
+
+.callout p {
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 5px;
+  font-weight: 200;
+  font-size: 23px;
+}
+
+.callout-buttons {
+  text-align: right;
+}
+
+.callout-buttons a {
+  margin: 30px 15px;
+}
+
+.col-container {
+  width: 940px;
+}
+
+.columns {
+  -webkit-column-count: 2;
+  -webkit-column-gap: 10px;
+  -webkit-column-fill: auto;
+  -moz-column-count: 2;
+  -moz-column-gap: 10px;
+  -moz-column-fill: auto;
+  column-count: 2;
+  column-gap: 10px;
+  column-fill: auto;
+}
+
+.user-tile {
+  -webkit-column-break-inside: avoid;
+  -moz-column-break-inside: avoid;
+  column-break-inside: avoid;
+  margin-bottom: 10px;
+}
+
+.user-tile .user-info h4 {
+  margin-top: 0px;
+}
+
+.timetable .badge {
+  color: black;
+  border: 1px solid #D3D3D3;
+  font-weight: normal;
+  border-radius: 5px;
+}
+
+.timetable .badge.lecture {
+  background-color: #F9F9F9;
+}
+
+.timetable .badge.seminar {
+  background-color: #E9E9E9;
+}
+
+.timetable-header-row .center {
+  text-align: center;
+}
+
+.timetable-header-row .center h2 {
+  margin: 0px;
+}
+
+.timetable-main-row h4 {
+  margin-top: 40px;
+}
+
+.center-aligned {
+  text-align: center;
+}
+
+h2 {
+  small a {
+    color: $color-gray-48;
+  }
+}
+
+.h2-and-buttons {
+  h2 {
+    float: left;
+    margin-top: 0;
+  }
+
+  .btn-toolbar {
+    float: right;
+    margin-bottom: 10px;
+  }
+
+  hr {
+    clear: both;
+  }
+}
+
+.btn {
+  border-radius: 0;
+}
+
+
+
+
+
+
+.marks-sheet-csv-link .reason {
+  display: none;
+}
+
+.link-disabled {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:hover {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:active {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled:visited {
+  color: #CCC;
+  text-decoration: none !important;
+}
+
+.link-disabled .reason {
+  opacity: 0;
+  display: inline;
+}
+
+.link-disabled .reason.active {
+  opacity: 1;
+  -webkit-transition: opacity .15s ease-in-out;
+  -moz-transition: opacity .15s ease-in-out;
+  -ms-transition: opacity .15s ease-in-out;
+  -o-transition: opacity .15s ease-in-out;
+  transition: opacity .15s ease-in-out;
+}
+
+.assignment-status {
+  //color: #fff;
+  font-weight: normal;
+  white-space: nowrap;
+
+    &.not-checked {
+      color: #000;
+    }
+
+    &.being-checked {
+      color: #E9E9E9;
+    }
+
+    &.unsatisfactory {
+      color: $color-red;
+    }
+
+    &.pass {
+      color: $color-orange;
+
+      &.__binary {
+        color: $color-green;
+      }
+    }
+
+    &.good {
+      color: $color-yellow;
+    }
+
+    &.excellent {
+      color: $color-green;
+    }
+
+  &.badge {
+    color: #fff;
+    border-radius: 5px;
+    padding: 4px 6px;
+
+    &.not-checked {
+      color: #000;
+      border: 1px solid #D3D3D3;
+      background-color: #F9F9F9;
+    }
+
+    &.being-checked {
+      background-color: #E9E9E9;
+    }
+
+    &.unsatisfactory {
+      background-color: $color-red;
+    }
+
+    &.pass {
+      background-color: $color-orange;
+
+      &.__binary {
+        background-color: $color-green;
+        color: $color-white;
+      }
+    }
+
+    &.good {
+      background-color: $color-yellow;
+    }
+
+    &.excellent {
+      background-color: $color-green;
+    }
+  }
+}
+
+
+
+tr.unread {
+  background-color: #E2F9FF;
+}
+
+
+.list-unstyled.no-margin {
+  margin-bottom: 0px !important;
+}
+
+
+
+
+
+.input-grade {
+  width: 100px !important;
+}
+
+.nobreak {
+  white-space: nowrap;
+}
+
+.grade-cell {
+  text-align: center;
+}
+
+.video-container {
+  margin: auto;
+  width: 250px;
+  height: 150px;
+  text-align: center;
+  line-height: 150px;
+  margin-bottom: 30px;
+  opacity: 0.65;
+  position: relative;
+}
+
+.video-bg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 250px;
+  height: 150px;
+  opacity: 0.45;
+  z-index: -5;
+}
+
+.video-container:hover {
+  opacity: 1;
+}
+
+.video-inner {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+  font-weight: bold;
+  font-size: 20px;
+  color: #1F4C66;
+}
+
+
+// Used on students detail page?
+.student-comment-metainfo {
+  color: #999;
+  font-size: 0.75em;
+}
+
+
+
+.scrollable-menu {
+  height: auto;
+  max-height: 600px;
+  overflow-x: hidden;
+}
+
+// teacher detail hack
+.profile-sidebar {
+  &.col-xs-3 {
+    width: 20%;
+  }
+}
+
+// application page
+.form-application-newsletter {
+  margin: 10px 0;
+  .btn {
+    border-radius: 4px;
+  }
+}

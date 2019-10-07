@@ -1,0 +1,15 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block content %}
+    <div class="container page-content">
+
+        <div class="row">
+            <div class="col-lg-9">
+                <h2>Видео</h2>
+                <section class="content-block">
+                    {{ macros.video_iframe() }}
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

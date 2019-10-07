@@ -1,0 +1,60 @@
+#open-nsk {
+  font-size: 16px;
+}
+
+.__underlined {
+  color: $header-lvl1-bg;
+  font-weight: 400;
+  padding-bottom: 10px;
+  border-bottom: 2px solid $header-lvl1-bg;
+  margin-bottom: 20px;
+}
+
+._icon-history {
+  margin: 0 60px 0 0;
+}
+
+._icon-csc {
+  margin: 0 0 0 60px;
+}
+
+._icon-courses {
+  margin: 0 60px 40px 0;
+}
+
+
+._icon-projects {
+  margin: 0 0 0 60px;
+}
+
+._icon-application {
+  margin: 0 70px 30px 0;
+}
+
+._icon-mail {
+  margin: 7px 0 0 60px;
+}
+
+#open-nsk-form {
+  label {
+    font-weight:normal;
+  }
+  input {
+    font-size: 14px;
+    height: auto;
+    border-radius: 0;
+    padding: 12px 22px;
+    border-color: $header-lvl1-bg;
+    border-width: 2px;
+
+    &.user-error {
+      border-color: #ed1c24;
+    }
+  }
+  input[type=submit] {
+    background: $header-lvl1-bg;
+    padding: 0 25px;
+    height: 48px;
+    width: 100%;
+  }
+}

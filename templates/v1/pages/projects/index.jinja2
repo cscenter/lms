@@ -1,0 +1,351 @@
+{% extends "v1/layouts/base.jinja2" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="content-title">Практика на направлениях Data Mining и Software Engineering</h1>
+    <p>Практика — это основная часть обучения в центре, поэтому у каждого проекта есть куратор, который направляет студентов и делится с ними опытом. Чёткого разделения проектов по двум направлениям нет, то есть студент может выбрать как более исследовательскую, так и чисто инженерную задачу. Важно, чтобы по итогам семестра студент улучшил свои навыки программирования, а также научился выполнять поставленные перед ним задачи. Обычно кураторами становятся сотрудники компаний-спонсоров или представители вузов. Куратор встречается с командой по заранее определенному расписанию (обычно раз в неделю).</p>
+    <p>В конце семестра студенты делают презентацию о результатах, достигнутых на практике. В следующем семестре можно по желанию либо продолжить работать над тем же проектом, либо сменить тему и/или руководителя. Со всеми проблемами помогают разбираться кураторы CS центра. </p>
+    <p>Важное отличие такой практики от работы в компании заключается в том, что на практике студенты работают в команде таких же студентов, как они сами: учатся, пробуют разные технологии ради интереса и любопытства, чего уже нельзя сказать об оплачиваемой работе, где у задач чёткие сроки и требования к выполнению. Иногда, в зависимости от задач, за практику можно засчитать стажировку в какой-либо компании.</p>
+    <p>После успешного сотрудничества в рамках практики студент может перейти на стажировку в соответствующую компанию. Это может произойти как летом, так и во время учебного года.</p>
+    <p class="mb-10">Код открытых проектов можно найти в <a href="https://github.com/cscenter">организации CS центра на GitHub</a>. О некоторых проектах студенты рассказали сами.</p>
+
+    <div class="row">
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-goodsreview/">
+                <p class="practice-work__author">Несколько авторов</p>
+                <div class="practice-work__title">
+                    Проект GoodsReview
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/research-sosa/">
+                <p class="practice-work__author">Катя Соса</p>
+                <div class="practice-work__title">
+                    Поиск генов в метагномных сборках
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-deduplication/">
+                <p class="practice-work__author">Кирилл Кононов</p>
+                <div class="practice-work__title">
+                    File System Deduplicator
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-birukov/">
+                <p class="practice-work__author">Бирюков Илья</p>
+                <div class="practice-work__title">
+                    Value-tracking анализ JavaScript
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-avto-recognition/">
+                <p class="practice-work__author">Несколько авторов</p>
+                <div class="practice-work__title">
+                    Распознавание марки и модели автомобиля по фотографии
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-happy/">
+                <p class="practice-work__author">София Бызова</p>
+                <div class="practice-work__title">
+                    Как счастье пользователя выражается в его движениях мышкой
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="https://github.com/pritykovskaya/UniRank/wiki">
+                <p class="practice-work__author">Несколько авторов</p>
+                <div class="practice-work__title">
+                    Рейтинг вузов
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-duckietown/">
+                <p class="practice-work__author">Максим Кузьмин и Анатолий Бендриковский</p>
+                <div class="practice-work__title">
+                    Duckietown
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-be-a-better-programmer/">
+                <p class="practice-work__author">Дарья Васина</p>
+                <div class="practice-work__title">
+                    Игра "Be a Better Programmer. Turing machine"
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-orlova/">
+                <p class="practice-work__author">Несколько авторов</p>
+                <div class="practice-work__title">
+                    Brand Analitics
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="https://github.com/kvmamich/ideavim">
+                <p class="practice-work__author"></p>
+                <div class="practice-work__title">
+                    Эмулятор Vim для Idea
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-jenkins-job/">
+                <p class="practice-work__author">Евгений Бовыкин</p>
+                <div class="practice-work__title">
+                    Визуализация связей в Jenkins Job
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="https://code.google.com/archive/p/city-places-parser/">
+                <p class="practice-work__author"></p>
+                <div class="practice-work__title">
+                    Поиск достопримеча-тельностей в постах LiveJournal
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="https://code.google.com/archive/p/alvor/">
+                <p class="practice-work__author"></p>
+                <div class="practice-work__title">
+                    Статический валидатор SQL запросов для платформы Eclipse
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="https://code.google.com/archive/p/ebook-service/">
+                <p class="practice-work__author"></p>
+                <div class="practice-work__title">
+                    Cервис поиска электронных книг ebooksearch
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="https://confluence.jetbrains.com/display/GQRY/Genome+Query">
+                <p class="practice-work__author"></p>
+                <div class="practice-work__title">
+                    Веб-сервис для поиска по геному человека и его изучения Genome Query
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/project-lioznova/">
+                <p class="practice-work__author">Анна Лиознова</p>
+                <div class="practice-work__title">
+                    Новые интерфейсы
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <h1 class="margin-top-50">Научно-исследовательская работа</h1>
+    <p>Неотъемлемой частью обучения студентов направления Computer Science является научно-исследовательская работа (НИР), которая даёт возможность начать или продолжить заниматься наукой. Студенты могут попробовать разные темы, оценить, насколько им интересны те или иные области. Исследования могут быть как чисто теоретическими, так и прикладными. Кроме того, данная работа может стать основой для поступления в магистратуру или аспирантуру.</p>
+    <p>Важно, что НИР ведётся совместно с опытным научным руководителем, общение с которым само по себе является полезным и расширяет кругозор студентов. Руководитель внимательно наблюдает за процессом и направляет усилия студента в верное русло. Предполагается, что студент встречается с ним не реже раза в неделю для обсуждения достигнутого прогресса и возникающих у него вопросов.</p>
+    <p class="mb-40">В рамках НИР студент изучает литературу и решает задачи по выбранной им теме, которая определяется, исходя из собственных интересов и предпочтений. Научным руководителем может быть любой активный ученый со степенью. Помочь в выборе может куратор и научные руководители направления.</p>
+
+    <div class="row">
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/research-mikhaylin">
+                <p class="practice-work__author">Иван Михайлин</p>
+                <div class="practice-work__title">
+                    Верхние и нижние оценки на время работы алгоритмов
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/research-knop">
+                <p class="practice-work__author">Александр Кноп</p>
+                <div class="practice-work__title">
+                    Сложность в среднем и диофантова сложность
+                </div>
+            </a>
+        </div>
+        <div class="col-xs-3">
+            <a class="practice-work" target="_blank" href="/pages/research-aganezov">
+                <p class="practice-work__author">Сергей Аганезов</p>
+                <div class="practice-work__title">
+                    Комбинаторика и теория графов в биоинформатике
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="panel-group mt-50">
+        <div class="panel">
+                <div class="panel-heading">
+                    <a class="panel-title" aria-expanded="false" href="#topics">Возможные темы исследований и руководители</a>
+                </div>
+                <div class="panel-collapse collapse" id="topics" aria-expanded="false">
+                    <div class="panel-body" id="topics__inner">
+                        <ul class="mb-30">
+                            <li>
+                                <h4>Комбинаторные задачи биоинформатики</h4>
+                                <a href="http://home.gwu.edu/~maxal/">М. Алексеев</a> (<a href="http://gwu.edu/">Университет Джорджа Вашингтона</a>)
+                            </li>
+                            <li>
+                                <h4>Системы типов</h4>
+                                <a href="http://sites.google.com/site/abreslav2/">А. А. Бреслав</a> (<a href="http://www.jetbrains.com/">JetBrains</a>):
+                            </li>
+                            <li>
+                                <h4>Квантовые алгоритмы</h4>
+                                <a href="http://www.mathnet.ru/rus/person17699">М. Н. Вялый</a> (<a href="http://www.ccas.ru/">Вычислительный центр имени А. А. Дородницына РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Вычислительная геометрия</h4>
+                                <a href="http://compsciclub.ru/teachers/23/">К. В. Вяткина</a> (<a href="http://mit.spbau.ru/">СПбАУ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Верификация</h4>
+                                С. Э. Вельдер (<a href="http://www.ifmo.ru/">НИУ ИТМО</a>)
+                            </li>
+                            <li>
+                                <h4>Теория сложности вычислений и доказательств</h4>
+                                <a href="http://logic.pdmi.ras.ru/~hirsch">Э. А. Гирш</a> (<a href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Теория сложности</h4>
+                                <a href="http://logic.pdmi.ras.ru/~dmitrits">Д. М. Ицыксон</a> (<a href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Раскраски графов</h4>
+                                <a href="http://logic.pdmi.ras.ru/~dvk/">Д. В. Карпов</a> (<a href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Кооперативная теория игр, <a href="http://habrahabr.ru/company/yandex/blog/182976/">искусственный интеллект в тестировании</a></h4>
+                                <a href="https://compscicenter.ru/teachers/611/">И. В. Кацев</a> (<a href="http://yandex.ru">Яндекс</a>, <a href="http://emi.nw.ru/">СПбЭМИ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Алгоритмы для NP-трудных задач, сложность булевых функций</h4>
+                                <a href="http://logic.pdmi.ras.ru/~kulikov">А. С. Куликов</a> (<a href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Криптография</h4>
+                                <a href="https://research.google.com/pubs/IlyaMironov.html">И. Миронов</a> (<a href="https://www.google.ru/?gws_rd=ssl">Google</a>)
+                            </li>
+                            <li>
+                                <h4>Функциональные языки программирования и их системы типов</h4>
+                                <a href="http://compsciclub.ru/teachers/33/">Д. Н. Москвин</a> (<a href="http://spbau.ru/">СПбАУ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Машинное обучение</h4>
+                                <a href="http://logic.pdmi.ras.ru/~sergey/">С. И. Николенко</a> (<a href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a href="http://mit.spbau.ru/">СПбАУ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Оптимизация и обработка запросов</h4>
+                                <a href="http://www.math.spbu.ru/user/boris_novikov/index.shtml">Б. А. Новиков</a> (<a href="http://www.spbu.ru/">СПбГУ</a>)
+                            </li>
+                            <li>
+                                <h4>Формальные языки и грамматики</h4>
+                                <a href="http://users.utu.fi/aleokh/">А. С. Охотин</a> (<a href="http://spbu.ru/">СПбГУ</a>)
+                            </li>
+                            <li>
+                                <h4>Раскраски графов</h4>
+                                <a href="http://logic.pdmi.ras.ru/~pastor/">А. В. Пастор</a> (<a href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Надёжные модели вычислений, теория кодирования</h4>
+                                <a href="http://www.mccme.ru/~anromash/">А. Е. Ромащенко</a> (<a href="http://www.iitp.ru/ru/about">ИППИ РАН</a>)
+                            </li>
+                            <li>
+                                <h4>Параллельные алгоритмы, алгоритмы на строках</h4>
+                                <a href="http://go.warwick.ac.uk/alextiskin">А. В. Тискин</a> (<a href="http://www2.warwick.ac.uk/">University of Warwick</a>)
+                            </li>
+                            <li>
+                                <h4>Колмогоровская сложность, теория информации</h4>
+                                <a href="http://www.mccme.ru/poncelet/pers/shen.htm">А. Х. Шень</a> (<a href="http://www.iitp.ru/ru/about">ИППИ РАН</a>)
+                            </li>
+                        </ul>
+                        <p>Почти все перечисленные возможные научные руководители читали курсы в Computer Science клубе при ПОМИ РАН, <a href="http://compsciclub.ru/teachers/">на сайте клуба</a> можно ознакомиться с материалами их курсов и видеозаписями лекций.</p>
+                    </div>
+                </div>
+            </div>
+        <div class="panel">
+            <div class="panel-heading" id="projects__alumni-cs">
+                <a class="panel-title" aria-expanded="false" href="#projects__alumni-cs__inner">Выпускники направления Computer Science</a>
+            </div>
+            <div class="panel-collapse collapse" id="projects__alumni-cs__inner" aria-expanded="false">
+                <div class="panel-body">
+                    <ul class="projects__alumni-cs">
+                        <li><h4>Сергей Аганезов (выпуск 2011 г.)</h4>
+                            <p>Закончил магистратуру ИТМО. В CS центре занимался комбинаторикой и теорией графов в биоинформатике под руководством Макса Алексеева. В 2013 году поступил в аспирантуру Университета Вашингтона. В 2017 году защитил под руководством Макса Алексеева степень PhD (тема диссертации: “Comparative genomics meets genome assembly: from ancestral reconstruction to scaffolding”). В 2017 году получил позицию Postdoctoral Research Associate в Университете Принстона.</p>
+                            <p>Домашняя страница: <a href = "http://cbi.gwu.edu/sergey-aganezov"> http://cbi.gwu.edu/sergey-aganezov  </a></p>
+                            <p>Список публикаций: <a href = "http://dblp.uni-trier.de/pers/hd/a/Aganezov_Jr=:Sergey "> http://dblp.uni-trier.de/pers/hd/a/Aganezov_Jr=:Sergey </a></p>
+                            Рассказ о НИР: <a href = "https://compscicenter.ru/pages/research-aganezov/">https://compscicenter.ru/pages/research-aganezov/</a>
+                        </li>
+                        <li><h4>Александр Кноп (выпуск 2011 г.)</h4>
+                            <p>Закончил специалитет мат-меха СПбГУ. В CS центре занимался схемной сложностью и сложностью в среднем под руководством Эдуарда Алексеевич Гирша. В 2013 году поступил в аспирантуру Петербургского математического института (ПОМИ РАН). С 2017 года преподает в Калифорнийском университете в Сан-Диего (UCSD).</p>
+                            <p>Домашняя страница: <a href="http://logic.pdmi.ras.ru/~knop/">http://logic.pdmi.ras.ru/~knop/</a></p>
+                            <p>Список публикаций: <a href="http://dblp.uni-trier.de/pers/hd/k/Knop:Alexander">http://dblp.uni-trier.de/pers/hd/k/Knop:Alexander</a></p>
+                            Рассказ о НИР: <a href="https://compscicenter.ru/pages/research-knop">https://compscicenter.ru/pages/research-knop</a>
+                        </li>
+                        <li><h4>Павел Авдеев (выпуск 2014 г.)</h4>
+                            Закончил бакалавриат ИТМО. В CS центре занимался биоинформатикой под руководством Макса Алексеева. В 2013 году поступил в магистратуру АУ РАН на направление биоинформатики. В 2015 году поступил в аспирантуру Университета Вашингтона.
+                        </li>
+
+                        <li><h4>Михаил Белоус (выпуск 2014 г.)</h4>
+                            Закончил специалитет мат-меха СПбГУ. В CS центре занимался машинным обучением под руководством Игоря Евгенеевича Куралёнка. С 2015 работал в финансовом агенстве Bloomberg в Лондоне. С 2017 работает в компании Schibsted в Барселоне.
+                        </li>
+
+                        <li><h4>Елена Иконникова (выпуск 2014 г.)</h4>
+                            Закончила специалитет мат-меха СПбГУ. В CS центре занималась сложностью доказательств под руководством Дмитрия Михайловича Ицыксона. В 2014 году поступила в аспирантуру Лаборатории Чебышева СПбГУ.
+                        </li>
+
+                        <li><h4>Николай Карпов (выпуск 2014 г.)</h4>
+                            <p>Закончил специалитет мат-меха СПбГУ. В CS центре занимался приближёнными алгоритмами для задачи о надстроке под руководством Александра Куликова. В 2014 году поступил в магистратуру АУ РАН на направление теоретической информатики.</p>
+                            Список публикаций: <a href="http://dblp.uni-trier.de/pers/hd/k/Karpov:Nikolay">http://dblp.uni-trier.de/pers/hd/k/Karpov:Nikolay</a>
+                        </li>
+
+                        <li><h4>Иван Михайлин (выпуск 2014 г.)</h4>
+                            <p>Закончил бакалавриат СПбГПУ и магистратуру АУ РАН по направлению теоретическая информатика. В CS центре занимался схемной сложностью и алгоритмами для NP-трудных задач под руководством Александра Куликова. В 2014 году поступил в аспирантуру Калифорнийского университета в Сан-Диего.</p>
+                            <p>Список публикаций: <a href="http://dblp.uni-trier.de/pers/hd/m/Mihajlin:Ivan">http://dblp.uni-trier.de/pers/hd/m/Mihajlin:Ivan</a></p>
+                            Рассказ о НИР: <a href="https://compscicenter.ru/pages/research-mikhaylin/">https://compscicenter.ru/pages/research-mikhaylin/</a>
+                        </li>
+
+                        <li><h4>Михаил Слабодкин (выпуск 2014 г.)</h4>
+                            <p>Закончил специалитет мат-меха СПбГУ. В CS центре занимался сложностью доказательств под руководством Дмитрия Михайловича Ицыксона. В 2014 году поступила в магистратуру АУ РАН на направление теоретической информатики.</p>
+                            Список публикаций: <a href="http://dblp.uni-trier.de/pers/hd/s/Slabodkin:Mikhail">http://dblp.uni-trier.de/pers/hd/s/Slabodkin:Mikhail</a>
+                        </li>
+
+                        <li><h4>Сергей Якунин (выпуск 2014 г.)</h4>
+                        Закончил бакалавриат и магистратуру СПбГПУ. Тема магистерской диссертации: "Исследование эффективности применения методов внутренней точи при решении специального класса контактных задач", руководитель: Петухова Маргарита Владимировна. В 2014 году поступил в аспирантуру Мадридского университета имени Карлоса III.
+                        </li>
+
+                        <li><h4>Алина Дубатовка (выпуск 2015 г.)</h4>
+                        Закончила бакалавриат СПбГУ. Тема диссертации: "Автоматическое выделение фаз ментальной активности", руководитель: Борис Асенович Новиков. В 2015 году поступила в магистратуру СПбГУ. В 2015 стала лауреатом премии имени Аниты Борг.
+                        </li>
+
+                        <li><h4>Иван Толстоганов (выпуск 2015 г.)</h4>
+                        Закончила бакалавриат СПбГУ. В CS центре занимался жадной гипотезой для задачи о надстроке под руководством Александра Куликова. В 2015 году поступил в магистратуру АУ РАН на направление биоинформатики.
+                        </li>
+
+                        <li><h4>Сергей Романов (выпуск 2016 г.)</h4>
+                        Закончил специалитет и аспирантуру в ЛЭТИ, преподаёт в родном университете. Во время обучения в CS центре исследовал использование методов полиномиальной оптимизации для анализ нелинейных полиномиальных систем. В ближайшее время предстоит защита диссертации по численным методам оценки области притяжения слабых аттракторов.
+                        </li>
+
+                        <li><h4>Илия Кузьмина (выпуск 2016 г.)</h4>
+                        Закончила бакалавриат мат-меха СПбГУ. Тема дипломной работы "Анализ программного кода методами машинного обучения", руководитель: Брыксин Тимофей Александрович. В CS центре занималась машинным обучением и анализом текстов под руководством Сергея Игоревича Николенко. В 2014 году стала лауреатом премии имени Аниты Борг.
+                        </li>
+
+                        <li><h4>Дмитрий Коваленко (выпуск 2017 г.)</h4>
+                        Закончил магистратуру Томского Политехнического Университета. С 2014 года
+                        работает в Samsung R&D Institute Russia в Москве, где занимается
+                        исследованиями в области компьютерного зрения и SLAM.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

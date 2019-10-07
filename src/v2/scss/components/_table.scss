@@ -1,0 +1,137 @@
+.table {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+  border: $border-width solid $gray-lighter;
+}
+
+.table__row {
+  display: table-row;
+
+  &:hover {
+    background-color: rgba($gray-lighter, .3);
+  }
+
+  &._head {
+    .table__cell {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      pointer-events: none;
+    }
+  }
+}
+
+.table__cell {
+  display: table-cell;
+  padding: spacer("3x");
+  border-bottom: $border-width solid $gray-lighter;
+  vertical-align: top;
+  line-height: $line-height-sm;
+  font-size: $font-size-base;
+  font-weight: $font-weight-base;
+
+  .sprite-img.svg-icon {
+    fill: $gray-light;
+  }
+
+  &._icons {
+    .sprite-img.svg-icon {
+      margin-right: spacer("2x");
+    }
+  }
+}
+
+.table__caption {
+  font-size: $font-size-sm;
+  padding-top: spacer("2x");
+  color: $gray-dark;
+  display: table-caption;
+  caption-side: bottom;
+}
+
+.table._fixed {
+  table-layout: fixed;
+}
+
+.table._celled {
+  .table__cell {
+    border: $border-width solid $gray-lighter;
+  }
+}
+
+.table._w-lg {
+  min-width: map_get($container-max-widths, "lg");
+}
+
+.table._no-adaptive {
+  max-width: map_get($container-max-widths, "md");
+  overflow: scroll;
+
+  .table__row {
+    min-width: map_get($container-max-widths, "lg");
+  }
+}
+
+table {
+  @extend .table;
+
+  caption {
+    @extend .table__caption;
+  }
+}
+
+tr {
+  @extend .table__row;
+}
+
+td, th {
+  @extend .table__cell;
+}
+
+thead, thead > tr {
+  @extend .table__row._head;
+}
+
+.table._mobile {
+  .table__row._head {
+    display: none;
+    @include media-breakpoint-up(md) {
+      display: table-row;
+    }
+  }
+
+  .table__row {
+    border-top: $border-width solid $gray-lighter;
+    border-bottom: $border-width solid $gray-lighter;
+    @include media-breakpoint-up(md) {
+      border: none;
+    }
+  }
+
+  .table__cell {
+    display: block;
+    border: none;
+    padding: 0 spacer("8x");
+
+    &:first-child {
+      padding-top: spacer("4x");
+    }
+
+    &:last-child {
+      padding-bottom: spacer("4x");
+    }
+
+    @include media-breakpoint-up(md) {
+      display: table-cell;
+      border-top: $border-width solid $gray-lighter;
+      padding: spacer("3x");
+      &:first-child {
+        padding-top: spacer("3x");
+      }
+
+      &:last-child {
+        padding-bottom: spacer("3x");
+      }
+    }
+  }
+}

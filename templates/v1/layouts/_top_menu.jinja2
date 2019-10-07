@@ -1,0 +1,71 @@
+{% set menu = csc_menu(request, "compscicenter") %}
+{% set user = request.user %}
+<div class="header">
+<div class="menu lvl1">
+    <div class="container">
+        <div class="col-xs-11">
+            <div class="logo-cell">
+                <a class="logo-container" href="{{ url('index') }}"><img src="{{ static("v1/img/center/logo.svg") }}" alt="Computer Science Center"></a>
+            </div>
+            <ul{% if menu["tree"]|length > 8 %} class="__narrow"{% endif %}>
+                {% for menu_item in menu["tree"] %}
+                    <li {% if menu_item.id in menu["active_items"] %}class="active"{% endif %}>
+                        <a {% if menu_item.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ menu_item.url }}">{% trans caption=menu_item.caption %}{{ caption }}{% endtrans %}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-xs-1" id="login" data-user-id="{{ user.pk }}">
+            {% if user.is_authenticated %}
+                <div class="dropdown">
+                  <a href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {% set im = userpreview(user, "60x60") %}
+                    {% if im %}
+                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                      {% else %}
+                        <img src="{% if user.gender == "F" %}{{ static("v1/img/csc_girl_head.svg") }}{% else %}{{ static("v1/img/csc_boy_head.svg") }}{% endif %}" class="_empty">
+                    {% endif %}
+                    <span class="caret"></span>
+                  </a>
+                  <ul class="dropdown-menu pull-right" aria-labelledby="user-menu">
+                      <li class="dropdown-header">{{ user.get_short_name() }}</li>
+                      {% if user.is_staff %}
+                          <li><a href="{{ url('admin:index') }}" target="_blank">Админ-панель</a></li>
+                      {% endif %}
+                      <li><a href="{{ user.get_absolute_url() }}">{% trans %}Profile{% endtrans %}</a></li>
+                      <li><a href="{{ url('logout') }}">{% trans %}Logout{% endtrans %}</a></li>
+                  </ul>
+                </div>
+            {% else %}
+                <a href="{{ url('login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">{% trans %}Login{% endtrans %}</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% for menu_item in menu["tree"] %}
+    {% if menu_item.id in menu["active_items"] and menu_item.children %}
+      <div class="menu lvl2 {{menu_item.extension.classes}}">
+        <div class="container">
+              <ul>
+                {% for second_level in menu_item.children %}
+                    <li {% if second_level.id in menu["active_items"] and second_level.extension.classes %}class="{{second_level.extension.classes}} active"
+                    {% elif second_level.extension.classes %}class="{{ second_level.extension.classes }}"
+                    {% elif second_level.id in menu["active_items"] %}class="active"{% endif %}>
+                        <a {% if second_level.extension.open_in_new_window %}target="_blank"{% endif %} href="{{ second_level.url }}">
+                            {{ second_level.caption }}
+
+                            {% if second_level.extension.budge and request.unread_notifications_cache[second_level.extension.budge] %}
+                            <span class="badge">
+                              {{ request.unread_notifications_cache[second_level.extension.budge]|length }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                {% endfor %}
+              </ul>
+        </div>
+      </div>
+    {% endif %}
+{% endfor %}
+</div>

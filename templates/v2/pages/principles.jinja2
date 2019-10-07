@@ -1,0 +1,81 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://unpkg.com/react-select@1.2.1/dist/react-select.css">
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="bg-gray">
+    <div class="container page-content">
+        <div class="row content-center">
+            <div class="col-lg-10">
+                <div class="ui form principles" action="">
+                    <div class="card__title text-center __inverse __image">
+                    </div>
+                    <div class="card__content">
+                        <div class="row content-center">
+                            <div class="col-lg-10">
+                                <h1>Проходя курсы&nbsp;CS центра, я:</h1>
+                                <div class="rule"><p>Осознаю, что обсуждение домашних заданий с&nbsp;товарищами
+                                    полезно, но заимствовать результаты чужой работы не&nbsp;буду, если это напрямую  не&nbsp;разрешено
+                                    в задании;</p>
+                                </div>
+                                <div class="rule"><p>Cамостоятельно решаю все контрольные работы и&nbsp;тесты, не
+                                    предполагающие кооперации с&nbsp;одногруппниками;</p>
+                                </div>
+                                <div class="rule"><p>Не&nbsp;прошу и&nbsp;не&nbsp;буду просить помощи при выполнении
+                                    заданий у&nbsp;людей, которыене имеют отношения к&nbsp;CS центру;</p>
+                                </div>
+                                <div class="rule"><p>Не&nbsp;публикую и&nbsp;не&nbsp;буду публиковать решения домашних
+                                    заданий и&nbsp;контрольных работ в&nbsp;открытый доступ без разрешения преподавателя
+                                    курса (это относится как к&nbsp;моим решениям, так и&nbsp;к&nbsp;официальным
+                                    решениям, опубликованным преподавателями);</p>
+                                </div>
+                                <div class="rule"><p>Не&nbsp;выкладываю и&nbsp;не&nbsp;буду выкладывать в&nbsp;открытый
+                                    доступ видеозаписи лекций&nbsp;CS центра без разрешения кураторов;</p>
+                                </div>
+                                <div class="rule"><p>Не&nbsp;пытаюсь улучшить свою или чужую оценку нечестным способом и&nbsp;не&nbsp;мешаю
+                                    другим добиваться хороших результатов;</p>
+                                </div>
+                                <div class="rule"><p>При общении с&nbsp;преподавателями, кураторами и&nbsp;другими
+                                    студентами уважаю собеседника, избегаю хамство и&nbsp;нецензурную лексику.
+                                </p>
+                                </div>
+                                <div class="rule">
+                                    <a href="" class="btn _big _primary _m-wide">
+                                        <div class="btn-animation">
+                                            <span>Я обещаю!</span><img
+                                                src="/static/v2/img/icons/checkmark.svg" alt="">
+                                        </div>
+                                    </a>
+                                </div>
+                                <small>Желаем тебе не поступиться своими принципами
+                                        и блестяще закончить учебу в центре!</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+{% block footer -%}
+<footer class="footer bg-gray">
+    <div class="container">
+        <span class="footer__copyright">&copy; Computer Science Center, 2018</span>
+        <div class="footer__contacts">
+            <a href="" class="footer__link">
+                info@compscicenter.ru
+            </a>
+            <div class="footer__social-media-icons">
+                <a href="">{{ macros.svg_icon('vk') }}</a>
+                <a href="">{{ macros.svg_icon('instagram') }}</a>
+                <a href="">{{ macros.svg_icon('twitter') }}</a>
+                <a href="">{{ macros.svg_icon('facebook') }}</a>
+                <a href="">{{ macros.svg_icon('youtube') }}</a>
+            </div>
+        </div>
+    </div>
+</footer>
+{%- endblock footer %}

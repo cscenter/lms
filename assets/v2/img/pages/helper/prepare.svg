@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="177" height="177" viewBox="0 0 177 177">
+  <defs>
+    <polygon id="prepare-a" points="0 87 122 87 122 0 0 0"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <circle cx="88.5" cy="88.5" r="88.5" fill="#F3F6F7" fill-rule="nonzero"/>
+    <g transform="translate(28 45)">
+      <path fill="#FEFEFE" d="M61,12.4175791 L61,76.2715187 C61,76.2715187 30.6423663,50.5517173 1,78 L1,12.4175791 C1,12.4175791 9.99932884,1 30.9990412,1 C52.0006712,1 61,12.4175791 61,12.4175791"/>
+      <path stroke="#33B99B" stroke-width="2" d="M61,12.4175791 L61,76.2715187 C61,76.2715187 30.6423663,50.5517173 1,78 L1,12.4175791 C1,12.4175791 9.99932884,1 30.9990412,1 C52.0006712,1 61,12.4175791 61,12.4175791 Z"/>
+      <path fill="#FEFEFE" d="M61,12.4175791 L61,76.2715187 C61,76.2715187 91.3557161,50.5517173 121,78 L121,12.4175791 C121,12.4175791 112.000671,1 90.9990412,1 C69.9974112,1 61,12.4175791 61,12.4175791"/>
+      <path stroke="#33B99B" stroke-width="2" d="M61,12.4175791 L61,76.2715187 C61,76.2715187 91.3557161,50.5517173 121,78 L121,12.4175791 C121,12.4175791 112.000671,1 90.9990412,1 C69.9974112,1 61,12.4175791 61,12.4175791 Z"/>
+      <mask id="prepare-b" fill="#fff">
+        <use xlink:href="#prepare-a"/>
+      </mask>
+      <polygon fill="#FEFEFE" points="1 81 122 81 122 78 1 78" mask="url(#prepare-b)"/>
+      <polygon stroke="#33B99B" stroke-width="2" points="1 81 122 81 122 78 1 78" mask="url(#prepare-b)"/>
+      <polygon fill="#FEFEFE" points="78 81 45 81 50.774 86 72.226 86" mask="url(#prepare-b)"/>
+      <polygon stroke="#33B99B" stroke-width="2" points="78 81 45 81 50.774 86 72.226 86" mask="url(#prepare-b)"/>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(1 10)">
+          <path fill="#FEFEFE" d="M0.0002,7.1316 L10.4682,0.5256"/>
+          <path stroke="#33B99B" d="M0.0002,7.1316 L10.4682,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(1 18)">
+          <path fill="#FEFEFE" d="M0.0002,7.1316 L10.4682,0.5256"/>
+          <path stroke="#33B99B" d="M0.0002,7.1316 L10.4682,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(1 26)">
+          <path fill="#FEFEFE" d="M0.0002,7.1316 L10.4682,0.5256"/>
+          <path stroke="#33B99B" d="M0.0002,7.1316 L10.4682,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(1 33)">
+          <path fill="#FEFEFE" d="M0.0002,7.1316 L10.4682,0.5256"/>
+          <path stroke="#33B99B" d="M0.0002,7.1316 L10.4682,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(1 41)">
+          <path fill="#FEFEFE" d="M0.0002,7.1316 L10.4682,0.5256"/>
+          <path stroke="#33B99B" d="M0.0002,7.1316 L10.4682,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(1 49)">
+          <path fill="#FEFEFE" d="M0.0002,7.1316 L10.4682,0.5256"/>
+          <path stroke="#33B99B" d="M0.0002,7.1316 L10.4682,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(1 56)">
+          <path fill="#FEFEFE" d="M0.0002,7.1316 L10.4682,0.5256"/>
+          <path stroke="#33B99B" d="M0.0002,7.1316 L10.4682,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(1 64)">
+          <path fill="#FEFEFE" d="M0.0002,7.1316 L10.4682,0.5256"/>
+          <path stroke="#33B99B" d="M0.0002,7.1316 L10.4682,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(61 10)">
+          <path fill="#FEFEFE" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+          <path stroke="#33B99B" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(61 18)">
+          <path fill="#FEFEFE" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+          <path stroke="#33B99B" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(61 26)">
+          <path fill="#FEFEFE" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+          <path stroke="#33B99B" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(61 33)">
+          <path fill="#FEFEFE" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+          <path stroke="#33B99B" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(61 41)">
+          <path fill="#FEFEFE" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+          <path stroke="#33B99B" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(61 49)">
+          <path fill="#FEFEFE" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+          <path stroke="#33B99B" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(61 56)">
+          <path fill="#FEFEFE" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+          <path stroke="#33B99B" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+        </g>
+      </g>
+      <g mask="url(#prepare-b)">
+        <g transform="translate(61 64)">
+          <path fill="#FEFEFE" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+          <path stroke="#33B99B" d="M0.423291429,7.1316 L11.1903771,0.5256"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

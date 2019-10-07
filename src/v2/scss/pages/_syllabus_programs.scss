@@ -1,0 +1,93 @@
+// On campus detail page
+._program-card {
+  flex-flow: wrap;
+  margin-bottom: spacer("6x");
+  border: none;
+
+  .card__img {
+    display: flex;
+    background-color: $teal;
+    height: 184px;
+    border-radius: $border-radius;
+    justify-content: center;
+    align-items: flex-start;
+
+    img {
+      max-width: 130px;
+      height: 130px;
+    }
+
+    @include media-breakpoint-up(md) {
+      img {
+        max-width: 180px;
+        height: 180px;
+      }
+    }
+  }
+
+  .card__content {
+    position: relative;
+    top: -88px;
+    height: 0;
+    padding: 0;
+    @include media-breakpoint-up(md) {
+      height: auto;
+      top: 0;
+      padding: 0 0 0 spacer("4x");
+    }
+  }
+
+  .card__title {
+    display: block;
+    text-align: center;
+    color: $white;
+    margin-bottom: 0;
+    @include media-breakpoint-up(md) {
+      text-align: left;
+      color: $link-color;
+    }
+
+    a {
+      color: $white;
+      @include media-breakpoint-up(md) {
+        color: $link-color;
+      }
+    }
+  }
+
+  .card__subtitle {
+    text-align: center;
+    color: $white;
+    @include media-breakpoint-up(md) {
+      margin-bottom: spacer("2x");
+      text-align: left;
+      color: $gray-dark;
+    }
+  }
+
+  .card__text {
+    display: none;
+    margin: 0;
+    @include media-breakpoint-up(md) {
+      display: block;
+    }
+  }
+}
+
+a._program-card {
+
+  .card__title {
+    color: $white;
+    @include media-breakpoint-up(md) {
+      color: $link-color;
+    }
+  }
+  &:hover {
+    .card__title {
+      color: $white;
+      @include media-breakpoint-up(md) {
+        color: $link-hover-color;
+      }
+    }
+  }
+}

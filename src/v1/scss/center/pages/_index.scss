@@ -1,0 +1,227 @@
+.bg-gray {
+  background-color: $background-grey; // This is a copy from styles.scss :<
+}
+
+
+
+a.links-sep-by-vertical-lines {
+  padding-right: 10px;
+  margin-right: 10px;
+  border-right: 1px solid $color-grey;
+
+  &:last-child {
+    border: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+// test css
+h2.right-line:after {
+    position: absolute;
+    top: 55%;
+    overflow: hidden;
+    width: 100%;
+    height: 1px;
+    content: '\a0';
+    background-color: #ddd;
+    border-left: solid 20px #fff;
+}
+
+#admission {
+  @extend .container;
+  font-size: 16px;
+  line-height: 1.55;
+  padding-bottom: 30px;
+
+  .center-header {
+    a {
+      @extend .links-sep-by-vertical-lines;
+      font-size: 14px;
+    }
+  }
+
+  ul {
+    @extend .list-unstyled;
+  }
+}
+
+#intro {
+    overflow: hidden;
+    background: #EDEDED;
+    margin-top: -60px;
+
+    h1 {
+        font-weight: normal;
+        margin-top: 100px;
+    }
+
+    .btn-primary {
+        background: #f67280;
+        border: darken(#f67280, 10%);
+    }
+}
+
+#index-page-image {
+  margin-top: -28px;
+  text-align: center;
+  background: $background-grey;
+
+  img {
+    max-width: 100%;
+    min-width: $min-width;
+  }
+}
+
+
+
+
+#index-online-courses {
+  min-width: $min-width;
+
+  #onlinecourses-list {
+    @extend .container;
+    padding-top: 0;
+
+    .center-header {
+      border-color: #ddd;
+    }
+  }
+}
+
+.supported-by {
+    overflow: hidden;
+
+    div {
+        text-align: center;
+        padding-bottom: 20px;
+
+        img {
+          max-width: 200px;
+        }
+    }
+
+}
+
+
+.index-news {
+  padding-left: 0px;
+}
+
+.index-news>li {
+  position: relative;
+  list-style: none;
+}
+
+.index-news span.date {
+  position: absolute;
+  margin-left: -160px;
+  padding-right: 10px;
+  width: 160px;
+  text-align: right;
+  font-size: 18px;
+  color: #B5B5B5;
+}
+
+.testimonials-wrapper {
+  &.__index {
+    .testimonials {
+      .testimonial {
+        margin-bottom: 40px;
+
+        blockquote {
+          padding: 30px;
+
+          &:before {
+            display: none;
+            border-color: #f8f8f8 transparent transparent transparent;
+          }
+        }
+
+      }
+    }
+
+    &.__inverse {
+      background: $background-grey;
+      .testimonials {
+        .testimonial {
+          margin-bottom: 40px;
+
+          blockquote {
+            padding: 10px 20px 10px 3px;
+            margin-bottom: 10px;
+
+            &:before {
+              display: none;
+              border-color: #fff transparent transparent transparent;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+#courses-wrapper {
+  .card { @extend .z-depth-2;}
+
+  #courses {
+
+    .center-header {
+      a {
+        @extend .links-sep-by-vertical-lines;
+      }
+    }
+
+    .card-header {
+      h2 {
+        min-height: 34px;
+      }
+    }
+
+    @extend .container;
+
+    .table {
+
+      th {
+        &._semester {
+          width: 100px;
+        }
+        &._lec_cnt {
+          width: 54px;
+          text-align: center;
+        }
+
+        &._video {
+          text-align: center;
+          width: 50px;
+        }
+      }
+
+      tr {
+        td:last-child {
+          text-align: center;
+        }
+      }
+
+      > thead > tr > th {
+        @extend .bg-gray;
+        border-bottom: 0;
+      }
+    }
+  }
+}
+
+
+// ribbons
+.ribbon {
+  position: absolute;
+  left: -3px;
+  bottom: -12px;
+
+  .ribbon-inner {
+    position: static;
+    height: auto;
+    line-height: 26px;
+  }
+}

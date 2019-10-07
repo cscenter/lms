@@ -1,3 +1,0 @@
-{% spaceless %}{% for widget in widget.subwidgets %}{% include widget.template_name with is_subwidget=True %}{% endfor %}{% if errors %}
-    <p class="help-text error">{% if field.error_message %}{{ error_message }}{% else %}{% for error in errors %}{{ error }}{% endfor %}{% endif %}</p>
-{% endif %}{% endspaceless %}

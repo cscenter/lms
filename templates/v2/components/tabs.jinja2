@@ -1,0 +1,91 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block body_attrs %}data-init-sections="tabs"{% endblock body_attrs %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-8">
+                <h1>Tabs</h1>
+                <ul class="ui nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Active</a>
+                    </li>
+                    <li class="nav-item">
+                        <span class="nav-link">Span</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Element with Really Long Title</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#">Disabled</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-9">
+                <h3>Cities Example</h3>
+                {% set city_tabs = [
+                    {'target': 'spb', 'name': 'Санкт-Петербург', 'active': true, 'url': '#'},
+                    {'target': 'nsk', 'name': 'Новосибирск', 'active': false, 'url': '#'}
+                ] %}
+
+                <div class="mb-10">
+                    {{ macros.tabs(city_tabs, modifiers='mb-2') }}
+                    <div class="tab-content">
+                        {% with tab = city_tabs[0] %}
+                            <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                контент {{ tab.name }}
+                            </div>
+                        {% endwith %}
+                        {% with tab = city_tabs[1] %}
+                            <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                контент {{ tab.name }}
+                            </div>
+                        {% endwith %}
+                    </div>
+                </div>
+
+
+                <ul class="ui nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Санкт-Петербург</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Новосибирск</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Казань</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Сан-Франциско</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3">
+                <h3>Scrollable</h3>
+                <ul class="ui nav-tabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Санкт-Петербург</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Новосибирск</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Казань</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Сан-Франциско</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

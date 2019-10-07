@@ -1,0 +1,214 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block body_attrs %}class="_nofooter"{% endblock body_attrs %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/achievements.svg") }}");
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-12">
+                <pre>
+FIXME: 
+Поддержка тега code - по желанию.
+Shadowed - не вижу тени.
+font-weight: bolder не работает, либо совсем не заметно.
+Нужно понять, какие глифы (или как эта фигня в шрифтах называется) подтянуть,
+чтобы заработало (смотри тег `b` в текстах сообщений). Ну и подумать, нужно ли.
+                </pre>
+                <h1>Types</h1>
+                <div class="message">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Базовый стиль
+                    </div>
+                    <p>Обратите <b>внимание</b> на важную информацию</p>
+                    <p>Модификатор <code>отсутствует</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
+                    <button href="#" class="btn _success _small message__btn">Разрешить доступ</button>
+                    <button href="#" class="btn _light _small message__btn">Не разрешать</button>
+                </div>
+                <div class="message _danger">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Внимание
+                    </div>
+                    <p><b>Срочно</b> примите неотложные меры!</p>
+                    <p>Модификатор <code>._danger</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
+                </div>
+                <div class="message _warning mb-4">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Системное сообщение
+                    </div>
+                    <p>Мы <b>предупреждаем</b> что все ваши <a href="#">действия</a> будут записанны в наших логах</p>
+                    <p>Модификатор <code>._warning</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
+                </div>
+                <div class="message _success">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        У вас кое-что получается!
+                    </div>
+                    <p>Мы <b>предупреждаем</b> что все ваши действия будут записанны в наших логах</p>
+                    <p>Модификатор <code>._success</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
+                </div>
+                <div class="message _info">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Информационное сообщение
+                    </div>
+                    <p>Мы <b>оповещаем</b> вас, что все ваши действия будут записанны в наших логах</p>
+                    <p>Модификатор <code>._info</code></p>
+                    <p>Перейти в раздел <a href="#">преподавания</a>.</p>
+                </div>
+
+                <h1>Bordered</h1>
+                <div class="message _danger _outline">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Внимание
+                    </div>
+                    <p><b>Срочно</b> примите неотложные <a href="">меры</a>!</p>
+                </div>
+                <div class="message _warning _outline mb-4">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Системное сообщение
+                    </div>
+                    <p>Мы предупреждаем что все ваши действия будут записанны в наших логах</p>
+                </div>
+                <div class="message _success _outline">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        У вас кое-что получается!
+                    </div>
+                    <p>Мы предупреждаем что все ваши действия будут записанны в наших логах</p>
+                </div>
+                <div class="message _info _outline">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Информационное сообщение
+                    </div>
+                    <p>Мы оповещаем что все ваши действия будут записанны в наших логах</p>
+                </div>
+
+                <h1>Contrast</h1>
+                <div class="message _danger _inverted">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Внимание
+                    </div>
+                    <p>Срочно примите неотложные <a href="">меры</a>!</p>
+                </div>
+                <div class="message _warning _inverted mb-4">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Системное сообщение
+                    </div>
+                    <p>Мы предупреждаем что все ваши <a href="">действия</a> будут записанны в наших логах</p>
+                </div>
+                <div class="message _success _inverted">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        У вас кое-что получается!
+                    </div>
+                    <p>Мы предупреждаем что все ваши <a href="">действия</a> будут записанны в наших логах</p>
+                </div>
+                <div class="message _info _inverted">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Информационное сообщение
+                    </div>
+                    <p>Мы оповещаем что все ваши действия будут записанны в наших логах</p>
+                </div>
+
+                <h1>Shadowed</h1>
+                <div class="message _shadowed">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
+                    </button>
+                    <div class="message__header">
+                        Внимание
+                    </div>
+                    <p>Срочно примите неотложные <a href="#">меры!</a></p>
+                </div>
+                <section class="page-content">
+                <h1>Using</h1>
+                    <h2>Пометки в форме</h2>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card _form">
+                                <form action="">
+                                    <div class="card__title">
+                                        <h2>Вход на сайт</h2>
+                                        <div class="mt-1 message _warning _inverted mb-4">
+                                            На заполнение формы у вас есть 5 минут
+                                        </div>
+                                    </div>
+                                    <div class="card__content">
+                                        <div class="row">
+                                            <div class="field col-12">
+                                                <div class="ui input">
+                                                    <input type="text" placeholder="Логин">
+                                                </div>
+                                                <div class="help-text">
+                                                    Логин, номер телефона или электронная почта
+                                                </div>
+                                            </div>
+                                            <div class="field col-12">
+                                                <div class="ui icon input">
+                                                    <input type="password" placeholder="Пароль">
+                                                    <i class="_password-hidden icon">{{ macros.svg_icon('password-hidden') }}</i>
+                                                </div>
+                                            </div>
+                                            <div class="field col-lg-auto">
+                                                <a href="" class="btn _primary _m-wide">Войти</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}

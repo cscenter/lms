@@ -1,0 +1,59 @@
+.tab-content {
+  > .tab-pane {
+    display: none;
+  }
+  > .active {
+    display: block;
+  }
+}
+
+//TODO: Create mobile view
+.ui.nav-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  list-style: none;
+
+  .nav-item {
+    margin-left: -$border-width;
+    &:first-child {
+      margin-left: 0;
+      border-top-left-radius: $border-radius;
+    }
+    &:last-child {
+      border-top-right-radius: $border-radius;
+    }
+  }
+
+  .nav-link {
+    border: $border-width solid $border-color;
+    padding: spacer("1x") spacer("4x");
+    color: $gray-dark;
+    opacity: 1;
+
+    &.disabled {
+      color: $input-disabled-bg;
+      background-color: $control-disabled-bg;
+      border-color: transparent;
+      &:hover {
+        background-color: $control-disabled-bg;
+      }
+    }
+    &:hover {
+      background-color: $gray-lighter;
+    }
+  }
+
+  .nav-link.active,
+  .nav-item.show .nav-link {
+    color: $white;
+    background-color: $control-checked-bg;
+    border-color: $control-checked-bg;
+  }
+
+  .dropdown-menu {
+    // Make dropdown border overlap tab border
+    margin-top: -$border-width;
+    // Remove the top rounded corners here since there is a hard edge above the menu
+    //@include border-top-radius(0);
+  }
+}

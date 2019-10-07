@@ -1,0 +1,209 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block content %}
+    <div class="container page-content">
+
+        <a href="/v2/pages/projects/" class="text-small text-muted">Примеры студенческих проектов /</a>
+        <h1>GoodsReview</h1>
+        <section class="content-block">
+            <h3>Участники проекта</h3>
+            <div class="row mb-3">
+                <div class="col-lg-4">
+                    <div class="author _project">
+                        <img class="author__img" width="48" height="48" src="/media/pages/index/student.png"
+                             alt="">
+                        <div class="author__details">
+                                <h4>Евгений Игоревич Викулов</h4>
+                                <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="author">
+                        <img class="author__img" width="48" height="48" src="/media/pages/index/student.png"
+                             alt="">
+                        <div class="author__details">
+                                <h4>Павел Александрович Иванов</h4>
+                                <span>Выпуск 2013, Разработка ПО</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h3>Руководитель</h3>
+            <div class="row">
+                <div class="col-xl-6 col-lg-6">
+                    <div class="author">
+                        <img class="author__img" width="48" height="48" src="/media/pages/index/student.png"
+                             alt="">
+                        <div class="author__details">
+                                <h4>Евгений Игоревич Викулов</h4>
+                                <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="row">
+            <div class="col-lg-10">
+                <section class="content-block">
+                    <h2>Описание</h2>
+                    <p>Проект GoodsReview стал одним из&nbsp;победителей конкурса стипендий компании СКБ Контур
+                        (Екатеринбург). Сегодня команда проекта рассказывает подробнее о&nbsp;GoodsReview.
+                    </p>
+                    <p>На&nbsp;практике в&nbsp;CSC мы&nbsp;продолжаем делать свой собственный интернет-сервис. Он&nbsp;называется
+                        <a href="https://github.com/AChugr/GoodsReview/wiki">GoodsReview</a>. Наша команда состоит из&nbsp;шести
+                        человек: пяти студентов и&nbsp;куратора&nbsp;&mdash; Александра Уланова, сотрудника HP&nbsp;Labs.
+                    </p>
+
+                    <figure class="figure">
+                        <img src="/media/pages/project/goods-review.jpg" class="figure-img img-fluid" alt="">
+                        <figcaption class="figure-caption">Логотип проекта</figcaption>
+                    </figure>
+
+                    <p>Основная цель нашего сервиса&nbsp;&mdash; помогать людям выбирать товары в&nbsp;интернет-магазинах.
+                        Сначала GoodsReview автоматически собирает комментарии о&nbsp;товарах, а&nbsp;потом проводит их&nbsp;анализ.
+                        Результат анализа&nbsp;&mdash; факты о&nbsp;товарах. Что мы&nbsp;называем фактом о&nbsp;товаре?
+                        Например: &laquo;клавиатура отличная&raquo;, &laquo;процессор слабый&raquo; и&nbsp;т.д. Больше
+                        примеров вы&nbsp;можете посмотреть на&nbsp;нашем сайте.</p>
+
+                    </p>
+                </section>
+                <section class="content-block">
+                    <h2>Пример использования таблицы</h2>
+                    <table>
+                        <caption>Таблица размеров обуви</caption>
+                        <tr>
+                            <th>Россия</th>
+                            <th>Великобритания</th>
+                            <th>Европа</th>
+                            <th>Длина ступни, см</th>
+                        </tr>
+                        <tr>
+                            <td>34,5</td>
+                            <td>3,5</td>
+                            <td>36</td>
+                            <td>23</td>
+                        </tr>
+                        <tr>
+                            <td>35,5</td>
+                            <td>4</td>
+                            <td>36⅔</td>
+                            <td>23–23,5</td>
+                        </tr>
+                        <tr>
+                            <td>36</td>
+                            <td>4,5</td>
+                            <td>37⅓</td>
+                            <td>23,5</td>
+                        </tr>
+                        <tr>
+                            <td>36,5</td>
+                            <td>5</td>
+                            <td>38</td>
+                            <td>24</td>
+                        </tr>
+                        <tr>
+                            <td>37</td>
+                            <td>5,5</td>
+                            <td>38⅔</td>
+                            <td>24,5</td>
+                        </tr>
+                        <tr>
+                            <td>38</td>
+                            <td>6</td>
+                            <td>39⅓</td>
+                            <td>25</td>
+                        </tr>
+                        <tr>
+                            <td>38,5</td>
+                            <td>6,5</td>
+                            <td>40</td>
+                            <td>25,5</td>
+                        </tr>
+                        <tr>
+                            <td>39</td>
+                            <td>7</td>
+                            <td>40⅔</td>
+                            <td>25,5–26</td>
+                        </tr>
+                        <tr>
+                            <td>40</td>
+                            <td>7,5</td>
+                            <td>41⅓</td>
+                            <td>26</td>
+                        </tr>
+                    </table>
+                </section>
+                <section class="content-block">
+                    <p>Работать в&nbsp;команде не&nbsp;так просто, как кажется на&nbsp;первый взгляд. Но&nbsp;одному
+                        работать над большим <code>проектом</code> еще сложнее.</p>
+
+                    <pre><code>function checkParent (src, dest) {}</code></pre>
+
+                    <p>Чтобы работа в&nbsp;коллективе приносила удовольствие и&nbsp;была эффективной, нужно очень
+                        многому учиться. Командная разработка позволяет развить свои коммуникативные навыки, стать
+                        ответственнее и&nbsp;освоить новые технологии. Думаем, работа над проектом внесла большой вклад
+                        в&nbsp;развитие каждого из&nbsp;нас как разработчика, так и&nbsp;члена коллектива.</p>
+                    <figure class="figure">
+                        <img src="/media/pages/project/be-a-better-programmer.jpg" class="figure-img img-fluid" alt="">
+                        <figcaption class="figure-caption">Первый экран</figcaption>
+                    </figure>
+
+                    <p>Мы&nbsp;работали как удаленно, так и&nbsp;собравшись вместе. Конечно, зачастую, вместе получалось
+                        эффективнее, поскольку так было проще настроиться на&nbsp;рабочий лад и&nbsp;не&nbsp;отвлекаться
+                        по&nbsp;каким-то своим делам. Кроме того, несколько раз мы&nbsp;собирались на&nbsp;природе,
+                        чтобы просто отдохнуть в&nbsp;хорошей компании и&nbsp;обсудить какие-то общие вопросы по&nbsp;проекту.
+                        А&nbsp;весь этот абзац к&nbsp;чему? А&nbsp;к&nbsp;тому, что работать в&nbsp;команде над
+                        собственным проектом&nbsp;&mdash; это интересно и&nbsp;полезно!</p>
+
+                    <h3>Чем мы&nbsp;занимались в&nbsp;этом семестре:</h3>
+                    <ul>
+                        <li>Мы&nbsp;переработали архитектуру сервиса. Каждый логический модуль проекта запускается
+                            отдельно и&nbsp;работает по&nbsp;своему расписанию. Это позволяет обновлять компоненты
+                            системы независимо, запускать их&nbsp;на&nbsp;разных машинах и&nbsp;настраивать
+                            индивидуальный режим работы для каждого модуля. Например, проверять обновления в&nbsp;списке
+                            категорий товаров наш сервис будет раз в&nbsp;месяц, а&nbsp;собирать новые комментарии&nbsp;&mdash;
+                            раз в&nbsp;день.
+                        </li>
+                        <li>Мы&nbsp;запустили сайт и&nbsp;придумали модель отображения фактов о&nbsp;товарах. На&nbsp;самом
+                            деле, мы&nbsp;не&nbsp;довольны этой моделью и&nbsp;ищем новые варианты.
+                            Для создания сайта мы&nbsp;использовали следующие технологии:
+                            <ul>
+                                <li>nginx&nbsp;&mdash; сервер, который отдает статические файлы и&nbsp;роутит запросы на&nbsp;java-сервер</li>
+                                <li>jetty&nbsp;&mdash; java-сервер</li>
+                                <li>jersey&nbsp;&mdash; имплементация REST на&nbsp;java</li>
+                                <li>jade&nbsp;&mdash; шаблонизатор</li>
+                                <li>mysql&nbsp;&mdash; наша база</li>
+                            </ul>
+                        </li>
+                        <li>Среднее &laquo;качество&raquo; извлекаемых фактов подтолкнуло нас к&nbsp;развитию алгоритма
+                            их&nbsp;извлечения. Изучив статьи и&nbsp;современные решения в&nbsp;области Natural Language
+                            Processing, мы&nbsp;попробовали создать уникальный в&nbsp;своем роде классификатор, который&nbsp;бы
+                            разделял слова на&nbsp;атрибуты товара и&nbsp;все остальное. Для создания такого
+                            классификатора мы&nbsp;на&nbsp;реальных данных создали вручную размеченное тестовое
+                            множество и&nbsp;посчитали около 25&nbsp;признаков для каждого полученного слова. Для
+                            подсчета признаков (и&nbsp;в&nbsp;этом отличие нашего решения от&nbsp;существующих) мы&nbsp;использовали
+                            поисковый индекс Яндекса, собирая статистику по&nbsp;миллионам документов. Решив проблему
+                            несбалансированности данных и&nbsp;применив различные подходы к&nbsp;классификации (в&nbsp;чем
+                            нам очень пригодились знания из&nbsp;курса Machine Learning) после сотни экспериментов мы&nbsp;получили
+                            точность классификации около 85%. Такой результат представляет помимо чисто практического
+                            интереса еще и&nbsp;научную ценность: была написана и&nbsp;отправлена статья на&nbsp;международную
+                            конференцию по&nbsp;компьютерной лингвистике &laquo;Диалог&raquo; 2013.
+                        </li>
+                    </ul>
+                    <p>
+                        Центр дает нам возможность получить как теоретические знания, так и&nbsp;практические навыки. А&nbsp;проект
+                        для нас&nbsp;&mdash; отличная возможность применить и&nbsp;то&nbsp;и&nbsp;другое :)
+                    </p>
+                    <p><b>Текст написал:</b> Евгений Соколов</p>
+                </section>
+                <div class="external-links">
+                    <h3>Публикации на внешних ресурсах</h3>
+                    <a href="https://github.com/" target="_blank" rel="noopener">https://github.com</a>
+                    <a href="https://habr.com/ru/" target="_blank" rel="noopener">https://habr.com/ru/</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% endblock content %}

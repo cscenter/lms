@@ -1,0 +1,73 @@
+.card._user {
+  border-radius: $border-radius-sm;
+  border: none;
+  display: block;
+
+  .card__img {
+    position: relative;
+    padding-bottom: 139.75%;
+    margin-bottom: spacer("2x");
+    overflow: hidden;
+    background: $gray-lighter;
+    background-size: cover;
+
+    img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+    }
+
+    &._b {
+      background-image: url("/static/v2/img/placeholder/boy.png");
+    }
+
+    &._m {
+      background-image: url("/static/v2/img/placeholder/man.png");
+    }
+
+    &._g {
+      background-image: url("/static/v2/img/placeholder/girl.png");
+    }
+
+    &._w {
+      background-image: url("/static/v2/img/placeholder/woman.png");
+    }
+  }
+
+  .card__title {
+    font-size: $font-size-base;
+  }
+}
+
+
+.card-deck._users {
+  .card {
+      @include card-width(2);
+      @include media-breakpoint-up(iphone6plus, $mobile-breakpoints) {
+        @include card-width(3);
+      }
+      // .cards-sm-4
+      @include media-breakpoint-up(sm) {
+        @include card-width(4);
+      }
+      // .cards-md-4
+      @include media-breakpoint-up(md) {
+        @include card-width(4);
+      }
+      // .cards-lg-6
+      @include media-breakpoint-up(lg) {
+        @include card-width(6);
+      }
+  }
+  // Utils
+  &.cards-lg-4 {
+    .card {
+      @include media-breakpoint-up(lg) {
+        @include card-width(4);
+      }
+    }
+  }
+}

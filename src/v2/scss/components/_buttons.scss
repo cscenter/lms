@@ -1,0 +1,233 @@
+$btn-border-width: $input-btn-border-width;
+
+$btn-font-weight: $font-weight-normal;
+$btn-focus-width: $input-btn-focus-width;
+$btn-active-box-shadow: inset 0 3px 5px rgba($black, .125);
+
+$btn-link-disabled-color: $gray-disabled;
+
+$btn-block-spacing-y: .5rem;
+
+$btn-transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+$btn-box-shadow: inset 0 1px 0 rgba($white, .15), 0 1px 1px rgba($black, .075) !default;
+$btn-focus-box-shadow: 0 0 0 3px transparentize($gray-dark, .8);
+$button-fill: solid;
+
+//
+// Mixins
+//
+
+// Button variants
+//
+// Easily pump out default styles, as well as :hover, :focus, :active,
+// and disabled options for all buttons
+
+@mixin button-variant($button-fill, $background, $border, $hover-background: darken($background, 7.5%), $hover-border: $hover-background, $active-background: darken($background, 12%), $active-border: $active-background) {
+  @if $button-fill == solid {
+    color: color-yiq($background);
+    svg {
+      fill: color-yiq($background);
+    }
+    @include gradient-bg($background);
+    border-color: $border;
+    @include hover {
+      color: color-yiq($hover-background);
+      @include gradient-bg($hover-background);
+      border-color: $hover-border;
+    }
+  } @else if $button-fill == outline {
+    $color: $background;
+    color: $color;
+    background-color: transparent;
+    background-image: none;
+    svg {
+      fill: $color;
+    }
+    @include hover {
+      background-color: rgba($active-background, .1);
+    }
+  }
+  transition: $btn-transition;
+
+  &:focus,
+  &._focus {
+    box-shadow: $btn-focus-box-shadow;
+  }
+
+  // Disabled comes first so active can properly restyle
+  &:disabled,
+  &._disabled {
+    color: color-yiq($background);
+    background-color: $background;
+    opacity: .3;
+    cursor: not-allowed;
+  }
+
+  &:not(:disabled):not(._disabled):active,
+  &:not(:disabled):not(._disabled)._active,
+  .show > &.dropdown-toggle {
+    &:focus {
+      box-shadow: 0 0 0 $btn-focus-width rgba($border, .5);
+    }
+  }
+}
+
+// Button sizes
+@mixin button-size($padding-y, $padding-x, $font-size, $line-height, $border-radius) {
+  padding: $padding-y $padding-x;
+  font-size: $font-size;
+  line-height: $line-height;
+  border-radius: $border-radius;
+
+  svg {
+    height: $line-height !important;
+    width: $line-height !important;
+  }
+
+  &._m-collapse {
+    padding: $padding-y;
+    @include media-breakpoint-up(md) {
+      padding: $padding-y $padding-x;
+    }
+
+    span {
+      display: none;
+      @include media-breakpoint-up(md) {
+        display: inline-block;
+      }
+    }
+  }
+}
+
+
+.btn {
+  display: inline-block;
+  font-weight: $btn-font-weight;
+  text-align: center;
+  vertical-align: middle;
+  user-select: none;
+  border: $btn-border-width solid transparent;
+  overflow: hidden;
+  @include button-size(spacer("3x"), spacer("6x"), $font-size-content-base, calculate-input-line-height(48px, spacer("3x")), $btn-border-radius);
+  @include transition($btn-transition);
+
+  &:focus,
+  &.focus {
+    outline: 0;
+    box-shadow: $btn-focus-box-shadow;
+  }
+
+
+  &._big {
+    @include button-size(spacer("3x"), spacer("6x"), $font-size-content-base, calculate-input-line-height(56px, spacer("3x")), $btn-border-radius);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  &._small {
+    @include button-size(spacer("3x"), spacer("4x"), $font-size-base, calculate-input-line-height(40px, spacer("3x")), $btn-border-radius-sm);
+  }
+
+  &._extra-small {
+    @include button-size(spacer("2x"), spacer("3x"), $font-size-base, calculate-input-line-height(32px, spacer("2x")), $btn-border-radius-sm);
+    font-size: $font-size-sm;
+  }
+
+  &._rounded {
+    border-radius: 2rem;
+  }
+}
+
+//
+// Alternate buttons
+//
+
+@each $color, $value in $btn-colors {
+  .btn._#{$color} {
+    @include button-variant('solid', $value, $value);
+  }
+}
+
+@each $color, $value in $btn-colors {
+  .btn._outline._#{$color} {
+    @include button-variant('outline', $value, $value);
+  }
+}
+
+.btn._white._opacity-10 {
+  $white-10: rgba($white, .1);
+  $white-30: rgba($white, .3);
+  background-color: $white-10;
+  border-color: transparent;
+  color: $white;
+
+  &:hover {
+    background-color: $white-30;
+  }
+
+  &:focus,
+  .focus {
+    background-color: $white-30;
+  }
+
+  &:not(:disabled):not(.disabled):active,
+  &:not(:disabled):not(.disabled).active,
+  .show > &.dropdown-toggle {
+    background-color: $white-30;
+  }
+}
+
+
+.btn-animation {
+  height: 28px;
+  position: relative;
+  top: 0;
+  transition: $transition-base;
+
+  span {
+    width: 100%;
+    display: block;
+    text-align: center;
+  }
+
+  img {
+    padding: 10px;
+  }
+
+  &:hover {
+    top: -40px;
+
+    img {
+      transform: scale(1.5);
+    }
+  }
+}
+
+._m-wide {
+  width: 100%;
+  @include media-breakpoint-up(md) {
+    width: auto;
+  }
+}
+
+.buttons {
+  .btn {
+    margin: 0 spacer("3x") spacer("3x") 0;
+
+    &._big {
+      margin: 0 spacer("4x") spacer("4x") 0;
+    }
+
+    &._small {
+      margin: 0 spacer("2x") spacer("2x") 0;
+    }
+
+    &._extra-small {
+      margin: 0 spacer("1x") spacer("1x") 0;
+    }
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}

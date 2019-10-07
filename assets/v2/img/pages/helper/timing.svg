@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="177" height="177" viewBox="0 0 177 177">
+  <defs>
+    <rect id="timing-a" width="90" height="51" rx="2"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <circle cx="88.5" cy="88.5" r="88.5" fill="#F3F6F7" fill-rule="nonzero"/>
+    <rect width="102" height="74" x="38" y="51" fill="#FFF" fill-rule="nonzero" stroke="#07C39F" stroke-width="2" rx="4"/>
+    <rect width="102" height="74" x="38" y="49" fill="#FFF" fill-rule="nonzero" stroke="#07C39F" stroke-width="2" rx="4"/>
+    <rect width="102" height="74" x="38" y="47" fill="#FFF" fill-rule="nonzero" stroke="#07C39F" stroke-width="2" rx="4"/>
+    <g transform="translate(44 64)">
+      <mask id="timing-b" fill="#fff">
+        <use xlink:href="#timing-a"/>
+      </mask>
+      <rect width="91" height="52" x="-.5" y="-.5" stroke="#07C39F" rx="2"/>
+      <rect width="38" height="14" y="-2" fill="#DFE5E9" fill-rule="nonzero" mask="url(#timing-b)"/>
+      <rect width="26" height="12" x="65" y="39" fill="#DFE5E9" fill-rule="nonzero" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="-.5" y="12.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="-.5" y="25.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="-.5" y="38.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="38.5" y="-.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="38.5" y="12.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="38.5" y="25.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="14" height="14" x="38" y="38" fill="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="12.5" y="12.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="12.5" y="25.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="12.5" y="38.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="51.5" y="-.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="14" height="14" x="51" y="12" fill="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="51.5" y="25.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="51.5" y="38.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="64.5" y="38.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="25.5" y="12.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="14" height="14" x="25" y="25" fill="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="25.5" y="38.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="14" height="14" x="64" y="-1" fill="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="64.5" y="12.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="14" height="14" x="64" y="25" fill="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="77.5" y="-.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="77.5" y="12.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+      <rect width="13" height="13" x="77.5" y="25.5" fill="#FFF" stroke="#07C39F" mask="url(#timing-b)"/>
+    </g>
+    <circle cx="58" cy="53" r="5" fill="#07C39F" fill-rule="nonzero"/>
+    <circle cx="89" cy="53" r="5" fill="#07C39F" fill-rule="nonzero"/>
+    <circle cx="120" cy="53" r="5" fill="#07C39F" fill-rule="nonzero"/>
+    <rect width="5" height="16" x="55.5" y="39.5" fill="#FFF" fill-rule="nonzero" stroke="#07C39F" rx="2.5"/>
+    <rect width="5" height="16" x="117.5" y="39.5" fill="#FFF" fill-rule="nonzero" stroke="#07C39F" rx="2.5"/>
+    <rect width="5" height="16" x="86.5" y="39.5" fill="#FFF" fill-rule="nonzero" stroke="#07C39F" rx="2.5"/>
+  </g>
+</svg>

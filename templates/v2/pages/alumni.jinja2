@@ -1,0 +1,13 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block title %}Выпускники центра{% endblock title %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="Alumni" data-init='{{ app_data|tojson|safe }}' class="__react-root"></div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

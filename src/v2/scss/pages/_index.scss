@@ -1,0 +1,336 @@
+.m-center {
+  text-align: center;
+  @include media-breakpoint-up(lg) {
+    text-align: inherit;
+  }
+}
+
+.cover-index-page {
+  background-image: url("/static/v2/img/pages/index/bg-main-page.jpg");
+  background-color: #201f20;
+  padding: 0 0 64px;
+  @include media-breakpoint-up(lg) {
+    padding-top: 0;
+    text-align: left;
+  }
+
+  .cover__title {
+    padding-top: 40px;
+  }
+
+  .cover__text {
+    margin-bottom: 40px;
+    max-width: 900px;
+  }
+}
+
+// 2 - screen `Study Areas`
+
+.csc-study-areas {
+  padding: spacer("10x") 0 0;
+  @include append-hr-to-container;
+}
+
+.card._study-area {
+  background-color: $gray-lighter;
+  text-align: center;
+  margin-bottom: spacer("4x");
+
+  @include media-breakpoint-up(lg) {
+    margin-bottom: 0;
+  }
+
+  .card__content {
+    padding: spacer("8x") spacer("4x");
+  }
+
+  svg {
+    margin-left: 30px;
+  }
+
+  &:hover {
+    background-color: $teal;
+    transition: .2s;
+
+    svg {
+      fill: $white;
+    }
+
+    .card__title,
+    .card__subtitle {
+      color: $white;
+    }
+
+  }
+
+  .card__title {
+    color: $blue;
+    margin-bottom: 0;
+    letter-spacing: -.01rem;
+    font-weight: $font-weight-light;
+
+    @include media-breakpoint-down(md) {
+      font-size: $font-size-content-base;
+    }
+  }
+}
+
+a.card {
+  color: $black;
+
+  .card__title {
+    color: $blue;
+  }
+
+  &:hover {
+    .card__title {
+      color: $link-hover-color;
+    }
+  }
+}
+
+.card-offline-course__icon {
+  height: 96px;
+}
+
+//3-screen about-csc
+
+.about-csc {
+  text-align: center;
+  margin-bottom: spacer("10x");
+  @include append-hr-to-container;
+
+  .about-csc__cover {
+    position: relative;
+    @include font-smoothing();
+  }
+
+  .about-csc__description {
+    color: $black;
+    margin-top: 2rem;
+
+    @include media-breakpoint-up(lg) {
+      background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.00) 0%, rgba(0, 0, 0, 0.50) 50%, rgba(0, 0, 0, 0.70) 100%);
+      display: flex;
+      flex-direction: column;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      margin: 0;
+      color: $white;
+
+      p {
+        z-index: $zindex-cover;
+        padding: 0 120px 60px;
+      }
+
+      h1 {
+        z-index: $zindex-cover;
+        margin-top: 3rem;
+      }
+    }
+  }
+
+  .about-csc_btn {
+    margin-bottom: 2rem;
+    @include media-breakpoint-up(lg) {
+      position: absolute;
+      bottom: 3rem;
+      margin: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+}
+
+.about-csc__organizers {
+  border-top: $hr-border-width solid $hr-border-color;
+  padding-top: spacer("8x");
+  @include media-breakpoint-up(lg) {
+    border-top: none;
+  }
+
+  .sprite-img {
+    @include media-breakpoint-up(md) {
+      width: 112px;
+      height: 88px;
+      margin: 0 .5rem;
+    }
+  }
+
+  h3 {
+    margin-bottom: .5rem;
+  }
+
+  p {
+    font-size: $font-size-sm;
+  }
+}
+
+
+// 4 - screen csc-online
+
+.csc-online-education {
+  text-align: center;
+  @include media-breakpoint-up(md) {
+    text-align: left;
+  }
+  padding-bottom: spacer("8x");
+}
+
+.card-deck._online-education {
+  .card {
+    @include media-breakpoint-up(sm) {
+      width: calc(50% - #{$grid-gutter-width});
+    }
+
+    @include media-breakpoint-up(md) {
+      width: calc(33.3333% - #{$grid-gutter-width});
+    }
+
+    @include media-breakpoint-up(lg) {
+      width: #{calc(16.6666% - #{$grid-gutter-width})};
+    }
+
+    @include media-breakpoint-up(xl) {
+      width: #{calc(16.6666% - #{$grid-gutter-width})};
+    }
+  }
+
+  .card__content {
+    padding-top: spacer("2x");
+  }
+
+  .card__title {
+    font-size: $font-size-base;
+    @include media-breakpoint-up(lg) {
+      font-size: $font-size-sm;
+    }
+    @include media-breakpoint-up(xl) {
+      font-size: $font-size-base;
+    }
+  }
+}
+
+//5-screen students-reviews
+
+.csc-student-reviews {
+  padding: spacer("8x") 0 spacer("10x");
+  background-color: $gray-lighter;
+
+  .card-columns {
+    margin: 30px 0;
+  }
+}
+
+//6-screen social-media-posts
+
+.social-media-posts {
+  padding: 2rem 0;
+  font-size: $font-size-base;
+}
+
+.social-media {
+  display: flex;
+  flex-flow: column;
+  padding: spacer("8x") spacer("6x") spacer("2x");
+  margin-bottom: spacer("4x");
+  background-size: cover;
+  @include media-breakpoint-down(md) {
+    align-items: center;
+  }
+
+  &__text {
+    color: $white;
+    margin: spacer("4x") 0;
+    overflow: hidden;
+    width: 100%; //fix for IE
+    max-height: 336px;
+
+    &--dark {
+      color: $gray-darker;
+    }
+
+  }
+
+  &__date {
+    font-size: $font-size-extra-sm;
+    color: $gray-darker;
+    margin-top: auto;
+    @include media-breakpoint-down(md) {
+      margin-top: 0;
+    }
+    &--light {
+      color: $gray-lighter;
+    }
+  }
+
+  &--instagram {
+    position: relative;
+    background-image: url('/media/pages/index/instagram-img.jpg');
+    transition: .3s;
+    z-index: 1;
+
+    &::before {
+      content: "";
+      background-color: rgba($gray-darker, .75);
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      position: absolute;
+      z-index: -1;
+      transition: .3s;
+    }
+    &:hover {
+      box-shadow: 0 0 2rem transparentize($gray-darker, .75);
+    }
+  }
+
+  &--full-size {
+    height: 512px;
+    @include media-breakpoint-down(md) {
+      justify-content: space-between;
+    }
+  }
+
+  &--vk {
+    background-color: $gray-lighter;
+    transition: .3s;
+    &:hover {
+      box-shadow: 0 0 2rem transparentize($gray-dark, .85);
+    }
+  }
+
+  &--twitter {
+    background-color: $gray-lighter;
+  }
+
+  &--youtube {
+    background-image: url('/media/pages/index/youtube-img.jpg');
+  }
+
+  &--half-size {
+    position: relative;
+    height: 248px;
+    @include media-breakpoint-down(md) {
+      justify-content: space-between;
+    }
+    .social-media__text {
+      max-height: 96px;
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      right: 16px;
+      bottom: 0;
+      width: 150px;
+      height: 96px;
+      background: linear-gradient(to right, rgba($gray-lighter, .2), $gray-lighter);
+      @include media-breakpoint-up(lg) {
+        height: 104px;
+      }
+    }
+  }
+}

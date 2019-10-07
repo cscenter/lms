@@ -1,0 +1,138 @@
+// Note: Use odd size for bullet to avoid 1px problem positioning
+$timeline-bullet-size: 9px;
+$timeline-bullet-active-size: ceil($timeline-bullet-size * 1.5) + 1px;
+$timeline-text-padding: floor($timeline-bullet-size * 1.5);
+$timeline-bullet-margin: $timeline-text-padding + floor($timeline-bullet-size / 2) + 1px;
+$timeline-bullet-border: 2px;
+$timeline-item-height: $timeline-bullet-size * 4;
+
+$timeline-bullet-photo-size: $timeline-bullet-size * 10;
+
+.timeline {
+  border-left: $border-width solid $gray-light;
+  margin-top: spacer("10x");
+  position: relative;
+  padding: 0 $timeline-text-padding;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -$timeline-bullet-margin / 2;
+    width: $timeline-bullet-size;
+    height: $timeline-item-height / 2;
+    background-color: $white;
+  }
+}
+
+.timeline__element {
+  position: relative;
+  display: flex;
+  margin-bottom: spacer("4x");
+  @include media-breakpoint-up(lg) {
+    margin-bottom: spacer("10x");
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+
+    &::after {
+      z-index: 2;
+      content: "";
+      display: inline-block;
+      width: $timeline-bullet-size;
+      background-color: $white;
+      position: absolute;
+      left: -$timeline-bullet-margin;
+      top: ($timeline-item-height + $timeline-bullet-size) / 2;
+      bottom: 0;
+    }
+  }
+
+  &::before {
+    z-index: 2;
+    content: "";
+    display: inline-block;
+    width: $timeline-bullet-size;
+    height: $timeline-bullet-size;
+    background-color: $gray-light;
+    border-radius: 50%;
+    position: absolute;
+    left: -$timeline-bullet-margin;
+    top: ($timeline-item-height - $timeline-bullet-size) / 2;
+  }
+
+  &.active {
+    &::before {
+      width: $timeline-bullet-active-size;
+      height: $timeline-bullet-active-size;
+      background-color: $white;
+      border: $timeline-bullet-border solid $gray-dark;
+      left: -$timeline-bullet-margin - $timeline-bullet-border - 1px;
+      top: ($timeline-item-height - $timeline-bullet-active-size) / 2;
+    }
+
+    &::after {
+      top: ($timeline-item-height + $timeline-bullet-active-size) / 2;
+    }
+  }
+}
+
+.timeline__date {
+  display: block;
+  position: relative;
+  line-height: $timeline-item-height;
+  color: $gray-light;
+
+  &._important {
+    color: $teal;
+    font-size: $font-size-lg;
+  }
+}
+
+.timeline._compact {
+  .active {
+    color: $gray-dark;
+  }
+
+  .timeline__element {
+    margin-bottom: 0;
+  }
+}
+
+.timeline__content {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  width: 100%; // IE 10
+
+  p,
+  h1,
+  h2,
+  h3,
+  h4 {
+    margin: 0;
+  }
+}
+
+.timeline__img {
+  display: none;
+  flex: 0 0 $timeline-bullet-photo-size;
+  height: $timeline-bullet-photo-size + 1px;
+  width: $timeline-bullet-photo-size + 1px;
+  margin-right: -$timeline-bullet-photo-size / 2;
+  overflow: hidden;
+  border-radius: 50%;
+  position: relative;
+  left: -$timeline-bullet-photo-size / 2 - $timeline-text-padding -1px;
+  z-index: 4;
+  @include media-breakpoint-up(lg) {
+    display: block;
+  }
+}
+
+.timeline__label {
+  font-size: $font-size-sm;
+  color: $gray-light;
+  margin: spacer("4x") 0 spacer("2x");
+}

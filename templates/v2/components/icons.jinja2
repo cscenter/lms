@@ -1,0 +1,121 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+
+        <div class="row">
+            <div class="col-lg-9">
+
+                <h2>Functional icons</h2>
+                {{ macros.svg_icon('cross')}}
+                {{ macros.svg_icon('arrow-left') }}
+                {{ macros.svg_icon('arrow-right') }}
+                {{ macros.svg_icon('arrow-top') }}
+                {{ macros.svg_icon('arrow-bottom') }}
+                {{ macros.svg_icon('pause') }}
+                {{ macros.svg_icon('play') }}
+
+                <h2 class="mt-10">Social media icons</h2>
+                {{ macros.svg_icon('facebook') }}
+                {{ macros.svg_icon('instagram') }}
+                {{ macros.svg_icon('telegram') }}
+                {{ macros.svg_icon('vk') }}
+                {{ macros.svg_icon('twitter') }}
+                {{ macros.svg_icon('youtube') }}
+                {{ macros.svg_icon('github') }}
+                {{ macros.svg_icon('habr') }}
+
+                <h2 class="mt-10">Pictograms</h2>
+                {{ macros.svg_icon('location') }}
+                {{ macros.svg_icon('user-sign') }}
+                {{ macros.svg_icon('video') }}
+                {{ macros.svg_icon('calendar') }}
+                {{ macros.svg_icon('slides') }}
+                {{ macros.svg_icon('graduate') }}
+                {{ macros.svg_icon('search') }}
+                {{ macros.svg_icon('files') }}
+            </div>
+        </div>
+
+        <div class="row mt-10">
+            <div class="col-lg-9">
+                <h2>Icons small (14px text)</h2>
+                <p class="text-small">{{ macros.svg_icon('arrow-bottom') }} Текст на русском</p>
+                <p class="text-small">{{ macros.svg_icon('arrow-left') }} Текст на русском</p>
+                <p class="text-small">{{ macros.svg_icon('arrow-right') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('arrow-top') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('facebook') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('github') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('habr') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('instagram') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('twitter') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('user') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('youtube') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('calendar') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('cross') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('graduate') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('location') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('pause') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('play') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('search') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('slides') }} English text</p>
+                <p class="text-small">{{ macros.svg_icon('video') }} English text</p>
+                <p class="text-small mb-10">{{ macros.svg_icon('files') }} English text</p>
+
+
+                <h2>Icons base (18px text)</h2>
+                <p>{{ macros.svg_icon('arrow-bottom') }} Текст на русском</p>
+                <p>{{ macros.svg_icon('arrow-left') }} Текст на русском</p>
+                <p>{{ macros.svg_icon('arrow-right') }} English text</p>
+                <p>{{ macros.svg_icon('arrow-top') }} English text</p>
+                <p>{{ macros.svg_icon('facebook') }} English text</p>
+                <p>{{ macros.svg_icon('github') }} English text</p>
+                <p>{{ macros.svg_icon('habr') }} English text</p>
+                <p>{{ macros.svg_icon('instagram') }} English text</p>
+                <p>{{ macros.svg_icon('twitter') }} English text</p>
+                <p>{{ macros.svg_icon('user') }} English text</p>
+                <p>{{ macros.svg_icon('youtube') }} English text</p>
+                <p>{{ macros.svg_icon('calendar') }} English text</p>
+                <p>{{ macros.svg_icon('cross') }} English text</p>
+                <p>{{ macros.svg_icon('graduate') }} English text</p>
+                <p>{{ macros.svg_icon('location') }} English text</p>
+                <p>{{ macros.svg_icon('pause') }} English text</p>
+                <p>{{ macros.svg_icon('play') }} English text</p>
+                <p>{{ macros.svg_icon('search') }} English text</p>
+                <p>{{ macros.svg_icon('slides') }} English text</p>
+                <p>{{ macros.svg_icon('video') }} English text</p>
+                <p class="mb-10">{{ macros.svg_icon('files') }} English text</p>
+
+                <h2>Icons big (24px text)</h2>
+                <p class="h3">{{ macros.svg_icon('arrow-bottom') }} Текст на русском</p>
+                <p class="h3">{{ macros.svg_icon('arrow-left') }} Текст на русском</p>
+                <p class="h3">{{ macros.svg_icon('arrow-right') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('arrow-top') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('facebook') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('github') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('habr') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('instagram') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('twitter') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('user') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('youtube') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('calendar') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('cross') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('graduate') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('location') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('pause') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('play') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('search') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('slides') }} English text</p>
+                <p class="h3">{{ macros.svg_icon('video') }} English text</p>
+                <p class="h3 mb-10">{{ macros.svg_icon('files') }} English text</p>
+
+            </div>
+        </div>
+    </div>
+{% endblock content %}

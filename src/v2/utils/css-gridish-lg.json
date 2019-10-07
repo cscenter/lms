@@ -1,0 +1,28 @@
+{
+  "prefix": "csc-lg",
+  "breakpoints": {
+    "xs": {
+      "breakpoint": 0,
+      "columns": 1,
+      "gutter": "16px",
+      "margin": 0
+    },
+    "sm": {
+      "breakpoint": 34,
+      "columns": 4,
+      "gutter": "16px",
+      "margin": 0
+    },
+    "lg": {
+      "breakpoint": 60,
+      "columns": 12,
+      "gutter": "16px",
+      "margin": 0
+    }
+  },
+  "extraArtboards": {},
+  "rem": 16,
+  "rowHeight": 0.5,
+  "rows": 30,
+  "paths": {}
+}

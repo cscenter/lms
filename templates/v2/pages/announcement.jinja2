@@ -1,0 +1,77 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="container-fluid _dark py-10">
+        <div class="container">
+            <div class="row no-gutters">
+                <div class="col-md-3 mr-md-8"
+                     style="background-image:url('/static/v2/img/pages/index/cscenter_meetup-1056.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 196px; border-radius: 4px;">
+                </div>
+                <div class="col-md-8 mt-6 mt-lg-0">
+                    <div class="announcement">
+                        <div class="ui labels _circular mb-2">
+                            <span class="ui label _blue" href="#">Курс</span>
+                            <span class="ui label _gray" href="#">Бесплатно</span>
+                        </div>
+                        <h1>Введение в трансфинитные методы</h1>
+                        <div class="grouped mb-4">
+                            <div class="ui label _icon">
+                                {{ macros.svg_icon('location') }}<span>Санкт-Петербург, БЦ «Таймс»</span>
+                            </div>
+                            <div class="ui label _icon">
+                                {{ macros.svg_icon('calendar') }}<span>21 сентября в 20:00</span>
+                            </div>
+                        </div>
+                        <a href="#" class="btn _big _primary _m-wide">Записаться</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-9">
+                <section class="content-block">
+                    <h3>Лектор</h3>
+                    <div class="row mb-3">
+                        <div class="col-lg-4">
+                            <div class="author _project">
+                                <img class="author__img" width="48" height="48" src="/media/pages/index/student.png"
+                                     alt="">
+                                <div class="author__details">
+                                    <h4>Валерий Лесин</h4>
+                                    <span>SimLabs, СПб АУ РАН</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p>Валерий Лесин — технический директор СимЛабс, преподаватель С++, а также руководитель НИРов в CS
+                        центре и
+                        Академическом университете.
+                    </p>
+                </section>
+                <section class="content-block">
+                    <h3>Описание</h3>
+                    <p>Программы на С++ ценят за их эффективность в использовании ресурсов. Но это же становится и
+                        проблемой,
+                        поскольку сложность перекладывается на программиста, который должен сам следить за их
+                        своевременным
+                        освобождением. Если добавить еще и неожиданно вылетающие исключения, то программирование вообще
+                        может
+                        превратиться в хождение по минному полю. В первой части/лекции будут рассмотрены несколько
+                        приемов,
+                        позволяющие существенно упростить жизнь и, наконец, избавиться от головной боли, как и когда
+                        освобождать
+                        ресурсы, а также как их эффективно передавать: от идиомы RAII до move-семантики и rvalue ссылок.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

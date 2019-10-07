@@ -1,0 +1,41 @@
+.card._qa {
+  $padding-left: 64px;
+  box-shadow: 0 1px 1px $gray-lighter;
+
+  .card__header {
+    cursor: pointer;
+    text-align: left;
+    padding: spacer("6x");
+    padding-left: $padding-left;
+    font-size: $font-size-lg;
+
+    &:hover,
+    &:focus {
+      box-shadow: none;
+
+      .sprite-img {
+        fill: $gray-darker;
+      }
+    }
+
+    .sprite-img {
+      fill: $gray-dark;
+      transition: transform 150ms linear;
+      position: absolute;
+      top: 20px;
+      left: 16px;
+      width: 32px !important;
+      height: 32px !important;
+    }
+
+    &[aria-expanded="true"] {
+      .sprite-img {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .card__content {
+    padding: 0 spacer("8x") spacer("4x") $padding-left;
+  }
+}

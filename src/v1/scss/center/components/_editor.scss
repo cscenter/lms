@@ -1,0 +1,22 @@
+.ubertext {
+  overflow: hidden;
+
+  pre {
+    padding: 1em;
+
+    code {
+      padding: 0;
+    }
+  }
+
+  table {
+    @extend .table;
+    @extend .table-bordered;
+    @extend .table-condensed;
+    @extend .table-striped;
+  }
+
+  img {
+    max-width: 100%;
+  }
+}

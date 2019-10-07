@@ -1,0 +1,23 @@
+.collapse-link {
+  color: $color-grey;
+  border-bottom: 1px dashed $color-grey;
+  font-size: 28px;
+  text-decoration: none!important;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.dashed-link {
+  @extend .collapse-link;
+}
+
+.big-link {
+  @extend .collapse-link;
+  color: $color-blue;
+  border-bottom: 2px solid $color-blue;
+
+  &:hover {
+    color: darken($color-blue, 10%);
+    border-bottom-color: darken($color-blue, 10%);
+  }
+}

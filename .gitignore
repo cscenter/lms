@@ -1,20 +1,13 @@
-# Mac specific files
+# OS X specific files
 .DS_Store
 ._*
-
-*.sublime-project
+# SASS specific files
+**/.sass-cache/
+*.css.map
+# Python
 *.pyc
-*.sqlite3
-media/
-apps/coverage/
+# Ignore IDEA files
 .idea/
-csc3/
-apps/static/
-local/
-.cache/
-.pytest_cache/
-coverage_html/
-.coverage
-.env
-# TODO: replace public/ with submodule, add to ignore here
-*-debug.log
+
+node_modules/
+core/db.sqlite3

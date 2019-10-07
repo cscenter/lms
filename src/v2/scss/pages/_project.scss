@@ -1,0 +1,21 @@
+.external-links {
+
+  svg + span {
+    display: none; //FixMe: не скрывать ссылку на мобильной версии
+    @include media-breakpoint-up(md) {
+      display: inline;
+      vertical-align: middle;
+    }
+  }
+
+  svg {
+    fill: $gray-light;
+    &:hover {
+      fill: $blue;
+    }
+  }
+
+  .sprite-img {
+    margin-right: spacer("1x");
+  }
+}

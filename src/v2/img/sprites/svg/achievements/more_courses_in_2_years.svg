@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="54px" height="44px" viewBox="0 0 54 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>more-courses-for-2-years_svg</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <circle id="path-1" cx="20" cy="20" r="20"></circle>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="achieves" transform="translate(-53.000000, -941.000000)">
+            <g id="Group-21-Copy-8" transform="translate(60.000000, 943.000000)">
+                <g id="Group-8-Copy-8">
+                    <g id="Group-9">
+                        <circle id="Oval-3-Copy" stroke-opacity="0.5" stroke="#323232" fill="#216097" cx="20" cy="20" r="19.5"></circle>
+                        <mask id="mask-2" fill="white">
+                            <use xlink:href="#path-1"></use>
+                        </mask>
+                        <circle stroke-opacity="0.5" stroke="#323232" cx="20" cy="20" r="19.5"></circle>
+                        <g id="Group-8" mask="url(#mask-2)">
+                            <g transform="translate(14.000000, -2.000000)">
+                                <polygon id="Combined-Shape" fill="#222121" fill-rule="nonzero" points="20.027203 5.13787964 8.57278666 24.9775106 0.328136097 20.2174594 11.7825524 0.377828415"></polygon>
+                                <polygon id="Path" fill="#971F1F" fill-rule="evenodd" points="12.1485783 1.74385577 1.69416345 19.8514335 8.20676073 23.6114833 18.6611756 5.50390556"></polygon>
+                            </g>
+                        </g>
+                        <g id="Group-8" mask="url(#mask-2)">
+                            <g transform="translate(14.500000, 10.500000) scale(-1, 1) translate(-14.500000, -10.500000) translate(4.000000, -2.000000)">
+                                <polygon id="Combined-Shape" fill="#222121" fill-rule="nonzero" points="20.027203 5.13787964 8.57278666 24.9775106 0.328136097 20.2174594 11.7825524 0.377828415"></polygon>
+                                <polygon id="Path" fill="#C42525" fill-rule="evenodd" points="12.1485783 1.74385577 1.69416345 19.8514335 8.20676073 23.6114833 18.6611756 5.50390556"></polygon>
+                            </g>
+                        </g>
+                    </g>
+                    <circle id="Oval-7" stroke="#222121" stroke-width="1.00000143" fill="#F2D802" cx="20" cy="23" r="9"></circle>
+                    <circle id="Oval-7" stroke="#222121" stroke-width="1.00000143" fill="#F2D802" cx="20" cy="23" r="6"></circle>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

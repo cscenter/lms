@@ -1,0 +1,69 @@
+.cover {
+  background: linear-gradient(to right, $gray-dark, $gray-darker);
+  background-size: cover;
+  color: $white;
+  @include font-smoothing();
+  text-align: center;
+  position: relative;
+
+  > .container {
+    position: relative;
+  }
+
+  &._green-gradient {
+    background: linear-gradient(to right, $teal, $blue);
+  }
+
+  &._img {
+    z-index: 1;
+    background-position: center;
+
+    &::before {
+      content: "";
+      z-index: -1;
+      opacity: .9;
+      background-color: $gray-darker;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+
+  nav {
+    &.cover__content {
+      width: 100%;
+      position: absolute;
+      padding: 1rem;
+      top: 0;
+      left: 0;
+      @include media-breakpoint-up(sm) {
+        padding: .5rem;
+      }
+    }
+  }
+}
+
+.cover__content {
+  padding: 80px 0;
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Mix this class with h1-h6 tag, e.g. `<h1 class="cover__title">Title</h1>`
+.cover__title {
+  max-width: 100%;
+}
+
+h1.cover__title {
+  @include media-breakpoint-up(lg) {
+    font-size: 3.5rem;
+  }
+}
+
+.cover__subtitle {
+  font-size: $font-size-sm;
+}

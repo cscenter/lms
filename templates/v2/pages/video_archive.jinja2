@@ -1,0 +1,114 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-9 order-lg-1 order-2">
+                <div class="card-deck _three">
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img lazy-wrapper" href="" >
+                        </a>
+                        <div class="card__content">
+                            <a class="card__title" href="#" rel="noopener">Основы программирования python</a>
+                            <div class="author">А. В. Гардер, С. И. Грязнов</div>
+                        </div>
+                        <div class="card__content _meta">
+                            <div class="ui labels _circular">
+                                <span class="ui label _blue" href="#">Курс</span>
+                                <span class="ui label _gray" href="#">2018</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img" href="" >
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </a>
+                        <div class="card__content">
+                            <a class="card__title" href="#" rel="noopener">From univariate polynomials to probabilistically checkable and error-tolerant proofs</a>
+                            <div class="author">P. Kaski</div>
+                        </div>
+                        <div class="card__content _meta">
+                            <div class="ui labels _circular">
+                                <span class="ui label _blue" href="#">Курс</span>
+                                <span class="ui label _gray" href="#">2018</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img" href="" >
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </a>
+                        <div class="card__content">
+                            <a class="card__title" href="#" rel="noopener">История исследования ДНК и белковых структур: от французской революции до современной биоинформатики</a>
+                            <div class="author">А. А. Шпильман</div>
+                        </div>
+                        <div class="card__content _meta">
+                            <div class="ui labels _circular">
+                                <span class="ui label _blue" href="#">Курс</span>
+                                <span class="ui label _gray" href="#">2017</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img" href="" >
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </a>
+                        <div class="card__content">
+                            <a class="card__title" href="#" rel="noopener">Задача выполнимости</a>
+                            <div class="author">А. Куликов</div>
+                            <div class="ui labels _circular">
+                                <span class="ui label _green" href="#">Лекция</span>
+                                <span class="ui label _gray" href="#">2018</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card _shadowed _video" href="#" rel="noopener">
+                        <a class="card__img" href="" >
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </a>
+                        <div class="card__content">
+                            <a class="card__title" href="#" rel="noopener">Введение в статистическое моделирование с помощью языка программирования Stan</a>
+                            <div class="author">А. Сухочев</div>
+                            <div class="ui labels _circular">
+                                <span class="ui label _green" href="#">Лекция</span>
+                                <span class="ui label _gray" href="#">2018</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-3 order-lg-2 order-0">
+                <form class="ui form __no-border _right-side-filter" action="">
+                    <div class="field">
+                        <div class="ui icon input">
+                            <input type="search" placeholder="Поиск">
+                            <i class="_search icon">{{ macros.svg_icon('search') }}</i>
+                        </div>
+                    </div>
+                    <div class="grouped inline">
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Лекции</span>
+                        </label>
+                        <label class="ui option checkbox">
+                            <input type="checkbox" class="control__input">
+                            <span class="control__indicator"></span>
+                            <span class="control__description">Курсы</span>
+                        </label>
+                        <label class="ui option checkbox disabled">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

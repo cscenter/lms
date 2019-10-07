@@ -1,0 +1,96 @@
+.__courses-filter {
+  .form-group {
+    padding-left: 20px;
+    display: inline-block;
+  }
+
+
+}
+
+.__courses-filter--academic-year {
+  .btn {
+    border-radius: 4px;
+  }
+  
+  .form-control {
+    display: inline-block;
+    width: 118px;
+  }
+}
+
+.__courses-filter--term {
+
+  display: inline-block;
+
+  a {
+    margin-right: 4px;
+    text-decoration: none;
+    border-bottom: 1px dashed transparentize($link-color, .7);
+
+    &.active {
+      border-bottom: none;
+      color: $color-gray-48;
+    }
+  }
+}
+
+.table {
+  &.__courses {
+    th {
+      white-space: nowrap;
+
+      &:first-child {
+        padding-left: 20px;
+      }
+    }
+
+    td {
+      &:first-child {
+        padding-left: 20px;
+      }
+
+      a {
+
+        &.__course {
+          font-size: 16px;
+          margin-right: 70px;
+        }
+        &.__teacher {
+          color: $color-gray-20;
+        }
+      }
+
+      .__club {
+        display: inline-block;
+        margin-left: -20px;
+        margin-right: 4px;
+        position: relative;
+        top: 4px;
+        width: 16px;
+        height: 18px;
+        background: url("/static/v1/img/icons/club_apple.svg") left top no-repeat;
+        background-size: contain;
+      }
+    }
+    .icon {
+      width: 24px;
+      height: 18px;
+      margin: 0 8px 0 0;
+      display: inline-block;
+      position: relative;
+      top: 2px;
+    }
+
+    .__video {
+      background: url("/static/v1/img/icons/video.svg") center left no-repeat;
+    }
+
+    .__image {
+      background: url("/static/v1/img/icons/img.svg") center left no-repeat;
+    }
+
+    .__file {
+      background: url("/static/v1/img/icons/file.svg") center left no-repeat;
+    }
+  }
+}

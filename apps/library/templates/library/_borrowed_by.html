@@ -1,7 +1,0 @@
-{% load i18n %}
-
-{% for borrow in stock.borrows.all %}
-    {% with student=borrow.student %}
-    <a href="{{ student.get_absolute_url }}">{{ student.get_short_name }}</a>{% if not forloop.last %}, {% endif %}
-    {% endwith %}
-{% endfor %}

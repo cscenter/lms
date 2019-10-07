@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="54px" height="46px" viewBox="0 0 54 46" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>partymaker_svg</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="achieves" transform="translate(-53.000000, -534.000000)">
+            <g id="Group-31-Copy" transform="translate(59.000000, 531.000000)">
+                <g id="Group-25">
+                    <g id="Group-8-Copy-7">
+                        <g id="Group-9">
+                            <circle id="Oval-3-Copy" stroke="#DCA313" fill="#FFCF00" cx="20" cy="26" r="19.5"></circle>
+                            <g id="Group-38" transform="translate(13.479682, 17.274035) rotate(-15.000000) translate(-13.479682, -17.274035) translate(3.979682, 2.774035)" fill="#F33232" stroke="#373737">
+                                <path d="M9.72538991,26.8977775 C4.1668179,26.2354611 1.0399898,22.5709696 0.34490561,15.904303 C-0.697720672,5.90430296 4.36132709,0.777659142 9.57445851,0.777659142 C14.7875899,0.777659142 18.919291,7.15784335 17.8766647,16.1578433 C17.1815805,22.1578433 14.4644889,25.7378214 9.72538991,26.8977775 Z" id="Path-8"></path>
+                                <polygon id="Path-9" stroke-linejoin="round" points="9.22354286 26.8977775 6.22354286 28.8977775 12.2235429 28.8977775"></polygon>
+                            </g>
+                            <g id="Group-38-Copy-3" transform="translate(29.007639, 22.835871) rotate(18.000000) translate(-29.007639, -22.835871) translate(19.007639, 9.835871)" fill="#53AFE0" stroke="#373737">
+                                <path d="M9.32939745,23.90509 C3.96263679,22.1175675 1.03846895,18.5113509 0.556893938,13.0864403 C-0.165468584,4.94907433 4.36424031,0.509710701 10.1394757,0.509710701 C15.9147111,0.509710701 19.4659713,5.42909521 19.2209962,12.279417 C19.0576795,16.8462981 15.7604799,20.7215225 9.32939745,23.90509 Z" id="Path-8"></path>
+                                <polygon id="Path-9" stroke-linejoin="round" points="8.8781075 23.5441526 5.8781075 25.5441526 11.8781075 25.5441526"></polygon>
+                            </g>
+                            <path d="M17,29 C12.3333333,29.6666667 10,31 10,33 C10,36 15,35 15,37 C15,39 14,41 12,41" id="Path-10" stroke="#323232" stroke-linecap="round"></path>
+                            <path d="M30.0231653,33.6627227 C26.2810803,33.3638289 24.4100379,34.2143821 24.4100379,36.2143821 C24.4100379,39.2143821 27.5424291,40.314078 27.5424291,42.314078 C27.5424291,44.314078 25.4987111,46.9295484 23.3005503,47.3395354" id="Path-10-Copy" stroke="#323232" stroke-linecap="round" transform="translate(26.661858, 40.471983) scale(-1, 1) rotate(-16.000000) translate(-26.661858, -40.471983) "></path>
+                            <path d="M9.25,8 C7.25,9.33333333 6.58333333,11 7.25,13" id="Path-11" stroke="#303030"></path>
+                            <path d="M28.2011419,13.241215 C26.2011419,14.5745483 25.5344752,16.241215 26.2011419,18.241215" id="Path-11-Copy" stroke="#303030" transform="translate(27.076142, 15.741215) rotate(25.000000) translate(-27.076142, -15.741215) "></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

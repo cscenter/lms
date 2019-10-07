@@ -1,0 +1,83 @@
+.panel-title {
+  font-size: 1.8rem;
+
+  &.no-collapse {
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+}
+
+.panel-body {
+  h1, h2, h3, h4, h5, h6,
+  .h1, .h2, .h3, .h4, .h5, .h6 {
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+}
+
+.panel-group {
+  .panel {
+    border: 1px solid $color-gray-90;
+    transition: all 150ms linear;
+  }
+
+  .panel-heading {
+    font-size: 1.8rem;
+    display: block;
+    position: relative;
+    padding: 15px 60px;
+    color: $color-gray-20;
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+      text-decoration: none;
+      color: $color-blue;
+    }
+
+    &:hover {
+      &::before {
+        background-image: url("/static/v1/img/icons/panel-arrow-hover.svg");
+      }
+    }
+
+    &::after,
+    &::before {
+      transform: rotate(0);
+      position: absolute;
+      top: 50%;
+      margin-top: -15px;
+      left: 15px;
+      content: "";
+    }
+
+    &::before {
+      content: "";
+      width: 30px;
+      height: 30px;
+      background-image: url("/static/v1/img/icons/panel-arrow.svg");
+      transition: transform 150ms linear;
+    }
+
+    &[aria-expanded="true"] {
+      color: $color-blue;
+
+      &::before {
+        // TODO: make sprite from `panel-arrow` and `panel-arrow-hover`
+        background-image: url("/static/v1/img/icons/panel-arrow-hover.svg");
+        transform: rotate(90deg);
+      }
+    }
+
+    .panel-title {
+      text-decoration: none;
+    }
+  }
+
+  .panel-body {
+    padding: 0 30px 20px 60px;
+  }
+}

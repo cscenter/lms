@@ -1,0 +1,154 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block title %}Карточка автора{% endblock title %}
+
+{% block body_attrs %}class="_dark"{% endblock body_attrs %}
+
+{% block content %}
+    <div class="container page-content">
+        <h1>Inside the card component</h1>
+        <div class="card-columns _testimonials">
+            <div class="card mb-2">
+                <div class="card__content _middle">
+                    <div class="author _testimonial">
+                        <img class="author__img" alt="Максим Павлович Кузьмин" src="/media/user_74x74.jpg" width="74"
+                             height="74">
+                        <div class="author__details">
+                            <h4>Максим Павлович Кузьмин</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                        <div class="author__testimonial">
+                            CSC даёт отличный шанс узнать новое и вспомнить подзабытое в области ИТ.
+                            Но сколько будет того и другого, зависит только от учащегося.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="card mb-2">
+                <div class="card__content">
+                    <div class="author _testimonial">
+                        <img class="author__img" alt="Максим Павлович Кузьмин" src="/media/user_74x74.jpg" width="74"
+                             height="74">
+                        <div class="author__details">
+                            <h4>Андрей Дмитриевич Кокорев</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                        <div class="author__testimonial">
+                            <p>Учеба в центре — это важный этап моей жизни. Люди и атмосфера здесь показывают, каким
+                                может и обязательно должно быть образование: свободным, глубоким, серьезным и
+                                обязательно увлеченным. Учеба здесь — это бесценный и ни с чем не сравнимый
+                                опыт.</p>
+                            <p>Спасибо кураторам, преподавателям и сокурсникам за прекрасно проведённое время!</p>
+                            <p>P.S. Маковые сушки невкусные, ищите ванильные на дне вазы!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-2">
+                <div class="card__content">
+                    <div class="author">
+                        <div class="author__testimonial _bubble">
+                            <p>Учеба в центре — это важный этап моей жизни. Люди и атмосфера здесь показывают, каким
+                                может и обязательно должно быть образование: свободным, глубоким, серьезным и
+                                обязательно увлеченным. Учеба здесь — это бесценный и ни с чем не сравнимый
+                                опыт.</p>
+                            <p>Спасибо кураторам, преподавателям и сокурсникам за прекрасно проведённое время!</p>
+                            <p>P.S. Маковые сушки невкусные, ищите ванильные на дне вазы!</p>
+                        </div>
+                        <img class="author__img" alt="Максим Павлович Кузьмин" src="/media/user_74x74.jpg" width="74"
+                             height="74">
+                        <div class="author__details">
+                            <h4>Андрей Дмитриевич Кокорев</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mb-2">
+                <div class="card__content">
+                    <div class="author">
+                        <img class="author__img" alt="Максим Павлович Кузьмин" src="/media/user_74x74.jpg" />
+                        <div class="author__details">
+                            <h4>Без модификатора _testimonial</h4>
+                            <span>Вид компонента по-умолчанию, без модификаторов</span>
+                        </div>
+                        <div class="author__testimonial">
+                            <p>Учеба в центре — это важный этап моей жизни. Люди и атмосфера здесь показывают, каким
+                                может и обязательно должно быть образование: свободным, глубоким, серьезным и
+                                обязательно увлеченным. Учеба здесь — это бесценный и ни с чем не сравнимый
+                                опыт.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h1>Without testimonial</h1>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="author mb-2">
+                    <img class="author__img" width="48" height="48" src="/media/pages/index/student.png"
+                         alt="">
+                    <div class="author__details">
+                        <h4>Евгений Игоревич Викулов</h4>
+                        <span>Выпуск 2017, Разработка ПО</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="author">
+                    <img class="author__img" width="48" height="48" src="/media/pages/index/student.png"
+                         alt="">
+                    <div class="author__details">
+                        <h4>Евгений Игоревич Викулов</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="background:#fff; padding: 40px;">
+        <div class="container">
+            <h1>Outside the card component</h1>
+            <div class="row">
+                <div class="col-lg-3 mb-4">
+                    <div class="author">
+                        <div class="author__testimonial _bubble">
+                            <p>Учеба в центре — это важный этап моей жизни. Люди и атмосфера здесь показывают, каким
+                                может и обязательно должно быть образование: свободным, глубоким, серьезным и
+                                обязательно увлеченным. Учеба здесь — это бесценный и ни с чем не сравнимый
+                                опыт.</p>
+                            <p>Спасибо кураторам, преподавателям и сокурсникам за прекрасно проведённое время!</p>
+                            <p>P.S. Маковые сушки невкусные, ищите ванильные на дне вазы!</p>
+                        </div>
+                        <img class="author__img" alt="Максим Павлович Кузьмин" src="/media/user_74x74.jpg"/>
+                        <div class="author__details">
+                            <h5>Андрей Дмитриевич Кокорев</h5>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="author _testimonial">
+                        <img class="author__img" alt="Максим Павлович Кузьмин" src="/media/user_74x74.jpg"/>
+                        <div class="author__details">
+                            <h4>Андрей Дмитриевич Кокорев</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                        <div class="author__testimonial">
+                            <p>Учеба в центре — это важный этап моей жизни. Люди и атмосфера здесь показывают, каким
+                                может и обязательно должно быть образование: свободным, глубоким, серьезным и
+                                обязательно увлеченным. Учеба здесь — это бесценный и ни с чем не сравнимый
+                                опыт.</p>
+                            <p>Спасибо кураторам, преподавателям и сокурсникам за прекрасно проведённое время!</p>
+                            <p>P.S. Маковые сушки невкусные, ищите ванильные на дне вазы!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock content %}

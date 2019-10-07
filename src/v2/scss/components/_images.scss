@@ -1,0 +1,54 @@
+$figure-caption-font-size:          $font-size-sm;
+$figure-caption-color:              $gray-dark;
+
+
+.img-rounded {
+  border-radius: 50%;
+  border: 3px solid $white;
+  box-shadow: 0 0 4px #ddd;
+}
+
+.img-fluid {
+  @include img-fluid;
+  width: 100%;
+}
+
+//
+// Figures
+//
+
+.figure {
+  // Ensures the caption's text aligns with the image.
+  display: inline-table;
+  vertical-align: top;
+}
+
+.figure-img {
+  margin-bottom: spacer("2x");
+  line-height: 1;
+}
+
+.figure-caption {
+  display: table-caption;
+  caption-side: bottom;
+  font-size: $figure-caption-font-size;
+  color: $figure-caption-color;
+}
+
+.lazy-wrapper {
+  position: relative;
+  padding-top: 52.5%;
+  background: $gray-darker;
+  overflow: hidden;
+  background-position: 50%;
+  background-repeat: no-repeat;
+
+  img {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}

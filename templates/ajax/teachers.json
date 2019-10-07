@@ -1,0 +1,57 @@
+[
+    {
+      "id": 1,
+      "name": "Иван Иванович Иванов",
+      "profile_url": "/users/1/",
+      "photo": "/media/user_card.jpg",
+      "occupation": "ИТМО",
+      "courses": [1,2,3],
+      "latest_session": 6,
+      "sex": "m",
+      "branch": "spb"
+    },
+    {
+      "id": 2,
+      "name": "Алексей Алексеевич Алексеев",
+      "profile_url": "/users/2/",
+      "photo": "/media/user_card.jpg",
+      "occupation": "Jetbrains",
+      "courses": [1,2,3],
+      "latest_session": 10,
+      "sex": "m",
+      "branch": "spb"
+    },
+    {
+      "id": 3,
+      "name": "Иван Иванов2",
+      "profile_url": "/users/1/",
+      "photo": "/media/user_card.jpg",
+      "occupation": "CSC",
+      "courses": [1,2],
+      "latest_session": 1,
+      "sex": "m",
+      "branch": "spb"
+    },
+    {
+      "id": 4,
+      "name": "Анна Ивановна Герасимова",
+      "profile_url": "/users/2/",
+      "photo": null,
+      "occupation": "Санкт-Петербургский государственный университет имени Ленина",
+      "courses": [2],
+      "latest_session": 42,
+      "sex": "w",
+      "branch": "nsk"
+    },
+    {
+      "id": 5,
+      "name": "test user2",
+      "profile_url": "/users/2/",
+      "photo": "/media/user_card.jpg",
+      "occupation": "Homeless",
+      "courses": [3],
+      "latest_session": 42,
+      "sex": "m",
+      "branch": "nsk"
+    }
+]

@@ -1,0 +1,38 @@
+$top-banner-height: 64px;
+
+.top-banner-wrapper {
+  background-color: darken($gray-darker, 10%);
+}
+
+.top-banner {
+  height: $top-banner-height;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $white;
+  text-align: center;
+  font-size: $font-size-sm;
+  text-transform: uppercase;
+  @include media-breakpoint-up(lg) {
+    font-weight: $font-weight-normal;
+    letter-spacing: 2px;
+  }
+
+  a {
+    color: $white;
+    padding-bottom: 1px;
+    border-bottom: 1px solid transparentize($white, .5);
+    font-weight: $font-weight-normal;
+    &:hover {
+      border-bottom: 1px solid transparentize($teal, .5);
+      color: lighten($teal, 20%);
+    }
+  }
+}
+
+.top-banner-spacer {
+  height: $top-banner-height;
+  @include media-breakpoint-up(lg) {
+    height: 0;
+  }
+}

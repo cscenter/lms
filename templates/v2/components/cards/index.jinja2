@@ -1,0 +1,282 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+
+{% block content %}
+    <div class="container page-content">
+        <h1>Cards</h1>
+        <div class="row">
+            <div class="col-lg">
+                <div class="card">
+                    <div class="card__content">
+                        <div class="card__title">
+                            Default
+                        </div>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                        будним вечерам и
+                        выходным.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg">
+                <div class="card">
+                    <div class="card__content">
+                        Without title<br>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg">
+                <div class="card _inverted">
+                    <div class="card__content">
+                        <div class="card__title">
+                            Inverted
+                        </div>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                        будним вечерам и
+                        выходным.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg">
+                <div class="card _no-border">
+                    <div class="card__content">
+                        <div class="card__title">
+                            Without border
+                        </div>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                        будним вечерам и
+                        выходным.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h3 class="mt-10">Top Image Support</h3>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card__img">
+                        <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                    </div>
+                    <div class="card__content">
+                        <div class="card__title">
+                            Default
+                        </div>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                        будним вечерам и
+                        выходным.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card__img">
+                        <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                    </div>
+                    <div class="card__content">
+                        <div class="card__title">
+                            Default
+                        </div>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                        будним вечерам и
+                        выходным.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card__img">
+                        <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                    </div>
+                    <div class="card__content">
+                        <div class="card__title">
+                            Default
+                        </div>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                        будним вечерам и
+                        выходным.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card _inverted">
+                    <div class="card__img">
+                        <img src="/media/online_courses/c_bd.png" alt="">
+                    </div>
+                    <div class="card__content text-small">
+                        Untitled (+ small text)<br>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по будним
+                        вечерам и
+                        выходным.
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h3 class="mt-10">Header Support</h3>
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="card">
+                    <div class="card__header">
+                        Default
+                    </div>
+                    <div class="card__img">
+                        <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                    </div>
+                    <div class="card__content">
+                        <div class="card__title">
+                            Default
+                        </div>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                        будним вечерам и
+                        выходным.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="card">
+                    <div class="card__header _dark">
+                        Header
+                    </div>
+                    <div class="card__content">
+                        <div class="card__title">
+                            Default
+                        </div>
+                        Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                        живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                        будним вечерам и
+                        выходным.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% include "v2/components/cards/_card_deck.jinja2" %}
+
+
+        <h1 class="mt-10">With sidebar</h1>
+        <div class="row">
+            <div class="col-lg-8">
+                <h2>Three cards</h2>
+                <div class="card-deck _three">
+                    <div class="card">
+                        <div class="card__img">
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__title">
+                                Default
+                            </div>
+                            Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                            живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                            будним вечерам и
+                            выходным.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card__img">
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__title">
+                                Default
+                            </div>
+                            Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                            живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                            будним вечерам и
+                            выходным.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card__img">
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__title">
+                                Default
+                            </div>
+                            Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                            живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                            будним вечерам и
+                            выходным.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card__img">
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__title">
+                                Default
+                            </div>
+                            Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                            живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                            будним вечерам и
+                            выходным.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card__img">
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__title">
+                                Default
+                            </div>
+                            Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                            живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                            будним вечерам и
+                            выходным.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 offset-md-1">
+                <h2>One card</h2>
+                <div class="card-deck">
+                    <div class="card">
+                        <div class="card__content">
+                            Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                            живой интерес к учебе, готовность развиваться в выбранном направлении и делать это по
+                            будним вечерам и
+                            выходным.
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card__img">
+                            <img src="/media/pages/text-page/info-card-image.jpg" alt="">
+                        </div>
+                        <div class="card__content">
+                            <div class="card__title">
+                                Default
+                            </div>
+                            Учиться в центре могут студенты вузов, аспиранты и молодые специалисты. Главное –
+                            живой интерес к учебе,
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% include "v2/components/cards/_horizontal.jinja2" %}
+
+    {% include "v2/components/cards/_announcements.jinja2" %}
+
+    {% include "v2/components/cards/_cover.jinja2" %}
+
+{% endblock content %}

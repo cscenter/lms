@@ -1,0 +1,59 @@
+@import "../sprites/index";
+@import "../sprites/achievements";
+
+// svg sprite dimensions base cls
+.sprite-img {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.svg-icon {
+  position: relative;
+  top: -0.08em;
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.svg-inline {
+  position: absolute;
+  z-index: -999;
+  left: -10000px;
+  top: -10000px;
+}
+
+// Social icons customization
+.sprite-img._facebook {
+  &:hover {
+    fill: #475993;
+  }
+}
+
+.sprite-img._instagram {
+  &:hover {
+    fill: #de194c;
+  }
+}
+
+.sprite-img._twitter {
+  &:hover {
+    fill: #76a9ea;
+  }
+}
+
+.sprite-img._vk {
+  &:hover {
+    fill: #4c75a3;
+  }
+}
+
+.sprite-img._youtube {
+  &:hover {
+    fill: #f00;
+  }
+}
+
+.sprite-img._telegram {
+  &:hover {
+    fill: #0088cc;
+  }
+}

@@ -1,0 +1,29 @@
+{% macro svg_image(id, modifiers='') -%}
+<svg class="sprite-img _{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
+{%- endmacro %}
+
+{% macro svg_icon(id, modifiers='') -%}
+<svg class="sprite-img svg-icon _{{ id }}{% if modifiers %} {{ modifiers }}{% endif %}" xmlns:xlink="http://www.w3.org/1999/xlink"><use xlink:href="#{{ id }}"></use></svg>
+{%- endmacro %}
+
+{% macro video_iframe(url="https://www.youtube.com/embed/A3SomwRa5iw", attrs={}) -%}
+<div class="video">
+    <iframe class="embed _responsive" src="{{ url }}" frameborder="0" allowfullscreen {% for k,v in attrs.items() %}{{ k }}={{ v }} {% endfor %}></iframe>
+</div>
+{%- endmacro %}
+
+{% macro tabs(tab_list, modifiers='') -%}
+    <ul class="ui nav nav-tabs{% if modifiers %} {{ modifiers }}{% endif %}" role="tablist">
+    {% for tab in tab_list -%}
+        <li class="nav-item">
+            <a class="nav-link{% if tab.active %} active{% endif %}"
+               data-toggle="tab" role="tab"
+               id="tab__{{ tab.target }}"
+               data-target="#{{ tab.target }}"
+               href="{{ tab.url }}"
+               aria-controls="{{ tab.target }}"
+               aria-selected="{% if tab.active %}true{% else %}false{% endif %}">{{ tab.name }}</a>
+        </li>
+    {%- endfor %}
+    </ul>
+{%- endmacro %}

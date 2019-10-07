@@ -1,0 +1,361 @@
+$navbar-mobile-height: 48px;
+$nav-link-padding-x: spacer("2x");
+$nav-link-padding-y: spacer("2x");
+// logo, navbar-toggler, .nav-link and reg button should have the same size
+
+// Avoid blinking effect on hovering two vertically adjacent links by replacing `line-height`
+// with `fixed line-height + vertical margin`. Vertical margin adds space between links and decrease a
+// chance of hovering 2 links at the same time
+$nav-link-expected-line-height: 24px;
+$__blinking-effect-fix: 4px;
+$nav-link-line-height: $nav-link-expected-line-height - $__blinking-effect-fix;
+$nav-link-margin: $__blinking-effect-fix / 2;
+
+$nav-link-mobile-padding-x: 16px;
+
+$navbar-toggler-padding-y: $grid-gutter-width / 2 - 1;  // humburger size is 18px, to fit in 8pt grid, remove px here
+$navbar-toggler-padding-x: $grid-gutter-width / 2;
+$navbar-toggler-font-size: $font-size-lg;
+$navbar-toggler-border-radius: $border-radius;
+
+
+$menu-desktop-wrapper-margin: 2px;
+
+@import "hamburger";
+
+body {
+  padding-top: $navbar-mobile-height;
+
+  @include media-breakpoint-up(lg) {
+    padding-top: 0;
+  }
+}
+
+.navbar-container {
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: $zindex-menu;
+  @include font-smoothing();
+  @include media-breakpoint-up(lg) {
+    position: relative;
+  }
+}
+
+.navbar {
+  background-color: $gray-darker;
+
+  > .container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    height: $navbar-mobile-height;
+    @include media-breakpoint-up(lg) {
+      align-items: start;
+      flex-wrap: nowrap;
+      height: auto;
+    }
+  }
+}
+
+.navbar-logo {
+  display: flex; // ie 10 fix
+  padding: $nav-link-padding-y $nav-link-padding-x;
+  margin-left: -$nav-link-padding-x;
+
+  svg {
+    height: 24px;
+    width: 72px;
+    @include media-breakpoint-up(lg) {
+      height: 32px;
+      width: 92px;
+    }
+  }
+}
+
+
+.navbar-toggler {
+  display: flex;
+  align-self: center;
+  padding: $navbar-toggler-padding-y $navbar-toggler-padding-x;
+  margin-left: -$navbar-toggler-padding-x;
+  background-color: transparent; // remove default button style
+  border: none; // remove default button style
+
+  @include media-breakpoint-up(lg) {
+    display: none;
+  }
+
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  color: $white;
+  opacity: .5;
+  white-space: nowrap;
+
+  &:hover {
+    color: $white;
+    opacity: 1;
+  }
+  &._active {
+    opacity: 1;
+  }
+
+  svg {
+    margin-left: auto;
+  }
+}
+
+.nav-link._external, .mobile-submenu__item._external {
+  align-items: flex-start;
+  &::after {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-left: 2px;
+    background-image: url("/static/v2/img/icons/external_link.svg");
+    vertical-align: top;
+  }
+}
+
+.menu-desktop-wrapper {
+  margin: $menu-desktop-wrapper-margin 0;
+  display: none;
+  @include media-breakpoint-up(lg) {
+    display: flex;
+    flex-basis: 0; // ie 10 fix
+    flex-grow: 1; // ie 10 fix
+  }
+}
+
+.navbar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
+  width: 100%; // ie 10 fix
+
+  .nav-item {
+    margin: 0;
+  }
+
+  .nav-link {
+    padding: $nav-link-padding-y $nav-link-padding-x;
+  }
+}
+
+.navbar-main {
+  @include media-breakpoint-up(lg) {
+    padding: $nav-link-padding-y/2 0;
+  }
+
+  .nav-link {
+    line-height: $nav-link-line-height;
+    margin: $nav-link-margin;
+  }
+}
+
+.menu-mobile-wrapper {
+  // TODO: Rewrite js part, only then remove transition
+  //@include transition(all 0ms);
+  width: 100%;
+  @include media-breakpoint-up(lg) {
+    display: none;
+  }
+
+  .sprite-img._arrow-bottom {
+    fill: $white;
+    top: 0;
+    width: 1em;
+    height: 1em;
+  }
+
+  ul {
+    border-top: 1px solid $gray-dark;
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    min-height: 100vh;
+    background-color: $gray-darker;
+
+    @include media-breakpoint-up(lg) {
+      display: none;
+    }
+
+    li {
+      border-bottom: 1px solid $gray-dark;
+      font-size: $font-size-lg;
+      &:last-child {
+        border-bottom: 0;
+      }
+
+
+    }
+    .nav-link {
+      color: $white;
+      opacity: .5;
+      padding: $nav-link-mobile-padding-x;
+      &:hover {
+        opacity: 1;
+        color: $white;
+      }
+
+      &[aria-expanded="true"] {
+        ._arrow-bottom {
+          transform: rotate(180deg);
+        }
+      }
+
+      &._active {
+        color: $white;
+        opacity: 1;
+      }
+
+      ._arrow-bottom {
+        transition: all .25s;
+      }
+    }
+  }
+
+  .mobile-submenu {
+    margin-bottom: spacer("4x");
+    &.collapsing {
+      transition-duration: .25s;
+    }
+  }
+
+  .mobile-submenu__item {
+    text-align: left;
+    display: block;
+    color: $gray-dark;
+    font-size: $font-size-content-base;
+    line-height: 24px; // crutch
+    padding: 12px $nav-link-mobile-padding-x;
+    &:hover {
+      color: $white;
+    }
+    &._active {
+      color: $white;
+      background-color: transparentize($black, .6);
+    }
+  }
+}
+
+.__transparent-theme {
+  background-color: $gray-darker;
+  @include media-breakpoint-up(lg) {
+    background-color: transparent;
+  }
+}
+
+.navbar-submenu {
+  height: 40px;
+  align-items: center;
+  font-size: $font-size-base;
+  display: none;
+  background-color: $gray-lighter;
+  @include media-breakpoint-up(lg) {
+    display: flex;
+  }
+
+  .navbar-nav {
+    margin-left: -$nav-link-padding-x;
+  }
+
+  .nav-item {
+    &._active {
+      .nav-link {
+        opacity: 1;
+      }
+    }
+  }
+
+  .nav-link {
+    color: $gray-darker;
+    opacity: .5;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.members-area {
+  padding: $nav-link-padding-y $nav-link-padding-x;
+  margin: ($nav-link-margin + $menu-desktop-wrapper-margin) 0 ($nav-link-margin + $menu-desktop-wrapper-margin) auto;
+  line-height: $nav-link-line-height;
+  color: $white!important;
+  display: none;
+  @include media-breakpoint-up(lg) {
+    display: inline-block;
+  }
+}
+
+.btn.menu-btn-reg {
+  padding: ($nav-link-padding-y / 2) $nav-link-padding-x;
+  margin: ($nav-link-padding-y / 2) 0 ($nav-link-padding-y / 2) auto;
+  line-height: $nav-link-line-height + 2 * $input-btn-border-width + 8px;
+  color: $white!important;
+}
+
+.dropdown-user-menu {
+  margin-left: auto;
+  margin-right: -$navbar-toggler-padding-x;
+
+  ._user {
+    margin-right: 4px;
+  }
+
+  &.show {
+    .btn {
+      box-shadow: none;
+
+      .user-menu-img {
+        box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
+      }
+    }
+  }
+
+  .dropdown-menu {
+    font-size: $font-size-content-base;
+    right: $navbar-toggler-padding-x;
+    left: auto;
+  }
+
+  .btn {
+    color: $white;
+    border: 0;
+    background-color: rgba(0, 0, 0, 0);
+    padding: $nav-link-padding-y $nav-link-padding-x;
+
+    @include media-breakpoint-up(lg) {
+      line-height: 30px;
+    }
+
+    .svg-icon {
+      fill: $white;
+    }
+
+    &:focus {
+      box-shadow: none;
+      .user-menu-img {
+        box-shadow: 0 0 0 4px transparentize($gray-dark, .6);
+      }
+    }
+
+    span {
+      margin-right: spacer("3x");
+      display: none;
+      @include media-breakpoint-up(lg) {
+        display: inline-block;
+      }
+    }
+  }
+}
+
+.user-menu-img {
+  border-radius: 50%;
+}

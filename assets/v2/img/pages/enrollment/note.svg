@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="272" height="129" viewBox="0 0 272 129">
+  <defs>
+    <polygon id="note-a" points="77 18 136 18 174 18 195 38 195 73 195 129 77 129"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <rect width="272" height="129" fill="#07C39F"/>
+    <mask id="note-b" fill="#fff">
+      <use xlink:href="#note-a"/>
+    </mask>
+    <use fill="#F3F6F7" fill-rule="nonzero" xlink:href="#note-a"/>
+    <rect width="100" height="4" x="87" y="56" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
+    <rect width="74" height="10" x="87" y="39" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
+    <rect width="100" height="4" x="87" y="66" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
+    <rect width="100" height="4" x="87" y="76" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
+    <rect width="100" height="4" x="87" y="86" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
+    <rect width="100" height="4" x="87" y="96" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
+    <rect width="100" height="4" x="87" y="106" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
+    <rect width="60" height="4" x="87" y="116" fill="#DFE5E9" fill-rule="nonzero" mask="url(#note-b)"/>
+    <polygon fill="#DFE5E9" fill-rule="nonzero" points="174 11 204 38 174 38" mask="url(#note-b)"/>
+  </g>
+</svg>

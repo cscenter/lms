@@ -1,0 +1,79 @@
+._students-courses-list {
+
+  .nav-tabs-solid {
+    a {
+      padding: 10px 30px;;
+    }
+  }
+
+  h3 {
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+
+  h4 {
+    margin: 0 0 4px 0;
+  }
+
+  .table {
+    margin: 0;
+
+    tr:first-child {
+      td {
+        border-top: none;
+      }
+    }
+
+    td {
+      padding: 10px;
+      font-size: 13px;
+      border-top-color: #e5e5e5;
+
+      .badge {
+        font-weight: normal;
+        white-space: nowrap;
+        vertical-align: baseline;
+      }
+
+      a {
+        &.title {
+          font-size: 18px;
+          font-weight: 500;
+          line-height: 1.1;
+          margin: 0 0 4px 0;
+
+          + span {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+
+    &._archive {
+      td {
+        font-size: 14px;
+
+        .badge {
+          bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+#current {
+
+  h3 {
+    margin-bottom: 4px;
+  }
+
+  .table {
+    th {
+      border: none;
+
+      &.actions {
+        width: 120px;
+      }
+    }
+  }
+}

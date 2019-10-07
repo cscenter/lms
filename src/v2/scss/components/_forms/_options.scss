@@ -1,0 +1,116 @@
+@import "checkbox";
+@import "radio";
+
+// Default styles for checkbox and radio
+
+.ui.option {
+  display: flex;
+  align-items: flex-start;
+  margin: 0 0 spacer("4x") 0;
+  cursor: pointer;
+  position: relative;
+  line-height: 1.2;
+
+  &:hover {
+    .control__indicator {
+      border-color: $control-bg-hover;
+    }
+
+    .control__description {
+      color: $input-color;
+    }
+  }
+
+  .control__input {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+
+    &:checked {
+      ~ .control__indicator {
+        border: none;
+        background: $control-checked-bg;
+      }
+    }
+
+    &:focus {
+      ~ .control__indicator {
+        border: none;
+        box-shadow: inset 0 0 2px 1px rgba($gray-darker, .5);
+      }
+    }
+  }
+
+  .control__indicator {
+    display: block;
+    position: absolute;
+    width: $control-size;
+    height: $control-size;
+    border: $control-border-width solid $control-border-color;
+    border-radius: $border-radius;
+    background-color: $control-bg;
+    background-size: 135%;
+  }
+
+  .control__description {
+    margin: 0 0 0 26px;
+    display: inline-block;
+    color: $control-color;
+  }
+
+  &.disabled {
+    cursor: default;
+
+    &:hover .control__indicator {
+      border-color: $control-border-color;
+    }
+
+    .control__input {
+      &:checked ~ .control__indicator {
+        background: $control-disabled-bg;
+
+      }
+    }
+
+    .control__description {
+      color: $control-disabled-bg;
+    }
+  }
+}
+
+// Options collection
+
+.grouped {
+  display: block;
+
+  .option:last-child {
+    margin-bottom: 0!important;
+  }
+
+  &.inline {
+    display: inline-flex;
+    height: auto;
+    padding: calc(#{$input-outerheight - $control-size} / 2) 0;
+    flex-flow: column wrap;
+    @include media-breakpoint-up(md) {
+      flex-flow: row wrap;
+      height: $input-outerheight;
+      max-width: 100%;
+    }
+
+    .ui.option {
+      margin: 0 0 spacer("4x") 0;
+      @include media-breakpoint-up(md) {
+        margin: 0 20px 0 0;
+      }
+    }
+
+    .option:last-child {
+      margin-bottom: 0;
+    }
+  }
+}

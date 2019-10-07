@@ -1,0 +1,138 @@
+{
+  "data": [
+    {
+      "id": 16,
+      "workplace": "test",
+      "student": {
+        "id": 3345,
+        "name": "Мария",
+        "surname": "Малых",
+        "patronymic": "Анатольевна",
+        "sex": "F",
+        "city": "nsk"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 17,
+      "student": {
+        "id": 3341,
+        "name": "Алексей",
+        "surname": "Мухин",
+        "patronymic": "Максимович",
+        "sex": "M",
+        "city": "nsk"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "ds"
+      ]
+    },
+    {
+      "id": 12,
+      "student": {
+        "id": 1657,
+        "name": "Григорий",
+        "surname": "Каргин",
+        "patronymic": "Игоревич",
+        "sex": "M",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 23,
+      "student": {
+        "id": 1716,
+        "name": "Игорь",
+        "surname": "Рябцев",
+        "patronymic": "Александрович",
+        "sex": "M",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 26,
+      "student": {
+        "id": 1681,
+        "name": "Владислав",
+        "surname": "Танков",
+        "patronymic": "Дмитриевич",
+        "sex": "M",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 31,
+      "student": {
+        "id": 1804,
+        "name": "Ирина",
+        "surname": "Шквиро",
+        "patronymic": "Алексеевна",
+        "sex": "F",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "se"
+      ]
+    },
+    {
+      "id": 3,
+      "student": {
+        "id": 888,
+        "name": "Егор",
+        "surname": "Башарин",
+        "patronymic": "Валерьевич",
+        "sex": "M",
+        "city": "spb"
+      },
+      "photo": "/media/user_card.jpg",
+      "year": 2019,
+      "areas": [
+        "ds",
+        "se",
+        "cs"
+      ]
+    },
+
+    {
+        "id": 9,
+        "student": {
+            "id": 892,
+            "name": "Павел",
+            "surname": "Жук",
+            "patronymic": "Павлович",
+            "sex": "M",
+            "city": "spb"
+        },
+        "photo": "/media/user_card.jpg",
+        "year": 2019,
+        "areas": [
+            "se"
+        ]
+    }
+
+
+  ]
+}

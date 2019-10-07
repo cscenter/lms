@@ -1,0 +1,157 @@
+// Variables
+$card-border-width: 1px;
+$card-border-radius: $border-radius !default;
+$card-border-color: $gray-lighter;
+$card-inner-border-radius: $card-border-radius;
+$card-cap-bg: rgba($black, .03) !default;
+$card-bg: $white !default;
+
+
+//
+// Base styles
+//
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  background-color: $card-bg;
+  background-clip: border-box;
+  font-size: $font-size-base;
+  border: $card-border-width solid $card-border-color;
+  @include border-radius($card-border-radius);
+  overflow: hidden;
+  padding: 0;
+
+  &:hover {
+    .card__img {
+      &::before {
+        background-color: rgba($gray-darker, .1);
+      }
+    }
+  }
+
+  &._inverted {
+    background-color: $gray-lighter;
+
+    .card__header {
+      background-color: $gray-dark;
+      color: $white;
+    }
+  }
+
+  &._no-border {
+    border: none;
+
+    .card__content {
+      padding-left: 0;
+      padding-right: 0;
+    }
+
+    .card__img {
+      @include border-radius($card-border-radius);
+      overflow: hidden;
+    }
+  }
+
+  &._horizontal {
+    .card__content {
+      padding: spacer("6x") spacer("4x");
+      align-self: center;
+      @include media-breakpoint-up(md) {
+        padding: spacer("8x") spacer("10x") spacer("8x") spacer("8x");
+      }
+    }
+  }
+}
+
+.card__content,
+.card__header {
+  // Enable `flex-grow: 1` for decks and groups so that card blocks take up
+  // as much space as possible, ensuring footers are aligned to the bottom.
+  flex: 1 1 auto;
+  padding: spacer("4x");
+
+  > :last-child {
+    margin-bottom: 0;
+  }
+
+  &._big {
+    padding: spacer("4x");
+    @include media-breakpoint-up(md) {
+      padding: spacer("8x");
+    }
+  }
+
+  // FIXME: middle bigger than default styles. Is it OK?
+  &._middle {
+    padding: spacer("6x");
+  }
+
+  &._meta {
+    padding-top: 0;
+    flex-grow: 0;
+  }
+}
+
+.card__header.cover {
+  padding: 0;
+
+  .cover__content {
+    @extend .card__content;
+
+    &._big {
+      padding: 80px spacer("4x");
+      @include media-breakpoint-up(md) {
+      padding: 104px spacer("10x");
+      }
+    }
+  }
+}
+
+.card__img { //this wrapper need for IE
+  position: relative;
+  flex: 0 0 auto;
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    text-align: center;
+  }
+
+  &._darken::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba($gray-darker, .3);
+    transition: .3s;
+  }
+}
+
+.card__title {
+  margin-bottom: spacer("1x");
+  font-size: $font-size-lg;
+  line-height: $line-height-sm;
+  word-wrap: normal;
+}
+
+.card__subtitle {
+  word-wrap: normal;
+  color: $gray-dark;
+  line-height: $line-height-sm;
+  font-size: $font-size-sm;
+  margin-bottom: 0;
+}
+
+
+.card__background {
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}

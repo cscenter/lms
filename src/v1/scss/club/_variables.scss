@@ -1,0 +1,22 @@
+@import "bootstrap-sass/assets/stylesheets/bootstrap/variables.scss";
+
+// Override variables
+$link-hover-color: darken($link-color, 5%);
+$pre-bg: #f8f8f8;
+
+$min-width: 940px;
+$color-blue: #337ab7;
+$color-green: #5cb85c;
+$color-red: #FF6B78;
+$color-orange: #F39700;
+$color-grey: #9B9B9B;
+$btn-primary-bg: #7a9cc6;
+$color-gray-20: #333333;
+$color-gray-60: #666666;
+$color-gray-90: #e5e5e5;
+
+$background-white: #fff;
+$background-grey: #f8f8f8;
+
+$panel-footer-bg: inherit;
+$panel-inner-border: $color-gray-90;

@@ -1,0 +1,425 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% set menu_theme="__transparent-theme" %}
+{% set is_admission_active = True %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/index.svg") }}");
+    </script>
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
+{% block before_navbar_container %}<div class="cover cover-index-page">{% endblock before_navbar_container %}
+{% block after_navbar_container %}
+    <div class="container">
+        <h1 class="cover__title">Знания, востребованные в&nbsp;науке и&nbsp;индустрии</h1>
+        <p class="cover__text">Очные вечерние курсы в Санкт-Петербурге и в Новосибирске по трём направлениям: Computer Science, Data Science, Software Engineering. Заочное обучение для жителей других городов.</p>
+        <div class="buttons">
+            <a href="#study-areas" class="btn _big _primary _m-wide">Смотреть программы</a>
+            <a href="/v2/pages/about/" class="btn _big _white _opacity-10 _m-wide">Узнать о центре</a>
+        </div>
+    </div>
+</div> {# -- div.cover #}
+{% endblock after_navbar_container %}
+
+{% block content %}
+<div class="csc-study-areas" id="study-areas">
+    <div class="container">
+        <h2 class="m-center">Очные курсы центра</h2>
+        <p class="card-offline-course__text">
+            Центр приглашает молодых специалистов, аспирантов, студентов средних и старших курсов технических
+            специальностей пройти двух- или трёхлетние курсы по направлениям:
+        </p>
+
+        <div class="card-deck _three">
+            <a href="#" class="card _study-area">
+                <div class="card__content">
+                    <div class="card-offline-course__icon">{{ macros.svg_image('se') }}</div>
+                    <h3 class="card__title">Software Engineering</h3>
+                    <p class="card__subtitle">Разработка программного обеспечения</p>
+                </div>
+            </a>
+            <a href="#" class="card _study-area">
+                <div class="card__content">
+                    <div class="card-offline-course__icon">{{ macros.svg_image('ds') }}</div>
+                    <h3 class="card__title">Data Science</h3>
+                    <p class="card__subtitle">Анализ данных</p>
+                </div>
+            </a>
+            <a href="#" class="card _study-area">
+                <div class="card__content">
+                    <div class="card-offline-course__icon">{{ macros.svg_image('cs') }}</div>
+                    <h3 class="card__title">Computer Science</h3>
+                    <p class="card__subtitle">Современная информатика</p>
+                </div>
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<div class="about-csc">
+    <div class="container">
+        <div class="about-csc__cover">
+            <div class="lazy-wrapper">
+                <img src="" data-src="{{ static("v2/img/pages/index/cscenter_meetup-1136.jpg") }}"
+                     data-srcset="{{ static("v2/img/pages/index/cscenter_meetup-1056.jpg") }} 1056w,
+                             {{ static("v2/img/pages/index/cscenter_meetup-1408.jpg") }} 1408w,
+                             {{ static("v2/img/pages/index/cscenter_meetup-1136@2x.jpg") }} 2272w"
+                     alt="">
+            </div>
+            <div class="about-csc__description">
+                <h1>О центре</h1>
+                <p>
+                    Computer Science Center&nbsp;существует, чтобы дать возможность талантливым студентам и&nbsp;выпускникам
+                    развиваться в&nbsp;интересном им&nbsp;направлении.
+                </p>
+            </div>
+            <a class="btn _big _primary about-csc_btn" href="/about/">Подробнее</a>
+        </div>
+        <div class="about-csc__organizers">
+            <h3>Организаторы</h3>
+            <p>CS Center — это совместная инициатива Школы анализа данных, Computer Science клуба и JetBrains.</p>
+            <div class="col-12">
+                <a target="_blank" rel="noopener" href="https://jetbrains.ru/students" title="JetBrains">{{ macros.svg_image('logo-jetbrains') }}</a>
+                <a target="_blank" rel="noopener" href="https://yandexdataschool.ru/" title="Яндекс ШАД">{{ macros.svg_image('logo-shad') }}</a>
+                <a target="_blank" rel="noopener" href="http://239.ru/" title="ФМЛ №239">{{ macros.svg_image('logo-fml239') }}</a>
+                <a target="_blank" rel="noopener" href="https://compsciclub.ru/" title="Computer Science Club">{{ macros.svg_image('logo-csclub') }}</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="container mb-10">
+    <h2 class="text-center mb-6">Мероприятия</h2>
+        <div class="card-deck _three">
+            <div class="card _dark">
+                <div class="w-100"
+                     style="background-image:url('/static/v2/img/pages/index/cscenter_meetup-1056.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 196px">
+                </div>
+                <div class="card__content _big">
+                    <div class="announcement">
+                        <div class="ui labels _circular mb-2">
+                            <span class="ui label _gray" href="#">Бакалавриат</span>
+                            <span class="ui label _gray" href="#">Абитуриентам</span>
+                        </div>
+                        <h3>Набор в бакалавриат ВШЭ «Прикладная математика и информатика»</h3>
+                        <p>До&nbsp;26&nbsp;июля идёт набор в&nbsp;бакалавриат ВШЭ <a
+                                href="https://spb.hse.ru/ba/appmath" target="_blank">«Прикладная математика и&nbsp;информатика»</a>.
+                            Программа создана при участии JetBrains и&nbsp;Computer Science центра. Готовит специалистов
+                            в&nbsp;области разработки&nbsp;ПО, языков программирования, анализа данных и&nbsp;машинного
+                            обучения.</p>
+                        <p>Бюджетных мест&nbsp;— 40, коммерческих&nbsp;— 20. Студенты, которые учатся без троек,
+                            получают стипендии от&nbsp;компании JetBrains от&nbsp;9&nbsp;000 до&nbsp;15&nbsp;000&nbsp;рублей.</p>
+                        <div class="grouped">
+                            <div class="ui label _icon">
+                                {{ macros.svg_icon('location') }}<span>Санкт-Петербург, ул. Кантемировская, 3 корп. 1, лит. А 	</span>
+                            </div>
+                            <div class="ui label _icon">
+                                {{ macros.svg_icon('calendar') }}<span>20 июня 2019 — 26 июля 2019</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card__content _big _meta">
+                    <a href="/v2/pages/announcement/" class="btn _outline _gray w-100">Подробнее</a>
+                </div>
+            </div>
+
+            <div class="card _dark">
+                <div class="w-100"
+                     style="background-image:url('/static/v2/img/pages/index/bg-main-page.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 196px">
+                </div>
+                <div class="card__content _big">
+                    <div class="announcement">
+                        <div class="ui labels _circular mb-2">
+                            <span class="ui label _gray" href="#">Бакалавриат</span>
+                            <span class="ui label _gray" href="#">Абитуриентам</span>
+                        </div>
+                        <h3>Набор на факультет математики и компьютерных наук в СПбГУ</h3>
+                        <p>В&nbsp;сентябре 2019 года СПбГУ открывает факультет математики и&nbsp;компьютерных наук. До&nbsp;26&nbsp;июля
+                            идёт набор в&nbsp;бакалавриат на&nbsp;три направления: «Математика», «Математика, алгоритмы
+                            и&nbsp;анализ данных» и&nbsp;«Современное программирование». Программы созданы коллективом
+                            Лаборатории им. П.Л. Чебышёва вместе с&nbsp;ПОМИ РАН, Computer Science центром, компаниями
+                            Газпромнефть, JetBrains и&nbsp;Яндекс.</p>
+                        <div class="grouped">
+                            <div class="ui label _icon">
+                                {{ macros.svg_icon('location') }}<span>Санкт-Петербург, Университетская набережная, 7−9−11</span>
+                            </div>
+                            <div class="ui label _icon">
+                                {{ macros.svg_icon('calendar') }}<span>20 июня 2019 — 26 июля 2019</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card__content _big _meta">
+                    <a href="/v2/pages/announcement/" class="btn _outline _gray w-100">Подробнее</a>
+                </div>
+            </div>
+            <div class="card _dark">
+                <div class="w-100"
+                     style="background-image:url('/static/v2/img/pages/index/online-program.svg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 196px">
+                </div>
+                <div class="card__content _big">
+                    <div class="announcement">
+                        <p class="text-muted mb-0">Новая лекция в CS центре</p>
+                        <h3>Введение в трансфинитные методы</h3>
+                        <p>Лекция носит теоретический характер и&nbsp;ориентирована на&nbsp;студентов
+                            младших
+                            курсов</p>
+                        <div class="grouped">
+                            <div class="ui label _icon">
+                                {{ macros.svg_icon('location') }}<span>Санкт-Петербург, БЦ «Таймс»</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    <div class="card__content _big _meta">
+                        <a href="/v2/pages/announcement/" class="btn _outline _gray w-100">Подробнее</a>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+<div class="csc-online-education">
+    <div class="container">
+        <h2 class="text-center">Онлайн-образование</h2>
+
+        <div class="card-deck _online-education">
+
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
+                    <img src="/static/v2/img/pages/index/online_programs/algo.jpg" alt="Card image cap">
+                </div>
+                <div class="card__content">
+                    <h4 class="card__title">Алгоритмы и эффективные вычисления</h4>
+                    <div class="card__subtitle">Онлайн-программа</div>
+                </div>
+            </a>
+
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
+                    <img src="/static/v2/img/pages/index/online_programs/math.jpg" alt="Card image cap">
+                </div>
+                <div class="card__content">
+                    <h4 class="card__title">Математика для разработчика</h4>
+                    <small class="card__subtitle">Онлайн-программа</small>
+                </div>
+            </a>
+
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
+                    <img src="/static/v2/img/pages/index/online_programs/dev.jpg" alt="Card image cap">
+                </div>
+                <div class="card__content">
+                    <h4 class="card__title">Разработка на C++, Java и Haskell</h4>
+                    <div class="card__subtitle">Онлайн-программа</div>
+                </div>
+            </a>
+
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
+                    <img src="/media/online_courses/15b5d7fa0dc91619222db27e7f671064.png" alt="Card image cap">
+                </div>
+                <div class="card__content">
+                    <h4 class="card__title">Программирование на Java Script</h4>
+                    <div class="card__subtitle">Онлайн-курс</div>
+                </div>
+            </a>
+
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
+                    <img src="/media/online_courses/python-yandex-2_1.png" alt="Card image cap">
+                </div>
+                <div class="card__content">
+                    <h4 class="card__title">Основы программирования</h4>
+                    <div class="card__subtitle">Онлайн-программа</div>
+                </div>
+            </a>
+
+            <a class="card _no-border" href="#">
+                <div class="card__img _darken">
+                    <img src="/media/online_courses/HlrWMsXhcgA.jpg" alt="Card image cap">
+                </div>
+                <div class="card__content">
+                    <h4 class="card__title">Основы программирования</h4>
+                    <div class="card__subtitle">Онлайн-программа</div>
+                </div>
+            </a>
+        </div>
+        <div class="text-center">
+            <a href="" class="btn _small _rounded _outline _gray">Все материалы</a>
+        </div>
+    </div>
+</div>
+
+<div class="csc-student-reviews">
+    <div class="container">
+        <h2 class="text-center">Отзывы студентов</h2>
+        <div class="card-columns _testimonials">
+            <div class="card">
+                <div class="card__content _middle">
+                    <div class="author _testimonial">
+                        <img class="author__img" width="74" height="74" src="/media/pages/index/student.png" alt="">
+                        <div class="author__details">
+                                <h4>Евгений Игоревич Викулов</h4>
+                                <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                        <div class="author__testimonial">
+                            <p>CS центр — это место, где сбываются мечты. Настоящая кладовая
+                                знаний, где каждому
+                                открыт
+                                путь к желаемым знаниям и умениям. Интересные курсы, увлекательные практики,
+                                живое
+                                общение и обсуждение – здесь каждый найдет себе занятие по душе. Преподаватели,
+                                руководители практик, кураторы, студенты – благодаря всем им в CS центре
+                                образуется
+                                невероятная атмосфера, настраивающая на позитивный лад и продуктивное обучение.
+                                Здесь
+                                очень круто и увлекательно!
+                                <ul>
+                                    <li>огромный выбор направлений, в которых интересно развиваться,</li>
+                                    <li>преподаватели, на пары к которым действительно хочется ходить,</li>
+                                    <li>интересные темы практик (последняя переросла в мой диплом),</li>
+                                    <li>умнейшие люди, общаясь с которыми, хочется идти и развиваться дальше.</li>
+
+                                </ul>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card__content _middle">
+                    <div class="author _testimonial">
+                        <img class="author__img" src="/media/pages/index/student.png" alt="">
+                        <div class="author__details">
+                            <h4>Евгений Игоревич Викулов</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                        <div class="author__testimonial">
+                            <p>CS центр — это место, где сбываются мечты. Настоящая кладовая
+                                знаний, где каждому
+                                открыт
+                                путь к желаемым знаниям и умениям. Интересные курсы, увлекательные практики,
+                                живое
+                                общение и обсуждение – здесь каждый найдет себе занятие по душе. Преподаватели,
+                                руководители практик, кураторы, студенты – благодаря всем им в CS центре
+                                образуется
+                                невероятная атмосфера, настраивающая на позитивный лад и продуктивное обучение.
+                                Здесь
+                                очень круто и увлекательно!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card__content _middle">
+                    <div class="author _testimonial">
+                        <img class="author__img" src="/media/pages/index/student.png" alt="">
+                        <div class="author__details">
+                            <h4>Евгений Игоревич Викулов</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                        <div class="author__testimonial">
+                            И даже в трудный час, когда уж неизбежен крах,
+                            Твой взор серьезный скажет, чтобы плечи я расправил.
+                            Мне сил и воли придает лишь твое имя на устах,
+                            Лишь ты меня ведёшь вперёд, лишь ты - Грудинин Павел.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card__content _middle">
+                    <div class="author _testimonial">
+                        <img class="author__img" src="/media/pages/index/student.png" alt="">
+                        <div class="author__details">
+                            <h4>Евгений Игоревич Викулов</h4>
+                            <span>Выпуск 2017, Разработка ПО</span>
+                        </div>
+                        <div class="author__testimonial">
+                            И даже в трудный час, когда уж неизбежен крах,
+                            Твой взор серьезный скажет, чтобы плечи я расправил.
+                            Мне сил и воли придает лишь твое имя на устах,
+                            Лишь ты меня ведёшь вперёд, лишь ты - Грудинин Павел.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="text-center">
+            <a href="" class="btn _small _rounded _outline _gray">Все отзывы</a>
+        </div>
+    </div>
+</div>
+
+<div class="social-media-posts">
+    <div class="container">
+        <h2 class="m-center">#compscicenter</h2>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <a href="#" target="_blank" rel="noopener"
+                   class="social-media social-media--instagram social-media--full-size">
+                    <img class="social-media__icon"
+                         src="/static/v2/img/pages/index/social-media-posts/instagram.svg" width="34" alt="">
+                    <p class="social-media__text">На Новый год студенты Центра обмениваются подарками в рамках
+                        «Тайного Санты» — игры,
+                        когда каждый дарит кому-то подарок, но получатель подарка не знает, кто же его Санта. У
+                        нас всегда есть специальная ёлочка, обрастающая подарками. Посмотрите, как она
+                        наполнилась в Новосибирске. И там обмен уже произошёл :)</p>
+                    <p class="social-media__date social-media__date--light">26 дек</p>
+                </a>
+            </div>
+
+            <div class="col-lg-6">
+                <a href="#" target="_blank" rel="noopener"
+                   class="social-media social-media--vk social-media--half-size">
+                    <img class="social-media__icon" src="/static/v2/img/pages/index/social-media-posts/vk.svg"
+                         width="40" alt="">
+                    <p class="social-media__text social-media__text--dark">На Новый год студенты Центра
+                        обмениваются
+                        подарками в
+                        рамках
+                        «Тайного Санты» — игры,
+                        когда каждый дарит</p>
+                    <p class="social-media__date">26 дек</p>
+                </a>
+
+                <a href="" target="_blank" rel="noopener"
+                   class="social-media social-media--vk social-media--half-size">
+                    <img class="social-media__icon" src="/static/v2/img/pages/index/social-media-posts/vk.svg"
+                         width="40" alt="">
+                    <p class="social-media__text social-media__text--dark">На Новый год студенты Центра
+                        обмениваются
+                        подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                        обмениваются
+                        подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                        обмениваются
+                        подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                        обмениваются
+                        подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                        обмениваются
+                        подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                        обмениваются
+                        подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                        обмениваются
+                        подарками в рамках «Тайного Санты» — игры, да каждый дарит На Новый год студенты Центра
+                        обмениваются
+                        подарками в рамках «Тайного Санты» — игры, да каждый дарит</p>
+                    <p class="social-media__date">26 дек</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

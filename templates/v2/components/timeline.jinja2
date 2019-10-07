@@ -1,0 +1,117 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-9">
+                <h2>Base timeline</h2>
+                FIXME: Компонент вылазит за границы (add border to .timeline)
+               <div class="timeline">
+                   <div class="timeline__element">
+                       <a class="timeline__date" href="#">2019</a>
+                   </div>
+                   <div class="timeline__element active">
+                       Просто текст
+                   </div>
+                   <div class="timeline__element">
+                       <a class="timeline__date" href="#">2017</a>
+                   </div>
+                   <div class="timeline__element">
+                       <span class="timeline__date" href="#">2016</span>
+                   </div>
+               </div>
+            </div>
+        </div>
+
+        <div class="row mt-10">
+            <div class="col-lg-9">
+                <h2>Компактный timeline для scrollspy</h2>
+                    <div class="timeline _compact list-group" id="history-navigation">
+                        <a class="timeline__element timeline__date list-group-item" href="#year2018">
+                            2018
+                        </a>
+                        <a class="timeline__element timeline__date list-group-item" href="#year2017">
+                            2017
+                        </a>
+                        <a class="timeline__element timeline__date list-group-item" href="#year2016">
+                            2016
+                        </a>
+                        <a class="timeline__element timeline__date list-group-item" href="#year2015">
+                            2015
+                        </a>
+                        <a class="timeline__element timeline__date list-group-item" href="#year2014">
+                            2014
+                        </a>
+                        <a class="timeline__element timeline__date list-group-item" href="#year2013">
+                            2013
+                        </a>
+                        <a class="timeline__element timeline__date list-group-item active" href="#year2011">
+                            2011
+                        </a>
+                    </div>
+            </div>
+        </div>
+
+        <div class="row mt-10">
+            <div class="col-lg-6">
+                <h2>Student history</h2>
+                <div class="timeline _person-history">
+                    <div class="timeline__element active">
+                        <div class="timeline__content">
+                            <div class="timeline__date">20 мая 2017</div>
+                            <p>Подала заявление</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <div class="timeline__date">31 мая 2017</div>
+                            <p>Написала экзамен на 9/10</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline__element">
+                        <div class="timeline__img">
+                            <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
+                        </div>
+                        <div class="timeline__content">
+                            <div class="timeline__date _important">10 июня 2017</div>
+                            <h3>Зачислена в CSC и длинный заголовок на несколько строчек</h3>
+                        </div>
+                    </div>
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <div class="timeline__date">Осень 2017</div>
+                            <ul class="ui _unstyled">
+                                <li>Алгоритмы и структуры данных, часть 1, осень 2017 /отлично/
+                                </li>
+                                <li>Программирование на C++, часть 1, осень 2017 /отлично/
+                                </li>
+                                <li>Программирование на Java, осень 2017 /отлично/</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline__element">
+                        <div class="timeline__content">
+                            <span class="timeline__date">Весна 2018</span>
+                            <ul class="_unstyled">
+                                <li>Алгоритмы и структуры данных, часть 2, осень 2017 /отлично/
+                                </li>
+                                <li>Программирование на Java, осень 2017 /отлично/</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="timeline__element _photo">
+                        <div class="timeline__img">
+                            <img class="img-fluid" src="/static/v2/img/placeholder/girl.png" alt="">
+                        </div>
+                        <div class="timeline__content">
+                            <span class="timeline__date _important">Весна 2018</span>
+                            <h3>Закончила обучение в CS центре</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

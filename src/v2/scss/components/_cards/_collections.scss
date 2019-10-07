@@ -1,0 +1,109 @@
+$card-group-margin: ($grid-gutter-width / 2);
+$card-deck-margin: $card-group-margin;
+
+$card-columns-count: 2;
+
+
+@mixin card-width($card-count) {
+  width: calc(#{percentage(1 / $card-count)} - #{$grid-gutter-width});
+}
+
+// Card deck
+
+.card-deck {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -$card-group-margin;
+  margin-right: -$card-group-margin;
+
+  &._six {
+    .card {
+      @include media-breakpoint-up(sm) {
+        @include card-width(2);
+      }
+
+      @include media-breakpoint-up(md) {
+        @include card-width(3);
+      }
+
+      @include media-breakpoint-up(lg) {
+        @include card-width(4);
+      }
+
+      @include media-breakpoint-up(xl) {
+        @include card-width(6);
+      }
+    }
+  }
+
+  &._four {
+    .card {
+      @include media-breakpoint-up(sm) {
+        @include card-width(2);
+      }
+
+      @include media-breakpoint-up(md) {
+        @include card-width(3);
+      }
+
+      @include media-breakpoint-up(lg) {
+        @include card-width(4);
+      }
+    }
+  }
+
+  &._three {
+    .card {
+      @include media-breakpoint-up(sm) {
+        @include card-width(2);
+      }
+
+      @include media-breakpoint-up(lg) {
+        @include card-width(3);
+      }
+    }
+  }
+
+  &._two {
+    .card {
+      @include media-breakpoint-up(sm) {
+        @include card-width(2);
+      }
+    }
+  }
+
+  .card {
+    margin: 0 $card-group-margin spacer("4x");
+    @include card-width(1);
+  }
+}
+
+//
+// Columns
+//
+
+.card-columns {
+  .card {
+    margin-bottom: spacer("3x");
+  }
+
+  @include media-breakpoint-up(sm) {
+    column-count: $card-columns-count;
+    column-gap: spacer("4x");
+
+    .card {
+      display: inline-block; // Don't let them vertically span multiple columns
+      width: 100%; // Don't let their width change
+    }
+  }
+
+  &._testimonials {
+    @include media-breakpoint-down(sm) {
+      column-count: 1;
+    }
+
+    .card {
+      border-radius: 0;
+    }
+  }
+}

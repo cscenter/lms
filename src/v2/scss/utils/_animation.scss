@@ -1,0 +1,13 @@
+.animation {
+  opacity: 1;
+  max-height: 3000px;
+  transition: max-height .25s ease-in, opacity .25s ease-in;
+
+  &.hide {
+    margin: 0!important;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .15s ease-out, margin-top .15s ease-out, opacity .15s ease-out;
+    opacity: 0;
+  }
+}

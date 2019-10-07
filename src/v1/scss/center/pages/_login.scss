@@ -1,0 +1,75 @@
+//@media (min-width: 480px) {
+body.sign-in, body.reset-password, body.gray {
+  background: #f8f8f8;
+
+}
+
+.container-box {
+    width: 415px;
+    margin: 40px auto;
+    padding: 30px 43px;
+  h4 {
+    //text-transform: uppercase;
+    font-weight: normal;
+  }
+}
+//}
+
+#sign-in, #reset-password {
+  margin-top: 10px;
+
+  label {
+    display: block;
+    margin: 0;
+    font-weight: 400;
+
+
+  }
+    input {
+      width: 100%;
+      border: 1px solid #e3e6e7;
+      border-radius: 4px;
+      padding: 11px 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      box-shadow: none;
+      line-height: normal;
+      height: auto;
+    }
+
+  .error-message {
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: block;
+      color: #d0021b;
+      overflow: hidden;
+
+    ul {
+      margin: 0;
+    }
+  }
+
+  .password-block {
+      display: block;
+      position: relative;
+
+    .forgot {
+        position: absolute;
+        top: 12px;
+        right: 10px;
+        font-size: 12px;
+    }
+  }
+
+  .btn.sign-up-in, .btn.btn-primary {
+      font-size: 13px;
+      margin-top: 15px;
+    border: 0 !important;
+    line-height: 24px;
+    text-transform: uppercase;
+    border-radius: 4px!important;
+  }
+  .btn.btn-primary {
+    margin-top: 0;
+  }
+}

@@ -1,0 +1,40 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}{% include "sprites/ui.svg" %}{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+        <a href="/v2/components/modals/basic/" class="btn _success mb-2" data-toggle="modal"
+           data-target="#exampleModalBasic">
+            Простое модальное окно
+        </a>
+        <a href="/v2/components/modals/complex/" class="btn _success _outline mb-2" data-toggle="modal"
+           data-target="#exampleModalComplex">
+            Модальное окно с хедером и футером
+        </a>
+        <a href="/v2/components/modals/img/" class="btn _success _outline mb-2" data-toggle="modal"
+           data-target="#exampleModalImage">
+            Модальное окно с картинкой
+        </a>
+        <a href="/v2/components/modals/fullscreen/" class="btn _success mb-2" data-toggle="modal"
+           data-target="#exampleModalCover">
+            Модальное окно на весь экран
+        </a>
+        <a href="/v2/components/modals/loading/" class="btn _danger mb-2" data-toggle="modal"
+           data-target="#exampleModalLoad">
+            Подгрузка
+        </a>
+        <a href="/v2/components/modals/small/" class="btn _success mb-2" data-toggle="modal"
+           data-target="#exampleModalBasicSm">
+            Маленький размер
+        </a>
+
+        <a href="/v2/components/modals/large/" class="btn _success mb-2" data-toggle="modal"
+           data-target="#exampleModalBasicLg">
+            Большой размер
+        </a>
+
+        <p>TODO: Добавить анимацию</p>
+
+    </div>
+{% endblock content %}

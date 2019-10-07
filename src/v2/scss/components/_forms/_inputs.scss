@@ -1,0 +1,263 @@
+
+//Inputs
+
+.ui.input {
+  font-weight: $font-weight-base;
+  display: inline-flex;
+  color: $input-color;
+  flex-direction: column;
+  width: 100%;
+
+  &.__split-input {
+    flex-flow: row;
+    flex-wrap: wrap;
+    label {
+      width: 100%;
+    }
+
+    .start-range {
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+      border-right: $border-width solid $input-border-color;
+    }
+
+    .end-range {
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+      border-left: none;
+    }
+
+  }
+}
+
+.ui.input > input {
+  margin: 0;
+  width: 100%;
+  outline: none;
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  text-align: left;
+  line-height: $input-line-height;
+  font-family: $font-family-base;
+  padding: spacer("3x") spacer("4x");
+  background: $input-bg;
+  border: $input-border-width solid $input-border-color;
+  color: $input-color;
+  border-radius: $input-border-radius;
+  &:hover {
+    transition: $input-transition;
+    border: $input-border-width solid $input-border-color-hover;
+  }
+  &::-ms-clear {
+    display: none;
+  }
+}
+
+.help-text {
+  display: block;
+  width: 100%;
+  font-size: $font-size-extra-sm;
+  color: $gray-dark;
+  margin-top: 4px;
+  line-height: $input-btn-line-height;
+
+  &.error {
+    color: $red;
+  }
+}
+
+
+//Placeholder
+.ui.input > input::placeholder {
+  color: $input-placeholder-color;
+}
+
+
+//Disabled
+
+.ui.disabled.input,
+.ui.input:not(.disabled) input[disabled] {
+  opacity: .6;
+}
+
+.ui.disabled.input > input,
+.ui.input:not(.disabled) input[disabled] {
+  pointer-events: none;
+}
+
+//Active
+
+.ui.input > input:active,
+.ui.input.down input {
+  background: $input-focus-bg;
+}
+
+//Focus
+
+.ui.input.focus > input,
+.ui.input > input:focus {
+  border-color: $input-focus-border-color;
+  background: $input-focus-bg;
+  color: $input-focus-color;
+}
+
+//Error
+
+.ui.input.error > input,
+.ui.input.error > textarea,
+.error .ui.option.radio:not(.disabled) > .control__indicator,
+.error .ui.option.checkbox:not(.disabled) > .control__indicator {
+  background-color: $form-feedback-color;
+  border:$control-border-width solid $form-feedback-invalid-color;
+  &:hover {
+    border-color: $form-feedback-invalid-color;
+  }
+}
+
+//Action
+
+.ui.action.input {
+  flex-direction: row;
+  position: relative;
+}
+
+.ui.action.input > .btn,
+.ui.action.input > .btn {
+  display: flex;
+  position: absolute;
+  right: 0;
+  top:0;
+  bottom: 0;
+  align-items: center;
+  flex: 0 0 auto;
+  color: $white;
+}
+.ui.action.input > .btn,
+.ui.action.input > .btn > .btn {
+  margin: 0;
+}
+
+/* Button on Right */
+.ui.action.input:not([class*="left action"]) > input {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-right-color: transparent !important;
+}
+.ui.action.input:not([class*="left action"]) > .dropdown:not(:first-child),
+.ui.action.input:not([class*="left action"]) > .btn:not(:first-child),
+.ui.action.input:not([class*="left action"]) > .btn:not(:first-child) > .btn {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+.ui.action.input:not([class*="left action"]) > .dropdown:last-child,
+.ui.action.input:not([class*="left action"]) > .btn:last-child,
+.ui.action.input:not([class*="left action"]) > .btn:last-child > .btn {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+//Icon
+
+.ui.icon.input{
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+}
+
+.ui.icon.input > i.icon {
+  cursor: default;
+  position: relative;
+  line-height: 1;
+  text-align: center;
+  right: 2rem;
+  border-radius: 0 $border-radius $border-radius 0;
+  transition: $transition-base;
+
+  .svg-icon {
+    fill: $gray-light;
+    transition: $transition-base;
+  }
+}
+
+.ui.icon.input > i.icon:not(.link) {
+  pointer-events: none;
+}
+
+.ui.icon.input > input {
+  padding-right: 40px;
+  min-width: 100%;
+}
+
+.ui.icon.input > i.link.icon {
+  cursor: pointer;
+}
+
+//Loading
+
+.ui.loading.loading.input > i.icon {
+  position: absolute;
+  right: 1.25rem;
+  top: .8rem; //hack for valign center
+  content: '';
+  animation-iteration-count: infinite;
+  border-radius: 50%;
+  border: .175rem solid $gray-light;
+  border-top-color: $border-color;
+  animation: spin 700ms infinite linear;
+  min-width: 1.2rem; //For IE
+  min-height: 1.2rem; //For IE
+}
+
+// Focus
+
+.ui.icon.input > input:focus ~ i.icon {
+  .svg-icon {
+    fill: $gray-dark;
+  }
+}
+
+//Text Area
+
+.ui.input textarea {
+  margin: 0;
+  -webkit-appearance: none;
+  padding: spacer("4x");
+  background: $input-bg;
+  resize: vertical;
+  outline: none;
+  border-radius: $border-radius;
+  border: $input-border-width solid $input-border-color;
+
+  &:hover {
+    transition: $input-transition;
+    border: $input-border-width solid $input-border-color-hover;
+  }
+  &:focus {
+    background: $white;
+    border: $input-border-width solid $input-border-color-hover;
+  }
+}
+
+.ui.input textarea:not([rows]) {
+  height: auto;
+  min-height: 100px;
+  max-height: 500px;
+}
+
+.ui.form textarea,
+.ui.form input[type="checkbox"] {
+  vertical-align: top;
+}
+
+//Placeholder
+
+.ui.input > textarea::-webkit-input-placeholder {
+  color: $input-placeholder-color;
+}
+
+.ui.input > textarea::-moz-placeholder {
+  color: $input-placeholder-color;
+}
+
+.ui.input > textarea:-ms-input-placeholder {
+  color: $input-placeholder-color;
+}
