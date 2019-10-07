@@ -70,7 +70,7 @@ class CourseOfferings extends React.Component {
             ...props.initialState
         };
     }
-// FIXME: search field - надо регулировать debounce, не всегда есть запрос на сервер
+
     getYearOptions(branchOption) {
         let academicYearOptions = [];
         const branch = getOptionByValue(this.props.branchOptions, branchOption.value);
@@ -142,10 +142,7 @@ class CourseOfferings extends React.Component {
      */
     checkYearOption(state, name = 'academicYear') {
         const options = this.getYearOptions(state.branch);
-        let hasOption = options.find((element) => {
-            return _isEqual(element, state.academicYear);
-        });
-        if (hasOption === null) {
+        if (getOptionByValue(options, state.academicYear) === null) {
             return {[name]: options[0]}
         }
         return {}
