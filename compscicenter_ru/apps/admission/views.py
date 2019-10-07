@@ -167,7 +167,7 @@ class ApplicationFormView(TemplateView):
             yandex_passport_access = self.request.session.get(SESSION_LOGIN_KEY)
             context['app'] = {
                 'props': {
-                    'endpoint': reverse('api:applicant_create'),
+                    'endpoint': reverse('public-api:v2:applicant_create'),
                     'csrfToken': get_token(self.request),
                     'authCompleteUrl': reverse('application:auth_complete'),
                     'authBeginUrl': reverse('application:auth_begin'),
