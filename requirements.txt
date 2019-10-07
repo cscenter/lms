@@ -1,4 +1,4 @@
-Django==2.1.7
+Django==2.2.6
 django-webpack-loader==0.6.0
 django-simple-menu==1.2.1
 Jinja2==2.10
