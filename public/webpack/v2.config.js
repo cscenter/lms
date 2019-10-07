@@ -34,7 +34,7 @@ const common = {
         common: [
             // "core-js/stable",
             // "regenerator-runtime/runtime",
-            'jquery',
+            //'jquery',
             'popper.js',
             'fontfaceobserver',
             'noty',
@@ -60,6 +60,15 @@ const common = {
 
     module: {
         rules: [
+            {
+                test: /bootstrap\.native/,
+                use: {
+                    loader: 'bootstrap.native-loader',
+                    options: {
+                        only: ['collapse', 'dropdown']
+                    }
+                }
+            },
             {
                 test: /\.(js|jsx|ts|tsx)$/,
                 include: path.resolve(__srcdir, "js"),
@@ -174,7 +183,7 @@ const common = {
             cacheGroups: {
                 common: {
                     chunks: "all",
-                    test: "common",
+                    test: /(common|[\\/]node_modules[\\/]core-js[\\/])/,
                     name: "common",
                     enforce: true
                 },
@@ -186,9 +195,10 @@ const common = {
                 // },
                 vendors: {
                     // chunks: "all",
-                    minChunks: 2,
+                    minChunks: 5,
                     test: /[\\/]node_modules[\\/]/,
                     priority: -10,
+                    // name: "vendors"
                     // reuseExistingChunk: true
                 },
                 // default: {
