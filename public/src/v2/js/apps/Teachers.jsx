@@ -5,7 +5,7 @@ import _throttle from 'lodash-es/throttle';
 import _includes from 'lodash-es/includes';
 import $ from 'jquery';
 
-import Select from 'components/Select';
+import {Select} from 'components/Select';
 import SelectLazyOptions from "components/SelectLazyOptions";
 import SearchInput from 'components/SearchInput';
 import UserCardList from 'components/UserCardList';
@@ -103,7 +103,7 @@ class App extends React.Component {
         }).done((data) => {
             data.forEach((item) => {
                item.courses = new Set(item.courses);
-               item.url = `/teachers/${item.id}`;
+               item.url = `/teachers/${item.id}/`;
             });
             this.setState({
                 loading: false,

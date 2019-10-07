@@ -30,9 +30,9 @@ export function launch() {
                toggleTab(event);
                if (!!(window.history && history.pushState)) {
                    history.pushState(
-                       {tabTarget: $(this).data("target")},
+                       {tabTarget: this.getAttribute("data-target")},
                        "",
-                       $(this).attr("href")
+                       this.getAttribute("href")
                    );
                }
            });

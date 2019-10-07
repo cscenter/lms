@@ -21,7 +21,13 @@ export const SelectDefaultProps = {
     }
 };
 
-class Select extends React.Component {
+export function getOptionByValue(options, value) {
+    let option = options.find((option) => option.value === value);
+    return option !== undefined ? option : null;
+}
+
+
+export class Select extends React.Component {
 
     handleChange = (e) => {
         this.props.onChange(e, this.props.name);
@@ -45,5 +51,3 @@ Select.propTypes = {
     onChange: PropTypes.func.isRequired,
     options: PropTypes.array.isRequired
 };
-
-export default Select;

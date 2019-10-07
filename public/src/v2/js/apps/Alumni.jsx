@@ -6,7 +6,7 @@ import i18next from 'i18next';
 import _throttle from 'lodash-es/throttle';
 import $ from 'jquery';
 
-import Select from 'components/Select';
+import {Select} from 'components/Select';
 import UserCardList from 'components/UserCardList';
 import {
     hideBodyPreloader,

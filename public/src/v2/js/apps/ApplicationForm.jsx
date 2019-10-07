@@ -4,7 +4,7 @@ import 'bootstrap/js/src/tooltip';
 import $ from 'jquery';
 import * as PropTypes from 'prop-types';
 import {showErrorNotification, showNotification} from "utils";
-import Select, {SelectDefaultProps} from "components/Select";
+import {Select, SelectDefaultProps} from "components/Select";
 import CreatableSelect from 'react-select/creatable';
 import Input from "components/Input";
 import Checkbox from "components/Checkbox";

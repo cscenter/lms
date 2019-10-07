@@ -10,7 +10,7 @@ import {
     loadIntersectionObserverPolyfill,
     showErrorNotification
 } from "utils";
-import Select from "../components/Select";
+import {Select} from "components/Select";
 import LazyImage from "../components/LazyImage";
 import Checkbox from "../components/Checkbox";
 import {

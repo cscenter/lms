@@ -1,7 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import i18n from "./i18n";
 
 import {showComponentError} from 'utils';
+
+i18n.changeLanguage('ru');
 
 export function renderComponentInElement(el) {
     let componentName = el.id;

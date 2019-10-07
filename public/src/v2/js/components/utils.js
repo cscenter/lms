@@ -1,3 +1,54 @@
+import {getOptionByValue} from "./Select";
+
+/**
+ * Common handler for input, select, radio buttons, multiple checkboxes
+ * @param {Array<function(<Object>, name, value): Object>} applyPatches - Chain of callbacks which mutates the initial patch (order is matter)
+ * @param {function(): void} setStateCallback - second argument for `setState`
+ * @param {string} name - state attribute name
+ * @param {Object} value - state value associated with `name`
+ */
+function onFilterChange({
+                            applyPatches = null,
+                            setStateCallback = undefined
+                        } = {}, name, value) {
+    this.setState((state) => {
+        const patch = {
+            [name]: value
+        };
+        if (applyPatches !== null) {
+            for (const applyPatch of applyPatches) {
+                Object.assign(patch, applyPatch.call(this, {...state, ...patch}));
+            }
+        }
+        return patch;
+    }, setStateCallback);
+}
+
+
+/**
+ * @param {Object} callbacks - see `onFilterChange` for details
+ * @returns {function(*): void} `onChange` state handler
+ */
+export function onRadioFilterChange(callbacks) {
+    let partial = onFilterChange.bind(this, callbacks);
+    return (event) => {
+        const {name, value} = event.target;
+        const optionsPropName = `${name}Options`;
+        let option = getOptionByValue(this.props[optionsPropName], value);
+        return partial(name, option);
+    };
+}
+
+export function onSelectFilterChange(callbacks) {
+    let partial = onFilterChange.bind(this, callbacks);
+    // `react-select` pass in (option, name) as arguments instead of react event
+    return (option, name) => {
+        return partial(name, option);
+    };
+}
+
+
+
 /**
  * Handle state for multiple checkboxes with the same name
  */
@@ -43,20 +94,24 @@ export function onSearchInputChange(value, name,
 
 /**
  * Handle state for input
+ * @param event - React event
+ * @param {Array<function(<Object>, name, value): Object>} applyPatches - Chain of callbacks which mutates the initial patch (order is matter)
+ * @param {function(): void} setStateCallback - second argument for `setState`
  */
 export function onInputChange(event,
-                              {applyPatch = null,
+                              {applyPatches = null,
                               setStateCallback = undefined} = {}) {
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
-
     this.setState((state) => {
         const patch = {
             [name]: value
         };
-        if (applyPatch !== null) {
-            Object.assign(patch, applyPatch({...state, ...patch}));
+        if (applyPatches !== null) {
+            for (const applyPatch of applyPatches) {
+                Object.assign(patch, applyPatch({...state, ...patch}));
+            }
         }
         return patch;
     }, setStateCallback);
@@ -69,7 +124,8 @@ export function onInputChange(event,
  */
 // FIXME: нельзя менять состояние связанного селекта :<
 export function onSelectChange(option,
-                               name, {
+                               name,
+                               {
                                    applyPatch = null,
                                    setStateCallback = undefined
                                } = {}) {

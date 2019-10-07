@@ -60,9 +60,6 @@ h3,
 h4,
 .h4 {
   font-size: $h4-font-size;
-  @include media-breakpoint-down(md) {
-    font-size: 1rem;
-  }
 }
 
 h5,

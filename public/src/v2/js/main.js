@@ -1,16 +1,17 @@
+// FIXME: polyfill for classList? https://www.npmjs.com/package/classlist-polyfill
 // FIXME:  https://babeljs.io/docs/en/next/babel-plugin-syntax-dynamic-import#working-with-webpack-and-babel-preset-env
 import 'core-js/modules/es.array.iterator';
 import "core-js/modules/es.promise";
 // Sentry needs Object.assign
 import "core-js/modules/es.object.assign";
 import * as Sentry from '@sentry/browser';
-import $ from 'jquery';
-import 'bootstrap/js/src/collapse';
-import 'bootstrap/js/src/dropdown';
+import 'bootstrap.native';
+import ky from 'ky';
+
 
 import sentryOptions from './sentry_conf';
-import i18n from './i18n';
 import {
+    onReady,
     showComponentError,
     getSections,
     showNotification,
@@ -22,65 +23,53 @@ Sentry.init({
     dsn: "https://f2a254aefeae4aeaa09657771205672f@sentry.io/13763",
     ...sentryOptions
 });
-let uid = $("#userMenuButton").data('id');
-if (uid !== undefined && !isNaN(parseInt(uid))) {
-    Sentry.configureScope(scope => {
-        scope.setUser({id: uid});
-    });
+const userInfo = document.getElementById('userMenuButton');
+if (userInfo) {
+    let uid = parseInt(userInfo.getAttribute('data-id'));
+    if (!isNaN(uid)) {
+        Sentry.configureScope(scope => {
+            scope.setUser({id: uid});
+        });
+    }
 }
 
 
-$(function () {
-    i18n.changeLanguage('ru');
-    let navbarContainer = document.getElementsByClassName("navbar-container")[0];
-    let navbarToggler = $(".navbar-toggler");
-    let menuRightBlock = document.getElementsByClassName("dropdown-user-menu")[0] ||
-                         document.getElementsByClassName("menu-btn-reg")[0];
-    $('#top-menu-mobile')
-        .on('show.bs.collapse', function (event) {
-            // Ignores bubbled events from submenu
-            if (event.target.classList.contains("mobile-submenu")) {
-                return;
-            }
-            document.body.style.height = "100%";
-            document.body.style.overflow = "hidden";
-            navbarContainer.style.height = "100%";
-            navbarContainer.style.overflowY = "scroll";
-            navbarToggler.addClass("is-active");
-            menuRightBlock.style.display = "none";
-        })
-        .on('hide.bs.collapse', function (event) {
-            // Ignores bubbled events from submenu
-            if (event.target.classList.contains("mobile-submenu")) {
-                return;
-            }
-            navbarToggler.removeClass("is-active");
-            menuRightBlock.style.removeProperty("display");
-        })
-        .on('hidden.bs.collapse', function (event) {
-            // Ignores bubbled events from submenu
-            if (event.target.classList.contains("mobile-submenu")) {
-                return;
-            }
-            navbarContainer.style.height = "";
-            navbarContainer.style.overflowY = "visible";
-            document.getElementsByClassName("navbar-container")[0].style.height = "";
-            document.body.style.height = "";
-            document.body.style.overflow = "auto";
-        });
-
-    // Click `Show Programs' on index page
-    $('a[href="#study-areas"]').click(function (e) {
-        e.preventDefault();
-        let scrollTo = $(this).attr('href');
-        // Adjustment for top navbar height on small screens
-        let offset = parseInt($('.cover').css('padding-top'), 10);
-        if (offset > 0) {
-            offset = $('.navbar-container').outerHeight(true);
+onReady(function () {
+    let navbarContainer = document.querySelector(".navbar-container");
+    let navbarToggler = document.querySelector(".navbar-toggler");
+    let menuRightBlock = document.querySelector(".dropdown-user-menu") ||
+                         document.querySelector(".menu-btn-reg");
+    const topMenu = document.querySelector('#top-menu-mobile');
+    topMenu.addEventListener('show.bs.collapse', function (event) {
+        // Ignores bubbled events from submenu
+        if (event.target.classList.contains("mobile-submenu")) {
+            return;
         }
-        $('html, body').animate({
-            scrollTop: $(scrollTo).offset().top - offset
-        }, 700);
+        document.body.style.height = "100%";
+        document.body.style.overflow = "hidden";
+        navbarContainer.style.height = "100%";
+        navbarContainer.style.overflowY = "scroll";
+        navbarToggler.classList.add("is-active");
+        menuRightBlock.style.display = "none";
+    });
+    topMenu.addEventListener('hide.bs.collapse', function (event) {
+        // Ignores bubbled events from submenu
+        if (event.target.classList.contains("mobile-submenu")) {
+            return;
+        }
+        navbarToggler.classList.remove("is-active");
+        menuRightBlock.style.removeProperty("display");
+    });
+    topMenu.addEventListener('hidden.bs.collapse', function (event) {
+        // Ignores bubbled events from submenu
+        if (event.target.classList.contains("mobile-submenu")) {
+            return;
+        }
+        navbarContainer.style.height = "";
+        navbarContainer.style.overflowY = "visible";
+        document.getElementsByClassName("navbar-container")[0].style.height = "";
+        document.body.style.height = "";
+        document.body.style.overflow = "auto";
     });
 
     // Notifications
@@ -132,14 +121,10 @@ $(function () {
     }
 
     // Append svg sprites
-    window.__CSC__.sprites.forEach((url) => {
-        $.ajax({
-            type: "GET",
-            url: url,
-            dataType: "text",
-        }).then((svgDefs) => {
-            $(".svg-inline").append(svgDefs);
-        });
+    window.__CSC__.sprites.forEach(async (url) => {
+        const svgDefs = await ky.get(url).text();
+        document.querySelector(".svg-inline")
+                .insertAdjacentHTML('beforeend', svgDefs);
     });
 
     // Replace data-src

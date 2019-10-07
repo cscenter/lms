@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import Icon from "./Icon";
 
 import _debounce from 'lodash-es/debounce';
@@ -19,6 +19,7 @@ function InputIcon(props) {
 
 class SearchInput extends React.Component {
     static defaultProps = {
+        debounceMaxWait: 200,
         placeholder: '',
         query: ''
     };
@@ -29,7 +30,8 @@ class SearchInput extends React.Component {
             query: this.props.query
         };
         // TODO: https://stackoverflow.com/a/28046731/1341309
-        this.handleChangeDebounced = _debounce(this.props.handleSearch, 200);
+        this.handleChangeDebounced = _debounce(this.props.handleSearch,
+                                               this.props.debounceMaxWait);
     }
 
     componentWillUnmount() {
@@ -62,6 +64,7 @@ class SearchInput extends React.Component {
 }
 
 SearchInput.propTypes = {
+    debounceMaxWait: PropTypes.number.isRequired,
     handleSearch: PropTypes.func.isRequired,
     name: PropTypes.string.isRequired,
     query: PropTypes.string.isRequired,

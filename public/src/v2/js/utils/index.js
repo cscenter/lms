@@ -1,7 +1,13 @@
-import $ from 'jquery';
 import Noty from 'noty';
 
-export const MOBILE_VIEWPORT_MAX = 992;
+
+export const onReady = function( callback ) {
+	if (document.readyState === 'complete' || document.readyState === 'interactive') {
+		return callback();
+	}
+
+	document.addEventListener( 'DOMContentLoaded', callback );
+};
 
 /**
  * Do feature detection, to figure out if polyfill needs to be imported.
@@ -49,9 +55,11 @@ export function showErrorNotification(msg) {
 }
 
 export function showBodyPreloader() {
-    $(document.body).addClass("_fullscreen").addClass("_loading");
+    document.body.classList.add("_fullscreen");
+    document.body.classList.add("_loading");
 }
 
 export function hideBodyPreloader() {
-    $(document.body).removeClass("_fullscreen").removeClass("_loading");
+    document.body.classList.remove("_fullscreen");
+    document.body.classList.remove("_loading");
 }

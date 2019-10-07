@@ -1,35 +1,39 @@
 import React, {Fragment} from 'react';
-
 import _includes from 'lodash-es/includes';
 import _partialRight from 'lodash-es/partialRight';
 import _isEqual from 'lodash-es/isEqual';
 import $ from 'jquery';
 import * as PropTypes from 'prop-types';
+import Media from 'react-media';
+
 import SearchInput from 'components/SearchInput';
-import { createBrowserHistory } from "history";
+import {createBrowserHistory} from "history";
 import {
     hideBodyPreloader,
-    loadIntersectionObserverPolyfill, showBodyPreloader,
+    loadIntersectionObserverPolyfill,
+    showBodyPreloader,
     showErrorNotification
 } from "utils";
-import Select from "components/Select";
+import { Select, getOptionByValue} from "components/Select";
 import Checkbox from "components/Checkbox";
 import RadioGroup from "components/RadioGroup";
 import RadioOption from "components/RadioOption";
 import Icon from "components/Icon";
 import {
-    onInputChange,
+    onSelectFilterChange,
+    onRadioFilterChange,
     onMultipleCheckboxChange,
     onSearchInputChange,
     onSelectChange
 } from "components/utils";
+import {tabletMaxMediaQuery, desktopMediaQuery} from "utils/media";
 
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
 ];
 
-// TODO: Share between components
+
 const history = createBrowserHistory();
 
 
@@ -41,7 +45,7 @@ function FilterState(state) {
 FilterState.prototype.getPayload = function () {
     return {
         'academic_year': this.academicYear.value,
-        'branch': this.branch,
+        'branch': this.branch.value,
     };
 };
 
@@ -67,15 +71,11 @@ class CourseOfferings extends React.Component {
             ...props.initialState
         };
     }
-
-    getYearOptions(branchName) {
+// FIXME: search field - надо регулировать debounce, не всегда есть запрос на сервер
+    getYearOptions(branchOption) {
         let academicYearOptions = [];
-        const branch = this.props.branchOptions.find((option) => {
-            if (option.value === branchName) {
-                return option;
-            }
-        });
-        if (branch !== undefined) {
+        const branch = getOptionByValue(this.props.branchOptions, branchOption.value);
+        if (branch) {
             for (let y = this.props.currentYear; y >= branch.established; --y) {
                 academicYearOptions.push({value: y, label: `${y}/${y + 1}`});
             }
@@ -88,18 +88,23 @@ class CourseOfferings extends React.Component {
         {applyPatch: this.filteredItemsPatch.bind(this)}
     ).bind(this);
 
-    handleBranchChange = _partialRight(
-        onInputChange,
-        {
-            applyPatch: this.checkYearOption.bind(this),
-            setStateCallback: this.historyPush.bind(this)
-        }
-    ).bind(this);
+    handleBranchSelectChange = onSelectFilterChange.call(this, {
+        applyPatches: [
+            this.checkYearOption
+        ],
+        setStateCallback: this.historyPush
+    });
 
-    handleAcademicYearChange = _partialRight(
-        onSelectChange,
-        {setStateCallback: this.historyPush.bind(this)}
-    ).bind(this);
+    handleBranchRadioChange = onRadioFilterChange.call(this, {
+        applyPatches: [
+            this.checkYearOption
+        ],
+        setStateCallback: this.historyPush
+    });
+
+    handleAcademicYearChange = onSelectFilterChange.call(this, {
+        setStateCallback: this.historyPush
+    });
 
     handleMultipleCheckboxChange = _partialRight(
         onMultipleCheckboxChange,
@@ -139,11 +144,9 @@ class CourseOfferings extends React.Component {
     checkYearOption(state, name = 'academicYear') {
         const options = this.getYearOptions(state.branch);
         let hasOption = options.find((element) => {
-            if (_isEqual(element, state.academicYear)) {
-                return element;
-            }
+            return _isEqual(element, state.academicYear);
         });
-        if (hasOption === undefined) {
+        if (hasOption === null) {
             return {[name]: options[0]}
         }
         return {}
@@ -197,7 +200,6 @@ class CourseOfferings extends React.Component {
         Promise.all(this.requests)
             .then((iterables) => {
                 let items = [];
-                let years = new Set();
                 for (const d of iterables) {
                     items = items.concat(d);
                 }
@@ -256,32 +258,73 @@ class CourseOfferings extends React.Component {
         return (
             <Fragment>
                 <div className="row no-gutters">
-                    <div className="col-lg-9">
+                    <div className="col-lg-9 order-2 order-lg-1">
                         <div className="card">
                             <div className="card__content _big">
                                 <h1>Курсы центра</h1>
-                                <div className="row">
-                                    <div className="field col-lg-9 mb-3 mb-lg-0">
-                                        <SearchInput
-                                            handleSearch={this.handleSearchInputChange}
-                                            name="courseNameQuery"
-                                            query={courseNameQuery}
-                                            placeholder="Поиск по названию курса"
-                                            icon="search"
+                                <form className="ui form">
+                                    <div className="row">
+                                        <div className="field col-lg-9 mb-3 mb-lg-0">
+                                            <label className='h4 d-lg-none'>Название курса</label>
+                                            <SearchInput
+                                                debounceMaxWait={100}
+                                                handleSearch={this.handleSearchInputChange}
+                                                name="courseNameQuery"
+                                                query={courseNameQuery}
+                                                placeholder="Поиск по названию курса"
+                                                icon="search"
+                                            />
+                                        </div>
+                                        <Media query={tabletMaxMediaQuery} render={() =>
+                                            (
+                                                <Fragment>
+                                                    <div className="field col-12 mb-3">
+                                                        <label className='h4' htmlFor="">Отделение</label>
+                                                        <div className="ui select">
+                                                            <Select
+                                                                onChange={this.handleBranchSelectChange}
+                                                                value={branch}
+                                                                name="branch"
+                                                                isClearable={false}
+                                                                placeholder="Отделение"
+                                                                options={branchOptions}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="field col-12 mb-3">
+                                                        <label className='h4' htmlFor="">Учебный год</label>
+                                                        <div className="ui select">
+                                                            <Select
+                                                                onChange={this.handleAcademicYearChange}
+                                                                value={academicYear}
+                                                                name="academicYear"
+                                                                isClearable={false}
+                                                                placeholder="Учебный год"
+                                                                options={academicYearOptions}
+                                                                key="year"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="field col-12 mb-3">
+                                                        <label className='h4'>Семестр</label>
+                                                        <div className="grouped">
+                                                            {semesterOptions.map((option) =>
+                                                                <Checkbox
+                                                                    name="semesters"
+                                                                    key={option.value}
+                                                                    value={option.value}
+                                                                    checked={semesters.includes(option.value)}
+                                                                    onChange={this.handleMultipleCheckboxChange}
+                                                                    label={option.label}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </Fragment>
+                                            )}
                                         />
                                     </div>
-
-                                    <div className="buttons col-12 d-lg-none mb-4">
-                                        <a href="#" className="btn _light _extra-small">Санкт-Петербург <Icon id={'arrow-bottom'}/></a>
-                                        <button type="button"
-                                                className="btn _light _extra-small"
-                                                data-toggle="modal"
-                                                data-target="#exampleModalFilter">
-                                            Фильтры
-                                        </button>
-                                    </div>
-
-                                </div>
+                                </form>
                             </div>
                             <div className={`card__content p-0`}>
                                 {
@@ -296,50 +339,58 @@ class CourseOfferings extends React.Component {
                             }
                         </div>
                     </div>
-
-                    <div className="col-lg-3">
-                        <form className="ui form pl-6 mt-10 ml-lg-4 d-none d-lg-block">
-                            <div className="field">
-                                <label className='h4'>Отделение</label>
-                                <RadioGroup required name="branch" className="" onChange={this.handleBranchChange} selected={`branch-${branch}`}>
-                                    {branchOptions.map((item) =>
-                                        <RadioOption  key={item.value} id={`branch-${item.value}`} value={item.value}>
-                                            {item.label}
-                                        </RadioOption>
-                                    )}
-                                </RadioGroup>
-                            </div>
-                            <div className="field">
-                                <div className="ui select">
+                    <Media query={desktopMediaQuery} render={() => (
+                        <div className="col-lg-3 order-1 order-lg-2">
+                            <form
+                                className="ui form px-6 mt-6 mt-lg-10 ml-lg-4">
+                                <div className="field">
+                                    <label className='h4'>Отделение</label>
+                                    <RadioGroup required name="branch"
+                                                className=""
+                                                onChange={this.handleBranchRadioChange}
+                                                selected={`branch-${branch.value}`}>
+                                        {branchOptions.map((item) =>
+                                            <RadioOption key={item.value}
+                                                         id={`branch-${item.value}`}
+                                                         value={item.value}>
+                                                {item.label}
+                                            </RadioOption>
+                                        )}
+                                    </RadioGroup>
+                                </div>
+                                <div className="field">
                                     <label className='h4' htmlFor="">Учебный год</label>
-                                    <Select
-                                        onChange={this.handleAcademicYearChange}
-                                        value={academicYear}
-                                        name="academicYear"
-                                        isClearable={false}
-                                        placeholder="Учебный год"
-                                        options={academicYearOptions}
-                                        key="year"
-                                    />
-                                </div>
-                            </div>
-                            <div className="field">
-                                <label className='h4'>Семестр</label>
-                                <div className="grouped">
-                                    {semesterOptions.map((option) =>
-                                        <Checkbox
-                                            name="semesters"
-                                            key={option.value}
-                                            value={option.value}
-                                            checked={semesters.includes(option.value)}
-                                            onChange={this.handleMultipleCheckboxChange}
-                                            label={option.label}
+                                    <div className="ui select">
+                                        <Select
+                                            onChange={this.handleAcademicYearChange}
+                                            value={academicYear}
+                                            name="academicYear"
+                                            isClearable={false}
+                                            placeholder="Учебный год"
+                                            options={academicYearOptions}
+                                            key="year"
                                         />
-                                    )}
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
-                    </div>
+                                <div className="field">
+                                    <label className='h4'>Семестр</label>
+                                    <div className="grouped">
+                                        {semesterOptions.map((option) =>
+                                            <Checkbox
+                                                name="semesters"
+                                                key={option.value}
+                                                value={option.value}
+                                                checked={semesters.includes(option.value)}
+                                                onChange={this.handleMultipleCheckboxChange}
+                                                label={option.label}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+                    />
                 </div>
             </Fragment>
         );
@@ -350,7 +401,11 @@ const propTypes = {
     entryURL: PropTypes.arrayOf(PropTypes.string).isRequired,
     // history api depends on initial state
     initialState: PropTypes.shape({
-        branch: PropTypes.string.isRequired,
+        branch: PropTypes.shape({
+            value: PropTypes.string.isRequired,
+            label: PropTypes.string.isRequired,
+            established: PropTypes.number.isRequired,
+        }).isRequired,
         academicYear: PropTypes.shape({
             value: PropTypes.number.isRequired,
             label: PropTypes.string.isRequired

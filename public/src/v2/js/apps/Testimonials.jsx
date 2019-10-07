@@ -9,11 +9,12 @@ import _throttle from 'lodash-es/debounce';
 
 import Pagination from 'components/Pagination';
 import TestimonialCard from 'components/TestimonialCard';
-import {MOBILE_VIEWPORT_MAX, showErrorNotification, showBodyPreloader,
+import {showErrorNotification, showBodyPreloader,
     hideBodyPreloader} from 'utils';
+import { DESKTOP_VIEWPORT_MIN } from "utils/media";
 
 
-const MASONRY_ENABLED = (window.screen.availWidth >= MOBILE_VIEWPORT_MAX);
+const MASONRY_ENABLED = (window.screen.availWidth >= DESKTOP_VIEWPORT_MIN);
 
 const history = createBrowserHistory();
 
