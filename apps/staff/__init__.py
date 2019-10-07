@@ -1,3 +1,0 @@
-"""
-Curators section
-"""

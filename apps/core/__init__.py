@@ -1,1 +1,0 @@
-FLATPAGE_URL_CACHE = []

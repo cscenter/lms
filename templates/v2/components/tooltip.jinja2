@@ -1,0 +1,63 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="container page-content">
+
+        <div class="row mt-10">
+            <div class="col-lg-9">
+                <label class="title-label">Тултип с произвольным текстом
+                    <a class="tooltip__icon _rounded" data-toggle="tooltip"
+                       data-placement="bottom"
+                       title="Вступительный тест организован в системе Яндекс.Контест.
+                       Чтобы выдать права участника и затем сопоставить результаты с анкетами,
+                       нам нужно знать ваш логин на Яндексе без ошибок, учитывая все особенности,
+                       например, вход через социальные сети. Чтобы всё сработало, поделитесь с нами
+                       доступом к некоторым данным из вашего Яндекс.Паспорта: логин и ФИО.">
+                        ?
+                    </a>
+                </label>
+                <p>
+                    Lorem ipsum dolor<a class="tooltip__icon _rounded ml-1" data-toggle="tooltip"
+                                        data-placement="bottom"
+                                        title="Выпускники">
+                    {{ macros.svg_icon('graduate') }}
+                </a> sit amet, consectetur adipisicing elit. Accusamus amet, aut cum dolores doloribus
+                    eaque expedita nihil odit praesentium quae sunt, voluptatibus. Aliquam consequuntur eveniet illum
+                    itaque maiores natus perspiciatis!
+                </p>
+                <h2>Data tooltips</h2>
+
+                <div class="tooltip__icon" data-toggle="tooltip"
+                     data-placement="bottom"
+                     title="Слайды">{{ macros.svg_icon('slides') }}</div>
+                <div class="tooltip__icon" data-toggle="tooltip"
+                     data-placement="bottom"
+                     title="Видеозапись">{{ macros.svg_icon('video') }}</div>
+                <div class="tooltip__icon" data-toggle="tooltip"
+                     data-placement="bottom"
+                     title="Файлы">{{ macros.svg_icon('files') }}</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+{% endblock content %}

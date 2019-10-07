@@ -1,6 +1,0 @@
-[Unit]
-After=network.target
-Requires={% for worker_name in rq_workers -%}rqworker_{{ worker_name }}.service {% endfor %}
-
-[Install]
-WantedBy=multi-user.target

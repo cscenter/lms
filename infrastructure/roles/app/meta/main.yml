@@ -1,6 +1,0 @@
----
-# Enable handlers from dependent roles
-dependencies:
-  - role: nginx
-    tags:
-      - nginx-role

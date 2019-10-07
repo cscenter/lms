@@ -1,0 +1,10 @@
+Django==2.1.7
+django-webpack-loader==0.6.0
+django-simple-menu==1.2.1
+Jinja2==2.10
+django-jinja==2.4.1
+Pillow==4.1.1
+django-vanilla-views==1.0.5
+sorl-thumbnail==12.3
+git+https://github.com/pacahon/django-treemenus.git
+django-choices==1.6.1

@@ -1,4 +1,0 @@
----
-pg_version: 11
-pg_cluster_name: main
-pg_setup_cluster: false

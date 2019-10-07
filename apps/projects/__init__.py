@@ -1,1 +1,0 @@
-# TODO: notifications by email when report period started, period ended
