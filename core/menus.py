@@ -99,7 +99,7 @@ public_menu = [
         weight=4,
         children=[
             MenuItem(pgettext_lazy("menu", "Поступающим"), '/v2/pages/enrollment/', weight=10),
-            MenuItem(pgettext_lazy("menu", "Памятка"), '/v2/pages/checklist/', weight=20),
+            MenuItem(pgettext_lazy("menu", "Памятка"), '/v2/pages/enrollment/checklist/', weight=20),
             MenuItem(pgettext_lazy("menu", "Программа для поступления"), '/v2/pages/enrollment/program/', weight=30),
             MenuItem(pgettext_lazy("menu", "Вопросы и ответы"), '/v2/pages/faq/', weight=40),
         ],
