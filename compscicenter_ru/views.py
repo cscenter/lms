@@ -632,7 +632,7 @@ class CourseOfferingsView(TemplateView):
                 'semesterOptions': semesters
             },
             'state': {
-                'branch': branch['value'],
+                'branch': branch,
                 'academicYear': {"value": year, "label": f"{year}/{year + 1}"},
             },
         }

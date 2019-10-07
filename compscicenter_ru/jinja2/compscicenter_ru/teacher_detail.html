@@ -19,7 +19,7 @@
                 </div>
                 <div class="col-12 col-sm pl-0 pl-sm-8 mt-8 mt-sm-0">
                     <h1 class="mb-1">{{ teacher.get_full_name() }}</h1>
-                    <p class="text-muted">Преподаватель{% if teacher.workplace %}, {{ teacher.workplace }}{% endif %}</p>
+                    {% if teacher.workplace %}<p class="text-muted">{{ teacher.workplace }}</p>{% endif %}
                     {% if teacher.bio %}
                         {{ teacher.bio|markdown("user_note", 3600, teacher.pk, teacher.modified) }}
                     {% endif %}
