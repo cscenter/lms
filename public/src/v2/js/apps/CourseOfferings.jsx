@@ -24,7 +24,6 @@ import {
     onRadioFilterChange,
     onMultipleCheckboxChange,
     onSearchInputChange,
-    onSelectChange
 } from "components/utils";
 import {tabletMaxMediaQuery, desktopMediaQuery} from "utils/media";
 
@@ -258,7 +257,7 @@ class CourseOfferings extends React.Component {
         return (
             <Fragment>
                 <div className="row no-gutters">
-                    <div className="col-lg-9 order-2 order-lg-1">
+                    <div className="col-lg-9">
                         <div className="card">
                             <div className="card__content _big">
                                 <h1>Курсы центра</h1>
@@ -340,7 +339,7 @@ class CourseOfferings extends React.Component {
                         </div>
                     </div>
                     <Media query={desktopMediaQuery} render={() => (
-                        <div className="col-lg-3 order-1 order-lg-2">
+                        <div className="col-lg-3">
                             <form
                                 className="ui form px-6 mt-6 mt-lg-10 ml-lg-4">
                                 <div className="field">
