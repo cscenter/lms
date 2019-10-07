@@ -22,7 +22,10 @@ var ravenOptions = {
         'bmi_SafeAddOnload',
         'EBCallBackMessageReceived',
         // See http://toolbar.conduit.com/Developer/HtmlAndGadget/Methods/JSInjection.aspx
-        'conduitPage'
+        'conduitPage',
+        // Generic error code from errors outside the security sandbox
+        // You can delete this if using raven.js > 1.0, which ignores these automatically.
+        'Script error.'
     ],
     ignoreUrls: [
         // Facebook flakiness

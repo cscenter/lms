@@ -87,7 +87,7 @@ class AssignmentsDeadline extends mix(PlotOptions).with(AssignmentsFilterMixin) 
                 assignment.students
                     .filter((s) => this.matchFilters(s, "student_assignment"))
                     .forEach((student) => {
-                        let type = this.toType(deadline, student.first_student_comment_at);
+                        let type = this.toType(deadline, student.first_submission_at);
                         if (type !== undefined) {
                             counters.set(type, counters.get(type) + 1);
                         } else {
@@ -151,7 +151,7 @@ class AssignmentsDeadline extends mix(PlotOptions).with(AssignmentsFilterMixin) 
         const curriculumYearChoices = new Set();
         rawJSON.forEach(function (assignment) {
             assignment.students
-                .filter((s) => { return s.first_student_comment_at !== null })
+                .filter((s) => { return s.first_submission_at !== null })
                 .forEach(function(sa) {
                     curriculumYearChoices.add(sa.student.curriculum_year);
                 });

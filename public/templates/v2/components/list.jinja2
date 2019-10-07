@@ -12,7 +12,7 @@
         <div class="row no-gutters">
             <div class="col-lg-8">
                 <h2>Базовый UL без дополнительных классов</h2>
-                <ul>
+                <ul class="mb-10">
                     <li>Проект GoodsReview</li>
                     <li>Поиск генов в метагномных сборках</li>
                     <li>Список второго уровня ul:
@@ -33,59 +33,43 @@
                         автомобиля по фотографии
                     </li>
                 </ul>
+
                 <h2>Базовый OL без дополнительных классов</h2>
                 <ol>
                     <li>Проект GoodsReview</li>
                     <li>Проект GoodsReview</li>
                     <li>Проект GoodsReview</li>
                 </ol>
-                <h2>UL с явным указанием класса .ui</h2>
-                FIXME: тут мешаются стили ul ul, ol ol из reboot.scss (перегружают margin-bottom)
-                <ul class="ui">
-                    <li>Проект GoodsReview</li>
-                    <li>Поиск генов в метагномных сборках</li>
-                    <li>Список второго уровня ul:
-                        <ul>
-                            <li>jersey&nbsp;— имплементация REST на&nbsp;java</li>
-                            <li>jade&nbsp;— шаблонизатор</li>
-                            <li>mysql&nbsp;— наша база</li>
-                        </ul>
-                    </li>
-                    <li>Список второго уровня ol:
-                        <ol>
-                            <li>nginx&nbsp;— сервер, который отдает статические файлы и&nbsp;роутит запросы на&nbsp;java-сервер</li>
-                            <li>jetty&nbsp;— java-сервер</li>
-                        </ol>
-                    </li>
-                    <li>Value-tracking анализ JavaScript</li>
-                </ul>
-                <h2>div.list > div.list__item</h2>
-                FIXME: Использовать ли базовые стили ul или забить. Почему ul, а не ol, например?
-                <div class="list">
+
+                <h2>div.list.ui > div.list__item</h2>
+                <div class="list ui">
                     <div class="list__item">Пункт 1</div>
                     <div class="list__item">Пункт 2</div>
                     <div class="list__item">Пункт 3</div>
                     <div class="list__item">
                         Nested list
-                        <div class="list">
+                        <div class="list ui">
                             <div class="list__item">Inner list 1</div>
                             <div class="list__item">Inner list 2</div>
                             <div class="list__item">Inner list 3</div>
                         </div>
                     </div>
                 </div>
-                <h2>ul.list > li.list__item</h2>
-                <ul class="list">
-                    <li class="list__item">Проект GoodsReview</li>
-                    <li class="list__item">Проект GoodsReview</li>
-                    <li class="list__item">Проект GoodsReview</li>
-                </ul>
-                <h2>ul.ui.list > li.list__item</h2>
-                <ul class="ui list">
-                    <li class="list__item">Проект GoodsReview</li>
-                    <li class="list__item">Проект GoodsReview</li>
-                    <li class="list__item">Проект GoodsReview</li>
-                </ul>
+
+                <h2>div.list.ui._dashed > div.list__item</h2>
+                <div class="list ui _dashed">
+                    <div class="list__item">Пункт 1</div>
+                    <div class="list__item">Пункт 2</div>
+                    <div class="list__item">Пункт 3</div>
+                    <div class="list__item">
+                        Nested list
+                        <div class="list ui">
+                            <div class="list__item">Inner list 1</div>
+                            <div class="list__item">Inner list 2</div>
+                            <div class="list__item">Inner list 3</div>
+                        </div>
+                    </div>
+                </div>
 
                 <h2 class="mt-4">Divided</h2>
                 <div class="ui list _divided mb-10">
@@ -93,7 +77,8 @@
                         Утечки ресурсов и как их избежать. RAII
                     </div>
                     <div class="list__item">
-                        Удобные возможности новых стандартов.Удобные возможности новых стандартов.Удобные возможности новых стандартов
+                        Удобные возможности новых стандартов.Удобные возможности новых стандартов.Удобные возможности
+                        новых стандартов
                     </div>
                     <div class="list__item">
                         Удобные
@@ -103,7 +88,8 @@
                 <h2 class="mt-4">Playlist?</h2>
                 <div class="ui list _divided _playlist">
                     <a href="#" class="list__item">
-                        <span class="item__ordinal">1.</span><div class="item__text">Утечки ресурсов и как их избежать. RAII</div>
+                        <span class="item__ordinal">1.</span>
+                        <div class="item__text">Утечки ресурсов и как их избежать. RAII</div>
                         <div class="item__icons">
                             {{ macros.svg_icon('video') }}{{ macros.svg_icon('slides') }}
                         </div>
@@ -112,8 +98,8 @@
                         <span class="item__ordinal">2.</span>
                         <div class="item__text">
                             Геометрическая вероятность и общее определение
-                                вероятности. Геометрическая вероятность и общее определение
-                                вероятности
+                            вероятности. Геометрическая вероятность и общее определение
+                            вероятности
                         </div>
                         <div class="item__icons">
                             {{ macros.svg_icon('video') }}{{ macros.svg_icon('slides') }}
@@ -145,6 +131,7 @@
                 </div>
 
                 <h2 class="mt-10">Definitions list</h2>
+
                 <dl>
                     <dt>Методы</dt>
                     <dd>Скорость роста функций, время работы алгоритмов; жадные алгоритмы; разделяй и властвуй;

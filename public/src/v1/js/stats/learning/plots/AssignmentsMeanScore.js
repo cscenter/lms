@@ -59,7 +59,7 @@ class AssignmentsMeanScore extends mix(PlotOptions).with(AssignmentsFilterMixin)
                         }
                 });
                 let mean = (cnt === 0) ? 0 : (sum / cnt).toFixed(1);
-                rows.push([assignment.passing_score, mean, assignment.maximum_score]);
+                rows.push([assignment.grade_min, mean, assignment.grade_max]);
         });
 
         this.state.titles = titles;

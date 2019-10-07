@@ -5,8 +5,17 @@
     .table__cell {
       padding-left: spacer("4x");
       &:first-child {
+        margin-bottom: spacer("1x");
         @include media-breakpoint-up(md) {
           width: 50%;
+          margin-bottom: 0;
+        }
+      }
+
+      &._icons .sprite-img.svg-icon{
+        display: none;
+        @include media-breakpoint-up(md) {
+          display: inline-block;
         }
       }
 
@@ -29,5 +38,12 @@
         padding-right: spacer("8x");
       }
     }
+  }
+}
+
+._courses-filter {
+  background: $dark-bg;
+  @include media-breakpoint-up(sm) {
+    background: $white;
   }
 }

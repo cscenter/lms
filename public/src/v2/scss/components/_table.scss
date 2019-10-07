@@ -111,7 +111,7 @@ thead, thead > tr {
   .table__cell {
     display: block;
     border: none;
-    padding: spacer("1x") spacer("8x");
+    padding: 0 spacer("8x");
 
     &:first-child {
       padding-top: spacer("4x");

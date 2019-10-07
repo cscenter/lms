@@ -17,7 +17,7 @@ export const SelectDefaultProps = {
         }),
     },
     formatCreateLabel: (inputValue) => {
-        return <React.Fragment><b>Добавить</b> "{inputValue}"</React.Fragment>;
+        return `Добавить "${inputValue}"`;
     }
 };
 

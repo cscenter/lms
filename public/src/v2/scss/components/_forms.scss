@@ -129,7 +129,10 @@ $form-feedback-invalid-color: $red;
 }
 
 .field {
-  margin-bottom: spacer("6x");
+  margin-bottom: spacer("4x");
+  @include media-breakpoint-up(sm) {
+    margin-bottom: spacer("6x");
+  }
 
   &.hide {
     margin-bottom: 0;
