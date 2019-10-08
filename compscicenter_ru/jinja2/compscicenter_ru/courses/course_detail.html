@@ -24,10 +24,7 @@
             <div class="card border-xs-0">
                 <div class="card__header cover _img" style="background-image:url('{{ course.meta_course.get_cover_url() }}')">
                     <nav class="cover__content py-4 text-left">
-                        <a href="{{ course.meta_course.get_absolute_url() }}" class="btn _extra-small _outline _white _rounded _m-collapse">{{ macros.svg_icon('arrow-left') }}<span>Все прочтения</span></a>
-{#                        <div class="float-right">#}
-{#                            <a href="#" class="btn _extra-small _primary _rounded">Записаться на осень 2019</a>#}
-{#                        </div>#}
+                        <a href="{{ course.meta_course.get_absolute_url() }}" class="btn _extra-small _outline _white _rounded">{{ macros.svg_icon('arrow-left') }}<span>Все прочтения</span></a>
                     </nav>
                     <div class="cover__content _big">
                         <h2 class="cover__title">{{ course.meta_course.name }}</h2>
