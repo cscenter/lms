@@ -18,7 +18,7 @@ class AssignmentCommentForm(forms.ModelForm):
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
         widget=UbereditorWidget(attrs={'data-quicksend': 'true',
-                                 'data-local-persist': 'true'}))
+                                       'data-local-persist': 'true'}))
     attached_file = forms.FileField(
         label="",
         required=False,
@@ -29,9 +29,9 @@ class AssignmentCommentForm(forms.ModelForm):
         self.helper.layout = Layout(
             Div('text'),
             Div(Div('attached_file',
-                    Div(Submit('save', _('Save')),
+                    Div(Submit('save', _('Send')),
                         css_class='pull-right'),
-                    css_class="form-inline"),
+                    css_class="form-inline clearfix"),
                 css_class="form-group"))
         super().__init__(*args, **kwargs)
 
