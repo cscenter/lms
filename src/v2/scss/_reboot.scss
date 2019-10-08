@@ -1,8 +1,10 @@
 // stylelint-disable at-rule-no-vendor-prefix, declaration-no-important, selector-no-qualifying-type, property-no-vendor-prefix
 @import "bootstrap/scss/vendor/rfs";
 
-// CUSTOMIZED BOOTSTRAP REBOOT VERSION. INSTEAD OF REMOVING OR OVERRIDING STYLES, ADD @if statement
+// CUSTOMIZED BOOTSTRAP REBOOT VERSION.
+// INSTEAD OF REMOVING OR OVERRIDING STYLES, ADD @if statement to track changes
 $reboot-enable-ul-css: false;
+$reboot-ie-scrollbar-autohide: true; // default - false
 
 // Reboot
 //
@@ -31,7 +33,11 @@ html {
   line-height: 1.15; // 3
   -webkit-text-size-adjust: 100%; // 4
   -webkit-tap-highlight-color: rgba($black, 0); // 5
+  @if $reboot-ie-scrollbar-autohide {
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }
 }
+
 
 // Shim for "new" HTML5 structural elements to display correctly (IE10, older browsers)
 // TODO: remove in v5

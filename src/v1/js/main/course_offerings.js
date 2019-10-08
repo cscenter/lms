@@ -59,7 +59,7 @@ function filterTermAction(event) {
 
 function filterCourseOfferings(event) {
     event.preventDefault();
-    let currentCity = event.data.offeringsData.city;
+    let currentCity = event.data.offeringsData.branch;
     let academicYear = parseInt(event.data.yearsFilter.find('select').val());
     let selectedTerm = event.data.termsFilter.find('.active').data("type");
     let year = academicYear;
@@ -83,7 +83,7 @@ function filterCourseOfferings(event) {
         // Update history
         if (!!(window.history && history.pushState)) {
             let path = `${location.protocol}//${location.host}${location.pathname}`;
-            let href = `${path}?city=${currentCity}&semester=${slug}`;
+            let href = `${path}?branch=${currentCity}&semester=${slug}`;
             history.pushState(
                 {
                     filterState: {

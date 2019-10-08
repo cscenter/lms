@@ -1,0 +1,17 @@
+.ui.breadcrumb {
+  font-size: $font-size-sm;
+
+  .breadcrumb__section {
+    display: inline-block;
+    color: $gray-dark;
+    &:hover {
+      color: $gray-darker;
+    }
+  }
+
+  .breadcrumb__divider {
+    display: inline-block;
+    color: $gray-light;
+    padding: 0 spacer("1x");
+  }
+}

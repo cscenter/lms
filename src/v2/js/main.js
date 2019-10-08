@@ -8,10 +8,10 @@ import * as Sentry from '@sentry/browser';
 import 'bootstrap.native';
 import ky from 'ky';
 
-
 import sentryOptions from './sentry_conf';
 import {
     onReady,
+    loadFetchPolyfill,
     showComponentError,
     getSections,
     showNotification,
@@ -34,43 +34,48 @@ if (userInfo) {
 }
 
 
+loadFetchPolyfill();
+
+
 onReady(function () {
     let navbarContainer = document.querySelector(".navbar-container");
     let navbarToggler = document.querySelector(".navbar-toggler");
     let menuRightBlock = document.querySelector(".dropdown-user-menu") ||
                          document.querySelector(".menu-btn-reg");
     const topMenu = document.querySelector('#top-menu-mobile');
-    topMenu.addEventListener('show.bs.collapse', function (event) {
-        // Ignores bubbled events from submenu
-        if (event.target.classList.contains("mobile-submenu")) {
-            return;
-        }
-        document.body.style.height = "100%";
-        document.body.style.overflow = "hidden";
-        navbarContainer.style.height = "100%";
-        navbarContainer.style.overflowY = "scroll";
-        navbarToggler.classList.add("is-active");
-        menuRightBlock.style.display = "none";
-    });
-    topMenu.addEventListener('hide.bs.collapse', function (event) {
-        // Ignores bubbled events from submenu
-        if (event.target.classList.contains("mobile-submenu")) {
-            return;
-        }
-        navbarToggler.classList.remove("is-active");
-        menuRightBlock.style.removeProperty("display");
-    });
-    topMenu.addEventListener('hidden.bs.collapse', function (event) {
-        // Ignores bubbled events from submenu
-        if (event.target.classList.contains("mobile-submenu")) {
-            return;
-        }
-        navbarContainer.style.height = "";
-        navbarContainer.style.overflowY = "visible";
-        document.getElementsByClassName("navbar-container")[0].style.height = "";
-        document.body.style.height = "";
-        document.body.style.overflow = "auto";
-    });
+    if (topMenu) {
+        topMenu.addEventListener('show.bs.collapse', function (event) {
+            // Ignores bubbled events from submenu
+            if (event.target.classList.contains("mobile-submenu")) {
+                return;
+            }
+            document.body.style.height = "100%";
+            document.body.style.overflow = "hidden";
+            navbarContainer.style.height = "100%";
+            navbarContainer.style.overflowY = "scroll";
+            navbarToggler.classList.add("is-active");
+            menuRightBlock.style.display = "none";
+        });
+        topMenu.addEventListener('hide.bs.collapse', function (event) {
+            // Ignores bubbled events from submenu
+            if (event.target.classList.contains("mobile-submenu")) {
+                return;
+            }
+            navbarToggler.classList.remove("is-active");
+            menuRightBlock.style.removeProperty("display");
+        });
+        topMenu.addEventListener('hidden.bs.collapse', function (event) {
+            // Ignores bubbled events from submenu
+            if (event.target.classList.contains("mobile-submenu")) {
+                return;
+            }
+            navbarContainer.style.height = "";
+            navbarContainer.style.overflowY = "visible";
+            document.getElementsByClassName("navbar-container")[0].style.height = "";
+            document.body.style.height = "";
+            document.body.style.overflow = "auto";
+        });
+    }
 
     // Notifications
     if (window.__CSC__.notifications !== undefined) {
