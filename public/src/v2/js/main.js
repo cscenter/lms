@@ -8,10 +8,10 @@ import * as Sentry from '@sentry/browser';
 import 'bootstrap.native';
 import ky from 'ky';
 
-
 import sentryOptions from './sentry_conf';
 import {
     onReady,
+    loadFetchPolyfill,
     showComponentError,
     getSections,
     showNotification,
@@ -32,6 +32,9 @@ if (userInfo) {
         });
     }
 }
+
+
+loadFetchPolyfill();
 
 
 onReady(function () {
