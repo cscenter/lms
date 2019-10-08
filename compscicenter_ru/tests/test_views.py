@@ -20,6 +20,13 @@ def test_testimonials_smoke(client):
 
 
 @pytest.mark.django_db
+def test_enrollment_checklist(client):
+    """Make sure template is rendered without errors"""
+    response = client.get(reverse("enrollment_checklist"))
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
 def test_alumni(client):
     url_alumni_all = reverse('alumni')
     response = client.get(url_alumni_all)
