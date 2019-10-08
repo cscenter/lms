@@ -33,12 +33,6 @@
   .sprite-img.svg-icon {
     fill: $gray-light;
   }
-
-  &._icons {
-    .sprite-img.svg-icon {
-      margin-right: spacer("2x");
-    }
-  }
 }
 
 .table__caption {
@@ -93,34 +87,30 @@ thead, thead > tr {
 }
 
 .table._mobile {
-  .table__row._head {
-    display: none;
-    @include media-breakpoint-up(md) {
-      display: table-row;
-    }
-  }
+  border-bottom: none;
 
   .table__row {
-    border-top: $border-width solid $gray-lighter;
+    display: block;
     border-bottom: $border-width solid $gray-lighter;
+    padding: spacer("3x") 0;
     @include media-breakpoint-up(md) {
+      display: table-row;
       border: none;
+    }
+
+    &._head {
+      display: none;
+      @include media-breakpoint-up(md) {
+        display: table-row;
+      }
     }
   }
 
   .table__cell {
     display: block;
     border: none;
-    padding: 0 spacer("8x");
-
-    &:first-child {
-      padding-top: spacer("4x");
-    }
-
-    &:last-child {
-      padding-bottom: spacer("4x");
-    }
-
+    padding: 0 spacer("4x");
+    margin-bottom: spacer("1x");
     @include media-breakpoint-up(md) {
       display: table-cell;
       border-top: $border-width solid $gray-lighter;
@@ -132,6 +122,10 @@ thead, thead > tr {
       &:last-child {
         padding-bottom: spacer("3x");
       }
+    }
+
+    &:first-child {
+      margin-top: spacer("1x");
     }
   }
 }

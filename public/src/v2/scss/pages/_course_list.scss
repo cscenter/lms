@@ -12,13 +12,6 @@
         }
       }
 
-      &._icons .sprite-img.svg-icon{
-        display: none;
-        @include media-breakpoint-up(md) {
-          display: inline-block;
-        }
-      }
-
       &._teachers {
         a {
           color: $black;
@@ -37,6 +30,13 @@
       .table__cell:last-child {
         padding-right: spacer("8x");
       }
+    }
+  }
+
+  .table__cell._icons {
+    display: none;
+    @include media-breakpoint-up(md) {
+      display: table-cell;
     }
   }
 }

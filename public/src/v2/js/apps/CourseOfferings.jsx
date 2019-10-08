@@ -255,8 +255,8 @@ class CourseOfferings extends React.Component {
             <Fragment>
                 <div className="row no-gutters">
                     <div className="col-lg-9">
-                        <div className="card">
-                            <div className="card__content _big">
+                        <div className="card border-xs-0 mb-4">
+                            <div className="card__content _big _courses-filter">
                                 <h1>Курсы центра</h1>
                                 <form className="ui form">
                                     <div className="row">
@@ -330,7 +330,7 @@ class CourseOfferings extends React.Component {
                             </div>
                             {
                                 !this.state.loading && filteredItems.size <= 0
-                                    ? <div className="card__content _big pt-0">Выберите другие параметры фильтрации.</div>
+                                    ? <div className="card__content _big pt-md-0">Выберите другие параметры фильтрации.</div>
                                     : ""
                             }
                         </div>
@@ -480,7 +480,7 @@ class CourseList extends React.Component {
                                 </Fragment>
                             )}
                         </div>
-                        <div className="table__cell">
+                        <div className="table__cell _icons">
                             {item.materials.video ? <Icon
                                 id={'video'}/> : ""} {item.materials.slides ?
                             <Icon id={'slides'}/> : ""} {item.materials.files ?
