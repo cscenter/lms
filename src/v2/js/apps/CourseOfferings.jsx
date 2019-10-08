@@ -24,7 +24,6 @@ import {
     onRadioFilterChange,
     onMultipleCheckboxChange,
     onSearchInputChange,
-    onSelectChange
 } from "components/utils";
 import {tabletMaxMediaQuery, desktopMediaQuery} from "utils/media";
 
@@ -71,7 +70,7 @@ class CourseOfferings extends React.Component {
             ...props.initialState
         };
     }
-// FIXME: search field - надо регулировать debounce, не всегда есть запрос на сервер
+
     getYearOptions(branchOption) {
         let academicYearOptions = [];
         const branch = getOptionByValue(this.props.branchOptions, branchOption.value);
@@ -143,10 +142,7 @@ class CourseOfferings extends React.Component {
      */
     checkYearOption(state, name = 'academicYear') {
         const options = this.getYearOptions(state.branch);
-        let hasOption = options.find((element) => {
-            return _isEqual(element, state.academicYear);
-        });
-        if (hasOption === null) {
+        if (getOptionByValue(options, state.academicYear) === null) {
             return {[name]: options[0]}
         }
         return {}
@@ -258,9 +254,9 @@ class CourseOfferings extends React.Component {
         return (
             <Fragment>
                 <div className="row no-gutters">
-                    <div className="col-lg-9 order-2 order-lg-1">
-                        <div className="card">
-                            <div className="card__content _big">
+                    <div className="col-lg-9">
+                        <div className="card border-xs-0 mb-4">
+                            <div className="card__content _big _courses-filter">
                                 <h1>Курсы центра</h1>
                                 <form className="ui form">
                                     <div className="row">
@@ -334,13 +330,13 @@ class CourseOfferings extends React.Component {
                             </div>
                             {
                                 !this.state.loading && filteredItems.size <= 0
-                                    ? <div className="card__content _big pt-0">Выберите другие параметры фильтрации.</div>
+                                    ? <div className="card__content _big pt-md-0">Выберите другие параметры фильтрации.</div>
                                     : ""
                             }
                         </div>
                     </div>
                     <Media query={desktopMediaQuery} render={() => (
-                        <div className="col-lg-3 order-1 order-lg-2">
+                        <div className="col-lg-3">
                             <form
                                 className="ui form px-6 mt-6 mt-lg-10 ml-lg-4">
                                 <div className="field">
@@ -484,7 +480,7 @@ class CourseList extends React.Component {
                                 </Fragment>
                             )}
                         </div>
-                        <div className="table__cell">
+                        <div className="table__cell _icons">
                             {item.materials.video ? <Icon
                                 id={'video'}/> : ""} {item.materials.slides ?
                             <Icon id={'slides'}/> : ""} {item.materials.files ?

@@ -9,6 +9,17 @@ export const onReady = function( callback ) {
 	document.addEventListener( 'DOMContentLoaded', callback );
 };
 
+// TODO: load all polyfills in 1 request
+/**
+ * Polyfill fetch API for browsers without native support.
+ **/
+export function loadFetchPolyfill() {
+    if (typeof window === 'object' && !window.fetch) {
+        return import(/* webpackChunkName: "fetch-polyfill" */ 'whatwg-fetch');
+    }
+}
+
+
 /**
  * Do feature detection, to figure out if polyfill needs to be imported.
  **/

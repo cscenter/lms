@@ -3,6 +3,12 @@
 
 {% block body_attrs %}data-init-sections="tabs" class="_dark"{% endblock body_attrs %}
 
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
 {% block content %}
     <div class="container page-content">
         <div class="row content-center no-gutters">
@@ -31,7 +37,7 @@
                     <div class="card__content _big text-base">
                         {% set course_tabs = [
                     {'target': 'about', 'name': 'О курсе', 'active': true, 'url': '#'},
-                    {'target': 'videos', 'name': 'Видеозаписи курса', 'active': false, 'url': '#'}
+                    {'target': 'videos', 'name': 'Список лекций', 'active': false, 'url': '#'}
                     ] %}
 
                         {{ macros.tabs(course_tabs, modifiers='mb-2') }}
@@ -91,18 +97,30 @@
                             {% with tab = course_tabs[1] %}
                                 <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}"
                                      role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
-                                    <h2>Список лекций</h2>
+                                    <h2 class="mt-4">Список лекций</h2>
 
-                                    <div class="ui list _divided _playlist">
+                                    <div class="ui list _divided _selection">
                                         <a href="#" class="list__item">
-                                            <span class="item__ordinal">1.</span><div class="item__text">Утечки ресурсов и как их избежать. ресурсов и как их из ресурсов и как их из RAII  как их избежать. ресурсов и как их из рес</div>
-                                            <div class="item__icons">
-                                                {{ macros.svg_icon('video') }}{{ macros.svg_icon('slides') }}
+                                            <div class="class-item">
+                                                <span class="item__ordinal">1.</span><div class="item__text">Утечки ресурсов и как их избежать. ресурсов и как их из ресурсов и как их из RAII  как их избежать. ресурсов и как их из рес</div>
+                                                <div class="item__icons">
+                                                    {{ macros.svg_icon('video') }}{{ macros.svg_icon('slides') }}
+                                                </div>
+                                            </div>
+                                            <div class="text-small text-muted">
+                                                В теоретической информатике многие задачи оптимизации могут быть сформулированы как задачи линейного программирования. Для этого с каждым допустимым решением задачи оптимизации отождествляют точку, так чтобы целевая функция соответствовала линейной функции над полученными точками. Такая трансформация дает доступ к методам линейного программирования для получения оптимального решения. К сожалению, для многих задач оптимизации "прямой" способ получения задачи линейного программирования ведет к программе очень большого размера. В таких случаях расширенные формулировки (extended formulations) предоставляют возможность уменьшить размер программы. Это обусловило появление интенсивного интереса к расширенным формулировкам.
                                             </div>
                                         </a>
                                         <a href="#" class="list__item">
-                                            <span class="item__ordinal">2.</span><div class="item__text">Лекция 2</div>
-                                            <div class="item__icons"></div>
+                                            <div class="class-item">
+                                                <span class="item__ordinal">2.</span><div class="item__text">Лекция 2</div>
+                                                <div class="item__icons">{{ macros.svg_icon('video') }}</div>
+                                            </div>
+                                        </a>
+                                        <a href="#" class="list__item">
+                                            <div class="class-item">
+                                                <span class="item__ordinal">2.</span><div class="item__text">Семинар 1</div>
+                                            </div>
                                         </a>
                                     </div>
                                 </div>

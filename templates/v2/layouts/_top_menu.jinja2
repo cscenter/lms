@@ -57,7 +57,7 @@
                 <li>
                     {%- if menu_item.children -%}
                         <a class="nav-link{% if menu_item.selected %} _active{% endif %}"
-                           href="{{ menu_item.url }}"
+                           href="#top-menu-item-{{ loop.index }}"
                            data-toggle="collapse" aria-expanded="{% if menu_item.selected %}true{% else %}false{% endif %}"
                            data-target="#top-menu-item-{{ loop.index }}"
                            aria-controls="top-menu-item-{{ loop.index }}"

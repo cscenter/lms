@@ -1,0 +1,73 @@
+
+.ui.playlist {
+  position: relative;
+  height: 100%;
+
+  .list {
+    overflow-y: auto;
+    position: relative;
+
+    @include media-breakpoint-up(lg) {
+      position: absolute;
+      right: 0;
+      top: spacer("8x");
+      left: 0;
+      bottom: 0;
+    }
+  }
+
+
+  .list__item {
+    color: $black;
+    display: block;
+  }
+}
+
+.playlist__summary {
+  margin: spacer("2x") 0;
+  @include media-breakpoint-up(lg) {
+    margin: 0;
+  }
+}
+
+// No idea where it's better to place this custom component
+
+.class-item {
+  font-size: $font-size-base;
+  display: flex;
+  position: relative;
+  align-items: center;
+
+  .item__text {
+    flex-shrink: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: spacer("2x");
+  }
+
+  .item__ordinal {
+    margin-right: spacer("1x");
+    color: $gray-light;
+  }
+
+  .item__duration {
+    margin-left: auto;
+  }
+
+  .item__icons {
+    flex-shrink: 0;
+    min-width: 48px;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .sprite-img {
+    margin-right: spacer("2x");
+    fill: $gray-light;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+}

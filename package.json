@@ -78,7 +78,8 @@
     "redux": "^4.0.4",
     "sassdash": "^0.9.0",
     "scheduler": "^0.16.1",
-    "tempusdominus-core": "^5.0.3"
+    "tempusdominus-core": "^5.0.3",
+    "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.2",

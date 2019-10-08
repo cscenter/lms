@@ -80,6 +80,16 @@ const common = {
             },
             {
                 test: /\.js$/,
+                include: path.resolve(__nodemodulesdir, "ky"),
+                use: [{
+                    loader: 'babel-loader',
+                    options: {
+                        extends: path.resolve(__srcdir, "js", ".babelrc.js")
+                    }
+                }]
+            },
+            {
+                test: /\.js$/,
                 include: path.resolve(__nodemodulesdir, "bootstrap"),
                 use: [{
                     loader: 'babel-loader',
