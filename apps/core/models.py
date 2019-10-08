@@ -139,10 +139,7 @@ class Branch(TimezoneAwareModel, models.Model):
         verbose_name_plural = _("Branches")
 
     def __str__(self):
-        if self.site_id != settings.SITE_ID:
-            return f"{self.name} [{self.site}]"
-        else:
-            return self.name
+        return f"{self.name} [{self.site}]"
 
     def save(self, *args, **kwargs):
         created = self.pk is None
