@@ -42,6 +42,7 @@
 @import "components/list";
 @import "components/scrollable";
 @import "components/modals";
+@import "components/breadcrumb";
 
 @import "pages/index";
 @import "pages/alumni";
@@ -55,6 +56,7 @@
 @import "pages/student_profile";
 @import "pages/announcement";
 @import "pages/course_list";
+@import "pages/course_class";
 @import "components/table";
 // TODO: Remove styles below from production build
 @import "pages/about";

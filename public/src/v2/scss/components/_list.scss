@@ -50,15 +50,28 @@ ul:not(.ui) {
   @include list-dashed(".ui.list", ".list__item");
 }
 
-
 .ui.list._divided {
   border-bottom: $border-width solid $gray-lighter;
   margin: 0;
 
   .list__item {
+    display: block;
     padding: spacer("3x") spacer("4x");
     border-top: $border-width solid $gray-lighter;
     margin: 0;
+  }
+}
+
+.ui.list._selection {
+  .list__item {
+    &:hover {
+      background-color: $gray-lighter;
+    }
+
+    &._active {
+      color: $white;
+      background-color: $gray-dark;
+    }
   }
 }
 

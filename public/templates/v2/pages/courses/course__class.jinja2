@@ -1,0 +1,150 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% block sprites %}
+    <script type="text/javascript">
+        window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="contaiber-fluid _dark">
+        <div class="container page-content">
+            <div class="ui breadcrumb mb-2">
+                <a href="#" class="breadcrumb__section">Курсы</a>
+                <div class="breadcrumb__divider"> /</div>
+                <a href="#" class="breadcrumb__section">Алгоритмы и структуры данных</a>
+                <div class="breadcrumb__divider"> /</div>
+                <a href="#" class="breadcrumb__section">Осень 2018</a>
+                <div class="breadcrumb__divider"> /</div>
+            </div>
+                <h1 class="mb-1">Понятие и оценка алгоритмов</h1>
+                <div class="venue-details">
+                    <div class="ui label _icon">
+                        {{ macros.svg_icon('calendar') }}
+                        <span>Среда, 11 сентября 2019, 18:30–20:00</span>
+                    </div>
+                    <div class="ui label _icon">
+                        {{ macros.svg_icon('location') }}
+                        <span>Таймс, ауд. 412</span>
+                    </div>
+                </div>
+                <div class="row mt-6">
+                    <div class="col-lg-7">
+                        {{ macros.video_iframe() }}
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="ui playlist">
+                            <div class="playlist__summary">Список тем / 14 записей</div>
+                            <ol class="ui list _divided _selection">
+                                <a href="#" class="list__item">
+                                    <div class="class-item">
+                                        <div class="item__ordinal">1.</div>
+                                        <div class="item__text">
+                                            Утечки ресурсов и как их избежать.
+                                            RAII
+                                        </div>
+                                        <div class="item__duration">1:44:20</div>
+                                    </div>
+                                </a>
+                                <a href="#" class="list__item _active">
+                                    <div class="class-item">
+                                        <div class="item__ordinal">2.</div>
+                                        <div class="item__text">
+                                            Мосты, точки сочленения, компоненты сильной связности
+                                        </div>
+                                        <div class="item__duration">1:44:20</div>
+                                    </div>
+                                </a>
+                                <a href="#" class="list__item">
+                                    <div class="class-item">
+                                        <div class="item__ordinal">3.</div>
+                                        <div class="item__text">
+                                            Heavy-Light декомпозиция, Link-cut дерево
+                                        </div>
+                                        <div class="item__duration">9:28</div>
+                                    </div>
+                                </a>
+                                <a href="#" class="list__item">
+                                    <div class="class-item">
+                                        <div class="item__ordinal">4.</div>
+                                        <div class="item__text">
+                                            Комбинаторная оптимизация и потоковые задачи
+                                        </div>
+                                        <div class="item__duration">44:20</div>
+                                    </div>
+                                </a>
+                                <a href="#" class="list__item">
+                                    <div class="class-item">
+                                        <div class="item__ordinal">5.</div>
+                                        <div class="item__text">
+                                            Утечки ресурсов и как их избежать.
+                                            RAII
+                                        </div>
+                                        <div class="item__duration">1:44:20</div>
+                                    </div>
+                                </a>
+                                <a href="#" class="list__item">
+                                    <div class="class-item">
+                                        <div class="item__ordinal">6.</div>
+                                        <div class="item__text">
+                                            Утечки ресурсов и как их избежать.
+                                            RAII
+                                        </div>
+                                        <div class="item__duration">1:44:20</div>
+                                    </div>
+                                </a>
+                                <a href="#" class="list__item">
+                                    <div class="class-item">
+                                        <div class="item__ordinal">7.</div>
+                                        <div class="item__text">
+                                            Утечки ресурсов и как их избежать.
+                                            RAII
+                                        </div>
+                                        <div class="item__duration">1:44:20</div>
+                                    </div>
+                                </a>
+                                <a href="#" class="list__item">
+                                    <div class="class-item">
+                                        <div class="item__ordinal">8.</div>
+                                        <div class="item__text">
+                                            Утечки ресурсов и как их избежать.
+                                            RAII
+                                        </div>
+                                        <div class="item__duration">1:44:20</div>
+                                    </div>
+                                </a>
+                                <a href="#" class="list__item">
+                                    <div class="class-item">
+                                        <div class="item__ordinal">9.</div>
+                                        <div class="item__text">
+                                            Утечки ресурсов и как их избежать.
+                                            RAII
+                                        </div>
+                                        <div class="item__duration">1:44:20</div>
+                                    </div>
+                                </a>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+    <div class="container page-content">
+        <div class="col-lg-9">
+            <h3>Описание</h3>
+            <p>Программы на С++ ценят за их эффективность в использовании ресурсов. Но это же становится и
+                проблемой,
+                поскольку сложность перекладывается на программиста, который должен сам следить за их
+                своевременным
+                освобождением. Если добавить еще и неожиданно вылетающие исключения, то программирование вообще
+                может
+                превратиться в хождение по минному полю. В первой части/лекции будут рассмотрены несколько
+                приемов,
+                позволяющие существенно упростить жизнь и, наконец, избавиться от головной боли, как и когда
+                освобождать
+                ресурсы, а также как их эффективно передавать: от идиомы RAII до move-семантики и rvalue ссылок.
+            </p>
+        </div>
+    </div>
+    </div>
+{% endblock content %}
