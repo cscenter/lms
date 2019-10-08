@@ -42,7 +42,7 @@
                                         </div>
                                         <div class="card__subtitle">{{ course.branch.name }}{% if course.additional_branches.all() -%}
                                             {% for branch in course.additional_branches.all() -%}
-                                                {% if branch.name != course.branch.name %}, {{ branch }}{% endif -%}
+                                                {% if branch.name != course.branch.name %}, {{ branch.name }}{% endif -%}
                                             {% endfor %}{% endif %}</div>
                                     </div>
                                     <div class="card__content _meta">
