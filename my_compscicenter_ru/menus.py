@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils.translation import pgettext_lazy
 from menu import Menu
 
@@ -7,7 +8,7 @@ from core.urls import reverse
 top_menu = [
     MenuItem(
         pgettext_lazy("menu", "Courses"),
-        reverse("course_list"),
+        reverse("course_list", subdomain=settings.LMS_SUBDOMAIN),
         weight=10,
         excluded_patterns=[
             r"^/courses/.*/assignments/add$",

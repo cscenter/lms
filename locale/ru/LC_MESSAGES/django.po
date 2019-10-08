@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-30 13:55+0000\n"
-"PO-Revision-Date: 2019-09-30 13:56+0000\n"
+"POT-Creation-Date: 2019-10-08 09:55+0000\n"
+"PO-Revision-Date: 2019-10-08 09:57+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -2371,7 +2371,7 @@ msgstr "Заметка куратора"
 msgid "Important dates"
 msgstr "Важные даты"
 
-#: apps/users/admin.py:152
+#: apps/users/admin.py:145
 msgid "Anytask"
 msgstr ""
 
@@ -2674,156 +2674,153 @@ msgstr "Выдать справку"
 msgid "Student references"
 msgstr "Справки студента"
 
-#: my_compscicenter_ru/menus.py:9
+#: my_compscicenter_ru/menus.py:10
 msgctxt "menu"
 msgid "Courses"
 msgstr "Курсы"
 
-#: my_compscicenter_ru/menus.py:17
+#: my_compscicenter_ru/menus.py:18
 msgctxt "menu"
 msgid "Обучение"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:21 my_compscicenter_ru/menus.py:40
+#: my_compscicenter_ru/menus.py:22 my_compscicenter_ru/menus.py:41
 msgctxt "menu"
 msgid "Задания"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:22
+#: my_compscicenter_ru/menus.py:23
 msgctxt "menu"
 msgid "Моё расписание"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:23 my_compscicenter_ru/menus.py:54
+#: my_compscicenter_ru/menus.py:24 my_compscicenter_ru/menus.py:55
 msgctxt "menu"
 msgid "Календарь"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:24 my_compscicenter_ru/menus.py:58
+#: my_compscicenter_ru/menus.py:25 my_compscicenter_ru/menus.py:59
 msgctxt "menu"
 msgid "Мои курсы"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:25
+#: my_compscicenter_ru/menus.py:26
 msgctxt "menu"
 msgid "Библиотека"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:26 my_compscicenter_ru/menus.py:106
+#: my_compscicenter_ru/menus.py:27 my_compscicenter_ru/menus.py:107
 msgctxt "menu"
 msgid "Полезное"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:27
+#: my_compscicenter_ru/menus.py:28
 msgctxt "menu"
 msgid "Кодекс чести"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:28
+#: my_compscicenter_ru/menus.py:29
 msgctxt "menu"
 msgid "Проекты организаторов"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:35
+#: my_compscicenter_ru/menus.py:36
 msgctxt "menu"
 msgid "Преподавание"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:49
+#: my_compscicenter_ru/menus.py:50
 msgctxt "menu"
 msgid "Расписание"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:63 my_compscicenter_ru/menus.py:103
+#: my_compscicenter_ru/menus.py:64 my_compscicenter_ru/menus.py:104
 msgctxt "menu"
 msgid "Ведомости"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:72
+#: my_compscicenter_ru/menus.py:73
 msgctxt "menu"
 msgid "Набор"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:76
+#: my_compscicenter_ru/menus.py:77
 msgctxt "menu"
 msgid "Собеседования"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:77
+#: my_compscicenter_ru/menus.py:78
 msgctxt "menu"
 msgid "Анкеты"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:78
+#: my_compscicenter_ru/menus.py:79
 msgctxt "menu"
 msgid "Результаты"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:85 my_compscicenter_ru/menus.py:90
+#: my_compscicenter_ru/menus.py:86 my_compscicenter_ru/menus.py:91
 msgctxt "menu"
 msgid "Проекты"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:89
+#: my_compscicenter_ru/menus.py:90
 msgctxt "menu"
 msgid "Отчеты"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:91
+#: my_compscicenter_ru/menus.py:92
 msgctxt "menu"
 msgid "Все проекты"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:92
+#: my_compscicenter_ru/menus.py:93
 msgctxt "menu"
 msgid "Все отчеты"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:99
+#: my_compscicenter_ru/menus.py:100
 msgctxt "menu"
 msgid "Курирование"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:104
+#: my_compscicenter_ru/menus.py:105
 msgctxt "menu"
 msgid "Поиск студентов"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:105
+#: my_compscicenter_ru/menus.py:106
 msgctxt "menu"
 msgid "Файлы"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:107
+#: my_compscicenter_ru/menus.py:108
 msgctxt "menu"
 msgid "Фейсбук"
 msgstr ""
 
-#: my_compscicenter_ru/menus.py:108
+#: my_compscicenter_ru/menus.py:109
 msgctxt "menu"
 msgid "Пересечения"
 msgstr ""
 
 #: my_compscicenter_ru/templates/my_compscicenter_ru/course_offerings.html:27
 #: my_compscicenter_ru/templates/my_compscicenter_ru/course_offerings.html:94
-#, fuzzy
 #| msgid "Go to course"
 msgid "CS club course"
-msgstr "Перейти к курсу"
+msgstr "Курс CS клуба"
 
 #: my_compscicenter_ru/views.py:76
-#, fuzzy
 #| msgid "autumn"
 msgctxt "adjective"
 msgid "autumn"
-msgstr "осень"
+msgstr "осенний"
 
 #: my_compscicenter_ru/views.py:77
-#, fuzzy
 #| msgid "spring"
 msgctxt "adjective"
 msgid "spring"
-msgstr "весна"
+msgstr "весенний"
 
 #~ msgid "Correspondence course"
 #~ msgstr "Заочный курс"
