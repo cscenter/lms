@@ -1,7 +1,7 @@
 {% spaceless %}
     {% for bound_field in form %}
         {% with field_options=bound_field.field.db_field %}
-        <div class="field animation{% if bound_field.field.is_hidden %} hidden{% endif %}{% if field_options.css_class %} {{ field_options.css_class }}{% endif %}" id="row_for_{{ field_options.name }}"{% if field_options.conditional_logic %}data-logic="{{ field_options.get_field_conditional_logic }}"{% endif %}>
+        <div class="field animated{% if bound_field.field.is_hidden %} hidden{% endif %}{% if field_options.css_class %} {{ field_options.css_class }}{% endif %}" id="row_for_{{ field_options.name }}"{% if field_options.conditional_logic %}data-logic="{{ field_options.get_field_conditional_logic }}"{% endif %}>
             {{ bound_field }}
         </div>
         {% endwith %}
