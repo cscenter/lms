@@ -1,22 +1,3 @@
-// fixme: remove?
-let Logic = (function createLogicFactory() {
-  let logicPrototype = {
-    getActionType: function() {
-      return this.action_type;
-    },
-
-    getFieldName: function () {
-        return `field_${this.field_id}`;
-    }
-  };
-
-  return function(logic){
-    let newLogic = Object.create(logicPrototype);
-    Object.assign(newLogic, logic);
-    return newLogic;
-  }
-})();
-
 export function launch() {
     let rows = document.querySelectorAll('.form .field');
     if (rows.length > 1) {
