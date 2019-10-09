@@ -54,11 +54,16 @@ ul:not(.ui) {
   border-bottom: $border-width solid $gray-lighter;
   margin: 0;
 
-  .list__item {
+  > .list__item {
     display: block;
     padding: spacer("3x") spacer("4x");
     border-top: $border-width solid $gray-lighter;
     margin: 0;
+
+    & :last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
   }
 }
 
