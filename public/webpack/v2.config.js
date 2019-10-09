@@ -4,7 +4,7 @@ const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
 const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const SentryWebpackPlugin = require('@sentry/webpack-plugin');
+
 
 const DEBUG = (process.env.NODE_ENV !== "production");
 
@@ -180,20 +180,6 @@ const common = {
             // both options are optional
             filename: DEBUG ? '[name].css' : '[name].[hash].css',
             chunkFilename: DEBUG ? '[id].css' : '[id].[hash].css',
-        }),
-        new SentryWebpackPlugin({
-            include: [
-                __bundlesdir
-            ],
-            ignoreFile: '.sentrycliignore',
-            ignore: ['node_modules'],
-            configFile: 'sentry.properties',
-            debug: true,
-            dryRun: false,
-            // Fail silently in case no auth data provided to the sentry-cli
-            errorHandler: function(err, invokeErr) {
-                console.log(`Sentry CLI Plugin: ${err.message}`);
-            },
         })
     ],
 
