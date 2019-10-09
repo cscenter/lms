@@ -63,16 +63,23 @@
                                 <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
                                     {% if classes %}
                                         <h2>{% trans %}Lectures List{% endtrans %}</h2>
-                                        <div class="ui list _divided _playlist">
+                                        <div class="ui list _divided">
                                             {% for course_class in classes %}
-                                                <a href="{{ course_class.get_absolute_url() }}" class="list__item">
-                                                    <div class="item__text">{{ course_class.name }}</div>
-                                                    {% if course_class.video_url or course_class.slides %}
-                                                    <div class="item__icons">
-                                                        {%- if course_class.video_url %}{{ macros.svg_icon('video') }}{% endif %}{% if course_class.slides %}{{ macros.svg_icon('slides') }}{% endif -%}
+                                                <div class="list__item">
+                                                    <a class="class-item" href="{{ course_class.get_absolute_url() }}">
+                                                        <div class="item__text">{{ course_class.name }}</div>
+                                                        {% if course_class.video_url or course_class.slides %}
+                                                        <div class="item__icons">
+                                                            {%- if course_class.video_url %}{{ macros.svg_icon('video') }}{% endif %}{% if course_class.slides %}{{ macros.svg_icon('slides') }}{% endif -%}
+                                                        </div>
+                                                        {% endif %}
+                                                    </a>
+                                                    {% if course_class.description %}
+                                                    <div class="text-muted text-small">
+                                                        {{ course_class.description|markdown("course_class_description", 3600, course_class.pk, course_class.modified) }}
                                                     </div>
                                                     {% endif %}
-                                                </a>
+                                                </div>
                                             {% endfor %}
                                         </div>
                                     {% else %}
