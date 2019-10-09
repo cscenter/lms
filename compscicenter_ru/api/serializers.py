@@ -70,7 +70,7 @@ class CourseSerializer(serializers.ModelSerializer):
         return obj.meta_course.name
 
     def get_url(self, obj: Course):
-        return obj.get_absolute_url()
+        return obj.get_absolute_url(subdomain=None)
 
     def get_materials(self, obj: Course):
         return {
