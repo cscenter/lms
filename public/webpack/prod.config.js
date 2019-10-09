@@ -62,7 +62,7 @@ module.exports = {
             ],
             ignoreFile: '.sentrycliignore',
             ignore: ['node_modules'],
-            urlPrefix: `/static/${APP_VERSION}/dist/js`,
+            urlPrefix: `~/static/${APP_VERSION}/dist/js`,
             debug: true,
             dryRun: false,
             // Fail silently in case no auth data provided to the sentry-cli
