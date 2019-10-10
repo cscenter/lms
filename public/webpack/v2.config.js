@@ -37,6 +37,7 @@ const common = {
             // "core-js/stable",
             // "regenerator-runtime/runtime",
             //'jquery',
+            'ky',
             'popper.js',
             'fontfaceobserver',
             'noty',
