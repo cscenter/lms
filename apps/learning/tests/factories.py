@@ -3,9 +3,9 @@
 import datetime
 
 import factory
+from django.conf import settings
 from django.utils import timezone
 
-from core.settings.base import DEFAULT_BRANCH_CODE
 from core.tests.factories import BranchFactory, LocationFactory
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
@@ -101,7 +101,7 @@ class EventFactory(factory.DjangoModelFactory):
 
     venue = factory.SubFactory(LocationFactory)
     branch = factory.SubFactory('core.tests.factories.BranchFactory',
-                                code=DEFAULT_BRANCH_CODE)
+                                code=settings.DEFAULT_BRANCH_CODE)
     name = factory.Sequence(lambda n: "Test event %03d" % n)
     description = factory.Sequence(lambda n: "Test event description %03d" % n)
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)

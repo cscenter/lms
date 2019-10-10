@@ -2,15 +2,12 @@ import datetime
 
 import pytest
 
-from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.tests.utils import now_for_branch
-from core.timezone import now_local
 from courses.models import Course
 from courses.tests.factories import CourseFactory, SemesterFactory
 from learning.permissions import course_access_role, CourseRole
 from learning.settings import StudentStatuses, GradeTypes, Branches
-from core.settings.base import DEFAULT_BRANCH_CODE
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
 from users.constants import Roles
 from users.models import ExtendedAnonymousUser, User
@@ -108,11 +105,11 @@ def test_course_access_role_student():
 
 
 @pytest.mark.django_db
-def test_enroll_in_course():
+def test_enroll_in_course(settings):
     today_local = now_for_branch(Branches.SPB)
     yesterday = today_local - datetime.timedelta(days=1)
     tomorrow = today_local + datetime.timedelta(days=1)
-    term = SemesterFactory.create_current(for_branch=DEFAULT_BRANCH_CODE,
+    term = SemesterFactory.create_current(for_branch=settings.DEFAULT_BRANCH_CODE,
                                           enrollment_end_at=tomorrow.date())
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)

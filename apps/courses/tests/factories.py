@@ -5,7 +5,6 @@ import pytz
 from django.conf import settings
 from django.utils import timezone
 
-from core.settings.base import DEFAULT_BRANCH_CODE
 from core.tests.factories import LocationFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
@@ -42,7 +41,7 @@ class SemesterFactory(factory.DjangoModelFactory):
     @classmethod
     def create_current(cls, **kwargs):
         """Get or create semester for current term"""
-        branch_code = kwargs.pop('for_branch', DEFAULT_BRANCH_CODE)
+        branch_code = kwargs.pop('for_branch', settings.DEFAULT_BRANCH_CODE)
         tz = Branches.get_choice(branch_code).timezone
         year, type = get_current_term_pair(tz)
         kwargs.pop('year', None)

@@ -6,8 +6,6 @@ from django.core.files.base import ContentFile
 from django.utils.timezone import now
 from sorl.thumbnail import delete
 
-from core.settings.base import MEDIA_URL
-
 
 # FIXME: Do we really need this?
 class AbstractUploadBackend:
@@ -119,5 +117,5 @@ class ProfileImageUploadBackend(DefaultStorageUploadBackend):
     def upload_complete(self, request, filename, *args, **kwargs):
         """Returns image url"""
         self._dest.close()
-        path_to_img = os.path.join(MEDIA_URL, self.path)
+        path_to_img = os.path.join(settings.MEDIA_URL, self.path)
         return {"url": path_to_img}
