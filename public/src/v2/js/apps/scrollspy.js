@@ -6,4 +6,9 @@ export function launch() {
         offset: 220,
         target: '#history-navigation'
     });
+
+    // FIXME: test sentry source mapping!
+    document.getElementById('year2011').addEventListener('click', function () {
+        myUndefinedFunction();
+    })
 }
