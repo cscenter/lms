@@ -5,7 +5,6 @@ from django.test import Client, TestCase
 from django.utils.functional import Promise
 
 from learning.settings import Branches
-from core.settings.base import DEFAULT_BRANCH_CODE
 
 if settings.LMS_SUBDOMAIN:
     _SERVER_NAME = f"{settings.LMS_SUBDOMAIN}.{settings.TEST_DOMAIN}"
@@ -104,7 +103,7 @@ class CSCTestCase(TestCase):
         super().assertRedirects(response, expected_url, *args, **kwargs)
 
 
-def now_for_branch(branch_code=DEFAULT_BRANCH_CODE):
+def now_for_branch(branch_code=settings.DEFAULT_BRANCH_CODE):
     from core.timezone import now_local
     tz = Branches.get_choice(Branches.SPB).timezone
     return now_local(tz)

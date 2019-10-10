@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import factory
+from django.conf import settings
 
-from core.settings.base import DEFAULT_BRANCH_CODE
 from learning.settings import GradeTypes
 from users.constants import Roles, GenderTypes
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
@@ -31,7 +31,7 @@ class UserFactory(factory.DjangoModelFactory):
     first_name = factory.Sequence(lambda n: "Ivan%03d" % n)
     last_name = factory.Sequence(lambda n: "Petrov%03d" % n)
     branch = factory.SubFactory('core.tests.factories.BranchFactory',
-                                code=DEFAULT_BRANCH_CODE)
+                                code=settings.DEFAULT_BRANCH_CODE)
 
     @factory.post_generation
     def groups(self, create, extracted, **kwargs):
@@ -103,7 +103,7 @@ class TeacherFactory(UserFactory):
 
 class VolunteerFactory(UserFactory):
     branch = factory.SubFactory('core.tests.factories.BranchFactory',
-                                code=DEFAULT_BRANCH_CODE)
+                                code=settings.DEFAULT_BRANCH_CODE)
 
     @factory.post_generation
     def _add_required_groups(self, create, extracted, **kwargs):

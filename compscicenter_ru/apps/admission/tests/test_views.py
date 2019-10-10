@@ -2,7 +2,6 @@ import datetime
 
 import pytest
 from bs4 import BeautifulSoup
-from django.contrib.messages import get_messages
 from django.utils import timezone, formats
 from django.utils.timezone import now
 from post_office.models import Email
@@ -13,13 +12,11 @@ from admission.models import Applicant, Interview, InterviewInvitation
 from admission.tests.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
-from core.tests.utils import now_for_branch
-from core.timezone import now_local
-from core.urls import reverse
 from core.models import Branch
+from core.tests.utils import now_for_branch
+from core.urls import reverse
 from learning.settings import Branches
-from core.settings.base import DEFAULT_BRANCH_CODE
-from users.tests.factories import UserFactory, CuratorFactory
+from users.tests.factories import UserFactory
 
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
@@ -206,7 +203,7 @@ def test_interview_results_dispatch_view(curator, client, settings):
     # Redirect to the default branch view
     redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission:branch_interview_results",
-                                   kwargs={"branch_code": DEFAULT_BRANCH_CODE})
+                                   kwargs={"branch_code": settings.DEFAULT_BRANCH_CODE})
     # And then to applicants list page
     redirect_url, status_code = response.redirect_chain[1]
     assert redirect_url == reverse("admission:applicants")
