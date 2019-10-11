@@ -17,7 +17,8 @@ from courses.models import Semester, Course, CourseTeacher, MetaCourse
 from learning.models import AssignmentComment, Enrollment
 from learning.permissions import has_master_degree
 from learning.settings import StudentStatuses, GradeTypes
-from projects.models import ReportComment, ProjectStudent
+from projects.constants import ProjectTypes
+from projects.models import ReportComment, ProjectStudent, Project
 from users.constants import Roles
 from users.models import User, SHADCourseRecord
 
@@ -103,7 +104,7 @@ class ProgressReport:
                     'is_open',
                     'grading_type',
                     'meta_course__name',
-                    'meta_course__name_ru', )
+                    'meta_course__name_ru',)
               .prefetch_related(Prefetch("teachers", queryset=teachers_qs)))
         return qs
 
@@ -346,8 +347,6 @@ class ProgressReportFull(ProgressReport):
             'Имя',
             'Отчество',
             'Профиль на сайте',
-            'Вольнослушатель',
-            'Магистратура',
             'Почта',
             'Телефон',
             'ВУЗ',
@@ -356,22 +355,24 @@ class ProgressReportFull(ProgressReport):
             'Год программы обучения',
             'Год выпуска',
             'Яндекс ID',
+            'Stepik ID',
+            'Github Login',
+            'Официальный студент',
+            'Номер диплома о высшем образовании',
             'Направления обучения',
             'Статус',
-            'Дата статуса или итога (изменения)',
             'Комментарий',
             'Дата последнего изменения комментария',
             'Работа',
             'Анкеты',
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
-            *self.get_courses_headers(meta_courses),
-            *self.generate_projects_headers(projects_max),
-            *self.generate_shad_courses_headers(shads_max),
-            *self.generate_online_courses_headers(online_max),
+            'Пройдено семестров практики(закончили, успех)',
+            'Пройдено семестров НИР (закончили, успех)',
         ]
 
-    def _export_row(self, student, *, courses, meta_courses, shads_max,
+    def _export_row(self, student: User, *, courses, meta_courses, shads_max,
                     online_max, projects_max):
+        # FIXME: можно считать и в БД теперь
         total_success_passed = (
             sum(1 for c in student.unique_enrollments.values() if
                 c.grade in GradeTypes.satisfactory_grades) +
@@ -379,6 +380,15 @@ class ProgressReportFull(ProgressReport):
                 c.grade in GradeTypes.satisfactory_grades) +
             sum(1 for _ in student.online_courses)
         )
+        total_success_research = 0
+        total_success_practice = 0
+        for ps in student.projects_progress:
+            if ps.project.is_canceled:
+                continue
+            if ps.final_grade in GradeTypes.satisfactory_grades:
+                type_ = ps.project.project_type
+                total_success_research += int(type_ == ProjectTypes.research)
+                total_success_practice += int(type_ == ProjectTypes.practice)
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
         if hasattr(student, "graduate_profile"):
             disciplines = student.graduate_profile.academic_disciplines
@@ -388,13 +398,11 @@ class ProgressReportFull(ProgressReport):
             graduation_year = ""
         return [
             student.pk,
-            student.branch,
+            student.branch.name,
             student.last_name,
             student.first_name,
             student.patronymic,
             student.get_absolute_url(),
-            "+" if student.is_volunteer else "",
-            "+" if has_master_degree(student) else "",
             student.email,
             student.phone,
             student.university,
@@ -403,18 +411,19 @@ class ProgressReportFull(ProgressReport):
             student.curriculum_year,
             graduation_year,
             student.yandex_login,
+            student.stepic_id,
+            student.github_login,
+            'да' if student.official_student else 'нет',
+            student.diploma_number,
             " и ".join(s.name for s in disciplines.all()),
             student.get_status_display(),
-            '',  # FIXME: error in student.status_changed_at field
             student.comment,
             student.comment_changed_at.strftime(dt_format),
             student.workplace,
             self.links_to_application_forms(student),
             total_success_passed,
-            *self._export_courses(student, courses, meta_courses),
-            *self._export_projects(student, projects_max),
-            *self._export_shad_courses(student, shads_max),
-            *self._export_online_courses(student, online_max),
+            total_success_practice,
+            total_success_research,
         ]
 
     def get_filename(self):
@@ -514,8 +523,6 @@ class ProgressReportForSemester(ProgressReport):
             'Имя',
             'Отчество',
             'Профиль на сайте',
-            'Вольнослушатель',
-            'Магистратура',
             'Почта',
             'Телефон',
             'ВУЗ',
@@ -523,6 +530,10 @@ class ProgressReportForSemester(ProgressReport):
             'Год поступления',
             'Год программы обучения',
             'Яндекс ID',
+            'Stepik ID',
+            'Github Login',
+            'Официальный студент',
+            'Номер диплома о высшем образовании',
             'Направления обучения',
             'Статус',
             'Дата статуса или итога (изменения)',
@@ -561,13 +572,11 @@ class ProgressReportForSemester(ProgressReport):
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
         return [
             student.pk,
-            student.branch,
+            student.branch.name,
             student.last_name,
             student.first_name,
             student.patronymic,
             student.get_absolute_url(),
-            "+" if student.is_volunteer else "",
-            "+" if has_master_degree(student) else "",
             student.email,
             student.phone,
             student.university,
@@ -575,6 +584,10 @@ class ProgressReportForSemester(ProgressReport):
             student.enrollment_year,
             student.curriculum_year,
             student.yandex_login,
+            student.stepic_id,
+            student.github_login,
+            'да' if student.official_student else 'нет',
+            student.diploma_number,
             " и ".join(s.name for s in student.academic_disciplines.all()),
             student.get_status_display(),
             '',  # FIXME: error with student.status_changed_at

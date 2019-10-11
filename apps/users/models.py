@@ -199,6 +199,17 @@ class StudentProfile(models.Model):
         help_text=_("at enrollment"),
         null=True,
         blank=True)
+    official_student = models.BooleanField(
+        verbose_name=_("Official Student"),
+        help_text=_("Passport, consent for processing personal data, "
+                    "diploma (optional)"),
+        default=False)
+    diploma_number = models.CharField(
+        verbose_name=_("Diploma Number"),
+        max_length=64,
+        help_text=_("Number of higher education diploma"),
+        blank=True
+    )
     academic_disciplines = models.ManyToManyField(
         'study_programs.AcademicDiscipline',
         verbose_name=_("Fields of study"),
