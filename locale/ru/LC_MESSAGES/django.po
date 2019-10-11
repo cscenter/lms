@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-08 09:55+0000\n"
-"PO-Revision-Date: 2019-10-08 09:57+0000\n"
+"POT-Creation-Date: 2019-10-11 07:34+0000\n"
+"PO-Revision-Date: 2019-10-11 07:35+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -58,8 +58,8 @@ msgstr ""
 #: apps/templates/learning/teaching/assignment_list.html:97
 #: apps/templates/learning/teaching/student_assignment_detail.html:144
 #: apps/templates/projects/report.html:240 apps/users/constants.py:29
-#: apps/users/models.py:67 apps/users/models.py:713 apps/users/models.py:729
-#: apps/users/models.py:762
+#: apps/users/models.py:67 apps/users/models.py:724 apps/users/models.py:740
+#: apps/users/models.py:773
 msgid "Student"
 msgstr "Студент"
 
@@ -110,8 +110,7 @@ msgstr ""
 msgid "Cancel"
 msgstr "Отмена"
 
-#: apps/core/forms.py:10 apps/learning/forms.py:32
-#: apps/templates/learning/gradebook/form.html:33
+#: apps/core/forms.py:10 apps/templates/learning/gradebook/form.html:33
 #: apps/templates/users/_user_detail_upload_photo.html:42
 #: apps/users/forms.py:80
 msgid "Save"
@@ -150,7 +149,7 @@ msgstr "Аббревиатура"
 msgid "Timezone"
 msgstr "Часовой пояс"
 
-#: apps/core/models.py:50 apps/core/models.py:172
+#: apps/core/models.py:50 apps/core/models.py:169
 msgid "City"
 msgstr "Город"
 
@@ -181,7 +180,7 @@ msgstr "Местонахождение"
 msgid "Site"
 msgstr "Сайт"
 
-#: apps/core/models.py:127 apps/core/models.py:182 apps/courses/forms.py:128
+#: apps/core/models.py:127 apps/core/models.py:179 apps/courses/forms.py:128
 #: apps/courses/models.py:57 apps/courses/models.py:264
 #: apps/courses/models.py:734 apps/learning/models.py:487
 #: apps/templates/courses/course_class_detail.html:46
@@ -196,7 +195,7 @@ msgstr "Общее описание, правила обучения"
 #: apps/core/models.py:138 apps/courses/models.py:48
 #: apps/courses/models.py:282 apps/learning/models.py:157
 #: apps/learning/models.py:477 apps/library/models.py:38
-#: apps/study_programs/models.py:55 apps/users/models.py:280
+#: apps/study_programs/models.py:55 apps/users/models.py:291
 msgid "Branch"
 msgstr "Отделение"
 
@@ -204,40 +203,40 @@ msgstr "Отделение"
 msgid "Branches"
 msgstr "Отделения"
 
-#: apps/core/models.py:175 apps/core/models.py:199 apps/courses/models.py:42
+#: apps/core/models.py:172 apps/core/models.py:196 apps/courses/models.py:42
 msgid "Location|Name"
 msgstr "Адрес"
 
-#: apps/core/models.py:177
+#: apps/core/models.py:174
 msgid "Address"
 msgstr "Адрес"
 
-#: apps/core/models.py:178
+#: apps/core/models.py:175
 msgid "Should be resolvable by Google Maps"
 msgstr "Должен находиться на google-картах"
 
-#: apps/core/models.py:185
+#: apps/core/models.py:182
 msgid "Directions"
 msgstr "Как добраться"
 
-#: apps/core/models.py:189
+#: apps/core/models.py:186
 msgid "Flags"
 msgstr "Флаги"
 
-#: apps/core/models.py:191 apps/courses/models.py:756
+#: apps/core/models.py:188 apps/courses/models.py:756
 #: apps/courses/models.py:855
 msgid "Class"
 msgstr "Занятие"
 
-#: apps/core/models.py:192
+#: apps/core/models.py:189
 msgid "Interview"
 msgstr "Собеседование"
 
-#: apps/core/models.py:195
+#: apps/core/models.py:192
 msgid "Set purpose of this place"
 msgstr "Отметьте, какие мероприятия проходят в данном месте."
 
-#: apps/core/models.py:200
+#: apps/core/models.py:197
 msgid "Locations"
 msgstr "Адреса"
 
@@ -367,7 +366,7 @@ msgid "Leads seminars"
 msgstr "Ведёт семинары"
 
 #: apps/courses/forms.py:28 apps/courses/models.py:193
-#: apps/users/models.py:715 apps/users/models.py:731
+#: apps/users/models.py:726 apps/users/models.py:742
 msgid "Course|name"
 msgstr "Название"
 
@@ -565,7 +564,7 @@ msgstr "Системное поле. Используется для сорти�
 #: apps/templates/learning/study/course_list.html:84
 #: apps/templates/learning/teaching/course_list.html:11
 #: apps/templates/users/teacher_detail.html:40 apps/users/models.py:59
-#: apps/users/models.py:735
+#: apps/users/models.py:746
 msgid "Semester"
 msgstr "Семестр"
 
@@ -939,6 +938,10 @@ msgstr "Обучение"
 msgid "Add comment"
 msgstr "Добавить комментарий"
 
+#: apps/learning/forms.py:32
+msgid "Send"
+msgstr ""
+
 #: apps/learning/forms.py:47
 msgid "Either text or file should be non-empty"
 msgstr "Требуется текст или приложенный файл"
@@ -1100,7 +1103,7 @@ msgstr "Отправить"
 msgid "Учетная запись активирована."
 msgstr ""
 
-#: apps/learning/models.py:55 apps/users/models.py:739
+#: apps/learning/models.py:55 apps/users/models.py:750
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
@@ -1229,8 +1232,8 @@ msgstr "Выполнение задания"
 msgid "AssignmentComment|text"
 msgstr "Текст"
 
-#: apps/learning/models.py:352 apps/users/models.py:276
-#: apps/users/models.py:300 apps/users/models.py:307
+#: apps/learning/models.py:352 apps/users/models.py:287
+#: apps/users/models.py:311 apps/users/models.py:318
 msgid "LaTeX+Markdown is enabled"
 msgstr "доступны LaTeX и Markdown"
 
@@ -1318,7 +1321,7 @@ msgstr "Выпускается"
 msgid "Graduation ceremony date"
 msgstr "Дата выпускного считается датой выпуска студента"
 
-#: apps/learning/models.py:561 apps/users/models.py:204
+#: apps/learning/models.py:561 apps/users/models.py:215
 msgid "Fields of study"
 msgstr "Направления обучения"
 
@@ -1674,7 +1677,7 @@ msgid "Groups"
 msgstr "Группы"
 
 #: apps/staff/templates/staff/student_search.html:64 apps/users/models.py:63
-#: apps/users/models.py:312
+#: apps/users/models.py:323
 msgid "Status"
 msgstr "Статус"
 
@@ -2335,7 +2338,7 @@ msgstr "Куратор в Computer Science центре"
 msgid "Reference|Detail|info"
 msgstr "Информация"
 
-#: apps/templates/users/teacher_detail.html:25 apps/users/models.py:305
+#: apps/templates/users/teacher_detail.html:25 apps/users/models.py:316
 msgid "Contact information"
 msgstr "Контактная информация"
 
@@ -2363,15 +2366,15 @@ msgstr "Внешние сервисы"
 msgid "Student info record"
 msgstr "Карточка студента"
 
-#: apps/users/admin.py:115
+#: apps/users/admin.py:116
 msgid "Curator's note"
 msgstr "Заметка куратора"
 
-#: apps/users/admin.py:117
+#: apps/users/admin.py:118
 msgid "Important dates"
 msgstr "Важные даты"
 
-#: apps/users/admin.py:145
+#: apps/users/admin.py:146
 msgid "Anytask"
 msgstr ""
 
@@ -2415,7 +2418,7 @@ msgstr "Удовлетворительно"
 msgid "Tell something about yourself"
 msgstr "Расскажите что-нибудь о себе"
 
-#: apps/users/forms.py:66 apps/users/models.py:308
+#: apps/users/forms.py:66 apps/users/models.py:319
 msgid "will be shown only to logged-in users"
 msgstr "показывается только залогиненным пользователям"
 
@@ -2481,186 +2484,204 @@ msgstr "Курс"
 msgid "at enrollment"
 msgstr "при поступлении"
 
-#: apps/users/models.py:205
+#: apps/users/models.py:203
+#| msgid "Student"
+msgid "Official Student"
+msgstr "Официальный студент"
+
+#: apps/users/models.py:204
+msgid "Passport, consent for processing personal data, diploma (optional)"
+msgstr ""
+"Передал данные о паспорте, соглашение о персональных данных, диплом и т.д."
+
+#: apps/users/models.py:208
+msgid "Diploma Number"
+msgstr "Номер диплома"
+
+#: apps/users/models.py:210
+msgid "Number of higher education diploma"
+msgstr "Номер диплома о высшем образовании"
+
+#: apps/users/models.py:216
 msgid "Academic disciplines from which student plans to graduate"
 msgstr "Отметьте, если студент уже определился с направлениями обучения."
 
-#: apps/users/models.py:225
+#: apps/users/models.py:236
 #, fuzzy
 #| msgid "Username"
 msgid "username"
 msgstr "Имя пользователя"
 
-#: apps/users/models.py:228
+#: apps/users/models.py:239
 msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
 msgstr ""
 
-#: apps/users/models.py:231
+#: apps/users/models.py:242
 msgid "A user with that username already exists."
 msgstr ""
 
-#: apps/users/models.py:234
+#: apps/users/models.py:245
 #, fuzzy
 #| msgid "First name"
 msgid "first name"
 msgstr "Имя"
 
-#: apps/users/models.py:235
+#: apps/users/models.py:246
 #, fuzzy
 #| msgid "Last Page"
 msgid "last name"
 msgstr "Последняя страница"
 
-#: apps/users/models.py:236
+#: apps/users/models.py:247
 msgid "email address"
 msgstr ""
 
-#: apps/users/models.py:238
+#: apps/users/models.py:249
 msgid "staff status"
 msgstr ""
 
-#: apps/users/models.py:240
+#: apps/users/models.py:251
 msgid "Designates whether the user can log into this admin site."
 msgstr ""
 
-#: apps/users/models.py:243
+#: apps/users/models.py:254
 msgid "active"
 msgstr ""
 
-#: apps/users/models.py:246
+#: apps/users/models.py:257
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
 
-#: apps/users/models.py:250
+#: apps/users/models.py:261
 msgid "date joined"
 msgstr ""
 
-#: apps/users/models.py:252
+#: apps/users/models.py:263
 msgid "superuser status"
 msgstr ""
 
-#: apps/users/models.py:255
+#: apps/users/models.py:266
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
 msgstr ""
 
-#: apps/users/models.py:259
+#: apps/users/models.py:270
 msgid "Gender"
 msgstr "Пол"
 
-#: apps/users/models.py:261
+#: apps/users/models.py:272
 msgid "modified"
 msgstr "изменено"
 
-#: apps/users/models.py:263
+#: apps/users/models.py:274
 msgid "CSCUser|patronymic"
 msgstr "Отчество"
 
-#: apps/users/models.py:267
+#: apps/users/models.py:278
 msgid "CSCUser|photo"
 msgstr "Фото"
 
-#: apps/users/models.py:275
+#: apps/users/models.py:286
 msgid "CSCUser|note"
 msgstr "Дополнительно"
 
-#: apps/users/models.py:284
+#: apps/users/models.py:295
 msgid "Yandex Login"
 msgstr "Логин на Яндексе"
 
-#: apps/users/models.py:288
+#: apps/users/models.py:299
 msgid "Github Login"
 msgstr "Логин на github.com"
 
-#: apps/users/models.py:293
+#: apps/users/models.py:304
 msgid "stepik.org ID"
 msgstr "stepik.org ID"
 
-#: apps/users/models.py:296
+#: apps/users/models.py:307
 msgid "Anytask URL"
 msgstr ""
 
-#: apps/users/models.py:298
+#: apps/users/models.py:309
 msgid "Social Networks"
 msgstr "Социальные сети"
 
-#: apps/users/models.py:301
+#: apps/users/models.py:312
 msgid "will be shown to curators only"
 msgstr "будут показаны только кураторам"
 
-#: apps/users/models.py:313
+#: apps/users/models.py:324
 msgid "Status|HelpText"
 msgstr ""
 "Если нужно выставить статус задним числом, то изменить семестр можно в логе."
 
-#: apps/users/models.py:318
+#: apps/users/models.py:329
 msgid "Status changed"
 msgstr "Статус изменён"
 
-#: apps/users/models.py:326
+#: apps/users/models.py:337
 msgid "Comment"
 msgstr "Комментарий"
 
-#: apps/users/models.py:331
+#: apps/users/models.py:342
 msgid "Comment changed"
 msgstr "Комментарий изменён"
 
-#: apps/users/models.py:334
+#: apps/users/models.py:345
 msgid "Author of last edit"
 msgstr "Автор последней правки"
 
-#: apps/users/models.py:340
+#: apps/users/models.py:351
 msgid "Workplace"
 msgstr "Место работы"
 
-#: apps/users/models.py:344
+#: apps/users/models.py:355
 msgid "Index Redirect Option"
 msgstr ""
 
-#: apps/users/models.py:353
+#: apps/users/models.py:364
 msgid "CSCUser|user"
 msgstr "Пользователь"
 
-#: apps/users/models.py:354
+#: apps/users/models.py:365
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: apps/users/models.py:719
+#: apps/users/models.py:730
 msgid "Online course record"
 msgstr "Запись об онлайн-курсе"
 
-#: apps/users/models.py:720
+#: apps/users/models.py:731
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: apps/users/models.py:732
+#: apps/users/models.py:743
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: apps/users/models.py:745
+#: apps/users/models.py:756
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: apps/users/models.py:746
+#: apps/users/models.py:757
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: apps/users/models.py:757
+#: apps/users/models.py:768
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: apps/users/models.py:758
+#: apps/users/models.py:769
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: apps/users/models.py:768
+#: apps/users/models.py:779
 msgid "Student Reference"
 msgstr "Справка студента"
 
-#: apps/users/models.py:769
+#: apps/users/models.py:780
 msgid "Student References"
 msgstr "Справки студента"
 
@@ -2806,18 +2827,15 @@ msgstr ""
 
 #: my_compscicenter_ru/templates/my_compscicenter_ru/course_offerings.html:27
 #: my_compscicenter_ru/templates/my_compscicenter_ru/course_offerings.html:94
-#| msgid "Go to course"
 msgid "CS club course"
 msgstr "Курс CS клуба"
 
 #: my_compscicenter_ru/views.py:76
-#| msgid "autumn"
 msgctxt "adjective"
 msgid "autumn"
 msgstr "осенний"
 
 #: my_compscicenter_ru/views.py:77
-#| msgid "spring"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
