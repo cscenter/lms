@@ -15,7 +15,7 @@ export const onReady = function( callback ) {
  **/
 export function loadFetchPolyfill() {
     if (typeof window === 'object' && !window.fetch) {
-        return import(/* webpackChunkName: "fetch-polyfill" */ 'whatwg-fetch');
+        return import(/* webpackChunkName: "fetch-polyfill" */ 'polyfills/fetch');
     }
 }
 
