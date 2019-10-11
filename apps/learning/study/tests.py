@@ -121,9 +121,10 @@ def test_access_student_assignment_failed_course(client):
 
 
 @pytest.mark.django_db
-def test_access_student_assignment_expelled_student(client):
+@pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
+def test_access_student_assignment_inactive_student(inactive_status, client):
     """
-    Expelled student could see student assignment only if he has any
+    Inactive student could see student assignment only if he has any
     submission or score, no matter course was failed/passed/still active
     """
     current_semester = SemesterFactory.create_current()
@@ -134,7 +135,7 @@ def test_access_student_assignment_expelled_student(client):
     student = student_assignment.student
     EnrollmentFactory(course=active_course, student=student, grade=GradeTypes.GOOD)
     assert course_access_role(course=active_course, user=student) == CourseRole.STUDENT_REGULAR
-    student.status = StudentStatuses.EXPELLED
+    student.status = inactive_status
     student.save()
     assert course_access_role(course=active_course, user=student) == CourseRole.STUDENT_RESTRICT
     client.login(student)

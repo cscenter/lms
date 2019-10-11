@@ -35,7 +35,7 @@
                     {% user_thumbnail student student.ThumbnailSize.BASE as im %}
                         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                     {% enduser_thumbnail %}
-                        <figcaption {% if student.status == "expelled" %}class="expelled"{% endif %}>{{ student.last_name }} {{ student.first_name }}</figcaption>
+                        <figcaption {% if student.status == "expelled" or student.status == "academic" %}class="expelled"{% endif %}>{{ student.last_name }} {{ student.first_name }}</figcaption>
                     </a>
                 </div>
                 {% endwith %}

@@ -32,17 +32,13 @@ class LearningPermissionsMixin:
     def is_volunteer(self):
         return UserRoles.VOLUNTEER in self.roles
 
-    @property
-    def is_expelled(self):
-        return None
-
     # FIXME: inline
     @property
     def is_active_student(self):
         if is_club_site():
             return self.is_student
         has_perm = self.is_student or self.is_volunteer
-        return has_perm and self.status != StudentStatuses.EXPELLED
+        return has_perm and not StudentStatuses.is_inactive(self.status)
 
     @property
     def is_teacher(self):
@@ -78,7 +74,7 @@ class CourseRole(Enum):
     STUDENT_REGULAR = auto()  # Enrolled active student
     # Restrict access to the course for enrolled students in next cases:
     #   * student failed the course
-    #   * student was expelled
+    #   * student was expelled or in academic leave
     STUDENT_RESTRICT = auto()
     TEACHER = auto()  # Any teacher from the same meta course
     CURATOR = auto()
@@ -98,7 +94,7 @@ def course_access_role(*, course, user) -> CourseRole:
     enrollment = user.get_enrollment(course.pk)
     if enrollment:
         failed = course_failed_by_student(course, user, enrollment)
-        if not failed and not user.is_expelled:
+        if not failed and not StudentStatuses.is_inactive(user.status):
             role = CourseRole.STUDENT_REGULAR
         else:
             role = CourseRole.STUDENT_RESTRICT
@@ -126,8 +122,8 @@ def view_course_reviews(user, course: Course):
 
 @rules.predicate
 def enroll_in_course(user, course: Course):
-    if user.status == StudentStatuses.EXPELLED:
-        logger.debug("Permissions of expelled students are restricted")
+    if StudentStatuses.is_inactive(user.status):
+        logger.debug("Permissions for students with inactive status are restricted")
         return False
     if not course.enrollment_is_open:
         logger.debug("Enrollment is closed")
@@ -162,13 +158,13 @@ def enroll_in_course_by_invitation(user, course_invitation: CourseInvitation):
 
 
 @rules.predicate
-def is_not_expelled(user):
-    return user.status != StudentStatuses.EXPELLED
+def has_active_status(user):
+    return user.status not in StudentStatuses.inactive_statuses
 
 
 @rules.predicate
 def create_assignment_comment(user, student_assignment: StudentAssignment):
-    if user.status == StudentStatuses.EXPELLED:
+    if user.status in StudentStatuses.inactive_statuses:
         return False
     return student_assignment.student_id == user.id
 
@@ -179,8 +175,8 @@ def view_own_assignment(user, student_assignment: StudentAssignment):
         return False
 
     course = student_assignment.assignment.course
-    is_student_expelled = (user.status == StudentStatuses.EXPELLED)
-    if not is_student_expelled and not course_failed_by_student(course, user):
+    is_inactive = user.status in StudentStatuses.inactive_statuses
+    if not is_inactive and not course_failed_by_student(course, user):
         return True
     # If student failed the course or was expelled at all, deny
     # access only when he has no submissions or positive
@@ -205,15 +201,15 @@ add_perm("learning.view_teaching_menu")
 add_perm("learning.view_course_news", view_course_news)
 # TODO: Where should live permission below?
 add_perm("learning.view_course_reviews", view_course_reviews)
-add_perm("study.view_library", is_not_expelled)
-add_perm("study.view_own_enrollments", is_not_expelled)
+add_perm("study.view_library", has_active_status)
+add_perm("study.view_own_enrollments", has_active_status)
 # FIXME: возможно, view_assignments надо отдать куратору и преподавателю. А студенту явный view_own_assignments. Но, блин, этот дурацкий случай для отчисленных студентов :< И own ничего не чекает, никакой бизнес-логики на самом деле не приаттачено(((((((((
-add_perm("study.view_own_assignments", is_not_expelled)
+add_perm("study.view_own_assignments", has_active_status)
 add_perm("study.view_own_assignment", view_own_assignment)
-add_perm("study.view_schedule", is_not_expelled)
-add_perm("study.view_courses", is_not_expelled)
-add_perm("study.view_internships", is_not_expelled)
-add_perm("study.view_faq", is_not_expelled)
+add_perm("study.view_schedule", has_active_status)
+add_perm("study.view_courses", has_active_status)
+add_perm("study.view_internships", has_active_status)
+add_perm("study.view_faq", has_active_status)
 add_perm("teaching.view_gradebook")
 add_perm("teaching.view_own_gradebook", view_own_gradebook)
 add_perm("study.create_assignment_comment", create_assignment_comment)

@@ -452,7 +452,7 @@ class ProgressReportForSemester(ProgressReport):
     def get_queryset(self):
         return (User.objects
                 .has_role(Roles.STUDENT, Roles.VOLUNTEER)
-                .exclude(status=StudentStatuses.EXPELLED)
+                .exclude(status__in=StudentStatuses.inactive_statuses)
                 .student_progress(before_term=self.target_semester)
                 .select_related('branch')
                 .prefetch_related('groups', 'academic_disciplines')
@@ -619,7 +619,7 @@ class ProgressReportForInvitation(ProgressReportForSemester):
                             .values('student_id'))
         return (User.objects
                 .has_role(Roles.INVITED)
-                .exclude(status=StudentStatuses.EXPELLED)
+                .exclude(status__in=StudentStatuses.inactive_statuses)
                 .filter(pk__in=invited_students)
                 .student_progress(before_term=self.target_semester)
                 .select_related('branch')

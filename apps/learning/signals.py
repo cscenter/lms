@@ -44,10 +44,11 @@ def create_student_assignments_for_new_assignment(sender, instance, created,
     if not created:
         return
     course = instance.course
-    # Skip those who already been expelled
+    # Skip expelled students or in academic leave
     active_students = (Enrollment.active
                        .filter(course=course)
-                       .exclude(student__status=StudentStatuses.EXPELLED)
+                       # FIXME: move to `active` manager?
+                       .exclude(student__status__in=StudentStatuses.inactive_statuses)
                        .values_list("student_id", flat=True))
     for student_id in active_students:
         a_s = StudentAssignment.objects.create(assignment=instance,
@@ -82,7 +83,7 @@ def create_deadline_change_notification(sender, instance, created,
                                         is_about_deadline=True)
                  .save())
             except StudentAssignment.DoesNotExist:
-                # It can occur when student was expelled
+                # It can occur for student with inactive status
                 continue
 
 

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-11 07:34+0000\n"
-"PO-Revision-Date: 2019-10-11 07:35+0000\n"
+"POT-Creation-Date: 2019-10-11 11:27+0000\n"
+"PO-Revision-Date: 2019-10-11 11:27+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -58,8 +58,8 @@ msgstr ""
 #: apps/templates/learning/teaching/assignment_list.html:97
 #: apps/templates/learning/teaching/student_assignment_detail.html:144
 #: apps/templates/projects/report.html:240 apps/users/constants.py:29
-#: apps/users/models.py:67 apps/users/models.py:724 apps/users/models.py:740
-#: apps/users/models.py:773
+#: apps/users/models.py:67 apps/users/models.py:720 apps/users/models.py:736
+#: apps/users/models.py:769
 msgid "Student"
 msgstr "Студент"
 
@@ -366,7 +366,7 @@ msgid "Leads seminars"
 msgstr "Ведёт семинары"
 
 #: apps/courses/forms.py:28 apps/courses/models.py:193
-#: apps/users/models.py:726 apps/users/models.py:742
+#: apps/users/models.py:722 apps/users/models.py:738
 msgid "Course|name"
 msgstr "Название"
 
@@ -564,7 +564,7 @@ msgstr "Системное поле. Используется для сорти�
 #: apps/templates/learning/study/course_list.html:84
 #: apps/templates/learning/teaching/course_list.html:11
 #: apps/templates/users/teacher_detail.html:40 apps/users/models.py:59
-#: apps/users/models.py:746
+#: apps/users/models.py:742
 msgid "Semester"
 msgstr "Семестр"
 
@@ -1103,7 +1103,7 @@ msgstr "Отправить"
 msgid "Учетная запись активирована."
 msgstr ""
 
-#: apps/learning/models.py:55 apps/users/models.py:750
+#: apps/learning/models.py:55 apps/users/models.py:746
 msgid "Enrollment|grade"
 msgstr "Оценка"
 
@@ -1430,38 +1430,42 @@ msgid "StudentInfo|Expelled"
 msgstr "Отчислен"
 
 #: apps/learning/settings.py:52
+msgid "StudentStatus|Academic leave"
+msgstr "Академический отпуск"
+
+#: apps/learning/settings.py:53
 msgid "StudentInfo|Reinstalled"
 msgstr "Восстановлен"
 
-#: apps/learning/settings.py:53
+#: apps/learning/settings.py:54
 msgid "StudentInfo|Will graduate"
 msgstr "Будет выпускаться"
 
-#: apps/learning/settings.py:57
+#: apps/learning/settings.py:68
 msgid "Default"
 msgstr "По-умолчанию"
 
-#: apps/learning/settings.py:58
+#: apps/learning/settings.py:69
 msgid "Binary"
 msgstr "Зачет-Незачет"
 
-#: apps/learning/settings.py:67 apps/users/constants.py:62
+#: apps/learning/settings.py:78 apps/users/constants.py:62
 msgid "Not graded"
 msgstr "Без оценки"
 
-#: apps/learning/settings.py:68
+#: apps/learning/settings.py:79
 msgid "Enrollment|Unsatisfactory"
 msgstr "Незачёт"
 
-#: apps/learning/settings.py:69
+#: apps/learning/settings.py:80
 msgid "Enrollment|Pass"
 msgstr "Зачёт"
 
-#: apps/learning/settings.py:70 apps/users/constants.py:65
+#: apps/learning/settings.py:81 apps/users/constants.py:65
 msgid "Good"
 msgstr "Хорошо"
 
-#: apps/learning/settings.py:71 apps/users/constants.py:66
+#: apps/learning/settings.py:82 apps/users/constants.py:66
 msgid "Excellent"
 msgstr "Отлично"
 
@@ -1525,7 +1529,7 @@ msgstr "Оценка успешно сохранена."
 msgid "Grading form is invalid"
 msgstr "Неправильная форма оценки"
 
-#: apps/learning/tests/test_assignments.py:177
+#: apps/learning/tests/test_assignments.py:178
 msgid "News"
 msgstr "Новости"
 
@@ -1538,8 +1542,8 @@ msgid "Places available"
 msgstr "Осталось мест"
 
 #: apps/learning/tests/test_enrollment.py:76
-#: apps/learning/tests/test_enrollment.py:107
-#: apps/learning/tests/test_enrollment.py:111
+#: apps/learning/tests/test_enrollment.py:108
+#: apps/learning/tests/test_enrollment.py:112
 msgid "Enroll in"
 msgstr "Записаться"
 
@@ -2485,7 +2489,6 @@ msgid "at enrollment"
 msgstr "при поступлении"
 
 #: apps/users/models.py:203
-#| msgid "Student"
 msgid "Official Student"
 msgstr "Официальный студент"
 
@@ -2649,39 +2652,39 @@ msgstr "Пользователь"
 msgid "CSCUser|users"
 msgstr "Пользователи"
 
-#: apps/users/models.py:730
+#: apps/users/models.py:726
 msgid "Online course record"
 msgstr "Запись об онлайн-курсе"
 
-#: apps/users/models.py:731
+#: apps/users/models.py:727
 msgid "Online course records"
 msgstr "Записи об онлайн-курсах"
 
-#: apps/users/models.py:743
+#: apps/users/models.py:739
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: apps/users/models.py:756
+#: apps/users/models.py:752
 msgid "SHAD course record"
 msgstr "Запись о курсе ШАД"
 
-#: apps/users/models.py:757
+#: apps/users/models.py:753
 msgid "SHAD course records"
 msgstr "Записи о курсах ШАД"
 
-#: apps/users/models.py:768
+#: apps/users/models.py:764
 msgid "Reference|signature"
 msgstr "Подпись"
 
-#: apps/users/models.py:769
+#: apps/users/models.py:765
 msgid "Reference|note"
 msgstr "Текст в свободной форме"
 
-#: apps/users/models.py:779
+#: apps/users/models.py:775
 msgid "Student Reference"
 msgstr "Справка студента"
 
-#: apps/users/models.py:780
+#: apps/users/models.py:776
 msgid "Student References"
 msgstr "Справки студента"
 

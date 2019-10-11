@@ -61,8 +61,9 @@ def test_detail_view_timezone(settings, client):
 
 
 @pytest.mark.django_db
-def test_student_status_expelled(client, settings):
-    student = StudentFactory(status=StudentStatuses.EXPELLED)
+@pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
+def test_student_status_inactive(inactive_status, client, settings):
+    student = StudentFactory(status=inactive_status)
     client.login(student)
     url = reverse('study:course_list')
     response = client.get(url)

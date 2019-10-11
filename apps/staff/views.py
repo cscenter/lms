@@ -478,7 +478,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
               .order_by('last_name', 'first_name', 'pk')
               .prefetch_related("groups"))
         if "print" in self.request.GET:
-            qs = qs.exclude(status=StudentStatuses.EXPELLED)
+            qs = qs.exclude(status__in=StudentStatuses.inactive_statuses)
         return qs
 
 
