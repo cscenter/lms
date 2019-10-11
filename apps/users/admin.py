@@ -111,7 +111,8 @@ class UserAdmin(_UserAdmin):
                                              'github_login', 'anytask_url']}),
         (_('Student info record'),
          {'fields': ['status', 'enrollment_year', 'curriculum_year',
-                     'university', 'uni_year_at_enrollment', 'phone']}),
+                     'university', 'uni_year_at_enrollment', 'phone',
+                     'official_student', 'diploma_number']}),
         (_("Curator's note"),
          {'fields': ['comment', 'comment_changed_at', 'comment_last_author']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
