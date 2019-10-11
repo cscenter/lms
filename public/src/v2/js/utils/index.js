@@ -14,7 +14,7 @@ export const onReady = function( callback ) {
  * Polyfill fetch API for browsers without native support.
  **/
 export function loadFetchPolyfill() {
-    if (typeof window === 'object' && !window.fetch) {
+    if (typeof window === 'object' && (!window.fetch || !window.AbortController)) {
         return import(/* webpackChunkName: "fetch-polyfill" */ 'polyfills/fetch');
     }
 }
