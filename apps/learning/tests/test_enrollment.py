@@ -94,7 +94,8 @@ def test_enrollment_capacity_view(client):
 
 
 @pytest.mark.django_db
-def test_enrollment_expelled_student(client):
+@pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
+def test_enrollment_inactive_student(inactive_status, client):
     student = StudentFactory(branch__code=Branches.SPB)
     client.login(student)
     tomorrow = now_local(student.get_timezone()) + datetime.timedelta(days=1)
@@ -105,7 +106,7 @@ def test_enrollment_expelled_student(client):
     response = client.get(course.get_absolute_url())
     assert response.status_code == 200
     assert smart_bytes(_("Enroll in")) in response.content
-    student.status = StudentStatuses.EXPELLED
+    student.status = inactive_status
     student.save()
     response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Enroll in")) not in response.content

@@ -285,7 +285,7 @@ def test_gradebook_data():
     assert data.students[s3.pk].total_score == 3
     assert data.students[e4.student_id].total_score == 0
     assert data.students[e5.student_id].total_score == 0
-    # Check grid with expelled students
+    # Check grid for student with inactive status
     e5.student.status = StudentStatuses.EXPELLED
     e5.student.save()
     a_new = AssignmentFactory(course=co, passing_score=3, maximum_score=7)

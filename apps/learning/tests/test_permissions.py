@@ -73,7 +73,8 @@ def test_course_access_role_teacher():
 
 
 @pytest.mark.django_db
-def test_course_access_role_student():
+@pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
+def test_course_access_role_student(inactive_status):
     semester = SemesterFactory.create_current()
     prev_semester = SemesterFactory.create_prev(semester)
     course = CourseFactory(semester=semester, is_open=False)
@@ -93,10 +94,10 @@ def test_course_access_role_student():
                       grade=GradeTypes.UNSATISFACTORY)
     role = course_access_role(course=prev_course, user=student)
     assert role == CourseRole.STUDENT_RESTRICT
-    # Expelled student has restricted access to all courses they enrolled in
+    # Inactive student has restricted access to all courses they enrolled in
     delete_enrollment_cache(student, course)
     delete_enrollment_cache(student, prev_course)
-    student.status = StudentStatuses.EXPELLED
+    student.status = inactive_status
     student.save()
     role = course_access_role(course=prev_course, user=student)
     assert role == CourseRole.STUDENT_RESTRICT
@@ -105,7 +106,8 @@ def test_course_access_role_student():
 
 
 @pytest.mark.django_db
-def test_enroll_in_course(settings):
+@pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
+def test_enroll_in_course(inactive_status, settings):
     today_local = now_for_branch(Branches.SPB)
     yesterday = today_local - datetime.timedelta(days=1)
     tomorrow = today_local + datetime.timedelta(days=1)
@@ -116,16 +118,15 @@ def test_enroll_in_course(settings):
     course = CourseFactory(semester=term, is_open=False,
                            capacity=0, branch=branch_spb)
     assert course.enrollment_is_open
-    student_spb = StudentFactory(branch=branch_spb)
-    assert student_spb.status != StudentStatuses.EXPELLED
+    student_spb = StudentFactory(branch=branch_spb, status="")
     assert student_spb.has_perm("learning.enroll_in_course", course)
     # Enrollment is closed
     course.semester.enrollment_end_at = yesterday.date()
     assert not student_spb.has_perm("learning.enroll_in_course", course)
     course.semester.enrollment_end_at = tomorrow.date()
     assert student_spb.has_perm("learning.enroll_in_course", course)
-    # Student was expelled
-    student_spb.status = StudentStatuses.EXPELLED
+    # Student with inactive status
+    student_spb.status = inactive_status
     assert not student_spb.has_perm("learning.enroll_in_course", course)
     student_spb.status = ''
     assert student_spb.has_perm("learning.enroll_in_course", course)

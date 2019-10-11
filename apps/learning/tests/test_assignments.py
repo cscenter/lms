@@ -17,7 +17,8 @@ from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
 from courses.models import Assignment, AssignmentAttachment
 from courses.tests.factories import SemesterFactory, CourseFactory, \
-    CourseTeacherFactory, AssignmentFactory, CourseNewsFactory
+    CourseTeacherFactory, AssignmentFactory, CourseNewsFactory, \
+    AssignmentAttachmentFactory
 from courses.utils import get_current_term_pair
 from learning.utils import course_failed_by_student
 from learning.models import StudentAssignment, Enrollment, \
@@ -679,15 +680,11 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     EnrollmentFactory(student=student_spb, course=co)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
-    student_spb.status = StudentStatuses.EXPELLED
-    student_spb.save()
-    response = client.get(task_attachment_url)
-    assert response.status_code == 403  # expelled
     # Should be the same for volunteer
     volunteer_spb = VolunteerFactory(branch__code=Branches.SPB)
+    client.login(volunteer_spb)
     response = client.get(task_attachment_url)
     assert response.status_code == 403
-    client.login(volunteer_spb)
     EnrollmentFactory(student=volunteer_spb, course=co)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
@@ -705,6 +702,23 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
     project_reviewer = ProjectReviewerFactory()
     # Reviewers and others have no access
     client.login(project_reviewer)
+    response = client.get(task_attachment_url)
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
+def test_assignment_attachment_inactive_student(inactive_status, client):
+    course = CourseFactory(semester=SemesterFactory.create_current())
+    student_spb = StudentFactory(branch__code=Branches.SPB)
+    a_attachment = AssignmentAttachmentFactory(assignment__course=course)
+    EnrollmentFactory(course=course, student=student_spb)
+    task_attachment_url = a_attachment.file_url()
+    client.login(student_spb)
+    response = client.get(task_attachment_url)
+    assert response.status_code == 200
+    student_spb.status = inactive_status
+    student_spb.save()
     response = client.get(task_attachment_url)
     assert response.status_code == 403
 

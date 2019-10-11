@@ -421,10 +421,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
     def get_timezone(self) -> Timezone:
         return self.branch.get_timezone()
 
-    @property
-    def is_expelled(self):
-        return self.status == StudentStatuses.EXPELLED
-
     @staticmethod
     def generate_random_username(length=30,
                                  chars=ascii_lowercase + digits,

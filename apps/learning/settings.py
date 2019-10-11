@@ -49,8 +49,19 @@ class AcademicDegreeYears(DjangoChoices):
 
 class StudentStatuses(DjangoChoices):
     EXPELLED = C('expelled', _("StudentInfo|Expelled"))
+    ACADEMIC_LEAVE = C('academic', _("StudentStatus|Academic leave"))
     REINSTATED = C('reinstated', _("StudentInfo|Reinstalled"))
     WILL_GRADUATE = C('will_graduate', _("StudentInfo|Will graduate"))
+
+    inactive_statuses = {EXPELLED.value, ACADEMIC_LEAVE.value}
+
+    @classmethod
+    def is_inactive(cls, status):
+        """
+        Inactive statuses affect student permissions, e.g. expelled student
+        can't enroll in a course
+        """
+        return status in cls.inactive_statuses
 
 
 class GradingSystems(DjangoChoices):

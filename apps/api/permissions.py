@@ -12,7 +12,7 @@ class CuratorAccessPermission(permissions.BasePermission):
 class StudentAccessPermission(permissions.BasePermission):
     """
     Check user has active student or volunteer group.
-    Active means student didn't expelled.
+    Active means student didn't expelled or in academic leave.
     """
 
     def has_permission(self, request, view):
