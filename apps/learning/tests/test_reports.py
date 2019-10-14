@@ -52,14 +52,16 @@ def test_report_common():
     assert progress_report.index[1] == student2.pk
     assert progress_report.index[2] == student3.pk
     # Check project headers and associated values
+    # ._export*() methods depend on `.student_progress()`
+    students_progress = report_factory.get_queryset().student_progress()
     project_headers = report_factory.generate_projects_headers(1)
     assert project_headers[0] == 'Проект 1, название'
     assert project_headers[1] == 'Проект 1, оценка'
     assert project_headers[2] == 'Проект 1, руководители'
     assert project_headers[3] == 'Проект 1, семестр'
-    s1 = report_factory.get_queryset().get(pk=student1.pk)
-    s2 = report_factory.get_queryset().get(pk=student2.pk)
-    s3 = report_factory.get_queryset().get(pk=student3.pk)
+    s1 = students_progress.get(pk=student1.pk)
+    s2 = students_progress.get(pk=student2.pk)
+    s3 = students_progress.get(pk=student3.pk)
     project_columns = report_factory._export_projects(s1, 1)
     assert project_columns[0] == p.name
     assert project_columns[1] == ps.get_final_grade_display()

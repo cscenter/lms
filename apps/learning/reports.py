@@ -5,14 +5,16 @@ from datetime import datetime
 from operator import attrgetter
 from typing import List, Dict
 
-from django.db.models import Q, Prefetch, Count
+from django.db.models import Q, Prefetch, Count, Case, When, Value, F, \
+    IntegerField
 from django.http import HttpResponse
 from django.utils import formats
 from pandas import DataFrame, ExcelWriter
 
 from admission.models import Applicant
 from core.reports import ReportFileOutput
-from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
+from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU, \
+    DATETIME_FORMAT_RU
 from courses.models import Semester, Course, CourseTeacher, MetaCourse
 from learning.models import AssignmentComment, Enrollment
 from learning.permissions import has_master_degree
@@ -318,28 +320,70 @@ class ProgressReportForDiplomas(ProgressReport):
 
 
 class ProgressReportFull(ProgressReport):
+    def generate(self, queryset=None) -> DataFrame:
+        students = queryset if queryset is not None else self.get_queryset()
+        headers = self._generate_headers()
+        data = [self._export_row(s) for s in students]
+        return DataFrame.from_records(columns=headers, data=data, index='ID')
+
     def get_queryset(self, base_queryset=None):
         if base_queryset is None:
+            # Can't use distinct here since later we use .annotation()
             base_queryset = (User.objects
                              .has_role(Roles.STUDENT,
                                        Roles.GRADUATE,
                                        Roles.VOLUNTEER)
-                             .order_by('last_name', 'first_name', 'pk')
-                             .distinct('last_name', 'first_name', 'pk'))
+                             .order_by('last_name', 'first_name', 'pk'))
+        success_practice = Count(
+            Case(When(Q(projectstudent__final_grade__in=GradeTypes.satisfactory_grades) &
+                      Q(projectstudent__project__project_type=ProjectTypes.practice) &
+                      ~Q(projectstudent__project__status=Project.Statuses.CANCELED),
+                      then=F('projectstudent__id')),
+                 output_field=IntegerField()),
+            distinct=True
+        )
+        success_research = Count(
+            Case(When(Q(projectstudent__final_grade__in=GradeTypes.satisfactory_grades) &
+                      Q(projectstudent__project__project_type=ProjectTypes.research) &
+                      ~Q(projectstudent__project__status=Project.Statuses.CANCELED),
+                      then=F('projectstudent__id')),
+                 output_field=IntegerField()),
+            distinct=True
+        )
+        # Take into account only 1 enrollment if student passed the course twice
+        success_enrollments_total = Count(
+            Case(When(Q(enrollment__grade__in=GradeTypes.satisfactory_grades) &
+                      Q(enrollment__is_deleted=False),
+                      then=F('enrollment__course__meta_course_id')),
+                 output_field=IntegerField()),
+            distinct=True
+        )
+        success_shad = Count(
+            Case(When(shadcourserecord__grade__in=GradeTypes.satisfactory_grades,
+                      then=F('shadcourserecord__id')),
+                 output_field=IntegerField()),
+            distinct=True
+        )
+        success_online = Count('onlinecourserecord', distinct=True)
         return (base_queryset
-                .student_progress()
                 .select_related('branch', 'graduate_profile')
                 .defer('graduate_profile__testimonial', 'private_contacts',
                        'social_networks', 'bio')
+                .annotate(success_enrollments=success_enrollments_total,
+                          success_shad=success_shad,
+                          success_online=success_online,
+                          success_practice=success_practice,
+                          success_research=success_research)
+                .annotate(total_success_passed=(F('success_enrollments') +
+                                                F('success_shad') +
+                                                F('success_online')))
                 .prefetch_related(
-                    'groups',
                     Prefetch('applicant_set',
                              queryset=Applicant.objects.only('pk', 'user_id')),
                     'academic_disciplines',
                     'graduate_profile__academic_disciplines'))
 
-    def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
-                          projects_max):
+    def _generate_headers(self, **kwargs):
         return [
             'ID',
             'Отделение',
@@ -370,26 +414,7 @@ class ProgressReportFull(ProgressReport):
             'Пройдено семестров НИР (закончили, успех)',
         ]
 
-    def _export_row(self, student: User, *, courses, meta_courses, shads_max,
-                    online_max, projects_max):
-        # FIXME: можно считать и в БД теперь
-        total_success_passed = (
-            sum(1 for c in student.unique_enrollments.values() if
-                c.grade in GradeTypes.satisfactory_grades) +
-            sum(1 for c in student.shads if
-                c.grade in GradeTypes.satisfactory_grades) +
-            sum(1 for _ in student.online_courses)
-        )
-        total_success_research = 0
-        total_success_practice = 0
-        for ps in student.projects_progress:
-            if ps.project.is_canceled:
-                continue
-            if ps.final_grade in GradeTypes.satisfactory_grades:
-                type_ = ps.project.project_type
-                total_success_research += int(type_ == ProjectTypes.research)
-                total_success_practice += int(type_ == ProjectTypes.practice)
-        dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
+    def _export_row(self, student, **kwargs):
         if hasattr(student, "graduate_profile"):
             disciplines = student.graduate_profile.academic_disciplines
             graduation_year = student.graduate_profile.graduation_year
@@ -418,12 +443,12 @@ class ProgressReportFull(ProgressReport):
             " и ".join(s.name for s in disciplines.all()),
             student.get_status_display(),
             student.comment,
-            student.comment_changed_at.strftime(dt_format),
+            student.comment_changed_at.strftime(DATETIME_FORMAT_RU),
             student.workplace,
             self.links_to_application_forms(student),
-            total_success_passed,
-            total_success_practice,
-            total_success_research,
+            student.total_success_passed,
+            student.success_practice,
+            student.success_research,
         ]
 
     def get_filename(self):
