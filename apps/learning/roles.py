@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from djchoices import DjangoChoices, C
 
+from auth.permissions import Role
 from auth.registry import role_registry
 
 
@@ -86,15 +87,6 @@ class Roles(DjangoChoices):
     ))
 
 
-role_registry.register(Roles.STUDENT,
-                       Roles.get_choice(Roles.STUDENT).permissions)
-role_registry.register(Roles.TEACHER,
-                       Roles.get_choice(Roles.TEACHER).permissions)
-role_registry.register(Roles.GRADUATE,
-                       Roles.get_choice(Roles.GRADUATE).permissions)
-role_registry.register(Roles.VOLUNTEER,
-                       Roles.get_choice(Roles.VOLUNTEER).permissions)
-role_registry.register(Roles.CURATOR,
-                       Roles.get_choice(Roles.CURATOR).permissions)
-role_registry.register(Roles.INVITED,
-                       Roles.get_choice(Roles.INVITED).permissions)
+for code, name in Roles.choices:
+    role_registry.register(Role(code=code, name=name,
+                                permissions=Roles.get_choice(code).permissions))

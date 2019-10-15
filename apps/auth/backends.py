@@ -27,14 +27,26 @@ class RBACPermissions:
         if not user.is_active or user.is_anonymous:
             return False
         if hasattr(user, 'roles'):
-            for role in user.roles:
-                if role in role_registry:
-                    permissions = role_registry[role]
-                    if permissions.rule_exists(perm):
-                        return permissions[perm].test(user, *args, **kwargs)
-                else:
-                    logger.warning(f'Role {role} is not registered '
-                                   f'but assigned to user {user}')
+            return self._has_perm(user, perm, user.roles, *args, **kwargs)
+        return False
+
+    def _has_perm(self, user, perm, roles, *args, **kwargs):
+        for role_code in roles:
+            if role_code in role_registry:
+                role = role_registry[role_code]
+                if role.permissions.rule_exists(perm):
+                    return role.permissions[perm].test(user, *args, **kwargs)
+                # Case when calling `.has_perm('update_comment')`
+                # e.g. for teacher and expect that
+                # .has_perm('update_own_comment') will be in a call chain
+                if perm in role.relations:
+                    for rel_perm_name in role.relations[perm]:
+                        if self._has_perm(user, rel_perm_name, [role.code],
+                                          *args, **kwargs):
+                            return True
+            else:
+                logger.warning(f'Role {role_code} is not registered '
+                               f'but assigned to user {user}')
         return False
 
     def has_module_perms(self, user, app_label):

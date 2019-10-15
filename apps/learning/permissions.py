@@ -3,7 +3,7 @@ from enum import Enum, auto
 
 import rules
 
-from auth.permissions import add_perm
+from auth.permissions import add_perm, Permission
 from core.utils import is_club_site
 from courses.models import Course
 from learning.models import StudentAssignment, CourseInvitation
@@ -110,17 +110,6 @@ def course_access_role(*, course, user) -> CourseRole:
 
 
 @rules.predicate
-def view_course_news(user, course: Course):
-    role = course_access_role(course=course, user=user)
-    return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
-
-
-@rules.predicate
-def view_course_reviews(user, course: Course):
-    return course.enrollment_is_open
-
-
-@rules.predicate
 def enroll_in_course(user, course: Course):
     if StudentStatuses.is_inactive(user.status):
         logger.debug("Permissions for students with inactive status are restricted")
@@ -140,80 +129,172 @@ def enroll_in_course(user, course: Course):
 
 
 @rules.predicate
-def leave_course(user, course: Course):
-    # Student could unenroll before enrollment deadline
-    if not course.enrollment_is_open:
-        return False
-    enrollment = user.get_enrollment(course)
-    if not enrollment:
-        return False
-    return True
-
-
-@rules.predicate
-def enroll_in_course_by_invitation(user, course_invitation: CourseInvitation):
-    if not course_invitation.is_active:
-        return False
-    return enroll_in_course(user, course_invitation.course)
-
-
-@rules.predicate
 def has_active_status(user):
     return user.status not in StudentStatuses.inactive_statuses
 
 
-@rules.predicate
-def create_assignment_comment(user, student_assignment: StudentAssignment):
-    if user.status in StudentStatuses.inactive_statuses:
-        return False
-    return student_assignment.student_id == user.id
+@add_perm
+class ViewStudyMenu(Permission):
+    name = "learning.view_study_menu"
 
 
-@rules.predicate
-def view_own_assignment(user, student_assignment: StudentAssignment):
-    if user.id != student_assignment.student_id:
-        return False
-
-    course = student_assignment.assignment.course
-    is_inactive = user.status in StudentStatuses.inactive_statuses
-    if not is_inactive and not course_failed_by_student(course, user):
-        return True
-    # If student failed the course or was expelled at all, deny
-    # access only when he has no submissions or positive
-    # grade on assignment
-    # XXX: Take into account only student comments since only
-    # they could be treated as `submission`.
-    return student_assignment.has_comments(user) or student_assignment.score
+@add_perm
+class ViewTeachingMenu(Permission):
+    name = "learning.view_teaching_menu"
 
 
-@rules.predicate
-def create_assignment_comment_teacher(user, sa: StudentAssignment):
-    return user in sa.assignment.course.teachers.all()
+@add_perm
+class ViewCourseNews(Permission):
+    name = "learning.view_course_news"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        role = course_access_role(course=course, user=user)
+        return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
 
 
-@rules.predicate
-def view_own_gradebook(user, course: Course):
-    return user in course.teachers.all()
+@add_perm
+class ViewCourseReviews(Permission):
+    name = "learning.view_course_reviews"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        return course.enrollment_is_open
 
 
-add_perm("learning.view_study_menu")
-add_perm("learning.view_teaching_menu")
-add_perm("learning.view_course_news", view_course_news)
-# TODO: Where should live permission below?
-add_perm("learning.view_course_reviews", view_course_reviews)
-add_perm("study.view_library", has_active_status)
-add_perm("study.view_own_enrollments", has_active_status)
+@add_perm
+class ViewLibrary(Permission):
+    name = "study.view_library"
+    rule = has_active_status
+
+
+@add_perm
+class ViewOwnEnrollments(Permission):
+    name = "study.view_own_enrollments"
+    rule = has_active_status
+
+
 # FIXME: возможно, view_assignments надо отдать куратору и преподавателю. А студенту явный view_own_assignments. Но, блин, этот дурацкий случай для отчисленных студентов :< И own ничего не чекает, никакой бизнес-логики на самом деле не приаттачено(((((((((
-add_perm("study.view_own_assignments", has_active_status)
-add_perm("study.view_own_assignment", view_own_assignment)
-add_perm("study.view_schedule", has_active_status)
-add_perm("study.view_courses", has_active_status)
-add_perm("study.view_internships", has_active_status)
-add_perm("study.view_faq", has_active_status)
-add_perm("teaching.view_gradebook")
-add_perm("teaching.view_own_gradebook", view_own_gradebook)
-add_perm("study.create_assignment_comment", create_assignment_comment)
-add_perm("teaching.create_assignment_comment", create_assignment_comment_teacher)
-add_perm("learning.enroll_in_course", enroll_in_course)
-add_perm("learning.enroll_in_course_by_invitation", enroll_in_course_by_invitation)
-add_perm("learning.leave_course", leave_course)
+@add_perm
+class ViewOwnAssignments(Permission):
+    name = "study.view_own_assignments"
+    rule = has_active_status
+
+
+@add_perm
+class ViewOwnAssignment(Permission):
+    name = "study.view_own_assignment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_assignment: StudentAssignment):
+        if user.id != student_assignment.student_id:
+            return False
+
+        course = student_assignment.assignment.course
+        is_inactive = user.status in StudentStatuses.inactive_statuses
+        if not is_inactive and not course_failed_by_student(course, user):
+            return True
+        # If student failed the course or was expelled at all, deny
+        # access only when he has no submissions or positive
+        # grade on assignment
+        # XXX: Take into account only student comments since only
+        # they could be treated as `submission`.
+        return student_assignment.has_comments(user) or student_assignment.score
+
+
+@add_perm
+class ViewSchedule(Permission):
+    name = "study.view_schedule"
+    rule = has_active_status
+
+
+@add_perm
+class ViewCourses(Permission):
+    name = "study.view_courses"
+    rule = has_active_status
+
+
+@add_perm
+class ViewInternships(Permission):
+    name = "study.view_internships"
+    rule = has_active_status
+
+
+@add_perm
+class ViewFAQ(Permission):
+    name = "study.view_faq"
+    rule = has_active_status
+
+
+@add_perm
+class ViewGradebook(Permission):
+    name = "teaching.view_gradebook"
+
+
+@add_perm
+class ViewOwnGradebook(Permission):
+    name = "teaching.view_own_gradebook"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        return user in course.teachers.all()
+
+
+@add_perm
+class CreateAssignmentCommentStudent(Permission):
+    name = "study.create_assignment_comment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_assignment: StudentAssignment):
+        if user.status in StudentStatuses.inactive_statuses:
+            return False
+        return student_assignment.student_id == user.id
+
+
+@add_perm
+class CreateAssignmentCommentTeacher(Permission):
+    name = "teaching.create_assignment_comment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, sa: StudentAssignment):
+        return user in sa.assignment.course.teachers.all()
+
+
+@add_perm
+class EnrollInCourse(Permission):
+    name = "learning.enroll_in_course"
+    rule = enroll_in_course
+
+
+@add_perm
+class EnrollInCourseByInvitation(Permission):
+    name = "learning.enroll_in_course_by_invitation"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course_invitation: CourseInvitation):
+        if not course_invitation.is_active:
+            return False
+        return enroll_in_course(user, course_invitation.course)
+
+
+@add_perm
+class LeaveCourse(Permission):
+    name = "learning.leave_course"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        # Student could unenroll before enrollment deadline
+        if not course.enrollment_is_open:
+            return False
+        enrollment = user.get_enrollment(course)
+        if not enrollment:
+            return False
+        return True

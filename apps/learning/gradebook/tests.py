@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.utils.encoding import smart_bytes, force_bytes
 
 from auth.mixins import PermissionRequiredMixin
-from auth.permissions import all_permissions
+from auth.permissions import perm_registry
 from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory, \
@@ -53,7 +53,7 @@ def test_gradebook_view_security(client, lms_resolver):
     resolver = lms_resolver(course.get_gradebook_url())
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
     assert resolver.func.view_class.permission_required == "teaching.view_own_gradebook"
-    assert resolver.func.view_class.permission_required in all_permissions
+    assert resolver.func.view_class.permission_required in perm_registry
 
 
 @pytest.mark.django_db
@@ -62,7 +62,7 @@ def test_gradebook_csv_view_security(client, lms_resolver):
     resolver = lms_resolver(course.get_gradebook_url(format='csv'))
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
     assert resolver.func.view_class.permission_required == "teaching.view_own_gradebook"
-    assert resolver.func.view_class.permission_required in all_permissions
+    assert resolver.func.view_class.permission_required in perm_registry
 
 
 @pytest.mark.django_db
