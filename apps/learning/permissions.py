@@ -245,6 +245,11 @@ class ViewOwnGradebook(Permission):
 
 
 @add_perm
+class CreateAssignmentComment(Permission):
+    name = "learning.create_assignment_comment"
+
+
+@add_perm
 class CreateAssignmentCommentStudent(Permission):
     name = "study.create_assignment_comment"
 
