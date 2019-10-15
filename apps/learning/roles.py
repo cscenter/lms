@@ -6,6 +6,10 @@ from auth.registry import role_registry
 
 
 # TODO: Add description of each role
+from learning.permissions import CreateAssignmentComment, \
+    CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent
+
+
 class Roles(DjangoChoices):
     STUDENT = C(1, _('Student'), permissions=(
         "learning.view_study_menu",
@@ -66,6 +70,7 @@ class Roles(DjangoChoices):
         "study.view_library",
         "teaching.create_assignment_comment",
         "teaching.view_gradebook",
+        CreateAssignmentComment,
     ))
     INVITED = C(11, _('Invited User'), permissions=(
         "learning.view_study_menu",
@@ -90,3 +95,10 @@ class Roles(DjangoChoices):
 for code, name in Roles.choices:
     role_registry.register(Role(code=code, name=name,
                                 permissions=Roles.get_choice(code).permissions))
+
+# Add relations
+teacher_role = role_registry[Roles.TEACHER]
+teacher_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentTeacher)
+
+student_role = role_registry[Roles.STUDENT]
+student_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentStudent)

@@ -2,17 +2,23 @@ import datetime
 
 import pytest
 
+from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.tests.utils import now_for_branch
 from courses.models import Course
-from courses.tests.factories import CourseFactory, SemesterFactory
-from learning.permissions import course_access_role, CourseRole
+from courses.tests.factories import CourseFactory, SemesterFactory, \
+    AssignmentFactory
+from learning.models import StudentAssignment
+from learning.permissions import course_access_role, CourseRole, \
+    CreateAssignmentComment, CreateAssignmentCommentTeacher, \
+    CreateAssignmentCommentStudent
 from learning.settings import StudentStatuses, GradeTypes, Branches
-from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
+from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory, \
+    AssignmentCommentFactory
 from users.constants import Roles
 from users.models import ExtendedAnonymousUser, User
 from users.tests.factories import CuratorFactory, TeacherFactory, \
-    StudentFactory
+    StudentFactory, UserFactory
 
 
 def delete_enrollment_cache(user: User, course: Course):
@@ -191,3 +197,39 @@ def test_enroll_in_course_by_invitation():
     assert not course.enrollment_is_open
     assert not student.has_perm("learning.enroll_in_course_by_invitation",
                                 course_invitation)
+
+
+@pytest.mark.django_db
+def test_create_assignment_comment():
+    user = UserFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
+    curator = CuratorFactory()
+    student_other = StudentFactory()
+    course = CourseFactory(teachers=[teacher])
+    assert CreateAssignmentComment.name in perm_registry
+    assert CreateAssignmentCommentTeacher in perm_registry
+    assert CreateAssignmentCommentStudent in perm_registry
+    e = EnrollmentFactory(course=course)
+    student = e.student
+    AssignmentFactory(course=course)
+    assert StudentAssignment.objects.count() == 1
+    sa = StudentAssignment.objects.first()
+    assert teacher.has_perm(CreateAssignmentCommentTeacher.name, sa)
+    assert not teacher_other.has_perm(CreateAssignmentCommentTeacher.name, sa)
+    assert not curator.has_perm(CreateAssignmentCommentTeacher.name, sa)
+    assert not user.has_perm(CreateAssignmentCommentTeacher.name, sa)
+    assert curator.has_perm(CreateAssignmentComment.name, sa)
+    # Now check relation
+    assert teacher.has_perm(CreateAssignmentComment.name, sa)
+    assert not teacher_other.has_perm(CreateAssignmentComment.name, sa)
+    assert not student_other.has_perm(CreateAssignmentComment.name, sa)
+    assert student.has_perm(CreateAssignmentComment.name, sa)
+    assert not user.has_perm(CreateAssignmentComment.name, sa)
+    # User has both roles: user and teacher
+    teacher.add_group(Roles.STUDENT)
+    # Make sure we don't use any cache
+    teacher = User.objects.get(pk=teacher.pk)
+    assert teacher.has_perm(CreateAssignmentComment.name, sa)
+    assert teacher.has_perm(CreateAssignmentCommentTeacher.name, sa)
+    assert not teacher.has_perm(CreateAssignmentCommentStudent.name, sa)

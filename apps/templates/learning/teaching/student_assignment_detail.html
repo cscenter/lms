@@ -106,7 +106,7 @@
             {% endfor %}
             </ul>
         {% endif %}
-        {% call_method request.user "has_perm" "teaching.create_assignment_comment" a_s as can_leave_comment %}
+        {% call_method request.user "has_perm" "learning.create_assignment_comment" a_s as can_leave_comment %}
         {% if can_leave_comment %}
             <div class="csc-well">{% crispy form %}</div>
         {% endif %}
