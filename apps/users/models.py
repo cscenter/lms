@@ -22,7 +22,7 @@ from model_utils.fields import MonitorField, AutoLastModifiedField
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
-from auth.permissions import all_permissions
+from auth.permissions import perm_registry
 from auth.tasks import update_password_in_gerrit
 from my_compscicenter_ru.utils import PublicRoute
 from core.models import LATEX_MARKDOWN_ENABLED
@@ -372,7 +372,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
 
     def has_perm(self, perm, obj=None):
         # Active superusers have only permissions implicitly added by Django
-        is_registered_permission = perm in all_permissions
+        is_registered_permission = perm in perm_registry
         if self.is_active and self.is_superuser and not is_registered_permission:
             return True
         # Otherwise we need to check the backends.

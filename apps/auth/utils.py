@@ -1,6 +1,6 @@
 from rules import predicate
 
-from auth.permissions import all_permissions
+from auth.permissions import perm_registry
 from auth.registry import role_registry
 
 
@@ -11,11 +11,11 @@ def override_perm(name, pred=None):
         * update already registered roles which have ref to the old
         permission predicate
     """
-    if not all_permissions.rule_exists(name):
+    if name not in perm_registry:
         return
     if pred is None:
         pred = predicate(lambda: True, name=name)
-    all_permissions.set_rule(name, pred)
-    for _, role_perms in role_registry.items():
-        if role_perms.rule_exists(name):
-            role_perms.set_rule(name, pred)
+    perm_registry.set_permission(name, pred)
+    for role in role_registry.values():
+        if role.permissions.rule_exists(name):
+            role.permissions.set_rule(name, pred)

@@ -1,21 +1,21 @@
-import rules
-
-from auth.permissions import add_perm
-from courses.models import Course
+from auth.permissions import add_perm, Permission
 
 
-@rules.predicate
-def can_view_course_contacts(user, course: Course):
-    return True
+@add_perm
+class ViewCourseNews(Permission):
+    name = "courses.view_news"
 
 
-@rules.predicate
-def can_view_course_assignments(user, course: Course):
-    return True
+@add_perm
+class ChangeMetaCourse(Permission):
+    name = "courses.change_metacourse"
 
 
-add_perm("courses.view_news")
-add_perm("courses.change_metacourse")
-add_perm("courses.can_view_contacts", can_view_course_contacts)
-add_perm("courses.can_view_assignments", can_view_course_assignments)
+@add_perm
+class ViewCourseContacts(Permission):
+    name = "courses.can_view_contacts"
 
+
+@add_perm
+class ViewCourseAssignments(Permission):
+    name = "courses.can_view_assignments"

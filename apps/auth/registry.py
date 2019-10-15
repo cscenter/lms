@@ -1,26 +1,8 @@
-from typing import Iterable
-
-from rules import RuleSet
-
-from auth.permissions import all_permissions
+from auth.permissions import Role
+from .errors import AlreadyRegistered, NotRegistered
 
 
-class RolePermissionsRegistryError(Exception):
-    pass
-
-
-class AlreadyRegistered(RolePermissionsRegistryError):
-    pass
-
-
-class PermissionNotRegistered(RolePermissionsRegistryError):
-    pass
-
-
-class NotRegistered(RolePermissionsRegistryError):
-    pass
-
-
+# TODO: в теории можно связывать роли, а не только permissions. Подумать о наследовании ролей по аналогии с add_relation
 class RolePermissionsRegistry:
     """
     This registry helps to organize Role-based access control. Inheritance
@@ -32,38 +14,34 @@ class RolePermissionsRegistry:
     def __init__(self):
         self._registry = {}
 
-    def register(self, role_name, permissions: Iterable[str]):
+    def register(self, role: Role):
         """
         Registers the given rule set for given role name.
         If notification already registered, this will raise AlreadyRegistered.
         """
 
-        if role_name in self._registry:
-            msg = 'The role name {} is already registered.'.format(role_name)
-            raise AlreadyRegistered(msg)
-        rule_set = RuleSet()
-        for permission in permissions:
-            if permission not in all_permissions:
-                msg = ("Permission `{}` is not registered in global rule set. "
-                       "Call `auth.permissions.add_perm` "
-                       "first.".format(permission))
-                raise PermissionNotRegistered(msg)
-            rule_set.add_rule(permission, all_permissions[permission])
-        self._registry[role_name] = rule_set
+        if role.code in self._registry:
+            raise AlreadyRegistered(f"Cannot register `{role}`. Role "
+                                    f"{self._registry[role.code]} is already "
+                                    f"registered with the same code")
+        self._registry[role.code] = role
 
-    def unregister(self, role_name):
+    def unregister(self, role: Role):
         """
         Unregisters the given role.
 
         If a role isn't already registered, this will raise NotRegistered.
         """
-        if role_name not in self._registry:
+        if role.code not in self._registry:
             raise NotRegistered('The role name %s is not '
-                                'registered' % role_name)
-        del self._registry[role_name]
+                                'registered' % role.code)
+        del self._registry[role.code]
 
-    def __contains__(self, role_name):
-        return role_name in self._registry
+    def __contains__(self, role):
+        if isinstance(role, Role):
+            return role.code in self._registry
+        else:
+            return role in self._registry
 
     def __len__(self):
         return len(self._registry)
@@ -71,8 +49,11 @@ class RolePermissionsRegistry:
     def __iter__(self):
         return self._registry
 
-    def __getitem__(self, role_name):
-        return self._registry[role_name]
+    def __getitem__(self, role) -> Role:
+        if isinstance(role, Role):
+            return self._registry[role.name]
+        else:
+            return self._registry[role]
 
     def items(self):
         return self._registry.items()
