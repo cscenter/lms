@@ -11,16 +11,13 @@ ifeq ($(filter $(PROJECT),$(PROJECTS)),)
     $(error A project with name '$(PROJECT)' does not exist. Available projects: $(PROJECTS))
 endif
 
-.PHONY: run club run_flame migrate msg msgcompile static dumpdata loaddata clean cmd refresh sync deploy check_defined
+.PHONY: run club migrate msg-collect msg-compile static dumpdata loaddata clean cmd refresh sync deploy check_defined
 
 run:
 	python -W once manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
 
 club:
 	python manage.py runserver --settings=compsciclub_ru.settings.local 8002
-
-run_flame:
-	python manage.py runserver_plus --nothreading --noreload --settings=$(PROJECT).settings.local $(PORT)
 
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)

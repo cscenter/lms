@@ -34,6 +34,7 @@ def test_permission_registry(mocker):
     mocker.patch.dict(perm_registry._dict, clear=True)
     perm_registry.add_permission(Permission1)
     assert Permission1 in perm_registry
+    assert Permission1.name in perm_registry
     assert perm_registry.test_rule(Permission1.name, None, 42)
     assert not perm_registry.test_rule(Permission1.name, None, 43)
     with pytest.raises(KeyError):

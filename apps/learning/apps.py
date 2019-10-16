@@ -7,6 +7,9 @@ class LearningConfig(AppConfig):
     verbose_name = _("Learning")
 
     def ready(self):
+        # Register checks
+        from . import checks
+        # Register app signals
         from . import signals
         # Register app permissions and roles
         from . import permissions
