@@ -63,23 +63,6 @@ def get_teacher_month_events(user, year, month, personal=False):
     return get_month_events(year, month, events_qs, classes_qs)
 
 
-def get_cities_for_teacher(user, year, month):
-    """
-    Returns all cities where user has been participated as a teacher
-    """
-    term_indexes = [get_term_index(*term) for term in
-                    get_terms_for_calendar_month(year, month)]
-    cities = list(Course.objects
-                  .filter(semester__index__in=term_indexes,
-                          teachers=user)
-                  .exclude(branch__city_id__isnull=True)
-                  .values_list("branch__city_id", flat=True)
-                  .distinct())
-    if not cities and user.branch.city_id:
-        cities = [user.branch.city_id]
-    return cities
-
-
 def get_branches_for_teacher(user, year, month):
     """
     Returns all branches where user has been participated as a teacher

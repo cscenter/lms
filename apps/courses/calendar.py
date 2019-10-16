@@ -15,8 +15,9 @@ from rest_framework import serializers, fields
 from core.settings.base import FOUNDATION_YEAR
 from courses.constants import MONDAY_WEEKDAY
 from core.utils import chunks
+from courses.utils import get_boundaries
 
-__all__ = ('EventsCalendar', 'CalendarEvent', 'MonthEventsCalendar',
+__all__ = ('EventsCalendar', 'CalendarEvent', 'MonthFullWeeksEventsCalendar',
            'WeekEventsCalendar', 'CalendarQueryParams')
 
 
@@ -71,7 +72,7 @@ class CalendarEvent:
 
 class EventsCalendar:
     """
-    Generates full weeks grid of the month with stored events.
+    This class helps to generate days/weeks grid with attached events
 
     Note:
         Repeated calls to `_add_events` could broke day events order.
@@ -112,9 +113,8 @@ class EventsCalendar:
 
     def by_week(self, year, month) -> List[CalendarWeek]:
         """
-        Returns a matrix representing a month's calendar.
-        Each row represents a week; week entries are tuple
-        (week number, [CalendarDay])
+        Returns a list of `CalendarWeek` for target month. Note that all weeks
+        are complete and could contain calendar days out of the target month.
         """
         by_week = []
         cal = Calendar(firstweekday=MONDAY_WEEKDAY)
@@ -132,7 +132,8 @@ class EventsCalendar:
     def by_day(self, start: datetime.date,
                end: datetime.date) -> List[CalendarDay]:
         """
-        Filters out the days in a range [start, end] which contains any event.
+        Returns a list of calendar days in a range [start, end] with
+        attached events.
         """
         by_days = []
         for dt in rrule(DAILY, dtstart=start, until=end):
@@ -144,14 +145,19 @@ class EventsCalendar:
         return by_days
 
 
-class MonthEventsCalendar(EventsCalendar):
+class MonthFullWeeksEventsCalendar(EventsCalendar):
+    """
+    This class extends all non-complete weeks of the month, `.weeks()` or
+    `.days()` could return days out of the target month.
+    """
     def __init__(self, year: int, month: int, events: Iterable[CalendarEvent]):
         super().__init__()
         self.year = year
         self.month = month
         self._date = datetime.date(year, month, 1)
+        begin, end = get_boundaries(year, month)
         self._add_events((e for e in events if
-                          e.date.month == month and e.date.year == year))
+                          e.date >= begin or e.date <= end))
 
     @property
     def prev_month(self):

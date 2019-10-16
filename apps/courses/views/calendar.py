@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.views import generic
 
 from core.timezone import now_local, CityCode, Timezone
-from courses.calendar import CalendarQueryParams, MonthEventsCalendar, \
+from courses.calendar import CalendarQueryParams, MonthFullWeeksEventsCalendar, \
     WeekEventsCalendar, CalendarEvent
 
 __all__ = ('MonthEventsCalendarView', 'WeekEventsView')
@@ -27,7 +27,7 @@ class MonthEventsCalendarView(generic.TemplateView):
 
     def get_context_data(self, year, month, today, **kwargs):
         events = self.get_events(year, month)
-        calendar = MonthEventsCalendar(year, month, events)
+        calendar = MonthFullWeeksEventsCalendar(year, month, events)
         context = {
             "today": today,
             "calendar_type": self.calendar_type,
