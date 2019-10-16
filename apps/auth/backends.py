@@ -30,17 +30,18 @@ class RBACPermissions:
             return self._has_perm(user, perm, user.roles, *args, **kwargs)
         return False
 
-    def _has_perm(self, user, perm, roles, *args, **kwargs):
+    def _has_perm(self, user, perm_name, roles, *args, **kwargs):
         for role_code in roles:
             if role_code in role_registry:
                 role = role_registry[role_code]
-                if role.permissions.rule_exists(perm):
-                    return role.permissions[perm].test(user, *args, **kwargs)
+                if role.permissions.rule_exists(perm_name):
+                    return role.permissions[perm_name].test(user, *args,
+                                                            **kwargs)
                 # Case when calling `.has_perm('update_comment')`
                 # e.g. for teacher and expect that
                 # .has_perm('update_own_comment') will be in a call chain
-                if perm in role.relations:
-                    for rel_perm_name in role.relations[perm]:
+                if perm_name in role.relations:
+                    for rel_perm_name in role.relations[perm_name]:
                         if self._has_perm(user, rel_perm_name, [role.code],
                                           *args, **kwargs):
                             return True
