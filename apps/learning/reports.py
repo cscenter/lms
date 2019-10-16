@@ -15,7 +15,9 @@ from admission.models import Applicant
 from core.reports import ReportFileOutput
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU, \
     DATETIME_FORMAT_RU
+from courses.constants import SemesterTypes
 from courses.models import Semester, Course, CourseTeacher, MetaCourse
+from courses.utils import get_term_index
 from learning.models import AssignmentComment, Enrollment
 from learning.permissions import has_master_degree
 from learning.settings import StudentStatuses, GradeTypes
@@ -123,24 +125,7 @@ class ProgressReport:
         # depend on these values.
         shads_max, online_max, projects_max = 0, 0, 0
         for student in students:
-            self.before_process_row(student)
-            enrollments = {}
-            for e in student.enrollments_progress:
-                if self.skip_enrollment(e, student, unique_courses):
-                    continue
-                course = unique_courses[e.course_id]
-                meta_course_id = course.meta_course_id
-                unique_meta_courses[meta_course_id] = course.meta_course
-                if meta_course_id in enrollments:
-                    # Get the highest grade
-                    if e.grade_weight > enrollments[meta_course_id].grade_weight:
-                        enrollments[meta_course_id] = e
-                else:
-                    enrollments[meta_course_id] = e
-            student.unique_enrollments = enrollments
-            # FIXME: mb объединить before/after? сейчас такое разделение никак не используется вроде, проверить
-            self.after_process_row(student)
-
+            self.process_row(student, unique_courses, unique_meta_courses)
             shads_max = max(shads_max, len(student.shads))
             online_max = max(online_max, len(student.online_courses))
             projects_max = max(projects_max, len(student.projects_progress))
@@ -158,11 +143,21 @@ class ProgressReport:
                                  projects_max=projects_max) for s in students]
         return DataFrame.from_records(columns=headers, data=data, index='ID')
 
-    def before_process_row(self, student):
-        pass
-
-    def after_process_row(self, student):
-        pass
+    def process_row(self, student, unique_courses, unique_meta_courses):
+        enrollments = {}
+        for e in student.enrollments_progress:
+            if self.skip_enrollment(e, student, unique_courses):
+                continue
+            course = unique_courses[e.course_id]
+            meta_course_id = course.meta_course_id
+            unique_meta_courses[meta_course_id] = course.meta_course
+            if meta_course_id in enrollments:
+                # Get the highest grade
+                if e.grade_weight > enrollments[meta_course_id].grade_weight:
+                    enrollments[meta_course_id] = e
+            else:
+                enrollments[meta_course_id] = e
+        student.unique_enrollments = enrollments
 
     def skip_enrollment(self, enrollment, student, courses):
         """Hook for collecting some stats"""
@@ -463,9 +458,6 @@ class ProgressReportForSemester(ProgressReport):
     Exported data contains club and center courses if target term already
     passed and additionally shad- and online-courses if target term is current.
     """
-
-    UNSUCCESSFUL_GRADES = [GradeTypes.NOT_GRADED, GradeTypes.UNSATISFACTORY]
-
     def __init__(self, term):
         self.target_semester = term
         super().__init__(grade_getter="grade_honest")
@@ -478,45 +470,56 @@ class ProgressReportForSemester(ProgressReport):
         return (User.objects
                 .has_role(Roles.STUDENT, Roles.VOLUNTEER)
                 .exclude(status__in=StudentStatuses.inactive_statuses)
-                .student_progress(before_term=self.target_semester)
+                .student_progress(until_term=self.target_semester)
                 .select_related('branch')
                 .prefetch_related('groups', 'academic_disciplines')
                 .order_by('last_name', 'first_name', 'pk')
                 .distinct('last_name', 'first_name', 'pk'))
 
-    def before_process_row(self, student):
+    def process_row(self, student, unique_courses, unique_meta_courses):
         student.enrollments_eq_target_semester = 0
         # During one term student can't enroll on 1 course twice, but for
         # previous terms we should consider this situation and count only
         # unique course ids
         student.success_eq_target_semester = 0
         student.success_lt_target_semester = set()
-        # Shad courses specific attributes
+        # Process enrollments
+        super().process_row(student, unique_courses, unique_meta_courses)
+        student.success_lt_target_semester = len(student.success_lt_target_semester)
+        # Shad courses stats
         student.shad_eq_target_semester = 0
         student.success_shad_eq_target_semester = 0
         student.success_shad_lt_target_semester = 0
-
-    def after_process_row(self, student):
-        """
-        Convert `success_lt_target_semester` to int repr.
-        Collect statistics for shad courses.
-        """
-        student.success_lt_target_semester = len(student.success_lt_target_semester)
-        if not student.shads:
-            return
-        shads = []
-        # During one term student can't enroll on 1 course twice, for
-        # previous terms we assume they can't do that.
-        for shad in student.shads:
-            if shad.semester_id == self.target_semester.pk:
-                student.shad_eq_target_semester += 1
-                if shad.grade not in self.UNSUCCESSFUL_GRADES:
-                    student.success_shad_eq_target_semester += 1
-                # Show shad enrollments for target term only
-                shads.append(shad)
-            elif shad.grade not in self.UNSUCCESSFUL_GRADES:
-                student.success_shad_lt_target_semester += 1
-        student.shads = shads
+        if student.shads:
+            shads = []
+            # During one term student can't enroll on 1 course twice, for
+            # previous terms we assume they can't do that.
+            for shad in student.shads:
+                if shad.semester_id == self.target_semester.pk:
+                    student.shad_eq_target_semester += 1
+                    if shad.grade in GradeTypes.satisfactory_grades:
+                        student.success_shad_eq_target_semester += 1
+                    # Show shad enrollments for target term only
+                    shads.append(shad)
+                elif shad.grade in GradeTypes.satisfactory_grades:
+                    student.success_shad_lt_target_semester += 1
+            student.shads = shads
+        # Projects stats
+        projects_eq_target_semester = []
+        success_inner_projects_lt_target_semester = 0
+        success_external_projects_lt_target_semester = 0
+        for ps in student.projects_progress:
+            if ps.project.semester_id == self.target_semester.pk:
+                projects_eq_target_semester.append(ps.project.get_absolute_url())
+            elif ps.final_grade in GradeTypes.satisfactory_grades:
+                is_ext = ps.project.is_external
+                success_inner_projects_lt_target_semester += int(not is_ext)
+                success_external_projects_lt_target_semester += int(is_ext)
+        student.projects_eq_target_semester = projects_eq_target_semester
+        student.success_inner_projects_lt_target_semester = \
+            success_inner_projects_lt_target_semester
+        student.success_external_projects_lt_target_semester = \
+            success_external_projects_lt_target_semester
 
     def skip_enrollment(self, enrollment: Enrollment, student, courses):
         """
@@ -525,10 +528,10 @@ class ProgressReportForSemester(ProgressReport):
         course = courses[enrollment.course_id]
         if course.semester_id == self.target_semester.pk:
             student.enrollments_eq_target_semester += 1
-            if enrollment.grade not in self.UNSUCCESSFUL_GRADES:
+            if enrollment.grade in GradeTypes.satisfactory_grades:
                 student.success_eq_target_semester += 1
         else:
-            if enrollment.grade not in self.UNSUCCESSFUL_GRADES:
+            if enrollment.grade in GradeTypes.satisfactory_grades:
                 student.success_lt_target_semester.add(course.meta_course_id)
             # Show enrollments for target term only
             return True
@@ -554,6 +557,7 @@ class ProgressReportForSemester(ProgressReport):
             'Курс (на момент поступления)',
             'Год поступления',
             'Год программы обучения',
+            'Номер семестра обучения',
             'Яндекс ID',
             'Stepik ID',
             'Github Login',
@@ -561,13 +565,15 @@ class ProgressReportForSemester(ProgressReport):
             'Номер диплома о высшем образовании',
             'Направления обучения',
             'Статус',
-            'Дата статуса или итога (изменения)',
             'Комментарий',
             'Дата последнего изменения комментария',
             'Работа',
             'Успешно сдано (Центр/Клуб/ШАД/Онлайн) до семестра "%s"' % self.target_semester,
             'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % self.target_semester,
             'Записей на курсы (Центр/Клуб/ШАД) за семестр "%s"' % self.target_semester,
+            'Успешных семестров внутренней практики/НИР до семестра "%s"' % self.target_semester,
+            'Успешных семестров внешней практики/НИР до семестра "%s"' % self.target_semester,
+            'Проекты за семестр "%s"' % self.target_semester,
             *self.get_courses_headers(meta_courses),
             *self.generate_shad_courses_headers(shads_max),
             *self.generate_online_courses_headers(online_max),
@@ -595,6 +601,8 @@ class ProgressReportForSemester(ProgressReport):
             student.shad_eq_target_semester
         )
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
+        target_term_index = get_term_index(student.curriculum_year,
+                                           SemesterTypes.AUTUMN)
         return [
             student.pk,
             student.branch.name,
@@ -608,6 +616,7 @@ class ProgressReportForSemester(ProgressReport):
             student.get_uni_year_at_enrollment_display(),
             student.enrollment_year,
             student.curriculum_year,
+            self.target_semester.index - target_term_index + 1,
             student.yandex_login,
             student.stepic_id,
             student.github_login,
@@ -615,13 +624,15 @@ class ProgressReportForSemester(ProgressReport):
             student.diploma_number,
             " и ".join(s.name for s in student.academic_disciplines.all()),
             student.get_status_display(),
-            '',  # FIXME: error with student.status_changed_at
             student.comment,
             student.comment_changed_at.strftime(dt_format),
             student.workplace,
             success_total_lt_target_semester,
             success_total_eq_target_semester,
             enrollments_eq_target_semester,
+            student.success_inner_projects_lt_target_semester,
+            student.success_external_projects_lt_target_semester,
+            "\r\n".join(student.projects_eq_target_semester),
             *self._export_courses(student, courses, meta_courses),
             *self._export_shad_courses(student, shads_max),
             *self._export_online_courses(student, online_max),
@@ -646,7 +657,7 @@ class ProgressReportForInvitation(ProgressReportForSemester):
                 .has_role(Roles.INVITED)
                 .exclude(status__in=StudentStatuses.inactive_statuses)
                 .filter(pk__in=invited_students)
-                .student_progress(before_term=self.target_semester)
+                .student_progress(until_term=self.target_semester)
                 .select_related('branch')
                 .prefetch_related('groups', 'academic_disciplines')
                 .order_by('last_name', 'first_name', 'pk')

@@ -17,13 +17,13 @@ class UserQuerySet(query.QuerySet):
                            group__site_id=settings.SITE_ID)
 
     def student_progress(self, exclude_grades: List[str] = None,
-                         before_term: "Semester" = None):
+                         until_term: "Semester" = None):
         """
         Prefetch student progress: courses, shad/online courses and projects
 
         Parameters:
             exclude_grades: Filter out records with provided grade values
-            before_term: Get records before this term (inclusive)
+            until_term: Get records before this term (inclusive)
         """
 
         from .models import SHADCourseRecord
@@ -35,17 +35,17 @@ class UserQuerySet(query.QuerySet):
                          .annotate(grade_weight=GradeTypes.to_int_case_expr())
                          .only('pk', 'created', 'student_id', 'course_id',
                                'grade'))
-        if before_term:
+        if until_term:
             enrollment_qs = enrollment_qs.filter(
-                course__semester__index__lte=before_term.index)
+                course__semester__index__lte=until_term.index)
         if exclude_grades:
             enrollment_qs = enrollment_qs.exclude(grade__in=exclude_grades)
 
         shad_qs = SHADCourseRecord.objects.get_queryset()
         if exclude_grades:
             shad_qs = shad_qs.exclude(grade__in=exclude_grades)
-        if before_term:
-            shad_qs = shad_qs.filter(semester__index__lte=before_term.index)
+        if until_term:
+            shad_qs = shad_qs.filter(semester__index__lte=until_term.index)
 
         return (
             self
@@ -61,6 +61,7 @@ class UserQuerySet(query.QuerySet):
                                     'final_grade', 'project__project_type',
                                     'project__name', 'project__is_external',
                                     'project__status',
+                                    'project__semester_id',
                                     'project__semester__index',
                                     'project__semester__year',
                                     'project__semester__type',)
