@@ -68,12 +68,7 @@ class Role:
         for perm in permissions:
             if not issubclass(perm, Permission):
                 raise TypeError(f"{perm} is not subclass of Permission")
-            if perm.name not in perm_registry:
-                msg = ("Permission `{}` is not added into global registry. "
-                       "Call `auth.permissions.add_perm` first.".format(perm))
-                raise PermissionNotRegistered(msg)
-            pred = always_true if perm.rule is None else perm.rule
-            self._permissions.add_rule(perm.name, pred)
+            self.add_permission(perm)
         self._relations: Dict[PermissionId, Set[PermissionId]] = {}
         relations = relations or {}
         for parent, child in relations.items():
@@ -88,7 +83,8 @@ class Role:
             msg = ("Permission `{}` is not added into global registry. "
                    "Call `auth.permissions.add_perm` first.".format(perm))
             raise PermissionNotRegistered(msg)
-        self._permissions.add_rule(perm.name, perm.rule)
+        pred = always_true if perm.rule is None else perm.rule
+        self._permissions.add_rule(perm.name, pred)
 
     def has_permission(self, perm: Union[str, Type[Permission]]) -> bool:
         if isinstance(perm, str):

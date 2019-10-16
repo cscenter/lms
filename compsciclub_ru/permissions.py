@@ -1,5 +1,6 @@
 import rules
 
+from auth.permissions import Permission
 from auth.utils import override_perm
 from courses.models import Course
 
@@ -22,5 +23,15 @@ def enroll_in_course(user, course: Course):
     return True
 
 
-override_perm("learning.view_course_news", rules.always_true)
-override_perm("learning.enroll_in_course", enroll_in_course & course_is_open)
+# FIXME: Only registered users can see the news. What about unauthenticated? Add default role with default permissions
+class ClubCourseViewNews(Permission):
+    name = "learning.view_course_news"
+
+
+class ClubEnrollInCourse(Permission):
+    name = "learning.enroll_in_course"
+    rule = enroll_in_course & course_is_open
+
+
+override_perm(ClubCourseViewNews)
+override_perm(ClubEnrollInCourse)
