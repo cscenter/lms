@@ -113,8 +113,9 @@ class CourseInlineAdmin(admin.TabularInline):
 
 
 class InvitationAdmin(admin.ModelAdmin):
-    list_display = ('name', 'created', 'get_link')
+    list_display = ('name', 'semester', 'get_link')
     inlines = (CourseInlineAdmin, )
+    list_filter = ('branch', 'semester')
     readonly_fields = ('token',)
     exclude = ('courses',)
 
