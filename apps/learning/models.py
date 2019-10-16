@@ -21,7 +21,7 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
-from core.timezone import TimezoneAwareModel
+from core.timezone import TimezoneAwareModel, now_local
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
@@ -133,6 +133,12 @@ class CourseInvitation(models.Model):
     def __str__(self):
         return f"[Invitation] course={self.course_id}"
 
+    def clean(self):
+        if (self.invitation_id and self.course_id and
+                self.invitation.semester_id != self.course.semester_id):
+            raise ValidationError(
+                _('Course semester should match invitation semester'))
+
     def save(self, **kwargs):
         created = self.pk is None
         if created and not self.token:
@@ -152,6 +158,10 @@ class CourseInvitation(models.Model):
 class Invitation(TimeStampedModel):
     name = models.CharField(_("Name"), max_length=255)
     token = models.CharField(verbose_name=_("Token"), max_length=128)
+    semester = models.ForeignKey(
+        "courses.Semester",
+        verbose_name=_("Semester"),
+        on_delete=models.CASCADE)
     branch = models.ForeignKey(
         Branch,
         verbose_name=_("Branch"),
@@ -183,10 +193,9 @@ class Invitation(TimeStampedModel):
 
     @property
     def is_active(self):
-        course_invitation = self.courses.through.objects.first()
-        if course_invitation:
-            return course_invitation.is_active
-        return False
+        today = now_local(self.branch.get_timezone()).date()
+        start_at = self.semester.enrollment_start_at
+        return start_at <= today <= self.semester.enrollment_end_at
 
 
 class StudentAssignment(TimezoneAwareModel, TimeStampedModel):

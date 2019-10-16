@@ -60,6 +60,7 @@ class InvitationFactory(factory.DjangoModelFactory):
         model = Invitation
 
     name = factory.Sequence(lambda n: "Invitation Name %03d" % n)
+    semester = factory.SubFactory(SemesterFactory)
     branch = factory.SubFactory(BranchFactory)
 
     @factory.post_generation
@@ -76,7 +77,9 @@ class CourseInvitationFactory(factory.DjangoModelFactory):
         model = CourseInvitation
 
     course = factory.SubFactory(CourseFactory)
-    invitation = factory.SubFactory(InvitationFactory)
+    invitation = factory.SubFactory(
+        InvitationFactory,
+        semester_id=factory.SelfAttribute('..course.semester_id'))
 
 
 class AssignmentNotificationFactory(factory.DjangoModelFactory):
