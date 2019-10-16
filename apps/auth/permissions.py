@@ -60,15 +60,12 @@ def add_perm(cls: Type[Permission]) -> Type[Permission]:
 
 class Role:
     def __init__(self, *, code, name,
-                 # TODO: Change type to Iterable[Type[Permission]] after migrate
-                 permissions: Iterable[Union[Type[Permission], PermissionId]],
+                 permissions: Iterable[Type[Permission]],
                  relations: Dict = None):
         self.code = code
         self.name = name
         self._permissions: RuleSet = RuleSet()
         for perm in permissions:
-            if isinstance(perm, str) and perm in perm_registry:
-                perm = perm_registry[perm]
             if not issubclass(perm, Permission):
                 raise TypeError(f"{perm} is not subclass of Permission")
             if perm.name not in perm_registry:
@@ -103,24 +100,28 @@ class Role:
     @property
     def relations(self) -> Dict[PermissionId, Set[PermissionId]]:
         """
-        relations хранит связи некоторых прав и используется для решения
-        следующей ситуации:
+        Some shared resources require different permissions level, e.g.
+        curator always could edit assignment while teacher could edit only
+        assignments where they participated. In that case we should apply
+        additional rule to teacher permission. On code level permission check
+        will look like:
 
-        Предположим, у нас есть правило `update_assignment`. Т.к. оно слишком
-        общее, мы его назначаем только куратору.
-        Для преподавателя мы создаём правило `update_own_assignment` и
-        дополнительно проверяем, что текущий авторизованный пользователь
-        является преподавателем редактируемого задания.
-        В коде это будет выглядеть как
-        `user.has_perm('update_own_assignment', assignment)`
-        Что если у нас есть ресурс, к которому нужно расшарить доступ и для преподавателя и для куратора?
-        Нам придётся написать что-то вроде
-        `user.has_perm('update_own_assignment', assignment) or user.has_perm('update_assignment')`
-        Если появляется ещё одна роль, то мы добавляем новое условие OR.
-        children помогает писать более общий код вида
-        `user.has_perm('update_assignment', assignment)`
-        Для куратора сразу будет возвращено True, для преподавателя
-        children будет хранить связь `update_assignment` -> `update_own_assignment`
+            # Curator
+            if (user.has_perm('edit_assignment') or
+                    # Teacher
+                    user.has_perm('edit_own_assignment', assignment_obj)):
+                ...
+
+        If we added new role that have access to the shared resource
+        we should edit this code. To avoid this complexity let's generalize
+        permission check to:
+
+            # For curator, teacher or other roles
+            user.has_perm('edit_assignment', assignment_obj)
+
+        In case user has no `edit_assignment` permission we additionally
+        check relation chain, e.g. `edit_assignment -> edit_own_assignment`,
+        where `edit_own_assignment` has custom permission rule applied to it
         """
         return self._relations
 
@@ -132,13 +133,13 @@ class Role:
         """
         Add relation between two permissions.
         Example:
-            # `user.has_perm('update_comment', object)` will call
-            # `user.has_perm('update_own_comment', object)` if user has no
-            # 'update_comment' permission, but has `role1` among roles
-            role1.add_relation(UpdateComment, UpdateOwnComment)
+            `user.has_perm('update_comment', object)` will call
+            `user.has_perm('update_own_comment', object)` if user has no
+            'update_comment' permission, but has role with relation
+            .add_relation(UpdateComment, UpdateOwnComment)
         """
-        parent: PermissionId = common_perm.name
-        child: PermissionId = specific_perm.name
+        parent = common_perm.name
+        child = specific_perm.name
         if parent not in perm_registry:
             raise PermissionNotRegistered(f"{common_perm} is not registered")
         if child not in perm_registry:

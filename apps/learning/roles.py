@@ -5,90 +5,96 @@ from auth.permissions import Role
 from auth.registry import role_registry
 
 
+from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
+    ViewCourseAssignments
+from .permissions import CreateAssignmentComment, \
+    CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
+    ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
+    ViewOwnAssignments, ViewOwnAssignment, ViewCourses, ViewSchedule, ViewFAQ, \
+    ViewLibrary, ViewInternships, EnrollInCourse, EnrollInCourseByInvitation, \
+    LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook
+
+
 # TODO: Add description of each role
-from learning.permissions import CreateAssignmentComment, \
-    CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent
-
-
 class Roles(DjangoChoices):
     STUDENT = C(1, _('Student'), permissions=(
-        "learning.view_study_menu",
-        "courses.can_view_contacts",
-        "courses.can_view_assignments",
-        "learning.view_course_news",
-        "learning.view_course_reviews",
-        "study.view_own_enrollments",
-        "study.view_own_assignments",
-        "study.view_own_assignment",
-        "study.create_assignment_comment",
-        "study.view_courses",
-        "study.view_schedule",
-        "study.view_faq",
-        "study.view_library",
-        "study.view_internships",
-        "learning.enroll_in_course",
-        "learning.enroll_in_course_by_invitation",
-        "learning.leave_course",
+        ViewStudyMenu,
+        ViewCourseContacts,
+        ViewCourseAssignments,
+        ViewCourseNews,
+        ViewCourseReviews,
+        ViewOwnEnrollments,
+        ViewOwnAssignments,
+        ViewOwnAssignment,
+        CreateAssignmentCommentStudent,
+        ViewCourses,
+        ViewSchedule,
+        ViewFAQ,
+        ViewLibrary,
+        ViewInternships,
+        EnrollInCourse,
+        EnrollInCourseByInvitation,
+        LeaveCourse,
     ))
     TEACHER = C(2, _('Teacher'), permissions=(
-        "learning.view_teaching_menu",
-        "courses.can_view_contacts",
-        "courses.can_view_assignments",
-        "learning.view_course_news",
-        "teaching.create_assignment_comment",
-        "teaching.view_own_gradebook",
+        ViewTeachingMenu,
+        ViewCourseContacts,
+        ViewCourseAssignments,
+        ViewCourseNews,
+        CreateAssignmentCommentTeacher,
+        ViewOwnGradebook,
     ))
     GRADUATE = C(3, _('Graduate'), permissions=(
-        "study.view_own_enrollments",
-        "study.view_own_assignment",
+        ViewOwnEnrollments,
+        ViewOwnAssignment,
     ))
     VOLUNTEER = C(4, _('Volunteer'), permissions=(
-        "learning.view_study_menu",
-        "courses.can_view_contacts",
-        "courses.can_view_assignments",
-        "learning.view_course_news",
-        "learning.view_course_reviews",
-        "study.view_own_enrollments",
-        "study.view_own_assignments",
-        "study.view_own_assignment",
-        "study.create_assignment_comment",
-        "study.view_courses",
-        "study.view_schedule",
-        "study.view_faq",
-        "study.view_library",
-        "study.view_internships",
-        "learning.enroll_in_course",
-        "learning.enroll_in_course_by_invitation",
-        "learning.leave_course",
+        ViewStudyMenu,
+        ViewCourseContacts,
+        ViewCourseAssignments,
+        ViewCourseNews,
+        ViewCourseReviews,
+        ViewOwnEnrollments,
+        ViewOwnAssignments,
+        ViewOwnAssignment,
+        CreateAssignmentCommentStudent,
+        ViewCourses,
+        ViewSchedule,
+        ViewFAQ,
+        ViewLibrary,
+        ViewInternships,
+        EnrollInCourse,
+        EnrollInCourseByInvitation,
+        LeaveCourse,
     ))
     CURATOR = C(5, _('Curator'), permissions=(
-        "courses.change_metacourse",
-        "courses.can_view_contacts",
-        "courses.can_view_assignments",
-        "learning.view_course_news",
-        "learning.view_course_reviews",
-        "study.view_library",
-        "teaching.create_assignment_comment",
-        "teaching.view_gradebook",
+        ChangeMetaCourse,
+        ViewCourseContacts,
+        ViewCourseAssignments,
+        ViewCourseNews,
+        ViewCourseReviews,
+        ViewLibrary,
+        CreateAssignmentCommentTeacher,
+        ViewGradebook,
         CreateAssignmentComment,
     ))
     INVITED = C(11, _('Invited User'), permissions=(
-        "learning.view_study_menu",
-        "courses.can_view_contacts",
-        "courses.can_view_assignments",
-        "learning.view_course_news",
-        "learning.view_course_reviews",
-        "study.view_own_enrollments",
-        "study.view_own_assignments",
-        "study.view_own_assignment",
-        "study.create_assignment_comment",
-        "study.view_courses",
-        "study.view_schedule",
-        "study.view_faq",
-        "study.view_library",
-        "study.view_internships",
-        "learning.enroll_in_course_by_invitation",
-        "learning.leave_course",
+        ViewStudyMenu,
+        ViewCourseContacts,
+        ViewCourseAssignments,
+        ViewCourseNews,
+        ViewCourseReviews,
+        ViewOwnEnrollments,
+        ViewOwnAssignments,
+        ViewOwnAssignment,
+        CreateAssignmentCommentStudent,
+        ViewCourses,
+        ViewSchedule,
+        ViewFAQ,
+        ViewLibrary,
+        ViewInternships,
+        EnrollInCourseByInvitation,
+        LeaveCourse,
     ))
 
 

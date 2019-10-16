@@ -3,11 +3,12 @@ from djchoices import DjangoChoices, C
 
 from auth.permissions import Role
 from auth.registry import role_registry
+from .permissions import ViewAdmissionMenu
 
 
 class Roles(DjangoChoices):
     INTERVIEWER = C(7, _('Interviewer [Admission]'), permissions=(
-        "learning.view_admission_menu",
+        ViewAdmissionMenu,
     ))
 
 

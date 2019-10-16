@@ -3,16 +3,18 @@ from djchoices import DjangoChoices, C
 
 from auth.permissions import Role
 from auth.registry import role_registry
+from .permissions import ViewProjectsMenu, UpdateOwnReportComment, \
+    UpdateReportComment
 
 
 class Roles(DjangoChoices):
     PROJECT_REVIEWER = C(9, _('Project reviewer'), permissions=(
-        "learning.view_projects_menu",
-        "projects.change_own_reportcomment",
+        ViewProjectsMenu,
+        UpdateOwnReportComment,
     ))
     CURATOR_PROJECTS = C(10, _('Curator of projects'), permissions=(
-        "learning.view_projects_menu",
-        "projects.change_reportcomment",
+        ViewProjectsMenu,
+        UpdateReportComment,
     ))
 
 
