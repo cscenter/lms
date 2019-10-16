@@ -171,12 +171,11 @@ def test_report_for_target_term():
     def get_progress_report(term) -> DataFrame:
         return ProgressReportForSemester(term).generate()
     teacher = TeacherFactory.create()
-    s = SemesterFactory.create_current()
-    STATIC_HEADERS_CNT = len(get_progress_report(s).columns)
-    prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
-    prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
-    co_active = CourseFactory.create(semester=s, teachers=[teacher])
-    co1, co2, co3 = CourseFactory.create_batch(3, semester=prev_s,
+    current_term = SemesterFactory.create_current()
+    prev_term = SemesterFactory.create_prev(current_term)
+    STATIC_HEADERS_CNT = len(get_progress_report(current_term).columns)
+    co_active = CourseFactory.create(semester=current_term, teachers=[teacher])
+    co1, co2, co3 = CourseFactory.create_batch(3, semester=prev_term,
                                                teachers=[teacher])
     student1, student2, student3 = StudentFactory.create_batch(3)
     e_active = EnrollmentFactory.create(student=student1,
@@ -189,17 +188,18 @@ def test_report_for_target_term():
                                       grade=GradeTypes.GOOD)
     e_old2 = EnrollmentFactory.create(student=student2, course=co1,
                                       grade=GradeTypes.NOT_GRADED)
-    progress_report = get_progress_report(prev_s)
+    active_courses_count = 1
+    prev_courses_count = 1
+    progress_report = get_progress_report(prev_term)
     assert len(progress_report) == 3
     # Graduated students not included in report
     student3.groups.all().delete()
     student3.add_group(Roles.GRADUATE)
-    progress_report = get_progress_report(prev_s)
+    progress_report = get_progress_report(prev_term)
     assert len(progress_report) == 2
-    CENTER_CLUB_COURSES_HEADERS_CNT = 1
-    # `co_active` headers not in report for passed term
+    # `co_active` headers not in report for passed terms
     assert len(progress_report.columns) == (STATIC_HEADERS_CNT +
-                                            CENTER_CLUB_COURSES_HEADERS_CNT)
+                                            prev_courses_count)
     assert co_active.meta_course.name not in progress_report.columns
     # Check `not_graded` values included for passed target term
     student1_data_index = 0
@@ -209,9 +209,9 @@ def test_report_for_target_term():
     check_value_for_header(progress_report, course_header_grade,
                            student2.pk, e_old2.grade_display.lower())
     # And included for current target term. Compare expected value with actual
-    progress_report = get_progress_report(s)
+    progress_report = get_progress_report(current_term)
     assert len(progress_report.columns) == (STATIC_HEADERS_CNT +
-                                            CENTER_CLUB_COURSES_HEADERS_CNT)
+                                            active_courses_count)
     course_header_grade = '{}, оценка'.format(co_active.meta_course.name)
     assert progress_report.index[student1_data_index] == student1.pk
     check_value_for_header(progress_report, course_header_grade,
@@ -219,40 +219,40 @@ def test_report_for_target_term():
     assert progress_report.index[student2_data_index] == student2.pk
     check_value_for_header(progress_report, course_header_grade,
                            student2.pk, e_active2.grade_display.lower())
-    # Shad and online courses from prev semester not included in report
+    # Shad and online courses from prev semester are not included in report
     shad = SHADCourseRecordFactory.create(student=student1, grade=GradeTypes.GOOD,
-                                          semester=prev_s)
+                                          semester=prev_term)
     shad_header = 'ШАД, курс 1, название'
-    progress_report = get_progress_report(s)
+    progress_report = get_progress_report(current_term)
     assert shad_header not in progress_report.columns
-    progress_report = get_progress_report(prev_s)
+    progress_report = get_progress_report(prev_term)
     assert shad_header in progress_report.columns
     check_value_for_header(progress_report, shad_header,
                            student1.pk, shad.name)
     # Check honest grade system
     e = EnrollmentFactory.create(student=student1, course=co2,
                                  grade=GradeTypes.CREDIT)
-    progress_report = get_progress_report(prev_s)
+    progress_report = get_progress_report(prev_term)
     assert progress_report.index[student1_data_index] == student1.pk
     course_header_grade = '{}, оценка'.format(co2.meta_course.name)
     check_value_for_header(progress_report, course_header_grade,
                            student1.pk, e.grade_honest.lower())
     # Test `success_total_lt_target_semester` value
     success_total_lt_ts_header = (
-        'Успешно сдано (Центр/Клуб/ШАД/Онлайн) до семестра "%s"' % prev_s)
+        'Успешно сдано (Центр/Клуб/ШАД/Онлайн) до семестра "%s"' % prev_term)
     success_total_eq_ts_header = (
-        'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % prev_s)
+        'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % prev_term)
     # +2 successful enrollments and +1 shad course for prev_s
     check_value_for_header(progress_report, success_total_lt_ts_header,
                            student1.pk, 0)
     check_value_for_header(progress_report, success_total_eq_ts_header,
                            student1.pk, 3)
     # And 1 successful enrollment in current semester
-    progress_report = get_progress_report(s)
+    progress_report = get_progress_report(current_term)
     success_total_lt_ts_header = (
-        'Успешно сдано (Центр/Клуб/ШАД/Онлайн) до семестра "%s"' % s)
+        'Успешно сдано (Центр/Клуб/ШАД/Онлайн) до семестра "%s"' % current_term)
     success_total_eq_ts_header = (
-        'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % s)
+        'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % current_term)
     check_value_for_header(progress_report, success_total_lt_ts_header,
                            student1.pk, 3)
     check_value_for_header(progress_report, success_total_eq_ts_header,
@@ -264,14 +264,102 @@ def test_report_for_target_term():
     # target semester, but it's not counted in stats
     SHADCourseRecordFactory.create(student=student1,
                                    grade=GradeTypes.NOT_GRADED,
-                                   semester=s)
-    progress_report = get_progress_report(s)
+                                   semester=current_term)
+    progress_report = get_progress_report(current_term)
     assert all(h in progress_report.columns for h in shad_headers)
     check_value_for_header(progress_report, success_total_lt_ts_header,
                            student1.pk, 3)
     check_value_for_header(progress_report, success_total_eq_ts_header,
                            student1.pk, 1)
     # TODO: Test enrollments_in_target_semester
+
+
+@pytest.mark.django_db
+def test_semester_report_projects_stats():
+    def get_header_inner(term):
+        return f'Успешных семестров внутренней практики/НИР до семестра "{term}"'
+
+    def get_header_external(term):
+        return 'Успешных семестров внешней практики/НИР до семестра "%s"' % term
+
+    current_term = SemesterFactory.create_current()
+    prev_term = SemesterFactory.create_prev(current_term)
+    prev2_term = SemesterFactory.create_prev(prev_term)
+    student = StudentFactory()
+    progress_report = ProgressReportForSemester(current_term).generate()
+    check_value_for_header(progress_report, get_header_inner(current_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, get_header_external(current_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, 'Проекты за семестр "%s"' % current_term,
+                           student.pk, expected_value='')
+    # Project in current term
+    ps = ProjectStudentFactory(student=student, project__is_external=True,
+                               project__semester=current_term,
+                               final_grade=GradeTypes.NOT_GRADED)
+    progress_report = ProgressReportForSemester(current_term).generate()
+    check_value_for_header(progress_report, get_header_inner(current_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, get_header_external(current_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, 'Проекты за семестр "%s"' % current_term,
+                           student.pk, expected_value=ps.project.get_absolute_url())
+    progress_report = ProgressReportForSemester(prev_term).generate()
+    check_value_for_header(progress_report, get_header_inner(prev_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, get_header_external(prev_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, 'Проекты за семестр "%s"' % prev_term,
+                           student.pk, expected_value='')
+    # External project with bad grade in prev term
+    ps_prev = ProjectStudentFactory(student=student, project__is_external=True,
+                                    project__semester=prev_term,
+                                    final_grade=GradeTypes.UNSATISFACTORY)
+    progress_report = ProgressReportForSemester(current_term).generate()
+    check_value_for_header(progress_report, get_header_inner(current_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, get_header_external(current_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, 'Проекты за семестр "%s"' % current_term,
+                           student.pk, expected_value=ps.project.get_absolute_url())
+    # Update grade to positive
+    ps_prev.final_grade = GradeTypes.GOOD
+    ps_prev.save()
+    progress_report = ProgressReportForSemester(current_term).generate()
+    check_value_for_header(progress_report, get_header_inner(current_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, get_header_external(current_term),
+                           student.pk, expected_value=1)
+    check_value_for_header(progress_report, 'Проекты за семестр "%s"' % current_term,
+                           student.pk, expected_value=ps.project.get_absolute_url())
+    # Student could pass more than 1 project in a term
+    ps_prev2 = ProjectStudentFactory(student=student, project__is_external=True,
+                                     project__semester=prev_term,
+                                     final_grade=GradeTypes.GOOD)
+    progress_report = ProgressReportForSemester(current_term).generate()
+    check_value_for_header(progress_report, get_header_inner(current_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, get_header_external(current_term),
+                           student.pk, expected_value=2)
+    check_value_for_header(progress_report, 'Проекты за семестр "%s"' % current_term,
+                           student.pk, expected_value=ps.project.get_absolute_url())
+    progress_report = ProgressReportForSemester(prev_term).generate()
+    check_value_for_header(progress_report, get_header_inner(prev_term),
+                           student.pk, expected_value=0)
+    check_value_for_header(progress_report, get_header_external(prev_term),
+                           student.pk, expected_value=0)
+    v = progress_report.loc[student.pk, 'Проекты за семестр "%s"' % prev_term]
+    assert ps_prev.project.get_absolute_url() in v
+    assert ps_prev2.project.get_absolute_url() in v
+    ps_prev_inner = ProjectStudentFactory(student=student,
+                                          project__is_external=False,
+                                          project__semester=prev_term,
+                                          final_grade=GradeTypes.GOOD)
+    progress_report = ProgressReportForSemester(current_term).generate()
+    check_value_for_header(progress_report, get_header_inner(current_term),
+                           student.pk, expected_value=1)
+    check_value_for_header(progress_report, get_header_external(current_term),
+                           student.pk, expected_value=2)
 
 
 @pytest.mark.django_db
