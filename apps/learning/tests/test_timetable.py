@@ -5,7 +5,7 @@ from auth.mixins import PermissionRequiredMixin
 from core.tests.utils import now_for_branch
 from core.timezone import now_local
 from core.urls import reverse
-from courses.calendar import WeekEventsCalendar, MonthEventsCalendar
+from courses.calendar import WeekEventsCalendar, MonthFullWeeksEventsCalendar
 from courses.tests.factories import CourseClassFactory, CourseFactory
 from learning.settings import Branches
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
@@ -51,7 +51,7 @@ def test_teacher_timetable(client):
                                     date=today_spb)
     response = client.get(timetable_url)
     calendar = response.context['calendar']
-    assert isinstance(calendar, MonthEventsCalendar)
+    assert isinstance(calendar, MonthFullWeeksEventsCalendar)
     assert len(flatten_calendar_month_events(calendar)) == 3
     next_month_qstr = ("?year={0}&month={1}"
                        .format(calendar.next_month.year,

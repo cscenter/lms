@@ -119,22 +119,20 @@ def get_term_by_index(term_index):
     return year, term
 
 
-# TODO: add tests
 def get_boundaries(year, month) -> Tuple:
     """
-    Calculates closed day interval out of all complete weeks of the month
+    Calculates closed interval in days for complete weeks of the month
     and returns boundaries of this interval.
 
     Example:
-        print(get_boundaries(2018, 2))
-        (datetime.date(2018, 1, 29), datetime.date(2018, 3, 4))
-        # First day of the month
+        In: get_boundaries(2018, 2)
+        Out: (datetime.date(2018, 1, 29), datetime.date(2018, 3, 4))
+        # Calculate date for the first day of the first week in the month
         first_day = datetime.date(year=2018, month=2, day=1)
-        # We interested in the beginning of the week this day belongs to.
-        # Since first_day.weekday() is 3 (0-based index),
+        # first_day.weekday() is 3 (0-based index)
         lower_bound = first_day - datetime.timedelta(days=3)
         datetime.date(year=2018, month=1, day=29)
-        # The same way calculate upper bound (the last day of the last
+        # The same logic to calculate upper bound (the last day of the last
         # complete week of the month)
     """
     day1, days_in_month = monthrange(year, month)

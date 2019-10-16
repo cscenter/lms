@@ -61,7 +61,12 @@ class CourseClassQuerySet(query.QuerySet):
                 .distinct('date', 'starts_at', 'course__pk', 'pk')
                 .order_by('date', 'starts_at', 'course__pk', 'pk'))
 
+    # FIXME: rename?
     def in_month(self, year, month):
+        """
+        Get boundaries for the month with complete weeks and return classes
+        in this range.
+        """
         date_start, date_end = get_boundaries(year, month)
         return self.filter(date__gte=date_start, date__lte=date_end)
 

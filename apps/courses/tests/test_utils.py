@@ -6,7 +6,7 @@ import pytz
 from courses.constants import SemesterTypes
 from courses.utils import get_term_index, get_term_by_index, \
     first_term_in_academic_year, get_current_term_pair, \
-    TERMS_INDEX_START
+    TERMS_INDEX_START, get_boundaries
 from core.settings.base import FOUNDATION_YEAR
 
 
@@ -30,6 +30,19 @@ def test_get_term_index():
                           SemesterTypes.SUMMER) == TERMS_INDEX_START + cnt + 1
     assert get_term_index(FOUNDATION_YEAR + 7,
                           SemesterTypes.SPRING) == TERMS_INDEX_START + cnt * 7
+
+
+def test_get_boundaries():
+    """Compare calculated values with wall calendar"""
+    d1, d2 = get_boundaries(2016, 2)
+    assert d1 == datetime.date(2016, 2, 1)
+    assert d2 == datetime.date(2016, 3, 6)
+    d1, d2 = get_boundaries(2019, 1)
+    assert d1 == datetime.date(2018, 12, 31)
+    assert d2 == datetime.date(2019, 2, 3)
+    d1, d2 = get_boundaries(2019, 9)
+    assert d1 == datetime.date(2019, 8, 26)
+    assert d2 == datetime.date(2019, 10, 6)
 
 
 def test_get_term_by_index():

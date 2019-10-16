@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from courses.calendar import MonthEventsCalendar, CalendarEvent, \
+from courses.calendar import MonthFullWeeksEventsCalendar, CalendarEvent, \
     WeekEventsCalendar
 from courses.tests.factories import CourseClassFactory, CourseFactory
 from courses.models import CourseClass
@@ -35,7 +35,7 @@ def test_month_events_calendar(client, settings):
     class_date = datetime.date(year=2018, month=2, day=3)
     course_classes = CourseClassFactory.create_batch(5, date=class_date)
     events = (CalendarEvent(e) for e in course_classes)
-    calendar = MonthEventsCalendar(year=2018, month=2, events=events)
+    calendar = MonthFullWeeksEventsCalendar(year=2018, month=2, events=events)
     assert calendar.next_month == datetime.date(year=2018, month=3,
                                                 day=calendar._date.day)
     assert calendar.prev_month == datetime.date(year=2018, month=1,
