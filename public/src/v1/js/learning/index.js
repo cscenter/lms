@@ -31,7 +31,7 @@ const fn = {
             e.preventDefault();
             var $this = $(this);
             $.get(this.href, function (data) {
-                modalFormWrapper.css('opacity', '0');
+                modalFormWrapper.css('opacity', '1');
                 $('.inner', modalFormWrapper).html(data);
                 modalFormWrapper.modal('toggle');
             }).fail(function (data) {

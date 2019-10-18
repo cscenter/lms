@@ -1,9 +1,8 @@
-html { padding:0 10px; }
-
-body {
-  margin:0;
-  padding:0;
-  background:#fff;
+body,
+html {
+	margin: 0;
+	padding: 0;
+	background: #fcfcfc;
 }
 
 #epiceditor-wrapper{
@@ -11,11 +10,10 @@ body {
 }
 
 #epiceditor-preview{
-	padding-top:10px;
-	padding-bottom:10px;
-	font-family: Helvetica,arial,freesans,clean,sans-serif;
-	font-size:13px;
-	line-height:1.6;
+	padding: 6px 12px;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size:14px;
+	line-height:1.42857;
 }
 
 #epiceditor-preview>*:first-child{
@@ -69,7 +67,6 @@ body {
 
 #epiceditor-preview h2{
 	font-size:24px;
-	border-bottom:1px solid #ccc;
 	color:#000;
 }
 

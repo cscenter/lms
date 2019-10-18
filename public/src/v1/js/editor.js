@@ -6,11 +6,12 @@ import {getLocalStorageKey} from "./utils";
 import _escape from "lodash-es/escape";
 import _unescape from "lodash-es/unescape";
 
+import './EpicEditor';
+
 export default class UberEditor {
     static init(textarea) {
         const $textarea = $(textarea);
         const $container = $("<div/>").insertAfter($textarea);
-        $container.css("border", "1px solid #f2f2f2");
         const autoSaveEnabled = $textarea.data("local-persist") === true;
         let buttonFullscreen = true;
         if ($textarea.data("button-fullscreen") !== undefined) {
@@ -34,11 +35,15 @@ export default class UberEditor {
             focusOnLoad: shouldFocus,
             basePath: "/static/v1/js/vendor/EpicEditor-v0.2.2",
             clientSideStorage: autoSaveEnabled,
-            autogrow: {minHeight: 200},
-            button: {bar: "show", fullscreen: buttonFullscreen},
+            autogrow: {minHeight: 160},
+            button: {
+                bar: "show",
+                fullscreen: false
+            },
             theme: {
-                base: '/themes/base/epiceditor.css',
-                editor: '/themes/editor/epic-light.css'
+                base: '/themes/custom/base.css',
+                editor: '/themes/custom/editor.css',
+                preview: '/themes/custom/preview.css'
             }
         };
 
@@ -69,10 +74,12 @@ export default class UberEditor {
         mathjax.src = window.CSC.config.JS_SRC.MATHJAX;
         previewer.body.appendChild(mathjax);
 
+        const previewerDocument = editor.getElement('previewer');
+        const epicEditorUtilBar = editor.iframe.getElementById('epiceditor-utilbar');
+        let epicEditorPreview = previewerDocument.getElementById('epiceditor-preview');
+
         editor.on('preview', function () {
             let text = editor._textareaElement.value;
-            const previewerDocument = editor.getElement('previewer');
-            let target = previewerDocument.getElementById('epiceditor-preview');
             if (text.length > 0) {
                 $.ajax({
                     method: "POST",
@@ -83,18 +90,13 @@ export default class UberEditor {
                 })
                 .done(function (data) {
                     if (data.status === 'OK') {
-                        target.innerHTML = data.text;
+                        epicEditorPreview.innerHTML = data.text;
                         editor.getElement('previewerIframe').contentWindow.MathJax.Hub.Queue(function () {
-                            editor.getElement('previewerIframe').contentWindow.MathJax.Hub.Typeset(target, function() {
-                                $(target).find("pre").addClass("hljs");
-                                if (!editor.is('fullscreen')) {
-                                    let height = Math.max(
-                                        $(target).height() + 20,
-                                        editor.settings.autogrow.minHeight
-                                    );
-                                    $container.height(height);
-                                }
-                                editor.reflow('height');
+                            editor.getElement('previewerIframe').contentWindow.MathJax.Hub.Typeset(epicEditorPreview, function() {
+                                $(epicEditorPreview).find("pre").addClass("hljs");
+                                // Width reflow breaks full screen
+                                editor.emit('__update');
+                                // editor.reflow('height');
                                 });
                         });
                     }
@@ -112,8 +114,9 @@ export default class UberEditor {
                         type: "error"
                     });
                 });
+            } else {
+                epicEditorPreview.innerHTML = '<i>Недостаточно данных. Введите текст в режиме редактирования.</i>';
             }
-
         });
 
         // Restore label behavior
@@ -132,21 +135,10 @@ export default class UberEditor {
             }
         });
 
-        editor.on('edit', function () {
-            if (!editor.is('fullscreen')) {
-                const height = Math.max(
-                    $(editor.getElement('editor').body).height() + 20,
-                    editor.settings.autogrow.minHeight
-                );
-                $container.height(height);
-            }
-            editor.reflow();
-        });
-
         // Ctrl+Enter to send form
         // Submit button value won't be attached to form data, be aware
         // if your form process logic depends on prefix, for example
-        if ($textarea[0].dataset.quicksend === 'true') {
+        if ($textarea[0].getAttribute('data-quicksend') === 'true') {
             let editorBody = editor.getElement('editor').body;
             // FIXME: use .on here
             editorBody.addEventListener('keydown', function (e) {
