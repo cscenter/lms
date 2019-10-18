@@ -1,6 +1,9 @@
+import datetime
+
 import pytest
 from django.contrib.sites.models import Site
 from django.utils import timezone
+from django.utils.timezone import now
 
 from auth.tasks import ActivationEmailContext
 from core.urls import reverse
@@ -17,8 +20,9 @@ from users.tests.factories import UserFactory, StudentFactory
 
 @pytest.mark.django_db
 def test_invitation_view(client, lms_resolver, assert_redirect, settings):
-    term = SemesterFactory.create_current()
-    course_invitation = CourseInvitationFactory(course__semester=term)
+    future = now() + datetime.timedelta(days=3)
+    current_term = SemesterFactory.create_current(enrollment_end_at=future.date())
+    course_invitation = CourseInvitationFactory(course__semester=current_term)
     invitation = course_invitation.invitation
     url = invitation.get_absolute_url()
     resolver = lms_resolver(url)
@@ -69,8 +73,9 @@ def test_invitation_register_form(client):
 def test_invitation_register_view(client, assert_redirect, settings, mocker):
     mocked_task = mocker.patch('learning.invitation.views.send_activation_email')
     settings.LANGUAGE_CODE = 'ru'
-    term = SemesterFactory.create_current()
-    course_invitation = CourseInvitationFactory(course__semester=term)
+    future = (now() + datetime.timedelta(days=3)).date()
+    current_term = SemesterFactory.create_current(enrollment_end_at=future)
+    course_invitation = CourseInvitationFactory(course__semester=current_term)
     invitation = course_invitation.invitation
     register_url = reverse("invitation:registration",
                            kwargs={"token": invitation.token},

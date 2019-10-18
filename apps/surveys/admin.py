@@ -16,6 +16,7 @@ class FormFieldAdmin(admin.StackedInline):
     exclude = ("description",)
     extra = 0
     classes = ['collapse']
+    show_change_link = True
 
 
 class FormAdmin(admin.ModelAdmin):
