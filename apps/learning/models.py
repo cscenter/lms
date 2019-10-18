@@ -356,6 +356,7 @@ class AssignmentComment(TimezoneAwareModel, TimeStampedModel):
         'StudentAssignment',
         verbose_name=_("AssignmentComment|student_assignment"),
         on_delete=models.CASCADE)
+    is_published = models.BooleanField(_("Published"), default=True)
     text = models.TextField(
         _("AssignmentComment|text"),
         help_text=_("LaTeX+Markdown is enabled"),

@@ -395,6 +395,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         user = self.request.user
         a_s = self.student_assignment
         course = a_s.assignment.course
+        # FIXME: переписать с union + first, перенести в manager
         ungraded_base = (StudentAssignment.objects
                          .filter(score__isnull=True,
                                  first_student_comment_at__isnull=False,
@@ -409,11 +410,11 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['score_form'] = AssignmentScoreForm(
             initial={'score': a_s.score},
             maximum_score=a_s.assignment.maximum_score)
-        form = AssignmentCommentForm()
-        form.helper.form_action = reverse(
+        comment_form = AssignmentCommentForm()
+        comment_form.helper.form_action = reverse(
             'teaching:assignment_comment_create',
             kwargs={'pk': a_s.pk})
-        context['form'] = form
+        context['form'] = comment_form
         return context
 
     def post(self, request, *args, **kwargs):
