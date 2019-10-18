@@ -601,8 +601,12 @@ class ProgressReportForSemester(ProgressReport):
             student.shad_eq_target_semester
         )
         dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
-        target_term_index = get_term_index(student.curriculum_year,
-                                           SemesterTypes.AUTUMN)
+        if student.curriculum_year:
+            target_term_index = get_term_index(student.curriculum_year,
+                                               SemesterTypes.AUTUMN)
+            term_order = self.target_semester.index - target_term_index + 1
+        else:
+            term_order = "-"
         return [
             student.pk,
             student.branch.name,
@@ -616,7 +620,7 @@ class ProgressReportForSemester(ProgressReport):
             student.get_uni_year_at_enrollment_display(),
             student.enrollment_year,
             student.curriculum_year,
-            self.target_semester.index - target_term_index + 1,
+            term_order,
             student.yandex_login,
             student.stepic_id,
             student.github_login,
