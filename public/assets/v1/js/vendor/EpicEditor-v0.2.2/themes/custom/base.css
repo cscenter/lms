@@ -10,6 +10,17 @@ html, body, iframe, div {
   z-index: 100;
 }
 
+#epiceditor-utilbar a {
+  color: #337ab7;
+  font-size: 12px;
+  line-height: 30px;
+  text-decoration: none;
+}
+
+#epiceditor-utilbar .pull-right {
+  float: right;
+}
+
 #epiceditor-utilbar button {
   display: inline-block;
   color: #000 !important;
