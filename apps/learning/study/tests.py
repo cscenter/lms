@@ -111,7 +111,7 @@ def test_access_student_assignment_failed_course(client):
     response = client.get(student_url)
     assert response.status_code == 200
     # Remove all comments and test access if student has any mark on assignment
-    AssignmentComment.objects.all().delete()
+    AssignmentComment.published.all().delete()
     response = client.get(student_url)
     assert response.status_code == 403
     student_assignment.score = 10

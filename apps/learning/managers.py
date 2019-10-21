@@ -98,3 +98,16 @@ class GraduateProfileQuerySet(models.QuerySet):
 
 GraduateProfileActiveManager = _GraduateProfileActiveManager.from_queryset(
     GraduateProfileQuerySet)
+
+
+class AssignmentCommentQuerySet(models.QuerySet):
+    pass
+
+
+class _AssignmentCommentPublishedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_published=True)
+
+
+AssignmentCommentPublishedManager = _AssignmentCommentPublishedManager.from_queryset(
+    AssignmentCommentQuerySet)

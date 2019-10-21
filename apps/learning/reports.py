@@ -694,7 +694,7 @@ class WillGraduateStatsReport(ReportFileOutput):
             # 1. Оставлено комментариев на сайте с 23:00 до 8:00 по мск
             time_range_in_utc = Q(created__hour__gte=20) | Q(created__hour__lte=5)
             assignment_comments_after_23 = (
-                AssignmentComment.objects
+                AssignmentComment.published
                 .filter(student_assignment__student_id=student.pk)
                 .filter(time_range_in_utc)
                 .count())
@@ -706,7 +706,7 @@ class WillGraduateStatsReport(ReportFileOutput):
             comments_after_23_total = report_comments_after_23 + assignment_comments_after_23
             # 2. Сколько вообще комментариев на сайте центра
             assignment_comments_count = (
-                AssignmentComment.objects
+                AssignmentComment.published
                 .filter(student_assignment__student_id=student.pk)
                 .count())
             report_comments_count = (

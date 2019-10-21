@@ -29,7 +29,7 @@ from courses.models import Course, CourseNews, Assignment
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
-    GraduateProfileActiveManager
+    GraduateProfileActiveManager, AssignmentCommentPublishedManager
 from learning.settings import GradingSystems, GradeTypes
 from learning.utils import populate_assignments_for_student
 from users.constants import ThumbnailSizes
@@ -289,7 +289,7 @@ class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
 
     def has_comments(self, user):
         return any(c.author_id == user.pk for c in
-                   self.assignmentcomment_set.all())
+                   self.assignmentcomment_set(manager='published').all())
 
     @cached_property
     def state(self):
@@ -369,6 +369,9 @@ class AssignmentComment(TimezoneAwareModel, TimeStampedModel):
         upload_to=task_comment_attachment_upload_to,
         max_length=150,
         blank=True)
+
+    objects = models.Manager()
+    published = AssignmentCommentPublishedManager()
 
     class Meta:
         ordering = ["created"]

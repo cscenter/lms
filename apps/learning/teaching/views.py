@@ -30,7 +30,7 @@ from learning.permissions import course_access_role, CourseRole, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
     CreateAssignmentComment
 from learning.views import AssignmentSubmissionBaseView
-from learning.views.views import logger, AssignmentCommentBaseCreateView
+from learning.views.views import logger, AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
 
 
@@ -410,7 +410,12 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['score_form'] = AssignmentScoreForm(
             initial={'score': a_s.score},
             maximum_score=a_s.assignment.maximum_score)
-        comment_form = AssignmentCommentForm()
+        draft = (AssignmentComment.objects
+                 .filter(author=self.request.user,
+                         is_published=False,
+                         student_assignment=self.student_assignment)
+                 .last())
+        comment_form = AssignmentCommentForm(instance=draft)
         comment_form.helper.form_action = reverse(
             'teaching:assignment_comment_create',
             kwargs={'pk': a_s.pk})
@@ -451,7 +456,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 
 
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
-                                         AssignmentCommentBaseCreateView):
+                                         AssignmentCommentUpsertView):
     permission_required = CreateAssignmentComment.name
 
     def get_permission_object(self):

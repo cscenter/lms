@@ -106,7 +106,7 @@ def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
     notifications = []
     sa_update_dict = {"modified": now()}
     if comment.author_id == sa.student_id:
-        other_comments = (sa.assignmentcomment_set
+        other_comments = (sa.assignmentcomment_set(manager='published')
                           .filter(author_id=comment.author_id)
                           .exclude(pk=comment.pk))
         is_first_comment = not other_comments.exists()

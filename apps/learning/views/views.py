@@ -12,7 +12,7 @@ from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
 from django.shortcuts import get_object_or_404
 from django.views import generic
 from nbconvert import HTMLExporter
-from vanilla import TemplateView, CreateView
+from vanilla import TemplateView, CreateView, GenericModelView
 
 from core import comment_persistence
 from core.utils import hashids
@@ -56,11 +56,31 @@ class StudentAssignmentURLParamsMixin:
                                 'assignment__course__semester'))
 
 
-class AssignmentCommentBaseCreateView(StudentAssignmentURLParamsMixin,
-                                      CreateView):
-    http_method_names = ('post', 'put')
+class AssignmentCommentUpsertView(StudentAssignmentURLParamsMixin,
+                                  GenericModelView):
+    """Post a new comment or save draft"""
     model = AssignmentComment
-    form_class = AssignmentCommentForm
+
+    def get_drafts(self):
+        return (AssignmentComment.objects
+                .filter(author=self.request.user,
+                        is_published=False,
+                        student_assignment=self.student_assignment))
+
+    def post(self, request, *args, **kwargs):
+        save_draft = "save-draft" in request.POST
+        # Note: should be exactly one record
+        draft = self.get_drafts().last()
+        if not draft:
+            draft = AssignmentComment(student_assignment=self.student_assignment,
+                                      author=request.user,
+                                      is_published=False)
+        draft.is_published = not save_draft
+        form = AssignmentCommentForm(data=request.POST, files=request.FILES,
+                                     instance=draft)
+        if form.is_valid():
+            return self.form_valid(form)
+        return self.form_invalid(form)
 
     def form_valid(self, form):
         comment = form.save(commit=False)
@@ -87,7 +107,7 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
     def get_student_assignment_queryset(self):
         qs = super().get_student_assignment_queryset()
         prefetch_comments = Prefetch('assignmentcomment_set',
-                                     queryset=(AssignmentComment.objects
+                                     queryset=(AssignmentComment.published
                                                .select_related('author')
                                                .order_by('created')))
         return qs.prefetch_related(prefetch_comments,
@@ -192,7 +212,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
             course = assignment_attachment.assignment.course
             file_field = assignment_attachment.attachment
         elif attachment_type == ASSIGNMENT_COMMENT_ATTACHMENT:
-            qs = (AssignmentComment.objects
+            qs = (AssignmentComment.published
                   .filter(pk=pk)
                   .select_related("student_assignment__assignment__course"))
             comment = get_object_or_404(qs)
