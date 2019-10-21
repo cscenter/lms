@@ -6,6 +6,7 @@ const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 const DeleteSourceMapWebpackPlugin = require('delete-sourcemap-webpack-plugin');
 
 const APP_VERSION = process.env.APP_VERSION || "v1";
+const SENTRY_ENABLED = (process.env.SENTRY !== "0");
 
 let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
 
@@ -50,7 +51,9 @@ module.exports = {
 
     plugins: [
         new webpack.DefinePlugin({
-            'process.env.NODE_ENV': '"production"',
+            'process.env': {
+                NODE_ENV: '"production"'
+            },
             '__DEVELOPMENT__': false
         }),
         // Need this plugin for deterministic hashing
@@ -64,7 +67,7 @@ module.exports = {
             ignore: ['node_modules'],
             urlPrefix: `~/static/${APP_VERSION}/dist/js`,
             debug: true,
-            dryRun: false,
+            dryRun: !SENTRY_ENABLED,
             // Fail silently in case no auth data provided to the sentry-cli
             errorHandler: function(err, invokeErr) {
                 console.log(`Sentry CLI Plugin: ${err.message}`);

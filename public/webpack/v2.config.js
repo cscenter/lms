@@ -10,7 +10,6 @@ const DEBUG = (process.env.NODE_ENV !== "production");
 
 const development = require('./dev.config');
 const production = require('./prod.config');
-const TARGET = process.env.npm_lifecycle_event;
 
 process.env.BABEL_ENV = process.env.NODE_ENV;
 
@@ -226,11 +225,10 @@ const common = {
 };
 
 let appConfig;
-if (['dev2', 'start'].includes(TARGET) || !TARGET) {
-    appConfig = merge(common, development);
-}
-if (TARGET === 'prod2' || !TARGET) {
+if (process.env.NODE_ENV !== "development") {
     appConfig = merge(common, production);
+} else {
+    appConfig = merge(common, development);
 }
 
 module.exports = appConfig;
