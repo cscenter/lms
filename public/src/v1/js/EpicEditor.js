@@ -365,6 +365,7 @@ function EpicEditor(options) {
         button: {
             fullscreen: true,
             preview: true,
+            helpFormatting: false,
             bar: "auto"
         }
     };
@@ -381,6 +382,7 @@ function EpicEditor(options) {
     self._fullscreenEnabled = typeof (buttons) === 'object' ? typeof buttons.fullscreen === 'undefined' || buttons.fullscreen : buttons === true;
     self._editEnabled = typeof (buttons) === 'object' ? typeof buttons.edit === 'undefined' || buttons.edit : buttons === true;
     self._previewEnabled = typeof (buttons) === 'object' ? typeof buttons.preview === 'undefined' || buttons.preview : buttons === true;
+    self._showHelpFormatting = typeof (buttons) === 'object' ? typeof buttons.helpFormatting === 'undefined' || buttons.helpFormatting : buttons === true;
 
     if (!(typeof self.settings.parser == 'function' && typeof self.settings.parser('TEST') == 'string')) {
         self.settings.parser = function (str) {
@@ -574,9 +576,10 @@ EpicEditor.prototype.load = function (callback) {
         // This is wrapping iframe element. It contains the other two iframes and the utilbar
         chrome: '<div id="epiceditor-wrapper" class="epiceditor-edit-mode">' +
             '<div id="epiceditor-utilbar">' +
-            (self._editEnabled ? '<button title="' + this.settings.string.toggleEdit + '" role="tab" class="epiceditor-toggle-btn epiceditor-toggle-edit-btn">Текст</button> ' : '') +
-            (self._previewEnabled ? '<button title="' + this.settings.string.togglePreview + '" role="tab" class="epiceditor-toggle-btn epiceditor-toggle-preview-btn">Предпросмотр</button> ' : '') +
-            (self._fullscreenEnabled ? '<button title="' + this.settings.string.toggleFullscreen + '" class="epiceditor-fullscreen-btn"></button>' : '') +
+                (self._editEnabled ? '<button title="' + this.settings.string.toggleEdit + '" role="tab" class="epiceditor-toggle-btn epiceditor-toggle-edit-btn">Текст</button> ' : '') +
+                (self._previewEnabled ? '<button title="' + this.settings.string.togglePreview + '" role="tab" class="epiceditor-toggle-btn epiceditor-toggle-preview-btn">Предпросмотр</button> ' : '') +
+                (self._fullscreenEnabled ? '<button title="' + this.settings.string.toggleFullscreen + '" class="epiceditor-fullscreen-btn"></button>' : '') +
+                (self._showHelpFormatting ? '<a class="pull-right" target="_blank" href="/commenting-the-right-way/">Как оформлять текст?</a>' : '') +
             '</div>' +
             '<iframe frameborder="0" id="epiceditor-editor-frame"></iframe>' +
             '<iframe frameborder="0" id="epiceditor-previewer-frame"></iframe>' +

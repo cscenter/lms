@@ -17,8 +17,13 @@ export default class UberEditor {
         if ($textarea.data("button-fullscreen") !== undefined) {
             buttonFullscreen = $textarea.data("button-fullscreen");
         }
+        const showHelpFormatting = $textarea.data("helper-formatting") === true;
         $textarea.hide();
         $textarea.removeProp("required");
+        // Try to hide help text with formatting helper
+        if (showHelpFormatting && $textarea.attr('id')) {
+            $(`#hint_${$textarea.attr('id')}`).hide();
+        }
         const shouldFocus = $textarea.prop("autofocus");
 
         const opts = {
@@ -38,7 +43,8 @@ export default class UberEditor {
             autogrow: {minHeight: 160},
             button: {
                 bar: "show",
-                fullscreen: false
+                fullscreen: false,
+                helpFormatting: showHelpFormatting
             },
             theme: {
                 base: '/themes/custom/base.css',
@@ -115,7 +121,7 @@ export default class UberEditor {
                     });
                 });
             } else {
-                epicEditorPreview.innerHTML = '<i>Недостаточно данных. Введите текст в режиме редактирования.</i>';
+                epicEditorPreview.innerHTML = '<i>Нет данных для просмотра</i>';
             }
         });
 
