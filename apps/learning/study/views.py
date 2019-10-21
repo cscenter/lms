@@ -24,7 +24,7 @@ from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
 from learning.roles import Roles
 from learning.views import AssignmentSubmissionBaseView
-from learning.views.views import AssignmentCommentBaseCreateView
+from learning.views.views import AssignmentCommentUpsertView
 from users.models import User
 
 
@@ -166,7 +166,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 
 
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
-                                         AssignmentCommentBaseCreateView):
+                                         AssignmentCommentUpsertView):
     permission_required = "study.create_assignment_comment"
 
     def get_permission_object(self):

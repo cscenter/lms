@@ -1,7 +1,7 @@
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
-    Div, HTML
+    Div, HTML, BaseInput
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
@@ -12,13 +12,22 @@ from learning.models import GraduateProfile
 from .models import AssignmentComment
 
 
+class SubmitLink(BaseInput):
+    input_type = 'submit'
+
+    def __init__(self, *args, **kwargs):
+        self.field_classes = 'btn btn-link'
+        super().__init__(*args, **kwargs)
+
+
 class AssignmentCommentForm(forms.ModelForm):
     text = forms.CharField(
         label=_("Add comment"),
         help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
         widget=UbereditorWidget(attrs={'data-quicksend': 'true',
-                                       'data-local-persist': 'true'}))
+                                       'data-local-persist': 'true',
+                                       'data-helper-formatting': 'true'}))
     attached_file = forms.FileField(
         label="",
         required=False,
@@ -29,8 +38,8 @@ class AssignmentCommentForm(forms.ModelForm):
         self.helper.layout = Layout(
             Div('text'),
             Div(Div('attached_file',
-                    Div(Submit('save', _('Send')),
-                        css_class='pull-right'),
+                    Div(SubmitLink('save-draft', _('Save Draft')),
+                        Submit('save', _('Send')), css_class='pull-right'),
                     css_class="form-inline clearfix"),
                 css_class="form-group"))
         super().__init__(*args, **kwargs)
