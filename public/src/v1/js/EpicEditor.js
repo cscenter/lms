@@ -580,11 +580,11 @@ EpicEditor.prototype.load = function (callback) {
     _HtmlTemplates = {
         // This is wrapping iframe element. It contains the other two iframes and the utilbar
         chrome: '<div id="epiceditor-wrapper" class="epiceditor-edit-mode">' +
-            '<div id="epiceditor-utilbar">' +
+            '<div id="epiceditor-utilbar" style="opacity: 0">' +
                 (self._editEnabled ? '<button title="' + this.settings.string.toggleEdit + '" role="tab" class="epiceditor-toggle-btn epiceditor-toggle-edit-btn">Текст</button> ' : '') +
                 (self._previewEnabled ? '<button title="' + this.settings.string.togglePreview + '" role="tab" class="epiceditor-toggle-btn epiceditor-toggle-preview-btn">Предпросмотр</button> ' : '') +
                 (self._fullscreenEnabled ? '<button title="' + this.settings.string.toggleFullscreen + '" class="epiceditor-fullscreen-btn"></button>' : '') +
-                (self._showHelpFormatting ? '<a class="pull-right" target="_blank" href="/commenting-the-right-way/">Как оформлять текст?</a>' : '') +
+                (self._showHelpFormatting ? '<a style="float: right; color: #337ab7; font-size: 12px; line-height: 30px; text-decoration: none;" target="_blank" href="/commenting-the-right-way/">Как оформлять текст?</a>' : '') +
             '</div>' +
             '<iframe frameborder="0" id="epiceditor-editor-frame"></iframe>' +
             '<iframe frameborder="0" id="epiceditor-previewer-frame"></iframe>' +
@@ -1153,6 +1153,7 @@ EpicEditor.prototype.load = function (callback) {
     }
 
     // The callback and call are the same thing, but different ways to access them
+    this.utilPanel.style.opacity = '1';
     callback.call(this);
     this.emit('load');
     return this;
