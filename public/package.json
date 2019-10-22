@@ -55,6 +55,7 @@
     "i18next": "^17.3.0",
     "i18next-xhr-backend": "^3.2.0",
     "intersection-observer": "^0.7.0",
+    "jasny-bootstrap": "^4.0.0",
     "jgrowl": "^1.4.6",
     "jquery": "^3.4.1",
     "jquery-bar-rating": "^1.2.2",

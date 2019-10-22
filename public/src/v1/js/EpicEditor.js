@@ -149,22 +149,27 @@ function _getIframeInnards(el) {
 
 // Grabs the text from an element and preserves whitespace
 function _getText(el) {
-    // First replace <br>s before replacing the rest of the HTML
-    var theText = el.innerHTML.replace(/<br>/gi, "\n");
-    // Fix HTML entities
-    theText = theText.replace(/&lt;/gi, '<');
-    theText = theText.replace(/&gt;/gi, '>');
-    theText = theText.replace(/&amp;/gi, '&');
-    // Replace spaces
-    theText = theText.replace(/&nbsp;/gi, ' ');
-    // Replace "<div>" (from Chrome).
-    theText = theText.replace(/<div>/gi, '\n');
-    theText = theText.replace(/<\/div>/gi, '');
-    // Replace "<p>" (from IE).
-    theText = theText.replace(/<p>/gi, '\n');
-    theText = theText.replace(/<\/p>/gi, '');
-    // Now we can clean the rest of HTML
-    theText = theText.replace(/<(?:.|\n)*?>/gm, '');
+    let theText;
+    if (typeof document.body.innerText === 'string') {
+        theText = el.innerText;
+    } else {
+        // First replace <br>s before replacing the rest of the HTML
+        theText = el.innerHTML.replace(/<br>/gi, "\n");
+        // Fix HTML entities
+        theText = theText.replace(/&lt;/gi, '<');
+        theText = theText.replace(/&gt;/gi, '>');
+        theText = theText.replace(/&amp;/gi, '&');
+        // Replace spaces
+        theText = theText.replace(/&nbsp;/gi, ' ');
+        // Replace "<div>" (from Chrome).
+        theText = theText.replace(/<div>/gi, '\n');
+        theText = theText.replace(/<\/div>/gi, '');
+        // Replace "<p>" (from IE).
+        theText = theText.replace(/<p>/gi, '\n');
+        theText = theText.replace(/<\/p>/gi, '');
+        // Now we can clean the rest of HTML
+        theText = theText.replace(/<(?:.|\n)*?>/gm, '');
+    }
     // No more than 2x newline, per "paragraph".
     theText = theText.replace(/\n\n+/g, '\n\n');
     // Whitespace before/after.

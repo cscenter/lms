@@ -1,4 +1,6 @@
 import $ from 'jquery';
+import "jasny-bootstrap/js/fileinput";
+
 import UberEditor from "../editor";
 import {createNotification} from "../utils";
 
@@ -13,6 +15,7 @@ const fn = {
     Launch: function () {
         fn.initCommentModal();
         fn.initStickySidebar();
+        fn.initFileInput();
     },
 
     initCommentModal: function () {
@@ -91,6 +94,16 @@ const fn = {
                 sidebar.affix('checkPosition');
             }
         }
+    },
+
+    initFileInput: function() {
+        $('.jasny.fileinput')
+            .on('clear.bs.fileinput', function(event) {
+                $(event.target).find('.fileinput-clear-checkbox').val('on');
+            })
+            .on('change.bs.fileinput', function(event) {
+                $(event.target).find('.fileinput-clear-checkbox').val('');
+            });
     },
 };
 

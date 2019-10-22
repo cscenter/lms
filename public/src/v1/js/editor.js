@@ -40,7 +40,7 @@ export default class UberEditor {
             focusOnLoad: shouldFocus,
             basePath: "/static/v1/js/vendor/EpicEditor-v0.2.2",
             clientSideStorage: autoSaveEnabled,
-            autogrow: {minHeight: 160},
+            autogrow: {minHeight: 180},
             button: {
                 bar: "show",
                 fullscreen: false,

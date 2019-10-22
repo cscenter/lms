@@ -1,3 +1,13 @@
+@import "jasny-bootstrap/scss/fileinput";
+
+.form-group-5 > .form-group {
+  margin-bottom: 5px;
+}
+
+.jasny.fileinput > .form-control {
+  border-radius: 0;
+}
+
 .input-daterange {
   width: 100%;
   &:after, &:before {
