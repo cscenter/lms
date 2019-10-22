@@ -2,10 +2,10 @@
 
 <div class="jasny fileinput input-group fileinput-{% if widget.value %}exists{% else %}new{% endif %}" data-provides="fileinput">
     <div class="form-control" data-trigger="fileinput">
-        <i class="fa fa-file-o fileinput-exists"></i> <span class="fileinput-filename">{% if widget.value %}{{ widget.value|file_name }}{% endif %}</span>
+        <i class="fa fa-file-o"></i> <span class="fileinput-filename">{% if widget.value %}{{ widget.value|file_name }}{% else %}Файл не выбран{% endif %}</span>
     </div>
     <span class="input-group-addon btn btn-default btn-file">
-        <span class="fileinput-new">Выбрать файл</span><span class="fileinput-exists">Изменить</span>
+        <span class="fileinput-new">Выбрать</span><span class="fileinput-exists">Изменить</span>
         <input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django/forms/widgets/attrs.html" %}>
     </span>
     <input class="fileinput-clear-checkbox" type="hidden" name="{{ widget.checkbox_name }}">

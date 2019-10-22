@@ -43,7 +43,7 @@ class AssignmentCommentForm(forms.ModelForm):
             Div('text', css_class='form-group-5'),
             Div('attached_file'),
             Div(Submit('save', _('Send')),
-                SubmitLink('save-draft', _('Save Draft')),
+                # SubmitLink('save-draft', _('Save Draft')),
                 css_class="form-group"))
         super().__init__(*args, **kwargs)
 
