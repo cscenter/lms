@@ -103,6 +103,9 @@ class SurveySubmissionsStats:
                 field_entries[e.field_id].append(e)
             for entries in field_entries.values():
                 for entry in entries:
+                    # Entry field could be deleted
+                    if entry.field_id not in self.db_fields:
+                        continue
                     db_field = self.db_fields[entry.field_id]
                     if db_field.field_type in [FieldType.TEXT,
                                                FieldType.TEXTAREA]:
