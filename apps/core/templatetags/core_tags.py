@@ -1,3 +1,4 @@
+import os
 import re
 
 import itertools
@@ -209,3 +210,6 @@ def call_method(obj, method_name, *args, **kwargs):
     return method(*args, **kwargs)
 
 
+@register.filter
+def file_name(value):
+    return os.path.basename(value.file.name)

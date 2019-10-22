@@ -1,7 +1,7 @@
 from crispy_forms.bootstrap import StrictButton
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Field, Layout, Submit, Hidden, \
-    Div, HTML, BaseInput
+    Div, HTML, BaseInput, Row
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
@@ -20,10 +20,14 @@ class SubmitLink(BaseInput):
         super().__init__(*args, **kwargs)
 
 
+class JesnyFileInput(forms.ClearableFileInput):
+    template_name = 'widgets/file_input.html'
+
+
 class AssignmentCommentForm(forms.ModelForm):
     text = forms.CharField(
         label=_("Add comment"),
-        help_text=_(LATEX_MARKDOWN_ENABLED),
+        # help_text=_(LATEX_MARKDOWN_ENABLED),
         required=False,
         widget=UbereditorWidget(attrs={'data-quicksend': 'true',
                                        'data-local-persist': 'true',
@@ -31,16 +35,15 @@ class AssignmentCommentForm(forms.ModelForm):
     attached_file = forms.FileField(
         label="",
         required=False,
-        widget=forms.FileInput)
+        widget=JesnyFileInput)
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
-            Div('text'),
-            Div(Div('attached_file',
-                    Div(SubmitLink('save-draft', _('Save Draft')),
-                        Submit('save', _('Send')), css_class='pull-right'),
-                    css_class="form-inline clearfix"),
+            Div('text', css_class='form-group-5'),
+            Div('attached_file'),
+            Div(Submit('save', _('Send')),
+                SubmitLink('save-draft', _('Save Draft')),
                 css_class="form-group"))
         super().__init__(*args, **kwargs)
 
