@@ -37,6 +37,7 @@ module.exports = {
     optimization: {
         namedModules: false,
         concatenateModules: true,
+        runtimeChunk: 'single',
         minimizer: [
             new TerserPlugin({
                 sourceMap: true, // Must be set to true if using source-maps in production

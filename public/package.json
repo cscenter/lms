@@ -9,7 +9,7 @@
     "gulp:build": "gulp --gulpfile gulp/gulpfile.babel.js build",
     "start": "NODE_ENV=development webpack-dev-server --progress --config webpack/v1.config.js",
     "dev2": "NODE_ENV=development APP_VERSION=v2 webpack-dev-server --progress --config webpack/v2.config.js",
-    "prod:1": "NODE_ENV=production webpack --config webpack/v1.config.js --progress --display-error-details --display-modules",
+    "prod:1": "NODE_ENV=production webpack --config webpack/v1.config.js --progress --display-error-details",
     "prod:1:debug": "SENTRY=0 npm run prod:1",
     "prod:2": "APP_VERSION=v2 NODE_ENV=production webpack --config webpack/v2.config.js",
     "prod:2:debug": "SENTRY=0 npm run prod:2",
