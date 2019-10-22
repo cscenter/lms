@@ -47,9 +47,9 @@ export default class UberEditor {
                 helpFormatting: showHelpFormatting
             },
             theme: {
-                base: '/themes/custom/base.css',
-                editor: '/themes/custom/editor.css',
-                preview: '/themes/custom/preview.css'
+                base: '/themes/custom/base.css?v=1',
+                editor: '/themes/custom/editor.css?v=1',
+                preview: '/themes/custom/preview.css?v=1'
             }
         };
 
