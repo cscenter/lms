@@ -5,6 +5,7 @@ import factory
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 from core.tests.factories import BranchFactory
 from core.tests.utils import CSCTestCase
@@ -22,7 +23,7 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
 from courses.utils import get_current_term_pair
 from learning.utils import course_failed_by_student
 from learning.models import StudentAssignment, Enrollment, \
-    AssignmentNotification, CourseNewsNotification
+    AssignmentNotification, CourseNewsNotification, AssignmentComment
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, \
     AssignmentCommentFactory, \

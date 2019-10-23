@@ -410,16 +410,9 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         context['score_form'] = AssignmentScoreForm(
             initial={'score': a_s.score},
             maximum_score=a_s.assignment.maximum_score)
-        draft = (AssignmentComment.objects
-                 .filter(author=self.request.user,
-                         is_published=False,
-                         student_assignment=self.student_assignment)
-                 .last())
-        comment_form = AssignmentCommentForm(instance=draft)
-        comment_form.helper.form_action = reverse(
+        context['comment_form'].helper.form_action = reverse(
             'teaching:assignment_comment_create',
             kwargs={'pk': a_s.pk})
-        context['form'] = comment_form
         return context
 
     def post(self, request, *args, **kwargs):

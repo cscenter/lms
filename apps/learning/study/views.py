@@ -19,7 +19,6 @@ from courses.utils import get_current_term_pair, get_term_index
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
 from learning.calendar import get_student_month_events
-from learning.forms import AssignmentCommentForm
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
 from learning.roles import Roles
@@ -151,15 +150,13 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         sa = self.student_assignment
-        user = self.request.user
-        form = AssignmentCommentForm()
-        form.helper.form_action = reverse(
+        comment_form = context['comment_form']
+        comment_form.helper.form_action = reverse(
             'study:assignment_comment_create',
             kwargs={'pk': sa.pk})
         # Update `text` label if student has no submissions yet
         if sa.assignment.is_online and not sa.has_comments(self.request.user):
-            form.fields.get('text').label = _("Add solution")
-        context['form'] = form
+            comment_form.fields.get('text').label = _("Add solution")
         # Format datetime in student timezone
         context['timezone'] = self.request.user.get_timezone()
         return context

@@ -38,14 +38,18 @@ class AssignmentCommentForm(forms.ModelForm):
         widget=JesnyFileInput)
 
     def __init__(self, *args, **kwargs):
-        self.helper = FormHelper()
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        if self.instance and self.instance.pk:
+            draft_button_label = _('Update Draft')
+        else:
+            draft_button_label = _('Save Draft')
         self.helper.layout = Layout(
             Div('text', css_class='form-group-5'),
             Div('attached_file'),
             Div(Submit('save', _('Send')),
-                # SubmitLink('save-draft', _('Save Draft')),
+                SubmitLink('save-draft', draft_button_label),
                 css_class="form-group"))
-        super().__init__(*args, **kwargs)
 
     class Meta:
         model = AssignmentComment

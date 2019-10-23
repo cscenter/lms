@@ -108,7 +108,7 @@
         {% endif %}
         {% call_method request.user "has_perm" "learning.create_assignment_comment" a_s as can_leave_comment %}
         {% if can_leave_comment %}
-            <div class="csc-well">{% crispy form %}</div>
+            <div class="csc-well">{% crispy comment_form %}</div>
         {% endif %}
     </div>
 
