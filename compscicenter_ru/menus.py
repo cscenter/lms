@@ -21,6 +21,11 @@ public_menu = [
             r"^/events/"
         ]),
     MenuItem(
+        pgettext_lazy("menu", "Courses"),
+        reverse("course_list"),
+        weight=20
+    ),
+    MenuItem(
         pgettext_lazy("menu", "Online Education"),
         PUBLIC_DOMAIN + '/online/',
         weight=30,
