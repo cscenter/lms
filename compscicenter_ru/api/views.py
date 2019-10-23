@@ -49,8 +49,9 @@ class LecturerList(ListAPIView):
                     .only("pk", "first_name", "last_name", "patronymic",
                           "cropbox_data", "photo", "branch__code", "gender",
                           "workplace")
-                    .distinct())
-        course = self.request.query_params.get('course', None)
+                    .distinct()
+                    .order_by("last_name", "first_name"))
+        course = self.request.query_params.get("course", None)
         if course:
             term_index = get_term_index(settings.CENTER_FOUNDATION_YEAR,
                                         SemesterTypes.AUTUMN)
