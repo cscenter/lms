@@ -22,7 +22,8 @@ module.exports = {
     // This is default settings for development mode, but lets set it explicitly
     optimization: {
         namedModules: true,
-        concatenateModules: false
+        concatenateModules: false,
+        runtimeChunk: 'single',
     },
 
     devServer: {

@@ -34,10 +34,7 @@ if (userInfo) {
 }
 
 
-loadFetchPolyfill();
-
-
-onReady(function () {
+onReady(async () => {
     let navbarContainer = document.querySelector(".navbar-container");
     let navbarToggler = document.querySelector(".navbar-toggler");
     let menuRightBlock = document.querySelector(".dropdown-user-menu") ||
@@ -89,6 +86,9 @@ onReady(function () {
         });
     }
 
+    // Global polyfills, react app could depends on them
+    const polyfillsLoaded = await Promise.all([loadFetchPolyfill()]);
+
     // TODO: section or component-based approach. What to choose?
     let sections = getSections();
     if (sections.includes("honorBoard")) {
@@ -125,11 +125,13 @@ onReady(function () {
             .catch(error => showComponentError(error));
     }
 
-    // Append svg sprites
-    window.__CSC__.sprites.forEach(async (url) => {
-        const svgDefs = await ky.get(url).text();
-        document.querySelector(".svg-inline")
-                .insertAdjacentHTML('beforeend', svgDefs);
+    window.__CSC__.sprites.forEach((url) => {
+        ky.get(url)
+            .then((response) => response.text())
+            .then((svgDefs) => {
+                document.querySelector(".svg-inline")
+                        .insertAdjacentHTML('beforeend', svgDefs);
+            });
     });
 
     // Replace data-src

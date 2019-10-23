@@ -12,7 +12,7 @@ const development = require('./dev.config');
 const production = require('./prod.config');
 const TARGET = process.env.npm_lifecycle_event;
 
-process.env.BABEL_ENV = TARGET;
+process.env.BABEL_ENV = process.env.NODE_ENV;
 
 const APP_VERSION = "v1";
 
@@ -199,10 +199,11 @@ const common = {
 	}
 };
 
-if (['dev', 'start'].includes(TARGET) || !TARGET) {
-    module.exports = merge(common, development);
+let appConfig;
+if (process.env.NODE_ENV !== "development") {
+    appConfig = merge(common, production);
+} else {
+    appConfig = merge(common, development);
 }
 
-if (TARGET === 'prod' || !TARGET) {
-    module.exports = merge(common, production);
-}
+module.exports = appConfig;

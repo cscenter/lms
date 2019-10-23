@@ -1,8 +1,8 @@
+import ky from 'ky';
 import React, {Fragment} from 'react';
 import _includes from 'lodash-es/includes';
 import _partialRight from 'lodash-es/partialRight';
 import _isEqual from 'lodash-es/isEqual';
-import $ from 'jquery';
 import * as PropTypes from 'prop-types';
 import Media from 'react-media';
 
@@ -14,18 +14,18 @@ import {
     showBodyPreloader,
     showErrorNotification
 } from "utils";
-import { Select, getOptionByValue} from "components/Select";
+import {getOptionByValue, Select} from "components/Select";
 import Checkbox from "components/Checkbox";
 import RadioGroup from "components/RadioGroup";
 import RadioOption from "components/RadioOption";
 import Icon from "components/Icon";
 import {
-    onSelectFilterChange,
-    onRadioFilterChange,
     onMultipleCheckboxChange,
+    onRadioFilterChange,
     onSearchInputChange,
+    onSelectFilterChange,
 } from "components/utils";
-import {tabletMaxMediaQuery, desktopMediaQuery} from "utils/media";
+import {desktopMediaQuery, tabletMaxMediaQuery} from "utils/media";
 
 
 export let polyfills = [
@@ -69,6 +69,7 @@ class CourseOfferings extends React.Component {
             "semesters": semesters,
             ...props.initialState
         };
+        this.latestFetchAbortController = null;
     }
 
     getYearOptions(branchOption) {
@@ -184,32 +185,44 @@ class CourseOfferings extends React.Component {
         }
     }
 
-    fetch = (payload = null) => {
+    fetch = async (payload = null) => {
         console.debug(`${this.constructor.name}: fetch`, this.props, payload);
-        this.requests = this.props.entryURL.map(entryURL => $.ajax({
-            type: "GET",
-            url: entryURL,
-            dataType: "json",
-            data: payload
-        }));
+        if (this.latestFetchAbortController !== null) {
+            this.latestFetchAbortController.abort();
+        }
 
-        Promise.all(this.requests)
-            .then((iterables) => {
-                let items = [];
-                for (const d of iterables) {
-                    items = items.concat(d);
-                }
-                this.setState( (state) => {
-                    return {
-                        loading: false,
-                        items: items,
-                        academicYearOptions: this.getYearOptions(state.branch),
-                        filteredItems: this.filterItems(items, state)
-                    };
-                });
-            }).catch((reason) => {
-            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
+        const abortController = new AbortController();
+        this.latestFetchAbortController = abortController;
+        this.requests = this.props.entryURL.map(entryURL => {
+            return ky.get(entryURL, {
+                searchParams: payload,
+                headers: {'content-type': 'application/json'},
+                signal: abortController.signal
+            })
         });
+
+        try {
+            let responses = await Promise.all(this.requests);
+            let items = [];
+            let jsons = await Promise.all(responses.map(r => r.json()));
+            if (abortController.signal.aborted) {
+                return;
+            }
+            for (const d of jsons) {
+                items = items.concat(d);
+            }
+            this.setState( (state) => {
+                return {
+                    loading: false,
+                    items: items,
+                    academicYearOptions: this.getYearOptions(state.branch),
+                    filteredItems: this.filterItems(items, state)
+                };
+            });
+        } catch(reason) {
+            console.debug(`Fetch error: ${reason}`);
+            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
+        }
     };
 
     filterItems(items, state) {

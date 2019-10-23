@@ -1,4 +1,6 @@
 import $ from 'jquery';
+import "jasny-bootstrap/js/fileinput";
+
 import UberEditor from "../editor";
 import {createNotification} from "../utils";
 
@@ -13,6 +15,7 @@ const fn = {
     Launch: function () {
         fn.initCommentModal();
         fn.initStickySidebar();
+        fn.initFileInput();
     },
 
     initCommentModal: function () {
@@ -31,7 +34,7 @@ const fn = {
             e.preventDefault();
             var $this = $(this);
             $.get(this.href, function (data) {
-                modalFormWrapper.css('opacity', '0');
+                modalFormWrapper.css('opacity', '1');
                 $('.inner', modalFormWrapper).html(data);
                 modalFormWrapper.modal('toggle');
             }).fail(function (data) {
@@ -91,6 +94,22 @@ const fn = {
                 sidebar.affix('checkPosition');
             }
         }
+    },
+
+    initFileInput: function() {
+        $('.jasny.fileinput')
+            .on('clear.bs.fileinput', function(event) {
+                $(event.target).find('.fileinput-clear-checkbox').val('on');
+                $(event.target).find('.fileinput-filename').text('Файл не выбран');
+            })
+            .on('change.bs.fileinput', function(event) {
+                $(event.target).find('.fileinput-clear-checkbox').val('');
+            })
+            .on('reseted.bs.fileinput', function(event) {
+                console.log(event.target);
+                $(event.target).find('.fileinput-filename').text('Файл не выбран');
+                $(event.target).find('.fileinput-clear-checkbox').val('');
+            });
     },
 };
 
