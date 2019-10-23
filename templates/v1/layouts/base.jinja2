@@ -73,6 +73,7 @@
     <script type="text/javascript">window.jQuery || document.write('<script src="{{ static("v1/js/vendor/jquery-3.2.1.min.js") }}"><\/script>')</script>
     <script type="text/javascript" src="{{ static("v1/js/vendor/EpicEditor-v0.2.2/js/epiceditor.min.js") }}"></script>
 
+    {{ render_bundle('runtime', 'js') }}
     {{ render_bundle('vendor', 'js') }}
     {{ render_bundle('main', 'js') }}
     {{ render_bundle('center', 'js') }}

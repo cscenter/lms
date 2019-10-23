@@ -16,6 +16,10 @@ $card-columns-count: 2;
   margin-left: -$card-group-margin;
   margin-right: -$card-group-margin;
 
+  .card__content {
+    flex: 1 1 auto;
+  }
+
   &._six {
     .card {
       @include media-breakpoint-up(sm) {

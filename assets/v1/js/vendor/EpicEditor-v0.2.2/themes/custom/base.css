@@ -1,0 +1,74 @@
+html, body, iframe, div {
+  margin:0;
+  padding:0;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+#epiceditor-utilbar {
+  padding: 0;
+  position: relative;
+  z-index: 100;
+}
+
+#epiceditor-utilbar a {
+  color: #337ab7;
+  font-size: 12px;
+  line-height: 30px;
+  text-decoration: none;
+}
+
+#epiceditor-utilbar .pull-right {
+  float: right;
+}
+
+#epiceditor-utilbar button {
+  display: inline-block;
+  color: #000 !important;
+  margin: 0;
+  height: 30px;
+  border: 1px solid transparent;
+  background: none;
+  font-size: 12px;
+  padding: 0 8px;
+}
+
+#epiceditor-utilbar button:focus {
+  outline: none;
+}
+
+
+#epiceditor-utilbar button.epiceditor-fullscreen-btn {
+  position: relative;
+  top: -3px;
+  width:30px;
+  float: right;
+  background-image:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAY5JREFUeNrsV8tthDAQhYgCtoV04BKghK2En5AQBw4IITjwq2RLgBJcwpawHZAxMpGDYGwTFPaQkUbG1sybj58NmNM0GVfIh3GRXBbYEid932N9d1zXHWWAGAb4m+9VsUA0H5SubKkKIGA4qyUC2qKBxSCe541HKln7dV2nVbHRtq0Nw7CXGNtz/jzwqjZ5odtqTOagQRC82KRpGkcS/L2Ok7lXZV3Xp7Q6DMNR2mqNthMhKXLqzcUCc6Wgn3wU1wlX1PboHs8tjaLoyVtLT7JFK2ZZM6CZvWyE+X1Voaj3la3DMA63epGqqm4wfyCBH8xmz1+Z1WVZ2vyqU2HvHtv9OI4PsRpjL91YV2a7pcB8onmOifYFUhSFLQCTnQtkDpokyYv73JBtcAQsA3zGTXJBEgNXgrF3CcrBZGwnC+4uqxHnH+zN8/ybvexZwvZNhlsHbrt5CyCgDtu1XosUe58K4kuOF9EKnKYp20eVrxDUJssyreM0bDg4kIw0EfCbftvqQ6KKYf7/wvyVfAkwAMjqoFSaWbrBAAAAAElFTkSuQmCC);
+}
+
+
+#epiceditor-utilbar button:hover {
+  cursor:pointer;
+}
+
+.epiceditor-edit-mode #epiceditor-utilbar button.epiceditor-toggle-edit-btn {
+  border-radius: 4px 4px 0 0;
+  border-top-color: #ccc;
+  border-left-color: #ccc;
+  border-right-color: #ccc;
+  border-bottom-color: #fcfcfc;
+}
+
+.epiceditor-preview-mode #epiceditor-utilbar button.epiceditor-toggle-preview-btn {
+  border-radius: 4px 4px 0 0;
+  border-top-color: #ccc;
+  border-left-color: #ccc;
+  border-right-color: #ccc;
+  border-bottom-color: #fff;
+}
+
+
+#epiceditor-editor-frame,
+#epiceditor-previewer-frame{
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+}

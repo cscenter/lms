@@ -1,5 +1,4 @@
-// This config is used by old template
-var ravenOptions = {
+let sentryOptions = {
     // Will cause a deprecation warning, but the demise of `ignoreErrors` is still under discussion.
     // See: https://github.com/getsentry/raven-js/issues/73
     ignoreErrors: [
@@ -22,12 +21,9 @@ var ravenOptions = {
         'bmi_SafeAddOnload',
         'EBCallBackMessageReceived',
         // See http://toolbar.conduit.com/Developer/HtmlAndGadget/Methods/JSInjection.aspx
-        'conduitPage',
-        // Generic error code from errors outside the security sandbox
-        // You can delete this if using raven.js > 1.0, which ignores these automatically.
-        'Script error.'
+        'conduitPage'
     ],
-    ignoreUrls: [
+    blacklistUrls: [
         // Facebook flakiness
             /graph\.facebook\.com/i,
         // Facebook blocked
@@ -46,10 +42,5 @@ var ravenOptions = {
             /kaspersky-labs\.com/i
     ]
 };
-Raven.config('https://8e585e0a766b4a8786870813ed7a4be4@app.getsentry.com/13763', ravenOptions).install();
-var $faUser = $("#login").data('user-id');
-if (!isNaN(parseInt($faUser))) {
-    Raven.setUserContext({
-        id: $faUser
-    });
-}
+
+export default sentryOptions;

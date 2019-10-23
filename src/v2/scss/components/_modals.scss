@@ -29,7 +29,7 @@ $modal-sm: 400px;
   overflow: auto;
   background-color: rgba($modal-backdrop-bg, $modal-backdrop-opacity);
 
-  &.show {
+  &.visible {
     display: flex;
   }
 

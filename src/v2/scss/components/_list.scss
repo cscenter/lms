@@ -56,7 +56,7 @@ ul:not(.ui) {
 
   > .list__item {
     display: block;
-    padding: spacer("3x") spacer("4x");
+    padding: spacer("3x") 0;
     border-top: $border-width solid $gray-lighter;
     margin: 0;
 
@@ -69,6 +69,7 @@ ul:not(.ui) {
 
 .ui.list._selection {
   .list__item {
+    padding: spacer("3x") spacer("4x");
     &:hover {
       background-color: $gray-lighter;
     }

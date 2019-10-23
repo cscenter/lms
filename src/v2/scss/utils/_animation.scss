@@ -1,9 +1,9 @@
-.animation {
+.animated {
   opacity: 1;
   max-height: 3000px;
   transition: max-height .25s ease-in, opacity .25s ease-in;
 
-  &.hide {
+  &.hidden {
     margin: 0!important;
     max-height: 0;
     overflow: hidden;

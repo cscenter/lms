@@ -5,11 +5,11 @@ const merge = require('webpack-merge');  // merge webpack configs
 const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
+
 const DEBUG = (process.env.NODE_ENV !== "production");
 
 const development = require('./dev.config');
 const production = require('./prod.config');
-const TARGET = process.env.npm_lifecycle_event;
 
 process.env.BABEL_ENV = process.env.NODE_ENV;
 
@@ -28,6 +28,7 @@ const PATHS = {
 };
 
 const common = {
+
     context: __srcdir,
 
     entry: {
@@ -35,6 +36,7 @@ const common = {
             // "core-js/stable",
             // "regenerator-runtime/runtime",
             //'jquery',
+            'ky',
             'popper.js',
             'fontfaceobserver',
             'noty',
@@ -223,11 +225,10 @@ const common = {
 };
 
 let appConfig;
-if (['dev2', 'start'].includes(TARGET) || !TARGET) {
-    appConfig = merge(common, development);
-}
-if (TARGET === 'prod2' || !TARGET) {
+if (process.env.NODE_ENV !== "development") {
     appConfig = merge(common, production);
+} else {
+    appConfig = merge(common, development);
 }
 
 module.exports = appConfig;
