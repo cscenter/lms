@@ -2,12 +2,35 @@ import Cookies from 'js-cookie';
 import 'bootstrap-sass';
 import $ from 'jquery';
 import "jgrowl/jquery.jgrowl.js";
+// Sentry needs Object.assign
+import "core-js/modules/es.object.assign";
+import * as Sentry from '@sentry/browser';
+
 import "mathjax_config";
 import UberEditor from "./editor";
 import {csrfSafeMethod, showComponentError} from './utils';
 import courseOfferingsList from './main/course_offerings';
+import sentryOptions from "./sentry_conf";
+
+// Configure Sentry SDK
+Sentry.init({
+    dsn: "https://f2a254aefeae4aeaa09657771205672f@sentry.io/13763",
+    ...sentryOptions
+});
+
+
+const userInfo = document.getElementById('login');
+if (userInfo) {
+    let uid = parseInt(userInfo.getAttribute('data-user-id'));
+    if (!isNaN(uid)) {
+        Sentry.configureScope(scope => {
+            scope.setUser({id: uid});
+        });
+    }
+}
 
 const CSC = window.CSC;
+
 
 // Replace textarea with EpicEditor
 const $ubereditors = $("textarea.ubereditor");

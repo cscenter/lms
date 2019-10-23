@@ -104,6 +104,11 @@ const fn = {
             })
             .on('change.bs.fileinput', function(event) {
                 $(event.target).find('.fileinput-clear-checkbox').val('');
+            })
+            .on('reseted.bs.fileinput', function(event) {
+                console.log(event.target);
+                $(event.target).find('.fileinput-filename').text('Файл не выбран');
+                $(event.target).find('.fileinput-clear-checkbox').val('');
             });
     },
 };
