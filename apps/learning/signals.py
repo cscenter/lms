@@ -1,9 +1,8 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils.timezone import now
 
 from courses.models import Assignment, CourseNews, CourseTeacher
-from learning.models import AssignmentComment, AssignmentNotification, \
+from learning.models import AssignmentNotification, \
     StudentAssignment, Enrollment, CourseNewsNotification
 from learning.settings import StudentStatuses
 from learning.utils import update_course_learners_count
@@ -85,50 +84,3 @@ def create_deadline_change_notification(sender, instance, created,
             except StudentAssignment.DoesNotExist:
                 # It can occur for student with inactive status
                 continue
-
-
-@receiver(post_save, sender=AssignmentComment)
-def assignment_comment_post_save(sender, instance, created, *args, **kwargs):
-    """
-    Notify teachers if student leave a comment, otherwise notify student.
-    Update `first_student_comment_at` and `last_comment_from`
-    StudentAssignment model fields.
-
-    Note:
-        Can be essential for future signals but it doesn't update
-        model attributes.
-    """
-    if not created:
-        return
-
-    comment = instance
-    sa: StudentAssignment = comment.student_assignment
-    notifications = []
-    sa_update_dict = {"modified": now()}
-    if comment.author_id == sa.student_id:
-        other_comments = (sa.assignmentcomment_set(manager='published')
-                          .filter(author_id=comment.author_id)
-                          .exclude(pk=comment.pk))
-        is_first_comment = not other_comments.exists()
-        is_about_passed = sa.assignment.is_online and is_first_comment
-
-        teachers = comment.student_assignment.assignment.notify_teachers.all()
-        for t in teachers:
-            notifications.append(
-                AssignmentNotification(user_id=t.teacher_id,
-                                       student_assignment=sa,
-                                       is_about_passed=is_about_passed))
-
-        if is_first_comment:
-            sa_update_dict["first_student_comment_at"] = comment.created
-        sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.STUDENT
-    else:
-        sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.TEACHER
-        student_id = comment.student_assignment.student_id
-        notifications.append(
-            AssignmentNotification(user_id=student_id, student_assignment=sa)
-        )
-    AssignmentNotification.objects.bulk_create(notifications)
-    sa.__class__.objects.filter(pk=sa.pk).update(**sa_update_dict)
-    for attr_name in sa_update_dict:
-        setattr(sa, attr_name, sa_update_dict[attr_name])

@@ -95,6 +95,7 @@ class SurveySubmissionsStats:
                        self.db_fields.values()}
 
         form_entries = self.survey.form.entries.order_by("submission_id")
+        # FIXME: What's the purpose of grouping by submission?
         grouped_by_submission = groupby(form_entries.iterator(),
                                         key=attrgetter("submission_id"))
         for submission_id, submission_entries in grouped_by_submission:
@@ -103,7 +104,7 @@ class SurveySubmissionsStats:
                 field_entries[e.field_id].append(e)
             for entries in field_entries.values():
                 for entry in entries:
-                    # Entry field could be deleted
+                    # Entry field could be already deleted
                     if entry.field_id not in self.db_fields:
                         continue
                     db_field = self.db_fields[entry.field_id]
@@ -123,7 +124,7 @@ class SurveySubmissionsStats:
                         raise ValueError(f"Field type {db_field.field_type} is "
                                          f"not supported")
 
-        # Show options starting with the most popular
+        # Sort options from the most popular answer to the lowest
         for db_field, stats in field_stats.items():
             if db_field.field_type in CHOICE_FIELD_TYPES:
                 new_values = []

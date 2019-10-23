@@ -127,12 +127,19 @@ class AssignmentSubmissionBaseView(StudentAssignmentURLParamsMixin,
         cs_after_deadline = (c for c in sa.assignmentcomment_set.all() if
                              c.created >= deadline_at)
         first_comment_after_deadline = next(cs_after_deadline, None)
+        draft = (AssignmentComment.objects
+                 .filter(author=self.request.user,
+                         is_published=False,
+                         student_assignment=self.student_assignment)
+                 .last())
+        comment_form = AssignmentCommentForm(instance=draft)
         context = {
             'a_s': sa,
             'timezone': sa.assignment.course.get_timezone(),
             'first_comment_after_deadline': first_comment_after_deadline,
             'one_teacher': sa.assignment.course.teachers.count() == 1,
-            'hashes_json': comment_persistence.get_hashes_json()
+            'hashes_json': comment_persistence.get_hashes_json(),
+            'comment_form': comment_form
         }
         return context
 
