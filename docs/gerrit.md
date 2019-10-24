@@ -68,6 +68,14 @@ You may need to fix author and committer
 git -c "user.name=admin" -c "user.email=webmaster@compscicenter.ru" commit --amend --reuse-message=HEAD --author="admin <webmaster@compscicenter.ru>"
 ```
 
+
+### Update gerrit user
+
+```bash
+ssh -p 29418 admin@review.compscicenter.ru gerrit set-account --delete-ssh-key 'ALL' 1000080
+cat ~/.ssh/jenkins_user.pub | ssh -p 29418 admin@review.compscicenter.ru gerrit set-account --add-ssh-key - --add-email mail@example.com 1000080
+```
+
 ## Для студента
 
 Чтобы успешно отправлять решения в систему code review, нужно знать, как работать с ssh клиентом на вашей платформе и уметь пользоваться git.
