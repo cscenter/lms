@@ -9,6 +9,7 @@ from courses.utils import get_boundaries
 
 
 class CourseTeacherQuerySet(query.QuerySet):
+    # FIXME: do I need subquery here?
     def for_course(self, course_slug):
         course_pks = (self.model.course.field.related_model.objects
                          .filter(meta_course__slug=course_slug)

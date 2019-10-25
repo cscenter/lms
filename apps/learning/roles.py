@@ -12,7 +12,9 @@ from .permissions import CreateAssignmentComment, \
     ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
     ViewOwnAssignments, ViewOwnAssignment, ViewCourses, ViewSchedule, ViewFAQ, \
     ViewLibrary, ViewInternships, EnrollInCourse, EnrollInCourseByInvitation, \
-    LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook
+    LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook, \
+    ViewStudentAssignment, ViewRelatedStudentAssignment, EditStudentAssignment, \
+    EditRelatedStudentAssignment
 
 
 # TODO: Add description of each role
@@ -40,6 +42,8 @@ class Roles(DjangoChoices):
         ViewTeachingMenu,
         ViewCourseContacts,
         ViewCourseAssignments,
+        ViewRelatedStudentAssignment,
+        EditRelatedStudentAssignment,
         ViewCourseNews,
         CreateAssignmentCommentTeacher,
         ViewOwnGradebook,
@@ -71,6 +75,8 @@ class Roles(DjangoChoices):
         ChangeMetaCourse,
         ViewCourseContacts,
         ViewCourseAssignments,
+        ViewStudentAssignment,
+        EditStudentAssignment,
         ViewCourseNews,
         ViewCourseReviews,
         ViewLibrary,
@@ -105,6 +111,8 @@ for code, name in Roles.choices:
 # Add relations
 teacher_role = role_registry[Roles.TEACHER]
 teacher_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentTeacher)
+teacher_role.add_relation(ViewStudentAssignment, ViewRelatedStudentAssignment)
+teacher_role.add_relation(EditStudentAssignment, EditRelatedStudentAssignment)
 
 student_role = role_registry[Roles.STUDENT]
 student_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentStudent)

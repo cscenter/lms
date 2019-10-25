@@ -11,10 +11,11 @@ from courses.tests.factories import CourseFactory, SemesterFactory, \
 from learning.models import StudentAssignment
 from learning.permissions import course_access_role, CourseRole, \
     CreateAssignmentComment, CreateAssignmentCommentTeacher, \
-    CreateAssignmentCommentStudent
+    CreateAssignmentCommentStudent, ViewRelatedStudentAssignment, \
+    ViewStudentAssignment
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory, \
-    AssignmentCommentFactory
+    AssignmentCommentFactory, StudentAssignmentFactory
 from users.constants import Roles
 from users.models import ExtendedAnonymousUser, User
 from users.tests.factories import CuratorFactory, TeacherFactory, \
@@ -233,3 +234,47 @@ def test_create_assignment_comment():
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
     assert teacher.has_perm(CreateAssignmentCommentTeacher.name, sa)
     assert not teacher.has_perm(CreateAssignmentCommentStudent.name, sa)
+
+
+@pytest.mark.django_db
+def test_view_related_student_assignment():
+    """
+    Tests teacher specific permission and relation with more common
+    `ViewStudentAssignment`.
+    """
+    curator = CuratorFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course)
+    assert not ViewRelatedStudentAssignment.rule(UserFactory(), sa)
+    assert ViewRelatedStudentAssignment.rule(teacher, sa)
+    assert not ViewRelatedStudentAssignment.rule(teacher_other, sa)
+    assert not ViewRelatedStudentAssignment.rule(curator, sa)
+    # Teacher for the same meta course has access to all readings
+    meta_course = course.meta_course
+    teacher2 = TeacherFactory()
+    course2 = CourseFactory(meta_course=meta_course, teachers=[teacher2])
+    sa2 = StudentAssignmentFactory(assignment__course=course2)
+    assert ViewRelatedStudentAssignment.rule(teacher2, sa)
+    # Make sure student `expelled` status doesn't affect on teacher role
+    teacher2.status = StudentStatuses.EXPELLED
+    teacher2.save()
+    assert ViewRelatedStudentAssignment.rule(teacher2, sa)
+
+
+@pytest.mark.django_db
+def test_view_student_assignment_role_relation():
+    """
+    Tests call chain `teacher.has_perm(ViewStudentAssignment.name, sa)` ->
+    `teacher.has_perm(ViewRelatedStudentAssignment.name, sa)`
+    """
+    curator = CuratorFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course)
+    assert not UserFactory().has_perm(ViewStudentAssignment.name, sa)
+    assert teacher.has_perm(ViewStudentAssignment.name, sa)
+    assert not teacher_other.has_perm(ViewStudentAssignment.name, sa)
+    assert curator.has_perm(ViewStudentAssignment.name, sa)

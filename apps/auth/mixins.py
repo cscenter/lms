@@ -1,16 +1,13 @@
 from django.contrib.auth.mixins import PermissionRequiredMixin as _PermissionRequiredMixin
 
 
-# FIXME: check that perms registered in all_permissions?
+# FIXME: statically check that perms registered in all_permissions?
 class PermissionRequiredMixin(_PermissionRequiredMixin):
     """
-    CBV mixin to provide object-level permission checking to views. Best used
-    with views that inherit from ``SingleObjectMixin`` (``DetailView``,
-    ``UpdateView``, etc.), though not required.
+    CBV mixin to provide object-level permission checking to views.
 
-    The single requirement is for a ``get_object`` method to be available
-    in the view. If there's no ``get_object`` method, permission checking
-    is model-level, that is exactly like Django's ``PermissionRequiredMixin``.
+    Best used with views that inherit from ``SingleObjectMixin``
+    (``DetailView``, ``UpdateView``, etc.), though not required.
     """
     def get_permission_object(self):
         """

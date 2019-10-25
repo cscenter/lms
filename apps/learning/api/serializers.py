@@ -1,6 +1,7 @@
+from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
-from learning.models import CourseNewsNotification
+from learning.models import CourseNewsNotification, StudentAssignment
 from users.models import User
 
 
@@ -28,3 +29,16 @@ class CourseNewsNotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CourseNewsNotification
         fields = ('user', 'is_unread', 'is_notified')
+
+
+class StudentAssignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentAssignment
+        fields = ('score',)
+
+    def validate_score(self, value):
+        max_score = self.instance.assignment.maximum_score
+        if value and value > max_score:
+            msg = _("Score can't be larger than %s") % max_score
+            raise serializers.ValidationError(msg)
+        return value

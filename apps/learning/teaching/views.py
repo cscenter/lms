@@ -28,7 +28,7 @@ from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
-    CreateAssignmentComment
+    CreateAssignmentComment, ViewStudentAssignment
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import logger, AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
@@ -382,13 +382,10 @@ class AssignmentDetailView(TeacherOnlyMixin, generic.DetailView):
 class StudentAssignmentDetailView(PermissionRequiredMixin,
                                   AssignmentSubmissionBaseView):
     template_name = "learning/teaching/student_assignment_detail.html"
+    permission_required = ViewStudentAssignment.name
 
-    def has_permission(self):
-        user = self.request.user
-        course = self.student_assignment.assignment.course
-        # FIXME: replace with `has_perm`
-        role = course_access_role(course=course, user=user)
-        return role in (CourseRole.TEACHER, CourseRole.CURATOR)
+    def get_permission_object(self):
+        return self.student_assignment
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
