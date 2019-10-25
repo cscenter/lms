@@ -129,19 +129,6 @@ def enroll_in_course(user, course: Course):
 
 
 @rules.predicate
-def is_meta_course_teacher(user, student_assignment: StudentAssignment):
-    """
-    Teacher permits to view/edit all assignments related to the meta course
-    where he participated in.
-    """
-    course = student_assignment.assignment.course
-    all_teachers = (CourseTeacher.objects
-                    .filter(course__meta_course_id=course.meta_course_id)
-                    .values_list('teacher_id', flat=True))
-    return user.pk in all_teachers
-
-
-@rules.predicate
 def has_active_status(user):
     return user.status not in StudentStatuses.inactive_statuses
 
@@ -197,7 +184,19 @@ class ViewStudentAssignment(Permission):
 @add_perm
 class ViewRelatedStudentAssignment(Permission):
     name = "teaching.view_studentassignment"
-    rule = is_meta_course_teacher
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_assignment: StudentAssignment):
+        """
+        Teacher permits to view all assignments related to the meta course
+        where he participated in.
+        """
+        course = student_assignment.assignment.course
+        all_teachers = (CourseTeacher.objects
+                        .filter(course__meta_course_id=course.meta_course_id)
+                        .values_list('teacher_id', flat=True))
+        return user.pk in all_teachers
 
 
 @add_perm
@@ -206,9 +205,14 @@ class EditStudentAssignment(Permission):
 
 
 @add_perm
-class EditRelatedStudentAssignment(Permission):
+class EditOwnStudentAssignment(Permission):
     name = "teaching.change_studentassignment"
-    rule = is_meta_course_teacher
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, student_assignment: StudentAssignment):
+        course = student_assignment.assignment.course
+        return user in course.teachers.all()
 
 
 # FIXME: возможно, view_assignments надо отдать куратору и преподавателю. А студенту явный view_own_assignments. Но, блин, этот дурацкий случай для отчисленных студентов :< И own ничего не чекает, никакой бизнес-логики на самом деле не приаттачено(((((((((

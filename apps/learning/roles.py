@@ -14,7 +14,7 @@ from .permissions import CreateAssignmentComment, \
     ViewLibrary, ViewInternships, EnrollInCourse, EnrollInCourseByInvitation, \
     LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook, \
     ViewStudentAssignment, ViewRelatedStudentAssignment, EditStudentAssignment, \
-    EditRelatedStudentAssignment
+    EditOwnStudentAssignment
 
 
 # TODO: Add description of each role
@@ -43,7 +43,7 @@ class Roles(DjangoChoices):
         ViewCourseContacts,
         ViewCourseAssignments,
         ViewRelatedStudentAssignment,
-        EditRelatedStudentAssignment,
+        EditOwnStudentAssignment,
         ViewCourseNews,
         CreateAssignmentCommentTeacher,
         ViewOwnGradebook,
@@ -112,7 +112,7 @@ for code, name in Roles.choices:
 teacher_role = role_registry[Roles.TEACHER]
 teacher_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentTeacher)
 teacher_role.add_relation(ViewStudentAssignment, ViewRelatedStudentAssignment)
-teacher_role.add_relation(EditStudentAssignment, EditRelatedStudentAssignment)
+teacher_role.add_relation(EditStudentAssignment, EditOwnStudentAssignment)
 
 student_role = role_registry[Roles.STUDENT]
 student_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentStudent)

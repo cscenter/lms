@@ -42,3 +42,8 @@ class StudentAssignmentSerializer(serializers.ModelSerializer):
             msg = _("Score can't be larger than %s") % max_score
             raise serializers.ValidationError(msg)
         return value
+
+
+class AssignmentScoreSerializer(StudentAssignmentSerializer):
+    class Meta(StudentAssignmentSerializer.Meta):
+        fields = ('score',)
