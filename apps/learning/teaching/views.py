@@ -21,6 +21,8 @@ from courses.models import CourseClass, Course, Assignment
 from courses.utils import get_term_index, \
     get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
+from learning.api.serializers import StudentAssignmentSerializer, \
+    AssignmentScoreSerializer
 from learning.calendar import get_teacher_month_events
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
     AssignmentCommentForm
@@ -28,7 +30,7 @@ from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
-    CreateAssignmentComment, ViewStudentAssignment
+    CreateAssignmentComment, ViewStudentAssignment, EditOwnStudentAssignment
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import logger, AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
@@ -414,35 +416,26 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
 
     def post(self, request, *args, **kwargs):
         if 'grading_form' in request.POST:
-            a_s = self.student_assignment
-            form = AssignmentScoreForm(request.POST,
-                                       maximum_score=a_s.assignment.maximum_score)
-
-            # Too hard to use ProtectedFormMixin here, let's just inline it's
-            # logic. A little drawback is that teachers still can leave
-            # comments under other's teachers assignments, but can not grade,
-            # so it's acceptable, IMO.
-            teachers = a_s.assignment.course.teachers.all()
-            if request.user not in teachers:
+            sa = self.student_assignment
+            if not request.user.has_perm(EditOwnStudentAssignment.name, sa):
                 raise PermissionDenied
 
-            if form.is_valid():
-                a_s.score = form.cleaned_data['score']
-                a_s.save()
-                if a_s.score is None:
-                    messages.info(self.request,
-                                  _("Score was deleted"),
+            serializer = AssignmentScoreSerializer(data=request.POST,
+                                                   instance=sa)
+            if serializer.is_valid():
+                serializer.save()
+                if serializer.instance.score is None:
+                    messages.info(self.request, _("Score was deleted"),
                                   extra_tags='timeout')
                 else:
-                    messages.success(self.request,
-                                     _("Score successfully saved"),
+                    messages.success(self.request, _("Score successfully saved"),
                                      extra_tags='timeout')
-                return redirect(a_s.get_teacher_url())
+                return redirect(sa.get_teacher_url())
             else:
                 # not sure if we can do anything more meaningful here.
                 # it shouldn't happen, after all.
                 return HttpResponseBadRequest(_("Grading form is invalid") +
-                                              "{}".format(form.errors))
+                                              "{}".format(serializer.errors))
 
 
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,

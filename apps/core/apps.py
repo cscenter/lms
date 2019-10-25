@@ -7,5 +7,13 @@ class CoreConfig(AppConfig):
     verbose_name = _("Core")
 
     def ready(self):
+        from rest_framework.serializers import ModelSerializer
         # Register checks
         from . import checks
+        # Update Django Rest Framework serializer mappings
+        from core.db.models import ScoreField
+        from core.api import fields
+        field_mapping = ModelSerializer.serializer_field_mapping
+        field_mapping.update({
+            ScoreField: fields.ScoreField
+        })

@@ -12,7 +12,7 @@ from learning.models import StudentAssignment
 from learning.permissions import course_access_role, CourseRole, \
     CreateAssignmentComment, CreateAssignmentCommentTeacher, \
     CreateAssignmentCommentStudent, ViewRelatedStudentAssignment, \
-    ViewStudentAssignment
+    ViewStudentAssignment, EditOwnStudentAssignment
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory, \
     AssignmentCommentFactory, StudentAssignmentFactory
@@ -238,10 +238,6 @@ def test_create_assignment_comment():
 
 @pytest.mark.django_db
 def test_view_related_student_assignment():
-    """
-    Tests teacher specific permission and relation with more common
-    `ViewStudentAssignment`.
-    """
     curator = CuratorFactory()
     teacher = TeacherFactory()
     teacher_other = TeacherFactory()
@@ -278,3 +274,24 @@ def test_view_student_assignment_role_relation():
     assert teacher.has_perm(ViewStudentAssignment.name, sa)
     assert not teacher_other.has_perm(ViewStudentAssignment.name, sa)
     assert curator.has_perm(ViewStudentAssignment.name, sa)
+
+
+@pytest.mark.django_db
+def test_edit_own_student_assignment():
+    curator = CuratorFactory()
+    teacher = TeacherFactory()
+    teacher_other = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    sa = StudentAssignmentFactory(assignment__course=course)
+    assert not EditOwnStudentAssignment.rule(UserFactory(), sa)
+    assert EditOwnStudentAssignment.rule(teacher, sa)
+    assert not EditOwnStudentAssignment.rule(teacher_other, sa)
+    assert not EditOwnStudentAssignment.rule(curator, sa)
+    # Teacher of the same meta course can't edit assignments where he's
+    # not participated
+    meta_course = course.meta_course
+    teacher2 = TeacherFactory()
+    course2 = CourseFactory(meta_course=meta_course, teachers=[teacher2])
+    sa2 = StudentAssignmentFactory(assignment__course=course2)
+    assert EditOwnStudentAssignment.rule(teacher2, sa2)
+    assert not EditOwnStudentAssignment.rule(teacher2, sa)
