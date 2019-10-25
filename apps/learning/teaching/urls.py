@@ -23,6 +23,7 @@ urlpatterns = [
     path('full-calendar/', CalendarFullView.as_view(), name='calendar_full'),
     path('courses/', include([
         path('', CourseListView.as_view(), name='course_list'),
+        # TODO: separate api views?
         path("news/<int:news_pk>/stats", CourseNewsUnreadNotificationsView.as_view(), name="course_news_unread"),
     ])),
     path('assignments/', include([

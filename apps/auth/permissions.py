@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Type, Dict, Set, Optional, Iterable, Union, NewType
 
+from rest_framework.permissions import BasePermission
 from rules import RuleSet, Predicate, always_true
 
 from auth.errors import PermissionNotRegistered, AuthPermissionError
@@ -8,13 +9,20 @@ from auth.errors import PermissionNotRegistered, AuthPermissionError
 PermissionId = str
 
 
-class Permission(metaclass=ABCMeta):
+class Permission(BasePermission):
     @property
     @abstractmethod
     def name(self) -> PermissionId:
         raise NotImplementedError
 
     rule: Optional[Predicate] = None
+
+    def has_object_permission(self, request, view, obj) -> bool:
+        """
+        Some permissions implicitly considered as `always True` and
+        haven't attached predicate rule
+        """
+        return request.user.has_perm(self.name, obj)
 
 
 class PermissionRegistry:
