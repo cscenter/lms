@@ -60,13 +60,19 @@ def test_teacher_timetable(client):
     assert next_month_qstr.encode() in response.content
     response = client.get(next_month_url)
     calendar = response.context['calendar']
-    assert len(flatten_calendar_month_events(calendar)) == 0
+    days = calendar.days()
+    first_day, last_day = days[0].date, days[-1].date
+    if first_day <= today_spb <= last_day:
+        expected = 3
+    else:
+        expected = 0
+    assert len(flatten_calendar_month_events(calendar)) == expected
     next_month_date = today_spb + relativedelta(months=1)
     CourseClassFactory.create_batch(2, course__teachers=[teacher],
                                     date=next_month_date)
     response = client.get(next_month_url)
     calendar = response.context['calendar']
-    assert len(flatten_calendar_month_events(calendar)) == 2
+    assert len(flatten_calendar_month_events(calendar)) == 2 + expected
 
 
 @pytest.mark.django_db
