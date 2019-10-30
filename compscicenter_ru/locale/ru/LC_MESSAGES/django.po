@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-27 11:40+0000\n"
-"PO-Revision-Date: 2019-09-27 11:40+0000\n"
+"POT-Creation-Date: 2019-10-30 14:05+0000\n"
+"PO-Revision-Date: 2019-10-30 14:06+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -223,7 +223,7 @@ msgstr "Черновик"
 #: compscicenter_ru/apps/publications/models.py:65
 #: compscicenter_ru/apps/publications/models.py:114
 #: compscicenter_ru/apps/publications/models.py:158
-#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:43
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:40
 msgid "Description"
 msgstr "Описание"
 
@@ -292,17 +292,16 @@ msgstr "Видеозапись мероприятия"
 msgid "Recorded Events"
 msgstr "Видеозаписи мероприятий"
 
-#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:51
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:48
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:68
-#: compscicenter_ru/views.py:562
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:65
 msgid "Lectures List"
 msgstr "Список лекций"
 
-#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:90
-#: compscicenter_ru/jinja2/compscicenter_ru/courses/meta_course_detail.html:82
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/course_detail.html:96
+#: compscicenter_ru/jinja2/compscicenter_ru/courses/meta_course_detail.html:85
 msgid "Edit in Admin"
 msgstr "Редактировать в админ. разделе сайта"
 
@@ -335,76 +334,82 @@ msgid "Distance"
 msgstr "Заочное обучение"
 
 #: compscicenter_ru/menus.py:24
+#| msgid "Course"
+msgctxt "menu"
+msgid "Courses"
+msgstr "Курсы"
+
+#: compscicenter_ru/menus.py:29
 msgctxt "menu"
 msgid "Online Education"
 msgstr "Онлайн-образование"
 
-#: compscicenter_ru/menus.py:28
+#: compscicenter_ru/menus.py:33
 msgctxt "menu"
 msgid "Online courses"
 msgstr "Онлайн-курсы"
 
-#: compscicenter_ru/menus.py:29
+#: compscicenter_ru/menus.py:34
 msgctxt "menu"
 msgid "Online programs"
 msgstr "Онлайн-программы"
 
-#: compscicenter_ru/menus.py:30
+#: compscicenter_ru/menus.py:35
 msgctxt "menu"
 msgid "Video Records"
 msgstr "Видеозаписи лекций"
 
-#: compscicenter_ru/menus.py:33
+#: compscicenter_ru/menus.py:38
 msgctxt "menu"
 msgid "Admission"
 msgstr "Поступление"
 
-#: compscicenter_ru/menus.py:37
+#: compscicenter_ru/menus.py:42
 msgctxt "menu"
 msgid "Apply"
 msgstr "Подать заявку"
 
-#: compscicenter_ru/menus.py:38
+#: compscicenter_ru/menus.py:43
 msgctxt "menu"
 msgid "Checklist"
 msgstr "Памятка"
 
-#: compscicenter_ru/menus.py:39
+#: compscicenter_ru/menus.py:44
 msgctxt "menu"
 msgid "Program for Admission"
 msgstr "Программа для поступления"
 
-#: compscicenter_ru/menus.py:40
+#: compscicenter_ru/menus.py:45
 msgctxt "menu"
 msgid "FAQ"
 msgstr "Вопросы и ответы"
 
-#: compscicenter_ru/menus.py:43
+#: compscicenter_ru/menus.py:48
 msgctxt "menu"
 msgid "About"
 msgstr "О центре"
 
-#: compscicenter_ru/menus.py:47
+#: compscicenter_ru/menus.py:52
 msgctxt "menu"
 msgid "History"
 msgstr "История"
 
-#: compscicenter_ru/menus.py:48
+#: compscicenter_ru/menus.py:53
 msgctxt "menu"
 msgid "Team"
 msgstr "Команда"
 
-#: compscicenter_ru/menus.py:49
+#: compscicenter_ru/menus.py:54
 msgctxt "menu"
 msgid "Teachers"
 msgstr "Преподаватели"
 
-#: compscicenter_ru/menus.py:50
+#: compscicenter_ru/menus.py:55
 msgctxt "menu"
 msgid "Alumni"
 msgstr "Выпускники"
 
-#: compscicenter_ru/menus.py:51
+#: compscicenter_ru/menus.py:56
 msgctxt "menu"
 msgid "Testimonials"
 msgstr "Отзывы"
@@ -426,7 +431,7 @@ msgstr "Войти"
 msgid "Computer Science Center, 2011–19 гг."
 msgstr ""
 
-#: compscicenter_ru/templates/base.html:85
+#: compscicenter_ru/templates/base.html:83
 msgid "close all"
 msgstr "закрыть все"
 
@@ -614,11 +619,15 @@ msgstr "Лекция"
 msgid "About the Course"
 msgstr "О курсе"
 
-#: compscicenter_ru/views.py:610
+#: compscicenter_ru/views.py:562
+msgid "Syllabus"
+msgstr "Программа"
+
+#: compscicenter_ru/views.py:613
 msgid "Autumn|adjective"
 msgstr "Осенний"
 
-#: compscicenter_ru/views.py:611
+#: compscicenter_ru/views.py:614
 msgid "Spring|adjective"
 msgstr "Весенний"
 

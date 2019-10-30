@@ -559,7 +559,7 @@ class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
                 url=self.course.get_absolute_url(subdomain=None),
                 active=True),
             Tab(target='classes',
-                name=_('Lectures List'),
+                name=_('Syllabus'),
                 url=self.course.get_absolute_url(tab='classes',
                                                  subdomain=None)),
         ])
