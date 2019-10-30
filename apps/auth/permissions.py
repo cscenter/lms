@@ -160,7 +160,7 @@ class Role:
             raise AuthPermissionError(f"Cannot add {specific_perm} as a child of itself")
         if child not in self._permissions:
             raise PermissionNotRegistered(f"{specific_perm} is not registered in current role")
-
+        # FIXME: child must be object level permission only!
         # FIXME: detect loop
         if parent in self._relations and child in self._relations[parent]:
             raise AuthPermissionError(f"The item {common_perm} already has a "
