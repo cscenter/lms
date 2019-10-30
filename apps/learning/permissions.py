@@ -165,6 +165,28 @@ class ViewCourseReviews(Permission):
 
 
 @add_perm
+class ViewEnrollments(Permission):
+    """
+    User with this permission has access to view all course enrollments.
+
+    As an object this Permission should accept `course` instance.
+    """
+    name = "learning.view_enrollment"
+
+
+@add_perm
+class ViewRelatedEnrollments(Permission):
+    name = "teaching.view_enrollment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        # TODO: What about teachers from other related courses?
+        return any(t.teacher_id == user.pk for t in
+                   course.course_teachers.all())
+
+
+@add_perm
 class ViewLibrary(Permission):
     name = "study.view_library"
     rule = has_active_status

@@ -132,9 +132,11 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
+        # FIXME: Better to use more restricted rules by default
         'rest_framework.permissions.IsAuthenticatedOrReadOnly'
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'api.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
     'UNAUTHENTICATED_USER': 'users.models.ExtendedAnonymousUser',

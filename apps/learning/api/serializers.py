@@ -1,7 +1,9 @@
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
-from learning.models import CourseNewsNotification, StudentAssignment
+from courses.api.serializers import CourseSerializer, AssignmentSerializer
+from learning.models import CourseNewsNotification, StudentAssignment, \
+    Enrollment
 from users.models import User
 
 
@@ -23,6 +25,19 @@ class StudentSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'surname', 'patronymic', 'sex', 'branch')
 
 
+class EnrollmentStudentSerializer(StudentSerializer):
+    class Meta(StudentSerializer.Meta):
+        fields = ('id', 'name', 'surname', 'patronymic', 'branch')
+
+
+class EnrollmentSerializer(serializers.ModelSerializer):
+    student = EnrollmentStudentSerializer()
+
+    class Meta:
+        model = Enrollment
+        fields = ('student', 'grade')
+
+
 class CourseNewsNotificationSerializer(serializers.ModelSerializer):
     user = UserSerializer()
 
@@ -32,9 +47,11 @@ class CourseNewsNotificationSerializer(serializers.ModelSerializer):
 
 
 class StudentAssignmentSerializer(serializers.ModelSerializer):
+    state = serializers.SerializerMethodField()
+
     class Meta:
         model = StudentAssignment
-        fields = ('score',)
+        fields = ('pk', 'score', 'state', 'student_id')
 
     def validate_score(self, value):
         max_score = self.instance.assignment.maximum_score
@@ -43,7 +60,21 @@ class StudentAssignmentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(msg)
         return value
 
+    def get_state(self, obj):
+        return obj.state.value
+
 
 class AssignmentScoreSerializer(StudentAssignmentSerializer):
     class Meta(StudentAssignmentSerializer.Meta):
         fields = ('score',)
+
+
+class MyCourseSerializer(CourseSerializer):
+    class Meta(CourseSerializer.Meta):
+        fields = ('id', 'name', 'url', 'semester', 'branch')
+
+
+class MyCourseAssignmentSerializer(AssignmentSerializer):
+    class Meta(AssignmentSerializer.Meta):
+        fields = ('pk', 'deadline_at', 'title', 'passing_score',
+                  'maximum_score', 'weight')

@@ -1,24 +1,11 @@
 from crispy_forms.utils import render_crispy_form
-from django.utils.safestring import mark_safe
-from django_jinja.builtins.extensions import make_template_fragment_key
-from django.core.cache import InvalidCacheBackendError, caches
 from jinja2 import contextfunction
 
-from core.utils import render_markdown
+from core.utils import render_markdown_and_cache
 
 
 def markdown(value, fragment_name, expires_in=0, *vary_on):
-    try:
-        fragment_cache = caches['markdown_fragments']
-    except InvalidCacheBackendError:
-        fragment_cache = caches['default']
-    cache_key = make_template_fragment_key(fragment_name, vary_on)
-    rendered = fragment_cache.get(cache_key)
-    if rendered is None:
-        rendered = render_markdown(value)
-        fragment_cache.set(cache_key, rendered, expires_in)
-    # TODO: think about escaping
-    return rendered
+    return render_markdown_and_cache(value, fragment_name, expires_in, *vary_on)
 
 
 @contextfunction

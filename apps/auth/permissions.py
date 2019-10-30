@@ -17,8 +17,16 @@ class Permission(BasePermission):
 
     rule: Optional[Predicate] = None
 
+    def has_permission(self, request, view) -> bool:
+        """
+        Django Rest Framework calls this for each view in `dispatch` method
+        """
+        return True
+
     def has_object_permission(self, request, view, obj) -> bool:
         """
+        Will be called by DRF in `get_object` method.
+
         Some permissions implicitly considered as `always True` and
         haven't attached predicate rule
         """

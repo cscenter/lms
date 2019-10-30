@@ -7,10 +7,10 @@ from django.views.generic import TemplateView
 from loginas import urls as loginas_urls
 
 from announcements.views import AnnouncementTagAutocomplete
+from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.urls import RE_COURSE_URI
 from courses.views import CourseDetailView
 from my_compscicenter_ru.views import IndexView, CourseOfferingsView
-from core.views import MarkdownRenderView, MarkdownHowToHelpView
 
 admin.autodiscover()
 
