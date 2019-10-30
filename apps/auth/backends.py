@@ -38,10 +38,16 @@ class RBACPermissions:
                 if role.permissions.rule_exists(perm_name):
                     return role.permissions[perm_name].test(user, *args,
                                                             **kwargs)
-                # Case when calling `.has_perm('update_comment')`
+                # Case when calling `.has_perm('update_comment', obj)`
                 # e.g. for teacher and expect that
-                # .has_perm('update_own_comment') will be in a call chain
+                # .has_perm('update_own_comment', obj) will be in a call chain
                 if perm_name in role.relations:
+                    # `Permission.rule` checks object level permissions,
+                    # if there is no any object has been passed - nothing
+                    # to check
+                    any_object_passed = len(kwargs) or any(a for a in args)
+                    if not any_object_passed:
+                        continue
                     for rel_perm_name in role.relations[perm_name]:
                         if self._has_perm(user, rel_perm_name, [role.code],
                                           *args, **kwargs):
