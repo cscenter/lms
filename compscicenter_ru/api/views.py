@@ -18,7 +18,7 @@ from users.models import User
 from .filters import CourseFilter
 from .serializers import TeacherCourseSerializer, TeacherSerializer, \
     CourseVideoSerializer, AlumniSerializer, TestimonialCardSerializer, \
-    CourseSerializer
+    CoursePublicSerializer
 
 
 class TeacherCourseList(ListAPIView):
@@ -163,7 +163,7 @@ class CourseList(ListAPIView):
     pagination_class = None
     filter_backends = (DjangoFilterBackend,)
     filterset_class = CourseFilter
-    serializer_class = CourseSerializer
+    serializer_class = CoursePublicSerializer
 
     def get_queryset(self):
         prefetch_teachers = Prefetch(

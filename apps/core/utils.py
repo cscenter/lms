@@ -1,14 +1,15 @@
 import datetime
+import logging
 from itertools import zip_longest
 from urllib.parse import urlparse, parse_qs
 
-import hoep as h
-import logging
-
 import bleach
+import hoep as h
 from django.conf import settings
+from django.core.cache import InvalidCacheBackendError, caches
 from django.db.models import Max, Min
 from django.utils import formats
+from django_jinja.builtins.extensions import make_template_fragment_key
 from hashids import Hashids
 
 hashids = Hashids(salt=settings.HASHIDS_SALT, min_length=8)
@@ -77,6 +78,20 @@ def render_markdown(text):
     md_rendered = markdown.render(text)
     return bleach.clean(md_rendered, tags=MARKDOWN_ALLOWED_TAGS,
                         attributes=MARKDOWN_ALLOWED_ATTRS)
+
+
+def render_markdown_and_cache(value, fragment_name, expires_in=0, *vary_on):
+    try:
+        fragment_cache = caches['markdown_fragments']
+    except InvalidCacheBackendError:
+        fragment_cache = caches['default']
+    cache_key = make_template_fragment_key(fragment_name, vary_on)
+    rendered = fragment_cache.get(cache_key)
+    if rendered is None:
+        rendered = render_markdown(value)
+        fragment_cache.set(cache_key, rendered, expires_in)
+    # TODO: think about escaping
+    return rendered
 
 
 def is_club_site():

@@ -6,7 +6,7 @@ from auth.registry import role_registry
 
 
 from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
-    ViewCourseAssignments
+    ViewCourseAssignments, CreateAssignment, CreateOwnAssignment
 from .permissions import CreateAssignmentComment, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
     ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
@@ -14,7 +14,7 @@ from .permissions import CreateAssignmentComment, \
     ViewLibrary, ViewInternships, EnrollInCourse, EnrollInCourseByInvitation, \
     LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook, \
     ViewStudentAssignment, ViewRelatedStudentAssignment, EditStudentAssignment, \
-    EditOwnStudentAssignment
+    EditOwnStudentAssignment, ViewEnrollments, ViewRelatedEnrollments
 
 
 # TODO: Add description of each role
@@ -41,10 +41,12 @@ class Roles(DjangoChoices):
     TEACHER = C(2, _('Teacher'), permissions=(
         ViewTeachingMenu,
         ViewCourseContacts,
+        CreateOwnAssignment,
         ViewCourseAssignments,
         ViewRelatedStudentAssignment,
         EditOwnStudentAssignment,
         ViewCourseNews,
+        ViewRelatedEnrollments,
         CreateAssignmentCommentTeacher,
         ViewOwnGradebook,
     ))
@@ -73,6 +75,7 @@ class Roles(DjangoChoices):
     ))
     CURATOR = C(5, _('Curator'), permissions=(
         ChangeMetaCourse,
+        CreateAssignment,
         ViewCourseContacts,
         ViewCourseAssignments,
         ViewStudentAssignment,
@@ -80,6 +83,7 @@ class Roles(DjangoChoices):
         ViewCourseNews,
         ViewCourseReviews,
         ViewLibrary,
+        ViewEnrollments,
         CreateAssignmentCommentTeacher,
         ViewGradebook,
         CreateAssignmentComment,
@@ -113,6 +117,8 @@ teacher_role = role_registry[Roles.TEACHER]
 teacher_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentTeacher)
 teacher_role.add_relation(ViewStudentAssignment, ViewRelatedStudentAssignment)
 teacher_role.add_relation(EditStudentAssignment, EditOwnStudentAssignment)
+teacher_role.add_relation(CreateAssignment, CreateOwnAssignment)
+teacher_role.add_relation(ViewEnrollments, ViewRelatedEnrollments)
 
 student_role = role_registry[Roles.STUDENT]
 student_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentStudent)

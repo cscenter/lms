@@ -42,7 +42,7 @@ def test_student_search(client, curator, search_url, settings):
     volunteer = VolunteerFactory(enrollment_year=2011, status="")
 
     response = client.get(search_url)
-    assert response.status_code == 403
+    assert response.status_code == 401
     client.login(curator)
     # Empty results by default
     response = client.get(search_url)

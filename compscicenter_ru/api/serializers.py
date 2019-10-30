@@ -3,13 +3,12 @@ from django.utils.encoding import force_bytes
 from rest_framework import serializers
 
 from api.utils import make_api_fragment_key
-from core.models import Branch
 from core.utils import render_markdown
+from courses.api.serializers import CourseSerializer
 
-from courses.models import Course, CourseTeacher, Semester
+from courses.models import Course, CourseTeacher
 from learning.api.serializers import StudentSerializer
 from learning.models import GraduateProfile
-from study_programs.models import StudyProgram, StudyProgramCourseGroup
 from users.api.serializers import PhotoSerializerField
 from users.models import User
 
@@ -22,62 +21,6 @@ class CourseRelatedField(serializers.RelatedField):
 class CourseTeacherRelatedField(serializers.RelatedField):
     def to_representation(self, value: CourseTeacher):
         return value.teacher.get_abbreviated_name()
-
-
-class SemesterSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="pk")
-    # name = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Semester
-        fields = ("id", "index", "year", "academic_year", "type")
-
-    def get_name(self, obj: Semester):
-        return str(obj)
-
-
-class BranchSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Branch
-        fields = ("id", "code")
-
-
-class CourseTeacherSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="teacher_id")
-    name = serializers.CharField(source='teacher.get_abbreviated_name')
-
-    class Meta:
-        model = CourseTeacher
-        fields = ("id", "name")
-
-
-class CourseSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source="pk")
-    name = serializers.SerializerMethodField()
-    url = serializers.SerializerMethodField()
-    semester = SemesterSerializer()
-    teachers = CourseTeacherSerializer(source="course_teachers",
-                                       many=True, read_only=True)
-    branch = BranchSerializer()
-    materials = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Course
-        fields = ('id', 'name', 'url', 'semester', 'teachers', 'branch',
-                  'materials')
-
-    def get_name(self, obj: Course):
-        return obj.meta_course.name
-
-    def get_url(self, obj: Course):
-        return obj.get_absolute_url(subdomain=None)
-
-    def get_materials(self, obj: Course):
-        return {
-            'video': bool(obj.videos_count),
-            'slides': bool(obj.materials_slides),
-            'files': bool(obj.materials_files)
-        }
 
 
 class CourseVideoSerializer(CourseSerializer):
@@ -187,3 +130,8 @@ class TestimonialCardSerializer(GraduateProfileSerializer):
 
     def get_student(self, graduate_profile):
         return graduate_profile.student.get_full_name()
+
+
+class CoursePublicSerializer(CourseSerializer):
+    def get_url(self, obj: Course):
+        return obj.get_absolute_url(subdomain=None)
