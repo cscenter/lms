@@ -121,6 +121,7 @@ rules = "*"
 django-simple-history = "*"
 django-static-compress = "==1.2.1"
 django-environ = "*"
+cryptography = "*"
 
 [requires]
 python_version = "3.6"
