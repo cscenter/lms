@@ -20,9 +20,9 @@
                     <h1>{{ form.survey.title|safe }}</h1>
                 </div>
                 <div class="card__content">
-                    {% if form.survey.expire_at %}
+                    {% if survey_deadline is defined %}
                         <div class="message _info mb-8">
-                            Дата окончания опроса &mdash; {{ form.survey.expire_at_local(format="j E H:i") }}
+                            Дата окончания опроса &mdash; {{ survey_deadline }} (московское время)
                         </div>
                     {% endif %}
                     <form action="" class="ui form" method="post">
