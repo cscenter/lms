@@ -34,9 +34,6 @@ class TokenService:
         token = create_token_string()
         digest = hash_token(token)
 
-        if expire_at is None:
-            expire_at = timezone.now() + TOKEN_TTL
-
         instance = Token(access_key=token[:TOKEN_KEY_LENGTH],
                          digest=digest, user=user, expire_at=expire_at)
         instance.save()
