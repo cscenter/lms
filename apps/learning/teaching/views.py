@@ -359,6 +359,7 @@ class AssignmentDetailView(TeacherOnlyMixin, generic.DetailView):
     def get_queryset(self):
         return (Assignment.objects
                 .select_related('course',
+                                'course__branch',
                                 'course__meta_course',
                                 'course__semester')
                 .prefetch_related('assignmentattachment_set'))
@@ -377,7 +378,8 @@ class AssignmentDetailView(TeacherOnlyMixin, generic.DetailView):
                             'assignment__course__meta_course',
                             'assignment__course__semester',
                             'student')
-            .prefetch_related('student__groups'))
+            .prefetch_related('student__groups')
+            .order_by('student__last_name', 'student__first_name'))
         return context
 
 
