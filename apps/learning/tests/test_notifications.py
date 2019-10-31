@@ -433,7 +433,7 @@ def test_new_assignment_comment(auth_user, client, assert_redirect):
     assert comment_dict['text'] == form.instance.text
     rendered_form = BeautifulSoup(str(form), "html.parser")
     file_name = rendered_form.find('span', class_='fileinput-filename')
-    assert file_name and file_name.string == 'a.txt'
+    assert file_name and file_name.string == form.instance.attached_file_name
     # Publish another comment. This one should override draft
     # But first create unpublished comment for course teacher and make sure
     # it won't be published on publishing new comment from another user
@@ -444,7 +444,7 @@ def test_new_assignment_comment(auth_user, client, assert_redirect):
     draft = AssignmentComment.objects.get(text=comment_dict['text'])
     comment_dict = {
         'text': "Updated test comment 2 with file",
-        'attached_file': SimpleUploadedFile("b.txt", b"b_content"),
+        'attached_file': SimpleUploadedFile("test_file_b.txt", b"b_content"),
     }
     response = client.post(create_comment_url, comment_dict)
     assert_redirect(response, detail_url)
@@ -452,6 +452,6 @@ def test_new_assignment_comment(auth_user, client, assert_redirect):
     assert AssignmentNotification.objects.count() == recipients_count
     draft.refresh_from_db()
     assert draft.is_published
-    assert draft.attached_file_name == 'b.txt'
+    assert draft.attached_file_name.startswith('test_file_b')
     teacher2_draft.refresh_from_db()
     assert not teacher2_draft.is_published
