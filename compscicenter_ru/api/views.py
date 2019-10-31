@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.http import HttpResponseBadRequest
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -35,22 +35,27 @@ class TeacherCourseList(ListAPIView):
                 .distinct("meta_course__name"))
 
 
-class LecturerList(ListAPIView):
-    """Returns lecturers"""
+class TeacherList(ListAPIView):
+    """Returns teachers except for those who only help with homework"""
     pagination_class = None
     serializer_class = TeacherSerializer
 
     def get_queryset(self):
-        lecturer = CourseTeacher.roles.lecturer
+        reviewer = CourseTeacher.roles.reviewer
+        # `.exclude` generates wrong sql as well as `.filter` combined with
+        # `~` operation. BitField overrides default `exact` lookup, so
+        # let's filter out only_reviewers with `__ne` custom lookup
+        any_role_except_reviewer = (Q(courseteacher__roles__ne=reviewer.mask) &
+                                    Q(courseteacher__roles__ne=0))
         queryset = (User.objects
                     .has_role(Roles.TEACHER)
-                    .filter(courseteacher__roles=lecturer)
+                    .filter(any_role_except_reviewer)
                     .select_related('branch')
                     .only("pk", "first_name", "last_name", "patronymic",
                           "cropbox_data", "photo", "branch__code", "gender",
                           "workplace")
-                    .distinct()
-                    .order_by("last_name", "first_name"))
+                    .distinct("last_name", "first_name", "pk")
+                    .order_by("last_name", "first_name", "pk"))
         course = self.request.query_params.get("course", None)
         if course:
             term_index = get_term_index(settings.CENTER_FOUNDATION_YEAR,
@@ -58,10 +63,12 @@ class LecturerList(ListAPIView):
             queryset = queryset.filter(
                 courseteacher__course__meta_course_id=course,
                 courseteacher__course__semester__index__gte=term_index)
+        any_role_except_reviewer = Q(roles__ne=reviewer.mask) & Q(roles__ne=0)
         queryset = queryset.prefetch_related(
             Prefetch(
                 "courseteacher_set",
                 queryset=(CourseTeacher.objects
+                          .filter(any_role_except_reviewer)
                           .select_related("course",
                                           "course__semester")
                           .only("teacher_id",

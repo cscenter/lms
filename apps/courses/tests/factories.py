@@ -96,7 +96,6 @@ class CourseTeacherFactory(factory.DjangoModelFactory):
 
     teacher = factory.SubFactory(TeacherFactory)
     course = factory.SubFactory(CourseFactory)
-    roles = CourseTeacher.roles.lecturer
 
 
 class CourseReviewFactory(factory.DjangoModelFactory):
