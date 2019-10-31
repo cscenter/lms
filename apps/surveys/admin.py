@@ -3,10 +3,12 @@ from django.db.models import Count, DateTimeField
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
+from core.admin import meta
 from core.timezone.admin import TimezoneAwareModelForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.filters import AdminRelatedDropdownFilter
 from core.urls import reverse
+from core.utils import admin_datetime
 from surveys.constants import STATUS_PUBLISHED
 from surveys.models import Form, Field, FieldChoice, CourseSurvey
 
@@ -44,14 +46,18 @@ class CourseSurveyAdmin(admin.ModelAdmin):
             'form_class': TimezoneAwareSplitDateTimeField
         }
     }
-    list_display = ("course", "type",
-                    "get_form_actions", "get_survey_actions", "expire_at")
+    list_display = ("course", "type", "get_form_actions", "get_survey_actions",
+                    "expire_at_local")
     list_filter = (
         'course__branch',
         ('course__semester', AdminRelatedDropdownFilter),
     )
     raw_id_fields = ["course", "email_template"]
     exclude = ("form",)
+
+    @meta(short_description=_("Expires on"))
+    def expire_at_local(self, obj):
+        return admin_datetime(obj.expire_at_local())
 
     def get_readonly_fields(self, request, obj=None):
         if obj:

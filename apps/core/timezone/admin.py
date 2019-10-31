@@ -20,7 +20,7 @@ class TimezoneAwareSplitDateTimeField(forms.SplitDateTimeField):
     def compress(self, data_list):
         if data_list:
             # Raise a validation error if time or date is empty
-            # (possible if SplitDateTimeField has required=False).
+            # (possible with `required=False` field attribute value).
             if data_list[0] in self.empty_values:
                 raise ValidationError(self.error_messages['invalid_date'],
                                       code='invalid_date')

@@ -8,6 +8,7 @@ from core.exceptions import Redirect
 from core.urls import reverse
 from courses.models import Course
 from courses.views.mixins import CourseURLParamsMixin
+from learning.settings import Branches
 from surveys.forms import FormBuilder
 from surveys.models import CourseSurvey
 
@@ -43,6 +44,17 @@ class CourseSurveyDetailView(CourseURLParamsMixin, FormView):
         """If the form is valid, save the associated model."""
         form.save()
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        survey = context['form'].survey
+        # Course survey is anonymous so we can't show deadline in the
+        # timezone of the student. Let's use msk timezone for everyone
+        if survey.expire_at:
+            context['survey_deadline'] = survey.expire_at_local(
+                tz=Branches.get_choice(Branches.SPB).timezone,
+                format="j E H:i")
+        return context
 
 
 class CourseSurveyFormSuccessView(CourseURLParamsMixin, TemplateView):

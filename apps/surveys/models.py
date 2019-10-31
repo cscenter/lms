@@ -262,7 +262,9 @@ class CourseSurvey(TimezoneAwareModel, models.Model):
     # Note: Minor inaccuracy with deadline since we set dates in UTC on client
     expire_at = models.DateTimeField(
         verbose_name=_("Expires on"),
-        help_text=_("With published selected, won't be shown after this time."))
+        help_text=_("With published selected, won't be shown after this time. "
+                    "Datetime should be specified in the timezone of the root "
+                    "course branch. Students will see deadline in MSK timezone"))
     email_template = models.ForeignKey(
         EmailTemplate,
         on_delete=models.CASCADE,

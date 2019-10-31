@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-10-16 16:58+0000\n"
-"PO-Revision-Date: 2018-10-16 16:58+0000\n"
+"POT-Creation-Date: 2019-10-31 16:26+0000\n"
+"PO-Revision-Date: 2019-10-31 16:30+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -17,274 +17,283 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n%100>=11 && n%100<=14)? 2 : 3);\n"
-"X-Translated-Using: django-rosetta 0.8.1\n"
+"X-Translated-Using: django-rosetta 0.9.3\n"
 
-#: cscsite/surveys/admin.py:60 cscsite/surveys/models.py:264
-msgid "Type"
-msgstr "Тип"
-
-#: cscsite/surveys/admin.py:65 cscsite/surveys/models.py:71
-msgid "Form"
-msgstr "Форма"
-
-#: cscsite/surveys/admin.py:70 cscsite/surveys/models.py:49
-msgid "Status"
-msgstr "Статус"
-
-#: cscsite/surveys/apps.py:7
-#| msgid "Course Surveys"
-msgid "Surveys"
-msgstr "Опросы"
-
-#: cscsite/surveys/constants.py:13
-msgid "Draft"
-msgstr "Черновик"
-
-#: cscsite/surveys/constants.py:14
-msgid "Published"
-msgstr "Опубликовано"
-
-#: cscsite/surveys/constants.py:43
-msgid "Single line text"
-msgstr "Одна строка текста"
-
-#: cscsite/surveys/constants.py:44
-msgid "Multi line text"
-msgstr "Несколько строк текста"
-
-#: cscsite/surveys/constants.py:45
-msgid "Email"
-msgstr "Email"
-
-#: cscsite/surveys/constants.py:46
-msgid "Number"
-msgstr "Число"
-
-#: cscsite/surveys/constants.py:47
-msgid "URL"
-msgstr "URL"
-
-#: cscsite/surveys/constants.py:48
-msgid "Check box"
-msgstr "Чекбокс"
-
-#: cscsite/surveys/constants.py:49
-msgid "Check boxes"
-msgstr "Чекбоксы"
-
-#: cscsite/surveys/constants.py:50
-msgid "Check boxes with textarea"
-msgstr "Чекбоксы с полем комментария"
-
-#: cscsite/surveys/constants.py:51
-msgid "Drop down"
-msgstr "Выпадающий список"
-
-#: cscsite/surveys/constants.py:52
-msgid "Multi select"
-msgstr "Список со множественным выборов"
-
-#: cscsite/surveys/constants.py:53
-msgid "Radio buttons"
-msgstr "Радио-кнопки"
-
-#: cscsite/surveys/constants.py:54
-msgid "Date"
-msgstr "Дата"
-
-#: cscsite/surveys/constants.py:55
-msgid "Date/time"
-msgstr "Дата/Время"
-
-#: cscsite/surveys/models.py:41 cscsite/surveys/models.py:96
-#: cscsite/surveys/models.py:167 cscsite/surveys/models.py:192
-msgid "created"
-msgstr "создано"
-
-#: cscsite/surveys/models.py:45
-msgid "Title"
-msgstr "Название"
-
-#: cscsite/surveys/models.py:47
-msgid "Slug"
-msgstr "slug"
-
-#: cscsite/surveys/models.py:53
-msgid "Published from"
-msgstr "Опубликовать с"
-
-#: cscsite/surveys/models.py:54
-msgid "With published selected, won't be shown until this time."
-msgstr "Уточнить, с какой даты форма считается опубликованной"
-
-#: cscsite/surveys/models.py:57
+#: apps/surveys/admin.py:58 apps/surveys/models.py:264
 msgid "Expires on"
 msgstr "Истекает"
 
-#: cscsite/surveys/models.py:58
-msgid "With published selected, won't be shown after this time."
-msgstr ""
-"Закрыть возможность заполнения опубликованной формы начиная с указанной даты"
+#: apps/surveys/admin.py:77 apps/surveys/models.py:48
+msgid "Status"
+msgstr "Статус"
 
-#: cscsite/surveys/models.py:61 cscsite/surveys/models.py:104
-msgid "Description"
-msgstr "Описание"
-
-#: cscsite/surveys/models.py:64
-msgid "Response Message"
+#: apps/surveys/admin.py:87
+msgid "Export"
 msgstr ""
 
-#: cscsite/surveys/models.py:65
-msgid "Shows this message after submitting form."
-msgstr "Показать это сообщение после успешной отправки формы"
+#: apps/surveys/apps.py:7
+msgid "Surveys"
+msgstr "Опросы"
 
-#: cscsite/surveys/models.py:72
-msgid "Forms"
-msgstr "Формы"
+#: apps/surveys/constants.py:14
+msgid "Draft"
+msgstr "Черновик"
 
-#: cscsite/surveys/models.py:92
-msgid "Hidden"
-msgstr "Скрытый"
+#: apps/surveys/constants.py:15
+msgid "Published"
+msgstr "Опубликовано"
 
-#: cscsite/surveys/models.py:93
-msgid "Visible"
-msgstr "Видимый"
-
-#: cscsite/surveys/models.py:99 cscsite/surveys/models.py:171
-msgid "Label"
-msgstr "Заголовок"
-
-#: cscsite/surveys/models.py:100
-msgid "Show Label"
-msgstr "Показать заголовок"
-
-#: cscsite/surveys/models.py:101
-msgid "Input Name"
-msgstr ""
-
-#: cscsite/surveys/models.py:102 cscsite/surveys/models.py:170
-msgid "Order"
-msgstr "Сортировка"
-
-#: cscsite/surveys/models.py:106
-msgid "Required"
-msgstr "Обязательное"
-
-#: cscsite/surveys/models.py:108
-msgid "Field Type"
-msgstr "Тип поля"
-
-#: cscsite/surveys/models.py:112
-msgid "Placeholder"
-msgstr "Placeholder"
-
-#: cscsite/surveys/models.py:117
-msgid "CSS classes"
-msgstr "CSS классы"
-
-#: cscsite/surveys/models.py:121
-msgid "Visibility"
-msgstr "Видимость"
-
-#: cscsite/surveys/models.py:125
-msgid "Help Text"
-msgstr "Подсказка"
-
-#: cscsite/surveys/models.py:130
-msgid "Error Message"
-msgstr "Сообщение об ошибке валидации"
-
-#: cscsite/surveys/models.py:135 cscsite/surveys/models.py:176
-msgid "Free Answer"
-msgstr "Свободный ответ"
-
-#: cscsite/surveys/models.py:141
-msgid "Field"
-msgstr "Поле"
-
-#: cscsite/surveys/models.py:142
-msgid "Fields"
-msgstr "Поля"
-
-#: cscsite/surveys/models.py:172
-msgid "Value"
-msgstr "Значение"
-
-#: cscsite/surveys/models.py:174
-msgid "Default"
-msgstr "По-умолчанию"
-
-#: cscsite/surveys/models.py:177
-msgid "Shows additional input for free answer if user selected this variant."
-msgstr "Показать дополнительное поле ответа, если выбран этот вариант"
-
-#: cscsite/surveys/models.py:182
-msgid "Field Choice"
-msgstr "Вариант ответа"
-
-#: cscsite/surveys/models.py:183
-msgid "Field Choices"
-msgstr "Варианты ответа"
-
-#: cscsite/surveys/models.py:197
-msgid "Form Submission"
-msgstr "Отзыв"
-
-#: cscsite/surveys/models.py:198
-msgid "Form Submissions"
-msgstr "Отзывы"
-
-#: cscsite/surveys/models.py:206
-msgid "Is Choice"
-msgstr ""
-
-#: cscsite/surveys/models.py:207
-msgid "Meta"
-msgstr ""
-
-#: cscsite/surveys/models.py:210
-msgid "Form Submission Entry"
-msgstr "Поле отзыва"
-
-#: cscsite/surveys/models.py:211
-msgid "Form Submission Entries"
-msgstr "Поля отзыва"
-
-#: cscsite/surveys/models.py:219
+#: apps/surveys/constants.py:16
 msgid "Template"
 msgstr "Шаблон"
 
-#: cscsite/surveys/models.py:256
+#: apps/surveys/constants.py:45
+msgid "Single line text"
+msgstr "Одна строка текста"
+
+#: apps/surveys/constants.py:46
+msgid "Multi line text"
+msgstr "Несколько строк текста"
+
+#: apps/surveys/constants.py:47
+msgid "Email"
+msgstr "Email"
+
+#: apps/surveys/constants.py:48
+msgid "Number"
+msgstr "Число"
+
+#: apps/surveys/constants.py:49
+msgid "URL"
+msgstr "URL"
+
+#: apps/surveys/constants.py:50
+msgid "Check box"
+msgstr "Чекбокс"
+
+#: apps/surveys/constants.py:51
+msgid "Check boxes"
+msgstr "Чекбоксы"
+
+#: apps/surveys/constants.py:52
+msgid "Check boxes with textarea"
+msgstr "Чекбоксы с полем комментария"
+
+#: apps/surveys/constants.py:53
+msgid "Drop down"
+msgstr "Выпадающий список"
+
+#: apps/surveys/constants.py:54
+msgid "Multi select"
+msgstr "Список со множественным выборов"
+
+#: apps/surveys/constants.py:55
+msgid "Radio buttons"
+msgstr "Радио-кнопки"
+
+#: apps/surveys/constants.py:56
+msgid "Date"
+msgstr "Дата"
+
+#: apps/surveys/constants.py:57
+msgid "Date/time"
+msgstr "Дата/Время"
+
+#: apps/surveys/models.py:40 apps/surveys/models.py:88
+#: apps/surveys/models.py:159 apps/surveys/models.py:184
+msgid "created"
+msgstr "создано"
+
+#: apps/surveys/models.py:44
+msgid "Title"
+msgstr "Название"
+
+#: apps/surveys/models.py:46
+msgid "Slug"
+msgstr "slug"
+
+#: apps/surveys/models.py:52 apps/surveys/models.py:96
+msgid "Description"
+msgstr "Описание"
+
+#: apps/surveys/models.py:55
+msgid "Response Message"
+msgstr ""
+
+#: apps/surveys/models.py:56
+msgid "Shows this message after submitting form."
+msgstr "Показать это сообщение после успешной отправки формы"
+
+#: apps/surveys/models.py:62
+msgid "Form"
+msgstr "Форма"
+
+#: apps/surveys/models.py:63
+msgid "Forms"
+msgstr "Формы"
+
+#: apps/surveys/models.py:83
+msgid "Hidden"
+msgstr "Скрытый"
+
+#: apps/surveys/models.py:84
+msgid "Visible"
+msgstr "Видимый"
+
+#: apps/surveys/models.py:91 apps/surveys/models.py:163
+msgid "Label"
+msgstr "Заголовок"
+
+#: apps/surveys/models.py:92
+msgid "Show Label"
+msgstr "Показать заголовок"
+
+#: apps/surveys/models.py:93
+msgid "Input Name"
+msgstr ""
+
+#: apps/surveys/models.py:94 apps/surveys/models.py:162
+msgid "Order"
+msgstr "Сортировка"
+
+#: apps/surveys/models.py:98
+msgid "Required"
+msgstr "Обязательное"
+
+#: apps/surveys/models.py:100
+msgid "Field Type"
+msgstr "Тип поля"
+
+#: apps/surveys/models.py:104
+msgid "Placeholder"
+msgstr "Placeholder"
+
+#: apps/surveys/models.py:109
+msgid "CSS classes"
+msgstr "CSS классы"
+
+#: apps/surveys/models.py:113
+msgid "Visibility"
+msgstr "Видимость"
+
+#: apps/surveys/models.py:117
+msgid "Help Text"
+msgstr "Подсказка"
+
+#: apps/surveys/models.py:122
+msgid "Error Message"
+msgstr "Сообщение об ошибке валидации"
+
+#: apps/surveys/models.py:127 apps/surveys/models.py:168
+msgid "Free Answer"
+msgstr "Свободный ответ"
+
+#: apps/surveys/models.py:133
+msgid "Field"
+msgstr "Поле"
+
+#: apps/surveys/models.py:134
+msgid "Fields"
+msgstr "Поля"
+
+#: apps/surveys/models.py:164
+msgid "Value"
+msgstr "Значение"
+
+#: apps/surveys/models.py:166
+msgid "Default"
+msgstr "По-умолчанию"
+
+#: apps/surveys/models.py:169
+msgid "Shows additional input for free answer if user selected this variant."
+msgstr "Показать дополнительное поле ответа, если выбран этот вариант"
+
+#: apps/surveys/models.py:174
+msgid "Field Choice"
+msgstr "Вариант ответа"
+
+#: apps/surveys/models.py:175
+msgid "Field Choices"
+msgstr "Варианты ответа"
+
+#: apps/surveys/models.py:189
+msgid "Form Submission"
+msgstr "Отзыв"
+
+#: apps/surveys/models.py:190
+msgid "Form Submissions"
+msgstr "Отзывы"
+
+#: apps/surveys/models.py:198
+msgid "Is Choice"
+msgstr ""
+
+#: apps/surveys/models.py:199
+msgid "Meta"
+msgstr ""
+
+#: apps/surveys/models.py:202
+msgid "Form Submission Entry"
+msgstr "Поле отзыва"
+
+#: apps/surveys/models.py:203
+msgid "Form Submission Entries"
+msgstr "Поля отзыва"
+
+#: apps/surveys/models.py:248
 msgid "Middle"
 msgstr "Промежуточный"
 
-#: cscsite/surveys/models.py:257
+#: apps/surveys/models.py:249
 msgid "Final"
 msgstr "Финальный"
 
-#: cscsite/surveys/models.py:273
+#: apps/surveys/models.py:256
+msgid "Type"
+msgstr "Тип"
+
+#: apps/surveys/models.py:265
+msgid ""
+"With published selected, won't be shown after this time. Datetime should be "
+"specified in the timezone of the root course branch. Students will see "
+"deadline in MSK timezone"
+msgstr ""
+"Закрыть возможность заполнения опубликованной формы начиная с указанной "
+"даты. Указывается локальное время для главного отделения курса. Опрашиваемые"
+" увидят дедлайн в часовом поясе UTC+3 (мск)"
+
+#: apps/surveys/models.py:271
 msgid ""
 "Students will receive notification based on this template after form "
 "publication"
 msgstr ""
 "Студенты получат уведомления после публикации формы, если указан шаблон"
 
-#: cscsite/surveys/models.py:279
+#: apps/surveys/models.py:277
 msgid "Course Survey"
 msgstr "Опрос по курсу"
 
-#: cscsite/surveys/models.py:280
+#: apps/surveys/models.py:278
 msgid "Course Surveys"
 msgstr "Опросы по курсу"
 
-#: cscsite/surveys/models.py:289
-msgid "City"
-msgstr "Город"
-
-#: cscsite/surveys/models.py:348
+#: apps/surveys/models.py:356
 msgid "Conditional Logic"
 msgstr ""
 
-#: cscsite/surveys/models.py:349
+#: apps/surveys/models.py:357
 msgid "Array of dictionaries with logic rules"
 msgstr ""
+
+#~ msgid "Published from"
+#~ msgstr "Опубликовать с"
+
+#~ msgid "With published selected, won't be shown until this time."
+#~ msgstr "Уточнить, с какой даты форма считается опубликованной"
+
+#~ msgid "With published selected, won't be shown after this time."
+#~ msgstr ""
+#~ "Закрыть возможность заполнения опубликованной формы начиная с указанной даты"
+
+#~ msgid "City"
+#~ msgstr "Город"
