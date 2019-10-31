@@ -188,7 +188,7 @@ class TeachersView(TemplateView):
             },
             "props": {
                 "entryURL": reverse("public-api:v2:teachers"),
-                "coursesURL": reverse("public-api:v2:teachers_courses"),
+                "coursesURL": reverse("public-api:v2:teachers_meta_courses"),
                 "branchOptions": _get_branch_choices(),
                 "termIndex": term_index,
             }

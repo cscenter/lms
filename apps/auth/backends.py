@@ -42,9 +42,9 @@ class RBACPermissions:
                 # e.g. for teacher and expect that
                 # .has_perm('update_own_comment', obj) will be in a call chain
                 if perm_name in role.relations:
-                    # `Permission.rule` checks object level permissions,
-                    # if there is no any object has been passed - nothing
-                    # to check
+                    # Related `Permission.rule` should check only object level
+                    # permission, if there is no any object has been
+                    # passed - nothing to check
                     any_object_passed = len(kwargs) or any(a for a in args)
                     if not any_object_passed:
                         continue

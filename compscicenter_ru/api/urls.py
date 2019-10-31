@@ -13,8 +13,8 @@ urlpatterns = [
         path('courses/', v.CourseList.as_view(), name='course_list'),
         path('courses/videos/', v.CourseVideoList.as_view(), name='course_videos'),
         path('recorded-events/videos/', RecordedEventList.as_view(), name='recorded_events_videos'),
-        path('teachers/', v.LecturerList.as_view(), name='teachers'),
-        path('teachers/courses/', v.TeacherCourseList.as_view(), name='teachers_courses'),
+        path('teachers/', v.TeacherList.as_view(), name='teachers'),
+        path('teachers/courses/', v.TeacherCourseList.as_view(), name='teachers_meta_courses'),
         path('testimonials/', v.TestimonialList.as_view(), name='testimonials'),
     ], 'v2')))
 ]

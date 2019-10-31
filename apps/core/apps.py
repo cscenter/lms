@@ -10,6 +10,8 @@ class CoreConfig(AppConfig):
         from rest_framework.serializers import ModelSerializer
         # Register checks
         from . import checks
+        # Register custom lookups
+        from .db import lookups
         # Update Django Rest Framework serializer mappings
         from core.db.models import ScoreField
         from core.api import fields
