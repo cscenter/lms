@@ -50,10 +50,9 @@ class CourseSurveyDetailView(CourseURLParamsMixin, FormView):
         survey = context['form'].survey
         # Course survey is anonymous so we can't show deadline in the
         # timezone of the student. Let's use msk timezone for everyone
-        if survey.expire_at:
-            context['survey_deadline'] = survey.expire_at_local(
-                tz=Branches.get_choice(Branches.SPB).timezone,
-                format="j E H:i")
+        context['survey_deadline'] = survey.expire_at_local(
+            tz=Branches.get_choice(Branches.SPB).timezone,
+            format="j E H:i")
         return context
 
 

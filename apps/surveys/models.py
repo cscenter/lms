@@ -259,7 +259,6 @@ class CourseSurvey(TimezoneAwareModel, models.Model):
     course = models.ForeignKey(Course,
                                related_name="surveys",
                                on_delete=models.CASCADE)
-    # Note: Minor inaccuracy with deadline since we set dates in UTC on client
     expire_at = models.DateTimeField(
         verbose_name=_("Expires on"),
         help_text=_("With published selected, won't be shown after this time. "
