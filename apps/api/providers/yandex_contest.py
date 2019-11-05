@@ -1,3 +1,4 @@
+import io
 import logging
 from enum import IntEnum, Enum
 
@@ -38,20 +39,18 @@ STANDINGS_PARAMS = {
     'participant_group_id': 'userGroupId',
 }
 
+SUBMISSIONS_PARAMS = {
+    'locale': 'locale',
+    'page': 'page',
+    'page_size': 'pageSize',
+}
+
 
 class SubmissionStatus(IntEnum):
     SUCCESS = 200
     BAD_REQUEST = 400  # Bad Request
     BAD_TOKEN = 401  # OAuth header is not declared or is wrong
     NOT_FOUND = 404  # Contest or your participation is not found
-
-
-# Map client filter names with API
-SUBMISSIONS_PARAMS = {
-    'page': 'page',
-    'page_size': 'pageSize',
-    'locale': 'locale',
-}
 
 
 class SubmissionVerdict(Enum):
@@ -157,6 +156,58 @@ class YandexContestAPI:
         info = response.json()
         logger.debug("Meta data: {}".format(info))
         return response.status_code, info["problems"]
+
+    # FIXME: api.contest(42).submissions()
+    # TODO: add pagination
+    def contest_submissions(self, contest_id, timeout: int = 2, **params):
+        headers = self.base_headers
+        url = self.SUBMISSIONS_URL.format(contest_id=contest_id)
+        if "page" not in params:
+            params["page"] = 1
+        if "page_size" not in params:
+            params["page_size"] = 100
+        if "locale" not in params:
+            params["locale"] = "ru"
+        payload = {}
+        for param_key, param_value in params.items():
+            key = SUBMISSIONS_PARAMS.get(param_key, param_key)
+            payload[key] = param_value
+        response = self.request_and_check(url, "get", headers=headers,
+                                          params=payload, timeout=timeout)
+        info = response.json()
+        logger.debug("Meta data: {}".format(info))
+        return response.status_code, info["submissions"]
+
+    # FIXME: api.contest(42).submission(1)
+    def submission_details(self, contest_id, submission_id,
+                           full=False, timeout=1):
+        """Provide `full=True` to get all details like checker log"""
+        headers = self.base_headers
+        url = self.SUBMISSION_URL.format(contest_id=contest_id,
+                                         sid=submission_id)
+        if full:
+            url = f"{url}/full"
+        response = self.request_and_check(url, "get", headers=headers,
+                                          timeout=timeout)
+        data = response.json()
+        logger.debug("Meta data: {}".format(data))
+        return response.status_code, data
+
+    def add_submission(self, contest_id, timeout=3, files=None, **params):
+        headers = {
+            **self.base_headers,
+            'Accept': '*/*',
+        }
+        # requests doesn't set boundary if the header were provided explicitly
+        del headers['Content-Type']
+        url = self.SUBMISSIONS_URL.format(contest_id=contest_id)
+        payload = {**params}
+        response = self.request_and_check(url, "post", headers=headers,
+                                          data=payload, files=files,
+                                          timeout=timeout)
+        data = response.content
+        logger.debug("Meta data: {}".format(data))
+        return response.status_code, data
 
     @staticmethod
     def request_and_check(url, method, **kwargs):
