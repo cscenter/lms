@@ -59,13 +59,14 @@ def test_teacher_timetable(client):
     next_month_url = timetable_url + next_month_qstr
     assert next_month_qstr.encode() in response.content
     response = client.get(next_month_url)
+    assert response.status_code == 200
     calendar = response.context['calendar']
     days = calendar.days()
-    first_day, last_day = days[0].date, days[-1].date
-    if first_day <= today_spb <= last_day:
-        expected = 3
-    else:
-        expected = 0
+    expected = 0
+    if days:
+        first_day, last_day = days[0].date, days[-1].date
+        if first_day <= today_spb <= last_day:
+            expected = 3
     assert len(flatten_calendar_month_events(calendar)) == expected
     next_month_date = today_spb + relativedelta(months=1)
     CourseClassFactory.create_batch(2, course__teachers=[teacher],

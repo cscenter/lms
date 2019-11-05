@@ -132,7 +132,7 @@ class EventsCalendar:
     def by_day(self, start: datetime.date,
                end: datetime.date) -> List[CalendarDay]:
         """
-        Returns a list of calendar days in a range [start, end] with
+        Returns a list of calendar days in a range [start, end] that have
         attached events.
         """
         by_days = []
