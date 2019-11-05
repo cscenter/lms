@@ -38,6 +38,7 @@ module.exports = {
         namedModules: false,
         concatenateModules: true,
         runtimeChunk: 'single',
+        moduleIds: 'hashed',
         minimizer: [
             new TerserPlugin({
                 sourceMap: true, // Must be set to true if using source-maps in production
@@ -59,7 +60,7 @@ module.exports = {
         }),
         // Need this plugin for deterministic hashing
         // until this issue is resolved: https://github.com/webpack/webpack/issues/1315
-        new webpack.HashedModuleIdsPlugin(),
+        //new webpack.HashedModuleIdsPlugin(),
         new SentryWebpackPlugin({
             include: [
                 __bundlesdir
