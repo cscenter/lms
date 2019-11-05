@@ -211,6 +211,10 @@ class CourseOfferings extends React.Component {
             for (const d of jsons) {
                 items = items.concat(d);
             }
+
+            items.sort((a, b) => a.name.localeCompare(b.name));
+            // Sort by course title
+
             this.setState( (state) => {
                 return {
                     loading: false,
