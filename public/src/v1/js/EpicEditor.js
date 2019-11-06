@@ -4,6 +4,8 @@
  */
 
 
+import {createNotification} from "./utils";
+
 /**
  * Applies attributes to a DOM object
  * @param  {object} context The DOM obj you want to apply the attributes to
@@ -324,6 +326,29 @@ function _mergeObjs() {
 
     // Return the modified object
     return target;
+}
+
+function isQuotaExceeded(e) {
+    let quotaExceeded = false;
+    if (e) {
+        if (e.code) {
+            switch (e.code) {
+                case 22:
+                    quotaExceeded = true;
+                    break;
+                case 1014:
+                    // Firefox
+                    if (e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+                        quotaExceeded = true;
+                    }
+                    break;
+            }
+        } else if (e.number === -2147024882) {
+            // Internet Explorer 8
+            quotaExceeded = true;
+        }
+    }
+    return quotaExceeded;
 }
 
 /**
@@ -1066,14 +1091,20 @@ EpicEditor.prototype.load = function (callback) {
         });
     }
 
+    self.localStorageCorrupted = false;
     // Save the document every 100ms by default
     // TODO: Move into autosave setup function (_setupAutoSave)
     if (self.settings.file.autoSave) {
-        self._saveIntervalTimer = window.setInterval(function () {
+        self._autoSaveTimer = window.setTimeout(function handler () {
             if (!self._canSave) {
                 return;
             }
+            //console.log('call autoSave timer', self._autoSaveTimer);
+            // Exception from localStorage should kill this timer
             self.save(false, true);
+            if (!self.localStorageCorrupted) {
+                self._autoSaveTimer = window.setTimeout(handler, self.settings.file.autoSave);
+            }
         }, self.settings.file.autoSave);
     }
 
@@ -1180,8 +1211,13 @@ EpicEditor.prototype._setupTextareaSync = function () {
         // This only happens for draft files. Probably has something to do with
         // the fact draft files haven't been saved by the time this is called.
         // TODO: Add test for this case.
-        self._textareaElement.value = self.exportFile(textareaFileName, 'text', true) || self.settings.file.defaultContent;
-    }
+        if (!self.localStorageCorrupted) {
+            self._textareaElement.value = self.exportFile(textareaFileName, 'text', true) || self.settings.file.defaultContent;
+        } else {
+            // `paste` event should work without localStorage
+            self._textareaElement.value = _getText(self.editor);
+        }
+    };
 
     // On page load, if there's content in the textarea that means one of two
     // different things:
@@ -1254,8 +1290,8 @@ EpicEditor.prototype.unload = function (callback) {
         self.removeListener('__update');
     }
 
-    if (self._saveIntervalTimer) {
-        window.clearInterval(self._saveIntervalTimer);
+    if (self._autoSaveTimer) {
+        window.clearTimeout(self._autoSaveTimer);
     }
     if (self._textareaSaveTimer) {
         window.clearInterval(self._textareaSaveTimer);
@@ -1302,8 +1338,6 @@ EpicEditor.prototype.reflow = function (kind, callback) {
         callback = function () {
         };
     }
-
-    console.debug('self.element.offsetHeight', self.element.offsetHeight);
 
     for (let x = 0; x < elements.length; x++) {
         if (!kind || kind === 'width') {
@@ -1561,7 +1595,24 @@ EpicEditor.prototype.save = function (_isPreviewDraft, _isAuto) {
         }
 
         storage[file].content = content;
-        this._storage[previewDraftName + self.settings.localStorageName] = JSON.stringify(storage);
+
+        try {
+            this._storage[previewDraftName + self.settings.localStorageName] = JSON.stringify(storage);
+        } catch (e) {
+            if (isQuotaExceeded(e)) {
+                self.localStorageCorrupted = true;
+                // At least sync textarea
+                self.emit('update');
+                // Do not emit `__update` since it's recursively call `.save`
+                // but exit condition is never satisfied since localStorage is broken
+                self._textareaElement.value = content;
+                if (_isAuto) {
+                    let msg = "Local storage is full or corrupted - editor's auto save feature has been disabled.";
+                    $.jGrowl(msg, { theme: 'warning', position: 'bottom-right', sticky: true });
+                }
+                return this;
+            }
+        }
 
         // After the content is actually changed, emit update so it emits the updated content
         if (isUpdate) {
