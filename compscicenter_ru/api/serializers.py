@@ -5,7 +5,6 @@ from rest_framework import serializers
 from api.utils import make_api_fragment_key
 from core.utils import render_markdown
 from courses.api.serializers import CourseSerializer
-
 from courses.models import Course, CourseTeacher
 from learning.api.serializers import StudentSerializer
 from learning.models import GraduateProfile
@@ -135,3 +134,7 @@ class TestimonialCardSerializer(GraduateProfileSerializer):
 class CoursePublicSerializer(CourseSerializer):
     def get_url(self, obj: Course):
         return obj.get_absolute_url(subdomain=None)
+
+    class Meta(CourseSerializer.Meta):
+        fields = ('id', 'name', 'url', 'semester', 'teachers', 'branch',
+                  'materials')
