@@ -9,6 +9,11 @@ from django.core.exceptions import ImproperlyConfigured
 
 logger = logging.getLogger(__name__)
 
+
+class UploadSlidesError(Exception):
+    pass
+
+
 REQUIRED_SETTINGS = [
     "YANDEX_DISK_USERNAME",
     "YANDEX_DISK_PASSWORD",
@@ -70,4 +75,6 @@ def upload_slides(local_file, path, academic_year, retries=3):
             logger.debug("Slides successfully uploaded on Yandex.Disk "
                          "to {}".format(remote_path))
             return
-    logger.error(exc)
+    msg = f"Failed to upload slides {local_path} on Yandex.Disk {remote_path}"
+    raise UploadSlidesError(msg) from exc
+    # logger.error(exc)
