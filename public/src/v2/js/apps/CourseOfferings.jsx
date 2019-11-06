@@ -19,6 +19,7 @@ import Checkbox from "components/Checkbox";
 import RadioGroup from "components/RadioGroup";
 import RadioOption from "components/RadioOption";
 import Icon from "components/Icon";
+import { Tooltip } from 'components/Tooltip';
 import {
     onMultipleCheckboxChange,
     onRadioFilterChange,
@@ -475,6 +476,9 @@ class CourseList extends React.Component {
         if (filteredItems.size <= 0) {
             return "";
         }
+
+
+
         return (
             <div className={className}>
                 <div className="table__row _head">
@@ -487,8 +491,7 @@ class CourseList extends React.Component {
                     .map(item =>
                     <div className="table__row" key={`course-${item.id}`}>
                         <div className="table__cell">
-                            <a href={item.url}
-                               className="__course">{item.name}</a>
+                            <a href={item.url} className="__course">{item.name}</a>&nbsp;{item.branch.is_club ? <ClubIcon/> : ''}
                         </div>
                         <div className="table__cell _teachers">
                             {item.teachers.map((teacher, i, arr) =>
@@ -498,10 +501,9 @@ class CourseList extends React.Component {
                             )}
                         </div>
                         <div className="table__cell _icons">
-                            {item.materials.video ? <Icon
-                                id={'video'}/> : ""} {item.materials.slides ?
-                            <Icon id={'slides'}/> : ""} {item.materials.files ?
-                            <Icon id={'files'}/> : ""}
+                            {item.materials.video ? <VideoIcon key={'video-icon'}/> : ""}
+                            {item.materials.slides ? <SlidesIcon key={'slides-icon'}/> : ""}
+                            {item.materials.files ? <FilesIcon key={'files-icon'}/> : ""}
                         </div>
                     </div>
                 )}
@@ -509,3 +511,18 @@ class CourseList extends React.Component {
         );
     }
 }
+
+
+const ClubIcon = () => (
+    <Tooltip title="Курс CS клуба"><Icon id={'cs-club'} className={`ml-1`}/></Tooltip>
+);
+
+const VideoIcon = () => (
+    <Tooltip title="Видео"><Icon id={'video'} className={'mr-1'}/></Tooltip>
+);
+
+const SlidesIcon = () => (
+    <Tooltip title="Слайды"><Icon id={'slides'} className={'mr-1'}/></Tooltip>
+);
+
+const FilesIcon = () => (<Tooltip title="Файлы"><Icon id={'files'}/></Tooltip>);
