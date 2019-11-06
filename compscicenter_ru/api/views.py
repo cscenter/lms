@@ -189,7 +189,7 @@ class CourseList(ListAPIView):
                       "videos_count", "materials_slides", "materials_files",
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
-                      "branch__code")
+                      "branch__code", "branch__site_id")
                 .filter(semester__index__gte=center_foundation_term_index)
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .prefetch_related(prefetch_teachers)
