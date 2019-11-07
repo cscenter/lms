@@ -491,7 +491,7 @@ class CourseList extends React.Component {
                     .map(item =>
                     <div className="table__row" key={`course-${item.id}`}>
                         <div className="table__cell">
-                            <a href={item.url} className="__course">{item.name}</a>&nbsp;{item.branch.is_club ? <ClubIcon/> : ''}
+                            {item.branch.is_club ? <ClubIcon/> : ''}<a href={item.url} className="__course">{item.name}</a>
                         </div>
                         <div className="table__cell _teachers">
                             {item.teachers.map((teacher, i, arr) =>
@@ -514,7 +514,7 @@ class CourseList extends React.Component {
 
 
 const ClubIcon = () => (
-    <Tooltip title="Курс CS клуба"><Icon id={'cs-club'} className={`ml-1`}/></Tooltip>
+    <Tooltip title="Курс CS клуба"><Icon id={'cs-club'} className={`mr-1`}/></Tooltip>
 );
 
 const VideoIcon = () => (
