@@ -200,4 +200,4 @@ class Location(TimezoneAwareModel, models.Model):
         return "{0}".format(smart_text(self.name))
 
     def get_absolute_url(self):
-        return reverse('venue_detail', args=[self.pk])
+        return reverse('courses:venue_detail', args=[self.pk])

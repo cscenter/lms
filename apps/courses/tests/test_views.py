@@ -146,6 +146,6 @@ def test_course_assignment_timezone(settings, client):
 @pytest.mark.django_db
 def test_venue_list(client):
     v = LocationFactory(city__code=settings.DEFAULT_CITY_CODE)
-    response = client.get(reverse('venue_list'))
+    response = client.get(reverse('courses:venue_list'))
     assert response.status_code == 200
     assert v in list(response.context_data['object_list'])

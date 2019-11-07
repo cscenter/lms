@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.views import generic
 
+from core.models import Branch
 from core.views import ProtectedFormMixin
 from courses.forms import CourseForm
 from courses.models import Course, MetaCourse
@@ -16,9 +18,16 @@ class MetaCourseDetailView(generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        filters = {}
+        if hasattr(self.request, 'branch'):
+            filters['branch'] = self.request.branch
+        else:
+            filters['branch__in'] = (Branch.objects
+                                     .filter(site_id=settings.SITE_ID)
+                                     .values_list('pk', flat=True))
         courses = (Course.objects
                    .filter(meta_course=self.object,
-                           branch=self.request.branch)
+                           **filters)
                    .select_related("meta_course", "semester", "branch")
                    .order_by('-semester__index'))
         context['courses'] = courses

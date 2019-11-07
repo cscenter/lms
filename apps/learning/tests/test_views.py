@@ -63,7 +63,7 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_basic_get(self):
         course = CourseFactory.create()
         assert 302 == self.client.get(course.get_absolute_url()).status_code
-        url = branch_aware_reverse('course_detail', kwargs={
+        url = branch_aware_reverse('courses:course_detail', kwargs={
             "course_slug": "space-odyssey",
             "semester_year": 2010,
             "semester_type": "autumn",

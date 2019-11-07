@@ -79,7 +79,7 @@ def post_save_project(sender, instance, created, *args, **kwargs):
             instance.save()
             return
 
-    # Download presentation from yandex.disk if local copy not saved.
+    # Download presentation from yandex.disk if local copy is not saved.
     if (instance.supervisor_presentation_url and
             instance.supervisor_presentation == ''):
         transaction.on_commit(lambda: job_ya_supervisor.delay(instance.pk))

@@ -35,7 +35,7 @@
                         <h2>Прочтения курсов</h2>
                         <div class="card-deck _three">
                             {% for course in teacher.course_offerings %}
-                                <a href="{{ course.get_absolute_url() }}" class="ui card">
+                                <a href="{{ view.public_url(course) }}" class="ui card">
                                     <div class="card__content mb-8">
                                         <div class="card__title mb-2">
                                             {{ course.meta_course.name }}

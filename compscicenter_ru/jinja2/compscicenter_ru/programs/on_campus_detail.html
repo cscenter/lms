@@ -57,7 +57,7 @@
             {% for course_group in study_program.course_groups.all() %}
                 {% set group_index = loop.index %}
                 {% for meta_course in course_group.courses.all() %}
-                    <a href="{{ meta_course.get_absolute_url() }}" class="card _program _shadowed">
+                    <a href="{{ view.public_url(meta_course) }}" class="card _program _shadowed">
                         <div class="right-label">{{ group_index }}</div>
                         <div class="card__img">
                             <img src="{{ meta_course.get_cover_url() }}" alt="" />

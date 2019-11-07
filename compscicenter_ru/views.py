@@ -18,14 +18,14 @@ from django.views import generic
 from vanilla import TemplateView, DetailView
 
 from announcements.models import Announcement
-from compscicenter_ru.utils import Tab, TabList
+from compscicenter_ru.utils import Tab, TabList, course_public_url
 from core.exceptions import Redirect
 from core.models import Branch
-from core.urls import reverse
+from core.urls import reverse, branch_aware_reverse
 from core.utils import bucketize
 from courses.constants import SemesterTypes, TeacherRoles, ClassTypes
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
-    group_course_teachers
+    group_course_teachers, CourseClass
 from courses.utils import get_current_term_pair, \
     first_term_in_academic_year
 from courses.views.mixins import CourseURLParamsMixin
@@ -66,6 +66,21 @@ def get_random_testimonials(count, cache_key, **filters):
                         .order_by('?'))[:count]
         cache.set(cache_key, testimonials, 3600)
     return testimonials
+
+
+class PublicURLMixin:
+    @staticmethod
+    def public_url(obj, **kwargs):
+        if isinstance(obj, Course):
+            return course_public_url(obj, **kwargs)
+        elif isinstance(obj, CourseClass):
+            return branch_aware_reverse(
+                'class_detail',
+                kwargs={'pk': obj.pk, **obj.course.url_kwargs})
+        elif isinstance(obj, MetaCourse):
+            return reverse('meta_course_detail',
+                           kwargs={'course_slug': obj.slug})
+        raise TypeError(f"{obj.__class__} is not supported")
 
 
 class IndexView(TemplateView):
@@ -317,7 +332,7 @@ class OnCampusProgramsView(generic.TemplateView):
         return context
 
 
-class OnCampusProgramDetailView(generic.TemplateView):
+class OnCampusProgramDetailView(PublicURLMixin, generic.TemplateView):
     template_name = "compscicenter_ru/programs/on_campus_detail.html"
 
     def get_context_data(self, discipline_code, **kwargs):
@@ -442,7 +457,7 @@ def timeline_element_factory(obj) -> TimelineElement:
         return TimelineElement(term=obj.course.semester,
                                type=TimelineElementTypes.COURSE,
                                name=obj.course.meta_course.name,
-                               url=obj.course.get_absolute_url(),
+                               url=course_public_url(obj.course),
                                grade=obj.get_grade_display())
     else:
         raise TypeError("timeline_element_factory: Unsupported object")
@@ -495,7 +510,7 @@ class StudentProfileView(generic.DetailView):
         return context
 
 
-class MetaCourseDetailView(generic.DetailView):
+class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
     model = MetaCourse
     slug_url_kwarg = 'course_slug'
     template_name = "compscicenter_ru/courses/meta_course_detail.html"
@@ -535,49 +550,7 @@ class MetaCourseDetailView(generic.DetailView):
         return context
 
 
-class CourseDetailView(CourseURLParamsMixin, generic.DetailView):
-    model = MetaCourse
-    template_name = "compscicenter_ru/courses/course_detail.html"
-    context_object_name = 'course'
-
-    def get_course_queryset(self):
-        course_teachers = Prefetch('course_teachers',
-                                   queryset=(CourseTeacher.objects
-                                             .select_related("teacher")))
-        return (super().get_course_queryset()
-                .select_related('meta_course', 'semester', 'branch')
-                .prefetch_related(course_teachers))
-
-    def get_object(self):
-        return self.course
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        tabs = TabList([
-            Tab(target='about',
-                name=_('About the Course'),
-                url=self.course.get_absolute_url(subdomain=None),
-                active=True),
-            Tab(target='classes',
-                name=_('Syllabus'),
-                url=self.course.get_absolute_url(tab='classes',
-                                                 subdomain=None)),
-        ])
-        show_tab = self.kwargs.get('tab', 'about')
-        tabs.set_active(show_tab)
-        teachers = group_course_teachers(self.course.course_teachers
-                                         .order_by('teacher__last_name',
-                                                   'teacher__first_name'))
-        context['tabs'] = tabs
-        context['teachers'] = {TeacherRoles.get_choice(k): v for k, v in
-                               teachers.items()}
-        context['classes'] = (self.course.courseclass_set
-                              .filter(type=ClassTypes.LECTURE)
-                              .order_by("date", "starts_at"))
-        return context
-
-
-class TeacherDetailView(DetailView):
+class TeacherDetailView(PublicURLMixin, DetailView):
     template_name = "compscicenter_ru/teacher_detail.html"
     context_object_name = 'teacher'
 
@@ -637,3 +610,76 @@ class CourseOfferingsView(TemplateView):
             },
         }
         return {"app_data": app_data}
+
+
+class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView):
+    model = MetaCourse
+    template_name = "compscicenter_ru/courses/course_detail.html"
+    context_object_name = 'course'
+
+    def get_course_queryset(self):
+        course_teachers = Prefetch('course_teachers',
+                                   queryset=(CourseTeacher.objects
+                                             .select_related("teacher")))
+        return (super().get_course_queryset()
+                .select_related('meta_course', 'semester', 'branch')
+                .prefetch_related(course_teachers))
+
+    def get_object(self):
+        return self.course
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tabs = TabList([
+            Tab(target='about',
+                name=_('About the Course'),
+                url=course_public_url(self.course),
+                active=True),
+            Tab(target='classes',
+                name=_('Syllabus'),
+                url=course_public_url(self.course, tab='classes')),
+        ])
+        show_tab = self.kwargs.get('tab', 'about')
+        tabs.set_active(show_tab)
+        teachers = group_course_teachers(self.course.course_teachers
+                                         .order_by('teacher__last_name',
+                                                   'teacher__first_name'))
+        context['tabs'] = tabs
+        context['teachers'] = {TeacherRoles.get_choice(k): v for k, v in
+                               teachers.items()}
+        context['classes'] = (self.course.courseclass_set
+                              .filter(type=ClassTypes.LECTURE)
+                              .order_by("date", "starts_at"))
+        return context
+
+
+class CourseClassDetailView(PublicURLMixin, generic.DetailView):
+    model = CourseClass
+    context_object_name = 'course_class'
+    template_name = "compscicenter_ru/courses/class_detail.html"
+
+    def get_queryset(self):
+        return (CourseClass.objects
+                .select_related("course",
+                                "course__meta_course",
+                                "course__semester",
+                                "course__branch",
+                                "venue",
+                                "venue__location"))
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(**kwargs)
+        course_class = context[self.context_object_name]
+        recorded = (CourseClass.objects
+                    .filter(course=course_class.course,
+                            type=ClassTypes.LECTURE)
+                    .exclude(video_url='')
+                    .only('pk', 'name', 'video_url', 'course_id', 'date',
+                          # FIXME: bug with tracked field
+                          'slides',
+                          'starts_at', 'ends_at')
+                    .order_by("date", "starts_at"))
+        for lecture in recorded:
+            lecture.course = course_class.course
+        context['recorded_lectures'] = recorded
+        return context

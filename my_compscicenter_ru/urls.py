@@ -27,13 +27,9 @@ urlpatterns = [
 
     path('', include('learning.urls')),
 
-    path('courses/', include([
-        path('', CourseOfferingsView.as_view(), name="course_list"),
-        re_path(RE_COURSE_URI, include([
-            path('', CourseDetailView.as_view(), name="course_detail"),
-            re_path(r"^(?P<tab>news|assignments|classes|about|contacts|reviews)/$", CourseDetailView.as_view(), name="course_detail_with_active_tab"),
-        ]))
-    ])),
+    path('courses/', CourseOfferingsView.as_view(), name="course_list"),
+    path('', include('courses.urls')),
+
     path("courses/", include('learning.invitation.urls')),
 
     path('', include('auth.urls')),

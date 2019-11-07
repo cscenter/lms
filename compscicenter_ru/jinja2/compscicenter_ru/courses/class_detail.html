@@ -1,0 +1,93 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% block sprites %}
+    <script type="text/javascript">
+    (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg") }}");
+    </script>
+{% endblock sprites %}
+
+{% block content %}
+    <div class="_dark">
+        <div class="container page-content">
+            <div class="ui breadcrumb mb-2">
+                <a href="{{ url('course_list', subdomain=None) }}"
+                   class="breadcrumb__section">Курсы</a>
+                <div class="breadcrumb__divider"> /</div>
+                <a href="{{ view.public_url(course_class.course.meta_course) }}"
+                   class="breadcrumb__section">{{ course_class.course.name }}</a>
+                <div class="breadcrumb__divider"> /</div>
+                <a href="{{ view.public_url(course_class.course) }}" class="breadcrumb__section">{{ course_class.course.semester }}</a>
+                <div class="breadcrumb__divider"> /</div>
+            </div>
+            <h1 class="mb-1">{{ course_class.name }}</h1>
+            <div class="venue-details">
+                <div class="ui label _icon">
+                    {{ macros.svg_icon('calendar') }}
+                    <span>{{ course_class.date|date("l, d E Y") }}, {{ course_class.starts_at|time("H:i") }}–{{ course_class.ends_at|time("H:i") }}</span>
+                </div>
+                <div class="ui label _icon">
+                    {{ macros.svg_icon('location') }}
+                    <span>{{ course_class.venue }}</span>
+                </div>
+            </div>
+            {% if course_class.type == 'lecture' and course_class.video_url and recorded_lectures %}
+            <div class="row mt-6">
+                <div class="col-lg-7">
+                    {% with youtube_video_id=course_class.video_url|youtube_video_id %}
+                        {% if youtube_video_id %}
+                            {% set url='https://www.youtube.com/embed/' + youtube_video_id %}
+                        {% else %}
+                            {% set url=course_class.video_url %}
+                        {% endif %}
+                        {{ macros.video_iframe(url) }}
+                    {% endwith %}
+                </div>
+                <div class="col-lg-5">
+                    <div class="ui playlist">
+                        <div class="playlist__summary">Список тем / {{ recorded_lectures|length }} запис{{ recorded_lectures|length|pluralize("ь", "и", "ей") }}</div>
+                        <ol class="ui list _divided _selection">
+                            {% for lecture in recorded_lectures %}
+                                {% if course_class.id != lecture.id %}
+                                    <a href="{{ view.public_url(lecture) }}" class="list__item">
+                                {% else %}
+                                    <div class="list__item _active">
+                                {% endif %}
+                                    <div class="class-item">
+                                        <div class="item__ordinal">{{ loop.index }}.</div>
+                                        <div class="item__text">{{ lecture.name }}</div>
+                                    </div>
+                                {% if course_class.id == lecture.id %}
+                                    </div>
+                                {% else %}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% if request.user.is_superuser %}
+        <div class="message _warning px-0">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <a href="{{ url('admin:courses_courseclass_change', object_id=course_class.pk) }}">{% trans %}Edit in Admin{% endtrans %}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    {% if course_class.description %}
+        <div class="container page-content">
+            <div class="row">
+                <div class="col-lg-9">
+                    <h3>Описание</h3>
+                    {{ course_class.description|markdown("course_class_description", 3600, course_class.pk, course_class.modified) }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock content %}

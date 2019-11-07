@@ -24,7 +24,7 @@
             <div class="card border-xs-0">
                 <div class="card__header cover _img" style="background-image:url('{{ course.meta_course.get_cover_url() }}')">
                     <nav class="cover__content py-4 text-left">
-                        <a href="{{ course.meta_course.get_absolute_url() }}" class="btn _extra-small _outline _white _rounded">{{ macros.svg_icon('arrow-left') }}<span>Все прочтения</span></a>
+                        <a href="{{ url('meta_course_detail', course_slug=course.meta_course.slug) }}" class="btn _extra-small _outline _white _rounded">{{ macros.svg_icon('arrow-left') }}<span>Все прочтения</span></a>
                     </nav>
                     <div class="cover__content _big">
                         <h2 class="cover__title">{{ course.meta_course.name }}</h2>
@@ -66,7 +66,7 @@
                                         <div class="ui list _divided">
                                             {% for course_class in classes %}
                                                 <div class="list__item">
-                                                    <a class="class-item" href="{{ course_class.get_absolute_url() }}">
+                                                    <a class="class-item" href="{{ view.public_url(course_class) }}">
                                                         <div class="item__text">{{ course_class.name }}</div>
                                                         {% if course_class.video_url or course_class.slides %}
                                                         <div class="item__icons">
