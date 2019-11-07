@@ -3,6 +3,8 @@ from django.utils.encoding import force_bytes
 from rest_framework import serializers
 
 from api.utils import make_api_fragment_key
+from compscicenter_ru.utils import course_public_url
+from core.urls import reverse, branch_aware_reverse
 from core.utils import render_markdown
 from courses.api.serializers import CourseSerializer
 from courses.models import Course, CourseTeacher
@@ -33,7 +35,7 @@ class CourseVideoSerializer(CourseSerializer):
         fields = ('id', 'name', 'preview_url', 'url', 'type', 'year', 'speakers')
 
     def get_url(self, obj: Course):
-        return obj.get_absolute_url(tab='classes', subdomain=None)
+        return course_public_url(obj, tab='classes')
 
     def get_year(self, obj: Course):
         return obj.semester.year
@@ -133,7 +135,7 @@ class TestimonialCardSerializer(GraduateProfileSerializer):
 
 class CoursePublicSerializer(CourseSerializer):
     def get_url(self, obj: Course):
-        return obj.get_absolute_url(subdomain=None)
+        return course_public_url(obj)
 
     class Meta(CourseSerializer.Meta):
         fields = ('id', 'name', 'url', 'semester', 'teachers', 'branch',

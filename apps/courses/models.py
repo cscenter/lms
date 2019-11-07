@@ -218,10 +218,12 @@ class MetaCourse(TimeStampedModel):
         return smart_text(self.name)
 
     def get_absolute_url(self):
-        return reverse('meta_course_detail', args=[self.slug])
+        return reverse('courses:meta_course_detail', kwargs={
+            "course_slug": self.slug
+        })
 
     def get_update_url(self):
-        return reverse('meta_course_edit', args=[self.slug])
+        return reverse('courses:meta_course_edit', args=[self.slug])
 
     def get_cover_url(self):
         if self.cover:
@@ -296,6 +298,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     videos_count = models.PositiveIntegerField(default=0, editable=False)
     materials_slides = models.BooleanField(default=False, editable=False)
     materials_files = models.BooleanField(default=False, editable=False)
+    # FIXME: wrong place for this
     youtube_video_id = models.CharField(
         max_length=255, editable=False,
         help_text="Helpful for getting thumbnail on /videos/ page",
@@ -413,10 +416,10 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     def get_absolute_url(self, tab=None, **kwargs):
         options = {"subdomain": settings.LMS_SUBDOMAIN, **kwargs}
         if tab is None:
-            route_name = 'course_detail'
+            route_name = 'courses:course_detail'
             url_kwargs = self.url_kwargs
         else:
-            route_name = 'course_detail_with_active_tab'
+            route_name = 'courses:course_detail_with_active_tab'
             url_kwargs = {**self.url_kwargs, "tab": tab}
         return branch_aware_reverse(route_name,
                                     kwargs=url_kwargs,
@@ -424,24 +427,24 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
     def get_url_for_tab(self, active_tab):
         kwargs = {**self.url_kwargs, "tab": active_tab}
-        return branch_aware_reverse("course_detail_with_active_tab",
+        return branch_aware_reverse("courses:course_detail_with_active_tab",
                                     kwargs=kwargs,
                                     subdomain=settings.LMS_SUBDOMAIN)
 
     def get_create_assignment_url(self):
-        return branch_aware_reverse("assignment_add",
+        return branch_aware_reverse("courses:assignment_add",
                                     kwargs=self.url_kwargs)
 
     def get_create_news_url(self):
-        return branch_aware_reverse("course_news_create",
+        return branch_aware_reverse("courses:course_news_create",
                                     kwargs=self.url_kwargs)
 
     def get_create_class_url(self):
-        return branch_aware_reverse("course_class_add",
+        return branch_aware_reverse("courses:course_class_add",
                                     kwargs=self.url_kwargs)
 
     def get_update_url(self):
-        return branch_aware_reverse("course_update",
+        return branch_aware_reverse("courses:course_update",
                                     kwargs=self.url_kwargs)
 
     def get_enroll_url(self):
@@ -468,6 +471,10 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         from notifications.middleware import get_unread_notifications_cache
         cache = get_unread_notifications_cache()
         return self in cache.courseoffering_news
+
+    @property
+    def name(self):
+        return self.meta_course.name
 
     @property
     def has_classes_with_slides(self):
@@ -666,7 +673,7 @@ class CourseNews(TimezoneAwareModel, TimeStampedModel):
                                   smart_text(self.course))
 
     def get_update_url(self):
-        return branch_aware_reverse('course_news_update', kwargs={
+        return branch_aware_reverse('courses:course_news_update', kwargs={
             **self.course.url_kwargs,
             "pk": self.pk
         })
@@ -676,7 +683,7 @@ class CourseNews(TimezoneAwareModel, TimeStampedModel):
                        kwargs={"news_pk": self.pk})
 
     def get_delete_url(self):
-        return branch_aware_reverse('course_news_delete', kwargs={
+        return branch_aware_reverse('courses:course_news_delete', kwargs={
             **self.course.url_kwargs,
             "pk": self.pk
         })
@@ -789,25 +796,26 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
             prefetch=True)
 
     def get_absolute_url(self):
-        return branch_aware_reverse('class_detail', kwargs={
+        return branch_aware_reverse('courses:class_detail', kwargs={
             **self.course.url_kwargs,
             "pk": self.pk
         })
 
     def get_update_url(self):
-        return branch_aware_reverse('course_class_update', kwargs={
+        return branch_aware_reverse('courses:course_class_update', kwargs={
             **self.course.url_kwargs,
             "pk": self.pk
         })
 
     def get_delete_url(self):
-        return branch_aware_reverse('course_class_delete', kwargs={
+        return branch_aware_reverse('courses:course_class_delete', kwargs={
             **self.course.url_kwargs,
             "pk": self.pk
         })
 
     @property
     def _track_fields(self):
+        # FIXME: What if tracked field is not in a queryset?
         return "slides",
 
     def _update_track_fields(self):
@@ -873,11 +881,13 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
             course.compute_fields('materials_files')
 
     def get_delete_url(self):
-        return branch_aware_reverse('course_class_attachment_delete', kwargs={
-            **self.course_class.course.url_kwargs,
-            "class_pk": self.course_class.pk,
-            "pk": self.pk
-        })
+        return branch_aware_reverse(
+            'courses:course_class_attachment_delete',
+            kwargs={
+                **self.course_class.course.url_kwargs,
+                "class_pk": self.course_class.pk,
+                "pk": self.pk
+            })
 
     @property
     def material_file_name(self):
@@ -946,13 +956,13 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         return reverse('teaching:assignment_detail', kwargs={"pk": self.pk})
 
     def get_update_url(self):
-        return branch_aware_reverse('assignment_update', kwargs={
+        return branch_aware_reverse('courses:assignment_update', kwargs={
             **self.course.url_kwargs,
             "pk": self.pk
         })
 
     def get_delete_url(self):
-        return branch_aware_reverse('assignment_delete', kwargs={
+        return branch_aware_reverse('courses:assignment_delete', kwargs={
             **self.course.url_kwargs,
             "pk": self.pk
         })
@@ -1021,8 +1031,10 @@ class AssignmentAttachment(TimeStampedModel):
                        kwargs={"sid": sid, "file_name": self.file_name})
 
     def get_delete_url(self):
-        return branch_aware_reverse('assignment_attachment_delete', kwargs={
-            **self.assignment.course.url_kwargs,
-            "assignment_pk": self.assignment.pk,
-            "pk": self.pk,
-        })
+        return branch_aware_reverse(
+            'courses:assignment_attachment_delete',
+            kwargs={
+                **self.assignment.course.url_kwargs,
+                "assignment_pk": self.assignment.pk,
+                "pk": self.pk,
+            })

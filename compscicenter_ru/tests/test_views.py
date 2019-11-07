@@ -52,11 +52,13 @@ def test_alumni(client):
 @pytest.mark.django_db
 def test_meta_course_detail(client, settings):
     mc = MetaCourseFactory()
-    response = client.get(mc.get_absolute_url())
+    meta_course_url = reverse('meta_course_detail',
+                              kwargs={'course_slug': mc.slug})
+    response = client.get(meta_course_url)
     assert response.status_code == 200
     assert not response.context_data['grouped_courses']
     course1, course2 = CourseFactory.create_batch(2, meta_course=mc)
-    response = client.get(mc.get_absolute_url())
+    response = client.get(meta_course_url)
     assert response.status_code == 200
     assert mc.name.encode() in response.content
     assert mc.description.encode() in response.content
@@ -72,14 +74,14 @@ def test_meta_course_detail(client, settings):
     branch = BranchFactory(city=city)
     course2.branch = branch
     course2.save()
-    response = client.get(mc.get_absolute_url())
+    response = client.get(meta_course_url)
     grouped_courses = response.context_data['grouped_courses']
     assert {c.pk for c in grouped_courses[Branches.SPB]} == {course1.pk}
     # Return to another cs center branch
     course2.branch = Branch.objects.get(code=Branches.NSK,
                                         site_id=settings.SITE_ID)
     course2.save()
-    response = client.get(mc.get_absolute_url())
+    response = client.get(meta_course_url)
     assert len(response.context_data['tabs']) == 2
     assert len(response.context_data['grouped_courses']) == 2
 

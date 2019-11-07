@@ -21,7 +21,8 @@ ROOT_URLCONF = 'compscicenter_ru.urls'
 LMS_SUBDOMAIN = 'my'
 RESTRICT_LOGIN_TO_LMS = True
 REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
-                                 'surveys', 'library', 'admission', 'auth')
+                                 'surveys', 'library', 'admission', 'auth',
+                                 'courses')
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
     LMS_SUBDOMAIN: 'my_compscicenter_ru.urls',
@@ -138,6 +139,8 @@ TEMPLATES = [
             # django-jinja decorator
             "filters": {
                 "markdown": "compscicenter_ru.jinja2_filters.markdown",
+                "pluralize": "compscicenter_ru.jinja2_filters.pluralize",
+                "youtube_video_id": "compscicenter_ru.jinja2_filters.youtube_video_id",
                 "as_survey": "surveys.jinja2_filters.render_form",
             },
             "globals": {

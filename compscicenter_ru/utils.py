@@ -2,6 +2,8 @@ from typing import List
 
 import attr
 
+from core.urls import branch_aware_reverse
+
 
 @attr.s(auto_attribs=True, slots=True)
 class Tab:
@@ -48,3 +50,14 @@ class TabList:
     
     def __len__(self):
         return len(self._tabs)
+
+
+def course_public_url(course: 'Course', tab=None):
+    if tab is None:
+        route_name = 'course_detail'
+        url_kwargs = course.url_kwargs
+    else:
+        route_name = 'course_detail_with_active_tab'
+        url_kwargs = {**course.url_kwargs, "tab": tab}
+    return branch_aware_reverse(route_name, subdomain=None,
+                                kwargs=url_kwargs)
