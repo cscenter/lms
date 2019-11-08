@@ -1,0 +1,215 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+
+{% block title %}НИР - {{ super() }}{% endblock title %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row content-center text-center py-10">
+            <div class="col-lg-9">
+                <h1>Научно-исследовательская работа</h1>
+                <section class="content-block">
+                    <p>Если студенты хотят заниматься наукой, то в качестве проекта можно взять научно-исследовательскую
+                        работу или НИР. Исследования могут быть теоретическими или прикладными. </p>
+                </section>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid _dark">
+        <div class="container page-content">
+            <div class="row">
+                <div class="col-lg-12">
+                    <section class="content-block mb-0">
+                        <h2 class="mb-8 text-center">Примеры научно-исследовательских работ</h2>
+                        <div class="card-deck _three">
+                            <div class="card _shadowed">
+                                <div class="w-100"
+                                     style="background-image:url('/media/pages/project/aganezov2.png'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                                </div>
+                                <div class="card__content">
+                                    <div class="card__title">
+                                        Комбинаторика и теория графов в биоинформатике
+                                    </div>
+                                </div>
+                                <div class="card__footer _dark">
+                                    <div class="author _project">
+                                        <img class="author__img" width="48" height="48"
+                                             src="/media/pages/index/student.png"
+                                             alt="">
+                                        <div class="author__details">
+                                            <div class="card__text">Евгений Игоревич Викулов</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card _shadowed">
+                                <div class="w-100"
+                                     style="background-image:url('/media/pages/project/complexity.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                                </div>
+                                <div class="card__content">
+                                    <div class="card__title">
+                                        Сложность в среднем и диофантова сложность
+                                    </div>
+                                </div>
+                                <div class="card__footer _dark">
+                                    <div class="author _project">
+                                        <img class="author__img" width="48" height="48"
+                                             src="/static/v2/img/placeholder/users.jpg"
+                                             alt="">
+                                        <div class="author__details">
+                                            <div class="card__text">Несколько авторов</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card _shadowed">
+                                <div class="w-100"
+                                     style="background-image:url('/static/v2/img/placeholder/project.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                                </div>
+                                <div class="card__content">
+                                    <div class="card__title">
+                                        Верхние и нижние оценки на сложность вычислительных задач
+                                    </div>
+                                </div>
+                                <div class="card__footer _dark">
+                                    <div class="author _project">
+                                        <img class="author__img" width="48" height="48"
+                                             src="/media/pages/index/student.png"
+                                             alt="">
+                                        <div class="author__details">
+                                            <div class="card__text">Евгений Игоревич Викулов</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <a href="/v2/pages/practice/" class="btn _small _rounded _outline _gray mt-2 mb-0">Все проекты</a>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-8">
+                <section class="content-block">
+                    <h2>О НИР</h2>
+                    <ul>
+                        <li>Студенты пробуют разные темы, чтобы оценить, насколько им интересны разные научные
+                            области
+                        </li>
+                        <li>Эта работа может стать основой для поступления в магистратуру или аспирантуру.</li>
+                    </ul>
+                </section>
+                <section class="content-block">
+                    <h2>Научный руководитель</h2>
+                    Научным руководителем может быть любой активный учёный со степенью. В выборе поможет куратор и
+                    научные руководители направления Computer Science. Руководитель внимательно наблюдает за процессом и
+                    направляет усилия студента в верное русло. Студенты встречаются с ним не реже раза в неделю.
+
+                    <h2 class="mt-8"> Темы исследований и руководители</h2>
+                    <ul class="ui list _divided">
+
+                        <li>Комбинаторные задачи биоинформатики
+
+                            <p class="text-small"><a href="http://home.gwu.edu/~maxal/">М. Алексеев</a> (<a
+                                    href="http://gwu.edu/">Университет
+                                Джорджа Вашингтона</a>)
+                            </p>
+                        </li>
+                        <li>Cистемы типов<p class="text-small"><a href="http://sites.google.com/site/abreslav2/">А. А.
+                            Бреслав</a> (<a
+                                href="http://www.jetbrains.com/">JetBrains</a>)</p>
+                        </li>
+                        <li>Квантовые алгоритмы<p class="text-small"><a href="http://www.mathnet.ru/rus/person17699">М.
+                            Н. Вялый</a> (<a
+                                href="http://www.ccas.ru/">Вычислительный центр имени А. А. Дородницына
+                            РАН</a>)</p>
+                        </li>
+                        <li>Вычислительная геометрия <p class="text-small"><a href="http://compsciclub.ru/teachers/23/">К. В. Вяткина</a> (<a
+                                href="http://mit.spbau.ru/">СПбАУ РАН</a>)</p>
+                        </li>
+                        <li>Верификация<p class="text-small">С. Э. Вельдер (<a href="http://www.ifmo.ru/">НИУ ИТМО</a>)</p> </li>
+                        <li>Теория сложности вычислений
+                            и доказательств<p class="text-small"><a href="http://logic.pdmi.ras.ru/~hirsch">Э. А.
+                                Гирш</a> (<a
+                                    href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a
+                                    href="http://mit.spbau.ru/">СПбАУ РАН</a>)</p>
+                        </li>
+                        <li>Теория сложности<p class="text-small"><a href="http://logic.pdmi.ras.ru/~dmitrits">Д. М. Ицыксон</a> (<a
+                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a
+                                href="http://mit.spbau.ru/">СПбАУ РАН</a>)</p>
+                        </li>
+                        <li>Раскраски графов<p class="text-small"><a href="http://logic.pdmi.ras.ru/~dvk/">Д. В. Карпов</a> (<a
+                                    href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>)</p>
+                        </li>
+                        <li>Кооперативная теория игр, <a href="http://habrahabr.ru/company/yandex/blog/182976/">искусственный
+                            интеллект в тестировании</a>
+                            <p class="text-small"><a href="https://compscicenter.ru/teachers/611/">И. В. Кацев</a> (<a
+                                    href="http://yandex.ru">Яндекс</a>, <a href="http://emi.nw.ru/">СПбЭМИ
+                                РАН</a>)</p>
+                        </li>
+                        <li>Алгоритмы для NP-трудных задач, сложность булевых функций<p class="text-small"><a href="http://logic.pdmi.ras.ru/~kulikov">А. С. Куликов</a> (<a
+                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a
+                                href="http://mit.spbau.ru/">СПбАУ РАН</a>)</p>
+                        </li>
+
+                        <li>Криптография<p class="text-small"><a
+                                href="https://research.google.com/pubs/IlyaMironov.html">И. Миронов</a> (<a
+                                href="https://www.google.ru/?gws_rd=ssl">Google</a>)</p>
+                        </li>
+                        <li>Функциональные языки
+                            программирования и их системы типов<p class="text-small"><a href="http://compsciclub.ru/teachers/33/">Д. Н. Москвин</a> (<a href="http://spbau.ru/">СПбАУ
+                                РАН</a>)</p>
+                        </li>
+                        <li>Машинное обучение<p class="text-small"><a href="http://logic.pdmi.ras.ru/~sergey/">С. И. Николенко</a> (<a
+                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a
+                                href="http://mit.spbau.ru/">СПбАУ РАН</a>)</p>
+                        </li>
+                        <li>Оптимизация и обработка запросов<p class="text-small"><a
+                                    href="http://www.math.spbu.ru/user/boris_novikov/index.shtml">Б. А.
+                                Новиков</a> (<a href="http://www.spbu.ru/">СПбГУ</a>)</p>
+                        </li>
+                        <li>Формальные языки и грамматики<p class="text-small"><a href="http://users.utu.fi/aleokh/">А. С. Охотин</a> (<a href="http://spbu.ru/">СПбГУ</a>)</p>
+
+                        </li>
+                        <li>Раскраски графов<p class="text-small"><a href="http://logic.pdmi.ras.ru/~pastor/">А. В. Пастор</a> (<a
+                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>)</p>
+                        </li>
+                        <li>Надёжные модели вычислений, теория кодирования<p class="text-small"><a href="http://www.mccme.ru/~anromash/">А. Е. Ромащенко</a> (<a
+                                href="http://www.iitp.ru/ru/about">ИППИ РАН</a>)</p>
+                        </li>
+                        <li>Параллельные алгоритмы, алгоритмы на строках<p class="text-small"><a
+                                href="http://go.warwick.ac.uk/alextiskin">А. В. Тискин</a> (<a
+                                href="http://www2.warwick.ac.uk/">University of Warwick</a>)</p>
+                        </li>
+                        <li>Колмогоровская
+                            сложность, теория информации<p class="text-small"><a
+                                    href="http://www.mccme.ru/poncelet/pers/shen.htm">А. Х. Шень</a> (<a
+                                    href="http://www.iitp.ru/ru/about">ИППИ РАН</a>)</p>
+                        </li>
+                    </ul>
+                </section>
+
+            </div>
+            <div class="col-lg-3 offset-lg-1 mt-4">
+                <aside>
+                    <div class="card  mb-6">
+                        <div class="h4 card__header _dark mb-0">
+                            Практика в CS центре
+                        </div>
+                        <div class="card__content">
+                            <a href="/v2/pages/projects/" class="pb-4">
+                                Как получить практику <br> в CS центре
+                            </a>
+                        </div>
+                    </div>
+                    <a href="/v2/pages/practice/" class="btn _small _primary w-100 mb-0">Все студенческие проекты</a>
+
+                </aside>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
