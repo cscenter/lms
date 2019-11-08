@@ -7,9 +7,10 @@ from django.core import management
 from django.core.management import CommandError
 
 from courses.tests.factories import SemesterFactory
+from notifications import NotificationTypes
 from projects.constants import ProjectTypes, \
     REPORTING_NOTIFY_BEFORE_START, REPORTING_NOTIFY_BEFORE_DEADLINE
-from projects.models import ProjectStudent
+from projects.models import ProjectStudent, ReportingPeriod
 from projects.tests.factories import ReportingPeriodFactory, \
     ProjectStudentFactory, ProjectFactory
 from notifications.models import Notification
@@ -50,18 +51,15 @@ def test_projects_notifications(settings, mocker):
     settings.LANGUAGE_CODE = 'ru'
     mocked_timezone = mocker.patch('django.utils.timezone.now')
     msk_tz = pytz.timezone("Europe/Moscow")
-    mocked_timezone.return_value = msk_tz.localize(
-        datetime.datetime(2019, 4, 1, 12, 0))
+    mocked_now = msk_tz.localize(datetime.datetime(2019, 4, 1, 12, 0))
+    mocked_timezone.return_value = mocked_now
     current_term = SemesterFactory.create_current()
-    from django.utils import timezone
-    start_on = timezone.now()
-    end_on = start_on + datetime.timedelta(days=5)
     rp_all_research = ReportingPeriodFactory(
         term=current_term,
         project_type=ProjectTypes.research,
         branch=None,
-        start_on=start_on + datetime.timedelta(days=REPORTING_NOTIFY_BEFORE_START),
-        end_on=end_on,
+        start_on=mocked_now + datetime.timedelta(days=REPORTING_NOTIFY_BEFORE_START),
+        end_on=mocked_now + datetime.timedelta(days=5),
         score_excellent=10, score_good=6,
         score_pass=3)
     project = ProjectFactory(semester=current_term,
@@ -81,12 +79,14 @@ def test_projects_notifications(settings, mocker):
     assert Notification.objects.count() == 1
     management.call_command("projects_notifications")
     assert Notification.objects.count() == 1
+    n = Notification.objects.first()
+    assert n.type.code == NotificationTypes.PROJECT_REPORTING_STARTED.name
     rp_all_practice = ReportingPeriodFactory(
         term=current_term,
         project_type=ProjectTypes.practice,
         branch=None,
-        start_on=start_on,
-        end_on=start_on + datetime.timedelta(days=REPORTING_NOTIFY_BEFORE_DEADLINE),
+        start_on=mocked_now,
+        end_on=mocked_now + datetime.timedelta(days=REPORTING_NOTIFY_BEFORE_DEADLINE),
         score_excellent=10, score_good=6,
         score_pass=3)
     management.call_command("projects_notifications")
@@ -95,3 +95,15 @@ def test_projects_notifications(settings, mocker):
     rp_all_practice.save()
     management.call_command("projects_notifications")
     assert Notification.objects.count() == 3
+    # Started earlier that today
+    ReportingPeriod.objects.all().delete()
+    rp_all_practice = ReportingPeriodFactory(
+        term=current_term,
+        project_type=ProjectTypes.practice,
+        branch=None,
+        start_on=mocked_now - datetime.timedelta(days=3),
+        end_on=mocked_now + datetime.timedelta(days=REPORTING_NOTIFY_BEFORE_DEADLINE),
+        score_excellent=10, score_good=6,
+        score_pass=3)
+    management.call_command("projects_notifications")
+    assert Notification.objects.count() == 4
