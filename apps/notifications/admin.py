@@ -11,4 +11,4 @@ class NotificationTypeAdmin(admin.ModelAdmin):
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ['id', 'type', 'recipient', 'emailed', 'timestamp']
-    list_select_related = ('recipient',)
+    list_select_related = ('recipient', 'type')
