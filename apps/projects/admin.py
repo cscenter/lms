@@ -131,6 +131,7 @@ class ProjectStudentAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ('student', 'project', 'get_project_semester', 'final_grade')
     list_filter = ('project__branch', 'project__semester')
     search_fields = ["project__name"]
+    raw_id_fields = ('student', 'project')
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

@@ -88,6 +88,13 @@ class Type(models.Model):
         related notifications in DB, but show,
         that you are not using this notification type anymore."""))
 
+    class Meta:
+        verbose_name = _("Type")
+        verbose_name_plural = _("Types")
+
+    def __str__(self):
+        return self.code
+
 
 class Notification(models.Model):
     """
@@ -183,6 +190,8 @@ class Notification(models.Model):
     class Meta:
         ordering = ('-timestamp', )
         app_label = 'notifications'
+        verbose_name = _("Notification")
+        verbose_name_plural = _("Notifications")
 
     def timesince(self, now=None):
         """
