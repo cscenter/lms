@@ -62,7 +62,7 @@ class CourseListTeacherTests(MyUtilitiesMixin, CSCTestCase):
 class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_basic_get(self):
         course = CourseFactory.create()
-        assert 302 == self.client.get(course.get_absolute_url()).status_code
+        assert 200 == self.client.get(course.get_absolute_url()).status_code
         url = branch_aware_reverse('courses:course_detail', kwargs={
             "course_slug": "space-odyssey",
             "semester_year": 2010,
@@ -119,7 +119,7 @@ class CourseDetailTests(MyUtilitiesMixin, CSCTestCase):
         EnrollmentFactory(student=student, course=course)
         a = AssignmentFactory.create(course=course)
         response = self.client.get(course_url)
-        assert response.status_code == 302
+        assert response.status_code == 200
         self.doLogin(student)
         self.assertContains(self.client.get(course_url), a.title)
         a_s = StudentAssignment.objects.get(assignment=a, student=student)
