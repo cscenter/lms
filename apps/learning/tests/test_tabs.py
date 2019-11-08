@@ -30,7 +30,7 @@ def test_course_news_tab_permissions(client):
                                               course__semester=prev_term)
     co_prev = news_prev.course
     response = client.get(course.get_absolute_url())
-    assert response.status_code == 302
+    assert response.status_code == 200
     # By default student can't see the news until enroll in the course
     student_spb = StudentFactory(branch__code=Branches.SPB)
     client.login(student_spb)
@@ -77,9 +77,8 @@ def test_course_assignments_tab_permissions(client):
     course = CourseFactory(meta_course=meta_course, semester=current_semester)
     teacher = TeacherFactory()
     CourseTeacherFactory(teacher=teacher, course=course)
-    # Unauthenticated user can't see tab at all
     response = client.get(co_prev.get_absolute_url())
-    assert response.status_code == 302
+    assert response.status_code == 200
     # Teacher can see links to assignments from other course sessions
     client.login(teacher)
     response = client.get(co_prev.get_absolute_url())

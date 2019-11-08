@@ -29,10 +29,6 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
     context_object_name = 'course'
 
     def get(self, request, *args, **kwargs):
-        # high risk of redirect cycle if this view on LMS_SUBDOMAIN already
-        if settings.LMS_SUBDOMAIN and not request.user.is_authenticated:
-            redirect_to = self.course.get_absolute_url(subdomain=None)
-            return HttpResponseRedirect(redirect_to)
         # Redirects to login page if tab is not visible to authenticated user
         context = self.get_context_data()
         # Redirects to club if course was created before center establishment.
