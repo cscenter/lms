@@ -1,8 +1,10 @@
 from collections import OrderedDict
+from decimal import Decimal
 
 import numpy as np
 from django.utils.translation import ugettext_lazy as _
 
+from core.db.models import normalize_score
 from courses.models import Course, Assignment
 from learning.models import StudentAssignment, Enrollment
 from learning.settings import GradeTypes
@@ -110,7 +112,8 @@ class GradeBookData:
     # Magic "100" constant - width of assignment column
     ASSIGNMENT_COLUMN_WIDTH = 100
 
-    def __init__(self, course: Course, students, assignments, submissions):
+    def __init__(self, course: Course, students, assignments, submissions,
+                 show_weight=False):
         """
         X-axis of submissions ndarray is students data.
         We make some assertions on that, but still can fail in case
@@ -121,6 +124,7 @@ class GradeBookData:
         self.students = students
         self.assignments = assignments
         self.submissions = submissions
+        self.show_weight = show_weight
 
     def get_table_width(self):
         # First 3 columns in gradebook table, see `pages/_gradebook.scss`
@@ -216,15 +220,15 @@ def gradebook_data(course: Course) -> GradeBookData:
         total_score = sum(s.score for s in student_submissions
                           if s is not None and s.score is not None)
         setattr(enrolled_students[student_id], "total_score", total_score)
-        max_weighted_score = sum(a.maximum_score * a.weight for a
-                                 in assignments.values())
-        total_weighted_score = sum(s.weight_score for s
-                                   in student_submissions
-                                   if s is not None and s.score is not None
-                                   and s.weight_score is not None)
-        # FIXME: achieved. если нет занятий, то не показывать?
-
+        total_score = Decimal(0)
+        for s in student_submissions:
+            if s is not None and s.weight_score is not None:
+                total_score += s.weight_score
+        total_score = normalize_score(total_score)
+        setattr(enrolled_students[student_id], "total_score", total_score)
+    show_weight = any(a.weight < 1 for a in assignments.values())
     return GradeBookData(course=course,
                          students=enrolled_students,
                          assignments=assignments,
-                         submissions=submissions)
+                         submissions=submissions,
+                         show_weight=show_weight)

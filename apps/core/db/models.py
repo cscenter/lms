@@ -1,8 +1,20 @@
+from decimal import Decimal
+from typing import Optional
+
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db.models import DecimalField
 
 from core import forms
+
+
+def normalize_score(value: Optional[Decimal]):
+    if value is None:
+        return value
+    decimal_as_int = value.to_integral_value()
+    if value == decimal_as_int:
+        return decimal_as_int
+    return value.normalize()
 
 
 class ScoreField(DecimalField):
@@ -14,12 +26,7 @@ class ScoreField(DecimalField):
         super().__init__(*args, **kwargs)
 
     def from_db_value(self, value, expression, connection):
-        if value is None:
-            return value
-        decimal_as_int = value.to_integral_value()
-        if value == decimal_as_int:
-            return decimal_as_int
-        return value.normalize()
+        return normalize_score(value)
 
     def formfield(self, **kwargs):
         kwargs.setdefault("form_class", forms.GradeField)

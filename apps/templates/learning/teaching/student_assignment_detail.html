@@ -153,6 +153,9 @@
                 <h5 class="assignment">{% trans "Passing score" %}</h5>
                 <span class="nowrap">{{ a_s.assignment.passing_score }}</span>
 
+                <h5 class="assignment">{% trans "Assignment Weight" %}</h5>
+                <span class="nowrap">{{ a_s.assignment.weight|floatdot }}</span>
+
                 <h5 class="assignment">{% trans "Assignment created" %}</h5>
                 {{ a_s.assignment.created_local|date:"d E Y" }}
                 {% if a_s.assignment.is_online %}

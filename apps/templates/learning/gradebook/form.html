@@ -79,8 +79,8 @@
                             <div class="title __total_score">{% trans "Total" %}</div>
                         {% endif %}
                         {% for assignment in gradebook.assignments.values %}
-                            <div class="title __assignment">
-                                <a href="{{ assignment.get_teacher_url }}" title="{{ assignment.title }}">{{ assignment.title }}</a>
+                            <div class="title __assignment{% if gradebook.show_weight %}  __weight{% endif %}">
+                                <a href="{{ assignment.get_teacher_url }}" title="{{ assignment.title }}">{{ assignment.title }}</a>{% if gradebook.show_weight %}<div class="assignment__weight">Вес: {{ assignment.weight }}</div>{% endif %}
                             </div>
                         {% endfor %}
                     </div>
