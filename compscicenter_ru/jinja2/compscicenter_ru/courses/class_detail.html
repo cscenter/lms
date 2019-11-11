@@ -70,7 +70,7 @@
             {% if course_class.slides %}
                 <div class="slides mt-6">
                     <h3 class="mb-2">Слайды с лекции</h3>
-                    <a href="{{ course_class.slides.url }}" class="ui label _icon _big" target="_blank">{{ macros.svg_icon('slides') }}product_lecture_180919_DAJVVwZ.pdf</a>
+                    <a href="{{ course_class.slides.url }}" class="ui label _icon _big _no-wrap" target="_blank">{{ macros.svg_icon('slides') }}product_lecture_180919_DAJVVwZ.pdf</a>
                 </div>
             {% endif %}
         </div>
@@ -94,7 +94,7 @@
                         <h3>Приложенные файлы</h3>
                         <div class="ui labels mb-6">
                             {% for attachment in attachments %}
-                                <a href="{{ attachment.material.url }}" class="ui label _icon _big" target="_blank">{{ macros.svg_icon('files') }}{{ attachment.material_file_name }}</a>
+                                <a href="{{ attachment.material.url }}" class="ui label _icon _big _no-wrap" target="_blank">{{ macros.svg_icon('files') }}{{ attachment.material_file_name }}</a>
                             {% endfor %}
                         </div>
                     {% endif %}
