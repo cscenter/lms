@@ -653,6 +653,7 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
         return context
 
 
+# FIXME: match course prefix and course class id
 class CourseClassDetailView(PublicURLMixin, generic.DetailView):
     model = CourseClass
     context_object_name = 'course_class'
@@ -682,4 +683,5 @@ class CourseClassDetailView(PublicURLMixin, generic.DetailView):
         for lecture in recorded:
             lecture.course = course_class.course
         context['recorded_lectures'] = recorded
+        context['attachments'] = course_class.courseclassattachment_set.order_by('created')
         return context

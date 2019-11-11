@@ -67,6 +67,12 @@
                 </div>
             </div>
             {% endif %}
+            {% if course_class.slides %}
+                <div class="slides mt-6">
+                    <h3 class="mb-2">Слайды с лекции</h3>
+                    <a href="{{ course_class.slides.url }}" class="ui label _icon _big" target="_blank">{{ macros.svg_icon('slides') }}product_lecture_180919_DAJVVwZ.pdf</a>
+                </div>
+            {% endif %}
         </div>
     </div>
     {% if request.user.is_superuser %}
@@ -80,12 +86,22 @@
             </div>
         </div>
     {% endif %}
-    {% if course_class.description %}
+    {% if course_class.description or attachments %}
         <div class="container page-content">
             <div class="row">
                 <div class="col-lg-9">
-                    <h3>Описание</h3>
-                    {{ course_class.description|markdown("course_class_description", 3600, course_class.pk, course_class.modified) }}
+                    {% if attachments %}
+                        <h3>Приложенные файлы</h3>
+                        <div class="ui labels mb-6">
+                            {% for attachment in attachments %}
+                                <a href="{{ attachment.material.url }}" class="ui label _icon _big" target="_blank">{{ macros.svg_icon('files') }}{{ attachment.material_file_name }}</a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if course_class.description %}
+                        <h3>Описание</h3>
+                        {{ course_class.description|markdown("course_class_description", 3600, course_class.pk, course_class.modified) }}
+                    {% endif %}
                 </div>
             </div>
         </div>
