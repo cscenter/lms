@@ -12,24 +12,45 @@
         <div class="row">
             <div class="col-lg-9">
                 <h2>Labels</h2>
-                <h3>Types</h3>
-                <div class="ui label">2018</div>  <a href="#" class="ui label _blue">Курсы</a> <a href="#" class="ui label _green">Лекции</a>
+                <h3>Default label</h3>
+                <div class="ui label">2018</div>
+                <br>
+                <br>
+                <h3>Colors</h3>
+                <div class="ui labels">
+                    <a href="#" class="ui label">Default label</a>
+                    <a href="#" class="ui label _gray">Gray label</a>
+                    <a href="#" class="ui label _blue">Blue label</a>
+                    <a href="#" class="ui label _green">Green label</a>
+                </div>
                 <br><br>
                 <h3>Icons</h3>
                 <div class="ui label _icon">
-                    {{ macros.svg_icon('location') }}<span>Санкт-Петербург, БЦ «Таймс»</span>
+                    {{ macros.svg_icon('location') }}Санкт-Петербург, БЦ «Таймс»
                 </div>
                 <div class="ui label _icon">
-                    {{ macros.svg_icon('calendar') }}<span>21 сентября в 20:00</span>
+                    {{ macros.svg_icon('calendar') }}21 сентября в 20:00
                 </div>
                 <br><br>
                 <h3>Circular</h3>
-                <div class="ui label _circular">2018</div>  <a href="#" class="ui label _circular _blue">Курсы</a> <a href="#" class="ui label _circular _green">Лекции</a>
-                <br><br>
-                <h4>Grouped</h4>
-                <div class="ui labels _circular">
-                    <div class="ui label">2018</div>  <a href="#" class="ui label _blue">Курсы</a> <a href="#" class="ui label _green">Лекции</a>
+                <div class="ui labels">
+                    <div class="ui label _circular">2018</div>
+                    <a href="#" class="ui label _circular _gray">2018</a>
+                    <a href="#" class="ui label _circular _blue">Курсы</a>
+                    <a href="#" class="ui label _circular _green">Лекции</a>
                 </div>
+                <br><br>
+                <h3>Big</h3>
+                <div class="ui labels">
+                    <a href="#" class="ui label _big">Default label</a>
+                    <a href="#" class="ui label _gray _big">Gray label</a>
+                    <a href="#" class="ui label _blue _big">Blue label</a>
+                    <a href="#" class="ui label _green _big">Green label</a>
+                </div>
+                <br>
+                <br>
+                <h3>Label icon+link</h3>
+                <a href="#" class="ui label _icon">{{ macros.svg_icon('location') }}Санкт-Петербург, БЦ «Таймс»</a>
             </div>
         </div>
     </div>

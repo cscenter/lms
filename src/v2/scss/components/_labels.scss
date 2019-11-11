@@ -1,6 +1,7 @@
 @mixin label-color($color) {
   background-color: rgba($color, .1);
   color: $color;
+  border-color: transparent;
   &::before {
     color: $color;
   }
@@ -8,6 +9,7 @@
 
 @mixin label-color-hover($color) {
   &:hover {
+    color: $color;
     background-color: rgba($color, .2);
   }
 }
@@ -34,8 +36,6 @@
   }
 
   &._icon {
-    display: inline-table;
-    margin: 0 spacer("2x") spacer("2x") 0;
     border: none;
     padding: 0;
     color: $black;
@@ -46,10 +46,16 @@
       width: 1.2em;
       height: 1.2em;
     }
+  }
+}
 
-    span {
-      display: table-cell;
-      vertical-align: middle;
+a.ui.label._icon {
+  color: $link-color;
+  &:hover {
+    color: $link-hover-color;
+
+    .sprite-img {
+      fill: $gray-dark;
     }
   }
 }
@@ -57,11 +63,13 @@
 .ui.labels a.label,
 a.ui.label {
   transition: $transition-base;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-width: 100%;
 
-  &:hover,
-  &.active {
-    background-color: $white;
-    color: $teal;
+  &._gray {
+    @include label-color-hover($gray-dark);
   }
 
   &._green {
@@ -73,6 +81,10 @@ a.ui.label {
   }
 }
 
+.ui.label._big {
+  font-size: $font-size-content-base;
+}
+
 .ui.labels {
   display: flex;
   flex-flow: row;
@@ -80,6 +92,10 @@ a.ui.label {
 
   > .label {
     margin: 0 spacer("2x") spacer("2x") 0;
+
+    &._big {
+      margin: 0 spacer("6x") spacer("3x") 0;
+    }
   }
 }
 
@@ -87,6 +103,5 @@ a.ui.label {
 .ui.label._circular {
   font-size: $font-size-sm;
   line-height: $line-height-sm;
-  border: none;
   border-radius: 2rem;
 }
