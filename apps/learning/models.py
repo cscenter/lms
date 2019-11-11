@@ -341,7 +341,7 @@ class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
 
     @property
     def weight_score(self):
-        return (self.score * self.assignment.weight) if self.score else None
+        return (self.assignment.weight * self.score) if self.score else None
 
 
 def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):

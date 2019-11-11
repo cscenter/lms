@@ -179,8 +179,13 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
             _("First name"),
             _("Final grade"),
             _("Total"),
-            *(a.title for a in data.assignments.values())
         ]
+        for a in data.assignments.values():
+            if data.show_weight:
+                title = f"{a.title} (вес: {a.weight})"
+            else:
+                title = a.title
+            headers.append(title)
         writer.writerow(headers)
         for student in data.students.values():
             writer.writerow(

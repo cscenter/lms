@@ -37,6 +37,9 @@
         {% trans "Can be passed online" %}:
         {{ assignment.is_online|yesno:_("Yes,No") }}
       </p>
+      <p>
+        {% trans "Assignment Weight" %}: {{ assignment.weight|floatdot }}
+      </p>
       {% if assignment.assignmentattachment_set.all %}
       {% trans "Attached files" %}:
       <ul class="list-unstyled">
