@@ -36,6 +36,7 @@
   }
 
   &._icon {
+    display: inline-table;
     border: none;
     padding: 0;
     color: $black;
@@ -45,6 +46,27 @@
       margin-right: spacer("1x");
       width: 1.2em;
       height: 1.2em;
+    }
+
+    span {
+      display: table-cell;
+      vertical-align: middle;
+    }
+  }
+
+  &._no-wrap {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 100%;
+
+    &._icon {
+      display: inline-block;
+    }
+
+    span {
+      display: inline;
+      vertical-align: middle;
     }
   }
 }
@@ -58,15 +80,12 @@ a.ui.label._icon {
       fill: $gray-dark;
     }
   }
+
 }
 
 .ui.labels a.label,
 a.ui.label {
   transition: $transition-base;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  max-width: 100%;
 
   &._gray {
     @include label-color-hover($gray-dark);
