@@ -24,7 +24,7 @@
     {% else %}
         {% set img_url = static('v2/img/placeholder/woman_150x150.png') %}
     {% endif %}
-    {{ _author_card(img_url, supervisor.full_name, supervisor.workplace, None, modifiers) }}
+    {{ _author_card(img_url, supervisor.full_name, supervisor.occupation, None, modifiers) }}
 {%- endmacro %}
 
 {% macro testimonial_card(graduate_profile) -%}
