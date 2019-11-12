@@ -100,7 +100,9 @@
                     {% endif %}
                     {% if course_class.description %}
                         <h3>Описание</h3>
-                        {{ course_class.description|markdown("course_class_description", 3600, course_class.pk, course_class.modified) }}
+                        <div class="math-support">
+                            {{ course_class.description|markdown("course_class_description", 3600, course_class.pk, course_class.modified) }}
+                        </div>
                     {% endif %}
                 </div>
             </div>
