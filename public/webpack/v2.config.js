@@ -104,7 +104,12 @@ const common = {
                 test: /\.s?[ac]ss$/,
                 exclude: __nodemodulesdir,
                 use: [
-                    DEBUG ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                        options: {
+                            hmr: DEBUG,
+                        },
+                    },
                     {
                         loader: 'css-loader', // translates CSS into CommonJS modules
                         options: {
@@ -130,6 +135,41 @@ const common = {
                 ],
             },
             {
+                test: /\.css$/,
+                use: [
+                    DEBUG ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    'css-loader',
+                ],
+            },
+            {
+                test: /\.woff2?$|\.ttf$|\.eot$|\.svg$|\.png$|\.jpg$|\.swf$/,
+                include: __nodemodulesdir,
+                use: [{
+                    loader: "file-loader",
+                    options: {
+                        context: __nodemodulesdir,
+                        name: (file) => {
+                            if (process.env.NODE_ENV === 'development') {
+                                return `[path][name].[ext]`;
+                            }
+
+                            return '[path][contenthash].[ext]';
+                        },
+                        outputPath: 'assets',
+                        publicPath: (url, resourcePath, context) => {
+                            // `resourcePath` is original absolute path to asset
+                            // `context` is directory where stored asset (`rootContext`) or `context` option
+                            if (process.env.NODE_ENV === 'development') {
+                                return `node_modules/${url}`;
+                            }
+                            return `assets/${url}`;
+                        },
+                        postTransformPublicPath: (p) => `__webpack_public_path__ + ${p}`,
+                        emitFile: !DEBUG,
+                    }
+                }]
+            },
+            {
                 test: /\.woff2?$|\.ttf$|\.eot$|\.svg|\.png|\.jpg$/,
                 exclude: __nodemodulesdir,
                 use: [{
@@ -141,20 +181,6 @@ const common = {
                         publicPath: STATIC_URL
                     }
                 }]
-            },
-            {
-                test: /\.swf$/,
-                include: __nodemodulesdir,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            context: __nodemodulesdir,
-                            publicPath: STATIC_PATH,
-                            name: '[path][name].[ext]'
-                        }
-                    }
-                ],
             },
         ]
     },
@@ -179,7 +205,7 @@ const common = {
             // Options similar to the same options in webpackOptions.output
             // both options are optional
             filename: DEBUG ? '[name].css' : '[name].[hash].css',
-            chunkFilename: DEBUG ? '[id].css' : '[id].[hash].css',
+            chunkFilename: DEBUG ? '[id].[name].css' : '[name]-[chunkhash].css',
         })
     ],
 

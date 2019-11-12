@@ -6,7 +6,7 @@ module.exports = {
     devtool: "cheap-eval-source-map",
 
     output: {
-        publicPath: 'http://csc.test:8081/static/',
+        publicPath: 'http://csc.test:8081/',
     },
 
     plugins: [
