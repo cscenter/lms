@@ -33,7 +33,7 @@ ALTER USER csc with CREATEDB;
 
 * Run migrations
 ```bash
-# Or simply run migrations to generate an empty database
+# Or simply generate an empty database
 $ python manage.py migrate --settings=compscicenter_ru.settings.local
 ```
 
