@@ -19,7 +19,6 @@ ROSETTA_MESSAGES_SOURCE_LANGUAGE_NAME = 'Russian'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -34,9 +33,9 @@ LOGGING = {
             '()': 'core.utils.SQLFormatter',
             'format': '[%(duration).3f] %(statement)s',
         },
-        "rq_console": {
-            "format": "%(asctime)s %(message)s",
-            "datefmt": "%H:%M:%S",
+        'rq_console': {
+            'format': '%(asctime)s %(message)s',
+            'datefmt': '%H:%M:%S',
         },
     },
     'handlers': {
@@ -45,11 +44,11 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
-        "rq_console": {
-            "level": "DEBUG",
-            "class": "rq.utils.ColorizingStreamHandler",
-            "formatter": "rq_console",
-            "exclude": ["%(asctime)s"],
+        'rq_console': {
+            'level': 'DEBUG',
+            'class': 'rq.utils.ColorizingStreamHandler',
+            'formatter': 'rq_console',
+            'exclude': ['%(asctime)s'],
         },
         'sql': {
             'class': 'logging.StreamHandler',

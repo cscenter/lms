@@ -84,7 +84,6 @@ CACHES = {
     }
 }
 
-# Make sure settings are the same as in ansible configuration
 REDIS_PASSWORD = env.str('REDIS_PASSWORD', default=None)
 REDIS_HOST = '127.0.0.1'
 RQ_QUEUES = {

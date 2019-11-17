@@ -11,7 +11,7 @@ ifeq ($(filter $(PROJECT),$(PROJECTS)),)
     $(error A project with name '$(PROJECT)' does not exist. Available projects: $(PROJECTS))
 endif
 
-.PHONY: run club migrate msg-collect msg-compile static dumpdata loaddata clean cmd refresh sync deploy check_defined
+.PHONY: run club migrate msg msg-compile static dumpdata loaddata clean cmd refresh sync deploy check_defined
 
 run:
 	python -W once manage.py runserver --settings=$(PROJECT).settings.local $(PORT)
@@ -22,7 +22,7 @@ club:
 migrate:
 	python manage.py migrate $(DJANGO_POSTFIX)
 
-msg-collect:
+msg:
 	python manage.py maketranslation -l ru --ignore=public/*
 
 # https://code.djangoproject.com/ticket/24159
