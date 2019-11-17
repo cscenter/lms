@@ -635,11 +635,15 @@ class ProcessReviewFormView(LoginRequiredMixin, ModelFormMixin, View):
                                              instance=criteria)
         if review_form.is_valid() and criteria_form.is_valid():
             with transaction.atomic():
+                # After saving review without attached criteria report model
+                # can't be updated if it meets all other requirements
+                # (see `Review.save` method) since it updates final score
+                # which depends on reviews criteria.
                 review = review_form.save()
                 criteria_form.instance.review = review
                 criteria = criteria_form.save()
                 review.criteria = criteria
-                # FIXME: No need to send signals here
+                # Here we could update report state if meet all the requirements
                 review.save()
             if review.is_completed:
                 self.send_notification_to_curators(review)
