@@ -789,8 +789,8 @@ class Review(TimeStampedModel):
     def save(self, *args, **kwargs):
         created = self.pk is None
         super().save(*args, **kwargs)
-        if self.is_completed and self.report.status == Report.REVIEW:
-            r = self.report
+        r = self.report
+        if self.is_completed and self.criteria and r.status == Report.REVIEW:
             reviewers_total = len(r.project_student.project.reviewers.all())
             reviews_completed = sum(r.is_completed for r in r.review_set.all())
             if reviews_completed == reviewers_total:
