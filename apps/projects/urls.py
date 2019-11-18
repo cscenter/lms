@@ -22,7 +22,7 @@ urlpatterns = [
             path('review/', views.ProcessReviewFormView.as_view(), name='project_report_upsert_review'),
             path('comments/<int:comment_id>/update/', views.ReportCommentUpdateView.as_view(), name='report_comment_edit'),
         ])),
-        path('prev/<int:project_id>)/', views.ProjectPrevNextView.as_view(direction="prev"), name='project_detail_prev'),
+        path('prev/<int:project_id>/', views.ProjectPrevNextView.as_view(direction="prev"), name='project_detail_prev'),
         path('next/<int:project_id>/', views.ProjectPrevNextView.as_view(direction="next"), name='project_detail_next'),
         path('attachments/<str:sid>/', views.ReportAttachmentDownloadView.as_view(), name='report_attachments_download'),
     ])),
