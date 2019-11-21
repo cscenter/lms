@@ -9,11 +9,9 @@ from django.views import generic
 from django.views.decorators.cache import never_cache
 from django.views.decorators.debug import sensitive_post_parameters
 
+from auth.forms import AsyncPasswordResetForm, LoginForm
 from core.urls import reverse, reverse_lazy
-from auth.forms import UserPasswordResetForm, LoginForm
 from users.constants import Roles
-from users.models import User
-from auth.tasks import EMAIL_RESTORE_PASSWORD_TEMPLATE, subject_template_name
 
 
 class LoginView(generic.FormView):
@@ -90,11 +88,11 @@ class LogoutView(LoginRequiredMixin, generic.RedirectView):
 
 
 pass_reset_view = views.PasswordResetView.as_view(
-    form_class=UserPasswordResetForm,
+    form_class=AsyncPasswordResetForm,
     success_url=reverse_lazy('auth:password_reset_done'),
-    email_template_name=EMAIL_RESTORE_PASSWORD_TEMPLATE,
+    email_template_name=None,
     html_email_template_name=None,
-    subject_template_name=subject_template_name)
+    subject_template_name=None)
 
 
 pass_reset_confirm_view = views.PasswordResetConfirmView.as_view(
