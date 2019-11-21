@@ -12,7 +12,7 @@ from auth.tasks import send_restore_password_email
 from core.urls import reverse
 
 
-class UserPasswordResetForm(PasswordResetForm):
+class AsyncPasswordResetForm(PasswordResetForm):
     def send_mail(self, subject_template_name, email_template_name,
                   context, from_email, to_email, html_email_template_name=None):
         # XXX: separate configuration for public domain and lms (they
