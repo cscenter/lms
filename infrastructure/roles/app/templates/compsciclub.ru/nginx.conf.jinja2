@@ -60,7 +60,11 @@ server {
     }
 
     location /media/  {
-        root /shared;
+        {% if media_root.endswith("/") -%}
+            root {{ media_root[:-1] | dirname }};
+        {%- else -%}
+            root {{ media_root | dirname }};
+        {%- endif %}
         access_log off;
         tcp_nodelay off;
         # gzip_static on;
@@ -76,8 +80,12 @@ server {
         }
     }
 
-    location /static {
-        alias {{ static_root }};
+    location /static/ {
+        {% if static_root.endswith("/") -%}
+            root {{ static_root[:-1] | dirname }};
+        {%- else -%}
+            root {{ static_root | dirname }};
+        {%- endif %}
         access_log off;
         tcp_nodelay off;
         gzip_static on;
