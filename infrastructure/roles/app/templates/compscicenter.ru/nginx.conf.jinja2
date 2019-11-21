@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 upstream django_{{ site_user }} {
-    server unix:///tmp/uwsgi_{{ site_dir_name }}.socket;
+    server unix:///tmp/uwsgi_{{ settings_module_parent_dir }}.socket;
 }
 
 map $http_referer $frame_options {

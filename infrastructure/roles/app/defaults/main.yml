@@ -15,7 +15,7 @@ app_required_vars:
   - media_root
   - static_root
   - backup_root
-  - site_dir_name
+  - settings_module_parent_dir
   - apps_dir_name
   - app_environment
   - db_name

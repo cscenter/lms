@@ -10,7 +10,7 @@
 - name: Globally install psycopg2 (used to make sure db user exists)
   pip:
     name: "psycopg2-binary"
-    version: "2.7.6.1"
+    version: "2.8.4"
     executable: pip{{ system_python3_version.stdout }}
 
 - name: install Postgres

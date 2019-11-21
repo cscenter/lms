@@ -11,7 +11,7 @@ User={{ site_user }}
 Group={{ site_user_group }}
 KillSignal=SIGTERM
 Restart=always
-Environment=DJANGO_SETTINGS_MODULE={{ site_dir_name }}.settings.{{ app_environment }}
+Environment=DJANGO_SETTINGS_MODULE={{ settings_module_parent_dir }}.settings.{{ app_environment }}
 # Note that `manage.py` must be located in the root of the repo directory due to hardcoded python paths
 ExecStart={{ virtualenv_root }}/bin/python {{ repo_root }}/manage.py rqworker {{ worker_name }} --pythonpath='{{ repo_root }}/{{ apps_dir_name }}'
 

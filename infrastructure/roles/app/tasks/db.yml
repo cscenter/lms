@@ -38,5 +38,5 @@
   django_manage:
     command: "migrate"
     app_path: "{{ repo_root }}"
-    settings: "{{ site_dir_name }}.settings.{{ app_environment }}"
+    settings: "{{ settings_module_parent_dir }}.settings.{{ app_environment }}"
     virtualenv: "{{ virtualenv_root }}"

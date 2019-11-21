@@ -18,7 +18,7 @@
         media_root: "/shared/media"
         media_directory_permissions: "775"
         backup_root: "/shared/backup_tmp"
-        site_dir_name: "{{ main_domain|replace('.', '_') }}"
+        settings_module_parent_dir: "{{ main_domain|replace('.', '_') }}"
         apps_dir_name: apps
         app_environment: production
         setup_cronjobs: no

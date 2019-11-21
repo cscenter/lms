@@ -8,7 +8,7 @@
     app_environment: production
     site_user: cscenter
     main_domain: "{% if site_user == 'cscenter' %}compscicenter.ru{% else %}compsciclub.ru{% endif %}"
-    site_dir_name: "{{ main_domain|replace('.', '_') }}"
+    settings_module_parent_dir: "{{ main_domain|replace('.', '_') }}"
     media_directory_permissions: "775"
     repo_root: "/home/{{ site_user }}/site/repo"
     virtualenv_root: "/home/{{ site_user }}/site/env"
@@ -39,7 +39,7 @@
   - name: Update .env file
     template:
       src: "env-file.jinja2"
-      dest: "{{ repo_root }}/{{ site_dir_name }}/settings/.env"
+      dest: "{{ repo_root }}/{{ settings_module_parent_dir }}/settings/.env"
       owner: "{{ site_user }}"
       force: yes
       mode: 0400
@@ -96,7 +96,7 @@
     django_manage:
       command: "collectstatic --noinput"
       app_path: "{{ repo_root }}"
-      settings: "{{ site_dir_name }}.settings.{{ app_environment }}"
+      settings: "{{ settings_module_parent_dir }}.settings.{{ app_environment }}"
       virtualenv: "{{ virtualenv_root }}"
 
   - name: Migrate DB
@@ -105,7 +105,7 @@
     django_manage:
       command: "migrate"
       app_path: "{{ repo_root }}"
-      settings: "{{ site_dir_name }}.settings.{{ app_environment }}"
+      settings: "{{ settings_module_parent_dir }}.settings.{{ app_environment }}"
       virtualenv: "{{ virtualenv_root }}"
 
   - name: Touch config file to reload uwsgi

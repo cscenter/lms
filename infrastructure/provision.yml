@@ -15,7 +15,7 @@
     aws_ec2_instance_volume_size: 16
     aws_ec2_keypair: csc
     # Ubuntu 16.04 hvm ssd
-    aws_ec2_image: ami-0565af6e282977273
+    aws_ec2_image_id: ami-050a22b7e0cf85dd0
     aws_ec2_cpu_credit_specification: standard
     aws_ec2_root_device_name: /dev/sda1
     attach_second_volume: yes

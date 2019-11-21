@@ -34,7 +34,7 @@
 - name: Create .env file
   template:
     src: "env-file.jinja2"
-    dest: "{{ repo_root }}/{{ site_dir_name }}/settings/.env"
+    dest: "{{ repo_root }}/{{ settings_module_parent_dir }}/settings/.env"
     owner: "{{ site_user }}"
     force: yes
     mode: 0400
@@ -121,7 +121,7 @@
   file:
     path: "{{ media_root }}"
     state: directory
-    owner: "ubuntu"
+    owner: "{{ site_user }}"
     group: "{{ site_user_group }}"
     mode: "{{ media_directory_permissions }}"
   when: not media_root_stat.stat.exists
@@ -164,7 +164,7 @@
   django_manage:
     command: "collectstatic"
     app_path: "{{ repo_root }}"
-    settings: "{{ site_dir_name }}.settings.{{ app_environment }}"
+    settings: "{{ settings_module_parent_dir }}.settings.{{ app_environment }}"
     virtualenv: "{{ virtualenv_root }}"
   tags:
     - collectstatic
