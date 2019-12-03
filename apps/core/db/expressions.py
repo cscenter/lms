@@ -4,6 +4,8 @@ from django.db.models import Subquery, Count
 
 class SubqueryCount(Subquery):
     """
+    `Count` aggregate function for subquery.
+
     There is no API in Django ORM for using aggregation inside subquery
     https://code.djangoproject.com/ticket/28296
 
