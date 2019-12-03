@@ -86,7 +86,7 @@ onReady(async () => {
         });
     }
 
-    // Global polyfills, react app could depends on them
+    // Global polyfills, react app could depend on them
     const polyfillsLoaded = await Promise.all([loadFetchPolyfill()]);
 
     // TODO: section or component-based approach. What to choose?

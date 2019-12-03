@@ -113,7 +113,6 @@ const common = {
                     {
                         loader: 'css-loader', // translates CSS into CommonJS modules
                         options: {
-                            minimize: !DEBUG,
                             sourceMap: DEBUG,
                         }
                     },
@@ -129,7 +128,9 @@ const common = {
                         options: {
                             sourceMap: DEBUG,
                             outputStyle: 'expanded',
-                            includePaths: [__nodemodulesdir,]
+                            sassOptions: {
+                                includePaths: [__nodemodulesdir,]
+                            }
                         }
                     },
                 ],
@@ -141,6 +142,7 @@ const common = {
                     'css-loader',
                 ],
             },
+            // Serve static in node_modules/
             {
                 test: /\.woff2?$|\.ttf$|\.eot$|\.svg$|\.png$|\.jpg$|\.swf$/,
                 include: __nodemodulesdir,
@@ -169,6 +171,8 @@ const common = {
                     }
                 }]
             },
+            // Serve static in project src/
+            // FIXME: merge with prev rule /node_modules/.test(url) blablabla
             {
                 test: /\.woff2?$|\.ttf$|\.eot$|\.svg|\.png|\.jpg$/,
                 exclude: __nodemodulesdir,
