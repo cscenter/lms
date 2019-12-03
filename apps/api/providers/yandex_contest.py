@@ -213,16 +213,19 @@ class YandexContestAPI:
     def request_and_check(url, method, **kwargs):
         assert method in ('post', 'get')
         try:
-            return getattr(requests, method)(url, **kwargs)
-        # Network problems
+            response = getattr(requests, method)(url, **kwargs)
+            response.raise_for_status()
+            return response
+        # Some of the network problems
         except (requests.ConnectionError, requests.Timeout) as e:
             raise Unavailable() from e
         # Client 4xx or server 5xx HTTP errors
         except requests.exceptions.HTTPError as e:
             response = e.response
             try:
-                ResponseStatus(response.status_code)  # known statuses
-                raise ContestAPIError(response.status_code, response.text)
+                s = response.status_code
+                ResponseStatus(s)  # known statuses
+                raise ContestAPIError(s, response.text) from e
             except ValueError:
                 # Unpredictable client or server error
                 logger.exception("Contest API service had internal error.")
