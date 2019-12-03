@@ -95,7 +95,7 @@ const fn = {
     },
 
     scrollButtons: function() {
-        if (gradebookContainer.width() <= gradebook.width()) {
+        if (gradebookContainer.width() <= gradebook.outerWidth()) {
             scrollButtonsWrapper.on("click", ".scroll.left", function() {
                 fn.scroll(-1);
             });

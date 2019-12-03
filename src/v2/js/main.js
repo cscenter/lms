@@ -86,7 +86,7 @@ onReady(async () => {
         });
     }
 
-    // Global polyfills, react app could depends on them
+    // Global polyfills, react app could depend on them
     const polyfillsLoaded = await Promise.all([loadFetchPolyfill()]);
 
     // TODO: section or component-based approach. What to choose?
@@ -141,6 +141,7 @@ onReady(async () => {
     // FIXME: autoload css
     const katexBlocks = document.getElementsByClassName('math-support');
     if (katexBlocks.length > 0) {
+        import(/* webpackChunkName: "katex" */ 'katex/dist/katex.css');
         import(/* webpackChunkName: "katex" */ 'katex_renderer')
             .then(module => {
                 katexBlocks.forEach(function(mathBlock) {

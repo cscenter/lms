@@ -5,6 +5,7 @@
       {
         "useBuiltIns": "usage",
         "corejs": 3,
+        "debug": false,
         "modules": false,
         "loose": true
       }
@@ -20,7 +21,6 @@
     "@babel/plugin-proposal-export-namespace-from",
     "@babel/plugin-proposal-numeric-separator",
     "@babel/plugin-proposal-throw-expressions",
-
     // Stage 3
     "@babel/plugin-syntax-dynamic-import",
     "@babel/plugin-syntax-import-meta",

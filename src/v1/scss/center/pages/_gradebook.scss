@@ -10,6 +10,10 @@ $total-score-column-width: 66px;
 $assignment-column-width: 100px;
 $unsaved-state-color: #dcf0ff;
 
+
+$gradebook-header-height: 80px;
+$gradebook-header-padding: 5px;
+
 .gradebook-wrapper {
   position: relative;
 }
@@ -53,7 +57,7 @@ $unsaved-state-color: #dcf0ff;
 
   .headers {
     overflow: hidden;
-    height: 90px;
+    height: $gradebook-header-height + ($gradebook-header-padding * 2);
   }
 
   .student {
@@ -77,12 +81,12 @@ $unsaved-state-color: #dcf0ff;
     border-right: 1px solid #e6e6e6;
     line-height: 120%;
     color: #555;
-    height: 90px;
-    padding: 5px;
+    height: $gradebook-header-height + ($gradebook-header-padding * 2);
+    padding: $gradebook-header-padding;
 
     a {
       display: inline-block;
-      height: 80px;
+      height: $gradebook-header-height;
       width: 90px;
       font-size: 13px;
       text-overflow: ellipsis;
@@ -93,23 +97,43 @@ $unsaved-state-color: #dcf0ff;
 
       width: $students-column-width;
       position: absolute;
+      z-index: 100;
       left: 0;
     }
 
     &.__final_grade {
       width: $final-grade-column-width;
       position: absolute;
+      z-index: 100;
       left: $students-column-width;
     }
 
     &.__total_score {
       width: $total-score-column-width;
       position: absolute;
+      z-index: 100;
       left: $students-column-width + $final-grade-column-width;
     }
 
     &.__assignment {
       width: $assignment-column-width;
+      position: relative;
+    }
+
+    &.__weight {
+      a {
+        height: $gradebook-header-height - 16px;
+      }
+
+      .assignment__weight {
+        overflow: hidden;
+        line-height: 1;
+        font-size: 12px;
+        position: absolute;
+        bottom: $gradebook-header-padding;
+        left: $gradebook-header-padding;
+        right: $gradebook-header-padding;
+      }
     }
   }
 
