@@ -90,9 +90,6 @@ const common = {
                 use: [
                     {
                         loader: 'babel-loader',
-                        options: {
-                            cacheDirectory: true  // Improve performance
-                        }
                     }
                 ],
                 include: path.resolve(__srcdir, "js")

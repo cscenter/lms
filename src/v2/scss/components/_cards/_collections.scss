@@ -18,6 +18,10 @@ $card-columns-count: 2;
 
   .card__content {
     flex: 1 1 auto;
+
+    &._meta {
+      flex-grow: 0;
+    }
   }
 
   &._six {
