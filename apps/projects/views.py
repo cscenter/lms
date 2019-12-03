@@ -640,6 +640,8 @@ class ProcessReviewFormView(LoginRequiredMixin, ModelFormMixin, View):
                 # (see `Review.save` method) since it updates final score
                 # which depends on reviews criteria.
                 review = review_form.save()
+                # FIXME: mb save criteria first, then review and then add
+                # review info to the criteria?
                 criteria_form.instance.review = review
                 criteria = criteria_form.save()
                 review.criteria = criteria

@@ -1,0 +1,167 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% import "compscicenter_ru/macros/_nav.jinja2" as macros_nav %}
+
+{% block title %}Практика и НИР - {{ super() }}{% endblock title %}
+
+{% block body_attrs %}class="_dark" data-init-sections="tabs"{% endblock body_attrs %}
+
+{% block content %}
+    <div class="container page-content">
+        <h1>Студенческие проекты</h1>
+        <div class="row">
+            <div class="col-12 order-1 order-lg-0">
+                {{ macros_nav.tabs(tabs, modifiers='scrollable mb-4') }}
+            </div>
+            <div class="col-lg-9 order-2 order-lg-1">
+                <div class="tab-content">
+                    {% for project_type, pp in project_publications.items() -%}
+                        {% with tab = tabs[project_type] -%}
+                            <div class="tab-pane {% if tab.active %} show active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                        {%- endwith %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+
+
+
+                <div class="tab-content">
+                    {% with tab = course_tabs[0] %}
+                        <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}"
+                             role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                            <div class="card-deck _three">
+                                <div class="card _shadowed">
+                                    <div class="w-100"
+                                         style="background-image:url('/media/pages/project/be-a-better-programmer.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                                    </div>
+                                    <div class="card__content">
+                                        <div class="card__title">
+                                            Be a Better Programmer. Turing machine
+                                        </div>
+                                    </div>
+                                    <div class="card__footer _dark">
+                                        <div class="author _project">
+                                            <img class="author__img" width="48" height="48"
+                                                 src="/media/pages/index/student.png"
+                                                 alt="">
+                                            <div class="author__details">
+                                                <div class="card__text">Евгений Игоревич Викулов</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card _shadowed">
+                                    <div class="w-100"
+                                         style="background-image:url('/media/pages/project/auto2.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                                    </div>
+                                    <div class="card__content">
+                                        <div class="card__title">
+                                            Распознавание марки и модели автомобиля по фотографии
+                                        </div>
+                                    </div>
+                                    <div class="card__footer _dark">
+                                        <div class="author _project">
+                                            <img class="author__img" width="48" height="48"
+                                                 src="/static/v2/img/placeholder/users.jpg"
+                                                 alt="">
+                                            <div class="author__details">
+                                                <div class="card__text">Несколько авторов</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endwith %}
+                    {% with tab = course_tabs[1] %}
+                        <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}"
+                             role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                            <div class="card-deck _three">
+                                <div class="card _shadowed">
+                                    <div class="w-100"
+                                         style="background-image:url('/media/pages/project/aganezov2.png'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                                    </div>
+                                    <div class="card__content">
+                                        <div class="card__title">
+                                            Комбинаторика и теория графов в биоинформатике
+                                        </div>
+                                    </div>
+                                    <div class="card__footer _dark">
+                                        <div class="author _project">
+                                            <img class="author__img" width="48" height="48"
+                                                 src="/media/pages/index/student.png"
+                                                 alt="">
+                                            <div class="author__details">
+                                                <div class="card__text">Евгений Игоревич Викулов</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card _shadowed">
+                                    <div class="w-100"
+                                         style="background-image:url('/media/pages/project/complexity.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                                    </div>
+                                    <div class="card__content">
+                                        <div class="card__title">
+                                            Сложность в среднем и диофантова сложность
+                                        </div>
+                                    </div>
+                                    <div class="card__footer _dark">
+                                        <div class="author _project">
+                                            <img class="author__img" width="48" height="48"
+                                                 src="/static/v2/img/placeholder/users.jpg"
+                                                 alt="">
+                                            <div class="author__details">
+                                                <div class="card__text">Несколько авторов</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card _shadowed">
+                                    <div class="w-100"
+                                         style="background-image:url('/static/v2/img/placeholder/project.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                                    </div>
+                                    <div class="card__content">
+                                        <div class="card__title">
+                                            Верхние и нижние оценки на сложность вычислительных задач
+                                        </div>
+                                    </div>
+                                    <div class="card__footer _dark">
+                                        <div class="author _project">
+                                            <img class="author__img" width="48" height="48"
+                                                 src="/media/pages/index/student.png"
+                                                 alt="">
+                                            <div class="author__details">
+                                                <div class="card__text">Евгений Игоревич Викулов</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endwith %}
+                </div>
+            </div>
+            <div class="col-lg-3 pl-lg-8 order-0 order-lg-2">
+                <div class="card _inverted mb-6">
+                    <div class="h4 card__header _dark mb-0">
+                        Подробнее
+                    </div>
+                    <div class="card__content">
+                        <div class="mb-4">
+                            <a href="/v2/pages/projects/" class="pb-4">
+                                Как получить практику в CS центре
+                            </a></div>
+                        <div>
+                            <a href="/v2/pages/nir/" class="mt-4">
+                                Как взять тему для научно-исследовательской работы
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

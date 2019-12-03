@@ -63,6 +63,7 @@ urlpatterns += [
         path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
     ], "announcements"))),
     path('projects/', views.ProjectsListView.as_view(), name="public_projects"),
+    path('projects2/', views.ProjectsListView2.as_view(), name="public_projects2"),
     path('', include('publications.urls')),
 
     path("courses/", include([
