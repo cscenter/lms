@@ -9,5 +9,6 @@ class StaticFilesConfig(_StaticFilesConfig):
     ignore_patterns = ['CVS', '.*', '*~', 'src', '*.map', '_builds']
 
 
+# FIXME: remove?
 class PipelineCachedGZIPedStorage(CompressMixin, ManifestStaticFilesStorage):
     pass
