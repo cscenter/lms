@@ -108,4 +108,11 @@
             </div>
         </div>
     {% endif %}
+
+    <script type="text/javascript">
+        // TODO: move to the main bundle
+        if (window.matchMedia('(min-width: 992px)').matches) {
+            document.querySelector(".playlist .list__item._active").scrollIntoView(false);
+        }
+    </script>
 {% endblock content %}
