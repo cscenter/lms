@@ -1,0 +1,114 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
+
+{% block title %}Практика в {{ super() }}{% endblock title %}
+
+
+{% block sprites %}
+    <script type="text/javascript">
+        (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/projects.svg")  }}");
+    </script>
+{% endblock sprites %}
+
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row content-center text-center">
+            <div class="col-lg-10 py-10">
+                <h1>Практика на&nbsp;направлениях Data Science и&nbsp;Software Engineering</h1>
+                <section class="mb-8">
+                    <p>Каждый семестр студенты работают над инженерными или исследовательскими проектами под
+                        руководством опытных сотрудников IT-компаний или учёных. </p>
+                </section>
+                <div class="text-center mt-10">
+                    <div class="row pt-6">
+                        <div class="col-sm-6 col-lg-3 mb-8">
+                            {{ macros.svg_image('select') }}
+                            <p class="mt-2 mb-0 text-small"><strong>Выбор проекта:</strong><br> практика или НИР</p>
+                        </div>
+                        <div class="col-sm-6 col-lg-3 mb-8">
+                            {{ macros.svg_image('work') }}
+                            <p class="mt-2 mb-0 text-small"><strong>Работа над проектом</strong><br> встречи руководителей и
+                                студентов раз в неделю</p>
+                        </div>
+                        <div class="col-sm-6 col-lg-3 mb-8">
+                            {{ macros.svg_image('report') }}
+                            <p class="mt-2 mb-0 text-small"><strong>Промежуточный отчёт</strong><br></p>
+                        </div>
+                        <div class="col-sm-6 col-lg-3 mb-8">
+                            {{ macros.svg_image('presentation') }}
+                            <p class="mt-2 mb-0 text-small"><strong>Презентация результатов</strong><br></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid _dark">
+        <div class="container page-content">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 class="mb-8 text-center">Примеры студенческих проектов</h2>
+                    <div class="card-deck _three">
+                        {% set cover_placeholder = static('v2/img/placeholder/project.jpg') %}
+                        {% set user_placeholder = static('v2/img/placeholder/users.jpg') %}
+                        {% for project_publication in sample_projects -%}
+                            {{ macros_cards.project_publication_card(project_publication,
+                                                                     cover_placeholder,
+                                                                     user_img_url=user_placeholder) }}
+                        {%- endfor %}
+                    </div>
+                    <div class="text-center">
+                        <a href="{{ url('public_projects') }}?type=practice" class="btn _small _rounded _outline _gray mt-2 mb-0">Все примеры</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-8">
+                <section class="mb-8">
+                    <h2>О практике</h2>
+
+                    <p>Во время практики студенты:</p>
+                    <ul>
+                        <li>Знакомятся с самыми разными технологиями.</li>
+                        <li>Понимают, какое направление или технология увлекают их больше других.</li>
+                        <li>Пробуют решить реальные рабочие задачи: проекты очень близки к ним.</li>
+                        <li>Работают в команде с такими же студентами, а не с взрослыми разработчиками: могут учиться на
+                            своих ошибках без ущерба для компании.
+                        </li>
+                    </ul>
+                    <h2>Как проходит практика</h2>
+                    <ol>
+                        <li>В начале семестра руководители представляют проекты, студенты выбирают интересные и проходят
+                            конкурсный отбор.
+                        </li>
+                        <li>Участники и руководители проекта встречаются раз в неделю: обсуждают сложные моменты и
+                            планы.
+                        </li>
+                        <li>В середине семестра студенты оформляют промежуточные итоги в отчёт. Получают обратную связь
+                            и оценку от специалистов в теме проекта.
+                        </li>
+                        <li>В конце семестра студенты рассказывают о результатах практики перед сокурсниками, кураторами
+                            и руководителями проектов.
+                        </li>
+                    </ol>
+                </section>
+            </div>
+            <div class="col-lg-3 offset-lg-1">
+                <a href="{{ url('project_research') }}" class="card mb-8 text-center">
+                    <div class="card__header cover _green-gradient">
+                        <div class="cover__content py-10">
+                            <div class="h1 cover__title">НИР</div>
+                            <div class="card__subtitle text-white">Исследовательские задачи под руководством учёных
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

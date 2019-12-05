@@ -1,6 +1,5 @@
 from .base import *
 
-DEBUG_TOOLBAR_PATCH_SETTINGS = False
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware'
 ] + MIDDLEWARE

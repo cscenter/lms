@@ -421,32 +421,6 @@ class ProjectsListView(TemplateView):
         }
 
 
-class ProjectsListView2(TemplateView):
-    template_name = "compscicenter_ru/projects/project_list2.html"
-
-    def get_context_data(self, **kwargs):
-        tabs = TabList()
-        selected_tab = self.request.GET.get('type', ProjectTypes.research)
-        qs = (ProjectPublication.objects
-              .filter(is_draft=False)
-              .order_by('title'))
-        project_publications = bucketize(qs, key=lambda p: p.type)
-        for i, project_type in enumerate(project_publications):
-            tab = Tab(target=project_type,
-                      name=ProjectTypes.labels[project_type],
-                      url=f"{self.request.path}?type={project_type}")
-            # Mark first tab as active by default
-            if i == 0:
-                tab.active = True
-            tabs.add(tab)
-            if project_type == selected_tab:
-                tabs.set_active(project_type)
-        return {
-            "tabs": tabs,
-            "project_publications": project_publications
-        }
-
-
 class TimelineElementTypes(Enum):
     COURSE = 1
     SHAD = 2

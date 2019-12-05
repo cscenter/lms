@@ -2,6 +2,7 @@ import factory
 from factory.fuzzy import FuzzyInteger, FuzzyChoice
 
 from courses.tests.factories import SemesterFactory
+from projects.constants import ProjectTypes
 from projects.forms import ReportReviewForm, PracticeCriteriaForm
 from projects.models import Project, ProjectStudent, Report, Review, \
     ReportingPeriod, PracticeCriteria, Supervisor, ReportComment
@@ -47,7 +48,7 @@ class ProjectFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Test student project %03d" % n)
     description = factory.Sequence(lambda n: ("Test student project "
                                               "description %03d" % n))
-    project_type = 'practice'
+    project_type = ProjectTypes.practice
     semester = factory.SubFactory(SemesterFactory)
     branch = factory.SubFactory(BranchFactory)
 
