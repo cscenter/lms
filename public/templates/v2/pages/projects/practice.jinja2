@@ -8,28 +8,27 @@
         <div class="row content-center text-center">
             <div class="col-lg-10 py-10">
                 <h1>Практика на&nbsp;направлениях Data Science и&nbsp;Software Engineering</h1>
-                <section class="content-block">
+                <section class="mb-8">
                     <p>Каждый семестр студенты работают над инженерными или исследовательскими проектами под
                         руководством опытных сотрудников IT-компаний или учёных. </p>
                 </section>
                 <div class="text-center mt-10">
                     <div class="row pt-6">
-                        <div class="col-sm-3"><img src="/static/v2/img/pages/projects/select.svg"
-                                                        alt="Бэкенд-разработчик">
+                        <div class="col-sm-3 mb-4">
+                            {{ macros.svg_image('select') }}
                             <p class="mt-2 mb-0 text-small"><strong>Выбор проекта:</strong><br> практика или НИР</p>
                         </div>
-                        <div class="col-sm-3"><img
-                                src="/static/v2/img/pages/projects/work.svg"
-                                alt="Веб-разработчик">
+                        <div class="col-sm-3 mb-4">
+                            {{ macros.svg_image('work') }}
                             <p class="mt-2 mb-0 text-small"><strong>Работа над проектом</strong><br> встречи руководителей и
                                 студентов раз в неделю</p>
                         </div>
-                        <div class="col-sm-3"><img src="/static/v2/img/pages/projects/report.svg"
-                                                        alt="Аналитик">
+                        <div class="col-sm-3 mb-4">
+                            {{ macros.svg_image('report') }}
                             <p class="mt-2 mb-0 text-small"><strong>Промежуточный отчёт</strong><br></p>
                         </div>
-                        <div class="col-sm-3"><img src="/static/v2/img/pages/projects/presentation.svg"
-                                                        alt="Аналитик">
+                        <div class="col-sm-3 mb-4">
+                            {{ macros.svg_image('presentation') }}
                             <p class="mt-2 mb-0 text-small"><strong>Презентация результатов</strong><br></p>
                         </div>
                     </div>
@@ -41,74 +40,72 @@
         <div class="container page-content">
             <div class="row">
                 <div class="col-lg-12">
-                    <section class="content-block mb-0">
-                        <h2 class="mb-8 text-center">Примеры студенческих проектов</h2>
-                        <div class="card-deck _three">
-                            <div class="card _shadowed">
-                                <div class="w-100"
-                                     style="background-image:url('/media/pages/project/be-a-better-programmer.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
-                                </div>
-                                <div class="card__content">
-                                    <div class="card__title">
-                                        Be a Better Programmer. Turing machine
-                                    </div>
-                                </div>
-                                <div class="card__footer _dark">
-                                    <div class="author _project">
-                                        <img class="author__img" width="48" height="48"
-                                             src="/media/pages/index/student.png"
-                                             alt="">
-                                        <div class="author__details">
-                                            <div class="card__text">Евгений Игоревич Викулов</div>
-                                        </div>
-                                    </div>
+                    <h2 class="mb-8 text-center">Примеры студенческих проектов</h2>
+                    <div class="card-deck _three">
+                        <div class="card _shadowed">
+                            <div class="w-100"
+                                 style="background-image:url('/media/pages/project/be-a-better-programmer.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                            </div>
+                            <div class="card__content">
+                                <div class="card__title">
+                                    Be a Better Programmer. Turing machine
                                 </div>
                             </div>
-                            <div class="card _shadowed">
-                                <div class="w-100"
-                                     style="background-image:url('/media/pages/project/auto2.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
-                                </div>
-                                <div class="card__content">
-                                    <div class="card__title">
-                                        Распознавание марки и модели автомобиля по фотографии
-                                    </div>
-                                </div>
-                                <div class="card__footer _dark">
-                                    <div class="author _project">
-                                        <img class="author__img" width="48" height="48"
-                                             src="/static/v2/img/placeholder/users.jpg"
-                                             alt="">
-                                        <div class="author__details">
-                                            <div class="card__text">Несколько авторов</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card _shadowed">
-                                <div class="w-100"
-                                     style="background-image:url('/media/pages/project/map.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
-                                </div>
-                                <div class="card__content">
-                                    <div class="card__title">
-                                        Дедупликация объявлений на Яндекс.Недвижимости
-                                    </div>
-                                </div>
-                                <div class="card__footer _dark">
-                                    <div class="author _project">
-                                        <img class="author__img" width="48" height="48"
-                                             src="/media/pages/index/student.png"
-                                             alt="">
-                                        <div class="author__details">
-                                            <div class="card__text">Евгений Игоревич Викулов</div>
-                                        </div>
+                            <div class="card__footer _dark">
+                                <div class="author _project">
+                                    <img class="author__img" width="48" height="48"
+                                         src="/media/pages/index/student.png"
+                                         alt="">
+                                    <div class="author__details">
+                                        <div class="card__text">Евгений Игоревич Викулов</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="text-center">
-                            <a href="/v2/pages/practice/" class="btn _small _rounded _outline _gray mt-2 mb-0">Все проекты</a>
+                        <div class="card _shadowed">
+                            <div class="w-100"
+                                 style="background-image:url('/media/pages/project/auto2.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                            </div>
+                            <div class="card__content">
+                                <div class="card__title">
+                                    Распознавание марки и модели автомобиля по фотографии
+                                </div>
+                            </div>
+                            <div class="card__footer _dark">
+                                <div class="author _project">
+                                    <img class="author__img" width="48" height="48"
+                                         src="/static/v2/img/placeholder/users.jpg"
+                                         alt="">
+                                    <div class="author__details">
+                                        <div class="card__text">Несколько авторов</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </section>
+                        <div class="card _shadowed">
+                            <div class="w-100"
+                                 style="background-image:url('/media/pages/project/map.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+                            </div>
+                            <div class="card__content">
+                                <div class="card__title">
+                                    Дедупликация объявлений на Яндекс.Недвижимости
+                                </div>
+                            </div>
+                            <div class="card__footer _dark">
+                                <div class="author _project">
+                                    <img class="author__img" width="48" height="48"
+                                         src="/media/pages/index/student.png"
+                                         alt="">
+                                    <div class="author__details">
+                                        <div class="card__text">Евгений Игоревич Викулов</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <a href="/v2/pages/practice/" class="btn _small _rounded _outline _gray mt-2 mb-0">Все проекты</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -116,7 +113,7 @@
     <div class="container page-content">
         <div class="row">
             <div class="col-lg-8">
-                <section class="content-block">
+                <section class="mb-8">
                     <h2>О практике</h2>
 
                     <p>Во время практики студенты:</p>
@@ -146,18 +143,16 @@
                 </section>
             </div>
             <div class="col-lg-3 offset-lg-1">
-                <aside>
-                    <a href="/v2/pages/nir/" class="card mb-8 text-center">
-                        <div class="card__header cover _green-gradient">
-                            <div class="cover__content py-10">
-                                <div class="h1 cover__title">НИР</div>
-                                <div class="card__subtitle text-white">Исследовательские задачи
-                                    под руководством учёных
-                                </div>
+                <a href="/v2/pages/nir/" class="card mb-8 text-center">
+                    <div class="card__header cover _green-gradient">
+                        <div class="cover__content py-10">
+                            <div class="h1 cover__title">НИР</div>
+                            <div class="card__subtitle text-white">Исследовательские задачи
+                                под руководством учёных
                             </div>
                         </div>
-                    </a>
-                </aside>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
