@@ -19,7 +19,7 @@
                     {% else %}
                         {% set subtitle = '' %}
                     {% endif %}
-                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros_cards.author_card(user, subtitle) }}</div>
+                    <div class="col-xl-4 col-lg-6 mb-2">{{ macros_cards.user_card(user, subtitle) }}</div>
                 {% endfor %}
             </div>
             {% set supervisors = project.get_supervisors() %}
@@ -41,7 +41,7 @@
                 <div class="row mb-3">
                     {% for pba in publication_authors %}
                         <div class="col-lg-4 mb-2">
-                        {{ macros_cards.author_card(pba.user, '') }}
+                        {{ macros_cards.user_card(pba.user, '') }}
                         </div>
                     {% endfor %}
                 </div>

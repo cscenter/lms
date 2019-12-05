@@ -1,0 +1,213 @@
+{% extends "compscicenter_ru/layouts/base.html" %}
+
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
+
+{% block title %}Научно-исследовательская работа в {{ super() }}{% endblock title %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row content-center text-center py-10">
+            <div class="col-lg-9">
+                <h1>Научно-исследовательская работа</h1>
+                <p class="mb-0">Если студенты хотят заниматься наукой, то в качестве проекта можно взять научно-исследовательскую
+                        работу или НИР. Исследования могут быть теоретическими или прикладными.</p>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid _dark">
+        <div class="container page-content">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h2 class="mb-8 text-center">Примеры научно-исследовательских работ</h2>
+                    <div class="card-deck _three">
+                        {% set cover_placeholder = static('v2/img/placeholder/project.jpg') %}
+                        {% set user_placeholder = static('v2/img/placeholder/users.jpg') %}
+                        {% for project_publication in sample_projects -%}
+                            {{ macros_cards.project_publication_card(project_publication,
+                                                                     cover_placeholder,
+                                                                     user_img_url=user_placeholder) }}
+                        {%- endfor %}
+                    </div>
+                    <div class="text-center">
+                        <a href="{{ url('public_projects') }}?type=research" class="btn _small _rounded _outline _gray mt-2 mb-0">Все примеры</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-8">
+                <section class="mb-8">
+                    <h2>О НИР</h2>
+                    <ul>
+                        <li>Студенты пробуют разные темы, чтобы оценить, насколько им интересны разные научные
+                            области
+                        </li>
+                        <li>Эта работа может стать основой для поступления в магистратуру или аспирантуру.</li>
+                    </ul>
+                </section>
+                <section class="mb-8">
+                    <h2>Научный руководитель</h2>
+                    <p>Научным руководителем может быть любой активный учёный со степенью. В выборе поможет куратор и
+                    научные руководители направления Computer Science. Руководитель внимательно наблюдает за процессом и
+                        направляет усилия студента в верное русло. Студенты встречаются с ним не реже раза в неделю.</p>
+                    <h2 class="mt-8"> Темы исследований и руководители</h2>
+                    <ul class="ui list _divided">
+                        <li>
+                            Комбинаторные задачи биоинформатики
+                            <div class="text-small">
+                                <a href="https://home.gwu.edu/~maxal/" rel="noopener" target="_blank">М. Алексеев</a> (<a
+                                    href="https://www.gwu.edu/" rel="noopener" target="_blank">Университет Джорджа Вашингтона</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Cистемы типов
+                            <div class="text-small">
+                                <a href="https://sites.google.com/site/abreslav2/" rel="noopener" target="_blank">А. А. Бреслав</a> (<a
+                                href="https://www.jetbrains.com/" rel="noopener" target="_blank">JetBrains</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Квантовые алгоритмы
+                            <div class="text-small">
+                                <a href="http://www.mathnet.ru/rus/person17699" rel="noopener" target="_blank">М. Н. Вялый</a> (<a
+                                href="http://www.ccas.ru/" rel="noopener" target="_blank">Вычислительный центр имени А. А. Дородницына РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Вычислительная геометрия
+                            <div class="text-small">
+                                <a href="https://compsciclub.ru/teachers/23/" rel="noopener" target="_blank">К. В. Вяткина</a> (<a
+                                href="http://mit.spbau.ru/" rel="noopener" target="_blank">СПбАУ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Верификация
+                            <div class="text-small">
+                                С. Э. Вельдер (<a href="https://www.ifmo.ru/" rel="noopener" target="_blank">НИУ ИТМО</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Теория сложности вычислений и доказательств
+                            <div class="text-small">
+                                <a href="https://logic.pdmi.ras.ru/~hirsch" rel="noopener" target="_blank">Э. А. Гирш</a> (<a
+                                    href="https://www.pdmi.ras.ru/ru/news/news.php" rel="noopener" target="_blank">ПОМИ РАН</a>, <a
+                                    href="http://mit.spbau.ru/" rel="noopener" target="_blank">СПбАУ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Теория сложности
+                            <div class="text-small">
+                                <a href="https://logic.pdmi.ras.ru/~dmitrits" rel="noopener" target="_blank">Д. М. Ицыксон</a> (<a
+                                href="https://www.pdmi.ras.ru/ru/news/news.php" rel="noopener" target="_blank">ПОМИ РАН</a>, <a
+                                href="http://mit.spbau.ru/" rel="noopener" target="_blank">СПбАУ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Раскраски графов
+                            <div class="text-small">
+                                <a href="https://logic.pdmi.ras.ru/~dvk/" rel="noopener" target="_blank">Д. В. Карпов</a> (<a
+                                    href="http://www.pdmi.ras.ru/ru/news/news.php" rel="noopener" target="_blank">ПОМИ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Кооперативная теория игр, <a href="https://habr.com/ru/company/yandex/blog/182976/"
+                                                         rel="noopener" target="_blank">искусственный интеллект в тестировании</a>
+                            <div class="text-small">
+                                <a href="https://compscicenter.ru/teachers/611/" target="_blank">И. В. Кацев</a> (<a
+                                    href="https://yandex.ru" rel="noopener" target="_blank">Яндекс</a>, <a
+                                    href="http://emi.nw.ru/" rel="noopener" target="_blank">СПбЭМИ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Алгоритмы для NP-трудных задач, сложность булевых функций
+                            <div class="text-small">
+                                <a href="https://logic.pdmi.ras.ru/~kulikov" rel="noopener" target="_blank">А. С. Куликов</a> (<a
+                                href="https://www.pdmi.ras.ru/ru/news/news.php" rel="noopener" target="_blank">ПОМИ РАН</a>, <a
+                                href="http://mit.spbau.ru/" rel="noopener" target="_blank">СПбАУ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Криптография
+                            <div class="text-small">
+                                <a href="https://research.google.com/pubs/IlyaMironov.html" rel="noopener" target="_blank">И. Миронов</a> (<a
+                                href="https://www.google.ru/?gws_rd=ssl" rel="noopener" target="_blank">Google</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Функциональные языки программирования и их системы типов
+                            <div class="text-small">
+                                <a href="https://compsciclub.ru/teachers/33/" rel="noopener" target="_blank">Д. Н. Москвин</a> (<a
+                                    href="https://spbau.ru/" rel="noopener" target="_blank">СПбАУ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Машинное обучение
+                            <div class="text-small">
+                                <a href="https://logic.pdmi.ras.ru/~sergey/" rel="noopener" target="_blank">С. И. Николенко</a> (<a
+                                href="https://www.pdmi.ras.ru/ru/news/news.php" rel="noopener" target="_blank">ПОМИ РАН</a>, <a
+                                href="http://mit.spbau.ru/" rel="noopener" target="_blank">СПбАУ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Оптимизация и обработка запросов
+                            <div class="text-small">
+                                <a href="http://www.math.spbu.ru/user/boris_novikov/index.shtml" rel="noopener" target="_blank">Б. А. Новиков</a> (<a
+                                    href="https://www.spbu.ru/" rel="noopener" target="_blank">СПбГУ</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Формальные языки и грамматики
+                            <div class="text-small">
+                                <a href="http://users.utu.fi/aleokh/" rel="noopener" target="_blank">А. С. Охотин</a> (<a
+                                    href="https://spbu.ru/" rel="noopener" target="_blank">СПбГУ</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Раскраски графов
+                            <div class="text-small">
+                                <a href="https://logic.pdmi.ras.ru/~pastor/" rel="noopener" target="_blank">А. В. Пастор</a> (<a
+                                    href="https://www.pdmi.ras.ru/ru/news/news.php" rel="noopener" target="_blank">ПОМИ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Надёжные модели вычислений, теория кодирования
+                            <div class="text-small">
+                                <a href="https://www.mccme.ru/~anromash/" rel="noopener" target="_blank">А. Е. Ромащенко</a> (<a
+                                    href="http://www.iitp.ru/ru/about" rel="noopener" target="_blank">ИППИ РАН</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Параллельные алгоритмы, алгоритмы на строках
+                            <div class="text-small">
+                                <a href="https://go.warwick.ac.uk/alextiskin" rel="noopener" target="_blank">А. В. Тискин</a> (<a
+                                    href="https://www2.warwick.ac.uk/" rel="noopener" target="_blank">University of Warwick</a>)
+                            </div>
+                        </li>
+                        <li>
+                            Колмогоровская сложность, теория информации
+                            <div class="text-small">
+                                <a href="https://www.mccme.ru/poncelet/pers/shen.htm" rel="noopener" target="_blank">А. Х. Шень</a> (<a
+                                    href="http://www.iitp.ru/ru/about" rel="noopener" target="_blank">ИППИ РАН</a>)
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+            <div class="col-lg-3 offset-lg-1 mt-4">
+                <div class="card  mb-6">
+                    <div class="h4 card__header _dark mb-0">
+                        Практика в CS центре
+                    </div>
+                    <div class="card__content">
+                        <a href="{{ url('project_practice') }}" class="pb-4">
+                            Как получить практику <br> в CS центре
+                        </a>
+                    </div>
+                </div>
+                <a href="{{ url('public_projects') }}" class="btn _small _primary w-100 mb-0">Все студенческие проекты</a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

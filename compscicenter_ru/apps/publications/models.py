@@ -2,10 +2,12 @@ import os
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Prefetch
 from django.utils.encoding import smart_text
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
+from sorl.thumbnail import ImageField
 
 from core.urls import reverse
 from core.utils import ru_en_mapping
@@ -35,6 +37,25 @@ class ProjectPublicationAuthor(models.Model):
                                   smart_text(self.user))
 
 
+def publication_photo_upload_to(instance: "ProjectPublication", filename):
+    _, ext = os.path.splitext(filename)
+    filename = instance.slug.replace("-", "_")
+    return f"publications/projects/{filename}{ext}"
+
+
+class ProjectPublicationQuerySet(models.QuerySet):
+    pass
+
+
+class _PublishedProjectsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_draft=False)
+
+
+PublishedProjectsManager = _PublishedProjectsManager.from_queryset(
+    ProjectPublicationQuerySet)
+
+
 class ProjectPublication(models.Model):
     created = models.DateTimeField(
         verbose_name=_("created"),
@@ -61,12 +82,20 @@ class ProjectPublication(models.Model):
         choices=ProjectTypes.choices,
         editable=False,
         max_length=10)
+    cover = ImageField(
+        _("Cover"),
+        upload_to=publication_photo_upload_to,
+        help_text=_("Min height - 180px"),
+        blank=True)
     description = models.TextField(
         verbose_name=_("Description"),
         blank=True)
     external_links = models.TextField(
         verbose_name=_("External Links"),
         blank=True)
+
+    objects = models.Manager()
+    published = PublishedProjectsManager()
 
     class Meta:
         db_table = 'publications_projects'
@@ -89,13 +118,16 @@ class ProjectPublication(models.Model):
         return Supervisor.objects.filter(projects__in=projects).distinct()
 
     def get_participants(self):
-        projects = [p.pk for p in self.projects.all()]
-        return (User.objects
-                .filter(projectstudent__project__in=projects)
-                .only("first_name", "last_name", "photo", "cropbox_data")
-                .select_related("graduate_profile")
-                .distinct()
-                .order_by("last_name"))
+        """
+        Returns distinct students who participated in projects related to
+        current publication.
+        """
+        participants = {}
+        for project in self.projects.all():
+            for student in project.students.all():
+                if student.pk not in participants:
+                    participants[student.pk] = student
+        return list(participants.values())
 
 
 def lecturer_photo_upload_to(instance: "Speaker", filename):

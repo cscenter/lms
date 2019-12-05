@@ -1,4 +1,4 @@
-{% macro _author_card(img_url, full_name, details, testimonial, modifiers) -%}
+{% macro author_card(img_url, full_name, details, testimonial='', modifiers='') -%}
     <div class="author{% if modifiers %} {{ modifiers }}{% endif %}">
         {% if img_url %}
             <img class="author__img" alt="{{ full_name }}" src="{{ img_url }}" />
@@ -11,20 +11,22 @@
     </div>
 {%- endmacro %}
 
-{% macro author_card(user, details, testimonial='', modifiers='') -%}
+{# Derives required fields for author_card from user model #}
+{% macro user_card(user, details, modifiers='') -%}
     {% with im = user.get_thumbnail(user.ThumbnailSize.SQUARE, use_stub=False) %}
         {% if im %}{% set img_url = im.url %}{% else %}{% set img_url = '' %}{% endif %}
-        {{ _author_card(im.url, user.get_short_name(), details, testimonial, modifiers) }}
+        {{ author_card(im.url, user.get_short_name(), details, modifiers=modifiers) }}
     {% endwith %}
 {%- endmacro %}
 
+{# Since we are not storing images for project supervisors use placeholders instead #}
 {% macro supervisor_card(supervisor, details, modifiers='') -%}
     {% if supervisor.gender == supervisor.GENDER_MALE %}
         {% set img_url = static('v2/img/placeholder/man_150x150.png') %}
     {% else %}
         {% set img_url = static('v2/img/placeholder/woman_150x150.png') %}
     {% endif %}
-    {{ _author_card(img_url, supervisor.full_name, supervisor.occupation, None, modifiers) }}
+    {{ author_card(img_url, supervisor.full_name, supervisor.occupation, None, modifiers) }}
 {%- endmacro %}
 
 {% macro testimonial_card(graduate_profile) -%}
@@ -32,11 +34,11 @@
     <div class="card__content _middle">
         {% set parts = ["Выпуск ", graduate_profile.graduation_year, ", ", graduate_profile.academic_disciplines.all()|join(", ")] %}
         {% with im = graduate_profile.get_thumbnail(graduate_profile.student.ThumbnailSize.SQUARE) %}
-            {{ _author_card(im.url,
-                            full_name=graduate_profile.student.get_short_name(),
-                            details=parts|join(''),
-                            testimonial=graduate_profile.testimonial|markdown(graduate_profile.TESTIMONIAL_CACHE_KEY, 3600, graduate_profile.pk, graduate_profile.modified),
-                            modifiers='_testimonial') }}
+            {{ author_card(im.url,
+                           full_name=graduate_profile.student.get_short_name(),
+                           details=parts|join(''),
+                           testimonial=graduate_profile.testimonial|markdown(graduate_profile.TESTIMONIAL_CACHE_KEY, 3600, graduate_profile.pk, graduate_profile.modified),
+                           modifiers='_testimonial') }}
         {% endwith %}
     </div>
 </div>
@@ -44,11 +46,10 @@
 
 {% macro speaker_card(speaker) -%}
     {% with im = speaker.get_thumbnail(speaker.ThumbnailSize.SQUARE) %}
-        {{ _author_card(
+        {{ author_card(
                 im.url,
                 full_name=speaker.full_name,
-                details=speaker.workplace,
-                testimonial=None) }}
+                details=speaker.workplace) }}
     {% endwith %}
 {%- endmacro %}
 
@@ -81,3 +82,28 @@
     {%- endwith %}
 {%- endmacro %}
 
+
+{% macro project_publication_card(project_publication, cover_url, user_img_url) -%}
+{% if project_publication.cover -%}
+    {% set cover_url = project_publication.cover.url %}
+{%- endif %}
+<a class="card _shadowed" href="{{ project_publication.get_absolute_url() }}">
+    <div class="w-100"
+         style="background-image:url('{{ cover_url }}'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 180px">
+    </div>
+    <div class="card__content">
+        <div class="card__title">
+            {{ project_publication.title }}
+        </div>
+    </div>
+    <div class="card__footer _dark">
+        {% set participants = project_publication.get_participants() %}
+        {% if participants|length > 1 %}
+            {{ author_card(img_url=user_img_url,
+            full_name='Несколько участников', details='', modifiers='_project') }}
+        {% else %}
+            {{ user_card(participants[0], '', modifiers='_project') }}
+        {% endif %}
+    </div>
+</a>
+{%- endmacro %}
