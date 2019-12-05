@@ -55,7 +55,10 @@ class SubmissionStatus(IntEnum):
 
 class SubmissionVerdict(Enum):
     OK = 'OK'
-    WRONG_ANSWER = 'WA'
+    WA = 'WrongAnswer'
+    PE = 'PresentationError'
+    CE = "CompilationError"
+    RE = "RuntimeError"
 
 
 class ProblemStatus(Enum):
