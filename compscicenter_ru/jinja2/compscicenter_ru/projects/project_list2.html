@@ -12,7 +12,7 @@
         <h1>Примеры студенческих проектов</h1>
         <div class="row">
             <div class="col-12 order-1 order-lg-0">
-                {{ macros_nav.tabs(tabs, modifiers='scrollable mb-4') }}
+                {% call macros.scrollable() %}{{ macros_nav.tabs(tabs) }}{% endcall %}
             </div>
             <div class="col-lg-9 order-2 order-lg-1">
                 <div class="tab-content">
