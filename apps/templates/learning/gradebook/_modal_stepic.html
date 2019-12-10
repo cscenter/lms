@@ -6,7 +6,7 @@
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title">{% trans "Import stepik statements" %}</h4>
             </div>
-            <form action="{% url 'teaching:gradebook_csv_import_stepic' gradebook.course.pk %}" enctype="multipart/form-data" method="POST">
+            <form action="{% if view.is_for_staff %}{% url 'staff:gradebook_csv_import_stepic' gradebook.course.pk %}{% else %}{% url 'teaching:gradebook_csv_import_stepic' gradebook.course.pk %}{% endif %}" enctype="multipart/form-data" method="POST">
             {% csrf_token %}
             <div class="modal-body">
                 <div class="form-group">
@@ -22,7 +22,7 @@
                     </div>
                     <div class="form-group">
                         <label for="csv-choose-file">2. {% trans "Select csv file" %}</label>
-                        <input id="input-id" name="csv_file" value="2" type="file">
+                        <input id="input-id" name="csv_file" value="2" type="file" required>
                         <span class="help-block">{% trans "Should contains comma-separated values of user stepic id and assignment score. First row is header. Example:" %}</span>
                         <pre><code>stepic_id,total
 1,7</code></pre>
