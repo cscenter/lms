@@ -2,7 +2,9 @@ from django.conf.urls import include, url
 from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
-from learning.gradebook.views import GradeBookView, GradeBookCSVView
+from learning.gradebook.views import GradeBookView, GradeBookCSVView, \
+    AssignmentScoresImportByStepikIDView, \
+    AssignmentScoresImportByYandexLoginView
 from staff.views import HintListView, StudentSearchView, ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
     ProgressReportForSemesterView, AdmissionReportView, \
@@ -22,6 +24,8 @@ urlpatterns = [
             path('', GradeBookView.as_view(is_for_staff=True, permission_required="teaching.view_gradebook"), name='gradebook'),
             path('csv/', GradeBookCSVView.as_view(permission_required="teaching.view_gradebook"), name='gradebook_csv'),
         ])),
+        path('<int:course_id>/import/stepic', AssignmentScoresImportByStepikIDView.as_view(is_for_staff=True), name='gradebook_csv_import_stepic'),
+        path('<int:course_id>/import/yandex', AssignmentScoresImportByYandexLoginView.as_view(is_for_staff=True), name='gradebook_csv_import_yandex'),
     ])),
 
     path('student-search/', StudentSearchView.as_view(), name='student_search'),

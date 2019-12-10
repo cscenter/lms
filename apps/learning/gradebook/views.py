@@ -200,6 +200,8 @@ class GradeBookCSVView(PermissionRequiredMixin, CourseURLParamsMixin,
 
 
 class AssignmentGradesImportBaseView(TeacherOnlyMixin, generic.View):
+    is_for_staff = False
+
     def post(self, request, course_id, *args, **kwargs):
         try:
             assignment_id = int(request.POST['assignment'])
@@ -225,7 +227,11 @@ class AssignmentGradesImportBaseView(TeacherOnlyMixin, generic.View):
                           _("Successfully imported {} results").format(success))
         except ValidationError as e:
             messages.error(self.request, e.message)
-        url = assignment.course.get_gradebook_url()
+        if self.is_for_staff:
+            route_name = 'staff:gradebook'
+        else:
+            route_name = 'teaching:gradebook'
+        url = assignment.course.get_gradebook_url(url_name=route_name)
         return HttpResponseRedirect(url)
 
     def import_grades_for_assignment(self, assignment):

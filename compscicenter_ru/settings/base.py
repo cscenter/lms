@@ -133,7 +133,7 @@ TEMPLATES = [
         "NAME": "jinja2",
         "OPTIONS": {
             "match_extension": None,
-            "match_regex": r"^(?!narnia/).*",
+            "match_regex": r"^(?!admin/).*",
             # Or put filters under templatetags and load with
             # django-jinja decorator
             "filters": {
