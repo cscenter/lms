@@ -42,7 +42,7 @@ class EnrollmentService:
                 defaults={'is_deleted': True}))
             if not enrollment.is_deleted:
                 raise AlreadyEnrolled
-            # This is a sharable lock for concurrent enrollments if needs to
+            # Use sharable lock for concurrent enrollments if necessary to
             # control participants number. A blocking operation since `nowait`
             # is not used.
             if course.is_capacity_limited:
