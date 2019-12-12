@@ -377,9 +377,8 @@ def notify_new_assignment_comment(comment):
         sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.STUDENT
     else:
         sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.TEACHER
-        student_id = comment.student_assignment.student_id
         notifications.append(
-            AssignmentNotification(user_id=student_id, student_assignment=sa)
+            AssignmentNotification(user_id=sa.student_id, student_assignment=sa)
         )
     AssignmentNotification.objects.bulk_create(notifications)
     StudentAssignment.objects.filter(pk=sa.pk).update(**sa_update_dict)
