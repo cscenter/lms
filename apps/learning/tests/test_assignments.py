@@ -439,6 +439,7 @@ def test_assignment_public_form_for_teachers(settings, client):
     co_in_spb = CourseFactory(teachers=[teacher])
     client.login(teacher)
     form_data = {
+        "is_online": "true",
         "title": "title",
         "text": "text",
         "deadline_at_0": "29.06.2017",
@@ -452,7 +453,7 @@ def test_assignment_public_form_for_teachers(settings, client):
     assert response.status_code == 200
     assert Assignment.objects.count() == 1
     assignment = Assignment.objects.first()
-    # In DB we store datetime values in UTC
+    # DB stores datetime values in UTC
     assert assignment.deadline_at.day == 28
     assert assignment.deadline_at.hour == 21
     assert assignment.deadline_at.minute == 0
