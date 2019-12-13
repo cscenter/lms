@@ -2,6 +2,9 @@ from .base import *
 
 MEDIA_ROOT = str(Path('/shared', 'media'))
 
+# Default scheme for `core.urls.reverse`
+DEFAULT_URL_SCHEME = "https"
+
 CACHES['default'] = {
     'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
     'LOCATION': '/tmp/django_cache'
@@ -13,8 +16,6 @@ EMAIL_PORT = 1025
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Don't use https for staging env
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_DOMAIN = '.dev.compscicenter.ru'
 CSRF_COOKIE_NAME = "dev_csrf_token"
 SESSION_COOKIE_DOMAIN = '.dev.compscicenter.ru'

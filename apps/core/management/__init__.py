@@ -15,11 +15,11 @@ def create_default_city_and_branch(app_config, verbosity=2, interactive=True, us
         return
 
     if not City.objects.using(using).exists():
-        # It isn't guaranteed that the next id will be 1, so coerce it
         if verbosity >= 2:
             print("Creating default City object")
         City(code=settings.DEFAULT_CITY_CODE,
-             name='Санкт-Петербург', abbr='СПб',
+             name='Санкт-Петербург',
+             abbr='СПб',
              time_zone='Europe/Moscow').save(using=using)
 
     try:
