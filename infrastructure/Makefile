@@ -40,4 +40,4 @@ update-app-certificate:
 	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_$(AWS_EC2_INSTANCE_TAG) $(PLAYBOOK_NAME).yml --tags="certbot" --skip-tags="nginx-role" -v
 
 dev-setup:
-	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_dev_csc setup.yml -v --skip-tags="cronjobs,lvm-role" --tags="dev.compscicenter.ru"
+	ansible-playbook -i inventory/ec2.py -e aws_ec2_host=tag_Name_dev_csc staging.yml -v --skip-tags="cronjobs,lvm-role"

@@ -2,6 +2,9 @@
 - name: Create group for /media folder
   group: name={{ site_user_group }} state=present
 
+- name: Make sure group with {{ site_user }} exists regardless to the /etc/login.defs settings
+  group: name={{ site_user }} state=present
+
 - name: Create website user
   user:
     home: "/home/{{ site_user }}"
@@ -9,7 +12,9 @@
     state: present
     # Set primary group
     group: "{{ site_user_group }}"
-    groups: "{{ site_user_group }}"
+    groups:
+      - "{{ site_user }}"
+      - "{{ site_user_group }}"
     append: yes
 
 - name: Create .ssh directory
