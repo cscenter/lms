@@ -130,9 +130,6 @@ DEBUG_TOOLBAR_CONFIG = {
     # 'SHOW_TOOLBAR_CALLBACK': lambda r: False,  # disables it
 }
 
-SESSION_COOKIE_DOMAIN = ".csc.test"
-CSRF_COOKIE_DOMAIN = ".csc.test"
-
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
     'rest_framework.renderers.JSONRenderer',
     'rest_framework.renderers.BrowsableAPIRenderer',

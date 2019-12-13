@@ -272,9 +272,14 @@ RECAPTCHA_USE_SSL = True
 # Stub
 ADMIN_REORDER = []
 
-# Share this cookie between subdomains
-SESSION_COOKIE_NAME = "cscsessionid"
-SESSION_COOKIE_DOMAIN = ".compscicenter.ru"
+SESSION_COOKIE_SECURE = env.bool('DJANGO_SESSION_COOKIE_SECURE', default=True)
+SESSION_COOKIE_DOMAIN = env.str('DJANGO_SESSION_COOKIE_DOMAIN', default='.compscicenter.ru')
+SESSION_COOKIE_NAME = env.str('DJANGO_SESSION_COOKIE_NAME', default='cscsessionid')
+SESSION_COOKIE_SAMESITE = env.str('DJANGO_SESSION_COOKIE_SAMESITE', default=None)
+CSRF_COOKIE_SECURE = env.bool('DJANGO_CSRF_COOKIE_SECURE', default=True)
+CSRF_COOKIE_DOMAIN = env.str('DJANGO_CSRF_COOKIE_DOMAIN', default='.compscicenter.ru')
+CSRF_COOKIE_NAME = env.str('DJANGO_CSRF_COOKIE_NAME', default='csrftoken')
+
 
 # Registration partially used on my.* (see `learning/invitation`)
 INCLUDE_REGISTER_URL = False

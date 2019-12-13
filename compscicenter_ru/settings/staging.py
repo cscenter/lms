@@ -1,27 +1,12 @@
 from .base import *
 
-ALLOWED_HOSTS = [".dev.compscicenter.ru"]
-
 MEDIA_ROOT = str(Path('/shared', 'media'))
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'test_cscdb',
-        'USER': 'csc',
-        'PASSWORD': 'FooBar',
-        'HOST': 'localhost',
-        'PORT': ''
-    }
-}
 
 CACHES['default'] = {
     'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
     'LOCATION': '/tmp/django_cache'
 }
 
-# FIXME: create separated .env for staging
-THUMBNAIL_DEBUG = False
 EMAIL_HOST = '127.0.0.1'
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 1025
@@ -93,4 +78,5 @@ FILE_UPLOAD_HANDLERS = [
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 26214400
 
+THUMBNAIL_DEBUG = False
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.cached_db_kvstore.KVStore'
