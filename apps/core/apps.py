@@ -1,12 +1,15 @@
 from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
+from core.management import create_default_city_branch_user
+
 
 class CoreConfig(AppConfig):
     name = 'core'
     verbose_name = _("Core")
 
     def ready(self):
+        post_migrate.connect(create_default_city_branch_user, sender=self)
         from rest_framework.serializers import ModelSerializer
         # Register checks
         from . import checks
