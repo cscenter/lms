@@ -1,4 +1,4 @@
-- name: Setup application for compsciclub.ru
+- name: Setup application for dev.compscicenter.ru
   hosts: "{{ hosts_override | default(aws_ec2_host) }}"
   user: "{{ aws_ec2_user }}"
   become: yes
@@ -6,10 +6,10 @@
   tasks:
     - import_role:
         name: app
-        vars_from: cs_club.vault.yml
+        vars_from: staging.vault.yml
       vars:
-        main_domain: "compsciclub.ru"
-        site_user: "csclub"
+        main_domain: "dev.compscicenter.ru"
+        site_user: "cscenter"
         site_user_group: "shared"
         app_root: "/home/{{ site_user }}/site"
         repo_root: "{{ app_root }}/repo"
@@ -18,23 +18,25 @@
         media_root: "/shared/media"
         media_directory_permissions: "775"
         backup_root: "/shared/backup_tmp"
-        settings_module_parent_dir: "{{ main_domain|replace('.', '_') }}"
+        settings_module_parent_dir: "compscicenter_ru"
         apps_dir_name: apps
-        app_environment: production
+        app_environment: staging
         setup_cronjobs: no
-        certbot_domains:
-          - "{{ main_domain }}"
-          - "www.{{ main_domain }}"
-          - "kzn.{{ main_domain }}"
-          - "nsk.{{ main_domain }}"
         nginx_configs:
           - "{{ main_domain }}"
+          - "my.{{ main_domain }}"
         certbot_config_dir: "/etc/letsencrypt/live/{{ main_domain }}"
-        rq_workers: []
-        rq_workers_target_service_name: "rqworker_csclub"
-        rq_scheduler_queues: []
+        certbot_domains:
+          - "{{ main_domain }}"
+          - "my.{{ main_domain }}"
+        rq_workers:
+          - default
+          - high
+        rq_workers_target_service_name: "rqworker_cscenter"
+        rq_scheduler_queues:
+          - default
         rq_scheduler_interval: 20
         rq_schedulers_target_service_name: "rqschedulers"
-        processes_num: 3
+        processes_num: 5
         log_to_file: no
         repo_url: git@github.com:cscenter/site.git

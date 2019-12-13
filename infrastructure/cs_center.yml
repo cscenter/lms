@@ -25,11 +25,11 @@
         nginx_configs:
           - "{{ main_domain }}"
           - "my.{{ main_domain }}"
-        certbot_config_dir: "/etc/letsencrypt/live/compscicenter.ru"
+        certbot_config_dir: "/etc/letsencrypt/live/{{ main_domain }}"
         certbot_domains:
           - "{{ main_domain }}"
-          - "www.compscicenter.ru"
-          - "my.compscicenter.ru"
+          - "www.{{ main_domain }}"
+          - "my.{{ main_domain }}"
         rq_workers:
           - default
           - high

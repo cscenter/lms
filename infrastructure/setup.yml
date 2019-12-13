@@ -77,3 +77,10 @@
     - never
     - app-deployment
     - compsciclub.ru
+
+- name: Setup application for dev.compscicenter.ru
+  import_playbook: staging.yml
+  tags:
+    - never
+    - app-deployment
+    - dev.compscicenter.ru
