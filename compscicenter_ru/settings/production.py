@@ -71,12 +71,6 @@ LOGGING = {
     },
 }
 
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = None
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_DOMAIN = '.compscicenter.ru'
-
-
 # django-dbbackup settings
 DBBACKUP_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 DBBACKUP_TMP_DIR = '/shared/backup_tmp'
