@@ -7,10 +7,10 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 
 from .base import *
 
+MEDIA_ROOT = str(Path('/shared', 'media'))
+
 # Default scheme for `core.urls.reverse`
 DEFAULT_URL_SCHEME = "https"
-
-MEDIA_ROOT = str(Path('/shared', 'media'))
 
 # Sentry
 SENTRY_DSN = env("SENTRY_DSN")
