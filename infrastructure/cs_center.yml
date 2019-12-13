@@ -34,6 +34,10 @@
           - default
           - high
         rq_workers_target_service_name: "rqworker_cscenter"
+        rq_scheduler_queues:
+          - default
+        rq_scheduler_interval: 20
+        rq_schedulers_target_service_name: "rqschedulers"
         processes_num: 5
         log_to_file: no
         repo_url: git@github.com:cscenter/site.git

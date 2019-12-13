@@ -110,14 +110,14 @@ server {
     rewrite ^/teaching/(.*)$ https://my.{{ main_domain }}/teaching/$1 redirect;
 
     {% filter indent(width=4) -%}
-    {% include 'compscicenter.ru/_nginx.locations.jinja2' %}
+    {% include '_nginx.locations.jinja2' %}
     {% endfilter %}
 
 
     # Django
     location / {
         {%- filter indent(width=8) -%}
-        {% include 'compscicenter.ru/_nginx.cors.jinja2' %}
+        {% include '_nginx.cors.jinja2' %}
         {% endfilter %}
 
         add_header X-Frame-Options $frame_options;

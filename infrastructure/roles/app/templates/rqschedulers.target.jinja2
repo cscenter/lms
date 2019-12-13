@@ -1,0 +1,6 @@
+[Unit]
+After=network.target
+Requires={% for queue_name in rq_scheduler_queues -%}rqscheduler_{{ queue_name }}.service {% endfor %}
+
+[Install]
+WantedBy=multi-user.target

@@ -6,6 +6,9 @@ media_file_permissions: "664"
 certbot_cert_filename: fullchain.pem
 certbot_privkey_filename: privkey.pem
 certbot_trusted_chain_filename: chain.pem
+rq_scheduler_queues: []
+rq_scheduler_interval: 20
+rq_schedulers_target_service_name: "rqschedulers"
 app_required_vars:
   - main_domain
   - site_user
@@ -27,6 +30,8 @@ app_required_vars:
   - certbot_config_dir
   - rq_workers
   - rq_workers_target_service_name
+  # List of rq queues that support scheduling
+  - rq_scheduler_queues
   - processes_num
   - log_to_file
   - enable_https

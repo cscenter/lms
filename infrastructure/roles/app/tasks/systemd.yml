@@ -19,6 +19,27 @@
     name: "{{ rq_workers_target_service_name }}.target"
     enabled: yes
 
+- name: Create rq scheduler service
+  template:
+    src: rqscheduler.service.jinja2
+    dest: "/etc/systemd/system/rqscheduler_{{ queue_name }}.service"
+  loop: "{{ rq_scheduler_queues }}"
+  loop_control:
+    loop_var: queue_name
+  when: rq_scheduler_queues|length > 0
+
+- name: rq schedulers target for easier management via systemctl
+  template:
+    src: rqschedulers.target.jinja2
+    dest: "/etc/systemd/system/{{ rq_schedulers_target_service_name }}.target"
+  when: rq_scheduler_queues|length > 0 and rq_schedulers_target_service_name is defined
+
+- name: Ensure rqschedulers are enabled after reboot
+  systemd:
+    name: "{{ rq_schedulers_target_service_name }}.target"
+    enabled: yes
+  when: rq_scheduler_queues|length > 0
+
 - name: Force systemd to reread configs and (re)start services
   systemd: daemon_reload=yes
 

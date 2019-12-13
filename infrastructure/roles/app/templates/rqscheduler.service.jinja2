@@ -1,0 +1,20 @@
+[Unit]
+Description="Django redis queue scheduler"
+After=network.target
+Requires=redis.service
+{% if rq_schedulers_target_service_name is defined -%}
+PartOf={{ rq_schedulers_target_service_name }}.target
+{%- endif %}
+
+[Service]
+Type=simple
+User={{ site_user }}
+Group={{ site_user_group }}
+KillSignal=SIGTERM
+Restart=always
+Environment=DJANGO_SETTINGS_MODULE={{ settings_parent_dir_name }}.settings.{{ app_environment }}
+# Note that `manage.py` must be located in the root of the repo directory due to hardcoded python paths
+ExecStart={{ virtualenv_root }}/bin/python {{ repo_root }}/manage.py rqscheduler --queue={{ queue_name }} {% if rq_scheduler_interval is defined %} --interval={{ rq_scheduler_interval }}{% endif %} --pythonpath='{{ repo_root }}/{{ apps_dir_name }}'
+
+[Install]
+WantedBy=multi-user.target
