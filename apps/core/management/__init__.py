@@ -1,11 +1,10 @@
 from django.apps import apps as global_apps
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.management.color import no_style
 from django.db import DEFAULT_DB_ALIAS, connections, router
 
 
-def create_default_city_branch_user(app_config, verbosity=2, interactive=True, using=DEFAULT_DB_ALIAS, apps=global_apps, **kwargs):
+def create_default_city_and_branch(app_config, verbosity=2, interactive=True, using=DEFAULT_DB_ALIAS, apps=global_apps, **kwargs):
     try:
         City = apps.get_model('core', 'City')
     except LookupError:
