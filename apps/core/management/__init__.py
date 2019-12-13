@@ -2,6 +2,7 @@ from django.apps import apps as global_apps
 from django.conf import settings
 from django.core.management.color import no_style
 from django.db import DEFAULT_DB_ALIAS, connections, router
+from django.utils.timezone import now
 
 
 def create_default_city_and_branch(app_config, verbosity=2, interactive=True, using=DEFAULT_DB_ALIAS, apps=global_apps, **kwargs):
@@ -34,8 +35,10 @@ def create_default_city_and_branch(app_config, verbosity=2, interactive=True, us
         if verbosity >= 2:
             print("Creating default City object")
         Branch(pk=1, code=settings.DEFAULT_BRANCH_CODE,
+               site_id=1,
                name='Главное отделение',
-               city_id=settings.DEFAULT_CITY_CODE, site_id=1,
+               established=now().year,
+               city_id=settings.DEFAULT_CITY_CODE,
                time_zone='Europe/Moscow').save(using=using)
 
         # We set an explicit pk instead of relying on auto-incrementation,
