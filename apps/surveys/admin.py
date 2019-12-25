@@ -46,8 +46,8 @@ class CourseSurveyAdmin(admin.ModelAdmin):
             'form_class': TimezoneAwareSplitDateTimeField
         }
     }
-    list_display = ("course", "type", "get_form_actions", "get_survey_actions",
-                    "expire_at_local")
+    list_display = ("course", "type", "get_form_status", "get_form_actions",
+                    "get_survey_actions", "expire_at_local")
     list_filter = (
         'course__branch',
         ('course__semester', AdminRelatedDropdownFilter),
@@ -70,11 +70,17 @@ class CourseSurveyAdmin(admin.ModelAdmin):
             fields = [f for f in fields if f != "email_template"]
         return fields
 
+    @meta(short_description=_("Status"))
+    def get_form_status(self, obj):
+        return obj.form.get_status_display()
+
+    @meta(short_description=_("Form"))
     def get_form_actions(self, obj):
-        form_url = reverse("admin:surveys_form_change", args=[obj.form_id])
-        url = f"<a href='{form_url}'>Редактировать форму</a>"
-        return mark_safe(f"{obj.form.get_status_display()} | {url}")
-    get_form_actions.short_description = _("Status")
+        edit_url = reverse("admin:surveys_form_change", args=[obj.form_id])
+        preview_url = self.get_view_on_site_url(obj)
+        edit_link = f"<a href='{edit_url}'>Редактировать</a>"
+        preview_link = f"<a target='_blank' href='{preview_url}'>Смотреть на сайте</a>"
+        return mark_safe(f"{preview_link} | {edit_link}")
 
     def get_survey_actions(self, obj):
         csv_url = reverse("staff:exports_report_survey_submissions",
