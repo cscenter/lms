@@ -11,6 +11,10 @@ class SurveyTextInput(forms.TextInput):
     template_name = 'surveys/forms/widgets/text.html'
 
 
+class SurveyNumberInput(forms.NumberInput):
+    template_name = 'surveys/forms/widgets/input.html'
+
+
 class SurveyCheckboxInput(forms.CheckboxInput):
     template_name = 'surveys/forms/widgets/checkbox.html'
 

@@ -43,7 +43,9 @@ loaddata:
 	python manage.py loaddata $(DJANGO_POSTFIX) $(src)
 
 clean:
-	find . -name "*.pyc" -print0 -delete
+	find . -type f -name "*.py[co]" -print0 -delete
+	find . -type d -name "__pycache__" -print0 -delete
+	find . -type f -name "*.DS_Store" -print0 -delete
 	-rm -rf htmlcov
 	-rm -rf .coverage
 	-rm -rf build
