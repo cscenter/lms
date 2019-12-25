@@ -109,6 +109,7 @@ class SurveySubmissionsStats:
                         continue
                     db_field = self.db_fields[entry.field_id]
                     if db_field.field_type in [FieldType.TEXT,
+                                               FieldType.NUMBER,
                                                FieldType.TEXTAREA]:
                         field_stats[db_field].append(entry.value)
                     elif db_field.field_type in CHOICE_FIELD_TYPES:
