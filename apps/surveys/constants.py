@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from surveys.widgets import SurveyTextInput, \
     SurveyTextarea, SurveyCheckboxInput, SurveyRadioSelect, \
-    SurveyCheckboxSelectMultiple
+    SurveyCheckboxSelectMultiple, SurveyNumberInput
 from surveys.fields import SurveyChoiceField, SurveyMultipleChoiceField, \
     SurveyMultipleChoiceFreeAnswerField
 
@@ -61,6 +61,7 @@ FIELD_TYPES = (
 FIELD_CLASSES = {
     FieldType.TEXT: forms.CharField,
     FieldType.TEXTAREA: forms.CharField,
+    FieldType.NUMBER: forms.IntegerField,
     FieldType.CHECKBOX: forms.BooleanField,
     FieldType.CHECKBOX_MULTIPLE: SurveyMultipleChoiceField,
     FieldType.CHECKBOX_MULTIPLE_WITH_NOTE: SurveyMultipleChoiceFreeAnswerField,
@@ -75,6 +76,7 @@ FIELD_CLASSES = {
 # Widgets for field types where a specialised widget is required.
 FIELD_WIDGETS = {
     FieldType.TEXT: SurveyTextInput,
+    FieldType.NUMBER: SurveyNumberInput,
     FieldType.TEXTAREA: SurveyTextarea,
     FieldType.CHECKBOX: SurveyCheckboxInput,
     FieldType.CHECKBOX_MULTIPLE: SurveyCheckboxSelectMultiple,
