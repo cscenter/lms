@@ -171,7 +171,7 @@ TEMPLATES = {
             "placeholder": "Расскажите, где вы изучали эту тему раньше?",
             "visibility": FieldVisibility.HIDDEN,
             "input_name": "where_did_you_learn",
-            "css_class": "_additional",
+            "field_css_classes": "_additional",
             "conditional_logic": [
                 {
                     "action_type": "show",
@@ -405,7 +405,7 @@ TEMPLATES = {
             "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.HIDDEN,
-            "css_class": "_additional",
+            "field_css_classes": "_additional",
             "conditional_logic": [
                 {
                     "action_type": "show",
@@ -450,7 +450,7 @@ TEMPLATES = {
             "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.HIDDEN,
-            "css_class": "_additional",
+            "field_css_classes": "_additional",
             "conditional_logic": [
                 {
                     "action_type": "show",
@@ -551,7 +551,7 @@ TEMPLATES = {
             "required": False,
             "field_type": FieldType.TEXTAREA,
             "visibility": FieldVisibility.HIDDEN,
-            "css_class": "_additional",
+            "field_css_classes": "_additional",
             "conditional_logic": [
                 {
                     "action_type": "show",

@@ -104,7 +104,8 @@ class FormBuilder(forms.ModelForm):
             css_class = ""
             if db_field.required:
                 css_class += " required"
-            new_field.widget.attrs["class"] = css_class
+            css_class += f" {db_field.widget_css_classes}"
+            new_field.widget.attrs["class"] = css_class.strip()
             # Crutch
             if not db_field.show_label and db_field.field_type == FieldType.TEXTAREA:
                 new_field.widget.attrs['rows'] = 6
