@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
 const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
+const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
@@ -190,6 +191,10 @@ const common = {
     },
 
     plugins: [
+        new Dotenv({
+            path: path.join(__dirname, '.env'),
+            silent: false,
+        }),
         new BundleTracker({filename: './webpack-stats-v2.json'}),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...
