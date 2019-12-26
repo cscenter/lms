@@ -94,21 +94,6 @@ $card-bg: $white !default;
   }
 }
 
-.card__header.cover {
-  padding: 0;
-
-  .cover__content {
-    @extend .card__content;
-
-    &._big {
-      padding: 80px spacer("4x");
-      @include media-breakpoint-up(md) {
-      padding: 104px spacer("10x");
-      }
-    }
-  }
-}
-
 .card__img { //this wrapper need for IE
   position: relative;
   flex: 0 0 auto;
@@ -152,4 +137,14 @@ $card-bg: $white !default;
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+
+.card__header.cover {
+  // FIXME: Doesn't play well. Share styles with mixin
+  padding: 0;
+
+  //.cover__content {
+  //  @extend .card__header;
+  //}
 }

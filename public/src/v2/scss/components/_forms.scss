@@ -44,7 +44,8 @@ $form-feedback-invalid-color: $red;
 @import "_forms/options";
 @import "_forms/file-input";
 @import "_forms/inputs";
-@import "_forms/select"; // FIXME: move to options?
+@import "_forms/select";
+@import "_forms/survey";
 
 
 
@@ -60,8 +61,7 @@ $form-feedback-invalid-color: $red;
 }
 
 
-.card._form,
-.card._survey {
+.card._form {
   margin-bottom: spacer("10x");
   overflow: hidden;
   border: $border-width solid $gray-lighter;
@@ -133,7 +133,12 @@ $form-feedback-invalid-color: $red;
   &.hidden {
     margin-bottom: 0;
   }
+
+  &._additional {
+    margin-top: -#{spacer("6x")};
+  }
 }
+
 
 // FIXME: how to deal with .card__content padding?
 fieldset {
@@ -149,38 +154,6 @@ fieldset {
 .title-label {
   font-size: $h4-font-size;
   margin-bottom: spacer("3x");
-}
-
-.card._survey {
-  background: $white;
-
-  .card__title {
-    text-align: center;
-    margin-bottom: spacer("10x");
-
-    h1 {
-      margin-bottom: 0;
-    }
-  }
-
-  .card__content .field {
-    margin-bottom: spacer("10x");
-
-    &._additional {
-      margin-top: -#{spacer("6x")};
-    }
-  }
-
-  .survey-label {
-    @extend .h3;
-    font-weight: $font-weight-normal;
-    margin-bottom: spacer("4x");
-
-    .asterisk {
-      font-weight: $font-weight-light;
-      color: $red;
-    }
-  }
 }
 
 .input.free-answer {
