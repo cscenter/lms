@@ -1,4 +1,4 @@
 <div class="ui input">
-<label class="survey-label" for="{{ widget.attrs.id }}">{{ field.label|safe }}</label>
+<label class="title-label survey-label" for="{{ widget.attrs.id }}">{{ field.label|safe }}</label>
 <input type="{{ widget.type }}" name="{{ widget.name }}"{% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
 </div>
