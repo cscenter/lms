@@ -28,4 +28,6 @@ def test_course_survey_detail_deadline(client, mocker, settings):
     response = client.get(url)
     assert response.status_code == 200
     deadline = response.context_data["survey_deadline"]
-    assert expire_at.astimezone(msk_tz).strftime("%H:%M") in deadline
+    hour = int(expire_at.astimezone(msk_tz).strftime("%H"))
+    minutes = int(expire_at.astimezone(msk_tz).strftime("%M"))
+    assert f"{hour}:{minutes}" in deadline
