@@ -44,6 +44,11 @@
 nav.cover__content {
   overflow: hidden;
   padding: spacer("4x") spacer("4x") 0;
+
+  &._abs {
+    position: absolute;
+    width: 100%;
+  }
 }
 
 

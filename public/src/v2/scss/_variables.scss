@@ -16,17 +16,18 @@
 //
 
 // stylelint-disable
-$white:    #fff;
-$black:    #1d1d1d;
-$blue:    #357A9C;
-$teal:    #07c39f;
-$green:   #30BD4C;
-$red:     #DB3131;
+$black:         #1d1d1d;
+$blue:          #357A9C;
+$green:         #30BD4C;
 $gray-lighter:  #ecf0f2;
 $gray-light:    #c0c9ce;
 $gray-dark:     #75828a;
 $gray-darker:   #374148;
 $gray-disabled: #717374;
+$orange: #ffa726;
+$red:     #DB3131;
+$teal:    #07c39f;
+$white:    #fff;
 
 $colors: (
   "white":        $white,
@@ -59,14 +60,6 @@ $btn-colors: (
   "success":    $green,
   "danger":     $red,
   "white":      $white
-);
-
-// Messages
-$message-colors: (
-  "info"   :    $blue,
-  "warning":    #f59a0c,
-  "success":    $green,
-  "danger":     $red
 );
 
 // stylelint-enable
