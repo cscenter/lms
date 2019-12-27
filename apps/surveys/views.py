@@ -52,7 +52,7 @@ class CourseSurveyDetailView(CourseURLParamsMixin, FormView):
         # timezone of the student. Let's use msk timezone for everyone
         context['survey_deadline'] = survey.expire_at_local(
             tz=Branches.get_choice(Branches.SPB).timezone,
-            format="j E H:i")
+            format="j E в G:i")
         return context
 
 

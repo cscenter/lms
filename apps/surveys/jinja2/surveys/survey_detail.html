@@ -5,7 +5,7 @@
 {% block body_attrs %}class="_dark" data-init-sections="surveys"{% endblock body_attrs %}
 
 {% block content %}
-<div class="container page-content _survey">
+<div class="container page-content p-xs-0">
     <div class="row content-center no-gutters">
         <div class="col-lg-8">
             {% if request.user.is_curator and not form.survey.is_published %}
@@ -14,22 +14,22 @@
                     Опрос ещё не опубликован. <a target="_blank" href="{{ url("admin:surveys_form_change", object_id=form.survey.form_id) }}">Редактировать форму опроса.</a>
                 </div>
             {% endif %}
-            <div class="card _survey">
-                <div class="card__title _inverted">
-                    <p>Опрос по курсу</p>
-                    <h1>{{ form.survey.title|safe }}</h1>
-                </div>
-                <div class="card__content">
-                    <div class="message _info mb-8">
-                        Дата окончания опроса &mdash; {{ survey_deadline }} (московское время)
+            <div class="card _survey border-xs-0">
+                <div class="card__header text-center cover">
+                    <div class="cover__content _big py-8">
+                        <h4 class="mb-2">Опрос по курсу</h4>
+                        <h1>{{ form.survey.title|safe }}</h1>
                     </div>
+                </div>
+                <div class="card__content _big">
+                    <p class="text-warning">Опрос закроется {{ survey_deadline }} по московскому времени.</p>
                     <form action="" class="ui form" method="post">
                         {% csrf_token %}
                         {{ form.non_field_errors() }}
                         {% if form.survey.form.description %}{{ form.survey.form.description }}{% endif %}
                         {{ form|as_survey }}
                         <div class="row">
-                            <div class="field col-lg-auto">
+                            <div class="col-lg-auto mb-2">
                                 <button type="submit" class="btn _primary _m-wide">Отправить</button>
                             </div>
                         </div>
