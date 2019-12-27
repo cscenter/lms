@@ -1,0 +1,31 @@
+{% extends "v2/layouts/inner.jinja2" %}
+
+{% import "v2/components/forms/_macros.jinja2" as macros %}
+
+{% block content %}
+    <div class="container page-content">
+        <div class="row">
+            <div class="col-lg-9">
+                <h2>States</h2>
+                <table>
+                    <tr>
+                        <td>
+                            Enabled Selected<br>
+                            <label class="ui option checkbox">
+                                <input type="checkbox" class="control__input">
+                                <span class="control__indicator"></span>
+                            </label>
+
+                        </td>
+                        <td>
+                            Disabled Selected
+                        </td>
+                        <td>Hover Selected</td>
+                        <td>Focus Selected</td>
+                        <td>Pressed Selected</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

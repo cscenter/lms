@@ -1,5 +1,7 @@
 {% extends "v2/layouts/inner.jinja2" %}
 
+{% import "v2/components/forms/_macros.jinja2" as form_macros %}
+
 {% block sprites %}
     <script type="text/javascript">
         window.__CSC__.sprites.push("{{ static("v2/dist/img/sprites/ui.svg") }}");
@@ -152,6 +154,13 @@
                         </div>
                         <div class="card__content">
                             <div class="row">
+                                <div class="field col-12">
+                                    <label for="">Ваш пол</label>
+                                    <div class="grouped inline pt-0">
+                                        {{ form_macros.radio_option(input_name='gender', title='Мужской', value='m') }}
+                                        {{ form_macros.radio_option(input_name='gender', title='Женский', value='f') }}
+                                    </div>
+                                </div>
                                 <div class="field col-12">
                                     <div class="ui input">
                                         <label for="">Ф.И.О.</label>

@@ -5,6 +5,11 @@
 // INSTEAD OF REMOVING OR OVERRIDING STYLES, ADD @if statement to track changes
 $reboot-enable-ul-css: false;
 $reboot-ie-scrollbar-autohide: true; // default - false
+$font-weight-base: $font-weight-normal !default;
+$headings-margin-bottom: spacer("4x");
+$mark-padding: .2em !default;
+$mark-bg: #fcf8e3 !default;
+$label-margin-bottom: spacer("1x");
 
 // Reboot
 //
@@ -432,6 +437,11 @@ legend {
   line-height: inherit;
   color: inherit; // 2
   white-space: normal; // 1
+}
+
+mark {
+  padding: $mark-padding;
+  background-color: $mark-bg;
 }
 
 progress {

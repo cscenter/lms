@@ -12,8 +12,8 @@
                 {% set course_tabs = [
                     {'target': 'practice', 'name': 'Практики', 'active': true, 'url': '#'},
                     {'target': 'nir', 'name': 'Научно-исследовательские работы', 'active': false, 'url': '#'}
-                    ] %}
-                {{ macros.tabs(course_tabs, modifiers='scrollable mb-4') }}
+                ] %}
+                {% call macros.scrollable() %}{{ macros.tabs(tabs) }}{% endcall %}
             </div>
             <div class="col-lg-9 order-2 order-lg-1">
                 <div class="tab-content">

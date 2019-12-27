@@ -27,15 +27,15 @@
   .nav-link {
     border: $border-width solid $border-color;
     padding: spacer("1x") spacer("4x");
-    color: $gray-dark;
+    color: $action-base-color;
     opacity: 1;
 
     &.disabled {
-      color: $input-disabled-bg;
-      background-color: $control-disabled-bg;
+      color: $action-disabled-color;
+      background-color: $action-disabled-bg;
       border-color: transparent;
       &:hover {
-        background-color: $control-disabled-bg;
+        background-color: $action-disabled-bg;
       }
     }
     &:hover {
@@ -46,8 +46,8 @@
   .nav-link.active,
   .nav-item.show .nav-link {
     color: $white;
-    background-color: $control-checked-bg;
-    border-color: $control-checked-bg;
+    background-color: $action-selected-bg;
+    border-color: $action-selected-bg;
   }
 
   .dropdown-menu {
