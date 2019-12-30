@@ -8,12 +8,12 @@
 <div class="container page-content p-xs-0">
     <div class="row content-center no-gutters">
         <div class="col-lg-8">
-            {% if request.user.is_curator and not form.survey.is_published %}
-                <div class="message _danger mb-8">
-                    <h4>Предварительный просмотр</h4>
-                    Опрос ещё не опубликован. <a target="_blank" href="{{ url("admin:surveys_form_change", object_id=form.survey.form_id) }}">Редактировать форму опроса.</a>
+            {% if request.user.is_curator and not form.survey.is_published%}
+                <div class="message mb-8 _danger">
+                    <b>Опрос не опубликован</b>. Предварительный просмотр.
                 </div>
             {% endif %}
+
             <div class="card _survey border-xs-0">
                 <div class="card__header text-center cover">
                     <div class="cover__content _big py-8">
@@ -35,6 +35,13 @@
                         </div>
                     </form>
                 </div>
+                {% if request.user.is_curator %}
+                    <div class="card__meta">
+                        <div class="message _warning">
+                            <a target="_blank" href="{{ url("admin:surveys_form_change", object_id=form.survey.form_id) }}">Редактировать в админ. разделе сайта</a>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
