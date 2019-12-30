@@ -147,7 +147,7 @@ class ApplicationFormView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         active_campaigns = (Campaign.get_active()
-                            .annotate(value=F('branch_id'),
+                            .annotate(value=F('branch__code'),
                                       label=F('branch__name'))
                             .values('value', 'label', 'id'))
         show_form = len(active_campaigns) > 0
