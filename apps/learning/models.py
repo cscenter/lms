@@ -292,7 +292,7 @@ class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
                    self.assignmentcomment_set(manager='published').all())
 
     @cached_property
-    def state(self):
+    def state(self) -> ChoiceItem:
         score = self.score
         passing_score = self.assignment.passing_score
         maximum_score = self.assignment.maximum_score

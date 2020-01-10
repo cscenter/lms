@@ -50,7 +50,7 @@
                                 {% endif %}
                             </td>
                             <td>{{ stock.available_copies }}</td>
-                            {% if user.is_curator %}<td>{{ stock.branch.abbr }}</td>{% endif %}
+                            {% if user.is_curator %}<td>{{ stock.branch.name }}</td>{% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>

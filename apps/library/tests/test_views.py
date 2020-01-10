@@ -2,6 +2,7 @@ import pytest
 from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
+from core.tests.factories import BranchFactory
 from core.urls import reverse
 from learning.settings import Branches
 from library.tests.factories import BorrowFactory, StockFactory
@@ -52,13 +53,15 @@ def test_user_detail(client, curator):
 
 @pytest.mark.django_db
 def test_branch_support(client):
-    student = StudentFactory(branch__code=Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    student = StudentFactory(branch=branch_spb)
     borrow_spb = BorrowFactory(student=student,
-                               stock__branch__code=Branches.SPB,
+                               stock__branch=branch_spb,
                                stock__copies=12)
     assert borrow_spb.stock.available_copies == 11
     borrow_nsk = BorrowFactory(student=student,
-                               stock__branch__code=Branches.NSK,
+                               stock__branch=branch_nsk,
                                stock__copies=42)
     borrow_spb.stock.refresh_from_db()
     assert borrow_spb.stock.available_copies == 11
@@ -69,8 +72,8 @@ def test_branch_support(client):
     response = client.get(url)
     assert len(response.context['stocks']) == 2
     assert smart_bytes("Отделение") in response.content
-    assert smart_bytes(str(Branches.get_choice(Branches.SPB).abbr)) in response.content
-    assert smart_bytes(str(Branches.get_choice(Branches.NSK).abbr)) in response.content
+    assert smart_bytes(branch_spb.name) in response.content
+    assert smart_bytes(branch_nsk.name) in response.content
     client.login(student)
     response = client.get(url)
     assert len(response.context['stocks']) == 1

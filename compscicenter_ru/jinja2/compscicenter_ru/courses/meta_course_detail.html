@@ -33,13 +33,13 @@
                         <h2 class="mt-8">Прочтения курса</h2>
                         {% call macros.scrollable() %}{{ macros_nav.tabs(tabs) }}{% endcall %}
                         <div class="tab-content">
-                            {% for branch_code, courses in grouped_courses.items() -%}
-                                {% with tab = tabs[branch_code] %}
+                            {% for branch, courses in grouped_courses.items() -%}
+                                {% with tab = tabs[branch.code] %}
                                 <div class="tab-pane {% if tab.active %} show active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
                                 {% endwith %}
                                     <div class="message _info mb-6">
-                                        {% if branch_code in study_programs %}
-                                            {% with sps = study_programs[branch_code] -%}
+                                        {% if branch.code in study_programs %}
+                                            {% with sps = study_programs[branch.code] -%}
                                                 <p>Базовый курс для направлени{% if sps|length > 1 %}й{% else %}я{% endif %} {% for study_program in sps -%}
                                                     <a class="text-nowrap" href="{{ url('on_campus_program_detail', discipline_code=study_program.academic_discipline.code) }}?branch={{ study_program.branch.code }}">{{ study_program.academic_discipline.name }}</a>
                                                 {%- if not loop.last %}, {% endif %}{% endfor %}.</p>

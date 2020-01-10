@@ -4,7 +4,7 @@ from django.utils.encoding import smart_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
-from core.tests.utils import now_for_branch
+from core.timezone import now_local
 from core.urls import reverse_lazy, reverse
 from courses.tests.factories import SemesterFactory
 from learning.settings import GradeTypes, Branches
@@ -220,7 +220,8 @@ def test_project_detail_student_participant(client):
     response = client.get(project.get_absolute_url())
     assert "can_enroll" in response.context
     assert response.context["can_enroll"] is False
-    today = now_for_branch(Branches.SPB).date()
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today = now_local(branch_spb.get_timezone()).date()
     rp = ReportingPeriodFactory(start_on=today + timedelta(days=1),
                                 end_on=today + timedelta(days=2),
                                 term=semester, branch=None)
@@ -266,13 +267,14 @@ def test_project_detail_student_participant_notifications(client, curator):
     # This curator not in reviewers group and doesn't receive notifications
     curator2 = CuratorFactory()
     semester = SemesterFactory.create_current()
-    today = now_for_branch(Branches.SPB).date()
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today = now_local(branch_spb.get_timezone()).date()
     rp = ReportingPeriodFactory(term=semester, start_on=today, branch=None,
                                 end_on=today + timedelta(days=1))
-    student = StudentFactory(branch__code=Branches.SPB)
+    student = StudentFactory(branch=branch_spb)
     reviewer = ProjectReviewerFactory()
     project = ProjectFactory(students=[student], reviewers=[reviewer],
-                             semester=semester, branch__code=Branches.SPB)
+                             semester=semester, branch=branch_spb)
     client.login(student)
     form = {
         f"{ReportForm.prefix}-reporting_period": rp.id,

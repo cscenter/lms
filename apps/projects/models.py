@@ -203,7 +203,7 @@ class ReportingPeriod(models.Model):
         if self.project_type:
             parts.append(ProjectTypes.labels[self.project_type].lower())
         if self.branch_id:
-            parts.append(self.branch.abbr.lower())
+            parts.append(self.branch.name)
         suffix = " [" + ", ".join(parts) + "]" if parts else ""
         return f"{self.term}, {start_on}-{end_on}{suffix}"
 
