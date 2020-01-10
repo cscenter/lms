@@ -23,21 +23,23 @@ def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:
     return tz.localize(datetime.datetime(2017, 1, 1)).utcoffset()
 
 
-SPB_OFFSET = get_timezone_gmt_offset(Branches.get_timezone(Branches.SPB))
-NSK_OFFSET = get_timezone_gmt_offset(Branches.get_timezone(Branches.NSK))
 
 
 @pytest.mark.django_db
 def test_course_news(settings, client):
     settings.LANGUAGE_CODE = 'ru'
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    spb_offset = get_timezone_gmt_offset(branch_spb.get_timezone())
+    nsk_offset = get_timezone_gmt_offset(branch_nsk.get_timezone())
     curator = CuratorFactory()
     client.login(curator)
-    course = CourseFactory(branch__code=Branches.SPB)
+    course = CourseFactory(branch=branch_spb)
     created_utc = datetime.datetime(2017, 1, 13, 20, 0, 0, 0, tzinfo=pytz.UTC)
     news = CourseNewsFactory(course=course, created=created_utc)
-    created_local = created_utc.astimezone(Branches.get_timezone(Branches.SPB))
+    created_local = created_utc.astimezone(branch_spb.get_timezone())
     assert created_local.utcoffset() == datetime.timedelta(
-        seconds=SPB_OFFSET.total_seconds())
+        seconds=spb_offset.total_seconds())
     assert created_local.hour == 23
     date_str = "{:02d}".format(created_local.day)
     assert date_str == "13"
@@ -49,9 +51,9 @@ def test_course_news(settings, client):
     course.branch = Branch.objects.get_by_natural_key(Branches.NSK,
                                                       settings.SITE_ID)
     course.save()
-    created_local = created_utc.astimezone(Branches.get_timezone(Branches.NSK))
+    created_local = created_utc.astimezone(branch_nsk.get_timezone())
     assert created_local.utcoffset() == datetime.timedelta(
-        seconds=NSK_OFFSET.total_seconds())
+        seconds=nsk_offset.total_seconds())
     assert created_local.hour == 3
     assert created_local.day == 14
     date_str = "{:02d}".format(created_local.day)
@@ -117,11 +119,11 @@ def test_course_assignment_timezone(settings, client):
     """
     Course teacher always must see assignments in the timezone of the course
     """
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
     # 12 january 2017 23:59 (time in UTC)
     deadline_at = datetime.datetime(2017, 1, 12, 23, 59, 0, 0,
                                     tzinfo=pytz.UTC)
-    branch_spb = BranchFactory(code=Branches.SPB)
-    branch_nsk = BranchFactory(code=Branches.NSK)
     course_spb = CourseFactory(branch=branch_spb)
     course_spb.additional_branches.add(branch_nsk)
     assignment = AssignmentFactory(deadline_at=deadline_at, course=course_spb)
@@ -130,11 +132,11 @@ def test_course_assignment_timezone(settings, client):
     client.login(teacher_nsk)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] == Branches.get_timezone(Branches.NSK)
+    assert response.context["tz_override"] == branch_nsk.get_timezone()
     teacher_nsk.add_group(Roles.STUDENT)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] == Branches.get_timezone(Branches.NSK)
+    assert response.context["tz_override"] == branch_nsk.get_timezone()
     # Don't override timezone if current authenticated user is an actual
     # teacher of the course
     CourseTeacherFactory(course=course_spb, teacher=teacher_nsk)

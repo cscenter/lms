@@ -9,7 +9,7 @@ from admission.tests.factories import InterviewFactory, \
 from core.admin import get_admin_url
 from core.models import Branch
 from core.urls import reverse
-from core.tests.factories import LocationFactory
+from core.tests.factories import LocationFactory, BranchFactory
 
 # FIXME: этот тест нужно переписать на tz aware datetime field, изначально тест и был так написан, но потом был удалён invitation.stream
 from learning.settings import Branches
@@ -40,9 +40,9 @@ def test_model(settings):
     assert invitation.expired_at.hour == HOUR
     assert invitation.expired_at.minute == 0
     # Update with nsk timezone
-    nsk_timezone = Branches.get_timezone(Branches.NSK)
+    branch_nsk = BranchFactory(code=Branches.NSK)
     value = invitation.expired_at.replace(tzinfo=None)
-    invitation.expired_at = nsk_timezone.localize(value)
+    invitation.expired_at = branch_nsk.get_timezone().localize(value)
     invitation.save()
     nsk_offset = invitation.expired_at.utcoffset()
     invitation.refresh_from_db()  # nsk tz -> UTC
@@ -52,15 +52,17 @@ def test_model(settings):
 
 @pytest.mark.django_db
 def test_get_timezone(settings):
+    branch_nsk = BranchFactory(code=Branches.NSK)
     date = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    interview = InterviewFactory(applicant__campaign__branch__code=Branches.NSK,
+    interview = InterviewFactory(applicant__campaign__branch=branch_nsk,
                                  date=date)
-    assert interview.get_timezone() == Branches.get_timezone(Branches.NSK)
+    assert interview.get_timezone() == branch_nsk.get_timezone()
     branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
     interview.applicant.campaign.branch = branch_spb
     interview.applicant.campaign.save()
     interview.refresh_from_db()
-    assert interview.get_timezone() == Branches.get_timezone(Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    assert interview.get_timezone() == branch_spb.get_timezone()
 
 
 @pytest.mark.skip("Нужно обязательно переписать этот тест на другое поле, которое точно не изменится :<")
@@ -214,7 +216,8 @@ def test_interview_detail(settings, client, curator):
     interview = InterviewFactory(date=dt_at,
                                  applicant__campaign__branch__code=Branches.NSK)
     date_in_utc = interview.date
-    localized = date_in_utc.astimezone(Branches.get_timezone(Branches.NSK))
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    localized = date_in_utc.astimezone(branch_nsk.get_timezone())
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "22:00"
     response = client.get(interview.get_absolute_url())
@@ -225,7 +228,7 @@ def test_interview_detail(settings, client, curator):
     branch_spb = Branch.objects.get(code=Branches.SPB, site_id=settings.SITE_ID)
     interview.applicant.campaign.branch = branch_spb
     interview.applicant.campaign.save()
-    localized = date_in_utc.astimezone(Branches.get_timezone(Branches.SPB))
+    localized = date_in_utc.astimezone(branch_spb.get_timezone())
     time_str = "{:02d}:{:02d}".format(localized.hour, localized.minute)
     assert time_str == "18:00"
     response = client.get(interview.get_absolute_url())

@@ -4,6 +4,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from core.models import Branch
+from core.tests.factories import BranchFactory
 from courses.constants import SemesterTypes
 from courses.models import Semester, Assignment
 from courses.tests.factories import CourseNewsFactory, SemesterFactory, \
@@ -16,13 +17,15 @@ from learning.settings import Branches
 
 @pytest.mark.django_db
 def test_news_get_timezone(settings):
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
     news = CourseNewsFactory(course__branch__code=Branches.NSK)
-    assert news.get_timezone() == Branches.get_timezone(Branches.NSK)
+    assert news.get_timezone() == branch_nsk.get_timezone()
     news.course.branch = Branch.objects.get(code=Branches.SPB,
                                             site_id=settings.SITE_ID)
     news.course.save()
     news.refresh_from_db()
-    assert news.get_timezone() == Branches.get_timezone(Branches.SPB)
+    assert news.get_timezone() == branch_spb.get_timezone()
 
 
 @pytest.mark.django_db
