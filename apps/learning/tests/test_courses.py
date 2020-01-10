@@ -43,15 +43,15 @@ def test_detail_view_timezone(settings, client):
     client.login(teacher_nsk)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] == Branches.get_timezone(Branches.NSK)
+    assert response.context["tz_override"] == branch_nsk.get_timezone()
     client.login(student_nsk)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] == Branches.get_timezone(Branches.NSK)
+    assert response.context["tz_override"] == branch_nsk.get_timezone()
     client.login(student_spb)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
-    assert response.context["tz_override"] == Branches.get_timezone(Branches.SPB)
+    assert response.context["tz_override"] == branch_spb.get_timezone()
     # Actual teacher of the course
     CourseTeacherFactory(course=course_spb, teacher=teacher_nsk)
     client.login(teacher_nsk)

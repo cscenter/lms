@@ -513,6 +513,8 @@ def test_assignment_deadline_display_for_teacher(settings, client):
 @pytest.mark.django_db
 def test_deadline_l10n_on_student_assignments_page(settings, client):
     settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
     FORMAT_DATE_PART = 'd E Y'
     FORMAT_TIME_PART = 'H:i'
     # This day will be in archive block (1 jan 2017 15:00 in UTC)
@@ -539,7 +541,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Test `upcoming` block
-    now_year, _ = get_current_term_pair(Branches.get_timezone(Branches.SPB))
+    now_year, _ = get_current_term_pair(branch_spb.get_timezone())
     dt = dt.replace(year=now_year + 1, month=2, hour=14)
     assignment.deadline_at = dt
     assignment.save()
@@ -556,18 +558,18 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     # Deadlines depends on authenticated user timezone
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     assignment_nsk = AssignmentFactory(deadline_at=dt,
-                                       course__branch__code=Branches.NSK,
+                                       course__branch=branch_nsk,
                                        course__semester=current_term)
     StudentAssignmentFactory(assignment=assignment_nsk, student=student)
     client.login(student)
     response = client.get(url_learning_assignments)
     assert len(response.context["assignment_list"]) == 2
-    assert response.context["tz_override"] == Branches.get_timezone(Branches.SPB)
+    assert response.context["tz_override"] == branch_spb.get_timezone()
     year_part = formats.date_format(assignment_nsk.deadline_at_local(),
                                     FORMAT_DATE_PART)
     assert year_part == "01 января 2017"
     time_part = formats.date_format(
-        assignment_nsk.deadline_at_local(tz=Branches.get_timezone(Branches.SPB)),
+        assignment_nsk.deadline_at_local(tz=branch_spb.get_timezone()),
         FORMAT_TIME_PART)
     assert time_part == "18:00"
     html = BeautifulSoup(response.content, "html.parser")
@@ -592,10 +594,11 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
 @pytest.mark.django_db
 def test_first_comment_after_deadline(client):
     dt = datetime.datetime(2017, 1, 1, 23, 58, 0, 0, tzinfo=pytz.UTC)
-    branch = BranchFactory(code=Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course__branch=branch)
-    sa = StudentAssignmentFactory(assignment=assignment, student__branch=branch)
+                                   course__branch=branch_spb)
+    sa = StudentAssignmentFactory(assignment=assignment,
+                                  student__branch=branch_spb)
     student = sa.student
     EnrollmentFactory(student=student, course=assignment.course)
     comment = AssignmentCommentFactory.create(student_assignment=sa,

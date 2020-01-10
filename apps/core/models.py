@@ -11,7 +11,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
-from learning.settings import Branches
 
 
 BranchKey = Union[int, "BranchNaturalKey"]
@@ -152,10 +151,6 @@ class Branch(TimezoneAwareModel, models.Model):
     @cached_property
     def _timezone(self):
         return pytz.timezone(self.time_zone)
-
-    @property
-    def abbr(self):
-        return Branches.get_choice(self.code).abbr
 
 
 class Location(TimezoneAwareModel, models.Model):

@@ -10,7 +10,6 @@ from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, LearningSpace, CourseReview
 from courses.utils import get_current_term_pair, get_term_by_index
-from learning.settings import Branches
 from users.tests.factories import TeacherFactory
 
 __all__ = (
@@ -42,8 +41,8 @@ class SemesterFactory(factory.DjangoModelFactory):
     def create_current(cls, **kwargs):
         """Get or create semester for current term"""
         branch_code = kwargs.pop('for_branch', settings.DEFAULT_BRANCH_CODE)
-        tz = Branches.get_choice(branch_code).timezone
-        year, type = get_current_term_pair(tz)
+        branch = BranchFactory(code=branch_code)
+        year, type = get_current_term_pair(branch.get_timezone())
         kwargs.pop('year', None)
         kwargs.pop('type', None)
         return cls.create(year=year, type=type, **kwargs)
