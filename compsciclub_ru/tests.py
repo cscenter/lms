@@ -4,7 +4,8 @@ import datetime
 import pytest
 from django.utils.encoding import smart_bytes
 
-from core.tests.utils import now_for_branch
+from core.tests.factories import BranchFactory
+from core.timezone import now_local
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.models import Enrollment
@@ -33,7 +34,9 @@ def test_courses_list(client):
 def test_enrollment(client, settings):
     """ Club Student can enroll only on open courses """
     # settings.SITE_ID = settings.CLUB_SITE_ID
-    tomorrow = now_for_branch(Branches.SPB) + datetime.timedelta(days=1)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today = now_local(branch_spb.get_timezone())
+    tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
     co = CourseFactory(semester=term, is_open=False)
     assert co.enrollment_is_open

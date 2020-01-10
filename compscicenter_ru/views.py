@@ -527,13 +527,12 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
                    .select_related("meta_course", "semester", "branch")
                    .prefetch_related(lecturers)
                    .order_by('-semester__index'))
-        grouped = bucketize(courses, key=lambda c: c.branch.code)
+        grouped = bucketize(courses, key=lambda c: c.branch)
         # Aggregate tabs
         tabs = TabList()
-        for branch_code in grouped:
-            if grouped[branch_code]:
-                branch = Branches.get_choice(branch_code)
-                tabs.add(Tab(target=branch.value, name=branch.label,
+        for branch in grouped:
+            if grouped[branch]:
+                tabs.add(Tab(target=branch.code, name=branch.name,
                              order=branch.order))
         if tabs:
             selected_tab = self.request.GET.get('branch', Branches.SPB)

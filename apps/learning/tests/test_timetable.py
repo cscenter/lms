@@ -2,7 +2,7 @@ import pytest
 from dateutil.relativedelta import relativedelta
 
 from auth.mixins import PermissionRequiredMixin
-from core.tests.utils import now_for_branch
+from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
 from courses.calendar import WeekEventsCalendar, MonthFullWeeksEventsCalendar
@@ -46,7 +46,8 @@ def test_teacher_timetable(client):
     assert response.status_code == 200
     events = flatten_events(response.context['calendar'])
     assert len(events) == 0
-    today_spb = now_for_branch(Branches.SPB).date()
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today_spb = now_local(branch_spb.get_timezone()).date()
     CourseClassFactory.create_batch(3, course__teachers=[teacher],
                                     date=today_spb)
     response = client.get(timetable_url)
@@ -95,7 +96,8 @@ def test_student_timetable(client):
     calendar = response.context['calendar']
     assert isinstance(calendar, WeekEventsCalendar)
     assert len(flatten_events(calendar)) == 0
-    today_spb = now_for_branch(Branches.SPB).date()
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today_spb = now_local(branch_spb.get_timezone()).date()
     CourseClassFactory.create_batch(3, course=co, date=today_spb)
     response = client.get(timetable_url)
     calendar = response.context['calendar']

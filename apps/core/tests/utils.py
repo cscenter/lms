@@ -101,9 +101,3 @@ class CSCTestCase(TestCase):
         # FIXME:disable for abs path only?
         kwargs['fetch_redirect_response'] = False
         super().assertRedirects(response, expected_url, *args, **kwargs)
-
-
-def now_for_branch(branch_code=settings.DEFAULT_BRANCH_CODE):
-    from core.timezone import now_local
-    tz = Branches.get_choice(Branches.SPB).timezone
-    return now_local(tz)

@@ -8,17 +8,17 @@ import pytest
 from admission.tests.factories import CampaignFactory, ApplicantFactory, \
     UniversityFactory
 from admission.views import SESSION_LOGIN_KEY
-from core.tests.utils import now_for_branch
+from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
 from learning.settings import Branches
-from core.tests.factories import BranchFactory
 
 
 @pytest.mark.django_db
 def test_application_form_inactive_or_past_campaign(client):
     url = reverse("public-api:v2:applicant_create")
-    today = now_for_branch(Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today = now_local(branch_spb.get_timezone())
     campaign = CampaignFactory(current=True, branch__code=Branches.SPB,
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))
@@ -39,7 +39,8 @@ def test_application_form_inactive_or_past_campaign(client):
 def test_application_form_preferred_study_programs(client):
     """`preferred_study_programs` is mandatory for on-campus branches"""
     url = reverse("public-api:v2:applicant_create")
-    today = now_for_branch(Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today = now_local(branch_spb.get_timezone())
     campaign = CampaignFactory(current=True, branch__code=Branches.SPB,
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))
@@ -65,7 +66,8 @@ def test_application_form_preferred_study_programs(client):
 def test_application_form_living_place(client):
     """`living_place` is mandatory for distance branch"""
     url = reverse("public-api:v2:applicant_create")
-    today = now_for_branch(Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today = now_local(branch_spb.get_timezone())
     branch = BranchFactory(code=Branches.DISTANCE, city=None)
     campaign = CampaignFactory(current=True,
                                branch=branch,

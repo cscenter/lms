@@ -64,9 +64,10 @@ def test_meta_course_detail(client, settings):
     assert mc.description.encode() in response.content
     grouped_courses = response.context_data['grouped_courses']
     assert len(grouped_courses) == 1
-    assert Branches.SPB in grouped_courses
-    assert {c.pk for c in grouped_courses[Branches.SPB]} == {course1.pk,
-                                                             course2.pk}
+    branch_spb = BranchFactory(code=Branches.SPB)
+    assert branch_spb in grouped_courses
+    assert {c.pk for c in grouped_courses[branch_spb]} == {course1.pk,
+                                                           course2.pk}
     assert 'tabs' in response.context_data
     assert len(response.context_data['tabs']) == 1
     # Relocate 1 course to the city out of the cs center branches
@@ -76,7 +77,7 @@ def test_meta_course_detail(client, settings):
     course2.save()
     response = client.get(meta_course_url)
     grouped_courses = response.context_data['grouped_courses']
-    assert {c.pk for c in grouped_courses[Branches.SPB]} == {course1.pk}
+    assert {c.pk for c in grouped_courses[branch_spb]} == {course1.pk}
     # Return to another cs center branch
     course2.branch = Branch.objects.get(code=Branches.NSK,
                                         site_id=settings.SITE_ID)

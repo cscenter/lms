@@ -1,14 +1,13 @@
+import pytz
 from django.contrib import messages
 from django.http import Http404
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.views.generic import FormView
 from vanilla import TemplateView
 
 from core.exceptions import Redirect
 from core.urls import reverse
-from courses.models import Course
 from courses.views.mixins import CourseURLParamsMixin
-from learning.settings import Branches
 from surveys.forms import FormBuilder
 from surveys.models import CourseSurvey
 
@@ -51,7 +50,7 @@ class CourseSurveyDetailView(CourseURLParamsMixin, FormView):
         # Course survey is anonymous so we can't show deadline in the
         # timezone of the student. Let's use msk timezone for everyone
         context['survey_deadline'] = survey.expire_at_local(
-            tz=Branches.get_choice(Branches.SPB).timezone,
+            tz=pytz.timezone('Europe/Moscow'),
             format="j E в G:i")
         return context
 

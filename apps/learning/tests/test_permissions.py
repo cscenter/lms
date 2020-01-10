@@ -4,7 +4,7 @@ import pytest
 
 from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
-from core.tests.utils import now_for_branch
+from core.timezone import now_local
 from courses.models import Course
 from courses.tests.factories import CourseFactory, SemesterFactory, \
     AssignmentFactory
@@ -115,7 +115,8 @@ def test_course_access_role_student(inactive_status):
 @pytest.mark.django_db
 @pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
 def test_enroll_in_course(inactive_status, settings):
-    today_local = now_for_branch(Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today_local = now_local(branch_spb.get_timezone())
     yesterday = today_local - datetime.timedelta(days=1)
     tomorrow = today_local + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(for_branch=settings.DEFAULT_BRANCH_CODE,
@@ -154,7 +155,8 @@ def test_enroll_in_course(inactive_status, settings):
 
 @pytest.mark.django_db
 def test_leave_course():
-    today = now_for_branch(Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today = now_local(branch_spb.get_timezone())
     yesterday = today - datetime.timedelta(days=1)
     future = today + datetime.timedelta(days=3)
     term = SemesterFactory.create_current(enrollment_end_at=future.date())
@@ -176,7 +178,8 @@ def test_leave_course():
 
 @pytest.mark.django_db
 def test_enroll_in_course_by_invitation():
-    today = now_for_branch(Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    today = now_local(branch_spb.get_timezone())
     yesterday = today - datetime.timedelta(days=1)
     tomorrow = today + datetime.timedelta(days=1)
     branch_spb = BranchFactory(code=Branches.SPB)
