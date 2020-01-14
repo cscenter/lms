@@ -459,7 +459,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
                                     current_year + 1)),
             "current_year": enrollment_year,
             "current_branch": branch,
-            "branches": Branches
+            "branches": Branch.objects.filter(site_id=settings.SITE_ID).order_by('order')
         }
         return context
 

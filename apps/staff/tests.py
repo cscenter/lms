@@ -45,3 +45,11 @@ def test_view_student_progress_report_for_term(client):
     response = client.get(url)
     assert response.status_code == 200
     assert response['Content-Type'] == 'text/csv; charset=utf-8'
+
+
+@pytest.mark.django_db
+def test_view_student_faces_smoke(client):
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(reverse('staff:student_faces'))
+    assert response.status_code == 200
