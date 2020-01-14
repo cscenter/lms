@@ -88,6 +88,7 @@ def get_course_reviews(course, **kwargs):
 
 def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
     """
+    Returns
     For enrolled students show links to there submissions.
     Course teachers (among all terms) see links to assignment details.
     Others can see only assignment names.
@@ -110,6 +111,7 @@ def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
     for a in assignments:
         to_details = None
         if user_role in student_roles:
+            # FIXME: спрятать реализацию в метод
             assignment_progress = a.studentassignment_set.first()
             if assignment_progress is not None:
                 if user_role == CourseRole.STUDENT_RESTRICT:

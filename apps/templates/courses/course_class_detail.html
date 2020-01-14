@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load markdown from core_tags %}
+{% load markdown call_method from core_tags %}
 {% load cache %}
 
 {% block content %}
@@ -10,12 +10,16 @@
       <h2>
         {{ course_class.name }}<br><small><a href="{{ course_class.course.get_absolute_url }}">{{ course_class.course.meta_course.name }}</a></small>
       </h2>
-      {% if user.is_curator or user.is_teacher and is_actual_teacher %}
+      {% call_method request.user "has_perm" "learning.change_courseclass" course_class as can_edit_course_class %}
+      {% call_method request.user "has_perm" "learning.delete_courseclass" course_class as can_delete_course_class %}
       <div class="btn-toolbar">
-        <a href="{{ course_class.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
-        <a href="{{ course_class.get_delete_url }}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
+        {% if can_edit_course_class %}
+            <a href="{{ course_class.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
+        {% endif %}
+        {% if can_delete_course_class %}
+            <a href="{{ course_class.get_delete_url }}" class="btn btn-danger" role="button">{% trans "Delete" %}</a>
+        {% endif %}
       </div>
-      {% endif %}
       <hr>
     </div>
   </div>

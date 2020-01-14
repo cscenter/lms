@@ -5,6 +5,7 @@ import pytest
 from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
+from core.utils import instance_memoize
 from courses.models import Course
 from courses.tests.factories import CourseFactory, SemesterFactory, \
     AssignmentFactory
@@ -23,9 +24,7 @@ from users.tests.factories import CuratorFactory, TeacherFactory, \
 
 
 def delete_enrollment_cache(user: User, course: Course):
-    cache_attr_name = user.ENROLLMENT_CACHE_KEY.format(course.pk)
-    if hasattr(user, cache_attr_name):
-        delattr(user, cache_attr_name)
+    instance_memoize.delete_cache(user)
 
 
 @pytest.mark.django_db

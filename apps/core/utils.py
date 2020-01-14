@@ -1,5 +1,6 @@
 import datetime
 import logging
+from functools import partial
 from itertools import zip_longest
 from urllib.parse import urlparse, parse_qs
 
@@ -319,3 +320,41 @@ def bucketize(iterable, key=None, value_transform=None):
         bucket_key = key(val)
         buckets.setdefault(bucket_key, []).append(value_transform(val))
     return buckets
+
+
+# noinspection PyPep8Naming
+class instance_memoize:
+    """
+    Method decorator that helps caching the return value on the
+    instance whose method was invoked. All arguments passed to a method
+    decorated with `Memoize` must be hashable.
+
+    If a memoized method is invoked directly on its class the result will not
+    be cached. Instead the method will be invoked like a static method.
+
+    Assumes that read and write operations are mutually exclusive per request.
+    """
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self.func
+        return partial(self, instance)
+
+    def __call__(self, *args, **kwargs):
+        obj = args[0]
+        try:
+            cache = obj._instance_memoize_cache
+        except AttributeError:
+            cache = obj._instance_memoize_cache = {}
+        key = (self.func, args[1:], frozenset(kwargs.items()))
+        if key not in cache:
+            cache[key] = self.func(*args, **kwargs)
+        return cache[key]
+
+    @classmethod
+    def delete_cache(cls, instance):
+        cache_attr_name = "_instance_memoize_cache"
+        if hasattr(instance, cache_attr_name):
+            delattr(instance, cache_attr_name)
