@@ -5,7 +5,7 @@ import rules
 
 from auth.permissions import add_perm, Permission
 from core.utils import is_club_site
-from courses.models import Course, CourseTeacher
+from courses.models import Course, CourseTeacher, CourseClass
 from learning.models import StudentAssignment, CourseInvitation
 from learning.settings import StudentStatuses
 from learning.utils import course_failed_by_student
@@ -204,6 +204,36 @@ class ViewStudentAssignment(Permission):
 
 
 @add_perm
+class EditCourseClass(Permission):
+    name = "learning.change_courseclass"
+
+
+@add_perm
+class EditOwnCourseClass(Permission):
+    name = "teaching.change_courseclass"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course_class: CourseClass):
+        return course_class.course.is_actual_teacher(user.pk)
+
+
+@add_perm
+class DeleteCourseClass(Permission):
+    name = "learning.delete_courseclass"
+
+
+@add_perm
+class DeleteOwnCourseClass(Permission):
+    name = "learning.delete_own_courseclass"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course_class: CourseClass):
+        return course_class.course.is_actual_teacher(user.pk)
+
+
+@add_perm
 class ViewRelatedStudentAssignment(Permission):
     name = "teaching.view_studentassignment"
 
@@ -237,7 +267,8 @@ class EditOwnStudentAssignment(Permission):
         return user in course.teachers.all()
 
 
-# FIXME: возможно, view_assignments надо отдать куратору и преподавателю. А студенту явный view_own_assignments. Но, блин, этот дурацкий случай для отчисленных студентов :< И own ничего не чекает, никакой бизнес-логики на самом деле не приаттачено(((((((((
+# FIXME: возможно, view_assignments надо отдать куратору и преподавателю. А студенту явный view_own_assignments.
+#  Но, блин, этот дурацкий случай для отчисленных студентов :< И own ничего не чекает, никакой бизнес-логики на самом деле не приаттачено(((((((((
 @add_perm
 class ViewOwnAssignments(Permission):
     name = "study.view_own_assignments"

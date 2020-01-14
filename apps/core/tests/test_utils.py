@@ -2,7 +2,7 @@ import pytest
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
-from core.utils import get_youtube_video_id, queryset_iterator
+from core.utils import get_youtube_video_id, queryset_iterator, instance_memoize
 
 
 def test_get_youtube_video_id():
@@ -45,3 +45,27 @@ def test_queryset_iterator(django_assert_num_queries):
                                     chunk_size=10, use_offset=True))
     bs.reverse()
     assert bs == branches
+
+
+def test_instance_memoize():
+    class A:
+        def __init__(self):
+            self.counter = -1
+
+        @instance_memoize
+        def foo(self, i):
+            self.counter += 1
+            return self.counter + i
+
+    a = A()
+    assert not hasattr(a, "_instance_memoize_cache")
+    assert a.foo(1) == 1
+    assert len(a.__dict__["_instance_memoize_cache"]) == 1
+    assert a.foo(1) == 1
+    del a.__dict__["_instance_memoize_cache"]
+    assert a.foo(1) == 2
+    a.counter = 42
+    assert a.foo(1) == 2
+    del a.__dict__["_instance_memoize_cache"]
+    assert a.foo(1) == 44
+    assert A.foo(a, 1) == 45

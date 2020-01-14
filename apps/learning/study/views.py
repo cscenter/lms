@@ -71,7 +71,7 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
 
 
 class StudentAssignmentListView(PermissionRequiredMixin, ListView):
-    """ Show assignments from current semester only. """
+    """Shows assignments for the current term."""
     model = StudentAssignment
     context_object_name = 'assignment_list'
     template_name = "learning/study/assignment_list.html"

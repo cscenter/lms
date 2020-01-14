@@ -28,7 +28,7 @@ from my_compscicenter_ru.utils import PublicRoute
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
-from core.utils import is_club_site, ru_en_mapping
+from core.utils import is_club_site, ru_en_mapping, instance_memoize
 from courses.models import Semester
 from learning.permissions import LearningPermissionsMixin
 from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeYears
@@ -226,7 +226,6 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
-    ENROLLMENT_CACHE_KEY = "_student_enrollment_{}"
     GENDER_MALE = GenderTypes.MALE
     GENDER_FEMALE = GenderTypes.FEMALE
 
@@ -576,21 +575,14 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
     def roles(self) -> set:
         return {g.role for g in self.site_groups}
 
+    @instance_memoize
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
-        """
-        Query enrollment from db on first call and cache the result. Cache
-        won't be refreshed if enrollment was deleted or changed after call.
-        """
+        """Returns student enrollment if exists and not soft deleted"""
         from learning.models import Enrollment
-        cache_key = self.ENROLLMENT_CACHE_KEY.format(course_id)
-        if not hasattr(self, cache_key):
-            e = (Enrollment.active
-                 .filter(student=self,
-                         course_id=course_id)
-                 .order_by()
-                 .first())
-            setattr(self, cache_key, e)
-        return getattr(self, cache_key)
+        return (Enrollment.active
+                .filter(student=self, course_id=course_id)
+                .order_by()
+                .first())
 
     # TODO: move to Project manager?
     def get_projects_queryset(self):

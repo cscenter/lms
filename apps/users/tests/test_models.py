@@ -2,6 +2,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from core.tests.factories import BranchFactory
+from core.utils import instance_memoize
 from learning.tests.factories import EnrollmentFactory
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
@@ -18,7 +19,7 @@ def test_enrolled_on_the_course():
     assert student.get_enrollment(co.pk) is None
     enrollment = EnrollmentFactory(student=student, course=co)
     assert student.get_enrollment(co.pk) is None  # query was cached
-    delattr(student, f"_student_enrollment_{co.pk}")
+    instance_memoize.delete_cache(student)
     assert student.get_enrollment(co.pk) is not None
     curator = CuratorFactory()
     assert curator.get_enrollment(co.pk) is None

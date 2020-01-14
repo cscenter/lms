@@ -77,7 +77,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
 
     def _get_additional_context(self, course, **kwargs):
         request_user = self.request.user
-        is_actual_teacher = course.is_actual_teacher(request_user)
+        is_actual_teacher = course.is_actual_teacher(request_user.pk)
         # For correspondence course try to override timezone
         tz_override = None
         # FIXME: cache additional branch count?

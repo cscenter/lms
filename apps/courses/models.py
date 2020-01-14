@@ -22,7 +22,7 @@ from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location, Branch
 from core.timezone import now_local, Timezone, TimezoneAwareModel
 from core.urls import reverse, branch_aware_reverse
-from core.utils import hashids, get_youtube_video_id
+from core.utils import hashids, get_youtube_video_id, instance_memoize
 from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
 from courses.utils import get_current_term_pair, get_term_start, \
     next_term_starts_at, get_term_index, get_current_term_index
@@ -518,8 +518,9 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     def grading_type_choice(self):
         return GradingSystems.get_choice(self.grading_type)
 
-    def is_actual_teacher(self, teacher):
-        return teacher.pk in (co.teacher_id for co in
+    @instance_memoize
+    def is_actual_teacher(self, teacher_id):
+        return teacher_id in (co.teacher_id for co in
                               self.course_teachers.all())
 
     def get_grouped_teachers(self):
