@@ -11,7 +11,7 @@
     <div class="container">
         <ul class="nav nav-tabs square">
             {% for branch in branches %}
-                <li class="{% if current_branch.code == branch.value %} active{% endif %}"><a href="{% url "staff:student_faces" %}?branch={{ branch.value }}&year={{ current_year }}">{{ branch.abbr }}</a></li>
+                <li class="{% if current_branch.code == branch.code %} active{% endif %}"><a href="{% url "staff:student_faces" %}?branch={{ branch.code }}&year={{ current_year }}">{{ branch.name }}</a></li>
             {% endfor %}
         </ul>
         <ul class="nav nav-tabs square" style="margin-top: 0">
