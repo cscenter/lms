@@ -69,10 +69,10 @@
   </div>
   {% endif %}
 
-    {% if reporting_periods_by_project %}
+    {% if reporting_periods %}
         <div class="alert alert-info my-25">
             <h4 class="mt-0">Отчетные периоды</h4>
-            {% for student_project, periods in reporting_periods_by_project.items %}
+            {% for student_project, periods in reporting_periods.items %}
                 {% for reporting_period in periods %}
                     Проект <a href="{{ student_project.project.get_absolute_url }}">{{ student_project.project.name }}</a>, {{ reporting_period.start_on|date:"d E" }} &mdash; {{ reporting_period.end_on|date:"d E" }}
                 {% endfor %}

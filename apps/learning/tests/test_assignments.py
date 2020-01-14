@@ -563,7 +563,6 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     StudentAssignmentFactory(assignment=assignment_nsk, student=student)
     client.login(student)
     response = client.get(url_learning_assignments)
-    assert len(response.context["assignment_list"]) == 2
     assert response.context["tz_override"] == branch_spb.get_timezone()
     year_part = formats.date_format(assignment_nsk.deadline_at_local(),
                                     FORMAT_DATE_PART)

@@ -6,7 +6,7 @@ from django.db.models import Q, Prefetch
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from isoweek import Week
-from vanilla import ListView
+from vanilla import ListView, TemplateView
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
@@ -21,9 +21,11 @@ from learning import utils
 from learning.calendar import get_student_month_events
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
+from learning.permissions import ViewOwnAssignments
 from learning.roles import Roles
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView
+from projects.services import get_project_reporting_periods
 from users.models import User
 
 
@@ -70,22 +72,15 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
         return qs
 
 
-class StudentAssignmentListView(PermissionRequiredMixin, ListView):
+class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
     """Shows assignments for the current term."""
-    model = StudentAssignment
-    context_object_name = 'assignment_list'
     template_name = "learning/study/assignment_list.html"
-    permission_required = "study.view_own_assignments"
+    permission_required = ViewOwnAssignments.name
 
-    def setup(self, request, *args, **kwargs):
-        super().setup(request, *args, **kwargs)
-        current_semester = Semester.get_current()
-        self.current_semester = current_semester
-
-    def get_queryset(self):
+    def get_queryset(self, current_term):
         return (StudentAssignment.objects
                 .filter(student=self.request.user,
-                        assignment__course__semester=self.current_semester)
+                        assignment__course__semester=current_term)
                 .order_by('assignment__deadline_at',
                           'assignment__course__meta_course__name',
                           'pk')
@@ -97,40 +92,28 @@ class StudentAssignmentListView(PermissionRequiredMixin, ListView):
                                 'student'))
 
     def get_context_data(self, **kwargs):
-        term = self.current_semester
-        user = self.request.user
-        context = super().get_context_data(**kwargs)
+        current_term = Semester.get_current()
+        student = self.request.user
+        assignment_list = self.get_queryset(current_term)
         enrolled_in = (Enrollment.active
-                       .filter(course__semester=term,
-                               student=self.request.user)
+                       .filter(course__semester=current_term, student=student)
                        .values_list("course", flat=True))
-        open_, archive = utils.split_on_condition(
-            context['assignment_list'],
+        in_progress, archive = utils.split_on_condition(
+            assignment_list,
             lambda sa: sa.assignment.is_open and
                        sa.assignment.course_id in enrolled_in)
         archive.reverse()
-        context['assignment_list_open'] = open_
-        context['assignment_list_archive'] = archive
-        context["tz_override"] = user.get_timezone()
-        # Collect all related reporting periods in current term for the student
-        reporting_periods = {}
+        # Map student projects in current term to related reporting periods
+        reporting_periods = None
         if apps.is_installed("projects"):
-            from projects.models import ProjectStudent, ReportingPeriod, \
-                ReportingPeriodKey, Project
-            student_projects = set(ProjectStudent.objects
-                                   .select_related('project', 'project__branch')
-                                   .filter(project__semester=term,
-                                           student_id=user.pk)
-                                   .exclude(project__status=Project.Statuses.CANCELED))
-            if student_projects:
-                periods = ReportingPeriod.get_periods(term=term)
-                for sp in student_projects:
-                    sp.project.semester = term
-                    key = ReportingPeriodKey(sp.project.branch.code,
-                                             sp.project.project_type)
-                    if key in periods:
-                        reporting_periods[sp] = periods[key]
-            context["reporting_periods_by_project"] = reporting_periods
+            reporting_periods = get_project_reporting_periods(student,
+                                                              current_term)
+        context = {
+            'assignment_list_open': in_progress,
+            'assignment_list_archive': archive,
+            'tz_override': student.get_timezone(),
+            'reporting_periods': reporting_periods
+        }
         return context
 
 

@@ -1,14 +1,12 @@
 from django.db import transaction
 from django.db.models import Q, OuterRef, Value, F, TextField
 from django.db.models.functions import Concat
-from django.utils.timezone import now
 
-from core.timezone.constants import DATE_FORMAT_RU
 from core.db.expressions import SubqueryCount
 from core.timezone import now_local
+from core.timezone.constants import DATE_FORMAT_RU
 from courses.models import Course
-from learning.models import Enrollment, AssignmentComment, StudentAssignment, \
-    AssignmentNotification
+from learning.models import Enrollment
 from learning.utils import populate_assignments_for_student, \
     update_course_learners_count
 from users.models import User

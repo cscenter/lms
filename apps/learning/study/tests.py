@@ -188,8 +188,8 @@ def test_student_assignment_projects_block(client):
     client.login(student)
     response = client.get(url)
     assert response.status_code == 200
-    assert "reporting_periods_by_project" in response.context_data
-    assert not response.context_data["reporting_periods_by_project"]
+    assert "reporting_periods" in response.context_data
+    assert not response.context_data["reporting_periods"]
     # Assign project to the student and add reporting period
     start_on = current_term.starts_at.date()
     end_on = start_on + datetime.timedelta(days=3)
@@ -204,7 +204,7 @@ def test_student_assignment_projects_block(client):
     ProjectStudentFactory(project=project)  # another random student
     response = client.get(url)
     assert response.status_code == 200
-    periods = response.context_data["reporting_periods_by_project"]
+    periods = response.context_data["reporting_periods"]
     assert len(periods) == 1
     assert ps in periods
     assert len(periods[ps]) == 1
@@ -216,7 +216,7 @@ def test_student_assignment_projects_block(client):
                                    project__semester=prev_term)
     response = client.get(url)
     assert response.status_code == 200
-    assert len(response.context_data["reporting_periods_by_project"]) == 1
+    assert len(response.context_data["reporting_periods"]) == 1
     # Add another reporting period
     rp_practice = ReportingPeriodFactory(term=current_term,
                                          start_on=end_on + datetime.timedelta(days=1),
@@ -224,6 +224,6 @@ def test_student_assignment_projects_block(client):
                                          project_type=project.project_type)
     response = client.get(url)
     assert response.status_code == 200
-    periods = response.context_data["reporting_periods_by_project"]
+    periods = response.context_data["reporting_periods"]
     assert len(periods) == 1
     assert len(periods[ps]) == 2
