@@ -75,14 +75,14 @@ class _GraduateProfileActiveManager(models.Manager):
     def get_queryset(self):
         return (super().get_queryset()
                 .filter(is_active=True)
-                .select_related("student")
+                .select_related("student", "student__branch")
                 .only("pk",
                       "modified",
                       "graduation_year",
                       "photo",
                       "testimonial",
                       "student_id",
-                      "student__branch__city_id",
+                      "student__branch__code",
                       "student__photo",
                       "student__cropbox_data",
                       "student__first_name",
