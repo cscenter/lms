@@ -581,13 +581,12 @@ class Event(TimeStampedModel):
                        args=[self.pk])
 
 
-# FIXME: move -> cscenter app
 class Useful(models.Model):
     question = models.CharField(_("Question"), max_length=255)
     answer = models.TextField(_("Answer"))
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     site = models.ForeignKey(Site, verbose_name=_("Site"),
-                             default=settings.CENTER_SITE_ID,
+                             default=settings.SITE_ID,
                              on_delete=models.CASCADE)
 
     class Meta:

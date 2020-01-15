@@ -25,7 +25,6 @@ from learning.permissions import ViewOwnAssignments
 from learning.roles import Roles
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView
-from projects.services import get_project_reporting_periods
 from users.models import User
 
 
@@ -106,6 +105,7 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
         # Map student projects in current term to related reporting periods
         reporting_periods = None
         if apps.is_installed("projects"):
+            from projects.services import get_project_reporting_periods
             reporting_periods = get_project_reporting_periods(student,
                                                               current_term)
         context = {

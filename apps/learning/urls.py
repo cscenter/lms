@@ -2,7 +2,7 @@ from django.conf.urls import include
 from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
-from learning.views import CourseInvitationEnrollView
+from learning.views import CourseInvitationEnrollView, ICalEventsView
 from learning.study.views import UsefulListView, InternshipListView, \
     HonorCodeView
 from .views import EventDetailView, CourseNewsNotificationUpdate, \
@@ -28,4 +28,5 @@ urlpatterns = [
     path('learning/library/', include("library.urls")),
 
     path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
+    re_path(r'^csc_events.ics', ICalEventsView.as_view(), name='ical_events'),
 ]

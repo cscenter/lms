@@ -189,7 +189,7 @@
                                 {% endfor %}
                             </ul>
                         {% endif %}
-                        <a href="{% url 'user_reference_add' pk=profile_user.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
+                        <a href="{% url 'user_reference_add' subdomain=LMS_SUBDOMAIN pk=profile_user.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
                     {% endif %}
 
                     {% with borrows=profile_user.borrows.all %}
@@ -464,7 +464,7 @@
                         <tr>
                             <td>{% trans "Events" %}:</td>
                             <td>
-                                <input type="text" value="{% url 'ical_events' %}" disabled="disabled">
+                                <input type="text" value="{% url 'ical_events' subdomain=LMS_SUBDOMAIN %}" disabled="disabled">
                             </td>
                         </tr>
                         </tbody>
