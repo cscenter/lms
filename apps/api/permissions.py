@@ -8,12 +8,3 @@ class CuratorAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.is_curator
 
-
-class StudentAccessPermission(permissions.BasePermission):
-    """
-    Check user has active student or volunteer group.
-    Active means student didn't expelled or in academic leave.
-    """
-
-    def has_permission(self, request, view):
-        return request.user.is_active_student or request.user.is_curator

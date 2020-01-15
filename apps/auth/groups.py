@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 # A list of registered access roles.
 REGISTERED_ACCESS_ROLES = {}
 
+# FIXME: remove?
 
 def register_access_role(cls):
     """
