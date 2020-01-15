@@ -1,7 +1,7 @@
 from rules import predicate
 
 from auth.permissions import add_perm, Permission
-from courses.models import Course
+from courses.models import Course, CourseClass
 
 
 @add_perm
@@ -38,3 +38,33 @@ class CreateOwnAssignment(Permission):
     def rule(user, course: Course):
         return any(t.teacher_id == user.pk for t in
                    course.course_teachers.all())
+
+
+@add_perm
+class EditCourseClass(Permission):
+    name = "learning.change_courseclass"
+
+
+@add_perm
+class EditOwnCourseClass(Permission):
+    name = "teaching.change_courseclass"
+
+    @staticmethod
+    @predicate
+    def rule(user, course_class: CourseClass):
+        return course_class.course.is_actual_teacher(user.pk)
+
+
+@add_perm
+class DeleteCourseClass(Permission):
+    name = "learning.delete_courseclass"
+
+
+@add_perm
+class DeleteOwnCourseClass(Permission):
+    name = "learning.delete_own_courseclass"
+
+    @staticmethod
+    @predicate
+    def rule(user, course_class: CourseClass):
+        return course_class.course.is_actual_teacher(user.pk)

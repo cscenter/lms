@@ -4,9 +4,9 @@ from djchoices import DjangoChoices, C
 from auth.permissions import Role
 from auth.registry import role_registry
 
-
 from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
-    ViewCourseAssignments, CreateAssignment, CreateOwnAssignment
+    ViewCourseAssignments, CreateAssignment, CreateOwnAssignment, \
+    EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, DeleteCourseClass
 from .permissions import CreateAssignmentComment, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
     ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
@@ -14,8 +14,7 @@ from .permissions import CreateAssignmentComment, \
     ViewLibrary, ViewInternships, EnrollInCourse, EnrollInCourseByInvitation, \
     LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook, \
     ViewStudentAssignment, ViewRelatedStudentAssignment, EditStudentAssignment, \
-    EditOwnStudentAssignment, ViewEnrollments, ViewRelatedEnrollments, \
-    EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, DeleteCourseClass
+    EditOwnStudentAssignment, ViewEnrollments, ViewRelatedEnrollments
 
 
 # TODO: Add description of each role
