@@ -36,13 +36,8 @@ class CourseClassDetailView(generic.DetailView):
                                 "venue",
                                 "venue__location",))
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
-        context['is_actual_teacher'] = (
-            self.request.user.is_authenticated and
-            self.request.user in (self.object
-                                  .course
-                                  .teachers.all()))
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         context['attachments'] = self.object.courseclassattachment_set.all()
         return context
 

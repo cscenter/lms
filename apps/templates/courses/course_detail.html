@@ -217,7 +217,6 @@
             {% else %}
                 {% call_method request.user "has_perm" "learning.enroll_in_course" course as can_enroll %}
                 {% if can_enroll %}
-                    {# FIXME: убедиться, что студент активен. Кажется, это нужно делать в общем предикате #}
                     <a href="{{ course.get_enroll_url }}" class="btn btn-primary btn-block">
                         {% trans "Enroll in the course" %}
                         {% if course.is_capacity_limited %}

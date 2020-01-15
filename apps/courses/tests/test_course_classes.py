@@ -24,21 +24,6 @@ from users.tests.factories import TeacherFactory
 
 
 @pytest.mark.django_db
-def test_course_class_detail_is_actual_teacher(client):
-    teacher = TeacherFactory()
-    cc = CourseClassFactory.create()
-    cc_other = CourseClassFactory.create()
-    url = cc.get_absolute_url()
-    assert not client.get(url).context['is_actual_teacher']
-    client.login(teacher)
-    assert not client.get(url).context['is_actual_teacher']
-    CourseTeacherFactory(course=cc_other.course, teacher=teacher)
-    assert not client.get(url).context['is_actual_teacher']
-    CourseTeacherFactory(course=cc.course, teacher=teacher)
-    assert client.get(url).context['is_actual_teacher']
-
-
-@pytest.mark.django_db
 def test_course_class_detail_security(client, assert_login_redirect):
     teacher = TeacherFactory()
     co = CourseFactory.create(teachers=[teacher])
