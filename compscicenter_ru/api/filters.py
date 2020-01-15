@@ -9,7 +9,7 @@ from courses.constants import SemesterTypes
 from courses.models import Course
 from courses.utils import get_term_index
 from learning.settings import Branches
-from my_compscicenter_ru.filters import BranchChoiceFilter
+from lms.filters import BranchChoiceFilter
 
 
 class IntegerFilter(Filter):
