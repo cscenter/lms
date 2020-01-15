@@ -771,4 +771,6 @@ class EnrollmentCertificate(TimeStampedModel):
         return smart_text(self.student)
 
     def get_absolute_url(self):
-        return reverse('user_reference_detail', args=[self.student_id, self.pk])
+        return reverse('user_reference_detail',
+                       subdomain=settings.LMS_SUBDOMAIN,
+                       args=[self.student_id, self.pk])

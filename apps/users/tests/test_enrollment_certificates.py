@@ -28,14 +28,17 @@ def test_create_reference(client, assert_redirect):
     UserFactory.reset_sequence(1)
     curator = CuratorFactory()
     client.login(curator)
-    form_url = reverse('user_reference_add', args=[user.id])
+    form_url = reverse('user_reference_add',
+                       subdomain=settings.LMS_SUBDOMAIN,
+                       args=[user.id])
     response = client.get(form_url)
     soup = BeautifulSoup(response.content, "html.parser")
     sig_input = soup.find(id="id_signature")
     assert sig_input.attrs.get('value') == curator.get_full_name()
 
     student = StudentFactory()
-    form_url = reverse('user_reference_add', args=[student.id])
+    form_url = reverse('user_reference_add',
+                       subdomain=settings.LMS_SUBDOMAIN, args=[student.id])
     form_data = factory.build(dict, FACTORY_CLASS=EnrollmentCertificateFactory)
     response = client.post(form_url, form_data)
     assert EnrollmentCertificate.objects.count() == 1

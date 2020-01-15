@@ -1,6 +1,7 @@
 from itertools import chain
 
 import pytest
+from django.conf import settings
 from icalendar import Calendar, Event
 
 from core.urls import reverse
@@ -82,15 +83,16 @@ def test_assignments(client):
 @pytest.mark.django_db
 def test_events(client):
     file_name = 'csc_events.ics'
+    url = reverse('ical_events', subdomain=settings.LMS_SUBDOMAIN)
     # Empty calendar
-    response = client.get(reverse('ical_events'))
+    response = client.get(url)
     assert "text/calendar; charset=UTF-8" == response['content-type']
     assert file_name in response['content-disposition']
     cal = Calendar.from_ical(response.content)
     assert "События CSC" == cal['X-WR-CALNAME']
     # Create some content
     nces = EventFactory.create_batch(3)
-    response = client.get(reverse('ical_events'))
+    response = client.get(url)
     cal = Calendar.from_ical(response.content)
     assert set(nce.name for nce in nces) == set(evt['SUMMARY']
                                                 for evt in cal.subcomponents

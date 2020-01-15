@@ -56,14 +56,11 @@
             </a>
         {% endif %}
         {% if has_curator_permissions and profile_user.enrollment_year %}
-            {% if profile_user.is_student or profile_user.is_graduate %}
-                <a href="{% url 'user_reference_add' profile_user.pk %}" class="list-group-item"><i class="fa fa-file-text-o"></i> {% trans "Create reference" %}</a>
-            {% endif %}
             {% if has_curator_permissions and profile_user.studentinfo %}
                 <a href="{% url 'student_info_update' profile_user.studentinfo.pk %}" class="list-group-item">{% trans "Edit info record" %}</a>
             {% endif %}
             {% if profile_user.pk == user.pk %}
-                <a href="{% url 'password_change' %}" class="list-group-item">{% trans "Change password" %}</a>
+                <a href="{% url 'auth:password_change' %}" class="list-group-item">{% trans "Change password" %}</a>
             {% endif %}
         {% endif %}
         </div>
@@ -283,19 +280,6 @@
           <td>{{ profile_user.workplace|default:"—" }}</td>
         </tr>
       </table>
-    {% endif %}
-    {% endif %}
-
-    {% if has_curator_permissions and  profile_user.enrollment_certificates.count > 0 %}
-    {% if profile_user.is_student or profile_user.is_graduate %}
-        <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
-          <ul>
-            {% for enrollment_certificate in profile_user.enrollment_certificates.all %}
-            <li>
-              <a href="{{ enrollment_certificate.get_absolute_url }}">{{ enrollment_certificate.created|date:"d.m.Y" }}</a>
-            </li>
-            {% endfor %}
-          </ul>
     {% endif %}
     {% endif %}
 

@@ -7,7 +7,6 @@ from django.urls import path, re_path
 from django.views.generic import RedirectView, TemplateView
 from loginas import urls as loginas_urls
 
-import publications.views
 from announcements.views import AnnouncementTagAutocomplete, \
     AnnouncementDetailView
 from compscicenter_ru import views

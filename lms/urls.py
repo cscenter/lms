@@ -2,15 +2,15 @@ from django.conf import settings
 from django.conf.urls import include
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path
 from django.views.generic import TemplateView
 from loginas import urls as loginas_urls
 
 from announcements.views import AnnouncementTagAutocomplete
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
-from courses.urls import RE_COURSE_URI
-from courses.views import CourseDetailView
 from lms.views import IndexView, CourseOfferingsView
+from users.views import EnrollmentCertificateCreateView, \
+    EnrollmentCertificateDetailView
 
 admin.autodiscover()
 
@@ -18,6 +18,9 @@ admin.autodiscover()
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('robots.txt', TemplateView.as_view(template_name="lms/robots.txt", content_type="text/plain"), name='robots_txt'),
+
+    path('', include('auth.urls')),
+
     # path('api/', include('api.urls')),
     path('api/', include('learning.api.urls')),
     path('api/', include('stats.api_urls')),
@@ -29,10 +32,10 @@ urlpatterns = [
 
     path('courses/', CourseOfferingsView.as_view(), name="course_list"),
     path('', include('courses.urls')),
-
     path("courses/", include('learning.invitation.urls')),
 
-    path('', include('auth.urls')),
+    path('users/<int:pk>/reference/add/', EnrollmentCertificateCreateView.as_view(), name='user_reference_add'),
+    path('users/<int:pk>/reference/<int:reference_pk>/', EnrollmentCertificateDetailView.as_view(), name='user_reference_detail'),
     path('', include('users.urls')),
 
     path('notifications/', include("notifications.urls")),
