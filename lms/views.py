@@ -13,9 +13,9 @@ from courses.constants import SemesterTypes
 from courses.models import Course
 from courses.utils import get_term_index, get_current_term_pair, \
     first_term_in_academic_year, get_term_by_index
-from my_compscicenter_ru.api.serializers import CoursesSerializer
-from my_compscicenter_ru.filters import CoursesFilter
-from my_compscicenter_ru.utils import PublicRouteException, PublicRoute, \
+from lms.api.serializers import CoursesSerializer
+from lms.filters import CoursesFilter
+from lms.utils import PublicRouteException, PublicRoute, \
     group_terms_by_academic_year
 from users.models import User
 
@@ -45,7 +45,7 @@ class IndexView(View):
 
 class CourseOfferingsView(FilterMixin, TemplateView):
     filterset_class = CoursesFilter
-    template_name = "my_compscicenter_ru/course_offerings.html"
+    template_name = "lms/course_offerings.html"
 
     def get_queryset(self):
         prefetch_teachers = Prefetch(

@@ -10,14 +10,14 @@ from announcements.views import AnnouncementTagAutocomplete
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.urls import RE_COURSE_URI
 from courses.views import CourseDetailView
-from my_compscicenter_ru.views import IndexView, CourseOfferingsView
+from lms.views import IndexView, CourseOfferingsView
 
 admin.autodiscover()
 
 
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
-    path('robots.txt', TemplateView.as_view(template_name="my_compscicenter_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
+    path('robots.txt', TemplateView.as_view(template_name="lms/robots.txt", content_type="text/plain"), name='robots_txt'),
     # path('api/', include('api.urls')),
     path('api/', include('learning.api.urls')),
     path('api/', include('stats.api_urls')),

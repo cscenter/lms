@@ -1,7 +1,7 @@
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 
-from my_compscicenter_ru.utils import PublicRoute
+from lms.utils import PublicRoute
 from users.constants import Roles
 from .models import UserGroup, User
 

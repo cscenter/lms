@@ -25,7 +25,7 @@ REVERSE_TO_LMS_URL_NAMESPACES = ('staff', 'study', 'teaching', 'projects',
                                  'courses')
 SUBDOMAIN_URLCONFS = {
     None: ROOT_URLCONF,
-    LMS_SUBDOMAIN: 'my_compscicenter_ru.urls',
+    LMS_SUBDOMAIN: 'lms.urls',
 }
 
 FILE_UPLOAD_DIRECTORY_PERMISSIONS = env.int('DJANGO_FILE_UPLOAD_DIRECTORY_PERMISSIONS', default=0o755)
@@ -56,7 +56,7 @@ MIDDLEWARE = [
 INSTALLED_APPS += [
     'dbbackup',
     'compscicenter_ru',
-    'my_compscicenter_ru',
+    'lms',
     'menu',
     'post_office',
     'django_jinja',
@@ -124,7 +124,7 @@ TEMPLATES = [
         'DIRS': [
             django.__path__[0] + '/forms/jinja2',
             str(ROOT_DIR / "compscicenter_ru" / "jinja2"),
-            str(ROOT_DIR / "my_compscicenter_ru" / "jinja2"),
+            str(ROOT_DIR / "lms" / "jinja2"),
             str(SHARED_APPS_DIR / "core" / "jinja2"),
             str(SHARED_APPS_DIR / "surveys" / "jinja2"),
             # svg inline support
