@@ -4,7 +4,6 @@ from rest_framework import serializers
 
 from api.utils import make_api_fragment_key
 from compscicenter_ru.utils import course_public_url
-from core.urls import reverse, branch_aware_reverse
 from core.utils import render_markdown
 from courses.api.serializers import CourseSerializer
 from courses.models import Course, CourseTeacher
