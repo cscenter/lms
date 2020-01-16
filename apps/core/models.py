@@ -13,7 +13,12 @@ from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 
 
-BranchKey = Union[int, "BranchNaturalKey"]
+class BranchNaturalKey(NamedTuple):
+    code: str
+    site_id: int
+
+
+BranchKey = Union[int, BranchNaturalKey]
 
 BRANCH_CACHE: Dict[BranchKey, "Branch"] = {}
 
@@ -58,11 +63,6 @@ class City(TimezoneAwareModel, models.Model):
     @cached_property
     def _timezone(self):
         return pytz.timezone(self.time_zone)
-
-
-class BranchNaturalKey(NamedTuple):
-    code: str
-    site_id: int
 
 
 class BranchManager(models.Manager):

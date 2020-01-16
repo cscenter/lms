@@ -29,9 +29,9 @@ class TeacherRoles(DjangoChoices):
     """
     This enum is used in the CourseTeacher.roles bitfield. Order is matter!
     """
-    LECTURER = C('lecturer', _("Lecturer"), narrative=_("Reads lectures"))
-    REVIEWER = C('reviewer', _("Reviewer"), narrative=_("Checks assignments"))
-    SEMINAR = C('seminar', _("Seminarian"), narrative=_("Leads seminars"))
+    LECTURER = C('lecturer', _("Lecturer"))
+    REVIEWER = C('reviewer', _("Reviewer"))
+    SEMINAR = C('seminar', _("Seminarian"))
 
 
 # TODO: Make a redirect for old links and rewrite download view without this constant?

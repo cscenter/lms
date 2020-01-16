@@ -46,7 +46,7 @@
                                     {% for role, course_teachers in teachers.items() -%}
                                         {% for course_teacher in course_teachers -%}
                                             {% with teacher=course_teacher.teacher %}
-                                                {{ macros_cards.teacher_card_link(teacher, subtitle=role.narrative) }}
+                                                {{ macros_cards.teacher_card_link(teacher, subtitle=role) }}
                                             {% endwith %}
                                         {%- endfor %}
                                     {%- endfor %}

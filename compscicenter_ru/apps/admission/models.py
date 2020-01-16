@@ -52,7 +52,7 @@ class Campaign(TimezoneAwareModel, models.Model):
 
     year = models.PositiveSmallIntegerField(
         _("Campaign|Year"),
-        validators=[MinValueValidator(settings.CENTER_FOUNDATION_YEAR)],
+        validators=[MinValueValidator(2000)],
         default=current_year)
     branch = models.ForeignKey(Branch,
                                verbose_name=_("Branch"),

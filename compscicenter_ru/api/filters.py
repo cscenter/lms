@@ -9,7 +9,7 @@ from courses.constants import SemesterTypes
 from courses.models import Course
 from courses.utils import get_term_index
 from learning.settings import Branches
-from lms.filters import BranchChoiceFilter
+from lms.filters import BranchCodeFilter
 
 
 class IntegerFilter(Filter):
@@ -28,8 +28,8 @@ class AcademicYearFilter(IntegerFilter):
 
 
 class CourseFilter(FilterSet):
-    branch = BranchChoiceFilter(field_name="branch__code", empty_label=None,
-                                choices=Branches.choices)
+    branch = BranchCodeFilter(field_name="branch__code", empty_label=None,
+                              choices=Branches.choices)
     # TODO: restrict max value
     academic_year = AcademicYearFilter(label='Academic Year',
                                        min_value=settings.CENTER_FOUNDATION_YEAR)
