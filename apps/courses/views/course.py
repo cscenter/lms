@@ -12,7 +12,8 @@ from core.utils import get_club_domain, is_club_site
 from core.views import ProtectedFormMixin
 from courses.constants import SemesterTypes, TeacherRoles
 from courses.forms import CourseEditDescrForm
-from courses.models import Course, CourseTeacher, group_course_teachers
+from courses.models import Course, CourseTeacher
+from courses.services import get_course_teachers
 from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_term_index
 from courses.views.mixins import CourseURLParamsMixin
@@ -23,6 +24,7 @@ __all__ = ('CourseDetailView', 'CourseEditView')
 
 
 # FIXME: разделить кастомную логику
+# FIXME: сделать отдельное view для сайта клуба?
 class CourseDetailView(CourseURLParamsMixin, DetailView):
     model = Course
     template_name = "courses/course_detail.html"
@@ -57,19 +59,27 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
 
     def get_context_data(self, *args, **kwargs):
         course = self.course
-        grouped = group_course_teachers(course.course_teachers
-                                        .order_by('teacher__last_name',
-                                                  'teacher__first_name'))
+        # Tabs
+        tab_list = get_course_tab_list(self.request, course)
+        try:
+            show_tab = self.kwargs.get('tab', CourseInfoTab.type)
+            tab_list.set_active_tab(show_tab)
+        except TabNotFound:
+            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
+        # Teachers
+        by_role = get_course_teachers(course.course_teachers
+                                      .order_by('teacher__last_name',
+                                                'teacher__first_name'))
         teachers = {'main': [], 'others': []}
-        for role, ts in grouped.items():
+        for role, ts in by_role.items():
             if role in (TeacherRoles.LECTURER, TeacherRoles.SEMINAR):
-                to_group = 'main'
+                group = 'main'
             else:
-                to_group = 'others'
-            teachers[to_group].extend(ts)
+                group = 'others'
+            teachers[group].extend(ts)
         context = {
             'course': course,
-            'course_tabs': self.make_tabs(course),
+            'course_tabs': tab_list,
             'teachers': teachers,
             **self._get_additional_context(course)
         }
@@ -108,15 +118,6 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
             'unread_news': unread_news,
             'survey_url': survey_url,
         }
-
-    def make_tabs(self, course: Course):
-        tab_list = get_course_tab_list(self.request, course)
-        try:
-            show_tab = self.kwargs.get('tab', CourseInfoTab.type)
-            tab_list.set_active_tab(show_tab)
-        except TabNotFound:
-            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
-        return tab_list
 
 
 class CourseEditView(TeacherOnlyMixin, CourseURLParamsMixin, ProtectedFormMixin,

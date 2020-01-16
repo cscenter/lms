@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.forms import SlugField
+from django.forms import SlugField, forms
 from django.http import QueryDict
 from django_filters import FilterSet, ChoiceFilter, Filter
 
@@ -8,66 +8,75 @@ from core.models import Branch
 from courses.constants import SemesterTypes
 from courses.models import Course
 from courses.utils import semester_slug_re, get_term_index
-from learning.settings import Branches
 
 
-def validate_semester_slug(value):
-    match = semester_slug_re.search(value)
-    if not match:
-        raise ValidationError("Semester slug should be YEAR-TERM_TYPE format")
-    term_year = int(match.group("term_year"))
-    if term_year < settings.CENTER_FOUNDATION_YEAR:
-        raise ValidationError("Wrong semester year")
-    term_type = match.group("term_type")
-    # More strict rules for term types
-    if term_type not in [SemesterTypes.AUTUMN, SemesterTypes.SPRING]:
-        raise ValidationError("Supported semester types: [autumn, spring]")
-    term_index = get_term_index(term_year, term_type)
-    first_term_index = get_term_index(settings.CENTER_FOUNDATION_YEAR,
-                                      SemesterTypes.AUTUMN)
-    if term_index < first_term_index:
-        raise ValidationError("CS Center has no offerings for this period")
-
-
-class BranchChoiceFilter(ChoiceFilter):
+class BranchCodeFilter(ChoiceFilter):
     def filter(self, qs, value):
         """
-        Returns union of offline courses and all correspondence courses
-        since they are also available in queried city.
+        Filters courses offered internally in a target branch and courses
+        available for a long-distance learning in that branch.
+        (don't confuse with a distant branch)
         """
         if value == self.null_value:
             value = None
-        branch = Branch.objects.get(code=value, site_id=settings.SITE_ID)
-        qs = qs.available_in(branch=branch.pk)
+        branch = next(b for b in self.parent.branches if b.code == value)
+        term_index = get_term_index(branch.established, SemesterTypes.AUTUMN)
+        qs = (qs
+              .available_in(branch=branch.pk)
+              .filter(semester__index__gte=term_index))
         return qs
 
 
-class SemesterSlugField(SlugField):
-    def __init__(self, *args, **kwargs):
-        validators = kwargs.pop("validators", [])
-        validators.append(validate_semester_slug)
-        kwargs["validators"] = validators
-        super().__init__(*args, **kwargs)
+class SlugFilter(Filter):
+    field_class = SlugField
 
 
-class SemesterSlugFilter(Filter):
-    field_class = SemesterSlugField
+class SemesterFilter(SlugFilter):
+    def filter(self, qs, value):
+        return qs
+
+
+class CoursesFilterForm(forms.Form):
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get('semester') and cleaned_data.get('branch'):
+            branch_code = cleaned_data['branch']
+            branch = next(b for b in self.filter_set.branches
+                          if b.code == branch_code)
+            semester_value = cleaned_data['semester']
+            match = semester_slug_re.search(semester_value)
+            if not match:
+                msg = "Incorrect term slug format"
+                raise ValidationError(msg)
+            term_year = int(match.group("term_year"))
+            if term_year < branch.established:
+                raise ValidationError("Invalid term year")
+            term_type = match.group("term_type")
+            # More strict rules for term types
+            if term_type not in [SemesterTypes.AUTUMN, SemesterTypes.SPRING]:
+                raise ValidationError("Supported term types: [autumn, spring]")
+            term_index = get_term_index(term_year, term_type)
+            first_term_index = get_term_index(branch.established,
+                                              SemesterTypes.AUTUMN)
+            if term_index < first_term_index:
+                raise ValidationError("Invalid term slug")
+        return cleaned_data
 
 
 class CoursesFilter(FilterSet):
     """
     FilterSet used on /courses/ page.
 
-    Note: `semester` query value is only validated. This field used in
-    filtering on client side only.
+    Note: `semester` value is validated but not used in queryset filtering.
     """
-    branch = BranchChoiceFilter(field_name="branch__code", empty_label=None,
-                                choices=Branches.choices)
-    semester = SemesterSlugFilter(method='semester_slug_filter')
+    branch = BranchCodeFilter(field_name="branch__code", empty_label=None,
+                              choices=Branch.objects.none())
+    semester = SemesterFilter()
 
     class Meta:
         model = Course
-        fields = ['branch', 'semester']
+        form = CoursesFilterForm
+        fields = ('branch', 'semester')
 
     def __init__(self, data=None, queryset=None, request=None, **kwargs):
         """
@@ -76,18 +85,37 @@ class CoursesFilter(FilterSet):
             * valid branch code from user settings
             * default branch code
         """
+        # FIXME: мб сначала валидировать request данные? зачем смешивать с фильтрацией? Тогда отсюда можно удалить semester, т.к. он не к месту
         if data is not None:
             data = data.copy()  # get a mutable copy of the QueryDict
         else:
             data = QueryDict(mutable=True)
+        self.branches = list(Branch.objects
+                             .filter(site_id=request.site.pk)
+                             .order_by('order'))
         branch_code = data.pop("branch", None)
-        if not branch_code and hasattr(request.user, "branch"):
-            branch_code = [request.user.branch.code]
-        # For unauthenticated users or users without valid branch code
+        if not branch_code and hasattr(request.user, "branch_id"):
+            branch = next((b for b in self.branches
+                           if b.id == request.user.branch_id), None)
+            branch_code = [branch.code] if branch else None
         if not branch_code:
+            # TODO: Provide default branch for the site
             branch_code = [settings.DEFAULT_BRANCH_CODE]
         data.setlist("branch", branch_code)
         super().__init__(data=data, queryset=queryset, request=request, **kwargs)
+        # Branch code choices depend on current site
+        self.form['branch'].field.choices = [(b.code, b.name) for b
+                                             in self.branches]
 
-    def semester_slug_filter(self, queryset, name, value):
-        return queryset
+    @property
+    def form(self):
+        """Attach reference to the filter set"""
+        if not hasattr(self, '_form'):
+            Form = self.get_form_class()
+            if self.is_bound:
+                self._form = Form(self.data, prefix=self.form_prefix)
+            else:
+                self._form = Form(branches=self.branches,
+                                  prefix=self.form_prefix)
+            self._form.filter_set = self
+        return self._form

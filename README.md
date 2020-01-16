@@ -25,6 +25,10 @@ psql -h localhost cscdb csc -c "update django_site set domain='csc.test' where i
 ./manage.py changepassword admin
 # TODO: Write ansible command to automate routine
 
+# Disable annoying debug messages in ipython
+import logging
+logging.getLogger('parso.python.diff').disabled = True
+
 # Enable sql console logger
 import logging
 from core.utils import SQLFormatter

@@ -52,8 +52,6 @@ class CourseOfferingsView(FilterMixin, TemplateView):
             'teachers',
             queryset=User.objects.only("id", "first_name", "last_name",
                                        "patronymic"))
-        center_foundation_term_index = get_term_index(
-            settings.CENTER_FOUNDATION_YEAR, SemesterTypes.AUTUMN)
         return (Course.objects
                 .select_related('meta_course', 'semester', 'branch')
                 .only("pk", "branch_id", "is_open", "grading_type",
@@ -61,7 +59,6 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
                       "branch__code")
-                .filter(semester__index__gte=center_foundation_term_index)
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',
                           'meta_course__name')

@@ -1,30 +1,40 @@
 import datetime
 import re
 from calendar import monthrange
-from collections import namedtuple
-from typing import List, Tuple
+from typing import List, Tuple, NamedTuple
 
 import pytz
 from dateutil import parser as dparser
 from django.utils import timezone
 
 from core.settings.base import FOUNDATION_YEAR, DEFAULT_TIMEZONE
-from core.timezone import Timezone, now_local, TzAware
+from core.timezone import Timezone, now_local
 from courses.constants import SemesterTypes, \
     AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START, MONDAY_WEEKDAY
 
 # Helps to sort terms in chronological order
 TERMS_INDEX_START = 1
 
-TermTuple = namedtuple('TermTuple', ['year', 'type'])
+
+class TermTuple(NamedTuple):
+    year: int
+    type: str  # one of `courses.constants.SemesterTypes` values
 
 
-def get_current_term_pair(tz: Timezone = DEFAULT_TIMEZONE) -> TermTuple:
-    dt_local = now_local(tz)
-    return date_to_term_pair(dt_local)
+_term_types = r"|".join(slug for slug, _ in SemesterTypes.choices)
+semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
+                              _term_types + r")$")
 
 
 def date_to_term_pair(dt: datetime.datetime) -> TermTuple:
+    """
+    Converts aware datetime to `(year, term type)` tuple
+    Example:
+        tz = pytz.timezone('Europe/Moscow')
+        dt_naive = datetime.datetime(2018, month=11, day=1, hour=23, minute=59)
+        dt_aware = tz.localize(dt_naive)
+        date_to_term_pair(dt_aware)  # TermTuple(year=2018, type='autumn')
+    """
     assert timezone.is_aware(dt)
     year = dt.year
     # Term start should be aware of the same timezone as `date`
@@ -43,6 +53,11 @@ def date_to_term_pair(dt: datetime.datetime) -> TermTuple:
         if dt.month <= spring_term_start.month:
             year -= 1
     return TermTuple(year, current_term)
+
+
+def get_current_term_pair(tz: Timezone = DEFAULT_TIMEZONE) -> TermTuple:
+    dt_local = now_local(tz)
+    return date_to_term_pair(dt_local)
 
 
 def convert_term_parts_to_datetime(year, term_start,
@@ -157,8 +172,3 @@ def get_terms_for_calendar_month(year: int, month: int) -> List[TermTuple]:
         return [start_term, end_term]
     else:
         return [start_term]
-
-
-term_types = r"|".join(slug for slug, _ in SemesterTypes.choices)
-semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
-                              term_types + r")$")

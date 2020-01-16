@@ -25,7 +25,8 @@ from core.urls import reverse, branch_aware_reverse
 from core.utils import bucketize
 from courses.constants import SemesterTypes, TeacherRoles, ClassTypes
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
-    group_course_teachers, CourseClass
+    CourseClass
+from courses.services import get_course_teachers
 from courses.utils import get_current_term_pair, \
     first_term_in_academic_year
 from courses.views.mixins import CourseURLParamsMixin
@@ -624,7 +625,7 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
                 .select_related('meta_course', 'semester', 'branch')
                 .prefetch_related(course_teachers))
 
-    def get_object(self):
+    def get_object(self, queryset=None):
         return self.course
 
     def get_context_data(self, **kwargs):
@@ -640,12 +641,19 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
         ])
         show_tab = self.kwargs.get('tab', 'about')
         tabs.set_active(show_tab)
-        teachers = group_course_teachers(self.course.course_teachers
-                                         .order_by('teacher__last_name',
-                                                   'teacher__first_name'))
         context['tabs'] = tabs
-        context['teachers'] = {TeacherRoles.get_choice(k): v for k, v in
-                               teachers.items()}
+        teachers = get_course_teachers(self.course.course_teachers
+                                       .order_by('teacher__last_name',
+                                                 'teacher__first_name'))
+        role_captions = {
+            TeacherRoles.LECTURER: _("Reads lectures"),
+            TeacherRoles.REVIEWER: _("Checks assignments"),
+            TeacherRoles.SEMINAR: _("Leads seminars"),
+        }
+        # Update role name with narrative if possible
+        context['teachers'] = {
+            role_captions.get(k, TeacherRoles.values[k]): v for k, v in
+            teachers.items()}
         context['classes'] = (self.course.courseclass_set
                               .filter(type=ClassTypes.LECTURE)
                               .order_by("date", "starts_at"))
