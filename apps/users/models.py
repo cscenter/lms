@@ -493,8 +493,9 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
     def get_assignments_icalendar_url(self):
         return reverse('user_ical_assignments', args=[self.pk])
 
-    def teacher_profile_url(self):
-        return reverse('teacher_detail', args=[self.pk])
+    def teacher_profile_url(self, subdomain=settings.LMS_SUBDOMAIN):
+        return reverse('teacher_detail', args=[self.pk],
+                       subdomain=subdomain)
 
     def get_full_name(self, last_name_first=False):
         """
@@ -577,7 +578,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
 
     @instance_memoize
     def get_enrollment(self, course_id: int) -> Optional["Enrollment"]:
-        """Returns student enrollment if exists and not soft deleted"""
+        """Returns student enrollment if it exists and not soft deleted"""
         from learning.models import Enrollment
         return (Enrollment.active
                 .filter(student=self, course_id=course_id)

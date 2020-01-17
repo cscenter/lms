@@ -8,6 +8,7 @@ from loginas import urls as loginas_urls
 
 from announcements.views import AnnouncementTagAutocomplete
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
+from courses.views import TeacherDetailView
 from lms.views import IndexView, CourseOfferingsView
 from users.views import EnrollmentCertificateCreateView, \
     EnrollmentCertificateDetailView
@@ -33,6 +34,7 @@ urlpatterns = [
     path('courses/', CourseOfferingsView.as_view(), name="course_list"),
     path('', include('courses.urls')),
     path("courses/", include('learning.invitation.urls')),
+    path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
 
     path('users/<int:pk>/reference/add/', EnrollmentCertificateCreateView.as_view(), name='user_reference_add'),
     path('users/<int:pk>/reference/<int:reference_pk>/', EnrollmentCertificateDetailView.as_view(), name='user_reference_detail'),

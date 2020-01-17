@@ -23,27 +23,10 @@ from users.mixins import TeacherOnlyMixin
 __all__ = ('CourseDetailView', 'CourseEditView')
 
 
-# FIXME: разделить кастомную логику
-# FIXME: сделать отдельное view для сайта клуба?
 class CourseDetailView(CourseURLParamsMixin, DetailView):
     model = Course
     template_name = "courses/course_detail.html"
     context_object_name = 'course'
-
-    def get(self, request, *args, **kwargs):
-        # Redirects to login page if tab is not visible to authenticated user
-        context = self.get_context_data()
-        # Redirects to club if course was created before center establishment.
-        # FIXME: remove or separate
-        co = context[self.context_object_name]
-        if settings.SITE_ID == settings.CENTER_SITE_ID and co.is_open:
-            index = get_term_index(settings.CENTER_FOUNDATION_YEAR,
-                                   SemesterTypes.AUTUMN)
-            if co.semester.index < index:
-                parsed = urlparse(co.get_absolute_url())
-                url = get_club_domain(co.branch.code) + parsed.path
-                return HttpResponseRedirect(url)
-        return self.render_to_response(context)
 
     def get_course_queryset(self):
         course_teachers = Prefetch('course_teachers',
@@ -98,7 +81,8 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
             request_user_enrollment = request_user.get_enrollment(course.pk)
         else:
             request_user_enrollment = None
-        # Attach unread notifications count if request user in mailing list
+        # Attach unread notifications count if authenticated user is in
+        # a mailing list
         unread_news = None
         if request_user_enrollment or is_actual_teacher:
             unread_news = (CourseNewsNotification.unread

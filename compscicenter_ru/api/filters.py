@@ -31,6 +31,7 @@ class CourseFilter(FilterSet):
     branch = BranchCodeFilter(field_name="branch__code", empty_label=None,
                               choices=Branches.choices)
     # TODO: restrict max value
+    # FIXME: сравнивать с established выбранной бранчи
     academic_year = AcademicYearFilter(label='Academic Year',
                                        min_value=settings.CENTER_FOUNDATION_YEAR)
 
@@ -50,7 +51,7 @@ class CourseFilter(FilterSet):
         else:
             data = QueryDict(mutable=True)
         branch_code = data.pop("branch", None)
-        if not branch_code and hasattr(request.user, "branch"):
+        if not branch_code and hasattr(request.user, "branch_id"):
             branch_code = [request.user.branch.code]
         # For unauthenticated users or users without valid branch code
         if not branch_code:

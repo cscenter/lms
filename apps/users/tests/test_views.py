@@ -153,16 +153,6 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         It has several paragraphs, by the way."""
         self.assertEqual(user.get_short_bio(), "Some large text.")
 
-    def test_teacher_detail_view(self):
-        user = UserFactory()
-        resp = self.client.get(user.teacher_profile_url())
-        self.assertEqual(resp.status_code, 404)
-        add_user_groups(user, [Roles.TEACHER])
-        user.save()
-        resp = self.client.get(user.teacher_profile_url())
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.context_data['teacher'], user)
-
     def test_user_detail_view(self):
         user = UserFactory()
         response = self.client.get(user.get_absolute_url())

@@ -16,13 +16,23 @@ from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
 from learning.settings import Branches
 from users.constants import Roles
-from users.tests.factories import TeacherFactory, CuratorFactory
+from users.tests.factories import TeacherFactory, CuratorFactory, UserFactory
 
 
 def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:
     return tz.localize(datetime.datetime(2017, 1, 1)).utcoffset()
 
 
+@pytest.mark.django_db
+def test_teacher_detail_view(client):
+    user = UserFactory()
+    response = client.get(user.teacher_profile_url())
+    assert response.status_code == 404
+    user.add_group(Roles.TEACHER)
+    user.save()
+    response = client.get(user.teacher_profile_url())
+    assert response.status_code == 200
+    assert response.context_data['teacher'] == user
 
 
 @pytest.mark.django_db

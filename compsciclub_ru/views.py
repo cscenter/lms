@@ -141,7 +141,7 @@ class TeacherDetailView(DetailView):
         co_queryset = (Course.objects
                        .filter(is_open=True,
                                branch=self.request.branch,)
-                       .select_related('semester', 'meta_course'))
+                       .select_related('semester', 'meta_course', 'branch'))
         return (get_user_model()._default_manager
                 .prefetch_related(
                     Prefetch('teaching_set',
