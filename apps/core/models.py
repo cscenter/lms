@@ -1,4 +1,4 @@
-from typing import NamedTuple, Dict, Union
+from typing import NamedTuple, Dict, Union, NewType, List
 
 import pytz
 from bitfield import BitField
@@ -18,9 +18,10 @@ class BranchNaturalKey(NamedTuple):
     site_id: int
 
 
-BranchKey = Union[int, BranchNaturalKey]
+SiteId = NewType('SiteId', int)
+BranchKey = Union[SiteId, BranchNaturalKey]
 
-BRANCH_CACHE: Dict[BranchKey, "Branch"] = {}
+BRANCH_CACHE: Dict[BranchKey, Union["Branch", List["Branch"]]] = {}
 
 
 LATEX_MARKDOWN_HTML_ENABLED = _(
@@ -83,6 +84,12 @@ class BranchManager(models.Manager):
         if key not in BRANCH_CACHE:
             BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
         return BRANCH_CACHE[key]
+
+    def for_site(self, site_id: int):
+        cache_key = SiteId(site_id)
+        if cache_key not in BRANCH_CACHE:
+            BRANCH_CACHE[cache_key] = list(self.filter(site_id=site_id))
+        return BRANCH_CACHE[cache_key]
 
     def get_current(self, request=None, site_id: int = settings.SITE_ID):
         """

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from django.db import models
 from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
@@ -101,9 +101,11 @@ class _CourseDefaultManager(models.Manager):
 
 
 class CourseQuerySet(models.QuerySet):
-    def available_in(self, branch: int):
-        return (self.filter(Q(branch_id=branch) |
-                            Q(additional_branches=branch))
+    def available_in(self, branch: Union[int, List[int]]):
+        if isinstance(branch, int):
+            branch = [branch]
+        return (self.filter(Q(branch__in=branch) |
+                            Q(additional_branches__in=branch))
                 .distinct('semester__index', 'meta_course__name', 'pk')
                 .order_by('-semester__index', 'meta_course__name', 'pk'))
 

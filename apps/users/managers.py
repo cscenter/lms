@@ -8,13 +8,13 @@ from learning.settings import GradeTypes
 
 
 class UserQuerySet(query.QuerySet):
-    def has_role(self, *roles):
+    def has_role(self, *roles, site_id=settings.SITE_ID):
         """
         Filter users who have at least one of the provided roles
         for current site. Could return duplicates.
         """
         return self.filter(group__role__in=roles,
-                           group__site_id=settings.SITE_ID)
+                           group__site_id=site_id)
 
     def student_progress(self, exclude_grades: List[str] = None,
                          until_term: "Semester" = None):
