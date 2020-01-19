@@ -12,6 +12,8 @@ class TeacherDetailView(DetailView):
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
+        # FIXME: сейчас не показываются преподы клуба, у них нет группы центра. Что делать? Если не ограничивать по сайту, то плохо.
+        # FIXME: ну можно здесь просто проверять наличие хоть какой-то роли "преподаватель", а уже по курсам что-то отфильтровать. А что?
         return User.objects.has_role(Roles.TEACHER,
                                      site_id=self.request.site.pk)
 

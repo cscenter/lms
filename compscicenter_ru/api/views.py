@@ -8,6 +8,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 
 from api.pagination import StandardPagination
+from core.models import Branch
 from courses.constants import SemesterTypes
 from courses.models import Course, CourseTeacher
 from courses.utils import get_term_index
@@ -44,11 +45,11 @@ class TeacherList(ListAPIView):
         reviewer = CourseTeacher.roles.reviewer
         # `.exclude` generates wrong sql as well as `.filter` combined with
         # `~` operation. BitField overrides default `exact` lookup, so
-        # let's filter out only_reviewers with `__ne` custom lookup
+        # let's filter out non-reviewers with `__ne` custom lookup
         any_role_except_reviewer = (Q(courseteacher__roles__ne=reviewer.mask) &
                                     Q(courseteacher__roles__ne=0))
         queryset = (User.objects
-                    .has_role(Roles.TEACHER)
+                    .has_role(Roles.TEACHER, site_id=self.request.site.pk)
                     .filter(any_role_except_reviewer)
                     .select_related('branch')
                     .only("pk", "first_name", "last_name", "patronymic",
@@ -58,8 +59,9 @@ class TeacherList(ListAPIView):
                     .order_by("last_name", "first_name", "pk"))
         course = self.request.query_params.get("course", None)
         if course:
-            term_index = get_term_index(settings.CENTER_FOUNDATION_YEAR,
-                                        SemesterTypes.AUTUMN)
+            branches = Branch.objects.for_site(site_id=self.request.site.pk)
+            min_established = min(b.established for b in branches)
+            term_index = get_term_index(min_established, SemesterTypes.AUTUMN)
             queryset = queryset.filter(
                 courseteacher__course__meta_course_id=course,
                 courseteacher__course__semester__index__gte=term_index)
@@ -78,9 +80,7 @@ class TeacherList(ListAPIView):
                                     "-course__semester__index")
                           .distinct("teacher_id", "course__meta_course__id"))
             )
-
         )
-
         return queryset
 
     def list(self, request, *args, **kwargs):

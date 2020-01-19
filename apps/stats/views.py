@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from admission.models import Campaign, Interview, Comment
+from core.models import Branch
 from core.utils import bucketize
 from courses.constants import SemesterTypes
 from courses.models import Course, Semester
@@ -28,8 +29,9 @@ class StatsLearningView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, **kwargs):
         context = super(StatsLearningView, self).get_context_data(**kwargs)
         # Terms grouped by year
-        term_start = get_term_index(settings.CENTER_FOUNDATION_YEAR,
-                                    SemesterTypes.AUTUMN)
+        branches = Branch.objects.for_site(site_id=self.request.site.pk)
+        min_established = min(b.established for b in branches)
+        term_start = get_term_index(min_established, SemesterTypes.AUTUMN)
         terms = (Semester.objects.only("pk", "type", "year")
                  .filter(index__gte=term_start)
                  .order_by("-index"))

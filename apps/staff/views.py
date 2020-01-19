@@ -21,7 +21,6 @@ import core.utils
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionReport
 from core.models import Branch
-from core.settings.base import FOUNDATION_YEAR, DEFAULT_BRANCH_CODE
 from core.templatetags.core_tags import tex
 from core.urls import reverse
 from courses.constants import SemesterTypes
@@ -34,7 +33,7 @@ from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
     ProgressReportForInvitation, DataFrameResponse
 from learning.settings import AcademicDegreeYears, StudentStatuses, \
-    GradeTypes, Branches
+    GradeTypes
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import FacesQueryParams
@@ -366,7 +365,7 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
         # Validate year and term GET params
         try:
             term_year = int(self.kwargs['term_year'])
-            if term_year < FOUNDATION_YEAR:
+            if term_year < settings.FOUNDATION_YEAR:
                 raise ValueError("ProgressReportForSemester: Wrong year format")
             term_type = self.kwargs['term_type']
             if term_type not in SemesterTypes.values:
@@ -441,7 +440,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         if not query_params.is_valid():
             return HttpResponseRedirect(request.path)
         branch_code = query_params.validated_data.get('branch',
-                                                      DEFAULT_BRANCH_CODE)
+                                                      settings.DEFAULT_BRANCH_CODE)
         branch = get_object_or_404(Branch.objects
                                    .filter(code=branch_code,
                                            site_id=settings.SITE_ID))
@@ -455,8 +454,7 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         current_year, _ = get_current_term_pair(branch.get_timezone())
         context = {
             'students': self.get_queryset(branch, enrollment_year),
-            "years": reversed(range(settings.CENTER_FOUNDATION_YEAR,
-                                    current_year + 1)),
+            "years": reversed(range(branch.established, current_year + 1)),
             "current_year": enrollment_year,
             "current_branch": branch,
             "branches": Branch.objects.filter(site_id=settings.SITE_ID).order_by('order')

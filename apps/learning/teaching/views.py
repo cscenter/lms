@@ -1,6 +1,7 @@
 from collections import OrderedDict
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import JsonResponse, HttpResponseBadRequest
@@ -12,7 +13,6 @@ from vanilla import TemplateView
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
-from core.settings.base import FOUNDATION_YEAR
 from core.urls import reverse
 from core.utils import render_markdown
 from courses.calendar import CalendarEvent
@@ -21,15 +21,12 @@ from courses.models import CourseClass, Course, Assignment
 from courses.utils import get_term_index, \
     get_current_term_pair
 from courses.views.calendar import MonthEventsCalendarView
-from learning.api.serializers import StudentAssignmentSerializer, \
-    AssignmentScoreSerializer
+from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_teacher_month_events
-from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm, \
-    AssignmentCommentForm
+from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole, \
-    CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
     CreateAssignmentComment, ViewStudentAssignment, EditOwnStudentAssignment
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import logger, AssignmentCommentUpsertView
@@ -221,7 +218,7 @@ class AssignmentListView(TeacherOnlyMixin, TemplateView):
         try:
             year, term_type = query_term.split("-")
             year = int(year)
-            if year < FOUNDATION_YEAR:  # invalid GET-param value
+            if year < settings.FOUNDATION_YEAR:  # invalid GET-param value
                 raise ValidationError("Wrong year value")
             if term_type not in SemesterTypes.values:
                 raise ValidationError("Wrong term type")
