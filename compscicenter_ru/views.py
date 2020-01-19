@@ -555,20 +555,21 @@ class TeacherDetailView(PublicURLMixin, DetailView):
     context_object_name = 'teacher'
 
     def get_queryset(self, *args, **kwargs):
-        # Prefetch both center and club courses
-        branches = [code for code, _ in Branches.choices]
+        return User.objects.filter(group__role=Roles.TEACHER).distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        branches = Branch.objects.for_site(site_id=self.request.site.pk)
+        min_established = min(b.established for b in branches)
         courses = (Course.objects
-                   .filter(branch__code__in=branches)
+                   .available_in(branches)
+                   .filter(semester__year__gte=min_established,
+                           teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'branch')
                    .order_by('-semester__index')
                    .prefetch_related('additional_branches'))
-        return (User.objects
-                .filter(group__role=Roles.TEACHER)
-                .distinct()
-                .prefetch_related(
-                    Prefetch('teaching_set',
-                             queryset=courses,
-                             to_attr='course_offerings')))
+        context['courses'] = courses
+        return context
 
 
 class CourseOfferingsView(TemplateView):
@@ -577,12 +578,13 @@ class CourseOfferingsView(TemplateView):
     def get_context_data(self, **kwargs):
         year, term = get_current_term_pair()
         academic_year = year if term == SemesterTypes.AUTUMN else year - 1
+        # TODO: use Branch.objects.for_site()
         branches = list(Branch.objects
                         .filter(site_id=settings.SITE_ID,
                                 established__lte=academic_year)
                         .annotate(value=F('code'), label=F('name'))
                         .values('value', 'label', 'established'))
-        semesters = [
+        terms = [
             {'value': SemesterTypes.AUTUMN, 'label': str(_('Autumn|adjective'))},
             {'value': SemesterTypes.SPRING, 'label': str(_('Spring|adjective'))}
         ]
@@ -602,7 +604,7 @@ class CourseOfferingsView(TemplateView):
                 'entryURL': [reverse('public-api:v2:course_list')],
                 'currentYear': academic_year,
                 'branchOptions': branches,
-                'semesterOptions': semesters
+                'semesterOptions': terms
             },
             'state': {
                 'branch': branch,

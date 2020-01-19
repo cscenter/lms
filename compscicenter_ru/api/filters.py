@@ -5,11 +5,12 @@ from django.http import QueryDict
 from django_filters import FilterSet, Filter
 from django_filters.constants import EMPTY_VALUES
 
+from core.models import Branch
 from courses.constants import SemesterTypes
 from courses.models import Course
 from courses.utils import get_term_index
 from learning.settings import Branches
-from lms.filters import BranchCodeFilter
+from lms.filters import BranchCodeFilter, CoursesFilter
 
 
 class IntegerFilter(Filter):
@@ -27,34 +28,11 @@ class AcademicYearFilter(IntegerFilter):
                                    Q(semester__index=term_index + 1))
 
 
-class CourseFilter(FilterSet):
+class CoursesPublicFilter(CoursesFilter):
     branch = BranchCodeFilter(field_name="branch__code", empty_label=None,
-                              choices=Branches.choices)
+                              choices=Branch.objects.none())
     # TODO: restrict max value
-    # FIXME: сравнивать с established выбранной бранчи
-    academic_year = AcademicYearFilter(label='Academic Year',
-                                       min_value=settings.CENTER_FOUNDATION_YEAR)
+    academic_year = AcademicYearFilter(label='Academic Year')
 
-    class Meta:
-        model = Course
+    class Meta(CoursesFilter.Meta):
         fields = ('branch', 'academic_year')
-
-    def __init__(self, data=None, queryset=None, request=None, **kwargs):
-        """
-        Resolves `branch` value in the next order:
-            * query value
-            * valid branch code from user settings
-            * default branch code
-        """
-        if data is not None:
-            data = data.copy()  # get a mutable copy of the QueryDict
-        else:
-            data = QueryDict(mutable=True)
-        branch_code = data.pop("branch", None)
-        if not branch_code and hasattr(request.user, "branch_id"):
-            branch_code = [request.user.branch.code]
-        # For unauthenticated users or users without valid branch code
-        if not branch_code:
-            branch_code = [settings.DEFAULT_BRANCH_CODE]
-        data.setlist("branch", branch_code)
-        super().__init__(data=data, queryset=queryset, request=request, **kwargs)

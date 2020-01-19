@@ -88,7 +88,8 @@ class BranchManager(models.Manager):
     def for_site(self, site_id: int):
         cache_key = SiteId(site_id)
         if cache_key not in BRANCH_CACHE:
-            BRANCH_CACHE[cache_key] = list(self.filter(site_id=site_id))
+            BRANCH_CACHE[cache_key] = list(self.filter(site_id=site_id)
+                                           .order_by('order'))
         return BRANCH_CACHE[cache_key]
 
     def get_current(self, request=None, site_id: int = settings.SITE_ID):

@@ -27,14 +27,14 @@
             </div>
         </div>
     </div>
-    {% if teacher.course_offerings %}
+    {% if courses %}
         <div class="container page-content">
             <div class="row">
                 <div class="col-lg-12">
                     <section class="content-block">
                         <h2>Прочтения курсов</h2>
                         <div class="card-deck _three">
-                            {% for course in teacher.course_offerings %}
+                            {% for course in courses %}
                                 <a href="{{ view.public_url(course) }}" class="ui card">
                                     <div class="card__content mb-8">
                                         <div class="card__title mb-2">
