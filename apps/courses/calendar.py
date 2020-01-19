@@ -6,13 +6,13 @@ from typing import List, Iterable, NewType
 import attr
 from dateutil.relativedelta import relativedelta
 from dateutil.rrule import rrule, DAILY
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.formats import date_format, time_format
 from isoweek import Week
 from rest_framework import serializers, fields
 
-from core.settings.base import FOUNDATION_YEAR
 from courses.constants import MONDAY_WEEKDAY
 from core.utils import chunks
 from courses.utils import get_boundaries
@@ -229,7 +229,8 @@ class WeekEventsCalendar(EventsCalendar):
 
 
 class CalendarQueryParams(serializers.Serializer):
-    year = fields.IntegerField(required=False, min_value=FOUNDATION_YEAR)
+    year = fields.IntegerField(required=False,
+                               min_value=settings.FOUNDATION_YEAR)
     month = fields.IntegerField(required=False, min_value=1, max_value=12)
     # ISO week-numbering year has 52 or 53 full weeks
     week = fields.IntegerField(required=False, min_value=1, max_value=53)

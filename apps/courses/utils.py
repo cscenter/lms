@@ -5,9 +5,9 @@ from typing import List, Tuple, NamedTuple
 
 import pytz
 from dateutil import parser as dparser
+from django.conf import settings
 from django.utils import timezone
 
-from core.settings.base import FOUNDATION_YEAR, DEFAULT_TIMEZONE
 from core.timezone import Timezone, now_local
 from courses.constants import SemesterTypes, \
     AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START, MONDAY_WEEKDAY
@@ -55,7 +55,7 @@ def date_to_term_pair(dt: datetime.datetime) -> TermTuple:
     return TermTuple(year, current_term)
 
 
-def get_current_term_pair(tz: Timezone = DEFAULT_TIMEZONE) -> TermTuple:
+def get_current_term_pair(tz: Timezone = settings.DEFAULT_TIMEZONE) -> TermTuple:
     dt_local = now_local(tz)
     return date_to_term_pair(dt_local)
 
@@ -87,16 +87,18 @@ def next_term_starts_at(term_index=None,
     return get_term_start(year, next_term, tz)
 
 
-# FIXME: pass in TermTuple, then allow to pass in datetime
 def get_term_index(target_year, target_term_type):
-    """Calculate consecutive term number from spring term of FOUNDATION_YEAR"""
-    if target_year < FOUNDATION_YEAR:
+    """
+    Returns position in the term sequence started from
+    the `settings.FOUNDATION_YEAR` value.
+    """
+    if target_year < settings.FOUNDATION_YEAR:
         raise ValueError("get_term_index: target year < FOUNDATION_YEAR")
     if target_term_type not in SemesterTypes.values:
         raise ValueError("get_term_index: unknown term type %s" %
                          target_term_type)
     terms_in_year = len(SemesterTypes.choices)
-    year_portion = (target_year - FOUNDATION_YEAR) * terms_in_year
+    year_portion = (target_year - settings.FOUNDATION_YEAR) * terms_in_year
     term_portion = TERMS_INDEX_START
     for index, (t, _) in enumerate(SemesterTypes.choices):
         if t == target_term_type:
@@ -104,7 +106,7 @@ def get_term_index(target_year, target_term_type):
     return year_portion + term_portion
 
 
-def get_current_term_index(tz: Timezone = DEFAULT_TIMEZONE):
+def get_current_term_index(tz: Timezone = settings.DEFAULT_TIMEZONE):
     return get_term_index(*get_current_term_pair(tz))
 
 
@@ -125,7 +127,7 @@ def get_term_by_index(term_index):
     assert term_index >= TERMS_INDEX_START
     terms_in_year = len(SemesterTypes.choices)
     term_index -= TERMS_INDEX_START
-    year = int(FOUNDATION_YEAR + term_index / terms_in_year)
+    year = int(settings.FOUNDATION_YEAR + term_index / terms_in_year)
     term = term_index % terms_in_year
     for index, (t, _) in enumerate(SemesterTypes.choices):
         if index == term:
