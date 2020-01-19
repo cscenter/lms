@@ -16,9 +16,20 @@ from courses.constants import SemesterTypes, \
 TERMS_INDEX_START = 1
 
 
-class TermTuple(NamedTuple):
-    year: int
+class TermPair(NamedTuple):
+    year: int  # calendar year
     type: str  # one of `courses.constants.SemesterTypes` values
+
+    # TODO: add next/prev methods
+
+    @property
+    def academic_year(self):
+        """
+        The academic year begins in autumn and ends during the following summer.
+        """
+        if self.type != SemesterTypes.AUTUMN:
+            return self.year - 1
+        return self.year
 
 
 _term_types = r"|".join(slug for slug, _ in SemesterTypes.choices)
@@ -26,14 +37,14 @@ semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
                               _term_types + r")$")
 
 
-def date_to_term_pair(dt: datetime.datetime) -> TermTuple:
+def date_to_term_pair(dt: datetime.datetime) -> TermPair:
     """
     Converts aware datetime to `(year, term type)` tuple
     Example:
         tz = pytz.timezone('Europe/Moscow')
         dt_naive = datetime.datetime(2018, month=11, day=1, hour=23, minute=59)
         dt_aware = tz.localize(dt_naive)
-        date_to_term_pair(dt_aware)  # TermTuple(year=2018, type='autumn')
+        date_to_term_pair(dt_aware)  # TermPair(year=2018, type='autumn')
     """
     assert timezone.is_aware(dt)
     year = dt.year
@@ -52,10 +63,10 @@ def date_to_term_pair(dt: datetime.datetime) -> TermTuple:
         # Fix year inaccuracy, when spring semester starts later than 1 jan
         if dt.month <= spring_term_start.month:
             year -= 1
-    return TermTuple(year, current_term)
+    return TermPair(year, current_term)
 
 
-def get_current_term_pair(tz: Timezone = settings.DEFAULT_TIMEZONE) -> TermTuple:
+def get_current_term_pair(tz: Timezone = settings.DEFAULT_TIMEZONE) -> TermPair:
     dt_local = now_local(tz)
     return date_to_term_pair(dt_local)
 
@@ -66,7 +77,7 @@ def convert_term_parts_to_datetime(year, term_start,
     return tz.localize(dt_naive)
 
 
-def get_term_start(year, term_type, tz: Timezone) -> datetime.datetime:
+def get_term_starts_at(year, term_type, tz: Timezone) -> datetime.datetime:
     """Returns term start point in datetime format."""
     if term_type == SemesterTypes.SPRING:
         term_start_str = SPRING_TERM_START
@@ -84,7 +95,7 @@ def next_term_starts_at(term_index=None,
     if not term_index:
         term_index = get_current_term_index(tz)
     year, next_term = get_term_by_index(term_index + 1)
-    return get_term_start(year, next_term, tz)
+    return get_term_starts_at(year, next_term, tz)
 
 
 def get_term_index(target_year, target_term_type):
@@ -108,18 +119,6 @@ def get_term_index(target_year, target_term_type):
 
 def get_current_term_index(tz: Timezone = settings.DEFAULT_TIMEZONE):
     return get_term_index(*get_current_term_pair(tz))
-
-
-def first_term_in_academic_year(year: int, term_type):
-    """
-    Returns term index of the beginning of academic year.
-
-    Academic year starts from autumn. Term should be greater than
-    autumn of `FOUNDATION_YEAR`.
-    """
-    if term_type != SemesterTypes.AUTUMN:
-        year -= 1
-    return get_term_index(year, SemesterTypes.AUTUMN)
 
 
 def get_term_by_index(term_index):
@@ -162,7 +161,7 @@ def get_boundaries(year, month) -> Tuple:
     return start, end
 
 
-def get_terms_for_calendar_month(year: int, month: int) -> List[TermTuple]:
+def get_terms_for_calendar_month(year: int, month: int) -> List[TermPair]:
     start_date, end_date = get_boundaries(year, month)
     # Case date to timezone aware datetime, no matter which timezone we choose
     time_part = datetime.time(tzinfo=pytz.UTC)

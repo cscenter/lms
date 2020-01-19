@@ -5,31 +5,25 @@ import pytz
 
 from courses.constants import SemesterTypes
 from courses.utils import get_term_index, get_term_by_index, \
-    first_term_in_academic_year, get_current_term_pair, \
-    TERMS_INDEX_START, get_boundaries
-from core.settings.base import FOUNDATION_YEAR
+    get_current_term_pair, \
+    TERMS_INDEX_START, get_boundaries, TermPair
 
 
-def test_get_term_index():
+def test_get_term_index(settings):
+    established = settings.FOUNDATION_YEAR = 2011
     cnt = len(SemesterTypes.choices)
     with pytest.raises(ValueError) as e:
-        get_term_index(FOUNDATION_YEAR - 1, SemesterTypes.SPRING)
+        get_term_index(established - 1, SemesterTypes.SPRING)
     assert "target year < FOUNDATION_YEAR" in str(e.value)
     with pytest.raises(ValueError) as e:
-        get_term_index(FOUNDATION_YEAR, "sprEng")
+        get_term_index(established, "sprEng")
     assert "unknown term type" in str(e.value)
-    assert get_term_index(FOUNDATION_YEAR,
-                          SemesterTypes.SPRING) == TERMS_INDEX_START
-    assert get_term_index(FOUNDATION_YEAR,
-                          SemesterTypes.SUMMER) == TERMS_INDEX_START + 1
-    assert get_term_index(FOUNDATION_YEAR,
-                          SemesterTypes.AUTUMN) == TERMS_INDEX_START + 2
-    assert get_term_index(FOUNDATION_YEAR + 1,
-                          SemesterTypes.SPRING) == TERMS_INDEX_START + cnt
-    assert get_term_index(FOUNDATION_YEAR + 1,
-                          SemesterTypes.SUMMER) == TERMS_INDEX_START + cnt + 1
-    assert get_term_index(FOUNDATION_YEAR + 7,
-                          SemesterTypes.SPRING) == TERMS_INDEX_START + cnt * 7
+    assert get_term_index(established, SemesterTypes.SPRING) == TERMS_INDEX_START
+    assert get_term_index(established, SemesterTypes.SUMMER) == TERMS_INDEX_START + 1
+    assert get_term_index(established, SemesterTypes.AUTUMN) == TERMS_INDEX_START + 2
+    assert get_term_index(established + 1, SemesterTypes.SPRING) == TERMS_INDEX_START + cnt
+    assert get_term_index(established + 1, SemesterTypes.SUMMER) == TERMS_INDEX_START + cnt + 1
+    assert get_term_index(established + 7, SemesterTypes.SPRING) == TERMS_INDEX_START + cnt * 7
 
 
 def test_get_boundaries():
@@ -45,12 +39,13 @@ def test_get_boundaries():
     assert d2 == datetime.date(2019, 10, 6)
 
 
-def test_get_term_by_index():
+def test_get_term_by_index(settings):
+    established = settings.FOUNDATION_YEAR = 2011
     with pytest.raises(AssertionError) as excinfo:
         get_term_by_index(TERMS_INDEX_START - 1)
     year, term = get_term_by_index(TERMS_INDEX_START)
     assert isinstance(year, int)
-    assert year == FOUNDATION_YEAR
+    assert year == established
     # Check ordering of terms also
     assert term == "spring"
     _, term = get_term_by_index(TERMS_INDEX_START + 1)
@@ -59,27 +54,19 @@ def test_get_term_by_index():
     assert term == "autumn"
     year, term = get_term_by_index(TERMS_INDEX_START +
                                    len(SemesterTypes.choices))
-    assert year == FOUNDATION_YEAR + 1
+    assert year == established + 1
     assert term == "spring"
     year, term = get_term_by_index(TERMS_INDEX_START +
                                    2 * len(SemesterTypes.choices))
-    assert year == FOUNDATION_YEAR + 2
+    assert year == established + 2
     assert term == "spring"
 
 
-def test_get_term_index_academic_year_starts():
-    # Indexing starts from 1 of foundation year spring.
-    with pytest.raises(ValueError):
-        first_term_in_academic_year(FOUNDATION_YEAR,
-                                    SemesterTypes.SPRING)
-    assert 3 == first_term_in_academic_year(FOUNDATION_YEAR,
-                                            SemesterTypes.AUTUMN)
-    assert 3 == first_term_in_academic_year(FOUNDATION_YEAR + 1,
-                                            SemesterTypes.SPRING)
-    assert 6 == first_term_in_academic_year(FOUNDATION_YEAR + 1,
-                                            SemesterTypes.AUTUMN)
-    assert 6 == first_term_in_academic_year(FOUNDATION_YEAR + 2,
-                                            SemesterTypes.SUMMER)
+def test_term_tuple_academic_year():
+    assert TermPair(2011, SemesterTypes.AUTUMN).academic_year == 2011
+    assert TermPair(2012, SemesterTypes.SPRING).academic_year == 2011
+    assert TermPair(2012, SemesterTypes.AUTUMN).academic_year == 2012
+    assert TermPair(2013, SemesterTypes.SUMMER).academic_year == 2012
 
 
 @pytest.mark.django_db

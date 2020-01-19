@@ -28,7 +28,7 @@ from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
     CourseClass
 from courses.services import get_course_teachers
 from courses.utils import get_current_term_pair, \
-    first_term_in_academic_year
+    get_term_index
 from courses.views.mixins import CourseURLParamsMixin
 from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
@@ -194,9 +194,10 @@ class TeachersView(TemplateView):
     template_name = "compscicenter_ru/teachers.html"
 
     def get_context_data(self, **kwargs):
-        # Get terms in last 3 academic years.
-        year, term_type = get_current_term_pair()
-        term_index = first_term_in_academic_year(year, term_type)
+        # Get terms in the last 3 academic years.
+        term_pair = get_current_term_pair()
+        term_index = get_term_index(term_pair.academic_year,
+                                    SemesterTypes.AUTUMN)
         term_index -= 2 * len(SemesterTypes.choices)
         app_data = {
             "state": {

@@ -20,7 +20,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFa
 from learning.models import StudentAssignment
 from courses.models import Semester, CourseNews, CourseReview
 from courses.constants import SemesterTypes
-from courses.utils import get_term_start
+from courses.utils import get_term_starts_at
 from users.tests.factories import UserFactory, StudentFactory, \
     TeacherFactory
 
@@ -204,7 +204,7 @@ def test_semester_enrollment_period(mocker):
     mocked_timezone.return_value = now_fixed
     # Default start is the beginning of the term
     term = SemesterFactory(year=year, type=term_type)
-    term_start_dt = get_term_start(year, term_type, pytz.UTC)
+    term_start_dt = get_term_starts_at(year, term_type, pytz.UTC)
     assert term.enrollment_start_at == term_start_dt.date()
     # Start/End of the enrollment period always non-empty value, even
     # without calling .clean() method
@@ -260,7 +260,7 @@ def test_course_enrollment_is_open(settings, mocker):
     term = SemesterFactory.create_current()
     assert term.type == term_type
     assert term.year == year
-    term_start_dt = get_term_start(year, term_type, pytz.UTC)
+    term_start_dt = get_term_starts_at(year, term_type, pytz.UTC)
     assert term.enrollment_start_at == term_start_dt.date()
     co_spb = CourseFactory(semester=term, branch__code=Branches.SPB,
                            is_open=False)

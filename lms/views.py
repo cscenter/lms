@@ -11,8 +11,7 @@ from core.exceptions import Redirect
 from core.urls import reverse
 from courses.constants import SemesterTypes
 from courses.models import Course
-from courses.utils import get_term_index, get_current_term_pair, \
-    first_term_in_academic_year, get_term_by_index
+from courses.utils import get_current_term_pair, TermPair
 from lms.api.serializers import CoursesSerializer
 from lms.filters import CoursesFilter
 from lms.utils import PublicRouteException, PublicRoute, \
@@ -124,6 +123,5 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                 term_type = term.type
             else:
                 term_year, term_type = get_current_term_pair()
-        idx = first_term_in_academic_year(term_year, term_type)
-        academic_year, _ = get_term_by_index(idx)
-        return academic_year, term_type
+        term_pair = TermPair(term_year, term_type)
+        return term_pair.academic_year, term_type
