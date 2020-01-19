@@ -122,8 +122,10 @@ def test_enroll_in_course(inactive_status, settings):
                                           enrollment_end_at=tomorrow.date())
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    course = CourseFactory(semester=term, is_open=False,
-                           capacity=0, branch=branch_spb)
+    course = CourseFactory(
+        semester=term, is_open=False,
+        completed_at=(today_local + datetime.timedelta(days=10)).date(),
+        capacity=0, branch=branch_spb)
     assert course.enrollment_is_open
     student_spb = StudentFactory(branch=branch_spb, status="")
     assert student_spb.has_perm("learning.enroll_in_course", course)

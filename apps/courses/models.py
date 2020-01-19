@@ -23,7 +23,7 @@ from core.timezone import now_local, Timezone, TimezoneAwareModel
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids, get_youtube_video_id, instance_memoize
 from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
-from courses.utils import get_current_term_pair, get_term_start, \
+from courses.utils import get_current_term_pair, get_term_starts_at, \
     next_term_starts_at, get_term_index, get_current_term_index
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
 from .constants import SemesterTypes, ClassTypes
@@ -136,11 +136,11 @@ class Semester(models.Model):
 
     def save(self, *args, **kwargs):
         self.index = get_term_index(self.year, self.type)
-        self.starts_at = get_term_start(self.year, self.type, pytz.UTC)
+        self.starts_at = get_term_starts_at(self.year, self.type, pytz.UTC)
         self.ends_at = next_term_starts_at(self.index) - datetime.timedelta(days=1)
         # Enrollment period starts from the beginning of the term by default
         if not self.enrollment_start_at:
-            start_at = get_term_start(self.year, self.type, pytz.UTC).date()
+            start_at = get_term_starts_at(self.year, self.type, pytz.UTC).date()
             self.enrollment_start_at = start_at
         if not self.enrollment_end_at:
             lifetime = datetime.timedelta(days=ENROLLMENT_DURATION)
@@ -151,7 +151,7 @@ class Semester(models.Model):
         if self.year and self.type and self.enrollment_end_at:
             start_at = self.enrollment_start_at
             if not start_at:
-                start_at = get_term_start(self.year, self.type, pytz.UTC).date()
+                start_at = get_term_starts_at(self.year, self.type, pytz.UTC).date()
             if start_at > self.enrollment_end_at:
                 if not self.enrollment_start_at:
                     msg = _("Enrollment period end should be later "
