@@ -15,7 +15,7 @@ from learning.models import GraduateProfile
 from study_programs.models import AcademicDiscipline
 from users.constants import Roles
 from users.models import User
-from .filters import CourseFilter
+from .filters import CoursesPublicFilter
 from .serializers import TeacherCourseSerializer, TeacherSerializer, \
     CourseVideoSerializer, AlumniSerializer, TestimonialCardSerializer, \
     CoursePublicSerializer
@@ -169,7 +169,7 @@ class TestimonialList(ListAPIView):
 class CourseList(ListAPIView):
     pagination_class = None
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = CourseFilter
+    filterset_class = CoursesPublicFilter
     serializer_class = CoursePublicSerializer
 
     def get_queryset(self):
@@ -181,8 +181,6 @@ class CourseList(ListAPIView):
                             'teacher__first_name',
                             'teacher__last_name',
                             'teacher__patronymic')))
-        center_foundation_term_index = get_term_index(
-            settings.CENTER_FOUNDATION_YEAR, SemesterTypes.AUTUMN)
         return (Course.objects
                 .select_related('meta_course', 'semester', 'branch')
                 .only("pk", "branch_id", "is_open", "grading_type",
@@ -190,7 +188,6 @@ class CourseList(ListAPIView):
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
                       "branch__code", "branch__site_id")
-                .filter(semester__index__gte=center_foundation_term_index)
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',

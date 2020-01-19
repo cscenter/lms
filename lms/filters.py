@@ -65,12 +65,11 @@ class CoursesFilterForm(forms.Form):
 
 class CoursesFilter(FilterSet):
     """
-    FilterSet used on /courses/ page.
-
-    Note: `semester` value is validated but not used in queryset filtering.
+    Returns courses available in target branch.
     """
     branch = BranchCodeFilter(field_name="branch__code", empty_label=None,
                               choices=Branch.objects.none())
+    # FIXME: мб сначала валидировать request данные? зачем смешивать с фильтрацией? Тогда отсюда можно удалить semester, т.к. он не к месту
     semester = SemesterFilter()
 
     class Meta:
@@ -85,14 +84,11 @@ class CoursesFilter(FilterSet):
             * valid branch code from user settings
             * default branch code
         """
-        # FIXME: мб сначала валидировать request данные? зачем смешивать с фильтрацией? Тогда отсюда можно удалить semester, т.к. он не к месту
         if data is not None:
             data = data.copy()  # get a mutable copy of the QueryDict
         else:
             data = QueryDict(mutable=True)
-        self.branches = list(Branch.objects
-                             .filter(site_id=request.site.pk)
-                             .order_by('order'))
+        self.branches = Branch.objects.for_site(request.site.pk)
         branch_code = data.pop("branch", None)
         if not branch_code and hasattr(request.user, "branch_id"):
             branch = next((b for b in self.branches
