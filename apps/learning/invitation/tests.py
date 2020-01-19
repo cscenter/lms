@@ -54,7 +54,12 @@ def test_invitation_view(client, lms_resolver, assert_redirect, settings):
 
 
 @pytest.mark.django_db
-def test_invitation_register_form(client):
+def test_invitation_register_form(client, mocker):
+    mocked_recaptcha_response = mocker.patch("captcha.client.recaptcha_request")
+    read_mock = mocker.MagicMock()
+    read_mock.read.return_value = b'{"success": true, "challenge_ts":' \
+        b'"2019-01-11T13:57:23Z", "hostname": "testkey.google.com"}'
+    mocked_recaptcha_response.return_value = read_mock
     assert not User.objects.filter(email='test@test.com').exists()
     form_data = {
         'email': 'test@test.com',
@@ -72,6 +77,11 @@ def test_invitation_register_form(client):
 @pytest.mark.django_db
 def test_invitation_register_view(client, assert_redirect, settings, mocker):
     mocked_task = mocker.patch('learning.invitation.views.send_activation_email')
+    mocked_recaptcha_response = mocker.patch("captcha.client.recaptcha_request")
+    read_mock = mocker.MagicMock()
+    read_mock.read.return_value = b'{"success": true, "challenge_ts":' \
+        b'"2019-01-11T13:57:23Z", "hostname": "testkey.google.com"}'
+    mocked_recaptcha_response.return_value = read_mock
     settings.LANGUAGE_CODE = 'ru'
     future = (now() + datetime.timedelta(days=3)).date()
     current_term = SemesterFactory.create_current(enrollment_end_at=future)
