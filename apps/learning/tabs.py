@@ -78,12 +78,13 @@ def get_course_news(course, **kwargs):
 
 
 def get_course_reviews(course, **kwargs):
-    reviews = []
-    for r in (CourseReview.objects
-              .filter(course__meta_course_id=course.meta_course_id)):
-        r.course = course
-        reviews.append(r)
-    return reviews
+    reviews = (CourseReview.objects
+               .filter(course__meta_course_id=course.meta_course_id)
+               .select_related('course', 'course__semester', 'course__branch')
+               .only('pk', 'modified', 'text',
+                     'course__semester__year', 'course__semester__type',
+                     'course__branch__name'))
+    return list(reviews)
 
 
 def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
