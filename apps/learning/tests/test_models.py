@@ -204,7 +204,7 @@ def test_semester_enrollment_period(mocker):
     mocked_timezone.return_value = now_fixed
     # Default start is the beginning of the term
     term = SemesterFactory(year=year, type=term_type)
-    term_start_dt = get_term_starts_at(year, term_type, pytz.UTC)
+    term_start_dt = term.starts_at
     assert term.enrollment_start_at == term_start_dt.date()
     # Start/End of the enrollment period always non-empty value, even
     # without calling .clean() method
@@ -222,7 +222,7 @@ def test_semester_enrollment_period(mocker):
     # Values didn't overridden
     assert term.enrollment_start_at == term_start_dt.date()
     assert term.enrollment_end_at == term_start_dt.date()
-    # End > Start
+    # Validation error: end > start
     Semester.objects.all().delete()
     with pytest.raises(ValidationError) as e:
         end_at = term_start_dt.date() - datetime.timedelta(days=1)

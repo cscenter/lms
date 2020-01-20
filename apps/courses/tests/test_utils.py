@@ -6,7 +6,8 @@ import pytz
 from courses.constants import SemesterTypes
 from courses.utils import get_term_index, get_term_by_index, \
     get_current_term_pair, \
-    TERMS_INDEX_START, get_boundaries, TermPair
+    TERMS_INDEX_START, get_boundaries, TermPair, get_term_starts_at, \
+    convert_term_parts_to_datetime
 
 
 def test_get_term_index(settings):
