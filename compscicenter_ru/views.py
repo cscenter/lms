@@ -504,31 +504,30 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Collect courses including compsciclub.ru records
-        branches = [code for code, _ in Branches.choices]
-        lecturers = CourseTeacher.lecturers_prefetch()
+        branches = Branch.objects.for_site(site_id=self.request.site.pk)
         courses = (Course.objects
-                   .filter(meta_course=self.object,
-                           branch__code__in=branches)
+                   .filter(meta_course=self.object)
+                   .available_in(branches)
                    .select_related("meta_course", "semester", "branch")
-                   .prefetch_related(lecturers)
+                   .prefetch_related(CourseTeacher.lecturers_prefetch())
                    .order_by('-semester__index'))
-        grouped = bucketize(courses, key=lambda c: c.branch)
+        courses_by_branch = bucketize(courses, key=lambda c: c.branch)
         # Aggregate tabs
         tabs = TabList()
-        for branch in grouped:
-            if grouped[branch]:
+        for branch in courses_by_branch:
+            if courses_by_branch[branch]:
                 tabs.add(Tab(target=branch.code, name=branch.name,
                              order=branch.order))
         if tabs:
             selected_tab = self.request.GET.get('branch', Branches.SPB)
-            tabs.set_active(selected_tab)  # deactivates all other tabs
-            if selected_tab not in tabs:
+            if selected_tab in tabs:
+                tabs.set_active(selected_tab)  # deactivates all other tabs
+            else:
                 first_tab = next(iter(tabs))
                 first_tab.active = True
             tabs.sort()
         context['tabs'] = tabs
-        context['grouped_courses'] = grouped
+        context['grouped_courses'] = courses_by_branch
         active_study_programs = get_study_programs(self.object.pk,
                                                    filters=[Q(is_active=True)])
         context['study_programs'] = active_study_programs
