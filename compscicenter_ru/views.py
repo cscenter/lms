@@ -577,12 +577,11 @@ class CourseOfferingsView(TemplateView):
     template_name = "compscicenter_ru/courses/course_list.html"
 
     def get_context_data(self, **kwargs):
-        year, term = get_current_term_pair()
-        academic_year = year if term == SemesterTypes.AUTUMN else year - 1
+        term_pair = get_current_term_pair()
         # TODO: use Branch.objects.for_site()
         branches = list(Branch.objects
                         .filter(site_id=settings.SITE_ID,
-                                established__lte=academic_year)
+                                established__lte=term_pair.year)
                         .annotate(value=F('code'), label=F('name'))
                         .values('value', 'label', 'established'))
         terms = [
@@ -595,15 +594,17 @@ class CourseOfferingsView(TemplateView):
         if not branch:
             raise Http404
         try:
-            year = int(self.request.GET.get("academic_year", year))
-            if year > academic_year or year < branch['established']:
+            year = int(self.request.GET.get("academic_year",
+                                            term_pair.academic_year))
+            established = branch['established'] - 1
+            if year > term_pair.academic_year or year < established:
                 raise ValueError("Invalid academic year")
         except ValueError:
             raise Http404
         app_data = {
             'props': {
                 'entryURL': [reverse('public-api:v2:course_list')],
-                'currentYear': academic_year,
+                'currentYear': term_pair.academic_year,
                 'branchOptions': branches,
                 'semesterOptions': terms
             },
