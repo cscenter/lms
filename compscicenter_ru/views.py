@@ -520,9 +520,8 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
                              order=branch.order))
         if tabs:
             selected_tab = self.request.GET.get('branch', Branches.SPB)
-            if selected_tab in tabs:
-                tabs.set_active(selected_tab)  # deactivates all other tabs
-            else:
+            tabs.set_active(selected_tab)  # deactivates all other tabs
+            if selected_tab not in tabs:
                 first_tab = next(iter(tabs))
                 first_tab.active = True
             tabs.sort()

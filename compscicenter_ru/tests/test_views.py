@@ -70,9 +70,8 @@ def test_meta_course_detail(client, settings):
                                                            course2.pk}
     assert 'tabs' in response.context_data
     assert len(response.context_data['tabs']) == 1
-    # Relocate 1 course to the city out of the cs center branches
-    city = CityFactory(code='xxx')
-    branch = BranchFactory(city=city)
+    # Relocate course to the non-target branch
+    branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
     course2.branch = branch
     course2.save()
     response = client.get(meta_course_url)
