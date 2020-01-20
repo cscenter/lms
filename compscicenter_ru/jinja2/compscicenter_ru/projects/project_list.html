@@ -1,186 +1,56 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
+{% import "compscicenter_ru/macros/_nav.jinja2" as macros_nav %}
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
+
 {% block title %}Практика и НИР - {{ super() }}{% endblock title %}
 
-{% block body_attrs %}class="_dark" data-init-sections="collapsible"{% endblock body_attrs %}
+{% block body_attrs %}class="_dark" data-init-sections="tabs"{% endblock body_attrs %}
 
 {% block content %}
     <div class="container page-content">
+        <h1>Примеры студенческих проектов</h1>
         <div class="row">
-            <div class="col-lg-9">
-                <section class="content-block">
-                    <h1>Практика на&nbsp;направлениях Data Science и&nbsp;Software Engineering</h1>
-                    <p>Практика&nbsp;&mdash; это основная часть обучения в&nbsp;центре, поэтому у&nbsp;каждого проекта
-                        есть
-                        куратор,
-                        который направляет студентов и&nbsp;делится с&nbsp;ними опытом. Чёткого разделения проектов по&nbsp;двум
-                        направлениям нет, то&nbsp;есть студент может выбрать как более исследовательскую, так и&nbsp;чисто
-                        инженерную задачу. Важно, чтобы по&nbsp;итогам семестра студент улучшил свои навыки
-                        программирования, а&nbsp;также
-                        научился выполнять поставленные перед ним задачи. Обычно кураторами становятся сотрудники
-                        компаний-спонсоров
-                        или представители вузов. Куратор встречается с&nbsp;командой по&nbsp;заранее определенному
-                        расписанию
-                        (обычно раз в&nbsp;неделю).</p>
-                    <p>В&nbsp;конце семестра студенты делают презентацию о&nbsp;результатах, достигнутых на&nbsp;практике.
-                        В&nbsp;следующем
-                        семестре можно по&nbsp;желанию либо продолжить работать над тем&nbsp;же проектом, либо сменить
-                        тему
-                        и/или
-                        руководителя. Со&nbsp;всеми проблемами помогают разбираться кураторы&nbsp;CS центра.
-                    </p>
-                    <p>Важное отличие такой практики от&nbsp;работы в&nbsp;компании заключается в&nbsp;том, что на&nbsp;практике
-                        студенты работают в&nbsp;команде таких&nbsp;же студентов, как они сами: учатся, пробуют разные
-                        технологии
-                        ради интереса и&nbsp;любопытства, чего уже нельзя сказать об&nbsp;оплачиваемой работе, где у&nbsp;задач
-                        чёткие сроки и&nbsp;требования к&nbsp;выполнению. Иногда, в&nbsp;зависимости от&nbsp;задач, за&nbsp;практику
-                        можно засчитать стажировку в&nbsp;какой-либо компании.</p>
-                    <p>После успешного сотрудничества в&nbsp;рамках практики студент может перейти на&nbsp;стажировку в&nbsp;соответствующую
-                        компанию. Это может произойти как летом, так и&nbsp;во&nbsp;время учебного года.</p>
-                    <div class="collapsible">
-                        <div class="card _qa mb-4">
-                            <button class="btn btn-link card__header" id="question-1" aria-expanded="false" href="#answer-1">
-                                {{ macros.svg_icon('border-arrow-right') }}
-                                Примеры проектов, выполненных студентами направлений Data Science и&nbsp;Software Engineering
-                            </button>
-                            <div class="collapse" id="answer-1" aria-expanded="true">
-                                <div class="card__content">
-                                    <p>Код открытых проектов можно найти в <a href="https://github.com/cscenter" target="_blank" rel="noopener">организации CS центра на GitHub</a>. О некоторых проектах студенты рассказали сами.</p>
-                                    <ul>
-                                    {% for project_publication in practice_projects %}
-                                        <li><a href="{{ project_publication.get_absolute_url() }}">{{ project_publication.title }}</a></li>
-                                    {% endfor %}
-                                    </ul>
+            <div class="col-12 order-1 order-lg-0">
+                {% call macros.scrollable() %}{{ macros_nav.tabs(tabs) }}{% endcall %}
+            </div>
+            <div class="col-lg-9 order-2 order-lg-1">
+                <div class="tab-content">
+                    {% for project_type, pp in project_publications.items() -%}
+                        {% with tab = tabs[project_type] -%}
+                            <div class="tab-pane {% if tab.active %} show active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
+                                <div class="card-deck _three">
+                                    {% set cover_placeholder = static('v2/img/placeholder/project.jpg') %}
+                                    {% set user_placeholder = static('v2/img/placeholder/users.jpg') %}
+                                    {% for project_publication in pp -%}
+                                        {{ macros_cards.project_publication_card(project_publication,
+                                                                                 cover_placeholder,
+                                                                                 user_img_url=user_placeholder) }}
+                                    {%- endfor %}
                                 </div>
                             </div>
-                        </div>
+                        {%- endwith %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-lg-3 pl-lg-8 order-0 order-lg-2">
+                <div class="card _inverted mb-6">
+                    <div class="h4 card__header _dark mb-0">
+                        Подробнее
                     </div>
-                </section>
-                <section class="content-block">
-                    <h1>Научно-исследовательская работа по&nbsp;Computer Science</h1>
-                    <p>Неотъемлемой частью обучения студентов направления Computer Science является
-                        научно-исследовательская работа (НИР), которая даёт возможность начать или продолжить заниматься
-                        наукой. Студенты могут попробовать разные темы, оценить, насколько им&nbsp;интересны те&nbsp;или
-                        иные области. Исследования могут быть как чисто теоретическими, так и&nbsp;прикладными. Кроме
-                        того, данная работа может стать основой для поступления в&nbsp;магистратуру или аспирантуру.</p>
-                    <p>Важно, что НИР ведётся совместно с&nbsp;опытным научным руководителем, общение с&nbsp;которым
-                        само по&nbsp;себе является полезным и&nbsp;расширяет кругозор студентов. Руководитель
-                        внимательно наблюдает за&nbsp;процессом и&nbsp;направляет усилия студента в&nbsp;верное русло.
-                        Предполагается, что студент встречается с&nbsp;ним не&nbsp;реже раза в&nbsp;неделю для
-                        обсуждения достигнутого прогресса и&nbsp;возникающих у&nbsp;него вопросов.
-                    </p>
-                    <p>В&nbsp;рамках НИР студент изучает литературу и&nbsp;решает задачи по&nbsp;выбранной им&nbsp;теме,
-                        которая определяется, исходя из&nbsp;собственных интересов и&nbsp;предпочтений. Научным
-                        руководителем может быть любой активный ученый со&nbsp;степенью. Помочь в&nbsp;выборе может
-                        куратор и&nbsp;научные руководители направления.</p>
-                    <div class="collapsible">
-                        <div class="card _qa mb-4">
-                            <button class="btn btn-link card__header" id="question-1"
-                                    aria-expanded="false" href="#answer-1">
-                                {{ macros.svg_icon('border-arrow-right') }}Примеры исследовательских задач, которыми
-                                занимаются студенты центра
-                            </button>
-                            <div class="collapse" id="answer-1" aria-expanded="true">
-                                <div class="card__content">
-                                    <ul>
-                                        {% for project_publication in research_projects %}
-                                            <li><a href="{{ project_publication.get_absolute_url() }}">{{ project_publication.title }}</a></li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            </div>
+                    <div class="card__content">
+                        <div class="mb-4">
+                            <a href="{{ url('project_practice') }}" class="pb-4">
+                                Как получить практику в CS центре
+                            </a></div>
+                        <div>
+                            <a href="{{ url('project_research') }}" class="mt-4">
+                                Как взять тему для научно-исследовательской работы
+                            </a>
                         </div>
-                        <div class="card _qa mb-4">
-                            <button class="btn btn-link card__header" id="question-1"
-                                    aria-expanded="false" href="#answer-1">
-                                {{ macros.svg_icon('border-arrow-right') }}Возможные темы исследований и руководители
-                            </button>
-                            <div class="collapse" id="answer-1" aria-expanded="true">
-                                <div class="card__content">
-                                    <ul>
-                                        <li><a href="http://home.gwu.edu/~maxal/">М. Алексеев</a> (<a
-                                                href="http://gwu.edu/">Университет Джорджа Вашингтона</a>):
-                                            комбинаторные задачи биоинформатики
-                                        </li>
-                                        <li><a href="http://sites.google.com/site/abreslav2/">А. А. Бреслав</a> (<a
-                                                href="http://www.jetbrains.com/">JetBrains</a>): системы типов
-                                        </li>
-                                        <li><a href="http://www.mathnet.ru/rus/person17699">М. Н. Вялый</a> (<a
-                                                href="http://www.ccas.ru/">Вычислительный центр имени А. А. Дородницына
-                                            РАН</a>): квантовые алгоритмы
-                                        </li>
-                                        <li><a href="http://compsciclub.ru/teachers/23/">К. В. Вяткина</a> (<a
-                                                href="http://mit.spbau.ru/">СПбАУ РАН</a>): вычислительная геометрия
-                                        </li>
-                                        <li>С. Э. Вельдер (<a href="http://www.ifmo.ru/">НИУ ИТМО</a>): верификация</li>
-                                        <li><a href="http://logic.pdmi.ras.ru/~hirsch">Э. А. Гирш</a> (<a
-                                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a
-                                                href="http://mit.spbau.ru/">СПбАУ РАН</a>): теория сложности вычислений
-                                            и доказательств
-                                        </li>
-                                        <li><a href="http://logic.pdmi.ras.ru/~dmitrits">Д. М. Ицыксон</a> (<a
-                                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a
-                                                href="http://mit.spbau.ru/">СПбАУ РАН</a>): теория сложности
-                                        </li>
-                                        <li><a href="http://logic.pdmi.ras.ru/~dvk/">Д. В. Карпов</a> (<a
-                                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>): раскраски
-                                            графов
-                                        </li>
-                                        <li><a href="https://compscicenter.ru/teachers/611/">И. В. Кацев</a> (<a
-                                                href="http://yandex.ru">Яндекс</a>, <a href="http://emi.nw.ru/">СПбЭМИ
-                                            РАН</a>): кооперативная теория игр, <a
-                                                href="http://habrahabr.ru/company/yandex/blog/182976/">искусственный
-                                            интеллект в тестировании</a></li>
-                                        <li><a href="http://logic.pdmi.ras.ru/~kulikov">А. С. Куликов</a> (<a
-                                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a
-                                                href="http://mit.spbau.ru/">СПбАУ РАН</a>): алгоритмы для NP-трудных
-                                            задач, сложность булевых функций
-                                        </li>
 
-                                        <li><a href="https://research.google.com/pubs/IlyaMironov.html">И. Миронов</a> (<a
-                                                href="https://www.google.ru/?gws_rd=ssl">Google</a>): криптография
-                                        </li>
-                                        <li><a href="http://compsciclub.ru/teachers/33/">Д. Н. Москвин</a> (<a
-                                                href="http://spbau.ru/">СПбАУ РАН</a>): функциональные языки
-                                            программирования и их системы типов
-                                        </li>
-                                        <li><a href="http://logic.pdmi.ras.ru/~sergey/">С. И. Николенко</a> (<a
-                                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>, <a
-                                                href="http://mit.spbau.ru/">СПбАУ РАН</a>): машинное обучение
-                                        </li>
-                                        <li><a href="http://www.math.spbu.ru/user/boris_novikov/index.shtml">Б. А.
-                                            Новиков</a> (<a href="http://www.spbu.ru/">СПбГУ</a>): оптимизация и
-                                            обработка запросов
-                                        </li>
-                                        <li><a href="http://users.utu.fi/aleokh/">А. С. Охотин</a> (<a
-                                                href="http://spbu.ru/">СПбГУ</a>): формальные языки и грамматики
-                                        </li>
-                                        <li><a href="http://logic.pdmi.ras.ru/~pastor/">А. В. Пастор</a> (<a
-                                                href="http://www.pdmi.ras.ru/ru/news/news.php">ПОМИ РАН</a>): раскраски
-                                            графов
-                                        </li>
-                                        <li><a href="http://www.mccme.ru/~anromash/">А. Е. Ромащенко</a> (<a
-                                                href="http://www.iitp.ru/ru/about">ИППИ РАН</a>): надёжные модели
-                                            вычислений, теория кодирования
-                                        </li>
-                                        <li><a href="http://go.warwick.ac.uk/alextiskin">А. В. Тискин</a> (<a
-                                                href="http://www2.warwick.ac.uk/">University of Warwick</a>):
-                                            параллельные алгоритмы, алгоритмы на строках
-                                        </li>
-                                        <li><a href="http://www.mccme.ru/poncelet/pers/shen.htm">А. Х. Шень</a> (<a
-                                                href="http://www.iitp.ru/ru/about">ИППИ РАН</a>): колмогоровская
-                                            сложность, теория информации
-                                        </li>
-                                    </ul>
-
-                                    Почти все перечисленные возможные научные руководители читали курсы в Computer
-                                    Science клубе при ПОМИ РАН, <a href="http://compsciclub.ru/teachers/">на сайте
-                                    клуба</a> можно ознакомиться с материалами их курсов и видеозаписями лекций.
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                </section>
+                </div>
             </div>
         </div>
     </div>

@@ -96,7 +96,7 @@
             {{ project_publication.title }}
         </div>
     </div>
-    <div class="card__footer _dark">
+    <div class="card__footer">
         {% set participants = project_publication.get_participants() %}
         {% if participants|length > 1 %}
             {{ author_card(img_url=user_img_url,

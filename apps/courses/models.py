@@ -137,6 +137,7 @@ class Semester(models.Model):
     def save(self, *args, **kwargs):
         self.index = get_term_index(self.year, self.type)
         self.starts_at = get_term_starts_at(self.year, self.type, pytz.UTC)
+        # FIXME: выразить через term_pair.get_next() ?
         self.ends_at = next_term_starts_at(self.index) - datetime.timedelta(days=1)
         # Enrollment period starts from the beginning of the term by default
         if not self.enrollment_start_at:
@@ -396,6 +397,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         # Make sure `self.completed_at` always has value
         if self.semester_id and not self.completed_at:
             index = get_term_index(self.semester.year, self.semester.type)
+            # FIXME: выразить через term_pair.get_next() ?
             next_term_dt = next_term_starts_at(index, self.get_timezone())
             self.completed_at = next_term_dt.date()
         super().save(*args, **kwargs)

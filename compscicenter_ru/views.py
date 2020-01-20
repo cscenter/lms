@@ -407,22 +407,6 @@ class CourseVideoListView(TemplateView):
         return {"app_data": app_data}
 
 
-class ProjectsListView(TemplateView):
-    template_name = "compscicenter_ru/projects/project_list.html"
-
-    def get_context_data(self, **kwargs):
-        return {
-            "practice_projects": (ProjectPublication.objects
-                                  .filter(is_draft=False,
-                                          type=ProjectTypes.practice)
-                                  .order_by('title')),
-            "research_projects": (ProjectPublication.objects
-                                  .filter(is_draft=False,
-                                          type=ProjectTypes.research)
-                                  .order_by('title'))
-        }
-
-
 class TimelineElementTypes(Enum):
     COURSE = 1
     SHAD = 2
