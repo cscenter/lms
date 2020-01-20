@@ -54,7 +54,7 @@ def _prefetch_project_participants():
 
 
 class ProjectsListView(TemplateView):
-    template_name = "compscicenter_ru/projects/project_list2.html"
+    template_name = "compscicenter_ru/projects/project_list.html"
 
     def get_context_data(self, **kwargs):
         tabs = TabList()
