@@ -31,6 +31,10 @@ class TermPair(NamedTuple):
             return self.year - 1
         return self.year
 
+    def get_next(self) -> "TermPair":
+        term_index = get_term_index(self.year, self.type)
+        return get_term_by_index(term_index + 1)
+
 
 _term_types = r"|".join(slug for slug, _ in SemesterTypes.choices)
 semester_slug_re = re.compile(r"^(?P<term_year>\d{4})-(?P<term_type>" +
@@ -98,7 +102,7 @@ def next_term_starts_at(term_index=None,
     return get_term_starts_at(year, next_term, tz)
 
 
-def get_term_index(target_year, target_term_type):
+def get_term_index(target_year, target_term_type) -> int:
     """
     Returns position in the term sequence started from
     the `settings.FOUNDATION_YEAR` value.
@@ -121,7 +125,7 @@ def get_current_term_index(tz: Timezone = settings.DEFAULT_TIMEZONE):
     return get_term_index(*get_current_term_pair(tz))
 
 
-def get_term_by_index(term_index):
+def get_term_by_index(term_index) -> TermPair:
     """Inverse func for `get_term_index`"""
     assert term_index >= TERMS_INDEX_START
     terms_in_year = len(SemesterTypes.choices)
@@ -132,7 +136,7 @@ def get_term_by_index(term_index):
         if index == term:
             term = t
     assert not isinstance(term, int)
-    return year, term
+    return TermPair(year, term)
 
 
 def get_boundaries(year, month) -> Tuple:
