@@ -5,9 +5,7 @@ import pytz
 
 from courses.constants import SemesterTypes
 from courses.utils import get_term_index, get_term_by_index, \
-    get_current_term_pair, \
-    TERMS_INDEX_START, get_boundaries, TermPair, get_term_starts_at, \
-    convert_term_parts_to_datetime
+    get_current_term_pair, get_boundaries, TermPair, TermIndexError
 
 
 def test_get_term_index(settings):
@@ -19,12 +17,12 @@ def test_get_term_index(settings):
     with pytest.raises(ValueError) as e:
         get_term_index(established, "sprEng")
     assert "unknown term type" in str(e.value)
-    assert get_term_index(established, SemesterTypes.SPRING) == TERMS_INDEX_START
-    assert get_term_index(established, SemesterTypes.SUMMER) == TERMS_INDEX_START + 1
-    assert get_term_index(established, SemesterTypes.AUTUMN) == TERMS_INDEX_START + 2
-    assert get_term_index(established + 1, SemesterTypes.SPRING) == TERMS_INDEX_START + cnt
-    assert get_term_index(established + 1, SemesterTypes.SUMMER) == TERMS_INDEX_START + cnt + 1
-    assert get_term_index(established + 7, SemesterTypes.SPRING) == TERMS_INDEX_START + cnt * 7
+    assert get_term_index(established, SemesterTypes.SPRING) == 0
+    assert get_term_index(established, SemesterTypes.SUMMER) == 1
+    assert get_term_index(established, SemesterTypes.AUTUMN) == 2
+    assert get_term_index(established + 1, SemesterTypes.SPRING) == cnt
+    assert get_term_index(established + 1, SemesterTypes.SUMMER) == cnt + 1
+    assert get_term_index(established + 7, SemesterTypes.SPRING) == cnt * 7
 
 
 def test_get_boundaries():
@@ -42,25 +40,23 @@ def test_get_boundaries():
 
 def test_get_term_by_index(settings):
     established = settings.FOUNDATION_YEAR = 2011
-    with pytest.raises(AssertionError) as excinfo:
-        get_term_by_index(TERMS_INDEX_START - 1)
-    year, term = get_term_by_index(TERMS_INDEX_START)
+    with pytest.raises(TermIndexError) as excinfo:
+        get_term_by_index(-1)
+    year, term = get_term_by_index(0)
     assert isinstance(year, int)
     assert year == established
-    # Check ordering of terms also
-    assert term == "spring"
-    _, term = get_term_by_index(TERMS_INDEX_START + 1)
-    assert term == "summer"
-    _, term = get_term_by_index(TERMS_INDEX_START + 2)
-    assert term == "autumn"
-    year, term = get_term_by_index(TERMS_INDEX_START +
-                                   len(SemesterTypes.choices))
+    # Check terms ordering
+    assert term == SemesterTypes.SPRING
+    _, term = get_term_by_index(1)
+    assert term == SemesterTypes.SUMMER
+    _, term = get_term_by_index(2)
+    assert term == SemesterTypes.AUTUMN
+    year, term = get_term_by_index(len(SemesterTypes.choices))
     assert year == established + 1
-    assert term == "spring"
-    year, term = get_term_by_index(TERMS_INDEX_START +
-                                   2 * len(SemesterTypes.choices))
+    assert term == SemesterTypes.SPRING
+    year, term = get_term_by_index(2 * len(SemesterTypes.choices))
     assert year == established + 2
-    assert term == "spring"
+    assert term == SemesterTypes.SPRING
 
 
 def test_term_tuple_academic_year():

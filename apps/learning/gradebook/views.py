@@ -38,7 +38,6 @@ class GradeBookListBaseView(generic.ListView):
                 .order_by("meta_course__name"))
 
     def get_term_threshold(self):
-        # FIXME: Is it ok to use 'spb' here?
         tz = self.request.user.get_timezone()
         current_year, current_term = get_current_term_pair(tz)
         term_index = get_term_index(current_year, current_term)
@@ -47,7 +46,7 @@ class GradeBookListBaseView(generic.ListView):
             spring_order = SemesterTypes.get_choice(SemesterTypes.SPRING).order
             autumn_order = SemesterTypes.get_choice(SemesterTypes.AUTUMN).order
             # How many terms are between spring and autumn
-            spring_autumn_gap = autumn_order - spring_order - 1
+            spring_autumn_gap = abs(autumn_order - spring_order - 1)
             term_index += spring_autumn_gap
         return term_index
 

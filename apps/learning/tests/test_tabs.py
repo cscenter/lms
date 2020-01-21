@@ -8,7 +8,8 @@ from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
     CourseTeacherFactory, CourseFactory, MetaCourseFactory, AssignmentFactory, \
     CourseReviewFactory
 from courses.models import CourseNews, CourseReview
-from learning.tabs import CourseReviewsTab, get_course_reviews
+from learning.tabs import CourseReviewsTab
+from courses.services import get_course_reviews
 from learning.tests.factories import EnrollmentFactory
 from learning.settings import GradeTypes, Branches
 from users.tests.factories import StudentFactory, TeacherFactory, \

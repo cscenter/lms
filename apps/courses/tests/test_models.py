@@ -67,15 +67,12 @@ def test_semester_starts_ends():
     assert autumn_2015_date < autumn_2015.ends_at
 
 
+@pytest.mark.django_db
 def test_semester_cmp():
-    index = get_term_index(2013, 'spring')
-    s2013_spring = Semester(type='spring', year=2013, index=index)
-    index = get_term_index(2013, 'autumn')
-    s2013_autumn = Semester(type='autumn', year=2013, index=index)
-    index = get_term_index(2013, 'summer')
-    s2013_summer = Semester(type='summer', year=2013, index=index)
-    index = get_term_index(2014, 'spring')
-    s2014_spring = Semester(type='spring', year=2014, index=index)
+    s2013_autumn = SemesterFactory(type=SemesterTypes.AUTUMN, year=2013)
+    s2013_spring = SemesterFactory(type=SemesterTypes.SPRING, year=2013)
+    s2013_summer = SemesterFactory(type=SemesterTypes.SUMMER, year=2013)
+    s2014_spring = SemesterFactory(type=SemesterTypes.SPRING, year=2014)
     assert s2013_spring < s2013_autumn
     assert s2013_spring < s2013_summer
     assert s2013_summer < s2013_autumn
