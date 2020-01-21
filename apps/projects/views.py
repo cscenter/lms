@@ -6,14 +6,13 @@ from itertools import groupby
 from django.apps import apps
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
-from django.core.exceptions import ImproperlyConfigured, PermissionDenied
+from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
-from django.db.models import Case, BooleanField, Prefetch, Count, Value, When, \
-    Window, F, Q
-from django.db.models.functions import FirstValue, LastValue, Lead, Lag
+from django.db.models import Prefetch, Count, Window, F, Q
+from django.db.models.functions import FirstValue, Lead
 from django.forms import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseForbidden, \
-    HttpResponseRedirect, HttpResponseNotFound
+    HttpResponseRedirect
 from django.http.response import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
@@ -30,7 +29,7 @@ from core.urls import reverse, reverse_lazy
 from core.utils import hashids, render_markdown
 from core.views import LoginRequiredMixin
 from courses.models import Semester
-from courses.utils import get_current_term_index
+from courses.utils import get_current_term_pair
 from notifications import NotificationTypes
 from notifications.signals import notify
 from projects.constants import ProjectTypes
@@ -75,7 +74,7 @@ class ReportListViewMixin:
 
     def get_queryset(self):
         tz = self.request.user.get_timezone()
-        current_term_index = get_current_term_index(tz)
+        current_term_index = get_current_term_pair(tz).index
         qs = (Report.objects
               .filter(project_student__project__semester__index=current_term_index)
                 # FIXME: replace with custom manager
@@ -141,7 +140,7 @@ class CurrentTermProjectsView(ProjectReviewerGroupOnlyMixin, FilterMixin,
 
     def get_queryset(self):
         tz = self.request.user.get_timezone()
-        current_term_index = get_current_term_index(tz)
+        current_term_index = get_current_term_pair(tz).index
         qs = (Project.active
               .filter(semester__index=current_term_index)
               .select_related("semester")

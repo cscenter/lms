@@ -24,7 +24,7 @@ from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids, get_youtube_video_id, instance_memoize
 from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
 from courses.utils import get_current_term_pair, get_term_starts_at, \
-    next_term_starts_at, get_term_index, get_current_term_index
+    TermPair
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
 from .constants import SemesterTypes, ClassTypes
 from .managers import CourseTeacherManager, AssignmentManager, \
@@ -124,28 +124,31 @@ class Semester(models.Model):
 
     @classmethod
     def get_current(cls, tz: Timezone = settings.DEFAULT_TIMEZONE):
-        year, term_type = get_current_term_pair(tz)
-        obj, created = cls.objects.get_or_create(year=year, type=term_type)
+        term_pair = get_current_term_pair(tz)
+        obj, created = cls.objects.get_or_create(year=term_pair.year,
+                                                 type=term_pair.type)
+        # FIXME: remove?
         if created:
             obj.save()
         return obj
 
     def is_current(self, tz: Timezone = settings.DEFAULT_TIMEZONE):
-        year, term = get_current_term_pair(tz)
-        return year == self.year and term == self.type
+        term_pair = get_current_term_pair(tz)
+        return term_pair.year == self.year and term_pair.type == self.type
 
     def save(self, *args, **kwargs):
-        self.index = get_term_index(self.year, self.type)
-        self.starts_at = get_term_starts_at(self.year, self.type, pytz.UTC)
-        # FIXME: выразить через term_pair.get_next() ?
-        self.ends_at = next_term_starts_at(self.index) - datetime.timedelta(days=1)
-        # Enrollment period starts from the beginning of the term by default
+        term_pair = TermPair(self.year, self.type)
+        next_term = term_pair.get_next()
+        tz = pytz.UTC
+        self.index = term_pair.index
+        self.starts_at = term_pair.starts_at(tz)
+        self.ends_at = next_term.starts_at(tz) - datetime.timedelta(days=1)
         if not self.enrollment_start_at:
-            start_at = get_term_starts_at(self.year, self.type, pytz.UTC).date()
-            self.enrollment_start_at = start_at
+            # Start enrollment period from the beginning of the term
+            self.enrollment_start_at = self.starts_at.date()
         if not self.enrollment_end_at:
-            lifetime = datetime.timedelta(days=ENROLLMENT_DURATION)
-            self.enrollment_end_at = self.enrollment_start_at + lifetime
+            duration = datetime.timedelta(days=ENROLLMENT_DURATION)
+            self.enrollment_end_at = self.enrollment_start_at + duration
         super(Semester, self).save(*args, **kwargs)
 
     def clean(self):
@@ -396,10 +399,9 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     def save(self, *args, **kwargs):
         # Make sure `self.completed_at` always has value
         if self.semester_id and not self.completed_at:
-            index = get_term_index(self.semester.year, self.semester.type)
-            # FIXME: выразить через term_pair.get_next() ?
-            next_term_dt = next_term_starts_at(index, self.get_timezone())
-            self.completed_at = next_term_dt.date()
+            term_pair = TermPair(self.semester.year, self.semester.type)
+            next_term = term_pair.get_next()
+            self.completed_at = next_term.starts_at(self.get_timezone()).date()
         super().save(*args, **kwargs)
 
     @property
@@ -491,7 +493,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
     @property
     def in_current_term(self):
-        current_term_index = get_current_term_index(self.get_timezone())
+        current_term_index = get_current_term_pair(self.get_timezone()).index
         return self.semester.index == current_term_index
 
     @property

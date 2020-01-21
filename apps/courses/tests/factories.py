@@ -42,22 +42,22 @@ class SemesterFactory(factory.DjangoModelFactory):
         """Get or create semester for current term"""
         branch_code = kwargs.pop('for_branch', settings.DEFAULT_BRANCH_CODE)
         branch = BranchFactory(code=branch_code)
-        year, type = get_current_term_pair(branch.get_timezone())
+        term_pair = get_current_term_pair(branch.get_timezone())
         kwargs.pop('year', None)
         kwargs.pop('type', None)
-        return cls.create(year=year, type=type, **kwargs)
+        return cls.create(year=term_pair.year, type=term_pair.type, **kwargs)
 
     @classmethod
-    def create_next(cls, term):
+    def create_next(cls, term: Semester):
         """Get or create term model which following this one"""
-        year, next_term = get_term_by_index(term.index + 1)
-        return cls.create(year=year, type=next_term)
+        term_pair = get_term_by_index(term.index + 1)
+        return cls.create(year=term_pair.year, type=term_pair.type)
 
     @classmethod
     def create_prev(cls, term):
         """Get or create term model which following this one"""
-        year, prev_term = get_term_by_index(term.index - 1)
-        return cls.create(year=year, type=prev_term)
+        term_pair = get_term_by_index(term.index - 1)
+        return cls.create(year=term_pair.year, type=term_pair.type)
 
 
 class CourseFactory(factory.DjangoModelFactory):

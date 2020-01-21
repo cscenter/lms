@@ -3,6 +3,7 @@ import re
 from calendar import monthrange
 from typing import List, Tuple, NamedTuple
 
+import attr
 import pytz
 from dateutil import parser as dparser
 from django.conf import settings
@@ -17,9 +18,10 @@ class TermIndexError(Exception):
     pass
 
 
-class TermPair(NamedTuple):
-    year: int  # calendar year
-    type: str  # one of `courses.constants.SemesterTypes` values
+@attr.s(frozen=True, slots=True)
+class TermPair:
+    year: int = attr.ib()  # calendar year
+    type: str = attr.ib()  # one of `courses.constants.SemesterTypes` values
 
     @property
     def academic_year(self):
@@ -30,9 +32,18 @@ class TermPair(NamedTuple):
             return self.year - 1
         return self.year
 
+    @property
+    def index(self):
+        return get_term_index(self.year, self.type)
+
     def get_next(self) -> "TermPair":
-        term_index = get_term_index(self.year, self.type)
-        return get_term_by_index(term_index + 1)
+        return get_term_by_index(self.index + 1)
+
+    def get_prev(self) -> "TermPair":
+        return get_term_by_index(self.index - 1)
+
+    def starts_at(self, tz: Timezone):
+        return get_term_starts_at(self.year, self.type, tz)
 
 
 _term_types = r"|".join(slug for slug, _ in SemesterTypes.choices)
@@ -93,14 +104,6 @@ def get_term_starts_at(year, term_type, tz: Timezone) -> datetime.datetime:
     return convert_term_parts_to_datetime(year, term_start_str, tz)
 
 
-def next_term_starts_at(term_index=None,
-                        tz: Timezone = pytz.UTC) -> datetime.datetime:
-    if not term_index:
-        term_index = get_current_term_index(tz)
-    year, next_term = get_term_by_index(term_index + 1)
-    return get_term_starts_at(year, next_term, tz)
-
-
 def get_term_index(target_year, target_term_type) -> int:
     """
     Returns 0-based term index.
@@ -120,10 +123,6 @@ def get_term_index(target_year, target_term_type) -> int:
         if t == target_term_type:
             term_portion += index
     return year_portion + term_portion
-
-
-def get_current_term_index(tz: Timezone = settings.DEFAULT_TIMEZONE):
-    return get_term_index(*get_current_term_pair(tz))
 
 
 def get_term_by_index(term_index) -> TermPair:

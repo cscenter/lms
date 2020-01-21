@@ -122,6 +122,8 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                 term_year = term.year
                 term_type = term.type
             else:
-                term_year, term_type = get_current_term_pair()
+                term_pair = get_current_term_pair()
+                term_year = term_pair.year
+                term_type = term_pair.type
         term_pair = TermPair(term_year, term_type)
         return term_pair.academic_year, term_type

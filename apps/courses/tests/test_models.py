@@ -6,12 +6,12 @@ from django.core.exceptions import ValidationError
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from courses.constants import SemesterTypes
-from courses.models import Semester, Assignment
+from courses.models import Assignment
 from courses.tests.factories import CourseNewsFactory, SemesterFactory, \
     CourseFactory, \
     CourseClassFactory, CourseClassAttachmentFactory, MetaCourseFactory, \
     AssignmentFactory, AssignmentAttachmentFactory
-from courses.utils import get_term_index, next_term_starts_at
+from courses.utils import TermPair
 from learning.settings import Branches
 
 
@@ -101,8 +101,8 @@ def test_course_completed_at_default_value():
     course = CourseFactory.build(semester=semester)
     assert not course.completed_at
     course = CourseFactory.create(semester=semester)
-    next_term_dt = next_term_starts_at(semester.index, course.get_timezone())
-    assert course.completed_at == next_term_dt.date()
+    next_term = TermPair(semester.year, semester.type).get_next()
+    assert course.completed_at == next_term.starts_at(course.get_timezone()).date()
 
 
 @pytest.mark.django_db

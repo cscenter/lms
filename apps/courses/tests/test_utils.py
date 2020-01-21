@@ -42,21 +42,19 @@ def test_get_term_by_index(settings):
     established = settings.FOUNDATION_YEAR = 2011
     with pytest.raises(TermIndexError) as excinfo:
         get_term_by_index(-1)
-    year, term = get_term_by_index(0)
-    assert isinstance(year, int)
-    assert year == established
+    term_pair = get_term_by_index(0)
+    assert isinstance(term_pair.year, int)
+    assert term_pair.year == established
     # Check terms ordering
-    assert term == SemesterTypes.SPRING
-    _, term = get_term_by_index(1)
-    assert term == SemesterTypes.SUMMER
-    _, term = get_term_by_index(2)
-    assert term == SemesterTypes.AUTUMN
-    year, term = get_term_by_index(len(SemesterTypes.choices))
-    assert year == established + 1
-    assert term == SemesterTypes.SPRING
-    year, term = get_term_by_index(2 * len(SemesterTypes.choices))
-    assert year == established + 2
-    assert term == SemesterTypes.SPRING
+    assert term_pair.type == SemesterTypes.SPRING
+    assert get_term_by_index(1).type == SemesterTypes.SUMMER
+    assert get_term_by_index(2).type == SemesterTypes.AUTUMN
+    term_pair = get_term_by_index(len(SemesterTypes.choices))
+    assert term_pair.year == established + 1
+    assert term_pair.type == SemesterTypes.SPRING
+    term_pair = get_term_by_index(2 * len(SemesterTypes.choices))
+    assert term_pair.year == established + 2
+    assert term_pair.type == SemesterTypes.SPRING
 
 
 def test_term_tuple_academic_year():
@@ -73,7 +71,6 @@ def test_get_current_semester_pair(settings, mocker):
     msk_tz = pytz.timezone("Europe/Moscow")
     mocked_timezone.return_value = msk_tz.localize(
         datetime.datetime(2014, 4, 1, 12, 0))
-    assert (2014, 'spring') == get_current_term_pair(msk_tz)
-    mocked_timezone.return_value = msk_tz.localize(
-        datetime.datetime(2015, 11, 1, 12, 0))
-    assert (2015, 'autumn') == get_current_term_pair(msk_tz)
+    assert TermPair(2014, SemesterTypes.SPRING) == get_current_term_pair(msk_tz)
+    mocked_timezone.return_value = msk_tz.localize(datetime.datetime(2015, 11, 1, 12, 0))
+    assert TermPair(2015, SemesterTypes.AUTUMN) == get_current_term_pair(msk_tz)

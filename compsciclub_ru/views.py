@@ -77,10 +77,12 @@ class IndexView(generic.TemplateView):
         context = super(IndexView, self).get_context_data(**kwargs)
         try:
             # All club courses in MSK timezone
-            year, term_type = get_current_term_pair()
-            if term_type == SemesterTypes.SUMMER:
+            current_term = get_current_term_pair()
+            term_type = current_term.type
+            if current_term.type == SemesterTypes.SUMMER:
                 term_type = SemesterTypes.AUTUMN
-            featured_term = Semester.objects.get(year=year, type=term_type)
+            featured_term = Semester.objects.get(year=current_term.year,
+                                                 type=term_type)
             context['featured_term'] = featured_term
             today = now().date()
             # TODO: add cache, limit classes returned values by 1

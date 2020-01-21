@@ -389,13 +389,14 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(response.context['ongoing_rest']) == 0
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['archive_enrolled']) == 0
-    now_year, now_season = get_current_term_pair(student_spb.get_timezone())
-    current_term_spb = SemesterFactory.create(year=now_year, type=now_season)
+    current_term = get_current_term_pair(student_spb.get_timezone())
+    current_term_spb = SemesterFactory(year=current_term.year,
+                                       type=current_term.type)
     cos = CourseFactory.create_batch(4, semester=current_term_spb,
                                      branch=student_spb.branch, is_open=False)
     cos_available = cos[:2]
     cos_enrolled = cos[2:]
-    prev_year = now_year - 1
+    prev_year = current_term.year - 1
     cos_archived = CourseFactory.create_batch(
         3, semester__year=prev_year, is_open=False)
     for co in cos_enrolled:
