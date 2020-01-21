@@ -12,8 +12,8 @@ MONDAY_WEEKDAY = 0
 
 class SemesterTypes(DjangoChoices):
     """
-    For ordering use the first term in a year as starting point.
-    Term order values must be consecutive numbers.
+    Term order values must be consecutive numbers and start from
+    the beginning of the year.
     """
     SPRING = C('spring', _("spring"), order=1)
     SUMMER = C('summer', _("summer"), order=2)

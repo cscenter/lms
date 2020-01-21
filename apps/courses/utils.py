@@ -12,15 +12,14 @@ from core.timezone import Timezone, now_local
 from courses.constants import SemesterTypes, \
     AUTUMN_TERM_START, SPRING_TERM_START, SUMMER_TERM_START, MONDAY_WEEKDAY
 
-# Helps to sort terms in chronological order
-TERMS_INDEX_START = 1
+
+class TermIndexError(Exception):
+    pass
 
 
 class TermPair(NamedTuple):
     year: int  # calendar year
     type: str  # one of `courses.constants.SemesterTypes` values
-
-    # TODO: add next/prev methods
 
     @property
     def academic_year(self):
@@ -104,8 +103,10 @@ def next_term_starts_at(term_index=None,
 
 def get_term_index(target_year, target_term_type) -> int:
     """
-    Returns position in the term sequence started from
-    the `settings.FOUNDATION_YEAR` value.
+    Returns 0-based term index.
+
+    Sequence starts from the `settings.FOUNDATION_YEAR` academic year.
+    Term order inside academic year is defined by `SemesterTypes` class.
     """
     if target_year < settings.FOUNDATION_YEAR:
         raise ValueError("get_term_index: target year < FOUNDATION_YEAR")
@@ -114,7 +115,7 @@ def get_term_index(target_year, target_term_type) -> int:
                          target_term_type)
     terms_in_year = len(SemesterTypes.choices)
     year_portion = (target_year - settings.FOUNDATION_YEAR) * terms_in_year
-    term_portion = TERMS_INDEX_START
+    term_portion = 0
     for index, (t, _) in enumerate(SemesterTypes.choices):
         if t == target_term_type:
             term_portion += index
@@ -127,16 +128,14 @@ def get_current_term_index(tz: Timezone = settings.DEFAULT_TIMEZONE):
 
 def get_term_by_index(term_index) -> TermPair:
     """Inverse func for `get_term_index`"""
-    assert term_index >= TERMS_INDEX_START
+    if term_index < 0:
+        raise TermIndexError()
     terms_in_year = len(SemesterTypes.choices)
-    term_index -= TERMS_INDEX_START
     year = int(settings.FOUNDATION_YEAR + term_index / terms_in_year)
     term = term_index % terms_in_year
     for index, (t, _) in enumerate(SemesterTypes.choices):
         if index == term:
-            term = t
-    assert not isinstance(term, int)
-    return TermPair(year, term)
+            return TermPair(year, t)
 
 
 def get_boundaries(year, month) -> Tuple:
