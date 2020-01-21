@@ -93,8 +93,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         current_term = get_current_term_pair()
-        current_term_index = get_term_index(current_term.year, current_term.type)
-        prev_term_year, prev_term = get_term_by_index(current_term_index - 1)
+        prev_term = current_term.get_prev()
         graduation_form = GraduationForm()
         graduation_form.helper.form_action = reverse('staff:create_alumni_profiles')
         invitations = core.utils.bucketize(Invitation.objects
@@ -104,7 +103,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         context = {
             "alumni_profiles_form": graduation_form,
             "current_term": current_term,
-            "prev_term": {"year": prev_term_year, "type": prev_term},
+            "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (Campaign.objects
                           .select_related("branch")
                           .order_by("-branch__name", "-year")),
@@ -446,12 +445,12 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
                                            site_id=settings.SITE_ID))
         enrollment_year = query_params.validated_data.get('year')
         if not enrollment_year:
-            enrollment_year, _ = get_current_term_pair(branch.get_timezone())
+            enrollment_year = get_current_term_pair(branch.get_timezone()).year
         context = self.get_context_data(branch, enrollment_year, **kwargs)
         return self.render_to_response(context)
 
     def get_context_data(self, branch, enrollment_year, **kwargs):
-        current_year, _ = get_current_term_pair(branch.get_timezone())
+        current_year = get_current_term_pair(branch.get_timezone()).year
         context = {
             'students': self.get_queryset(branch, enrollment_year),
             "years": reversed(range(branch.established, current_year + 1)),
@@ -500,10 +499,9 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
     template_name = "staff/courses_intersection.html"
 
     def get_context_data(self, **kwargs):
-        year, term = get_current_term_pair()
-        current_term_index = get_term_index(year, term)
+        term_pair = get_current_term_pair()
         all_courses_in_term = (Course.objects
-                               .filter(semester__index=current_term_index)
+                               .filter(semester__index=term_pair.index)
                                .select_related("meta_course"))
         # Get participants
         query_courses = self.request.GET.getlist('course_offerings[]', [])
@@ -533,7 +531,7 @@ class CourseParticipantsIntersectionView(CuratorOnlyMixin, generic.TemplateView)
         context = {
             'course_offerings': all_courses_in_term,
             'intersection': intersection,
-            'current_term': "{} {}".format(_(term), year),
+            'current_term': "{} {}".format(_(term_pair.type), term_pair.year),
             'results': results,
             'query': {
                 'course_offerings': query_courses

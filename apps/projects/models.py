@@ -11,7 +11,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models, transaction
-from django.db.models import Case, BooleanField, Count, Value, When
 from django.db.models import Q, F
 from django.utils import timezone, formats
 from django.utils.encoding import smart_text
@@ -27,7 +26,7 @@ from core.urls import reverse
 from core.utils import hashids
 from courses.constants import SemesterTypes
 from courses.models import Semester
-from courses.utils import get_current_term_index
+from courses.utils import get_current_term_pair
 from learning.settings import GradeTypes, Branches
 from notifications.signals import notify
 from projects.constants import ProjectTypes, EDITING_REPORT_COMMENT_AVAIL
@@ -581,8 +580,8 @@ class Project(TimezoneAwareModel, TimeStampedModel):
 
     def is_active(self):
         """Check project is from current term"""
-        current_term_index = get_current_term_index(self.branch.get_timezone())
-        return not self.is_canceled and self.semester.index == current_term_index
+        term_index = get_current_term_pair(self.branch.get_timezone()).index
+        return not self.is_canceled and self.semester.index == term_index
 
 
 def report_file_name(self, filename):

@@ -39,10 +39,10 @@ class GradeBookListBaseView(generic.ListView):
 
     def get_term_threshold(self):
         tz = self.request.user.get_timezone()
-        current_year, current_term = get_current_term_pair(tz)
-        term_index = get_term_index(current_year, current_term)
+        term_pair = get_current_term_pair(tz)
+        term_index = term_pair.index
         # Skip to the spring semester
-        if current_term == SemesterTypes.AUTUMN:
+        if term_pair.type == SemesterTypes.AUTUMN:
             spring_order = SemesterTypes.get_choice(SemesterTypes.SPRING).order
             autumn_order = SemesterTypes.get_choice(SemesterTypes.AUTUMN).order
             # How many terms are between spring and autumn

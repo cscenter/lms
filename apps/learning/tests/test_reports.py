@@ -372,8 +372,8 @@ def test_report_diplomas_csv(settings):
     student1, student2, student3 = StudentFactory.create_batch(
         3, branch__code=Branches.SPB)
     s = SemesterFactory.create_current()
-    prev_term_year, prev_term_type = get_term_by_index(s.index - 1)
-    prev_s = SemesterFactory.create(year=prev_term_year, type=prev_term_type)
+    term_pair = get_term_by_index(s.index - 1)
+    prev_s = SemesterFactory.create(year=term_pair.year, type=term_pair.type)
     co_prev1 = CourseFactory.create(semester=prev_s, teachers=[teacher])
     co1 = CourseFactory.create(semester=s, teachers=[teacher])
     student1.status = StudentStatuses.WILL_GRADUATE

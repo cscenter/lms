@@ -193,8 +193,8 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
         student_enrolled_in = {e.course_id: e for e in student_enrollments}
         # 1. Union courses from current term and which student enrolled in
         tz = self.request.user.get_timezone()
-        current_year, current_term = get_current_term_pair(tz)
-        current_term_index = get_term_index(current_year, current_term)
+        current_term = get_current_term_pair(tz)
+        current_term_index = current_term.index
         in_current_term = Q(semester__index=current_term_index)
         enrolled_in = Q(id__in=list(student_enrolled_in))
         # Hide summer courses on CS Club site until student enrolled in
@@ -229,8 +229,9 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
             "archive_enrolled": archive_enrolled,
             # FIXME: what about custom template tag for this?
             # TODO: Add util method
-            "current_term": "{} {}".format(SemesterTypes.values[current_term],
-                                           current_year).capitalize()
+            "current_term": "{} {}".format(
+                SemesterTypes.values[current_term.type],
+                current_term.year).capitalize()
         }
         return context
 

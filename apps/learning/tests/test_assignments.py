@@ -541,7 +541,7 @@ def test_deadline_l10n_on_student_assignments_page(settings, client):
     assert any(year_part in s.text and time_part in s.text for s in
                html.find_all('div', {'class': 'assignment-date'}))
     # Test `upcoming` block
-    now_year, _ = get_current_term_pair(branch_spb.get_timezone())
+    now_year = get_current_term_pair(branch_spb.get_timezone()).year
     dt = dt.replace(year=now_year + 1, month=2, hour=14)
     assignment.deadline_at = dt
     assignment.save()

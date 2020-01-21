@@ -1,15 +1,10 @@
-from abc import ABC, abstractmethod
 from itertools import chain
-from typing import Iterable
 
 import attr
-from django.db.models import Q
 
-from core.utils import is_club_site
 from courses.calendar import CalendarEvent
 from courses.models import CourseClass, Course
-from courses.constants import SemesterTypes
-from courses.utils import get_terms_for_calendar_month, get_term_index
+from courses.utils import get_terms_for_calendar_month
 from learning.models import Event
 
 
@@ -67,7 +62,7 @@ def get_branches_for_teacher(user, year, month):
     """
     Returns all branches where user has been participated as a teacher
     """
-    term_indexes = [get_term_index(*term) for term in
+    term_indexes = [term.index for term in
                     get_terms_for_calendar_month(year, month)]
     branches = set(Course.objects
                    .filter(semester__index__in=term_indexes,
