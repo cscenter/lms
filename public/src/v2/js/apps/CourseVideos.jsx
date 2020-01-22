@@ -48,8 +48,6 @@ class CourseVideosPage extends React.Component {
     handleSearchInputChange = onSearchInputChange.bind(this);
 
     componentDidMount = () => {
-        const filterState = this.getFilterState(this.state);
-        console.debug("CourseVideosPage: filterState", filterState);
         this.fetch();
     };
 
@@ -68,19 +66,6 @@ class CourseVideosPage extends React.Component {
             hideBodyPreloader();
         }
     };
-
-    getFilterState(state) {
-        let {q, semester} = state;
-        let filterState = {q, semester};
-        Object.keys(filterState).map((k) => {
-            if (k === "year" && filterState[k] !== null) {
-                filterState[k] = filterState[k]["value"];
-            }
-            // Convert null and undefined to empty string
-            filterState[k] = !filterState[k] ? "" : filterState[k];
-        });
-        return filterState;
-    }
 
     fetch = (payload = null) => {
         console.debug("CourseVideosPage: fetch", this.props, payload);
@@ -208,7 +193,7 @@ class CourseVideosPage extends React.Component {
                                             name="videoTypes"
                                             key={item.value}
                                             value={item.value}
-                                            defaultChecked={true}
+                                            checked={videoTypes.includes(item.value)}
                                             onChange={this.handleMultipleCheckboxChange}
                                             label={item.label}
                                         />

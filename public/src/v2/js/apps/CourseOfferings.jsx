@@ -38,15 +38,15 @@ const history = createBrowserHistory();
 
 
 function FilterState(state) {
-    // FIXME: Convert null and undefined to empty string
+    // FIXME: Convert null and undefined to empty string?
     this.academicYear = state.academicYear;
     this.branch = state.branch;
 }
-FilterState.prototype.getPayload = function () {
-    return {
-        'academic_year': this.academicYear.value,
-        'branch': this.branch.value,
-    };
+FilterState.prototype.toURLSearchParams = function () {
+    let params = new URLSearchParams();
+    params.set('academic_year', this.academicYear.value);
+    params.set('branch', this.branch.value);
+    return params;
 };
 
 
@@ -125,14 +125,13 @@ class CourseOfferings extends React.Component {
      */
     historyPush() {
         const filterState = new FilterState(this.state);
-        const payload = filterState.getPayload();
         const historyState = this.getHistoryState(history.location,
                                                   this.props.initialState);
         if (!_isEqual(filterState, historyState)) {
             console.debug(`History.push: new filter state `, JSON.stringify(filterState));
             history.push({
                 pathname: history.location.pathname,
-                search: `?branch=${payload.branch}&academic_year=${payload.academic_year}`,
+                search: '?' + filterState.toURLSearchParams().toString(),
                 state: filterState
             });
         }
@@ -151,7 +150,7 @@ class CourseOfferings extends React.Component {
     }
 
     componentDidMount = () => {
-        this.fetch((new FilterState(this.state)).getPayload());
+        this.fetch((new FilterState(this.state)).toURLSearchParams());
         // FIXME: Do we need ref for this?
         this.unlistenHistory = history.listen((location, action) => {
             const currentState = new FilterState(this.state);
@@ -179,15 +178,15 @@ class CourseOfferings extends React.Component {
         const prevFilterState = new FilterState(prevState);
         const filterState = new FilterState(this.state);
         if (this.state.loading || !_isEqual(prevFilterState, filterState)) {
-            const payload = filterState.getPayload();
+            const payload = filterState.toURLSearchParams();
             this.fetch(payload);
         } else {
             hideBodyPreloader();
         }
     }
 
-    fetch = async (payload = null) => {
-        console.debug(`${this.constructor.name}: fetch`, this.props, payload);
+    fetch = async (urlParams = null) => {
+        console.debug(`${this.constructor.name}: fetch`, this.props, urlParams);
         if (this.latestFetchAbortController !== null) {
             this.latestFetchAbortController.abort();
         }
@@ -196,7 +195,7 @@ class CourseOfferings extends React.Component {
         this.latestFetchAbortController = abortController;
         this.requests = this.props.entryURL.map(entryURL => {
             return ky.get(entryURL, {
-                searchParams: payload,
+                searchParams: urlParams,
                 headers: {'content-type': 'application/json'},
                 signal: abortController.signal
             })
