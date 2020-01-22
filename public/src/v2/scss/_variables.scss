@@ -134,6 +134,7 @@ $link-color:                $blue;
 $link-decoration:           none !default;
 $link-hover-color:          darken($link-color, 15%) !default;
 $link-hover-decoration:     none !default;
+$emphasized-link-hover-darken-percentage: 15% !default;
 
 // Paragraphs
 //
@@ -299,3 +300,6 @@ $zindex-popover:                    1080;
 $zindex-tooltip:                    1090;
 $zindex-close:                      1100;
 
+
+// Utilities
+$displays: none, inline, inline-block, block, table, table-row, table-cell, flex, inline-flex !default;
