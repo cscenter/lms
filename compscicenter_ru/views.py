@@ -15,6 +15,7 @@ from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import gettext, ugettext_lazy as _
 from django.views import generic
+from djchoices import DjangoChoices, C
 from vanilla import TemplateView, DetailView
 
 from announcements.models import Announcement
@@ -384,14 +385,23 @@ class OpenNskView(generic.TemplateView):
     template_name = "open_nsk.html"
 
 
+class CourseVideoTypes(DjangoChoices):
+    COURSE = C('course', _('Course'))
+    LECTURE = C('lecture', _('Lecture'))
+
+
 class CourseVideoListView(TemplateView):
     template_name = "compscicenter_ru/courses_video_list.html"
 
     def get_context_data(self, **kwargs):
-        video_types = [
-            {"value": "course", "label": gettext("Course")},
-            {"value": "lecture", "label": gettext("Lecture")},
-        ]
+        video_types = [{"value": v, "label": str(l)} for v, l
+                       in CourseVideoTypes.choices]
+        filtered_types = self.request.GET.get('types', None)
+        if filtered_types:
+            filtered_types = [t for t in filtered_types.split(',')
+                              if t in CourseVideoTypes.values]
+        else:
+            filtered_types = [item["value"] for item in video_types]
         app_data = {
             "props": {
                 "entryURL": [
@@ -401,7 +411,7 @@ class CourseVideoListView(TemplateView):
                 "videoOptions": video_types
             },
             "state": {
-                "videoTypes": [item["value"] for item in video_types]
+                "videoTypes": filtered_types
             },
         }
         return {"app_data": app_data}
