@@ -41,40 +41,9 @@ export const sassConfig = {
 };
 
 
-export let postCssPlugins;
-if (staticVersion === "v2") {
-    postCssPlugins = [
-        autoprefixer({
-            browsers: [
-                "last 1 major version",
-                ">= 1%",
-                "Chrome >= 45",
-                "Firefox >= 38",
-                "Edge >= 12",
-                "Explorer >= 10",
-                "iOS >= 9",
-                "Safari >= 9",
-                "Android >= 4.4",
-                "Opera >= 30"
-            ]
-        })
-    ];
-} else {
-    postCssPlugins = [
-        autoprefixer({
-            browsers: [
-                'Chrome >= 45',
-                'Firefox ESR',
-                'Edge >= 12',
-                'Explorer >= 10',
-                'iOS >= 9',
-                'Safari >= 9',
-                'Android >= 4.4',
-                'Opera >= 30'
-            ]
-        })
-    ];
-}
+export let postCssPlugins = [
+    autoprefixer()
+];
 
 export const plumberConfig = {
     errorHandler
