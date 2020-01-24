@@ -13,14 +13,10 @@ MEDIA_ROOT = str(Path('/shared', 'media'))
 DEFAULT_URL_SCHEME = "https"
 
 # Sentry
-SENTRY_DSN = env("SENTRY_DSN")
-SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
-
 sentry_logging = LoggingIntegration(
     level=logging.INFO,        # Capture info and above as breadcrumbs
     event_level=logging.ERROR  # Send errors as events
 )
-
 sentry_sdk.init(
     dsn=SENTRY_DSN,
     integrations=[sentry_logging, DjangoIntegration()]

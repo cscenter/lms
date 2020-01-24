@@ -15,7 +15,6 @@ EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 1025
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-# Don't use https for staging env
 CSRF_COOKIE_DOMAIN = '.dev.compscicenter.ru'
 CSRF_COOKIE_NAME = "dev_csrf_token"
 SESSION_COOKIE_DOMAIN = '.dev.compscicenter.ru'

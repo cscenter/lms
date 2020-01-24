@@ -1,6 +1,8 @@
 """
 Project settings
 """
+import logging
+
 import django
 
 import environ
@@ -232,9 +234,6 @@ HASHIDS_SALT = env.str('HASHIDS_SALT')
 YANDEX_DISK_USERNAME = env.str('YANDEX_DISK_USERNAME')
 YANDEX_DISK_PASSWORD = env.str('YANDEX_DISK_PASSWORD')
 
-NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
-NEWRELIC_ENV = env.str('NEWRELIC_ENV', default='production')
-
 # s3boto3.S3Boto3Storage: all files will inherit the bucket’s ACL
 AWS_DEFAULT_ACL = None
 
@@ -287,3 +286,9 @@ INCLUDE_AUTH_URLS = False
 ACCOUNT_ACTIVATION_DAYS = 1
 ACTIVATION_EMAIL_SUBJECT = 'emails/activation_email_subject.txt'
 ACTIVATION_EMAIL_BODY = 'emails/activation_email_body.txt'
+
+# Monitoring
+SENTRY_DSN = env("SENTRY_DSN")
+SENTRY_LOG_LEVEL = env.int("SENTRY_LOG_LEVEL", default=logging.INFO)
+NEWRELIC_CONF = str(PROJECT_DIR / "newrelic.ini")
+NEWRELIC_ENV = env.str('NEWRELIC_ENV', default='production')

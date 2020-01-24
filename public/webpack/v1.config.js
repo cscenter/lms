@@ -170,7 +170,7 @@ const common = {
         // }),
         new CleanWebpackPlugin({
             verbose: true,
-            cleanOnceBeforeBuildPatterns: ['!.gitattributes'],
+            cleanOnceBeforeBuildPatterns: ['**/*', '!.gitattributes'],
         }),
         new MiniCssExtractPlugin({
           // Options similar to the same options in webpackOptions.output

@@ -61,14 +61,6 @@ class LearningPermissionsMixin:
         return UserRoles.PROJECT_REVIEWER in self.roles
 
 
-def has_master_degree(user):
-    """
-    Emphasis that user is studying for a masters degree.
-    This group doesn't give any access to the site.
-    """
-    return UserRoles.MASTERS_DEGREE in user.roles
-
-
 class CourseRole(Enum):
     NO_ROLE = auto()
     STUDENT_REGULAR = auto()  # Enrolled active student

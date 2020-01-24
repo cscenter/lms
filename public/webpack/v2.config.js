@@ -4,7 +4,7 @@ const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
 const Dotenv = require('dotenv-webpack');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('**/*', "mini-css-extract-plugin");
 
 
 const DEBUG = (process.env.NODE_ENV !== "production");
@@ -198,7 +198,7 @@ const common = {
         new BundleTracker({filename: './webpack-stats-v2.json'}),
         new CleanWebpackPlugin({
             verbose: true,
-            cleanOnceBeforeBuildPatterns: ['!.gitattributes'],
+            cleanOnceBeforeBuildPatterns: ['**/*', '!.gitattributes'],
         }),
         new MiniCssExtractPlugin({
             // Options similar to the same options in webpackOptions.output

@@ -1,5 +1,6 @@
 from braces.views import UserPassesTestMixin
 
+# FIXME: remove
 
 class TeacherOnlyMixin(UserPassesTestMixin):
     raise_exception = False

@@ -288,7 +288,7 @@ def test_new_course_news_notification_context(settings):
         course_offering_news__course=course,
         user=StudentFactory(required_groups__site_id=settings.ANOTHER_DOMAIN_ID,))
     context = get_course_news_notification_context(cn)
-    assert context['course_link'].startswith('https://compsciclub.ru')
+    assert context['course_link'].startswith(f'https://{settings.ANOTHER_DOMAIN}')
 
 
 @pytest.mark.django_db
