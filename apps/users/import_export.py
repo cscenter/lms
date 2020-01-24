@@ -55,17 +55,6 @@ class UserGenderWidget(widgets.CharWidget):
         return value
 
 
-class GroupManyToManyWidget(widgets.ManyToManyWidget):
-    def clean(self, value, row=None, *args, **kwargs):
-        if not value:
-            return self.model.objects.filter(pk=Roles.VOLUNTEER)
-        return super().clean(value, row, *args, **kwargs)
-
-    def render(self, value, obj=None):
-        ids = [obj.name for obj in value.all()]
-        return self.separator.join(ids)
-
-
 class UserRecordResource(resources.ModelResource):
     course = fields.Field(column_name='course',
                           attribute='uni_year_at_enrollment',

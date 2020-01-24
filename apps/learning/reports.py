@@ -19,7 +19,6 @@ from courses.constants import SemesterTypes
 from courses.models import Semester, Course, CourseTeacher, MetaCourse
 from courses.utils import get_term_index
 from learning.models import AssignmentComment, Enrollment
-from learning.permissions import has_master_degree
 from learning.settings import StudentStatuses, GradeTypes
 from projects.constants import ProjectTypes
 from projects.models import ReportComment, ProjectStudent, Project
