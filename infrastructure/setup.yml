@@ -5,6 +5,34 @@
   become_user: "{{ aws_ec2_root_user }}"
   tasks:
 
+    # Used for mapping NVMe device name (which is random) to block device name specified in Amazon EC2 console
+    - name: Copy ebsnvme-id utility
+      copy:
+        src: ebsnvme-id
+        dest: /sbin/ebsnvme-id
+        owner: "{{ aws_ec2_root_user }}"
+        group: "{{ aws_ec2_root_user }}"
+        mode: '0755'
+      tags:
+        - always
+
+    - name: Copy ec2nvme-nsid utility
+      copy:
+        src: ec2nvme-nsid
+        dest: /lib/udev/ec2nvme-nsid
+        owner: "{{ aws_ec2_root_user }}"
+        group: "{{ aws_ec2_root_user }}"
+        mode: '0755'
+      tags:
+        - always
+
+    - name: Configure nvme devices mapping
+      template:
+        src: ec2-nvme-devices.rules.jinja2
+        dest: "/etc/udev/rules.d/70-ec2-nvme-devices.rules"
+      tags:
+        - always
+
     - name: Install and configure system dependencies
       import_role:
         name: system

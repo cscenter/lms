@@ -29,6 +29,8 @@
           - "nsk.{{ main_domain }}"
         nginx_configs:
           - "{{ main_domain }}"
+        redirect_to_main_domain:
+          - "www.{{ main_domain }}"
         certbot_config_dir: "/etc/letsencrypt/live/{{ main_domain }}"
         rq_workers: []
         rq_workers_target_service_name: "rqworker_csclub"

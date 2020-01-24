@@ -33,6 +33,7 @@
 - name: Apt dependencies
   apt:
     name:
+      - nvme-cli
       - jq
       - openssl
       - python-setuptools
@@ -55,6 +56,7 @@
       - libgnutls28-dev
       - "python{{ python_version }}"
       - "python{{ python_version }}-dev"
+      - "python{{ python_version }}-distutils"
       - python-pycurl
       # LDAP support
       - ldap-utils

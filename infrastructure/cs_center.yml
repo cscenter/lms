@@ -25,6 +25,8 @@
         nginx_configs:
           - "{{ main_domain }}"
           - "my.{{ main_domain }}"
+        redirect_to_main_domain:
+          - "www.{{ main_domain }}"
         certbot_config_dir: "/etc/letsencrypt/live/{{ main_domain }}"
         certbot_domains:
           - "{{ main_domain }}"

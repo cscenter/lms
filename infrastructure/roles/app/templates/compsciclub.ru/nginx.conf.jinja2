@@ -16,13 +16,10 @@ server {
     }
 }
 
-{%- set main_domain_parts = main_domain.split('.') -%}
-{% if main_domain_parts|length == 2 %}
-
-# Redirect from `www.` to domain without `www`
+{% if redirect_to_main_domain is defined and redirect_to_main_domain|length > 0 %}
 server {
     listen 443 ssl;
-    server_name www.{{ main_domain }};
+    server_name {% for subdomain in redirect_to_main_domain %} {{ subdomain }}{% endfor %};
     {# ssl certificates paths will be uncomment by certbot tasks #}
     # ssl_certificate {{ certbot_config_dir }}/{{ certbot_cert_filename }};
     # ssl_certificate_key {{ certbot_config_dir }}/{{ certbot_privkey_filename }};

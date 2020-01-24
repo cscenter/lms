@@ -90,7 +90,7 @@
           - device_name: "{{ aws_ec2_root_device_name }}"
             ebs:
               volume_size: "{{ aws_ec2_instance_volume_size }}"
-              delete_on_termination: true
+              delete_on_termination: false
         wait: true
       register: ec2
 
@@ -153,7 +153,7 @@
       ec2_vol:
         region: "{{ aws_ec2_region }}"
         snapshot: "{{ snapshot_id|default(omit) }}"
-        instance: "{{ ec2.tagged_instances[0].instance_id }}"
+        instance: "{{ ec2.instances[0].instance_id }}"
         volume_size: "{{ second_volume_size }}"
         volume_type: gp2
         device_name: "{{ second_volume_device_name }}"
