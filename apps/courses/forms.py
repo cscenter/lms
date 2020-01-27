@@ -6,16 +6,16 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
+from core.forms import CANCEL_SAVE_PAIR
+from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.admin import TimezoneAwareModelForm, \
     TimezoneAwareSplitDateTimeField
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location
+from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
+from courses.constants import ClassTypes
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
     Assignment, LearningSpace
-from courses.constants import ClassTypes
-from core.forms import CANCEL_SAVE_PAIR
-from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')
@@ -262,6 +262,12 @@ class AssignmentForm(TimezoneAwareModelForm):
     maximum_score = forms.IntegerField(
         label=_("Maximum score"),
         initial=5)
+    ttc = forms.TimeField(
+        label=_("Time to Completion"),
+        input_formats=[TIME_FORMAT_RU],
+        required=False,
+        widget=TimeInputAsTextInput(format=TIME_FORMAT_RU,
+                                    attrs={"autocomplete": "off"}))
 
     def __init__(self, *args, **kwargs):
         course = kwargs.pop('course', None)
@@ -290,6 +296,7 @@ class AssignmentForm(TimezoneAwareModelForm):
                     Div('passing_score',
                         'maximum_score',
                         'weight',
+                        PrependedText('ttc', '<i class="fa fa-clock-o"></i>', css_class='timepicker'),
                         css_class="form-inline"),
                     css_class="form-group"
                 ),
@@ -303,4 +310,4 @@ class AssignmentForm(TimezoneAwareModelForm):
     class Meta:
         model = Assignment
         fields = ('title', 'text', 'deadline_at', 'attachments', 'is_online',
-                  'passing_score', 'maximum_score', 'weight')
+                  'passing_score', 'maximum_score', 'weight', 'ttc')

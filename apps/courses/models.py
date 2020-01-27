@@ -904,8 +904,8 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         default=1,
         max_digits=3, decimal_places=2,
         validators=[MinValueValidator(0), MaxValueValidator(1)])
-    ttc = models.PositiveSmallIntegerField(
-        _("Time to Completion (min)"),
+    ttc = models.TimeField(
+        _("Time to Completion"),
         blank=True, null=True,
         help_text=_("Calculated amount of time required for the task to be completed"))
     notify_teachers = models.ManyToManyField(
