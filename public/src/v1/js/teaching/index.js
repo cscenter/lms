@@ -38,7 +38,7 @@ $(document).ready(function () {
                     tooltips: TIMEPICKER_TOOLTIPS
                 });
 
-                $('#timepicker').datetimepicker({
+                $('.timepicker').datetimepicker({
                     locale: 'ru',
                     format: 'HH:mm',
                     stepping: 1,
@@ -46,7 +46,6 @@ $(document).ready(function () {
                     allowInputToggle: true,
                     icons: TIMEPICKER_ICONS,
                     tooltips: TIMEPICKER_TOOLTIPS,
-                    defaultDate: new Date("01/01/1980 23:59"),
                     keyBinds: {
                         left: false,
                         right: false,
