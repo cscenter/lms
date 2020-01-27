@@ -73,7 +73,7 @@ class CityAwareSplitDateTimeWidget(forms.MultiWidget):
     template_name = "widgets/timezone_aware_split_datetime.html"
 
     def __init__(self, attrs=None, date_format=None, time_format=None):
-        attrs = {"class": "form-control"}
+        attrs = {"class": "form-control", "autocomplete": "off"}
         widgets = (
             DateInputAsTextInput(attrs=attrs, format=date_format),
             TimeInputAsTextInput(attrs=attrs, format=time_format),
