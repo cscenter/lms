@@ -1,7 +1,7 @@
 from crispy_forms.bootstrap import TabHolder, Tab, PrependedText, FormActions, \
     StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, HTML, Fieldset
+from crispy_forms.layout import Layout, Div, HTML, Fieldset, Field
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -249,7 +249,7 @@ class AssignmentForm(TimezoneAwareModelForm):
                                             time_format=TIME_FORMAT_RU)
     )
     attachments = forms.FileField(
-        label=_("Attached file"),
+        label=_("Attached files"),
         required=False,
         help_text=_("You can select multiple files"),
         widget=forms.ClearableFileInput(attrs={'multiple': 'multiple'}))
@@ -266,44 +266,14 @@ class AssignmentForm(TimezoneAwareModelForm):
         label=_("Time to Completion"),
         input_formats=[TIME_FORMAT_RU],
         required=False,
+        help_text=_("Calculated amount of time required for the task to be completed"),
         widget=TimeInputAsTextInput(format=TIME_FORMAT_RU,
-                                    attrs={"autocomplete": "off"}))
+                                    attrs={"autocomplete": "off",
+                                           "class": "timepicker form-control"}))
 
     def __init__(self, *args, **kwargs):
         course = kwargs.pop('course', None)
         assert course is not None
-        if "instance" in kwargs:
-            instance = kwargs["instance"]
-            remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
-                "".join("<li>{}</li>".format(
-                    DROP_ATTACHMENT_LINK.format(aa.get_delete_url(),
-                                                aa.file_name))
-                        for aa in instance.assignmentattachment_set.all()))
-        else:
-            remove_links = ""
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Div(
-                'title',
-                'text',
-                Div(
-                    Div('deadline_at', css_class='col-xs-6'),
-                    Div('attachments', HTML(remove_links),
-                        css_class='col-xs-6'),
-                    css_class='row'
-                ),
-                Div(
-                    Div('passing_score',
-                        'maximum_score',
-                        'weight',
-                        PrependedText('ttc', '<i class="fa fa-clock-o"></i>', css_class='timepicker'),
-                        css_class="form-inline"),
-                    css_class="form-group"
-                ),
-                'is_online',
-                css_class="form-group"
-            ),
-            CANCEL_SAVE_PAIR)
         super().__init__(*args, **kwargs)
         self.instance.course = course
 
