@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
 {% load static %}
 {% load render_bundle from webpack_loader %}
 
@@ -18,7 +19,68 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-      {% crispy form form.helper %}
+        <h2 class="content-title">{% if form.instance %}Редактировать{% else %}Добавить{% endif %} задание</h2>
+        <form action="" method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {{ form.title|as_crispy_field }}
+            {{ form.text|as_crispy_field }}
+            <div class="row">
+                <div class="col-xs-6">
+                    {{ form.is_online|as_crispy_field }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-5">
+                    {{ form.deadline_at|as_crispy_field }}
+                </div>
+                <div class="col-xs-7">
+                    <div class="row">
+                        <div class="col-xs-4">
+                            {{ form.passing_score|as_crispy_field }}
+                        </div>
+                        <div class="col-xs-4">
+                            {% with field=form.maximum_score %}
+                                {{ form.maximum_score|as_crispy_field }}
+                            {% endwith %}
+                        </div>
+                        <div class="col-xs-4">
+                            {{ form.weight|as_crispy_field }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6">
+                    {% with field=form.ttc %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
+                            {{ field }}
+                        </div>
+                        <div class="help-block">
+                            {{ field.help_text }}
+                        </div>
+                    </div>
+                    {% endwith %}
+                </div>
+                <div class="col-xs-6">
+                    {{ form.attachments|as_crispy_field }}
+                    {% if form.instance %}
+                        <ul class="list-unstyled __files">
+                            {% for aa in form.instance.assignmentattachment_set.all %}
+                                <li><a href="{{ aa.get_delete_url }}"><i class="fa fa-trash-o"></i>&nbsp;{{ aa.file_name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <input type="submit" name="save" value="Сохранить" class="btn btn-primary" id="submit-id-save">
+            <input type="button" name="cancel" value="Отмена" class="btn btn btn-link" id="button-id-cancel" onclick="history.go(-1);">
+        </form>
     </div>
   </div>
 </div>

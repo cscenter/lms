@@ -90,6 +90,7 @@ def test_course_assignment_update(client, assert_redirect):
     co = CourseFactory.create(teachers=[teacher])
     a = AssignmentFactory.create(course=co)
     form = model_to_dict(a)
+    del form['ttc']
     deadline_date = form['deadline_at'].strftime(DATE_FORMAT_RU)
     deadline_time = form['deadline_at'].strftime(TIME_FORMAT_RU)
     new_title = a.title + " foo42bar"
