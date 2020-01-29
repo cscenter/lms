@@ -269,7 +269,8 @@ class AssignmentForm(TimezoneAwareModelForm):
         help_text=_("Calculated amount of time required for the task to be completed"),
         widget=TimeInputAsTextInput(format=TIME_FORMAT_RU,
                                     attrs={"autocomplete": "off",
-                                           "class": "timepicker form-control"}))
+                                           "class": "timepicker form-control",
+                                           "placeholder": "hh:mm"}))
 
     def __init__(self, *args, **kwargs):
         course = kwargs.pop('course', None)
