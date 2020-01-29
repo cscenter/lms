@@ -1,4 +1,5 @@
 import rules
+from django.conf import settings
 
 from auth.permissions import Permission
 from auth.utils import override_perm
@@ -14,10 +15,13 @@ def course_is_open(user, course):
 def enroll_in_course(user, course: Course):
     if not course.enrollment_is_open:
         return False
-    # Check that course is available for student branch
     if course.branch_id != user.branch_id:
-        if user.branch not in course.additional_branches.all():
-            return False
+        # Course have to be shared for any club branch to be available
+        # on compsciclub.ru
+        if course.branch.site_id != settings.SITE_ID:
+            if not any(branch.site_id == settings.SITE_ID for branch
+                       in course.additional_branches.all()):
+                return False
     if course.is_capacity_limited and not course.places_left:
         return False
     return True
