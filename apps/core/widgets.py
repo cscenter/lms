@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django_filters.widgets import RangeWidget
 from webpack_loader import utils
+from django.utils.translation import ugettext_lazy as _
 
 from core.timezone.constants import DATE_FORMAT_RU
 from core.timezone.utils import aware_to_naive
@@ -75,8 +76,10 @@ class CityAwareSplitDateTimeWidget(forms.MultiWidget):
     def __init__(self, attrs=None, date_format=None, time_format=None):
         attrs = {"class": "form-control", "autocomplete": "off"}
         widgets = (
-            DateInputAsTextInput(attrs=attrs, format=date_format),
-            TimeInputAsTextInput(attrs=attrs, format=time_format),
+            DateInputAsTextInput(attrs={"placeholder": "dd/mm/yyyy", **attrs},
+                                 format=date_format),
+            TimeInputAsTextInput(attrs={"placeholder": "hh:mm", **attrs},
+                                 format=time_format),
         )
         super().__init__(widgets, attrs)
 
