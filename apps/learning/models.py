@@ -242,6 +242,11 @@ class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
     score_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='score')
+    execution_time = models.TimeField(
+        verbose_name=_("Execution Time"),
+        blank=True, null=True,
+        help_text=_("The time spent by the student executing this task"),
+    )
     first_student_comment_at = models.DateTimeField(
         _("First Student Comment At"),
         null=True,
