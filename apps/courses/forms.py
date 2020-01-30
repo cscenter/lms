@@ -266,7 +266,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         label=_("Time to Completion"),
         input_formats=[TIME_FORMAT_RU],
         required=False,
-        help_text=_("Calculated amount of time required for the task to be completed"),
+        help_text=_("Estimated amount of time required for the task to be completed"),
         widget=TimeInputAsTextInput(format=TIME_FORMAT_RU,
                                     attrs={"autocomplete": "off",
                                            "class": "timepicker form-control",
