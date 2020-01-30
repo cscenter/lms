@@ -280,5 +280,5 @@ class AssignmentForm(TimezoneAwareModelForm):
 
     class Meta:
         model = Assignment
-        fields = ('title', 'text', 'deadline_at', 'attachments', 'is_online',
+        fields = ('title', 'text', 'deadline_at', 'attachments', 'is_online', 'submission_type',
                   'passing_score', 'maximum_score', 'weight', 'ttc')
