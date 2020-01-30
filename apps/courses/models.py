@@ -892,8 +892,6 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
     deadline_at = models.DateTimeField(_("Assignment|deadline"))
-    is_online = models.BooleanField(_("Assignment|can be passed online"),
-                                    default=True)
     submission_type = models.CharField(
         verbose_name=_("Submission Type"),
         max_length=42,

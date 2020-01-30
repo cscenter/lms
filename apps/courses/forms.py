@@ -253,9 +253,6 @@ class AssignmentForm(TimezoneAwareModelForm):
         required=False,
         help_text=_("You can select multiple files"),
         widget=forms.ClearableFileInput(attrs={'multiple': 'multiple'}))
-    is_online = forms.BooleanField(
-        label=_("Can be passed online"),
-        required=False)
     passing_score = forms.IntegerField(
         label=_("Passing score"),
         initial=2)
@@ -280,5 +277,6 @@ class AssignmentForm(TimezoneAwareModelForm):
 
     class Meta:
         model = Assignment
-        fields = ('title', 'text', 'deadline_at', 'attachments', 'is_online', 'submission_type',
-                  'passing_score', 'maximum_score', 'weight', 'ttc')
+        fields = ('title', 'text', 'deadline_at', 'attachments',
+                  'submission_type', 'passing_score', 'maximum_score',
+                  'weight', 'ttc')
