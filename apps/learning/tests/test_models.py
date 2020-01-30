@@ -18,7 +18,8 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFa
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment
-from courses.models import Semester, CourseNews, CourseReview
+from courses.models import Semester, CourseNews, CourseReview, \
+    AssignmentSubmissionTypes
 from courses.constants import SemesterTypes
 from courses.utils import get_term_starts_at
 from users.tests.factories import UserFactory, StudentFactory, \
@@ -88,7 +89,7 @@ class StudentAssignmentTests(CSCTestCase):
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course__teachers=[u_teacher],
-            assignment__is_online=True)
+            assignment__submission_type=AssignmentSubmissionTypes.ONLINE)
         # teacher comments first
         self.assertFalse(as_.submission_is_received)
         AssignmentCommentFactory.create(student_assignment=as_,
@@ -103,7 +104,7 @@ class StudentAssignmentTests(CSCTestCase):
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course__teachers=[u_teacher],
-            assignment__is_online=True)
+            assignment__submission_type=AssignmentSubmissionTypes.ONLINE)
         as_.refresh_from_db()
         self.assertFalse(as_.submission_is_received)
         AssignmentCommentFactory.create(student_assignment=as_,
@@ -118,7 +119,7 @@ class StudentAssignmentTests(CSCTestCase):
         as_ = StudentAssignmentFactory(
             student=u_student,
             assignment__course__teachers=[u_teacher],
-            assignment__is_online=False)
+            assignment__submission_type=AssignmentSubmissionTypes.OTHER)
         as_.refresh_from_db()
         self.assertFalse(as_.submission_is_received)
         AssignmentCommentFactory.create(student_assignment=as_,
@@ -131,7 +132,8 @@ class StudentAssignmentTests(CSCTestCase):
         from django.utils import timezone
         student = StudentFactory()
         a_online = AssignmentFactory.create(
-            passing_score=5, maximum_score=10, is_online=True,
+            passing_score=5, maximum_score=10,
+            submission_type=AssignmentSubmissionTypes.ONLINE,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx = {'student': student, 'assignment': a_online}
@@ -148,7 +150,8 @@ class StudentAssignmentTests(CSCTestCase):
         a_s = StudentAssignment(**ctx)
         self.assertEqual(a_s.state.value, a_s.States.NOT_SUBMITTED)
         a_offline = AssignmentFactory.create(
-            passing_score=5, maximum_score=10, is_online=False,
+            passing_score=5, maximum_score=10,
+            submission_type=AssignmentSubmissionTypes.OTHER,
             deadline_at=datetime.datetime.now().replace(tzinfo=timezone.utc)
         )
         ctx['assignment'] = a_offline

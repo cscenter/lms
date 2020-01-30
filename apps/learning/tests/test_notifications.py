@@ -17,7 +17,7 @@ from core.tests.utils import CSCTestCase
 
 from core.urls import reverse
 from courses.admin import AssignmentAdmin
-from courses.models import CourseTeacher, Assignment
+from courses.models import CourseTeacher, Assignment, AssignmentSubmissionTypes
 from courses.tests.factories import CourseFactory, AssignmentFactory, \
     SemesterFactory
 from learning.utils import course_failed_by_student
@@ -46,7 +46,7 @@ class NotificationTests(CSCTestCase):
         a = AssignmentFactory.build()
         form = {
             'title': a.title,
-            'is_online': 1,
+            'submission_type': AssignmentSubmissionTypes.ONLINE,
             'text': a.text,
             'passing_score': 0,
             'maximum_score': 5,
@@ -137,7 +137,7 @@ def test_assignment_notify_teachers_public_form(client):
     a = AssignmentFactory.build()
     form = {
         'title': a.title,
-        'is_online': 1,
+        'submission_type': AssignmentSubmissionTypes.ONLINE,
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,
@@ -197,7 +197,7 @@ def test_assignment_notify_teachers_admin_form(client):
     post_data = {
         'course': co.pk,
         'title': a.title,
-        'is_online': 1,
+        'submission_type': AssignmentSubmissionTypes.ONLINE,
         'text': a.text,
         'passing_score': 0,
         'maximum_score': 5,

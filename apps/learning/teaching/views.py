@@ -53,7 +53,6 @@ class AssignmentListView(TeacherOnlyMixin, TemplateView):
     )
 
     def get_queryset(self, filters):
-        # TODO: Show cs center courses on club site?
         return (
             StudentAssignment.objects
             .filter(**filters)
@@ -65,7 +64,7 @@ class AssignmentListView(TeacherOnlyMixin, TemplateView):
                   "student__last_name",
                   "assignment__id",
                   "assignment__course_id",
-                  "assignment__is_online",
+                  "assignment__submission_type",
                   "assignment__passing_score",
                   "assignment__maximum_score",)
             .prefetch_related("student__groups",)

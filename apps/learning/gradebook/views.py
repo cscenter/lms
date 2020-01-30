@@ -4,7 +4,7 @@ from typing import Optional
 
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse, \
     HttpResponseForbidden, HttpResponseBadRequest
 from django.shortcuts import redirect
@@ -14,7 +14,8 @@ from django.views import generic
 from vanilla import FormView
 
 from auth.mixins import PermissionRequiredMixin
-from courses.models import Course, Semester, Assignment
+from courses.models import Course, Semester, Assignment, \
+    AssignmentSubmissionTypes
 from courses.constants import SemesterTypes
 from courses.utils import get_current_term_pair, get_term_index
 from courses.views.mixins import CourseURLParamsMixin
@@ -210,14 +211,16 @@ class AssignmentGradesImportBaseView(TeacherOnlyMixin, generic.View):
         filters = {
             "pk": assignment_id,
             "course_id": course_id,
-            "is_online": False
+            "is_online": False,
         }
+        filters = (Q(pk=assignment_id) & Q(course_id=course_id) &
+                   ~Q(submission_type=AssignmentSubmissionTypes.ONLINE))
         if not request.user.is_curator:
-            filters['course__teachers__id'] = request.user.pk
+            filters &= Q(course__teachers__id=request.user.pk)
         try:
             assignment = (Assignment.objects
                           .select_related("course")
-                          .get(**filters))
+                          .get(filters))
         except Assignment.DoesNotExist:
             return HttpResponseForbidden()
         try:
