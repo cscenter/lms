@@ -35,7 +35,7 @@
       </p>
       <p>
         {% trans "Can be passed online" %}:
-        {{ assignment.is_online2|yesno:_("Yes,No") }}
+        {{ assignment.is_online|yesno:_("Yes,No") }}
       </p>
       <p>
         {% trans "Assignment Weight" %}: {{ assignment.weight|floatdot }}

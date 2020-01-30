@@ -158,7 +158,7 @@
 
                 <h5 class="assignment">{% trans "Assignment created" %}</h5>
                 {{ a_s.assignment.created_local|date:"d E Y" }}
-                {% if a_s.assignment.is_online2 %}
+                {% if a_s.assignment.is_online %}
                 <h4>{% trans "Can be passed online "%}</h4>
                 {% endif %}
             </div>

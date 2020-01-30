@@ -208,11 +208,6 @@ class AssignmentGradesImportBaseView(TeacherOnlyMixin, generic.View):
             csv_file = request.FILES['csv_file']
         except (MultiValueDictKeyError, ValueError, TypeError):
             return HttpResponseBadRequest()
-        filters = {
-            "pk": assignment_id,
-            "course_id": course_id,
-            "is_online": False,
-        }
         filters = (Q(pk=assignment_id) & Q(course_id=course_id) &
                    ~Q(submission_type=AssignmentSubmissionTypes.ONLINE))
         if not request.user.is_curator:

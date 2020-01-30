@@ -984,9 +984,8 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
     def is_open(self):
         return self.deadline_at > timezone.now()
 
-    # FIXME: remove .is_online field, then rename property to `is_online`
     @property
-    def is_online2(self):
+    def is_online(self):
         """
         Online is when you want students to submit their assignments
         using current site.

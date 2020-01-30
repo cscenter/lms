@@ -170,7 +170,7 @@ class GradeBookFormFactory:
                 if not sa:
                     continue
                 assignment = sa.assignment
-                if not assignment.is_online2:
+                if not assignment.is_online:
                     k = BaseGradebookForm.GRADE_PREFIX + str(sa.id)
                     fields[k] = AssignmentScore(assignment, sa)
 
@@ -189,7 +189,7 @@ class GradeBookFormFactory:
                 if not submission:
                     continue
                 assignment = submission.assignment
-                if not assignment.is_online2:
+                if not assignment.is_online:
                     k = BaseGradebookForm.GRADE_PREFIX + str(submission.id)
                     initial[k] = submission.score
         for s in gradebook.students.values():
