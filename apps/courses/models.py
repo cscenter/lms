@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
+from djchoices import DjangoChoices, C
 from model_utils import FieldTracker
 from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
@@ -877,6 +878,12 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
         return os.path.basename(self.material.name)
 
 
+class AssignmentSubmissionTypes(DjangoChoices):
+    ONLINE = C("online", _("Online Submission"))
+    EXTERNAL = C("external", _("External Service"))
+    NONE = C("offline", _("No Submission"))
+
+
 class Assignment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'
 
@@ -887,6 +894,11 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
     deadline_at = models.DateTimeField(_("Assignment|deadline"))
     is_online = models.BooleanField(_("Assignment|can be passed online"),
                                     default=True)
+    submission_type = models.CharField(
+        verbose_name=_("Submission Type"),
+        max_length=42,
+        choices=AssignmentSubmissionTypes.choices
+    )
     title = models.CharField(_("Assignment|name"),
                              max_length=140)
     text = models.TextField(_("Assignment|text"),
