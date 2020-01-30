@@ -138,7 +138,7 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
             'study:assignment_comment_create',
             kwargs={'pk': sa.pk})
         # Update `text` label if student has no submissions yet
-        if sa.assignment.is_online2 and not sa.has_comments(self.request.user):
+        if sa.assignment.is_online and not sa.has_comments(self.request.user):
             comment_form.fields.get('text').label = _("Add solution")
         # Format datetime in student timezone
         context['timezone'] = self.request.user.get_timezone()

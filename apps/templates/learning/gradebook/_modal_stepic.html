@@ -13,7 +13,7 @@
                         <label for="csv-assignment-selected">1. {% trans "Select assignment" %}</label>
                         <select name="assignment" class="form-control" id="csv-assignment-selected">
                         {% for assignment in gradebook.assignments.values %}
-                            {% if not assignment.is_online2 %}
+                            {% if not assignment.is_online %}
                                 <option value="{{ assignment.pk }}">{{ assignment.title}}</option>
                             {% endif %}
                         {% endfor %}

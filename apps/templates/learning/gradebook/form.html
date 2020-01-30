@@ -99,7 +99,7 @@
                                 {% endif %}
                                 {% for student_progress in gradebook.submissions|lookup:student.index %}
                                     {% if student_progress %}
-                                        {% if student_progress.assignment.is_online2 %}
+                                        {% if student_progress.assignment.is_online %}
                                             <div class="cell __assignment __score">
                                                 <a href="{{ student_progress.get_teacher_url }}">{{ student_progress.get_state }}</a>
                                             </div>

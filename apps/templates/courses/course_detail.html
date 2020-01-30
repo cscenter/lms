@@ -153,7 +153,7 @@
                                         <div>{{ assignment.title }}</div>
                                     {% endif %}
                                 </td>
-                                <td>{{ assignment.is_online2|yesno:_("Yes,No") }}</td>
+                                <td>{{ assignment.is_online|yesno:_("Yes,No") }}</td>
                                 <td>
                                     {% for attachment in assignment.assignmentattachment_set.all %}
                                         {% if assignment.magic_link %}

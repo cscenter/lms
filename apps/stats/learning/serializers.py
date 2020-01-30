@@ -59,8 +59,7 @@ class StudentAssignmentsSerializer(serializers.ModelSerializer):
 
 class AssignmentsStatsSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    # FIXME: replace with serializers.Field() after renaming .is_online2 -> .is_online
-    is_online = serializers.SerializerMethodField(read_only=True)
+    is_online = serializers.ReadOnlyField()
     title = serializers.CharField(read_only=True)
     deadline_at = serializers.DateTimeField(label="deadline", read_only=True)
     passing_score = serializers.IntegerField(read_only=True)
@@ -72,9 +71,6 @@ class AssignmentsStatsSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         pass
-
-    def get_is_online(self, obj):
-        return obj.is_online2
 
 
 class EnrollmentsStatsSerializer(serializers.Serializer):

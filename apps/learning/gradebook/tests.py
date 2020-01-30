@@ -119,7 +119,7 @@ def test_recalculate_course_grading_system(client):
     a1 = assignments[0]
     submission = StudentAssignment.objects.get(student=student, assignment=a1)
     # Online assignments are not presented in gradebook form
-    assert not a1.is_online2
+    assert not a1.is_online
     form = {
         BaseGradebookForm.GRADE_PREFIX + str(submission.pk): 2
     }
