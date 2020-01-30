@@ -14,6 +14,7 @@ from auth.mixins import PermissionRequiredMixin
 from auth.permissions import perm_registry
 from core.tests.utils import CSCTestCase
 from core.urls import reverse
+from courses.models import AssignmentSubmissionTypes
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.gradebook import gradebook_data, BaseGradebookForm, \
@@ -72,11 +73,12 @@ def test_recalculate_course_grading_system(client):
     s = SemesterFactory.create_current()
     co = CourseFactory.create(semester=s, teachers=[teacher])
     assert co.grading_type == GradingSystems.BASE
-    assignments = AssignmentFactory.create_batch(2,
-                                                 course=co,
-                                                 is_online=False,
-                                                 passing_score=10,
-                                                 maximum_score=20)
+    assignments = AssignmentFactory.create_batch(
+        2,
+        course=co,
+        submission_type=AssignmentSubmissionTypes.OTHER,
+        passing_score=10,
+        maximum_score=20)
     client.login(teacher)
     url = co.get_gradebook_url()
     # Save empty form first, nothing should been updated
@@ -117,7 +119,7 @@ def test_recalculate_course_grading_system(client):
     a1 = assignments[0]
     submission = StudentAssignment.objects.get(student=student, assignment=a1)
     # Online assignments are not presented in gradebook form
-    assert not a1.is_online
+    assert not a1.is_online2
     form = {
         BaseGradebookForm.GRADE_PREFIX + str(submission.pk): 2
     }
@@ -177,8 +179,9 @@ class MarksSheetTeacherTests(MyUtilitiesMixin, CSCTestCase):
         for student in students:
             EnrollmentFactory.create(student=student, course=co)
         as_online = AssignmentFactory.create_batch(2, course=co)
-        as_offline = AssignmentFactory.create_batch(3, course=co,
-                                                    is_online=False)
+        as_offline = AssignmentFactory.create_batch(
+            3, course=co,
+            submission_type=AssignmentSubmissionTypes.OTHER)
         url = co.get_gradebook_url()
         self.doLogin(teacher)
         response = self.client.get(url)
@@ -207,7 +210,10 @@ def test_save_gradebook(client, assert_redirect):
     course = CourseFactory(teachers=[teacher])
     for student in students:
         EnrollmentFactory.create(student=student, course=course)
-    a1, a2 = AssignmentFactory.create_batch(2, course=course, is_online=False)
+    a1, a2 = AssignmentFactory.create_batch(
+        2,
+        course=course,
+        submission_type=AssignmentSubmissionTypes.OTHER)
     teacher_gradebook_url = course.get_gradebook_url()
     form = {}
     pairs = zip([StudentAssignment.objects.get(student=student, assignment=a)
@@ -401,9 +407,10 @@ def test_save_gradebook_form(client):
     teacher = TeacherFactory.create()
     client.login(teacher)
     co = CourseFactory.create(teachers=[teacher])
-    a1, a2 = AssignmentFactory.create_batch(2, course=co,
-                                            is_online=False,
-                                            passing_score=10, maximum_score=20)
+    a1, a2 = AssignmentFactory.create_batch(
+        2, course=co,
+        submission_type=AssignmentSubmissionTypes.OTHER,
+        passing_score=10, maximum_score=20)
     e1, e2 = EnrollmentFactory.create_batch(2, course=co,
                                             grade=GradeTypes.EXCELLENT)
     # We have 2 enrollments with `excellent` final grades. Change one of them.
@@ -462,7 +469,8 @@ def test_save_gradebook_l10n(client):
     student = StudentFactory()
     co = CourseFactory.create(teachers=[teacher])
     EnrollmentFactory.create(student=student, course=co)
-    a = AssignmentFactory(course=co, is_online=False,
+    a = AssignmentFactory(course=co,
+                          submission_type=AssignmentSubmissionTypes.OTHER,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
@@ -487,7 +495,8 @@ def test_save_gradebook_less_than_passing_score(client):
     student = StudentFactory()
     co = CourseFactory.create(teachers=[teacher])
     e = EnrollmentFactory.create(student=student, course=co)
-    a = AssignmentFactory(course=co, is_online=False,
+    a = AssignmentFactory(course=co,
+                          submission_type=AssignmentSubmissionTypes.OTHER,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     field_name = BaseGradebookForm.GRADE_PREFIX + str(sa.pk)
@@ -508,7 +517,8 @@ def test_gradebook_view_form_invalid(client):
     co = CourseFactory.create(teachers=[teacher])
     e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GradeTypes.EXCELLENT)
-    a = AssignmentFactory(course=co, is_online=False,
+    a = AssignmentFactory(course=co,
+                          submission_type=AssignmentSubmissionTypes.OTHER,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a)
     sa.score = 7
@@ -538,7 +548,8 @@ def test_gradebook_view_form_conflict(client):
     student = StudentFactory()
     e = EnrollmentFactory.create(student=student, course=co,
                                  grade=GradeTypes.NOT_GRADED)
-    a = AssignmentFactory(course=co, is_online=False,
+    a = AssignmentFactory(course=co,
+                          submission_type=AssignmentSubmissionTypes.OTHER,
                           passing_score=10, maximum_score=40)
     sa = StudentAssignment.objects.get(student=student, assignment=a, score=None)
     final_grade_field_name = BaseGradebookForm.FINAL_GRADE_PREFIX + str(e.pk)
@@ -615,8 +626,10 @@ def test_gradebook_import_assignments_from_csv_security(client):
     co = CourseFactory.create(teachers=[teacher])
     student_spb = StudentFactory(branch__code=Branches.SPB)
     EnrollmentFactory.create(student=student_spb, course=co)
-    assignments = AssignmentFactory.create_batch(3, course=co,
-                                                 is_online=False)
+    assignments = AssignmentFactory.create_batch(
+        3,
+        course=co,
+        submission_type=AssignmentSubmissionTypes.OTHER)
     teacher2 = TeacherFactory()
     client.login(teacher2)
     url = reverse('teaching:gradebook_csv_import_stepic', args=[co.pk])
@@ -673,8 +686,10 @@ def test_gradebook_import_assignments_from_csv(client, tmpdir):
                               stepic_id='3')
     for s in [student1, student2, student3]:
         EnrollmentFactory.create(student=s, course=co)
-    assignment = AssignmentFactory.create(course=co, is_online=False,
-                                          maximum_score=50)
+    assignment = AssignmentFactory.create(
+        course=co,
+        submission_type=AssignmentSubmissionTypes.OTHER,
+        maximum_score=50)
     # Generate csv file with missing header `login`
     tmp_file = tmpdir.mkdir("csv").join("grades_missing_header.csv")
     tmp_file.write("""

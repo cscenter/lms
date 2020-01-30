@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 
 from core.admin import get_admin_url
 from core.urls import reverse
-from courses.models import Assignment
+from courses.models import Assignment, AssignmentSubmissionTypes
 from courses.tests.factories import CourseFactory
 from learning.settings import Branches
 from users.tests.factories import CuratorFactory
@@ -19,6 +19,7 @@ def test_assignment_admin_view(settings, client):
     co_in_nsk = CourseFactory(branch__code=Branches.NSK)
     form_data = {
         "course": "",
+        "submission_type": AssignmentSubmissionTypes.ONLINE,
         "deadline_at_0": "29.06.2017",
         "deadline_at_1": "00:00:00",
         "title": "title",

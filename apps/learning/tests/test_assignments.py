@@ -16,7 +16,8 @@ from django.utils.translation import ugettext as _
 
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.urls import reverse
-from courses.models import Assignment, AssignmentAttachment
+from courses.models import Assignment, AssignmentAttachment, \
+    AssignmentSubmissionTypes
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     CourseTeacherFactory, AssignmentFactory, CourseNewsFactory, \
     AssignmentAttachmentFactory
@@ -439,7 +440,7 @@ def test_assignment_public_form_for_teachers(settings, client):
     co_in_spb = CourseFactory(teachers=[teacher])
     client.login(teacher)
     form_data = {
-        "is_online": "true",
+        "submission_type": AssignmentSubmissionTypes.ONLINE,
         "title": "title",
         "text": "text",
         "deadline_at_0": "29.06.2017",

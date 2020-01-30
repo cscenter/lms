@@ -25,7 +25,8 @@ from core.timezone import TimezoneAwareModel, now_local
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
-from courses.models import Course, CourseNews, Assignment
+from courses.models import Course, CourseNews, Assignment, \
+    AssignmentSubmissionTypes
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
@@ -294,11 +295,12 @@ class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
     @cached_property
     def state(self) -> ChoiceItem:
         score = self.score
-        passing_score = self.assignment.passing_score
-        maximum_score = self.assignment.maximum_score
+        assignment = self.assignment
+        passing_score = assignment.passing_score
+        maximum_score = assignment.maximum_score
         satisfactory_range = maximum_score - passing_score
         if score is None:
-            if not self.assignment.is_online or self.submission_is_received:
+            if not assignment.is_online2 or self.submission_is_received:
                 state = StudentAssignment.States.NOT_CHECKED
             else:
                 state = StudentAssignment.States.NOT_SUBMITTED
@@ -320,7 +322,7 @@ class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
         marked as `online`.
         """
         return (self.first_student_comment_at is not None
-                and self.assignment.is_online)
+                and self.assignment.is_online2)
 
     @property
     def state_display(self):
@@ -363,7 +365,7 @@ def notify_new_assignment_comment(comment):
                           .filter(author_id=comment.author_id)
                           .exclude(pk=comment.pk))
         is_first_comment = not other_comments.exists()
-        is_about_passed = sa.assignment.is_online and is_first_comment
+        is_about_passed = sa.assignment.is_online2 and is_first_comment
 
         teachers = comment.student_assignment.assignment.notify_teachers.all()
         for t in teachers:

@@ -87,7 +87,7 @@ class AssignmentsStats(ReadOnlyModelViewSet):
                            .values_list("student_id", flat=True))
         return (Assignment.objects
                 .only("pk", "title", "course_id", "deadline_at",
-                      "passing_score", "maximum_score", "is_online")
+                      "passing_score", "maximum_score", "submission_type")
                 .filter(course_id=course_id)
                 .prefetch_related(
                     Prefetch(
@@ -106,7 +106,7 @@ class AssignmentsStats(ReadOnlyModelViewSet):
                                         "assignment__course_id",
                                         "assignment__maximum_score",
                                         "assignment__passing_score",
-                                        "assignment__is_online")
+                                        "assignment__submission_type")
                                   .order_by()),
                         to_attr="students"
                     ),

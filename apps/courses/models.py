@@ -879,9 +879,9 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
 
 
 class AssignmentSubmissionTypes(DjangoChoices):
-    ONLINE = C("online", _("Online Submission"))
+    ONLINE = C("online", _("Online Submission"))  # file or text on site
     EXTERNAL = C("external", _("External Service"))
-    NONE = C("offline", _("No Submission"))
+    OTHER = C("other", _("No Submission"))  # on paper, etc
 
 
 class Assignment(TimezoneAwareModel, TimeStampedModel):
@@ -985,6 +985,15 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
     @property
     def is_open(self):
         return self.deadline_at > timezone.now()
+
+    # FIXME: remove .is_online field, then rename property to `is_online`
+    @property
+    def is_online2(self):
+        """
+        Online is when you want students to submit their assignments
+        using current site.
+        """
+        return self.submission_type == AssignmentSubmissionTypes.ONLINE
 
     @cached_property
     def files_root(self):

@@ -138,21 +138,15 @@ def gradebook_data(course: Course) -> GradeBookData:
         students = OrderedDict(
             1: StudentMeta(
                 "pk": 1,
-                "full_name": "serg",
-                "final_grade": good,
+                "full_name": "Ivan Ivanov",
+                "final_grade": "good",
                 "total_score": 23,
                 "enrollment_id": 1,
             ),
             ...
         ),
         assignments = OrderedDict(
-            1: {
-                "pk": 1,
-                "title": "HW#1",
-                "is_online": True,
-                "passing_score": 0,
-                "maximum_score": 10
-            },
+            1: Assignment(...)
             ...
         ),
         submissions = [
@@ -187,7 +181,7 @@ def gradebook_data(course: Course) -> GradeBookData:
                              "title",
                              # Assignment constructor caches course id
                              "course_id",
-                             "is_online",
+                             "submission_type",
                              "maximum_score",
                              "passing_score",
                              "weight")
