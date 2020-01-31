@@ -1,7 +1,9 @@
+import datetime
+
 from crispy_forms.bootstrap import TabHolder, Tab, PrependedText, FormActions, \
     StrictButton
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, HTML, Fieldset, Field
+from crispy_forms.layout import Layout, Div, HTML, Fieldset
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
@@ -19,6 +21,8 @@ from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')
+
+from courses.utils import execution_time_string
 
 DROP_ATTACHMENT_LINK = '<a href="{}"><i class="fa fa-trash-o"></i>&nbsp;{}</a>'
 
@@ -233,6 +237,30 @@ class CourseClassForm(forms.ModelForm):
         return date
 
 
+class AssignmentDurationField(forms.DurationField):
+    """
+    Supports `hours:minutes` format instead of Django's '%d %H:%M:%S.%f'.
+    """
+    def prepare_value(self, value):
+        if isinstance(value, datetime.timedelta):
+            return execution_time_string(value)
+        return value
+
+    def to_python(self, value):
+        if value in self.empty_values:
+            return None
+        if isinstance(value, datetime.timedelta):
+            return value
+        try:
+            hours, minutes = map(int, str(value).split(":", maxsplit=1))
+            value = datetime.timedelta(hours=hours, minutes=minutes)
+        except ValueError:
+            raise ValidationError(self.error_messages['invalid'], code='invalid')
+        if value is None:
+            raise ValidationError(self.error_messages['invalid'], code='invalid')
+        return value
+
+
 class AssignmentForm(TimezoneAwareModelForm):
     title = forms.CharField(
         label=_("Title"),
@@ -259,15 +287,14 @@ class AssignmentForm(TimezoneAwareModelForm):
     maximum_score = forms.IntegerField(
         label=_("Maximum score"),
         initial=5)
-    ttc = forms.TimeField(
+    ttc = AssignmentDurationField(
         label=_("Time to Completion"),
-        input_formats=[TIME_FORMAT_RU],
         required=False,
         help_text=_("Estimated amount of time required for the task to be completed"),
-        widget=TimeInputAsTextInput(format=TIME_FORMAT_RU,
-                                    attrs={"autocomplete": "off",
-                                           "class": "timepicker form-control",
-                                           "placeholder": "hh:mm"}))
+        widget=forms.TextInput(
+            attrs={"autocomplete": "off",
+                   "class": "form-control",
+                   "placeholder": _("hours:minutes")}))
 
     def __init__(self, *args, **kwargs):
         course = kwargs.pop('course', None)

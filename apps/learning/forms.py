@@ -7,8 +7,10 @@ from django.utils.translation import ugettext_lazy as _
 
 from core.forms import GradeField
 from core.models import LATEX_MARKDOWN_ENABLED
+from core.timezone.constants import TIME_FORMAT_RU
 from core.widgets import UbereditorWidget
-from learning.models import GraduateProfile
+from courses.forms import AssignmentDurationField
+from learning.models import GraduateProfile, StudentAssignment
 from .models import AssignmentComment
 
 
@@ -63,6 +65,20 @@ class AssignmentCommentForm(forms.ModelForm):
                 _("Either text or file should be non-empty"))
 
         return cleaned_data
+
+
+class AssignmentExecutionTimeForm(forms.ModelForm):
+    execution_time = AssignmentDurationField(
+        label="Time Spent on Assignment",
+        widget=forms.TextInput(attrs={'autocomplete': 'off',
+                                      'class': 'form-control',
+                                      'placeholder': _('hours:minutes')}),
+        help_text=_("Form will be available after grading")
+    )
+
+    class Meta:
+        model = StudentAssignment
+        fields = ('execution_time',)
 
 
 class AssignmentModalCommentForm(forms.ModelForm):

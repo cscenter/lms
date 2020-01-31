@@ -326,6 +326,16 @@ class CreateAssignmentCommentTeacher(Permission):
 
 
 @add_perm
+class UpdateAssignmentExecutionTime(Permission):
+    name = "study.update_assignment_execution_time"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, sa: StudentAssignment):
+        return sa.student_id == user.id and sa.score is not None
+
+
+@add_perm
 class EnrollInCourse(Permission):
     name = "learning.enroll_in_course"
     rule = enroll_in_course

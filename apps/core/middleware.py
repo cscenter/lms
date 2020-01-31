@@ -44,6 +44,7 @@ class CurrentBranchMiddleware:
     def __call__(self, request):
         # Allows adding a missing branch through the admin interface
         if not request.path.startswith(settings.ADMIN_URL):
+            # FIXME: handle case with wrong HTTP_HOST header. Now it raises 500 `Branch not found`
             request.branch = Branch.objects.get_current(request)
         return self.get_response(request)
 

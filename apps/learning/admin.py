@@ -9,7 +9,8 @@ from core.timezone.admin import TimezoneAwareModelForm, \
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
-from learning.models import GraduateProfile, Invitation, CourseInvitation
+from learning.models import GraduateProfile, Invitation, CourseInvitation, \
+    StudentAssignment
 from .models import AssignmentComment, Enrollment, Event, Useful
 
 
@@ -71,8 +72,10 @@ class EnrollmentAdmin(admin.ModelAdmin):
     grade_changed_local.short_description = _("Enrollment|grade changed")
 
 
+@admin.register(StudentAssignment)
 class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
-    list_display = ['student', 'assignment', 'score', 'score_changed', 'state']
+    list_display = ['student', 'assignment', 'score', 'score_changed',
+                    'state_display']
     related_spec = {'select': [('assignment',
                                 [('course', ['semester', 'meta_course'])]),
                                'student']}
@@ -81,9 +84,9 @@ class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['student', 'assignment', 'score_changed', 'state']
+            return ['student', 'assignment', 'score_changed', 'state_display']
         else:
-            return ['score_changed', 'state']
+            return ['score_changed', 'state_display']
 
 
 class EventAdmin(admin.ModelAdmin):

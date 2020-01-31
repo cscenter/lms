@@ -5,7 +5,7 @@
 {% load crispy_forms_tags %}
 {% load core_tags %}
 {% load static %}
-{% load markdown from core_tags %}
+{% load markdown call_method from core_tags %}
 {% load render_bundle from webpack_loader %}
 
 {% block title %}{{ a_s.student.get_short_name }} - {{ a_s.assignment.title }}{% endblock %}
@@ -110,21 +110,41 @@
                 <h5 class="assignment">{% trans "Grade" %}</h5>
                 <span class="nowrap badge assignment-status {{ a_s.state.css_class }}">{{ a_s.state_display }}</span>
 
-                {% if not is_actual_teacher %}
-                      {% if one_teacher %}
-                      <h5 class="assignment">{% trans "Professor" %}</h5>
-                      {% else %}
-                      <h5 class="assignment">{% trans "Professors" %}</h5>
-                      {% endif %}
-                      <ul class="list-unstyled">
-                        {% for teacher in a_s.assignment.course.teachers.all %}
-                        <li>
-                          <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_full_name }}</a>
-                        </li>
-                        {% endfor %}
-                      </ul>
+                <h5 class="assignment">{% trans "Time Spent on Assignment" %}</h5>
+                <form method="post" action="{% url "study:student_assignment_execution_time_update" a_s.pk %}">
+                    {% call_method request.user "has_perm" "study.update_assignment_execution_time" a_s as can_update_execution_time %}
+                    {% if not can_update_execution_time %}
+                        <fieldset disabled="disabled">
+                    {% endif %}
+                    {% csrf_token %}
+                    <div class="form-inline">
+                        <div class="input-group">
+                            {{ execution_time_form.execution_time }}
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="submit"><i class="fa fa-floppy-o"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                    {% if not can_update_execution_time %}
+                        <p class="help-block">{{ execution_time_form.execution_time.help_text }}</p>
+                        </fieldset>
+                    {% endif %}
+                </form>
+
+                {% if one_teacher %}
+                    <h5 class="assignment">{% trans "Professor" %}</h5>
+                {% else %}
+                    <h5 class="assignment">{% trans "Professors" %}</h5>
                 {% endif %}
-                <h5 class="assignment">{% if a_s.student.is_volunteer %}{% trans "Volunteer" %}{% else %}{% trans "Student" %}{% endif %}</h5>
+                <ul class="list-unstyled">
+                    {% for teacher in a_s.assignment.course.teachers.all %}
+                        <li>
+                            <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_full_name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+
+                <h5 class="assignment">{% trans "Student" %}</h5>
                 <a href="{{ a_s.student.get_absolute_url }}">{{ a_s.student.get_full_name }}</a>
 
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
