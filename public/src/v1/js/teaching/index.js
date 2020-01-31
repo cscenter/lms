@@ -60,6 +60,7 @@ $(document).ready(function () {
                     allowInputToggle: true,
                     icons: TIMEPICKER_ICONS,
                     tooltips: TIMEPICKER_TOOLTIPS,
+                    defaultDate: new Date("01/01/1980 23:59"),
                     keyBinds: {
                         left: false,
                         right: false,

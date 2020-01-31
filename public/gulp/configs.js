@@ -33,6 +33,7 @@ export const paths = {
 
 
 export const sassConfig = {
+    precision: 8,
     outputStyle: 'compressed',
     includePaths: [
         './node_modules/',
