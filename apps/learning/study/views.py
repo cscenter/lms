@@ -2,11 +2,14 @@ from typing import Iterable
 
 from django.apps import apps
 from django.conf import settings
+from django.contrib import messages
 from django.db.models import Q, Prefetch
-from django.utils.translation import ugettext_lazy as _
+from django.http import HttpResponseRedirect, JsonResponse, \
+    HttpResponseBadRequest
+from django.utils.translation import ugettext_lazy as _, gettext
 from django.views import generic
 from isoweek import Week
-from vanilla import ListView, TemplateView
+from vanilla import ListView, TemplateView, GenericModelView
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
@@ -19,12 +22,15 @@ from courses.utils import get_current_term_pair, get_term_index
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
 from learning.calendar import get_student_month_events
+from learning.forms import AssignmentExecutionTimeForm
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
-from learning.permissions import ViewOwnAssignments
+from learning.permissions import ViewOwnAssignments, \
+    UpdateAssignmentExecutionTime
 from learning.roles import Roles
 from learning.views import AssignmentSubmissionBaseView
-from learning.views.views import AssignmentCommentUpsertView
+from learning.views.views import AssignmentCommentUpsertView, \
+    StudentAssignmentURLParamsMixin
 from users.models import User
 
 
@@ -142,7 +148,33 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
             comment_form.fields.get('text').label = _("Add solution")
         # Format datetime in student timezone
         context['timezone'] = self.request.user.get_timezone()
+        execution_time_form = AssignmentExecutionTimeForm(instance=sa)
+        context['execution_time_form'] = execution_time_form
         return context
+
+
+class AssignmentExecutionTimeUpdateView(PermissionRequiredMixin,
+                                        StudentAssignmentURLParamsMixin,
+                                        GenericModelView):
+    permission_required = UpdateAssignmentExecutionTime.name
+    form_class = AssignmentExecutionTimeForm
+
+    def get_permission_object(self):
+        return self.student_assignment
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form(data=request.POST, files=request.FILES,
+                             instance=self.student_assignment)
+        if form.is_valid():
+            # TODO: update only execution_time field
+            self.student_assignment = form.save()
+            success_url = self.student_assignment.get_student_url()
+            return HttpResponseRedirect(success_url)
+        msg = str(_("Form has not been saved."))
+        if "execution_time" in form.errors:
+            msg = msg + " " + str(_('Wrong time format'))
+        messages.error(request, msg)
+        return HttpResponseRedirect(self.student_assignment.get_student_url())
 
 
 class StudentAssignmentCommentCreateView(PermissionRequiredMixin,

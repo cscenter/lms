@@ -17,7 +17,8 @@
 
 {% block content %}{% localize off %}
 <div class="container container-wide">
-    <form method="post" name="gradebook">{% csrf_token %}
+    <form method="post" name="gradebook">
+        {% csrf_token %}
         <div class="row">
             <div class="col-xs-12 h2-and-buttons">
               <h2>

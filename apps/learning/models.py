@@ -21,12 +21,11 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
-from core.timezone import TimezoneAwareModel, now_local
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
+from core.timezone import TimezoneAwareModel, now_local
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
-from courses.models import Course, CourseNews, Assignment, \
-    AssignmentSubmissionTypes
+from courses.models import Course, CourseNews, Assignment
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
@@ -242,7 +241,7 @@ class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
     score_changed = MonitorField(
         verbose_name=_("Assignment|grade changed"),
         monitor='score')
-    execution_time = models.TimeField(
+    execution_time = models.DurationField(
         verbose_name=_("Execution Time"),
         blank=True, null=True,
         help_text=_("The time spent by the student executing this task"),
@@ -349,6 +348,12 @@ class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
     @property
     def weight_score(self):
         return (self.assignment.weight * self.score) if self.score else None
+
+    def get_execution_time_display(self):
+        if self.execution_time is not None:
+            total_minutes = int(self.execution_time.total_seconds()) // 60
+            hours, minutes = divmod(total_minutes, 60)
+            return str(_("{} hrs {:02d} min")).format(hours, minutes)
 
 
 def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):

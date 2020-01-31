@@ -122,10 +122,13 @@
 
                 <h5 class="assignment">{% trans "Grade" %}</h5>
                 {% if is_actual_teacher %}
-                {% crispy score_form %}
+                    {% crispy score_form %}
                 {% else %}
-                <span class="nowrap badge assignment-status {{ a_s.state.css_class }}">{{ a_s.state_display }}</span>
+                    <span class="nowrap badge assignment-status {{ a_s.state.css_class }}">{{ a_s.state_display }}</span>
                 {% endif %}
+
+                <h5 class="assignment">{% trans "Time Spent on Assignment" %}</h5>
+                <span>{% if a_s.execution_time == None %}{% trans "No value is specified" %}{% else %}{{ a_s.get_execution_time_display }}{% endif %}</span>
 
                 {% if not is_actual_teacher %}
                       {% if one_teacher %}

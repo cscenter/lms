@@ -175,3 +175,9 @@ def get_terms_for_calendar_month(year: int, month: int) -> List[TermPair]:
         return [start_term, end_term]
     else:
         return [start_term]
+
+
+def execution_time_string(value: datetime.timedelta):
+    minutes = int(value.total_seconds()) // 60
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours}:{minutes:02}"

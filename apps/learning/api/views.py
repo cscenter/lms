@@ -12,7 +12,7 @@ from learning.api.serializers import CourseNewsNotificationSerializer, \
 from learning.models import CourseNewsNotification, StudentAssignment, \
     Enrollment
 from learning.permissions import EditStudentAssignment, \
-    ViewStudentAssignment, ViewEnrollments
+    ViewEnrollments
 
 
 class CourseNewsUnreadNotificationsView(ListAPIView):
