@@ -111,7 +111,7 @@ class App extends React.Component {
     fetch = (payload) => {
         this.serverRequest = $.ajax({
             type: "GET",
-            url: this.props.entry_url,
+            url: this.props.endpoint,
             dataType: "json",
             data: payload
         }).done((data) => {

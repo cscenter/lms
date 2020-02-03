@@ -97,7 +97,7 @@ class App extends React.Component {
         console.debug("Teachers: fetch", this.props, payload);
         this.serverRequest = $.ajax({
             type: "GET",
-            url: this.props.entryURL,
+            url: this.props.endpoint,
             dataType: "json",
             data: payload
         }).done((data) => {
@@ -119,7 +119,7 @@ class App extends React.Component {
         console.debug("Teachers: load course list options");
         $.ajax({
             type: "GET",
-            url: select.props.entryURL,
+            url: select.props.endpoint,
             dataType: "json"
         }).done((data) => {
             let options = [];
@@ -184,7 +184,7 @@ class App extends React.Component {
                             placeholder="Предмет"
                             key="course"
                             handleLoadOptions={this.handleLoadCourseOptions}
-                            entryURL={this.props.coursesURL}
+                            endpoint={this.props.coursesURL}
                             ref={this.CourseSelect}
                         />
                     </div>
@@ -214,7 +214,7 @@ class App extends React.Component {
 }
 
 const propTypes = {
-    entryURL: PropTypes.string.isRequired,
+    endpoint: PropTypes.string.isRequired,
     coursesURL: PropTypes.string.isRequired,
     termIndex: PropTypes.number.isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({

@@ -25,7 +25,7 @@ class AlumniView(TemplateView):
                 "year": self.kwargs.get("year", {"label": '2019', "value": 2019})
             },
             "props": {
-                "entryURL": '/ajax/alumni.json',
+                "endpoint": '/ajax/alumni.json',
                 "branchOptions": [
                     {"label": 'Санкт-Петербург', "value": 'spb'},
                     {"label": 'Новосибирск', "value": 'nsk'}
@@ -52,7 +52,7 @@ class TeachersView(TemplateView):
                 "branch": self.kwargs.get("branch", None),
             },
             "props": {
-                "entryURL": '/ajax/teachers.json',
+                "endpoint": '/ajax/teachers.json',
                 "coursesURL": '/ajax/courses.json',
                 "branchOptions": [
                     {"label": 'Санкт-Петербург', "value": 'spb'},

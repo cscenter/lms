@@ -69,9 +69,10 @@ class CourseVideosPage extends React.Component {
 
     fetch = (payload = null) => {
         console.debug("CourseVideosPage: fetch", this.props, payload);
-        this.requests = this.props.entryURL.map(entryURL => $.ajax({
+        // FIXME: remove jquery
+        this.requests = this.props.endpoints.map(endpoint => $.ajax({
             type: "GET",
-            url: entryURL,
+            url: endpoint,
             dataType: "json",
             data: payload
         }));
@@ -209,7 +210,7 @@ class CourseVideosPage extends React.Component {
 }
 
 const propTypes = {
-    entryURL: PropTypes.arrayOf(PropTypes.string).isRequired,
+    endpoints: PropTypes.arrayOf(PropTypes.string).isRequired,
     videoOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired

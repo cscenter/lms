@@ -25,7 +25,7 @@ class EnrollmentsResults {
     }
 
     getJSON(course_session_id) {
-        let dataURL = window.URLS["api:stats_enrollments"](course_session_id);
+        let dataURL = window.URLS["stats-api:stats_enrollments"](course_session_id);
         return $.getJSON(dataURL);
     }
 

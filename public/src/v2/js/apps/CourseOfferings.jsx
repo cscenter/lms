@@ -193,8 +193,8 @@ class CourseOfferings extends React.Component {
 
         const abortController = new AbortController();
         this.latestFetchAbortController = abortController;
-        this.requests = this.props.entryURL.map(entryURL => {
-            return ky.get(entryURL, {
+        this.requests = this.props.endpoints.map(endpoint => {
+            return ky.get(endpoint, {
                 searchParams: urlParams,
                 headers: {'content-type': 'application/json'},
                 signal: abortController.signal
@@ -411,7 +411,7 @@ class CourseOfferings extends React.Component {
 }
 
 const propTypes = {
-    entryURL: PropTypes.arrayOf(PropTypes.string).isRequired,
+    endpoints: PropTypes.arrayOf(PropTypes.string).isRequired,
     // history api depends on initial state
     initialState: PropTypes.shape({
         branch: PropTypes.shape({

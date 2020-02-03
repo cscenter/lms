@@ -14,11 +14,11 @@ export default class CampaignTestScore extends mix(PlotOptions).with(PlotTypeOpt
     static PLOT_TYPES = {
         "universities": {
             type: "universities",
-            entry_point: "api:stats_admission_campaign_testing_score_by_university",
+            entry_point: "stats-api:stats_admission_campaign_testing_score_by_university",
         },
         "courses": {
             type: "courses",
-            entry_point: "api:stats_admission_campaign_testing_score_by_course",
+            entry_point: "stats-api:stats_admission_campaign_testing_score_by_course",
         }
     };
 

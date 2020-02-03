@@ -9,7 +9,7 @@ import i18n from 'stats/i18n';
  * Renders plot with stages statistics by years for target branch
  */
 export default class CampaignStagesTimeline {
-    static ENTRY_POINT_URL = "api:stats_admission_campaigns_stages_by_year";
+    static ENDPOINT_URI = "stats-api:stats_admission_campaigns_stages_by_year";
 
     constructor(id, options) {
         this.id = id;
@@ -43,7 +43,7 @@ export default class CampaignStagesTimeline {
     }
 
     getStats(branchId) {
-        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](branchId);
+        let dataURL = URLS[this.constructor.ENDPOINT_URI](branchId);
         return $.getJSON(dataURL);
     }
 

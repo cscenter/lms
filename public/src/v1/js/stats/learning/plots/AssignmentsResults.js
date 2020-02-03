@@ -39,7 +39,7 @@ class AssignmentsResults extends mix(PlotOptions).with(AssignmentsFilterMixin) {
     }
 
     static getStats(course_session_id) {
-        let dataURL = window.URLS["api:stats_assignments"](course_session_id);
+        let dataURL = window.URLS["stats-api:stats_assignments"](course_session_id);
         return $.getJSON(dataURL);
     }
 

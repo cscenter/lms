@@ -5,7 +5,7 @@ import {GROUPS, URLS} from 'stats/utils';
 import i18n from 'stats/i18n';
 
 class ParticipantsGroup {
-    static ENTRY_POINT_URL = "api:stats_learning_participants_group";
+    static ENDPOINT_URI = "stats-api:stats_learning_participants_group";
 
     constructor(id, options) {
         this.id = `#${id}`;
@@ -40,7 +40,7 @@ class ParticipantsGroup {
     }
 
     getStats(course_session_id) {
-        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](course_session_id);
+        let dataURL = URLS[this.constructor.ENDPOINT_URI](course_session_id);
         return $.getJSON(dataURL);
     }
 

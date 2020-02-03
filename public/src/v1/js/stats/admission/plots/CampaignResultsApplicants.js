@@ -13,12 +13,12 @@ export default class CampaignResultsApplicants extends mix(PlotOptions).with(Plo
     static PLOT_TYPES = {
         "universities": {
             type: "universities",
-            entry_point: "api:stats_admission_campaign_applicants_by_university",
+            entry_point: "stats-api:stats_admission_campaign_applicants_by_university",
             x_axis: "university__name"
         },
         "courses": {
             type: "courses",
-            entry_point: "api:stats_admission_campaign_applicants_by_course",
+            entry_point: "stats-api:stats_admission_campaign_applicants_by_course",
             x_axis: "course__name"
         }
     };

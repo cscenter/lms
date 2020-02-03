@@ -4,7 +4,7 @@ const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
 const Dotenv = require('dotenv-webpack');
-const MiniCssExtractPlugin = require('**/*', "mini-css-extract-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
 const DEBUG = (process.env.NODE_ENV !== "production");
