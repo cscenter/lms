@@ -13,7 +13,8 @@ from learning.models import StudentAssignment
 from learning.permissions import course_access_role, CourseRole, \
     CreateAssignmentComment, CreateAssignmentCommentTeacher, \
     CreateAssignmentCommentStudent, ViewRelatedStudentAssignment, \
-    ViewStudentAssignment, EditOwnStudentAssignment
+    ViewStudentAssignment, EditOwnStudentAssignment, \
+    EditOwnAssignmentExecutionTime
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory, \
     AssignmentCommentFactory, StudentAssignmentFactory
@@ -299,3 +300,28 @@ def test_edit_own_student_assignment():
     sa2 = StudentAssignmentFactory(assignment__course=course2)
     assert EditOwnStudentAssignment.rule(teacher2, sa2)
     assert not EditOwnStudentAssignment.rule(teacher2, sa)
+
+
+@pytest.mark.django_db
+def test_update_assignment_execution_time():
+    """
+    Available to the student only after course teacher assessed student work
+    """
+    permission_name = EditOwnAssignmentExecutionTime.name
+    sa = StudentAssignmentFactory(score=None)
+    curator = CuratorFactory()
+    student = sa.student
+    student_other = StudentFactory()
+    teacher = TeacherFactory()
+    user = UserFactory()
+    no_permission = [teacher, user, student_other, curator]
+    for u in no_permission:
+        assert not u.has_perm(permission_name, sa)
+    # Permission denied until student assignment without a score
+    assert not student.has_perm(permission_name, sa)
+    sa.score = 0
+    assert student.has_perm(permission_name, sa)
+    for u in no_permission:
+        assert not u.has_perm(permission_name, sa)
+
+

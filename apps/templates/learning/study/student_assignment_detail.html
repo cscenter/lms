@@ -112,7 +112,7 @@
 
                 <h5 class="assignment">{% trans "Time Spent on Assignment" %}</h5>
                 <form method="post" action="{% url "study:student_assignment_execution_time_update" a_s.pk %}">
-                    {% call_method request.user "has_perm" "study.update_assignment_execution_time" a_s as can_update_execution_time %}
+                    {% call_method request.user "has_perm" "study.update_own_assignment_execution_time" a_s as can_update_execution_time %}
                     {% if not can_update_execution_time %}
                         <fieldset disabled="disabled">
                     {% endif %}

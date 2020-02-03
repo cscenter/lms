@@ -26,7 +26,7 @@ from learning.forms import AssignmentExecutionTimeForm
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
 from learning.permissions import ViewOwnAssignments, \
-    UpdateAssignmentExecutionTime
+    EditOwnAssignmentExecutionTime
 from learning.roles import Roles
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView, \
@@ -153,10 +153,10 @@ class StudentAssignmentDetailView(PermissionRequiredMixin,
         return context
 
 
-class AssignmentExecutionTimeUpdateView(PermissionRequiredMixin,
-                                        StudentAssignmentURLParamsMixin,
+class AssignmentExecutionTimeUpdateView(StudentAssignmentURLParamsMixin,
+                                        PermissionRequiredMixin,
                                         GenericModelView):
-    permission_required = UpdateAssignmentExecutionTime.name
+    permission_required = EditOwnAssignmentExecutionTime.name
     form_class = AssignmentExecutionTimeForm
 
     def get_permission_object(self):

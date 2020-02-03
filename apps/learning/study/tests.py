@@ -7,6 +7,7 @@ from core.urls import reverse
 from courses.tests.factories import *
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.permissions import course_access_role, CourseRole
+from learning.services import EnrollmentService
 from learning.settings import GradeTypes, StudentStatuses, Branches
 from learning.tests.factories import *
 from projects.constants import ProjectTypes
@@ -178,7 +179,7 @@ def test_course_list(client, settings):
 
 
 @pytest.mark.django_db
-def test_student_assignment_projects_block(client):
+def test_projects_on_assignment_list_page(client):
     url = reverse("study:assignment_list")
     branch_spb = BranchFactory(code=Branches.SPB)
     current_term = SemesterFactory.create_current()
@@ -227,3 +228,26 @@ def test_student_assignment_projects_block(client):
     periods = response.context_data["reporting_periods"]
     assert len(periods) == 1
     assert len(periods[ps]) == 2
+
+
+@pytest.mark.django_db
+def test_student_assignment_execution_time_form(client, assert_redirect):
+    """
+    Execution time form is unavailable until student get score on assignment
+    """
+    term = SemesterFactory.create_current()
+    assignment = AssignmentFactory(course__semester=term, maximum_score=10)
+    student = StudentFactory()
+    EnrollmentService.enroll(student, assignment.course)
+    sa = StudentAssignment.objects.get(assignment=assignment, student=student)
+    assert sa.execution_time is None
+    update_url = reverse('study:student_assignment_execution_time_update',
+                         args=[sa.pk])
+    client.login(student)
+    form_data = {'execution_time': '2:45'}
+    response = client.post(update_url, form_data)
+    assert response.status_code == 403
+    sa.score = 4
+    sa.save()
+    response = client.post(update_url, form_data)
+    assert_redirect(response, sa.get_student_url())

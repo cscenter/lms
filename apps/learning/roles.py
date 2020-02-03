@@ -16,7 +16,7 @@ from .permissions import CreateAssignmentComment, \
     LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook, \
     ViewStudentAssignment, ViewRelatedStudentAssignment, EditStudentAssignment, \
     EditOwnStudentAssignment, ViewEnrollments, ViewRelatedEnrollments, \
-    UpdateAssignmentExecutionTime
+    EditOwnAssignmentExecutionTime
 
 
 # TODO: Add description of each role
@@ -31,7 +31,7 @@ class Roles(DjangoChoices):
         ViewOwnAssignments,
         ViewOwnAssignment,
         CreateAssignmentCommentStudent,
-        UpdateAssignmentExecutionTime,
+        EditOwnAssignmentExecutionTime,
         ViewCourses,
         ViewSchedule,
         ViewFAQ,
@@ -52,7 +52,7 @@ class Roles(DjangoChoices):
         ViewOwnAssignments,
         ViewOwnAssignment,
         CreateAssignmentCommentStudent,
-        UpdateAssignmentExecutionTime,
+        EditOwnAssignmentExecutionTime,
         ViewCourses,
         ViewSchedule,
         ViewFAQ,
