@@ -41,6 +41,22 @@ class CreateOwnAssignment(Permission):
 
 
 @add_perm
+class EditAssignment(Permission):
+    name = "courses.change_assignment"
+
+
+@add_perm
+class EditOwnAssignment(Permission):
+    name = "teaching.change_own_assignment"
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        return any(t.teacher_id == user.pk for t in
+                   course.course_teachers.all())
+
+
+@add_perm
 class EditCourseClass(Permission):
     name = "learning.change_courseclass"
 

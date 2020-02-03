@@ -5,11 +5,13 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect, get_object_or_404
 from vanilla import CreateView, UpdateView, DeleteView
 
+from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
 from core.urls import reverse
 from core.views import ProtectedFormMixin
 from courses.forms import AssignmentForm
 from courses.models import Assignment, Course, AssignmentAttachment
+from courses.permissions import CreateAssignment, EditAssignment
 from courses.views.mixins import CourseURLParamsMixin
 from users.mixins import TeacherOnlyMixin
 
@@ -17,21 +19,17 @@ __all__ = ('AssignmentCreateView', 'AssignmentUpdateView',
            'AssignmentDeleteView', 'AssignmentAttachmentDeleteView')
 
 
-class AssignmentCreateUpdateMixin(TeacherOnlyMixin, CourseURLParamsMixin):
+class AssignmentCreateUpdateMixin(CourseURLParamsMixin,
+                                  PermissionRequiredMixin):
     model = Assignment
     form_class = AssignmentForm
     template_name = "courses/course_assignment_form.html"
 
-    def get_form(self, **kwargs):
-        course = self.course
-        if not self.is_form_allowed(self.request.user, course):
-            raise Redirect(to=redirect_to_login(self.request.get_full_path()))
-        kwargs["course"] = course
-        return AssignmentForm(**kwargs)
+    def get_permission_object(self):
+        return self.course
 
-    @staticmethod
-    def is_form_allowed(user, course: Course):
-        return user.is_curator or user in course.teachers.all()
+    def get_form(self, **kwargs):
+        return AssignmentForm(course=self.course, **kwargs)
 
     def get_success_url(self):
         return self.object.get_teacher_url()
@@ -51,6 +49,8 @@ class AssignmentCreateUpdateMixin(TeacherOnlyMixin, CourseURLParamsMixin):
 
 
 class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
+    permission_required = CreateAssignment.name
+
     def save_form(self, form):
         self.object = form.save()
         # Set up notifications recipients setting
@@ -61,6 +61,8 @@ class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
 
 
 class AssignmentUpdateView(AssignmentCreateUpdateMixin, UpdateView):
+    permission_required = EditAssignment.name
+
     def save_form(self, form):
         self.object = form.save()
 

@@ -1,9 +1,33 @@
 import pytest
 
-from courses.permissions import EditCourseClass
-from courses.tests.factories import CourseClassFactory, CourseTeacherFactory
+from courses.permissions import EditCourseClass, CreateAssignment, \
+    EditAssignment
+from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
+    CourseFactory
 from users.tests.factories import UserFactory, TeacherFactory, CuratorFactory, \
-    StudentFactory
+    StudentFactory, InvitedStudentFactory
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("permission_name", [CreateAssignment.name,
+                                             EditAssignment.name])
+def test_can_create_course_assignment(permission_name, client):
+    """
+    Curators and actual teachers have permissions to create/edit assignment
+    """
+    teacher = TeacherFactory()
+    curator = CuratorFactory()
+    user = UserFactory()
+    student = StudentFactory()
+    invited_student = InvitedStudentFactory()
+    teacher_other = TeacherFactory()
+    course = CourseFactory(teachers=[teacher])
+    assert teacher.has_perm(permission_name, course)
+    assert curator.has_perm(permission_name, course)
+    assert not user.has_perm(permission_name, course)
+    assert not student.has_perm(permission_name, course)
+    assert not invited_student.has_perm(permission_name, course)
+    assert not teacher_other.has_perm(permission_name, course)
 
 
 @pytest.mark.django_db
