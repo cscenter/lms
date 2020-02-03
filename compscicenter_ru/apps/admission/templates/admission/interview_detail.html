@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
 {% load static %}
+{% load tz %}
 {% load markdown from core_tags %}
 {% load floatdot from core_tags %}
 {% load render_bundle from webpack_loader %}
@@ -15,14 +16,14 @@
     {% render_bundle "admission" "js" %}
 {% endblock javascripts %}
 
-{% block content %}
+{% block content %}{% localtime off %}
 <div class="container">
     <div class="page-header">
         <h2 class="page-title">{{ applicant.get_full_name }}{% if request.user.is_curator %}
             <a href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
         {% endif %}</h2>
     </div>
-    <div class="date">Дата собеседования: {{ interview.date|default:"Не назначена" }}</div>
+    <div class="date">Дата собеседования: {{ interview.date_local|default:"Не назначена" }}</div>
     <div class="additional-info">Статус собеседования: {{ interview.get_status_display|default_if_none:"<не указан>" }}</div>
     <div class="nav-tabs-horizontal nav-tabs-inverse">
       <ul class="nav nav-tabs nav-tabs-solid" data-plugin="nav-tabs" role="tablist">
@@ -64,7 +65,7 @@
             {% include "admission/_results_tab.html" %}
         </div>
         <div class="tab-pane" id="assignments" role="tabpanel">
-            <div class="interview-info visible-print-block">{{ applicant.get_full_name }}<br>{{ interview.date }}</div>
+            <div class="interview-info visible-print-block">{{ applicant.get_full_name }}<br>{{ interview.date_local }}</div>
                 {% if interview.assignments.all %}
                     <div class="clear hidden-print">
                         <button class="btn btn-default _print-without-solution">Печать условий</button> <div class="btn btn-default _print-with-solution">Печать решений</div>
@@ -142,4 +143,4 @@
 </div>
 
     {% include "admission/_interview_assignment_modal.html" %}
-{% endblock content %}
+{% endlocaltime %}{% endblock content %}

@@ -184,7 +184,7 @@ class TestimonialsListView(TemplateView):
                 },
                 "props": {
                     "page_size": page_size,
-                    "entry_url": reverse("public-api:v2:testimonials"),
+                    "endpoint": reverse("public-api:v2:testimonials"),
                     "total": total,
                 }
             }
@@ -205,7 +205,7 @@ class TeachersView(TemplateView):
                 "branch": self.kwargs.get("city", None),
             },
             "props": {
-                "entryURL": reverse("public-api:v2:teachers"),
+                "endpoint": reverse("public-api:v2:teachers"),
                 "coursesURL": reverse("public-api:v2:teachers_meta_courses"),
                 "branchOptions": _get_branch_choices(),
                 "termIndex": term_index,
@@ -294,7 +294,7 @@ class AlumniView(TemplateView):
                 "branch": self.kwargs.get("city", None),
             },
             "props": {
-                "entryURL": reverse("public-api:v2:alumni"),
+                "endpoint": reverse("public-api:v2:alumni"),
                 "branchOptions": _get_branch_choices(),
                 "areaOptions": areas,
                 "yearOptions": years
@@ -404,7 +404,7 @@ class CourseVideoListView(TemplateView):
             filtered_types = [item["value"] for item in video_types]
         app_data = {
             "props": {
-                "entryURL": [
+                "endpoints": [
                     reverse("public-api:v2:course_videos"),
                     reverse("public-api:v2:recorded_events_videos"),
                 ],
@@ -595,7 +595,7 @@ class CourseOfferingsView(TemplateView):
             raise Http404
         app_data = {
             'props': {
-                'entryURL': [reverse('public-api:v2:course_list')],
+                'endpoints': [reverse('public-api:v2:course_list')],
                 'currentYear': term_pair.academic_year,
                 'branchOptions': branches,
                 'semesterOptions': terms

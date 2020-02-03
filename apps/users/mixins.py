@@ -9,13 +9,6 @@ class TeacherOnlyMixin(UserPassesTestMixin):
         return user.is_teacher or user.is_curator
 
 
-class InterviewerOnlyMixin(UserPassesTestMixin):
-    raise_exception = False
-
-    def test_func(self, user):
-        return user.is_interviewer or user.is_curator
-
-
 class ProjectReviewerGroupOnlyMixin(UserPassesTestMixin):
     """Curator must have this group"""
     raise_exception = False

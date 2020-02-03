@@ -1,10 +1,11 @@
 from django.conf import settings
+from django.utils import formats
 from rest_framework import serializers
-from rest_framework.fields import empty
+from rest_framework.fields import empty, TimeField
 from rest_framework.validators import UniqueTogetherValidator
 
 from admission.constants import WHERE_DID_YOU_LEARN
-from admission.models import Applicant, Campaign, University
+from admission.models import Applicant, Campaign, University, InterviewSlot
 from admission.tasks import register_in_yandex_contest
 
 
@@ -128,3 +129,15 @@ class ApplicantSerializer(serializers.ModelSerializer):
 
     def validate_github_login(self, value):
         return value.rsplit("/", maxsplit=1)[-1]
+
+
+class InterviewSlotSerializer(serializers.ModelSerializer):
+    start_at = TimeField(format="%H:%M", input_formats=None)
+    stream = serializers.SerializerMethodField()
+
+    class Meta:
+        model = InterviewSlot
+        fields = ("id", "start_at", "interview_id", "stream")
+
+    def get_stream(self, obj):
+        return formats.date_format(obj.stream.date, "SHORT_DATE_FORMAT")

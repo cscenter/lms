@@ -7,6 +7,7 @@ from functools import wraps
 from typing import Optional
 from urllib import parse
 
+from braces.views import UserPassesTestMixin
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.db import transaction, IntegrityError
@@ -29,9 +30,6 @@ from django.views.generic.edit import BaseCreateView, \
     ModelFormMixin
 from django_filters.views import BaseFilterView, FilterMixin
 from extra_views.formsets import BaseModelFormSetView
-from rest_framework.exceptions import ParseError
-from rest_framework.response import Response
-from rest_framework.views import APIView
 from social_core.actions import do_auth
 from social_core.exceptions import MissingBackend, SocialAuthBaseException
 from social_core.storage import UserMixin
@@ -48,11 +46,9 @@ from admission.forms import InterviewCommentForm, \
 from admission.models import Interview, Comment, Contest, Test, Exam, \
     Applicant, Campaign, InterviewAssignment, InterviewSlot, \
     InterviewInvitation, InterviewStream, University
-from admission.serializers import InterviewSlotSerializer
 from admission.services import create_invitation, create_student_from_applicant, \
     EmailQueueService, UsernameError
 from admission.utils import calculate_time
-from api.permissions import CuratorAccessPermission
 from auth.backends import YandexRuOAuth2Backend
 from core.settings.base import DEFAULT_BRANCH_CODE
 from core.timezone import now_local
@@ -61,7 +57,7 @@ from core.utils import render_markdown, bucketize
 from core.views import RequestBranchMixin
 from learning.settings import AcademicDegreeYears
 from tasks.models import Task
-from users.mixins import InterviewerOnlyMixin, CuratorOnlyMixin
+from users.mixins import CuratorOnlyMixin
 from users.models import User
 from .tasks import import_testing_results
 
@@ -223,10 +219,17 @@ class ApplicantContextMixin:
         return context
 
 
+class InterviewerOnlyMixin(UserPassesTestMixin):
+    raise_exception = False
+
+    def test_func(self, user):
+        return user.is_interviewer or user.is_curator
+
+
 def applicant_testing_new_task(request):
     """
     Creates new task for importing testing results from yandex contests.
-    Make sure `current` campaigns are already exists in DB before add new task.
+    Make sure `current` campaigns are already exist in DB before add new task.
     """
     if request.method == "POST" and request.user.is_curator:
         task = Task.build(
@@ -249,25 +252,6 @@ def applicant_testing_new_task(request):
             import_testing_results.delay(task_id=task.pk)
         return HttpResponse(status=201)
     return HttpResponseForbidden()
-
-
-class ApplicantTestingResultsTask(APIView):
-    """
-    Returns interview slots for requested venue and date.
-    """
-    http_method_names = ['post']
-    permission_classes = [CuratorAccessPermission]
-
-    def post(self, request, format=None):
-        slots = []
-        if "stream" in request.GET:
-            try:
-                stream = int(self.request.GET["stream"])
-            except ValueError:
-                raise ParseError()
-            slots = InterviewSlot.objects.filter(stream_id=stream)
-        serializer = InterviewSlotSerializer(slots, many=True)
-        return Response(serializer.data)
 
 
 class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
@@ -575,8 +559,6 @@ class InterviewDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                              queryset=(Comment.objects
                                        .select_related("interviewer")))))
         context = self.get_applicant_context(self.request, interview.applicant_id)
-        # Activate timezone for the whole detail view
-        timezone.activate(context['applicant'].get_timezone())
         context.update({
             "interview": interview,
             "assignments_form": InterviewAssignmentsForm(instance=interview),
@@ -928,25 +910,3 @@ class InterviewAppointmentView(generic.TemplateView):
                     transaction.savepoint_commit(sid)
             return HttpResponseRedirect(invitation.get_absolute_url())
         return HttpResponseBadRequest()
-
-
-class InterviewSlots(APIView):
-    """
-    Returns all slots for requested interview streams
-    """
-    http_method_names = ['get']
-    permission_classes = [CuratorAccessPermission]
-
-    def get(self, request, format=None):
-        slots = []
-        if "streams[]" in request.GET:
-            try:
-                streams = [int(v) for v in self.request.GET.getlist("streams[]")]
-            except ValueError:
-                raise ParseError()
-            slots = (InterviewSlot.objects
-                     .filter(stream_id__in=streams)
-                     .select_related("stream")
-                     .order_by("stream__date", "start_at"))
-        serializer = InterviewSlotSerializer(slots, many=True)
-        return Response(serializer.data)
