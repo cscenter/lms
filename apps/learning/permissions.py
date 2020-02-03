@@ -326,8 +326,11 @@ class CreateAssignmentCommentTeacher(Permission):
 
 
 @add_perm
-class UpdateAssignmentExecutionTime(Permission):
-    name = "study.update_assignment_execution_time"
+class EditOwnAssignmentExecutionTime(Permission):
+    """
+    Access is granted to the student after course teacher assessed student work
+    """
+    name = "study.update_own_assignment_execution_time"
 
     @staticmethod
     @rules.predicate

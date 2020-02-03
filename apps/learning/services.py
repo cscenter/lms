@@ -26,8 +26,7 @@ class CourseCapacityFull(EnrollmentError):
 
 class EnrollmentService:
     @staticmethod
-    def enroll(user: User, course: Course, **attrs):
-        reason_entry = attrs.pop("reason_entry", None)
+    def enroll(user: User, course: Course, reason_entry='', **attrs):
         if reason_entry:
             timezone = course.get_timezone()
             today = now_local(timezone).strftime(DATE_FORMAT_RU)
