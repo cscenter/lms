@@ -24,6 +24,7 @@ class RBACPermissions:
     def authenticate(self, *args, **kwargs):
         return None
 
+    # FIXME: Hmm, looks like *args, **kwargs could be replaced with optional object. Django doesn't pass anything else, seee `_user_has_perm`
     def has_perm(self, user, perm, *args, **kwargs):
         if not user.is_active or user.is_anonymous:
             return False

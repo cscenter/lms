@@ -92,6 +92,27 @@ class StudentFactory(UserFactory):
         self.add_group(role=Roles.STUDENT, site_id=site_id)
 
 
+class InvitedStudentFactory(UserFactory):
+    enrollment_year = 2015
+
+    @factory.post_generation
+    def required_groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        site_id = kwargs.pop("site_id", None)
+        self.add_group(role=Roles.INVITED, site_id=site_id)
+
+
+class VolunteerFactory(UserFactory):
+
+    @factory.post_generation
+    def required_groups(self, create, extracted, **kwargs):
+        if not create:
+            return
+        site_id = kwargs.pop("site_id", None)
+        self.add_group(role=Roles.VOLUNTEER, site_id=site_id)
+
+
 class TeacherFactory(UserFactory):
     @factory.post_generation
     def required_groups(self, create, extracted, **kwargs):
@@ -101,16 +122,6 @@ class TeacherFactory(UserFactory):
         self.add_group(role=Roles.TEACHER, site_id=site_id)
 
 
-class VolunteerFactory(UserFactory):
-    branch = factory.SubFactory('core.tests.factories.BranchFactory',
-                                code=settings.DEFAULT_BRANCH_CODE)
-
-    @factory.post_generation
-    def _add_required_groups(self, create, extracted, **kwargs):
-        if not create:
-            return
-        required_groups = [Roles.VOLUNTEER]
-        add_user_groups(self, required_groups)
 
 
 class OnlineCourseRecordFactory(factory.DjangoModelFactory):

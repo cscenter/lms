@@ -6,7 +6,8 @@ from auth.registry import role_registry
 
 from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
     ViewCourseAssignments, CreateAssignment, CreateOwnAssignment, \
-    EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, DeleteCourseClass
+    EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, \
+    DeleteCourseClass, EditAssignment, EditOwnAssignment
 from .permissions import CreateAssignmentComment, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
     ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
@@ -40,24 +41,7 @@ class Roles(DjangoChoices):
         EnrollInCourseByInvitation,
         LeaveCourse,
     ))
-    TEACHER = C(2, _('Teacher'), permissions=(
-        ViewTeachingMenu,
-        ViewCourseContacts,
-        ViewCourseNews,
-        CreateOwnAssignment,
-        ViewCourseAssignments,
-        ViewRelatedStudentAssignment,
-        EditOwnStudentAssignment,
-        EditOwnCourseClass,
-        DeleteOwnCourseClass,
-        ViewRelatedEnrollments,
-        CreateAssignmentCommentTeacher,
-        ViewOwnGradebook,
-    ))
-    GRADUATE = C(3, _('Graduate'), permissions=(
-        ViewOwnEnrollments,
-        ViewOwnAssignment,
-    ))
+    # FIXME: copy permissions from student role, there are identical
     VOLUNTEER = C(4, _('Volunteer'), permissions=(
         ViewStudyMenu,
         ViewCourseContacts,
@@ -78,23 +62,6 @@ class Roles(DjangoChoices):
         EnrollInCourseByInvitation,
         LeaveCourse,
     ))
-    CURATOR = C(5, _('Curator'), permissions=(
-        ChangeMetaCourse,
-        CreateAssignment,
-        ViewCourseContacts,
-        ViewCourseAssignments,
-        ViewStudentAssignment,
-        EditStudentAssignment,
-        EditCourseClass,
-        DeleteCourseClass,
-        ViewCourseNews,
-        ViewCourseReviews,
-        ViewLibrary,
-        ViewEnrollments,
-        CreateAssignmentCommentTeacher,
-        ViewGradebook,
-        CreateAssignmentComment,
-    ))
     INVITED = C(11, _('Invited User'), permissions=(
         ViewStudyMenu,
         ViewCourseContacts,
@@ -113,6 +80,43 @@ class Roles(DjangoChoices):
         EnrollInCourseByInvitation,
         LeaveCourse,
     ))
+    GRADUATE = C(3, _('Graduate'), permissions=(
+        ViewOwnEnrollments,
+        ViewOwnAssignment,
+    ))
+    TEACHER = C(2, _('Teacher'), permissions=(
+        ViewTeachingMenu,
+        ViewCourseContacts,
+        ViewCourseNews,
+        CreateOwnAssignment,
+        EditOwnAssignment,
+        ViewCourseAssignments,
+        ViewRelatedStudentAssignment,
+        EditOwnStudentAssignment,
+        EditOwnCourseClass,
+        DeleteOwnCourseClass,
+        ViewRelatedEnrollments,
+        CreateAssignmentCommentTeacher,
+        ViewOwnGradebook,
+    ))
+    CURATOR = C(5, _('Curator'), permissions=(
+        ChangeMetaCourse,
+        CreateAssignment,
+        EditAssignment,
+        ViewCourseContacts,
+        ViewCourseAssignments,
+        ViewStudentAssignment,
+        EditStudentAssignment,
+        EditCourseClass,
+        DeleteCourseClass,
+        ViewCourseNews,
+        ViewCourseReviews,
+        ViewLibrary,
+        ViewEnrollments,
+        CreateAssignmentCommentTeacher,
+        ViewGradebook,
+        CreateAssignmentComment,
+    ))
 
 
 for code, name in Roles.choices:
@@ -127,6 +131,7 @@ teacher_role.add_relation(EditStudentAssignment, EditOwnStudentAssignment)
 teacher_role.add_relation(EditCourseClass, EditOwnCourseClass)
 teacher_role.add_relation(DeleteCourseClass, DeleteOwnCourseClass)
 teacher_role.add_relation(CreateAssignment, CreateOwnAssignment)
+teacher_role.add_relation(EditAssignment, EditOwnAssignment)
 teacher_role.add_relation(ViewEnrollments, ViewRelatedEnrollments)
 
 student_role = role_registry[Roles.STUDENT]
