@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 13:18+0000\n"
-"PO-Revision-Date: 2019-12-05 13:20+0000\n"
+"POT-Creation-Date: 2020-02-03 16:51+0000\n"
+"PO-Revision-Date: 2020-02-03 16:52+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -444,8 +444,9 @@ msgid "Login"
 msgstr "Войти"
 
 #: compscicenter_ru/templates/base.html:59
-msgid "Computer Science Center, 2011–19 гг."
-msgstr ""
+#| msgid "Review of Computer Science Center"
+msgid "Computer Science Center, 2011–20 гг."
+msgstr "Computer Science Center, 2011–20 гг."
 
 #: compscicenter_ru/templates/base.html:83
 msgid "close all"
@@ -623,29 +624,41 @@ msgstr "Аккаунты"
 msgid "Contact information"
 msgstr "Контактная информация"
 
-#: compscicenter_ru/views.py:390
+#: compscicenter_ru/views.py:389
 msgid "Course"
 msgstr "Курс"
 
-#: compscicenter_ru/views.py:391
+#: compscicenter_ru/views.py:390
 msgid "Lecture"
 msgstr "Лекция"
 
-#: compscicenter_ru/views.py:586
+#: compscicenter_ru/views.py:580
 msgid "Autumn|adjective"
 msgstr "Осенний"
 
-#: compscicenter_ru/views.py:587
+#: compscicenter_ru/views.py:581
 msgid "Spring|adjective"
 msgstr "Весенний"
 
-#: compscicenter_ru/views.py:635
+#: compscicenter_ru/views.py:631
 msgid "About the Course"
 msgstr "О курсе"
 
-#: compscicenter_ru/views.py:639
+#: compscicenter_ru/views.py:635
 msgid "Syllabus"
 msgstr "Программа"
+
+#: compscicenter_ru/views.py:645
+msgid "Reads lectures"
+msgstr "Читает лекции"
+
+#: compscicenter_ru/views.py:646
+msgid "Checks assignments"
+msgstr "Проверяет задания"
+
+#: compscicenter_ru/views.py:647
+msgid "Leads seminars"
+msgstr "Ведёт семинары"
 
 #~ msgid "CS club course"
 #~ msgstr "Курс CS клуба"
@@ -687,9 +700,6 @@ msgstr "Программа"
 
 #~ msgid "Open Lecture"
 #~ msgstr "Открытая лекция"
-
-#~ msgid "Open Lectures"
-#~ msgstr "Открытые лекции"
 
 #~ msgctxt "menu"
 #~ msgid "Online"

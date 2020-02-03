@@ -4,9 +4,7 @@ from admission.views import InterviewListView, InterviewDetailView, \
     ApplicantListView, ApplicantDetailView, \
     ApplicantStatusUpdateView, InterviewResultsView, ApplicantCreateUserView, \
     InterviewResultsDispatchView, InterviewAssignmentDetailView, \
-    InterviewCommentView, InterviewAppointmentView, InterviewSlots, \
-    applicant_testing_new_task
-
+    InterviewCommentView, InterviewAppointmentView, applicant_testing_new_task
 
 app_name = 'admission'
 
@@ -18,7 +16,6 @@ urlpatterns = [
         url(r'^applicants/(?P<pk>\d+)/create_user$', ApplicantCreateUserView.as_view(), name='applicant_create_user'),
         url(r'^applicants/status/(?P<pk>\d+)/$', ApplicantStatusUpdateView.as_view(), name='applicant_status_update'),
         url(r'^interviews/$', InterviewListView.as_view(), name='interviews'),
-        url(r'^interviews/slots/$', InterviewSlots.as_view(), name='interview_slots'),
         url(r'^interviews/assignments/(?P<pk>\d+)/$', InterviewAssignmentDetailView.as_view(), name='interview_assignment_detail'),
         url(r'^interviews/(?P<pk>\d+)/$', InterviewDetailView.as_view(), name='interview_detail'),
         url(r'^interviews/(?P<pk>\d+)/comment$', InterviewCommentView.as_view(), name='interview_comment'),

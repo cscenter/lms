@@ -1,7 +1,8 @@
 from django.conf.urls import include, url
 
-app_name = 'api'
-# Run `./manage.py collectstatic_js_reverse` to update js file with urls
+app_name = 'stats-api'
+
+# TODO: separate and move to appropriate apps
 urlpatterns = [
     url(r'^v1/stats/', include([
         url(r'^learning/', include('stats.learning.api_urls')),

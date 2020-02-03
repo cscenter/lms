@@ -25,6 +25,7 @@ urlpatterns = [
     # path('api/', include('api.urls')),
     path('api/', include('learning.api.urls')),
     path('api/', include('stats.api_urls')),
+    path('api/', include('admission.api.urls')),
 
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),

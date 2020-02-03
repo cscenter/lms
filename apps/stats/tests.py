@@ -19,7 +19,7 @@ def test_application_form_stats_empty_results(client, curator):
                                application_starts_at=start,
                                application_ends_at=start + timedelta(hours=1),
                                year=2018)
-    url = reverse("api:stats_admission_application_form_submission",
+    url = reverse("stats-api:stats_admission_application_form_submission",
                   kwargs={"branch_id": campaign.branch.id},
                   subdomain=settings.LMS_SUBDOMAIN)
     client.login(curator)
@@ -42,7 +42,7 @@ def test_application_form_stats(client, curator):
                                application_starts_at=start,
                                application_ends_at=start + timedelta(days=15),
                                year=2018)
-    url = reverse("api:stats_admission_application_form_submission",
+    url = reverse("stats-api:stats_admission_application_form_submission",
                   kwargs={"branch_id": campaign.branch_id},
                   subdomain=settings.LMS_SUBDOMAIN)
     ApplicantFactory(campaign=campaign, created=start - timedelta(hours=1))
