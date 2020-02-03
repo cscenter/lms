@@ -910,7 +910,7 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         default=5,
         validators=[MaxValueValidator(1000)])
     weight = models.DecimalField(
-        _("Problem Weight"),
+        _("Assignment Weight"),
         default=1,
         max_digits=3, decimal_places=2,
         validators=[MinValueValidator(0), MaxValueValidator(1)])

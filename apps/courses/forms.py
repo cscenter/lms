@@ -287,6 +287,13 @@ class AssignmentForm(TimezoneAwareModelForm):
     maximum_score = forms.IntegerField(
         label=_("Maximum score"),
         initial=5)
+    weight = forms.DecimalField(
+        label=_("Assignment Weight"),
+        initial=1,
+        min_value=0, max_value=1, max_digits=3, decimal_places=2,
+        help_text=_("Assignment contribution to the course total score. "
+                    "It takes into account in the gradebook.")
+    )
     ttc = AssignmentDurationField(
         label=_("Time to Completion"),
         required=False,
