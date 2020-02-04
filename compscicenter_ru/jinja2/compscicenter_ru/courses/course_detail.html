@@ -59,7 +59,7 @@
                                 <div class="tab-pane {% if tab.active %} active{% endif %}" id="{{ tab.target }}" role="tabpanel" aria-labelledby="tab__{{ tab.target }}">
                                     {% if classes %}
                                         <h2>{% trans %}Lectures List{% endtrans %}</h2>
-                                        <div class="ui list _divided">
+                                        <div class="ui list _divided math-support">
                                             {% for course_class in classes %}
                                                 <div class="list__item">
                                                     <a class="class-item" href="{{ view.public_url(course_class) }}">
