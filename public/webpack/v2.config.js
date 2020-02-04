@@ -68,7 +68,12 @@ const common = {
                 use: {
                     loader: 'bootstrap.native-loader',
                     options: {
-                        only: ['collapse', 'dropdown']
+                        bs_version: 4,
+                        only: [
+                            'collapse',
+                            'dropdown',
+                            // 'tab'
+                        ]
                     }
                 }
             },
