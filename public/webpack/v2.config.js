@@ -216,11 +216,12 @@ const common = {
         splitChunks: {
             chunks: "async",
             minSize: 30000,
-            minChunks: 1,
-            maxAsyncRequests: 5,
-            maxInitialRequests: 3,
+            minChunks: 2,
+            maxAsyncRequests: 6,
+            maxInitialRequests: 4,
             automaticNameDelimiter: '~',
-            name: true,
+            automaticNameMaxLength: DEBUG ? 109 : 30,
+            // name: true,
             cacheGroups: {
                 common: {
                     chunks: "all",
