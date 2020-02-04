@@ -69,7 +69,6 @@ class CourseVideosPage extends React.Component {
 
     fetch = (payload = null) => {
         console.debug("CourseVideosPage: fetch", this.props, payload);
-        // FIXME: remove jquery
         this.requests = this.props.endpoints.map(endpoint => $.ajax({
             type: "GET",
             url: endpoint,

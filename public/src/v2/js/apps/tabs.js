@@ -1,14 +1,6 @@
-// FIXME: can't replace tab module with bootstrap.native and remove jquery from here right now since it doesn't respect `data-target` over `href` value.
-import $ from 'jquery';
-import 'bootstrap/js/src/tab';
-import { toEnhancedHTMLElement } from "@drivy/dom-query"
+import {toEnhancedHTMLElement} from "@drivy/dom-query";
+import Tab from 'bootstrap5/tab';
 
-
-function toggleTab(event) {
-    // Replace js animation with css.
-    event.preventDefault();
-    $(this).tab('show');
-}
 
 export function launch() {
     document.getElementsByClassName('nav-tabs').forEach(function(item) {
@@ -23,6 +15,9 @@ export function launch() {
             return;
         }
         if (tabList.classList.contains('browser-history')) {
+            for (const tab of tabList.queryAll('[data-toggle="tab"]')) {
+                new Tab(tab);
+            }
             // Toggle tab if the url has changed
            window.onpopstate = function (event) {
                let tabTarget;
@@ -34,13 +29,11 @@ export function launch() {
                if (tabTarget === undefined) {
                    tabTarget = defaultTab.getAttribute('data-target');
                }
-               $(item)
-                   .find('.nav-link[data-target="' + tabTarget + '"]')
-                   .tab('show');
+               let tabLink = tabList.query('[data-target="' + tabTarget + '"]');
+               Tab.getInstance(tabLink).show();
            };
 
             tabList.onDelegate('[data-toggle="tab"]', 'click', function (event) {
-                toggleTab(event);
                 if (!!(window.history && history.pushState)) {
                     history.pushState(
                         {tabTarget: this.getAttribute("data-target")},
@@ -49,8 +42,6 @@ export function launch() {
                     );
                 }
             });
-       } else {
-            tabList.onDelegate('[data-toggle="tab"]', 'click', toggleTab);
        }
     });
 }

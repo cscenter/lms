@@ -72,7 +72,6 @@ const common = {
                         only: [
                             'collapse',
                             'dropdown',
-                            // 'tab'
                         ]
                     }
                 }

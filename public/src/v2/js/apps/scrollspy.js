@@ -1,8 +1,7 @@
-import $ from 'jquery';
-import 'bootstrap/js/src/scrollspy';
+import ScrollSpy from 'bootstrap5/scrollspy';
 
 export function launch() {
-    $('body').scrollspy({
+    new ScrollSpy(document.body, {
         offset: 220,
         target: '#history-navigation'
     });
