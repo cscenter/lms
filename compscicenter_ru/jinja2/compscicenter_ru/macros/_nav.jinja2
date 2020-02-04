@@ -3,7 +3,8 @@
     {% for tab in tab_list -%}
         <li class="nav-item">
             <a class="nav-link{% if tab.active %} active{% endif %}"
-               data-toggle="tab" role="tab"
+               role="tab"
+               data-toggle="tab"
                id="tab__{{ tab.target }}"
                data-target="#{{ tab.target }}"
                href="{{ tab.url }}"
