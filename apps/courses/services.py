@@ -4,10 +4,10 @@ from courses.constants import TeacherRoles
 from courses.models import CourseReview
 
 
-def get_course_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
+def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
     """
     Returns teachers grouped by the most priority role.
-    Groups are also in priority order.
+    Groups are in priority order.
 
     Set `multiple_roles=True` if you need to take into account
     all teacher roles.

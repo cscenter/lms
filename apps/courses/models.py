@@ -8,7 +8,7 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Case, When, IntegerField, Value
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -572,6 +572,10 @@ class CourseTeacher(models.Model):
         return "{0} [{1}]".format(smart_text(self.teacher),
                                   smart_text(self.course_id))
 
+    def get_absolute_url(self, subdomain=settings.LMS_SUBDOMAIN):
+        return reverse('teacher_detail', args=[self.teacher_id],
+                       subdomain=subdomain)
+
     @property
     def is_lecturer(self):
         return bool(self.roles.lecturer)
@@ -584,6 +588,19 @@ class CourseTeacher(models.Model):
             queryset=(cls.objects
                       .filter(roles=lecturer)
                       .select_related('teacher')))
+
+    @staticmethod
+    def get_most_priority_role_expr():
+        """
+        Expression for annotating the most priority teacher role.
+
+        It's helpful for showing lecturers first, then seminarians, etc.
+        """
+        return Case(
+            When(roles=CourseTeacher.roles.lecturer, then=Value(8)),
+            When(roles=CourseTeacher.roles.seminar, then=Value(4)),
+            default=Value(0),
+            output_field=IntegerField())
 
     @staticmethod
     def grouped(course_teachers):

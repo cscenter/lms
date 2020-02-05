@@ -13,7 +13,7 @@ from core.views import ProtectedFormMixin
 from courses.constants import SemesterTypes, TeacherRoles
 from courses.forms import CourseEditDescrForm
 from courses.models import Course, CourseTeacher
-from courses.services import get_course_teachers
+from courses.services import group_teachers
 from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.utils import get_term_index
 from courses.views.mixins import CourseURLParamsMixin
@@ -50,9 +50,9 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
         except TabNotFound:
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         # Teachers
-        by_role = get_course_teachers(course.course_teachers
-                                      .order_by('teacher__last_name',
-                                                'teacher__first_name'))
+        by_role = group_teachers(course.course_teachers
+                                 .order_by('teacher__last_name',
+                                           'teacher__first_name'))
         teachers = {'main': [], 'others': []}
         for role, ts in by_role.items():
             if role in (TeacherRoles.LECTURER, TeacherRoles.SEMINAR):
