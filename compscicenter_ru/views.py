@@ -27,7 +27,7 @@ from core.utils import bucketize
 from courses.constants import SemesterTypes, TeacherRoles, ClassTypes
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
     CourseClass
-from courses.services import get_course_teachers
+from courses.services import group_teachers
 from courses.utils import get_current_term_pair, \
     get_term_index
 from courses.views.mixins import CourseURLParamsMixin
@@ -638,8 +638,8 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
         show_tab = self.kwargs.get('tab', 'about')
         tabs.set_active(show_tab)
         context['tabs'] = tabs
-        teachers = get_course_teachers(self.course.course_teachers
-                                       .order_by('teacher__last_name',
+        teachers = group_teachers(self.course.course_teachers
+                                  .order_by('teacher__last_name',
                                                  'teacher__first_name'))
         role_captions = {
             TeacherRoles.LECTURER: _("Reads lectures"),

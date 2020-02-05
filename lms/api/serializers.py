@@ -4,11 +4,12 @@ from itertools import groupby
 from rest_framework import serializers
 
 
+# FIXME: replace with learning.api.serializers.CourseSerializer
 class CourseSerializer(serializers.Serializer):
     def to_representation(self, obj):
-        teachers = [{"url": u.teacher_profile_url(),
-                     "name": u.get_abbreviated_name()} for u in
-                    obj.teachers.all()]
+        teachers = [{"url": u.teacher.get_absolute_url(),
+                     "name": u.teacher.get_abbreviated_name()} for u in
+                    obj.course_teachers.all()]
         return {
             "name": obj.meta_course.name,
             "url": obj.get_absolute_url(),

@@ -43,7 +43,7 @@ class TeacherList(ListAPIView):
 
     def get_queryset(self):
         reviewer = CourseTeacher.roles.reviewer
-        # `.exclude` generates wrong sql as well as `.filter` combined with
+        # `.exclude` generates wrong sql (as well as `.filter`) combined with
         # `~` operation. BitField overrides default `exact` lookup, so
         # let's filter out non-reviewers with `__ne` custom lookup
         any_role_except_reviewer = (Q(courseteacher__roles__ne=reviewer.mask) &
@@ -173,22 +173,26 @@ class CourseList(ListAPIView):
     serializer_class = CoursePublicSerializer
 
     def get_queryset(self):
+        most_priority_role = CourseTeacher.get_most_priority_role_expr()
         prefetch_teachers = Prefetch(
             'course_teachers',
             queryset=(CourseTeacher.objects
                       .select_related('teacher')
+                      .annotate(most_priority_role=most_priority_role)
                       .only('id', 'course_id', 'teacher_id',
                             'teacher__first_name',
                             'teacher__last_name',
-                            'teacher__patronymic')))
+                            'teacher__patronymic')
+                      .order_by('-most_priority_role',
+                                'teacher__last_name')))
         return (Course.objects
+                .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'branch')
                 .only("pk", "branch_id", "is_open", "grading_type",
                       "videos_count", "materials_slides", "materials_files",
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
                       "branch__code", "branch__site_id")
-                .exclude(semester__type=SemesterTypes.SUMMER)
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',
                           'meta_course__name')

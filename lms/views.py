@@ -10,7 +10,7 @@ from vanilla import TemplateView
 from core.exceptions import Redirect
 from core.urls import reverse
 from courses.constants import SemesterTypes
-from courses.models import Course
+from courses.models import Course, CourseTeacher
 from courses.utils import get_current_term_pair, TermPair
 from lms.api.serializers import CoursesSerializer
 from lms.filters import CoursesFilter
@@ -47,11 +47,20 @@ class CourseOfferingsView(FilterMixin, TemplateView):
     template_name = "lms/course_offerings.html"
 
     def get_queryset(self):
+        most_priority_role = CourseTeacher.get_most_priority_role_expr()
         prefetch_teachers = Prefetch(
-            'teachers',
-            queryset=User.objects.only("id", "first_name", "last_name",
-                                       "patronymic"))
+            'course_teachers',
+            queryset=(CourseTeacher.objects
+                      .select_related('teacher')
+                      .annotate(most_priority_role=most_priority_role)
+                      .only('id', 'course_id', 'teacher_id',
+                            'teacher__first_name',
+                            'teacher__last_name',
+                            'teacher__patronymic')
+                      .order_by('-most_priority_role',
+                                'teacher__last_name')))
         return (Course.objects
+                .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'branch')
                 .only("pk", "branch_id", "is_open", "grading_type",
                       "videos_count", "materials_slides", "materials_files",
@@ -60,8 +69,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                       "branch__code")
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',
-                          'meta_course__name')
-                .exclude(semester__type=SemesterTypes.SUMMER))
+                          'meta_course__name'))
 
     def get_context_data(self, **kwargs):
         filterset_class = self.get_filterset_class()
