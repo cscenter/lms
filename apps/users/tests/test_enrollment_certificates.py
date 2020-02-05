@@ -54,7 +54,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
         student = UserFactory.create(groups=[Roles.STUDENT],
                                      enrollment_year=2011)
         self.doLogin(student)
-        url = reverse('user_detail', args=[student.pk])
+        url = student.get_absolute_url()
         response = self.client.get(url)
         soup = BeautifulSoup(response.content, "html.parser")
         button = soup.find('a', text=_("Create reference"))
@@ -73,7 +73,7 @@ class EnrollmentCertificateTests(MyUtilitiesMixin, CSCTestCase):
         EnrollmentFactory.create()
         EnrollmentCertificateFactory.create(student=student)
         curator = CuratorFactory()
-        url = reverse('user_detail', args=[student.pk])
+        url = student.get_absolute_url()
         self.doLogin(curator)
         response = self.client.get(url)
         self.assertEqual(

@@ -41,7 +41,7 @@ def test_user_detail(client):
     sp2 = p2.projectstudent_set.all()[0]
     sp2.final_grade = GradeTypes.GOOD
     sp2.save()
-    resp = client.get(reverse('user_detail', args=[student.pk]))
+    resp = client.get(student.get_absolute_url())
     assert smart_bytes(p1.name) in resp.content
     assert smart_bytes(p2.name) in resp.content
     assert smart_bytes(sp2.get_final_grade_display().lower()) in resp.content
