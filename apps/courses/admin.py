@@ -1,4 +1,5 @@
 from bitfield import BitField
+from bitfield.forms import BitFieldCheckboxSelectMultiple
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
@@ -8,7 +9,6 @@ from modeltranslation.admin import TranslationAdmin
 
 from core.timezone.admin import TimezoneAwareModelForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
-from core.compat import Django21BitFieldCheckboxSelectMultiple
 from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseTeacher, Course, CourseClassAttachment, \
@@ -44,7 +44,7 @@ class CourseTeacherInline(admin.TabularInline):
     extra = 0
     min_num = 1
     formfield_overrides = {
-            BitField: {'widget': Django21BitFieldCheckboxSelectMultiple},
+            BitField: {'widget': BitFieldCheckboxSelectMultiple},
     }
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
