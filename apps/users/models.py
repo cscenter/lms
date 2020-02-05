@@ -477,22 +477,27 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
     def __str__(self):
         return smart_text(self.get_full_name(True))
 
-    def get_absolute_url(self, subdomain=None):
-        return reverse('user_detail', args=[self.pk], subdomain=subdomain)
+    def get_absolute_url(self):
+        return reverse('user_detail', args=[self.pk],
+                       subdomain=settings.LMS_SUBDOMAIN)
 
     def get_student_profile_url(self, subdomain=None):
         return reverse('student_profile', args=[self.pk], subdomain=subdomain)
 
     def get_update_profile_url(self):
-        return reverse('user_update', args=[self.pk])
+        return reverse('user_update', args=[self.pk],
+                       subdomain=settings.LMS_SUBDOMAIN)
 
     def get_classes_icalendar_url(self):
         # Returns relative path
-        return reverse('user_ical_classes', args=[self.pk])
+        return reverse('user_ical_classes', args=[self.pk],
+                       subdomain=settings.LMS_SUBDOMAIN)
 
     def get_assignments_icalendar_url(self):
-        return reverse('user_ical_assignments', args=[self.pk])
+        return reverse('user_ical_assignments', args=[self.pk],
+                       subdomain=settings.LMS_SUBDOMAIN)
 
+    # FIXME: remove
     def teacher_profile_url(self, subdomain=settings.LMS_SUBDOMAIN):
         return reverse('teacher_detail', args=[self.pk],
                        subdomain=subdomain)

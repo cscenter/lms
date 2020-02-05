@@ -25,8 +25,7 @@ class IndexView(View):
         if not user.is_authenticated:
             redirect_to = reverse('auth:login')
         else:
-            redirect_to = user.get_absolute_url(
-                subdomain=settings.LMS_SUBDOMAIN)
+            redirect_to = user.get_absolute_url()
         if user.index_redirect:
             try:
                 section_code = user.index_redirect

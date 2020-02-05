@@ -1,11 +1,7 @@
-from django.conf import settings
-from django.conf.urls import url
 from django.urls import path
 
-from learning.views.icalendar import ICalClassesView, ICalAssignmentsView, \
-    ICalEventsView
+from learning.views.icalendar import ICalClassesView, ICalAssignmentsView
 from users.views import UserDetailView, UserUpdateView, \
-    EnrollmentCertificateCreateView, EnrollmentCertificateDetailView, \
     ProfileImageUpdate
 
 urlpatterns = [

@@ -173,18 +173,18 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         self.client.login(user)
         response = self.client.post(user.get_update_profile_url(),
                                     {'testimonial': test_review})
-        self.assertRedirects(response, reverse('user_detail', args=[user.pk]),
+        self.assertRedirects(response, user.get_absolute_url(),
                              status_code=302)
-        response = self.client.get(reverse('user_detail', args=[user.pk]))
+        response = self.client.get(user.get_absolute_url())
         assert smart_bytes(test_review) not in response.content
         add_user_groups(user, [Roles.GRADUATE])
         user.save()
         GraduateProfileFactory(student=user)
         response = self.client.post(user.get_update_profile_url(),
                                     {'testimonial': test_review})
-        self.assertRedirects(response, reverse('user_detail', args=[user.pk]),
+        self.assertRedirects(response, user.get_absolute_url(),
                              status_code=302)
-        response = self.client.get(reverse('user_detail', args=[user.pk]))
+        response = self.client.get(user.get_absolute_url())
         assert smart_bytes(test_review) in response.content
 
     def test_duplicate_check(self):
@@ -220,7 +220,7 @@ class UserTests(MyUtilitiesMixin, CSCTestCase):
         student_mail = "student@student.mail"
         student = StudentFactory(email=student_mail)
         self.doLogin(student)
-        url = reverse('user_detail', args=[student.pk])
+        url = student.get_absolute_url()
         resp = self.client.get(url)
         self.assertNotContains(resp, student_mail)
         # check with curator credentials

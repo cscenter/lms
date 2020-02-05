@@ -54,7 +54,6 @@ urlpatterns += [
     path('videos/', views.CourseVideoListView.as_view(), name='video_list'),
 
     path('students/<int:student_id>/', views.StudentProfileView.as_view(), name='student_profile'),
-    path('', include('users.urls')),
 
     path('api/', include('compscicenter_ru.api.urls')),
 
