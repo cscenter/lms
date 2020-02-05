@@ -10,7 +10,6 @@ from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.compat import Django21BitFieldCheckboxSelectMultiple
 from core.models import Location
 from core.widgets import AdminRichTextAreaWidget
 from .models import City, Branch
@@ -155,7 +154,6 @@ class LocationAdminForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'description': AdminRichTextAreaWidget(),
-            'flags': Django21BitFieldCheckboxSelectMultiple()
         }
 
 
