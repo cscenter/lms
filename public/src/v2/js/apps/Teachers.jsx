@@ -3,6 +3,7 @@ import * as PropTypes from 'prop-types';
 
 import _throttle from 'lodash-es/throttle';
 import _includes from 'lodash-es/includes';
+import _cloneDeep from 'lodash-es/cloneDeep';
 import $ from 'jquery';
 
 import {Select} from 'components/Select';
@@ -11,14 +12,11 @@ import SearchInput from 'components/SearchInput';
 import UserCardList from 'components/UserCardList';
 import {
     hideBodyPreloader,
+    loadIntersectionObserverPolyfill,
     showBodyPreloader,
-    showErrorNotification,
-    loadIntersectionObserverPolyfill
+    showErrorNotification
 } from "utils";
-import {
-    onSearchInputChange,
-    onSelectChange
-} from "components/utils";
+import {onSearchInputChange, onSelectChange} from "components/utils";
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
@@ -35,7 +33,7 @@ class App extends React.Component {
             "query": "",
             "course": null,
             "recentOnly": true,
-            ...props.initialState
+            ..._cloneDeep(props.initialState)
         };
         this.fetch = _throttle(this.fetch, 300);
         this.CourseSelect = React.createRef();

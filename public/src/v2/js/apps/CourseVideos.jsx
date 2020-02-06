@@ -1,10 +1,12 @@
 import React, {Fragment} from 'react';
 
-import _throttle from 'lodash-es/throttle';
+import _cloneDeep from 'lodash-es/cloneDeep';
 import _includes from 'lodash-es/includes';
+import _throttle from 'lodash-es/throttle';
 import $ from 'jquery';
 import * as PropTypes from 'prop-types';
 import SearchInput from 'components/SearchInput';
+import {createBrowserHistory} from "history";
 import {
     hideBodyPreloader,
     loadIntersectionObserverPolyfill,
@@ -14,15 +16,27 @@ import {Select} from "components/Select";
 import LazyImage from "../components/LazyImage";
 import Checkbox from "../components/Checkbox";
 import {
-    onMultipleCheckboxChange,
+    onMultipleCheckboxFilterChange,
     onSearchInputChange,
     onSelectChange
 } from "components/utils";
+import {historyPush, onPopState} from "utils/history";
 
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
 ];
+
+const history = createBrowserHistory();
+
+function FilterState(state) {
+    this.videoTypes = state.videoTypes;
+}
+FilterState.prototype.toURLSearchParams = function () {
+    let params = new URLSearchParams();
+    params.set('types', this.videoTypes.join(","));
+    return params;
+};
 
 
 class CourseVideosPage extends React.Component {
@@ -36,12 +50,21 @@ class CourseVideosPage extends React.Component {
             "year": null,
             "yearOptions": [],
             "videoTypes": [],
-            ...props.initialState
+            ..._cloneDeep(props.initialState)
         };
         this.fetch = _throttle(this.fetch, 300);
     }
 
-    handleMultipleCheckboxChange = onMultipleCheckboxChange.bind(this);
+    historyPush = historyPush.bind(this, history);
+
+    getFilterState(state) {
+        return new FilterState(state);
+    }
+
+
+    handleMultipleCheckboxChange = onMultipleCheckboxFilterChange.call(this, {
+        setStateCallback: this.historyPush
+    });
 
     handleSelectChange = onSelectChange.bind(this);
 
@@ -49,6 +72,7 @@ class CourseVideosPage extends React.Component {
 
     componentDidMount = () => {
         this.fetch();
+        this.unlistenHistory = history.listen(onPopState.bind(this));
     };
 
     componentWillUnmount = function () {
@@ -210,6 +234,9 @@ class CourseVideosPage extends React.Component {
 
 const propTypes = {
     endpoints: PropTypes.arrayOf(PropTypes.string).isRequired,
+    initialState: PropTypes.shape({
+        videoTypes: PropTypes.arrayOf(PropTypes.string).isRequired,
+    }).isRequired,
     videoOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired

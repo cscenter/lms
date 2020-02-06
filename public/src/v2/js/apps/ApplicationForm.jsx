@@ -11,7 +11,7 @@ import Checkbox from "components/Checkbox";
 import RadioGroup from 'components/RadioGroup';
 import RadioOption from 'components/RadioOption';
 import {
-    onMultipleCheckboxChange,
+    onMultipleCheckboxFilterChange,
     onInputChange,
     onSelectChange
 } from "components/utils";
@@ -27,7 +27,7 @@ class ApplicationFormPage extends React.Component {
         };
     }
 
-    handleMultipleCheckboxChange = onMultipleCheckboxChange.bind(this);
+    handleMultipleCheckboxChange = onMultipleCheckboxFilterChange.call(this);
 
     handleInputChange = onInputChange.bind(this);
 
@@ -474,7 +474,7 @@ ApplicationFormPage.propTypes = {
     universities: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.number.isRequired,
         label: PropTypes.string.isRequired,
-        branch_id: PropTypes.string.isRequired
+        branch_id: PropTypes.number.isRequired
     })).isRequired,
     courses: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,

@@ -1,19 +1,21 @@
 import {getOptionByValue} from "./Select";
+import _isFunction from "lodash-es/isFunction";
 
 /**
  * Common handler for input, select, radio buttons, multiple checkboxes
  * @param {Array<function(<Object>, name, value): Object>} applyPatches - Chain of callbacks which mutates the initial patch (order is matter)
- * @param {function(): void} setStateCallback - second argument for `setState`
+ * @param {function(): void} setStateCallback - second argument for React `setState`
  * @param {string} name - state attribute name
- * @param {Object} value - state value associated with `name`
+ * @param {Object|Function} value - state value associated with the `name` attribute
  */
 function onFilterChange({
                             applyPatches = null,
                             setStateCallback = undefined
                         } = {}, name, value) {
     this.setState((state) => {
+        let v = _isFunction(value) ? value(state) : value;
         const patch = {
-            [name]: value
+            [name]: v
         };
         if (applyPatches !== null) {
             for (const applyPatch of applyPatches) {
@@ -39,6 +41,31 @@ export function onRadioFilterChange(callbacks) {
     };
 }
 
+
+/**
+ * Handle state for multiple checkboxes with the same name
+ * @param {Object} callbacks - see `onFilterChange` for details
+ * @returns {function(*): void} `onChange` state handler
+ */
+export function onMultipleCheckboxFilterChange(callbacks) {
+    let partial = onFilterChange.bind(this, callbacks);
+    return (event) => {
+        const {name, value, checked} = event.target;
+        let selectedCheckboxes = function(prevState) {
+            let selected = [...prevState[name]] || [];
+            if (checked === true) {
+                selected.push(value);
+            } else {
+                let valueIndex = selected.indexOf(value);
+                selected.splice(valueIndex, 1);
+            }
+            return selected;
+        };
+        return partial(name, selectedCheckboxes);
+    };
+}
+
+
 export function onSelectFilterChange(callbacks) {
     let partial = onFilterChange.bind(this, callbacks);
     // `react-select` pass in (option, name) as arguments instead of react event
@@ -46,7 +73,6 @@ export function onSelectFilterChange(callbacks) {
         return partial(name, option);
     };
 }
-
 
 
 /**
