@@ -44,7 +44,7 @@ class CourseTeacherInline(admin.TabularInline):
     extra = 0
     min_num = 1
     formfield_overrides = {
-            BitField: {'widget': BitFieldCheckboxSelectMultiple},
+        BitField: {'widget': BitFieldCheckboxSelectMultiple},
     }
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
