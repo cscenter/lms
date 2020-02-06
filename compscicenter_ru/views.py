@@ -397,7 +397,7 @@ class CourseVideoListView(TemplateView):
         video_types = [{"value": v, "label": str(l)} for v, l
                        in CourseVideoTypes.choices]
         filtered_types = self.request.GET.get('types', None)
-        if filtered_types:
+        if filtered_types is not None:
             filtered_types = [t for t in filtered_types.split(',')
                               if t in CourseVideoTypes.values]
         else:
@@ -580,6 +580,13 @@ class CourseOfferingsView(TemplateView):
             {'value': SemesterTypes.AUTUMN, 'label': str(_('Autumn|adjective'))},
             {'value': SemesterTypes.SPRING, 'label': str(_('Spring|adjective'))}
         ]
+
+        filtered_terms = self.request.GET.get('terms', None)
+        if filtered_terms is not None:
+            filtered_terms = [t for t in filtered_terms.split(',')
+                              if t in SemesterTypes.values]
+        else:
+            filtered_terms = [item["value"] for item in terms]
         # Get state based on URL params
         branch_query = self.request.GET.get("branch", branches[0]['value'])
         branch = next((b for b in branches if b['value'] == branch_query), None)
@@ -603,6 +610,7 @@ class CourseOfferingsView(TemplateView):
             'state': {
                 'branch': branch,
                 'academicYear': {"value": year, "label": f"{year}/{year + 1}"},
+                'terms': filtered_terms
             },
         }
         return {"app_data": app_data}
