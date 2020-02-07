@@ -117,7 +117,7 @@ $timeline-bullet-photo-size: $timeline-bullet-size * 10;
 
 .timeline__img {
   display: none;
-  flex: 0 0 $timeline-bullet-photo-size;
+  flex: 0 0 ($timeline-bullet-photo-size + 1px);
   height: $timeline-bullet-photo-size + 1px;
   width: $timeline-bullet-photo-size + 1px;
   margin-right: -$timeline-bullet-photo-size / 2;
