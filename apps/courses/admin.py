@@ -1,9 +1,11 @@
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
+from dal_select2.widgets import ListSelect2
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
+from django.db.models import ForeignKey
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
@@ -25,6 +27,7 @@ class SemesterAdmin(admin.ModelAdmin):
 
 class MetaCourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_display = ['name_ru', 'name_en']
+    search_fields = ('name_ru', 'name_en')
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
@@ -45,6 +48,9 @@ class CourseTeacherInline(admin.TabularInline):
     min_num = 1
     formfield_overrides = {
         BitField: {'widget': BitFieldCheckboxSelectMultiple},
+        ForeignKey: {
+            'widget': ListSelect2()
+        }
     }
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
@@ -76,6 +82,7 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
+    raw_id_fields = ('meta_course',)
     form = CourseAdminForm
     filter_horizontal = ('additional_branches', )
 

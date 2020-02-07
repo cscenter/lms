@@ -1,11 +1,57 @@
-from django.db.models.signals import post_save
+from typing import Set
+
+from django.db.models.signals import post_save, m2m_changed
 from django.dispatch import receiver
 
-from courses.models import Assignment, CourseNews, CourseTeacher
+from core.models import Branch
+from courses.models import Assignment, CourseNews, CourseTeacher, Course, \
+    StudentGroupTypes
 from learning.models import AssignmentNotification, \
-    StudentAssignment, Enrollment, CourseNewsNotification
+    StudentAssignment, Enrollment, CourseNewsNotification, StudentGroup
 from learning.settings import StudentStatuses
 from learning.utils import update_course_learners_count
+
+
+def add_student_group(course: Course, branch):
+    group, _ = (StudentGroup.objects.get_or_create(
+        course_id=course.pk,
+        type=StudentGroupTypes.BRANCH,
+        branch_id=branch.pk,
+        defaults={
+            "name": str(branch),
+            "name_en": f"{branch.name_en} [{branch.site}]"
+        }))
+
+"""
+TODO:
+1. Сделать привязку Assignment к StudentGroup (если групп > 1 ???). Кого-то это может начать путать, особенно суффиксы [compsciclub.ru]
+Возможно, надо делать явный вариант "все", т.к. возможны студенты без привязки к группе. Тогда если в UI выбрать все группы - им не будут видны 
+2. Генерировать StudentAssignment на основе StudentGroup. Как матчить необходимость? Если type == manual, то просто по StudentGroup.pk. Если type == branch, то по StudentGroup.branch_id
+3. При записи студента на курс - добавлять его в группу по возможности. [optional Enrollment.student_group]. Если записывают студента, для которого нет группы - его всё равно надо как-то добавить.
+"""
+
+
+# FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
+# FIXME: группу лучше удалить, т.к. она будет предлагаться для новых заданий, хотя типа уже удалена.
+@receiver(post_save, sender=Course)
+def manage_student_group_for_course_root_branch(sender, instance, created,
+                                                **kwargs):
+    # FIXME: Как взять предыдущее значение? Нужно ли его удалять?
+    if instance.group_mode == StudentGroupTypes.BRANCH:
+        add_student_group(instance, instance.branch)
+
+
+@receiver(m2m_changed, sender=Course.additional_branches.through)
+def manage_student_group_for_course_additional_branch(sender, **kwargs):
+    action = kwargs.pop("action")
+    if action != "post_add":
+        return
+    instance = kwargs.pop("instance")
+    if instance.group_mode == StudentGroupTypes.BRANCH:
+        branches: Set[int] = kwargs.pop("pk_set", set())
+        for branch_id in branches:
+            branch = Branch.objects.get(pk=branch_id)
+            add_student_group(instance, branch)
 
 
 @receiver(post_save, sender=Enrollment)
