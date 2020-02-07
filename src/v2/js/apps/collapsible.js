@@ -1,11 +1,12 @@
-import $ from 'jquery';
+import {queryAll} from "@drivy/dom-query";
 
 export function launch() {
-    $('.collapsible').on('click', '.card__header', function(e) {
-        // Replace js animation with css.
-        e.preventDefault();
-        const open = this.getAttribute("aria-expanded") === "true";
-        $(this).next().toggleClass('collapse').attr("aria-expanded", !open);
-        this.setAttribute("aria-expanded", !open);
+    queryAll('.collapsible').onDelegate('.card__header', 'click', function (event) {
+        event.preventDefault();
+        const isOpened = this.getAttribute("aria-expanded") === "true";
+        let answerElement = this.nextElementSibling;
+        answerElement.classList.toggle('collapse');
+        answerElement.setAttribute('aria-expanded', !isOpened);
+        this.setAttribute('aria-expanded', !isOpened);
     });
 }

@@ -1,0 +1,15 @@
+{% macro _option(option_type, title, value='', input_name='') -%}
+    <label class="ui option {{ option_type }}">
+        <input type="{{ option_type }}" class="control__input"{% if value %} value="{{ value }}" {% endif %}{% if input_name %} name="{{ input_name }}" {% endif %}>
+        <span class="control__indicator"></span>
+        <span class="control__description">{{ title }}</span>
+    </label>
+{%- endmacro %}
+
+{% macro checkbox_option(title, value='', input_name='') -%}
+    {{ _option('checkbox', title, value, input_name) }}
+{%- endmacro %}
+
+{% macro radio_option(input_name, title, value='') -%}
+    {{ _option('radio', title, value, input_name) }}
+{%- endmacro %}

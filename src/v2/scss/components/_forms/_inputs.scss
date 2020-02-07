@@ -1,8 +1,7 @@
-
 //Inputs
 
 .ui.input {
-  font-weight: $font-weight-base;
+  font-weight: $font-weight-normal;
   display: inline-flex;
   color: $input-color;
   flex-direction: column;
@@ -107,7 +106,7 @@
 .error .ui.option.radio:not(.disabled) > .control__indicator,
 .error .ui.option.checkbox:not(.disabled) > .control__indicator {
   background-color: $form-feedback-color;
-  border:$control-border-width solid $form-feedback-invalid-color;
+  border:$input-btn-border-width solid $form-feedback-invalid-color;
   &:hover {
     border-color: $form-feedback-invalid-color;
   }

@@ -38,14 +38,13 @@
                         в&nbsp;частности,
                         механизм классов типов.</p>
                     <h2 class="mt-8">Прочтения курса</h2>
-                    <ul class="ui nav-tabs mb-2">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#">Санкт-Петербург</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Новосибирск</a>
-                        </li>
-                    </ul>
+
+                    {% set tabs = [
+                        {'target': 'practice', 'name': 'Санкт-Петербург', 'active': true, 'url': '#'},
+                        {'target': 'nir', 'name': 'Новосибирск', 'active': false, 'url': '#'}
+                        ] %}
+                    {% call macros.scrollable() %}{{ macros.tabs(tabs) }}{% endcall %}
+
                     <div class="message _warning mb-6">
                         <p>Базовый курс для направлений <a href="#">Computer Science</a> и <a href="#">Data Science</a></p>
                     </div>

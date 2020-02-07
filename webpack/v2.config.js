@@ -2,7 +2,8 @@ const path = require('path');
 const webpack = require('webpack');
 const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
-const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
+const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
@@ -67,7 +68,11 @@ const common = {
                 use: {
                     loader: 'bootstrap.native-loader',
                     options: {
-                        only: ['collapse', 'dropdown']
+                        bs_version: 4,
+                        only: [
+                            'collapse',
+                            'dropdown',
+                        ]
                     }
                 }
             },
@@ -129,6 +134,7 @@ const common = {
                             sourceMap: DEBUG,
                             outputStyle: 'expanded',
                             sassOptions: {
+                                // precision: 8,
                                 includePaths: [__nodemodulesdir,]
                             }
                         }
@@ -160,7 +166,7 @@ const common = {
                         outputPath: 'assets',
                         publicPath: (url, resourcePath, context) => {
                             // `resourcePath` is original absolute path to asset
-                            // `context` is directory where stored asset (`rootContext`) or `context` option
+                            // `context` is a directory where asset is stored (`rootContext` or `context` option)
                             if (process.env.NODE_ENV === 'development') {
                                 return `node_modules/${url}`;
                             }
@@ -171,18 +177,17 @@ const common = {
                     }
                 }]
             },
-            // Serve static in project src/
-            // FIXME: merge with prev rule /node_modules/.test(url) blablabla
+            // Static in a project source directory
             {
                 test: /\.woff2?$|\.ttf$|\.eot$|\.svg|\.png|\.jpg$/,
                 exclude: __nodemodulesdir,
                 use: [{
                     loader: "file-loader",
                     options: {
-                        // context: __nodemodulesdir,
                         name: '[path][name].[ext]',
                         emitFile: false, // since all images are in assets/img dir, do not copy paste it, use publicPath instead
-                        publicPath: STATIC_URL
+                        // FIXME: replace with __webpack_public_path__
+                        publicPath: STATIC_URL,
                     }
                 }]
             },
@@ -190,20 +195,14 @@ const common = {
     },
 
     plugins: [
+        new Dotenv({
+            path: path.join(__dirname, '.env'),
+            silent: false,
+        }),
         new BundleTracker({filename: './webpack-stats-v2.json'}),
-        // Fixes warning in moment-with-locales.min.js
-        //   Module not found: Error: Can't resolve './locale' in ...
-        new webpack.IgnorePlugin(/^\.\/locale$/),
-        // TODO: Prevent autoload jquery for now
-        // new webpack.ProvidePlugin({
-        //     '$': 'jquery',
-        //     'jQuery': 'jquery',
-        //     'window.jQuery': 'jquery'
-        // }),
-        new CleanWebpackPlugin([__bundlesdir], {
+        new CleanWebpackPlugin({
             verbose: true,
-            exclude: ['.gitattributes'],
-            root: process.cwd()
+            cleanOnceBeforeBuildPatterns: ['**/*', '!.gitattributes'],
         }),
         new MiniCssExtractPlugin({
             // Options similar to the same options in webpackOptions.output

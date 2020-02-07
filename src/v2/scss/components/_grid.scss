@@ -1,13 +1,5 @@
 @import "bootstrap/scss/grid";
 
-._dark {
-  background: map_get($theme-colors, "dark");
-}
-
-._light {
-  background: map_get($theme-colors, "light");
-}
-
 .page-content {
   padding-top: spacer("10x");
   padding-bottom: spacer("10x");

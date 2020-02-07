@@ -6,14 +6,14 @@
 
 {% block content %}
     <div class="container page-content">
-        <h1>Студенческие проекты</h1>
+        <h1>Примеры студенческих проектов</h1>
         <div class="row">
             <div class="col-12 order-1 order-lg-0">
                 {% set course_tabs = [
                     {'target': 'practice', 'name': 'Практики', 'active': true, 'url': '#'},
                     {'target': 'nir', 'name': 'Научно-исследовательские работы', 'active': false, 'url': '#'}
-                    ] %}
-                {{ macros.tabs(course_tabs, modifiers='scrollable mb-4') }}
+                ] %}
+                {% call macros.scrollable() %}{{ macros.tabs(tabs) }}{% endcall %}
             </div>
             <div class="col-lg-9 order-2 order-lg-1">
                 <div class="tab-content">
@@ -30,7 +30,7 @@
                                             Be a Better Programmer. Turing machine
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/media/pages/index/student.png"
@@ -50,13 +50,13 @@
                                             Распознавание марки и модели автомобиля по фотографии
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/static/v2/img/placeholder/users.jpg"
                                                  alt="">
                                             <div class="author__details">
-                                                <div class="card__text">Несколько авторов</div>
+                                                <div class="card__text">Несколько участников</div>
                                             </div>
                                         </div>
                                     </div>
@@ -70,7 +70,7 @@
                                             Дедупликация объявлений на Яндекс.Недвижимости
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/media/pages/index/student.png"
@@ -90,7 +90,7 @@
                                             Be a Better Programmer. Turing machine
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/media/pages/index/student.png"
@@ -110,13 +110,13 @@
                                             Распознавание марки и модели автомобиля по фотографии
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/static/v2/img/placeholder/users.jpg"
                                                  alt="">
                                             <div class="author__details">
-                                                <div class="card__text">Несколько авторов</div>
+                                                <div class="card__text">Несколько участников</div>
                                             </div>
                                         </div>
                                     </div>
@@ -130,7 +130,7 @@
                                             Дедупликация объявлений на Яндекс.Недвижимости
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/media/pages/index/student.png"
@@ -150,7 +150,7 @@
                                             Be a Better Programmer. Turing machine
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/media/pages/index/student.png"
@@ -170,13 +170,13 @@
                                             Распознавание марки и модели автомобиля по фотографии
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/static/v2/img/placeholder/users.jpg"
                                                  alt="">
                                             <div class="author__details">
-                                                <div class="card__text">Несколько авторов</div>
+                                                <div class="card__text">Несколько участников</div>
                                             </div>
                                         </div>
                                     </div>
@@ -197,7 +197,7 @@
                                             Комбинаторика и теория графов в биоинформатике
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/media/pages/index/student.png"
@@ -217,13 +217,13 @@
                                             Сложность в среднем и диофантова сложность
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/static/v2/img/placeholder/users.jpg"
                                                  alt="">
                                             <div class="author__details">
-                                                <div class="card__text">Несколько авторов</div>
+                                                <div class="card__text">Несколько участников</div>
                                             </div>
                                         </div>
                                     </div>
@@ -237,7 +237,7 @@
                                             Верхние и нижние оценки на сложность вычислительных задач
                                         </div>
                                     </div>
-                                    <div class="card__footer _dark">
+                                    <div class="card__footer">
                                         <div class="author _project">
                                             <img class="author__img" width="48" height="48"
                                                  src="/media/pages/index/student.png"
@@ -260,11 +260,11 @@
                     </div>
                     <div class="card__content">
                         <div class="mb-4">
-                            <a href="/v2/pages/projects/" class="pb-4">
+                            <a href="/v2/pages/projects/practice/" class="pb-4">
                                 Как получить практику в CS центре
                             </a></div>
                         <div>
-                            <a href="/v2/pages/nir/" class="mt-4">
+                            <a href="/v2/pages/projects/research/" class="mt-4">
                                 Как взять тему для научно-исследовательской работы
                             </a>
                         </div>

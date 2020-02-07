@@ -100,10 +100,9 @@ export default class UberEditor {
                         editor.getElement('previewerIframe').contentWindow.MathJax.Hub.Queue(function () {
                             editor.getElement('previewerIframe').contentWindow.MathJax.Hub.Typeset(epicEditorPreview, function() {
                                 $(epicEditorPreview).find("pre").addClass("hljs");
-                                // Width reflow breaks full screen
+                                // Note: width reflow breaks full screen
                                 editor.emit('__update');
-                                // editor.reflow('height');
-                                });
+                            });
                         });
                     }
                 }).fail(function (data) {
@@ -202,7 +201,7 @@ export default class UberEditor {
         });
         $(CSC.config.uberEditors).each(function(i, editor) {
             if ($.inArray(editor._instanceId, editorIDs) !== -1) {
-                editor.reflow();
+                editor.emit('__update');
             }
         });
     }

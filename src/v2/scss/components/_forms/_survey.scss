@@ -1,0 +1,33 @@
+.card._survey {
+  margin-bottom: spacer("10x");
+
+  .card__content {
+    &._big {
+      padding: spacer("6x");
+      @include media-breakpoint-up(md) {
+        padding: spacer("8x");
+      }
+    }
+
+    .field {
+      margin-bottom: spacer("10x");
+    }
+  }
+
+  label {
+    font-weight: $font-weight-normal;
+    vertical-align: top;
+  }
+
+  .title-label {
+    @extend .h3;
+    font-weight: $font-weight-normal;
+    margin-bottom: spacer("4x");
+
+    .asterisk {
+      font-weight: $font-weight-light;
+      color: $red;
+    }
+  }
+}
+

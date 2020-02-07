@@ -13,6 +13,12 @@
   }
 }
 
+.input-group-btn {
+  .btn {
+    border-radius: $btn-border-radius-base;
+  }
+}
+
 
 // BTN OUTLINE
 .btn-outline.btn-default {

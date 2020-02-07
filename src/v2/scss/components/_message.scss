@@ -1,3 +1,10 @@
+$message-colors: (
+  "info"   :    $blue,
+  "warning":    $orange,
+  "success":    $green,
+  "danger":     $red
+);
+
 @mixin message-variant($message-fill, $color) {
   color: darken($color, 7.5%);
   a {

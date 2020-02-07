@@ -1,0 +1,13 @@
+// Backgrounds
+// TODO: remove underscore
+._dark {
+  background: map_get($theme-colors, "dark");
+}
+
+._light {
+  background: map_get($theme-colors, "light");
+}
+
+.text-warning {
+  color: $orange;
+}

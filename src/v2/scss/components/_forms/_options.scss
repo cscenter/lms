@@ -2,6 +2,13 @@
 @import "radio";
 
 // Default styles for checkbox and radio
+// FIXME: Проверить, что эти стили могут шариться с `input-btn-*`. Тогда переименовать как в material-ui `action-*` и применять к элементам, которые ожидают действия пользователя, которое в свою очередь влияет на их состояние и отображение (disabled, selected, focused, etc)
+$control-border-width: $input-btn-border-width;
+$control-border-color: $input-border-color;
+$control-bg: $white;
+$control-bg-hover: $input-border-color-hover;
+$control-color: $black;
+$control-size: 20px;
 
 .ui.option {
   display: flex;
@@ -33,7 +40,7 @@
     &:checked {
       ~ .control__indicator {
         border: none;
-        background: $control-checked-bg;
+        background: $action-selected-bg;
       }
     }
 
@@ -71,13 +78,13 @@
 
     .control__input {
       &:checked ~ .control__indicator {
-        background: $control-disabled-bg;
+        background: $action-disabled-bg;
 
       }
     }
 
     .control__description {
-      color: $control-disabled-bg;
+      color: $action-disabled-bg;
     }
   }
 }
@@ -93,13 +100,11 @@
 
   &.inline {
     display: inline-flex;
-    height: auto;
-    padding: calc(#{$input-outerheight - $control-size} / 2) 0;
     flex-flow: column wrap;
     @include media-breakpoint-up(md) {
-      flex-flow: row wrap;
-      height: $input-outerheight;
+      flex-flow: row nowrap;
       max-width: 100%;
+      padding-top: #{($input-outerheight - $control-size) / 2};
     }
 
     .ui.option {

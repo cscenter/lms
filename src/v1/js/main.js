@@ -1,4 +1,3 @@
-import Cookies from 'js-cookie';
 import 'bootstrap-sass';
 import $ from 'jquery';
 import "jgrowl/jquery.jgrowl.js";
@@ -8,13 +7,13 @@ import * as Sentry from '@sentry/browser';
 
 import "mathjax_config";
 import UberEditor from "./editor";
-import {csrfSafeMethod, showComponentError} from './utils';
+import {csrfSafeMethod, getCSRFToken, showComponentError} from './utils';
 import courseOfferingsList from './main/course_offerings';
 import sentryOptions from "./sentry_conf";
 
 // Configure Sentry SDK
 Sentry.init({
-    dsn: "https://f2a254aefeae4aeaa09657771205672f@sentry.io/13763",
+    dsn: process.env.SENTRY_DSN,
     ...sentryOptions
 });
 
@@ -66,12 +65,11 @@ $(document).ready(function () {
 const fn = {
     configureCSRFAjax: function () {
         // Append csrf token on ajax POST requests made with jQuery
-        const token = Cookies.get('csrf_token');
         // FIXME: add support for allowed subdomains
         $.ajaxSetup({
             beforeSend: function (xhr, settings) {
                 if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                    xhr.setRequestHeader("X-CSRFToken", token);
+                    xhr.setRequestHeader("X-CSRFToken", getCSRFToken());
                 }
             }
         });
@@ -155,7 +153,7 @@ const fn = {
                 url: $tab.data('notifications-url'),
                 method: "POST",
                 // Avoiding preflight request by sending csrf token in payload
-                data: {"csrfmiddlewaretoken": Cookies.get('csrf_token')},
+                data: {"csrfmiddlewaretoken": getCSRFToken()},
                 xhrFields: {
                     withCredentials: true
                 }

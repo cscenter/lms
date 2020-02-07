@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="container page-content">
-        <div class="row">
+        <div class="row mb-8">
             <div class="col-lg-8">
                 <h1>Tabs</h1>
                 <ul class="ui nav-tabs">
@@ -27,7 +27,7 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row mb-8">
             <div class="col-lg-9">
                 <h3>Cities Example</h3>
                 {% set city_tabs = [
@@ -68,23 +68,26 @@
                 </ul>
             </div>
         </div>
+
         <div class="row">
             <div class="col-lg-3">
                 <h3>Scrollable</h3>
-                <ul class="ui nav-tabs">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Санкт-Петербург</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Новосибирск</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Казань</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">Сан-Франциско</a>
-                    </li>
-                </ul>
+                {% call macros.scrollable() %}
+                    <ul class="ui nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#">Санкт-Петербург</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Новосибирск</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Казань</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Сан-Франциско</a>
+                        </li>
+                    </ul>
+                {% endcall %}
             </div>
         </div>
     </div>

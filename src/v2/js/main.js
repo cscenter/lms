@@ -20,7 +20,7 @@ import {
 
 // Configure Sentry SDK
 Sentry.init({
-    dsn: "https://f2a254aefeae4aeaa09657771205672f@sentry.io/13763",
+    dsn: process.env.SENTRY_DSN,
     ...sentryOptions
 });
 const userInfo = document.getElementById('userMenuButton');
