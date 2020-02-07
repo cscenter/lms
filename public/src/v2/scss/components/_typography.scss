@@ -82,19 +82,19 @@ h6,
 }
 
 // Blockquotes
-.blockquote {
+blockquote, .blockquote {
   margin-bottom: spacer("4x");
   font-size: $blockquote-font-size;
+  border-left: 8px solid $gray-lighter;
+  padding-left: spacer("8x");
 }
 
 .blockquote-footer {
   display: block;
+  margin-top: spacer("2x");
   font-size: 80%; // back to default font-size
-  color: $blockquote-small-color;
-
-  &::before {
-    content: "\2014 \00A0"; // em dash, nbsp
-  }
+  color: $gray-dark;
+  font-style: italic;
 }
 
 a {
