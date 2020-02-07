@@ -575,6 +575,7 @@ class CourseOfferingsView(TemplateView):
                         .filter(site_id=settings.SITE_ID,
                                 established__lte=term_pair.year)
                         .annotate(value=F('code'), label=F('name'))
+                        .order_by('order')
                         .values('value', 'label', 'established'))
         terms = [
             {'value': SemesterTypes.AUTUMN, 'label': str(_('Autumn|adjective'))},
