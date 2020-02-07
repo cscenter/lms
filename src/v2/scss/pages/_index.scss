@@ -60,6 +60,21 @@
   }
 }
 
+a.card {
+  color: $black;
+
+  .card__title {
+    color: $blue;
+  }
+
+  &:hover {
+    .card__title {
+      color: $link-hover-color;
+    }
+  }
+}
+
+
 .card-offline-course__icon {
   height: 72px;
   margin-bottom: spacer("4x");
