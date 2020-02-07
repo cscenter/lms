@@ -1,11 +1,11 @@
 import * as d3 from "d3";
-import * as c3 from "c3";
+import c3 from "c3";
 import $ from 'jquery';
 import {GROUPS, URLS} from 'stats/utils';
 import i18n from 'stats/i18n';
 
 class CampaignResultsStudents {
-    static ENTRY_POINT_URL = "api:stats_admission_campaign_students_results";
+    static ENDPOINT_URI = "stats-api:stats_admission_campaign_students_results";
 
     constructor(id, options) {
         this.id = id;
@@ -38,7 +38,7 @@ class CampaignResultsStudents {
     }
 
     getStats(campaign_id) {
-        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](campaign_id);
+        let dataURL = URLS[this.constructor.ENDPOINT_URI](campaign_id);
         return $.getJSON(dataURL);
     }
 

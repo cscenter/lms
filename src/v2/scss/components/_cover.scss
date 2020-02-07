@@ -30,26 +30,32 @@
       left: 0;
     }
   }
-
-  nav {
-    &.cover__content {
-      width: 100%;
-      position: absolute;
-      padding: 1rem;
-      top: 0;
-      left: 0;
-      @include media-breakpoint-up(sm) {
-        padding: .5rem;
-      }
-    }
-  }
 }
+
 
 .cover__content {
   padding: 80px 0;
 
   > :last-child {
     margin-bottom: 0;
+  }
+}
+
+nav.cover__content {
+  overflow: hidden;
+  padding: spacer("4x") spacer("4x") 0;
+
+  &._abs {
+    position: absolute;
+    width: 100%;
+  }
+}
+
+
+.cover__content {
+  padding: 80px spacer("4x");
+  @include media-breakpoint-up(md) {
+    padding: 104px spacer("10x");
   }
 }
 

@@ -1,3 +1,4 @@
+import {get as getCookie} from 'es-cookie';
 import template from 'lodash-es/template';
 
 export function getLocalStorageKey(textarea) {
@@ -6,8 +7,12 @@ export function getLocalStorageKey(textarea) {
 }
 
 export function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
+    // These HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+export function getCSRFToken() {
+    return getCookie(process.env.DJANGO_CSRF_COOKIE_NAME);
 }
 
 export function getTemplate (id) {

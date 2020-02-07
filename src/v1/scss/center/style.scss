@@ -58,6 +58,10 @@
 
 @import "pages/courses_experiment";
 
+.help-block {
+  margin-bottom: 0;
+}
+
 .__one-line-slash {
   background: #d1e0e8;
   font-size: 24px;
@@ -566,10 +570,3 @@ tr.unread {
   }
 }
 
-// application page
-.form-application-newsletter {
-  margin: 10px 0;
-  .btn {
-    border-radius: 4px;
-  }
-}

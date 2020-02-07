@@ -1,16 +1,23 @@
-import $ from 'jquery';
-import 'bootstrap/js/src/tab';
+import {toEnhancedHTMLElement} from "@drivy/dom-query";
+import Tab from 'bootstrap5/tab';
 
-function toggleTab(event) {
-        // Replace js animation with css.
-        event.preventDefault();
-        $(this).tab('show');
-}
 
 export function launch() {
     document.getElementsByClassName('nav-tabs').forEach(function(item) {
-        const tabList = $(item);
-        if (tabList.hasClass('browser-history')) {
+        const tabList = toEnhancedHTMLElement(item);
+        // Selected tab on page loading
+        let defaultTab = tabList.query('.nav-item .active[data-toggle="tab"]');
+        if (defaultTab === null) {
+            defaultTab = tabList.query('.nav-item [data-toggle="tab"]');
+        }
+        console.debug(`tabs: active tab on page loading: ${defaultTab}`);
+        if (defaultTab === null) {
+            return;
+        }
+        if (tabList.classList.contains('browser-history')) {
+            for (const tab of tabList.queryAll('[data-toggle="tab"]')) {
+                new Tab(tab);
+            }
             // Toggle tab if the url has changed
            window.onpopstate = function (event) {
                let tabTarget;
@@ -20,24 +27,21 @@ export function launch() {
                    }
                }
                if (tabTarget === undefined) {
-                   tabTarget = tabList.find('.nav-link').first().data('target');
+                   tabTarget = defaultTab.getAttribute('data-target');
                }
-               tabList
-                   .find('.nav-link[data-target="' + tabTarget + '"]')
-                   .tab('show');
+               let tabLink = tabList.query('[data-target="' + tabTarget + '"]');
+               Tab.getInstance(tabLink).show();
            };
-           tabList.find('.nav-link').on('click', function (event) {
-               toggleTab(event);
-               if (!!(window.history && history.pushState)) {
-                   history.pushState(
-                       {tabTarget: this.getAttribute("data-target")},
-                       "",
-                       this.getAttribute("href")
-                   );
-               }
-           });
-       } else {
-           $(this).find('.nav-link').on('click', toggleTab);
+
+            tabList.onDelegate('[data-toggle="tab"]', 'click', function (event) {
+                if (!!(window.history && history.pushState)) {
+                    history.pushState(
+                        {tabTarget: this.getAttribute("data-target")},
+                        "",
+                        this.getAttribute("href")
+                    );
+                }
+            });
        }
     });
 }

@@ -12,7 +12,7 @@
         <div class="row no-gutters">
             <div class="col-lg-8">
                 <h2>Базовый table без дополнительных классов</h2>
-                <div class="scrollable">
+                {% call macros.scrollable() %}
                     <table>
                         <thead>
                         <tr>
@@ -74,9 +74,9 @@
                         </tbody>
                         <caption>Таблица 1. Базовые курсы программы</caption>
                     </table>
-                </div>
+                {% endcall %}
                 <h2 class="mt-10">Таблица c вертикальными рамками .table._celled</h2>
-                <div class="scrollable">
+                {% call macros.scrollable() %}
                     <table class="table _celled">
                         <thead>
                         <tr>
@@ -138,10 +138,10 @@
                         </tbody>
                         <caption>Таблица 1. Базовые курсы программы</caption>
                     </table>
-                </div>
+                {% endcall %}
                 <h2 class="mt-10">Таблица с одинаковой шириной колонок и вертикальными рамками
                     .table._fixed._celled</h2>
-                <div class="scrollable">
+                {% call macros.scrollable() %}
                     <table class="table _fixed _celled">
                         <thead>
                         <tr>
@@ -203,9 +203,9 @@
                         </tbody>
                         <caption>Таблица 1. Базовые курсы программы</caption>
                     </table>
-                </div>
+                {% endcall %}
                 <h2 class="mt-10">div.table > div.table__row>.div.table__cell</h2>
-                <div class="scrollable">
+                {% call macros.scrollable() %}
                     <div class="table">
                         <div class="table__row _head">
                             <div class="table__cell">Название</div>
@@ -260,7 +260,7 @@
                             Таблица 1. Базовые курсы программы
                         </div>
                     </div>
-                </div>
+                {% endcall %}
             </div>
         </div>
     </div>

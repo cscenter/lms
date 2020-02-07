@@ -3,6 +3,7 @@ import * as PropTypes from 'prop-types';
 
 import _throttle from 'lodash-es/throttle';
 import _includes from 'lodash-es/includes';
+import _cloneDeep from 'lodash-es/cloneDeep';
 import $ from 'jquery';
 
 import {Select} from 'components/Select';
@@ -11,14 +12,11 @@ import SearchInput from 'components/SearchInput';
 import UserCardList from 'components/UserCardList';
 import {
     hideBodyPreloader,
+    loadIntersectionObserverPolyfill,
     showBodyPreloader,
-    showErrorNotification,
-    loadIntersectionObserverPolyfill
+    showErrorNotification
 } from "utils";
-import {
-    onSearchInputChange,
-    onSelectChange
-} from "components/utils";
+import {onSearchInputChange, onSelectChange} from "components/utils";
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
@@ -35,7 +33,7 @@ class App extends React.Component {
             "query": "",
             "course": null,
             "recentOnly": true,
-            ...props.initialState
+            ..._cloneDeep(props.initialState)
         };
         this.fetch = _throttle(this.fetch, 300);
         this.CourseSelect = React.createRef();
@@ -97,7 +95,7 @@ class App extends React.Component {
         console.debug("Teachers: fetch", this.props, payload);
         this.serverRequest = $.ajax({
             type: "GET",
-            url: this.props.entryURL,
+            url: this.props.endpoint,
             dataType: "json",
             data: payload
         }).done((data) => {
@@ -119,7 +117,7 @@ class App extends React.Component {
         console.debug("Teachers: load course list options");
         $.ajax({
             type: "GET",
-            url: select.props.entryURL,
+            url: select.props.endpoint,
             dataType: "json"
         }).done((data) => {
             let options = [];
@@ -184,7 +182,7 @@ class App extends React.Component {
                             placeholder="Предмет"
                             key="course"
                             handleLoadOptions={this.handleLoadCourseOptions}
-                            entryURL={this.props.coursesURL}
+                            endpoint={this.props.coursesURL}
                             ref={this.CourseSelect}
                         />
                     </div>
@@ -214,7 +212,7 @@ class App extends React.Component {
 }
 
 const propTypes = {
-    entryURL: PropTypes.string.isRequired,
+    endpoint: PropTypes.string.isRequired,
     coursesURL: PropTypes.string.isRequired,
     termIndex: PropTypes.number.isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({

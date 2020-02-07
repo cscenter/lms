@@ -9,5 +9,6 @@
 # Ignore IDEA files
 .idea/
 
+.env
 node_modules/
 core/db.sqlite3

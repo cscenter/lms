@@ -1,17 +1,20 @@
 // TODO: add translation support (error msg)
 
-import FontFaceObserver from 'fontfaceobserver';
-import { createBrowserHistory } from "history";
+import {createBrowserHistory} from "history";
 import Masonry from 'masonry-layout';
 import $ from 'jquery';
 import React from 'react';
 import _throttle from 'lodash-es/debounce';
+import _cloneDeep from 'lodash-es/cloneDeep';
 
 import Pagination from 'components/Pagination';
 import TestimonialCard from 'components/TestimonialCard';
-import {showErrorNotification, showBodyPreloader,
-    hideBodyPreloader} from 'utils';
-import { DESKTOP_VIEWPORT_MIN } from "utils/media";
+import {
+    hideBodyPreloader,
+    showBodyPreloader,
+    showErrorNotification
+} from 'utils';
+import {DESKTOP_VIEWPORT_MIN} from "utils/media";
 
 
 const MASONRY_ENABLED = (window.screen.availWidth >= DESKTOP_VIEWPORT_MIN);
@@ -26,7 +29,7 @@ class App extends React.Component {
         this.state = {
             loading: true,
             items: [],
-            ...props.initialState
+            ..._cloneDeep(props.initialState)
         };
         // bind function in constructor instead of render (https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md)
         this.onChangePage = this.onChangePage.bind(this);
@@ -111,7 +114,7 @@ class App extends React.Component {
     fetch = (payload) => {
         this.serverRequest = $.ajax({
             type: "GET",
-            url: this.props.entry_url,
+            url: this.props.endpoint,
             dataType: "json",
             data: payload
         }).done((data) => {

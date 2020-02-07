@@ -3,6 +3,7 @@ import React, {Fragment} from 'react';
 import _includes from 'lodash-es/includes';
 import _partialRight from 'lodash-es/partialRight';
 import _isEqual from 'lodash-es/isEqual';
+import _cloneDeep from 'lodash-es/cloneDeep';
 import * as PropTypes from 'prop-types';
 import Media from 'react-media';
 
@@ -21,12 +22,13 @@ import RadioOption from "components/RadioOption";
 import Icon from "components/Icon";
 import { Tooltip } from 'components/Tooltip';
 import {
-    onMultipleCheckboxChange,
+    onMultipleCheckboxFilterChange,
     onRadioFilterChange,
     onSearchInputChange,
     onSelectFilterChange,
 } from "components/utils";
 import {desktopMediaQuery, tabletMaxMediaQuery} from "utils/media";
+import {historyPush, onPopState} from "utils/history";
 
 
 export let polyfills = [
@@ -38,15 +40,17 @@ const history = createBrowserHistory();
 
 
 function FilterState(state) {
-    // FIXME: Convert null and undefined to empty string
+    // FIXME: Convert null and undefined to empty string?
     this.academicYear = state.academicYear;
     this.branch = state.branch;
+    this.terms = state.terms;
 }
-FilterState.prototype.getPayload = function () {
-    return {
-        'academic_year': this.academicYear.value,
-        'branch': this.branch.value,
-    };
+FilterState.prototype.toURLSearchParams = function () {
+    let params = new URLSearchParams();
+    params.set('academic_year', this.academicYear.value);
+    params.set('branch', this.branch.value);
+    params.set('terms', this.terms.join(","));
+    return params;
 };
 
 
@@ -54,11 +58,6 @@ class CourseOfferings extends React.Component {
 
     constructor(props) {
         super(props);
-        // Select all terms by default, could be overridden by initial state
-        let semesters = [];
-        for (const s of props.semesterOptions) {
-            semesters.push(s.value);
-        }
         this.state = {
             "loading": true,
             "items": [],
@@ -67,11 +66,12 @@ class CourseOfferings extends React.Component {
             "academicYear": null,
             "academicYearOptions": this.getYearOptions(props.initialState.branch),
             "branch": null,
-            "semesters": semesters,
-            ...props.initialState
+            ..._cloneDeep(props.initialState)
         };
         this.latestFetchAbortController = null;
     }
+
+    historyPush = historyPush.bind(this, history);
 
     getYearOptions(branchOption) {
         let academicYearOptions = [];
@@ -107,35 +107,15 @@ class CourseOfferings extends React.Component {
         setStateCallback: this.historyPush
     });
 
-    handleMultipleCheckboxChange = _partialRight(
-        onMultipleCheckboxChange,
-        {applyPatch: this.filteredItemsPatch.bind(this)}
-    ).bind(this);
+    handleMultipleCheckboxChange = onMultipleCheckboxFilterChange.call(this, {
+        applyPatches: [
+            this.filteredItemsPatch
+        ],
+        setStateCallback: this.historyPush
+    });
 
-    getHistoryState(location, initialState) {
-        if (!location.state) {
-            return new FilterState(initialState);
-        } else {
-            return new FilterState(location.state);
-        }
-    }
-
-    /**
-     * Push new browser history if filterState was updated
-     */
-    historyPush() {
-        const filterState = new FilterState(this.state);
-        const payload = filterState.getPayload();
-        const historyState = this.getHistoryState(history.location,
-                                                  this.props.initialState);
-        if (!_isEqual(filterState, historyState)) {
-            console.debug(`History.push: new filter state `, JSON.stringify(filterState));
-            history.push({
-                pathname: history.location.pathname,
-                search: `?branch=${payload.branch}&academic_year=${payload.academic_year}`,
-                state: filterState
-            });
-        }
+    getFilterState(state) {
+        return new FilterState(state);
     }
 
     /**
@@ -151,19 +131,9 @@ class CourseOfferings extends React.Component {
     }
 
     componentDidMount = () => {
-        this.fetch((new FilterState(this.state)).getPayload());
+        this.fetch((new FilterState(this.state)).toURLSearchParams());
         // FIXME: Do we need ref for this?
-        this.unlistenHistory = history.listen((location, action) => {
-            const currentState = new FilterState(this.state);
-            const historyState = this.getHistoryState(location,
-                                                      this.props.initialState);
-            console.debug('History.listen: current state', JSON.stringify(currentState));
-            console.debug('History.listen: history state', JSON.stringify(historyState));
-            if (!_isEqual(currentState, historyState)) {
-                console.debug(`History.listen: new state`, JSON.stringify(historyState));
-                this.setState(historyState);
-            }
-        });
+        this.unlistenHistory = history.listen(onPopState.bind(this));
     };
 
     componentWillUnmount = function () {
@@ -179,24 +149,24 @@ class CourseOfferings extends React.Component {
         const prevFilterState = new FilterState(prevState);
         const filterState = new FilterState(this.state);
         if (this.state.loading || !_isEqual(prevFilterState, filterState)) {
-            const payload = filterState.getPayload();
+            const payload = filterState.toURLSearchParams();
             this.fetch(payload);
         } else {
             hideBodyPreloader();
         }
     }
 
-    fetch = async (payload = null) => {
-        console.debug(`${this.constructor.name}: fetch`, this.props, payload);
+    fetch = async (urlParams = null) => {
+        console.debug(`${this.constructor.name}: fetch`, this.props, urlParams);
         if (this.latestFetchAbortController !== null) {
             this.latestFetchAbortController.abort();
         }
 
         const abortController = new AbortController();
         this.latestFetchAbortController = abortController;
-        this.requests = this.props.entryURL.map(entryURL => {
-            return ky.get(entryURL, {
-                searchParams: payload,
+        this.requests = this.props.endpoints.map(endpoint => {
+            return ky.get(endpoint, {
+                searchParams: urlParams,
                 headers: {'content-type': 'application/json'},
                 signal: abortController.signal
             })
@@ -226,18 +196,20 @@ class CourseOfferings extends React.Component {
             });
         } catch(reason) {
             console.debug(`Fetch error: ${reason}`);
-            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
+            if (reason.name !== 'AbortError') {
+                showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
+            }
         }
     };
 
     filterItems(items, state) {
         let filteredItems = new Set();
-        const {academicYear, courseNameQuery, semesters} = state;
+        const {academicYear, courseNameQuery, terms} = state;
         for (const item of items) {
             let yearCondition = (academicYear !== null) ?
                 item.semester.academic_year === academicYear.value :
                 true;
-            let semesterCondition = semesters.includes(item.semester.type);
+            let semesterCondition = terms.includes(item.semester.type);
             if (yearCondition && semesterCondition &&
                 _includes(item.name.toLowerCase(), courseNameQuery.toLowerCase())) {
                 filteredItems.add(item.id);
@@ -260,7 +232,7 @@ class CourseOfferings extends React.Component {
             courseNameQuery,
             academicYear,
             branch,
-            semesters,
+            terms,
             items,
             filteredItems
         } = this.state;
@@ -324,10 +296,10 @@ class CourseOfferings extends React.Component {
                                                         <div className="grouped">
                                                             {semesterOptions.map((option) =>
                                                                 <Checkbox
-                                                                    name="semesters"
+                                                                    name="terms"
                                                                     key={option.value}
                                                                     value={option.value}
-                                                                    checked={semesters.includes(option.value)}
+                                                                    checked={terms.includes(option.value)}
                                                                     onChange={this.handleMultipleCheckboxChange}
                                                                     label={option.label}
                                                                 />
@@ -391,10 +363,10 @@ class CourseOfferings extends React.Component {
                                     <div className="grouped">
                                         {semesterOptions.map((option) =>
                                             <Checkbox
-                                                name="semesters"
+                                                name="terms"
                                                 key={option.value}
                                                 value={option.value}
-                                                checked={semesters.includes(option.value)}
+                                                checked={terms.includes(option.value)}
                                                 onChange={this.handleMultipleCheckboxChange}
                                                 label={option.label}
                                             />
@@ -412,7 +384,7 @@ class CourseOfferings extends React.Component {
 }
 
 const propTypes = {
-    entryURL: PropTypes.arrayOf(PropTypes.string).isRequired,
+    endpoints: PropTypes.arrayOf(PropTypes.string).isRequired,
     // history api depends on initial state
     initialState: PropTypes.shape({
         branch: PropTypes.shape({
@@ -423,7 +395,8 @@ const propTypes = {
         academicYear: PropTypes.shape({
             value: PropTypes.number.isRequired,
             label: PropTypes.string.isRequired
-        }).isRequired
+        }).isRequired,
+        terms: PropTypes.arrayOf(PropTypes.string).isRequired,
     }).isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,

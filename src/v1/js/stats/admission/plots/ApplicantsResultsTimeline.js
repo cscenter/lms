@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import * as c3 from "c3";
+import c3 from "c3";
 import $ from 'jquery';
 import {URLS} from 'stats/utils';
 import i18n from 'stats/i18n';
@@ -7,7 +7,7 @@ import {COLOR_PALETTE} from "../../utils";
 
 
 export default class ApplicantsResultsTimeline {
-    static ENTRY_POINT_URL = "api:stats_admission_campaign_applicants_results";
+    static ENDPOINT_URI = "stats-api:stats_admission_campaign_applicants_results";
 
     constructor(id, options) {
         this.id = id;
@@ -51,7 +51,7 @@ export default class ApplicantsResultsTimeline {
     }
 
     getStats(branchId) {
-        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](branchId);
+        let dataURL = URLS[this.constructor.ENDPOINT_URI](branchId);
         return $.getJSON(dataURL);
     }
 

@@ -41,56 +41,28 @@
   }
 
   .card__content {
-    padding: spacer("8x") spacer("4x");
-  }
-
-  svg {
-    margin-left: 30px;
+    padding: spacer("10x") spacer("4x");
   }
 
   &:hover {
     background-color: $teal;
     transition: .2s;
 
-    svg {
-      fill: $white;
-    }
-
-    .card__title,
     .card__subtitle {
-      color: $white;
+      color: rgba($black, .7);
     }
-
   }
 
   .card__title {
-    color: $blue;
-    margin-bottom: 0;
+    color: $black;
+    margin-bottom: spacer("1x");
     letter-spacing: -.01rem;
-    font-weight: $font-weight-light;
-
-    @include media-breakpoint-down(md) {
-      font-size: $font-size-content-base;
-    }
-  }
-}
-
-a.card {
-  color: $black;
-
-  .card__title {
-    color: $blue;
-  }
-
-  &:hover {
-    .card__title {
-      color: $link-hover-color;
-    }
   }
 }
 
 .card-offline-course__icon {
-  height: 96px;
+  height: 72px;
+  margin-bottom: spacer("4x");
 }
 
 //3-screen about-csc
@@ -145,7 +117,7 @@ a.card {
 }
 
 .about-csc__organizers {
-  border-top: $hr-border-width solid $hr-border-color;
+  border-top: $border-width solid $border-color;
   padding-top: spacer("8x");
   @include media-breakpoint-up(lg) {
     border-top: none;

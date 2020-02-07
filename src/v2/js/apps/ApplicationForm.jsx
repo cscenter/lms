@@ -11,7 +11,7 @@ import Checkbox from "components/Checkbox";
 import RadioGroup from 'components/RadioGroup';
 import RadioOption from 'components/RadioOption';
 import {
-    onMultipleCheckboxChange,
+    onMultipleCheckboxFilterChange,
     onInputChange,
     onSelectChange
 } from "components/utils";
@@ -27,7 +27,7 @@ class ApplicationFormPage extends React.Component {
         };
     }
 
-    handleMultipleCheckboxChange = onMultipleCheckboxChange.bind(this);
+    handleMultipleCheckboxChange = onMultipleCheckboxFilterChange.call(this);
 
     handleInputChange = onInputChange.bind(this);
 
@@ -144,7 +144,6 @@ class ApplicationFormPage extends React.Component {
             preferred_study_programs,
             isFormSubmitted,
         } = this.state;
-
         let filteredStudyPrograms = studyPrograms.filter((program) => {
             if (campaign === "nsk") {
                 return program.value !== "cs";
@@ -278,9 +277,9 @@ class ApplicationFormPage extends React.Component {
                         </div>
                     </div>
                     <div className="row">
-                        <div className="field col-lg-12 mb-2">
+                        <div className="field col-lg-12">
                             <label>Вы сейчас работаете?</label>
-                            <RadioGroup required name="has_job" className="inline" onChange={this.handleInputChange}>
+                            <RadioGroup required name="has_job" className="inline pt-0" onChange={this.handleInputChange}>
                                 <RadioOption id="yes">Да</RadioOption>
                                 <RadioOption id="no">Нет</RadioOption>
                             </RadioGroup>
@@ -323,9 +322,9 @@ class ApplicationFormPage extends React.Component {
                 <fieldset>
                     <h3>CS центр</h3>
                     <div className="row">
-                        <div className="field col-lg-12 mb-2">
+                        <div className="field col-lg-12">
                             <label>Выберите отделение, в котором собираетесь учиться</label>
-                            <RadioGroup required name="campaign" className="inline" onChange={this.handleInputChange}>
+                            <RadioGroup required name="campaign" className="inline pt-0" onChange={this.handleInputChange}>
                                 {campaigns.map((branch) =>
                                     <RadioOption  key={branch.value} id={`campaign-${branch.value}`} value={branch.value}>
                                         {branch.label}
@@ -395,7 +394,7 @@ class ApplicationFormPage extends React.Component {
                         </Fragment>
                     }
                     {
-                        campaign && campaign === "online" &&
+                        campaign && campaign === "distance" &&
                         <div className="row">
                             <div className="field col-lg-5">
                                 <Input required name="living_place" id="living_place" placeholder="В каком городе вы живёте?" onChange={this.handleInputChange} />
@@ -475,7 +474,7 @@ ApplicationFormPage.propTypes = {
     universities: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.number.isRequired,
         label: PropTypes.string.isRequired,
-        branch_id: PropTypes.string.isRequired
+        branch_id: PropTypes.number.isRequired
     })).isRequired,
     courses: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,

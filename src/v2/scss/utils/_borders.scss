@@ -2,7 +2,7 @@
 // Remove border width and radius in one place
 .border-xs-0 {
   @include media-breakpoint-down(xs) {
-    border: 0!important;
-    border-radius: 0!important;
+    border: 0 !important;
+    border-radius: 0 !important;
   }
 }

@@ -5,8 +5,12 @@ $dropdown-spacer: 0;
 $dropdown-bg: $white;
 $dropdown-border-color: rgba($black, .15);
 $dropdown-border-width: $border-width;
-$dropdown-divider-bg: $gray-lighter;
 $dropdown-box-shadow: 0 0 1rem rgba($black, .175);
+$dropdown-color: $body-color;
+$dropdown-divider-bg: $gray-lighter;
+$dropdown-divider-margin-y: $nav-divider-margin-y;
+// FIXME: font-size-content?
+$dropdown-font-size: $font-size-base;
 
 $dropdown-link-color: $black;
 $dropdown-link-hover-color: $black;
@@ -14,7 +18,6 @@ $dropdown-link-hover-bg: $gray-lighter;
 
 $dropdown-link-active-color: $component-active-color;
 $dropdown-link-active-bg: $component-active-bg;
-
 $dropdown-link-disabled-color: $gray-disabled;
 
 $dropdown-item-padding-y: spacer("1x");
@@ -23,9 +26,9 @@ $dropdown-item-padding-x: spacer("3x");
 $dropdown-header-color: $gray-disabled;
 $dropdown-border-radius: 4px;
 
-$zindex-dropdown: 1000;
-
 $caret-width: 0;
+$caret-vertical-align:        $caret-width * .85 !default;
+$caret-spacing:               $caret-width * .85 !default;
 
 // Imports
 @import "bootstrap/scss/dropdown";

@@ -77,7 +77,7 @@ class Alumni extends React.Component {
         console.debug("Alumni: fetch", this.props, payload);
         this.serverRequest = $.ajax({
             type: "GET",
-            url: this.props.entryURL,
+            url: this.props.endpoint,
             dataType: "json",
             data: payload
         }).done((result) => {
@@ -157,7 +157,7 @@ class Alumni extends React.Component {
 }
 
 const propTypes = {
-    entryURL: PropTypes.string.isRequired,
+    endpoint: PropTypes.string.isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired

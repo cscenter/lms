@@ -27,3 +27,7 @@
     {%- endfor %}
     </ul>
 {%- endmacro %}
+
+{% macro scrollable(modifiers='mb-2') -%}
+    <div class="scrollable{% if modifiers %} {{ modifiers }}{% endif %}">{{ caller() }}</div>
+{%- endmacro %}

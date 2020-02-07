@@ -6,126 +6,127 @@
     <div class="container page-content p-xs-0">
         <div class="row content-center no-gutters">
             <div class="col-lg-8">
-                <div class="card _survey">
-                    <form action="">
-                        <div class="card__title text-center _inverted">
-                            <p>Опрос по курсу</p>
+                <div class="card _survey border-xs-0">
+                    <div class="card__header text-center cover">
+                        <div class="cover__content _big">
+                            <h4 class="mb-2">Опрос по курсу</h4>
                             <h1>Алгоритмы и структуры данных, часть 1</h1>
                         </div>
-                        <div class="card__content">
-                            <div class="message _warning mb-8">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">{{ macros.svg_icon('cross') }}</span>
-                                </button>
-                                <p>Дата окончания опроса — 22 мая 19:00</p>
-                            </div>
-                            <div class="field col-12">
-                                <div class="ui checkbox-group">
-                                    <label class="survey-label">Что вы думаете о том, как проходят очные лекции? <span
-                                            class="asterisk">*</span></label>
-                                    <label class="ui option checkbox">
-                                        <input type="checkbox" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Материал разбирается слишком быстро</span>
-                                    </label>
-                                    <label class="ui option checkbox">
-                                        <input type="checkbox" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Материал разбирается слишком медленно</span>
-                                    </label>
-                                    <label class="ui option checkbox">
-                                        <input type="checkbox" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Лектор не общается с аудиторией, и это вредит пониманию материала</span>
-                                    </label>
-                                    <label class="ui option checkbox">
-                                        <input type="checkbox" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Преподаватель не отвечает на вопросы по материалу</span>
-                                    </label>
-                                    <label class="ui option checkbox">
-                                        <input type="checkbox" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Тематика и чтение курса мне понравились, и я хочу продолжить изучение материала</span>
-                                    </label>
+                    </div>
+                    <div class="card__content _big">
+                        <p class="text-warning">Опрос закроется 22 мая в 19:00 (по московскому времени)</p>
+                            <div class="row">
+                                <form action="">
+                                    <div class="field col-12">
+                                    <div class="ui checkbox-group">
+                                        <label class="title-label survey-label">Что вы думаете о том, как проходят очные лекции? <span
+                                                class="asterisk">*</span></label>
+                                        <label class="ui option checkbox">
+                                            <input type="checkbox" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Материал разбирается слишком быстро</span>
+                                        </label>
+                                        <label class="ui option checkbox">
+                                            <input type="checkbox" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Материал разбирается слишком медленно</span>
+                                        </label>
+                                        <label class="ui option checkbox">
+                                            <input type="checkbox" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Лектор не общается с аудиторией, и это вредит пониманию материала</span>
+                                        </label>
+                                        <label class="ui option checkbox">
+                                            <input type="checkbox" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Преподаватель не отвечает на вопросы по материалу</span>
+                                        </label>
+                                        <label class="ui option checkbox">
+                                            <input type="checkbox" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Тематика и чтение курса мне понравились, и я хочу продолжить изучение материала</span>
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="field col-12 hidden">
-                                <div class="ui input">
-                                    <label class="survey-label">Сколько времени вам нужно на выполнение дз? <span
-                                            class="asterisk">*</span></label>
-                                    <input class="" type="text" placeholder="Время от">
+                                <div class="field col-12 hidden">
+                                    <div class="ui input">
+                                        <label class="title-label survey-label">Сколько времени вам нужно на выполнение дз? <span
+                                                class="asterisk">*</span></label>
+                                        <input class="" type="text" placeholder="Время от">
+                                    </div>
+
+                                </div>
+                                <div class="field col-12">
+                                    <div class="grouped">
+                                        <label class="title-label survey-label">Как часто вы посещаете занятия?</label>
+                                        <label class="ui option radio">
+                                            <input type="radio" name="Colors" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">На занятия хожу по максимуму</span>
+                                        </label>
+                                        <label class="ui option radio">
+                                            <input type="radio" name="Colors" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Чаще всего прихожу, но иногда пропускаю и смотрю видео
+    </span>
+                                        </label>
+                                        <label class="ui option radio">
+                                            <input type="radio" name="Colors" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Смотрю записи лекций и прихожу на семинары</span>
+                                        </label>
+                                        <label class="ui option radio">
+                                            <input type="radio" name="Colors" class="control__input">
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Обычно смотрю видео и не хожу на семинары</span>
+                                        </label>
+                                        <label class="ui option radio">
+                                            <input type="radio" name="Colors" class="control__input" checked>
+                                            <span class="control__indicator"></span>
+                                            <span class="control__description">Не смотрю видео и не хожу на занятия</span>
+                                        </label>
+                                    </div>
+                                    <div class="ui input free-answer">
+                                        <textarea rows="6" placeholder="А ну-ка расскажи, почему"></textarea>
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <div class="ui input __split-input">
+                                        <label class="title-label survey-label">Сколько времени вам нужно на выполнение дз?</label>
+                                        <input class="start-range col-4 col-md-3" type="text" placeholder="Время от">
+                                        <input class="end-range col-4 col-md-3" type="text" placeholder="до часов">
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <div class="ui input">
+                                        <label class="title-label survey-label" for="">Ф.И.О.</label>
+                                        <input type="text" placeholder="Фамилия Имя Отчество">
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <div class="ui input">
+                                        <label class="title-label survey-label">Расскажите немного о себе</label>
+                                        <textarea rows="6" placeholder="Расскажите о своих увлечениях"></textarea>
+                                    </div>
+                                </div>
+                                <div class="field col-12">
+                                    <label class="ui option checkbox">
+                                        <input type="checkbox" class="control__input" checked>
+                                        <span class="control__indicator"></span>
+                                        <span class="control__description __user-agreement">Я принимаю условия <a
+                                                href="">Лицензионного соглашения</a> и согласен на обработку персональных данных</span>
+                                    </label>
                                 </div>
 
-                            </div>
-                            <div class="field col-12">
-                                <div class="grouped">
-                                    <label class="survey-label">Как часто вы посещаете занятия?</label>
-                                    <label class="ui option radio">
-                                        <input type="radio" name="Colors" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">На занятия хожу по максимуму</span>
-                                    </label>
-                                    <label class="ui option radio">
-                                        <input type="radio" name="Colors" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Чаще всего прихожу, но иногда пропускаю и смотрю видео
-</span>
-                                    </label>
-                                    <label class="ui option radio">
-                                        <input type="radio" name="Colors" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Смотрю записи лекций и прихожу на семинары</span>
-                                    </label>
-                                    <label class="ui option radio">
-                                        <input type="radio" name="Colors" class="control__input">
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Обычно смотрю видео и не хожу на семинары</span>
-                                    </label>
-                                    <label class="ui option radio">
-                                        <input type="radio" name="Colors" class="control__input" checked>
-                                        <span class="control__indicator"></span>
-                                        <span class="control__description">Не смотрю видео и не хожу на занятия</span>
-                                    </label>
+                                <div class="col-lg-auto mb-4">
+                                    <a href="" class="btn _primary _m-wide">Отправить</a>
                                 </div>
-                                <div class="ui input free-answer">
-                                    <textarea rows="6" placeholder="А ну-ка расскажи, почему"></textarea>
-                                </div>
+                            </form>
                             </div>
-                            <div class="field col-12">
-                                <div class="ui input __split-input">
-                                    <label class="survey-label">Сколько времени вам нужно на выполнение дз?</label>
-                                    <input class="start-range col-4 col-md-3" type="text" placeholder="Время от">
-                                    <input class="end-range col-4 col-md-3" type="text" placeholder="до часов">
-                                </div>
-                            </div>
-                            <div class="field col-12">
-                                <div class="ui input">
-                                    <label class="survey-label" for="">Ф.И.О.</label>
-                                    <input type="text" placeholder="Фамилия Имя Отчество">
-                                </div>
-                            </div>
-                            <div class="field col-12">
-                                <div class="ui input">
-                                    <label class="survey-label">Расскажите немного о себе</label>
-                                    <textarea rows="6" placeholder="Расскажите о своих увлечениях"></textarea>
-                                </div>
-                            </div>
-                            <div class="field col-12">
-                                <label class="ui option checkbox">
-                                    <input type="checkbox" class="control__input" checked>
-                                    <span class="control__indicator"></span>
-                                    <span class="control__description __user-agreement">Я принимаю условия <a
-                                            href="">Лицензионного соглашения</a> и согласен на обработку персональных данных</span>
-                                </label>
-                            </div>
-
-                            <div class="field col-lg-auto">
-                                <a href="" class="btn _primary _m-wide">Отправить</a>
-                            </div>
-                        </div>
-                    </form>
+                    </div>
                 </div>
+
+
             </div>
         </div>
     </div>

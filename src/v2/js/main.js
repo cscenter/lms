@@ -20,7 +20,7 @@ import {
 
 // Configure Sentry SDK
 Sentry.init({
-    dsn: "***REMOVED***",
+    dsn: process.env.SENTRY_DSN,
     ...sentryOptions
 });
 const userInfo = document.getElementById('userMenuButton');

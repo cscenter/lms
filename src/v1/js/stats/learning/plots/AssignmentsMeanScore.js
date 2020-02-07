@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import * as c3 from "c3";
+import c3 from "c3";
 import $ from 'jquery';
 import mix from 'stats/MixinBuilder';
 import PlotOptions from 'stats/PlotOptions';
@@ -33,7 +33,7 @@ class AssignmentsMeanScore extends mix(PlotOptions).with(AssignmentsFilterMixin)
     }
 
     static getStats(course_session_id) {
-        let dataURL = window.URLS["api:stats_assignments"](course_session_id);
+        let dataURL = window.URLS["stats-api:stats_assignments"](course_session_id);
         return $.getJSON(dataURL);
     }
 

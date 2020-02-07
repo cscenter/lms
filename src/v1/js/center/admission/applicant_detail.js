@@ -17,8 +17,7 @@ function streamSelectChanged(event) {
     if (streamValues.length > 0) {
         $.ajax({
             dataType: "json",
-            // TODO: Replace url with data from js_reverse?
-            url: "/admission/interviews/slots/",
+            url: window.URLS["admission-api:v2:interview_slots"],
             data: {
                 streams: streamValues,
             },

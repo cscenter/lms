@@ -2,9 +2,9 @@ const path = require('path');
 const webpack = require('webpack');
 const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
-const CleanWebpackPlugin = require('clean-webpack-plugin');  // clean build dir before building
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
+const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-
 const DEBUG = (process.env.NODE_ENV !== "production");
 
 
@@ -124,36 +124,64 @@ const common = {
                 ],
             },
             {
-                test: /\.woff2?$|\.ttf$|\.eot$|\.svg|\.png|\.jpg$/,
+                test: /\.css$/,
+                use: [
+                    DEBUG ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    'css-loader',
+                ],
+            },
+            // Static in a project source directory
+            {
+                test: /\.woff2?$|\.ttf$|\.eot$|\.svg$|\.png$|\.jpg$|\.swf$/,
                 exclude: __nodemodulesdir,
                 use: [{
                     loader: "file-loader",
                     options: {
-                        // context: __nodemodulesdir,
                         name: '[path][name].[ext]',
                         emitFile: false, // since all images are in assets/img dir, do not copy paste it, use publicPath instead
-                        publicPath: STATIC_URL
+                        // FIXME: replace with __webpack_public_path__
+                        publicPath: STATIC_URL,
                     }
                 }]
             },
+            // Serve static in node_modules/
             {
-                test: /\.swf$/,
+                test: /\.woff2?$|\.ttf$|\.eot$|\.svg$|\.png$|\.jpg$|\.swf$/,
                 include: __nodemodulesdir,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            context: __nodemodulesdir,
-                            publicPath: STATIC_PATH,
-                            name: '[path][name].[ext]'
-                        }
+                use: [{
+                    loader: "file-loader",
+                    options: {
+                        context: __nodemodulesdir,
+                        name: (file) => {
+                            if (process.env.NODE_ENV === 'development') {
+                                return `[path][name].[ext]`;
+                            }
+
+                            return '[path][contenthash].[ext]';
+                        },
+                        outputPath: 'assets',
+                        publicPath: (url, resourcePath, context) => {
+                            // `resourcePath` is original absolute path to asset
+                            // `context` is a directory where asset is stored (`rootContext` or `context` option)
+                            if (process.env.NODE_ENV === 'development') {
+                                return `node_modules/${url}`;
+                            }
+                            return `assets/${url}`;
+                        },
+                        postTransformPublicPath: (p) => `__webpack_public_path__ + ${p}`,
+                        emitFile: !DEBUG,
                     }
-                ],
+                }]
             },
+
         ]
     },
 
     plugins: [
+        new Dotenv({
+            path: path.join(__dirname, '.env'),
+            silent: false,
+        }),
         new BundleTracker({filename: './webpack-stats.json'}),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...
@@ -164,16 +192,15 @@ const common = {
         //     'jQuery': 'jquery',
         //     'window.jQuery': 'jquery'
         // }),
-        new CleanWebpackPlugin([__bundlesdir], {
+        new CleanWebpackPlugin({
             verbose: true,
-            exclude: ['.gitattributes'],
-            root: process.cwd()
+            cleanOnceBeforeBuildPatterns: ['**/*', '!.gitattributes'],
         }),
         new MiniCssExtractPlugin({
-          // Options similar to the same options in webpackOptions.output
-          // both options are optional
-          filename: DEBUG ? '[name].css' : '[name].[hash].css',
-          chunkFilename: DEBUG ? '[id].css' : '[id].[hash].css',
+            // Options similar to the same options in webpackOptions.output
+            // both options are optional
+            filename: DEBUG ? '[name].css' : '[name].[hash].css',
+            chunkFilename: DEBUG ? '[id].[name].css' : '[name]-[chunkhash].css',
         })
     ],
 

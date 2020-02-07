@@ -19,6 +19,20 @@ $(document).ready(function () {
             .catch(error => showComponentError(error));
     } else if (sections.includes("assignmentForm")) {
         $('[data-toggle="tooltip"]').tooltip();
+        let defaultWhiteList = $.fn.tooltip.Constructor.DEFAULTS.whiteList;
+        defaultWhiteList.dl = ['class'];
+        defaultWhiteList.dd = [];
+        defaultWhiteList.dt = [];
+        $('.has-popover').popover({
+            container: 'body',
+            html: true,
+            placement: 'auto',
+            trigger: 'hover',
+            content: function () {
+                let helpBlockId = $(this).data('target');
+                return $(helpBlockId).html();
+            }
+        });
         import('forms')
             .then(_ => {
                 $('.datepicker').datetimepicker({
@@ -38,7 +52,7 @@ $(document).ready(function () {
                     tooltips: TIMEPICKER_TOOLTIPS
                 });
 
-                $('#timepicker').datetimepicker({
+                $('.timepicker').datetimepicker({
                     locale: 'ru',
                     format: 'HH:mm',
                     stepping: 1,
@@ -50,8 +64,6 @@ $(document).ready(function () {
                     keyBinds: {
                         left: false,
                         right: false,
-                        up: false,
-                        down: false
                     }
                 });
             })

@@ -1,7 +1,6 @@
-import Cookies from 'js-cookie';
 import Cropper from 'cropperjs';
 import $ from 'jquery';
-import {createNotification, getTemplate} from './utils';
+import {createNotification, getCSRFToken, getTemplate} from './utils';
 
 // profileAppInit - global dependency :<
 const profileAppInit = window.profileAppInit;
@@ -38,7 +37,7 @@ var photoValidation = {
 const xhrOpts = {
     url: `/users/${profileAppInit.user_id}/profile-update-image/`,
     headers: {
-        'X-CSRFToken': Cookies.get('csrf_token')
+        'X-CSRFToken': getCSRFToken()
     }
 };
 

@@ -1,11 +1,11 @@
 import * as d3 from "d3";
-import * as c3 from "c3";
+import c3 from "c3";
 import $ from 'jquery';
 import {URLS} from 'stats/utils';
 import i18n from 'stats/i18n';
 
 class ParticipantsYear {
-    static ENTRY_POINT_URL = "api:stats_learning_participants_year";
+    static ENDPOINT_URI = "stats-api:stats_learning_participants_year";
 
     constructor(id, options) {
         this.id = `#${id}`;
@@ -47,7 +47,7 @@ class ParticipantsYear {
     }
 
     getStats(course_session_id) {
-        let dataURL = URLS[this.constructor.ENTRY_POINT_URL](course_session_id);
+        let dataURL = URLS[this.constructor.ENDPOINT_URI](course_session_id);
         return $.getJSON(dataURL);
     }
 

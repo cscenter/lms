@@ -6,22 +6,15 @@
     <div class="container mt-10">
         <div class="row">
             <div class="col-4">
-                <div class="scrollable mb-4">
-                    <ul class="ui nav-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#">Санкт-Петербург</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Новосибирск</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Казань</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Сан-Франциско</a>
-                        </li>
-                    </ul>
-                </div>
+                {% call macros.scrollable() %}
+                    {% set tabs = [
+                        {'target': 'practice', 'name': 'Санкт-Петербург', 'active': true, 'url': '#'},
+                        {'target': 'nir', 'name': 'Новосибирск', 'active': false, 'url': '#'},
+                        {'target': 'nir', 'name': 'Казань', 'active': false, 'url': '#'},
+                        {'target': 'nir', 'name': 'Сан-Франциско', 'active': false, 'url': '#'}
+                        ] %}
+                    {{ macros.tabs(tabs, modifiers='') }}
+                {% endcall %}
             </div>
         </div>
     </div>
@@ -29,7 +22,7 @@
         <h3>Table</h3>
         <div class="row">
             <div class="col-3">
-                <div class="scrollable mb-4">
+                {% call macros.scrollable() %}
                     <table>
                         <caption>Таблица размеров обуви</caption>
                         <tbody>
@@ -95,7 +88,7 @@
                         </tr>
                         </tbody>
                     </table>
-                </div>
+                {% endcall %}
             </div>
         </div>
     </div>
