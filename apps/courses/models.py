@@ -236,6 +236,11 @@ class MetaCourse(TimeStampedModel):
             return staticfiles_storage.url('v2/img/placeholder/meta_course.png')
 
 
+class StudentGroupTypes(DjangoChoices):
+    MANUAL = C('manual', _('Manual'))
+    BRANCH = C('branch', _('Branch'))
+
+
 class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'branch'
 
@@ -295,6 +300,17 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("Branches where the course is also available for "
                     "enrollment"),
         blank=True)
+    group_mode = models.CharField(
+        verbose_name=_("Student Group Mode"),
+        max_length=100,
+        choices=StudentGroupTypes.choices,
+        default=StudentGroupTypes.BRANCH,
+        # Hide this field as implementation detail.
+        # Right now we support only `branch` mode.
+        editable=False,
+        help_text=_("Choose `Branch` to auto generate student groups "
+                    "from course branches."))
+
     language = models.CharField(max_length=5, db_index=True,
                                 choices=settings.LANGUAGES,
                                 default=settings.LANGUAGE_CODE)

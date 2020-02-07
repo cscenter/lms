@@ -25,7 +25,7 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
 from core.timezone import TimezoneAwareModel, now_local
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
-from courses.models import Course, CourseNews, Assignment
+from courses.models import Course, CourseNews, Assignment, StudentGroupTypes
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
@@ -36,6 +36,48 @@ from users.constants import ThumbnailSizes
 from users.thumbnails import UserThumbnailMixin
 
 logger = logging.getLogger(__name__)
+
+
+class StudentGroup(TimeStampedModel):
+    type = models.CharField(
+        verbose_name=_("Type"),
+        max_length=100,
+        choices=StudentGroupTypes.choices,
+        default=StudentGroupTypes.BRANCH)
+    name = models.CharField(
+        verbose_name=_("Name"),
+        max_length=255)
+    course = models.ForeignKey(
+        Course,
+        verbose_name=_("Course offering"),
+        related_name="student_groups",
+        on_delete=models.CASCADE)
+    meta = PrettyJSONField(
+        verbose_name=_("Meta"),
+        blank=True,
+        null=True,
+    )
+    # Note: better to place in `meta`, but now we support only `branch` mode
+    branch = models.ForeignKey(
+        Branch,
+        verbose_name=_("Branch"),
+        related_name="+",  # Disable backwards relation
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True)
+    enrollment_key = models.CharField(
+        verbose_name=_("Enrollment key"),
+        max_length=128)
+
+    class Meta:
+        verbose_name = _("Student Group")
+        verbose_name_plural = _("Student Groups")
+
+    def save(self, **kwargs):
+        created = self.pk is None
+        if created and not self.enrollment_key:
+            self.enrollment_key = token_urlsafe(18)  # 24 chars in base64
+        super().save(**kwargs)
 
 
 class Enrollment(TimezoneAwareModel, TimeStampedModel):
