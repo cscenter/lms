@@ -521,13 +521,15 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
                    .select_related("meta_course", "semester", "branch")
                    .prefetch_related(CourseTeacher.lecturers_prefetch())
                    .order_by('-semester__index'))
-        courses_by_branch = bucketize(courses, key=lambda c: c.branch)
+        # Don't divide center and club courses from the same city
+        courses_by_branch = bucketize(
+            courses,
+            key=lambda c: (c.branch.code, c.branch.name))
         # Aggregate tabs
         tabs = TabList()
-        for branch in courses_by_branch:
-            if courses_by_branch[branch]:
-                tabs.add(Tab(target=branch.code, name=branch.name,
-                             order=branch.order))
+        for (code, name), values in courses_by_branch.items():
+            if values:
+                tabs.add(Tab(target=code, name=name))
         if tabs:
             selected_tab = self.request.GET.get('branch', Branches.SPB)
             tabs.set_active(selected_tab)  # deactivates all other tabs
