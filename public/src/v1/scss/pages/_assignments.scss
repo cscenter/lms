@@ -14,12 +14,6 @@
 
 
 // TEACHER assignment submissions page
-#assignments-select-button {
-  @extend .btn;
-  @extend .btn-primary;
-  padding: 6px 12px!important;
-}
-
 #assignments-page {
   @extend .container;
   position: relative;

@@ -4,3 +4,4 @@ import moment from "moment";
 import "moment/locale/ru";
 import "eonasdan-bootstrap-datetimepicker";
 
+$.fn.selectpicker.Constructor.BootstrapVersion = '3';

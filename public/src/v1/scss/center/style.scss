@@ -1,18 +1,15 @@
-
 @import "variables";
 @import "../bootstrap.custom";
-@import "../jgrowl.customize";
-@import "../bootstrap.sweetalerts/sweet-alert-combine";
+@import "bootstrap-select/sass/bootstrap-select";
+
 @import "top_menu";
 
 @import "utilities/spacing";
 
-// Material design elements based on bootstrap
+@import "material_design"; // Material design elements based on bootstrap
+@import "components/bootstrap.sweetalerts/sweet-alert-combine";
+@import "components/jgrowl/jgrowl";
 @import "components/labels";
-//@import "components/page_aside";
-@import "material_design";
-
-
 @import "components/inputs";
 @import "components/buttons";
 @import "components/widgets";
@@ -33,30 +30,21 @@
 @import "components/editor";
 
 // TODO: separate pages from common bundle (teacher bundle, student bundle?)
-@import "pages/open_in_nsk";
+@import "pages/_assignments";
+@import "pages/calendar";
+@import "pages/course_detail";
 @import "pages/courses";
-@import "pages/application";
 @import "pages/login";
-@import "pages/online_courses_page";
-@import "pages/index";
-@import "pages/testimonials";
 @import "pages/gradebook";
 @import "pages/courses_list_student";
 @import "pages/student_submission_comments";
-@import "pages/alumni";
-@import "pages/alumni_by_year";
-@import "pages/admission";
-@import "pages/projects_examples";
-@import "pages/projects";
-@import "pages/_assignments";
-@import "pages/calendar";
 @import "pages/teachers_list";
-@import "pages/user_profile";
-@import "pages/staff";
-@import "pages/course_offering";
 
+@import "./pages/alumni_by_year";
+@import "./pages/admission";
+@import "./pages/projects";
+@import "./pages/user_profile";
 
-@import "pages/courses_experiment";
 
 .help-block {
   margin-bottom: 0;
@@ -81,6 +69,10 @@
     margin-top: -2px;
     position: absolute;
   }
+}
+
+select.multiple-select[multiple] {
+  height: $input-height-base;
 }
 
 
@@ -294,27 +286,20 @@ html {
 }
 
 .columns {
-  -webkit-column-count: 2;
-  -webkit-column-gap: 10px;
-  -webkit-column-fill: auto;
-  -moz-column-count: 2;
-  -moz-column-gap: 10px;
-  -moz-column-fill: auto;
   column-count: 2;
   column-gap: 10px;
   column-fill: auto;
 }
 
 .user-tile {
-  -webkit-column-break-inside: avoid;
-  -moz-column-break-inside: avoid;
-  column-break-inside: avoid;
+  break-inside: avoid;
   margin-bottom: 10px;
+
+  .user-info h4 {
+    margin-top: 0;
+  }
 }
 
-.user-tile .user-info h4 {
-  margin-top: 0px;
-}
 
 .timetable .badge {
   color: black;
@@ -336,7 +321,7 @@ html {
 }
 
 .timetable-header-row .center h2 {
-  margin: 0px;
+  margin: 0;
 }
 
 .timetable-main-row h4 {
@@ -369,7 +354,7 @@ h2 {
   }
 }
 
-.btn {
+.btn:not(.dropdown-toggle) {
   border-radius: 0;
 }
 
@@ -409,10 +394,6 @@ h2 {
 
 .link-disabled .reason.active {
   opacity: 1;
-  -webkit-transition: opacity .15s ease-in-out;
-  -moz-transition: opacity .15s ease-in-out;
-  -ms-transition: opacity .15s ease-in-out;
-  -o-transition: opacity .15s ease-in-out;
   transition: opacity .15s ease-in-out;
 }
 

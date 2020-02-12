@@ -2,34 +2,36 @@
 @import "variables";
 @import "../bootstrap.custom";
 
-@import "../center/utilities/spacing";
+@import "utilities/spacing";
 
-@import "../jgrowl.customize";
-@import "../bootstrap.sweetalerts/sweet-alert-combine";
-@import "profile_page";
-@import "../center/pages/login";
-@import "../center/pages/courses_list_student.scss";
-@import "../center/pages/_calendar";
-@import "../center/pages/_assignments";
-@import "../center/pages/gradebook.scss";
-@import "../center/pages/course_offering";
-@import "../center/pages/student_submission_comments";
-@import "../center/pages/teachers_list";
-@import "../center/components/buttons";
-@import "../center/components/labels";
-@import "../center/components/toolbars";
-@import "../center/components/page_aside";
-@import "../center/components/loading";
-@import "../center/components/cropper";
-@import "../center/components/lists";
-@import "../center/components/panels";
-@import "../center/components/inputs";
-@import "../center/components/breadcrumbs";
-@import "../center/components/upload_photo";
-@import "../center/components/editor";
-@import "top_menu";
-// Make sure to run `grunt build` from `csc` dir until we replace grunt with webpack.
 @import "magnific-popup/src/css/main.scss";
+@import "bootstrap-select/sass/bootstrap-select";
+
+@import "components/bootstrap.sweetalerts/sweet-alert-combine";
+@import "components/jgrowl/jgrowl";
+@import "components/buttons";
+@import "components/labels";
+@import "components/toolbars";
+@import "components/loading";
+@import "components/cropper";
+@import "components/lists";
+@import "components/panels";
+@import "components/inputs";
+@import "components/breadcrumbs";
+@import "components/upload_photo";
+@import "components/editor";
+
+@import "top_menu";
+@import "profile_page";
+@import "pages/login";
+@import "pages/courses_list_student.scss";
+@import "pages/_calendar";
+@import "pages/_assignments";
+@import "pages/gradebook.scss";
+@import "pages/course_detail";
+@import "pages/student_submission_comments";
+@import "pages/teachers_list";
+
 
 .bg-gray {
   background-color: $background-grey;

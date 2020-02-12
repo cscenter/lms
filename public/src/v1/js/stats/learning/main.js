@@ -47,7 +47,7 @@ function initFilter() {
     // TODO: refactor
     termFilter.on('change', function () {
         let term_id = $(this).val();
-        let courses = json_data.courses[term_id];
+        let courses = jsonData.courses[term_id];
         courseFilter.empty();
         courses.forEach(function (co) {
             let opt = document.createElement('option');
@@ -61,7 +61,7 @@ function initFilter() {
 }
 
 export function initPlots() {
-    let courseSessionId = json_data.course_session_id;
+    let courseSessionId = jsonData.course_session_id;
     initFilter();
     renderPlots(courseSessionId);
 }

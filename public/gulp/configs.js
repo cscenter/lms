@@ -38,6 +38,7 @@ export const sassConfig = {
     includePaths: [
         './node_modules/',
         '../node_modules/',
+        `../src/${staticVersion}/scss/`,
     ]
 };
 
