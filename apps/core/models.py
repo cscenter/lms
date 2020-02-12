@@ -19,9 +19,11 @@ class BranchNaturalKey(NamedTuple):
 
 
 SiteId = NewType('SiteId', int)
-BranchKey = Union[SiteId, BranchNaturalKey]
+BranchId = NewType('BranchId', int)
 
-BRANCH_CACHE: Dict[BranchKey, Union["Branch", List["Branch"]]] = {}
+# TODO: Move to shared cache since it's hard to clear in all processes
+BRANCH_CACHE: Dict[Union[BranchId, BranchNaturalKey], "Branch"] = {}
+BRANCH_SITE_CACHE: Dict[SiteId, List[BranchId]] = {}
 
 
 LATEX_MARKDOWN_HTML_ENABLED = _(
@@ -69,6 +71,12 @@ class City(TimezoneAwareModel, models.Model):
 class BranchManager(models.Manager):
     use_in_migrations = True
 
+    def get_by_pk(self, branch_id: int):
+        pk = BranchId(branch_id)
+        if pk not in BRANCH_CACHE:
+            BRANCH_CACHE[pk] = self.get(pk=pk)
+        return BRANCH_CACHE[pk]
+
     def get_by_natural_key(self, code, site_id):
         key = BranchNaturalKey(code=code, site_id=site_id)
         if key not in BRANCH_CACHE:
@@ -85,12 +93,18 @@ class BranchManager(models.Manager):
             BRANCH_CACHE[key] = self.get(code=key.code, site_id=key.site_id)
         return BRANCH_CACHE[key]
 
-    def for_site(self, site_id: int):
+    def for_site(self, site_id: int) -> List["Branch"]:
+        """Returns all branches for concrete site"""
         cache_key = SiteId(site_id)
-        if cache_key not in BRANCH_CACHE:
-            BRANCH_CACHE[cache_key] = list(self.filter(site_id=site_id)
-                                           .order_by('order'))
-        return BRANCH_CACHE[cache_key]
+        if cache_key not in BRANCH_SITE_CACHE:
+            branches = list(self.filter(site_id=site_id).order_by('order'))
+            if not branches:
+                return []
+            for b in branches:
+                key = BranchId(b.pk)
+                BRANCH_CACHE[key] = b
+            BRANCH_SITE_CACHE[cache_key] = [BranchId(b.pk) for b in branches]
+        return [BRANCH_CACHE[pk] for pk in BRANCH_SITE_CACHE[cache_key]]
 
     def get_current(self, request=None, site_id: int = settings.SITE_ID):
         """
@@ -107,9 +121,10 @@ class BranchManager(models.Manager):
 
     @staticmethod
     def clear_cache():
-        """Clear the ``Branch`` object cache."""
-        global BRANCH_CACHE
+        """Clear the ``Branch`` object caches."""
+        global BRANCH_CACHE, BRANCH_SITE_CACHE
         BRANCH_CACHE = {}
+        BRANCH_SITE_CACHE = {}
 
 
 class Branch(TimezoneAwareModel, models.Model):
@@ -152,6 +167,9 @@ class Branch(TimezoneAwareModel, models.Model):
         created = self.pk is None
         super(Branch, self).save(*args, **kwargs)
         Branch.objects.clear_cache()
+
+    def natural_key(self):
+        return BranchNaturalKey(self.code, self.site_id)
 
     def get_timezone(self) -> Timezone:
         return self._timezone
