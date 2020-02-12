@@ -17,29 +17,6 @@ const fn = {
         fn.initCommentModal();
         fn.initStickySidebar();
         fn.initFileInput();
-
-        const timePickers = $('.timepicker');
-        if (timePickers.length > 0) {
-            import(/* webpackChunkName: "bootstrap-datetimepicker" */ 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css');
-            import('forms')
-                .then(_ => {
-                    timePickers.datetimepicker({
-                        locale: 'ru',
-                        format: 'HH:mm',
-                        stepping: 1,
-                        useCurrent: false,
-                        allowInputToggle: false,
-                        icons: TIMEPICKER_ICONS,
-                        tooltips: TIMEPICKER_TOOLTIPS,
-                        keyBinds: {
-                            left: false,
-                            right: false,
-                        }
-                    });
-                })
-                .catch(error => showComponentError(error));
-        }
-
     },
 
     initCommentModal: function () {

@@ -5,3 +5,5 @@ import "moment/locale/ru";
 import "eonasdan-bootstrap-datetimepicker";
 
 $.fn.selectpicker.Constructor.BootstrapVersion = '3';
+
+import(/* webpackChunkName: "bootstrap-datetimepicker" */ 'eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css');
