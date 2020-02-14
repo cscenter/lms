@@ -351,7 +351,7 @@ class EnrollInCourseByInvitation(Permission):
     @staticmethod
     @rules.predicate
     def rule(user, course_invitation: CourseInvitation):
-        if not course_invitation.is_active:
+        if not course_invitation or not course_invitation.is_active:
             return False
         return enroll_in_course(user, course_invitation.course)
 

@@ -8,20 +8,16 @@
 
 {% block stylesheets %}
      <link href="{% static "v1/css/vendor/c3.min.css" %}" rel="stylesheet">
-     <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/css/bootstrap-select.min.css" rel="stylesheet">
 {% endblock stylesheets %}
 
 {% block javascripts %}
     <script charset="utf-8">
-        var json_data = jQuery.parseJSON('{{ json_data|escapejs }}');
+        window.jsonData = JSON.parse('{{ json_data|escapejs }}');
     </script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js" charset="utf-8"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-ru_RU.min.js" charset="utf-8"></script>
-    <script src="https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
     <script src="{% static 'v1/js/vendor/reverse.js' %}"></script>
     {% render_bundle 'stats' 'js' %}
 
-    {% include "stats/_filter_templates.html" %}
+    {% include "stats/_js_templates.html" %}
 {% endblock javascripts %}
 
 {% block content %}

@@ -1,7 +1,5 @@
-from typing import List
-
 from django.db import models
-from django.db.models import query, Prefetch
+from django.db.models import query
 
 from core.utils import is_club_site
 from courses.utils import get_boundaries

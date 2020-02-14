@@ -7,51 +7,41 @@ from core.models import Branch
 from courses.models import Assignment, CourseNews, CourseTeacher, Course, \
     StudentGroupTypes
 from learning.models import AssignmentNotification, \
-    StudentAssignment, Enrollment, CourseNewsNotification, StudentGroup
-from learning.settings import StudentStatuses
+    StudentAssignment, Enrollment, CourseNewsNotification, AssignmentGroup, \
+    StudentGroup
+from learning.services import StudentGroupService, AssignmentService
 from learning.utils import update_course_learners_count
-
-
-def add_student_group(course: Course, branch):
-    group, _ = (StudentGroup.objects.get_or_create(
-        course_id=course.pk,
-        type=StudentGroupTypes.BRANCH,
-        branch_id=branch.pk,
-        defaults={
-            "name": str(branch),
-            "name_en": f"{branch.name_en} [{branch.site}]"
-        }))
-
-"""
-TODO:
-1. Сделать привязку Assignment к StudentGroup (если групп > 1 ???). Кого-то это может начать путать, особенно суффиксы [compsciclub.ru]
-Возможно, надо делать явный вариант "все", т.к. возможны студенты без привязки к группе. Тогда если в UI выбрать все группы - им не будут видны 
-2. Генерировать StudentAssignment на основе StudentGroup. Как матчить необходимость? Если type == manual, то просто по StudentGroup.pk. Если type == branch, то по StudentGroup.branch_id
-3. При записи студента на курс - добавлять его в группу по возможности. [optional Enrollment.student_group]. Если записывают студента, для которого нет группы - его всё равно надо как-то добавить.
-"""
 
 
 # FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
 # FIXME: группу лучше удалить, т.к. она будет предлагаться для новых заданий, хотя типа уже удалена.
 @receiver(post_save, sender=Course)
-def manage_student_group_for_course_root_branch(sender, instance, created,
-                                                **kwargs):
+def add_student_group_for_course_root_branch(sender, instance, created,
+                                             **kwargs):
     # FIXME: Как взять предыдущее значение? Нужно ли его удалять?
-    if instance.group_mode == StudentGroupTypes.BRANCH:
-        add_student_group(instance, instance.branch)
+    if created:
+        if instance.group_mode == StudentGroupTypes.BRANCH:
+            StudentGroupService.add(instance, instance.branch)
+    # TODO: What if a root branch were changed?
 
 
 @receiver(m2m_changed, sender=Course.additional_branches.through)
 def manage_student_group_for_course_additional_branch(sender, **kwargs):
     action = kwargs.pop("action")
-    if action != "post_add":
+    if action not in ("post_add", "post_remove"):
         return
-    instance = kwargs.pop("instance")
-    if instance.group_mode == StudentGroupTypes.BRANCH:
-        branches: Set[int] = kwargs.pop("pk_set", set())
-        for branch_id in branches:
-            branch = Branch.objects.get(pk=branch_id)
-            add_student_group(instance, branch)
+    course = kwargs.pop("instance")
+    branches: Set[int] = kwargs.pop("pk_set", set())
+    if action == "post_add":
+        if course.group_mode == StudentGroupTypes.BRANCH:
+            for branch_id in branches:
+                branch = Branch.objects.get_by_pk(branch_id)
+                StudentGroupService.add(course, branch)
+    elif action == "post_remove":
+        if course.group_mode == StudentGroupTypes.BRANCH:
+            for branch_id in branches:
+                branch = Branch.objects.get_by_pk(branch_id)
+                StudentGroupService.remove(course, branch)
 
 
 @receiver(post_save, sender=Enrollment)
@@ -80,34 +70,6 @@ def create_notifications_about_course_news(sender, instance: CourseNews,
             CourseNewsNotification(user_id=co_t.teacher_id,
                                    course_offering_news_id=instance.pk))
     CourseNewsNotification.objects.bulk_create(notifications)
-
-
-# TODO: send notification to other teachers
-@receiver(post_save, sender=Assignment)
-def create_student_assignments_for_new_assignment(sender, instance, created,
-                                                  *args, **kwargs):
-    if not created:
-        return
-    course = instance.course
-    # Skip expelled students or in academic leave
-    active_students = (Enrollment.active
-                       .filter(course=course)
-                       # FIXME: move to `active` manager?
-                       .exclude(student__status__in=StudentStatuses.inactive_statuses)
-                       .values_list("student_id", flat=True))
-    for student_id in active_students:
-        a_s = StudentAssignment.objects.create(assignment=instance,
-                                               student_id=student_id)
-        # Note(Dmitry): we create notifications here instead of a separate
-        #               receiver because it's much more efficient than getting
-        #               StudentAssignment objects back one by one. It seems
-        #               reasonable that 2*N INSERTs are better than bulk_create
-        #               + N SELECTs + N INSERTs.
-        # bulk_create doesn't return pks, that's the main reason
-        (AssignmentNotification(user_id=student_id,
-                                student_assignment=a_s,
-                                is_about_creation=True)
-         .save())
 
 
 @receiver(post_save, sender=Assignment)

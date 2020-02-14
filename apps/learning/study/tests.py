@@ -1,21 +1,32 @@
 import datetime
 
 import pytest
+import pytz
+from bs4 import BeautifulSoup
+from django.utils import timezone, formats
 
+from auth.mixins import PermissionRequiredMixin
 from core.tests.factories import BranchFactory
+from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.tests.factories import *
-from courses.tests.factories import SemesterFactory, CourseFactory
+from courses.tests.factories import SemesterFactory, CourseFactory, \
+    AssignmentFactory
+from courses.utils import get_current_term_pair
+from learning.models import StudentAssignment
 from learning.permissions import course_access_role, CourseRole
 from learning.services import EnrollmentService
 from learning.settings import GradeTypes, StudentStatuses, Branches
 from learning.tests.factories import *
+from learning.tests.factories import EnrollmentFactory, StudentAssignmentFactory
+from learning.tests.mixins import MyUtilitiesMixin
 from projects.constants import ProjectTypes
 from projects.models import ReportingPeriodKey
 from projects.tests.factories import ReportingPeriodFactory, \
     ProjectStudentFactory, ProjectFactory
+from users.constants import Roles
 from users.tests.factories import *
-from users.tests.factories import StudentFactory
+from users.tests.factories import StudentFactory, UserFactory
 
 
 @pytest.mark.django_db
@@ -251,3 +262,256 @@ def test_student_assignment_execution_time_form(client, assert_redirect):
     sa.save()
     response = client.post(update_url, form_data)
     assert_redirect(response, sa.get_student_url())
+
+
+class StudentAssignmentListTests(MyUtilitiesMixin, CSCTestCase):
+    url_name = 'study:assignment_list'
+    groups_allowed = [Roles.STUDENT]
+
+    # FIXME: test permission instead and remove this test!
+    def test_group_security(self):
+        """
+        Checks if only users in groups listed in self.groups_allowed can
+        access the page which url is stored in self.url_name.
+        Also checks that curator can access any page
+        """
+        self.assertTrue(self.groups_allowed is not None)
+        self.assertTrue(self.url_name is not None)
+        self.assertLoginRedirect(reverse(self.url_name))
+        all_test_groups = [
+            [],
+            [Roles.TEACHER],
+            [Roles.STUDENT],
+            [Roles.GRADUATE]
+        ]
+        for groups in all_test_groups:
+            self.doLogin(UserFactory.create(groups=groups))
+            if any(group in self.groups_allowed for group in groups):
+                self.assertStatusCode(200, self.url_name)
+            else:
+                self.assertStatusCode(403, self.url_name)
+            self.client.logout()
+
+    def test_list(self):
+        u = StudentFactory()
+        s = SemesterFactory.create_current(for_branch=Branches.SPB)
+        co = CourseFactory.create(semester=s)
+        as1 = AssignmentFactory.create_batch(2, course=co)
+        self.doLogin(u)
+        # no assignments yet
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEqual(0, len(resp.context['assignment_list_open']))
+        self.assertEqual(0, len(resp.context['assignment_list_archive']))
+        # enroll at course offering, assignments are shown
+        EnrollmentFactory.create(student=u, course=co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEqual(2, len(resp.context['assignment_list_open']))
+        self.assertEqual(0, len(resp.context['assignment_list_archive']))
+        # add a few assignments, they should show up
+        as2 = AssignmentFactory.create_batch(3, course=co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertSameObjects([(StudentAssignment.objects
+                                 .get(assignment=a, student=u))
+                                for a in (as1 + as2)],
+                               resp.context['assignment_list_open'])
+        # Add few old assignments from current semester with expired deadline
+        deadline_at = (datetime.datetime.now().replace(tzinfo=timezone.utc)
+                       - datetime.timedelta(days=1))
+        as_olds = AssignmentFactory.create_batch(2, course=co,
+                                             deadline_at=deadline_at)
+        resp = self.client.get(reverse(self.url_name))
+        for a in as1 + as2 + as_olds:
+            self.assertContains(resp, a.title)
+        for a in as_olds:
+            self.assertContains(resp, a.title)
+        self.assertSameObjects([(StudentAssignment.objects
+                                 .get(assignment=a, student=u))
+                                for a in (as1 + as2)],
+                               resp.context['assignment_list_open'])
+        self.assertSameObjects([(StudentAssignment.objects
+                                 .get(assignment=a, student=u)) for a in as_olds],
+                                resp.context['assignment_list_archive'])
+        # Now add assignment from the past semester
+        old_s = SemesterFactory.create_prev(s)
+        old_co = CourseFactory.create(semester=old_s)
+        as_past = AssignmentFactory(course=old_co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertNotIn(as_past, resp.context['assignment_list_archive'])
+
+    def test_assignments_from_unenrolled_course(self):
+        """Move to archive active assignments from course offerings
+        which student already leave
+        """
+        u = StudentFactory()
+        s = SemesterFactory.create_current(for_branch=Branches.SPB)
+        # Create open co to pass enrollment limit
+        co = CourseFactory.create(semester=s, is_open=True)
+        as1 = AssignmentFactory.create_batch(2, course=co)
+        self.doLogin(u)
+        # enroll at course offering, assignments are shown
+        EnrollmentFactory.create(student=u, course=co)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEqual(2, len(resp.context['assignment_list_open']))
+        self.assertEqual(0, len(resp.context['assignment_list_archive']))
+        # Now unenroll from the course
+        form = {'course_pk': co.pk}
+        response = self.client.post(co.get_unenroll_url(), form)
+        resp = self.client.get(reverse(self.url_name))
+        self.assertEqual(0, len(resp.context['assignment_list_open']))
+        self.assertEqual(2, len(resp.context['assignment_list_archive']))
+
+
+@pytest.mark.django_db
+def test_deadline_l10n_on_student_assignment_list_page(settings, client):
+    settings.LANGUAGE_CODE = 'ru'  # formatting depends on locale
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    FORMAT_DATE_PART = 'd E Y'
+    FORMAT_TIME_PART = 'H:i'
+    # This day will be in archive block (1 jan 2017 15:00 in UTC)
+    dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    # Assignment will be created with the past date, but we will see it on
+    # assignments page since course offering semester set to current
+    current_term = SemesterFactory.create_current()
+    assignment = AssignmentFactory(deadline_at=dt,
+                                   course__branch__code=Branches.SPB,
+                                   course__semester_id=current_term.pk)
+    student = StudentFactory(branch__code=Branches.SPB)
+    sa = StudentAssignmentFactory(assignment=assignment, student=student)
+    client.login(student)
+    url_learning_assignments = reverse('study:assignment_list')
+    response = client.get(url_learning_assignments)
+    html = BeautifulSoup(response.content, "html.parser")
+    # Note: On this page used `naturalday` filter, so use passed datetime
+    year_part = formats.date_format(assignment.deadline_at_local(),
+                                    FORMAT_DATE_PART)
+    assert year_part == "01 января 2017"
+    time_part = formats.date_format(assignment.deadline_at_local(),
+                                    FORMAT_TIME_PART)
+    assert time_part == "18:00"
+    assert any(year_part in s.text and time_part in s.text for s in
+               html.find_all('div', {'class': 'assignment-date'}))
+    # Test `upcoming` block
+    now_year = get_current_term_pair(branch_spb.get_timezone()).year
+    dt = dt.replace(year=now_year + 1, month=2, hour=14)
+    assignment.deadline_at = dt
+    assignment.save()
+    year_part = formats.date_format(assignment.deadline_at_local(),
+                                    FORMAT_DATE_PART)
+    assert year_part == "01 февраля {}".format(now_year + 1)
+    time_part = formats.date_format(assignment.deadline_at_local(),
+                                    FORMAT_TIME_PART)
+    assert time_part == "17:00"
+    response = client.get(url_learning_assignments)
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any(year_part in s.text and time_part in s.text for s in
+               html.find_all('div', {'class': 'assignment-date'}))
+    # Deadlines depends on authenticated user timezone
+    dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
+    assignment_nsk = AssignmentFactory(deadline_at=dt,
+                                       course__branch=branch_nsk,
+                                       course__semester=current_term)
+    StudentAssignmentFactory(assignment=assignment_nsk, student=student)
+    client.login(student)
+    response = client.get(url_learning_assignments)
+    assert response.context["tz_override"] == branch_spb.get_timezone()
+    year_part = formats.date_format(assignment_nsk.deadline_at_local(),
+                                    FORMAT_DATE_PART)
+    assert year_part == "01 января 2017"
+    time_part = formats.date_format(
+        assignment_nsk.deadline_at_local(tz=branch_spb.get_timezone()),
+        FORMAT_TIME_PART)
+    assert time_part == "18:00"
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any(year_part in s.text and time_part in s.text for s in
+               html.find_all('div', {'class': 'assignment-date'}))
+    # Make student as a volunteer, should be the same
+    student.remove_group(Roles.STUDENT)
+    student.add_group(Roles.VOLUNTEER)
+    response = client.get(url_learning_assignments)
+    assert response.status_code == 200
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any(year_part in s.text and time_part in s.text for s in
+               html.find_all('div', {'class': 'assignment-date'}))
+    # Users without student role on current site has no access to the page
+    client.login(student)
+    student.remove_group(Roles.VOLUNTEER)
+    student.add_group(Roles.STUDENT, site_id=settings.ANOTHER_DOMAIN_ID)
+    response = client.get(url_learning_assignments)
+    assert response.status_code == 403
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
+def test_course_list_student_with_inactive_status(inactive_status, client):
+    student = StudentFactory(status=inactive_status)
+    client.login(student)
+    url = reverse('study:course_list')
+    response = client.get(url)
+    assert response.status_code == 403
+    active_student = StudentFactory()
+    client.login(active_student)
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_student_courses_list(client, lms_resolver, assert_login_redirect):
+    url = reverse('study:course_list')
+    resolver = lms_resolver(url)
+    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
+    assert resolver.func.view_class.permission_required == "study.view_courses"
+    student_spb = StudentFactory(branch__code=Branches.SPB)
+    client.login(student_spb)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert len(response.context['ongoing_rest']) == 0
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['archive_enrolled']) == 0
+    current_term = get_current_term_pair(student_spb.get_timezone())
+    current_term_spb = SemesterFactory(year=current_term.year,
+                                       type=current_term.type)
+    cos = CourseFactory.create_batch(4, semester=current_term_spb,
+                                     branch=student_spb.branch, is_open=False)
+    cos_available = cos[:2]
+    cos_enrolled = cos[2:]
+    prev_year = current_term.year - 1
+    cos_archived = CourseFactory.create_batch(
+        3, semester__year=prev_year, is_open=False)
+    for co in cos_enrolled:
+        EnrollmentFactory.create(student=student_spb, course=co)
+    for co in cos_archived:
+        EnrollmentFactory.create(student=student_spb, course=co)
+    response = client.get(url)
+    assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
+    assert set(cos_enrolled) == set(response.context['ongoing_enrolled'])
+    assert len(cos_archived) == len(response.context['archive_enrolled'])
+    assert set(cos_archived) == set(response.context['archive_enrolled'])
+    assert len(cos_available) == len(response.context['ongoing_rest'])
+    assert set(cos_available) == set(response.context['ongoing_rest'])
+    # Add courses from other branch
+    current_term_nsk = SemesterFactory.create_current(for_branch=Branches.NSK)
+    co_nsk = CourseFactory.create(semester=current_term_nsk,
+                                  branch__code=Branches.NSK, is_open=False)
+    response = client.get(url)
+    assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
+    assert len(cos_available) == len(response.context['ongoing_rest'])
+    assert len(cos_archived) == len(response.context['archive_enrolled'])
+    # Test for student from nsk
+    student_nsk = StudentFactory(branch__code=Branches.NSK)
+    client.login(student_nsk)
+    CourseFactory.create(semester__year=prev_year, branch=student_nsk.branch,
+                         is_open=False)
+    response = client.get(url)
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['ongoing_rest']) == 1
+    assert set(response.context['ongoing_rest']) == {co_nsk}
+    assert len(response.context['archive_enrolled']) == 0
+    # Add open reading, it should be available on compscicenter.ru
+    co_open = CourseFactory.create(semester=current_term_nsk,
+                                   branch=student_nsk.branch, is_open=True)
+    response = client.get(url)
+    assert len(response.context['ongoing_enrolled']) == 0
+    assert len(response.context['ongoing_rest']) == 2
+    assert set(response.context['ongoing_rest']) == {co_nsk, co_open}
+    assert len(response.context['archive_enrolled']) == 0

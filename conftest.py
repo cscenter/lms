@@ -114,7 +114,7 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
                       name="Заочное",
                       city=None)
 
-        BranchFactory(code=Branches.NSK,
+        BranchFactory(code='kzn',
                       site=Site.objects.get(id=settings.ANOTHER_DOMAIN_ID),
                       name="Казань",
                       city=city_kzn)

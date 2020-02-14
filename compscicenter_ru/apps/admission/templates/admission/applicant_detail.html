@@ -11,12 +11,6 @@
 
 {% block body_attrs %} class="gray admission-applicant-page" data-init-sections="applicant_detail"{% endblock body_attrs %}
 
-
-{% block stylesheets %}
-    <link href="{% static "v1/css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
-{% endblock stylesheets %}
-
 {% block javascripts %}
     {% render_bundle 'admission' 'js' %}
 {% endblock javascripts %}

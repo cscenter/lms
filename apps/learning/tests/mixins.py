@@ -6,7 +6,6 @@ __all__ = ('MyUtilitiesMixin',)
 
 
 # FIXME: rewrite tests with pytest and remove this mixin.
-# XXX: assertion for redirects duplicated in conftest.py
 class MyUtilitiesMixin:
     def assertStatusCode(self, code, url_name, make_reverse=True, **kwargs):
         if make_reverse:

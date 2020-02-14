@@ -8,7 +8,7 @@ from courses.models import Assignment
 from courses.tabs import CourseTab, CourseTabPanel
 from courses.tabs_registry import register
 from learning.permissions import course_access_role, CourseRole
-from courses.services import get_course_reviews
+from courses.services import get_course_reviews, group_teachers
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +122,6 @@ def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
 
 
 def get_course_contacts(course, **kwargs):
-    teachers_by_role = course.get_grouped_teachers()
+    teachers_by_role = group_teachers(course.course_teachers.all())
     return [ct for g in teachers_by_role.values() for ct in g
             if len(ct.teacher.private_contacts.strip()) > 0]

@@ -10,6 +10,7 @@ from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, LearningSpace, CourseReview, AssignmentSubmissionTypes
 from courses.utils import get_current_term_pair, get_term_by_index
+from learning.services import AssignmentService
 from users.tests.factories import TeacherFactory
 
 __all__ = (
@@ -178,6 +179,19 @@ class AssignmentFactory(factory.DjangoModelFactory):
     weight = 1
 
     @factory.post_generation
+    def restrict_to(self, create, extracted, **kwargs):
+        if extracted:
+            for student_group in extracted:
+                self.restrict_to.add(student_group)
+
+    # Note: this hook depends on `.restrict_to` values and must be
+    # declared after `restrict_to` hook
+    @factory.post_generation
+    def generate_student_assignments(self, create, extracted, **kwargs):
+        if create:
+            AssignmentService.bulk_create_student_assignments(self)
+
+    @factory.post_generation
     def notify_teachers(self, create, extracted, **kwargs):
         if not create:
             return
@@ -185,9 +199,7 @@ class AssignmentFactory(factory.DjangoModelFactory):
             for co_teacher in extracted:
                 self.notify_teachers.add(co_teacher)
         else:
-            ts = self.course.course_teachers.all()
-            for t in ts:
-                self.notify_teachers.add(t)
+            AssignmentService.setup_notification_settings(self)
 
 
 class AssignmentAttachmentFactory(factory.DjangoModelFactory):

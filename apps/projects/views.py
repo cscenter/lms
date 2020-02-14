@@ -40,6 +40,7 @@ from projects.forms import ReportCommentForm, ReportReviewForm, \
     ReportCommentModalForm
 from projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review, ReportingPeriod, ReportingPeriodKey, PracticeCriteria
+from projects.permissions import UpdateReportComment
 from users.constants import Roles, GenderTypes
 from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
@@ -571,23 +572,20 @@ class ReportView(FormMixin, generic.DetailView):
 
 
 # TODO: add permissions tests! Or perhaps anyone can look outside comments if I missed something :<
-# FIXME: replace with vanilla view
 class ReportCommentUpdateView(PermissionRequiredMixin, generic.UpdateView):
     model = ReportComment
     pk_url_kwarg = 'comment_id'
     context_object_name = "comment"
     template_name = "projects/modal_update_report_comment.html"
     form_class = ReportCommentModalForm
+    permission_required = UpdateReportComment.name
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.object = self.get_object()
 
-    def has_permission(self):
-        if self.request.user.has_perm("projects.change_own_reportcomment",
-                                      self.object):
-            return True
-        return self.request.user.has_perm("projects.change_reportcomment")
+    def get_permission_object(self):
+        return self.object
 
     def form_valid(self, form):
         self.object = form.save()

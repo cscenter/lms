@@ -73,11 +73,33 @@ class StudentGroup(TimeStampedModel):
         verbose_name = _("Student Group")
         verbose_name_plural = _("Student Groups")
 
+    def __str__(self):
+        return self.name
+
     def save(self, **kwargs):
         created = self.pk is None
         if created and not self.enrollment_key:
             self.enrollment_key = token_urlsafe(18)  # 24 chars in base64
         super().save(**kwargs)
+
+
+class AssignmentGroup(models.Model):
+    assignment = models.ForeignKey(
+        'courses.Assignment',
+        verbose_name=_("Assignment"),
+        on_delete=models.CASCADE)
+    group = models.ForeignKey(
+        StudentGroup,
+        verbose_name=_("Group"),
+        on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = _("Assignment Group")
+        verbose_name_plural = _("Assignment Groups")
+        constraints = [
+            models.UniqueConstraint(fields=('assignment', 'group'),
+                                    name='unique_assignment_group'),
+        ]
 
 
 class Enrollment(TimezoneAwareModel, TimeStampedModel):
@@ -110,6 +132,13 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
     reason_leave = models.TextField(
         _("Leave reason"),
         blank=True)
+    student_group = models.ForeignKey(
+        StudentGroup,
+        verbose_name=_("Student Group"),
+        related_name="enrollments",
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True)
     invitation = models.ForeignKey(
         'learning.Invitation',
         verbose_name=_("Invitation"),
@@ -403,43 +432,6 @@ def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):
     return f"{sa.assignment.files_root}/user_{sa.student_id}/{filename}"
 
 
-def notify_new_assignment_comment(comment):
-    """
-    Notify teachers if student leave a comment, otherwise notify student.
-    Update `first_student_comment_at` and `last_comment_from`
-    StudentAssignment model fields.
-    """
-    sa: StudentAssignment = comment.student_assignment
-    notifications = []
-    sa_update_dict = {"modified": now()}
-    if comment.author_id == sa.student_id:
-        other_comments = (sa.assignmentcomment_set(manager='published')
-                          .filter(author_id=comment.author_id)
-                          .exclude(pk=comment.pk))
-        is_first_comment = not other_comments.exists()
-        is_about_passed = sa.assignment.is_online and is_first_comment
-
-        teachers = comment.student_assignment.assignment.notify_teachers.all()
-        for t in teachers:
-            notifications.append(
-                AssignmentNotification(user_id=t.teacher_id,
-                                       student_assignment=sa,
-                                       is_about_passed=is_about_passed))
-
-        if is_first_comment:
-            sa_update_dict["first_student_comment_at"] = comment.created
-        sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.STUDENT
-    else:
-        sa_update_dict["last_comment_from"] = sa.CommentAuthorTypes.TEACHER
-        notifications.append(
-            AssignmentNotification(user_id=sa.student_id, student_assignment=sa)
-        )
-    AssignmentNotification.objects.bulk_create(notifications)
-    StudentAssignment.objects.filter(pk=sa.pk).update(**sa_update_dict)
-    for attr_name, attr_value in sa_update_dict.items():
-        setattr(sa, attr_name, attr_value)
-
-
 class AssignmentComment(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'student_assignment'
 
@@ -505,9 +497,11 @@ class AssignmentComment(TimezoneAwareModel, TimeStampedModel):
         self.__original_is_published = self.is_published
 
     def save(self, **kwargs):
+        from learning.services import notify_new_assignment_comment
         created = self.pk is None
         is_published_before = getattr(self, '__original_is_published', False)
         super().save(**kwargs)
+        # FIXME: remove notification logic from model
         # Send notifications only on publishing comment
         if self.is_published and (created or not is_published_before):
             notify_new_assignment_comment(self)
