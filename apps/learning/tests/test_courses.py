@@ -4,15 +4,14 @@ import pytest
 import pytz
 
 from core.tests.factories import BranchFactory
-from core.urls import reverse
 from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
     CourseFactory
-from learning.settings import StudentStatuses, Branches
+from learning.settings import Branches
 from users.tests.factories import TeacherFactory, StudentFactory
 
 
 @pytest.mark.django_db
-def test_detail_view_timezone(settings, client):
+def test_course_detail_view_timezone(settings, client):
     """Test `tz_override` based on user role"""
     # 12 january 2017 23:59 (UTC)
     deadline_at = datetime.datetime(2017, 1, 12, 23, 59, 0, 0,
@@ -58,17 +57,3 @@ def test_detail_view_timezone(settings, client):
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
     assert response.context["tz_override"] is None
-
-
-@pytest.mark.django_db
-@pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
-def test_student_status_inactive(inactive_status, client, settings):
-    student = StudentFactory(status=inactive_status)
-    client.login(student)
-    url = reverse('study:course_list')
-    response = client.get(url)
-    assert response.status_code == 403
-    active_student = StudentFactory()
-    client.login(active_student)
-    response = client.get(url)
-    assert response.status_code == 200

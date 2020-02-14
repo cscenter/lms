@@ -6,11 +6,6 @@
 
 {% block body_attrs %} data-init-sections="datetimepicker"{% endblock body_attrs %}
 
-
-{% block stylesheets %}
-    <link href="{% static "v1/css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
-{% endblock stylesheets %}
-
 {% block javascripts %}
     {% render_bundle 'teaching' 'js' %}
 {% endblock javascripts %}

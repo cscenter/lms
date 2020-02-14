@@ -70,4 +70,3 @@ class TimezoneAwareModelForm(forms.ModelForm):
                         self.cleaned_data[field_name] = value
                         setattr(self.instance, field_name, value)
         return super().save(commit)
-

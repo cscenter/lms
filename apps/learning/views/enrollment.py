@@ -10,33 +10,47 @@ from core.exceptions import Redirect
 from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import CourseEnrollmentForm
-from learning.models import Enrollment, CourseInvitation
+from learning.models import Enrollment, CourseInvitation, StudentGroup
+from learning.permissions import EnrollInCourse, EnrollInCourseByInvitation
 from learning.services import EnrollmentService, AlreadyEnrolled, \
-    CourseCapacityFull
+    CourseCapacityFull, StudentGroupService, GroupEnrollmentKeyError
 
 
-class CourseEnrollView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
+class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
     form_class = CourseEnrollmentForm
     template_name = "learning/enrollment/enrollment_enter.html"
+    permission_required = EnrollInCourse.name
 
     def get_course_queryset(self):
         return (super().get_course_queryset()
                 .select_related("semester", "meta_course"))
 
+    def get_permission_object(self):
+        return self.course
+
     def has_permission(self):
-        if self.request.user.has_perm("learning.enroll_in_course", self.course):
-            return True
-        if self.course.is_capacity_limited and not self.course.places_left:
+        has_perm = super().has_permission()
+        # FIXME: remove?
+        if not has_perm and not self.course.places_left:
             msg = _("No places available, sorry")
             messages.error(self.request, msg, extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
-        return False
+        return has_perm
 
     def form_valid(self, form):
         reason_entry = form.cleaned_data["reason"].strip()
+        student = self.request.user
         try:
-            EnrollmentService.enroll(self.request.user, self.course,
-                                     reason_entry=reason_entry)
+            student_group = StudentGroupService.resolve(self.course, student)
+        except GroupEnrollmentKeyError:
+            # In fact, there is no enrollment key support right now
+            msg = _("Please, check your group enrollment key")
+            messages.error(self.request, msg, extra_tags='timeout')
+            raise Redirect(to=self.course.get_absolute_url())
+        try:
+            EnrollmentService.enroll(student, self.course,
+                                     reason_entry=reason_entry,
+                                     student_group=student_group)
             msg = _("You are successfully enrolled in the course")
             messages.success(self.request, msg, extra_tags='timeout')
         except AlreadyEnrolled:
@@ -87,7 +101,7 @@ class CourseUnenrollView(PermissionRequiredMixin, CourseURLParamsMixin,
 
 class CourseInvitationEnrollView(PermissionRequiredMixin,
                                  CourseURLParamsMixin, GenericView):
-    permission_required = "learning.enroll_in_course_by_invitation"
+    permission_required = EnrollInCourseByInvitation.name
 
     def get_permission_object(self):
         return self.course_invitation
@@ -112,10 +126,19 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
 
     def post(self, request, *args, **kwargs):
         invitation = self.course_invitation.invitation
+        student = request.user
         try:
-            EnrollmentService.enroll(request.user, self.course,
+            resolved_group = StudentGroupService.resolve(self.course, student)
+        except GroupEnrollmentKeyError:
+            # In fact, there is no enrollment key support right now
+            msg = _("Please, check your group enrollment key")
+            messages.error(self.request, msg, extra_tags='timeout')
+            raise Redirect(to=self.course.get_absolute_url())
+        try:
+            EnrollmentService.enroll(student, self.course,
                                      reason_entry='',
-                                     invitation=invitation)
+                                     invitation=invitation,
+                                     student_group=resolved_group)
             msg = _("You are successfully enrolled in the course")
             messages.success(self.request, msg, extra_tags='timeout')
             redirect_to = self.course.get_absolute_url()

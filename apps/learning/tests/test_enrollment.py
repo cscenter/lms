@@ -4,19 +4,20 @@ import pytest
 from bs4 import BeautifulSoup
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
+from django.utils.timezone import now
 from django.utils.translation import ugettext as _
 
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
-from core.urls import reverse
+from core.urls import reverse, branch_aware_reverse
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment
 from learning.services import EnrollmentService, CourseCapacityFull
 from learning.settings import StudentStatuses, Branches
-from learning.tests.factories import EnrollmentFactory
-from users.tests.factories import StudentFactory
+from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
+from users.tests.factories import StudentFactory, InvitedStudentFactory
 
 
 # TODO: запись кем-то без группы INVITED.
@@ -24,8 +25,6 @@ from users.tests.factories import StudentFactory
 
 
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
-# TODO: Test volunteer can enroll!
-# TODO: вызывает запись на полный курс, смотрим, что после поднятия исключения CapacityFull созданный объект Enrollment не живёт в БД, т.к. транзакция откатывается
 
 
 @pytest.mark.django_db
@@ -395,3 +394,22 @@ def test_enrollment_is_enrollment_open(client):
     assert smart_bytes("Enroll in") not in response.content
 
 
+@pytest.mark.django_db
+def test_enrollment_by_invitation(settings, client):
+    future = now() + datetime.timedelta(days=3)
+    term = SemesterFactory.create_current(enrollment_end_at=future.date())
+    course_invitation = CourseInvitationFactory(course__semester=term)
+    course = course_invitation.course
+    enroll_url = course_invitation.get_absolute_url()
+    invited = InvitedStudentFactory(branch=course.branch)
+    client.login(invited)
+    wrong_url = branch_aware_reverse(
+        "course_enroll_by_invitation",
+        kwargs={"course_token": "WRONG_TOKEN", **course.url_kwargs},
+        subdomain=settings.LMS_SUBDOMAIN)
+    response = client.post(wrong_url, {})
+    assert response.status_code == 404
+    response = client.post(enroll_url, {})
+    assert response.status_code == 302
+    enrollments = Enrollment.active.filter(student=invited, course=course).all()
+    assert len(enrollments) == 1

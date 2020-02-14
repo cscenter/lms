@@ -1,18 +1,18 @@
 import os
 
-from django.contrib.auth.views import redirect_to_login
+from django.db import transaction
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 from vanilla import CreateView, UpdateView, DeleteView
 
 from auth.mixins import PermissionRequiredMixin
-from core.exceptions import Redirect
 from core.urls import reverse
 from core.views import ProtectedFormMixin
 from courses.forms import AssignmentForm
-from courses.models import Assignment, Course, AssignmentAttachment
+from courses.models import Assignment, AssignmentAttachment
 from courses.permissions import CreateAssignment, EditAssignment
 from courses.views.mixins import CourseURLParamsMixin
+from learning.services import AssignmentService
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('AssignmentCreateView', 'AssignmentUpdateView',
@@ -34,37 +34,31 @@ class AssignmentCreateUpdateMixin(CourseURLParamsMixin,
     def get_success_url(self):
         return self.object.get_teacher_url()
 
-    # TODO: Add atomic
     def form_valid(self, form):
-        self.save_form(form)
         attachments = self.request.FILES.getlist('attachments')
-        if attachments:
-            for attachment in attachments:
-                (AssignmentAttachment.objects
-                 .create(assignment=self.object, attachment=attachment))
+        with transaction.atomic():
+            self.object = form.save()
+            self.post_save(self.object)
+            AssignmentService.process_attachments(self.object, attachments)
         return redirect(self.get_success_url())
 
-    def save_form(self, form):
-        raise NotImplementedError()
+    def post_save(self, form):
+        pass
 
 
 class AssignmentCreateView(AssignmentCreateUpdateMixin, CreateView):
     permission_required = CreateAssignment.name
 
-    def save_form(self, form):
-        self.object = form.save()
-        # Set up notifications recipients setting
-        course = self.object.course
-        co_teachers = course.course_teachers.all()
-        notify_teachers = [t.pk for t in co_teachers if t.notify_by_default]
-        self.object.notify_teachers.add(*notify_teachers)
+    def post_save(self, assignment):
+        AssignmentService.bulk_create_student_assignments(assignment)
+        AssignmentService.setup_notification_settings(assignment)
 
 
 class AssignmentUpdateView(AssignmentCreateUpdateMixin, UpdateView):
     permission_required = EditAssignment.name
 
-    def save_form(self, form):
-        self.object = form.save()
+    def post_save(self, assignment):
+        AssignmentService.sync_student_assignments(assignment)
 
 
 class AssignmentDeleteView(TeacherOnlyMixin, ProtectedFormMixin, DeleteView):

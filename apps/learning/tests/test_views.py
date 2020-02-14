@@ -7,13 +7,10 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
 from testfixtures import LogCapture
 
-from auth.mixins import PermissionRequiredMixin
-from core.tests.factories import BranchFactory
 from core.tests.utils import CSCTestCase
 from core.timezone import now_local
 from core.urls import branch_aware_reverse, reverse
 from courses.tests.factories import *
-from courses.utils import get_current_term_pair
 from learning.settings import Branches
 from learning.tests.factories import *
 from users.constants import Roles
@@ -376,63 +373,3 @@ def test_events_smoke(client):
 # TODO: test CourseOffering edit-description page. returned more than one CourseOffering error if we have CO for kzn and spb
 
 
-@pytest.mark.django_db
-def test_student_courses_list(client, lms_resolver, assert_login_redirect):
-    url = reverse('study:course_list')
-    resolver = lms_resolver(url)
-    assert issubclass(resolver.func.view_class, PermissionRequiredMixin)
-    assert resolver.func.view_class.permission_required == "study.view_courses"
-    student_spb = StudentFactory(branch__code=Branches.SPB)
-    client.login(student_spb)
-    response = client.get(url)
-    assert response.status_code == 200
-    assert len(response.context['ongoing_rest']) == 0
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['archive_enrolled']) == 0
-    current_term = get_current_term_pair(student_spb.get_timezone())
-    current_term_spb = SemesterFactory(year=current_term.year,
-                                       type=current_term.type)
-    cos = CourseFactory.create_batch(4, semester=current_term_spb,
-                                     branch=student_spb.branch, is_open=False)
-    cos_available = cos[:2]
-    cos_enrolled = cos[2:]
-    prev_year = current_term.year - 1
-    cos_archived = CourseFactory.create_batch(
-        3, semester__year=prev_year, is_open=False)
-    for co in cos_enrolled:
-        EnrollmentFactory.create(student=student_spb, course=co)
-    for co in cos_archived:
-        EnrollmentFactory.create(student=student_spb, course=co)
-    response = client.get(url)
-    assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
-    assert set(cos_enrolled) == set(response.context['ongoing_enrolled'])
-    assert len(cos_archived) == len(response.context['archive_enrolled'])
-    assert set(cos_archived) == set(response.context['archive_enrolled'])
-    assert len(cos_available) == len(response.context['ongoing_rest'])
-    assert set(cos_available) == set(response.context['ongoing_rest'])
-    # Add courses from other branch
-    current_term_nsk = SemesterFactory.create_current(for_branch=Branches.NSK)
-    co_nsk = CourseFactory.create(semester=current_term_nsk,
-                                  branch__code=Branches.NSK, is_open=False)
-    response = client.get(url)
-    assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
-    assert len(cos_available) == len(response.context['ongoing_rest'])
-    assert len(cos_archived) == len(response.context['archive_enrolled'])
-    # Test for student from nsk
-    student_nsk = StudentFactory(branch__code=Branches.NSK)
-    client.login(student_nsk)
-    CourseFactory.create(semester__year=prev_year, branch=student_nsk.branch,
-                         is_open=False)
-    response = client.get(url)
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['ongoing_rest']) == 1
-    assert set(response.context['ongoing_rest']) == {co_nsk}
-    assert len(response.context['archive_enrolled']) == 0
-    # Add open reading, it should be available on compscicenter.ru
-    co_open = CourseFactory.create(semester=current_term_nsk,
-                                   branch=student_nsk.branch, is_open=True)
-    response = client.get(url)
-    assert len(response.context['ongoing_enrolled']) == 0
-    assert len(response.context['ongoing_rest']) == 2
-    assert set(response.context['ongoing_rest']) == {co_nsk, co_open}
-    assert len(response.context['archive_enrolled']) == 0

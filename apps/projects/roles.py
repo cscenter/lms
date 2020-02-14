@@ -21,3 +21,7 @@ class Roles(DjangoChoices):
 for code, name in Roles.choices:
     role_registry.register(Role(code=code, name=name,
                                 permissions=Roles.get_choice(code).permissions))
+
+
+reviewer_role = role_registry[Roles.PROJECT_REVIEWER]
+reviewer_role.add_relation(UpdateReportComment, UpdateOwnReportComment)

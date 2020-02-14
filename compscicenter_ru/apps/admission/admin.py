@@ -17,7 +17,7 @@ from admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
     InterviewInvitation, University
 from core.admin import meta
-from core.timezone.admin import TimezoneAwareModelForm, \
+from core.timezone.forms import TimezoneAwareModelForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget

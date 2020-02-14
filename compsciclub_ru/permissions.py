@@ -4,6 +4,7 @@ from django.conf import settings
 from auth.permissions import Permission
 from auth.utils import override_perm
 from courses.models import Course
+from learning.permissions import EnrollInCourse
 
 
 @rules.predicate
@@ -32,8 +33,7 @@ class ClubCourseViewNews(Permission):
     name = "learning.view_course_news"
 
 
-class ClubEnrollInCourse(Permission):
-    name = "learning.enroll_in_course"
+class ClubEnrollInCourse(EnrollInCourse):
     rule = enroll_in_course & course_is_open
 
 

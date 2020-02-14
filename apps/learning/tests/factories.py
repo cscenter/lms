@@ -7,20 +7,31 @@ from django.conf import settings
 from django.utils import timezone
 
 from core.tests.factories import BranchFactory, LocationFactory
+from courses.models import StudentGroupTypes
 from courses.tests.factories import *
 from learning.models import StudentAssignment, \
     AssignmentComment, Enrollment, AssignmentNotification, \
     CourseNewsNotification, Event, GraduateProfile, Invitation, \
-    CourseInvitation
+    CourseInvitation, StudentGroup
+from learning.services import StudentGroupService
 from users.constants import Roles
 from users.tests.factories import UserFactory, StudentFactory
 
-__all__ = ('StudentAssignmentFactory',
+__all__ = ('StudentGroupFactory', 'StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentFactory', 'InvitationFactory',
            'CourseInvitationFactory', 'AssignmentNotificationFactory',
            'CourseNewsNotificationFactory', 'EventFactory',
            'StudentAssignment', 'Enrollment', 'AssignmentComment',
            'GraduateProfileFactory')
+
+
+class StudentGroupFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = StudentGroup
+
+    type = StudentGroupTypes.MANUAL
+    name = factory.Sequence(lambda n: "Group Name %03d" % n)
+    course = factory.SubFactory(CourseFactory)
 
 
 # FIXME: create enrollment
@@ -53,6 +64,16 @@ class EnrollmentFactory(factory.DjangoModelFactory):
     student = factory.SubFactory(StudentFactory)
     course = factory.SubFactory(CourseFactory,
                                 branch_id=factory.SelfAttribute('..student.branch_id'))
+
+    @factory.post_generation
+    def student_group(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            self.student_group = extracted
+        else:
+            self.student_group = StudentGroupService.resolve(self.course,
+                                                             self.student)
 
 
 class InvitationFactory(factory.DjangoModelFactory):

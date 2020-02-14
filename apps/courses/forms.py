@@ -1,4 +1,5 @@
 import datetime
+from operator import attrgetter
 
 from crispy_forms.bootstrap import TabHolder, Tab, PrependedText, FormActions, \
     StrictButton
@@ -9,20 +10,21 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from core.forms import CANCEL_SAVE_PAIR
-from core.models import LATEX_MARKDOWN_HTML_ENABLED
-from core.timezone.admin import TimezoneAwareModelForm, \
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch
+from core.timezone.forms import TimezoneAwareModelForm, \
     TimezoneAwareSplitDateTimeField
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 from core.widgets import UbereditorWidget, DateInputAsTextInput, \
     TimeInputAsTextInput, CityAwareSplitDateTimeWidget
 from courses.constants import ClassTypes
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
-    Assignment, LearningSpace
+    Assignment, LearningSpace, StudentGroupTypes
 
 __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
            'CourseClassForm', 'AssignmentForm')
 
 from courses.utils import execution_time_string
+from learning.models import StudentGroup
 
 DROP_ATTACHMENT_LINK = '<a href="{}"><i class="fa fa-trash-o"></i>&nbsp;{}</a>'
 
@@ -302,15 +304,44 @@ class AssignmentForm(TimezoneAwareModelForm):
             attrs={"autocomplete": "off",
                    "class": "form-control",
                    "placeholder": _("hours:minutes")}))
+    restrict_to = forms.ModelMultipleChoiceField(
+        label=_("Available for"),
+        widget=forms.SelectMultiple(attrs={
+            'class': 'multiple-select bs-select-hidden',
+            'title': _('All groups'),
+        }),
+        required=False,
+        help_text=_("Restrict assignment to selected groups. Available to all by default."),
+        queryset=StudentGroup.objects.none())
 
     def __init__(self, *args, **kwargs):
         course = kwargs.pop('course', None)
         assert course is not None
         super().__init__(*args, **kwargs)
         self.instance.course = course
+        qs = StudentGroup.objects.filter(course=course)
+        groups = list(qs)
+        field_restrict_to = self.fields['restrict_to']
+        # TODO: move to method
+        field_restrict_to.queryset = qs
+        if course.group_mode == StudentGroupTypes.BRANCH:
+            field_restrict_to.label = _("Available to Branches")
+            field_restrict_to.widget.attrs['title'] = _("All Branches")
+            sites = set()
+            for g in groups:
+                g.branch = Branch.objects.get_by_pk(g.branch_id)
+                sites.add(g.branch.site_id)
+            if len(sites) > 1:
+                get_label = lambda sg: f"{sg.name} [{sg.branch.site}]"
+            else:
+                get_label = attrgetter('name')
+        else:
+            get_label = attrgetter('name')
+        choices = [(sg.pk, get_label(sg)) for sg in groups]
+        field_restrict_to.choices = choices
 
     class Meta:
         model = Assignment
         fields = ('title', 'text', 'deadline_at', 'attachments',
                   'submission_type', 'passing_score', 'maximum_score',
-                  'weight', 'ttc')
+                  'weight', 'ttc', 'restrict_to')

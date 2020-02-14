@@ -25,7 +25,7 @@ from sorl.thumbnail import ImageField
 from auth.permissions import perm_registry
 from auth.tasks import update_password_in_gerrit
 from lms.utils import PublicRoute
-from core.models import LATEX_MARKDOWN_ENABLED
+from core.models import LATEX_MARKDOWN_ENABLED, Branch
 from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping, instance_memoize
@@ -418,6 +418,8 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
         self.groups.filter(user=self, role=role, site_id=sid).delete()
 
     def get_timezone(self) -> Timezone:
+        if not User.branch.is_cached(self):
+            self.branch = Branch.objects.get_by_pk(self.branch_id)
         return self.branch.get_timezone()
 
     @staticmethod

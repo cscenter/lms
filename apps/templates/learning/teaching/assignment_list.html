@@ -8,10 +8,6 @@
 
 {% block body_attrs %} class="gray" data-init-sections="submissions"{% endblock body_attrs %}
 
-{% block stylesheets %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
-{% endblock stylesheets %}
-
 {% block javascripts %}
     {% render_bundle 'teaching' 'js' %}
 {% endblock javascripts %}
@@ -70,7 +66,7 @@
                         <option {% if assignment.pk == query.assignment.pk %}selected{% endif %} value="{{ assignment.pk }}">{{ assignment.title }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" id="assignments-select-button">Показать</button>
+                <button type="submit" class="btn btn-primary" id="assignments-select-button">Показать</button>
                 <div class="loading"><i class="fa fa-spinner fa-pulse"></i></div>
             </form>
         </div>

@@ -12,12 +12,6 @@
 
 {% block body_attrs %} class="gray" data-init-sections="datetimepicker"{% endblock body_attrs %}
 
-{% block stylesheets %}
-    {# TODO: move to webpack #}
-    <link href="{% static "v1/css/vendor/bootstrap-datetimepicker.min.css" %}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.min.css">
-{% endblock stylesheets %}
-
 {% block javascripts %}
     {% render_bundle 'admission' %}
 {% endblock javascripts %}

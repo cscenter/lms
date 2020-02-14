@@ -1,6 +1,6 @@
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
-from dal_select2.widgets import ListSelect2
+from dal_select2.widgets import ListSelect2, Select2Multiple
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
@@ -9,13 +9,15 @@ from django.db.models import ForeignKey
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.timezone.admin import TimezoneAwareModelForm, \
+from core.timezone.forms import TimezoneAwareModelForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseTeacher, Course, CourseClassAttachment, \
     Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
     AssignmentAttachment, LearningSpace, CourseReview
+from learning.models import AssignmentGroup, StudentGroup
+from learning.services import AssignmentService
 from users.constants import Roles
 from users.models import User
 
@@ -84,7 +86,7 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     }
     raw_id_fields = ('meta_course',)
     form = CourseAdminForm
-    filter_horizontal = ('additional_branches', )
+    filter_horizontal = ('additional_branches',)
 
 
 class LearningSpaceAdmin(admin.ModelAdmin):
@@ -150,12 +152,29 @@ class AssignmentAdminForm(TimezoneAwareModelForm):
             co_teachers = [t.pk for t in co.course_teachers.all()]
             if any(t.pk not in co_teachers for t in cleaned_data['notify_teachers']):
                 self.add_error('notify_teachers', ValidationError(
-                        _("Assignment|Please, double check teachers list. Some "
-                          "of them not related to selected course offering")))
+                        _("Please, double check teacher list. Some "
+                          "users are not related to the selected course")))
 
 
 class AssignmentAttachmentAdmin(admin.ModelAdmin):
     raw_id_fields = ["assignment"]
+
+
+class AssignmentGroupInline(admin.TabularInline):
+    model = AssignmentGroup
+    extra = 0
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "group":
+            qs = StudentGroup.objects.select_related("course")
+            try:
+                assignment_id = request.resolver_match.kwargs['object_id']
+                a = Assignment.objects.get(pk=assignment_id)
+                qs = qs.filter(course_id=a.course_id)
+            except KeyError:
+                pass
+            kwargs["queryset"] = qs.order_by("name").distinct()
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class AssignmentAdmin(admin.ModelAdmin):
@@ -167,6 +186,7 @@ class AssignmentAdmin(admin.ModelAdmin):
             'form_class': TimezoneAwareSplitDateTimeField
         },
     }
+    raw_id_fields = ('course',)
     list_display = ['id', 'title', 'course', 'created_local',
                     'deadline_at_local']
     search_fields = ['course__meta_course__name']
@@ -174,11 +194,8 @@ class AssignmentAdmin(admin.ModelAdmin):
     def get_readonly_fields(self, request, obj=None):
         return ['course'] if obj else []
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'course':
-            kwargs['queryset'] = (Course.objects
-                                  .select_related("meta_course", "semester"))
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    def get_exclude(self, request, obj=None):
+        return None if obj else ('notify_teachers',)
 
     def formfield_for_manytomany(self, db_field, request=None, **kwargs):
         if db_field.name == "notify_teachers":
@@ -193,10 +210,11 @@ class AssignmentAdmin(admin.ModelAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def save_related(self, request, form, formsets, change):
-        if not change and not form.cleaned_data['notify_teachers']:
-            co_teachers = form.cleaned_data['course'].course_teachers.all()
-            form.cleaned_data['notify_teachers'] = [t.pk for t in co_teachers if t.notify_by_default]
-        return super().save_related(request, form, formsets, change)
+        super().save_related(request, form, formsets, change)
+        created = not change
+        if created:
+            AssignmentService.bulk_create_student_assignments(form.instance)
+            AssignmentService.setup_notification_settings(form.instance)
 
     def created_local(self, obj):
         return admin_datetime(obj.created_local())

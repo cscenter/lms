@@ -205,8 +205,11 @@
     <div class="col-xs-3">
     {% if user.is_authenticated %}
         <div class="o-buttons-vertical">
+            {% call_method request.user "has_perm" "courses.add_assignment" course as can_add_assignment %}
+            {% if can_add_assignment %}
+                <a href="{{ course.get_create_assignment_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add assignment" %}</a>
+            {% endif %}
             {% if user.is_curator or user.is_teacher and is_actual_teacher %}
-              <a href="{{ course.get_create_assignment_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add assignment" %}</a>
               <a href="{{ course.get_create_news_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Add news" %}</a>
               <a href="{{ course.get_create_class_url }}" class="btn btn-primary btn-outline btn-block">{% trans 'Add class' %}</a>
               <a href="{{ course.get_update_url }}" class="btn btn-primary btn-outline btn-block" role="button">{% trans "Edit description" %}</a>

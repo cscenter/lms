@@ -237,6 +237,7 @@ class MetaCourse(TimeStampedModel):
 
 
 class StudentGroupTypes(DjangoChoices):
+    NO_GROUPS = C('no_groups', _('Without Groups'))
     MANUAL = C('manual', _('Manual'))
     BRANCH = C('branch', _('Branch'))
 
@@ -311,9 +312,12 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("Choose `Branch` to auto generate student groups "
                     "from course branches."))
 
-    language = models.CharField(max_length=5, db_index=True,
-                                choices=settings.LANGUAGES,
-                                default=settings.LANGUAGE_CODE)
+    language = models.CharField(
+        verbose_name=_("Language"),
+        max_length=5, db_index=True,
+        help_text=_("The language in which lectures are given."),
+        choices=settings.LANGUAGES,
+        default=settings.LANGUAGE_CODE)
     # TODO: recalculate on deleting course class
     videos_count = models.PositiveIntegerField(default=0, editable=False)
     materials_slides = models.BooleanField(default=False, editable=False)
@@ -542,24 +546,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     def is_actual_teacher(self, teacher_id):
         return teacher_id in (co.teacher_id for co in
                               self.course_teachers.all())
-
-    def get_grouped_teachers(self):
-        """
-        Returns teachers grouped by role.
-
-        A bit complicated to implement this logic on query level without
-        ORM hacking.
-        """
-        # TODO: replace with sql logic after drop sqlite compatibility
-        ts = {'lecturers': [], 'others': []}
-
-        def __cmp__(ct):
-            return -ct.is_lecturer, ct.teacher.last_name
-
-        for t in sorted(self.course_teachers.all(), key=__cmp__):
-            slot = ts['lecturers'] if t.is_lecturer else ts['others']
-            slot.append(t)
-        return ts
 
 
 class CourseTeacher(models.Model):
@@ -954,9 +940,13 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
     notify_teachers = models.ManyToManyField(
         CourseTeacher,
         verbose_name=_("Assignment|notify_settings"),
-        help_text=_("Leave blank if you want to populate list from "
-                    "the course settings"),
+        help_text=_("Specify who will receive notifications about new comments"),
         blank=True)
+    restrict_to = models.ManyToManyField(
+        'learning.StudentGroup',
+        verbose_name=_("Groups"),
+        related_name='restricted_assignments',
+        through='learning.AssignmentGroup')
 
     tracker = FieldTracker(fields=['deadline_at'])
 
@@ -971,6 +961,17 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         super().__init__(*args, **kwargs)
         if self.pk:
             self._original_course_id = self.course_id
+
+    def clean(self):
+        if self.pk and self._original_course_id != self.course_id:
+            raise ValidationError(_("Course modification is not allowed"))
+        if self.passing_score > self.maximum_score:
+            raise ValidationError(_("Passing score should be less than "
+                                    "(or equal to) maximum one"))
+
+    def __str__(self):
+        return "{0} ({1})".format(smart_text(self.title),
+                                  smart_text(self.course))
 
     def deadline_at_local(self, tz=None):
         if not tz:
@@ -996,17 +997,6 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
             **self.course.url_kwargs,
             "pk": self.pk
         })
-
-    def clean(self):
-        if self.pk and self._original_course_id != self.course_id:
-            raise ValidationError(_("Course modification is not allowed"))
-        if self.passing_score > self.maximum_score:
-            raise ValidationError(_("Passing score should be less than "
-                                    "(or equal to) maximum one"))
-
-    def __str__(self):
-        return "{0} ({1})".format(smart_text(self.title),
-                                  smart_text(self.course))
 
     def has_unread(self):
         from notifications.middleware import get_unread_notifications_cache

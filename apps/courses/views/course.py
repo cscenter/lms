@@ -1,21 +1,16 @@
-from urllib.parse import urlparse
-
-from django.conf import settings
 from django.contrib.auth.views import redirect_to_login
 from django.db.models import Prefetch
-from django.http import HttpResponseRedirect
 from django.views import generic
 from vanilla import DetailView
 
 from core.exceptions import Redirect
-from core.utils import get_club_domain, is_club_site
+from core.utils import is_club_site
 from core.views import ProtectedFormMixin
-from courses.constants import SemesterTypes, TeacherRoles
+from courses.constants import TeacherRoles
 from courses.forms import CourseEditDescrForm
 from courses.models import Course, CourseTeacher
 from courses.services import group_teachers
 from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
-from courses.utils import get_term_index
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
 from users.mixins import TeacherOnlyMixin
@@ -31,7 +26,9 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
     def get_course_queryset(self):
         course_teachers = Prefetch('course_teachers',
                                    queryset=(CourseTeacher.objects
-                                             .select_related("teacher")))
+                                             .select_related("teacher")
+                                             .order_by('teacher__last_name',
+                                                       'teacher__first_name')))
         return (super().get_course_queryset()
                 .select_related('meta_course', 'semester', 'branch')
                 .prefetch_related(course_teachers,
@@ -50,9 +47,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
         except TabNotFound:
             raise Redirect(to=redirect_to_login(self.request.get_full_path()))
         # Teachers
-        by_role = group_teachers(course.course_teachers
-                                 .order_by('teacher__last_name',
-                                           'teacher__first_name'))
+        by_role = group_teachers(course.course_teachers.all())
         teachers = {'main': [], 'others': []}
         for role, ts in by_role.items():
             if role in (TeacherRoles.LECTURER, TeacherRoles.SEMINAR):
