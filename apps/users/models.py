@@ -15,7 +15,6 @@ from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.text import normalize_newlines
-from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from model_utils.fields import MonitorField, AutoLastModifiedField
@@ -30,11 +29,10 @@ from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping, instance_memoize
 from courses.models import Semester
-from learning.permissions import LearningPermissionsMixin
 from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeYears
 from learning.utils import is_negative_grade
 from users.constants import GROUPS_IMPORT_TO_GERRIT, Roles, \
-    SHADCourseGradeTypes, GenderTypes
+    SHADCourseGradeTypes, GenderTypes, Roles as UserRoles
 from users.fields import MonitorStatusField
 from users.thumbnails import UserThumbnailMixin
 from .managers import CustomUserManager
@@ -53,7 +51,7 @@ GITHUB_LOGIN_VALIDATOR = RegexValidator(regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*$")
 
 # FIXME: rename to student status log and move to learning app (and all User.status* fields to StudentProfile)
 class UserStatusLog(models.Model):
-    created = models.DateField(_("created"), default=now)
+    created = models.DateField(_("created"), default=timezone.now)
     semester = models.ForeignKey(
         "courses.Semester",
         verbose_name=_("Semester"),
@@ -80,6 +78,52 @@ class UserStatusLog(models.Model):
     def __str__(self):
         return smart_text("{} [{}]".format(
             self.student.get_full_name(True), self.semester))
+
+
+class LearningPermissionsMixin:
+    @property
+    def site_groups(self):
+        return set()
+
+    @property
+    def is_curator(self):
+        return self.is_superuser and self.is_staff
+
+    @property
+    def is_student(self):
+        return UserRoles.STUDENT in self.roles
+
+    @property
+    def is_volunteer(self):
+        return UserRoles.VOLUNTEER in self.roles
+
+    # FIXME: inline
+    @property
+    def is_active_student(self):
+        if is_club_site():
+            return self.is_student
+        has_perm = self.is_student or self.is_volunteer
+        return has_perm and not StudentStatuses.is_inactive(self.status)
+
+    @property
+    def is_teacher(self):
+        return UserRoles.TEACHER in self.roles
+
+    @property
+    def is_graduate(self):
+        return UserRoles.GRADUATE in self.roles
+
+    @property
+    def is_curator_of_projects(self):
+        return UserRoles.CURATOR_PROJECTS in self.roles
+
+    @property
+    def is_interviewer(self):
+        return UserRoles.INTERVIEWER in self.roles
+
+    @property
+    def is_project_reviewer(self):
+        return UserRoles.PROJECT_REVIEWER in self.roles
 
 
 class ExtendedAnonymousUser(LearningPermissionsMixin, AnonymousUser):

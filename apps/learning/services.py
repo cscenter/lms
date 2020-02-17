@@ -15,9 +15,38 @@ from courses.models import Course, Assignment, AssignmentAttachment, \
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, StudentGroup
 from learning.settings import StudentStatuses
-from learning.utils import populate_assignments_for_student, \
-    update_course_learners_count
 from users.models import User
+
+
+# FIXME: move to enrollment service?
+def populate_assignments_for_student(enrollment):
+    for a in enrollment.course.assignment_set.all():
+        AssignmentService.create_student_assignment(a, enrollment)
+
+
+def update_course_learners_count(course_id):
+    from learning.models import Enrollment
+    Course.objects.filter(id=course_id).update(
+        learners_count=SubqueryCount(
+            Enrollment.active.filter(course_id=OuterRef('id'))
+        )
+    )
+
+
+def course_failed_by_student(course: Course, student, enrollment=None) -> bool:
+    """Checks that student didn't fail the completed course"""
+    from learning.models import Enrollment
+    if course.is_open or not course.is_completed:
+        return False
+    bad_grades = (Enrollment.GRADES.UNSATISFACTORY,
+                  Enrollment.GRADES.NOT_GRADED)
+    if enrollment:
+        return enrollment.grade in bad_grades
+    return (Enrollment.active
+            .filter(student_id=student.id,
+                    course_id=course.id,
+                    grade__in=bad_grades)
+            .exists())
 
 
 class GroupEnrollmentKeyError(Exception):
@@ -83,19 +112,28 @@ class AssignmentService:
         notify_teachers = [t.pk for t in course_teachers if t.notify_by_default]
         assignment.notify_teachers.add(*notify_teachers)
 
-    @staticmethod
-    def create_student_assignment(assignment: Assignment, student_id: int):
-        sa = StudentAssignment.objects.create(assignment=assignment,
-                                              student_id=student_id)
-        # Note(Dmitry): we create notifications here instead of a separate
-        # receiver because it's much more efficient than getting
-        # StudentAssignment objects back one by one. It seems
-        # reasonable that 2 * N INSERTs are better than .bulk_create
-        # + N SELECTs + N INSERTs.
-        (AssignmentNotification(user_id=student_id,
-                                student_assignment=sa,
-                                is_about_creation=True)
-         .save())
+    @classmethod
+    def create_student_assignment(cls, assignment: Assignment,
+                                  enrollment: Enrollment):
+        """
+        Creates record for tracking student progress on assignment
+        if the assignment is not restricted for the student's group.
+        """
+        restricted_to = list(sg.pk for sg in assignment.restrict_to.all())
+        if restricted_to and enrollment.student_group_id not in restricted_to:
+            return
+        return StudentAssignment.objects.get_or_create(assignment=assignment,
+                                                student_id=enrollment.student_id)
+        # return cls._create_student_assignment(assignment, enrollment.student_id)
+
+    @classmethod
+    def _create_student_assignment(cls, assignment: Assignment, student_id):
+        """
+        Creates record for tracking student progress on assignment regardless
+        of the assignment group settings.
+        """
+        return StudentAssignment.objects.create(assignment=assignment,
+                                                student_id=student_id)
 
     # TODO: send notification to teachers except assignment publisher
     @classmethod
@@ -134,7 +172,13 @@ class AssignmentService:
                .filter(*filters)
                .values_list("student_id", flat=True))
         for student_id in pks:
-            cls.create_student_assignment(assignment, student_id)
+            sa = cls._create_student_assignment(assignment, student_id)
+            # Note(Dmitry): we create notifications here instead of a separate
+            # receiver because it's much more efficient than getting
+            # StudentAssignment objects back one by one. It seems
+            # reasonable that 2 * N INSERTs are better than .bulk_create
+            # + N SELECTs + N INSERTs.
+            notify_student_new_assignment(sa)
 
     @staticmethod
     def bulk_remove_student_assignments(assignment: Assignment,
@@ -256,6 +300,13 @@ class EnrollmentService:
             update_fields.append('reason_leave')
         with transaction.atomic():
             enrollment.save(update_fields=update_fields)
+
+
+def notify_student_new_assignment(student_assignment):
+    (AssignmentNotification(user_id=student_assignment.student_id,
+                            student_assignment=student_assignment,
+                            is_about_creation=True)
+     .save())
 
 
 def notify_new_assignment_comment(comment):

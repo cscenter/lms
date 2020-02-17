@@ -20,7 +20,7 @@ from courses.admin import AssignmentAdmin
 from courses.models import CourseTeacher, Assignment, AssignmentSubmissionTypes
 from courses.tests.factories import CourseFactory, AssignmentFactory, \
     SemesterFactory
-from learning.utils import course_failed_by_student
+from learning.services import course_failed_by_student
 from learning.models import AssignmentNotification
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import *

@@ -31,7 +31,6 @@ from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
     GraduateProfileActiveManager, AssignmentCommentPublishedManager
 from learning.settings import GradingSystems, GradeTypes
-from learning.utils import populate_assignments_for_student
 from users.constants import ThumbnailSizes
 from users.thumbnails import UserThumbnailMixin
 
@@ -159,6 +158,7 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
                                   smart_text(self.student.get_full_name()))
 
     def save(self, *args, **kwargs):
+        from learning.services import populate_assignments_for_student
         created = self.pk is None
         super().save(*args, **kwargs)
         if created or not self.is_deleted:

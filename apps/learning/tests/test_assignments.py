@@ -21,7 +21,7 @@ from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, \
     AssignmentCommentFactory, \
     StudentAssignmentFactory
-from learning.utils import course_failed_by_student
+from learning.services import course_failed_by_student
 from projects.tests.factories import ProjectReviewerFactory
 from users.tests.factories import TeacherFactory, \
     StudentFactory, VolunteerFactory, CuratorFactory

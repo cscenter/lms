@@ -13,7 +13,7 @@ from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse, branch_aware_reverse
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
-from learning.models import Enrollment, StudentAssignment
+from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.services import EnrollmentService, CourseCapacityFull
 from learning.settings import StudentStatuses, Branches
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
@@ -264,24 +264,32 @@ def test_unenrollment(client, assert_redirect):
 @pytest.mark.django_db
 def test_reenrollment(client):
     """Create assignments for student if they left the course and come back"""
-    s = StudentFactory()
-    course = CourseFactory(branch=s.branch, is_open=True)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_other = BranchFactory()
+    student = StudentFactory(branch=branch_spb)
+    tomorrow = now_local(branch_spb.get_timezone()) + datetime.timedelta(days=1)
+    term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
+    course = CourseFactory(branch=branch_spb, semester=term,
+                           additional_branches=[branch_other])
     assignment = AssignmentFactory(course=course)
-    e = EnrollmentFactory(student=s, course=course)
+    e = EnrollmentFactory(student=student, course=course)
     assert not e.is_deleted
-    assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
+    assert StudentAssignment.objects.filter(student_id=student.pk).count() == 1
     # Deactivate student enrollment
     e.is_deleted = True
     e.save()
     assert Enrollment.active.count() == 0
     assignment2 = AssignmentFactory(course=course)
-    assert StudentAssignment.objects.filter(student_id=s.pk).count() == 1
-    client.login(s)
+    sg = StudentGroup.objects.get(course=course, branch=branch_other)
+    # This assignment is restricted for student's group
+    assignment3 = AssignmentFactory(course=course, restrict_to=[sg])
+    assert StudentAssignment.objects.filter(student_id=student.pk).count() == 1
+    client.login(student)
     form = {'course_pk': course.pk}
     response = client.post(course.get_enroll_url(), form, follow=True)
     assert response.status_code == 200
     e.refresh_from_db()
-    assert StudentAssignment.objects.filter(student_id=s.pk).count() == 2
+    assert StudentAssignment.objects.filter(student_id=student.pk).count() == 2
 
 
 @pytest.mark.django_db
