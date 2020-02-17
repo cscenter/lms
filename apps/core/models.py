@@ -40,6 +40,37 @@ TIMEZONES = (
 )
 
 
+class LiveManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=True)
+
+
+class TrashManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted_at__isnull=False)
+
+
+class SoftDeletionModel(models.Model):
+    deleted_at = models.DateTimeField(db_index=True, blank=True, null=True)
+
+    objects = LiveManager()
+    trash = TrashManager()
+    base = models.Manager()
+
+    class Meta:
+        abstract = True
+
+    @property
+    def is_deleted(self):
+        return bool(self.deleted_at)
+
+    def delete(self, using=None, keep_parents=False, permanent=False):
+        if permanent:
+            super().delete(using=using, keep_parents=keep_parents)
+        else:
+            pass
+
+
 class City(TimezoneAwareModel, models.Model):
     TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
 
