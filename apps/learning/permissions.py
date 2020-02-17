@@ -4,61 +4,12 @@ from enum import Enum, auto
 import rules
 
 from auth.permissions import add_perm, Permission
-from core.utils import is_club_site
 from courses.models import Course, CourseTeacher
 from learning.models import StudentAssignment, CourseInvitation
 from learning.settings import StudentStatuses
-from learning.utils import course_failed_by_student
-from users.constants import Roles as UserRoles
-
+from learning.services import course_failed_by_student
 
 logger = logging.getLogger(__name__)
-
-
-class LearningPermissionsMixin:
-    @property
-    def site_groups(self):
-        return set()
-
-    @property
-    def is_curator(self):
-        return self.is_superuser and self.is_staff
-
-    @property
-    def is_student(self):
-        return UserRoles.STUDENT in self.roles
-
-    @property
-    def is_volunteer(self):
-        return UserRoles.VOLUNTEER in self.roles
-
-    # FIXME: inline
-    @property
-    def is_active_student(self):
-        if is_club_site():
-            return self.is_student
-        has_perm = self.is_student or self.is_volunteer
-        return has_perm and not StudentStatuses.is_inactive(self.status)
-
-    @property
-    def is_teacher(self):
-        return UserRoles.TEACHER in self.roles
-
-    @property
-    def is_graduate(self):
-        return UserRoles.GRADUATE in self.roles
-
-    @property
-    def is_curator_of_projects(self):
-        return UserRoles.CURATOR_PROJECTS in self.roles
-
-    @property
-    def is_interviewer(self):
-        return UserRoles.INTERVIEWER in self.roles
-
-    @property
-    def is_project_reviewer(self):
-        return UserRoles.PROJECT_REVIEWER in self.roles
 
 
 class CourseRole(Enum):

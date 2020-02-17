@@ -70,7 +70,8 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'CSCUser|users',
                 'db_table': 'users_user',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, learning.permissions.LearningPermissionsMixin, users.thumbnails.UserThumbnailMixin, models.Model),
+            bases=(core.timezone.models.TimezoneAwareModel,
+                   users.models.LearningPermissionsMixin, users.thumbnails.UserThumbnailMixin, models.Model),
         ),
         migrations.CreateModel(
             name='Group',

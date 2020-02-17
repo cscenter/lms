@@ -9,8 +9,8 @@ from courses.models import Assignment, CourseNews, CourseTeacher, Course, \
 from learning.models import AssignmentNotification, \
     StudentAssignment, Enrollment, CourseNewsNotification, AssignmentGroup, \
     StudentGroup
-from learning.services import StudentGroupService, AssignmentService
-from learning.utils import update_course_learners_count
+from learning.services import StudentGroupService, AssignmentService, \
+    update_course_learners_count
 
 
 # FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
