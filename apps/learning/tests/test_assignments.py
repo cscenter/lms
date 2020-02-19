@@ -246,4 +246,3 @@ def test_create_assignment_admin_form(client):
     response = client.post(reverse('admin:courses_assignment_add'), post_data)
     assert (Assignment.objects.count() == 1)
     assert StudentAssignment.objects.count() == 1
-

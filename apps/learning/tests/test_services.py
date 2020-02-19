@@ -3,11 +3,13 @@ import pytest
 from core.tests.factories import BranchFactory
 from courses.models import StudentGroupTypes
 from courses.tests.factories import CourseFactory, AssignmentFactory
-from learning.models import StudentGroup, StudentAssignment
+from learning.models import StudentGroup, StudentAssignment, \
+    AssignmentNotification
 from learning.services import StudentGroupService, GroupEnrollmentKeyError, \
     AssignmentService
 from learning.settings import Branches, StudentStatuses
-from learning.tests.factories import StudentGroupFactory, EnrollmentFactory
+from learning.tests.factories import StudentGroupFactory, EnrollmentFactory, \
+    AssignmentNotificationFactory
 from users.tests.factories import StudentFactory
 
 
@@ -121,11 +123,25 @@ def test_assignment_service_remove_student_assignments():
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 3
     AssignmentService.bulk_remove_student_assignments(assignment)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 0
+    assert StudentAssignment.trash.filter(assignment=assignment).count() == 3
     AssignmentService.bulk_create_student_assignments(assignment)
-    AssignmentService.bulk_remove_student_assignments(assignment, for_groups=[group_spb.pk])
+    AssignmentService.bulk_remove_student_assignments(assignment,
+                                                      for_groups=[group_spb.pk])
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 2
+    assert StudentAssignment.trash.filter(assignment=assignment).count() == 1
     AssignmentService.bulk_remove_student_assignments(assignment, for_groups=[])
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 2
+    # Make sure notifications will be hard deleted
+    sa_nsk = StudentAssignment.objects.get(assignment=assignment, student=student_nsk)
+    sa_other = StudentAssignment.objects.get(assignment=assignment, student=student_other)
+    AssignmentNotification.objects.all().delete()
+    AssignmentNotificationFactory(student_assignment=sa_nsk)
+    AssignmentNotificationFactory(student_assignment=sa_other)
+    assert AssignmentNotification.objects.count() == 2
+    AssignmentService.bulk_remove_student_assignments(assignment,
+                                                      for_groups=[group_nsk.pk])
+    assert AssignmentNotification.objects.count() == 1
+    assert AssignmentNotification.objects.filter(student_assignment=sa_other).exists()
 
 
 @pytest.mark.django_db

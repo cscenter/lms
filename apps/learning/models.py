@@ -21,7 +21,8 @@ from model_utils.models import TimeStampedModel
 from sorl.thumbnail import ImageField
 
 from core.db.models import ScoreField, PrettyJSONField
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location
+from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch, Location, \
+    SoftDeletionModel
 from core.timezone import TimezoneAwareModel, now_local
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids
@@ -90,7 +91,10 @@ class AssignmentGroup(models.Model):
     group = models.ForeignKey(
         StudentGroup,
         verbose_name=_("Group"),
-        on_delete=models.CASCADE)
+        # Protect from deleting the last group of the assignment since it
+        # will be interpreted as the assignment is available to all
+        # student groups now. Manually resolve this issue.
+        on_delete=models.PROTECT)
 
     class Meta:
         verbose_name = _("Assignment Group")
@@ -269,7 +273,7 @@ class Invitation(TimeStampedModel):
         return start_at <= today <= self.semester.enrollment_end_at
 
 
-class StudentAssignment(TimezoneAwareModel, TimeStampedModel):
+class StudentAssignment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'assignment'
 
     class CommentAuthorTypes(DjangoChoices):
@@ -432,7 +436,7 @@ def task_comment_attachment_upload_to(instance: "AssignmentComment", filename):
     return f"{sa.assignment.files_root}/user_{sa.student_id}/{filename}"
 
 
-class AssignmentComment(TimezoneAwareModel, TimeStampedModel):
+class AssignmentComment(SoftDeletionModel, TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'student_assignment'
 
     student_assignment = models.ForeignKey(
@@ -453,7 +457,6 @@ class AssignmentComment(TimezoneAwareModel, TimeStampedModel):
         max_length=150,
         blank=True)
 
-    objects = models.Manager()
     published = AssignmentCommentPublishedManager()
 
     class Meta:
