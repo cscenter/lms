@@ -3,6 +3,7 @@ from io import StringIO as OutputIO
 import pytest
 from django.core import mail, management
 
+from core.tests.factories import BranchFactory, SiteFactory
 from learning.models import AssignmentNotification
 from learning.tests.factories import AssignmentNotificationFactory, \
     CourseNewsNotificationFactory
@@ -51,27 +52,20 @@ def test_notifications(client, settings):
 
 
 @pytest.mark.django_db
-def test_notify_get_base_url(settings):
-    """Site domain in notifications depends on recipient user groups"""
-    user = UserFactory(groups=[Roles.STUDENT])
-    notification = AssignmentNotificationFactory(user=user)
-    assert _get_base_domain(notification) == "my.compscicenter.ru"
-    user = StudentFactory()
-    notification = AssignmentNotificationFactory(user=user)
-    assert _get_base_domain(notification) == "my.compscicenter.ru"
-    notification.user = StudentFactory(
-        required_groups__site_id=settings.ANOTHER_DOMAIN_ID
-    )
-    assert _get_base_domain(notification) == "compsciclub.ru"
-    notification.user = UserFactory(groups=[Roles.STUDENT,
-                                            Roles.TEACHER])
-    assert _get_base_domain(notification) == "my.compscicenter.ru"
-    notification.user = TeacherFactory(
-        required_groups__site_id=settings.ANOTHER_DOMAIN_ID
-    )
-    assert _get_base_domain(notification) == "compsciclub.ru"
-    notification.user = TeacherFactory(
-        required_groups__site_id=settings.ANOTHER_DOMAIN_ID,
-        groups=[Roles.GRADUATE],
-    )
-    assert _get_base_domain(notification) == "my.compscicenter.ru"
+@pytest.mark.parametrize("notification_factory",  [AssignmentNotificationFactory, CourseNewsNotificationFactory])
+def test_notify_get_base_url(notification_factory, settings):
+    settings.LMS_SUBDOMAIN = 'my'
+    branch = BranchFactory(site=SiteFactory(domain='test.domain'))
+    user = UserFactory(branch=branch)
+    notification = notification_factory(user=user)
+    assert _get_base_domain(notification) == f"{settings.LMS_SUBDOMAIN}.test.domain"
+    # Test subdomain resolving (supported on club site)
+    settings.LMS_SUBDOMAIN = None
+    new_branch = BranchFactory()
+    notification.user.branch = new_branch
+    settings.DEFAULT_BRANCH_CODE = new_branch.code
+    settings.CLUB_SITE_ID = new_branch.site_id
+    assert _get_base_domain(notification) == new_branch.site.domain
+    branch_code = f"xyz{new_branch.code}"
+    new_branch.code = branch_code
+    assert _get_base_domain(notification) == f"{branch_code}.{new_branch.site.domain}"
