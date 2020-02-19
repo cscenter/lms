@@ -6,6 +6,7 @@ from urllib.parse import urlparse
 import pytest
 import pytz
 from bs4 import BeautifulSoup
+from django.contrib.sites.models import Site
 from django.core import mail, management
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils.encoding import smart_bytes
@@ -273,10 +274,9 @@ def test_new_assignment_create_notification_context(settings):
 
 @pytest.mark.django_db
 def test_new_course_news_notification_context(settings):
-    settings.SITE_ID = 1
+    settings.SITE_ID = settings.TEST_DOMAIN_ID
     settings.DEFAULT_URL_SCHEME = 'https'
-    current_domain = get_domain()
-    assert current_domain == settings.TEST_DOMAIN
+    assert get_domain() == settings.TEST_DOMAIN
     course = CourseFactory()
     student = StudentFactory(branch=course.branch)
     enrollment = EnrollmentFactory(course=course, student=student)
@@ -284,9 +284,11 @@ def test_new_course_news_notification_context(settings):
                                        user=student)
     context = get_course_news_notification_context(cn)
     assert context['course_link'] == course.get_absolute_url()
+    another_site = Site.objects.get(pk=settings.ANOTHER_DOMAIN_ID)
+    branch = BranchFactory(code=settings.DEFAULT_BRANCH_CODE, site=another_site)
     cn = CourseNewsNotificationFactory(
         course_offering_news__course=course,
-        user=StudentFactory(required_groups__site_id=settings.ANOTHER_DOMAIN_ID,))
+        user=StudentFactory(branch=branch))
     context = get_course_news_notification_context(cn)
     assert context['course_link'].startswith(f'https://{settings.ANOTHER_DOMAIN}')
 

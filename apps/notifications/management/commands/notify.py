@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+from typing import Union
 
 from django.apps import apps
 from django.conf import settings
@@ -15,7 +16,6 @@ from django.utils.html import strip_tags, linebreaks
 from core.urls import replace_hostname
 from learning.models import AssignmentNotification, \
     CourseNewsNotification
-from users.constants import Roles
 from notifications import NotificationTypes as notification_types
 
 logger = logging.getLogger(__name__)
@@ -47,37 +47,22 @@ EMAIL_TEMPLATES = {
     },
 }
 
-# Student and teacher groups which can access center site.
-LEARNING_PARTICIPANTS_CENTER = {
-    Roles.STUDENT,
-    Roles.VOLUNTEER,
-    Roles.GRADUATE,
-    Roles.TEACHER,
-}
 
-
-def _get_base_domain(notification):
-    """
-    This method should resolve notifications for students or teachers only.
-    """
-    receiver = notification.user
-    if isinstance(notification, AssignmentNotification):
-        course = notification.student_assignment.assignment.course
-    elif isinstance(notification, CourseNewsNotification):
-        course = notification.course_offering_news.course
+def _get_base_domain(notification: Union[AssignmentNotification,
+                                         CourseNewsNotification]):
+    user_branch = notification.user.branch
+    base_domain = user_branch.site.domain
+    # FIXME: move to the SiteConfiguration model
+    resolve_subdomain = (user_branch.site_id == settings.CLUB_SITE_ID)
+    if resolve_subdomain:
+        prefix = user_branch.code.lower()
+        if prefix == settings.DEFAULT_BRANCH_CODE:
+            prefix = ""
     else:
-        raise NotImplementedError()
-    user_roles = receiver.roles
-    if not user_roles.intersection(LEARNING_PARTICIPANTS_CENTER):
-        if course.branch.code == "spb":
-            return "compsciclub.ru"
-        else:
-            return "{}.compsciclub.ru".format(course.branch.code)
-    if isinstance(notification, AssignmentNotification):
-        return f"{settings.LMS_SUBDOMAIN}.compscicenter.ru"
-    elif isinstance(notification, CourseNewsNotification):
-        return f"{settings.LMS_SUBDOMAIN}.compscicenter.ru"
-    return "compscicenter.ru"
+        prefix = settings.LMS_SUBDOMAIN if settings.LMS_SUBDOMAIN else ""
+    if prefix:
+        return f"{prefix}.{base_domain}"
+    return base_domain
 
 
 def report(f, s):
