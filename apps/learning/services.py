@@ -1,13 +1,14 @@
 from typing import List, Iterable, Union
 
 from django.core.files.uploadedfile import UploadedFile
-from django.db import transaction
+from django.db import transaction, router
 from django.db.models import Q, OuterRef, Value, F, TextField
 from django.db.models.functions import Concat
 from django.utils.timezone import now
 
 from core.db.expressions import SubqueryCount
 from core.models import Branch
+from core.services import SoftDeleteService
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from courses.models import Course, Assignment, AssignmentAttachment, \
@@ -67,7 +68,6 @@ class StudentGroupService:
 
     @staticmethod
     def remove(course: Course, branch: Branch):
-        # FIXME: delete method should trigger deleting all related StudentAssignments and unlink enrollments from this student group?
         StudentGroup.objects.filter(course_id=course.pk,
                                     branch_id=branch.pk).delete()
 
@@ -122,9 +122,7 @@ class AssignmentService:
         restricted_to = list(sg.pk for sg in assignment.restrict_to.all())
         if restricted_to and enrollment.student_group_id not in restricted_to:
             return
-        return StudentAssignment.objects.get_or_create(assignment=assignment,
-                                                student_id=enrollment.student_id)
-        # return cls._create_student_assignment(assignment, enrollment.student_id)
+        return cls._create_student_assignment(assignment, enrollment.student_id)
 
     @classmethod
     def _create_student_assignment(cls, assignment: Assignment, student_id):
@@ -132,8 +130,10 @@ class AssignmentService:
         Creates record for tracking student progress on assignment regardless
         of the assignment group settings.
         """
-        return StudentAssignment.objects.create(assignment=assignment,
-                                                student_id=student_id)
+        obj, created = StudentAssignment.base.update_or_create(
+            assignment=assignment, student_id=student_id,
+            defaults={'deleted_at': None})
+        return obj
 
     # TODO: send notification to teachers except assignment publisher
     @classmethod
@@ -195,7 +195,13 @@ class AssignmentService:
                         .filter(*filters_)
                         .values_list('student_id', flat=True))
             filters.append(Q(student__in=students))
-        StudentAssignment.objects.filter(*filters).delete()
+        to_delete = list(StudentAssignment.objects.filter(*filters))
+        using = router.db_for_write(StudentAssignment)
+        SoftDeleteService(using).delete(to_delete)
+        # Hard delete notifications
+        (AssignmentNotification.objects
+         .filter(student_assignment__in=to_delete)
+         .delete())
 
     @classmethod
     def sync_student_assignments(cls, assignment: Assignment):

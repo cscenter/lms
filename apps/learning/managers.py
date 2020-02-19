@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import query
 
+from core.models import LiveManager
 from core.utils import is_club_site
 from courses.utils import get_boundaries
 
@@ -22,7 +23,7 @@ class StudentAssignmentQuerySet(query.QuerySet):
         return self.filter(assignment__course__semester_id=term.id)
 
 
-class _StudentAssignmentDefaultManager(models.Manager):
+class _StudentAssignmentDefaultManager(LiveManager):
     """On compsciclub.ru always restrict by open readings"""
     def get_queryset(self):
         qs = super().get_queryset()
@@ -102,7 +103,7 @@ class AssignmentCommentQuerySet(models.QuerySet):
     pass
 
 
-class _AssignmentCommentPublishedManager(models.Manager):
+class _AssignmentCommentPublishedManager(LiveManager):
     def get_queryset(self):
         return super().get_queryset().filter(is_published=True)
 

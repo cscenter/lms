@@ -4,7 +4,8 @@ import pytz
 from bitfield import BitField
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.db import models
+from django.db import models, router
+from django.db.models.deletion import Collector
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
@@ -64,11 +65,23 @@ class SoftDeletionModel(models.Model):
     def is_deleted(self):
         return bool(self.deleted_at)
 
-    def delete(self, using=None, keep_parents=False, permanent=False):
+    def delete(self, using=None, permanent=False):
+        from core.services import SoftDeleteService
         if permanent:
-            super().delete(using=using, keep_parents=keep_parents)
+            super().delete(using=using, keep_parents=False)
         else:
-            pass
+            using = using or router.db_for_write(self.__class__, instance=self)
+            assert self.pk is not None, (
+                "%s object can't be deleted because its %s attribute is set to None." %
+                (self._meta.object_name, self._meta.pk.attname)
+            )
+            SoftDeleteService(using).delete([self])
+
+    def restore(self, using=None):
+        from core.services import SoftDeleteService
+        if self.deleted_at:
+            using = using or router.db_for_write(self.__class__, instance=self)
+            SoftDeleteService(using).restore([self])
 
 
 class City(TimezoneAwareModel, models.Model):

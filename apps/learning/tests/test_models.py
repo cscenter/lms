@@ -17,7 +17,8 @@ from learning.tests.factories import StudentAssignmentFactory, AssignmentComment
 from courses.tests.factories import MetaCourseFactory, SemesterFactory, CourseFactory, \
     CourseNewsFactory, CourseClassFactory, CourseClassAttachmentFactory, \
     AssignmentFactory
-from learning.models import StudentAssignment
+from learning.models import StudentAssignment, AssignmentNotification, \
+    AssignmentComment
 from courses.models import Semester, CourseNews, CourseReview, \
     AssignmentSubmissionTypes
 from courses.constants import SemesterTypes
@@ -309,3 +310,26 @@ def test_score_field():
     sa.save()
     sa.refresh_from_db()
     assert str(sa.score) == '20.5'
+
+
+@pytest.mark.django_db
+def test_soft_delete_student_assignment():
+    assignment = AssignmentFactory()
+    sa = StudentAssignmentFactory(assignment=assignment)
+    comment = AssignmentCommentFactory(student_assignment=sa)
+    assert AssignmentNotification.objects.count() == 1
+    assert AssignmentComment.objects.count() == 1
+    sa.delete()
+    assert sa.is_deleted
+    assert StudentAssignment.objects.count() == 0
+    assert StudentAssignment.trash.count() == 1
+    assert assignment.studentassignment_set.count() == 0
+    assert assignment.studentassignment_set(manager='trash').count() == 1
+    assert AssignmentNotification.objects.count() == 1
+    assert AssignmentComment.objects.count() == 0
+    assert AssignmentComment.trash.count() == 1
+    assert sa.assignmentcomment_set.count() == 0
+    # Restore
+    sa.restore()
+    assert not sa.is_deleted
+    assert AssignmentComment.objects.count() == 1
