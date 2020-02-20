@@ -1,6 +1,7 @@
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.sites.shortcuts import get_current_site
 from django.db import transaction
 from django.http import HttpResponseRedirect, Http404, HttpResponseForbidden
@@ -168,14 +169,23 @@ def complete_student_profile(user, invitation):
             user.add_group(Roles.INVITED)
 
 
-class InvitationCompleteProfileView(InvitationURLParamsMixin, UpdateView):
+class InvitationCompleteProfileView(InvitationURLParamsMixin,
+                                    LoginRequiredMixin,
+                                    UpdateView):
     form_class = CompleteProfileForm
     template_name = "learning/invitation/complete_profile.html"
 
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
         if student_profile_is_valid(request.user, self.invitation):
             return HttpResponseRedirect(self.invitation.get_absolute_url())
         return super().dispatch(request, *args, **kwargs)
+
+    def get_login_url(self):
+        return reverse("invitation:login",
+                       kwargs={"token": self.invitation.token},
+                       subdomain=settings.LMS_SUBDOMAIN)
 
     def get_object(self):
         return self.request.user
