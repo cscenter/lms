@@ -9,13 +9,13 @@ from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from registration import signals
 from registration.backends.default.views import RegistrationView, ActivationView
-from vanilla import TemplateView
+from vanilla import TemplateView, UpdateView
 
 from auth.tasks import send_activation_email, ActivationEmailContext
 from auth.views import LoginView
 from core.urls import reverse
 from learning.invitation.forms import InvitationLoginForm, \
-    InvitationRegistrationForm
+    InvitationRegistrationForm, CompleteProfileForm
 from learning.models import Invitation
 from learning.roles import Roles
 
@@ -28,21 +28,7 @@ def student_profile_is_valid(user, invitation):
     if not user.roles.intersection({Roles.INVITED, Roles.STUDENT,
                                     Roles.VOLUNTEER}):
         return False
-    return True
-
-
-def complete_student_profile(user, invitation):
-    update_fields = []
-    if not user.enrollment_year:
-        user.enrollment_year = timezone.now().year
-        update_fields.append('enrollment_year')
-    if user.branch_id != invitation.branch_id:
-        user.branch = invitation.branch
-        update_fields.append('branch')
-    with transaction.atomic():
-        user.save(update_fields=update_fields)
-        if Roles.INVITED not in user.roles:
-            user.add_group(Roles.INVITED)
+    return user.first_name and user.last_name
 
 
 class InvitationURLParamsMixin:
@@ -168,8 +154,22 @@ class InvitationActivationView(InvitationURLParamsMixin, ActivationView):
         return self.invitation.get_absolute_url()
 
 
-class InvitationCompleteProfileView(InvitationURLParamsMixin,
-                                    TemplateView):
+def complete_student_profile(user, invitation):
+    update_fields = list(CompleteProfileForm.Meta.fields)
+    if not user.enrollment_year:
+        user.enrollment_year = timezone.now().year
+        update_fields.append('enrollment_year')
+    if user.branch_id != invitation.branch_id:
+        update_fields.append('branch')
+        user.branch = invitation.branch
+    with transaction.atomic():
+        user.save(update_fields=update_fields)
+        if Roles.INVITED not in user.roles:
+            user.add_group(Roles.INVITED)
+
+
+class InvitationCompleteProfileView(InvitationURLParamsMixin, UpdateView):
+    form_class = CompleteProfileForm
     template_name = "learning/invitation/complete_profile.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -177,11 +177,12 @@ class InvitationCompleteProfileView(InvitationURLParamsMixin,
             return HttpResponseRedirect(self.invitation.get_absolute_url())
         return super().dispatch(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
-        confirm = request.POST.get('confirm', None)
-        if not confirm:
-            return HttpResponseForbidden()
-        complete_student_profile(request.user, self.invitation)
+    def get_object(self):
+        return self.request.user
+
+    def form_valid(self, form):
+        self.object = form.save(commit=False)
+        complete_student_profile(self.object, self.invitation)
         return HttpResponseRedirect(self.invitation.get_absolute_url())
 
     def get_context_data(self, **kwargs):

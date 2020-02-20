@@ -1,18 +1,46 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load crispy_forms_field %}
 
-{% block title %}{% trans "Complete Profile Confirmation" %}{% endblock %}
+{% block title %}{% trans "Profile Update" %}{% endblock %}
 
 {% block content %}
     <div class="container">
         <div class="row">
             <div class="col-xs-8 col-xs-offset-2">
-                <h3>Обновление профиля</h3>
-                <form method="post" action="">
+                <h3>{% trans "Profile Update" %}</h3>
+                <form action="" method="post">
+                    <p>Пожалуйста, указывайте только реальные ФИО.<br>
+                    Отделение самостоятельно изменить нельзя, если есть неточность в данных, напишите на <a href="mailto:curators@compscicenter.ru">curators@compscicenter.ru</a><br>
+                    </p>
                     {% csrf_token %}
-                    Ваш профиль будет привязан к отделению "{{ invitation.branch }}".<br>
-                    Если есть неточность в данных, напишите на <a href="mailto:curators@compscicenter.ru">curators@compscicenter.ru</a><br>
-                    <button class="mt-10 btn btn-primary" type="submit" name="confirm" value="Y">Всё верно, продолжить</button>
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    {{ form.non_field_errors }}
+
+                    <div class="form-group">
+                        <label for="id_branch">{% trans "Branch" %}</label>
+                        <input type="text" value="{{ invitation.branch }}" class="form-control" readonly="" id="id_branch">
+                        <div class="help-block">Вы будете привязаны к указанному отделению</div>
+                    </div>
+
+                    {% for field in form %}
+                        <div class="form-group{% if field.errors %} has-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="asteriskField">*</span>{% endif %}</label>
+                            {% crispy_field field %}
+                            {% if field.help_text %}
+                                <div class="help-block">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                {% for error in field.errors %}
+                                    <p id="error_{{ forloop.counter }}_{{ field.auto_id }}" class="help-block"><strong>{{ error }}</strong></p>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button class="mt-10 btn btn-primary" type="submit" name="confirm" value="Y">{% trans "Continue" %}</button>
                 </form>
             </div>
         </div>
