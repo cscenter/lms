@@ -36,7 +36,7 @@ class AssignmentCreateUpdateMixin(CourseURLParamsMixin,
 
     def form_valid(self, form):
         attachments = self.request.FILES.getlist('attachments')
-        with transaction.atomic():
+        with transaction.atomic(savepoint=False):
             self.object = form.save()
             self.post_save(self.object)
             AssignmentService.process_attachments(self.object, attachments)

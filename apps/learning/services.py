@@ -1,3 +1,4 @@
+from itertools import islice
 from typing import List, Iterable, Union
 
 from django.core.files.uploadedfile import UploadedFile
@@ -116,24 +117,22 @@ class AssignmentService:
     def create_student_assignment(cls, assignment: Assignment,
                                   enrollment: Enrollment):
         """
-        Creates record for tracking student progress on assignment
+        Creates or restores record for tracking student progress on assignment
         if the assignment is not restricted for the student's group.
         """
         restricted_to = list(sg.pk for sg in assignment.restrict_to.all())
         if restricted_to and enrollment.student_group_id not in restricted_to:
             return
-        return cls._create_student_assignment(assignment, enrollment.student_id)
+        return StudentAssignment.base.update_or_create(
+            assignment=assignment, student_id=enrollment.student_id,
+            defaults={'deleted_at': None, 'score': None, 'execution_time': None})
 
     @classmethod
-    def _create_student_assignment(cls, assignment: Assignment, student_id):
-        """
-        Creates record for tracking student progress on assignment regardless
-        of the assignment group settings.
-        """
-        obj, created = StudentAssignment.base.update_or_create(
-            assignment=assignment, student_id=student_id,
-            defaults={'deleted_at': None})
-        return obj
+    def _bulk_restore_student_assignments(cls, assignment: Assignment,
+                                          student_ids: Iterable[int]):
+        (StudentAssignment.trash
+         .filter(assignment=assignment, student_id__in=student_ids)
+         .update(deleted_at=None, score=None, execution_time=None))
 
     # TODO: send notification to teachers except assignment publisher
     @classmethod
@@ -168,17 +167,37 @@ class AssignmentService:
             # Exclude enrollments without student group if assignment is
             # restricted to some groups
             filters.append(Q(student_group_id__in=restrict_to))
-        pks = (Enrollment.active
-               .filter(*filters)
-               .values_list("student_id", flat=True))
-        for student_id in pks:
-            sa = cls._create_student_assignment(assignment, student_id)
-            # Note(Dmitry): we create notifications here instead of a separate
-            # receiver because it's much more efficient than getting
-            # StudentAssignment objects back one by one. It seems
-            # reasonable that 2 * N INSERTs are better than .bulk_create
-            # + N SELECTs + N INSERTs.
-            notify_student_new_assignment(sa)
+        pks = list(Enrollment.active
+                   .filter(*filters)
+                   .values_list("student_id", flat=True))
+        # Create/update records in separate steps to avoid tons of savepoints
+        trash = set(StudentAssignment.trash
+                    .filter(assignment=assignment, student_id__in=pks)
+                    .values_list('student_id', flat=True))
+        if trash:
+            cls._bulk_restore_student_assignments(assignment, trash)
+        batch_size = 100
+        to_create = (sid for sid in pks if sid not in trash)
+        objs = (StudentAssignment(assignment=assignment, student_id=student_id)
+                for student_id in to_create)
+        while True:
+            batch = list(islice(objs, batch_size))
+            if not batch:
+                break
+            StudentAssignment.objects.bulk_create(batch, batch_size)
+        # Generate notifications
+        created = (StudentAssignment.objects
+                   .filter(assignment=assignment, student_id__in=pks)
+                   .values_list('pk', 'student_id', named=True))
+        objs = (AssignmentNotification(user_id=sa.student_id,
+                                       student_assignment_id=sa.pk,
+                                       is_about_creation=True) for sa in created)
+        batch_size = 100
+        while True:
+            batch = list(islice(objs, batch_size))
+            if not batch:
+                break
+            AssignmentNotification.objects.bulk_create(batch, batch_size)
 
     @staticmethod
     def bulk_remove_student_assignments(assignment: Assignment,
@@ -310,7 +329,7 @@ class EnrollmentService:
 
 def notify_student_new_assignment(student_assignment):
     (AssignmentNotification(user_id=student_assignment.student_id,
-                            student_assignment=student_assignment,
+                            student_assignment_id=student_assignment.pk,
                             is_about_creation=True)
      .save())
 

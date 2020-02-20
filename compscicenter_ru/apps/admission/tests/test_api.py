@@ -16,7 +16,7 @@ from learning.settings import Branches
 
 @pytest.mark.django_db
 def test_application_form_inactive_or_past_campaign(client):
-    url = reverse("public-api:v2:applicant_create")
+    create_url = reverse("public-api:v2:applicant_create")
     branch_spb = BranchFactory(code=Branches.SPB)
     today = now_local(branch_spb.get_timezone())
     campaign = CampaignFactory(current=True, branch__code=Branches.SPB,
@@ -25,12 +25,12 @@ def test_application_form_inactive_or_past_campaign(client):
     form_data = {
         "campaign": campaign.id
     }
-    response = client.post(url, form_data)
+    response = client.post(create_url, form_data)
     assert response.status_code == 400
     assert "campaign" not in response.data
     campaign.application_ends_at = today - timedelta(days=1)
     campaign.save()
-    response = client.post(url, form_data)
+    response = client.post(create_url, form_data)
     assert response.status_code == 400
     assert "campaign" in response.data
 

@@ -1,8 +1,8 @@
 import pytest
 from django.db import models, connection, router
 
-from core.deletion import SoftDeleteCollector
 from core.models import SoftDeletionModel
+from core.services import SoftDeleteService
 
 
 @pytest.mark.django_db
@@ -38,9 +38,7 @@ def test_soft_delete_collector():
     hard_child = HardChild(parent=p)
     hard_child.save()
     using = router.db_for_write(Parent, instance=p)
-    collector = SoftDeleteCollector(using, SoftDeletionModel)
-    collector.collect([p])
-    collector.soft_delete()
+    SoftDeleteService(using).delete([p])
     assert p.pk is not None, "Without pk it's impossible to call .restore()"
     assert p.is_deleted
     assert Parent.objects.count() == 0
@@ -50,7 +48,7 @@ def test_soft_delete_collector():
     assert SoftSoftChild.objects.count() == 0
     assert SoftSoftChild.trash.count() == 1
     assert HardSoftChild.objects.count() == 1
-    collector.restore()
+    SoftDeleteService(using).restore([p])
     assert not p.is_deleted
     assert Parent.objects.count() == 1
     assert Parent.trash.count() == 0

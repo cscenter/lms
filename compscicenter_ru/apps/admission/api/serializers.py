@@ -23,11 +23,15 @@ class ApplicantSerializer(serializers.ModelSerializer):
     preferred_study_programs = serializers.MultipleChoiceField(
         Applicant.STUDY_PROGRAMS,
         required=False,
-        error_messages={'empty': 'Выберите интересующие вас направления обучения'}
+        error_messages={
+            'empty': 'Выберите интересующие вас направления обучения'
+        }
     )
     campaign = ActiveCampaignField(
         label='Отделение',
-        error_messages={'does_not_exist': 'Приемная кампания окончена либо не существует'})
+        error_messages={
+            'does_not_exist': 'Приемная кампания окончена либо не существует'
+        })
     # Note: This field is marked as required on a form level only since
     # curators could insert applicant through admin interface
     # without full information about applicant.
