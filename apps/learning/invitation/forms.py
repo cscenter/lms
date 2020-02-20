@@ -46,3 +46,14 @@ class InvitationRegistrationForm(RegistrationFormUniqueEmail):
                 raise forms.ValidationError("Username is not unique")
             self.instance.username = username
         return cleaned_data
+
+
+class CompleteProfileForm(forms.ModelForm):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.fields['first_name'].required = True
+        self.fields['last_name'].required = True
+
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "patronymic")

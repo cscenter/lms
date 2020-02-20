@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-02-20 11:44+0000\n"
-"PO-Revision-Date: 2020-02-20 11:44+0000\n"
+"POT-Creation-Date: 2020-02-20 15:56+0000\n"
+"PO-Revision-Date: 2020-02-20 15:57+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -257,7 +257,9 @@ msgstr "Общее описание, правила обучения"
 #: apps/courses/models.py:242 apps/courses/models.py:294
 #: apps/learning/models.py:63 apps/learning/models.py:242
 #: apps/learning/models.py:591 apps/library/models.py:38
-#: apps/study_programs/models.py:55 apps/users/models.py:334
+#: apps/study_programs/models.py:55
+#: apps/templates/learning/invitation/complete_profile.html:23
+#: apps/users/models.py:334
 msgid "Branch"
 msgstr "Отделение"
 
@@ -906,7 +908,7 @@ msgstr "Внешний сервис"
 msgid "No Submission"
 msgstr "Без отправки решения"
 
-#: apps/courses/models.py:915
+#: apps/courses/models.py:915 apps/templates/courses/course_detail.html:136
 #: apps/templates/learning/study/assignment_list.html:33
 #: apps/templates/learning/study/assignment_list.html:94
 #: apps/templates/learning/study/student_assignment_detail.html:153
@@ -977,7 +979,8 @@ msgstr "Задания"
 msgid "video"
 msgstr "видео"
 
-#: apps/courses/tabs.py:362 lms/templates/lms/course_offerings.html:28
+#: apps/courses/tabs.py:362 apps/templates/courses/course_detail.html:137
+#: lms/templates/lms/course_offerings.html:28
 #: lms/templates/lms/course_offerings.html:96
 msgid "Files"
 msgstr "Файлы"
@@ -1240,7 +1243,7 @@ msgstr "Стажировка"
 msgid "Submit"
 msgstr "Отправить"
 
-#: apps/learning/invitation/views.py:166
+#: apps/learning/invitation/views.py:152
 msgid "Учетная запись активирована."
 msgstr ""
 
@@ -2095,10 +2098,6 @@ msgstr "Название"
 msgid "Venue|short"
 msgstr "Место"
 
-#: apps/templates/courses/course_detail.html:156
-msgid "Yes,No"
-msgstr "Да,Нет"
-
 #: apps/templates/courses/course_detail.html:193
 msgid "delete"
 msgstr "удалить"
@@ -2314,9 +2313,15 @@ msgstr ""
 msgid "Account activation failed."
 msgstr ""
 
-#: apps/templates/learning/invitation/complete_profile.html:4
-msgid "Complete Profile Confirmation"
-msgstr ""
+#: apps/templates/learning/invitation/complete_profile.html:5
+#: apps/templates/learning/invitation/complete_profile.html:11
+#| msgid "Profile photo"
+msgid "Profile Update"
+msgstr "Обновление профиля"
+
+#: apps/templates/learning/invitation/complete_profile.html:43
+msgid "Continue"
+msgstr "Продолжить"
 
 #: apps/templates/learning/invitation/registration.html:5
 msgid "Register for an account"
@@ -3014,6 +3019,12 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
+
+#~ msgid "Update Profile"
+#~ msgstr "Обновить профиль"
+
+#~ msgid "Yes,No"
+#~ msgstr "Да,Нет"
 
 #~ msgid "Online"
 #~ msgstr "Онлайн"
