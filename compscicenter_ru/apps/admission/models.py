@@ -143,11 +143,9 @@ class Campaign(TimezoneAwareModel, models.Model):
     @classmethod
     def get_active(cls):
         today = timezone.now()
-        # Allow to apply just before the official start
-        two_days_ago = today - datetime.timedelta(days=2)
         return (cls.objects
                 .filter(current=True,
-                        application_starts_at__lte=two_days_ago,
+                        application_starts_at__lte=today,
                         application_ends_at__gt=today)
                 .select_related('branch')
                 .order_by('id'))
