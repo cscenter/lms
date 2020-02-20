@@ -62,7 +62,6 @@
       -w {{ certbot_webroot_path }}
       -d {{ certbot_domains|join(' -d ') }}
       --deploy-hook 'service nginx reload'
-      --no-self-upgrade
     state: present
   when: certbot_auto_renew
   tags:
