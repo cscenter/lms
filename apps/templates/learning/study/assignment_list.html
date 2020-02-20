@@ -26,11 +26,11 @@
       <h3>{% trans "Open assignments" %}</h3>
       <table class="table" width="100%">
         <thead>
-          <th width="10%">{% trans "Deadline" %}</th>
+          <th width="15%">{% trans "Deadline" %}</th>
           <th></th>
           <th width="20%">{% trans "Course" %}</th>
-          <th width="15%">{% trans "State" %}</th>
-          <th width="5%">{% trans "Online" %}</th>
+          <th width="17%">{% trans "State" %}</th>
+          <th width="15%">{% trans "Submission Type" %}</th>
         </thead>
         {% for a_s in assignment_list_open %}
         <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
@@ -60,7 +60,7 @@
             </span>
           </td>
           <td>
-            {{ a_s.assignment.is_online|yesno:_("Yes,No") }}
+            {{ a_s.assignment.get_submission_type_display }}
           </td>
         </tr>
         {% endfor %}
@@ -87,11 +87,11 @@
       <h3>{% trans "Archive" %}</h3>
       <table class="table" width="100%">
         <thead>
-          <th width="10%">{% trans "Deadline" %}</th>
+          <th width="15%">{% trans "Deadline" %}</th>
           <th></th>
           <th width="20%">{% trans "Course" %}</th>
-          <th width="15%">{% trans "State" %}</th>
-          <th width="5%">{% trans "Online" %}</th>
+          <th width="17%">{% trans "State" %}</th>
+          <th width="15%">{% trans "Submission Type" %}</th>
         </thead>
         {% for a_s in assignment_list_archive %}
         <tr class="{{ a_s.has_unread|yesno:"unread,noop" }}">
@@ -117,7 +117,7 @@
             </span>
           </td>
           <td>
-            {{ a_s.assignment.is_online|yesno:_("Yes,No") }}
+            {{ a_s.assignment.get_submission_type_display }}
           </td>
         </tr>
         {% endfor %}
