@@ -150,17 +150,14 @@
                 <h5 class="assignment">{% trans "Deadline" %}</h5>
                 <span class="nowrap">{{ a_s.assignment.deadline_at|timezone:timezone|naturalday:"d E Y" }} {{ a_s.assignment.deadline_at|timezone:timezone|time:"H:i" }}</span>
 
-                <h5 class="assignment">{% trans "Maximum score" %}</h5>
-                <span class="nowrap">{{ a_s.assignment.maximum_score }}</span>
+                <h5 class="assignment">{% trans "Submission Type" %}</h5>
+                {{ a_s.assignment.get_submission_type_display }}
 
                 <h5 class="assignment">{% trans "Passing score" %}</h5>
-                <span class="nowrap">{{ a_s.assignment.passing_score }}</span>
+                <span class="nowrap">{{ a_s.assignment.passing_score }} {% trans "out of" %} {{ a_s.assignment.maximum_score }}</span>
 
                 <h5 class="assignment">{% trans "Assignment created" %}</h5>
                 {{ a_s.assignment.created_local|date:"d E Y" }}
-                {% if a_s.assignment.is_online %}
-                <h4>{% trans "Can be passed online "%}</h4>
-                {% endif %}
             </div>
         </div>
     </div>

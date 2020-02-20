@@ -133,8 +133,8 @@
                             <tr>
                               <th>{% trans "Deadline" %}</th>
                               <th>{% trans "Title" %}</th>
-                              <th class="nobreak">Через сайт</th>
-                              <th style="width: 110px;">Файлы</th>
+                              <th class="nobreak" width="25%">{% trans "Submission Type" %}</th>
+                              <th style="width: 110px;">{% trans "Files" %}</th>
                             </tr>
                         </thead>
                         {% for assignment in tab.tab_panel.context.items %}
@@ -153,7 +153,7 @@
                                         <div>{{ assignment.title }}</div>
                                     {% endif %}
                                 </td>
-                                <td>{{ assignment.is_online|yesno:_("Yes,No") }}</td>
+                                <td>{{ assignment.get_submission_type_display }}</td>
                                 <td>
                                     {% for attachment in assignment.assignmentattachment_set.all %}
                                         {% if assignment.magic_link %}

@@ -34,8 +34,7 @@
         {{ assignment.deadline_at_local|naturalday:"d E Y" }} {{ assignment.deadline_at_local|time:"H:i" }}
       </p>
       <p>
-        {% trans "Can be passed online" %}:
-        {{ assignment.is_online|yesno:_("Yes,No") }}
+        {% trans "Submission Type" %}: {{ assignment.get_submission_type_display|lower }}
       </p>
       <p>
         {% trans "Assignment Weight" %}: {{ assignment.weight|floatdot }}
