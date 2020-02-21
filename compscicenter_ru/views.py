@@ -183,7 +183,7 @@ class TestimonialsListView(TemplateView):
                     "page": current_page,
                 },
                 "props": {
-                    "page_size": page_size,
+                    "pageSize": page_size,
                     "endpoint": reverse("public-api:v2:testimonials"),
                     "total": total,
                 }
