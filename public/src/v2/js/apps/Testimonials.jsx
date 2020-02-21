@@ -1,5 +1,5 @@
 // TODO: add translation support (error msg)
-
+import * as PropTypes from 'prop-types';
 import {createBrowserHistory} from "history";
 import Masonry from 'masonry-layout';
 import $ from 'jquery';
@@ -22,7 +22,7 @@ const MASONRY_ENABLED = (window.screen.availWidth >= DESKTOP_VIEWPORT_MIN);
 const history = createBrowserHistory();
 
 
-class App extends React.Component {
+class Testimonials extends React.Component {
     constructor(props) {
         super(props);
         this.masonryGrid = React.createRef();
@@ -78,7 +78,7 @@ class App extends React.Component {
 
     componentWillUnmount() {
         this.serverRequest.abort();
-    };
+    }
 
     onChangePage(page) {
         console.debug("onChangePage");
@@ -90,7 +90,7 @@ class App extends React.Component {
         this.setState({ loading: true, page: page });
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         console.debug("Testimonials: componentDidUpdate");
         if (this.state.loading) {
             const payload = this.getRequestPayload(this.state);
@@ -104,11 +104,11 @@ class App extends React.Component {
                 hideBodyPreloader();
             }
         }
-    };
+    }
 
     getRequestPayload(state) {
         let {page} = state;
-        return { page, page_size: this.props.page_size };
+        return { page, pageSize: this.props.pageSize };
     }
 
     fetch = (payload) => {
@@ -151,11 +151,20 @@ class App extends React.Component {
                     )}
                     <div className="grid-sizer" />
                 </div>
-                <Pagination totalItems={this.props.total} pageSize={this.props.page_size}
+                <Pagination totalItems={this.props.total} pageSize={this.props.pageSize}
                             currentPage={this.state.page} onChangePage={this.onChangePage} />
             </div>
         );
     }
 }
 
-export default App;
+Testimonials.propTypes = {
+    initialState: PropTypes.shape({
+        page: PropTypes.number.isRequired,
+    }).isRequired,
+    pageSize: PropTypes.number.isRequired,
+    total: PropTypes.number.isRequired,
+    endpoint: PropTypes.string.isRequired,
+};
+
+export default Testimonials;

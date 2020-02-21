@@ -5,8 +5,8 @@
  * --------------------------------------------------------------------------
  */
 
-import { find as findFn, findOne, matches, closest } from './polyfill'
-import { makeArray } from '../util/index'
+import { find as findFn, findOne, matches, closest } from './polyfill';
+import { makeArray } from '../util/index';
 
 /**
  * ------------------------------------------------------------------------
@@ -14,62 +14,62 @@ import { makeArray } from '../util/index'
  * ------------------------------------------------------------------------
  */
 
-const NODE_TEXT = 3
+const NODE_TEXT = 3;
 
 const SelectorEngine = {
   matches(element, selector) {
-    return matches.call(element, selector)
+    return matches.call(element, selector);
   },
 
   find(selector, element = document.documentElement) {
-    return findFn.call(element, selector)
+    return findFn.call(element, selector);
   },
 
   findOne(selector, element = document.documentElement) {
-    return findOne.call(element, selector)
+    return findOne.call(element, selector);
   },
 
   children(element, selector) {
-    const children = makeArray(element.children)
+    const children = makeArray(element.children);
 
-    return children.filter(child => this.matches(child, selector))
+    return children.filter(child => this.matches(child, selector));
   },
 
   parents(element, selector) {
-    const parents = []
+    const parents = [];
 
-    let ancestor = element.parentNode
+    let ancestor = element.parentNode;
 
     while (ancestor && ancestor.nodeType === Node.ELEMENT_NODE && ancestor.nodeType !== NODE_TEXT) {
       if (this.matches(ancestor, selector)) {
-        parents.push(ancestor)
+        parents.push(ancestor);
       }
 
-      ancestor = ancestor.parentNode
+      ancestor = ancestor.parentNode;
     }
 
-    return parents
+    return parents;
   },
 
   closest(element, selector) {
-    return closest.call(element, selector)
+    return closest.call(element, selector);
   },
 
   prev(element, selector) {
-    const siblings = []
+    const siblings = [];
 
-    let previous = element.previousSibling
+    let previous = element.previousSibling;
 
     while (previous && previous.nodeType === Node.ELEMENT_NODE && previous.nodeType !== NODE_TEXT) {
       if (this.matches(previous, selector)) {
-        siblings.push(previous)
+        siblings.push(previous);
       }
 
-      previous = previous.previousSibling
+      previous = previous.previousSibling;
     }
 
-    return siblings
+    return siblings;
   }
-}
+};
 
-export default SelectorEngine
+export default SelectorEngine;

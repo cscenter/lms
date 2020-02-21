@@ -1,6 +1,5 @@
 import React from 'react';
 import * as PropTypes from 'prop-types';
-import cx from 'classnames';
 import {Consumer} from './RadioGroupContext';
 
 
@@ -20,7 +19,6 @@ const RadioOption = ({
               className: groupClassName,
               required: optionRequired
           }) => {
-            const className = cx(optionClassName, groupClassName);
             const disabled = optionDisabled || groupDisabled;
 
             const radioProps = {

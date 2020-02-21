@@ -16,8 +16,8 @@ export const SelectDefaultProps = {
             marginBottom: 0,
         }),
     },
-    formatCreateLabel: (inputValue) => {
-        return <React.Fragment><b>Добавить</b> "{inputValue}"</React.Fragment>;
+    formatCreateLabel: (inputValue) => { // eslint-disable-line react/display-name
+        return <React.Fragment><b>Добавить</b> &quot;{inputValue}&quot;</React.Fragment>;
     }
 };
 
@@ -48,6 +48,8 @@ export class Select extends React.Component {
 }
 
 Select.propTypes = {
+    name: PropTypes.string.isRequired,
     onChange: PropTypes.func.isRequired,
+    value: PropTypes.any,  // TODO: specify type
     options: PropTypes.array.isRequired
 };

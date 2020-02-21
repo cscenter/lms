@@ -1,4 +1,5 @@
 import React from 'react';
+import * as PropTypes from 'prop-types';
 import {Tooltip as BaseTooltip} from 'react-tippy';
 
 export const Tooltip = ({ title, children, ...options }) => (
@@ -12,3 +13,8 @@ export const Tooltip = ({ title, children, ...options }) => (
       {children}
     </BaseTooltip>
 );
+
+Tooltip.propTypes = {
+    title: PropTypes.string.isRequired,
+    children: PropTypes.element.isRequired
+};

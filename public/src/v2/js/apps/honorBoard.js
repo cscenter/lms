@@ -10,7 +10,7 @@ export function launch() {
             students.forEach((userId) => {
                 studentAchievements[userId] = studentAchievements[userId] || [];
                 studentAchievements[userId].push(code);
-            })
+            });
         });
         Object.keys(studentAchievements).forEach((userId) => {
             let codes = studentAchievements[userId];
@@ -35,4 +35,4 @@ export function launch() {
         });
 
     }
-};
+}

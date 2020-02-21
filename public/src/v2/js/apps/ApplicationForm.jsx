@@ -23,6 +23,7 @@ class ApplicationFormPage extends React.Component {
         super(props);
         this.state = {
             "loading": true,
+            "agreement": false,
             ...props.initialState
         };
     }
@@ -50,9 +51,9 @@ class ApplicationFormPage extends React.Component {
         this.serverRequest.abort();
     };
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
 
-    };
+    }
 
     openAuthPopup = function(url) {
         const width = 700;
@@ -81,7 +82,6 @@ class ApplicationFormPage extends React.Component {
         const {endpoint, csrfToken, campaigns} = this.props;
         const {
             has_job,
-            agreement,
             university,
             course,
             campaign,
@@ -97,7 +97,7 @@ class ApplicationFormPage extends React.Component {
             }
         }
         let campaignSelectedOption = campaigns.find(obj => {
-            return obj.value === campaign
+            return obj.value === campaign;
         });
         payload["campaign"] = campaignSelectedOption.id;
 
@@ -117,7 +117,7 @@ class ApplicationFormPage extends React.Component {
                 let msg = "<h5>Анкета не была сохранена</h5>";
                 const data = jqXHR.responseJSON;
                 if (Object.keys(data).length === 1 &&
-                        data.hasOwnProperty('non_field_errors')) {
+                        Object.prototype.hasOwnProperty.call(data, 'non_field_errors')) {
                     msg += data['non_field_errors'];
                     showErrorNotification(msg);
                 } else {
@@ -128,7 +128,7 @@ class ApplicationFormPage extends React.Component {
                 let msg = "<h5>Анкета не была сохранена</h5>Приемная кампания окончена.";
                 showErrorNotification(msg);
             } else {
-                showErrorNotification("Что-то пошло не так. Попробуйте позже.")
+                showErrorNotification("Что-то пошло не так. Попробуйте позже.");
             }
         });
     };
@@ -362,7 +362,7 @@ class ApplicationFormPage extends React.Component {
                                         <div className="ui input">
                                             <label htmlFor="preferred_study_programs_cs_note">Вы бы хотели заниматься исследованиями в области Computer Science? Какие темы вам особенно интересны?</label>
                                             <p className="text-small mb-2">
-                                                Вы можете посмотреть список возможных тем и руководителей НИРов у нас на <a target="_blank" href="https://compscicenter.ru/projects/#research-curators">сайте</a>.
+                                                Вы можете посмотреть список возможных тем и руководителей НИРов у нас на <a target="_blank" href="https://compscicenter.ru/projects/#research-curators" rel="noopener noreferrer">сайте</a>.
                                             </p>
                                             <textarea id="preferred_study_programs_cs_note" name="preferred_study_programs_cs_note" rows="6" onChange={this.handleInputChange} />
                                         </div>
@@ -451,7 +451,7 @@ class ApplicationFormPage extends React.Component {
                             <Checkbox
                                 required
                                 name={"agreement"}
-                                label={<Fragment>Настоящим подтверждаю свое согласие на обработку Оператором моих персональных данных в соответствии с <a target="_blank" href='https://compscicenter.ru/policy/'>Политикой в отношении обработки персональных данных Пользователей Веб-сайта</a>, а также гарантирую достоверность представленных мной данных</Fragment>}
+                                label={<Fragment>Настоящим подтверждаю свое согласие на обработку Оператором моих персональных данных в соответствии с <a target="_blank" href="https://compscicenter.ru/policy/" rel="noopener noreferrer">Политикой в отношении обработки персональных данных Пользователей Веб-сайта</a>, а также гарантирую достоверность представленных мной данных</Fragment>}
                                 onChange={this.handleInputChange}
                             />
                         </div>
@@ -464,10 +464,18 @@ class ApplicationFormPage extends React.Component {
 }
 
 ApplicationFormPage.propTypes = {
+    initialState: PropTypes.shape({
+        isYandexPassportAccessAllowed: PropTypes.bool.isRequired,
+    }).isRequired,
     endpoint: PropTypes.string.isRequired,
+    csrfToken: PropTypes.string.isRequired,
     authBeginUrl: PropTypes.string.isRequired,
     authCompleteUrl: PropTypes.string.isRequired,
     campaigns: PropTypes.arrayOf(PropTypes.shape({
+        value: PropTypes.string.isRequired,
+        label: PropTypes.string.isRequired
+    })).isRequired,
+    sources: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired
     })).isRequired,

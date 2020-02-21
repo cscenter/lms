@@ -15,6 +15,7 @@ import {
     showErrorNotification
 } from "../utils";
 import {onSelectChange} from "components/utils";
+import {selectOptionType} from "types/props";
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
@@ -47,7 +48,7 @@ class Alumni extends React.Component {
         this.serverRequest.abort();
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.state.loading) {
             const filterState = this.getFilterState(this.state);
             const newPayload = this.getRequestPayload(filterState);
@@ -99,7 +100,7 @@ class Alumni extends React.Component {
             showBodyPreloader();
         }
         const {year, branch, area} = this.state;
-        const {t, yearOptions, branchOptions, areaOptions} = this.props;
+        const {yearOptions, branchOptions, areaOptions} = this.props;
 
         let filteredItems = this.state.items.filter(function(item) {
             let branchCondition = (branch !== null) ? item.student.branch === branch.value : true;
@@ -128,7 +129,7 @@ class Alumni extends React.Component {
                             onChange={this.handleSelectChange}
                             value={area}
                             name="area"
-                            placeholder={t("Направление")}
+                            placeholder={i18next.t("Направление")}
                             isClearable={true}
                             options={areaOptions}
                             key="area"
@@ -149,7 +150,7 @@ class Alumni extends React.Component {
                 {
                     filteredItems.length > 0 ?
                         <UserCardList users={filteredItems} />
-                        : t("Таких выпускников у нас нет. Выберите другие параметры фильтрации.")
+                        : i18next.t("Таких выпускников у нас нет. Выберите другие параметры фильтрации.")
                 }
             </Fragment>
         );
@@ -157,6 +158,14 @@ class Alumni extends React.Component {
 }
 
 const propTypes = {
+    initialState: PropTypes.shape({
+        year: selectOptionType.isRequired, // // FIXME: optional? test
+        area: PropTypes.shape({
+            value: PropTypes.string.isRequired,
+            label: PropTypes.string.isRequired
+        }), // FIXME: required? test
+        branch: PropTypes.string,
+    }).isRequired,
     endpoint: PropTypes.string.isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,

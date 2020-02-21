@@ -125,9 +125,9 @@ class CourseOfferings extends React.Component {
     checkYearOption(state, name = 'academicYear') {
         const options = this.getYearOptions(state.branch);
         if (getOptionByValue(options, state.academicYear) === null) {
-            return {[name]: options[0]}
+            return {[name]: options[0]};
         }
-        return {}
+        return {};
     }
 
     componentDidMount = () => {
@@ -169,7 +169,7 @@ class CourseOfferings extends React.Component {
                 searchParams: urlParams,
                 headers: {'content-type': 'application/json'},
                 signal: abortController.signal
-            })
+            });
         });
 
         try {
@@ -219,8 +219,8 @@ class CourseOfferings extends React.Component {
     }
 
     filteredItemsPatch(state, name = 'filteredItems') {
-        return {[name]: this.filterItems(state.items, state)}
-    };
+        return {[name]: this.filterItems(state.items, state)};
+    }
 
     render() {
         const {
@@ -383,6 +383,32 @@ class CourseOfferings extends React.Component {
     }
 }
 
+const courseType = PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
+    teachers: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        name: PropTypes.string.isRequired
+    })).isRequired,
+    branch: PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        code: PropTypes.string.isRequired
+    }).isRequired,
+    semester: PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        index: PropTypes.number.isRequired,
+        year: PropTypes.number.isRequired,
+        academic_year: PropTypes.number.isRequired,
+        type: PropTypes.oneOf(['autumn', 'spring']).isRequired,
+    }).isRequired,
+    materials: PropTypes.shape({
+        video: PropTypes.bool.isRequired,
+        slides: PropTypes.bool.isRequired,
+        files: PropTypes.bool.isRequired,
+    }).isRequired
+});
+
 const propTypes = {
     endpoints: PropTypes.arrayOf(PropTypes.string).isRequired,
     // history api depends on initial state
@@ -398,6 +424,7 @@ const propTypes = {
         }).isRequired,
         terms: PropTypes.arrayOf(PropTypes.string).isRequired,
     }).isRequired,
+    currentYear: PropTypes.number.isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired,
@@ -407,31 +434,7 @@ const propTypes = {
         value: PropTypes.string.isRequired,
         label: PropTypes.string.isRequired
     })).isRequired,
-    courses: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number.isRequired,
-        name: PropTypes.string.isRequired,
-        url: PropTypes.string.isRequired,
-        teachers: PropTypes.arrayOf(PropTypes.shape({
-            id: PropTypes.number.isRequired,
-            name: PropTypes.string.isRequired
-        })).isRequired,
-        branch: PropTypes.shape({
-            id: PropTypes.number.isRequired,
-            code: PropTypes.string.isRequired
-        }).isRequired,
-        semester: PropTypes.shape({
-            id: PropTypes.number.isRequired,
-            index: PropTypes.number.isRequired,
-            year: PropTypes.number.isRequired,
-            academic_year: PropTypes.number.isRequired,
-            type: PropTypes.oneOf(['autumn', 'spring']).isRequired,
-        }).isRequired,
-        materials: PropTypes.shape({
-            video: PropTypes.bool.isRequired,
-            slides: PropTypes.bool.isRequired,
-            files: PropTypes.bool.isRequired,
-        }).isRequired
-    })),
+    courses: PropTypes.arrayOf(courseType),
 };
 
 CourseOfferings.propTypes = propTypes;
@@ -450,8 +453,6 @@ class CourseList extends React.Component {
             return "";
         }
 
-
-
         return (
             <div className={className}>
                 <div className="table__row _head">
@@ -460,7 +461,7 @@ class CourseList extends React.Component {
                     <div className="table__cell">Материалы</div>
                 </div>
                 {items
-                    .filter(function(item) {return filteredItems.has(item.id)})
+                    .filter(function(item) {return filteredItems.has(item.id);})
                     .map(item =>
                     <div className="table__row" key={`course-${item.id}`}>
                         <div className="table__cell">
@@ -484,6 +485,12 @@ class CourseList extends React.Component {
         );
     }
 }
+
+CourseList.propTypes = {
+    className: PropTypes.string,
+    items: PropTypes.arrayOf(courseType),
+    filteredItems: PropTypes.instanceOf(Set)
+};
 
 
 const ClubIcon = () => (

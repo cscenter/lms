@@ -8,7 +8,8 @@ export function launch() {
                 actions.forEach(function (logic) {
                     if (logic.action_type === "show") {
                         for (let rule of logic.rules) {
-                            document.querySelectorAll(`input[name="field_${rule.field_name}"]`)
+                            const inputSelector = `input[name="field_${rule.field_name}"]`;
+                            document.querySelectorAll(inputSelector)
                                 .forEach(input => input.addEventListener("change", function () {
                                     let selected;
                                     if (this.type === 'checkbox') {
@@ -33,7 +34,7 @@ export function launch() {
                             }));
                         }
                     }
-                })
+                });
             }
 
         });

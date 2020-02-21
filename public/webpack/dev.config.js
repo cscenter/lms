@@ -14,7 +14,6 @@ module.exports = {
             'process.env': {
                 NODE_ENV: '"development"'
             },
-            '__DEVELOPMENT__': true
         }),
         new webpack.HotModuleReplacementPlugin()
     ],

@@ -2,6 +2,7 @@
   "root": true,
   "extends": [
     "eslint:recommended",
+    "plugin:react/recommended",
     "plugin:import/errors",
     "plugin:import/warnings"
   ],
@@ -11,7 +12,8 @@
     "sourceType": "module",
     "ecmaFeatures": {
       "experimentalObjectRestSpread": true,
-      "modules": true
+      "modules": true,
+      "jsx": true
     }
   },
   "env": {
@@ -20,20 +22,57 @@
     "node": true,
     "jquery": true
   },
+  "plugins": [
+    "react-hooks"
+  ],
   "rules": {
     "quotes": 0,
-    "no-console": 1,
+    "no-console": [
+      "warn",
+      // console.debug will be stripped out by webpack
+      { "allow": ["debug"] }
+    ],
     "no-debugger": 1,
     "no-var": 1,
+    // Disable checking function arguments
+    "no-unused-vars": ["error", { "args": "none" }],
     "semi": [
-      1,
+      "warn",
       "always"
     ],
     "no-trailing-spaces": 0,
     "eol-last": 0,
     "no-underscore-dangle": 0,
     "no-alert": 0,
-    "no-lone-blocks": 0
+    "no-lone-blocks": 0,
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": [
+          "src/v2/js"
+        ],
+        "extensions": [
+          ".js", ".jsx"
+        ]
+      },
+      // uses 'eslint-import-resolver-webpack'
+      "webpack": {
+        "paths": [
+          "src/v2/js"
+        ]
+      }
+    },
+    "react": {
+      // Regex for Component Factory to use,
+      // default to "createReactClass"
+      "createClass": "createReactClass",
+      // Pragma to use, default to "React"
+      "pragma": "React",
+      "version": "detect"
+    }
   },
   "globals": {
     "$": true

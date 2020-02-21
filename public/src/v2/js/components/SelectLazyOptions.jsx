@@ -1,6 +1,7 @@
 import SelectBase from 'react-select';
 import * as PropTypes from 'prop-types';
 import React from 'react';
+import {selectOptionType} from 'types/props';
 
 
 const inputStyles = {
@@ -21,7 +22,7 @@ class SelectLazyOptions extends React.Component {
             optionsLoaded: false,
             options: [],
             isLoading: false
-        }
+        };
     }
 
     handleChange = (e) => {
@@ -57,6 +58,7 @@ class SelectLazyOptions extends React.Component {
 
 SelectLazyOptions.propTypes = {
     name: PropTypes.string.isRequired,
+    value: selectOptionType,
     onChange: PropTypes.func.isRequired,
     handleLoadOptions: PropTypes.func.isRequired
 };

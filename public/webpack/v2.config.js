@@ -80,9 +80,8 @@ const common = {
                 test: /\.(js|jsx|ts|tsx)$/,
                 include: path.resolve(__srcdir, "js"),
                 use: [
-                    {
-                        loader: 'babel-loader',
-                    }
+                    {loader: 'babel-loader'},
+                    {loader: 'eslint-loader'},
                 ]
             },
             {

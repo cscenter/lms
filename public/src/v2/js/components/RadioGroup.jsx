@@ -33,6 +33,7 @@ const RadioGroup = ({
 
 RadioGroup.propTypes = {
     children: PropTypes.node.isRequired,
+    required: PropTypes.bool,
     name: PropTypes.string.isRequired,
     selected: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     onChange: PropTypes.func,

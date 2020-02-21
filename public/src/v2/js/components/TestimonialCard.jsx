@@ -26,6 +26,12 @@ class TestimonialCard extends React.Component {
 
 TestimonialCard.propTypes = {
     id: PropTypes.number.isRequired,
+    photo: PropTypes.string.isRequired,
+    imgWidth: PropTypes.number.isRequired,
+    imgHeight: PropTypes.number.isRequired,
+    year: PropTypes.number.isRequired,
+    testimonial: PropTypes.string.isRequired,
+    areas: PropTypes.string.isRequired,
     student: PropTypes.string.isRequired
 };
 
