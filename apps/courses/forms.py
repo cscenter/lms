@@ -263,6 +263,12 @@ class AssignmentDurationField(forms.DurationField):
         return value
 
 
+def _get_label(student_group):
+    if student_group.type == StudentGroupTypes.BRANCH:
+        return f"{student_group.name} [{student_group.branch.site}]"
+    return student_group.name
+
+
 class AssignmentForm(TimezoneAwareModelForm):
     title = forms.CharField(
         label=_("Title"),
@@ -319,7 +325,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         assert course is not None
         super().__init__(*args, **kwargs)
         self.instance.course = course
-        qs = StudentGroup.objects.filter(course=course)
+        qs = StudentGroup.objects.filter(course=course).order_by('pk')
         groups = list(qs)
         field_restrict_to = self.fields['restrict_to']
         # TODO: move to method
@@ -329,10 +335,12 @@ class AssignmentForm(TimezoneAwareModelForm):
             field_restrict_to.widget.attrs['title'] = _("All Branches")
             sites = set()
             for g in groups:
-                g.branch = Branch.objects.get_by_pk(g.branch_id)
-                sites.add(g.branch.site_id)
+                # Special case when student group manually added in admin
+                if g.branch_id:
+                    g.branch = Branch.objects.get_by_pk(g.branch_id)
+                    sites.add(g.branch.site_id)
             if len(sites) > 1:
-                get_label = lambda sg: f"{sg.name} [{sg.branch.site}]"
+                get_label = _get_label
             else:
                 get_label = attrgetter('name')
         else:

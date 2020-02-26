@@ -58,7 +58,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
     ]
     search_fields = ['course__meta_course__name']
     exclude = ['grade_changed']
-    raw_id_fields = ("student", "course", "invitation")
+    raw_id_fields = ("student", "course", "invitation", "student_group")
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
