@@ -169,9 +169,9 @@ class ApplicationFormView(TemplateView):
                     'authBeginUrl': reverse('application:auth_begin'),
                     'campaigns': list(active_campaigns),
                     'universities': list(universities),
-                    'courses': courses,
-                    'studyPrograms': study_programs,
-                    'sources': sources
+                    'courseOptions': courses,
+                    'studyProgramOptions': study_programs,
+                    'sourceOptions': sources
                 },
                 'state': {
                     'isYandexPassportAccessAllowed': bool(yandex_passport_access),

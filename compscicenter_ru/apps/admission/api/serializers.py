@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.validators import validate_integer
 from django.utils import formats
 from rest_framework import serializers
 from rest_framework.fields import empty, TimeField
@@ -30,11 +31,11 @@ class ApplicantSerializer(serializers.ModelSerializer):
     campaign = ActiveCampaignField(
         label='Отделение',
         error_messages={
-            'does_not_exist': 'Приемная кампания окончена либо не существует'
+            'does_not_exist': 'Приемная кампания окончена либо не существует',
+            'incorrect_type': 'Некорректное значение идентификатора кампании'
         })
     # Note: This field is marked as required on a form level only since
-    # curators could insert applicant through admin interface
-    # without full information about applicant.
+    # curators could edit applicant info in admin without knowing all details.
     has_job = serializers.BooleanField(label='Вы сейчас работаете?')
     # FIXME: Replace with hidden field since real value stores in session
     yandex_login = serializers.CharField(max_length=80)
@@ -93,16 +94,17 @@ class ApplicantSerializer(serializers.ModelSerializer):
                     # This logic adds one additional DB hit, but
                     # improves validation since we need dynamically set
                     # `required` logic for some fields
+                    campaign_id = int(data['campaign'])
                     campaign = (self.fields['campaign']
                                 .get_queryset()
-                                .get(pk=data['campaign']))
+                                .get(pk=campaign_id))
                     if campaign.branch.city_id:
                         field = self.fields["preferred_study_programs"]
                         field.required = True
                         field.allow_empty = False
                     elif not data.get("living_place"):
                         self.fields["living_place"].required = True
-                except Campaign.DoesNotExist:
+                except (ValueError, Campaign.DoesNotExist):
                     self.fields['campaign'].queryset = Campaign.objects.none()
         super().__init__(instance, data, **kwargs)
 
