@@ -138,11 +138,7 @@ class CourseOfferings extends React.Component {
 
     componentWillUnmount = function () {
         this.unlistenHistory();
-        if (this.requests) {
-            for (const request of this.requests) {
-                request.abort();
-            }
-        }
+        this.latestFetchAbortController.abort();
     };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -164,18 +160,18 @@ class CourseOfferings extends React.Component {
 
         const abortController = new AbortController();
         this.latestFetchAbortController = abortController;
-        this.requests = this.props.endpoints.map(endpoint => {
-            return ky.get(endpoint, {
-                searchParams: urlParams,
-                headers: {'content-type': 'application/json'},
-                signal: abortController.signal
-            });
-        });
 
         try {
-            let responses = await Promise.all(this.requests);
+            let requests = this.props.endpoints.map(endpoint => {
+                return ky.get(endpoint, {
+                    searchParams: urlParams,
+                    headers: {'content-type': 'application/json'},
+                    signal: abortController.signal
+                });
+            });
             let items = [];
-            let jsons = await Promise.all(responses.map(r => r.json()));
+            let jsons = await Promise.all(requests.map(r => r.json()));
+            // Abort signal was received during JSON parsing
             if (abortController.signal.aborted) {
                 return;
             }

@@ -2,9 +2,8 @@ import React, {Fragment} from 'react';
 import * as PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 import i18next from 'i18next';
-
+import ky from 'ky';
 import _throttle from 'lodash-es/throttle';
-import $ from 'jquery';
 
 import {Select} from 'components/Select';
 import UserCardList from 'components/UserCardList';
@@ -32,6 +31,7 @@ class Alumni extends React.Component {
             ...props.initialState
         };
         this.fetch = _throttle(this.fetch, 300);
+        this.latestFetchAbortController = null;
     }
 
     handleSelectChange = onSelectChange.bind(this);
@@ -45,7 +45,7 @@ class Alumni extends React.Component {
     }
 
     componentWillUnmount() {
-        this.serverRequest.abort();
+        this.latestFetchAbortController.abort();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
@@ -74,14 +74,27 @@ class Alumni extends React.Component {
         return filterState;
     }
 
-    fetch = (payload) => {
+    fetch = async (payload) => {
         console.debug("Alumni: fetch", this.props, payload);
-        this.serverRequest = $.ajax({
-            type: "GET",
-            url: this.props.endpoint,
-            dataType: "json",
-            data: payload
-        }).done((result) => {
+        let urlParams = new URLSearchParams();
+        for (let key of Object.keys(payload)) {
+            urlParams.set(key, payload[key]);
+        }
+        if (this.latestFetchAbortController !== null) {
+            this.latestFetchAbortController.abort();
+        }
+        const abortController = new AbortController();
+        this.latestFetchAbortController = abortController;
+        try {
+            const result = await ky.get(this.props.endpoint, {
+                searchParams: urlParams,
+                headers: {'content-type': 'application/json'},
+                signal: abortController.signal
+            }).json();
+            // Abort signal was received during JSON parsing
+            if (abortController.signal.aborted) {
+                return;
+            }
             result.data.forEach((g) => {
                 g.url = `/students/${g.student.id}/`;
                 g.name = `${g.student.name} ${g.student.surname}`;
@@ -90,9 +103,11 @@ class Alumni extends React.Component {
                 loading: false,
                 items: result.data,
             });
-        }).fail(() => {
-            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
-        });
+        } catch(reason) {
+            if (reason.name !== 'AbortError') {
+                showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
+            }
+        }
     };
 
     render() {

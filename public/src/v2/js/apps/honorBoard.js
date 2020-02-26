@@ -3,7 +3,7 @@ import $ from 'jquery';
 
 export function launch() {
     let achievementGrid = window.achievementGrid;
-    if (achievementGrid !== "undefined") {
+    if (achievementGrid !== undefined) {
         let studentAchievements = {};
         Object.keys(achievementGrid).forEach((code) => {
             let students = achievementGrid[code];
