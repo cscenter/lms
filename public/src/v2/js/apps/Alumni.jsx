@@ -15,7 +15,7 @@ import {
     showErrorNotification
 } from "../utils";
 import {onSelectChange} from "components/utils";
-import {selectOptionType} from "types/props";
+import {optionIntType} from "types/props";
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
@@ -159,11 +159,11 @@ class Alumni extends React.Component {
 
 const propTypes = {
     initialState: PropTypes.shape({
-        year: selectOptionType.isRequired, // // FIXME: optional? test
+        year: optionIntType.isRequired,
         area: PropTypes.shape({
             value: PropTypes.string.isRequired,
             label: PropTypes.string.isRequired
-        }), // FIXME: required? test
+        }),
         branch: PropTypes.string,
     }).isRequired,
     endpoint: PropTypes.string.isRequired,
