@@ -9,6 +9,7 @@ import {
     CreatableSelect,
     ErrorMessage,
     InputField,
+    MemoizedTextField,
     Input,
     RadioGroup,
     RadioOption,
@@ -27,25 +28,6 @@ const YandexAccessTooltip = () => (
         <span className="tooltip__icon _rounded">?</span>
     </Tooltip>
 );
-
-
-/**
- * Returns selected checkbox values filtered by input `name`.
- * @param formState - current form state
- * @param name - checkbox input name
- * @param value - checkbox input value
- * @param checked - checkbox new state
- */
-let selectedCheckboxes = function (formState, {name, value, checked}) {
-    let selected = formState[name] || [];
-    if (checked === true) {
-        selected.push(value);
-    } else {
-        let valueIndex = selected.indexOf(value);
-        selected.splice(valueIndex, 1);
-    }
-    return selected;
-};
 
 
 let openAuthPopup = function(url, authCompleteUrl) {
@@ -114,72 +96,51 @@ function ApplicationForm({
     const reducer = (state, newState) => ({ ...state, ...newState });
     const [state, setState] = useReducer(reducer, initial);
     const {isPending, run: runSubmit} = useAsync({deferFn: submitForm});
-    const {register, handleSubmit, setValue, triggerValidation, errors, watch} = useForm({mode: 'onSubmit', defaultValues: {agreement: false}, nativeValidation: true});
+    const {register, handleSubmit, setValue, triggerValidation, errors, watch} = useForm({
+        mode: 'onBlur',
+        defaultValues: {agreement: false},
+    });
 
-    // Personal Info
-    // TODO: Implement ref forwarding for Input component https://reactjs.org/docs/forwarding-refs.html
     let msgRequired = "Это поле обязательно для заполнения";
-    register({name: 'surname', type: 'custom'}, {required: msgRequired});
-    register({name: 'first_name', type: 'custom'}, {required: msgRequired});
     register({name: 'patronymic', type: 'custom'});
-    register({name: 'email', type: 'custom'}, {required: msgRequired});
-    register({name: 'phone', type: 'custom'}, {required: msgRequired});
-    // Social Accounts
-    register({name: 'stepic_id', type: 'custom'});
-    register({name: 'github_login', type: 'custom'});
     // Education
     register({name: 'university', type: 'custom'}, {required: msgRequired});
-    register({name: 'faculty', type: 'custom'}, {required: msgRequired});
     register({name: 'course', type: 'custom'}, {required: msgRequired});
     register({name: 'has_job', type: 'custom'}, {required: msgRequired});
     register({name: 'position', type: 'custom'});
     register({name: 'workplace', type: 'custom'});
-    register({name: 'experience', type: 'custom'});
     register({name: 'online_education_experience', type: 'custom'});
     // Branch Specific
     register({name: 'campaign', type: 'custom'}, {required: msgRequired});
-    const selectedCampaignId = watch('campaign');
+    // Others
+    register({name: 'agreement', type: 'custom'}, {required: msgRequired});
+
+    const watchFields = watch([
+        'campaign',
+        'has_job',
+        'preferred_study_programs',
+        'where_did_you_learn',
+        'agreement'
+    ]);
+    const {
+        campaign: selectedCampaignId,
+        has_job: hasJob,
+        preferred_study_programs: selectedStudyPrograms,
+        where_did_you_learn: whereDidYouLearn,
+        agreement: agreementConfirmed
+    } = watchFields;
     let selectedCampaign = selectedCampaignId && campaigns.find(obj => {
         return obj.id === parseInt(selectedCampaignId);
     }).value;
-    if (selectedCampaign && selectedCampaign !== 'distance') {
-        register({name: 'preferred_study_programs', type: 'custom'}, {required: msgRequired});
-        register({name: 'preferred_study_programs_cs_note', type: 'custom'});
-        register({name: 'preferred_study_programs_dm_note', type: 'custom'});
-        register({name: 'preferred_study_programs_se_note', type: 'custom'});
-    } else if (selectedCampaign) {
-        register({name: 'living_place', type: 'custom'}, {required: msgRequired});
-    }
-    // Others
-    register({name: 'motivation', type: 'custom'}, {required: msgRequired});
-    register({name: 'probability', type: 'custom'}, {required: msgRequired});
-    register({name: 'additional_info', type: 'custom'});
-    register({name: 'where_did_you_learn', type: 'custom'}, {required: msgRequired});
-    const whereDidYouLearn = watch('where_did_you_learn');
-    if (whereDidYouLearn && whereDidYouLearn.includes('other')) {
-        register({name: 'where_did_you_learn_other', type: 'custom'}, {required: msgRequired});
-    }
-    register({name: 'agreement', type: 'custom'}, {required: msgRequired});
-
-    const hasJob = watch('has_job');
-    const selectedStudyPrograms = watch('preferred_study_programs');
-    const agreementConfirmed = watch('agreement');
-
-    function handleMultipleCheckboxChange(event) {
-        const {name, value, checked} = event.target;
-        setValue(name, selectedCheckboxes(state, {name, value, checked}));
-    }
 
     function handleInputChange(event) {
         const target = event.target;
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
         setValue(name, value);
-    }
-
-    function validateField(event) {
-        const target = event.target;
-        triggerValidation(target.name);
+        if (name === 'campaign') {
+            setValue('preferred_study_programs', []);
+        }
     }
 
     function handleSelectChange(option, name) {
@@ -249,11 +210,11 @@ function ApplicationForm({
             <fieldset>
                 <h3>Личная информация</h3>
                 <div className="row">
-                    <InputField name="surname" label={"Фамилия"} wrapperClass="col-lg-4" errors={errors} onChange={handleInputChange} onBlur={validateField} />
-                    <InputField name="first_name" label={"Имя"} wrapperClass="col-lg-4" errors={errors} onChange={handleInputChange} onBlur={validateField} />
-                    <InputField name="patronymic" label={"Отчество"} wrapperClass="col-lg-4" errors={errors} onChange={handleInputChange} onBlur={validateField} />
-                    <InputField name="email" type="email" label={"Электронная почта"} wrapperClass="col-lg-4" errors={errors} onChange={handleInputChange} onBlur={validateField} />
-                    <InputField name="phone" label={"Контактный телефон"} wrapperClass="col-lg-4" errors={errors} onChange={handleInputChange} onBlur={validateField}
+                    <InputField name="surname" label={"Фамилия"} inputRef={register({required: msgRequired})} wrapperClass="col-lg-4" errors={errors} />
+                    <InputField name="first_name" label={"Имя"} inputRef={register({required: msgRequired})} wrapperClass="col-lg-4" errors={errors} />
+                    <InputField name="patronymic" label={"Отчество"} onChange={handleInputChange} wrapperClass="col-lg-4" errors={errors} />
+                    <InputField name="email" type="email" label={"Электронная почта"} inputRef={register({required: msgRequired})} wrapperClass="col-lg-4" errors={errors} />
+                    <InputField name="phone" label={"Контактный телефон"} inputRef={register({required: msgRequired})} wrapperClass="col-lg-4" errors={errors}
                                 placeholder="+7 (999) 1234567"/>
                 </div>
             </fieldset>
@@ -262,14 +223,12 @@ function ApplicationForm({
                 <div className="row">
                     <InputField name="stepic_id" label={"ID на stepik.org"}
                                 wrapperClass="col-lg-4" errors={errors}
-                                onChange={handleInputChange}
-                                onBlur={validateField}
+                                inputRef={register}
                                 helpText={"https://stepik.org/users/xxxx, ID — это xxxx"}
                                 placeholder="ХХХХ"/>
                     <InputField name="github_login" label={"Логин на github.com"}
                                 wrapperClass="col-lg-4" errors={errors}
-                                onChange={handleInputChange}
-                                onBlur={validateField}
+                                inputRef={register}
                                 helpText={"https://github.com/xxxx, логин — это xxxx"}
                                 placeholder="ХХХХ"/>
                     <div className="field col-lg-4 mb-2">
@@ -295,26 +254,29 @@ function ApplicationForm({
                             <label htmlFor="">Вуз</label>
                             <CreatableSelect
                                 required
+                                components={{
+                                    DropdownIndicator: null
+                                }}
+                                openMenuOnFocus={true}
                                 isClearable={true}
                                 onChange={handleSelectChange}
                                 onBlur={e => triggerValidation("university")}
                                 name="university"
-                                placeholder="---"
+                                placeholder=""
                                 options={universities}
                                 menuPortalTarget={document.body}
                                 errors={errors}
                             />
                         </div>
                         <div className="help-text">
-                            Если вашего вуза нет в списке, просто введите название своего университета в это поле.
+                            Расскажите, где вы учитесь или учились
                         </div>
                         <ErrorMessage errors={errors} name={"university"} />
                     </div>
                     <InputField name="faculty" label={"Специальность"}
                                 wrapperClass="col-lg-4" errors={errors}
-                                onChange={handleInputChange}
-                                onBlur={validateField}
-                                helpText={"Факультет, специальность или кафедра"}/>
+                                inputRef={register({required: msgRequired})}
+                                helpText={"Факультет, специальность или кафедра"} />
 
                     <div className="field col-lg-4">
                         <div className="ui select">
@@ -324,7 +286,7 @@ function ApplicationForm({
                                 onBlur={e => triggerValidation("course")}
                                 name="course"
                                 isClearable={false}
-                                placeholder="---"
+                                placeholder="Выберите из списка"
                                 options={courseOptions}
                                 menuPortalTarget={document.body}
                                 required
@@ -357,24 +319,18 @@ function ApplicationForm({
                         </div>
                 }
                 <div className="row">
-                    <div className="field col-lg-8">
-                        <div className="ui input">
-                            <label htmlFor="experience">Расскажите об опыте программирования и исследований</label>
-                            <p className="text-small mb-2">
-                                Напишите здесь о том, что вы делаете на работе, и о своей нынешней дипломной или курсовой работе. Здесь стоит рассказать о студенческих проектах, в которых вы участвовали, или о небольших личных проектах, которые вы делаете дома, для своего удовольствия. Если хотите, укажите ссылки, где можно посмотреть текст или код работ.
-                            </p>
-                            <textarea id="experience" name="experience" rows="6" onChange={handleInputChange} />
-                        </div>
-                    </div>
-                    <div className="field col-lg-8">
-                        <div className="ui input">
-                            <label htmlFor="online_education_experience">Вы проходили какие-нибудь онлайн-курсы? Какие? Какие удалось закончить?</label>
-                            <p className="text-small mb-2">
-                                Приведите ссылки на курсы или их названия и платформы, где вы их проходили. Расскажите о возникших трудностях. Что понравилось, а что не понравилось в таком формате обучения?
-                            </p>
-                            <textarea id="online_education_experience" name="online_education_experience" rows="6" onChange={handleInputChange} />
-                        </div>
-                    </div>
+                    <MemoizedTextField name="experience"
+                                       label="Расскажите об опыте программирования и исследований"
+                                       wrapperClass="col-lg-8"
+                                       inputRef={register}
+                                       helpText="Напишите здесь о том, что вы делаете на работе, и о своей нынешней дипломной или курсовой работе. Здесь стоит рассказать о студенческих проектах, в которых вы участвовали, или о небольших личных проектах, которые вы делаете дома, для своего удовольствия. Если хотите, укажите ссылки, где можно посмотреть текст или код работ."
+                                       errors={errors}/>
+                    <MemoizedTextField name="online_education_experience"
+                                       label="Вы проходили какие-нибудь онлайн-курсы? Какие? Какие удалось закончить?"
+                                       wrapperClass="col-lg-8"
+                                       inputRef={register}
+                                       helpText="Приведите ссылки на курсы или их названия и платформы, где вы их проходили. Расскажите о возникших трудностях. Что понравилось, а что не понравилось в таком формате обучения?"
+                                       errors={errors}/>
                 </div>
             </fieldset>
             <fieldset>
@@ -405,8 +361,8 @@ function ApplicationForm({
                                         <Checkbox
                                             name="preferred_study_programs"
                                             key={option.value}
+                                            ref={register({required: msgRequired})}
                                             value={option.value}
-                                            onChange={handleMultipleCheckboxChange}
                                             label={option.label}
                                         />
                                     )}
@@ -422,7 +378,7 @@ function ApplicationForm({
                                         <p className="text-small mb-2">
                                             Вы можете посмотреть список возможных тем и руководителей НИРов у нас на <a target="_blank" href="https://compscicenter.ru/projects/#research-curators" rel="noopener noreferrer">сайте</a>.
                                         </p>
-                                        <textarea id="preferred_study_programs_cs_note" name="preferred_study_programs_cs_note" rows="6" onChange={handleInputChange} />
+                                        <textarea id="preferred_study_programs_cs_note" name="preferred_study_programs_cs_note" rows="6" ref={register} />
                                     </div>
                                 </div>
                             </div>
@@ -433,7 +389,7 @@ function ApplicationForm({
                                 <div className="field col-lg-8">
                                     <div className="ui input">
                                         <label htmlFor="preferred_study_programs_dm_note">Что вам больше всего интересно в области Data Science? Какие достижения последних лет вас особенно удивили?</label>
-                                        <textarea id="preferred_study_programs_dm_note" name="preferred_study_programs_dm_note" rows="6" onChange={handleInputChange} />
+                                        <textarea id="preferred_study_programs_dm_note" name="preferred_study_programs_dm_note" rows="6" ref={register} />
                                     </div>
                                 </div>
                             </div>
@@ -444,7 +400,7 @@ function ApplicationForm({
                                 <div className="field col-lg-8">
                                     <div className="ui input">
                                         <label htmlFor="preferred_study_programs_se_note">В разработке какого приложения, которым вы пользуетесь каждый день, вы хотели бы принять участие? Каких знаний вам для этого не хватает?</label>
-                                        <textarea id="preferred_study_programs_se_note" name="preferred_study_programs_se_note" rows="6" onChange={handleInputChange} />
+                                        <textarea id="preferred_study_programs_se_note" name="preferred_study_programs_se_note" rows="6" ref={register} />
                                     </div>
                                 </div>
                             </div>
@@ -455,30 +411,27 @@ function ApplicationForm({
                     selectedCampaign && selectedCampaign === "distance" &&
                     <div className="row">
                         <div className="field col-lg-5">
-                            <Input required name="living_place" id="living_place" placeholder="В каком городе вы живёте?" onChange={handleInputChange} />
+                            <Input required name="living_place" id="living_place" placeholder="В каком городе вы живёте?" ref={register({required: msgRequired})} />
                         </div>
                     </div>
                 }
 
                 <div className="row">
-                    <div className="field col-lg-8">
-                        <label>Почему вы хотите учиться в CS центре? Что вы ожидаете от обучения?</label>
-                        <div className="ui input">
-                            <textarea required name="motivation" rows="6" onChange={handleInputChange} />
-                        </div>
-                    </div>
-                    <div className="field col-lg-8">
-                        <label>Что нужно для выпуска из CS центра? Оцените вероятность, что вы сможете это сделать</label>
-                        <div className="ui input">
-                            <textarea required name="probability" rows="6" onChange={handleInputChange} />
-                        </div>
-                    </div>
-                    <div className="field col-lg-8">
-                        <label>Напишите любую дополнительную информацию о себе</label>
-                        <div className="ui input">
-                            <textarea name="additional_info" rows="6" onChange={handleInputChange} />
-                        </div>
-                    </div>
+                    <MemoizedTextField name="motivation"
+                                       label="Почему вы хотите учиться в CS центре? Что вы ожидаете от обучения?"
+                                       wrapperClass="col-lg-8"
+                                       inputRef={register({required: msgRequired})}
+                                       errors={errors}/>
+                    <MemoizedTextField name="probability"
+                                       label="Что нужно для выпуска из CS центра? Оцените вероятность, что вы сможете это сделать"
+                                       wrapperClass="col-lg-8"
+                                       inputRef={register({required: msgRequired})}
+                                       errors={errors}/>
+                    <MemoizedTextField name="additional_info"
+                                       label="Напишите любую дополнительную информацию о себе"
+                                       wrapperClass="col-lg-8"
+                                       inputRef={register}
+                                       errors={errors}/>
                 </div>
                 <div className="row">
                     <div className="field col-lg-8">
@@ -487,9 +440,9 @@ function ApplicationForm({
                             {sourceOptions.map((option) =>
                                 <Checkbox
                                     key={option.value}
+                                    ref={register}
                                     name="where_did_you_learn"
                                     value={option.value}
-                                    onChange={handleMultipleCheckboxChange}
                                     label={option.label}
                                 />
                             )}
@@ -497,9 +450,11 @@ function ApplicationForm({
                     </div>
                     {
                         whereDidYouLearn && whereDidYouLearn.includes("other") &&
-                        <div className="field animation col-lg-5">
-                            <Input required name="where_did_you_learn_other" placeholder="Ваш вариант" onChange={handleInputChange} />
-                        </div>
+                        <InputField name="where_did_you_learn_other"
+                                    wrapperClass="animation col-lg-5"
+                                    inputRef={register({required: msgRequired})}
+                                    placeholder="Ваш вариант"
+                                    errors={errors} />
                     }
                 </div>
             </fieldset>

@@ -327,10 +327,10 @@ class CourseOfferings extends React.Component {
                                 className="ui form px-6 mt-6 mt-lg-10 ml-lg-4">
                                 <div className="field">
                                     <label className='h4'>Отделение</label>
-                                    <RadioGroup required name="branch"
-                                                className=""
+                                    <RadioGroup name="branch"
+                                                required
                                                 onChange={this.handleBranchRadioChange}
-                                                selected={`branch-${branch.value}`}>
+                                                value={`branch-${branch.value}`}>
                                         {branchOptions.map((item) =>
                                             <RadioOption key={item.value}
                                                          id={`branch-${item.value}`}

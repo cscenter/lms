@@ -2,7 +2,7 @@ export { default as Checkbox } from "./Checkbox";
 export { default as Icon } from "./Icon";
 export { default as Input } from "./Input";
 export { default as ErrorMessage } from "./ErrorMessage";
-export { default as InputField } from "./InputField";
+export { InputField, TextField, MemoizedInputField, MemoizedTextField } from "./Field";
 export { default as LazyImage } from "./LazyImage";
 export { default as Pagination } from "./Pagination";
 export { default as RadioGroup } from "./RadioGroup";
