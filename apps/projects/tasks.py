@@ -6,11 +6,30 @@ import shutil
 import requests
 from django.apps import apps
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django_rq import job
 
 from api.providers.yandex_disk import YandexDiskRestAPI
 
 logger = logging.getLogger(__name__)
+
+
+REQUIRED_SETTINGS = [
+    "YANDEX_DISK_CLIENT_ID",
+    "YANDEX_DISK_CLIENT_SECRET",
+    "YANDEX_DISK_ACCESS_TOKEN",
+    "YANDEX_DISK_REFRESH_TOKEN"
+]
+for attr in REQUIRED_SETTINGS:
+    if not hasattr(settings, attr):
+        raise ImproperlyConfigured(f"Please add {attr} to your settings module")
+
+YANDEX_DISK_API_DATA = {
+    "client_id": settings.YANDEX_DISK_CLIENT_ID,
+    "client_secret": settings.YANDEX_DISK_CLIENT_SECRET,
+    "access_token": settings.YANDEX_DISK_ACCESS_TOKEN,
+    "refresh_token": settings.YANDEX_DISK_REFRESH_TOKEN,
+}
 
 
 @job('default')
@@ -70,7 +89,7 @@ def _download_presentation(instance, public_link, file_attribute_name,
         logger.warning("File path not empty for project {}. Field: {}. "
                        "Skip".format(instance.pk, file_attribute_name))
         return
-    yandex_api_client = YandexDiskRestAPI()
+    yandex_api_client = YandexDiskRestAPI(**YANDEX_DISK_API_DATA)
     # Get file extension and attach it
     meta_data = yandex_api_client.get_metadata(public_link)
     _, ext = posixpath.splitext(meta_data["name"])
