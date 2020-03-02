@@ -57,6 +57,10 @@ class CampaignListFilter(admin.SimpleListFilter):
             return queryset
 
 
+class ApplicantCampaignListFilter(CampaignListFilter):
+    parameter_name = 'applicant__campaign_id__exact'
+
+
 class CampaignAdmin(admin.ModelAdmin):
     form = TimezoneAwareModelForm
     list_display = ['year', 'branch', 'current']
@@ -193,7 +197,7 @@ class InterviewAdmin(admin.ModelAdmin):
         }
     }
     list_display = ['get_date_local', 'applicant', 'status']
-    list_filter = ['status', 'applicant__campaign']
+    list_filter = ['status', ApplicantCampaignListFilter]
     raw_id_fields = ["applicant"]
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
@@ -202,8 +206,7 @@ class InterviewAdmin(admin.ModelAdmin):
                 Applicant.objects
                          .select_related("campaign", "campaign__branch")
                          .order_by("surname"))
-        return (super(InterviewAdmin, self)
-                .formfield_for_foreignkey(db_field, request, **kwargs))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_date_local(self, obj):
         return admin_datetime(obj.date_local())
