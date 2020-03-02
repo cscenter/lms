@@ -109,7 +109,6 @@ function ApplicationForm({
     register({name: 'has_job', type: 'custom'}, {required: msgRequired});
     register({name: 'position', type: 'custom'});
     register({name: 'workplace', type: 'custom'});
-    register({name: 'online_education_experience', type: 'custom'});
     // Branch Specific
     register({name: 'campaign', type: 'custom'}, {required: msgRequired});
     // Others
