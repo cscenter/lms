@@ -124,6 +124,7 @@ django-simple-menu = "*"
 django-ckeditor = "==5.9.0"
 django-simple-history = "*"
 django-static-compress = "==1.2.1"
+webdavclient3 = "*"
 
 [requires]
 python_version = "3.7"
