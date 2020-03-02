@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f64a0361ffdce6b5bf49afa1700444617259f07094e48b161b45baba25a00017"
+            "sha256": "4f98694f30852aeaf8654f03736d671b263f7b1583e2ce74fe8236c04a71a311"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -607,7 +607,7 @@
                 "sha256:06f5b3a99029c7134207dd882428a66992a9de2bef7c2b699b5641f9886c3302",
                 "sha256:b97607a1a18a5100839aec1dc26a1ea17ee0d93b20b0f008d80a5a050afb200b"
             ],
-            "markers": "python_version == '3.7'",
+            "markers": "python_version < '3.8'",
             "version": "==1.5.0"
         },
         "ipython-genutils": {
@@ -1253,6 +1253,13 @@
             "index": "pypi",
             "version": "==1.0.8"
         },
+        "webdavclient3": {
+            "hashes": [
+                "sha256:c419de76e47211b34330d76c080c55829511a9fbdc84657fbbb5907ac874d4fc"
+            ],
+            "index": "pypi",
+            "version": "==3.14.1"
+        },
         "webencodings": {
             "hashes": [
                 "sha256:a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a78",
@@ -1509,7 +1516,7 @@
                 "sha256:06f5b3a99029c7134207dd882428a66992a9de2bef7c2b699b5641f9886c3302",
                 "sha256:b97607a1a18a5100839aec1dc26a1ea17ee0d93b20b0f008d80a5a050afb200b"
             ],
-            "markers": "python_version == '3.7'",
+            "markers": "python_version < '3.8'",
             "version": "==1.5.0"
         },
         "ipdb": {
