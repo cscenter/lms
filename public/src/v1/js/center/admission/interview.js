@@ -1,3 +1,5 @@
+import _throttle from 'lodash-es/throttle';
+
 import UberEditor from "editor";
 import 'jquery-bar-rating';
 import {createNotification} from "utils";
@@ -8,36 +10,46 @@ const commentForm = $("#comment form");
 const assignmentsWrapper = $(".assignments-multicheckbox");
 const assignmentPreviewWrapper = $("#interview-assignment-model-form");
 
+function handleSubmit(e) {
+    $.ajax({
+        type: 'POST',
+        url: commentForm.attr("action"),
+        data: commentForm.serialize(),
+        dataType: 'json',
+    }).done(function (data) {
+        // FIXME: update #comments block instead of reload after migrating to react
+        // Form was valid and saved, reload the page
+        createNotification("Комментарий успешно сохранён. Страница будет перезагружена");
+        setTimeout(function () {
+            window.location.reload();
+        }, 500);
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+        if (jqXHR.status === 400) {
+            swal({
+                title: "",
+                text: jqXHR.responseJSON.errors,
+                type: "warning",
+                confirmButtonText: "Хорошо"
+            });
+        } else {
+            swal({
+                title: "Всё плохо!",
+                text: "Пожалуйста, скопируйте результаты своей работы и попробуйте перезагрузить страницу.",
+                type: "error"
+            });
+        }
+    });
+}
+
+const throttledSubmitHandler = _throttle(handleSubmit,  500,
+    {leading: true, trailing: false});
+
+
 function initInterviewCommentForm() {
     // Stupid defense from stale sessions
-    commentForm.submit(function (e) {
+    commentForm.submit(function(e) {
         e.preventDefault();
-        $.ajax({
-            type: 'POST',
-            url: commentForm.attr("action"),
-            data: commentForm.serialize(),
-            dataType: 'json',
-        }).done(function (data) {
-            // FIXME: update #comments block instead of reload after migrating to react
-            // Form was valid and saved, reload the page
-            createNotification("Комментарий успешно сохранён. Страница будет перезагружена");
-            setTimeout(function() {window.location.reload();}, 500);
-        }).fail(function (jqXHR, textStatus, errorThrown) {
-            if (jqXHR.status === 400) {
-                swal({
-                    title: "",
-                    text: jqXHR.responseJSON.errors,
-                    type: "warning",
-                    confirmButtonText: "Хорошо"
-                });
-            } else {
-                swal({
-                    title: "Всё плохо!",
-                    text: "Пожалуйста, скопируйте результаты своей работы и попробуйте перезагрузить страницу.",
-                    type: "error"
-                });
-            }
-        });
+        throttledSubmitHandler(e);
     })
 }
 
