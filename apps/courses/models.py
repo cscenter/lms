@@ -291,7 +291,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
                     "Science Club website so anyone can join"),
         default=False)
     branch = models.ForeignKey(Branch,
-                               verbose_name=_("Branch"),
+                               verbose_name=_("Main Branch"),
                                related_name="courses",
                                on_delete=models.PROTECT)
     additional_branches = models.ManyToManyField(
