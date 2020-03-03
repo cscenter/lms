@@ -90,6 +90,12 @@ def startswith(value, arg):
 
 
 @register.filter
+def endswith(value, arg):
+    """Usage, {% if value|endswith:"arg" %}"""
+    return value.endswith(arg)
+
+
+@register.filter
 def markdownify(text):
     return render_markdown(text)
 
