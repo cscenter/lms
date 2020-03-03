@@ -63,6 +63,10 @@ def test_upsert_student_group_from_additional_branch(settings):
 
 @pytest.mark.django_db
 def test_student_group_resolving_on_enrollment(client):
+    """
+    Prevent enrollment ff it's impossible to resolve student group by
+    student's root branch.
+    """
     student1 = StudentFactory()
     student2 = StudentFactory(branch=BranchFactory())
     today = now_local(student1.get_timezone()).date()
@@ -84,18 +88,39 @@ def test_student_group_resolving_on_enrollment(client):
     client.login(student2)
     response = client.post(enroll_url, form)
     assert response.status_code == 403
-    # But it's still possible to enroll someone through admin interface
+
+
+@pytest.mark.django_db
+def test_student_group_resolving_on_enrollment_admin(client):
+    """
+    Admin interface doesn't check all the requirements to enroll student.
+    If it's impossible to resolve student group - add student to the
+    special group `Others`.
+    """
+    student, student2 = StudentFactory.create_batch(2, branch=BranchFactory())
+    today = now_local(student.get_timezone()).date()
+    current_semester = SemesterFactory.create_current(enrollment_end_at=today)
+    course = CourseFactory(semester=current_semester, branch=BranchFactory())
     post_data = {
         'course': course.pk,
-        'student': student2.pk,
+        'student': student.pk,
         'grade': GradeTypes.NOT_GRADED
     }
     curator = CuratorFactory()
     client.login(curator)
     response = client.post(reverse('admin:learning_enrollment_add'), post_data)
-    enrollments = Enrollment.active.filter(student=student2, course=course)
+    enrollments = Enrollment.active.filter(student=student, course=course)
     assert len(enrollments) == 1
-    assert enrollments[0].student_group_id is None
+    e = enrollments[0]
+    assert e.student_group_id is not None
+    assert e.student_group.name_en == 'Others'
+    assert e.student_group.type == StudentGroupTypes.MANUAL
+    # Enroll the second student
+    post_data['student'] = student2.pk
+    response = client.post(reverse('admin:learning_enrollment_add'), post_data)
+    e2 = Enrollment.active.filter(student=student2, course=course)
+    assert e2.exists()
+    assert e2.get().student_group == e.student_group
 
 
 @pytest.mark.django_db

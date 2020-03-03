@@ -9,9 +9,11 @@ from core.timezone.forms import TimezoneAwareModelForm, \
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
+from courses.models import StudentGroupTypes
 from learning.models import GraduateProfile, Invitation, CourseInvitation, \
-    StudentAssignment
+    StudentAssignment, StudentGroup
 from .models import AssignmentComment, Enrollment, Event, Useful
+from .services import StudentGroupService
 
 
 class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
@@ -70,6 +72,24 @@ class EnrollmentAdmin(admin.ModelAdmin):
         return admin_datetime(obj.grade_changed_local())
     grade_changed_local.admin_order_field = 'grade_changed'
     grade_changed_local.short_description = _("Enrollment|grade changed")
+
+    def save_form(self, request, form, change):
+        created = not change
+        instance = super().save_form(request, form, change)
+        if created:
+            course = instance.course
+            student = instance.student
+            if course.group_mode == StudentGroupTypes.BRANCH:
+                student_group = StudentGroupService.resolve(course, student)
+                if student_group is None:
+                    student_group, _ = StudentGroup.objects.get_or_create(
+                        course=course,
+                        type=StudentGroupTypes.MANUAL,
+                        branch_id__isnull=True,
+                        name_en="Others",
+                        defaults={"name_ru": "Остальные"})
+                instance.student_group = student_group
+        return instance
 
 
 @admin.register(StudentAssignment)
