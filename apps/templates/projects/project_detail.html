@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load crispy_forms_tags %}
-{% load markdown call_method from core_tags %}
+{% load markdown call_method endswith from core_tags %}
 {% load cache %}
 {% load override_url %}
 {% load tz %}
@@ -40,7 +40,7 @@
                     </div>
                 {% endif %}
 
-                {% if project.supervisor_presentation %}
+                {% if project.supervisor_presentation.name|endswith:"pdf" %}
                     <h4>Презентация руководителя</h4>
                     <object data="{{ project.supervisor_presentation.url|urlencode }}" type="application/pdf" width="100%" height="500">
                     Ваш браузер не поддерживает встроенный просмотр PDF. Пожалуйста, скачайте файл для просмотра: <a href="{{ project.supervisor_presentation.url }}">Скачать PDF</a>.
