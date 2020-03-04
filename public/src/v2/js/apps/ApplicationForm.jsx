@@ -83,7 +83,7 @@ function ApplicationForm({
                              authBeginUrl,
                              campaigns,
                              universities,
-                             courseOptions,
+                             educationLevelOptions,
                              studyProgramOptions,
                              sourceOptions,
                              initialState
@@ -103,15 +103,10 @@ function ApplicationForm({
 
     let msgRequired = "Это поле обязательно для заполнения";
     register({name: 'patronymic', type: 'custom'});
-    // Education
     register({name: 'university', type: 'custom'}, {required: msgRequired});
     register({name: 'course', type: 'custom'}, {required: msgRequired});
     register({name: 'has_job', type: 'custom'}, {required: msgRequired});
-    register({name: 'position', type: 'custom'});
-    register({name: 'workplace', type: 'custom'});
-    // Branch Specific
     register({name: 'campaign', type: 'custom'}, {required: msgRequired});
-    // Others
     register({name: 'agreement', type: 'custom'}, {required: msgRequired});
 
     const watchFields = watch([
@@ -171,7 +166,7 @@ function ApplicationForm({
     function onSubmit(data) {
         let {has_job, course, university, ...payload} = data;
         payload['has_job'] = (has_job === "yes");
-        payload['course'] = course && course.value;
+        payload['level_of_education'] = course && course.value;
         if (university) {
             if (university.__isNew__) {
                 payload["university_other"] = university.value;
@@ -286,7 +281,7 @@ function ApplicationForm({
                                 name="course"
                                 isClearable={false}
                                 placeholder="Выберите из списка"
-                                options={courseOptions}
+                                options={educationLevelOptions}
                                 menuPortalTarget={document.body}
                                 required
                                 errors={errors}
@@ -309,11 +304,11 @@ function ApplicationForm({
                         <div className="row ">
                             <div className="field col-lg-4">
                                 <label htmlFor="position">Должность</label>
-                                <Input name="position" id="position" placeholder="" onChange={handleInputChange} />
+                                <Input name="position" id="position" ref={register} placeholder="" onChange={handleInputChange} />
                             </div>
                             <div className="field col-lg-4">
                                 <label htmlFor="workplace">Место работы</label>
-                                <Input name="workplace" id="workplace" placeholder="" onChange={handleInputChange} />
+                                <Input name="workplace" id="workplace" ref={register} placeholder="" onChange={handleInputChange} />
                             </div>
                         </div>
                 }
@@ -358,6 +353,7 @@ function ApplicationForm({
                                 <div className="grouped">
                                     {filteredStudyPrograms.map((option) =>
                                         <Checkbox
+                                            className={errors && errors.preferred_study_programs ? 'error' : ''}
                                             name="preferred_study_programs"
                                             key={option.value}
                                             ref={register({required: msgRequired})}
@@ -366,6 +362,7 @@ function ApplicationForm({
                                         />
                                     )}
                                 </div>
+                                <ErrorMessage errors={errors} name={"preferred_study_programs"} className="mt-2" />
                             </div>
                         </div>
                         {
@@ -439,13 +436,15 @@ function ApplicationForm({
                             {sourceOptions.map((option) =>
                                 <Checkbox
                                     key={option.value}
-                                    ref={register}
+                                    ref={register({required: msgRequired})}
+                                    className={errors && errors.where_did_you_learn ? 'error' : ''}
                                     name="where_did_you_learn"
                                     value={option.value}
                                     label={option.label}
                                 />
                             )}
                         </div>
+                        <ErrorMessage errors={errors} name={"where_did_you_learn"} className="mt-2" />
                     </div>
                     {
                         whereDidYouLearn && whereDidYouLearn.includes("other") &&
@@ -493,7 +492,7 @@ ApplicationForm.propTypes = {
         label: PropTypes.string.isRequired,
         branch_id: PropTypes.number.isRequired
     })).isRequired,
-    courseOptions: PropTypes.arrayOf(optionStrType).isRequired,
+    educationLevelOptions: PropTypes.arrayOf(optionStrType).isRequired,
     studyProgramOptions: PropTypes.arrayOf(optionStrType).isRequired
 };
 
