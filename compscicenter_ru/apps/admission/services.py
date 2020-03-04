@@ -89,7 +89,7 @@ def create_student_from_applicant(applicant):
         user.github_login = applicant.github_login.split("github.com/",
                                                       maxsplit=1)[-1]
     user.workplace = applicant.workplace if applicant.workplace else ""
-    user.uni_year_at_enrollment = applicant.course
+    user.uni_year_at_enrollment = applicant.level_of_education
     user.branch = applicant.campaign.branch
     user.university = applicant.university.name
     user.save()

@@ -20,7 +20,7 @@ class Branches(DjangoChoices):
 
 
 # FIXME: move to users?
-class AcademicDegreeYears(DjangoChoices):
+class AcademicDegreeLevels(DjangoChoices):
     BACHELOR_SPECIALITY_1 = C("1", _('1 course bachelor, speciality'))
     BACHELOR_SPECIALITY_2 = C("2", _('2 course bachelor, speciality'))
     BACHELOR_SPECIALITY_3 = C("3", _('3 course bachelor, speciality'))

@@ -49,8 +49,8 @@ class AdmissionReport(ReportFileOutput):
                 value = getattr(applicant, field.name)
                 if field.name == 'status':
                     value = applicant.get_status_display()
-                elif field.name == 'course':
-                    value = applicant.get_course_display()
+                elif field.name == 'level_of_education':
+                    value = applicant.get_level_of_education_display()
                 elif field.name == 'id':
                     value = reverse("admission:applicant_detail", args=[value])
                 elif field.name == 'created':

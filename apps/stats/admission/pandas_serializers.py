@@ -1,12 +1,12 @@
 from rest_pandas import PandasSerializer
 from django.utils.translation import ugettext_lazy as _
 
-from learning.settings import AcademicDegreeYears
+from learning.settings import AcademicDegreeLevels
 from users.models import User
 
 
 def _index_to_name(course_index):
-    return str(AcademicDegreeYears.values.get(course_index, _("Other")))
+    return str(AcademicDegreeLevels.values.get(course_index, _("Other")))
 
 
 class CampaignResultsTimelineSerializer(PandasSerializer):

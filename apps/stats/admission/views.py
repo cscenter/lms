@@ -80,12 +80,12 @@ class CampaignStagesByCourses(ReadOnlyModelViewSet):
         campaign_id = self.kwargs.get('campaign_id')
         return (Applicant.objects
                 .filter(campaign_id=campaign_id)
-                .values('course')
+                .values('level_of_education')
                 .annotate(application_form=Count("campaign_id"),
                           testing=TestingCountAnnotation,
                           examination=ExaminationCountAnnotation,
                           interviewing=InterviewingCountAnnotation)
-                .order_by("course"))
+                .order_by("level_of_education"))
 
 
 class ApplicationFormSubmissionByDays(ListAPIView):
@@ -203,7 +203,7 @@ class CampaignResultsByCourses(ListRenderersMixin, PandasView):
         qs = (Applicant.objects
               .filter(campaign_id=campaign_id,
                       status__in=STATUSES)
-              .values('course', 'status')
+              .values('level_of_education', 'status')
               .annotate(total=Count("status")))
         return qs
 

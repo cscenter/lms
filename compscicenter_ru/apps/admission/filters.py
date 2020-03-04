@@ -172,7 +172,7 @@ class ResultsFilter(django_filters.FilterSet):
 
     class Meta:
         model = Applicant
-        fields = ['status', 'university', 'course']
+        fields = ['status', 'university', 'level_of_education']
 
     def __init__(self, *args, branch_code, **kwargs):
         super().__init__(*args, **kwargs)
@@ -194,7 +194,7 @@ class ResultsFilter(django_filters.FilterSet):
                 Row(
                     Div("status", css_class="col-xs-3"),
                     Div("university", css_class="col-xs-3"),
-                    Div("course", css_class="col-xs-3"),
+                    Div("level_of_education", css_class="col-xs-3"),
                     Div(Submit('', _('Filter'),
                                css_class="btn-block -inline-submit"),
                         css_class="col-xs-3"),

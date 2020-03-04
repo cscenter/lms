@@ -4,7 +4,7 @@ import tablib
 from django.core.exceptions import ValidationError
 from import_export import resources, fields, widgets
 
-from learning.settings import AcademicDegreeYears
+from learning.settings import AcademicDegreeLevels
 from core.timezone import now_local
 from users.constants import Roles
 from .models import User, Group
@@ -16,7 +16,7 @@ class AcademicDegreeYearWidget(widgets.IntegerWidget):
             return None
         # Key values depend on activated language, aggregate at runtime
         # TODO: seems translation should works even with class attribute. Write test to prove it
-        mapping = {v.lower(): k for k, v in AcademicDegreeYears.values.items()}
+        mapping = {v.lower(): k for k, v in AcademicDegreeLevels.values.items()}
         # Replace non-breaking space and tabs with common white space
         label = label.replace(u'\xa0', u' ')
         if label in mapping:
@@ -24,7 +24,7 @@ class AcademicDegreeYearWidget(widgets.IntegerWidget):
         raise ValueError(f'Course should be one of {mapping}')
 
     def render(self, value, obj=None):
-        return AcademicDegreeYears.values[value]
+        return AcademicDegreeLevels.values[value]
 
 
 class UserEmailWidget(widgets.CharWidget):

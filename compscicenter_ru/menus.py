@@ -13,10 +13,6 @@ public_menu = [
         pgettext_lazy("menu", "Programs"),
         reverse('on_campus_programs'),
         weight=10,
-        children=[
-            MenuItem(pgettext_lazy("menu", "On Campus"), reverse('on_campus_programs'), weight=20),
-            MenuItem(pgettext_lazy("menu", "Distance"), reverse('distance_program'), weight=30),
-        ],
         selected_patterns=[
             r"^/events/"
         ]),
