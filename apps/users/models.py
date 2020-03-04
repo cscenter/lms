@@ -232,10 +232,6 @@ class StudentProfile(models.Model):
         _("University"),
         max_length=255,
         blank=True)
-    phone = models.CharField(
-        _("Phone"),
-        max_length=40,
-        blank=True)
     uni_year_at_enrollment = models.CharField(
         _("StudentInfo|University year"),
         choices=AcademicDegreeYears.choices,
@@ -287,6 +283,10 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
     )
     first_name = models.CharField(_('first name'), max_length=30, blank=True)
     last_name = models.CharField(_('last name'), max_length=150, blank=True)
+    patronymic = models.CharField(
+        verbose_name=_("CSCUser|patronymic"),
+        max_length=100,
+        blank=True)
     email = models.EmailField(_('email address'), unique=True)
     is_staff = models.BooleanField(
         _('staff status'),
@@ -312,11 +312,12 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
     )
     gender = models.CharField(_("Gender"), max_length=1,
                               choices=GenderTypes.choices)
-    modified = AutoLastModifiedField(_('modified'))
-    patronymic = models.CharField(
-        _("CSCUser|patronymic"),
-        max_length=100,
+    phone = models.CharField(
+        _("Phone"),
+        max_length=40,
         blank=True)
+    modified = AutoLastModifiedField(_('modified'))
+
     photo = ImageField(
         _("CSCUser|photo"),
         upload_to="photos/",
