@@ -49,7 +49,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
             # Accounts
             "stepic_id", "github_login", "yandex_login",
             # Education
-            "university", "university_other", "faculty", "course",
+            "university", "university_other", "faculty", "level_of_education",
             # Work
             "has_job", "workplace", "position",
             "experience", "online_education_experience",

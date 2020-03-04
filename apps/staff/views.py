@@ -32,7 +32,7 @@ from learning.models import Enrollment, Invitation
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
     ProgressReportForInvitation, DataFrameResponse
-from learning.settings import AcademicDegreeYears, StudentStatuses, \
+from learning.settings import AcademicDegreeLevels, StudentStatuses, \
     GradeTypes
 from staff.forms import GraduationForm
 from staff.models import Hint
@@ -151,7 +151,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             if s.graduate_profile and len(s.graduate_profile.academic_disciplines.all()) >= 2:
                 finished_two_or_more_programs.add(s)
             by_enrollment_year[s.enrollment_year].add(s)
-            degree_year = AcademicDegreeYears.BACHELOR_SPECIALITY_1
+            degree_year = AcademicDegreeLevels.BACHELOR_SPECIALITY_1
             if s.uni_year_at_enrollment == degree_year:
                 enrolled_on_first_course.add(s)
             # Count most_courses_students

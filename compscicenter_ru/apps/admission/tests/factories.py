@@ -16,7 +16,7 @@ from admission.models import Campaign, Applicant, Contest, Test, \
     InterviewSlot, InterviewStream, InterviewInvitation, University
 from admission.signals import post_save_interview
 from core.models import Branch
-from learning.settings import AcademicDegreeYears
+from learning.settings import AcademicDegreeLevels
 from core.tests.factories import BranchFactory, LocationFactory
 from users.constants import Roles
 from users.tests.factories import UserFactory, add_user_groups
@@ -70,8 +70,8 @@ class ApplicantFactory(factory.DjangoModelFactory):
     university = factory.SubFactory(UniversityFactory)
     yandex_login = factory.Sequence(lambda n: "yandex_login_%03d" % n)
     faculty = factory.Sequence(lambda n: "faculty_%03d" % n)
-    course = factory.fuzzy.FuzzyChoice([x for x, _ in
-                                        AcademicDegreeYears.choices])
+    level_of_education = factory.fuzzy.FuzzyChoice([x for x, _ in
+                                                    AcademicDegreeLevels.choices])
     where_did_you_learn = factory.fuzzy.FuzzyChoice([x for x, _ in
                                                      WHERE_DID_YOU_LEARN])
 

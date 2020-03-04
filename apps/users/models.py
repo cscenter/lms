@@ -29,7 +29,7 @@ from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping, instance_memoize
 from courses.models import Semester
-from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeYears
+from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeLevels
 from learning.utils import is_negative_grade
 from users.constants import GROUPS_IMPORT_TO_GERRIT, Roles, \
     SHADCourseGradeTypes, GenderTypes, Roles as UserRoles
@@ -234,7 +234,7 @@ class StudentProfile(models.Model):
         blank=True)
     uni_year_at_enrollment = models.CharField(
         _("StudentInfo|University year"),
-        choices=AcademicDegreeYears.choices,
+        choices=AcademicDegreeLevels.choices,
         max_length=2,
         help_text=_("at enrollment"),
         null=True,

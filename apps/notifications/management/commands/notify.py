@@ -55,6 +55,8 @@ def _get_base_domain(notification: Union[AssignmentNotification,
     # FIXME: move to the SiteConfiguration model
     resolve_subdomain = (user_branch.site_id == settings.CLUB_SITE_ID)
     if resolve_subdomain:
+        # FIXME: проблема с приглашенными студентами, которые имели аккаунт на сайте клуба - домашнее отделение теперь указывает на СПБ[site_id=1]. Как им получить нотификацию на нужный сайт?
+        # FIXME
         prefix = user_branch.code.lower()
         if prefix == settings.DEFAULT_BRANCH_CODE:
             prefix = ""

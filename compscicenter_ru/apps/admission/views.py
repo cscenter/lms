@@ -55,7 +55,7 @@ from core.timezone import now_local
 from core.urls import reverse
 from core.utils import render_markdown, bucketize
 from core.views import RequestBranchMixin
-from learning.settings import AcademicDegreeYears
+from learning.settings import AcademicDegreeLevels
 from tasks.models import Task
 from users.mixins import CuratorOnlyMixin
 from users.models import User
@@ -154,8 +154,8 @@ class ApplicationFormView(TemplateView):
                             .annotate(value=F('id'), label=F('name'))
                             .values('value', 'label', 'branch_id')
                             .order_by("name"))
-            courses = [{"value": k, "label": str(v)} for k, v in
-                       AcademicDegreeYears.values.items()]
+            levels_of_education = [{"value": k, "label": str(v)} for k, v in
+                                   AcademicDegreeLevels.values.items()]
             study_programs = [{"value": k, "label": v} for k, v in
                               Applicant.STUDY_PROGRAMS]
             sources = [{"value": k, "label": v} for k, v in WHERE_DID_YOU_LEARN]
@@ -169,7 +169,7 @@ class ApplicationFormView(TemplateView):
                     'authBeginUrl': reverse('application:auth_begin'),
                     'campaigns': list(active_campaigns),
                     'universities': list(universities),
-                    'courseOptions': courses,
+                    'educationLevelOptions': levels_of_education,
                     'studyProgramOptions': study_programs,
                     'sourceOptions': sources
                 },

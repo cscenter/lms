@@ -30,7 +30,7 @@ from core.db.models import ScoreField
 from core.models import Branch, Location
 from core.timezone import TimezoneAwareModel
 from core.urls import reverse
-from learning.settings import AcademicDegreeYears
+from learning.settings import AcademicDegreeLevels
 from users.constants import Roles
 
 
@@ -335,9 +335,9 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
     faculty = models.TextField(
         _("Faculty"),
         help_text=_("Applicant|faculty"))
-    course = models.CharField(
+    level_of_education = models.CharField(
         _("Course"),
-        choices=AcademicDegreeYears.choices,
+        choices=AcademicDegreeLevels.choices,
         help_text=_("Applicant|course"),
         max_length=355)
     graduate_work = models.TextField(
