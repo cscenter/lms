@@ -20,10 +20,10 @@ const toType = obj => ({}.toString.call(obj).match(/\s([a-z]+)/i)[1].toLowerCase
 
 const getUID = prefix => {
   do {
-    prefix += ~~(Math.random() * MAX_UID) // "~~" acts like a faster Math.floor() here
+    prefix += ~~(Math.random() * MAX_UID); // "~~" acts like a faster Math.floor() here
   } while (document.getElementById(prefix));
 
-  return prefix
+  return prefix;
 };
 
 const getSelector = element => {
@@ -32,31 +32,31 @@ const getSelector = element => {
   if (!selector || selector === '#') {
     const hrefAttr = element.getAttribute('href');
 
-    selector = hrefAttr && hrefAttr !== '#' ? hrefAttr.trim() : null
+    selector = hrefAttr && hrefAttr !== '#' ? hrefAttr.trim() : null;
   }
 
-  return selector
+  return selector;
 };
 
 const getSelectorFromElement = element => {
   const selector = getSelector(element);
 
   if (selector) {
-    return document.querySelector(selector) ? selector : null
+    return document.querySelector(selector) ? selector : null;
   }
 
-  return null
+  return null;
 };
 
 const getElementFromSelector = element => {
   const selector = getSelector(element);
 
-  return selector ? document.querySelector(selector) : null
+  return selector ? document.querySelector(selector) : null;
 };
 
 const getTransitionDurationFromElement = element => {
   if (!element) {
-    return 0
+    return 0;
   }
 
   // Get transition-duration of the element
@@ -70,21 +70,21 @@ const getTransitionDurationFromElement = element => {
 
   // Return 0 if element or transition duration is not found
   if (!floatTransitionDuration && !floatTransitionDelay) {
-    return 0
+    return 0;
   }
 
   // If multiple durations are defined, take the first
   transitionDuration = transitionDuration.split(',')[0];
   transitionDelay = transitionDelay.split(',')[0];
 
-  return (parseFloat(transitionDuration) + parseFloat(transitionDelay)) * MILLISECONDS_MULTIPLIER
+  return (parseFloat(transitionDuration) + parseFloat(transitionDelay)) * MILLISECONDS_MULTIPLIER;
 };
 
 const triggerTransitionEnd = element => {
   const evt = document.createEvent('HTMLEvents');
 
   evt.initEvent(TRANSITION_END, true, true);
-  element.dispatchEvent(evt)
+  element.dispatchEvent(evt);
 };
 
 const isElement = obj => (obj[0] || obj).nodeType;
@@ -95,15 +95,15 @@ const emulateTransitionEnd = (element, duration) => {
   const emulatedDuration = duration + durationPadding;
   function listener() {
     called = true;
-    element.removeEventListener(TRANSITION_END, listener)
+    element.removeEventListener(TRANSITION_END, listener);
   }
 
   element.addEventListener(TRANSITION_END, listener);
   setTimeout(() => {
     if (!called) {
-      triggerTransitionEnd(element)
+      triggerTransitionEnd(element);
     }
-  }, emulatedDuration)
+  }, emulatedDuration);
 };
 
 const typeCheckConfig = (componentName, config, configTypes) => {
@@ -119,22 +119,22 @@ const typeCheckConfig = (componentName, config, configTypes) => {
         throw new Error(
           `${componentName.toUpperCase()}: ` +
           `Option "${property}" provided type "${valueType}" ` +
-          `but expected type "${expectedTypes}".`)
+          `but expected type "${expectedTypes}".`);
       }
-    })
+    });
 };
 
 const makeArray = nodeList => {
   if (!nodeList) {
-    return []
+    return [];
   }
 
-  return [].slice.call(nodeList)
+  return [].slice.call(nodeList);
 };
 
 const isVisible = element => {
   if (!element) {
-    return false
+    return false;
   }
 
   if (element.style && element.parentNode && element.parentNode.style) {
@@ -143,33 +143,33 @@ const isVisible = element => {
 
     return elementStyle.display !== 'none' &&
       parentNodeStyle.display !== 'none' &&
-      elementStyle.visibility !== 'hidden'
+      elementStyle.visibility !== 'hidden';
   }
 
-  return false
+  return false;
 };
 
 const findShadowRoot = element => {
   if (!document.documentElement.attachShadow) {
-    return null
+    return null;
   }
 
   // Can find the shadow root otherwise it'll return the document
   if (typeof element.getRootNode === 'function') {
     const root = element.getRootNode();
-    return root instanceof ShadowRoot ? root : null
+    return root instanceof ShadowRoot ? root : null;
   }
 
   if (element instanceof ShadowRoot) {
-    return element
+    return element;
   }
 
   // when we don't find a shadow root
   if (!element.parentNode) {
-    return null
+    return null;
   }
 
-  return findShadowRoot(element.parentNode)
+  return findShadowRoot(element.parentNode);
 };
 
 const noop = () => function () {};
@@ -191,4 +191,4 @@ export {
   findShadowRoot,
   noop,
   reflow
-}
+};

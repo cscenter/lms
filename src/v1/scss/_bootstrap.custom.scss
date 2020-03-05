@@ -56,27 +56,6 @@
 @import "bootstrap-sass/assets/stylesheets/bootstrap/responsive-utilities.scss";
 
 
-// Custom styles. Here for now.
-.news {
-    @include make-xs-column(10);
-    @include make-xs-column-offset(1);
-
-    h1 {
-        margin-bottom: 40px;
-    }
-
-    article {
-        border-bottom: 1px solid #ccc;
-        margin-bottom: 1em;
-
-        .post-date {
-            color: #9f9f9f;
-            text-transform: uppercase;
-            margin-top: 1em;
-        }
-    }
-}
-
 .table>thead>tr>th {
     border-bottom: 1px solid #e4eaec;
 }

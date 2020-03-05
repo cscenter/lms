@@ -48,6 +48,10 @@
     background-color: $teal;
     transition: .2s;
 
+    .card__title {
+      color: $black;
+    }
+
     .card__subtitle {
       color: rgba($black, .7);
     }
@@ -57,20 +61,6 @@
     color: $black;
     margin-bottom: spacer("1x");
     letter-spacing: -.01rem;
-  }
-}
-
-a.card {
-  color: $black;
-
-  .card__title {
-    color: $blue;
-  }
-
-  &:hover {
-    .card__title {
-      color: $link-hover-color;
-    }
   }
 }
 

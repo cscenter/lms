@@ -89,7 +89,7 @@ class CourseVideosPage extends React.Component {
         } else {
             hideBodyPreloader();
         }
-    };
+    }
 
     fetch = (payload = null) => {
         console.debug("CourseVideosPage: fetch", this.props, payload);
@@ -107,9 +107,7 @@ class CourseVideosPage extends React.Component {
                 let years = new Set();
                 for (const d of iterables) {
                     data = data.concat(d);
-                    d.forEach((item) => {
-                        years.add(item.year)
-                    });
+                    d.forEach((item) => { years.add(item.year); });
                 }
                 let yearOptions = Array.from(years, year => ({
                     value: year, label: year
@@ -128,21 +126,21 @@ class CourseVideosPage extends React.Component {
 
     getLabelColor(videoType) {
         if (videoType === "course") {
-            return "_blue"
+            return "_blue";
         } else if (videoType === "lecture") {
-            return "_green"
+            return "_green";
         } else {
-            return ""
+            return "";
         }
     }
 
     getVideoTypeLabel(videoType) {
         for (const x of this.props.videoOptions) {
             if (x.value === videoType) {
-                return x.label
+                return x.label;
             }
         }
-        return ""
+        return "";
     }
 
     render() {

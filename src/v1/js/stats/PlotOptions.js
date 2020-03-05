@@ -1,4 +1,4 @@
-// import * as d3 from "d3";
+import { select as d3Select } from 'd3-selection';
 
 /**
  * Inherit from this class if plot has some view/filter options.
@@ -22,11 +22,11 @@ export default class PlotOptions {
             return;
         }
         // .col-xs-10 node
-        let plotWrapperNode = d3.select('#' + this.id).node().parentNode,
+        let plotWrapperNode = d3Select('#' + this.id).node().parentNode,
             // first `nextSibling` used for skipping #text node
             // between .col-xs-10 and .col-xs-2
             filterWrapperNode = plotWrapperNode.nextSibling.nextSibling;
-        d3.select(filterWrapperNode)
+        d3Select(filterWrapperNode)
             .selectAll('div.form-group')
             .data(options)
             .enter()

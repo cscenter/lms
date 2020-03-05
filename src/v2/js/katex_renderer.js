@@ -1,4 +1,5 @@
-import katex from "katex";
+// FIXME: check
+// import katex from "katex";
 import renderMathInElement from "katex/dist/contrib/auto-render.js";
 
 let katexOptions = {

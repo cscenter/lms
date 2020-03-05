@@ -7,40 +7,40 @@
 
 function normalizeData(val) {
   if (val === 'true') {
-    return true
+    return true;
   }
 
   if (val === 'false') {
-    return false
+    return false;
   }
 
   if (val === Number(val).toString()) {
-    return Number(val)
+    return Number(val);
   }
 
   if (val === '' || val === 'null') {
-    return null
+    return null;
   }
 
-  return val
+  return val;
 }
 
 function normalizeDataKey(key) {
-  return key.replace(/[A-Z]/g, chr => `-${chr.toLowerCase()}`)
+  return key.replace(/[A-Z]/g, chr => `-${chr.toLowerCase()}`);
 }
 
 const Manipulator = {
   setDataAttribute(element, key, value) {
-    element.setAttribute(`data-${normalizeDataKey(key)}`, value)
+    element.setAttribute(`data-${normalizeDataKey(key)}`, value);
   },
 
   removeDataAttribute(element, key) {
-    element.removeAttribute(`data-${normalizeDataKey(key)}`)
+    element.removeAttribute(`data-${normalizeDataKey(key)}`);
   },
 
   getDataAttributes(element) {
     if (!element) {
-      return {}
+      return {};
     }
 
     const attributes = {
@@ -48,14 +48,14 @@ const Manipulator = {
     };
 
     Object.keys(attributes).forEach(key => {
-      attributes[key] = normalizeData(attributes[key])
+      attributes[key] = normalizeData(attributes[key]);
     });
 
-    return attributes
+    return attributes;
   },
 
   getDataAttribute(element, key) {
-    return normalizeData(element.getAttribute(`data-${normalizeDataKey(key)}`))
+    return normalizeData(element.getAttribute(`data-${normalizeDataKey(key)}`));
   },
 
   offset(element) {
@@ -65,27 +65,27 @@ const Manipulator = {
     return {
       top: rect.top + scrollTop,
       left: rect.left + scrollLeft
-    }
+    };
   },
 
   position(element) {
     return {
       top: element.offsetTop,
       left: element.offsetLeft
-    }
+    };
   },
 
   toggleClass(element, className) {
     if (!element) {
-      return
+      return;
     }
 
     if (element.classList.contains(className)) {
-      element.classList.remove(className)
+      element.classList.remove(className);
     } else {
-      element.classList.add(className)
+      element.classList.add(className);
     }
   }
 };
 
-export default Manipulator
+export default Manipulator;

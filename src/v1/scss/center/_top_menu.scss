@@ -138,40 +138,6 @@
             }
         }
 
-        //&.for-teachers {
-        //    background-color: #A6A8CD;
-        //
-        //    .badge {
-        //        border: 1px solid #fff;
-        //        color: #fff;
-        //    }
-        //
-        //    ul {
-        //        margin-left: 0;
-        //    }
-        //
-        //    li {
-        //        &:hover {
-        //            background-color: #787AAE;
-        //        }
-        //
-        //        &.active {
-        //            background-color: #515492 !important;
-        //            a {
-        //                color: #fff;
-        //            }
-        //        }
-        //
-        //        a {
-        //            border-color: transparent!important;
-        //
-        //            &:hover {
-        //                color: #fff;
-        //            }
-        //        }
-        //    }
-        //}
-
         &.for-staff {
             li {
                 &.active {
@@ -243,6 +209,7 @@
     }
 
 }
+
 #user-menu {
     text-decoration: none!important;
     display: inline-block;

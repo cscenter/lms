@@ -148,3 +148,19 @@ $card-bg: $white !default;
   //  @extend .card__header;
   //}
 }
+
+
+
+a.card {
+  color: $black;
+
+  .card__title {
+    color: $blue;
+  }
+
+  &:hover {
+    .card__title {
+      color: $link-hover-color;
+    }
+  }
+}

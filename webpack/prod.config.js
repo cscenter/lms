@@ -56,7 +56,6 @@ module.exports = {
             'process.env': {
                 NODE_ENV: '"production"'
             },
-            '__DEVELOPMENT__': false
         }),
         // Need this plugin for deterministic hashing
         // until this issue is resolved: https://github.com/webpack/webpack/issues/1315

@@ -5,7 +5,7 @@ import Pagination from 'components/Pagination';
 
 
 let render = function(props) {
-  return shallow(<Pagination {...props} />)
+  return shallow(<Pagination {...props} />);
 };
 
 let props = {

@@ -40,7 +40,7 @@ module.exports = {
                 modules: false,
                 useBuiltIns: "usage",
                 corejs: 3,
-                debug: true,
+                debug: false,
                 loose: true,
                 spec: true,
             }

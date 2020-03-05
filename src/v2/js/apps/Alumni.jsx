@@ -2,9 +2,8 @@ import React, {Fragment} from 'react';
 import * as PropTypes from 'prop-types';
 import {withTranslation} from 'react-i18next';
 import i18next from 'i18next';
-
+import ky from 'ky';
 import _throttle from 'lodash-es/throttle';
-import $ from 'jquery';
 
 import {Select} from 'components/Select';
 import UserCardList from 'components/UserCardList';
@@ -15,6 +14,7 @@ import {
     showErrorNotification
 } from "../utils";
 import {onSelectChange} from "components/utils";
+import {optionIntType} from "types/props";
 
 export let polyfills = [
     loadIntersectionObserverPolyfill(),
@@ -31,6 +31,7 @@ class Alumni extends React.Component {
             ...props.initialState
         };
         this.fetch = _throttle(this.fetch, 300);
+        this.latestFetchAbortController = null;
     }
 
     handleSelectChange = onSelectChange.bind(this);
@@ -44,10 +45,10 @@ class Alumni extends React.Component {
     }
 
     componentWillUnmount() {
-        this.serverRequest.abort();
+        this.latestFetchAbortController.abort();
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.state.loading) {
             const filterState = this.getFilterState(this.state);
             const newPayload = this.getRequestPayload(filterState);
@@ -73,14 +74,27 @@ class Alumni extends React.Component {
         return filterState;
     }
 
-    fetch = (payload) => {
+    fetch = async (payload) => {
         console.debug("Alumni: fetch", this.props, payload);
-        this.serverRequest = $.ajax({
-            type: "GET",
-            url: this.props.endpoint,
-            dataType: "json",
-            data: payload
-        }).done((result) => {
+        let urlParams = new URLSearchParams();
+        for (let key of Object.keys(payload)) {
+            urlParams.set(key, payload[key]);
+        }
+        if (this.latestFetchAbortController !== null) {
+            this.latestFetchAbortController.abort();
+        }
+        const abortController = new AbortController();
+        this.latestFetchAbortController = abortController;
+        try {
+            const result = await ky.get(this.props.endpoint, {
+                searchParams: urlParams,
+                headers: {'content-type': 'application/json'},
+                signal: abortController.signal
+            }).json();
+            // Abort signal was received during JSON parsing
+            if (abortController.signal.aborted) {
+                return;
+            }
             result.data.forEach((g) => {
                 g.url = `/students/${g.student.id}/`;
                 g.name = `${g.student.name} ${g.student.surname}`;
@@ -89,9 +103,11 @@ class Alumni extends React.Component {
                 loading: false,
                 items: result.data,
             });
-        }).fail(() => {
-            showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
-        });
+        } catch(reason) {
+            if (reason.name !== 'AbortError') {
+                showErrorNotification("Ошибка загрузки данных. Попробуйте перезагрузить страницу.");
+            }
+        }
     };
 
     render() {
@@ -99,7 +115,7 @@ class Alumni extends React.Component {
             showBodyPreloader();
         }
         const {year, branch, area} = this.state;
-        const {t, yearOptions, branchOptions, areaOptions} = this.props;
+        const {yearOptions, branchOptions, areaOptions} = this.props;
 
         let filteredItems = this.state.items.filter(function(item) {
             let branchCondition = (branch !== null) ? item.student.branch === branch.value : true;
@@ -128,7 +144,7 @@ class Alumni extends React.Component {
                             onChange={this.handleSelectChange}
                             value={area}
                             name="area"
-                            placeholder={t("Направление")}
+                            placeholder={i18next.t("Направление")}
                             isClearable={true}
                             options={areaOptions}
                             key="area"
@@ -149,7 +165,7 @@ class Alumni extends React.Component {
                 {
                     filteredItems.length > 0 ?
                         <UserCardList users={filteredItems} />
-                        : t("Таких выпускников у нас нет. Выберите другие параметры фильтрации.")
+                        : i18next.t("Таких выпускников у нас нет. Выберите другие параметры фильтрации.")
                 }
             </Fragment>
         );
@@ -157,6 +173,14 @@ class Alumni extends React.Component {
 }
 
 const propTypes = {
+    initialState: PropTypes.shape({
+        year: optionIntType.isRequired,
+        area: PropTypes.shape({
+            value: PropTypes.string.isRequired,
+            label: PropTypes.string.isRequired
+        }),
+        branch: PropTypes.string,
+    }).isRequired,
     endpoint: PropTypes.string.isRequired,
     branchOptions: PropTypes.arrayOf(PropTypes.shape({
         value: PropTypes.string.isRequired,

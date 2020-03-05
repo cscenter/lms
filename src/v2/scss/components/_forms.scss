@@ -129,15 +129,17 @@ $form-feedback-invalid-color: $red;
 }
 
 
-// FIXME: how to deal with .card__content padding?
 fieldset {
   margin-bottom: spacer("4x");
-  &::after {
-    content: "";
-    margin: spacer("2x") -#{spacer("8x")};
-    border-top: $border-width solid $border-color;
-    display: block;
+  &:last-child {
+    margin-bottom: 0;
   }
+}
+
+// FIXME: not in use
+.ui.divider {
+  margin: spacer("2x") -#{spacer("8x")};
+  border-top: $border-width solid $border-color;
 }
 
 .title-label {

@@ -19,7 +19,7 @@ class Pagination extends React.Component {
         gapSize: 1,
     };
 
-    shouldComponentUpdate(nextProps, nextState) {
+    shouldComponentUpdate(nextProps, nextState, snapshot) {
         return this.props.currentPage !== nextProps.currentPage;
     }
 
@@ -30,7 +30,7 @@ class Pagination extends React.Component {
                     {label}
                 </button>
             </li>
-        )
+        );
     }
 
     createEllipsis(index) {
@@ -38,7 +38,7 @@ class Pagination extends React.Component {
             <li key={index} className={`page-item disabled d-none d-md-block`}>
                 <div className="ellipsis">&hellip;</div>
             </li>
-        )
+        );
     }
 
     setPage(page) {
@@ -152,6 +152,7 @@ class Pagination extends React.Component {
 }
 
 Pagination.propTypes = {
+    gapSize: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
     onChangePage: PropTypes.func.isRequired,
     pageRangeDisplayed: PropTypes.number.isRequired,
