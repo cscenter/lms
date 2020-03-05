@@ -11,7 +11,7 @@ i18n
     // init i18next
     // for all options read: https://www.i18next.com/overview/configuration-options
     .init({
-        debug: __DEVELOPMENT__,
+        debug: (process.env.NODE_ENV === "development"),
         lng: 'ru',
         fallbackLng: 'ru',
         defaultNS: 'translation',

@@ -17,6 +17,10 @@ function InputIcon(props) {
     return null;
 }
 
+InputIcon.propTypes = {
+    icon: PropTypes.string,
+};
+
 class SearchInput extends React.Component {
     static defaultProps = {
         debounceMaxWait: 200,
@@ -65,7 +69,9 @@ class SearchInput extends React.Component {
 
 SearchInput.propTypes = {
     debounceMaxWait: PropTypes.number.isRequired,
+    icon: PropTypes.string,
     handleSearch: PropTypes.func.isRequired,
+    placeholder: PropTypes.string,
     name: PropTypes.string.isRequired,
     query: PropTypes.string.isRequired,
 };

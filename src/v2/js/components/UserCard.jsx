@@ -22,6 +22,7 @@ class UserCard extends React.Component {
 }
 
 const propTypes = {
+    className: PropTypes.string,
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     url: PropTypes.string.isRequired,

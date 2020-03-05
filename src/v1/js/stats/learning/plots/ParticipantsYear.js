@@ -1,4 +1,4 @@
-import * as d3 from "d3";
+import { select as d3Select } from 'd3-selection';
 import c3 from "c3";
 import $ from 'jquery';
 import {URLS} from 'stats/utils';
@@ -104,7 +104,7 @@ class ParticipantsYear {
             },
         ];
 
-        d3.select(this.id)
+        d3Select(this.id)
             .insert('div', ":first-child")
                 .attr('class', 'btn-group pull-right')
                 .attr('role', 'group')
@@ -120,11 +120,11 @@ class ParticipantsYear {
             })
                 .text(d => d.name)
                 .on('click',  (d, i, nodes) => {
-                    d3.select(this.id)
+                    d3Select(this.id)
                         .select('div')
                         .selectAll('button')
                         .classed('active', false);
-                    d3.select(nodes[i]).classed('active', true);
+                    d3Select(nodes[i]).classed('active', true);
                     d.render();
                 });
     };

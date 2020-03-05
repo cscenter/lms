@@ -103,8 +103,8 @@
 
 .ui.input.error > input,
 .ui.input.error > textarea,
-.error .ui.option.radio:not(.disabled) > .control__indicator,
-.error .ui.option.checkbox:not(.disabled) > .control__indicator {
+.ui.option.error:not(.disabled) > .control__indicator,
+.error .ui.option:not(.disabled) > .control__indicator {
   background-color: $form-feedback-color;
   border:$input-btn-border-width solid $form-feedback-invalid-color;
   &:hover {

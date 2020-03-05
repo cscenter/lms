@@ -3,14 +3,14 @@ import $ from 'jquery';
 
 export function launch() {
     let achievementGrid = window.achievementGrid;
-    if (achievementGrid !== "undefined") {
+    if (achievementGrid !== undefined) {
         let studentAchievements = {};
         Object.keys(achievementGrid).forEach((code) => {
             let students = achievementGrid[code];
             students.forEach((userId) => {
                 studentAchievements[userId] = studentAchievements[userId] || [];
                 studentAchievements[userId].push(code);
-            })
+            });
         });
         Object.keys(studentAchievements).forEach((userId) => {
             let codes = studentAchievements[userId];
@@ -35,4 +35,4 @@ export function launch() {
         });
 
     }
-};
+}

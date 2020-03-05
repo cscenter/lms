@@ -12,10 +12,10 @@ import {
     getTransitionDurationFromElement,
     makeArray,
     reflow
-} from './util/index'
-import Data from './dom/data'
-import EventHandler from './dom/event-handler'
-import SelectorEngine from './dom/selector-engine'
+} from './util/index';
+import Data from './dom/data';
+import EventHandler from './dom/event-handler';
+import SelectorEngine from './dom/selector-engine';
 
 /**
  * ------------------------------------------------------------------------
@@ -23,11 +23,10 @@ import SelectorEngine from './dom/selector-engine'
  * ------------------------------------------------------------------------
  */
 
-const NAME = 'tab'
-const VERSION = '4.3.1'
-const DATA_KEY = 'bs.tab'
-const EVENT_KEY = `.${DATA_KEY}`
-const DATA_API_KEY = '.data-api'
+const VERSION = '4.3.1';
+const DATA_KEY = 'bs.tab';
+const EVENT_KEY = `.${DATA_KEY}`;
+const DATA_API_KEY = '.data-api';
 
 const Event = {
     HIDE: `hide${EVENT_KEY}`,
@@ -35,7 +34,7 @@ const Event = {
     SHOW: `show${EVENT_KEY}`,
     SHOWN: `shown${EVENT_KEY}`,
     CLICK_DATA_API: `click${EVENT_KEY}${DATA_API_KEY}`
-}
+};
 
 const ClassName = {
     DROPDOWN_MENU: 'dropdown-menu',
@@ -43,7 +42,7 @@ const ClassName = {
     DISABLED: 'disabled',
     FADE: 'fade',
     SHOW: 'show'
-}
+};
 
 const Selector = {
     DROPDOWN: '.dropdown',
@@ -64,13 +63,13 @@ const Selector = {
 class Tab {
     constructor(element) {
         this._element = element;
-        Data.setData(this._element, DATA_KEY, this)
+        Data.setData(this._element, DATA_KEY, this);
     }
 
     // Getters
 
     static get VERSION() {
-        return VERSION
+        return VERSION;
     }
 
     // Public
@@ -80,40 +79,40 @@ class Tab {
             this._element.parentNode.nodeType === Node.ELEMENT_NODE &&
             this._element.classList.contains(ClassName.ACTIVE)) ||
             this._element.classList.contains(ClassName.DISABLED)) {
-            return
+            return;
         }
 
-        let previous
-        const target = getElementFromSelector(this._element)
-        const listElement = SelectorEngine.closest(this._element, Selector.NAV_LIST_GROUP)
+        let previous;
+        const target = getElementFromSelector(this._element);
+        const listElement = SelectorEngine.closest(this._element, Selector.NAV_LIST_GROUP);
 
         if (listElement) {
-            const itemSelector = listElement.nodeName === 'UL' || listElement.nodeName === 'OL' ? Selector.ACTIVE_UL : Selector.ACTIVE
-            previous = makeArray(SelectorEngine.find(itemSelector, listElement))
-            previous = previous[previous.length - 1]
+            const itemSelector = listElement.nodeName === 'UL' || listElement.nodeName === 'OL' ? Selector.ACTIVE_UL : Selector.ACTIVE;
+            previous = makeArray(SelectorEngine.find(itemSelector, listElement));
+            previous = previous[previous.length - 1];
         }
 
-        let hideEvent = null
+        let hideEvent = null;
 
         if (previous) {
             hideEvent = EventHandler.trigger(previous, Event.HIDE, {
                 relatedTarget: this._element
-            })
+            });
         }
 
         const showEvent = EventHandler.trigger(this._element, Event.SHOW, {
             relatedTarget: previous
-        })
+        });
 
         if (showEvent.defaultPrevented ||
             (hideEvent !== null && hideEvent.defaultPrevented)) {
-            return
+            return;
         }
 
         this._activate(
             this._element,
             listElement
-        )
+        );
 
         const complete = () => {
             EventHandler.trigger(previous, Event.HIDDEN, {
@@ -121,19 +120,19 @@ class Tab {
             });
             EventHandler.trigger(this._element, Event.SHOWN, {
                 relatedTarget: previous
-            })
+            });
         };
 
         if (target) {
-            this._activate(target, target.parentNode, complete)
+            this._activate(target, target.parentNode, complete);
         } else {
-            complete()
+            complete();
         }
     }
 
     dispose() {
-        Data.removeData(this._element, DATA_KEY)
-        this._element = null
+        Data.removeData(this._element, DATA_KEY);
+        this._element = null;
     }
 
     // Private
@@ -141,74 +140,74 @@ class Tab {
     _activate(element, container, callback) {
         const activeElements = container && (container.nodeName === 'UL' || container.nodeName === 'OL') ?
             SelectorEngine.find(Selector.ACTIVE_UL, container) :
-            SelectorEngine.children(container, Selector.ACTIVE)
+            SelectorEngine.children(container, Selector.ACTIVE);
 
-        const active = activeElements[0]
+        const active = activeElements[0];
         const isTransitioning = callback &&
-            (active && active.classList.contains(ClassName.FADE))
+            (active && active.classList.contains(ClassName.FADE));
 
         const complete = () => this._transitionComplete(
             element,
             active,
             callback
-        )
+        );
 
         if (active && isTransitioning) {
-            const transitionDuration = getTransitionDurationFromElement(active)
-            active.classList.remove(ClassName.SHOW)
+            const transitionDuration = getTransitionDurationFromElement(active);
+            active.classList.remove(ClassName.SHOW);
 
-            EventHandler.one(active, TRANSITION_END, complete)
-            emulateTransitionEnd(active, transitionDuration)
+            EventHandler.one(active, TRANSITION_END, complete);
+            emulateTransitionEnd(active, transitionDuration);
         } else {
-            complete()
+            complete();
         }
     }
 
     _transitionComplete(element, active, callback) {
         if (active) {
-            active.classList.remove(ClassName.ACTIVE)
+            active.classList.remove(ClassName.ACTIVE);
 
-            const dropdownChild = SelectorEngine.findOne(Selector.DROPDOWN_ACTIVE_CHILD, active.parentNode)
+            const dropdownChild = SelectorEngine.findOne(Selector.DROPDOWN_ACTIVE_CHILD, active.parentNode);
 
             if (dropdownChild) {
-                dropdownChild.classList.remove(ClassName.ACTIVE)
+                dropdownChild.classList.remove(ClassName.ACTIVE);
             }
 
             if (active.getAttribute('role') === 'tab') {
-                active.setAttribute('aria-selected', false)
+                active.setAttribute('aria-selected', false);
             }
         }
 
-        element.classList.add(ClassName.ACTIVE)
+        element.classList.add(ClassName.ACTIVE);
         if (element.getAttribute('role') === 'tab') {
-            element.setAttribute('aria-selected', true)
+            element.setAttribute('aria-selected', true);
         }
 
-        reflow(element)
+        reflow(element);
 
         if (element.classList.contains(ClassName.FADE)) {
-            element.classList.add(ClassName.SHOW)
+            element.classList.add(ClassName.SHOW);
         }
 
         if (element.parentNode && element.parentNode.classList.contains(ClassName.DROPDOWN_MENU)) {
-            const dropdownElement = SelectorEngine.closest(element, Selector.DROPDOWN)
+            const dropdownElement = SelectorEngine.closest(element, Selector.DROPDOWN);
 
             if (dropdownElement) {
                 makeArray(SelectorEngine.find(Selector.DROPDOWN_TOGGLE))
-                    .forEach(dropdown => dropdown.classList.add(ClassName.ACTIVE))
+                    .forEach(dropdown => dropdown.classList.add(ClassName.ACTIVE));
             }
 
-            element.setAttribute('aria-expanded', true)
+            element.setAttribute('aria-expanded', true);
         }
 
         if (callback) {
-            callback()
+            callback();
         }
     }
 
     // Static
     static getInstance(element) {
-        return Data.getData(element, DATA_KEY)
+        return Data.getData(element, DATA_KEY);
     }
 }
 
@@ -222,8 +221,8 @@ EventHandler.on(document, Event.CLICK_DATA_API, Selector.DATA_TOGGLE, function (
     event.preventDefault();
 
     const data = Data.getData(this, DATA_KEY) || new Tab(this);
-    data.show()
+    data.show();
 });
 
 
-export default Tab
+export default Tab;

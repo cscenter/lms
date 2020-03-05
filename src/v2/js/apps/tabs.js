@@ -34,7 +34,7 @@ export function launch() {
            };
 
             tabList.onDelegate('[data-toggle="tab"]', 'click', function (event) {
-                if (!!(window.history && history.pushState)) {
+                if (window.history && history.pushState) {
                     history.pushState(
                         {tabTarget: this.getAttribute("data-target")},
                         "",

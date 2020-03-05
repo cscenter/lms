@@ -47,7 +47,7 @@ class App extends React.Component {
         this.setState(state => {
             return {
                 recentOnly: !state.recentOnly
-            }
+            };
         });
     };
 
@@ -63,7 +63,7 @@ class App extends React.Component {
         this.serverRequest.abort();
     };
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.state.loading) {
             const filterState = this.getFilterState(this.state);
             const newPayload = this.getRequestPayload(filterState);
@@ -71,7 +71,7 @@ class App extends React.Component {
         } else {
             hideBodyPreloader();
         }
-    };
+    }
 
     getFilterState(state) {
         let {query, branch, course} = state;
@@ -212,6 +212,9 @@ class App extends React.Component {
 }
 
 const propTypes = {
+    initialState: PropTypes.shape({
+        state: PropTypes.string,
+    }).isRequired,
     endpoint: PropTypes.string.isRequired,
     coursesURL: PropTypes.string.isRequired,
     termIndex: PropTypes.number.isRequired,

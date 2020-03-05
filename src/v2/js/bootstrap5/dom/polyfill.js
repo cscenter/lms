@@ -7,139 +7,139 @@
  * --------------------------------------------------------------------------
  */
 
-import { getUID } from '../util/index'
+import { getUID } from '../util/index';
 
-let { matches, closest } = Element.prototype
-let find = Element.prototype.querySelectorAll
-let findOne = Element.prototype.querySelector
+let { matches, closest } = Element.prototype;
+let find = Element.prototype.querySelectorAll;
+let findOne = Element.prototype.querySelector;
 let createCustomEvent = (eventName, params) => {
-  const cEvent = new CustomEvent(eventName, params)
+  const cEvent = new CustomEvent(eventName, params);
 
-  return cEvent
-}
+  return cEvent;
+};
 
 if (typeof window.CustomEvent !== 'function') {
   createCustomEvent = (eventName, params) => {
-    params = params || { bubbles: false, cancelable: false, detail: null }
+    params = params || { bubbles: false, cancelable: false, detail: null };
 
-    const evt = document.createEvent('CustomEvent')
+    const evt = document.createEvent('CustomEvent');
 
-    evt.initCustomEvent(eventName, params.bubbles, params.cancelable, params.detail)
-    return evt
-  }
+    evt.initCustomEvent(eventName, params.bubbles, params.cancelable, params.detail);
+    return evt;
+  };
 }
 
 const workingDefaultPrevented = (() => {
-  const e = document.createEvent('CustomEvent')
+  const e = document.createEvent('CustomEvent');
 
-  e.initEvent('Bootstrap', true, true)
-  e.preventDefault()
-  return e.defaultPrevented
-})()
+  e.initEvent('Bootstrap', true, true);
+  e.preventDefault();
+  return e.defaultPrevented;
+})();
 
 if (!workingDefaultPrevented) {
-  const origPreventDefault = Event.prototype.preventDefault
+  const origPreventDefault = Event.prototype.preventDefault;
 
   Event.prototype.preventDefault = function () {
     if (!this.cancelable) {
-      return
+      return;
     }
 
-    origPreventDefault.call(this)
+    origPreventDefault.call(this);
     Object.defineProperty(this, 'defaultPrevented', {
       get() {
-        return true
+        return true;
       },
       configurable: true
-    })
-  }
+    });
+  };
 }
 
 // MSEdge resets defaultPrevented flag upon dispatchEvent call if at least one listener is attached
 const defaultPreventedPreservedOnDispatch = (() => {
   const e = createCustomEvent('Bootstrap', {
     cancelable: true
-  })
+  });
 
-  const element = document.createElement('div')
-  element.addEventListener('Bootstrap', () => null)
+  const element = document.createElement('div');
+  element.addEventListener('Bootstrap', () => null);
 
-  e.preventDefault()
-  element.dispatchEvent(e)
-  return e.defaultPrevented
-})()
+  e.preventDefault();
+  element.dispatchEvent(e);
+  return e.defaultPrevented;
+})();
 
 if (!matches) {
-  matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector
+  matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
 }
 
 if (!closest) {
   closest = function (selector) {
-    let element = this
+    let element = this;
 
     do {
       if (matches.call(element, selector)) {
-        return element
+        return element;
       }
 
-      element = element.parentElement || element.parentNode
-    } while (element !== null && element.nodeType === 1)
+      element = element.parentElement || element.parentNode;
+    } while (element !== null && element.nodeType === 1);
 
-    return null
-  }
+    return null;
+  };
 }
 
-const scopeSelectorRegex = /:scope\b/
+const scopeSelectorRegex = /:scope\b/;
 const supportScopeQuery = (() => {
-  const element = document.createElement('div')
+  const element = document.createElement('div');
 
   try {
-    element.querySelectorAll(':scope *')
+    element.querySelectorAll(':scope *');
   } catch (_) {
-    return false
+    return false;
   }
 
-  return true
-})()
+  return true;
+})();
 
 if (!supportScopeQuery) {
   find = function (selector) {
     if (!scopeSelectorRegex.test(selector)) {
-      return this.querySelectorAll(selector)
+      return this.querySelectorAll(selector);
     }
 
-    const hasId = Boolean(this.id)
+    const hasId = Boolean(this.id);
 
     if (!hasId) {
-      this.id = getUID('scope')
+      this.id = getUID('scope');
     }
 
-    let nodeList = null
+    let nodeList = null;
     try {
-      selector = selector.replace(scopeSelectorRegex, `#${this.id}`)
-      nodeList = this.querySelectorAll(selector)
+      selector = selector.replace(scopeSelectorRegex, `#${this.id}`);
+      nodeList = this.querySelectorAll(selector);
     } finally {
       if (!hasId) {
-        this.removeAttribute('id')
+        this.removeAttribute('id');
       }
     }
 
-    return nodeList
-  }
+    return nodeList;
+  };
 
   findOne = function (selector) {
     if (!scopeSelectorRegex.test(selector)) {
-      return this.querySelector(selector)
+      return this.querySelector(selector);
     }
 
-    const matches = find.call(this, selector)
+    const matches = find.call(this, selector);
 
     if (typeof matches[0] !== 'undefined') {
-      return matches[0]
+      return matches[0];
     }
 
-    return null
-  }
+    return null;
+  };
 }
 
 export {
@@ -149,4 +149,4 @@ export {
   matches,
   closest,
   defaultPreventedPreservedOnDispatch
-}
+};

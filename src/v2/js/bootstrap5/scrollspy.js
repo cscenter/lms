@@ -9,11 +9,11 @@ import {
     getUID,
     makeArray,
     typeCheckConfig
-} from './util/index'
-import Data from './dom/data'
-import EventHandler from './dom/event-handler'
-import Manipulator from './dom/manipulator'
-import SelectorEngine from './dom/selector-engine'
+} from './util/index';
+import Data from './dom/data';
+import EventHandler from './dom/event-handler';
+import Manipulator from './dom/manipulator';
+import SelectorEngine from './dom/selector-engine';
 
 /**
  * ------------------------------------------------------------------------
@@ -89,17 +89,17 @@ class ScrollSpy {
     this.refresh();
     this._process();
 
-    Data.setData(element, DATA_KEY, this)
+    Data.setData(element, DATA_KEY, this);
   }
 
   // Getters
 
   static get VERSION() {
-    return VERSION
+    return VERSION;
   }
 
   static get Default() {
-    return Default
+    return Default;
   }
 
   // Public
@@ -130,7 +130,7 @@ class ScrollSpy {
         const targetSelector = getSelectorFromElement(element);
 
         if (targetSelector) {
-          target = SelectorEngine.findOne(targetSelector)
+          target = SelectorEngine.findOne(targetSelector);
         }
 
         if (target) {
@@ -139,17 +139,17 @@ class ScrollSpy {
             return [
               Manipulator[offsetMethod](target).top + offsetBase,
               targetSelector
-            ]
+            ];
           }
         }
 
-        return null
+        return null;
       })
       .filter(item => item)
       .sort((a, b) => a[0] - b[0])
       .forEach(item => {
         this._offsets.push(item[0]);
-        this._targets.push(item[1])
+        this._targets.push(item[1]);
       });
   }
 
@@ -164,7 +164,7 @@ class ScrollSpy {
     this._offsets = null;
     this._targets = null;
     this._activeTarget = null;
-    this._scrollHeight = null
+    this._scrollHeight = null;
   }
 
   // Private
@@ -179,34 +179,34 @@ class ScrollSpy {
       let { id } = config.target;
       if (!id) {
         id = getUID(NAME);
-        config.target.id = id
+        config.target.id = id;
       }
 
-      config.target = `#${id}`
+      config.target = `#${id}`;
     }
 
     typeCheckConfig(NAME, config, DefaultType);
 
-    return config
+    return config;
   }
 
   _getScrollTop() {
     return this._scrollElement === window ?
       this._scrollElement.pageYOffset :
-      this._scrollElement.scrollTop
+      this._scrollElement.scrollTop;
   }
 
   _getScrollHeight() {
     return this._scrollElement.scrollHeight || Math.max(
       document.body.scrollHeight,
       document.documentElement.scrollHeight
-    )
+    );
   }
 
   _getOffsetHeight() {
     return this._scrollElement === window ?
       window.innerHeight :
-      this._scrollElement.getBoundingClientRect().height
+      this._scrollElement.getBoundingClientRect().height;
   }
 
   _process() {
@@ -217,23 +217,23 @@ class ScrollSpy {
       this._getOffsetHeight();
 
     if (this._scrollHeight !== scrollHeight) {
-      this.refresh()
+      this.refresh();
     }
 
     if (scrollTop >= maxScroll) {
       const target = this._targets[this._targets.length - 1];
 
       if (this._activeTarget !== target) {
-        this._activate(target)
+        this._activate(target);
       }
 
-      return
+      return;
     }
 
     if (this._activeTarget && scrollTop < this._offsets[0] && this._offsets[0] > 0) {
       this._activeTarget = null;
       this._clear();
-      return
+      return;
     }
 
     const offsetLength = this._offsets.length;
@@ -244,7 +244,7 @@ class ScrollSpy {
               scrollTop < this._offsets[i + 1]);
 
       if (isActiveTarget) {
-        this._activate(this._targets[i])
+        this._activate(this._targets[i]);
       }
     }
   }
@@ -264,7 +264,7 @@ class ScrollSpy {
         .findOne(Selector.DROPDOWN_TOGGLE, SelectorEngine.closest(link, Selector.DROPDOWN))
         .classList.add(ClassName.ACTIVE);
 
-      link.classList.add(ClassName.ACTIVE)
+      link.classList.add(ClassName.ACTIVE);
     } else {
       // Set triggered link as active
       link.classList.add(ClassName.ACTIVE);
@@ -281,26 +281,26 @@ class ScrollSpy {
           SelectorEngine.prev(listGroup, Selector.NAV_ITEMS)
             .forEach(navItem => {
               SelectorEngine.children(navItem, Selector.NAV_LINKS)
-                .forEach(item => item.classList.add(ClassName.ACTIVE))
-            })
-        })
+                .forEach(item => item.classList.add(ClassName.ACTIVE));
+            });
+        });
     }
 
     EventHandler.trigger(this._scrollElement, Event.ACTIVATE, {
       relatedTarget: target
-    })
+    });
   }
 
   _clear() {
     makeArray(SelectorEngine.find(this._selector))
       .filter(node => node.classList.contains(ClassName.ACTIVE))
-      .forEach(node => node.classList.remove(ClassName.ACTIVE))
+      .forEach(node => node.classList.remove(ClassName.ACTIVE));
   }
 
   // Static
 
   static getInstance(element) {
-    return Data.getData(element, DATA_KEY)
+    return Data.getData(element, DATA_KEY);
   }
 }
 
@@ -312,8 +312,8 @@ class ScrollSpy {
 
 EventHandler.on(window, Event.LOAD_DATA_API, () => {
   makeArray(SelectorEngine.find(Selector.DATA_SPY))
-    .forEach(spy => new ScrollSpy(spy, Manipulator.getDataAttributes(spy)))
+    .forEach(spy => new ScrollSpy(spy, Manipulator.getDataAttributes(spy)));
 });
 
 
-export default ScrollSpy
+export default ScrollSpy;

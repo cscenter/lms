@@ -35,6 +35,12 @@ $(document).ready(function () {
         });
         import('forms')
             .then(_ => {
+                document.querySelectorAll('.multiple-select').forEach((element) => {
+                    $(element).selectpicker({
+                        iconBase: 'fa',
+                        tickIcon: 'fa-check',
+                    });
+                });
                 $('.datepicker').datetimepicker({
                     locale: 'ru',
                     format: 'DD.MM.YYYY',

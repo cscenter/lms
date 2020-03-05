@@ -14,7 +14,7 @@ export function renderComponentInElement(el) {
             // in parallel with application source, but this limitation allows
             // to store all dependencies in one place.
             // TODO: Optimization: add support for data-polyfills
-            if (component.hasOwnProperty('polyfills')) {
+            if (Object.prototype.hasOwnProperty.call(component,'polyfills')) {
                 return Promise
                     .all(component.polyfills)
                     .then(() => component);

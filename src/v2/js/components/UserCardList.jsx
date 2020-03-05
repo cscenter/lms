@@ -1,4 +1,5 @@
 import React from 'react';
+import * as PropTypes from 'prop-types';
 
 import UserCard from './UserCard';
 
@@ -17,5 +18,10 @@ class UserCardList extends React.Component {
         );
     }
 }
+
+UserCardList.propTypes = {
+    className: PropTypes.string,
+    users: PropTypes.arrayOf(PropTypes.object)
+};
 
 export default UserCardList;

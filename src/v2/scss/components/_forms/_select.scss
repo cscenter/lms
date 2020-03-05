@@ -23,6 +23,12 @@
   }
 }
 
+.react-select-container.error {
+  .react-select__control {
+    border: 1px solid $red;
+  }
+}
+
 .react-select__control.react-select__control--is-focused{
   border: $input-border-width solid $input-border-color-hover;
   box-shadow: none !important;

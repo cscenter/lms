@@ -1,12 +1,11 @@
-@import "jgrowl/jgrowl.variables";
-$jgrowl-backgroundColor: $color-green;
-@import "jgrowl/jgrowl.core";
+@import "./jgrowl.variables";
+@import "./jgrowl.core";
 
-/* jGrowl overrides */
 .jGrowl {
   color: #fff;
   font-size: 14px;
 }
+
 .jGrowl-notification {
   border-color: transparent;
   padding: 15px 20px;

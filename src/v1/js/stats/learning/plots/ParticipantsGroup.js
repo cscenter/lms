@@ -1,4 +1,4 @@
-import * as d3 from "d3";
+import { select as d3Select } from 'd3-selection';
 import c3 from "c3";
 import $ from 'jquery';
 import {GROUPS, URLS} from 'stats/utils';
@@ -63,7 +63,7 @@ class ParticipantsGroup {
         rawJSON.forEach((e) => {
             total += e.students;
         });
-        d3.select(this.id).insert('div', ":first-child")
+        d3Select(this.id).insert('div', ":first-child")
             .attr('class', 'info')
             .selectAll('div')
             .data([total])

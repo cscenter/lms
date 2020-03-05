@@ -21,7 +21,7 @@ class SelectLazyOptions extends React.Component {
             optionsLoaded: false,
             options: [],
             isLoading: false
-        }
+        };
     }
 
     handleChange = (e) => {
@@ -39,7 +39,6 @@ class SelectLazyOptions extends React.Component {
         return (
             <SelectBase
                 name={this.props.name}
-                value={this.props.value}
                 clearable={false}
                 className='react-select-container'
                 classNamePrefix='react-select'
