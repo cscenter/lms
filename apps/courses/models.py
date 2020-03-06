@@ -242,6 +242,11 @@ class StudentGroupTypes(DjangoChoices):
     BRANCH = C('branch', _('Branch'))
 
 
+class MaterialVisibilityTypes(DjangoChoices):
+    VISIBLE = C('all', _('All Users'))
+    HIDDEN = C('students', _('Only Students'))
+
+
 class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'branch'
 
@@ -318,6 +323,13 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("The language in which lectures are given."),
         choices=settings.LANGUAGES,
         default=settings.LANGUAGE_CODE)
+    materials_visibility = models.CharField(
+        verbose_name=_("Materials Visibility"),
+        max_length=8,
+        help_text=_("Default visibility for class materials."),
+        choices=MaterialVisibilityTypes.choices,
+        default=MaterialVisibilityTypes.VISIBLE)
+    # FIXME: calculate public videos/materials only
     # TODO: recalculate on deleting course class
     videos_count = models.PositiveIntegerField(default=0, editable=False)
     materials_slides = models.BooleanField(default=False, editable=False)
