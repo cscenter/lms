@@ -1,7 +1,8 @@
 from rules import predicate
 
 from auth.permissions import add_perm, Permission
-from courses.models import Course, CourseClass
+from courses.models import Course, CourseClass, MaterialVisibilityTypes
+from learning.permissions import course_access_role, CourseRole
 
 
 @add_perm
@@ -54,6 +55,19 @@ class EditOwnAssignment(Permission):
     def rule(user, course: Course):
         return any(t.teacher_id == user.pk for t in
                    course.course_teachers.all())
+
+
+@add_perm
+class ViewCourseClassMaterials(Permission):
+    name = "courses.view_course_class_materials"
+
+    @staticmethod
+    @predicate
+    def rule(user, course_class: CourseClass):
+        if course_class.materials_visibility == MaterialVisibilityTypes.VISIBLE:
+            return True
+        role = course_access_role(course=course_class.course, user=user)
+        return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
 
 
 @add_perm

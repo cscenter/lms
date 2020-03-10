@@ -756,6 +756,11 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
+    materials_visibility = models.CharField(
+        verbose_name=_("Materials Visibility"),
+        max_length=8,
+        help_text=_("Slides, attachments and other materials"),
+        choices=MaterialVisibilityTypes.choices)
     slides = models.FileField(
         _("Slides"),
         blank=True,
@@ -763,7 +768,8 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         upload_to=course_class_slides_upload_to)
     slides_url = models.URLField(_("SlideShare URL"), blank=True)
     video_url = models.URLField(
-        _("Video URL"), blank=True,
+        verbose_name=_("Video Recording"),
+        blank=True,
         help_text=_("Both YouTube and Yandex Video are supported"))
     other_materials = models.TextField(
         _("CourseClass|Other materials"),

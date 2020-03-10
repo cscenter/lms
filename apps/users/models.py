@@ -415,7 +415,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
         return PermissionsMixin.get_all_permissions(self, obj)
 
     def has_perm(self, perm, obj=None):
-        # Active superusers have only permissions implicitly added by Django
+        # Active superusers have permissions implicitly added by Django
         is_registered_permission = perm in perm_registry
         if self.is_active and self.is_superuser and not is_registered_permission:
             return True

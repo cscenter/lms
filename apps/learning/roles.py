@@ -7,7 +7,8 @@ from auth.registry import role_registry
 from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
     ViewCourseAssignments, CreateAssignment, CreateOwnAssignment, \
     EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, \
-    DeleteCourseClass, EditAssignment, EditOwnAssignment
+    DeleteCourseClass, EditAssignment, EditOwnAssignment, \
+    ViewCourseClassMaterials
 from .permissions import CreateAssignmentComment, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
     ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
@@ -136,3 +137,6 @@ teacher_role.add_relation(ViewEnrollments, ViewRelatedEnrollments)
 
 student_role = role_registry[Roles.STUDENT]
 student_role.add_relation(CreateAssignmentComment, CreateAssignmentCommentStudent)
+
+default_role = role_registry.default_role
+default_role.add_permission(ViewCourseClassMaterials)

@@ -11,8 +11,12 @@ class RolePermissionsRegistry:
     Each record in the registry is a role (R) associated with
     `rules.RuleSet` instance (P).
     """
+
+    DEFAULT_ROLE_CODE = '_default'
+
     def __init__(self):
         self._registry = {}
+        self._register_default_role()
 
     def register(self, role: Role):
         """
@@ -37,6 +41,11 @@ class RolePermissionsRegistry:
                                 'registered' % role.code)
         del self._registry[role.code]
 
+    def _register_default_role(self):
+        self.register(Role(code=self.DEFAULT_ROLE_CODE,
+                           name='Default Role',
+                           permissions=[]))
+
     def __contains__(self, role):
         if isinstance(role, Role):
             return role.code in self._registry
@@ -51,9 +60,13 @@ class RolePermissionsRegistry:
 
     def __getitem__(self, role) -> Role:
         if isinstance(role, Role):
-            return self._registry[role.name]
+            return self._registry[role.code]
         else:
             return self._registry[role]
+
+    @property
+    def default_role(self) -> Role:
+        return self._registry[self.DEFAULT_ROLE_CODE]
 
     def items(self):
         return self._registry.items()

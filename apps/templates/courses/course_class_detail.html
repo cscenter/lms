@@ -23,6 +23,9 @@
       <hr>
     </div>
   </div>
+
+   {% call_method request.user "has_perm" "courses.view_course_class_materials" course_class as can_view_course_class_materials %}
+
   <div class="row">
     <div class="col-xs-12">
       <table class="table table-striped">
@@ -38,7 +41,7 @@
           <td>{% trans "Where" %}:</td>
           <td><a href="{{ course_class.venue.location.get_absolute_url }}">{{ course_class.venue }}</a></td>
         </tr>
-        {% if course_class.slides %}
+        {% if course_class.slides and can_view_course_class_materials %}
         <tr>
           <td>{% trans "Slides" %}:</td>
           <td id="slides"><a href="{{ course_class.slides.url }}">{{ course_class.slides_file_name }}</a></td>

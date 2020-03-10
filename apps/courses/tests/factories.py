@@ -8,7 +8,8 @@ from django.utils import timezone
 from core.tests.factories import LocationFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
-    AssignmentAttachment, LearningSpace, CourseReview, AssignmentSubmissionTypes
+    AssignmentAttachment, LearningSpace, CourseReview, \
+    AssignmentSubmissionTypes, MaterialVisibilityTypes
 from courses.utils import get_current_term_pair, get_term_by_index
 from learning.services import AssignmentService
 from users.tests.factories import TeacherFactory
@@ -142,6 +143,7 @@ class CourseClassFactory(factory.DjangoModelFactory):
             + datetime.timedelta(days=3)).date()
     starts_at = datetime.time(hour=13, minute=0)
     ends_at = datetime.time(hour=13, minute=45)
+    materials_visibility = MaterialVisibilityTypes.VISIBLE
 
     @classmethod
     def build(cls, *args, **kwargs):
