@@ -15,7 +15,7 @@ from django.utils.timezone import now
 from core.timezone import now_local
 from core.urls import reverse
 from courses.forms import CourseClassForm
-from courses.models import CourseClass
+from courses.models import CourseClass, MaterialVisibilityTypes
 from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory, SemesterFactory, CourseClassAttachmentFactory, \
     LearningSpaceFactory
@@ -292,7 +292,8 @@ def test_course_class_form_available(client, curator, settings):
         "name": "Test class",
         "date": next_day.strftime(date_format),
         "starts_at": "17:20",
-        "ends_at": "18:50"
+        "ends_at": "18:50",
+        "materials_visibility": MaterialVisibilityTypes.VISIBLE
     }
     response = client.post(course_class_add_url, form, follow=True)
     message = list(response.context['messages'])[0]

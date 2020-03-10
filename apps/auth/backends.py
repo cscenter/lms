@@ -24,21 +24,24 @@ class RBACPermissions:
     def authenticate(self, *args, **kwargs):
         return None
 
-    # FIXME: Hmm, looks like *args, **kwargs could be replaced with optional object. Django doesn't pass anything else, seee `_user_has_perm`
-    def has_perm(self, user, perm, *args, **kwargs):
-        if not user.is_active or user.is_anonymous:
+    def has_perm(self, user, perm, obj=None):
+        if not user.is_active and not user.is_anonymous:
             return False
-        if hasattr(user, 'roles'):
-            return self._has_perm(user, perm, user.roles, *args, **kwargs)
+        default_role = role_registry.default_role.code
+        if user.is_anonymous:
+            return self._has_perm(user, perm, {default_role}, obj)
+        elif hasattr(user, 'roles'):
+            roles = set(user.roles)
+            roles.add(default_role)
+            return self._has_perm(user, perm, roles, obj)
         return False
 
-    def _has_perm(self, user, perm_name, roles, *args, **kwargs):
+    def _has_perm(self, user, perm_name, roles, obj):
         for role_code in roles:
             if role_code in role_registry:
                 role = role_registry[role_code]
                 if role.permissions.rule_exists(perm_name):
-                    return role.permissions[perm_name].test(user, *args,
-                                                            **kwargs)
+                    return role.permissions[perm_name].test(user, obj)
                 # Case when calling `.has_perm('update_comment', obj)`
                 # e.g. for teacher and expect that
                 # .has_perm('update_own_comment', obj) will be in a call chain
@@ -46,16 +49,14 @@ class RBACPermissions:
                     # Related `Permission.rule` should check only object level
                     # permission, if there is no any object has been
                     # passed - nothing to check
-                    any_object_passed = len(kwargs) or any(a for a in args)
-                    if not any_object_passed:
+                    if obj is None:
                         continue
                     for rel_perm_name in role.relations[perm_name]:
-                        if self._has_perm(user, rel_perm_name, [role.code],
-                                          *args, **kwargs):
+                        if self._has_perm(user, rel_perm_name, [role.code], obj):
                             return True
             else:
                 logger.warning(f'Role {role_code} is not registered '
-                               f'but assigned to user {user}')
+                               f'but assigned to the user {user}')
         return False
 
     def has_module_perms(self, user, app_label):

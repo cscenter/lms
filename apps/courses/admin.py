@@ -109,7 +109,7 @@ class CourseClassAdmin(admin.ModelAdmin):
     date_hierarchy = 'date'
     list_filter = ['type']
     search_fields = ['course__meta_course__name']
-    list_display = ['id', 'name', 'course', 'date', 'venue', 'type']
+    list_display = ['id', 'name', 'course', 'date', 'type']
     raw_id_fields = ['venue']
     inlines = [CourseClassAttachmentInline]
     formfield_overrides = {

@@ -76,6 +76,7 @@ def test_role_relations(mocker):
 def test_backend(mocker):
     mocker.patch.dict(role_registry._registry, clear=True)
     mocker.patch.dict(perm_registry._dict, clear=True)
+    role_registry._register_default_role()
     backend = RBACModelBackend()
     user = UserFactory()
     assert not backend.has_perm(user, PermissionAlwaysTrue.name)
@@ -92,6 +93,7 @@ def test_backend(mocker):
 def test_rbac_backend_has_perm(mocker):
     mocker.patch.dict(role_registry._registry, clear=True)
     mocker.patch.dict(perm_registry._dict, clear=True)
+    role_registry._register_default_role()
     perm_registry.add_permission(Permission1)
     perm_registry.add_permission(PermissionAlwaysTrue)
     perm_registry.add_permission(Permission3)

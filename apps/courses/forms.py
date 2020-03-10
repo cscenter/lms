@@ -121,7 +121,7 @@ class CourseNewsForm(forms.ModelForm):
 
 class CourseClassForm(forms.ModelForm):
     venue = forms.ModelChoiceField(
-        queryset=LearningSpace.objects.all(),
+        queryset=LearningSpace.objects.select_related('location'),
         label=_("Venue"),
         empty_label=None)
     type = forms.ChoiceField(
@@ -145,7 +145,7 @@ class CourseClassForm(forms.ModelForm):
         help_text=_("You can select multiple files"),
         widget=forms.ClearableFileInput(attrs={'multiple': 'multiple'}))
     other_materials = forms.CharField(
-        label=_("Other materials"),
+        label=_("CourseClass|Other materials"),
         required=False,
         help_text=LATEX_MARKDOWN_HTML_ENABLED,
         widget=UbereditorWidget)
@@ -171,6 +171,8 @@ class CourseClassForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
             branch_id=course.branch_id)
+        self.fields['materials_visibility'].help_text = None
+        self.fields['materials_visibility'].label = _("Visibility Setting")
         self.instance.course = course
 
         self.helper = FormHelper(self)
@@ -200,12 +202,12 @@ class CourseClassForm(forms.ModelForm):
                 css_class="form-group"),
             Fieldset(_("Materials"),
                      Div(
-                         Div('slides', css_class='col-xs-6'),
-                         Div('attachments', HTML(remove_links),
-                             css_class='col-xs-6'),
-                         css_class='row'
+                        Div('materials_visibility', css_class='col-xs-3'),
+                        css_class='row'
                      ),
+                     'slides',
                      'video_url',
+                     Div('attachments', HTML(remove_links),),
                      'other_materials'),
             FormActions(
                 StrictButton(_('<i class="fa fa-plus"></i> Save and add'),
@@ -217,9 +219,9 @@ class CourseClassForm(forms.ModelForm):
 
     class Meta:
         model = CourseClass
-        fields = ['venue', 'type', 'name', 'description',
-                  'slides', 'attachments', 'video_url', 'other_materials',
-                  'date', 'starts_at', 'ends_at']
+        fields = ['venue', 'type', 'materials_visibility', 'name',
+                  'description', 'slides', 'attachments', 'video_url',
+                  'other_materials', 'date', 'starts_at', 'ends_at']
 
     def clean_date(self):
         date = self.cleaned_data['date']
