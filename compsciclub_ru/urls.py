@@ -16,7 +16,7 @@ from courses.urls import RE_COURSE_URI
 from htmlpages import views
 from international_schools.views import InternationalSchoolsListView
 from learning.views import CourseNewsNotificationUpdate, CourseEnrollView, \
-    CourseUnenrollView
+    CourseUnenrollView, EventDetailView
 
 admin.autodiscover()
 
@@ -52,6 +52,7 @@ urlpatterns += [
 
     path('teaching/', include('learning.teaching.urls')),
     path('learning/', include('learning.study.urls')),
+    path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
 
 
 
