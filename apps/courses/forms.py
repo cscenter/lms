@@ -171,7 +171,7 @@ class CourseClassForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
             branch_id=course.branch_id)
-        self.fields['materials_visibility'].help_text = None
+        self.fields['materials_visibility'].help_text = _("Note that some materials would be available by direct link")
         self.fields['materials_visibility'].label = _("Visibility Setting")
         self.instance.course = course
 
@@ -202,7 +202,7 @@ class CourseClassForm(forms.ModelForm):
                 css_class="form-group"),
             Fieldset(_("Materials"),
                      Div(
-                        Div('materials_visibility', css_class='col-xs-3'),
+                        Div('materials_visibility', css_class='col-xs-6'),
                         css_class='row'
                      ),
                      'slides',

@@ -58,40 +58,43 @@
       </div>
       {% endif %}
 
+    {% if can_view_course_class_materials %}
         {% if course_class.video_iframe %}
             <a id="video" href="#"></a><h4 class="bigger-margin">{% trans "Video" %}</h4>
             <div class="">
                 {{ course_class.video_iframe|safe }}
             </div>
         {% endif %}
-
-      {% if course_class.other_materials or course_class.slides_iframe %}
-      <h4 class="bigger-margin" id="other_materials">{% trans "Materials" %}</h4>
-          {% if course_class.slides_iframe %}
+        {% if attachments %}
+            <h4 class="bigger-margin" id="attachments">{% trans "Attached files" %}</h4>
+            <ul class="list">
+                {% for attachment in attachments %}
+                    <li>
+                        <span class="assignment-attachment">
+                            <i class="fa fa-file"></i>
+                            <a href="{{ attachment.material.url }}">
+                              {{ attachment.material_file_name }}
+                            </a>
+                        </span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% if course_class.other_materials or course_class.slides_iframe %}
+            <h4 class="bigger-margin" id="other_materials">{% trans "Other materials" %}</h4>
+            {% if course_class.slides_iframe %}
               {{ course_class.slides_iframe|safe }}
-          {% endif %}
-          <div class="ubertext">
-            {% markdown 3600 "course_class_materials" course_class.pk course_class.modified %}
-              {{ course_class.other_materials }}
-            {% endmarkdown %}
-          </div>
-      {% endif %}
+            {% endif %}
+            <div class="ubertext">
+                {% markdown 3600 "course_class_materials" course_class.pk course_class.modified %}
+                  {{ course_class.other_materials }}
+                {% endmarkdown %}
+            </div>
+        {% endif %}
+    {% endif %}
 
-      {% if attachments %}
-      <h4 class="bigger-margin" id="attachments">{% trans "Attached files" %}</h4>
-      <ul class="list">
-        {% for attachment in attachments %}
-        <li>
-          <span class="assignment-attachment">
-            <i class="fa fa-file"></i>
-            <a href="{{ attachment.material.url }}">
-              {{ attachment.material_file_name }}
-            </a>
-          </span>
-        </li>
-        {% endfor %}
-      </ul>
-      {% endif %}
+
+
     </div>
   </div>
 </div>

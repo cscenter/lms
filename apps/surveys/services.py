@@ -67,7 +67,7 @@ def course_form_builder(survey: CourseSurvey):
         templates.append(FormTemplates.HOMEWORK)
     if has_seminars and has_assignments:
         templates.append(FormTemplates.SEMINAR_HOMEWORK)
-    if course.videos_count:
+    if course.public_videos_count:
         if has_seminars:
             templates.append(FormTemplates.VIDEO_SEMINAR)
         else:

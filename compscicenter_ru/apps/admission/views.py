@@ -448,7 +448,7 @@ def get_default_campaign_for_user(user: User) -> Optional[Campaign]:
                             .only("pk", "branch"))
     try:
         campaign = next(c for c in active_campaigns
-                        if c.branch.code == user.branch_id)
+                        if c.branch_id == user.branch_id)
     except StopIteration:
         # Get any campaign if no active campaign found for the user branch
         campaign = next((c for c in active_campaigns), None)

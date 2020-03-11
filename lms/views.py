@@ -1,4 +1,6 @@
-from django.conf import settings
+from collections import OrderedDict
+from itertools import groupby
+
 from django.db.models import Prefetch
 from django.http import HttpResponseRedirect
 from django.utils.translation import pgettext_lazy
@@ -12,11 +14,10 @@ from core.urls import reverse
 from courses.constants import SemesterTypes
 from courses.models import Course, CourseTeacher
 from courses.utils import get_current_term_pair, TermPair
-from lms.api.serializers import CoursesSerializer
+from lms.api.serializers import OfferingsCourseSerializer
 from lms.filters import CoursesFilter
 from lms.utils import PublicRouteException, PublicRoute, \
     group_terms_by_academic_year
-from users.models import User
 
 
 class IndexView(View):
@@ -62,7 +63,8 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'branch')
                 .only("pk", "branch_id", "is_open", "grading_type",
-                      "videos_count", "materials_slides", "materials_files",
+                      "public_videos_count", "public_slides_count",
+                      "public_attachments_count",
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
                       "branch__code")
@@ -79,17 +81,19 @@ class CourseOfferingsView(FilterMixin, TemplateView):
             SemesterTypes.AUTUMN: pgettext_lazy("adjective", "autumn"),
             SemesterTypes.SPRING: pgettext_lazy("adjective", "spring"),
         }
-        courses = filterset.qs
-        terms = group_terms_by_academic_year(courses)
-        active_academic_year, active_type = self.get_term(filterset, courses)
+        courses_qs = filterset.qs
+        terms = group_terms_by_academic_year(courses_qs)
+        active_academic_year, active_type = self.get_term(filterset, courses_qs)
         if active_type == SemesterTypes.SPRING:
             active_year = active_academic_year + 1
         else:
             active_year = active_academic_year
         active_slug = "{}-{}".format(active_year, active_type)
         active_branch = filterset.data['branch']
-        serializer = CoursesSerializer(courses)
-        courses = serializer.data
+        # Group courses by (year, term_type)
+        courses = OrderedDict()
+        for term, cs in groupby(courses_qs, key=lambda x: x.semester):
+            courses[term.slug] = OfferingsCourseSerializer(cs, many=True).data
         context = {
             "TERM_TYPES": term_options,
             "branches": filterset.form.fields['branch'].choices,

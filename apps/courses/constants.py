@@ -36,3 +36,8 @@ class TeacherRoles(DjangoChoices):
 
 # TODO: Make a redirect for old links and rewrite download view without this constant?
 ASSIGNMENT_TASK_ATTACHMENT = 0
+
+
+class MaterialVisibilityTypes(DjangoChoices):
+    VISIBLE = C('all', _('All Users'))
+    HIDDEN = C('students', _('Only Students'))

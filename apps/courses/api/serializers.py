@@ -49,9 +49,9 @@ class CourseSerializer(serializers.ModelSerializer):
 
     def get_materials(self, obj: Course):
         return {
-            'video': bool(obj.videos_count),
-            'slides': bool(obj.materials_slides),
-            'files': bool(obj.materials_files)
+            'video': bool(obj.public_videos_count),
+            'slides': bool(obj.public_slides_count),
+            'files': bool(obj.public_attachments_count)
         }
 
 

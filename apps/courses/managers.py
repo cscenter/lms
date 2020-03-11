@@ -5,6 +5,7 @@ from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
     Value, IntegerField
 
 from core.utils import is_club_site
+from courses.constants import MaterialVisibilityTypes
 from courses.utils import get_boundaries
 
 
@@ -77,6 +78,9 @@ class CourseClassQuerySet(query.QuerySet):
 
     def for_teacher(self, user):
         return self.filter(course__teachers=user)
+
+    def with_public_materials(self):
+        return self.filter(materials_visibility=MaterialVisibilityTypes.VISIBLE)
 
 
 class _CourseClassManager(models.Manager):
