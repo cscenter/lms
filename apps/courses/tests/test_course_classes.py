@@ -15,7 +15,8 @@ from django.utils.timezone import now
 from core.timezone import now_local
 from core.urls import reverse
 from courses.forms import CourseClassForm
-from courses.models import CourseClass, MaterialVisibilityTypes
+from courses.models import CourseClass
+from courses.constants import MaterialVisibilityTypes
 from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory, SemesterFactory, CourseClassAttachmentFactory, \
     LearningSpaceFactory
@@ -29,7 +30,6 @@ def test_course_class_detail_security(client, assert_login_redirect):
     co = CourseFactory.create(teachers=[teacher])
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
     form.update({'venue': LocationFactory.create().pk})
-    del form['slides']
     url = co.get_create_class_url()
     assert_login_redirect(url, method='get')
     assert_login_redirect(url, form, method='post')
@@ -44,7 +44,6 @@ def test_course_class_create(client):
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
     venue = LearningSpaceFactory(branch=course.branch)
     form.update({'venue': venue.pk})
-    del form['slides']
     url = course.get_create_class_url()
     client.login(teacher)
     # should save with course = co
@@ -66,7 +65,6 @@ def test_course_class_create_and_add(client, assert_redirect):
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
     location = LearningSpaceFactory(branch=course.branch)
     form.update({'venue': location.pk, '_addanother': True})
-    del form['slides']
     client.login(teacher)
     url = course.get_create_class_url()
     # should save with course = co
@@ -112,8 +110,8 @@ def test_course_class_update_and_add(client, assert_redirect):
     url = cc.get_update_url()
     client.login(teacher)
     form = model_to_dict(cc)
-    del form['slides']
     form['name'] += " foobar"
+    del form['slides']
     assert_redirect(client.post(url, form),
                     cc.get_absolute_url())
     response = client.get(cc.get_absolute_url())
@@ -200,7 +198,7 @@ def test_course_class_attachments(client, assert_redirect,
     teacher = TeacherFactory()
     s = SemesterFactory.create_current()
     co = CourseFactory.create(teachers=[teacher], semester=s)
-    cc = CourseClassFactory.create(course=co)
+    cc = CourseClassFactory.create(course=co, slides=None)
     f1 = SimpleUploadedFile("attachment1.txt", b"attachment1_content")
     f2 = SimpleUploadedFile("attachment2.txt", b"attachment2_content")
     client.login(teacher)
@@ -208,7 +206,8 @@ def test_course_class_attachments(client, assert_redirect,
     del form['slides']
     form['attachments'] = [f1, f2]
     url = cc.get_update_url()
-    assert_redirect(client.post(url, form),
+    response = client.post(url, form)
+    assert_redirect(response,
                     cc.get_absolute_url())
     # check that files are available from course class page
     response = client.get(cc.get_absolute_url())

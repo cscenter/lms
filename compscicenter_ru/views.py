@@ -24,9 +24,11 @@ from core.exceptions import Redirect
 from core.models import Branch
 from core.urls import reverse, branch_aware_reverse
 from core.utils import bucketize
-from courses.constants import SemesterTypes, TeacherRoles, ClassTypes
+from courses.constants import SemesterTypes, TeacherRoles, ClassTypes, \
+    MaterialVisibilityTypes
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
     CourseClass
+from courses.permissions import ViewCourseClassMaterials
 from courses.services import group_teachers
 from courses.utils import get_current_term_pair, \
     get_term_index
@@ -651,7 +653,7 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
         context['tabs'] = tabs
         teachers = group_teachers(self.course.course_teachers
                                   .order_by('teacher__last_name',
-                                                 'teacher__first_name'))
+                                            'teacher__first_name'))
         role_captions = {
             TeacherRoles.LECTURER: _("Reads lectures"),
             TeacherRoles.REVIEWER: _("Checks assignments"),
@@ -685,6 +687,8 @@ class CourseClassDetailView(PublicURLMixin, generic.DetailView):
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(**kwargs)
         course_class = context[self.context_object_name]
+        can_view_materials = self.request.user.has_perm(
+            ViewCourseClassMaterials.name, course_class)
         recorded = (CourseClass.objects
                     .filter(course=course_class.course,
                             type=ClassTypes.LECTURE)
@@ -694,8 +698,12 @@ class CourseClassDetailView(PublicURLMixin, generic.DetailView):
                           'slides',
                           'starts_at', 'ends_at')
                     .order_by("date", "starts_at"))
+        if not can_view_materials:
+            visible = Q(materials_visibility=MaterialVisibilityTypes.VISIBLE)
+            recorded = recorded.filter(visible)
         for lecture in recorded:
             lecture.course = course_class.course
+        context['can_view_course_class_materials'] = can_view_materials
         context['recorded_lectures'] = recorded
         context['attachments'] = course_class.courseclassattachment_set.order_by('created')
         return context

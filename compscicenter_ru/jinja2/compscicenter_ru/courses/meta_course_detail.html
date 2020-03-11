@@ -61,7 +61,7 @@
                                                     <div class="grouped">
                                                         {% if course.is_published_in_video -%}
                                                         <div class="ui label _icon mb-0">
-                                                            {{ macros.svg_icon('video') }}<span>{{ course.videos_count }}</span>
+                                                            {{ macros.svg_icon('video') }}<span>{{ course.public_videos_count }}</span>
                                                         </div>
                                                         {%- endif %}
                                                         {% if course.learners_count -%}

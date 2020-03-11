@@ -104,24 +104,24 @@ def test_update_derivable_fields(curator, client, mocker):
     co = CourseFactory.create(teachers=[teacher])
     cc1 = CourseClassFactory.create(course=co, video_url="")
     co.refresh_from_db()
-    assert not co.videos_count
-    assert not co.materials_slides
-    assert not co.materials_files
+    assert not co.public_videos_count
+    assert not co.public_slides_count
+    assert not co.public_attachments_count
     slides_file = SimpleUploadedFile("slides.pdf", b"slides_content")
     client.login(curator)
     form = model_to_dict(cc1)
     form['slides'] = slides_file
     client.post(cc1.get_update_url(), form)
     co.refresh_from_db()
-    assert not co.videos_count
-    assert co.materials_slides
-    assert not co.materials_files
+    assert not co.public_videos_count
+    assert co.public_slides_count
+    assert not co.public_attachments_count
     cc2 = CourseClassFactory(course=co, video_url="youtuuube")
     co.refresh_from_db()
-    assert co.videos_count
+    assert co.public_videos_count
     # Slides were uploaded on first class
-    assert co.materials_slides
-    assert not co.materials_files
+    assert co.public_slides_count
+    assert not co.public_attachments_count
 
 
 @pytest.mark.django_db

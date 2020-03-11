@@ -50,9 +50,9 @@
                                             <div class="ui label _icon mb-0">
                                                 {{ macros.svg_icon('time') }}<span>{{ course.semester|title }}</span>
                                             </div>
-                                            {%- if course.videos_count %}
+                                            {%- if course.public_videos_count %}
                                                 <div class="ui label _icon mb-0">
-                                                    {{ macros.svg_icon('video') }}<span>{{ course.videos_count }}</span>
+                                                    {{ macros.svg_icon('video') }}<span>{{ course.public_videos_count }}</span>
                                                 </div>
                                             {%- endif %}
                                             {% if course.learners_count -%}

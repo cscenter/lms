@@ -36,6 +36,10 @@ class TermPair:
     def index(self):
         return get_term_index(self.year, self.type)
 
+    @property
+    def slug(self) -> str:
+        return f"{self.year}-{self.type}"
+
     def get_next(self) -> "TermPair":
         return get_term_by_index(self.index + 1)
 

@@ -1,5 +1,7 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
+{% block title %}{{ course_class.name }}{% endblock title %}
+
 {% block sprites %}
     <script type="text/javascript">
     (window.__CSC__.sprites = window.__CSC__.sprites || []).push("{{ static("v2/dist/img/sprites/ui.svg") }}");
@@ -67,7 +69,7 @@
                 </div>
             </div>
             {% endif %}
-            {% if course_class.slides %}
+            {% if can_view_course_class_materials and course_class.slides %}
                 <div class="slides mt-6">
                     <h3 class="mb-2">Слайды с лекции</h3>
                     <a href="{{ course_class.slides.url }}" class="ui label _icon _big _no-wrap" target="_blank">{{ macros.svg_icon('slides') }}{{ course_class.slides_file_name }}</a>
@@ -86,11 +88,11 @@
             </div>
         </div>
     {% endif %}
-    {% if course_class.description or attachments %}
+    {% if course_class.description or (attachments and can_view_course_class_materials) %}
         <div class="container page-content">
             <div class="row">
                 <div class="col-lg-9">
-                    {% if attachments %}
+                    {% if can_view_course_class_materials and attachments %}
                         <h3>Приложенные файлы</h3>
                         <div class="ui labels mb-6">
                             {% for attachment in attachments %}

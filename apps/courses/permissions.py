@@ -1,7 +1,8 @@
 from rules import predicate
 
 from auth.permissions import add_perm, Permission
-from courses.models import Course, CourseClass, MaterialVisibilityTypes
+from courses.models import Course, CourseClass
+from courses.constants import MaterialVisibilityTypes
 from learning.permissions import course_access_role, CourseRole
 
 

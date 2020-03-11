@@ -1,6 +1,6 @@
 import logging
 
-from django.contrib.contenttypes.models import ContentType
+from django.core import checks
 from django.db import models
 from django.db.models import prefetch_related_objects
 
@@ -15,6 +15,8 @@ class DerivableFieldsMixin:
     field depends on didn't cache (e.g. related queryset could be cached
     with .prefetch_related)
     """
+    # TODO: Make as an abstract property
+    # TODO: Add Django's check
     derivable_fields = []
     prefetch_before_compute_fields = {}
 
@@ -41,7 +43,7 @@ class DerivableFieldsMixin:
 
     def compute_fields(self, *derivable_fields, prefetch=False) -> bool:
         """
-        Use async version instead to avoid caching problem with .prefetch_related
+        Use async version to avoid caching problem with `.prefetch_related`
         """
         if not isinstance(self, models.Model):
             raise TypeError('DerivableFieldsMixin needs a model instance')
@@ -71,6 +73,7 @@ class DerivableFieldsMixin:
         return False
 
     def compute_fields_async(self, *derivable_fields) -> None:
+        from django.contrib.contenttypes.models import ContentType
         if not isinstance(self, models.Model):
             raise TypeError('DerivableFieldsMixin needs a model instance')
 
@@ -79,3 +82,39 @@ class DerivableFieldsMixin:
 
         for field in derivable_fields:
             compute_model_field.delay(content_type.id, self.pk, field)
+
+    @classmethod
+    def check(cls, **kwargs):
+        errors = super().check(**kwargs)
+        errors.extend(cls._check_mixin_contract())
+        return errors
+
+    @classmethod
+    def _check_mixin_contract(cls):
+        from collections import Iterable
+        errors = []
+        if not issubclass(cls, models.Model):
+            errors.append(
+                checks.Error(
+                    f'`{cls.__name__} is a subclass of DerivableFieldsMixin '
+                    f'and must be a subclass of django.db.models.Model as well',
+                    obj=cls,
+                    id='derivable_mixin.E001',
+                ))
+        if not hasattr(cls, "derivable_fields"):
+            errors.append(
+                checks.Error(
+                    f'`{cls} is a subclass of DerivableFieldsMixin but no '
+                    f'information about derivable fields was provided',
+                    hint=f'define {cls.__name__}.derivable_fields attribute',
+                    obj=cls,
+                    id='derivable_mixin.E002',
+                ))
+        if not isinstance(cls.derivable_fields, Iterable):
+            errors.append(
+                checks.Error(
+                    f'`{cls.__name__}.derivable_fields must be iterable',
+                    obj=cls,
+                    id='derivable_mixin.E003',
+                ))
+        return errors

@@ -8,7 +8,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import Prefetch, Case, When, IntegerField, Value
+from django.db.models import Prefetch, Case, When, IntegerField, Value, Count
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
@@ -23,7 +24,8 @@ from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location, Branch
 from core.timezone import now_local, Timezone, TimezoneAwareModel
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids, get_youtube_video_id, instance_memoize
-from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles
+from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles, \
+    MaterialVisibilityTypes
 from courses.utils import get_current_term_pair, get_term_starts_at, \
     TermPair
 from learning.settings import GradingSystems, ENROLLMENT_DURATION
@@ -242,11 +244,6 @@ class StudentGroupTypes(DjangoChoices):
     BRANCH = C('branch', _('Branch'))
 
 
-class MaterialVisibilityTypes(DjangoChoices):
-    VISIBLE = C('all', _('All Users'))
-    HIDDEN = C('students', _('Only Students'))
-
-
 class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     TIMEZONE_AWARE_FIELD_NAME = 'branch'
 
@@ -329,11 +326,16 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("Default visibility for class materials."),
         choices=MaterialVisibilityTypes.choices,
         default=MaterialVisibilityTypes.VISIBLE)
-    # FIXME: calculate public videos/materials only
     # TODO: recalculate on deleting course class
-    videos_count = models.PositiveIntegerField(default=0, editable=False)
-    materials_slides = models.BooleanField(default=False, editable=False)
-    materials_files = models.BooleanField(default=False, editable=False)
+    public_videos_count = models.PositiveIntegerField(default=0, editable=False)
+    public_slides_count = models.PositiveIntegerField(
+        verbose_name=_("Public Slides"),
+        default=0,
+        editable=False)
+    public_attachments_count = models.PositiveIntegerField(
+        verbose_name=_("Public Attachments"),
+        default=0,
+        editable=False)
     # FIXME: wrong place for this
     youtube_video_id = models.CharField(
         max_length=255, editable=False,
@@ -344,18 +346,12 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     objects = CourseDefaultManager()
 
     derivable_fields = [
-        'videos_count',
+        'public_videos_count',
+        'public_slides_count',
+        'public_attachments_count',
         'youtube_video_id',
-        'materials_slides',
-        'materials_files',
         'learners_count',
     ]
-
-    prefetch_before_compute_fields = {
-        # TODO: remove default ordering for courseclass_set
-        'videos_count': ['courseclass_set'],
-        'materials_slides': ['courseclass_set']
-    }
 
     class Meta:
         ordering = ["-semester", "meta_course__created"]
@@ -372,18 +368,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         return "{0}, {1}".format(smart_text(self.meta_course),
                                  smart_text(self.semester))
 
-    def _compute_videos_count(self):
-        videos_count = 0
-        for course_class in self.courseclass_set.all():
-            if course_class.video_url:
-                videos_count += 1
-
-        if self.videos_count != videos_count:
-            self.videos_count = videos_count
-            return True
-
-        return False
-
     def _compute_youtube_video_id(self):
         youtube_video_id = ''
         for course_class in self.courseclass_set.order_by('pk').all():
@@ -399,26 +383,44 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
         return False
 
-    def _compute_materials_slides(self):
-        materials_slides = False
-        for course_class in self.courseclass_set.all():
-            if course_class.slides:
-                materials_slides = True
-                break
+    def _compute_public_videos_count(self):
+        qs = (CourseClass.objects
+              .filter(course_id=self.pk,
+                      type=ClassTypes.LECTURE)
+              .with_public_materials()
+              .exclude(video_url=''))
+        public_videos_count = qs.count()
 
-        if self.materials_slides != materials_slides:
-            self.materials_slides = materials_slides
+        if self.public_videos_count != public_videos_count:
+            self.public_videos_count = public_videos_count
             return True
 
         return False
 
-    def _compute_materials_files(self):
-        materials_files = (CourseClassAttachment.objects
-                           .filter(course_class__course_id=self.pk)
-                           .exists())
+    def _compute_public_slides_count(self):
+        qs = (CourseClass.objects
+              .filter(course_id=self.pk,
+                      type=ClassTypes.LECTURE)
+              .with_public_materials()
+              .exclude(slides=''))
+        public_slides_count = qs.count()
 
-        if self.materials_files != materials_files:
-            self.materials_files = materials_files
+        if self.public_slides_count != public_slides_count:
+            self.public_slides_count = public_slides_count
+            return True
+
+        return False
+
+    def _compute_public_attachments_count(self):
+        qs = (CourseClass.objects
+              .filter(course_id=self.pk,
+                      type=ClassTypes.LECTURE)
+              .with_public_materials()
+              .aggregate(total_attachments=Count('courseclassattachment')))
+        public_attachments_count = qs['total_attachments']
+
+        if self.public_attachments_count != public_attachments_count:
+            self.public_attachments_count = public_attachments_count
             return True
 
         return False
@@ -511,14 +513,6 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     @property
     def name(self):
         return self.meta_course.name
-
-    @property
-    def has_classes_with_slides(self):
-        return self.materials_slides
-
-    @property
-    def has_classes_with_files(self):
-        return self.materials_files
 
     @property
     def is_completed(self):
@@ -810,11 +804,11 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         # TODO: make async
         course = Course.objects.get(pk=self.course_id)
         course.compute_fields(
-            'videos_count',
             'youtube_video_id',
-            'materials_slides',
-            'materials_files',
-            prefetch=True)
+            'public_videos_count',
+            'public_slides_count',
+            'public_attachments_count'
+        )
 
     def get_absolute_url(self):
         return branch_aware_reverse('courses:class_detail', kwargs={
@@ -859,6 +853,15 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         return os.path.basename(self.slides.name)
 
 
+@receiver(models.signals.post_delete, sender=CourseClass)
+def course_class_post_delete(sender, instance: CourseClass, *args, **kwargs):
+    instance.course.compute_fields(
+        'public_videos_count',
+        'public_slides_count',
+        'public_attachments_count'
+    )
+
+
 def course_class_attachment_upload_to(instance: "CourseClassAttachment",
                                       filename) -> str:
     """
@@ -899,7 +902,7 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
         super().save(*args, **kwargs)
         if created:
             course = self.course_class.course
-            course.compute_fields('materials_files')
+            course.compute_fields('public_attachments_count')
 
     def get_delete_url(self):
         return branch_aware_reverse(
@@ -913,6 +916,13 @@ class CourseClassAttachment(TimezoneAwareModel, TimeStampedModel):
     @property
     def material_file_name(self):
         return os.path.basename(self.material.name)
+
+
+@receiver(models.signals.post_delete, sender=CourseClassAttachment)
+def course_class_attachment_post_delete(sender, instance, *args, **kwargs):
+    instance.course_class.course.compute_fields(
+        'public_attachments_count'
+    )
 
 
 class AssignmentSubmissionTypes(DjangoChoices):

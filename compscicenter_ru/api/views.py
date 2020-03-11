@@ -189,7 +189,8 @@ class CourseList(ListAPIView):
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'branch')
                 .only("pk", "branch_id", "is_open", "grading_type",
-                      "videos_count", "materials_slides", "materials_files",
+                      "public_videos_count", "public_slides_count",
+                      "public_attachments_count",
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
                       "branch__code", "branch__site_id")

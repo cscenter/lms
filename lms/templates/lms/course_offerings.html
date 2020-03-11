@@ -23,11 +23,6 @@
         <tr>
             <td><% if (co.is_open) { %><span data-title="{% trans "CS club course" %}" class="__club"></span><% } %><a href="<%-co.url%>" class="__course"><%-co.name%></a></td>
             <td>
-                <% if (co.with_video) { %><a data-title="{% trans "Video" %}" class="icon __video" href="<%-co.url%>classes/"></a><%
-                } %><% if (co.with_slides) { %><a data-title="{% trans "Slides" %}" class="icon __image" href="<%-co.url%>classes/"></a><%
-                } %><% if (co.with_files) { %><a data-title="{% trans "Files" %}" class="icon __file" href="<%-co.url%>classes/"></a><% } %>
-            </td>
-            <td>
                 <% for (var i = 0; i < co.teachers.length; i++) { %>
                     <a class="__teacher text-nowrap" href="<%=co.teachers[i].url%>"><%=co.teachers[i].name%></a><% if (i != co.teachers.length - 1) { %>, <% } %>
                 <% } %>
@@ -81,7 +76,6 @@
                         <thead>
                             <tr>
                                 <th style="width:470px;">Название</th>
-                                <th style="width:200px;">Материалы курса</th>
                                 <th>Преподаватели</th>
                             </tr>
                         </thead>
@@ -89,13 +83,6 @@
                             {% for co in courses|lookup:active_slug %}
                                 <tr>
                                     <td>{% if co.is_open %}<span data-title="{% trans "CS club course" %}" class="__club"></span>{% endif %}<a href="{{ co.url }}" class="__course">{{ co.name }}</a></td>
-                                    <td>
-                                        {% spaceless %}
-                                        {% if co.with_video %}<a data-title="{% trans "Video" %}"  class="icon __video" href="{{ co.url }}classes/"></a>{% endif %}
-                                        {% if co.with_slides %}<a data-title="{% trans "Slides" %}" class="icon __image" href="{{ co.url }}classes/"></a>{% endif %}
-                                        {% if co.with_files %}<a data-title="{% trans "Files" %}" class="icon __file" href="{{ co.url }}classes/"></a>{% endif %}
-                                        {% endspaceless %}
-                                    </td>
                                     <td>
                                         {% for teacher in co.teachers %}
                                             <a class="__teacher text-nowrap" href="{{ teacher.url }}">{{ teacher.name }}</a>{% if not forloop.last %}, {% endif %}

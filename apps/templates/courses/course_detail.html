@@ -116,7 +116,11 @@
                             <a href="{{ class.venue.location.get_absolute_url }}">{{ class.venue.location.name }}</a>
                           </td>
                           <td>
-                            {{ class.materials_str|safe }}
+                              {% if class.materials %}
+                                  {% for m in class.materials %}<a href="{{ m.url }}">{{ m.name }}</a>{% if not forloop.last %},{% if forloop.counter|divisibleby:2 %} {% else %}&nbsp;{% endif %}{% endif %}{% endfor %}
+                              {% else %}
+                                  {% trans "No" %}
+                              {% endif %}
                           </td>
                         </tr>
                         {% endfor %}

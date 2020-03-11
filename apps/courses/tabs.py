@@ -333,22 +333,14 @@ class CourseAssignmentsTab(CourseTab):
         return True
 
 
-# FIXME: remove html!
-# FIXME: move to utils? or services
 def get_course_classes(course, **kwargs) -> List[CourseClass]:
     """Get course classes with attached materials"""
     classes = []
-    course_classes_qs = (
-        course.courseclass_set
-            .select_related("venue", "venue__location")
-            .annotate(attachments_cnt=Count('courseclassattachment'))
-            .annotate(has_attachments=Case(
-                When(attachments_cnt__gt=0, then=Value(True)),
-                default=Value(False),
-                output_field=BooleanField()
-            ))
-            .order_by("date", "starts_at"))
-    for cc in course_classes_qs.iterator():
+    classes_qs = (course.courseclass_set
+                  .select_related("venue", "venue__location")
+                  .annotate(attachments_cnt=Count('courseclassattachment'))
+                  .order_by("date", "starts_at"))
+    for cc in classes_qs.iterator():
         class_url = cc.get_absolute_url()
         materials = []
         if cc.slides:
@@ -357,7 +349,7 @@ def get_course_classes(course, **kwargs) -> List[CourseClass]:
         if cc.video_url:
             materials.append({'url': class_url + "#video",
                               'name': _("video")})
-        if cc.has_attachments:
+        if cc.attachments_cnt > 0:
             materials.append({'url': class_url + "#attachments",
                               'name': _("Files")})
         other_materials_embed = (
@@ -370,12 +362,6 @@ def get_course_classes(course, **kwargs) -> List[CourseClass]:
                               'name': _("CourseClass|Other [materials]")})
         for m in materials:
             m['name'] = m['name'].lower()
-        materials_str = ", ".join(",&nbsp;"
-                                  .join(("<a href={url}>{name}</a>"
-                                         .format(**x))
-                                        for x in materials[i:i + 2])
-                                  for i in range(0, len(materials), 2))
-        materials_str = materials_str or _("No")
-        setattr(cc, 'materials_str', materials_str)
+        setattr(cc, 'materials', materials)
         classes.append(cc)
     return classes

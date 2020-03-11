@@ -9,7 +9,8 @@ from core.tests.factories import LocationFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, LearningSpace, CourseReview, \
-    AssignmentSubmissionTypes, MaterialVisibilityTypes
+    AssignmentSubmissionTypes
+from courses.constants import MaterialVisibilityTypes
 from courses.utils import get_current_term_pair, get_term_by_index
 from learning.services import AssignmentService
 from users.tests.factories import TeacherFactory
@@ -138,24 +139,11 @@ class CourseClassFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Test class %03d" % n)
     description = factory.Sequence(
         lambda n: "In this class %03d we will test" % n)
-    slides = factory.django.FileField()
     date = (datetime.datetime.now().replace(tzinfo=timezone.utc)
             + datetime.timedelta(days=3)).date()
     starts_at = datetime.time(hour=13, minute=0)
     ends_at = datetime.time(hour=13, minute=45)
     materials_visibility = MaterialVisibilityTypes.VISIBLE
-
-    @classmethod
-    def build(cls, *args, **kwargs):
-        if all('slides_' not in key for key in kwargs.keys()):
-            kwargs['slides'] = None
-        return super(CourseClassFactory, cls).build(*args, **kwargs)
-
-    @classmethod
-    def create(cls, *args, **kwargs):
-        if all('slides_' not in key for key in kwargs.keys()):
-            kwargs['slides'] = None
-        return super(CourseClassFactory, cls).create(*args, **kwargs)
 
 
 class CourseClassAttachmentFactory(factory.DjangoModelFactory):

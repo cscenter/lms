@@ -48,7 +48,7 @@ class ApplicantFilter(django_filters.FilterSet):
         label=_("Campaign"),
         queryset=(Campaign.objects
                   .select_related("branch")
-                  .order_by("-branch_id", "-year").all()))
+                  .order_by("-year", "branch__order").all()))
     status = ApplicantStatusFilter(choices=Applicant.STATUS,
                                    label=_("Status"))
     surname = django_filters.CharFilter(lookup_expr='icontains',
