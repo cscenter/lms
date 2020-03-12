@@ -33,7 +33,6 @@ from .constants import SemesterTypes, ClassTypes
 from .managers import CourseTeacherManager, AssignmentManager, \
     CourseClassManager, CourseDefaultManager
 from .micawber_providers import get_oembed_html
-from .tasks import maybe_upload_slides_yandex
 
 
 class LearningSpace(TimezoneAwareModel, models.Model):
@@ -799,6 +798,7 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
             self.slides_url = ""
         super().save(*args, **kwargs)
         if self.slides and not self.slides_url:
+            from .tasks import maybe_upload_slides_yandex
             maybe_upload_slides_yandex.delay(self.pk)
         self._update_track_fields()
         # TODO: make async

@@ -1,3 +1,4 @@
+import fakeredis
 import pytest
 from django.core.files.base import ContentFile
 
@@ -39,7 +40,8 @@ def test_course_derivable_field_public_videos_count():
 
 
 @pytest.mark.django_db
-def test_course_derivable_field_public_slides_count():
+def test_course_derivable_field_public_slides_count(mocker):
+    mocker.patch("courses.tasks.maybe_upload_slides_yandex.delay")
     course = CourseFactory()
     slides_file = ContentFile("stub", name="test.txt")
     assert not course.public_slides_count
