@@ -22,6 +22,7 @@ django-extensions = "==2.2.8"
 # Fixtures
 testfixtures = "*"
 factory_boy = "==2.12.0"
+fakeredis = "*"
 # Test framework
 pytest = "==5.3.5"
 pytest-django = ">=3.7.0"
