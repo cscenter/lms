@@ -1,7 +1,10 @@
-from typing import Dict, List
+from typing import Dict, List, NamedTuple
+
+from django.db.models import Count
+from django.utils.translation import ugettext_lazy as _
 
 from courses.constants import TeacherRoles
-from courses.models import CourseReview
+from courses.models import CourseReview, CourseClass
 
 
 def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
@@ -27,11 +30,35 @@ def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
     return {k: v for k, v in grouped.items() if v}
 
 
-def get_course_reviews(course, **kwargs):
-    reviews = (CourseReview.objects
-               .filter(course__meta_course_id=course.meta_course_id)
-               .select_related('course', 'course__semester', 'course__branch')
-               .only('pk', 'modified', 'text',
-                     'course__semester__year', 'course__semester__type',
-                     'course__branch__name'))
-    return list(reviews)
+class CourseService:
+    @staticmethod
+    def get_reviews(course):
+        reviews = (CourseReview.objects
+                   .filter(course__meta_course_id=course.meta_course_id)
+                   .select_related('course', 'course__semester',
+                                   'course__branch')
+                   .only('pk', 'modified', 'text',
+                         'course__semester__year', 'course__semester__type',
+                         'course__branch__name'))
+        return list(reviews)
+
+    @staticmethod
+    def get_contacts(course):
+        teachers_by_role = group_teachers(course.course_teachers.all())
+        return [ct for g in teachers_by_role.values() for ct in g
+                if len(ct.teacher.private_contacts.strip()) > 0]
+
+    @staticmethod
+    def get_news(course):
+        return course.coursenews_set.all()
+
+    @staticmethod
+    def get_classes(course):
+        """
+        Returns course classes with custom `.materials` attribute indicating
+        material availability by type.
+        """
+        return (course.courseclass_set
+                .select_related("venue", "venue__location")
+                .annotate(attachments_count=Count('courseclassattachment'))
+                .order_by("date", "starts_at"))

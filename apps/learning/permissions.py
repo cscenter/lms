@@ -46,8 +46,7 @@ def course_access_role(*, course, user) -> CourseRole:
                            .for_course(course.meta_course.slug)
                            .values_list('teacher_id', flat=True))
     if user.is_teacher and user.pk in all_course_teachers:
-        # Overrides student role if teacher accidentally enrolled in
-        # his own course
+        # Overrides student role if a teacher enrolled in his own course
         role = CourseRole.TEACHER
     return role
 

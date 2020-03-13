@@ -1,5 +1,6 @@
 import datetime
 import os.path
+from typing import NamedTuple
 
 import pytz
 from bitfield import BitField
@@ -384,8 +385,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
     def _compute_public_videos_count(self):
         qs = (CourseClass.objects
-              .filter(course_id=self.pk,
-                      type=ClassTypes.LECTURE)
+              .filter(course_id=self.pk)
               .with_public_materials()
               .exclude(video_url=''))
         public_videos_count = qs.count()
@@ -398,8 +398,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
     def _compute_public_slides_count(self):
         qs = (CourseClass.objects
-              .filter(course_id=self.pk,
-                      type=ClassTypes.LECTURE)
+              .filter(course_id=self.pk)
               .with_public_materials()
               .exclude(slides=''))
         public_slides_count = qs.count()
@@ -412,8 +411,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
     def _compute_public_attachments_count(self):
         qs = (CourseClass.objects
-              .filter(course_id=self.pk,
-                      type=ClassTypes.LECTURE)
+              .filter(course_id=self.pk)
               .with_public_materials()
               .aggregate(total_attachments=Count('courseclassattachment')))
         public_attachments_count = qs['total_attachments']
@@ -729,6 +727,12 @@ def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
                         "slides", filename)
 
 
+class ClassMaterial(NamedTuple):
+    type: str
+    name: str
+    icon_code: str = None  # svg icon code
+
+
 class CourseClass(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'course'  # or venue?
 
@@ -851,6 +855,37 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
     @property
     def slides_file_name(self):
         return os.path.basename(self.slides.name)
+
+    @property
+    def materials_is_public(self):
+        return self.materials_visibility == MaterialVisibilityTypes.VISIBLE
+
+    def get_available_materials(self):
+        """
+        Returns list of the material types available for the course class.
+        Store the amount of attachments in a `attachments_count` attribute
+        to prevent db hitting.
+        """
+        materials = []
+        if self.slides:
+            m = ClassMaterial(type='slides', name=_("slides"),
+                              icon_code='slides')
+            materials.append(m)
+        if self.video_url:
+            m = ClassMaterial(type='video', name=_("video"),
+                              icon_code='video')
+            materials.append(m)
+        if hasattr(self, "attachments_count"):
+            attachments_count = self.attachments_count
+        else:
+            attachments_count = self.courseclassattachment_set.count()
+        if attachments_count:
+            m = ClassMaterial(type='attachments', name=_("files"))
+            materials.append(m)
+        if self.other_materials:
+            m = ClassMaterial(type='other_materials', name=_("other"))
+            materials.append(m)
+        return materials
 
 
 @receiver(models.signals.post_delete, sender=CourseClass)

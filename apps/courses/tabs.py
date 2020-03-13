@@ -5,13 +5,12 @@ https://github.com/edx/edx-platform/blob/a439d5164c07e4695181b15244e8e5c7681421c
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, NamedTuple, Dict
+from typing import Optional, NamedTuple, Dict
 
-from django.db.models import Count, Case, When, Value, BooleanField
 from django.utils.translation import ugettext_noop, \
     ugettext_lazy as _
 
-from courses.models import CourseClass
+from courses.services import CourseService
 from courses.tabs_registry import registry, register
 
 # TODO: default tab implementation for `assignments` and `classes` + tests
@@ -239,7 +238,7 @@ class CourseTab:
         tab_class.validate(tab_dict)
         return tab_class(tab_dict=tab_dict)
 
-    def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
+    def get_tab_panel(self, *, course, user) -> Optional[CourseTabPanel]:
         return None
 
 
@@ -319,8 +318,10 @@ class CourseClassesTab(CourseTab):
     def is_enabled(cls, course, user):
         return True
 
-    def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
-        return CourseTabPanel(context={"items": get_course_classes(**kwargs)})
+    def get_tab_panel(self, *, course, user) -> Optional[CourseTabPanel]:
+        return CourseTabPanel(context={
+            "items": CourseService.get_classes(course)
+        })
 
 
 class CourseAssignmentsTab(CourseTab):
@@ -331,37 +332,3 @@ class CourseAssignmentsTab(CourseTab):
     @classmethod
     def is_enabled(cls, course, user):
         return True
-
-
-def get_course_classes(course, **kwargs) -> List[CourseClass]:
-    """Get course classes with attached materials"""
-    classes = []
-    classes_qs = (course.courseclass_set
-                  .select_related("venue", "venue__location")
-                  .annotate(attachments_cnt=Count('courseclassattachment'))
-                  .order_by("date", "starts_at"))
-    for cc in classes_qs.iterator():
-        class_url = cc.get_absolute_url()
-        materials = []
-        if cc.slides:
-            materials.append({'url': class_url + "#slides",
-                              'name': _("Slides")})
-        if cc.video_url:
-            materials.append({'url': class_url + "#video",
-                              'name': _("video")})
-        if cc.attachments_cnt > 0:
-            materials.append({'url': class_url + "#attachments",
-                              'name': _("Files")})
-        other_materials_embed = (
-                cc.other_materials.startswith(
-                    ("<iframe src=\"https://www.slideshare",
-                     "<iframe src=\"http://www.slideshare"))
-                and cc.other_materials.strip().endswith("</iframe>"))
-        if cc.other_materials and not other_materials_embed:
-            materials.append({'url': class_url + "#other_materials",
-                              'name': _("CourseClass|Other [materials]")})
-        for m in materials:
-            m['name'] = m['name'].lower()
-        setattr(cc, 'materials', materials)
-        classes.append(cc)
-    return classes

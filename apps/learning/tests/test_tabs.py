@@ -4,14 +4,14 @@ import pytest
 from django.utils import timezone
 from django.utils.encoding import smart_bytes
 
+from courses.models import CourseNews, CourseReview
+from courses.services import CourseService
 from courses.tests.factories import SemesterFactory, CourseNewsFactory, \
     CourseTeacherFactory, CourseFactory, MetaCourseFactory, AssignmentFactory, \
     CourseReviewFactory
-from courses.models import CourseNews, CourseReview
-from learning.tabs import CourseReviewsTab
-from courses.services import get_course_reviews
-from learning.tests.factories import EnrollmentFactory
 from learning.settings import GradeTypes, Branches
+from learning.tabs import CourseReviewsTab
+from learning.tests.factories import EnrollmentFactory
 from users.tests.factories import StudentFactory, TeacherFactory, \
     VolunteerFactory
 
@@ -135,5 +135,5 @@ def test_get_course_reviews(settings):
                        semester__year=2015)
     cr3 = CourseReviewFactory(course=c3)
     CourseReview(course=c4, text='zzz').save()
-    assert len(get_course_reviews(c1)) == 3
-    assert set(get_course_reviews(c1)) == {cr1, cr2, cr3}
+    assert len(CourseService.get_reviews(c1)) == 3
+    assert set(CourseService.get_reviews(c1)) == {cr1, cr2, cr3}
