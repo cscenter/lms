@@ -706,11 +706,10 @@ class CourseClassDetailView(PublicURLMixin, generic.DetailView):
                           'starts_at', 'ends_at')
                     .order_by("date", "starts_at"))
         if not can_view_materials:
-            visible = Q(materials_visibility=MaterialVisibilityTypes.VISIBLE)
-            recorded = recorded.filter(visible)
+            recorded = recorded.with_public_materials()
         for lecture in recorded:
             lecture.course = course_class.course
         context['can_view_course_class_materials'] = can_view_materials
-        context['recorded_lectures'] = recorded
+        context['recorded_classes'] = recorded
         context['attachments'] = course_class.courseclassattachment_set.order_by('created')
         return context
