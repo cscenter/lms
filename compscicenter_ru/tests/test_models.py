@@ -23,20 +23,20 @@ def test_course_derivable_field_public_videos_count():
         type=ClassTypes.SEMINAR,
         video_url="https://link/to/youtube")
     course.refresh_from_db()
-    assert course.public_videos_count == 1
+    assert course.public_videos_count == 2
     CourseClassFactory(
         course=course,
         type=ClassTypes.LECTURE,
         video_url="")
     course.refresh_from_db()
-    assert course.public_videos_count == 1
+    assert course.public_videos_count == 2
     CourseClassFactory(
         materials_visibility=MaterialVisibilityTypes.HIDDEN,
         course=course,
         type=ClassTypes.LECTURE,
         video_url="https://link/to/youtube")
     course.refresh_from_db()
-    assert course.public_videos_count == 1
+    assert course.public_videos_count == 2
 
 
 @pytest.mark.django_db
@@ -58,23 +58,23 @@ def test_course_derivable_field_public_slides_count(mocker):
         type=ClassTypes.SEMINAR,
         slides=slides_file)
     course.refresh_from_db()
-    assert course.public_slides_count == 1
+    assert course.public_slides_count == 2
     CourseClassFactory(
         materials_visibility=MaterialVisibilityTypes.HIDDEN,
         course=course,
         type=ClassTypes.LECTURE,
         slides=slides_file)
     course.refresh_from_db()
-    assert course.public_slides_count == 1
+    assert course.public_slides_count == 2
     CourseClassFactory(
         materials_visibility=MaterialVisibilityTypes.VISIBLE,
         course=course,
         type=ClassTypes.LECTURE)
     course.refresh_from_db()
-    assert course.public_slides_count == 1
+    assert course.public_slides_count == 2
     cc.delete()
     course.refresh_from_db()
-    assert course.public_slides_count == 0
+    assert course.public_slides_count == 1
 
 
 @pytest.mark.django_db

@@ -2,8 +2,12 @@ from rules import predicate
 
 from auth.permissions import add_perm, Permission
 from courses.models import Course, CourseClass
-from courses.constants import MaterialVisibilityTypes
 from learning.permissions import course_access_role, CourseRole
+
+
+def can_view_private_materials(role: CourseRole) -> bool:
+    # TODO: bad pattern for checking permissions! Reverse
+    return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
 
 
 @add_perm
@@ -65,10 +69,10 @@ class ViewCourseClassMaterials(Permission):
     @staticmethod
     @predicate
     def rule(user, course_class: CourseClass):
-        if course_class.materials_visibility == MaterialVisibilityTypes.VISIBLE:
+        if course_class.materials_is_public:
             return True
         role = course_access_role(course=course_class.course, user=user)
-        return role != CourseRole.NO_ROLE and role != CourseRole.STUDENT_RESTRICT
+        return can_view_private_materials(role)
 
 
 @add_perm

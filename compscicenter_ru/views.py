@@ -28,13 +28,15 @@ from courses.constants import SemesterTypes, TeacherRoles, ClassTypes, \
     MaterialVisibilityTypes
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
     CourseClass
-from courses.permissions import ViewCourseClassMaterials
-from courses.services import group_teachers
+from courses.permissions import ViewCourseClassMaterials, \
+    can_view_private_materials
+from courses.services import group_teachers, CourseService
 from courses.utils import get_current_term_pair, \
     get_term_index
 from courses.views.mixins import CourseURLParamsMixin
 from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
+from learning.permissions import course_access_role
 from learning.roles import Roles
 from learning.settings import Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
@@ -629,7 +631,9 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
     def get_course_queryset(self):
         course_teachers = Prefetch('course_teachers',
                                    queryset=(CourseTeacher.objects
-                                             .select_related("teacher")))
+                                             .select_related("teacher")
+                                             .order_by('teacher__last_name',
+                                                       'teacher__first_name')))
         return (super().get_course_queryset()
                 .select_related('meta_course', 'semester', 'branch')
                 .prefetch_related(course_teachers))
@@ -638,7 +642,6 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
         return self.course
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
         tabs = TabList([
             Tab(target='about',
                 name=_('About the Course'),
@@ -650,26 +653,31 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
         ])
         show_tab = self.kwargs.get('tab', 'about')
         tabs.set_active(show_tab)
-        context['tabs'] = tabs
-        teachers = group_teachers(self.course.course_teachers
-                                  .order_by('teacher__last_name',
-                                            'teacher__first_name'))
+        teachers = group_teachers(self.course.course_teachers.all())
         role_captions = {
             TeacherRoles.LECTURER: _("Reads lectures"),
             TeacherRoles.REVIEWER: _("Checks assignments"),
             TeacherRoles.SEMINAR: _("Leads seminars"),
         }
-        # Update role name with narrative if possible
-        context['teachers'] = {
+        # Update role names with narrative if possible
+        teachers = {
             role_captions.get(k, TeacherRoles.values[k]): v for k, v in
-            teachers.items()}
-        context['classes'] = (self.course.courseclass_set
-                              .filter(type=ClassTypes.LECTURE)
-                              .order_by("date", "starts_at"))
+            teachers.items()
+        }
+        role = course_access_role(course=self.course, user=self.request.user)
+        classes = CourseService.get_classes(self.course).select_related(None)
+        context = {
+            'view': self,
+            'course': self.course,
+            'tabs': tabs,
+            'teachers': teachers,
+            'has_access_to_private_materials': can_view_private_materials(role),
+            'classes': classes,
+        }
         return context
 
 
-# FIXME: match course prefix and course class id
+# FIXME: match course prefix with a course class id
 class CourseClassDetailView(PublicURLMixin, generic.DetailView):
     model = CourseClass
     context_object_name = 'course_class'
@@ -690,11 +698,10 @@ class CourseClassDetailView(PublicURLMixin, generic.DetailView):
         can_view_materials = self.request.user.has_perm(
             ViewCourseClassMaterials.name, course_class)
         recorded = (CourseClass.objects
-                    .filter(course=course_class.course,
-                            type=ClassTypes.LECTURE)
+                    .filter(course=course_class.course)
                     .exclude(video_url='')
                     .only('pk', 'name', 'video_url', 'course_id', 'date',
-                          # FIXME: bug with tracked field
+                          # FIXME: bug with a tracked field
                           'slides',
                           'starts_at', 'ends_at')
                     .order_by("date", "starts_at"))

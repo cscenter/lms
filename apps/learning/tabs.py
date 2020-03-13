@@ -5,10 +5,10 @@ from django.db.models import Prefetch
 from django.utils.translation import ugettext_noop
 
 from courses.models import Assignment
+from courses.services import CourseService
 from courses.tabs import CourseTab, CourseTabPanel
 from courses.tabs_registry import register
 from learning.permissions import course_access_role, CourseRole
-from courses.services import get_course_reviews, group_teachers
 
 logger = logging.getLogger(__name__)
 
@@ -24,8 +24,10 @@ class CourseContactsTab(CourseTab):
     def is_enabled(cls, course, user):
         return user.get_enrollment(course.pk) or user.is_curator
 
-    def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
-        return CourseTabPanel(context={"items": get_course_contacts(**kwargs)})
+    def get_tab_panel(self, *, course, user) -> Optional[CourseTabPanel]:
+        return CourseTabPanel(context={
+            "items": CourseService.get_contacts(course)
+        })
 
 
 @register
@@ -38,8 +40,8 @@ class CourseNewsTab(CourseTab):
     def is_enabled(cls, course, user):
         return user.has_perm("learning.view_course_news", course)
 
-    def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
-        return CourseTabPanel(context={"items": get_course_news(**kwargs)})
+    def get_tab_panel(self, *, course, user) -> Optional[CourseTabPanel]:
+        return CourseTabPanel(context={"items": CourseService.get_news(course)})
 
 
 @register
@@ -53,8 +55,10 @@ class CourseReviewsTab(CourseTab):
     def is_enabled(cls, course, user):
         return user.has_perm("learning.view_course_reviews", course)
 
-    def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
-        return CourseTabPanel(context={"items": get_course_reviews(**kwargs)})
+    def get_tab_panel(self, *, course, user) -> Optional[CourseTabPanel]:
+        return CourseTabPanel(context={
+            "items": CourseService.get_reviews(course)
+        })
 
 
 @register
@@ -68,14 +72,10 @@ class CourseAssignmentsTab(CourseTab):
         return (user.is_curator or user.is_student or user.is_graduate or
                 user.is_teacher or user.get_enrollment(course.pk))
 
-    def get_tab_panel(self, **kwargs) -> Optional[CourseTabPanel]:
+    def get_tab_panel(self, *, course, user) -> Optional[CourseTabPanel]:
         return CourseTabPanel(context={
-            "items": get_course_assignments(**kwargs)
+            "items": get_course_assignments(course=course, user=user)
         })
-
-
-def get_course_news(course, **kwargs):
-    return course.coursenews_set.all()
 
 
 def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
@@ -119,9 +119,3 @@ def get_course_assignments(course, user, user_role=None) -> List[Assignment]:
             to_details = a.get_teacher_url()
         setattr(a, 'magic_link', to_details)
     return assignments
-
-
-def get_course_contacts(course, **kwargs):
-    teachers_by_role = group_teachers(course.course_teachers.all())
-    return [ct for g in teachers_by_role.values() for ct in g
-            if len(ct.teacher.private_contacts.strip()) > 0]

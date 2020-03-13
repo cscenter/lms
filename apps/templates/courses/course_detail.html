@@ -116,11 +116,13 @@
                             <a href="{{ class.venue.location.get_absolute_url }}">{{ class.venue.location.name }}</a>
                           </td>
                           <td>
-                              {% if class.materials %}
-                                  {% for m in class.materials %}<a href="{{ m.url }}">{{ m.name }}</a>{% if not forloop.last %},{% if forloop.counter|divisibleby:2 %} {% else %}&nbsp;{% endif %}{% endif %}{% endfor %}
-                              {% else %}
-                                  {% trans "No" %}
-                              {% endif %}
+                              {% with available_materials=class.get_available_materials %}
+                                  {% if available_materials %}
+                                      {% for m in available_materials %}<a href="{{ class.get_absolute_url }}#{{ m.type }}">{{ m.name }}</a>{% if not forloop.last %},{% if forloop.counter|divisibleby:2 %} {% else %}&nbsp;{% endif %}{% endif %}{% endfor %}
+                                  {% else %}
+                                      {% trans "No" %}
+                                  {% endif %}
+                              {% endwith %}
                           </td>
                         </tr>
                         {% endfor %}
