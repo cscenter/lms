@@ -105,24 +105,26 @@
                           <th style="width: 110px;">{% trans "Materials" %}</th>
                         </tr>
                         </thead>
-                        {% for class in tab.tab_panel.context.items %}
+                        {% for course_class in tab.tab_panel.context.items %}
                         <tr>
-                            <td>{{ class.date|date:"d E" }}<br><span class="text-muted">{{ class.starts_at|time:"H:i" }}–{{ class.ends_at|time:"H:i" }}</span></td>
+                            <td>{{ course_class.date|date:"d E" }}<br><span class="text-muted">{{ course_class.starts_at|time:"H:i" }}–{{ course_class.ends_at|time:"H:i" }}</span></td>
                           <td>
-                            <a href="{{ class.get_absolute_url }}">
-                              {{ class.name }}</a><span class="text-muted">, {% if class.type == 'lecture'%}{% trans 'Lecture'|lower %}{% else %}{% trans 'Seminar'|lower %}</span>{% endif %}
+                            <a href="{{ course_class.get_absolute_url }}">
+                              {{ course_class.name }}</a><span class="text-muted">, {% if course_class.type == 'lecture'%}{% trans 'Lecture'|lower %}{% else %}{% trans 'Seminar'|lower %}</span>{% endif %}
                           </td>
                           <td>
-                            <a href="{{ class.venue.location.get_absolute_url }}">{{ class.venue.location.name }}</a>
+                            <a href="{{ course_class.venue.location.get_absolute_url }}">{{ course_class.venue.location.name }}</a>
                           </td>
                           <td>
-                              {% with available_materials=class.get_available_materials %}
+                              {% if course_class.materials_is_public or has_access_to_private_materials %}
+                              {% with available_materials=course_class.get_available_materials %}
                                   {% if available_materials %}
-                                      {% for m in available_materials %}<a href="{{ class.get_absolute_url }}#{{ m.type }}">{{ m.name }}</a>{% if not forloop.last %},{% if forloop.counter|divisibleby:2 %} {% else %}&nbsp;{% endif %}{% endif %}{% endfor %}
+                                      {% for m in available_materials %}<a href="{{ course_class.get_absolute_url }}#{{ m.type }}">{{ m.name }}</a>{% if not forloop.last %},{% if forloop.counter|divisibleby:2 %} {% else %}&nbsp;{% endif %}{% endif %}{% endfor %}
                                   {% else %}
                                       {% trans "No" %}
                                   {% endif %}
                               {% endwith %}
+                              {% endif %}
                           </td>
                         </tr>
                         {% endfor %}

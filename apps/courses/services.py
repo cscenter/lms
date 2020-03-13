@@ -1,10 +1,9 @@
-from typing import Dict, List, NamedTuple
+from typing import Dict, List
 
 from django.db.models import Count
-from django.utils.translation import ugettext_lazy as _
 
 from courses.constants import TeacherRoles
-from courses.models import CourseReview, CourseClass
+from courses.models import CourseReview
 
 
 def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
