@@ -880,7 +880,8 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         else:
             attachments_count = self.courseclassattachment_set.count()
         if attachments_count:
-            m = ClassMaterial(type='attachments', name=_("files"))
+            m = ClassMaterial(type='attachments', name=_("files"),
+                              icon_code='files')
             materials.append(m)
         if self.other_materials:
             m = ClassMaterial(type='other_materials', name=_("other"))

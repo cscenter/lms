@@ -64,19 +64,19 @@
                                                 <div class="list__item">
                                                     <a class="class-item" href="{{ view.public_url(course_class) }}">
                                                         <div class="item__text">{{ course_class.name }}</div>
-                                                        {% if course_class.materials_is_public or has_access_to_private_materials %}
+                                                        {% if course_class.materials_is_public or has_access_to_private_materials -%}
                                                         {% with all_available_materials = course_class.get_available_materials() -%}
-                                                            {% set available_materials = [] %}
+                                                            {% set available_materials = [] -%}
                                                             {% for m in all_available_materials -%}
-                                                                {% if m.type == 'slides' or m.type == 'video' %}{{ available_materials.append(m)|default("", True) }}{% endif %}
+                                                                {% if m.type != 'other_materials' %}{{ available_materials.append(m)|default("", True) }}{% endif %}
                                                             {%- endfor %}
-                                                            {% if available_materials %}
+                                                            {%- if available_materials -%}
                                                             <div class="item__icons">
-                                                                {% for m in available_materials %}{{ macros.svg_icon(m.icon_code) }}{% endfor %}
+                                                                {%- for m in available_materials %}{{ macros.svg_icon(m.icon_code) }}{% endfor -%}
                                                             </div>
-                                                            {% endif %}
+                                                            {%- endif %}
                                                         {%- endwith %}
-                                                        {% endif %}
+                                                        {%- endif %}
                                                     </a>
                                                     {% if course_class.type != 'seminar' and course_class.description %}
                                                     <div class="text-muted text-small">
