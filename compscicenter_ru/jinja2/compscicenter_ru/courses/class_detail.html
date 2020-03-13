@@ -32,7 +32,7 @@
                     <span>{{ course_class.venue }}</span>
                 </div>
             </div>
-            {% if course_class.type == 'lecture' and course_class.video_url and recorded_lectures %}
+            {% if can_view_course_class_materials and course_class.video_url and recorded_classes %}
             <div class="row mt-6">
                 <div class="col-lg-7">
                     {% with youtube_video_id=course_class.video_url|youtube_video_id %}
@@ -46,19 +46,19 @@
                 </div>
                 <div class="col-lg-5">
                     <div class="ui playlist">
-                        <div class="playlist__summary">Список тем / {{ recorded_lectures|length }} запис{{ recorded_lectures|length|pluralize("ь", "и", "ей") }}</div>
+                        <div class="playlist__summary">Список тем / {{ recorded_classes|length }} запис{{ recorded_classes|length|pluralize("ь", "и", "ей") }}</div>
                         <ol class="ui list _divided _selection">
-                            {% for lecture in recorded_lectures %}
-                                {% if course_class.id != lecture.id %}
-                                    <a href="{{ view.public_url(lecture) }}" class="list__item">
+                            {% for recorded_class in recorded_classes %}
+                                {% if recorded_class.id != course_class.id %}
+                                    <a href="{{ view.public_url(recorded_class) }}" class="list__item">
                                 {% else %}
                                     <div class="list__item _active">
                                 {% endif %}
                                     <div class="class-item">
                                         <div class="item__ordinal">{{ loop.index }}.</div>
-                                        <div class="item__text">{{ lecture.name }}</div>
+                                        <div class="item__text">{{ recorded_class.name }}</div>
                                     </div>
-                                {% if course_class.id == lecture.id %}
+                                {% if recorded_class.id == course_class.id %}
                                     </div>
                                 {% else %}
                                     </a>
