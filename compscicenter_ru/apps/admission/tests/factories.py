@@ -46,11 +46,10 @@ class CampaignFactory(factory.DjangoModelFactory):
     online_test_passing_score = FuzzyInteger(20, 25)
     exam_max_score = FuzzyInteger(30, 40)
     exam_passing_score = FuzzyInteger(20, 25)
-    application_starts_at = factory.Faker('date_time_between',
-                                          start_date="now", end_date="-10d",
+    application_starts_at = factory.Faker('past_datetime',
+                                          start_date="-10d",
                                           tzinfo=timezone.utc)
-    application_ends_at = factory.Faker('date_time_between',
-                                        start_date="now", end_date="+30d",
+    application_ends_at = factory.Faker('future_datetime', end_date="+30d",
                                         tzinfo=timezone.utc)
     # FIXME: generate registration template name
     template_appointment = APPOINTMENT_INVITATION_TEMPLATE

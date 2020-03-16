@@ -147,8 +147,7 @@ class Campaign(TimezoneAwareModel, models.Model):
                 .filter(current=True,
                         application_starts_at__lte=today,
                         application_ends_at__gt=today)
-                .select_related('branch')
-                .order_by('id'))
+                .select_related('branch'))
 
     @property
     def is_active(self):
@@ -722,7 +721,7 @@ class YandexContestIntegration(models.Model):
         while True:
             try:
                 status, json_data = api.standings(contest.contest_id, **paging)
-                # XXX: Assignments order on scoreboard could be different from
+                # XXX: Assignments order on a scoreboard could differ from
                 # the similar contest problems API call response
                 if "titles" not in contest.details:
                     titles = [t["name"] for t in json_data["titles"]]
