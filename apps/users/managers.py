@@ -8,7 +8,6 @@ from learning.settings import GradeTypes
 
 
 class UserQuerySet(query.QuerySet):
-    # FIXME: make `site_id=None` by default, filtering user by `role on any site` cause it's crucial for admin
     def has_role(self, *roles, site_id=settings.SITE_ID):
         """
         Filter users who have at least one of the provided roles

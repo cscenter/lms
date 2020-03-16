@@ -87,7 +87,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
                         type=StudentGroupTypes.MANUAL,
                         branch_id__isnull=True,
                         name_en="Others",
-                        defaults={"name_ru": "Остальные"})
+                        defaults={"name_ru": "Другие"})
                 instance.student_group = student_group
         return instance
 
