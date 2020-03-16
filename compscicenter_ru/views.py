@@ -10,10 +10,10 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q, Max, Prefetch, F
+from django.db.models import Q, Max, Prefetch, F, Count
 from django.http import Http404
 from django.utils.timezone import now
-from django.utils.translation import gettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from djchoices import DjangoChoices, C
 from vanilla import TemplateView, DetailView
@@ -24,8 +24,7 @@ from core.exceptions import Redirect
 from core.models import Branch
 from core.urls import reverse, branch_aware_reverse
 from core.utils import bucketize
-from courses.constants import SemesterTypes, TeacherRoles, ClassTypes, \
-    MaterialVisibilityTypes
+from courses.constants import SemesterTypes, TeacherRoles
 from courses.models import Course, Semester, MetaCourse, CourseTeacher, \
     CourseClass
 from courses.permissions import ViewCourseClassMaterials, \
@@ -42,7 +41,6 @@ from learning.settings import Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
 from projects.constants import ProjectTypes
 from projects.models import ProjectStudent
-from publications.models import ProjectPublication
 from stats.views import StudentsDiplomasStats
 from study_programs.models import StudyProgram, AcademicDiscipline
 from study_programs.services import get_study_programs
@@ -665,7 +663,9 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
             teachers.items()
         }
         role = course_access_role(course=self.course, user=self.request.user)
-        classes = CourseService.get_classes(self.course).select_related(None)
+        classes = (CourseService.get_classes(self.course)
+                   .annotate(attachments_count=Count('courseclassattachment'))
+                   .select_related(None))
         context = {
             'view': self,
             'course': self.course,

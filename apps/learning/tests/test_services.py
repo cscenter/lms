@@ -90,7 +90,7 @@ def test_assignment_service_create_student_assignments():
     student_spb.save()
     e_nsk.is_deleted = False
     e_nsk.save()
-    assignment.restrict_to.add(group_spb)
+    assignment.restricted_to.add(group_spb)
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 1
@@ -160,20 +160,20 @@ def test_assignment_service_sync_student_assignments():
     e_spb = EnrollmentFactory(course=course, student=student_spb)
     e_nsk = EnrollmentFactory(course=course, student=student_nsk)
     e_other = EnrollmentFactory(course=course, student=student_other)
-    assignment = AssignmentFactory(course=course, restrict_to=[group_spb])
+    assignment = AssignmentFactory(course=course, restricted_to=[group_spb])
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 1
     assert StudentAssignment.objects.get(assignment=assignment).student_id == student_spb.pk
     # [spb] -> [nsk, spb]
-    assignment.restrict_to.add(group_nsk)
+    assignment.restricted_to.add(group_nsk)
     AssignmentService.sync_student_assignments(assignment)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 2
     assert not StudentAssignment.objects.filter(assignment=assignment,
                                                 student_id=student_other).exists()
     # [nsk, spb] -> all (including manually added students without group)
-    assignment.restrict_to.clear()
+    assignment.restricted_to.clear()
     AssignmentService.sync_student_assignments(assignment)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 3
     # all -> [nsk]
-    assignment.restrict_to.add(group_nsk)
+    assignment.restricted_to.add(group_nsk)
     AssignmentService.sync_student_assignments(assignment)
     assert StudentAssignment.objects.filter(assignment=assignment).count() == 1

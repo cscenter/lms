@@ -53,11 +53,6 @@ class CourseService:
 
     @staticmethod
     def get_classes(course):
-        """
-        Returns course classes with custom `.materials` attribute indicating
-        material availability by type.
-        """
         return (course.courseclass_set
                 .select_related("venue", "venue__location")
-                .annotate(attachments_count=Count('courseclassattachment'))
                 .order_by("date", "starts_at"))

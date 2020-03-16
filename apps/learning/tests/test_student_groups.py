@@ -145,7 +145,7 @@ def test_student_group_resolving_enrollment_by_invitation(settings, client):
 
 
 @pytest.mark.django_db
-def test_assignment_restrict_to(settings):
+def test_assignment_restricted_to(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(branch=branch_spb,
@@ -159,7 +159,7 @@ def test_assignment_restrict_to(settings):
     student_nsk = StudentFactory(branch=branch_nsk)
     EnrollmentFactory(course=course, student=student_spb)
     EnrollmentFactory(course=course, student=student_nsk)
-    a = AssignmentFactory(course=course, restrict_to=[sg_spb])
+    a = AssignmentFactory(course=course, restricted_to=[sg_spb])
     student_assignments = StudentAssignment.objects.filter(assignment=a)
     assert len(student_assignments) == 1
     assert student_assignments[0].student == student_spb

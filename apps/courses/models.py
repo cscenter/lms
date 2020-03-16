@@ -748,16 +748,14 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         _("Type"),
         max_length=100,
         choices=ClassTypes.choices)
+    date = models.DateField(_("Date"))
+    starts_at = models.TimeField(_("Starts at"))
+    ends_at = models.TimeField(_("Ends at"))
     name = models.CharField(_("CourseClass|Name"), max_length=255)
     description = models.TextField(
         _("Description"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    materials_visibility = models.CharField(
-        verbose_name=_("Materials Visibility"),
-        max_length=8,
-        help_text=_("Slides, attachments and other materials"),
-        choices=MaterialVisibilityTypes.choices)
     slides = models.FileField(
         _("Slides"),
         blank=True,
@@ -772,9 +770,16 @@ class CourseClass(TimezoneAwareModel, TimeStampedModel):
         _("CourseClass|Other materials"),
         blank=True,
         help_text=LATEX_MARKDOWN_HTML_ENABLED)
-    date = models.DateField(_("Date"))
-    starts_at = models.TimeField(_("Starts at"))
-    ends_at = models.TimeField(_("Ends at"))
+    materials_visibility = models.CharField(
+        verbose_name=_("Materials Visibility"),
+        max_length=8,
+        help_text=_("Slides, attachments and other materials"),
+        choices=MaterialVisibilityTypes.choices)
+    restricted_to = models.ManyToManyField(
+        'learning.StudentGroup',
+        verbose_name=_("Groups"),
+        related_name='course_classes',
+        through='learning.CourseClassGroup')
 
     class Meta:
         ordering = ["-date", "course", "-starts_at"]
@@ -1006,7 +1011,7 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Assignment|notify_settings"),
         help_text=_("Specify who will receive notifications about new comments"),
         blank=True)
-    restrict_to = models.ManyToManyField(
+    restricted_to = models.ManyToManyField(
         'learning.StudentGroup',
         verbose_name=_("Groups"),
         related_name='restricted_assignments',
