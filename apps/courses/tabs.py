@@ -7,6 +7,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import Optional, NamedTuple, Dict
 
+from django.db.models import Count
 from django.utils.translation import ugettext_noop, \
     ugettext_lazy as _
 
@@ -319,8 +320,10 @@ class CourseClassesTab(CourseTab):
         return True
 
     def get_tab_panel(self, *, course, user) -> Optional[CourseTabPanel]:
+        classes = (CourseService.get_classes(course)
+                   .annotate(attachments_count=Count('courseclassattachment')))
         return CourseTabPanel(context={
-            "items": CourseService.get_classes(course)
+            "items": classes
         })
 
 

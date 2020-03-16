@@ -172,7 +172,6 @@ class CourseClassForm(forms.ModelForm):
         self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
             branch_id=course.branch_id)
         self.fields['materials_visibility'].help_text = _("Note that some materials would be available by direct link")
-        self.fields['materials_visibility'].label = _("Visibility Setting")
         self.instance.course = course
 
         self.helper = FormHelper(self)
@@ -190,9 +189,6 @@ class CourseClassForm(forms.ModelForm):
             Div(Div('type', css_class='col-xs-2'),
                 Div('venue', css_class='col-xs-3'),
                 css_class='row'),
-            Div('name',
-                'description',
-                css_class="form-group"),
             Div(Div(PrependedText('date', '<i class="fa fa-calendar"></i>'),
                     HTML("&nbsp;"),
                     PrependedText('starts_at', '<i class="fa fa-clock-o"></i>'),
@@ -200,15 +196,18 @@ class CourseClassForm(forms.ModelForm):
                     PrependedText('ends_at', '<i class="fa fa-clock-o"></i>'),
                     css_class="form-inline"),
                 css_class="form-group"),
+            Div('name',
+                'description',
+                css_class="form-group"),
             Fieldset(_("Materials"),
-                     Div(
-                        Div('materials_visibility', css_class='col-xs-6'),
-                        css_class='row'
-                     ),
                      'slides',
                      'video_url',
                      Div('attachments', HTML(remove_links),),
                      'other_materials'),
+            Fieldset(_("Visibility Settings"),
+                     Div(
+                        Div('materials_visibility', css_class='col-xs-5'),
+                        css_class='row'),),
             FormActions(
                 StrictButton(_('<i class="fa fa-plus"></i> Save and add'),
                              name='_addanother', type="submit",
@@ -312,7 +311,7 @@ class AssignmentForm(TimezoneAwareModelForm):
             attrs={"autocomplete": "off",
                    "class": "form-control",
                    "placeholder": _("hours:minutes")}))
-    restrict_to = forms.ModelMultipleChoiceField(
+    restricted_to = forms.ModelMultipleChoiceField(
         label=_("Available for"),
         widget=forms.SelectMultiple(attrs={
             'class': 'multiple-select bs-select-hidden',
@@ -329,7 +328,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         self.instance.course = course
         qs = StudentGroup.objects.filter(course=course).order_by('pk')
         groups = list(qs)
-        field_restrict_to = self.fields['restrict_to']
+        field_restrict_to = self.fields['restricted_to']
         # TODO: move to method
         field_restrict_to.queryset = qs
         if course.group_mode == StudentGroupTypes.BRANCH:
@@ -354,4 +353,4 @@ class AssignmentForm(TimezoneAwareModelForm):
         model = Assignment
         fields = ('title', 'text', 'deadline_at', 'attachments',
                   'submission_type', 'passing_score', 'maximum_score',
-                  'weight', 'ttc', 'restrict_to')
+                  'weight', 'ttc', 'restricted_to')

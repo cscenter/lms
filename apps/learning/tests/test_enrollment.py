@@ -282,7 +282,7 @@ def test_reenrollment(client):
     assignment2 = AssignmentFactory(course=course)
     sg = StudentGroup.objects.get(course=course, branch=branch_other)
     # This assignment is restricted for student's group
-    assignment3 = AssignmentFactory(course=course, restrict_to=[sg])
+    assignment3 = AssignmentFactory(course=course, restricted_to=[sg])
     assert StudentAssignment.objects.filter(student_id=student.pk).count() == 1
     client.login(student)
     form = {'course_pk': course.pk}

@@ -18,8 +18,7 @@ def add_student_group_for_course_root_branch(sender, instance, created,
                                              **kwargs):
     # FIXME: Как взять предыдущее значение? Нужно ли его удалять?
     if created:
-        if instance.group_mode == StudentGroupTypes.BRANCH:
-            StudentGroupService.add(instance, instance.branch)
+        StudentGroupService.add(instance, instance.branch)
     # TODO: What if a root branch were changed?
 
 
@@ -31,15 +30,13 @@ def manage_student_group_for_course_additional_branch(sender, **kwargs):
     course = kwargs.pop("instance")
     branches: Set[int] = kwargs.pop("pk_set", set())
     if action == "post_add":
-        if course.group_mode == StudentGroupTypes.BRANCH:
-            for branch_id in branches:
-                branch = Branch.objects.get_by_pk(branch_id)
-                StudentGroupService.add(course, branch)
+        for branch_id in branches:
+            branch = Branch.objects.get_by_pk(branch_id)
+            StudentGroupService.add(course, branch)
     elif action == "post_remove":
-        if course.group_mode == StudentGroupTypes.BRANCH:
-            for branch_id in branches:
-                branch = Branch.objects.get_by_pk(branch_id)
-                StudentGroupService.remove(course, branch)
+        for branch_id in branches:
+            branch = Branch.objects.get_by_pk(branch_id)
+            StudentGroupService.remove(course, branch)
 
 
 @receiver(post_save, sender=Enrollment)

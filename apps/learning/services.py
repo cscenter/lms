@@ -51,26 +51,38 @@ def course_failed_by_student(course: Course, student, enrollment=None) -> bool:
             .exists())
 
 
-class GroupEnrollmentKeyError(Exception):
+class StudentGroupError(Exception):
+    pass
+
+
+class GroupEnrollmentKeyError(StudentGroupError):
     pass
 
 
 class StudentGroupService:
     @staticmethod
     def add(course: Course, branch: Branch):
-        group, _ = (StudentGroup.objects.get_or_create(
-            course_id=course.pk,
-            type=StudentGroupTypes.BRANCH,
-            branch_id=branch.pk,
-            defaults={
-                "name_ru": branch.name_ru,
-                "name_en": branch.name_en,
-            }))
+        if course.group_mode == StudentGroupTypes.BRANCH:
+            group, _ = (StudentGroup.objects.get_or_create(
+                course_id=course.pk,
+                type=StudentGroupTypes.BRANCH,
+                branch_id=branch.pk,
+                defaults={
+                    "name_ru": branch.name_ru,
+                    "name_en": branch.name_en,
+                }))
+        else:
+            raise StudentGroupError("Only `branch` group mode is supported")
 
     @staticmethod
-    def remove(course: Course, branch: Branch):
-        StudentGroup.objects.filter(course_id=course.pk,
-                                    branch_id=branch.pk).delete()
+    def remove(course: Course, instance):
+        if course.group_mode == StudentGroupTypes.BRANCH:
+            assert isinstance(instance, Branch)
+            StudentGroup.objects.filter(course_id=course.pk,
+                                        branch_id=instance.pk).delete()
+        else:
+            StudentGroup.objects.filter(course_id=course.pk,
+                                        pk=instance.pk).delete()
 
     @staticmethod
     def resolve(course: Course, student: User, enrollment_key: str = None):
@@ -120,7 +132,7 @@ class AssignmentService:
         Creates or restores record for tracking student progress on assignment
         if the assignment is not restricted for the student's group.
         """
-        restricted_to = list(sg.pk for sg in assignment.restrict_to.all())
+        restricted_to = list(sg.pk for sg in assignment.restricted_to.all())
         if restricted_to and enrollment.student_group_id not in restricted_to:
             return
         return StudentAssignment.base.update_or_create(
@@ -153,7 +165,7 @@ class AssignmentService:
             Q(course_id=assignment.course_id),
             ~Q(student__status__in=StudentStatuses.inactive_statuses)
         ]
-        restrict_to = list(sg.pk for sg in assignment.restrict_to.all())
+        restrict_to = list(sg.pk for sg in assignment.restricted_to.all())
         if for_groups is not None:
             has_null = None in for_groups
             if restrict_to:
@@ -236,7 +248,7 @@ class AssignmentService:
                                       student__in=ss)
                               .values_list('student_group_id', flat=True)
                               .distinct())
-        restricted_to_groups = set(sg.pk for sg in assignment.restrict_to.all())
+        restricted_to_groups = set(sg.pk for sg in assignment.restricted_to.all())
         if not restricted_to_groups:
             restricted_to_groups = set(StudentGroup.objects
                                        .filter(course_id=assignment.course_id)

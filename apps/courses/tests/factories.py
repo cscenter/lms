@@ -169,13 +169,13 @@ class AssignmentFactory(factory.DjangoModelFactory):
     weight = 1
 
     @factory.post_generation
-    def restrict_to(self, create, extracted, **kwargs):
+    def restricted_to(self, create, extracted, **kwargs):
         if extracted:
             for student_group in extracted:
-                self.restrict_to.add(student_group)
+                self.restricted_to.add(student_group)
 
-    # Note: this hook depends on `.restrict_to` values and must be
-    # declared after `restrict_to` hook
+    # Note: this hook depends on `.restricted_to` values and must be
+    # declared after `restricted_to` hook
     @factory.post_generation
     def generate_student_assignments(self, create, extracted, **kwargs):
         if create:

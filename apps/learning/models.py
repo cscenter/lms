@@ -93,7 +93,7 @@ class AssignmentGroup(models.Model):
         verbose_name=_("Group"),
         # Protect from deleting the last group of the assignment since it
         # will be interpreted as the assignment is available to all
-        # student groups now. Manually resolve this issue.
+        # student groups which is not true. Manually resolve this issue.
         on_delete=models.PROTECT)
 
     class Meta:
@@ -102,6 +102,23 @@ class AssignmentGroup(models.Model):
         constraints = [
             models.UniqueConstraint(fields=('assignment', 'group'),
                                     name='unique_assignment_group'),
+        ]
+
+
+class CourseClassGroup(models.Model):
+    course_class = models.ForeignKey(
+        'courses.CourseClass',
+        verbose_name=_("Course Class"),
+        on_delete=models.CASCADE)
+    group = models.ForeignKey(
+        StudentGroup,
+        verbose_name=_("Group"),
+        on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=('course_class', 'group'),
+                                    name='unique_class_student_group'),
         ]
 
 
