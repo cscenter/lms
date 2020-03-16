@@ -21,8 +21,7 @@ class CurrentCampaignsMixin:
     def get_current_campaigns(self, options, required=False):
         branch_code = options["branch"]
         if not branch_code and required:
-            available = (Campaign.objects
-                         .filter(current=True)
+            available = (Campaign.get_active()
                          .select_related('branch'))
             campaigns = [c.branch.code for c in available]
             msg = f"Provide the code of the campaign branch. Options: {campaigns}"

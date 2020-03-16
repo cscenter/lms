@@ -7,7 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Q
-from django.utils import timezone
+from django.utils import timezone, formats
 from model_utils.fields import AutoLastModifiedField
 
 logger = logging.getLogger(__name__)
@@ -90,8 +90,25 @@ class Task(models.Model):
         self.locked_by = self.locked_by or None
         return super(Task, self).save(*args, **kwargs)
 
+    @property
     def is_failed(self):
         return bool(self.error)
+
+    @property
+    def is_completed(self):
+        return self.processed_at is not None
+
+    def created_at_local(self, tz):
+        dt = timezone.localtime(self.created, timezone=tz)
+        return formats.date_format(dt, "SHORT_DATETIME_FORMAT")
+
+    @property
+    def status(self):
+        # TODO: add "In progress"
+        if self.is_completed:
+            return "error" if self.is_failed else "ok"
+        else:
+            return "waiting"
 
     def params(self):
         args, kwargs = json.loads(self.task_params)

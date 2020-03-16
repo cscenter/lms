@@ -13,10 +13,11 @@ from admission.tests.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
     InterviewInvitationFactory, InterviewStreamFactory
 from core.models import Branch
+from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
 from learning.settings import Branches
-from users.tests.factories import UserFactory
+from users.tests.factories import UserFactory, CuratorFactory
 
 
 # TODO: если приняли приглашение и выбрали время - не создаётся для занятого слота. Создаётся напоминание (прочекать expired_at)
@@ -185,54 +186,55 @@ def test_autoupdate_applicant_status_from_final():
 
 
 @pytest.mark.django_db
-def test_interview_results_dispatch_view(curator, client, settings):
+def test_interview_results_dispatch_view(client, settings, assert_redirect,
+                                         assert_login_redirect):
+    from admission.models import Campaign
     # Not enough permissions if you are not a curator
-    branch1, branch2 = Branch.objects.filter(site_id=settings.SITE_ID)[:2]
-    curator.branch = branch1
-    curator.save()
-    user = UserFactory(is_staff=False, branch=branch1)
+    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_nsk = BranchFactory(code=Branches.NSK)
+    branch_default = BranchFactory(code=settings.DEFAULT_BRANCH_CODE)
+    user = UserFactory(is_staff=False, branch=branch_spb)
     client.login(user)
     url = reverse('admission:interview_results_dispatch')
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[-1]
     assert status_code == 302
-    assert 'login' in redirect_url
-    # No active campaigns at this moment.
+    assert_login_redirect(url)
+    # No active campaigns at this moment
+    curator = CuratorFactory(branch=branch_spb)
     client.login(curator)
     response = client.get(url, follow=True)
-    # Redirect to the default branch view
     redirect_url, status_code = response.redirect_chain[0]
     assert redirect_url == reverse("admission:branch_interview_results",
-                                   kwargs={"branch_code": settings.DEFAULT_BRANCH_CODE})
-    # And then to applicants list page
+                                   kwargs={"branch_code": branch_default.code})
+    # And then to the applicants list page
     redirect_url, status_code = response.redirect_chain[1]
     assert redirect_url == reverse("admission:applicants")
-    # Create campaign with a branch different from curator branch value
-    campaign1 = CampaignFactory.create(branch=branch2, current=False)
+    # Add inactive campaign
+    campaign_nsk = CampaignFactory.create(branch=branch_nsk, current=False)
     response = client.get(url, follow=True)
     redirect_url, status_code = response.redirect_chain[1]
     assert redirect_url == reverse("admission:applicants")
-    # Make it active
-    campaign1.current = True
-    campaign1.save()
-    # Now curator should see this active campaign tab
-    response = client.get(url, follow=True)
-    redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission:branch_interview_results",
-                                   kwargs={"branch_code": branch2.code})
-    # Create inactive campaign with a branch equal curator branch setting value
-    campaign2 = CampaignFactory(branch=branch1, current=False)
-    response = client.get(url, follow=True)
-    redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission:branch_interview_results",
-                                   kwargs={"branch_code": branch2.code})
-    # Make it active
-    campaign2.current = True
-    campaign2.save()
-    response = client.get(url, follow=True)
-    redirect_url, status_code = response.redirect_chain[0]
-    assert redirect_url == reverse("admission:branch_interview_results",
-                                   kwargs={"branch_code": branch1.code})
+    # Test redirection to the first active campaign
+    campaign_nsk.current = True
+    campaign_nsk.save()
+    results_nsk = reverse("admission:branch_interview_results",
+                          kwargs={"branch_code": branch_nsk.code})
+    response = client.get(url)
+    assert_redirect(response, results_nsk)
+    # Create inactive campaign from the curator branch
+    campaign_spb = CampaignFactory(branch=branch_spb, current=False)
+    assert_redirect(client.get(url), results_nsk)
+    # Then activate
+    campaign_spb.order = 200
+    campaign_spb.save()
+    campaign_nsk.order = 100
+    campaign_nsk.save()
+    campaign_spb.current = True
+    campaign_spb.save()
+    results_spb = reverse("admission:branch_interview_results",
+                          kwargs={"branch_code": branch_spb.code})
+    assert_redirect(client.get(url), results_spb)
 
 
 @pytest.mark.django_db

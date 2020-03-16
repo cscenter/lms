@@ -49,23 +49,20 @@ def register_in_yandex_contest(applicant_id, language_code):
 # FIXME: надо отлавливать все timeout'ы при запросе, т.к. в этом случае поле processed_at не будет обновлено и будет попадать в очередь задач на исполнение
 # TODO: What if rq.timeouts.JobTimeoutException?
 @job('default')
-def import_testing_results(task_id=None):
+def import_testing_results(*, task_id):
     Campaign = apps.get_model('admission', 'Campaign')
     Task = apps.get_model('tasks', 'Task')
-    if task_id:
-        try:
-            task = Task.objects.unlocked(timezone.now()).get(pk=task_id)
-        except Task.DoesNotExist:
-            logger.error(f"Task with id = {task_id} doesn't exist.")
-            return
+    try:
+        task = Task.objects.unlocked(timezone.now()).get(pk=task_id)
+    except Task.DoesNotExist:
+        logger.error(f"Task with id = {task_id} not found.")
+        return
     task.lock(locked_by="rqworker")
-    current_campaigns = Campaign.objects.filter(current=True)
+    current_campaigns = Campaign.get_active()
     if not current_campaigns:
         # TODO: mark task as failed
         return
     now = timezone.now()
-    # Campaigns are the same now, but handle them separately,
-    # since this behavior can be changed in the future.
     for campaign in current_campaigns:
         api = YandexContestAPI(access_token=campaign.access_token)
         for contest in campaign.contests.filter(type=Contest.TYPE_TEST).all():

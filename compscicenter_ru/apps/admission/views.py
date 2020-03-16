@@ -289,17 +289,15 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
         import_testing_results_btn_state = None
         if campaign and campaign.current and self.request.user.is_curator:
             task_name = "admission.tasks.import_testing_results"
-            task = (Task.objects
-                    .get_task(task_name)
-                    .filter(processed_at__isnull=False)
-                    .order_by("-id")
-                    .first())
-            if task:
+            latest_task = (Task.objects
+                           .get_task(task_name)
+                           .order_by("-id")
+                           .first())
+            if latest_task:
                 tz = self.request.user.get_timezone()
-                dt = timezone.localtime(task.processed_at, timezone=tz)
                 import_testing_results_btn_state = {
-                    "date": formats.date_format(dt, "SHORT_DATETIME_FORMAT"),
-                    "status": "Успешно" if not task.is_failed() else "Ошибка"
+                    "date": latest_task.created_at_local(tz),
+                    "status": latest_task.status
                 }
             else:
                 import_testing_results_btn_state = {}
@@ -442,10 +440,9 @@ class InterviewAssignmentDetailView(CuratorOnlyMixin, generic.DetailView):
 
 
 def get_default_campaign_for_user(user: User) -> Optional[Campaign]:
-    active_campaigns = list(Campaign.objects
-                            .filter(current=True)
-                            .select_related('branch')
-                            .only("pk", "branch"))
+    active_campaigns = list(Campaign.get_active()
+                            .only("pk", "branch_id")
+                            .order_by('branch__order'))
     try:
         campaign = next(c for c in active_campaigns
                         if c.branch_id == user.branch_id)
@@ -533,7 +530,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             # To interviewers show interviews from current campaigns where
             # they participate.
             try:
-                current_campaigns = list(Campaign.objects.filter(current=True)
+                current_campaigns = list(Campaign.get_active()
                                          .values_list("pk", flat=True))
             except Campaign.DoesNotExist:
                 messages.error(self.request, "Нет активных кампаний по набору.")
@@ -656,8 +653,7 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
 class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         """Based on user settings, get preferred page address and redirect"""
-        branches = (Campaign.objects
-                    .filter(current=True)
+        branches = (Campaign.get_active()
                     .values_list("branch__code", flat=True))
         branch_code = self.request.user.branch.code
         if branch_code not in branches:
@@ -680,12 +676,10 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
     filterset_class = ResultsFilter
 
     def dispatch(self, request, *args, **kwargs):
-        self.active_campaigns = (Campaign.objects
-                                 .filter(current=True)
-                                 .select_related("branch"))
+        self.active_campaigns = Campaign.get_active()
         try:
             self.selected_campaign = next(c for c in self.active_campaigns
-                                          if c.branch == request.branch)
+                                          if c.branch_id == request.branch.pk)
         except StopIteration:
             messages.error(self.request,
                            "Активная кампания по набору не найдена")
