@@ -176,6 +176,15 @@
                                 {{ profile_user.social_networks|default_if_none:"-" }}
                             </td>
                         </tr>
+                        <tr>
+                            <td>Anytask</td>
+                            <td>{% if profile_user.anytask_url %}
+                                <a href="{{ profile_user.anytask_url }}" target="_blank" rel="noopener">{{ profile_user.anytask_url }}</a>
+                            {% else %}
+                                —
+                            {% endif %}
+                            </td>
+                        </tr>
                     </table>
 
                     {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
@@ -491,7 +500,6 @@
                                 </td>
                             </tr>
                             <tr>
-
                                 <td>Stepik</td>
                                 <td>{% if profile_user.stepic_id %}
                                     <a href="https://stepik.org/users/{{ profile_user.stepic_id }}"
