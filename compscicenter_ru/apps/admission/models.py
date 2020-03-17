@@ -704,7 +704,7 @@ class YandexContestIntegration(models.Model):
     @classmethod
     def import_results(cls, api, contest: Contest) -> YandexContestImportResults:
         """
-        Importing contest results page by page.
+        Imports contest results page by page.
 
         Since scoreboard can be modified at any moment we could miss some
         results during the importing if someone has improved his position

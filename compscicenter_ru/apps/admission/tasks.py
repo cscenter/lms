@@ -7,7 +7,7 @@ from django_rq import job
 from admission.models import Test, Contest
 from admission.services import EmailQueueService
 from api.providers.yandex_contest import YandexContestAPI, RegisterStatus, \
-    ContestAPIError
+    ContestAPIError, ResponseStatus
 
 logger = logging.getLogger(__name__)
 
@@ -58,28 +58,18 @@ def import_testing_results(*, task_id):
         logger.error(f"Task with id = {task_id} not found.")
         return
     task.lock(locked_by="rqworker")
-    current_campaigns = Campaign.get_active()
-    if not current_campaigns:
-        # TODO: mark task as failed
-        return
-    now = timezone.now()
-    for campaign in current_campaigns:
+    active_campaigns = Campaign.get_active()
+    for campaign in active_campaigns:
         api = YandexContestAPI(access_token=campaign.access_token)
-        for contest in campaign.contests.filter(type=Contest.TYPE_TEST).all():
-            contest_id = contest.contest_id
-            logger.debug(f"Starting processing contest {contest_id}")
-
+        for contest in campaign.contests.filter(type=Contest.TYPE_TEST):
+            logger.debug(f"Starting processing contest {contest.pk}")
             try:
                 on_scoreboard, updated = Test.import_results(api, contest)
             except ContestAPIError as e:
-                if e.code == RegisterStatus.BAD_TOKEN:
+                if e.code == ResponseStatus.BAD_TOKEN:
                     notify_admin_bad_token(campaign.pk)
-                logger.error(f"Yandex.Contest API error. "
-                             f"Method: `standings` "
-                             f"Contest: {contest_id}")
                 raise
-            logger.debug(f"Total participants {on_scoreboard}")
-            logger.debug(f"Updated {updated}")
+            logger.debug(f"Scoreboard total = {on_scoreboard}")
+            logger.debug(f"Updated = {updated}")
         # FIXME: если контест закончился - для всех, кого нет в scoreboard надо проставить соответствующий статус анкете и тесту.
-    task.processed_at = timezone.now()
-    task.save()
+    task.complete()

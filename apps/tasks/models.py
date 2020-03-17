@@ -49,7 +49,7 @@ class Task(models.Model):
     MAX_RUN_TIME = 300  # in seconds
 
     created = models.DateTimeField(db_index=True, auto_now_add=True)
-    modified = AutoLastModifiedField()  # TODO: when this field can be really useful?
+    modified = AutoLastModifiedField()
     # the "name" of the task/function to be run
     task_name = models.CharField(max_length=190, db_index=True)
     # the json encoded parameters to pass to the task
@@ -92,7 +92,7 @@ class Task(models.Model):
 
     @property
     def is_failed(self):
-        return bool(self.error)
+        return self.is_completed and bool(self.error)
 
     @property
     def is_completed(self):
@@ -104,9 +104,10 @@ class Task(models.Model):
 
     @property
     def status(self):
-        # TODO: add "In progress"
         if self.is_completed:
             return "error" if self.is_failed else "ok"
+        elif self.locked_at:
+            return "in progress"
         else:
             return "waiting"
 
@@ -125,6 +126,10 @@ class Task(models.Model):
             self.locked_at = now
             return self
         return None
+
+    def complete(self):
+        self.processed_at = timezone.now()
+        self.save()
 
     @classmethod
     def build(cls, task_name, args=None, kwargs=None,
