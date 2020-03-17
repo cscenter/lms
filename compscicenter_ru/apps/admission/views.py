@@ -296,6 +296,7 @@ class ApplicantListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             if latest_task:
                 tz = self.request.user.get_timezone()
                 import_testing_results_btn_state = {
+                    # TODO: humanize
                     "date": latest_task.created_at_local(tz),
                     "status": latest_task.status
                 }
