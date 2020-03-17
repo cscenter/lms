@@ -35,7 +35,7 @@
         <div class="pb-10">
             <a href="{% url 'admission:import_testing_results' %}" class="btn btn-default _btn-import-testings-results mr-10">
                 <i class="fa fa-refresh" aria-hidden="true"></i> Результаты теста
-            </a>{% if import_testing_results %} Последний запуск {{ import_testing_results.date }} [{{ import_testing_results.status }}]{% endif %}
+            </a>{% if import_testing_results %} Задача добавлена {{ import_testing_results.date }} [{{ import_testing_results.status }}]{% endif %}
         </div>
     </div>
 {% endif %}
