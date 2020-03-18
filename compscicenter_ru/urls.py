@@ -22,7 +22,6 @@ urlpatterns = i18n_patterns(
     prefix_default_language=False
 )
 
-
 urlpatterns += [
     path('', views.IndexView.as_view(), name='index'),
     path('robots.txt', TemplateView.as_view(template_name="compscicenter_ru/robots.txt", content_type="text/plain"), name='robots_txt'),
@@ -33,9 +32,7 @@ urlpatterns += [
     path('teachers/', views.TeachersView.as_view(), name='teachers'),
     path('teachers/<int:pk>/', views.TeacherDetailView.as_view(), name='teacher_detail'),
     path('testimonials/', views.TestimonialsListView.as_view(), name='testimonials'),
-    # Editing courses/
-    path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
-    path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
+    path('students/<int:student_id>/', views.StudentProfileView.as_view(), name='student_profile'),
     # TODO: move redirect to nginx?
     path('pages/questions/', RedirectView.as_view(url='/enrollment/program/', permanent=True)),
     re_path(r'^(?P<year>20[0-9]{2})/$', views.AlumniHonorBoardView.as_view(), name='alumni_honor'),
@@ -44,23 +41,17 @@ urlpatterns += [
     path('syllabus/on-campus/', views.OnCampusProgramsView.as_view(), name='on_campus_programs'),
     path('syllabus/on-campus/<slug:discipline_code>/', views.OnCampusProgramDetailView.as_view(), name='on_campus_program_detail'),
     path('syllabus/distance/', views.DistanceProgramView.as_view(), name='distance_program'),
-
+    # Admission
     path('enrollment/', RedirectView.as_view(url='/application/')),
     path('enrollment/checklist/', views.EnrollmentChecklistView.as_view(), name='enrollment_checklist'),
     path('enrollment/program/', views.EnrollmentPreparationProgramView.as_view(), name='enrollment_preparation_program'),
     path('faq/', views.QAListView.as_view(), name='faq'),
+    path('', include('admission.urls_application')),
     # Online education
     path('', include('online_courses.urls')),
     path('videos/', views.CourseVideoListView.as_view(), name='video_list'),
 
-    path('students/<int:student_id>/', views.StudentProfileView.as_view(), name='student_profile'),
-
     path('api/', include('compscicenter_ru.api.urls')),
-
-    # Place tags-autocomplete under `announcements` namespace
-    path("", include(([
-        path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
-    ], "announcements"))),
 
     path('', include('publications.urls')),
 
@@ -74,8 +65,13 @@ urlpatterns += [
         ]))
     ])),
 
-    path('', include('admission.urls_application')),
-
+    # Used in admin interface
+    path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
+    path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
+    # Place tags-autocomplete under `announcements` namespace
+    path("", include(([
+        path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
+    ], "announcements"))),
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),
     path('narnia/django-rq/', include('django_rq.urls')),
@@ -96,7 +92,9 @@ if settings.DEBUG:
     if 'rosetta' in settings.INSTALLED_APPS:
         urlpatterns += [path('rosetta/', include('rosetta.urls'))]
 
-urlpatterns += i18n_patterns(re_path(r'^pages/(?P<url>.*/)$', flatpage, name='html_pages'), prefix_default_language=False)
+urlpatterns += i18n_patterns(
+    re_path(r'^pages/(?P<url>.*/)$', flatpage, name='html_pages'),
+    prefix_default_language=False)
 urlpatterns += [
     path('policy/', flatpage, {'url': '/policy/'}, name="policy_html_page"),
     path('<slug:slug>/', AnnouncementDetailView.as_view(), name="announcement_detail"),

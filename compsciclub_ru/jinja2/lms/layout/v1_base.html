@@ -1,0 +1,142 @@
+{% set LANGUAGE_CODE = request.LANGUAGE_CODE %}
+{% set BRANCH_LIST = get_branches(request)['BRANCH_LIST'] %}
+{% set available_languages = [{'code': 'ru', 'name_local': 'Русский'}, {'code': 'en', 'name_local': 'English'}] %}
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=960">
+    <meta name="google-site-verification" content="pBs4x-E9VGlX-gA7WxCNEqcYB0TYJCSmcZtSeLBpEgk">
+    <title>{% block title %}Computer Science Club{% endblock title %}</title>
+    <link rel="shortcut icon" href="{{ static("v1/img/club/favicon.ico") }}" >
+    <link href="{{ static("v1/dist/css/club/style.css") }}" rel="stylesheet">
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    {% block hightlight_styles %}
+        <link href="{{ static("v1/css/vendor/highlight-styles/tomorrow.css") }}" rel="stylesheet">
+    {% endblock hightlight_styles %}
+    {% block stylesheets %}{% endblock stylesheets %}
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script>
+      // Global Configuration
+      window.CSC = {
+          config: {
+              JS_SRC: {
+                MATHJAX: "//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML",
+                HIGHLIGHTJS: "{{ static("v1/js/vendor/highlight.pack.js") }}",
+              },
+              // Used to reflow editor on tab toggle event
+              uberEditors: [],
+              localStorage: {
+                  // Map from hash to dummy value (effectively a set)
+                  hashes: []
+              }
+          },
+          notifications: {{ messages(request)|tojson }},
+      }
+    </script>
+  </head>
+<body {% block body_attrs %}{% endblock body_attrs %}>
+    <div class="container _top">
+      {% if request.user.is_authenticated %}
+      <ul>
+        {% if request.user.is_curator %}
+        <li class="_curator">
+            <i class="fa fa-lock"></i> <a href="{{ url('admin:index') }}" target="_blank" title="Admin section">{% trans %}Admin{% endtrans %}</a>
+        </li>
+        {% endif %}
+      </ul>
+      {% endif %}
+      <span class="cities">
+          {% trans %}City{% endtrans %}: {% for branch in BRANCH_LIST %}{% if request.branch == branch %}<span>{{ branch.name }}</span>
+          {% else %}<a href="{{ branch.url }}{% if LANGUAGE_CODE != "ru" %}{{ LANGUAGE_CODE }}/{% endif %}">{{ branch.name }}</a>{% endif %} {% endfor %}
+      </span>
+      <span class="languages">{% trans %}Language{% endtrans %}: {% for language in available_languages %}
+        {% if LANGUAGE_CODE == language.code %}<span>{{ language.name_local }}</span>{% else %}<a  href="/{% if language.code != 'ru' %}{{ language.code }}/{% endif %}">{{ language.name_local }}</a>{% endif %}{% endfor %}</span>
+    </div>
+
+    {%- include "lms/layout/_top_menu.html" -%}
+
+    {% block content_top %}{% endblock content_top %}
+    {% block content %}
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          hello world
+        </div>
+      </div>
+    </div>
+    {% endblock content %}
+    {% block content_bottom %}{% endblock content_bottom %}
+
+    <div class="footer">
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-8">Computer Science Club, 2007–20</div>
+          <div class="col-xs-4 social">
+            {% if request.branch.code == 'spb' %}
+            <a href="https://t.me/compsciclub" target="_blank"><i class="fa fa-telegram fa-2x"></i></a>
+            <a href="mailto:spbinfo@compsciclub.ru" target="_blank"><i class="fa fa-envelope fa-2x"></i></a>
+            <a href="https://vk.com/spbcsclub" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
+            <a href="http://groups.google.com/group/pdmicsclub" target="_blank"><i class="fa fa-google fa-2x"></i></a>
+            <a href="https://www.instagram.com/compsciclub.ru/" target="_blank" rel="noopener"><i class="fa fa-instagram fa-2x"></i></a>
+            <a href="https://www.facebook.com/pdmicsclub" target="_blank" rel="noopener"><i class="fa fa-facebook fa-2x"></i></a>
+            <a href="https://twitter.com/spbcsclub/" target="_blank" rel="noopener"><i class="fa fa-twitter fa-2x"></i></a>
+            {% elif request.branch.code == 'kzn' %}
+              <a href="mailto:kazaninfo@compsciclub.ru" target="_blank"><i class="fa fa-envelope fa-2x"></i></a>
+              <a href="https://vk.com/kazancsclub" target="_blank"><i class="fa fa-vk fa-2x"></i></a>
+              <a href="http://groups.google.com/group/kazancsclub" target="_blank"><i class="fa fa-google fa-2x"></i></a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript">window.jQuery || document.write('<script src="{{ static("v1/js/vendor/jquery-3.4.1.min.js") }}"><\/script>')</script>
+
+    {{ render_bundle('runtime', extension='js') }}
+    {{ render_bundle('vendor', extension='js') }}
+    {{ render_bundle('main', extension='js') }}
+    {{ render_bundle('club', extension='js') }}
+
+    {% block javascripts %}{% endblock javascripts %}
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function (d, w, c) {
+            (w[c] = w[c] || []).push(function() {
+                try {
+                    w.yaCounter32180204 = new Ya.Metrika({
+                        id:32180204,
+                        clickmap:true,
+                        trackLinks:true,
+                        accurateTrackBounce:true,
+                        webvisor:true
+                    });
+                } catch(e) { }
+            });
+
+            var n = d.getElementsByTagName("script")[0],
+                s = d.createElement("script"),
+                f = function () { n.parentNode.insertBefore(s, n); };
+            s.type = "text/javascript";
+            s.async = true;
+            s.src = "https://mc.yandex.ru/metrika/watch.js";
+
+            if (w.opera === "[object Opera]") {
+                d.addEventListener("DOMContentLoaded", f, false);
+            } else { f(); }
+        })(document, window, "yandex_metrika_callbacks");
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/32180204" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+  </body>
+</html>

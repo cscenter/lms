@@ -3,18 +3,9 @@
 {% load i18n %}
 {% load lookup from core_tags %}
 
+{% block body_attrs %} data-init-sections="courseOfferings"{% endblock body_attrs %}
 
 {% block javascripts %}
-    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js" charset="utf-8"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/i18n/defaults-ru_RU.min.js" charset="utf-8"></script>
-    <script type="text/javascript">
-        $('.__courses-filter--academic-year select').selectpicker({
-            showTick: false,
-            iconBase: 'fa',
-            tickIcon: 'fa-check',
-            width: 'fit',
-        });
-    </script>
     <script type="text/javascript">
         window.courseOfferingsData = JSON.parse('{{ json|escapejs|safe }}');
     </script>

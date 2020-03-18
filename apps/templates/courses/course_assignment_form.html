@@ -6,7 +6,7 @@
 {% load static %}
 {% load render_bundle from webpack_loader %}
 
-{% block body_attrs %} data-init-sections="assignmentForm"{% endblock body_attrs %}
+{% block body_attrs %} data-init-sections="assignmentForm,tooltips,datetimepickers,selectpickers"{% endblock body_attrs %}
 
 {% block javascripts %}
     {% render_bundle 'teaching' 'js' %}

@@ -6,11 +6,14 @@
 {% load render_bundle from webpack_loader %}
 {% load user_thumbnail from user_thumbnail %}
 
+{% block title %}{{ course.meta_course.name }}, {{ course.semester }}{% endblock title %}
+
+{% block body_attrs %} data-init-sections="courseDetails"{% endblock body_attrs %}
+
 {% block javascripts %}
     {% if user.is_curator %}{% render_bundle "supervising" "js" %}{% endif %}
 {% endblock javascripts %}
 
-{% block title %}{{ course.meta_course.name }}, {{ course.semester }}{% endblock title %}
 
 {% block content %}{% localtime off %}
 <div class="container" id="course-detail-page">

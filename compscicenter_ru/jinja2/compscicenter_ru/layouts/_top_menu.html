@@ -1,11 +1,11 @@
 {% if request.subdomain == LMS_SUBDOMAIN %}
     {% if request.user.is_authenticated %}
-        {% set menu = csc_menu("menu_private", request) %}
+        {% set menu = get_menu("menu_private", request) %}
     {% else %}
         {% set menu = [] %}
     {% endif %}
 {% else %}
-    {% set menu = csc_menu("menu_public", request) %}
+    {% set menu = get_menu("menu_public", request) %}
 {% endif %}
 <nav class="navbar navbar-main{% if menu_theme %} {{ menu_theme }}{% endif %}">
     <div class="container">

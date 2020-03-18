@@ -92,6 +92,54 @@ LOCALE_PATHS = [
 
 TEMPLATES = [
     {
+        "BACKEND": "django_jinja.backend.Jinja2",
+        "APP_DIRS": False,
+        'DIRS': [
+            str(PROJECT_DIR / "jinja2"),
+            django.__path__[0] + '/forms/jinja2',
+            str(ROOT_DIR / "lms" / "jinja2"),
+        ],
+        "NAME": "jinja2",
+        "OPTIONS": {
+            "match_extension": None,
+            "match_regex": r"^(?!admin/).*",
+            "filters": {
+                "markdown": "core.jinja2.filters.markdown",
+                "pluralize": "core.jinja2.filters.pluralize",
+                "with_classes": "core.jinja2.filters.with_classes",
+            },
+            "globals": {
+                "messages": "core.jinja2.globals.messages",
+                "get_menu": "core.jinja2.globals.generate_menu",
+                "crispy": "core.jinja2.globals.crispy",
+                "get_branches": "compsciclub_ru.context_processors.get_branches",
+            },
+            "extensions": [
+                "jinja2.ext.do",
+                "jinja2.ext.loopcontrols",
+                "jinja2.ext.with_",
+                "jinja2.ext.i18n",
+                "jinja2.ext.autoescape",
+                "django_jinja.builtins.extensions.CsrfExtension",
+                "django_jinja.builtins.extensions.CacheExtension",
+                "django_jinja.builtins.extensions.TimezoneExtension",
+                "django_jinja.builtins.extensions.StaticFilesExtension",
+                "django_jinja.builtins.extensions.DjangoFiltersExtension",
+                "webpack_loader.contrib.jinja2ext.WebpackExtension",
+                "core.jinja2.ext.UrlExtension",
+            ],
+            "bytecode_cache": {
+                "name": "default",
+                "backend": "django_jinja.cache.BytecodeCache",
+                "enabled": False,
+            },
+            "newstyle_gettext": True,
+            "autoescape": False,
+            "auto_reload": DEBUG,
+            "translation_engine": "django.utils.translation",
+        }
+    },
+    {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'APP_DIRS': False,
         'DIRS': [
