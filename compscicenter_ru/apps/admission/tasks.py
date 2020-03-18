@@ -58,7 +58,7 @@ def import_testing_results(*, task_id):
         logger.error(f"Task with id = {task_id} not found.")
         return
     task.lock(locked_by="rqworker")
-    active_campaigns = Campaign.get_active()
+    active_campaigns = Campaign.objects.filter(current=True)
     for campaign in active_campaigns:
         api = YandexContestAPI(access_token=campaign.access_token)
         for contest in campaign.contests.filter(type=Contest.TYPE_TEST):
@@ -68,6 +68,7 @@ def import_testing_results(*, task_id):
             except ContestAPIError as e:
                 if e.code == ResponseStatus.BAD_TOKEN:
                     notify_admin_bad_token(campaign.pk)
+                    # FIXME: skip campaign processing instead of raising exc
                 raise
             logger.debug(f"Scoreboard total = {on_scoreboard}")
             logger.debug(f"Updated = {updated}")
