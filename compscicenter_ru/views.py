@@ -219,8 +219,6 @@ class TeachersView(TemplateView):
 class AlumniHonorBoardView(TemplateView):
     def get_template_names(self):
         graduation_year = int(self.kwargs['year'])
-        if graduation_year <= 2017:
-            return "compscicenter_ru/alumni_by_year.html"
         return [
             f"compscicenter_ru/alumni/{graduation_year}.html",
             "compscicenter_ru/alumni/fallback_year.html"

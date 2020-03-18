@@ -1,6 +1,7 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
 {% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
+{% import "compscicenter_ru/alumni/_macros.jinja2" as macros_alumni %}
 
 {% block body_attrs %}class="mb-0" data-init-sections="honorBoard"{% endblock body_attrs %}
 
@@ -10,7 +11,7 @@
 <div class="navbar-container">
     <nav class="navbar navbar-main{% if theme_class %} {{ theme_class }}{% endif %}">
         <div class="container">
-            <a class="navbar-logo" href="/">{{ macros.svg_icon('logo-csc') }}</a>
+            <a class="navbar-logo" href="/">{{ macros.csc_logo() }}</a>
             <div class="menu-desktop-wrapper">
                 <ul class="ui navbar-nav">
                     <li class="nav-item">
@@ -130,18 +131,7 @@
     </div>
 
     {% if testimonials %}
-    <div class="csc-student-reviews"><a name="testimonials"></a>
-        <div class="container">
-            <h1 class="text-center">Отзывы студентов</h1>
-            <div class="card-columns _testimonials">
-                {% for graduate_profile in testimonials %}
-                    {{ macros_cards.testimonial_card(graduate_profile) }}
-                {% endfor %}
-
-                <a href="{{ url('testimonials') }}" class="btn _small _outline _rounded _gray mt-3">Все отзывы</a>
-            </div>
-        </div>
-    </div>
+        {{ macros_alumni.testimonial_grid(testimonials) }}
     {% endif %}
 
     <script type="text/javascript">
