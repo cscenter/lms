@@ -9,9 +9,10 @@
 {% load user_thumbnail from user_thumbnail %}
 {% block title %}{{ profile_user.get_short_name }} - {% trans "Profile" %} {% trans "on site" %} Computer Science Center{% endblock title %}
 
+{% block body_attrs %} data-init-sections="profile"{% endblock body_attrs %}
+
 
 {% block javascripts %}
-    {#  Initial data  #}
     <script type="text/javascript">
         {# TODO: How to preload this staff with webpack? #}
         window.profileAppInit = {{ initial|safe }};
@@ -30,8 +31,6 @@
             });
         {% endif %}
     </script>
-
-    {% render_bundle 'profile' 'js' %}
 {% endblock javascripts %}
 
 

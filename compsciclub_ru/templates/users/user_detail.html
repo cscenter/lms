@@ -7,16 +7,15 @@
 {% load render_bundle from webpack_loader %}
 {% block title %}{{ profile_user.get_short_name }} - {% trans "Profile" %} {% trans "on site" %} Computer Science Club{% endblock title %}
 
+{% block body_attrs %} data-init-sections="profile"{% endblock body_attrs %}
 
 {% block javascripts %}
-    {#  Initial data  #}
     <script type="text/javascript">
         window.profileAppInit = {{ initial|safe }};
         window.profileAppInit["preload"] = [
             "{% static "v1/js/vendor/FileAPI/FileAPI.min.js" %}"
         ];
     </script>
-    {% render_bundle 'profile' 'js' %}
 {% endblock javascripts %}
 
 {% block content %}

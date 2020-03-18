@@ -1,0 +1,36 @@
+{% macro widget_attrs(bound_field) -%}
+{% for name, value in bound_field.field.widget.attrs.items() %}{% if value is not sameas False %} {{ name }}{% if value is not sameas True %}="{{ value }}"{% endif %}{% endif %}{% endfor %}
+{%- endmacro %}
+
+
+{% macro field(bound_field, hide_label=False, prepend_text="", wrapper_classes="", label_classes="", input_classes="") -%}
+    {% if bound_field.is_hidden %}
+        {{ bound_field|safe }}
+    {% else %}
+        <div id="div_{{ bound_field.id_for_label }}" class="form-group{% if bound_field.errors %} has-error{% endif -%}{% if wrapper_classes %} {{ wrapper_classes }}{% endif %}">
+            {% if not hide_label -%}
+                <label for="{{ bound_field.id_for_label }}" class="control-label{% if label_classes %} {{ label_classes }}{%- endif %}">{{ bound_field.label }}{% if bound_field.field.required %}<span class="asteriskField">*</span>{% endif %}</label>
+            {%- endif %}
+            <div class="controls">
+                {% if prepend_text -%}
+                    <div class="input-group">
+                        <span class="input-group-addon">{{ prepend_text }}</span>
+                        {{ bound_field|with_classes('form-control ' + input_classes) }}
+                    </div>
+                {%- else -%}
+                    {{ bound_field|with_classes('form-control ' + input_classes) }}
+                {%- endif %}
+                {% if bound_field.help_text -%}
+                    <div class="help-block">{{ bound_field.help_text }}</div>
+                {%- endif %}
+                {% if bound_field.errors -%}
+                    <div class="help-block">
+                    {% for e in bound_field.errors %}
+                        {{ e }}<br>
+                    {% endfor %}
+                    </div>
+                {%- endif %}
+            </div>
+        </div>
+    {% endif %}
+{%- endmacro %}

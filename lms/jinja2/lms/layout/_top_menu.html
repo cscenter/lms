@@ -1,0 +1,78 @@
+{% with user = request.user %}
+{% if user.is_authenticated %}
+    {% set menu = get_menu("menu_private", request) %}
+{% else %}
+    {% set menu = [] %}
+{% endif %}
+
+<div class="header">
+<div class="menu lvl1">
+    <div class="container">
+        <div class="col-xs-9">
+            <div class="logo-cell">
+                <a class="logo-container" href="{{ url('index', subdomain=None) }}"><img src="{{ static("v1/img/center/logo.svg") }}" alt="Computer Science Center"></a>
+            </div>
+            <ul{% if menu|length > 8 %} class="__narrow"{% endif %}>
+                {% for menu_item in menu %}
+                    <li {% if menu_item.selected %}class="active"{% endif %}>
+                        <a {% if menu_item.is_external %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.title }}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-xs-3" id="login" data-user-id="{{ user.pk|default("") }}">
+            {% if user.is_authenticated %}
+                <div class="dropdown">
+                  <a href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      {%- with im = user.get_thumbnail("60x60", use_stub=True) -%}
+                          <img src="{{ im.url }}" width="32" height="32" alt="{{ user.get_full_name() }}">
+                      {%- endwith %}
+                      <span class="caret"></span>
+                  </a>
+                  <ul class="dropdown-menu pull-right" aria-labelledby="user-menu">
+                      <li class="dropdown-header">{{ user.get_short_name() }}</li>
+                      <li><a href="{{ user.get_absolute_url() }}">{% trans %}Profile{% endtrans %}</a></li>
+                      {% if user.is_staff %}
+                          <li><a href="{{ url('staff:student_search', subdomain=LMS_SUBDOMAIN) }}">Курирование</a></li>
+                          <li><a href="{{ url('stats:index', subdomain=LMS_SUBDOMAIN) }}">Статистика</a></li>
+                          <li><a href="{{ url('admin:index') }}" target="_blank">Админ-панель</a></li>
+                      {% endif %}
+                      <li><a href="{{ url('auth:logout') }}">{% trans %}Logout{% endtrans %}</a></li>
+                  </ul>
+                </div>
+                {% if request.subdomain != LMS_SUBDOMAIN %}
+                    <a href="{{ url('index', subdomain=LMS_SUBDOMAIN) }}" class="members-area-link">Личный кабинет</a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url('auth:login') }}{% if not request.path.startswith("/login") %}?next={{ request.get_full_path()|urlencode}}{% endif %}">{% trans %}Login{% endtrans %}</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% for menu_item in menu %}
+    {% if menu_item.selected and menu_item.children -%}
+      <div class="menu lvl2 {{ menu_item.css_classes }}">
+        <div class="container">
+              <ul>
+                {% for second_level in menu_item.children %}
+                    <li {% if second_level.selected and second_level.css_classes %}class="{{second_level.css_classes}} active"
+                    {% elif second_level.css_classes %}class="{{ second_level.css_classes }}"
+                    {% elif second_level.selected %}class="active"{% endif %}>
+                        <a {% if second_level.is_external %}target="_blank"{% endif %} href="{{ second_level.url }}">
+                            {{ second_level.title }}
+                            {% if second_level.budge and second_level.budge in request.unread_notifications_cache %}
+                            <span class="badge">
+                              {{ request.unread_notifications_cache[second_level.budge]|length }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                {% endfor %}
+              </ul>
+        </div>
+      </div>
+    {%- endif %}
+{% endfor %}
+</div>
+{% endwith %}

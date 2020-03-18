@@ -4,7 +4,7 @@
 {% load lookup startswith from core_tags %}
 {% load csc_menu from csc_menu %}
 {% if request.subdomain == LMS_SUBDOMAIN %}
-{% if request.user.is_authenticated %}{% csc_menu "menu_private" as menu %}{% else %}{% csc_menu "my_compscicenter_ru_public" as menu %}{% endif %}
+{% if request.user.is_authenticated %}{% csc_menu "menu_private" as menu %}{% else %}{% csc_menu "not_exists" as menu %}{% endif %}
 {% else %}{% if request.user.is_authenticated and request.path|startswith:"/courses/" %}{% csc_menu "menu_private" as menu %}{% else %}{% csc_menu "menu_public" as menu %}{% endif %}{% endif %}
 {% load user_thumbnail from user_thumbnail %}
 

@@ -125,10 +125,9 @@ TEMPLATES = [
         "BACKEND": "django_jinja.backend.Jinja2",
         "APP_DIRS": False,
         'DIRS': [
+            str(PROJECT_DIR / "jinja2"),
             django.__path__[0] + '/forms/jinja2',
-            str(ROOT_DIR / "compscicenter_ru" / "jinja2"),
             str(ROOT_DIR / "lms" / "jinja2"),
-            str(SHARED_APPS_DIR / "core" / "jinja2"),
             str(SHARED_APPS_DIR / "surveys" / "jinja2"),
             # svg inline support
             str(SHARED_APPS_DIR / "assets" / "v2" / "dist" / "img"),
@@ -137,16 +136,18 @@ TEMPLATES = [
         "OPTIONS": {
             "match_extension": None,
             "match_regex": r"^(?!admin/).*",
-            # Or put filters under templatetags and load with
-            # django-jinja decorator
             "filters": {
-                "markdown": "compscicenter_ru.jinja2_filters.markdown",
-                "pluralize": "compscicenter_ru.jinja2_filters.pluralize",
-                "youtube_video_id": "compscicenter_ru.jinja2_filters.youtube_video_id",
+                "markdown": "core.jinja2.filters.markdown",
+                "pluralize": "core.jinja2.filters.pluralize",
+                "with_classes": "core.jinja2.filters.with_classes",
+                "youtube_video_id": "core.jinja2.filters.youtube_video_id",
                 "as_survey": "surveys.jinja2_filters.render_form",
             },
             "globals": {
-                "crispy": "compscicenter_ru.jinja2_filters.crispy",
+                "messages": "core.jinja2.globals.messages",
+                "get_menu": "core.jinja2.globals.generate_menu",
+                "crispy": "core.jinja2.globals.crispy",
+                "pagination": "core.jinja2.globals.pagination",
             },
             "extensions": [
                 "jinja2.ext.do",
@@ -160,9 +161,7 @@ TEMPLATES = [
                 "django_jinja.builtins.extensions.StaticFilesExtension",
                 "django_jinja.builtins.extensions.DjangoFiltersExtension",
                 "webpack_loader.contrib.jinja2ext.WebpackExtension",
-                "compscicenter_ru.jinja2_extensions.Extensions",
-                "compscicenter_ru.jinja2_extensions.UrlsExtension",
-                "compscicenter_ru.jinja2_extensions.MenuExtension",
+                "core.jinja2.ext.UrlExtension",
             ],
             "bytecode_cache": {
                 "name": "default",

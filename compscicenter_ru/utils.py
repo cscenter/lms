@@ -29,7 +29,7 @@ class TabList:
             self._tabs[target].active = True
 
     def sort(self, key=None):
-        """If **key** is None, sort by tab.order attribute"""
+        """If **key** is None sort by tab.order attribute"""
         key = key or (lambda t: t.order)
         new_order = list((key(t), t.target) for t in self._tabs.values())
         new_order.sort()
@@ -42,7 +42,6 @@ class TabList:
         return iter(self._tabs.values())
 
     def __getitem__(self, target):
-        # TODO: support indexing by int since dict in python > 3.5 is ordered
         return self._tabs[target]
 
     def __contains__(self, item):

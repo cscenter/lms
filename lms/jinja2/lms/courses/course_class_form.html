@@ -1,0 +1,86 @@
+{% extends "lms/layout/v1_base.html" %}
+
+{% import "macros/_forms.jinja2" as forms %}
+
+{% block body_attrs %} data-init-sections="datetimepickers,tooltips,selectpickers,courseClassForm"{% endblock body_attrs %}
+
+{% block javascripts %}
+    {{ render_bundle('teaching', extension='js') }}
+{% endblock javascripts %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+        <ol class="breadcrumb projects">
+        {% if not form.instance.pk %}
+          <li class="active">Добавление нового занятия</li>
+            {% else %}
+            <li class="active">Редактирование занятия</li>
+        {% endif %}
+        </ol>
+
+        {% if not form.instance.pk and form.instance.course.is_completed and not request.user.is_curator %}
+            <div class="alert alert-block alert-warning">
+                Курс завершён. Если по какой-то причине вам необходимо добавить новое занятие - обратитесь, пожалуйста, к кураторам.
+            </div>
+        {% else %}
+            <form action="" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.non_field_errors() }}
+                <div class="row">
+                    <div class="col-xs-2">{{ forms.field(form['type']) }}</div>
+                    <div class="col-xs-3">{{ forms.field(form['venue']) }}</div>
+                </div>
+                <div class="form-group">
+                    <div class="form-inline">
+                        {{ forms.field(form['date'], prepend_text='<i class="fa fa-calendar"></i>', input_classes='datepicker') }}&nbsp;
+                        {{ forms.field(form['starts_at'], prepend_text='<i class="fa fa-clock-o"></i>', input_classes='timepicker') }}&nbsp;
+                        {{ forms.field(form['ends_at'], prepend_text='<i class="fa fa-clock-o"></i>', input_classes='timepicker') }}
+                    </div>
+                </div>
+                {{ forms.field(form['name']) }}
+                {{ forms.field(form['description']) }}
+                <fieldset>
+                    <legend>{% trans %}Materials{% endtrans %}</legend>
+                    {{ forms.field(form['slides']) }}
+                    {{ forms.field(form['video_url']) }}
+                    {{ forms.field(form['attachments']) }}
+                    {% if form.instance -%}
+                        {% with course_class_attachments = form.instance.courseclassattachment_set.all() -%}
+                            {% if course_class_attachments|length > 0 -%}
+                                <ul class="list-unstyled __files">
+                                    {% for attachment in course_class_attachments -%}
+                                        <li><a href="{{ attachment.get_delete_url() }}"><i class="fa fa-trash-o"></i>&nbsp;{{ attachment.material_file_name }}</a></li>
+                                    {%- endfor %}
+                                </ul>
+                            {%- endif %}
+                        {%- endwith %}
+                    {%- endif %}
+                    {{ forms.field(form['other_materials']) }}
+                </fieldset>
+                <fieldset>
+                    <legend>{% trans %}Visibility Settings{% endtrans %}</legend>
+                    <div class="row">
+                        <div class="col-xs-5">{{ forms.field(form['materials_visibility']) }}</div>
+                        <div class="col-xs-5">{{ forms.field(form['restricted_to']) }}</div>
+                    </div>
+                </fieldset>
+                <div class="form-group">
+                    <div class="controls ">
+                        <button class="btn btn-primary btn-outline" name="_addanother" type="submit">
+                            <i class="fa fa-plus"></i> {% trans %}Save and add{% endtrans %}
+                        </button>
+                        <div class="pull-right">
+                            <input type="button" name="cancel" value="{% trans %}Cancel{% endtrans %}" class="btn btn-default" id="button-id-cancel" onclick="history.go(-1);">
+                            <input type="submit" name="save" value="{% trans %}Save{% endtrans %}" class="btn btn-primary" id="submit-id-save">
+                        </div>
+                    </div>
+                </div>
+            </form>
+{#            {{ crispy(form) }}#}
+        {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock content %}

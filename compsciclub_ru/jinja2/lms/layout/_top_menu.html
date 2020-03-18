@@ -1,0 +1,65 @@
+{% set menu = get_menu("compsciclub_" + request.LANGUAGE_CODE, request) %}
+{% set user = request.user %}
+
+<div class="header lvl1">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-9">
+                <div class="logo-cell">
+                    <a href="{{ url('index') }}">
+                        <div class="logo-container">
+                            <img src="{{ static("v1/img/club/logo.svg") }}" alt="Computer Science Club">
+                        </div>
+                    </a>
+                </div>
+                <ul{% if menu|length > 8 %} class="__narrow"{% endif %}>
+                    {% for menu_item in menu %}
+                        <li {% if menu_item.selected %}class="active"{% endif %}>
+                            <a {% if menu_item.is_external %}target="_blank"{% endif %} href="{{ menu_item.url }}">{{ menu_item.title }}{% if menu_item.children %} <i class="fa fa-angle-down"></i>{% endif %}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-xs-3 login" id="login" data-user-id="{{ user.pk }}">
+                {% if user.is_authenticated %}
+                    <a class="btn" href="{{ user.get_absolute_url() }}">
+                        <i class="fa fa-user"></i> Профиль
+                    </a>
+                    <a class="btn" href="{{ url('auth:logout') }}"><i class="fa fa-sign-out"></i> Выйти</a>
+                {% else %}
+                    <a href="{{ url('auth:login') }}" class="login-link">
+                      {% trans %}Login{% endtrans %}
+                    </a>
+                    <a href="{{ url('registration_register') }}" class="reg">
+                      {% trans %}Registration{% endtrans %}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for menu_item in menu %}
+    {% if menu_item.selected and menu_item.children %}
+      <div class="header lvl2 {{ menu_item.css_classes }} active">
+        <div class="container">
+              <ul>
+                {% for second_level in menu_item.children %}
+                    <li {% if second_level.selected and second_level.css_classes %}class="{{second_level.css_classes}} active"
+                    {% elif second_level.css_classes %}class="{{ second_level.css_classes }}"
+                    {% elif second_level.selected %}class="active"{% endif %}>
+                        <a {% if second_level.is_external %}target="_blank"{% endif %} href="{{ second_level.url }}">
+                            {{ second_level.title }}
+                            {% if second_level.budge and second_level.budge in request.unread_notifications_cache %}
+                            <span class="badge">
+                              {{ request.unread_notifications_cache[second_level.budge]|length }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                {% endfor %}
+              </ul>
+        </div>
+      </div>
+    {% endif %}
+{% endfor %}
