@@ -1,0 +1,16 @@
+{% import "compscicenter_ru/macros/_cards.jinja2" as macros_cards %}
+
+{% macro testimonial_grid(testimonials) -%}
+    <div class="csc-student-reviews"><a name="testimonials"></a>
+        <div class="container">
+            <h1 class="text-center">Отзывы студентов</h1>
+            <div class="card-columns _testimonials">
+                {% for graduate_profile in testimonials %}
+                    {{ macros_cards.testimonial_card(graduate_profile) }}
+                {% endfor %}
+
+                <a href="{{ url('testimonials') }}" class="btn _small _outline _rounded _gray mt-3">Все отзывы</a>
+            </div>
+        </div>
+    </div>
+{%- endmacro %}
