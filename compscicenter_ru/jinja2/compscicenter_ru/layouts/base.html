@@ -20,13 +20,14 @@
         };
     </script>
 </head>
+
 <body {% block body_attrs %}{% endblock body_attrs %}>
     <div class="svg-inline">{% block sprites %}{% endblock sprites %}</div>
     {% block before_navbar_container %}{% endblock before_navbar_container %}
     {% block menu %}
     <div class="navbar-container">
         {% block top_banner %}
-            {%- if is_admission_active -%}
+            {%- if not is_admission_disabled -%}
                 <div class="top-banner-wrapper">
                     <div class="container">
                         <div class="top-banner">
