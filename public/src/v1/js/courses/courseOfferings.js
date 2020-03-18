@@ -1,6 +1,5 @@
-import {getTemplate} from 'utils';
+import {getTemplate, showComponentError} from 'utils';
 
-// Maybe need to translate those strings in the future.
 const MESSAGES = {
     term: 'Семестр: ',
 };
@@ -8,7 +7,7 @@ const MESSAGES = {
 // TODO: add assert for `window.courseOfferingsData`
 
 
-export default function courseOfferingsList() {
+function courseOfferingsList() {
     const wrapper = document.getElementById('courses-list');
     if (wrapper === null) return;
     // Filters
@@ -124,3 +123,19 @@ function updateDOM(eventData, termSlug, academicYear, selectedTerm) {
     // Update select value. Need it for browser history
     eventData.yearsFilter.find('select').val(academicYear);
 }
+
+
+export function launch() {
+    courseOfferingsList();
+    import('components/forms')
+        .then(m => {
+            $('.__courses-filter--academic-year select').selectpicker({
+                showTick: false,
+                iconBase: 'fa',
+                tickIcon: 'fa-check',
+                width: 'fit',
+            });
+        })
+        .catch(error => showComponentError(error));
+}
+

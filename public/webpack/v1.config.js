@@ -21,14 +21,11 @@ const __nodemodulesdir = path.join(__dirname, '../node_modules');
 let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
 
 // All dependencies will be copied to path, relative to bundles output
-const STATIC_PATH = path.join('/static/', __bundlesdir);
 const STATIC_URL = path.join('/static/');
 
 // TODO: analyze bundles size and concat
 const PATHS = {
     common: path.join(__srcdir, '/js/main.js'),
-    profile: path.join(__srcdir, '/js/profile.js'),
-    forms: path.join(__srcdir, '/js/forms.js'),
     admission: path.join(__srcdir, '/js/center/admission/index.js'),
     supervising: path.join(__srcdir, '/js/supervising/index.js'),
     learning: path.join(__srcdir, '/js/learning/index.js'),
@@ -42,7 +39,7 @@ const PATHS = {
 const VENDOR = [
     "core-js/stable",
     "regenerator-runtime/runtime",
-    path.join(__srcdir, '/js/editor.js'),
+    path.join(__srcdir, '/js/components/editor'),
 ];
 
 const common = {
@@ -52,8 +49,6 @@ const common = {
         main: PATHS.common,
         center: PATHS.center,
         club: PATHS.club,
-        profile: PATHS.profile,
-        forms: PATHS.forms, // TODO: Should it be DLL instead?
         admission: PATHS.admission,
         learning: PATHS.learning,
         teaching: PATHS.teaching,
@@ -185,12 +180,6 @@ const common = {
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...
         new webpack.IgnorePlugin(/^\.\/locale$/),
-        // TODO: Prevent autoload jquery for now
-        // new webpack.ProvidePlugin({
-        //     '$': 'jquery',
-        //     'jQuery': 'jquery',
-        //     'window.jQuery': 'jquery'
-        // }),
         new CleanWebpackPlugin({
             verbose: true,
             cleanOnceBeforeBuildPatterns: ['**/*', '!.gitattributes'],
@@ -203,23 +192,23 @@ const common = {
         })
     ],
 
-	optimization: {
-		splitChunks: {
-		    minChunks: 2,
-			cacheGroups: {
-				vendor: {
-					name: "vendor",
-					test: "vendor",
-					enforce: true
-				},
-				forms: {
-					name: "forms",
-					test: "forms",
-					enforce: true
-				},
-			}
-		}
-	}
+    optimization: {
+        splitChunks: {
+            minChunks: 2,
+            cacheGroups: {
+                vendor: {
+                    name: "vendor",
+                    test: "vendor",
+                    enforce: true
+                },
+                forms: {
+                    name: "forms",
+                    test: "components/forms",
+                    enforce: true
+                },
+            }
+        }
+    }
 };
 
 let appConfig;

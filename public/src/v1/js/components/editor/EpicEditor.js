@@ -4,7 +4,7 @@
  */
 
 
-import {createNotification} from "./utils";
+import {createNotification} from "utils";
 
 /**
  * Applies attributes to a DOM object

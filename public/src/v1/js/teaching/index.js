@@ -1,8 +1,30 @@
 import {showComponentError, getSections} from 'utils';
-import {TIMEPICKER_ICONS, TIMEPICKER_TOOLTIPS} from "../conf";
 
 $(document).ready(function () {
     let sections = getSections();
+    if (sections.includes("tooltips")) {
+        let defaultWhiteList = $.fn.tooltip.Constructor.DEFAULTS.whiteList;
+        defaultWhiteList.dl = ['class'];
+        defaultWhiteList.dd = [];
+        defaultWhiteList.dt = [];
+        $('[data-toggle="tooltip"]').tooltip();
+    }
+    if (sections.includes("datetimepickers")) {
+        import('components/forms')
+            .then(m => {
+                m.initDatePickers();
+                m.initTimePickers();
+            })
+            .catch(error => showComponentError(error));
+    }
+    if (sections.includes("selectpickers")) {
+        import('components/forms')
+            .then(m => {
+                m.initMultiSelectPickers();
+            })
+            .catch(error => showComponentError(error));
+    }
+
     if (sections.includes("gradebook")) {
         import(/* webpackChunkName: "gradebook" */ 'teaching/gradebook')
             .then(module => {
@@ -18,11 +40,6 @@ $(document).ready(function () {
             })
             .catch(error => showComponentError(error));
     } else if (sections.includes("assignmentForm")) {
-        $('[data-toggle="tooltip"]').tooltip();
-        let defaultWhiteList = $.fn.tooltip.Constructor.DEFAULTS.whiteList;
-        defaultWhiteList.dl = ['class'];
-        defaultWhiteList.dd = [];
-        defaultWhiteList.dt = [];
         $('.has-popover').popover({
             container: 'body',
             html: true,
@@ -33,86 +50,46 @@ $(document).ready(function () {
                 return $(helpBlockId).html();
             }
         });
-        import('forms')
-            .then(_ => {
-                document.querySelectorAll('.multiple-select').forEach((element) => {
-                    $(element).selectpicker({
-                        iconBase: 'fa',
-                        tickIcon: 'fa-check',
-                    });
-                });
-                $('.datepicker').datetimepicker({
-                    locale: 'ru',
-                    format: 'DD.MM.YYYY',
-                    stepping: 5,
-                    allowInputToggle: true,
-                    toolbarPlacement: "bottom",
-                    keyBinds: {
-                        left: false,
-                        right: false,
-                        escape: function () {
-                            this.hide();
-                        },
-                    },
-                    icons: TIMEPICKER_ICONS,
-                    tooltips: TIMEPICKER_TOOLTIPS
-                });
+    } else if (sections.includes("courseClassForm")) {
+        // FIXME: omg, what is this? remove?
+        let ends_at_touched = false;
+        // FIXME: use .on here
+        $("#id_ends_at").focus(function () {
+            ends_at_touched = true;
+        });
 
-                $('.timepicker').datetimepicker({
-                    locale: 'ru',
-                    format: 'HH:mm',
-                    stepping: 1,
-                    useCurrent: false,
-                    allowInputToggle: true,
-                    icons: TIMEPICKER_ICONS,
-                    tooltips: TIMEPICKER_TOOLTIPS,
-                    defaultDate: new Date("01/01/1980 23:59"),
-                    keyBinds: {
-                        left: false,
-                        right: false,
-                    }
-                });
-            })
-            .catch(error => showComponentError(error));
-    } else if (sections.includes("datetimepicker")) {
-        $('[data-toggle="tooltip"]').tooltip();
-        import('forms')
-            .then(_ => {
-                $('#div_id_date .input-group').datetimepicker({
-                    allowInputToggle: true,
-                    locale: 'ru',
-                    format: 'DD.MM.YYYY',
-                    stepping: 5,
-                    toolbarPlacement: "bottom",
-                    keyBinds: {
-                        left: false,
-                        right: false,
-                        escape: function () {
-                            this.hide();
-                        },
-                    },
-                    icons: TIMEPICKER_ICONS,
-                    tooltips: TIMEPICKER_TOOLTIPS,
+        // this is fragile as hell, didn't find a suitable library
+        $("#id_starts_at").change(function () {
+            var DELTA_MINUTES = 80;
 
-                });
+            function pad(num, size) {
+                var s = num + "";
+                while (s.length < size) s = "0" + s;
+                return s;
+            }
 
-                $('#div_id_starts_at .input-group, #div_id_ends_at .input-group').datetimepicker({
-                    locale: 'ru',
-                    format: 'HH:mm',
-                    stepping: 5,
-                    useCurrent: false,
-                    icons: TIMEPICKER_ICONS,
-                    defaultDate: new Date("01/01/1980 18:00"),
-                    allowInputToggle: true,
-                    tooltips: TIMEPICKER_TOOLTIPS,
-                    keyBinds: {
-                        left: false,
-                        right: false,
-                        up: false,
-                        down: false
-                    }
-                });
-            })
-            .catch(error => showComponentError(error));
+            if (!ends_at_touched) {
+                const string_time = $(this).val();
+                var matches = string_time.match(
+                    "([0-9]{2})([:\-])([0-9]{2})([:0-9\-]*)");
+                if (matches !== null) {
+                    var hours = parseInt(matches[1]);
+                    var separator = matches[2];
+                    var minutes = parseInt(matches[3]);
+                    var maybe_seconds = matches[4];
+
+                    var raw_new_minutes = minutes + DELTA_MINUTES;
+                    var new_hours = (hours + Math.floor(raw_new_minutes / 60)) % 24;
+                    var new_minutes = raw_new_minutes % 60;
+
+                    $("#id_ends_at").val(pad(new_hours, 2)
+                        + separator
+                        + pad(new_minutes, 2)
+                        + maybe_seconds);
+                } else {
+                    console.warning("Can't parse " + string_time);
+                }
+            }
+        });
     }
 });

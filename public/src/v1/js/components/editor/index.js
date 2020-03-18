@@ -1,7 +1,7 @@
 import $ from "jquery";
 import md5 from "blueimp-md5";
 import SweetAlert from "bootstrap-sweetalert";
-import {getLocalStorageKey} from "./utils";
+import {getLocalStorageKey} from "utils";
 
 import _escape from "lodash-es/escape";
 import _unescape from "lodash-es/unescape";
