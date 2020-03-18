@@ -10,11 +10,11 @@ from admission.models import Applicant, Campaign, University, InterviewSlot
 from admission.tasks import register_in_yandex_contest
 
 
-class ActiveCampaignField(serializers.PrimaryKeyRelatedField):
+class OpenRegistrationCampaignsField(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
         if self.queryset:
             return self.queryset.all()
-        return Campaign.get_active()
+        return Campaign.with_open_registration()
 
 
 class ApplicantSerializer(serializers.ModelSerializer):
@@ -28,7 +28,7 @@ class ApplicantSerializer(serializers.ModelSerializer):
             'empty': 'Выберите интересующие вас направления обучения'
         }
     )
-    campaign = ActiveCampaignField(
+    campaign = OpenRegistrationCampaignsField(
         label='Отделение',
         error_messages={
             'does_not_exist': 'Приемная кампания окончена либо не существует',

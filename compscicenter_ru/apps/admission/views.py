@@ -142,7 +142,7 @@ class ApplicationFormView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        active_campaigns = (Campaign.get_active()
+        active_campaigns = (Campaign.with_open_registration()
                             .annotate(value=F('branch__code'),
                                       label=F('branch__name'))
                             .values('value', 'label', 'id'))
@@ -441,7 +441,7 @@ class InterviewAssignmentDetailView(CuratorOnlyMixin, generic.DetailView):
 
 
 def get_default_campaign_for_user(user: User) -> Optional[Campaign]:
-    active_campaigns = list(Campaign.get_active()
+    active_campaigns = list(Campaign.objects.filter(current=True)
                             .only("pk", "branch_id")
                             .order_by('branch__order'))
     try:
@@ -531,7 +531,7 @@ class InterviewListView(InterviewerOnlyMixin, BaseFilterView, generic.ListView):
             # To interviewers show interviews from current campaigns where
             # they participate.
             try:
-                current_campaigns = list(Campaign.get_active()
+                current_campaigns = list(Campaign.objects.filter(current=True)
                                          .values_list("pk", flat=True))
             except Campaign.DoesNotExist:
                 messages.error(self.request, "Нет активных кампаний по набору.")
@@ -654,7 +654,7 @@ class InterviewCommentView(InterviewerOnlyMixin, generic.UpdateView):
 class InterviewResultsDispatchView(CuratorOnlyMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         """Based on user settings, get preferred page address and redirect"""
-        branches = (Campaign.get_active()
+        branches = (Campaign.objects.filter(current=True)
                     .values_list("branch__code", flat=True))
         branch_code = self.request.user.branch.code
         if branch_code not in branches:
@@ -677,7 +677,7 @@ class InterviewResultsView(CuratorOnlyMixin, FilterMixin,
     filterset_class = ResultsFilter
 
     def dispatch(self, request, *args, **kwargs):
-        self.active_campaigns = Campaign.get_active()
+        self.active_campaigns = Campaign.objects.filter(current=True)
         try:
             self.selected_campaign = next(c for c in self.active_campaigns
                                           if c.branch_id == request.branch.pk)

@@ -141,7 +141,8 @@ class Campaign(TimezoneAwareModel, models.Model):
             raise ValidationError(errors)
 
     @classmethod
-    def get_active(cls):
+    def with_open_registration(cls):
+        """Returns campaigns marked as `current` with open registration form"""
         today = timezone.now()
         return (cls.objects
                 .filter(current=True,
