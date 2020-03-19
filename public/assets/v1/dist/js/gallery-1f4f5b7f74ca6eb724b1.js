@@ -1,1 +1,0 @@
-(window.webpackJsonp=window.webpackJsonp||[]).push([[7],{"hRW/":function(e,a,t){"use strict";t.r(a);var n={launch:function(){$(".gallery a").magnificPopup({type:"image",image:{titleSrc:function(e){return e.el.attr("title")}},gallery:{enabled:!0,tCounter:'<span class="mfp-counter">%curr% из %total%</span>'},disableOn:400,key:"teacher-gallery"})}};a.default=n}}]);
