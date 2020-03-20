@@ -4,8 +4,6 @@
  */
 
 
-import {createNotification} from "utils";
-
 /**
  * Applies attributes to a DOM object
  * @param  {object} context The DOM obj you want to apply the attributes to
