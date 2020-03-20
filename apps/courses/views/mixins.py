@@ -75,4 +75,5 @@ class CourseURLParamsMixin:
         return (Course.objects
                 .filter(semester__type=self.kwargs['semester_type'],
                         semester__year=self.kwargs['semester_year'],
-                        meta_course__slug=self.kwargs['course_slug']))
+                        meta_course__slug=self.kwargs['course_slug'])
+                .select_related('meta_course', 'semester'))

@@ -14,7 +14,8 @@ from core.urls import reverse, branch_aware_reverse
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment, StudentGroup
-from learning.services import EnrollmentService, CourseCapacityFull
+from learning.services import EnrollmentService, CourseCapacityFull, \
+    StudentGroupService
 from learning.settings import StudentStatuses, Branches
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
 from users.tests.factories import StudentFactory, InvitedStudentFactory
@@ -25,6 +26,23 @@ from users.tests.factories import StudentFactory, InvitedStudentFactory
 
 
 # TODO: Убедиться, что в *.ical они тоже не попадают (see CalendarStudentView also)
+
+
+@pytest.mark.django_db
+def test_service_enroll():
+    student = StudentFactory()
+    student2 = StudentFactory(branch=student.branch)
+    current_semester = SemesterFactory.create_current()
+    course = CourseFactory(semester=current_semester, branch=student.branch)
+    enrollment = EnrollmentService.enroll(student, course, 'test enrollment')
+    reason_entry = EnrollmentService._format_reason_record('test enrollment', course)
+    assert enrollment.reason_entry == reason_entry
+    assert not enrollment.is_deleted
+    assert enrollment.student_group_id is None
+    student_group = StudentGroupService.resolve(course, student2)
+    enrollment = EnrollmentService.enroll(student2, course, 'test enrollment',
+                                          student_group=student_group)
+    assert enrollment.student_group == student_group
 
 
 @pytest.mark.django_db

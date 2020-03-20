@@ -113,7 +113,6 @@ def get_user_thumbnail(user, geometry, use_stub=True,
         options["crop"] = "center top"
     if "cropbox" not in options:
         options["cropbox"] = user.photo_thumbnail_cropbox()
-    # FIXME: Instead of factory we could pass in path to stub image, but to do with cropbox in that case?
     if use_stub:
         if user.gender == GenderTypes.MALE:
             factory = ManStubImage if stub_official else BoyStubImage
@@ -133,7 +132,7 @@ def get_thumbnail_or_stub(path_to_img, geometry, stub_factory=None, **options):
         thumbnail = get_thumbnail(path_to_img, geometry, **options)
     else:
         thumbnail = None
-    # TODO: Override default DummyImageFile
-    if not thumbnail and stub_factory:
+    thumbnail_is_missed = not thumbnail or isinstance(thumbnail, DummyImageFile)
+    if thumbnail_is_missed and stub_factory:
         thumbnail = stub_factory(geometry=geometry)
     return thumbnail

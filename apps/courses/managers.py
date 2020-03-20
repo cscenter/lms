@@ -2,7 +2,7 @@ from typing import List, Union
 
 from django.db import models
 from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
-    Value, IntegerField
+    Value, IntegerField, F
 
 from core.utils import is_club_site
 from courses.constants import MaterialVisibilityTypes
@@ -73,8 +73,13 @@ class CourseClassQuerySet(query.QuerySet):
         return self.filter(date__gte=date_start, date__lte=date_end)
 
     def for_student(self, user):
-        return self.filter(course__enrollment__student_id=user.pk,
-                           course__enrollment__is_deleted=False)
+        # Get common courses classes and restricted to the student group
+        common_classes = Q(courseclassgroup__isnull=True)
+        restricted_to_student_group = Q(courseclassgroup__group_id=F('course__enrollment__student_group_id'))
+        return (self.filter(common_classes | restricted_to_student_group,
+                            course__enrollment__student_id=user.pk,
+                            course__enrollment__is_deleted=False)
+                    .order_by("-date", "-starts_at"))
 
     def for_teacher(self, user):
         return self.filter(course__teachers=user)

@@ -20,8 +20,11 @@ from courses.constants import MaterialVisibilityTypes
 from courses.tests.factories import CourseClassFactory, CourseTeacherFactory, \
     CourseFactory, SemesterFactory, CourseClassAttachmentFactory, \
     LearningSpaceFactory
-from core.tests.factories import LocationFactory
-from users.tests.factories import TeacherFactory
+from core.tests.factories import LocationFactory, BranchFactory
+from learning.models import StudentGroup
+from learning.services import EnrollmentService, StudentGroupService
+from learning.tests.factories import EnrollmentFactory
+from users.tests.factories import TeacherFactory, StudentFactory
 
 
 @pytest.mark.django_db
@@ -298,3 +301,48 @@ def test_course_class_form_available(client, curator, settings):
     message = list(response.context['messages'])[0]
     assert 'success' in message.tags
     # FIXME: добавить тест на is_form_available и посмотреть, можно ли удалить эту часть, по-моему это лишняя логика
+
+
+@pytest.mark.django_db
+def test_manager_for_student():
+    new_branch = BranchFactory()
+    student = StudentFactory()
+    teacher = TeacherFactory()
+    course = CourseFactory(branch=student.branch,
+                           additional_branches=[new_branch])
+    # Active enrollment
+    enrollment = EnrollmentService.enroll(student, course)
+    enrollment.student_group = StudentGroupService.resolve(course, student)
+    enrollment.save()
+    assert CourseClass.objects.for_student(student).count() == 0
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    cc = CourseClassFactory(course=course)
+    assert CourseClass.objects.for_student(student).count() == 1
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    # Student left the course
+    EnrollmentService.leave(enrollment)
+    assert CourseClass.objects.for_student(student).count() == 0
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    # Course class is visible to main course branch students
+    cc = CourseClassFactory(course=course,
+                            restricted_to=[enrollment.student_group])
+    EnrollmentService.enroll(student, course)
+    assert CourseClass.objects.for_student(student).count() == 2
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    # This one is hidden to main branch
+    new_branch_group = StudentGroup.objects.filter(course=course,
+                                                   branch_id=new_branch).first()
+    assert new_branch_group is not None
+    cc = CourseClassFactory(course=course,
+                            restricted_to=[new_branch_group])
+    assert CourseClass.objects.for_student(student).count() == 2
+    assert CourseClass.objects.for_student(teacher).count() == 0
+    # Student is not enrolled in the course
+    course2 = CourseFactory(branch=student.branch)
+    CourseClassFactory(course=course2)
+    assert CourseClass.objects.for_student(student).count() == 2
+    EnrollmentFactory(student=student, course=course2)
+    assert CourseClass.objects.for_student(student).count() == 3
+    CourseClassFactory(course=course,
+                       restricted_to=[enrollment.student_group, new_branch_group])
+    assert CourseClass.objects.for_student(student).count() == 4

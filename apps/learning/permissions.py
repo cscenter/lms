@@ -54,7 +54,7 @@ def course_access_role(*, course, user) -> CourseRole:
 @rules.predicate
 def enroll_in_course(user, course: Course):
     if StudentStatuses.is_inactive(user.status):
-        logger.debug("Permissions for students with inactive status are restricted")
+        logger.debug("Permissions for student with inactive status are restricted")
         return False
     if not course.enrollment_is_open:
         logger.debug("Enrollment is closed")

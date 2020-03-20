@@ -25,8 +25,30 @@ __all__ = ('CourseForm', 'CourseEditDescrForm', 'CourseNewsForm',
 
 from courses.utils import execution_time_string
 from learning.models import StudentGroup
+from learning.services import StudentGroupService
 
 DROP_ATTACHMENT_LINK = '<a href="{}"><i class="fa fa-trash-o"></i>&nbsp;{}</a>'
+
+
+class MultipleStudentGroupField(forms.TypedMultipleChoiceField):
+    def __init__(self, **kwargs):
+        super().__init__(coerce=int, **kwargs)
+
+    def prepare_value(self, value):
+        if not value:
+            return super().prepare_value(value)
+        return [
+            # Initial data stores model objects
+            (sg.pk if isinstance(sg, StudentGroup) else sg) for sg in value
+        ]
+
+    def widget_attrs(self, widget):
+        widget_attrs = super().widget_attrs(widget)
+        widget_attrs.update({
+            'class': 'multiple-select bs-select-hidden',
+            'title': _('All groups'),
+        })
+        return widget_attrs
 
 
 class CourseForm(forms.ModelForm):
@@ -164,6 +186,16 @@ class CourseClassForm(forms.ModelForm):
         help_text=_("Format: hh:mm"),
         widget=TimeInputAsTextInput(format="%H:%M",
                                     attrs={'autocomplete': 'off'}))
+    restricted_to = MultipleStudentGroupField(
+        label=_("Student Groups"),
+        required=False,
+        help_text=_("Restrict course class visibility in the student schedule"))
+
+    class Meta:
+        model = CourseClass
+        fields = ['venue', 'type', 'date', 'starts_at', 'ends_at', 'name',
+                  'description', 'slides', 'attachments', 'video_url',
+                  'other_materials', 'materials_visibility', 'restricted_to']
 
     def __init__(self, *args, **kwargs):
         course = kwargs.pop('course', None)
@@ -172,55 +204,9 @@ class CourseClassForm(forms.ModelForm):
         self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
             branch_id=course.branch_id)
         self.fields['materials_visibility'].help_text = _("Note that some materials would be available by direct link")
+        field_restrict_to = self.fields['restricted_to']
+        field_restrict_to.choices = StudentGroupService.get_choices(course)
         self.instance.course = course
-
-        self.helper = FormHelper(self)
-        if "instance" in kwargs:
-            remove_links = "<ul class=\"list-unstyled __files\">{0}</ul>".format(
-                "".join("<li>{}</li>".format(
-                            DROP_ATTACHMENT_LINK.format(
-                                attachment.get_delete_url(),
-                                attachment.material_file_name))
-                        for attachment
-                        in kwargs["instance"].courseclassattachment_set.all()))
-        else:
-            remove_links = ""
-        self.helper.layout = Layout(
-            Div(Div('type', css_class='col-xs-2'),
-                Div('venue', css_class='col-xs-3'),
-                css_class='row'),
-            Div(Div(PrependedText('date', '<i class="fa fa-calendar"></i>'),
-                    HTML("&nbsp;"),
-                    PrependedText('starts_at', '<i class="fa fa-clock-o"></i>'),
-                    HTML("&nbsp;"),
-                    PrependedText('ends_at', '<i class="fa fa-clock-o"></i>'),
-                    css_class="form-inline"),
-                css_class="form-group"),
-            Div('name',
-                'description',
-                css_class="form-group"),
-            Fieldset(_("Materials"),
-                     'slides',
-                     'video_url',
-                     Div('attachments', HTML(remove_links),),
-                     'other_materials'),
-            Fieldset(_("Visibility Settings"),
-                     Div(
-                        Div('materials_visibility', css_class='col-xs-5'),
-                        css_class='row'),),
-            FormActions(
-                StrictButton(_('<i class="fa fa-plus"></i> Save and add'),
-                             name='_addanother', type="submit",
-                             css_class="btn-primary btn-outline"),
-                CANCEL_SAVE_PAIR
-            )
-        )
-
-    class Meta:
-        model = CourseClass
-        fields = ['venue', 'type', 'materials_visibility', 'name',
-                  'description', 'slides', 'attachments', 'video_url',
-                  'other_materials', 'date', 'starts_at', 'ends_at']
 
     def clean_date(self):
         date = self.cleaned_data['date']
@@ -264,12 +250,6 @@ class AssignmentDurationField(forms.DurationField):
         return value
 
 
-def _get_label(student_group):
-    if student_group.type == StudentGroupTypes.BRANCH:
-        return f"{student_group.name} [{student_group.branch.site}]"
-    return student_group.name
-
-
 class AssignmentForm(TimezoneAwareModelForm):
     title = forms.CharField(
         label=_("Title"),
@@ -311,43 +291,21 @@ class AssignmentForm(TimezoneAwareModelForm):
             attrs={"autocomplete": "off",
                    "class": "form-control",
                    "placeholder": _("hours:minutes")}))
-    restricted_to = forms.ModelMultipleChoiceField(
+    restricted_to = MultipleStudentGroupField(
         label=_("Available for"),
-        widget=forms.SelectMultiple(attrs={
-            'class': 'multiple-select bs-select-hidden',
-            'title': _('All groups'),
-        }),
         required=False,
-        help_text=_("Restrict assignment to selected groups. Available to all by default."),
-        queryset=StudentGroup.objects.none())
+        help_text=_("Restrict assignment to selected groups. Available to all by default."))
 
     def __init__(self, *args, **kwargs):
         course = kwargs.pop('course', None)
         assert course is not None
         super().__init__(*args, **kwargs)
         self.instance.course = course
-        qs = StudentGroup.objects.filter(course=course).order_by('pk')
-        groups = list(qs)
         field_restrict_to = self.fields['restricted_to']
-        # TODO: move to method
-        field_restrict_to.queryset = qs
         if course.group_mode == StudentGroupTypes.BRANCH:
             field_restrict_to.label = _("Available to Branches")
             field_restrict_to.widget.attrs['title'] = _("All Branches")
-            sites = set()
-            for g in groups:
-                # Special case when student group manually added in admin
-                if g.branch_id:
-                    g.branch = Branch.objects.get_by_pk(g.branch_id)
-                    sites.add(g.branch.site_id)
-            if len(sites) > 1:
-                get_label = _get_label
-            else:
-                get_label = attrgetter('name')
-        else:
-            get_label = attrgetter('name')
-        choices = [(sg.pk, get_label(sg)) for sg in groups]
-        field_restrict_to.choices = choices
+        field_restrict_to.choices = StudentGroupService.get_choices(course)
 
     class Meta:
         model = Assignment

@@ -97,15 +97,19 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
         city_nsk = CityFactory(name="Novosibirsk", code="nsk", abbr="nsk",
                                time_zone='Asia/Novosibirsk',)
         city_kzn = CityFactory(name="Kazan", code="kzn", abbr="kzn")
-
+        # FIXME: add ru/en names
         for site_id in (settings.TEST_DOMAIN_ID, settings.ANOTHER_DOMAIN_ID):
             BranchFactory(code=Branches.SPB,
                           site=Site.objects.get(id=site_id),
                           name="Санкт-Петербург",
+                          name_ru="Санкт-Петербург",
+                          name_en="Saint Petersburg",
                           city=city_spb)
             BranchFactory(code=Branches.NSK,
                           site=Site.objects.get(id=site_id),
                           name="Новосибирск",
+                          name_ru="Новосибирск",
+                          name_en="Novosibirsk",
                           time_zone='Asia/Novosibirsk',
                           city=city_nsk)
 

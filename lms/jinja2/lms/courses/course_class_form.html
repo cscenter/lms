@@ -2,7 +2,7 @@
 
 {% import "macros/_forms.jinja2" as forms %}
 
-{% block body_attrs %} data-init-sections="datetimepickers,tooltips,selectpickers,courseClassForm"{% endblock body_attrs %}
+{% block body_attrs %} data-init-sections="datetimepickers,tooltips,selectpickers"{% endblock body_attrs %}
 
 {% block javascripts %}
     {{ render_bundle('teaching', extension='js') }}
@@ -12,13 +12,10 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-        <ol class="breadcrumb projects">
-        {% if not form.instance.pk %}
-          <li class="active">Добавление нового занятия</li>
-            {% else %}
-            <li class="active">Редактирование занятия</li>
-        {% endif %}
-        </ol>
+        <h2 class="content-title mb-20">
+            {% if not form.instance.pk %}Добавление нового занятия{% else %}Редактирование занятия{% endif %}<br>
+            <small><a href="{{ form.instance.course.get_absolute_url() }}">{{ form.instance.course }}</a></small>
+        </h2>
 
         {% if not form.instance.pk and form.instance.course.is_completed and not request.user.is_curator %}
             <div class="alert alert-block alert-warning">
@@ -28,17 +25,19 @@
             <form action="" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form.non_field_errors() }}
-                <div class="row">
-                    <div class="col-xs-2">{{ forms.field(form['type']) }}</div>
-                    <div class="col-xs-3">{{ forms.field(form['venue']) }}</div>
-                </div>
-                <div class="form-group">
-                    <div class="form-inline">
-                        {{ forms.field(form['date'], prepend_text='<i class="fa fa-calendar"></i>', input_classes='datepicker') }}&nbsp;
-                        {{ forms.field(form['starts_at'], prepend_text='<i class="fa fa-clock-o"></i>', input_classes='timepicker') }}&nbsp;
-                        {{ forms.field(form['ends_at'], prepend_text='<i class="fa fa-clock-o"></i>', input_classes='timepicker') }}
+                <fieldset>
+                    <div class="row">
+                        <div class="col-xs-2">{{ forms.field(form['type']) }}</div>
+                        <div class="col-xs-3">{{ forms.field(form['venue']) }}</div>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <div class="form-inline">
+                            {{ forms.field(form['date'], prepend_text='<i class="fa fa-calendar"></i>', input_classes='datepicker') }}&nbsp;
+                            {{ forms.field(form['starts_at'], prepend_text='<i class="fa fa-clock-o"></i>', input_classes='timepicker') }}&nbsp;
+                            {{ forms.field(form['ends_at'], prepend_text='<i class="fa fa-clock-o"></i>', input_classes='timepicker') }}
+                        </div>
+                    </div>
+                </fieldset>
                 {{ forms.field(form['name']) }}
                 {{ forms.field(form['description']) }}
                 <fieldset>
@@ -78,7 +77,6 @@
                     </div>
                 </div>
             </form>
-{#            {{ crispy(form) }}#}
         {% endif %}
     </div>
   </div>

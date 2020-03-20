@@ -73,10 +73,6 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
     def get_permission_object(self):
         return self.course
 
-    def get_course_queryset(self):
-        return (super().get_course_queryset()
-                .select_related('semester', 'meta_course'))
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.data = None
