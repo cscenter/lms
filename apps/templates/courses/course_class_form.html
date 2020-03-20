@@ -4,7 +4,7 @@
 {% load static %}
 {% load render_bundle from webpack_loader %}
 
-{% block body_attrs %} data-init-sections="datetimepicker"{% endblock body_attrs %}
+{% block body_attrs %} data-init-sections="datetimepickers,tooltips"{% endblock body_attrs %}
 
 {% block javascripts %}
     {% render_bundle 'teaching' 'js' %}

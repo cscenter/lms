@@ -85,25 +85,28 @@ class CourseClassCreateUpdateMixin(CourseURLParamsMixin):
 class CourseClassCreateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin, CreateView):
     model = CourseClass
-    template_name = "courses/course_class_form.html"
+    template_name = "lms/courses/course_class_form.html"
 
     def get_initial(self, **kwargs):
-        # TODO: Add tests for initial data after discussion
         course = kwargs["course"]
+        initial = {
+            "materials_visibility": course.materials_visibility
+        }
+        # TODO: Add tests for initial data after discussion
         previous_class = (CourseClass.objects
                           .filter(course=course.pk)
                           .defer("description")
                           .order_by("-date", "starts_at")
                           .first())
         if previous_class is not None:
-            return {
+            initial.update({
                 "type": previous_class.type,
                 "venue": previous_class.venue,
                 "starts_at": previous_class.starts_at,
                 "ends_at": previous_class.ends_at,
                 "date": previous_class.date + datetime.timedelta(weeks=1)
-            }
-        return None
+            })
+        return initial
 
     def get_success_url(self):
         msg = _("The class '%s' was successfully created.")
@@ -126,7 +129,7 @@ class CourseClassCreateView(TeacherOnlyMixin,
 class CourseClassUpdateView(TeacherOnlyMixin,
                             CourseClassCreateUpdateMixin, UpdateView):
     model = CourseClass
-    template_name = "courses/course_class_form.html"
+    template_name = "lms/courses/course_class_form.html"
 
     def get_success_url(self):
         msg = _("The class '%s' was successfully updated.")

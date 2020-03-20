@@ -1,9 +1,9 @@
 from typing import Dict, List
 
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from courses.constants import TeacherRoles
-from courses.models import CourseReview
+from courses.models import CourseReview, CourseClass
 
 
 def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:

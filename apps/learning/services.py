@@ -1,4 +1,5 @@
 from itertools import islice
+from operator import attrgetter
 from typing import List, Iterable, Union
 
 from django.core.files.uploadedfile import UploadedFile
@@ -104,6 +105,31 @@ class StudentGroupService:
                 raise GroupEnrollmentKeyError
         elif course.group_mode == StudentGroupTypes.NO_GROUPS:
             return None
+
+    @classmethod
+    def get_choices(cls, course: Course):
+        choices = []
+        qs = StudentGroup.objects.filter(course=course).order_by('pk')
+        groups = list(qs)
+        sites_count = 1
+        if course.group_mode == StudentGroupTypes.BRANCH:
+            sites = set()
+            for g in groups:
+                # Special case when student group manually added in admin
+                if g.branch_id:
+                    g.branch = Branch.objects.get_by_pk(g.branch_id)
+                    sites.add(g.branch.site_id)
+            sites_count = len(sites)
+        for g in groups:
+            label = cls._get_choice_label(g, sites_count)
+            choices.append((str(g.pk), label))
+        return choices
+
+    @staticmethod
+    def _get_choice_label(student_group, sites_count):
+        if student_group.type == StudentGroupTypes.BRANCH and sites_count > 1:
+            return f"{student_group.name} [{student_group.branch.site}]"
+        return student_group.name
 
 
 class AssignmentService:
@@ -279,11 +305,17 @@ class CourseCapacityFull(EnrollmentError):
 
 class EnrollmentService:
     @staticmethod
-    def enroll(user: User, course: Course, reason_entry='', **attrs):
+    def _format_reason_record(reason_text: str, course: Course):
+        """Append date to the enter/leave reason text"""
+        timezone = course.get_timezone()
+        today = now_local(timezone).strftime(DATE_FORMAT_RU)
+        return f'{today}\n{reason_text}\n\n'
+
+    @classmethod
+    def enroll(cls, user: User, course: Course, reason_entry='', **attrs):
         if reason_entry:
-            timezone = course.get_timezone()
-            today = now_local(timezone).strftime(DATE_FORMAT_RU)
-            reason_entry = Concat(Value(f'{today}\n{reason_entry}\n\n'),
+            new_record = cls._format_reason_record(reason_entry, course)
+            reason_entry = Concat(Value(new_record),
                                   F('reason_entry'),
                                   output_field=TextField())
         with transaction.atomic():
@@ -297,18 +329,20 @@ class EnrollmentService:
             # is not used.
             if course.is_capacity_limited:
                 locked = Course.objects.select_for_update().get(pk=course.pk)
-            # Try to update state of the enrollment record to `active`
+            # Try to update enrollment to the `active` state
             filters = [Q(pk=enrollment.pk), Q(is_deleted=True)]
             if course.is_capacity_limited:
                 learners_count = SubqueryCount(
                     Enrollment.active
                     .filter(course_id=OuterRef('course_id')))
                 filters.append(Q(course__capacity__gt=learners_count))
+            attrs.update({
+                "is_deleted": False,
+                "reason_entry": reason_entry
+            })
             updated = (Enrollment.objects
                        .filter(*filters)
-                       .update(**attrs,
-                               is_deleted=False,
-                               reason_entry=reason_entry))
+                       .update(**attrs))
             if not updated:
                 # At this point we don't know the exact reason why row wasn't
                 # updated. It could happen if the enrollment state was
@@ -322,16 +356,19 @@ class EnrollmentService:
                 if not created:
                     populate_assignments_for_student(enrollment)
                 update_course_learners_count(course.pk)
+        enrollment.refresh_from_db()
+        return enrollment
 
-    @staticmethod
-    def leave(enrollment: Enrollment, reason_leave=''):
+    # TODO: replace `enrollment` with `student + course` like in `enroll` method?
+    @classmethod
+    def leave(cls, enrollment: Enrollment, reason_leave=''):
         update_fields = ['is_deleted']
         enrollment.is_deleted = True
         if reason_leave:
-            timezone = enrollment.course.get_timezone()
-            today = now_local(timezone).strftime(DATE_FORMAT_RU)
+            new_record = cls._format_reason_record(reason_leave,
+                                                   enrollment.course)
             enrollment.reason_leave = Concat(
-                Value(f'{today}\n{reason_leave}\n\n'),
+                Value(new_record),
                 F('reason_leave'),
                 output_field=TextField())
             update_fields.append('reason_leave')

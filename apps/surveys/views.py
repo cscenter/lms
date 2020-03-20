@@ -18,10 +18,6 @@ class CourseSurveyDetailView(CourseURLParamsMixin, FormView):
     def get_success_url(self):
         return reverse("surveys:form_success", kwargs=self.kwargs)
 
-    def get_course_queryset(self):
-        return (super().get_course_queryset()
-                .select_related("meta_course", "semester"))
-
     def get_form(self, form_class=None):
         """Return an instance of the form to be used in this view."""
         survey = get_object_or_404(

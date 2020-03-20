@@ -21,10 +21,6 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
     template_name = "learning/enrollment/enrollment_enter.html"
     permission_required = EnrollInCourse.name
 
-    def get_course_queryset(self):
-        return (super().get_course_queryset()
-                .select_related("semester", "meta_course"))
-
     def get_permission_object(self):
         return self.course
 

@@ -145,6 +145,12 @@ class CourseClassFactory(factory.DjangoModelFactory):
     ends_at = datetime.time(hour=13, minute=45)
     materials_visibility = MaterialVisibilityTypes.VISIBLE
 
+    @factory.post_generation
+    def restricted_to(self, create, extracted, **kwargs):
+        if extracted:
+            for student_group in extracted:
+                self.restricted_to.add(student_group)
+
 
 class CourseClassAttachmentFactory(factory.DjangoModelFactory):
     class Meta:

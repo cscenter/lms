@@ -5,6 +5,7 @@ from django.db import DEFAULT_DB_ALIAS, connections, router
 from django.utils.timezone import now
 
 
+# FIXME: remove User.branch and this code
 def create_default_city_and_branch(app_config, verbosity=2, interactive=True, using=DEFAULT_DB_ALIAS, apps=global_apps, **kwargs):
     try:
         City = apps.get_model('core', 'City')
@@ -37,6 +38,8 @@ def create_default_city_and_branch(app_config, verbosity=2, interactive=True, us
         Branch(pk=1, code=settings.DEFAULT_BRANCH_CODE,
                site_id=1,
                name='Главное отделение',
+               name_ru='Главное отделение',
+               name_en='Main Branch',
                established=now().year,
                city_id=settings.DEFAULT_CITY_CODE,
                time_zone='Europe/Moscow').save(using=using)

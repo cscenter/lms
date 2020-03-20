@@ -244,6 +244,7 @@ def applicant_testing_new_task(request):
                              processed_at__isnull=True,
                              task_name=task.task_name,
                              task_hash=task.task_hash)
+            # TODO: update `.created`?
         except Task.MultipleObjectsReturned:
             # Even more than 1 job in Task.MAX_RUN_TIME seconds
             pass
