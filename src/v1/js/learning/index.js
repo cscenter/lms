@@ -1,9 +1,8 @@
 import $ from 'jquery';
 import "jasny-bootstrap/js/fileinput";
 
-import UberEditor from "../editor";
+import UberEditor from "components/editor";
 import {createNotification, showComponentError} from "../utils";
-import {TIMEPICKER_ICONS, TIMEPICKER_TOOLTIPS} from "../conf";
 
 const sidebar = $("#o-sidebar");
 const footer = $(".footer");

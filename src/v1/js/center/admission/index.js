@@ -2,7 +2,6 @@ import initApplicantDetailSection from './applicant_detail';
 import initApplicantListSection from './applicant_list';
 import initInterviewSection from './interview';
 import {showComponentError, getSections} from 'utils';
-import {TIMEPICKER_ICONS, TIMEPICKER_TOOLTIPS} from "conf";
 
 
 $(document).ready(function () {
@@ -20,11 +19,13 @@ $(document).ready(function () {
 
 $(document).ready(function () {
     let sections = getSections();
-    if (sections.includes("datetimepicker")) {
+    if (sections.includes("tooltips")) {
         $('[data-toggle="tooltip"]').tooltip();
+    }
+    if (sections.includes("datetimepickers")) {
         // TODO: Move to `interview_list`
-        import('forms')
-            .then(_ => {
+        import('components/forms')
+            .then(m => {
                 // Status
                 $('select[name="status"]').selectpicker({
                     iconBase: 'fa',
@@ -48,8 +49,8 @@ $(document).ready(function () {
                             this.hide();
                         },
                     },
-                    icons: TIMEPICKER_ICONS,
-                    tooltips: TIMEPICKER_TOOLTIPS,
+                    icons: m.TIMEPICKER_ICONS,
+                    tooltips: m.TIMEPICKER_TOOLTIPS,
 
                 });
                 let dateFromPicker = $('#id_date_0').closest('.input-group');

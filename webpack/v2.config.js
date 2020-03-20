@@ -95,6 +95,20 @@ const common = {
                 }]
             },
             {
+                test: /\.(js|jsx|ts|tsx)$/,
+                include: [
+                    path.resolve(__nodemodulesdir, "react-async"),
+                    path.resolve(__nodemodulesdir, "react-hook-form"),
+                ],
+                use: [{
+                    loader: 'babel-loader',
+                    options: {
+                        extends: path.resolve(__srcdir, "js", ".babelrc.js"),
+                        cacheDirectory: true,
+                    }
+                }]
+            },
+            {
                 test: /\.js$/,
                 include: path.resolve(__nodemodulesdir, "bootstrap"),
                 use: [{

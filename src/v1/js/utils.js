@@ -28,11 +28,12 @@ export function showComponentError(error, msg='An error occurred while loading t
     createNotification(msg, 'error');
 }
 
+// TODO: share with v2?
 export function getSections() {
-    let sections = $("body").data("init-sections");
-    if (sections === undefined) {
-        return [];
-    } else {
+    if (document.body.hasAttribute("data-init-sections")) {
+        let sections = document.body.getAttribute("data-init-sections");
         return sections.split(",");
+    } else {
+        return [];
     }
 }
