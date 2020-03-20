@@ -59,7 +59,7 @@ function streamSelectChanged(event) {
 export default function initApplicantDetailSection() {
     restoreTabFromHash();
 
-    import('forms')
+    import('components/forms')
         .then(_ => {
             let streamSelect = $("select[name=interview_from_stream-streams]");
             streamSelect.selectpicker({

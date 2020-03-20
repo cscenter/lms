@@ -103,6 +103,9 @@ a {
     margin-bottom: 4px;
     color: $link-color;
   }
+  &._dashed {
+    border-bottom: 1px dashed $blue;
+  }
 }
 
 

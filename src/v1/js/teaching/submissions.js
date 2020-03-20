@@ -10,7 +10,7 @@ const fn = {
     },
 
     initFiltersForm: function () {
-        import('forms')
+        import('components/forms')
             .then(_ => {
                 assignmentSelect.selectpicker({
                     iconBase: 'fa',

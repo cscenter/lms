@@ -1,6 +1,6 @@
 import Cropper from 'cropperjs';
 import $ from 'jquery';
-import {createNotification, getCSRFToken, getTemplate} from './utils';
+import {createNotification, getCSRFToken, getTemplate} from 'utils';
 
 // profileAppInit - global dependency :<
 const profileAppInit = window.profileAppInit;
@@ -282,7 +282,6 @@ let fn = {
     }
 };
 
-// document.ready
-$(function () {
+export function launch() {
     fn.init();
-});
+}

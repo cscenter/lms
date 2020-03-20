@@ -1,6 +1,6 @@
 import _throttle from 'lodash-es/throttle';
 
-import UberEditor from "editor";
+import UberEditor from "components/editor";
 import 'jquery-bar-rating';
 import {createNotification} from "utils";
 import {restoreTabFromHash} from './utils';
