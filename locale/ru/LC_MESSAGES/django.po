@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-03-19 14:47+0000\n"
-"PO-Revision-Date: 2020-03-19 14:47+0000\n"
+"PO-Revision-Date: 2020-03-20 16:20+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -2939,7 +2939,7 @@ msgstr "Настройки отображения"
 
 #: lms/jinja2/lms/courses/course_class_form.html:72
 msgid "Save and add"
-msgstr ""
+msgstr "Сохранить и добавить ещё"
 
 #: lms/jinja2/lms/layout/_top_menu.html:34 lms/templates/_top_menu.html:39
 #: lms/templates/users/user_detail.html:10
