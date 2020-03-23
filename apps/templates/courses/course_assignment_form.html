@@ -16,7 +16,10 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
-        <h2 class="content-title">{% if form.instance.pk %}Редактировать{% else %}Добавить{% endif %} задание</h2>
+        <h2 class="content-title mb-20">
+            {% if form.instance.pk %}Редактировать{% else %}Добавить{% endif %} задание<br>
+            <small><a href="{{ form.instance.course.get_absolute_url }}">{{ form.instance.course }}</a></small>
+        </h2>
         <form action="" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.non_field_errors }}
