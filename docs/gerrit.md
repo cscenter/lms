@@ -8,14 +8,32 @@ ssh -p 29418 admin@review.compscicenter.ru gerrit flush-caches --cache projects
 
 ### Инициализация проекта для курса
 
-Убедиться, что для преподавателей и студентов созданы ldap-аккаунты. Далее
+Убедиться, что для преподавателей и студентов созданы ldap-аккаунты:
 
 ```python
-from learning.models import Course
-from learning.gerrit import *
-co = Course.objects.get(pk=1)
-init_project_for_course(co)
+from users.ldap import *
+from django.conf import settings
+import datetime
+today = datetime.datetime.now().strftime('%d%m%y')
+file_path = settings.ROOT_DIR / f"{today}.ldif"
+# Save dump into repository root dir
+export(file_path=file_path, domain_component="dc=review,dc=compscicenter,dc=ru")
+```
 
+```bash
+scp <FILE_PATH> ubuntu@review.compscicenter.ru:/home/ubuntu/
+ssh ubuntu@review.compscicenter.ru
+ldapadd -H ldap:// -x -D "cn=admin,dc=review,dc=compscicenter,dc=ru" -w "***REMOVED***" -f <TODAY>.ldif -c
+```
+
+Далее
+
+```python
+from learning.gerrit import *
+from learning.models import Course
+course_id = 1
+course = Course.objects.get(pk=course_id)
+init_project_for_course(course)
 ```
 
 
