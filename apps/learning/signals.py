@@ -29,13 +29,14 @@ def manage_student_group_for_course_additional_branch(sender, **kwargs):
         return
     course = kwargs.pop("instance")
     branches: Set[int] = kwargs.pop("pk_set", set())
-    if action == "post_add":
-        for branch_id in branches:
-            branch = Branch.objects.get_by_pk(branch_id)
+    for branch_id in branches:
+        # Case when the main branch was added as an additional one
+        if branch_id == course.branch_id:
+            continue
+        branch = Branch.objects.get_by_pk(branch_id)
+        if action == "post_add":
             StudentGroupService.add(course, branch)
-    elif action == "post_remove":
-        for branch_id in branches:
-            branch = Branch.objects.get_by_pk(branch_id)
+        elif action == "post_remove":
             StudentGroupService.remove(course, branch)
 
 
