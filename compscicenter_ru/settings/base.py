@@ -258,6 +258,8 @@ POST_OFFICE = {
 
 # "ldap:///"
 LDAP_CLIENT_URI = env.str('LDAP_CLIENT_URI', default="ldap://review.compscicenter.ru:389")
+# Domain Component suffix for distinguished name (or DN)
+# FIXME: move to the SiteConfiguration
 LDAP_DB_SUFFIX = env.str('LDAP_DB_SUFFIX', default="dc=review,dc=compscicenter,dc=ru")
 LDAP_CLIENT_USERNAME = env.str('LDAP_CLIENT_USERNAME', default="admin")
 LDAP_CLIENT_PASSWORD = env.str('LDAP_CLIENT_PASSWORD')
