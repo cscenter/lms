@@ -1,44 +1,105 @@
+import itertools
+from typing import NamedTuple, Iterable
+
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.views import generic
 
-from learning.icalendar import UserClassesICalendar, UserAssignmentsICalendar, \
-    EventsICalendar
+from learning.icalendar import generate_icalendar, \
+    get_icalendar_student_classes, get_icalendar_teacher_classes, \
+    get_icalendar_teacher_assignments, get_icalendar_student_assignments, \
+    get_icalendar_non_course_events
 from users.models import User
 
 
-# TODO: add secret link for each student?
-class UserICalendarView(generic.base.View):
-    calendar_class = None
+class ICalendarMeta(NamedTuple):
+    name: str
+    description: str
+    file_name: str
 
+
+# TODO: add secret link for each student
+class UserICalendarView(generic.base.View):
     def get(self, request, *args, **kwargs):
-        cal = self.calendar_class(*self.get_init_args())
+        user = self.get_user()
+        site = self.request.site
+        url_builder = request.build_absolute_uri
+        product_id = f"-//{site.name} Calendar//{site.domain}//"
+        tz = user.get_timezone()
+        calendar_meta = self.get_calendar_meta(user, site, url_builder, tz)
+        events = self.get_calendar_events(user, site, url_builder, tz)
+        cal = generate_icalendar(product_id,
+                                 name=calendar_meta.name,
+                                 description=calendar_meta.description,
+                                 time_zone=tz,
+                                 events=events)
         response = HttpResponse(cal.to_ical(),
                                 content_type="text/calendar; charset=UTF-8")
         response['Content-Disposition'] = "attachment; filename=\"{}\"".format(
-            cal.file_name)
+            calendar_meta.file_name)
         return response
 
-    def get_init_args(self):
+    def get_user(self):
         user_id = self.kwargs['pk']
         qs = (User.objects
               .filter(pk=user_id)
               .only("first_name", "last_name", "patronymic", "pk"))
-        user = get_object_or_404(qs)
-        return [self.request.site, user, self.request.build_absolute_uri]
+        return get_object_or_404(qs)
+
+    @staticmethod
+    def get_calendar_meta(user, site, url_builder, tz) -> ICalendarMeta:
+        raise NotImplementedError
+
+    def get_calendar_events(self, user, site, url_builder, tz) -> Iterable:
+        raise NotImplementedError
 
 
 class ICalClassesView(UserICalendarView):
-    calendar_class = UserClassesICalendar
+    @staticmethod
+    def get_calendar_meta(user, site, url_builder, tz) -> ICalendarMeta:
+        return ICalendarMeta(
+            name="Занятия CSC",
+            description=f"Календарь занятий {site.name} ({user.get_full_name()})",
+            file_name="csc_classes.ics"
+        )
+
+    def get_calendar_events(self, user, site, url_builder, tz):
+        domain = site.domain
+        as_student = get_icalendar_student_classes(user, tz, url_builder, domain)
+        as_teacher = get_icalendar_teacher_classes(user, tz, url_builder, domain)
+        return itertools.chain(as_student, as_teacher)
 
 
 class ICalAssignmentsView(UserICalendarView):
-    calendar_class = UserAssignmentsICalendar
+    @staticmethod
+    def get_calendar_meta(user, site, url_builder, tz) -> ICalendarMeta:
+        description = "Календарь сроков выполнения заданий {} ({})".format(
+            site.name, user.get_full_name())
+        return ICalendarMeta(
+            name="Задания CSC",
+            description=description,
+            file_name="csc_assignments.ics")
+
+    def get_calendar_events(self, user, site, url_builder, tz):
+        domain = site.domain
+        as_teacher = get_icalendar_teacher_assignments(user, url_builder,
+                                                       domain)
+        as_student = get_icalendar_student_assignments(user, url_builder,
+                                                       domain)
+        return itertools.chain(as_teacher, as_student)
 
 
 class ICalEventsView(UserICalendarView):
-    calendar_class = EventsICalendar
+    def get_user(self):
+        return self.request.user
 
-    def get_init_args(self):
-        request = self.request
-        return [request.site, request.user, request.build_absolute_uri]
+    @staticmethod
+    def get_calendar_meta(user, site, url_builder, tz) -> ICalendarMeta:
+        return ICalendarMeta(
+            name="События CSC",
+            description="Календарь общих событий {}".format(site.name),
+            file_name="csc_events.ics")
+
+    def get_calendar_events(self, user, site, url_builder, tz):
+        return get_icalendar_non_course_events(user, tz, url_builder,
+                                               site.domain)

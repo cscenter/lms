@@ -1,10 +1,8 @@
-from abc import ABC, abstractmethod
 from datetime import datetime
-from itertools import chain, repeat
+from typing import Iterable, Dict
 
 import pytz
 from dateutil.relativedelta import relativedelta
-from django.contrib.sites.models import Site
 from django.utils import timezone
 from icalendar import vText, vUri, Calendar, Event as ICalendarEvent, \
     Timezone, TimezoneStandard
@@ -29,214 +27,216 @@ def generate_vtimezone(tz: pytz.timezone):
     return tzc
 
 
-class UserEventsICalendar(ABC):
+def generate_icalendar(product_id: str,
+                       name: str,
+                       description: str,
+                       time_zone: pytz.timezone,
+                       events: Iterable[Dict]) -> Calendar:
     """
-    Generates iCalendar for requested user in the timezone of the
-    requested user. Supports only one time zone.
+    Creates VTIMEZONE component like in a google calendar.
 
-    Timezone should be consistent across all events (although iCalendar
-    specification allows multiple VTIMEZONE's).
+    Google calendar doesn't provide "honest" implementation
+    (based on RFC) for `VTIMEZONE` component. Just a stub with current
+    daylight/standard offsets. Also, it has custom `X-WR-TIMEZONE` header
+    with timezone info. The same for Outlook.
+
+    Note:
+        http://tzurl.org/ project implements conversion of IANA
+        tzdata into iCalendar VTIMEZONE objects.
+
+    :param product_id: globally unique identifier
+    :param name: Calendar display name
+    :param description: Calendar description
+    :param time_zone: Time zone of the events
+    :param events: Calendar events
+    :return: Calendar object
     """
-    TEACHER_EVENT = 'teaching'
-    STUDENT_EVENT = 'learning'
-
-    @property
-    @abstractmethod
-    def file_name(self):
-        raise NotImplementedError()
-
-    @property
-    @abstractmethod
-    def title(self):
-        """X-WR-CALNAME value"""
-        raise NotImplementedError()
-
-    def __init__(self, site: Site, user: User, abs_url_builder, events=None,
-                 **kwargs):
-        """
-        Creates VTIMEZONE component like in a google calendar.
-
-        Google calendar doesn't provide "honest" implementation
-        (based on RFC) for `VTIMEZONE` component. Just a stub with current
-        daylight/standard offsets. Also, it has custom `X-WR-TIMEZONE` header
-        with timezone info. The same for Outlook.
-
-        Note:
-            http://tzurl.org/ project implements conversion of IANA
-            tzdata into iCalendar VTIMEZONE objects.
-        """
-        self.site = site
-        self.user = user
-        self.timezone = user.get_timezone()
-        self.abs_url_builder = abs_url_builder
-        cal = Calendar()
-        cal.add('prodid', f"-//{site.name} Calendar//{site.domain}//")
-        cal.add('version', '2.0')
-        tzc = generate_vtimezone(self.timezone)
-        cal.add_component(tzc)
-        cal.add('X-WR-CALNAME', vText(self.title))
-        cal.add('X-WR-TIMEZONE', vText(self.timezone))
-        cal_description = self.get_description(**kwargs)
-        cal.add('X-WR-CALDESC', vText(cal_description))
-        cal.add('calscale', 'gregorian')
-        self.cal = cal
-        events = events or self.get_events()
-        for event in events:
-            evt = ICalendarEvent()
-            for k, v in event.items():
-                evt.add(k, v)
-            self.cal.add_component(evt)
-
-    def get_description(self, **kwargs):
-        return ""
-
-    def get_events(self):
-        return []
-
-    def to_ical(self):
-        return self.cal.to_ical()
+    cal = Calendar()
+    cal.add('prodid', product_id)
+    cal.add('version', '2.0')
+    timezone_component = generate_vtimezone(time_zone)
+    cal.add_component(timezone_component)
+    cal.add('X-WR-CALNAME', vText(name))
+    cal.add('X-WR-TIMEZONE', vText(time_zone))
+    cal.add('X-WR-CALDESC', vText(description))
+    cal.add('calscale', 'gregorian')
+    for event in events:
+        event_component = ICalendarEvent()
+        for k, v in event.items():
+            event_component.add(k, v)
+        cal.add_component(event_component)
+    return cal
 
 
-class UserClassesICalendar(UserEventsICalendar):
-    file_name = "csc_classes.ics"
-    title = "Занятия CSC"
-
-    def get_description(self):
-        return f"Календарь занятий {self.site.name} ({self.user.get_full_name()})"
-
-    def get_events(self):
-        localize = self.timezone.localize
-        cc_related = ['venue',
-                      'venue__location',
-                      'course',
-                      'course__branch',
-                      'course__semester',
-                      'course__meta_course']
-        as_teacher = (CourseClass.objects
-                      .filter(course__teachers=self.user)
-                      .select_related(*cc_related))
-        as_student = (CourseClass.objects
-                      .filter(course__enrollment__student_id=self.user.pk,
-                              course__enrollment__is_deleted=False)
-                      .select_related(*cc_related))
-
-        data = chain(zip(repeat(self.TEACHER_EVENT), as_teacher),
-                     zip(repeat(self.STUDENT_EVENT), as_student))
-        for cc_type, cc in data:
-            uid = f"courseclasses-{cc.pk}-{cc_type}@compscicenter.ru"
-            url = cc.get_absolute_url()
-            if cc.description.strip():
-                description = "{}\n\n{}".format(cc.description, url)
-            else:
-                description = url
-            categories = 'CSC,CLASS,{}'.format(cc_type.upper())
-            start = localize(datetime.combine(cc.date, cc.starts_at))
-            end = localize(datetime.combine(cc.date, cc.ends_at))
-            event = {
-                'uid': vText(uid),
-                'url': vUri(url),
-                'summary': vText(cc.name),
-                'description': vText(description),
-                'location': vText(cc.venue.address),
-                'dtstart': start,
-                'dtend': end,
-                'dtstamp': timezone.now(),
-                'created': cc.created,
-                'last-modified': cc.modified,
-                'categories': vInline(categories)
-            }
-            yield event
+class CalendarEventScope:
+    TEACHER = 'teaching'
+    STUDENT = 'learning'
 
 
-class UserAssignmentsICalendar(UserEventsICalendar):
-    file_name = "csc_assignments.ics"
-    title = "Задания CSC"
-
-    def get_description(self):
-        return "Календарь сроков выполнения заданий {} ({})".format(
-            self.site.name, self.user.get_full_name())
-
-    def get_events(self):
-        as_student = (StudentAssignment.objects
-                      .filter(student_id=self.user.pk,
-                              assignment__deadline_at__gt=timezone.now())
-                      .select_related('assignment',
-                                      'assignment__course',
-                                      'assignment__course__meta_course',
-                                      'assignment__course__semester'))
-        as_teacher = (Assignment.objects
-                      .filter(course__teachers=self.user,
-                              deadline_at__gt=timezone.now())
-                      .select_related('course',
-                                      'course__meta_course',
-                                      'course__semester'))
-
-        data = chain(zip(repeat(self.TEACHER_EVENT), as_teacher),
-                     zip(repeat(self.STUDENT_EVENT), as_student))
-        for data_type, d in data:
-            if data_type == self.TEACHER_EVENT:
-                assignment = d
-                to_assignment_url = assignment.get_teacher_url()
-            else:  # Student event
-                assignment = d.assignment
-                to_assignment_url = d.get_student_url()
-            url = self.abs_url_builder(to_assignment_url)
-            uid = "assignments-{}-{}-{}@{}".format(
-                self.user.pk, assignment.pk, data_type, self.site.domain)
-            summary = "{} ({})".format(
-                assignment.title, assignment.course.meta_course.name)
-            categories = 'CSC,ASSIGNMENT,{}'.format(data_type.upper())
-            start = assignment.deadline_at
-            end = assignment.deadline_at + relativedelta(hours=1)
-            event = {
-                'uid': vText(uid),
-                'url': vUri(url),
-                'summary': vText(summary),
-                'description': vText(url),
-                'dtstart': start,
-                'dtend': end,
-                'dtstamp': timezone.now(),
-                'created': assignment.created,
-                'last-modified': assignment.modified,
-                'categories': vInline(categories)
-            }
-            yield event
+def get_icalendar_class_event(cc: CourseClass, tz: pytz.timezone,
+                              uid, url, categories):
+    if cc.description.strip():
+        description = "{}\n\n{}".format(cc.description, url)
+    else:
+        description = url
+    starts_at = tz.localize(datetime.combine(cc.date, cc.starts_at))
+    ends_at = tz.localize(datetime.combine(cc.date, cc.ends_at))
+    return {
+        'uid': vText(uid),
+        'url': vUri(url),
+        'summary': vText(cc.name),
+        'description': vText(description),
+        'location': vText(cc.venue.address),
+        'dtstart': starts_at,
+        'dtend': ends_at,
+        'dtstamp': timezone.now(),
+        'created': cc.created,
+        'last-modified': cc.modified,
+        'categories': vInline(categories)
+    }
 
 
-class EventsICalendar(UserEventsICalendar):
-    """Study events in the timezone of the requesting user"""
-    file_name = "csc_events.ics"
-    title = "События CSC"
+def get_icalendar_student_classes(user: User, time_zone, url_builder, domain):
+    """Generates icalendar events from individual classes"""
+    event_scope = CalendarEventScope.STUDENT
+    uid_pattern = f"courseclasses-{user.pk}-{'{}'}-{event_scope}@{domain}"
+    cc_related = ['venue',
+                  'venue__location',
+                  'course',
+                  'course__branch',
+                  'course__semester',
+                  'course__meta_course']
+    queryset = (CourseClass.objects
+                .filter(course__enrollment__student_id=user.pk,
+                        course__enrollment__is_deleted=False)
+                .select_related(*cc_related))
+    for cc in queryset:
+        uid = uid_pattern.format(cc.pk)
+        url = url_builder(cc.get_absolute_url())
+        categories = [event_scope.upper()]
+        event = get_icalendar_class_event(cc, time_zone,
+                                          uid, url, categories=categories)
+        yield event
 
-    def get_description(self):
-        return "Календарь общих событий {}".format(self.site.name)
 
-    def get_events(self):
-        localize = self.timezone.localize
-        qs = (Event.objects
-              .filter(date__gt=timezone.now())
-              .select_related('venue'))
-        if hasattr(self.user, "branch_id") and self.user.branch_id:
-            qs = qs.filter(branch_id=self.user.branch_id)
-        for nce in qs:
-            uid = "noncourseevents-{}@compscicenter.ru".format(nce.pk)
-            url = self.abs_url_builder(nce.get_absolute_url())
-            if nce.name.strip():
-                description = "{}\n\n{}".format(nce.name, url)
-            else:
-                description = url
-            start = localize(datetime.combine(nce.date, nce.starts_at))
-            end = localize(datetime.combine(nce.date, nce.ends_at))
-            event = {
-                'uid': vText(uid),
-                'url': vUri(url),
-                'summary': vText(nce.name),
-                'description': vText(description),
-                'dtstart': start,
-                'dtend': end,
-                'dtstamp': timezone.now(),
-                'created': nce.created,
-                'last-modified': nce.modified,
-                'categories': vInline('CSC,EVENT')
-            }
-            yield event
+def get_icalendar_teacher_classes(user: User, time_zone, url_builder, domain):
+    """
+    Generates icalendar events from classes where user is participating
+    as a teacher.
+    """
+    event_scope = CalendarEventScope.TEACHER
+    uid_pattern = f"courseclasses-{user.pk}-{'{}'}-{event_scope}@{domain}"
+    cc_related = ['venue',
+                  'venue__location',
+                  'course',
+                  'course__branch',
+                  'course__semester',
+                  'course__meta_course']
+    queryset = (CourseClass.objects
+                .filter(course__teachers=user)
+                .select_related(*cc_related))
+    for cc in queryset:
+        uid = uid_pattern.format(cc.pk)
+        url = url_builder(cc.get_absolute_url())
+        categories = [event_scope.upper()]
+        event = get_icalendar_class_event(cc, time_zone,
+                                          uid, url, categories=categories)
+        yield event
+
+
+def get_icalendar_assignment_event(assignment: Assignment, uid, url, categories):
+    summary = "{} ({})".format(assignment.title, assignment.course.name)
+    starts_at = assignment.deadline_at
+    ends_at = starts_at + relativedelta(hours=1)
+    categories = 'CSC,ASSIGNMENT,{}'.format(','.join(categories))
+    return {
+        'uid': vText(uid),
+        'url': vUri(url),
+        'summary': vText(summary),
+        'description': vText(url),
+        'dtstart': starts_at,
+        'dtend': ends_at,
+        'dtstamp': timezone.now(),
+        'created': assignment.created,
+        'last-modified': assignment.modified,
+        'categories': vInline(categories)
+    }
+
+
+def get_icalendar_student_assignments(user: User, url_builder, domain):
+    """
+    Generates icalendar events from individual assignments with
+    future deadline.
+    """
+    event_scope = CalendarEventScope.STUDENT
+    uid_pattern = f"assignments-{user.pk}-{'{}'}-{event_scope}@{domain}"
+    queryset = (StudentAssignment.objects
+                .filter(student_id=user.pk,
+                        assignment__deadline_at__gt=timezone.now())
+                .select_related('assignment',
+                                'assignment__course',
+                                'assignment__course__meta_course',
+                                'assignment__course__semester'))
+    for sa in queryset:
+        assignment = sa.assignment
+        uid = uid_pattern.format(assignment.pk)
+        url = url_builder(sa.get_student_url())
+        categories = [event_scope.upper()]
+        event = get_icalendar_assignment_event(assignment, uid, url, categories)
+        yield event
+
+
+def get_icalendar_teacher_assignments(user: User, url_builder, domain):
+    """
+    Generates icalendar events from assignments with future deadline
+    where user is participating as a teacher.
+    """
+    event_scope = CalendarEventScope.TEACHER
+    uid_pattern = f"assignments-{user.pk}-{'{}'}-{event_scope}@{domain}"
+    queryset = (Assignment.objects
+                .filter(course__teachers=user,
+                        deadline_at__gt=timezone.now())
+                .select_related('course',
+                                'course__meta_course',
+                                'course__semester'))
+    for assignment in queryset:
+        uid = uid_pattern.format(assignment.pk)
+        url = url_builder(assignment.get_teacher_url())
+        categories = [event_scope.upper()]
+        event = get_icalendar_assignment_event(assignment, uid, url, categories)
+        yield event
+
+
+def get_icalendar_non_course_events(user: User, time_zone, url_builder, domain):
+    """
+    Generates icalendar records for all events related to the user branch
+    """
+    localize = time_zone.localize
+    uid_pattern = f"noncourseevents-{'{}'}@{domain}"
+    queryset = (Event.objects
+                .filter(date__gt=timezone.now())
+                .select_related('venue'))
+    if hasattr(user, "branch_id") and user.branch_id:
+        queryset = queryset.filter(branch_id=user.branch_id)
+    for event in queryset:
+        uid = uid_pattern.format(event.pk)
+        url = url_builder(event.get_absolute_url())
+        if event.name.strip():
+            description = "{}\n\n{}".format(event.name, url)
+        else:
+            description = url
+        starts_at = localize(datetime.combine(event.date, event.starts_at))
+        ends_at = localize(datetime.combine(event.date, event.ends_at))
+        icalendar_event = {
+            'uid': vText(uid),
+            'url': vUri(url),
+            'summary': vText(event.name),
+            'description': vText(description),
+            'dtstart': starts_at,
+            'dtend': ends_at,
+            'dtstamp': timezone.now(),
+            'created': event.created,
+            'last-modified': event.modified,
+            'categories': vInline('CSC,EVENT')
+        }
+        yield icalendar_event
