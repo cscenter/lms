@@ -266,9 +266,10 @@ class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
 
     def get_events(self, year, month, **kwargs):
         qs = (CourseClass.objects
-              .for_timetable()
+              .for_teacher(self.request.user)
               .in_month(year, month)
-              .filter(course__teachers=self.request.user))
+              .select_calendar_data()
+              .select_related('venue', 'venue__location'))
         return (CalendarEvent(e) for e in qs)
 
 

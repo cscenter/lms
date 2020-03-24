@@ -8,7 +8,9 @@ from django.views import generic
 from learning.icalendar import generate_icalendar, \
     get_icalendar_student_classes, get_icalendar_teacher_classes, \
     get_icalendar_teacher_assignments, get_icalendar_student_assignments, \
-    get_icalendar_non_course_events
+    get_icalendar_non_course_events, CourseClassICalendarEventBuilder, \
+    AssignmentICalendarEventBuilder, NonCourseEventICalendarEventBuilder, \
+    StudentAssignmentICalendarEventBuilder
 from users.models import User
 
 
@@ -64,9 +66,9 @@ class ICalClassesView(UserICalendarView):
         )
 
     def get_calendar_events(self, user, site, url_builder, tz):
-        domain = site.domain
-        as_student = get_icalendar_student_classes(user, tz, url_builder, domain)
-        as_teacher = get_icalendar_teacher_classes(user, tz, url_builder, domain)
+        event_builder = CourseClassICalendarEventBuilder(tz, url_builder, site)
+        as_student = get_icalendar_student_classes(user, event_builder)
+        as_teacher = get_icalendar_teacher_classes(user, event_builder)
         return itertools.chain(as_student, as_teacher)
 
 
@@ -81,11 +83,10 @@ class ICalAssignmentsView(UserICalendarView):
             file_name="csc_assignments.ics")
 
     def get_calendar_events(self, user, site, url_builder, tz):
-        domain = site.domain
-        as_teacher = get_icalendar_teacher_assignments(user, url_builder,
-                                                       domain)
-        as_student = get_icalendar_student_assignments(user, url_builder,
-                                                       domain)
+        builder = AssignmentICalendarEventBuilder(tz, url_builder, site)
+        as_teacher = get_icalendar_teacher_assignments(user, builder)
+        builder = StudentAssignmentICalendarEventBuilder(tz, url_builder, site)
+        as_student = get_icalendar_student_assignments(user, builder)
         return itertools.chain(as_teacher, as_student)
 
 
@@ -101,5 +102,5 @@ class ICalEventsView(UserICalendarView):
             file_name="csc_events.ics")
 
     def get_calendar_events(self, user, site, url_builder, tz):
-        return get_icalendar_non_course_events(user, tz, url_builder,
-                                               site.domain)
+        event_builder = NonCourseEventICalendarEventBuilder(tz, url_builder, site)
+        return get_icalendar_non_course_events(user, event_builder)

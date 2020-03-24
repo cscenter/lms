@@ -94,7 +94,10 @@ class UserDetailView(generic.DetailView):
         # Assignments sorted by course name
         assignments_qs = (StudentAssignment.objects
                           .for_user(profile_user)
-                          .in_term(context['current_semester']))
+                          .in_term(context['current_semester'])
+                          .order_by('assignment__course__meta_course__name',
+                                    'assignment__deadline_at',
+                                    'assignment__title'))
         context['assignments'] = u.is_curator and assignments_qs.all()
         # Initial data for photo cropper
         photo_data = {}

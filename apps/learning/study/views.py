@@ -71,9 +71,10 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
     def _get_classes(self, iso_year, iso_week):
         w = Week(iso_year, iso_week)
         qs = (CourseClass.objects
-              .for_timetable()
               .filter(date__range=[w.monday(), w.sunday()])
-              .for_student(self.request.user))
+              .for_student(self.request.user)
+              .select_calendar_data()
+              .select_related('venue', 'venue__location'))
         return qs
 
 
@@ -84,17 +85,11 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
 
     def get_queryset(self, current_term):
         return (StudentAssignment.objects
-                .filter(student=self.request.user,
-                        assignment__course__semester=current_term)
+                .for_user(self.request.user)
+                .in_term(current_term)
                 .order_by('assignment__deadline_at',
                           'assignment__course__meta_course__name',
-                          'pk')
-                .select_related('assignment',
-                                'assignment__course',
-                                'assignment__course__meta_course',
-                                'assignment__course__semester',
-                                'assignment__course__branch',
-                                'student'))
+                          'pk'))
 
     def get_context_data(self, **kwargs):
         current_term = Semester.get_current()
