@@ -65,7 +65,7 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
         classes = (CourseClass.objects
                    .filter(~Q(course__semester__type=SemesterTypes.SUMMER),
                            course__branch=self.request.branch)
-                   .for_calendar()
+                   .select_calendar_data()
                    .in_month(year, month))
         return (CalendarEvent(e) for e in classes)
 

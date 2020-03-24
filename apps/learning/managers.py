@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import query
+from django.utils import timezone
 
 from core.models import LiveManager
 from core.utils import is_club_site
@@ -8,19 +9,21 @@ from courses.utils import get_boundaries
 
 class StudentAssignmentQuerySet(query.QuerySet):
     def for_user(self, user):
-        related = ['assignment',
-                   'assignment__course',
-                   'assignment__course__meta_course',
-                   'assignment__course__semester']
-        return (self
-                .filter(student=user)
-                .select_related(*related)
-                .order_by('assignment__course__meta_course__name',
-                          'assignment__deadline_at',
-                          'assignment__title'))
+        return (self.filter(student=user)
+                .select_related('assignment',
+                                'assignment__course',
+                                'assignment__course__branch',
+                                'assignment__course__meta_course',
+                                'assignment__course__semester'))
 
     def in_term(self, term):
         return self.filter(assignment__course__semester_id=term.id)
+
+    def with_future_deadline(self):
+        """
+        Returns individual assignments with unexpired deadlines.
+        """
+        return self.filter(assignment__deadline_at__gt=timezone.now())
 
 
 class _StudentAssignmentDefaultManager(LiveManager):

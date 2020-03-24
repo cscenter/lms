@@ -20,7 +20,7 @@ def get_month_events(year, month, base_events_qs, base_course_class_qs):
                     .in_month(year, month)
                     .order_by('date', 'starts_at'))
     classes = (base_course_class_qs
-               .for_calendar()
+               .select_calendar_data()
                .in_month(year, month))
     return chain(
         (CalendarEvent(e) for e in classes),

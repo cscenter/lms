@@ -3,6 +3,7 @@ from typing import List, Union
 from django.db import models
 from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
     Value, IntegerField, F
+from django.utils import timezone
 
 from core.utils import is_club_site
 from courses.constants import MaterialVisibilityTypes
@@ -24,6 +25,12 @@ CourseTeacherManager = models.Manager.from_queryset(CourseTeacherQuerySet)
 
 
 class AssignmentQuerySet(query.QuerySet):
+    def with_future_deadline(self):
+        """
+        Returns assignments with unexpired deadlines.
+        """
+        return self.filter(deadline_at__gt=timezone.now())
+
     def prefetch_student_scores(self, student):
         """
         For each assignment prefetch requested student's score and comments
@@ -48,14 +55,14 @@ AssignmentManager = models.Manager.from_queryset(AssignmentQuerySet)
 
 
 class CourseClassQuerySet(query.QuerySet):
-    def for_calendar(self):
+    def select_calendar_data(self):
         return (self
-                .select_related('course', 'course__meta_course',
-                                'course__semester', 'course__branch')
+                .select_related('course',
+                                'course__meta_course',
+                                'course__semester',
+                                'course__branch')
+                # FIXME: remove ordering!
                 .order_by('course__pk', 'date', 'starts_at', 'pk'))
-
-    def for_timetable(self):
-        return self.for_calendar().select_related('venue', 'venue__location')
 
     def in_branches(self, *branches: List[int]):
         return (self.filter(Q(course__branch_id__in=branches) |
