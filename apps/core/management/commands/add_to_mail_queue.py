@@ -2,6 +2,7 @@
 import csv
 from datetime import datetime
 
+import pytz
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import formats
 from post_office import mail
@@ -44,6 +45,7 @@ class Command(BaseCommand):
         if scheduled_time is not None:
             try:
                 scheduled_time = datetime.fromisoformat(scheduled_time)
+                scheduled_time = pytz.utc.localize(scheduled_time)
             except ValueError:
                 raise CommandError(f"Wrong scheduled time format")
 
@@ -53,7 +55,7 @@ class Command(BaseCommand):
             time_display = formats.date_format(scheduled_time, 'DATETIME_FORMAT')
         else:
             time_display = 'now'
-        self.stdout.write(f"Scheduled Time: {time_display}")
+        self.stdout.write(f"Scheduled Time [UTC]: {time_display}")
         if input("Continue? [y/n]") != "y":
             self.stdout.write("Canceled")
             return
