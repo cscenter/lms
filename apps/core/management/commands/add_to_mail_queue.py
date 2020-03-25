@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, unicode_literals
-
 import csv
+from datetime import datetime
 
-import tablib
 from django.core.management.base import BaseCommand, CommandError
+from django.utils import formats
 from post_office import mail
 from post_office.models import EmailTemplate, Email
 from post_office.utils import get_email_template
@@ -29,6 +27,9 @@ class Command(BaseCommand):
             '--from', type=str,
             default='noreply@compscicenter.ru',
             help='`From` header, e.g. `CS центр <info@compscicenter.ru>`')
+        parser.add_argument(
+            '--scheduled_time', type=str,
+            help='Scheduled time in UTC [YYYY-MM-DD HH:MM]')
 
     def handle(self, *args, **options):
         file_path = options["src"]
@@ -39,6 +40,23 @@ class Command(BaseCommand):
                 template = get_email_template(template_name)
             except EmailTemplate.DoesNotExist:
                 raise CommandError(f"Email template {template_name} not found")
+        scheduled_time = options['scheduled_time']
+        if scheduled_time is not None:
+            try:
+                scheduled_time = datetime.fromisoformat(scheduled_time)
+            except ValueError:
+                raise CommandError(f"Wrong scheduled time format")
+
+        self.stdout.write(f"Subject: {template.subject}")
+        self.stdout.write(f"From: {header_from}")
+        if scheduled_time:
+            time_display = formats.date_format(scheduled_time, 'DATETIME_FORMAT')
+        else:
+            time_display = 'now'
+        self.stdout.write(f"Scheduled Time: {time_display}")
+        if input("Continue? [y/n]") != "y":
+            self.stdout.write("Canceled")
+            return
 
         with open(file_path, "r") as f:
             reader = csv.DictReader(f)
@@ -68,10 +86,11 @@ class Command(BaseCommand):
                     mail.send(
                         recipient,
                         sender=header_from,
+                        scheduled_time=scheduled_time,
                         template=template,
                         context=context,
-                        # Render on delivery, we have no really big amount of
-                        # emails to think about saving CPU time
+                        # This option allows filtering emails and
+                        # avoid duplicates
                         render_on_delivery=True,
                         backend='ses',
                     )
