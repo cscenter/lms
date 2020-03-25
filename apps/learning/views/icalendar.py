@@ -9,8 +9,9 @@ from learning.icalendar import generate_icalendar, \
     get_icalendar_student_classes, get_icalendar_teacher_classes, \
     get_icalendar_teacher_assignments, get_icalendar_student_assignments, \
     get_icalendar_non_course_events, CourseClassICalendarEventBuilder, \
-    AssignmentICalendarEventBuilder, NonCourseEventICalendarEventBuilder, \
-    StudentAssignmentICalendarEventBuilder
+    TeacherAssignmentICalendarEventBuilder, NonCourseEventICalendarEventBuilder, \
+    StudentAssignmentICalendarEventBuilder, TeacherClassICalendarEventBuilder, \
+    StudentClassICalendarEventBuilder
 from users.models import User
 
 
@@ -66,8 +67,9 @@ class ICalClassesView(UserICalendarView):
         )
 
     def get_calendar_events(self, user, site, url_builder, tz):
-        event_builder = CourseClassICalendarEventBuilder(tz, url_builder, site)
+        event_builder = StudentClassICalendarEventBuilder(tz, url_builder, site)
         as_student = get_icalendar_student_classes(user, event_builder)
+        event_builder = TeacherClassICalendarEventBuilder(tz, url_builder, site)
         as_teacher = get_icalendar_teacher_classes(user, event_builder)
         return itertools.chain(as_student, as_teacher)
 
@@ -83,7 +85,7 @@ class ICalAssignmentsView(UserICalendarView):
             file_name="csc_assignments.ics")
 
     def get_calendar_events(self, user, site, url_builder, tz):
-        builder = AssignmentICalendarEventBuilder(tz, url_builder, site)
+        builder = TeacherAssignmentICalendarEventBuilder(tz, url_builder, site)
         as_teacher = get_icalendar_teacher_assignments(user, builder)
         builder = StudentAssignmentICalendarEventBuilder(tz, url_builder, site)
         as_student = get_icalendar_student_assignments(user, builder)
