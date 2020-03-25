@@ -9,7 +9,20 @@ export const onReady = function( callback ) {
 	document.addEventListener( 'DOMContentLoaded', callback );
 };
 
+// TODO: move polyfills to the `polyfills/index.js`
 // TODO: load all polyfills in 1 request
+
+/**
+ * For browsers that do not support Element.matches() or Element.matchesSelector(), but include
+ * support for document.querySelectorAll(). IE9+ version
+ */
+export function polyfillElementMatches() {
+    if (!Element.prototype.matches) {
+      Element.prototype.matches = Element.prototype.msMatchesSelector ||
+                                  Element.prototype.webkitMatchesSelector;
+    }
+}
+
 /**
  * Polyfill fetch API for browsers without native support.
  **/
