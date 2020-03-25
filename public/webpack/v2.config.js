@@ -85,18 +85,10 @@ const common = {
                 ]
             },
             {
-                test: /\.js$/,
-                include: path.resolve(__nodemodulesdir, "ky"),
-                use: [{
-                    loader: 'babel-loader',
-                    options: {
-                        extends: path.resolve(__srcdir, "js", ".babelrc.js")
-                    }
-                }]
-            },
-            {
                 test: /\.(js|jsx|ts|tsx)$/,
                 include: [
+                    path.resolve(__nodemodulesdir, "ky"),
+                    path.resolve(__nodemodulesdir, "bootstrap"),
                     path.resolve(__nodemodulesdir, "react-async"),
                     path.resolve(__nodemodulesdir, "react-hook-form"),
                 ],
@@ -104,17 +96,7 @@ const common = {
                     loader: 'babel-loader',
                     options: {
                         extends: path.resolve(__srcdir, "js", ".babelrc.js"),
-                        cacheDirectory: true,
-                    }
-                }]
-            },
-            {
-                test: /\.js$/,
-                include: path.resolve(__nodemodulesdir, "bootstrap"),
-                use: [{
-                    loader: 'babel-loader',
-                    options: {
-                        extends: path.resolve(__srcdir, "js", ".babelrc.js")
+                        cacheDirectory: false,
                     }
                 }]
             },
