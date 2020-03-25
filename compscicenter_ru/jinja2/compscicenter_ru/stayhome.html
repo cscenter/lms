@@ -1,6 +1,6 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
-{% block body_attrs %}data-init-sections="collapsible" style="padding-top:0"{% endblock body_attrs %}
+{% block body_attrs %}data-init-sections="collapsible" style="padding-top:0; margin-bottom:0;"{% endblock body_attrs %}
 
 {% block sprites %}
     <script type="text/javascript">
@@ -427,6 +427,67 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="row mt-8 text-center text-md-left">
+                    <div class="col-12 col-md-auto pb-4 pb-md-0">
+                        <img src="{{ static('v2/img/pages/stayhome/pencil.svg')}}" alt="Pencil" width="32" height="32">
+                    </div>
+                    <div class="col pl-2">
+                        <p class="h4">Если у&nbsp;вас есть вопросы по&nbsp;настройке процесса, напишите нам
+                        на&nbsp;<a href="mailto:info@compscicenter.ru">info@compscicenter.ru</a>&nbsp;&mdash;
+                        мы&nbsp;попробуем помочь.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container-fluid _dark text-center">
+    <div class="container py-10">
+        <div class="row content-center py-10">
+            <div class="col-12">
+                <h2 class="h1">Материалы CS центра онлайн</h2>
+                <div class="row content-center">
+                    <div class="col-md-10">
+                        <p>Используйте доступные в&nbsp;интернете курсы и&nbsp;видеозаписи лекций, дополняйте
+                            семинарами и&nbsp;добавляйте
+                            к&nbsp;ним свои задания. Что есть в&nbsp;коллекции центра, что может помочь
+                            преподавателям
+                            математики и&nbsp;программирования?</p>
+                    </div>
+                </div>
+
+                <div class="card-deck _three pt-8">
+                    <a href="https://compscicenter.ru/videos/?types=course" target="_blank" class="card _shadowed">
+                        <div class="card__header">
+                            <div class="cover__content px-8 pt-8 pb-0">
+                                <img src="{{ static('v2/img/pages/stayhome/star.svg')}}" alt="Star" width="80" height="80">
+                            </div>
+                        </div>
+                        <div class="card__content pb-8">
+                            <h3 class="h2">Видеозаписи очных курсов</h3>
+                        </div>
+                    </a>
+                    <a href="https://stepik.org/org/compscicenter" target="_blank" class="card _shadowed">
+                        <div class="card__header">
+                            <div class="cover__content px-8 pt-8 pb-0">
+                                <img src="{{ static('v2/img/pages/stayhome/star.svg')}}" alt="Star" width="80" height="80">
+                            </div>
+                        </div>
+                        <div class="card__content pb-8">
+                            <h3 class="h2">Онлайн-курсы центра </h3>
+                        </div>
+                    </a>
+                    <a href="https://compscicenter.ru/videos/?types=lecture" target="_blank" class="card _shadowed">
+                        <div class="card__header">
+                            <div class="cover__content px-8 pt-8 pb-0">
+                                <img src="{{ static('v2/img/pages/stayhome/star.svg')}}" alt="Star" width="80" height="80">
+                            </div>
+                        </div>
+                        <div class="card__content pb-8">
+                            <h3 class="h2">Открытые лекции на&nbsp;разные темы</h3>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
