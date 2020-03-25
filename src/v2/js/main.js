@@ -12,6 +12,7 @@ import sentryOptions from './sentry_conf';
 import {
     onReady,
     loadFetchPolyfill,
+    polyfillElementMatches,
     showComponentError,
     getSections,
     showNotification,
@@ -38,7 +39,7 @@ onReady(async () => {
     initTopMenu();
     displayNotifications();
     // Global polyfills
-    await Promise.all([loadFetchPolyfill()]);
+    await Promise.all([loadFetchPolyfill(), polyfillElementMatches()]);
 
     // TODO: section or component-based approach. What to choose?
     let sections = getSections();
