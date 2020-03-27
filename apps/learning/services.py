@@ -4,7 +4,7 @@ from typing import List, Iterable, Union
 
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction, router
-from django.db.models import Q, OuterRef, Value, F, TextField
+from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet
 from django.db.models.functions import Concat
 from django.utils.timezone import now
 
@@ -13,10 +13,11 @@ from core.models import Branch
 from core.services import SoftDeleteService
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
+from courses.managers import CourseClassQuerySet
 from courses.models import Course, Assignment, AssignmentAttachment, \
-    StudentGroupTypes
+    StudentGroupTypes, CourseClass
 from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, StudentGroup
+    AssignmentNotification, StudentGroup, Event
 from learning.settings import StudentStatuses
 from users.models import User
 
@@ -418,3 +419,31 @@ def notify_new_assignment_comment(comment):
     StudentAssignment.objects.filter(pk=sa.pk).update(**sa_update_dict)
     for attr_name, attr_value in sa_update_dict.items():
         setattr(sa, attr_name, attr_value)
+
+
+def get_student_classes(user, filters: List[Q] = None) -> CourseClassQuerySet:
+    # Student could be manually enrolled in the course without
+    # checking branch compatibility, skip filtering by branch
+    branch_list = []
+    return get_classes(branch_list, filters).for_student(user)
+
+
+def get_teacher_classes(user, filters: List[Q] = None) -> CourseClassQuerySet:
+    branch_list = []
+    return get_classes(branch_list, filters).for_teacher(user)
+
+
+def get_classes(branch_list, filters: List[Q] = None) -> CourseClassQuerySet:
+    filters = filters or []
+    return (CourseClass.objects
+            .filter(*filters)
+            .in_branches(*branch_list)
+            .select_calendar_data())
+
+
+def get_study_events(filters: List[Q] = None) -> QuerySet:
+    filters = filters or []
+    return (Event.objects
+            .filter(*filters)
+            .select_related('venue')
+            .order_by('date', 'starts_at'))

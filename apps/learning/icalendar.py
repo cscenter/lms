@@ -187,7 +187,7 @@ class StudentAssignmentICalendarEventBuilder(ICalendarEventBuilder):
         }
 
 
-class NonCourseEventICalendarEventBuilder(ICalendarEventBuilder):
+class StudyEventICalendarEventBuilder(ICalendarEventBuilder):
     def get_calendar_event_id(self, instance: Event, user):
         return f"noncourseevents-{instance.pk}@{self.domain}"
 
@@ -208,30 +208,7 @@ class NonCourseEventICalendarEventBuilder(ICalendarEventBuilder):
         }
 
 
-def get_icalendar_student_classes(user: User,
-                                  event_builder: ICalendarEventBuilder) -> Iterable[ICalendarEvent]:
-    """Generates icalendar events from individual classes"""
-    queryset = (CourseClass.objects
-                .for_student(user)
-                .select_calendar_data()
-                .select_related('venue', 'venue__location'))
-    for cc in queryset:
-        yield event_builder.create(cc, user)
-
-
-def get_icalendar_teacher_classes(user: User, event_builder: ICalendarEventBuilder):
-    """
-    Generates icalendar events from classes where user is participating
-    as a teacher.
-    """
-    queryset = (CourseClass.objects
-                .for_teacher(user)
-                .select_calendar_data()
-                .select_related('venue', 'venue__location'))
-    for cc in queryset:
-        yield event_builder.create(cc, user)
-
-
+# FIXME: теперь можно выделить queryset и удалить все методы ниже
 def get_icalendar_student_assignments(user: User,
                                       event_builder: ICalendarEventBuilder):
     queryset = (StudentAssignment.objects
@@ -254,16 +231,3 @@ def get_icalendar_teacher_assignments(user: User, event_builder: ICalendarEventB
                                 'course__semester'))
     for assignment in queryset:
         yield event_builder.create(assignment, user)
-
-
-def get_icalendar_non_course_events(user: User, event_builder: ICalendarEventBuilder):
-    """
-    Generates icalendar records for all events related to the user branch
-    """
-    queryset = (Event.objects
-                .filter(date__gt=timezone.now())
-                .select_related('venue'))
-    if hasattr(user, "branch_id") and user.branch_id:
-        queryset = queryset.filter(branch_id=user.branch_id)
-    for event in queryset:
-        yield event_builder.create(event, user)

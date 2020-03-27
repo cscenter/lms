@@ -56,28 +56,19 @@ AssignmentManager = models.Manager.from_queryset(AssignmentQuerySet)
 
 class CourseClassQuerySet(query.QuerySet):
     def select_calendar_data(self):
+        # FIXME: better to use `.values` but some queries rely on
+        #  further `.select_related('venue'...) call :<
         return (self
                 .select_related('course',
                                 'course__meta_course',
                                 'course__semester',
-                                'course__branch')
-                # FIXME: remove ordering!
-                .order_by('course__pk', 'date', 'starts_at', 'pk'))
+                                'course__branch'))
 
-    def in_branches(self, *branches: List[int]):
-        return (self.filter(Q(course__branch_id__in=branches) |
-                            Q(course__additional_branches__in=branches))
-                .distinct('date', 'starts_at', 'course__pk', 'pk')
-                .order_by('date', 'starts_at', 'course__pk', 'pk'))
-
-    # FIXME: rename?
-    def in_month(self, year, month):
-        """
-        Get boundaries for the month with complete weeks and return classes
-        in this range.
-        """
-        date_start, date_end = get_boundaries(year, month)
-        return self.filter(date__gte=date_start, date__lte=date_end)
+    def in_branches(self, *branches):
+        if not branches:
+            return self
+        return (self.filter(Q(course__branch__in=branches) |
+                            Q(course__additional_branches__in=branches)))
 
     def for_student(self, user):
         # Get common courses classes and restricted to the student group

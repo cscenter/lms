@@ -1,10 +1,11 @@
 import datetime
 import re
 from calendar import monthrange
-from typing import List, Tuple, NamedTuple
+from dataclasses import dataclass, field
+from typing import Tuple, Union, Iterator
 
-import attr
 import pytz
+import attr
 from dateutil import parser as dparser
 from django.conf import settings
 from django.utils import timezone
@@ -18,10 +19,16 @@ class TermIndexError(Exception):
     pass
 
 
-@attr.s(frozen=True, slots=True)
+@attr.s(cmp=True, frozen=True, slots=True)
 class TermPair:
-    year: int = attr.ib()  # calendar year
-    type: str = attr.ib()  # one of `courses.constants.SemesterTypes` values
+    index: int = attr.ib(init=False, repr=False)
+    year: int = attr.ib(cmp=False)
+    type: str = attr.ib(cmp=False)
+
+    def __attrs_post_init__(self):
+        if self.type not in SemesterTypes.values:
+            raise ValueError("TermPair: unsupported `type` value")
+        object.__setattr__(self, 'index', get_term_index(self.year, self.type))
 
     @property
     def academic_year(self):
@@ -31,10 +38,6 @@ class TermPair:
         if self.type != SemesterTypes.AUTUMN:
             return self.year - 1
         return self.year
-
-    @property
-    def index(self):
-        return get_term_index(self.year, self.type)
 
     @property
     def slug(self) -> str:
@@ -143,8 +146,9 @@ def get_term_by_index(term_index) -> TermPair:
 
 def get_boundaries(year, month) -> Tuple:
     """
-    Calculates closed interval in days for complete weeks of the month
-    and returns boundaries of this interval.
+    For the requested month returns the first day of the first week and
+    the last day of the last week. Week starts on Monday (0-index) and
+    ends on Sunday (6-index).
 
     Example:
         In: get_boundaries(2018, 2)
@@ -157,31 +161,72 @@ def get_boundaries(year, month) -> Tuple:
         # The same logic to calculate upper bound (the last day of the last
         # complete week of the month)
     """
-    day1, days_in_month = monthrange(year, month)
+    weekday, days_in_month = monthrange(year, month)
     date = datetime.date(year, month, 1)
     # Go back to the beginning of the week
-    days_before = (day1 - MONDAY_WEEKDAY) % 7
-    days_after = (MONDAY_WEEKDAY - day1 - days_in_month) % 7
+    days_before = (weekday - MONDAY_WEEKDAY) % 7
+    days_after = (MONDAY_WEEKDAY - weekday - days_in_month) % 7
     start = date - datetime.timedelta(days=days_before)
     end = date + datetime.timedelta(days=days_in_month + days_after - 1)
     return start, end
 
 
-def get_terms_for_calendar_month(year: int, month: int) -> List[TermPair]:
-    start_date, end_date = get_boundaries(year, month)
-    # Case date to timezone aware datetime, no matter which timezone we choose
+def get_terms_in_range(start: datetime.date,
+                       end: datetime.date) -> Iterator[TermPair]:
     time_part = datetime.time(tzinfo=pytz.UTC)
-    start_aware = datetime.datetime.combine(start_date, time_part)
-    end_aware = datetime.datetime.combine(end_date, time_part)
+    start_aware = datetime.datetime.combine(start, time_part)
+    end_aware = datetime.datetime.combine(end, time_part)
     start_term = date_to_term_pair(start_aware)
     end_term = date_to_term_pair(end_aware)
-    if start_term.type != end_term.type:
-        return [start_term, end_term]
-    else:
-        return [start_term]
+    current = start_term
+    while current.index <= end_term.index:
+        yield current
+        current = current.get_next()
 
 
 def execution_time_string(value: datetime.timedelta):
     minutes = int(value.total_seconds()) // 60
     hours, minutes = divmod(minutes, 60)
     return f"{hours}:{minutes:02}"
+
+
+def get_start_of_week(value: Union[datetime.datetime, datetime.date],
+                      week_start_on=MONDAY_WEEKDAY):
+    """
+    Returns the first day of the week. By default week starts on Monday.
+    """
+    weekday = value.weekday()  # 0 - 6
+    days_diff = (weekday - week_start_on) % 7
+    return value - datetime.timedelta(days=days_diff)
+
+
+def get_end_of_week(value: Union[datetime.datetime, datetime.date],
+                    week_start_on=MONDAY_WEEKDAY):
+    """
+    Returns the last day of the week. By default week starts on Monday.
+    """
+    first_day = get_start_of_week(value, week_start_on)
+    return first_day + datetime.timedelta(days=6)
+
+
+@dataclass
+class MonthPeriod:
+    year: int
+    month: int
+    starts: datetime.date = field(init=False)
+    ends: datetime.date = field(init=False)
+
+    def __post_init__(self):
+        weekday, days_in_month = monthrange(self.year, self.month)
+        self.starts = datetime.date(self.year, self.month, 1)
+        self.ends = self.starts + datetime.timedelta(days=days_in_month - 1)
+
+
+def extended_month_date_range(month_period: MonthPeriod,
+                              week_start_on=MONDAY_WEEKDAY):
+    """
+    Complete weeks for the given month and return new date range.
+    """
+    start_date = get_start_of_week(month_period.starts, week_start_on)
+    end_date = get_end_of_week(month_period.ends, week_start_on)
+    return start_date, end_date
