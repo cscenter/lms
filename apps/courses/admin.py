@@ -68,6 +68,16 @@ class CourseAdminForm(forms.ModelForm):
         model = Course
         fields = '__all__'
 
+    def clean(self):
+        cleaned_data = super().clean()
+        main_branch = cleaned_data['branch']
+        additional = cleaned_data['additional_branches']
+        # TODO: Add guard to the additional_branches.through model
+        # Main branch is not allowed among additional branches to avoid
+        # duplicates.
+        cleaned_data['additional_branches'] = additional.exclude(pk=main_branch.pk)
+        return cleaned_data
+
     def clean_is_open(self):
         is_open = self.cleaned_data['is_open']
         if is_club_site() and not is_open:
@@ -77,15 +87,15 @@ class CourseAdminForm(forms.ModelForm):
 
 
 class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
+    form = CourseAdminForm
+    formfield_overrides = {
+        db_models.TextField: {'widget': AdminRichTextAreaWidget},
+    }
     list_filter = ['branch', 'semester']
     list_display = ['meta_course', 'semester', 'is_published_in_video',
                     'is_open']
     inlines = (CourseTeacherInline,)
-    formfield_overrides = {
-        db_models.TextField: {'widget': AdminRichTextAreaWidget},
-    }
     raw_id_fields = ('meta_course',)
-    form = CourseAdminForm
     filter_horizontal = ('additional_branches',)
 
 

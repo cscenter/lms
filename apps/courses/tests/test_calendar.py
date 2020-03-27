@@ -10,6 +10,7 @@ from courses.models import CourseClass
 
 # TODO: test CourseClassQuerySet manager
 # TODO: test utils.get_boundaries
+from courses.utils import MonthPeriod
 
 
 def test_calendar_event():
@@ -35,11 +36,9 @@ def test_month_events_calendar(client, settings):
     class_date = datetime.date(year=2018, month=2, day=3)
     course_classes = CourseClassFactory.create_batch(5, date=class_date)
     events = (CalendarEvent(e) for e in course_classes)
-    calendar = MonthFullWeeksEventsCalendar(year=2018, month=2, events=events)
-    assert calendar.next_month == datetime.date(year=2018, month=3,
-                                                day=calendar._date.day)
-    assert calendar.prev_month == datetime.date(year=2018, month=1,
-                                                day=calendar._date.day)
+    calendar = MonthFullWeeksEventsCalendar(month_period=MonthPeriod(2018, 2), events=events)
+    assert calendar.next_month == datetime.date(year=2018, month=3, day=1)
+    assert calendar.prev_month == datetime.date(year=2018, month=1, day=1)
     assert calendar.month_label == 'Февраль 2018'
     week_index = 0  # week index of the month
     events = calendar.weeks()[week_index].days[class_date.weekday()].events

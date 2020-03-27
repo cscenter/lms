@@ -19,9 +19,11 @@ from core.urls import reverse
 from courses.calendar import CalendarEvent
 from courses.constants import SemesterTypes
 from courses.models import Course, Semester, CourseClass
-from courses.utils import get_current_term_pair
+from courses.utils import get_current_term_pair, MonthPeriod, \
+    extended_month_date_range
 from courses.views.calendar import MonthEventsCalendarView
 from learning.gallery.models import Image
+from learning.services import get_classes
 from users.constants import Roles
 from users.models import User
 
@@ -61,13 +63,12 @@ class CalendarClubScheduleView(MonthEventsCalendarView):
     calendar_type = "public_full"
     template_name = "learning/calendar.html"
 
-    def get_events(self, year, month, **kwargs):
-        classes = (CourseClass.objects
-                   .filter(~Q(course__semester__type=SemesterTypes.SUMMER),
-                           course__branch=self.request.branch)
-                   .select_calendar_data()
-                   .in_month(year, month))
-        return (CalendarEvent(e) for e in classes)
+    def get_events(self, month_period: MonthPeriod, **kwargs):
+        start, end = extended_month_date_range(month_period)
+        fs = [Q(date__range=[start, end]),
+              ~Q(course__semester__type=SemesterTypes.SUMMER)]
+        for c in get_classes(branch_list=[self.request.branch], filters=fs):
+            yield CalendarEvent(c)
 
 
 class IndexView(generic.TemplateView):

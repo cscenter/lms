@@ -29,7 +29,7 @@ def test_smoke(client, curator, settings):
 
 
 @pytest.mark.django_db
-def test_classes(client):
+def test_course_classes(client):
     user = UserFactory(groups=[Roles.STUDENT, Roles.TEACHER])
     client.login(user)
     fname = 'csc_classes.ics'
@@ -42,15 +42,19 @@ def test_classes(client):
     # Create some content
     ccs_teaching = (CourseClassFactory
                     .create_batch(2, course__teachers=[user]))
-    co_learning = CourseFactory.create()
-    EnrollmentFactory.create(student=user, course=co_learning)
+    course = CourseFactory.create()
+    EnrollmentFactory.create(student=user, course=course)
     ccs_learning = (CourseClassFactory
-                    .create_batch(3, course=co_learning))
+                    .create_batch(3, course=course))
     ccs_other = CourseClassFactory.create_batch(5)
     response = client.get(user.get_classes_icalendar_url())
     cal = Calendar.from_ical(response.content)
-    assert {cc.name for cc in chain(ccs_teaching, ccs_learning)} == {
-        evt['SUMMARY'] for evt in cal.subcomponents if isinstance(evt, Event)}
+    cal_events = {evt['SUMMARY'] for evt in
+                  cal.subcomponents if isinstance(evt, Event)}
+    for cc in ccs_learning:
+        assert cc.name in cal_events
+    for cc in ccs_teaching:
+        assert cc.name in cal_events
 
 
 @pytest.mark.django_db

@@ -9,6 +9,8 @@ from courses.calendar import CalendarQueryParams, MonthFullWeeksEventsCalendar, 
 
 __all__ = ('MonthEventsCalendarView', 'WeekEventsView')
 
+from courses.utils import MonthPeriod
+
 
 class MonthEventsCalendarView(generic.TemplateView):
     calendar_type = "full"
@@ -20,14 +22,16 @@ class MonthEventsCalendarView(generic.TemplateView):
         if not query_params.is_valid():
             return HttpResponseRedirect(request.path)
         today_local = now_local(request.user.get_timezone()).date()
+        # FIXME: validate in a MonthPeriod instead?
         year = query_params.validated_data.get('year', today_local.year)
         month = query_params.validated_data.get('month', today_local.month)
-        context = self.get_context_data(year, month, today_local, **kwargs)
+        month_period = MonthPeriod(year, month)
+        context = self.get_context_data(month_period, today_local, **kwargs)
         return self.render_to_response(context)
 
-    def get_context_data(self, year, month, today, **kwargs):
-        events = self.get_events(year, month)
-        calendar = MonthFullWeeksEventsCalendar(year, month, events)
+    def get_context_data(self, month_period, today, **kwargs):
+        events = self.get_events(month_period)
+        calendar = MonthFullWeeksEventsCalendar(month_period, events)
         context = {
             "today": today,
             "calendar_type": self.calendar_type,
@@ -35,7 +39,7 @@ class MonthEventsCalendarView(generic.TemplateView):
         }
         return context
 
-    def get_events(self, year, month, **kwargs) -> Iterable:
+    def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
         raise NotImplementedError()
 
 
@@ -60,6 +64,5 @@ class WeekEventsView(generic.TemplateView):
         }
         return context
 
-    def get_events(self, iso_year, iso_week,
-                   **kwargs) -> Iterable[CalendarEvent]:
+    def get_events(self, iso_year, iso_week) -> Iterable[CalendarEvent]:
         raise NotImplementedError()

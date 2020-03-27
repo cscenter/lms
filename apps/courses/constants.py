@@ -8,6 +8,7 @@ SUMMER_TERM_START = '1 jul'
 
 
 MONDAY_WEEKDAY = 0
+SUNDAY_WEEKDAY = 6
 
 
 class SemesterTypes(DjangoChoices):

@@ -1,9 +1,8 @@
 from typing import Dict, List
 
-from django.db.models import Count, Q
-
 from courses.constants import TeacherRoles
-from courses.models import CourseReview, CourseClass
+from courses.models import CourseReview, Course
+from courses.utils import get_terms_in_range
 
 
 def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
@@ -56,3 +55,18 @@ class CourseService:
         return (course.courseclass_set
                 .select_related("venue", "venue__location")
                 .order_by("date", "starts_at"))
+
+
+def get_teacher_branches(user, start_date, end_date):
+    """
+    Returns branches where user has been participated as a teacher in a
+    given period.
+    """
+    term_indexes = [t.index for t in get_terms_in_range(start_date, end_date)]
+    branches = set(Course.objects
+                   .filter(semester__index__in=term_indexes,
+                           teachers=user)
+                   .values_list("branch_id", flat=True)
+                   .distinct())
+    branches.add(user.branch_id)
+    return branches

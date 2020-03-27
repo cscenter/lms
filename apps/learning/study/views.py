@@ -4,12 +4,11 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
 from django.db.models import Q, Prefetch
-from django.http import HttpResponseRedirect, JsonResponse, \
-    HttpResponseBadRequest
-from django.utils.translation import ugettext_lazy as _, gettext
+from django.http import HttpResponseRedirect
+from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 from isoweek import Week
-from vanilla import ListView, TemplateView, GenericModelView
+from vanilla import TemplateView, GenericModelView
 
 from auth.mixins import PermissionRequiredMixin
 from core.exceptions import Redirect
@@ -18,10 +17,12 @@ from core.utils import is_club_site
 from courses.calendar import CalendarEvent
 from courses.constants import SemesterTypes
 from courses.models import CourseClass, Semester, Course
-from courses.utils import get_current_term_pair, get_term_index
+from courses.utils import get_current_term_pair, MonthPeriod, \
+    get_start_of_week, get_end_of_week, extended_month_date_range
 from courses.views import WeekEventsView, MonthEventsCalendarView
 from learning import utils
-from learning.calendar import get_student_month_events
+from learning.calendar import get_student_calendar_events, get_calendar_events
+from learning.services import get_student_classes, get_classes
 from learning.forms import AssignmentExecutionTimeForm
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
@@ -41,8 +42,11 @@ class CalendarFullView(PermissionRequiredMixin, MonthEventsCalendarView):
     """
     permission_required = "study.view_schedule"
 
-    def get_events(self, year, month, **kwargs):
-        return get_student_month_events(self.request.user, year, month)
+    def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
+        branches = [self.request.user.branch_id]
+        start_date, end_date = extended_month_date_range(month_period)
+        return get_calendar_events(branch_list=branches, start_date=start_date,
+                                   end_date=end_date)
 
 
 class CalendarPersonalView(CalendarFullView):
@@ -53,9 +57,11 @@ class CalendarPersonalView(CalendarFullView):
     calendar_type = "student"
     template_name = "learning/calendar.html"
 
-    def get_events(self, year, month, **kwargs):
-        return get_student_month_events(self.request.user, year, month,
-                                        personal=True)
+    def get_events(self, month_period: MonthPeriod, **kwargs) -> Iterable:
+        start_date, end_date = extended_month_date_range(month_period)
+        return get_student_calendar_events(user=self.request.user,
+                                           start_date=start_date,
+                                           end_date=end_date)
 
 
 class TimetableView(PermissionRequiredMixin, WeekEventsView):
@@ -63,19 +69,13 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
     template_name = "learning/study/timetable.html"
     permission_required = "study.view_schedule"
 
-    def get_events(self, iso_year, iso_week,
-                   **kwargs) -> Iterable[CalendarEvent]:
-        # TODO: Add NonCourseEvents like in a calendar view?
-        return (CalendarEvent(e) for e in self._get_classes(iso_year, iso_week))
-
-    def _get_classes(self, iso_year, iso_week):
+    def get_events(self, iso_year, iso_week) -> Iterable[CalendarEvent]:
         w = Week(iso_year, iso_week)
-        qs = (CourseClass.objects
-              .filter(date__range=[w.monday(), w.sunday()])
-              .for_student(self.request.user)
-              .select_calendar_data()
+        in_range = [Q(date__range=[w.monday(), w.sunday()])]
+        cs = (get_student_classes(self.request.user, in_range)
               .select_related('venue', 'venue__location'))
-        return qs
+        for c in cs:
+            yield CalendarEvent(c)
 
 
 class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):

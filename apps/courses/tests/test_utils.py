@@ -5,7 +5,8 @@ import pytz
 
 from courses.constants import SemesterTypes
 from courses.utils import get_term_index, get_term_by_index, \
-    get_current_term_pair, get_boundaries, TermPair, TermIndexError
+    get_current_term_pair, get_boundaries, TermPair, TermIndexError, \
+    get_start_of_week, get_end_of_week, MonthPeriod
 
 
 def test_get_term_index(settings):
@@ -74,3 +75,23 @@ def test_get_current_semester_pair(settings, mocker):
     assert TermPair(2014, SemesterTypes.SPRING) == get_current_term_pair(msk_tz)
     mocked_timezone.return_value = msk_tz.localize(datetime.datetime(2015, 11, 1, 12, 0))
     assert TermPair(2015, SemesterTypes.AUTUMN) == get_current_term_pair(msk_tz)
+
+
+def test_get_start_of_week():
+    sunday_index = 6  # 0-based index of the week
+    dt = datetime.date(2015, 9, 14)
+    assert get_start_of_week(dt) == dt
+    assert get_start_of_week(dt, week_start_on=sunday_index) == datetime.date(2015, 9, 13)
+
+
+def test_get_end_of_week():
+    sunday_index = 6  # 0-based index of the week
+    assert get_end_of_week(datetime.date(2015, 9, 14)) == datetime.date(2015, 9, 20)
+    assert get_end_of_week(datetime.date(2015, 9, 14), week_start_on=sunday_index) == datetime.date(2015, 9, 19)
+
+
+def test_month_period():
+    month = MonthPeriod(2019, 1)
+    assert month.starts == datetime.date(2019, 1, 1)
+    assert month.ends == datetime.date(2019, 1, 31)
+    assert MonthPeriod(2020, 2).ends == datetime.date(2020, 2, 29)

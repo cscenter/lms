@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
@@ -18,16 +19,18 @@ from core.utils import render_markdown
 from courses.calendar import CalendarEvent
 from courses.constants import SemesterTypes
 from courses.models import CourseClass, Course, Assignment
-from courses.utils import get_term_index, \
-    get_current_term_pair
+from courses.utils import get_current_term_pair, MonthPeriod, get_start_of_week, \
+    get_end_of_week, extended_month_date_range
 from courses.views.calendar import MonthEventsCalendarView
 from learning.api.serializers import AssignmentScoreSerializer
-from learning.calendar import get_teacher_month_events
+from learning.calendar import get_teacher_calendar_events, get_calendar_events
+from courses.services import get_teacher_branches
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment
 from learning.permissions import course_access_role, CourseRole, \
     CreateAssignmentComment, ViewStudentAssignment, EditOwnStudentAssignment
+from learning.services import get_teacher_classes
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import logger, AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
@@ -264,13 +267,13 @@ class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
     calendar_type = "teacher"
     template_name = "learning/teaching/timetable.html"
 
-    def get_events(self, year, month, **kwargs):
-        qs = (CourseClass.objects
-              .for_teacher(self.request.user)
-              .in_month(year, month)
-              .select_calendar_data()
+    def get_events(self, month_period: MonthPeriod, **kwargs):
+        start, end = extended_month_date_range(month_period)
+        in_range = [Q(date__range=[start, end])]
+        cs = (get_teacher_classes(self.request.user, in_range)
               .select_related('venue', 'venue__location'))
-        return (CalendarEvent(e) for e in qs)
+        for c in cs:
+            yield CalendarEvent(c)
 
 
 class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
@@ -278,8 +281,11 @@ class CalendarFullView(TeacherOnlyMixin, MonthEventsCalendarView):
     Shows all non-course events and classes filtered by the cities where
     authorized teacher has taught.
     """
-    def get_events(self, year, month, **kwargs):
-        return get_teacher_month_events(self.request.user, year, month)
+    def get_events(self, month_period: MonthPeriod, **kwargs):
+        start_date, end_date = extended_month_date_range(month_period)
+        branches = get_teacher_branches(self.request.user, start_date, end_date)
+        return get_calendar_events(branch_list=branches, start_date=start_date,
+                                   end_date=end_date)
 
 
 class CalendarPersonalView(CalendarFullView):
@@ -290,9 +296,11 @@ class CalendarPersonalView(CalendarFullView):
     calendar_type = 'teacher'
     template_name = "learning/calendar.html"
 
-    def get_events(self, year, month, **kwargs):
-        return get_teacher_month_events(self.request.user, year, month,
-                                        personal=True)
+    def get_events(self, month_period: MonthPeriod, **kwargs):
+        start_date, end_date = extended_month_date_range(month_period)
+        return get_teacher_calendar_events(user=self.request.user,
+                                           start_date=start_date,
+                                           end_date=end_date)
 
 
 class CourseListView(TeacherOnlyMixin, generic.ListView):

@@ -18,7 +18,6 @@ from ajaxuploader.backends import ProfileImageUploadBackend
 from ajaxuploader.handlers import MemoryImageUploadHandler, \
     TemporaryImageUploadHandler
 from ajaxuploader.signals import file_uploaded
-from core.utils import is_club_site
 from core.views import ProtectedFormMixin
 from courses.models import Course, Semester
 from learning.forms import TestimonialForm

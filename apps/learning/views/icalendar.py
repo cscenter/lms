@@ -1,15 +1,18 @@
 import itertools
 from typing import NamedTuple, Iterable
 
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.views import generic
 
+from learning.services import get_student_classes, get_teacher_classes, \
+    get_study_events
 from learning.icalendar import generate_icalendar, \
-    get_icalendar_student_classes, get_icalendar_teacher_classes, \
     get_icalendar_teacher_assignments, get_icalendar_student_assignments, \
-    get_icalendar_non_course_events, CourseClassICalendarEventBuilder, \
-    TeacherAssignmentICalendarEventBuilder, NonCourseEventICalendarEventBuilder, \
+    TeacherAssignmentICalendarEventBuilder, \
+    StudyEventICalendarEventBuilder, \
     StudentAssignmentICalendarEventBuilder, TeacherClassICalendarEventBuilder, \
     StudentClassICalendarEventBuilder
 from users.models import User
@@ -68,10 +71,16 @@ class ICalClassesView(UserICalendarView):
 
     def get_calendar_events(self, user, site, url_builder, tz):
         event_builder = StudentClassICalendarEventBuilder(tz, url_builder, site)
-        as_student = get_icalendar_student_classes(user, event_builder)
+        # FIXME: filter out past course classes?
+        qs = (get_student_classes(user)
+              .select_related('venue', 'venue__location'))
+        for course_class in qs:
+            yield event_builder.create(course_class, user)
         event_builder = TeacherClassICalendarEventBuilder(tz, url_builder, site)
-        as_teacher = get_icalendar_teacher_classes(user, event_builder)
-        return itertools.chain(as_student, as_teacher)
+        qs = (get_teacher_classes(user)
+              .select_related('venue', 'venue__location'))
+        for course_class in qs:
+            yield event_builder.create(course_class, user)
 
 
 class ICalAssignmentsView(UserICalendarView):
@@ -104,5 +113,12 @@ class ICalEventsView(UserICalendarView):
             file_name="csc_events.ics")
 
     def get_calendar_events(self, user, site, url_builder, tz):
-        event_builder = NonCourseEventICalendarEventBuilder(tz, url_builder, site)
-        return get_icalendar_non_course_events(user, event_builder)
+        event_builder = StudyEventICalendarEventBuilder(tz, url_builder, site)
+        filters = []
+        future_events = Q(date__gt=timezone.now())
+        filters.append(future_events)
+        # FIXME: take into account all teacher branches?
+        if hasattr(user, "branch_id") and user.branch_id:
+            filters.append(Q(branch_id=user.branch_id))
+        for e in get_study_events(filters).select_related('venue'):
+            yield event_builder.create(e, user)

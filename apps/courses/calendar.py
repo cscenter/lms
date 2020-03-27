@@ -1,4 +1,5 @@
 import datetime
+from abc import ABC
 from calendar import Calendar
 from collections import defaultdict
 from typing import List, Iterable, NewType
@@ -15,24 +16,14 @@ from rest_framework import serializers, fields
 
 from courses.constants import MONDAY_WEEKDAY
 from core.utils import chunks
-from courses.utils import get_boundaries
+from courses.utils import get_boundaries, MonthPeriod, get_start_of_week, \
+    get_end_of_week
 
 __all__ = ('EventsCalendar', 'CalendarEvent', 'MonthFullWeeksEventsCalendar',
            'WeekEventsCalendar', 'CalendarQueryParams')
 
 
-@attr.s
-class CalendarDay:
-    date: datetime.date = attr.ib()
-    events = attr.ib(factory=list)
-
-
-@attr.s
-class CalendarWeek:
-    iso_number: int = attr.ib()  # ISO 8601
-    days: List[CalendarDay] = attr.ib()
-
-
+# FIXME: rename. Должно подходить для Class/Assignment/UncategorizedEvent
 # TODO: Month calendar has event interface, but timetable is not. Do not use for timetable right now?
 @attr.s
 class CalendarEvent:
@@ -70,7 +61,19 @@ class CalendarEvent:
         return self.event.name
 
 
-class EventsCalendar:
+@attr.s
+class CalendarDay:
+    date: datetime.date = attr.ib()
+    events: List[CalendarEvent] = attr.ib(factory=list)
+
+
+@attr.s
+class CalendarWeek:
+    iso_number: int = attr.ib()  # ISO 8601
+    days: List[CalendarDay] = attr.ib()
+
+
+class EventsCalendar(ABC):
     """
     This class helps to generate days/weeks grid with attached events
 
@@ -111,12 +114,12 @@ class EventsCalendar:
         for event in events:
             self._date_to_events[event.date].append(event)
 
-    def by_week(self, year, month) -> List[CalendarWeek]:
+    def _weeks(self, year, month) -> List[CalendarWeek]:
         """
-        Returns a list of `CalendarWeek` for target month. Note that all weeks
-        are complete and could contain calendar days out of the target month.
+        Returns a list of `CalendarWeek` for one month. It contains dates
+        outside the specified month since it iterates over complete weeks.
         """
-        by_week = []
+        weeks = []
         cal = Calendar(firstweekday=MONDAY_WEEKDAY)
         dates = cal.itermonthdates(year, month)
         for full_week in chunks(dates, 7):
@@ -125,67 +128,72 @@ class EventsCalendar:
             for day in full_week:
                 data = CalendarDay(date=day, events=self._date_to_events[day])
                 week_days.append(data)
-            by_week.append(CalendarWeek(iso_number=iso_week_number,
-                                        days=week_days))
-        return by_week
+            weeks.append(CalendarWeek(iso_number=iso_week_number,
+                                      days=week_days))
+        return weeks
 
-    def by_day(self, start: datetime.date,
-               end: datetime.date) -> List[CalendarDay]:
+    def _days(self, start: datetime.date,
+              end: datetime.date) -> List[CalendarDay]:
         """
-        Returns a list of calendar days in a range [start, end] that have
-        attached events.
+        Returns a list of calendar days that have attached events in
+        a range [start, end].
         """
-        by_days = []
+        days = []
         for dt in rrule(DAILY, dtstart=start, until=end):
             d = dt.date()
             events = self._date_to_events[d]
             if events:
                 day = CalendarDay(date=d, events=events)
-                by_days.append(day)
-        return by_days
+                days.append(day)
+        return days
 
 
+# FIXME: add `week_starts_on` support
+# TODO: more generic class DateRangeEventsCalendar? No need right now
 class MonthFullWeeksEventsCalendar(EventsCalendar):
     """
     This class extends all non-complete weeks of the month, `.weeks()` or
     `.days()` could return days out of the target month.
     """
-    def __init__(self, year: int, month: int, events: Iterable[CalendarEvent]):
+    def __init__(self, month_period: MonthPeriod, events: Iterable[CalendarEvent]):
         super().__init__()
-        self.year = year
-        self.month = month
-        self._date = datetime.date(year, month, 1)
-        begin, end = get_boundaries(year, month)
+        self.month_period = month_period
+        begin, end = get_boundaries(month_period.year, month_period.month)
         self._add_events((e for e in events if
                           e.date >= begin or e.date <= end))
 
     @property
     def prev_month(self):
-        return self._date + relativedelta(months=-1)
+        return self.month_period.starts + relativedelta(months=-1)
 
     @property
     def next_month(self):
-        return self._date + relativedelta(months=+1)
+        return self.month_period.starts + relativedelta(months=+1)
 
     @property
     def month_label(self):
-        return date_format(self._date, "F Y")
+        return date_format(self.month_period.starts, "F Y")
+
+    @property
+    def month(self):
+        return self.month_period.month
+
+    @property
+    def year(self):
+        return self.month_period.year
 
     def weeks(self) -> List[CalendarWeek]:
         """
         Returns a list of the weeks in the month as full weeks.
         Each day of the week stores attached events.
         """
-        return super().by_week(self.year, self.month)
+        return super()._weeks(self.month_period.year, self.month_period.month)
 
     def days(self) -> List[CalendarDay]:
-        """Returns events grouped by day"""
-        cal = Calendar(firstweekday=MONDAY_WEEKDAY)
-        dates = cal.itermonthdates(self.year, self.month)
-        first = last = next(dates)
-        for last in dates:
-            pass
-        return self.by_day(first, last)
+        """Returns list of events grouped by day"""
+        first = get_start_of_week(self.month_period.starts)
+        last = get_end_of_week(self.month_period.ends)
+        return self._days(first, last)
 
 
 ISOWeekNumber = NewType('ISOWeekNumber', int)
@@ -225,7 +233,7 @@ class WeekEventsCalendar(EventsCalendar):
         return self.week + 1
 
     def days(self) -> List[CalendarDay]:
-        return self.by_day(self.week.monday(), self.week.sunday())
+        return self._days(self.week.monday(), self.week.sunday())
 
 
 class CalendarQueryParams(serializers.Serializer):
