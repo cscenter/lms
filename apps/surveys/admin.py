@@ -4,7 +4,8 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from core.admin import meta
-from core.timezone.forms import TimezoneAwareModelForm, \
+from core.timezone import TimezoneAwareDateTimeField
+from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.filters import AdminRelatedDropdownFilter
 from core.urls import reverse
@@ -39,9 +40,9 @@ class FormAdmin(admin.ModelAdmin):
 
 
 class CourseSurveyAdmin(admin.ModelAdmin):
-    form = TimezoneAwareModelForm
+    form = TimezoneAwareAdminForm
     formfield_overrides = {
-        DateTimeField: {
+        TimezoneAwareDateTimeField: {
             'widget': TimezoneAwareAdminSplitDateTimeWidget,
             'form_class': TimezoneAwareSplitDateTimeField
         }

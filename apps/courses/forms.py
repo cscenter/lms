@@ -10,8 +10,8 @@ from django.utils.translation import ugettext_lazy as _
 from core.forms import CANCEL_SAVE_PAIR
 from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
-from core.timezone.forms import TimezoneAwareModelForm, \
-    TimezoneAwareSplitDateTimeField, TimezoneAwareSplitDateTimeWidget
+from core.timezone.forms import TimezoneAwareSplitDateTimeField, \
+    TimezoneAwareModelForm
 from core.widgets import UbereditorWidget, DateInputTextWidget, \
     TimeInputTextWidget
 from courses.constants import ClassTypes
@@ -257,7 +257,6 @@ class AssignmentForm(TimezoneAwareModelForm):
         label=_("Deadline"),
         input_date_formats=[DATE_FORMAT_RU],
         input_time_formats=[TIME_FORMAT_RU],
-        widget=TimezoneAwareSplitDateTimeWidget()
     )
     attachments = forms.FileField(
         label=_("Attached files"),
