@@ -1,21 +1,19 @@
 import datetime
-from operator import attrgetter
 
-from crispy_forms.bootstrap import TabHolder, Tab, PrependedText, FormActions, \
-    StrictButton
+from crispy_forms.bootstrap import TabHolder, Tab
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Div, HTML, Fieldset
+from crispy_forms.layout import Layout, Div
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 
 from core.forms import CANCEL_SAVE_PAIR
-from core.models import LATEX_MARKDOWN_HTML_ENABLED, Branch
-from core.timezone.forms import TimezoneAwareModelForm, \
-    TimezoneAwareSplitDateTimeField
+from core.models import LATEX_MARKDOWN_HTML_ENABLED
 from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
-from core.widgets import UbereditorWidget, DateInputAsTextInput, \
-    TimeInputAsTextInput, CityAwareSplitDateTimeWidget
+from core.timezone.forms import TimezoneAwareModelForm, \
+    TimezoneAwareSplitDateTimeField, TimezoneAwareSplitDateTimeWidget
+from core.widgets import UbereditorWidget, DateInputTextWidget, \
+    TimeInputTextWidget
 from courses.constants import ClassTypes
 from courses.models import Course, CourseNews, MetaCourse, CourseClass, \
     Assignment, LearningSpace, StudentGroupTypes
@@ -174,18 +172,15 @@ class CourseClassForm(forms.ModelForm):
     date = forms.DateField(
         label=_("Date"),
         help_text=_("Format: dd.mm.yyyy"),
-        widget=DateInputAsTextInput(attrs={'class': 'datepicker',
-                                           'autocomplete': 'off'}))
+        widget=DateInputTextWidget(attrs={'class': 'datepicker'}))
     starts_at = forms.TimeField(
         label=_("Starts at"),
         help_text=_("Format: hh:mm"),
-        widget=TimeInputAsTextInput(format="%H:%M",
-                                    attrs={'autocomplete': 'off'}))
+        widget=TimeInputTextWidget())
     ends_at = forms.TimeField(
         label=_("Ends at"),
         help_text=_("Format: hh:mm"),
-        widget=TimeInputAsTextInput(format="%H:%M",
-                                    attrs={'autocomplete': 'off'}))
+        widget=TimeInputTextWidget())
     restricted_to = MultipleStudentGroupField(
         label=_("Student Groups"),
         required=False,
@@ -262,8 +257,7 @@ class AssignmentForm(TimezoneAwareModelForm):
         label=_("Deadline"),
         input_date_formats=[DATE_FORMAT_RU],
         input_time_formats=[TIME_FORMAT_RU],
-        widget=CityAwareSplitDateTimeWidget(date_format=DATE_FORMAT_RU,
-                                            time_format=TIME_FORMAT_RU)
+        widget=TimezoneAwareSplitDateTimeWidget()
     )
     attachments = forms.FileField(
         label=_("Attached files"),

@@ -3,10 +3,8 @@ from django import forms
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django_filters.widgets import RangeWidget
 from webpack_loader import utils
-from django.utils.translation import ugettext_lazy as _
 
-from core.timezone.constants import DATE_FORMAT_RU
-from core.timezone.utils import aware_to_naive
+from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU
 
 
 class UbereditorWidget(forms.Textarea):
@@ -56,35 +54,31 @@ class DateTimeRangeWidget(RangeWidget):
         super(RangeWidget, self).__init__(widgets, attrs)
 
 
-class DateInputAsTextInput(forms.DateInput):
+class DateInputTextWidget(forms.DateInput):
     input_type = 'text'
 
     def __init__(self, attrs=None, format=None):
-        super(DateInputAsTextInput, self).__init__(attrs, format)
-        self.format = DATE_FORMAT_RU
+        format_attrs = {"placeholder": "dd.mm.yyyy"} if format is None else {}
+        attrs = {
+            "autocomplete": "off",
+            "class": "form-control",
+            **format_attrs,
+            **(attrs or {})
+        }
+        fmt = format or DATE_FORMAT_RU
+        super().__init__(attrs=attrs, format=fmt)
 
 
-class TimeInputAsTextInput(forms.TimeInput):
+class TimeInputTextWidget(forms.TimeInput):
     input_type = 'text'
 
-
-class CityAwareSplitDateTimeWidget(forms.MultiWidget):
-    """Using bootstrap datetime picker for assignment form"""
-    supports_microseconds = False
-    template_name = "widgets/timezone_aware_split_datetime.html"
-
-    def __init__(self, attrs=None, date_format=None, time_format=None):
-        attrs = {"class": "form-control", "autocomplete": "off"}
-        widgets = (
-            DateInputAsTextInput(attrs={"placeholder": "dd/mm/yyyy", **attrs},
-                                 format=date_format),
-            TimeInputAsTextInput(attrs={"placeholder": "hh:mm", **attrs},
-                                 format=time_format),
-        )
-        super().__init__(widgets, attrs)
-
-    def decompress(self, value):
-        if value:
-            value = aware_to_naive(value, self.instance)
-            return [value.date(), value.time().replace(microsecond=0)]
-        return [None, None]
+    def __init__(self, attrs=None, format=None):
+        format_attrs = {"placeholder": "hh:mm"} if format is None else {}
+        attrs = {
+            "autocomplete": "off",
+            "class": "form-control",
+            **format_attrs,
+            **(attrs or {})
+        }
+        fmt = format or TIME_FORMAT_RU
+        super().__init__(attrs=attrs, format=fmt)

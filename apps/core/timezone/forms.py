@@ -1,14 +1,52 @@
 import datetime
 
+import pytz
 from django import forms
+from django.conf import settings
 from django.contrib.admin import widgets
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
-from .utils import aware_to_naive, naive_to_aware
+from .models import TimezoneAwareModel
+from .utils import aware_to_naive
+from ..widgets import DateInputTextWidget, TimeInputTextWidget
 
 
-class TimezoneAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
+def naive_to_aware(value, instance: TimezoneAwareModel):
+    """
+    Make a naive datetime.datetime in a given instance time zone aware.
+    """
+    if settings.USE_TZ and value is not None and timezone.is_naive(value):
+        try:
+            instance_tz = instance.get_timezone()
+        except ObjectDoesNotExist:
+            # Can't retrieve timezone until timezone aware field is empty
+            instance_tz = pytz.UTC
+        try:
+            return timezone.make_aware(value, instance_tz)
+        except Exception as exc:
+            msg = _(
+                '%(datetime)s couldn\'t be interpreted in time zone '
+                '%(instance_tz)s; it may be ambiguous or it may not exist.'
+            )
+            params = {'datetime': value, 'instance_tz': instance_tz}
+            raise ValidationError(
+                msg,
+                code='ambiguous_timezone',
+                params=params) from exc
+    return value
+
+
+class TimezoneAwareSplitDateTimeWidget(forms.SplitDateTimeWidget):
+    template_name = "widgets/timezone_aware_split_datetime.html"
+
+    def __init__(self, attrs=None):
+        widgets = [DateInputTextWidget, TimeInputTextWidget]
+        # Note that we're calling MultiWidget, not SplitDateTimeWidget, because
+        # we want to define widgets.
+        forms.MultiWidget.__init__(self, widgets, attrs)
+
     def decompress(self, value):
         if value:
             value = aware_to_naive(value, self.instance)
@@ -16,10 +54,16 @@ class TimezoneAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
         return [None, None]
 
 
+class TimezoneAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
+    def decompress(self, value):
+        # noinspection PyCallByClass
+        return TimezoneAwareSplitDateTimeWidget.decompress(self, value)
+
+
 class TimezoneAwareSplitDateTimeField(forms.SplitDateTimeField):
     def compress(self, data_list):
         if data_list:
-            # Raise a validation error if time or date is empty
+            # Raise validation error if time or date is empty
             # (possible with `required=False` field attribute value).
             if data_list[0] in self.empty_values:
                 raise ValidationError(self.error_messages['invalid_date'],
@@ -27,9 +71,8 @@ class TimezoneAwareSplitDateTimeField(forms.SplitDateTimeField):
             if data_list[1] in self.empty_values:
                 raise ValidationError(self.error_messages['invalid_time'],
                                       code='invalid_time')
-            result = datetime.datetime.combine(*data_list)
-            city_aware = naive_to_aware(result, self.widget.instance)
-            return city_aware
+            dt_naive = datetime.datetime.combine(*data_list)
+            return naive_to_aware(dt_naive, self.widget.instance)
         return None
 
 
