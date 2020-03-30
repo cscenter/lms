@@ -8,11 +8,11 @@ class TimezoneAwareModel:
     SELF_AWARE = object()
     """
     `TIMEZONE_AWARE_FIELD_NAME = SELF_AWARE` is a special case when
-    current model knows how to get timezone without using mro call chain
+    current model knows how to get timezone without using __mro__ call chain
     """
     def get_timezone(self) -> Timezone:
-        next_in_tz_aware_mro = getattr(self, self.get_tz_aware_field_name())
-        return next_in_tz_aware_mro.get_timezone()
+        related_model = getattr(self, self.get_tz_aware_field_name())
+        return related_model.get_timezone()
 
     @classmethod
     def get_tz_aware_field_name(cls):

@@ -1,7 +1,5 @@
-from typing import NewType, Union
+from typing import NewType
 
 import pytz
 
-CityCode = NewType('CityCode', str)
 Timezone = NewType('Timezone', pytz.timezone)
-TzAware = Union[Timezone, CityCode]

@@ -1,9 +1,9 @@
-from typing import Iterable, Union
+from typing import Iterable
 
 from django.http import HttpResponseRedirect
 from django.views import generic
 
-from core.timezone import now_local, CityCode, Timezone
+from core.timezone import now_local
 from courses.calendar import CalendarQueryParams, MonthFullWeeksEventsCalendar, \
     WeekEventsCalendar, CalendarEvent
 

@@ -4,15 +4,13 @@ from crispy_forms.layout import Submit, Layout, Div, Row
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
-from core.widgets import DateInputAsTextInput
+from core.widgets import DateInputTextWidget
 
 
 class GraduationForm(forms.Form):
     graduated_on = forms.DateField(
         label=_("Date of Graduation"),
-        widget=DateInputAsTextInput(attrs={'class': 'datepicker',
-                                           'autocomplete': 'off',
-                                           'placeholder': 'dd.mm.yyyy'}))
+        widget=DateInputTextWidget(attrs={'class': 'datepicker'}))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
