@@ -1,5 +1,6 @@
 from django.core import checks
 from django.core.exceptions import FieldDoesNotExist
+from django.db.models import DateTimeField
 
 from .typing import Timezone
 
@@ -121,3 +122,7 @@ class TimezoneAwareModel:
                     ))
                 break
         return errors
+
+
+class TimezoneAwareDateTimeField(DateTimeField):
+    pass

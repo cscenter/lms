@@ -22,7 +22,8 @@ from sorl.thumbnail import ImageField
 
 from core.mixins import DerivableFieldsMixin
 from core.models import LATEX_MARKDOWN_HTML_ENABLED, Location, Branch
-from core.timezone import now_local, Timezone, TimezoneAwareModel
+from core.timezone import now_local, Timezone, TimezoneAwareModel, \
+    TimezoneAwareDateTimeField
 from core.urls import reverse, branch_aware_reverse
 from core.utils import hashids, get_youtube_video_id, instance_memoize
 from courses.constants import ASSIGNMENT_TASK_ATTACHMENT, TeacherRoles, \
@@ -979,7 +980,7 @@ class Assignment(TimezoneAwareModel, TimeStampedModel):
         Course,
         verbose_name=_("Course offering"),
         on_delete=models.PROTECT)
-    deadline_at = models.DateTimeField(_("Assignment|deadline"))
+    deadline_at = TimezoneAwareDateTimeField(_("Assignment|deadline"))
     submission_type = models.CharField(
         verbose_name=_("Submission Type"),
         max_length=42,

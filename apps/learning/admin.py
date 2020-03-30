@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
 from core.admin import RelatedSpecMixin
-from core.timezone.forms import TimezoneAwareModelForm, \
+from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
@@ -44,13 +44,6 @@ class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
 
 
 class EnrollmentAdmin(admin.ModelAdmin):
-    form = TimezoneAwareModelForm
-    formfield_overrides = {
-        db_models.DateTimeField: {
-            'widget': TimezoneAwareAdminSplitDateTimeWidget,
-            'form_class': TimezoneAwareSplitDateTimeField
-        }
-    }
     list_display = ['student', 'course', 'is_deleted', 'grade',
                     'grade_changed_local']
     ordering = ['-pk']

@@ -17,7 +17,8 @@ from admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
     InterviewInvitation, University
 from core.admin import meta
-from core.timezone.forms import TimezoneAwareModelForm, \
+from core.timezone import TimezoneAwareDateTimeField
+from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
@@ -62,11 +63,11 @@ class ApplicantCampaignListFilter(CampaignListFilter):
 
 
 class CampaignAdmin(admin.ModelAdmin):
-    form = TimezoneAwareModelForm
+    form = TimezoneAwareAdminForm
     list_display = ['year', 'branch', 'current']
     list_filter = ['branch']
     formfield_overrides = {
-        models.DateTimeField: {
+        TimezoneAwareDateTimeField: {
             'widget': TimezoneAwareAdminSplitDateTimeWidget,
             'form_class': TimezoneAwareSplitDateTimeField
         },
@@ -189,9 +190,9 @@ class ContestAdmin(admin.ModelAdmin):
 
 
 class InterviewAdmin(admin.ModelAdmin):
-    form = TimezoneAwareModelForm
+    form = TimezoneAwareAdminForm
     formfield_overrides = {
-        models.DateTimeField: {
+        TimezoneAwareDateTimeField: {
             'widget': TimezoneAwareAdminSplitDateTimeWidget,
             'form_class': TimezoneAwareSplitDateTimeField
         }

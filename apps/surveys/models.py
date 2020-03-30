@@ -13,7 +13,8 @@ from django.utils.translation import ugettext_lazy as _
 from post_office import mail
 from post_office.models import EmailTemplate
 
-from core.timezone import now_local, TimezoneAwareModel
+from core.timezone import now_local, TimezoneAwareModel, \
+    TimezoneAwareDateTimeField
 from core.urls import reverse, branch_aware_reverse
 from courses.models import Course
 from learning.models import Enrollment
@@ -263,7 +264,7 @@ class CourseSurvey(TimezoneAwareModel, models.Model):
     course = models.ForeignKey(Course,
                                related_name="surveys",
                                on_delete=models.CASCADE)
-    expire_at = models.DateTimeField(
+    expire_at = TimezoneAwareDateTimeField(
         verbose_name=_("Expires on"),
         help_text=_("With published selected, won't be shown after this time. "
                     "Datetime should be specified in the timezone of the root "

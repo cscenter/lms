@@ -4,13 +4,22 @@ import pytz
 from django import forms
 from django.conf import settings
 from django.contrib.admin import widgets
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
-from .models import TimezoneAwareModel
-from .utils import aware_to_naive
-from ..widgets import DateInputTextWidget, TimeInputTextWidget
+from core.widgets import DateInputTextWidget, TimeInputTextWidget
+from .models import TimezoneAwareDateTimeField, TimezoneAwareModel
+
+
+def aware_to_naive(value, instance: TimezoneAwareModel):
+    """
+    Make an aware datetime.datetime naive in a time zone of the given instance
+    """
+    if settings.USE_TZ and value is not None and timezone.is_aware(value):
+        instance_timezone = instance.get_timezone()
+        return timezone.make_naive(value, instance_timezone)
+    return value
 
 
 def naive_to_aware(value, instance: TimezoneAwareModel):
@@ -39,7 +48,7 @@ def naive_to_aware(value, instance: TimezoneAwareModel):
 
 
 class TimezoneAwareSplitDateTimeWidget(forms.SplitDateTimeWidget):
-    template_name = "widgets/timezone_aware_split_datetime.html"
+    template_name = "widgets/timezone_aware_split_datetime.html"  # bootstrap 3
 
     def __init__(self, attrs=None):
         widgets = [DateInputTextWidget, TimeInputTextWidget]
@@ -60,7 +69,15 @@ class TimezoneAwareAdminSplitDateTimeWidget(widgets.AdminSplitDateTime):
         return TimezoneAwareSplitDateTimeWidget.decompress(self, value)
 
 
-class TimezoneAwareSplitDateTimeField(forms.SplitDateTimeField):
+class TimezoneAwareFormField(forms.Field):
+    pass
+
+
+class TimezoneAwareSplitDateTimeField(TimezoneAwareFormField,
+                                      forms.SplitDateTimeField):
+    widget = TimezoneAwareSplitDateTimeWidget
+    # TODO: customize hidden widget?
+
     def compress(self, data_list):
         if data_list:
             # Raise validation error if time or date is empty
@@ -79,23 +96,16 @@ class TimezoneAwareSplitDateTimeField(forms.SplitDateTimeField):
 class TimezoneAwareModelForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """
-        Attach model instance to all `AdminSplitDateTime` widgets.
-        This allows to get timezone inside widget and makes a datetime
-        in a given time zone aware.
+        Links a model instance to a field widget if the field is aware of
+        timezone.
         """
         super().__init__(*args, **kwargs)
-        for field_name, field_data in self.fields.items():
-            if isinstance(field_data, forms.SplitDateTimeField):
-                if not isinstance(field_data, TimezoneAwareSplitDateTimeField):
-                    raise TypeError(f"`{field_name}` must be subclassed from "
-                                    f"{TimezoneAwareSplitDateTimeField}")
-                widget = field_data.widget
-                if isinstance(widget, widgets.AdminSplitDateTime) and \
-                        not isinstance(widget, TimezoneAwareAdminSplitDateTimeWidget):
-                    raise TypeError(f"`{field_name}` widget must be subclassed "
-                                    f"from {TimezoneAwareAdminSplitDateTimeWidget}")
-                else:
-                    widget.instance = self.instance
+        if not isinstance(self.instance, TimezoneAwareModel):
+            raise TypeError(f"{TimezoneAwareModelForm.__class__}.instance "
+                            f"must be subclassed from {TimezoneAwareModel}")
+        for field_name, form_field in self.fields.items():
+            if isinstance(form_field, TimezoneAwareFormField):
+                form_field.widget.instance = self.instance
 
     def save(self, commit=True):
         """
@@ -104,8 +114,8 @@ class TimezoneAwareModelForm(forms.ModelForm):
         """
         if self.instance.get_tz_aware_field_name() in self.changed_data:
             tz = self.instance.get_timezone()
-            for field_name, field_data in self.fields.items():
-                if isinstance(field_data, TimezoneAwareSplitDateTimeField):
+            for field_name, form_field in self.fields.items():
+                if isinstance(form_field, TimezoneAwareFormField):
                     value = self.cleaned_data[field_name]
                     if isinstance(value, datetime.datetime):
                         value = value.replace(tzinfo=None)
@@ -113,3 +123,18 @@ class TimezoneAwareModelForm(forms.ModelForm):
                         self.cleaned_data[field_name] = value
                         setattr(self.instance, field_name, value)
         return super().save(commit)
+
+
+class TimezoneAwareAdminForm(TimezoneAwareModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, form_field in self.fields.items():
+            model_field = self._meta.model._meta.get_field(field_name)
+            if isinstance(model_field, TimezoneAwareDateTimeField):
+                if not isinstance(form_field, TimezoneAwareSplitDateTimeField):
+                    raise TypeError(f"`{field_name}` must be subclassed from "
+                                    f"{TimezoneAwareSplitDateTimeField}")
+                widget = form_field.widget
+                if not isinstance(widget, TimezoneAwareAdminSplitDateTimeWidget):
+                    raise TypeError(f"`{field_name}` widget must be subclassed "
+                                    f"from {TimezoneAwareAdminSplitDateTimeWidget}")

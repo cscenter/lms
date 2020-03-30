@@ -9,7 +9,8 @@ from django.db.models import ForeignKey
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
-from core.timezone.forms import TimezoneAwareModelForm, \
+from core.timezone import TimezoneAwareDateTimeField
+from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
 from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget
@@ -147,7 +148,7 @@ class CourseNewsAdmin(admin.ModelAdmin):
     created_local.short_description = _("Created")
 
 
-class AssignmentAdminForm(TimezoneAwareModelForm):
+class AssignmentAdminForm(TimezoneAwareAdminForm):
     class Meta:
         model = Assignment
         fields = '__all__'
@@ -191,7 +192,7 @@ class AssignmentAdmin(admin.ModelAdmin):
     form = AssignmentAdminForm
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
-        db_models.DateTimeField: {
+        TimezoneAwareDateTimeField: {
             'widget': TimezoneAwareAdminSplitDateTimeWidget,
             'form_class': TimezoneAwareSplitDateTimeField
         },

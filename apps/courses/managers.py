@@ -77,6 +77,7 @@ class CourseClassQuerySet(query.QuerySet):
         return (self.filter(common_classes | restricted_to_student_group,
                             course__enrollment__student_id=user.pk,
                             course__enrollment__is_deleted=False)
+                    # FIXME: move ordering outside?
                     .order_by("-date", "-starts_at"))
 
     def for_teacher(self, user):

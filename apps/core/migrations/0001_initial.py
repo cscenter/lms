@@ -2,7 +2,7 @@
 
 import bitfield.models
 import core.models
-import core.timezone.models
+from core.timezone import models as tz_models
 from django.db import migrations, models
 import django.db.models.deletion
 
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Cities',
                 'ordering': ['name'],
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(tz_models.TimezoneAwareModel, models.Model),
         ),
         migrations.CreateModel(
             name='Location',
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 'verbose_name_plural': 'Locations',
                 'ordering': ('name',),
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(tz_models.TimezoneAwareModel, models.Model),
         ),
         migrations.CreateModel(
             name='Branch',
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'Branch',
                 'verbose_name_plural': 'Branches',
             },
-            bases=(core.timezone.models.TimezoneAwareModel, models.Model),
+            bases=(tz_models.TimezoneAwareModel, models.Model),
             managers=[
                 ('objects', core.models.BranchManager()),
             ],

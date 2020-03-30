@@ -28,7 +28,7 @@ from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
 from core.db.models import ScoreField
 from core.models import Branch, Location
-from core.timezone import TimezoneAwareModel
+from core.timezone import TimezoneAwareModel, TimezoneAwareDateTimeField
 from core.urls import reverse
 from learning.settings import AcademicDegreeLevels
 from users.constants import Roles
@@ -75,8 +75,8 @@ class Campaign(TimezoneAwareModel, models.Model):
         _("Current campaign"),
         help_text=_("Show in application form list"),
         default=False)
-    application_starts_at = models.DateTimeField(_("Application Starts on"))
-    application_ends_at = models.DateTimeField(
+    application_starts_at = TimezoneAwareDateTimeField(_("Application Starts on"))
+    application_ends_at = TimezoneAwareDateTimeField(
         _("Application Ends on"),
         help_text=_("Last day for submitting application"))
     access_token = models.CharField(
@@ -900,7 +900,7 @@ class Interview(TimezoneAwareModel, TimeStampedModel):
     )
     TRANSITION_STATUSES = [DEFERRED, CANCELED, APPROVAL]
 
-    date = models.DateTimeField(_("When"))
+    date = TimezoneAwareDateTimeField(_("When"))
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),
