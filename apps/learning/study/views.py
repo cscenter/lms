@@ -72,8 +72,7 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
     def get_events(self, iso_year, iso_week) -> Iterable[CalendarEvent]:
         w = Week(iso_year, iso_week)
         in_range = [Q(date__range=[w.monday(), w.sunday()])]
-        cs = (get_student_classes(self.request.user, in_range)
-              .select_related('venue', 'venue__location'))
+        cs = get_student_classes(self.request.user, in_range, with_venue=True)
         for c in cs:
             yield CalendarEvent(c)
 
