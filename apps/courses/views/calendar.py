@@ -9,6 +9,8 @@ from courses.calendar import CalendarQueryParams, MonthFullWeeksEventsCalendar, 
 
 __all__ = ('MonthEventsCalendarView', 'WeekEventsView')
 
+from courses.constants import SUNDAY_WEEKDAY
+
 from courses.utils import MonthPeriod
 
 

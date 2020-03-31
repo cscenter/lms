@@ -28,15 +28,12 @@
     <div class="event-types">
     Типы событий: <span class="lecture">Лекция</span> <span class="seminar">Семинар</span>
     </div>
+    {% for week_day in calendar.week_days %}{{ week_day }}{% endfor %}
       <table class="table table-bordered calendar">
         <tr>
-          <th>{% trans "Monday" %}</th>
-          <th>{% trans "Tuesday" %}</th>
-          <th>{% trans "Wednesday" %}</th>
-          <th>{% trans "Thursday" %}</th>
-          <th>{% trans "Friday" %}</th>
-          <th>{% trans "Saturday" %}</th>
-          <th>{% trans "Sunday" %}</th>
+            {% for weekday_title in calendar.week_titles %}
+                <th>{{ weekday_title }}</th>
+            {% endfor %}
         </tr>
         {% for week in calendar.weeks %}
         <tr id="week_{{week.iso_number}}">
