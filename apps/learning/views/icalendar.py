@@ -72,14 +72,10 @@ class ICalClassesView(UserICalendarView):
     def get_calendar_events(self, user, site, url_builder, tz):
         event_builder = StudentClassICalendarEventBuilder(tz, url_builder, site)
         # FIXME: filter out past course classes?
-        qs = (get_student_classes(user)
-              .select_related('venue', 'venue__location'))
-        for course_class in qs:
+        for course_class in get_student_classes(user, with_venue=True):
             yield event_builder.create(course_class, user)
         event_builder = TeacherClassICalendarEventBuilder(tz, url_builder, site)
-        qs = (get_teacher_classes(user)
-              .select_related('venue', 'venue__location'))
-        for course_class in qs:
+        for course_class in get_teacher_classes(user, with_venue=True):
             yield event_builder.create(course_class, user)
 
 

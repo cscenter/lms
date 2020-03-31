@@ -56,13 +56,21 @@ AssignmentManager = models.Manager.from_queryset(AssignmentQuerySet)
 
 class CourseClassQuerySet(query.QuerySet):
     def select_calendar_data(self):
-        # FIXME: better to use `.values` but some queries rely on
-        #  further `.select_related('venue'...) call :<
         return (self
                 .select_related('course',
                                 'course__meta_course',
                                 'course__semester',
-                                'course__branch'))
+                                'course__branch')
+                .defer('course__description',
+                       'course__description_en',
+                       'course__description_ru',
+                       'course__branch__description',
+                       'course__meta_course__description',
+                       'course__meta_course__description_en',
+                       'course__meta_course__description_ru',
+                       'course__meta_course__short_description',
+                       'course__meta_course__short_description_en',
+                       'course__meta_course__short_description_ru'))
 
     def in_branches(self, *branches):
         if not branches:

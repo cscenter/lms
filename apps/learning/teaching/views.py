@@ -270,8 +270,7 @@ class TimetableView(TeacherOnlyMixin, MonthEventsCalendarView):
     def get_events(self, month_period: MonthPeriod, **kwargs):
         start, end = extended_month_date_range(month_period)
         in_range = [Q(date__range=[start, end])]
-        cs = (get_teacher_classes(self.request.user, in_range)
-              .select_related('venue', 'venue__location'))
+        cs = get_teacher_classes(self.request.user, in_range, with_venue=True)
         for c in cs:
             yield CalendarEvent(c)
 
