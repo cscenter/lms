@@ -1,4 +1,4 @@
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_noop, ugettext_lazy as _
 from djchoices import DjangoChoices, C
 
 
@@ -9,8 +9,18 @@ SUMMER_TERM_START = '1 jul'
 
 MONDAY_WEEKDAY = 0
 SUNDAY_WEEKDAY = 6
+WEEKDAY_TITLES = [
+    ugettext_noop("Monday"),
+    ugettext_noop("Tuesday"),
+    ugettext_noop("Wednesday"),
+    ugettext_noop("Thursday"),
+    ugettext_noop("Friday"),
+    ugettext_noop("Saturday"),
+    ugettext_noop("Sunday"),
+]
 
 
+# FIXME: mb it needs to replace lazy translation with `ugettext_noop`. Test with en version
 class SemesterTypes(DjangoChoices):
     """
     Term order values must be consecutive numbers and start from

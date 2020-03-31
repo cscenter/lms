@@ -11,13 +11,13 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.utils.formats import date_format, time_format
+from django.utils.translation import ugettext_lazy as _
 from isoweek import Week
 from rest_framework import serializers, fields
 
-from courses.constants import MONDAY_WEEKDAY
 from core.utils import chunks
-from courses.utils import get_boundaries, MonthPeriod, get_start_of_week, \
-    get_end_of_week
+from courses.constants import MONDAY_WEEKDAY, WEEKDAY_TITLES
+from courses.utils import MonthPeriod, extended_month_date_range
 
 __all__ = ('EventsCalendar', 'CalendarEvent', 'MonthFullWeeksEventsCalendar',
            'WeekEventsCalendar', 'CalendarQueryParams')
@@ -105,8 +105,10 @@ class EventsCalendar(ABC):
         ]
     """
 
-    def __init__(self):
+    def __init__(self, week_starts_on):
         self._date_to_events = defaultdict(list)
+        self.week_starts_on = week_starts_on
+        self._cal = Calendar(firstweekday=self.week_starts_on)
 
     def _add_events(self, events: Iterable[CalendarEvent]):
         # Note: Day events order could be broken on subsequent calls
@@ -114,14 +116,16 @@ class EventsCalendar(ABC):
         for event in events:
             self._date_to_events[event.date].append(event)
 
-    def _weeks(self, year, month) -> List[CalendarWeek]:
+    def week_titles(self):
+        return [_(WEEKDAY_TITLES[n]) for n in self._cal.iterweekdays()]
+
+    def _weeks(self, month_period: MonthPeriod) -> List[CalendarWeek]:
         """
         Returns a list of `CalendarWeek` for one month. It contains dates
         outside the specified month since it iterates over complete weeks.
         """
         weeks = []
-        cal = Calendar(firstweekday=MONDAY_WEEKDAY)
-        dates = cal.itermonthdates(year, month)
+        dates = self._cal.itermonthdates(month_period.year, month_period.month)
         for full_week in chunks(dates, 7):
             iso_week_number = full_week[0].isocalendar()[1]
             week_days = []
@@ -148,17 +152,19 @@ class EventsCalendar(ABC):
         return days
 
 
-# FIXME: add `week_starts_on` support
 # TODO: more generic class DateRangeEventsCalendar? No need right now
 class MonthFullWeeksEventsCalendar(EventsCalendar):
     """
     This class extends all non-complete weeks of the month, `.weeks()` or
     `.days()` could return days out of the target month.
     """
-    def __init__(self, month_period: MonthPeriod, events: Iterable[CalendarEvent]):
-        super().__init__()
+    def __init__(self, month_period: MonthPeriod,
+                 events: Iterable[CalendarEvent],
+                 week_starts_on=MONDAY_WEEKDAY):
+        super().__init__(week_starts_on)
         self.month_period = month_period
-        begin, end = get_boundaries(month_period.year, month_period.month)
+        begin, end = extended_month_date_range(month_period,
+                                               week_start_on=week_starts_on)
         self._add_events((e for e in events if
                           e.date >= begin or e.date <= end))
 
@@ -187,22 +193,24 @@ class MonthFullWeeksEventsCalendar(EventsCalendar):
         Returns a list of the weeks in the month as full weeks.
         Each day of the week stores attached events.
         """
-        return super()._weeks(self.month_period.year, self.month_period.month)
+        return super()._weeks(self.month_period)
 
     def days(self) -> List[CalendarDay]:
         """Returns list of events grouped by day"""
-        first = get_start_of_week(self.month_period.starts)
-        last = get_end_of_week(self.month_period.ends)
-        return self._days(first, last)
+        begin, end = extended_month_date_range(self.month_period,
+                                               week_start_on=self.week_starts_on)
+        return self._days(begin, end)
 
 
 ISOWeekNumber = NewType('ISOWeekNumber', int)
 
 
+# TODO: add week_starts_on support
 class WeekEventsCalendar(EventsCalendar):
     def __init__(self, year: int, week_number: ISOWeekNumber,
-                 events: Iterable[CalendarEvent]):
-        super().__init__()
+                 events: Iterable[CalendarEvent],
+                 week_starts_on=MONDAY_WEEKDAY):
+        super().__init__(week_starts_on)
         w = Week(year, week_number)
         self._add_events((e for e in events if
                           w.monday() <= e.date <= w.sunday()))
