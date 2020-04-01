@@ -426,7 +426,9 @@ def get_student_classes(user, filters: List[Q] = None,
     # Student could be manually enrolled in the course without
     # checking branch compatibility, skip filtering by branch
     branch_list = []
-    qs = get_classes(branch_list, filters).for_student(user)
+    qs = (get_classes(branch_list, filters)
+          .for_student(user)
+          .order_by("-date", "-starts_at"))
     if with_venue:
         qs = qs.select_related('venue', 'venue__location')
     return qs

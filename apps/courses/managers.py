@@ -84,9 +84,7 @@ class CourseClassQuerySet(query.QuerySet):
         restricted_to_student_group = Q(courseclassgroup__group_id=F('course__enrollment__student_group_id'))
         return (self.filter(common_classes | restricted_to_student_group,
                             course__enrollment__student_id=user.pk,
-                            course__enrollment__is_deleted=False)
-                    # FIXME: move ordering outside?
-                    .order_by("-date", "-starts_at"))
+                            course__enrollment__is_deleted=False))
 
     def for_teacher(self, user):
         return self.filter(course__teachers=user)
