@@ -7,7 +7,6 @@ from django.utils import timezone
 
 from core.utils import is_club_site
 from courses.constants import MaterialVisibilityTypes
-from courses.utils import get_boundaries
 
 
 class CourseTeacherQuerySet(query.QuerySet):
@@ -107,7 +106,6 @@ CourseClassManager = _CourseClassManager.from_queryset(CourseClassQuerySet)
 class _CourseDefaultManager(models.Manager):
     """On compsciclub.ru always restrict selection by open readings"""
     def get_queryset(self):
-        # TODO: add test
         if is_club_site():
             return super().get_queryset().filter(is_open=True)
         else:
