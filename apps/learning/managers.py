@@ -4,7 +4,6 @@ from django.utils import timezone
 
 from core.models import LiveManager
 from core.utils import is_club_site
-from courses.utils import get_boundaries
 
 
 class StudentAssignmentQuerySet(query.QuerySet):
@@ -40,9 +39,7 @@ StudentAssignmentManager = _StudentAssignmentDefaultManager.from_queryset(
 
 
 class EventQuerySet(query.QuerySet):
-    def in_month(self, year, month):
-        date_start, date_end = get_boundaries(year, month)
-        return self.filter(date__gte=date_start, date__lte=date_end)
+    pass
 
 
 class _EnrollmentDefaultManager(models.Manager):

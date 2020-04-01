@@ -2,10 +2,10 @@ import datetime
 import re
 from calendar import monthrange
 from dataclasses import dataclass, field
-from typing import Tuple, Union, Iterator
+from typing import Union, Iterator
 
-import pytz
 import attr
+import pytz
 from dateutil import parser as dparser
 from django.conf import settings
 from django.utils import timezone
@@ -111,23 +111,22 @@ def get_term_starts_at(year, term_type, tz: Timezone) -> datetime.datetime:
     return convert_term_parts_to_datetime(year, term_start_str, tz)
 
 
-def get_term_index(target_year, target_term_type) -> int:
+def get_term_index(term_year, term_type) -> int:
     """
     Returns 0-based term index.
 
     Sequence starts from the `settings.FOUNDATION_YEAR` academic year.
     Term order inside academic year is defined by `SemesterTypes` class.
     """
-    if target_year < settings.FOUNDATION_YEAR:
+    if term_year < settings.FOUNDATION_YEAR:
         raise ValueError("get_term_index: target year < FOUNDATION_YEAR")
-    if target_term_type not in SemesterTypes.values:
-        raise ValueError("get_term_index: unknown term type %s" %
-                         target_term_type)
+    if term_type not in SemesterTypes.values:
+        raise ValueError("get_term_index: unknown term type %s" % term_type)
     terms_in_year = len(SemesterTypes.choices)
-    year_portion = (target_year - settings.FOUNDATION_YEAR) * terms_in_year
+    year_portion = (term_year - settings.FOUNDATION_YEAR) * terms_in_year
     term_portion = 0
     for index, (t, _) in enumerate(SemesterTypes.choices):
-        if t == target_term_type:
+        if t == term_type:
             term_portion += index
     return year_portion + term_portion
 
@@ -142,33 +141,6 @@ def get_term_by_index(term_index) -> TermPair:
     for index, (t, _) in enumerate(SemesterTypes.choices):
         if index == term:
             return TermPair(year, t)
-
-
-def get_boundaries(year, month) -> Tuple:
-    """
-    For the requested month returns the first day of the first week and
-    the last day of the last week. Week starts on Monday (0-index) and
-    ends on Sunday (6-index).
-
-    Example:
-        In: get_boundaries(2018, 2)
-        Out: (datetime.date(2018, 1, 29), datetime.date(2018, 3, 4))
-        # Calculate date for the first day of the first week in the month
-        first_day = datetime.date(year=2018, month=2, day=1)
-        # first_day.weekday() is 3 (0-based index)
-        lower_bound = first_day - datetime.timedelta(days=3)
-        datetime.date(year=2018, month=1, day=29)
-        # The same logic to calculate upper bound (the last day of the last
-        # complete week of the month)
-    """
-    weekday, days_in_month = monthrange(year, month)
-    date = datetime.date(year, month, 1)
-    # Go back to the beginning of the week
-    days_before = (weekday - MONDAY_WEEKDAY) % 7
-    days_after = (MONDAY_WEEKDAY - weekday - days_in_month) % 7
-    start = date - datetime.timedelta(days=days_before)
-    end = date + datetime.timedelta(days=days_in_month + days_after - 1)
-    return start, end
 
 
 def get_terms_in_range(start: datetime.date,
