@@ -1,5 +1,4 @@
 from django.core.validators import MinValueValidator
-from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.db.models import query, Prefetch
 from django.utils.encoding import smart_text
