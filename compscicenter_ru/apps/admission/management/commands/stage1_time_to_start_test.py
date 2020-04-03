@@ -3,11 +3,12 @@ from django.core.management.base import BaseCommand, CommandError
 from post_office import mail
 from post_office.utils import get_email_template
 
-from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin
+from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 from admission.models import Applicant, Test
+from admission.services import get_email_from
 
 
-class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
+class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     TEMPLATE_TYPE = "testing-reminder"
     help = """
     Send notification to those who applied but haven't yet started the contest.
@@ -23,6 +24,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
 
         generated = 0
         for campaign in campaigns:
+            email_from = get_email_from(campaign)
             template_name = self.get_template_name(campaign, self.TEMPLATE_TYPE)
             template = get_email_template(template_name)
             tests = (Test.objects
@@ -36,7 +38,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                 email = t["applicant__email"]
                 mail.send(
                     [email],
-                    sender='CS центр <info@compscicenter.ru>',
+                    sender=email_from,
                     template=template,
                     context={
                       "CONTEST_ID": t["yandex_contest_id"]

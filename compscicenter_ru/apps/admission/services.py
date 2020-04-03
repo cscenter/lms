@@ -12,11 +12,17 @@ from post_office.models import EmailTemplate, Email, STATUS as EMAIL_STATUS
 from admission.constants import INVITATION_EXPIRED_IN_HOURS, \
     INTERVIEW_FEEDBACK_TEMPLATE
 from admission.models import InterviewStream, InterviewInvitation, \
-    Applicant
+    Applicant, Campaign
 from admission.utils import logger
 from core.timezone.constants import DATE_FORMAT_RU
 from learning.roles import Roles
 from users.models import User
+
+
+def get_email_from(campaign: Campaign, default=None):
+    if campaign.branch.site.domain == 'compscicenter.ru':
+        return 'CS центр <info@compscicenter.ru>'
+    return default or settings.DEFAULT_FROM_EMAIL
 
 
 def create_invitation(streams: List[InterviewStream], applicant: Applicant):

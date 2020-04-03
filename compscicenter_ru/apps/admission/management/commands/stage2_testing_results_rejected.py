@@ -7,11 +7,12 @@ from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
-from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin
+from ._utils import CurrentCampaignMixin, EmailTemplateMixin
 from admission.models import Test, Applicant
+from admission.services import get_email_from
 
 
-class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
+class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     help = """
     Updates applicant status to REJECTED_BY_TEST if they failed testing, then
     send notification to them.
@@ -34,6 +35,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
         self.validate_templates(campaigns, types=[template_type])
 
         for campaign in campaigns:
+            email_from = get_email_from(campaign)
             self.stdout.write(str(campaign))
             testing_passing_score = campaign.online_test_passing_score
             if not testing_passing_score:
@@ -76,7 +78,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                          .update(status=Applicant.REJECTED_BY_TEST))
                         mail.send(
                             recipients,
-                            sender='CS центр <info@compscicenter.ru>',
+                            sender=email_from,
                             template=template,
                             context=context,
                             # If emails rendered on delivery, they will store

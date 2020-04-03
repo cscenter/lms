@@ -4,11 +4,12 @@ from post_office.models import Email
 from post_office.utils import get_email_template
 
 from admission.models import Applicant
-from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin, \
+from ._utils import CurrentCampaignMixin, EmailTemplateMixin, \
     CustomizeQueryMixin
+from admission.services import get_email_from
 
 
-class Command(ValidateTemplatesMixin, CurrentCampaignsMixin,
+class Command(EmailTemplateMixin, CurrentCampaignMixin,
               CustomizeQueryMixin, BaseCommand):
     """
     Example:
@@ -28,8 +29,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin,
             help='Post office email template')
         parser.add_argument(
             '--from', type=str,
-            default='CS центр <info@compscicenter.ru>',
-            help='Override default `From` header')
+            help='`From` header')
 
     def get_template_name(self, campaign, template):
         return template
@@ -47,10 +47,11 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin,
 
         manager = self.get_manager(Applicant, options)
 
-        header_from = options["from"]
+        default_from = options["from"]
 
         for campaign in campaigns:
             self.stdout.write(f"{campaign}")
+            email_from = get_email_from(campaign, default=default_from)
             template = get_email_template(template_name)
             processed = 0
             new_emails = 0
@@ -64,7 +65,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin,
                                             template=template).exists():
                     mail.send(
                         recipient,
-                        sender=header_from,
+                        sender=email_from,
                         template=template,
                         # If emails rendered on delivery, they will store
                         # value of the template id. It makes `exists`

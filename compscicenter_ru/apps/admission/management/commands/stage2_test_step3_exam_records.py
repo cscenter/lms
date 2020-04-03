@@ -5,11 +5,11 @@ from __future__ import unicode_literals, absolute_import
 import itertools
 from django.core.management import BaseCommand, CommandError
 
-from ._utils import CurrentCampaignsMixin
+from ._utils import CurrentCampaignMixin
 from admission.models import Applicant, Test, Exam, Contest
 
 
-class Command(CurrentCampaignsMixin, BaseCommand):
+class Command(CurrentCampaignMixin, BaseCommand):
     help = """
         Deprecated. Creates empty exam results record (if not exists) for 
         each applicant who successfully passed test (score >= test passing 

@@ -6,13 +6,14 @@ from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
-from admission.management.commands._utils import CurrentCampaignsMixin, \
-    ValidateTemplatesMixin, CustomizeQueryMixin
+from admission.management.commands._utils import CurrentCampaignMixin, \
+    EmailTemplateMixin, CustomizeQueryMixin
 from admission.models import Applicant
+from admission.services import get_email_from
 
 
-class Command(ValidateTemplatesMixin, CustomizeQueryMixin,
-              CurrentCampaignsMixin, BaseCommand):
+class Command(EmailTemplateMixin, CustomizeQueryMixin,
+              CurrentCampaignMixin, BaseCommand):
     TEMPLATE_REGEXP = "admission-{year}-{branch_code}-results-{status}"
     help = """
     Generates emails with final decision based on applicant status.
@@ -25,7 +26,6 @@ class Command(ValidateTemplatesMixin, CustomizeQueryMixin,
         super().add_arguments(parser)
         parser.add_argument(
             '--from', type=str,
-            default='CS центр <info@compscicenter.ru>',
             help='Override default `From` header')
 
     def get_template_name(self, campaign, suffix):
@@ -41,11 +41,12 @@ class Command(ValidateTemplatesMixin, CustomizeQueryMixin,
             self.stdout.write("Canceled")
             return
 
-        header_from = options["from"]
+        default_email_from = options["from"]
 
         manager = self.get_manager(Applicant, options)
 
         for campaign in campaigns:
+            email_from = get_email_from(campaign, default_email_from)
             self.stdout.write("{}:".format(campaign))
             applicants = manager.filter(campaign_id=campaign.pk)
 
@@ -63,7 +64,7 @@ class Command(ValidateTemplatesMixin, CustomizeQueryMixin,
                                             template=template).exists():
                     mail.send(
                         recipients,
-                        sender=header_from,
+                        sender=email_from,
                         template=template,
                         render_on_delivery=True,
                         backend='ses',

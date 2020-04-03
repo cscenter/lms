@@ -5,11 +5,12 @@ from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
-from ._utils import ValidateTemplatesMixin, CurrentCampaignsMixin
+from ._utils import EmailTemplateMixin, CurrentCampaignMixin
 from admission.models import Applicant, Exam
+from admission.services import get_email_from
 
 
-class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
+class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     help = """Generate emails about exam results."""
 
     def add_arguments(self, parser):
@@ -32,6 +33,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
 
         for campaign in campaigns:
             self.stdout.write("{}:".format(campaign))
+            email_from = get_email_from(campaign)
             statuses = [
                 Applicant.REJECTED_BY_EXAM,
             ]
@@ -56,7 +58,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                     }
                     mail.send(
                         recipients,
-                        sender='CS центр <info@compscicenter.ru>',
+                        sender=email_from,
                         template=template,
                         # If emails rendered on delivery, they will store
                         # value of the template id. It makes

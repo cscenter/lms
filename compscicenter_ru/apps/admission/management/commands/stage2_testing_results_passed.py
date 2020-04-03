@@ -7,10 +7,11 @@ from post_office.models import Email
 from post_office.utils import get_email_template
 
 from admission.models import Applicant
-from ._utils import CurrentCampaignsMixin, ValidateTemplatesMixin
+from ._utils import CurrentCampaignMixin, EmailTemplateMixin
+from admission.services import get_email_from
 
 
-class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
+class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     help = """
     Updates applicant status to PERMIT_TO_EXAM if they passed testing
     (score >= passing_score) and adds notification about this event to 
@@ -37,18 +38,19 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
         template_type = "testing-success"
         self.validate_templates(campaigns, types=[template_type])
 
-        for c in campaigns:
-            self.stdout.write(str(c))
-            testing_passing_score = c.online_test_passing_score
+        for campaign in campaigns:
+            email_from = get_email_from(campaign)
+            self.stdout.write(str(campaign))
+            testing_passing_score = campaign.online_test_passing_score
             if not testing_passing_score:
-                self.stdout.write(f"Zero testing passing score for {c}. Skip")
+                self.stdout.write(f"Zero testing passing score for {campaign}. Skip")
                 continue
 
-            template_name = self.get_template_name(c, template_type)
+            template_name = self.get_template_name(campaign, template_type)
             template = get_email_template(template_name)
 
             applicants = (Applicant.objects
-                          .filter(campaign_id=c.pk,
+                          .filter(campaign=campaign,
                                   online_test__score__gte=testing_passing_score)
                           .values("pk",
                                   "online_test__score",
@@ -82,7 +84,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                          .update(status=Applicant.PERMIT_TO_EXAM))
                         mail.send(
                             recipients,
-                            sender='CS центр <info@compscicenter.ru>',
+                            sender=email_from,
                             template=template,
                             context=context,
                             # If emails rendered on delivery, they will store
