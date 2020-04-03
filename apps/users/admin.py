@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ImportMixin
 
-from core.admin import RelatedSpecMixin, meta
+from core.admin import meta
 from core.filters import AdminRelatedDropdownFilter
 from core.widgets import AdminRichTextAreaWidget
 from users.constants import Roles
@@ -17,11 +17,11 @@ from .models import User, EnrollmentCertificate, \
     OnlineCourseRecord, SHADCourseRecord, UserStatusLog, UserGroup
 
 
-class UserStatusLogAdmin(RelatedSpecMixin, admin.TabularInline):
+class UserStatusLogAdmin(admin.TabularInline):
+    list_select_related = ['semester', 'student']
     model = UserStatusLog
     extra = 0
     readonly_fields = ('created', 'status')
-    related_spec = {'select': ['semester', 'student']}
 
     def has_add_permission(self, request, obj=None):
         return False

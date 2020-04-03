@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import meta, urlize, RelatedSpecMixin
+from core.admin import meta, BaseModelAdmin
 from core.widgets import AdminRichTextAreaWidget
 from .models import Book, Borrow, Stock
 
@@ -15,11 +15,11 @@ class BorrowInline(admin.TabularInline):
 
 
 @admin.register(Book)
-class BookAdmin(admin.ModelAdmin):
+class BookAdmin(BaseModelAdmin):
+    list_select_related = True
     list_display = ["author", "title"]
     list_display_links = ["author", "title"]
     list_filter = ["tags"]
-    list_select_related = True
     search_fields = ("title", "author")
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
@@ -27,16 +27,14 @@ class BookAdmin(admin.ModelAdmin):
 
 
 @admin.register(Stock)
-class StockAdmin(RelatedSpecMixin, admin.ModelAdmin):
+class StockAdmin(BaseModelAdmin):
+    list_select_related = ['book', 'branch', 'branch__site']
+    list_prefetch_related = ['borrows']
     list_display = ["book", "branch", "copies", "copies_left"]
     list_display_links = ["book"]
     autocomplete_fields = ["book"]
     list_filter = ["branch"]
     search_fields = ('book__title',)
-    related_spec = {
-        'select': ['book', 'branch'],
-        'prefetch': ['borrows']
-    }
     inlines = [BorrowInline]
 
     @meta(_("Copies available"))
@@ -45,7 +43,7 @@ class StockAdmin(RelatedSpecMixin, admin.ModelAdmin):
 
 
 @admin.register(Borrow)
-class BorrowAdmin(admin.ModelAdmin):
+class BorrowAdmin(BaseModelAdmin):
     list_display = ('stock', 'student', 'borrowed_on')
     list_filter = ('stock__branch',)
     search_fields = ('student__last_name', 'student__first_name',

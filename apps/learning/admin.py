@@ -3,9 +3,7 @@ from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import RelatedSpecMixin
-from core.timezone.forms import TimezoneAwareAdminForm, \
-    TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
+from core.admin import BaseModelAdmin
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
@@ -16,7 +14,15 @@ from .models import AssignmentComment, Enrollment, Event, Useful
 from .services import StudentGroupService
 
 
-class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
+class AssignmentCommentAdmin(BaseModelAdmin):
+    list_select_related = [
+        'author',
+        'student_assignment__student',
+        'student_assignment__assignment',
+        'student_assignment__assignment__course',
+        'student_assignment__assignment__course__semester',
+        'student_assignment__assignment__course__meta_course',
+    ]
     readonly_fields = ['student_assignment']
     list_display = ["get_assignment_name", "get_student", "author"]
     search_fields = ["student_assignment__assignment__title",
@@ -24,14 +30,6 @@ class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
-    related_spec = {
-        'select': [
-            ('student_assignment', [
-                 ('assignment', [('course', ['semester', 'meta_course'])]),
-                 'student'
-             ]),
-            'author'
-        ]}
 
     def get_student(self, obj: AssignmentComment):
         return obj.student_assignment.student
@@ -43,7 +41,7 @@ class AssignmentCommentAdmin(RelatedSpecMixin, admin.ModelAdmin):
     get_assignment_name.short_description = _("Asssignment|name")
 
 
-class EnrollmentAdmin(admin.ModelAdmin):
+class EnrollmentAdmin(BaseModelAdmin):
     list_display = ['student', 'course', 'is_deleted', 'grade',
                     'grade_changed_local']
     ordering = ['-pk']
@@ -86,12 +84,16 @@ class EnrollmentAdmin(admin.ModelAdmin):
 
 
 @admin.register(StudentAssignment)
-class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
+class StudentAssignmentAdmin(BaseModelAdmin):
+    list_select_related = [
+        'student',
+        'assignment',
+        'assignment__course',
+        'assignment__course__semester',
+        'assignment__course__meta_course',
+    ]
     list_display = ['student', 'assignment', 'score', 'score_changed',
                     'state_display']
-    related_spec = {'select': [('assignment',
-                                [('course', ['semester', 'meta_course'])]),
-                               'student']}
     search_fields = ['student__last_name']
     raw_id_fields = ["assignment", "student"]
 
@@ -102,19 +104,19 @@ class StudentAssignmentAdmin(RelatedSpecMixin, admin.ModelAdmin):
             return ['score_changed', 'state_display']
 
 
-class EventAdmin(admin.ModelAdmin):
+class EventAdmin(BaseModelAdmin):
+    list_select_related = ('venue',)
     date_hierarchy = 'date'
     list_filter = ['branch']
     list_display = ['name', 'date', 'venue']
-    list_select_related = ('venue',)
 
 
-class UsefulAdmin(admin.ModelAdmin):
+class UsefulAdmin(BaseModelAdmin):
     list_filter = ['site']
     list_display = ['question', 'sort']
 
 
-class GraduateProfileAdmin(admin.ModelAdmin):
+class GraduateProfileAdmin(BaseModelAdmin):
     list_display = ('student', 'graduation_year')
     list_filter = ('graduation_year',)
     search_fields = ('student__last_name',)
@@ -128,7 +130,7 @@ class CourseInlineAdmin(admin.TabularInline):
     extra = 0
 
 
-class InvitationAdmin(admin.ModelAdmin):
+class InvitationAdmin(BaseModelAdmin):
     list_display = ('name', 'semester', 'get_link')
     inlines = (CourseInlineAdmin, )
     list_filter = ('branch', 'semester')
