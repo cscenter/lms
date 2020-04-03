@@ -7,7 +7,7 @@ from django.db.models import Model
 from django.db.models.query import QuerySet
 from django.urls import reverse, NoReverseMatch
 from django.utils.encoding import force_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _, gettext_noop
 from modeltranslation.admin import TranslationAdmin
 
 from core.models import Location
@@ -19,55 +19,19 @@ admin.site.unregister(Group)
 admin.site.unregister(Site)
 
 
-def related_spec_to_list(spec):
-    list_form = []
-    for subspec in spec:
-        if isinstance(subspec, tuple):
-            parent, children = subspec
-            list_form.append(parent)
-            list_form.extend("{}__{}".format(parent, x)
-                             for x in related_spec_to_list(children))
-        else:
-            list_form.append(subspec)
+class BaseModelAdmin(admin.ModelAdmin):
+    list_select_related = []
+    list_prefetch_related = []
 
-    return list_form
+    def get_prefetch_related(self):
+        return self.list_prefetch_related
 
-
-def apply_related_spec(qs, related_spec):
-    if not related_spec:
-        return qs
-    if 'select' in related_spec:
-        qs = qs.select_related(*related_spec_to_list(related_spec['select']))
-    if 'prefetch' in related_spec:
-        qs = qs.prefetch_related(*related_spec_to_list(related_spec['prefetch']))
-    return qs
-
-
-class RelatedSpecMixin:
-    """
-    Extend base queryset with additional values for `select_related` and
-    `prefetch_related`.
-
-    Don't forget to add `related_spec` attribute.
-
-    Example:
-        ExampleModelAdmin(admin.ModelAdmin):
-            related_spec = {'select': [
-                                ('assignment',
-                                [('course', ['semester', 'meta_course'])]),
-                               'student']}
-
-        `related_spec` will be translated to:
-
-            .select_related('assignment',
-                            'assignment__course',
-                            'assignment__course__semester',
-                            'assignment__course__meta_course',
-                            'student')
-    """
     def get_queryset(self, request):
-        qs = super(RelatedSpecMixin, self).get_queryset(request)
-        return apply_related_spec(qs, self.related_spec)
+        queryset = super().get_queryset(request)
+        list_prefetch_related = self.get_prefetch_related()
+        if list_prefetch_related:
+            queryset = queryset.prefetch_related(*list_prefetch_related)
+        return queryset
 
 
 def get_admin_url(instance_or_qs):
