@@ -7,10 +7,10 @@ from django.core.management import BaseCommand
 from admission.models import Applicant, Test, Campaign, Contest
 from api.providers.yandex_contest import YandexContestAPI, \
     YandexContestAPIException
-from ._utils import CurrentCampaignsMixin
+from ._utils import CurrentCampaignMixin
 
 
-class Command(CurrentCampaignsMixin, BaseCommand):
+class Command(CurrentCampaignMixin, BaseCommand):
     help = (
         """
         To make sure that all results across all contests were correctly 
@@ -27,14 +27,14 @@ class Command(CurrentCampaignsMixin, BaseCommand):
 
     def handle(self, *args, **options):
         csv_path = options["csv"]
-        campaign_ids = self.get_current_campaign_ids(options)
+        campaigns = self.get_current_campaigns(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return
 
         # Collect map "yandex_login -> participant_id" from monitor
         participants = {}
-        campaign = Campaign.objects.filter(id__in=campaign_ids).first()
+        campaign = Campaign.objects.filter(id__in=campaigns).first()
         api = YandexContestAPI(access_token=campaign.access_token)
         for contest in campaign.contests.filter(type=Contest.TYPE_TEST).all():
             contest_id = contest.contest_id
@@ -65,7 +65,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
             for row in reader:
                 total = int(Decimal(row['total'].replace(',', '.')))
                 yandex_login = row['yandex_login']
-                a = Applicant.objects.filter(campaign__in=campaign_ids,
+                a = Applicant.objects.filter(campaign__in=campaigns,
                                              yandex_login=yandex_login)
                 applicant = None
                 exists = a.exists()
@@ -91,7 +91,7 @@ class Command(CurrentCampaignsMixin, BaseCommand):
 
                 if applicant is not None:
                     # Поиск дубликатор
-                    similar = applicant.get_similar().filter(campaign_id__in=campaign_ids)
+                    similar = applicant.get_similar().filter(campaign__in=campaigns)
                     if similar.exists():
                         print(f"Дубликаты для {applicant}, yandex_login {yandex_login}. Анкета {applicant.get_absolute_url()}")
                         for a in similar:

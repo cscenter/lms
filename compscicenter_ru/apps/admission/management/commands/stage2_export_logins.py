@@ -3,10 +3,10 @@
 from django.core.management import BaseCommand
 
 from admission.models import Applicant
-from ._utils import CurrentCampaignsMixin
+from ._utils import CurrentCampaignMixin
 
 
-class Command(CurrentCampaignsMixin, BaseCommand):
+class Command(CurrentCampaignMixin, BaseCommand):
     help = """Prints list of yandex ids who successfully passed test"""
 
     def handle(self, *args, **options):

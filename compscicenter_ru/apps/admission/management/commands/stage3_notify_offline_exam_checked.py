@@ -8,11 +8,12 @@ from post_office.models import Email
 from post_office.utils import get_email_template
 
 from admission.constants import ChallengeStatuses
-from ._utils import ValidateTemplatesMixin, CurrentCampaignsMixin
+from ._utils import EmailTemplateMixin, CurrentCampaignMixin
 from admission.models import Applicant, Exam
+from admission.services import get_email_from
 
 
-class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
+class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     TEMPLATE_TYPE = "offline-exam-checked"
     help = 'Generate mails about check completeness'
 
@@ -26,6 +27,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
 
         generated = 0
         for campaign in campaigns:
+            email_from = get_email_from(campaign)
             template_name = self.get_template_name(campaign, self.TEMPLATE_TYPE)
             template = get_email_template(template_name)
             exams = (Exam.objects
@@ -55,7 +57,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                     }
                     mail.send(
                         recipients,
-                        sender='CS центр <info@compscicenter.ru>',
+                        sender=email_from,
                         template=template,
                         context=context,
                         # If emails rendered on delivery, they will store

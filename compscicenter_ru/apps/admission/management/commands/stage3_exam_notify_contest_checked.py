@@ -7,10 +7,11 @@ from post_office.utils import get_email_template
 
 from admission.constants import ChallengeStatuses
 from admission.models import Applicant, Exam
-from ._utils import ValidateTemplatesMixin, CurrentCampaignsMixin
+from ._utils import EmailTemplateMixin, CurrentCampaignMixin
+from admission.services import get_email_from
 
 
-class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
+class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     TEMPLATE_TYPE = "exam-contest-checked"
     help = 'Generate mails about contest check completeness'
 
@@ -24,6 +25,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
 
         generated = 0
         for campaign in campaigns:
+            email_from = get_email_from(campaign)
             template_name = self.get_template_name(campaign, self.TEMPLATE_TYPE)
             template = get_email_template(template_name)
             exam_results = (
@@ -46,7 +48,7 @@ class Command(ValidateTemplatesMixin, CurrentCampaignsMixin, BaseCommand):
                                             template=template).exists():
                     mail.send(
                         recipients,
-                        sender='CS центр <info@compscicenter.ru>',
+                        sender=email_from,
                         template=template,
                         # If emails rendered on delivery, they will store
                         # value of the template id. It makes

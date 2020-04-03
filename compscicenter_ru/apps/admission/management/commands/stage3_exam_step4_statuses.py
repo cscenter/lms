@@ -4,11 +4,11 @@ from decimal import Decimal
 from django.core.management import BaseCommand, CommandError
 from django.db.models import Q
 
-from ._utils import CurrentCampaignsMixin
+from ._utils import CurrentCampaignMixin
 from admission.models import Applicant, Test, Campaign
 
 
-class Command(CurrentCampaignsMixin, BaseCommand):
+class Command(CurrentCampaignMixin, BaseCommand):
     help = """
     Updates applicant status for selected campaign based on exam results.
 

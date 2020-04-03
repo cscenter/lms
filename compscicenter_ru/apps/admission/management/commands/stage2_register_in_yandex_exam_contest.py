@@ -6,10 +6,10 @@ from admission.models import Applicant, Exam, Contest
 from admission.constants import ChallengeStatuses
 from api.providers.yandex_contest import YandexContestAPI, \
     YandexContestAPIException, RegisterStatus, ContestAPIError
-from ._utils import CurrentCampaignsMixin, CustomizeQueryMixin
+from ._utils import CurrentCampaignMixin, CustomizeQueryMixin
 
 
-class Command(CurrentCampaignsMixin, CustomizeQueryMixin, BaseCommand):
+class Command(CurrentCampaignMixin, CustomizeQueryMixin, BaseCommand):
     help = """
     For those who passed testing (score >= passing_score) creates 
     exam record and registers in yandex contest. 

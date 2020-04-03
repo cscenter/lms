@@ -8,7 +8,7 @@ from post_office.utils import get_email_template
 from admission.models import Campaign
 
 
-class CurrentCampaignsMixin:
+class CurrentCampaignMixin:
     CURRENT_CAMPAIGNS_AGREE = "The action will affect campaigns above. " \
                               "Continue? (y/n): "
 
@@ -40,10 +40,6 @@ class CurrentCampaignsMixin:
             self.stdout.write(f"  {campaign} [{campaign.branch}]")
         return campaigns
 
-    # FIXME: remove?
-    def get_current_campaign_ids(self, options):
-        return [c.pk for c in self.get_current_campaigns(options)]
-
 
 class HandleErrorsMixin:
     @staticmethod
@@ -56,19 +52,18 @@ class HandleErrorsMixin:
                     print("line {} - {}".format(line + 1, error.error))
 
 
-class ValidateTemplatesMixin:
+class EmailTemplateMixin:
     TEMPLATE_REGEXP = "admission-{year}-{branch_code}-{type}"
 
-    def validate_templates(self, campaigns, types=None):
+    def validate_templates(self, campaigns, types=None,
+                           validate_campaign_settings=True):
         # For each campaign check email template exists and
         # passing score for test results non zero
         check_types = types or ["success", "fail"]
-        qs = EmailTemplate.objects.get_queryset()
         errors = []
         for c in campaigns:
-            if not c.online_test_passing_score:
-                msg = f"Passing score for campaign '{c}' must be non zero"
-                errors.append(msg)
+            if validate_campaign_settings:
+                self._validate_campaign_settings(c, errors)
             for t in check_types:
                 template_name = self.get_template_name(c, t)
                 try:
@@ -79,6 +74,12 @@ class ValidateTemplatesMixin:
                     errors.append(msg)
         if errors:
             raise CommandError("\n".join(errors))
+
+    # FIXME: Not sure why this validation is in templates
+    def _validate_campaign_settings(self, campaign, errors):
+        if not campaign.online_test_passing_score:
+            msg = f"Passing score for campaign '{campaign}' must be non zero"
+            errors.append(msg)
 
     def get_template_name(self, campaign, suffix):
         return self.TEMPLATE_REGEXP.format(
