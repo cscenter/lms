@@ -4,7 +4,9 @@
     <div class="choices"{% if id %} id="{{ id }}"{% endif %}>
         {% for group, options, index in widget.optgroups %}
             {% for option in options %}
-                {% include option.template_name with widget=option %}
+                {% with widget=option %}
+                    {% include option.template_name %}
+                {% endwith %}
             {% endfor %}
         {% endfor %}
     </div>
