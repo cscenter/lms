@@ -71,12 +71,14 @@ class CourseAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        main_branch = cleaned_data['branch']
-        additional = cleaned_data['additional_branches']
-        # TODO: Add guard to the additional_branches.through model
-        # Main branch is not allowed among additional branches to avoid
-        # duplicates.
-        cleaned_data['additional_branches'] = additional.exclude(pk=main_branch.pk)
+        main_branch = cleaned_data.get('branch')
+        if main_branch:
+            additional = cleaned_data['additional_branches']
+            # TODO: Add guard to the additional_branches.through model
+            # Main branch is not allowed among additional branches to avoid
+            # duplicates.
+            cleaned_data['additional_branches'] = (additional
+                                                   .exclude(pk=main_branch.pk))
         return cleaned_data
 
     def clean_is_open(self):
