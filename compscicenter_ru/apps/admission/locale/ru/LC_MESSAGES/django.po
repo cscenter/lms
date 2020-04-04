@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-08-28 11:15+0000\n"
-"PO-Revision-Date: 2019-08-28 11:20+0000\n"
+"PO-Revision-Date: 2020-04-04 15:16+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -638,7 +638,7 @@ msgstr "Анкеты"
 #: compscicenter_ru/apps/admission/models.py:559
 #: compscicenter_ru/apps/admission/models.py:800
 msgid "Testing"
-msgstr "Онлайн-тестирование"
+msgstr "Результат тестирования"
 
 #: compscicenter_ru/apps/admission/models.py:560
 #: compscicenter_ru/apps/admission/models.py:843
@@ -710,7 +710,7 @@ msgstr "Оценка"
 
 #: compscicenter_ru/apps/admission/models.py:801
 msgid "Testings"
-msgstr "Тестирование"
+msgstr "Результаты тестирования"
 
 #: compscicenter_ru/apps/admission/models.py:844
 msgid "Exams"

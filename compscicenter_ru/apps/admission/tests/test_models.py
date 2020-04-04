@@ -1,30 +1,26 @@
 import pytest
 
+from admission.models import Contest, Applicant
 from admission.tests.factories import CampaignFactory, ContestFactory, \
     ApplicantFactory, InterviewInvitationFactory
-from admission.models import Contest, Applicant
 
-
-# FIXME: Test.compute_contest_id instead
 
 @pytest.mark.django_db
-def test_applicant_set_contest_id(client):
-    """Test contest id rotation for testing stage"""
+def test_compute_contest_id():
     campaign = CampaignFactory.create()
+    ContestFactory(campaign=campaign, type=Contest.TYPE_EXAM)
     contests = ContestFactory.create_batch(3, campaign=campaign,
                                            type=Contest.TYPE_TEST)
     c1, c2, c3 = sorted(contests, key=lambda x: x.contest_id)
-    ContestFactory(campaign=campaign, type=Contest.TYPE_EXAM)
     a = ApplicantFactory(campaign=campaign)
-    expected_index = a.id % 3
-    assert a.online_test.yandex_contest_id == contests[expected_index].contest_id
-    expected_contest_id = contests[expected_index].contest_id
-    a = ApplicantFactory(campaign=campaign)
-    a = ApplicantFactory(campaign=campaign)
-    a = ApplicantFactory(campaign=campaign)
-    # At this point we made full cycle over all available contests and should
-    # repeat them due to round robin
-    assert a.online_test.yandex_contest_id == expected_contest_id
+    a.id = 1
+    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=5) == c1.contest_id
+    a.id = 2
+    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=5) == c1.contest_id
+    a.id = 6
+    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=5) == c2.contest_id
+    a.id = 8
+    assert a.online_test.compute_contest_id(Contest.TYPE_TEST, group_size=5) == c2.contest_id
 
 
 @pytest.mark.django_db

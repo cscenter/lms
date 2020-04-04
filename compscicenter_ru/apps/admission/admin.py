@@ -76,7 +76,7 @@ class CampaignAdmin(admin.ModelAdmin):
 
 class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     resource_class = OnlineTestRecordResource
-    list_display = ['__str__', 'score', 'get_campaign', 'yandex_contest_id']
+    list_display = ['get_applicant', 'score', 'get_campaign', 'yandex_contest_id']
     list_filter = ['applicant__campaign']
     search_fields = ['applicant__yandex_login', 'applicant__surname',
                      'applicant__first_name', 'applicant__email']
@@ -94,6 +94,10 @@ class OnlineTestAdmin(ExportMixin, admin.ModelAdmin):
     def get_campaign(self, obj):
         return obj.applicant.campaign
     get_campaign.short_description = _("Campaign")
+
+    @meta(_("Applicant"), admin_order_field="applicant__surname")
+    def get_applicant(self, obj):
+        return obj.applicant.full_name
 
     def get_queryset(self, request):
         qs = super(OnlineTestAdmin, self).get_queryset(request)
@@ -237,7 +241,7 @@ class InterviewCommentAdmin(admin.ModelAdmin):
 
     @meta(_("Interview"), admin_order_field="interview__applicant__surname")
     def get_interview(self, obj):
-        return obj.interview.applicant.get_full_name()
+        return obj.interview.applicant.full_name
 
     @meta(_("Interviewer"))
     def get_interviewer(self, obj):
@@ -316,7 +320,7 @@ class InterviewInvitationAdmin(admin.ModelAdmin):
 
     @meta(_("Applicant"))
     def get_applicant(self, obj):
-        return obj.applicant.get_full_name()
+        return obj.applicant.full_name
 
     @meta(_("Branch"))
     def get_campaign_branch(self, obj):
