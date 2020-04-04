@@ -45,7 +45,7 @@
                             {{ interview.date_local|date:"d E" }}
                         </td>
                         <td class="applicant">
-                            <a href="{{ interview.get_absolute_url }}">{{ interview.applicant.get_full_name }}</a>
+                            <a href="{{ interview.get_absolute_url }}">{{ interview.applicant.full_name }}</a>
                         </td>
                         <td class="members">
                             <ul>

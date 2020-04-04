@@ -7,7 +7,7 @@
 {% load lookup from core_tags %}
 {% load render_bundle from webpack_loader %}
 
-{% block title %} Анкета {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
+{% block title %} Анкета {{ applicant.campaign }} - {{ applicant.full_name }}{% endblock title %}
 
 {% block body_attrs %} class="gray admission-applicant-page" data-init-sections="applicant_detail"{% endblock body_attrs %}
 
@@ -18,7 +18,7 @@
 {% block content %}
 <div class="container">
     <div class="page-header">
-        <h2 class="page-title">{{ applicant.get_full_name }}{% if request.user.is_curator %}
+        <h2 class="page-title">{{ applicant.full_name }}{% if request.user.is_curator %}
             <a href="{% url "admin:admission_applicant_change" applicant.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
         {% endif %}</h2>
 
@@ -55,7 +55,7 @@
         </div>
         <div class="tab-pane" id="similar-applicants" role="tabpanel">
             {% for applicant in similar_applicants %}
-                <a target="_blank" href="{% url "admission:applicant_detail" applicant.pk %}">{{ applicant.get_full_name }} ({{ applicant.campaign }})</a><br>
+                <a target="_blank" href="{% url "admission:applicant_detail" applicant.pk %}">{{ applicant.full_name }} ({{ applicant.campaign }})</a><br>
             {% empty %}
                 Похожие анкеты не найдены.
             {% endfor %}

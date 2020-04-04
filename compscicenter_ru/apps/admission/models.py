@@ -23,7 +23,7 @@ from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
 from admission.constants import ChallengeStatuses, INTERVIEW_FEEDBACK_TEMPLATE
-from admission.utils import slot_range
+from admission.utils import slot_range, get_next_process
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
 from core.db.models import ScoreField
@@ -70,7 +70,6 @@ class Campaign(TimezoneAwareModel, models.Model):
         _("Campaign|Exam_passing_score"),
         help_text=_("Campaign|Exam_passing_score-help"),
         null=True, blank=True)
-    # FIXME: Make this field system/derivable or remove since now we store start and end
     current = models.BooleanField(
         _("Current campaign"),
         help_text=_("Show in application form list"),
@@ -479,7 +478,8 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
             tz = self.get_timezone()
         return timezone.localtime(self.created, timezone=tz)
 
-    def get_full_name(self):
+    @property
+    def full_name(self):
         parts = [self.surname, self.first_name, self.patronymic]
         return smart_text(" ".join(part for part in parts if part).strip())
 
@@ -505,9 +505,9 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
     def __str__(self):
         if self.campaign_id:
             return smart_text(
-                "{} [{}]".format(self.get_full_name(), self.campaign))
+                "{} [{}]".format(self.full_name, self.campaign))
         else:
-            return smart_text(self.get_full_name())
+            return smart_text(self.full_name)
 
     def get_similar(self):
         conditions = [
@@ -759,9 +759,10 @@ class YandexContestIntegration(models.Model):
 
 
 class ApplicantRandomizeContestMixin:
-    def compute_contest_id(self, contest_type) -> Optional[int]:
+    def compute_contest_id(self, contest_type, group_size=1) -> Optional[int]:
         """
-        Returns contest id based on applicant id and existing contest records.
+        Selects contest id in a round-robin manner but allows group applicants
+        to complicate brute-forcing all available contests.
         """
         contests = list(Contest.objects
                         .filter(campaign_id=self.applicant.campaign_id,
@@ -769,8 +770,9 @@ class ApplicantRandomizeContestMixin:
                         .values_list("contest_id", flat=True)
                         .order_by("contest_id"))
         if contests:
-            contest_index = self.applicant.id % len(contests)
-            return contests[contest_index]
+            # All applicants are ordered by registration time (or PK)
+            applicant_number = self.applicant.id
+            return get_next_process(applicant_number, contests, group_size)
 
 
 class Test(TimeStampedModel, YandexContestIntegration,
@@ -799,7 +801,7 @@ class Test(TimeStampedModel, YandexContestIntegration,
     def __str__(self):
         """ Import/export get repr before instance created in db."""
         if self.applicant_id:
-            return self.applicant.get_full_name()
+            return self.applicant.full_name
         else:
             return smart_text(self.score)
 
@@ -851,7 +853,7 @@ class Exam(TimeStampedModel, YandexContestIntegration,
     def __str__(self):
         """ Import/export get repr before instance created in db."""
         if self.applicant_id:
-            return self.applicant.get_full_name()
+            return self.applicant.full_name
         else:
             return smart_text(self.score)
 
@@ -1014,7 +1016,7 @@ class Comment(TimeStampedModel):
 
     def __str__(self):
         return smart_text("{} [{}]".format(self.interviewer.get_full_name(),
-                                           self.interview.applicant.get_full_name()))
+                                           self.interview.applicant.full_name))
 
 
 class InterviewStream(TimezoneAwareModel, TimeStampedModel):

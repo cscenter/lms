@@ -9,7 +9,31 @@ from admission.services import create_invitation
 from admission.tests.factories import InterviewFactory, InterviewerFactory, \
     CommentFactory, InterviewStreamFactory, ApplicantFactory
 from admission.models import Interview, InterviewInvitation
+from admission.utils import get_next_process
 from learning.settings import Branches
+
+
+def test_get_next_process():
+    processes = [42, 43, 44]
+    assert get_next_process(1, processes, group_size=1) == 42
+    assert get_next_process(2, processes, group_size=1) == 43
+    assert get_next_process(3, processes, group_size=1) == 44
+    assert get_next_process(4, processes, group_size=1) == 42
+    assert get_next_process(11, processes, group_size=1) == 43
+    assert get_next_process(15, processes, group_size=1) == 44
+    # Increase group size
+    assert get_next_process(1, processes, group_size=2) == 42
+    assert get_next_process(2, processes, group_size=2) == 42
+    assert get_next_process(3, processes, group_size=2) == 43
+    assert get_next_process(4, processes, group_size=2) == 43
+    assert get_next_process(5, processes, group_size=2) == 44
+    assert get_next_process(6, processes, group_size=2) == 44
+    assert get_next_process(7, processes, group_size=2) == 42
+    # Group size of 5
+    assert get_next_process(1, processes, group_size=5) == 42
+    assert get_next_process(5, processes, group_size=5) == 42
+    assert get_next_process(6, processes, group_size=5) == 43
+    assert get_next_process(15, processes, group_size=5) == 44
 
 
 @pytest.mark.django_db

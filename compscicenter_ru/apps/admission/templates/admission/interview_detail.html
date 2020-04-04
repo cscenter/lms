@@ -8,7 +8,7 @@
 {% load render_bundle from webpack_loader %}
 {% load user_thumbnail from user_thumbnail %}
 
-{% block title %} Набор {{ applicant.campaign }} - {{ applicant.get_full_name }}{% endblock title %}
+{% block title %} Набор {{ applicant.campaign }} - {{ applicant.full_name }}{% endblock title %}
 
 {% block body_attrs %} class="gray admission-interview-page" data-init-sections="interview"{% endblock body_attrs %}
 
@@ -19,7 +19,7 @@
 {% block content %}{% localtime off %}
 <div class="container">
     <div class="page-header">
-        <h2 class="page-title">{{ applicant.get_full_name }}{% if request.user.is_curator %}
+        <h2 class="page-title">{{ applicant.full_name }}{% if request.user.is_curator %}
             <a href="{% url "admin:admission_interview_change" interview.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>
         {% endif %}</h2>
     </div>
@@ -65,7 +65,7 @@
             {% include "admission/_results_tab.html" %}
         </div>
         <div class="tab-pane" id="assignments" role="tabpanel">
-            <div class="interview-info visible-print-block">{{ applicant.get_full_name }}<br>{{ interview.date_local }}</div>
+            <div class="interview-info visible-print-block">{{ applicant.full_name }}<br>{{ interview.date_local }}</div>
                 {% if interview.assignments.all %}
                     <div class="clear hidden-print">
                         <button class="btn btn-default _print-without-solution">Печать условий</button> <div class="btn btn-default _print-with-solution">Печать решений</div>
@@ -133,7 +133,7 @@
         </div>
         <div class="tab-pane" id="similar-applicants" role="tabpanel">
             {% for applicant in similar_applicants %}
-                <a target="_blank" href="{% url "admission:applicant_detail" applicant.pk %}">{{ applicant.get_full_name }} ({{ applicant.campaign }})</a><br>
+                <a target="_blank" href="{% url "admission:applicant_detail" applicant.pk %}">{{ applicant.full_name }} ({{ applicant.campaign }})</a><br>
             {% empty %}
                 Похожие анкеты не найдены.
             {% endfor %}
