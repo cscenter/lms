@@ -56,7 +56,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
         else:
             for c in prev_campaigns:
                 self.stdout.write(f"{c}")
-            if input('Continue? [y/n]') != "y":
+            if input('Continue? [y/n] ') != "y":
                 return
 
         template_name = self.get_template_name(current_campaign,
