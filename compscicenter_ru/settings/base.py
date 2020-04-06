@@ -126,9 +126,10 @@ TEMPLATES = [
         "APP_DIRS": False,
         'DIRS': [
             str(PROJECT_DIR / "jinja2"),
+            # Path to the overriden widgets should be earlier than the default one
+            str(SHARED_APPS_DIR / "surveys" / "jinja2"),
             django.__path__[0] + '/forms/jinja2',
             str(ROOT_DIR / "lms" / "jinja2"),
-            str(SHARED_APPS_DIR / "surveys" / "jinja2"),
             # svg inline support
             str(SHARED_APPS_DIR / "assets" / "v2" / "dist" / "img"),
         ],

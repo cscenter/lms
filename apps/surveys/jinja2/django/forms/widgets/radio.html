@@ -1,0 +1,18 @@
+{% with id=widget.attrs.id %}
+{% if field is defined %}
+    {% if field.label %}<label class="title-label survey-label">{{ field.label }}{% if field.required %}<span class="asterisk">*</span>{% endif %}</label>{% endif %}
+    {% if field.help_text %} <p class="small-text text-muted mb-4">{{ field.help_text }}</p>{% endif %}
+{% endif %}
+<div class="grouped{% if widget.attrs.class %} {{ widget.attrs.class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}>
+    {% for group, options, index in widget.optgroups %}
+        {% for option in options %}
+            {% with widget=option %}
+                {% include option.template_name %}
+            {% endwith %}
+        {% endfor %}
+    {% endfor %}
+</div>
+{% if errors %}
+    <p class="help-text error">{% if field is defined and field.error_message %}{{ error_message }}{% else %}{% for error in errors %}{{ error }}{% endfor %}{% endif %}</p>
+{% endif %}
+{% endwith %}
