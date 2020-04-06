@@ -92,6 +92,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                         # value of the template id. It makes `exists`
                         # method above works correctly.
                         render_on_delivery=True,
+                        context={},
                         backend='ses',
                     )
                     sent += 1
