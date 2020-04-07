@@ -1,4 +1,4 @@
 <label{% if widget.attrs.id %} for="{{ widget.attrs.id }}"{% endif %} class="ui option checkbox">
 <input type="{{ widget.type }}" name="{{ widget.name }}"{% if widget.value != None %} value="{{ "%s"|format(widget.value) }}"{% endif %} class="control__input" {% include "django/forms/widgets/attrs.html" %}>
 <span class="control__indicator"></span>
-{% if field is defined %}<span class="control__description">{{ field.help_text|safe }}</span>{% endif %}</label>
+<span class="control__description">{{ field.help_text|safe }}</span></label>

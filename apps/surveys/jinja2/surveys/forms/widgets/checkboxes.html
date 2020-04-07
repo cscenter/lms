@@ -1,8 +1,6 @@
 {% with id=widget.attrs.id %}
 <div class="ui checkbox-group">
-    {% if field is defined %}
-        {% if field.label %}<label class="title-label survey-label">{{ field.label }}{% if field.required %}<span class="asterisk">*</span>{% endif %}</label>{% endif %}
-    {% endif %}
+    {% if field.label %}<label class="title-label survey-label">{{ field.label }}{% if field.required %}<span class="asterisk">*</span>{% endif %}</label>{% endif %}
     <div class="choices"{% if id %} id="{{ id }}"{% endif %}>
         {% for group, options, index in widget.optgroups %}
             {% for option in options %}
@@ -14,6 +12,6 @@
     </div>
 </div>
 {% if not is_subwidget and errors %}
-    <p class="help-text error">{% if field is defined and field.error_message %}{{ error_message }}{% else %}{% for error in errors %}{{ error }}{% endfor %}{% endif %}</p>
+    <p class="help-text error">{% if field.error_message %}{{ error_message }}{% else %}{% for error in errors %}{{ error }}{% endfor %}{% endif %}</p>
 {% endif %}
 {% endwith %}

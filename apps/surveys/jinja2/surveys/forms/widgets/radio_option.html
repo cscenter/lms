@@ -1,0 +1,4 @@
+<label{% if widget.attrs.id %} for="{{ widget.attrs.id }}"{% endif %} class="ui option radio{% if widget.value == field.free_answer %} has-free-answer{% endif %}">
+<input type="{{ widget.type }}" name="{{ widget.name }}"{% if widget.value %} value="{{ "%s"|format(widget.value) }}"{% endif %} class="control__input" {% include "django/forms/widgets/attrs.html" %}>
+<span class="control__indicator"></span>
+<span class="control__description">{{ widget.label }}</span>{% if widget.value == field.free_answer %}{% with name=widget.name %}{% include "surveys/forms/widgets/free_answer.html" %}{% endwith %}{% endif %}</label>
