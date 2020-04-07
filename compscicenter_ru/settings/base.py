@@ -180,7 +180,6 @@ TEMPLATES = [
         'APP_DIRS': False,
         'DIRS': [
             str(PROJECT_DIR / "templates"),
-            # str(SHARED_APPS_DIR / "surveys" / "jinja2"),
             str(PROJECT_DIR / "apps" / "admission" / "templates"),
             str(SHARED_APPS_DIR / "staff" / "templates"),
             str(SHARED_APPS_DIR / "templates"),
