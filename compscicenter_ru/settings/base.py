@@ -163,6 +163,7 @@ TEMPLATES = [
                 "django_jinja.builtins.extensions.DjangoFiltersExtension",
                 "webpack_loader.contrib.jinja2ext.WebpackExtension",
                 "core.jinja2.ext.UrlExtension",
+                "core.jinja2.ext.SpacelessExtension"
             ],
             "bytecode_cache": {
                 "name": "default",

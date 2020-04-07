@@ -1,4 +1,4 @@
-{# {% spaceless %} #}
+{% spaceless %}
     {% for bound_field in form %}
         {% with field_options=bound_field.field.db_field %}
         <div class="field animated{% if bound_field.field.is_hidden %} hidden{% endif %}{% if field_options.field_css_classes %} {{ field_options.field_css_classes }}{% endif %}" id="row_for_{{ field_options.name }}"{% if field_options.conditional_logic %} data-logic="{{ field_options.get_field_conditional_logic()|e }}"{% endif %}>
@@ -6,4 +6,4 @@
         </div>
         {% endwith %}
     {% endfor %}
-{# {% endspaceless %} #}
+{% endspaceless %}
