@@ -206,7 +206,7 @@ TEMPLATES = [
         }
     },
 ]
-FORM_RENDERER = 'django.forms.renderers.DjangoTemplates'
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 LOCALE_PATHS += [
     str(PROJECT_DIR / "locale"),
