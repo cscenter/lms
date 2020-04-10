@@ -14,19 +14,27 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     Send notification to those who applied but haven't yet started the contest.
     """
 
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument(
+            '--template', type=str,
+            default=self.TEMPLATE_TYPE,
+            help='Override default post office email template prefix')
+
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
         if input(self.CURRENT_CAMPAIGNS_AGREE) != "y":
             self.stdout.write("Canceled")
             return
 
-        self.validate_templates(campaigns, types=[self.TEMPLATE_TYPE],
+        template_type = options['template']
+        self.validate_templates(campaigns, types=[template_type],
                                 validate_campaign_settings=False)
 
         generated = 0
         for campaign in campaigns:
             email_from = get_email_from(campaign)
-            template_name = self.get_template_name(campaign, self.TEMPLATE_TYPE)
+            template_name = self.get_template_name(campaign, template_type)
             template = get_email_template(template_name)
             tests = (Test.objects
                      .filter(applicant__campaign_id=campaign.pk,
