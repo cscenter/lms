@@ -35,8 +35,6 @@ class SpacelessExtension(Extension):
     """
     Removes whitespace between HTML tags, including tab and
     newline characters. Works exactly like Django's own tag.
-
-    Adopted from: https://github.com/openstack/deb-python-coffin/blob/master/coffin/common.py
     """
 
     tags = {'spaceless'}
