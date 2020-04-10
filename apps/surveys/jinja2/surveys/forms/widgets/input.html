@@ -1,4 +1,6 @@
 <div class="ui input">
-<label class="title-label survey-label" for="{{ widget.attrs.id }}">{{ field.label|safe }}</label>
-<input type="{{ widget.type }}" name="{{ widget.name }}"{% if widget.value != None %} value="{{ "{}".format(widget.value) }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+    <label class="title-label survey-label" for="{{ widget.attrs.id }}">{{ field.label|safe }}</label>
+    <input type="{{ widget.type }}" name="{{ widget.name }}"{% if widget.value != None %} value="{{ "{}".format(widget.value) }}"{% endif %}{% include "django/forms/widgets/attrs.html" %}>
+    {% if field.help_text %}<div class="help-text">{{ field.help_text|safe }}</div>{% endif %}
+    {% if errors %}<div class="help-text error">{% if field.error_message %}{{ error_message }}{% else %}{% for error in errors %}{{ error }}{% endfor %}{% endif %}</div>{% endif %}
 </div>
