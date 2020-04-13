@@ -4,7 +4,9 @@
 <div class="grouped{% if widget.attrs.class %} {{ widget.attrs.class }}{% endif %}"{% if id %} id="{{ id }}"{% endif %}>
     {% for group, options, index in widget.optgroups %}
         {% for option in options %}
-            {% include option.template_name with widget=option field=field %}
+            {% with widget=option %}
+                {% include option.template_name %}
+            {% endwith %}
         {% endfor %}
     {% endfor %}
 </div>
