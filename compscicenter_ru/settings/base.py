@@ -162,6 +162,7 @@ TEMPLATES = [
                 "django_jinja.builtins.extensions.DjangoFiltersExtension",
                 "webpack_loader.contrib.jinja2ext.WebpackExtension",
                 "core.jinja2.ext.UrlExtension",
+                "core.jinja2.ext.SpacelessExtension"
             ],
             "bytecode_cache": {
                 "name": "default",
@@ -179,7 +180,6 @@ TEMPLATES = [
         'APP_DIRS': False,
         'DIRS': [
             str(PROJECT_DIR / "templates"),
-            str(SHARED_APPS_DIR / "surveys" / "jinja2"),
             str(PROJECT_DIR / "apps" / "admission" / "templates"),
             str(SHARED_APPS_DIR / "staff" / "templates"),
             str(SHARED_APPS_DIR / "templates"),
