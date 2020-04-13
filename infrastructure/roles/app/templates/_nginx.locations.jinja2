@@ -27,8 +27,8 @@ location /static/ {
     {% endif -%}
     access_log off;
     tcp_nodelay off;
-    gzip_static on;
-    gzip on;
+    gzip_static off;
+    gzip off;
     gzip_min_length 1100;
     gzip_types text/css text/javascript application/javascript;
     expires 1M;
