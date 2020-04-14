@@ -1029,6 +1029,10 @@ EpicEditor.prototype.load = function (callback) {
             content = (e.originalEvent || e).clipboardData.getData('text/plain');
         } else if (window.clipboardData) {
         }
+
+        // Handle different line endings - convert CRLF (Windows) and single CR (Mac) to LF
+        content = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
         if (content) {
             e.preventDefault();
             if (self.editorIframeDocument.queryCommandSupported('insertText')) {
