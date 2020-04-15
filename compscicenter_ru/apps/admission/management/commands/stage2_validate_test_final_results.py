@@ -61,10 +61,11 @@ class Command(CurrentCampaignMixin, BaseCommand):
                     print(f"проблемсы с апишкой {error_status_code}")
 
         with open(csv_path, "r") as f:
-            reader = csv.DictReader(f, delimiter=';')
+            reader = csv.DictReader(f, delimiter=',')
             for row in reader:
-                total = int(Decimal(row['total'].replace(',', '.')))
-                yandex_login = row['yandex_login']
+                total = int(Decimal(row['Score'].replace(',', '.')))
+                yandex_login = row['login']
+                user_name = row['user_name']
                 a = Applicant.objects.filter(campaign__in=campaigns,
                                              yandex_login=yandex_login)
                 applicant = None
@@ -84,7 +85,7 @@ class Command(CurrentCampaignMixin, BaseCommand):
                     else:
                         try:
                             t = Test.objects.select_related("applicant").get(contest_participant_id=participants[yandex_login])
-                            print(f"Не найден логин {yandex_login}, но есть запись в контесте {t.yandex_contest_id} [participant_id {participants[yandex_login]}]. Ссылка на анкету {t.applicant.get_absolute_url()}")
+                            print(f"Не найден логин {yandex_login} [user_name =  {user_name}], но есть запись в контесте {t.yandex_contest_id} [participant_id {participants[yandex_login]}]. Ссылка на анкету {t.applicant.get_absolute_url()} [ФИО {t.applicant.full_name}]")
                             applicant = t.applicant
                         except Test.DoesNotExist:
                             print(f"Вообще не найден {yandex_login} c participant_id {participants[yandex_login]}")

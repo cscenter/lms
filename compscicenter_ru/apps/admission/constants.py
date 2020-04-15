@@ -18,5 +18,6 @@ INTERVIEW_FEEDBACK_TEMPLATE = "admission-interview-feedback"
 
 class ChallengeStatuses(DjangoChoices):
     NEW = ChoiceItem('new', _("Not registered in the contest"))
-    REGISTERED = ChoiceItem('registered', _("Registered in the contest"))
+    # Results could be imported from a contest
+    REGISTERED = ChoiceItem('registered', _("Syncing with a contest"))
     MANUAL = ChoiceItem('manual', _("Manual score input"))
