@@ -681,7 +681,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
             if in_current_term:
                 in_current_term_total += 1
                 in_current_term_courses.add(e.course.meta_course_id)
-            if e.course.is_open:
+            if e.course.is_club_course:
                 # FIXME: Something wrong with this approach.
                 # FIXME: Look for `classes_total` annotation and fix
                 if hasattr(e, "classes_total"):

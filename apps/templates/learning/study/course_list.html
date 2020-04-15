@@ -54,7 +54,7 @@
             <tr class="{{ course.has_unread|yesno:"unread,noop" }}">
               <td>
                 <a class="title" href="{{ course.get_absolute_url }}">
-                    {{ course.meta_course.name }}</a>{% if request.site.domain == "compscicenter.ru" and course.is_open %}<span>, курс CS клуба</span>{% endif %}<br>
+                    {{ course.meta_course.name }}</a>{% if request.site.domain == "compscicenter.ru" and course.is_club_course %}<span>, курс CS клуба</span>{% endif %}<br>
               {% trans "Professors" %}:
                 {% for teacher in course.teachers.all %}
                 <a href="{{ teacher.teacher_profile_url }}">{{ teacher.get_abbreviated_name }}</a>{% if not forloop.last %}, {% endif %}

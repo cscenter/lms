@@ -142,8 +142,7 @@ class TeacherDetailView(DetailView):
 
     def get_queryset(self):
         co_queryset = (Course.objects
-                       .filter(is_open=True,
-                               main_branch=self.request.branch, )
+                       .available_in(self.request.branch)
                        .select_related('semester', 'meta_course',
                                        'main_branch'))
         return (get_user_model()._default_manager
@@ -239,7 +238,7 @@ class CoursesListView(generic.ListView):
 
     def get_queryset(self):
         courses_qs = (Course.objects
-                      .filter(main_branch_id=self.request.branch.id, )
+                      .available_in(self.request.branch)
                       .select_related('meta_course', 'main_branch')
                       .prefetch_related('teachers')
                       .order_by('meta_course__name'))

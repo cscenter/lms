@@ -92,24 +92,7 @@ class CourseClassQuerySet(query.QuerySet):
         return self.filter(materials_visibility=MaterialVisibilityTypes.VISIBLE)
 
 
-class _CourseClassManager(models.Manager):
-    def get_queryset(self):
-        if is_club_site():
-            return super().get_queryset().filter(course__is_open=True)
-        else:
-            return super().get_queryset()
-
-
-CourseClassManager = _CourseClassManager.from_queryset(CourseClassQuerySet)
-
-
-class _CourseDefaultManager(models.Manager):
-    """On compsciclub.ru always restrict selection by open readings"""
-    def get_queryset(self):
-        if is_club_site():
-            return super().get_queryset().filter(is_open=True)
-        else:
-            return super().get_queryset()
+CourseClassManager = models.Manager.from_queryset(CourseClassQuerySet)
 
 
 class CourseQuerySet(models.QuerySet):
@@ -125,4 +108,4 @@ class CourseQuerySet(models.QuerySet):
         return self.filter(teachers=user)
 
 
-CourseDefaultManager = _CourseDefaultManager.from_queryset(CourseQuerySet)
+CourseDefaultManager = models.Manager.from_queryset(CourseQuerySet)
