@@ -12,7 +12,7 @@
 
     <script type="text/template" id="courses-list-table-row">
         <tr>
-            <td><% if (co.is_open) { %><span data-title="{% trans "CS club course" %}" class="__club"></span><% } %><a href="<%-co.url%>" class="__course"><%-co.name%></a></td>
+            <td><% if (co.is_club_course) { %><span data-title="{% trans "CS club course" %}" class="__club"></span><% } %><a href="<%-co.url%>" class="__course"><%-co.name%></a></td>
             <td>
                 <% for (var i = 0; i < co.teachers.length; i++) { %>
                     <a class="__teacher text-nowrap" href="<%=co.teachers[i].url%>"><%=co.teachers[i].name%></a><% if (i != co.teachers.length - 1) { %>, <% } %>
@@ -73,7 +73,7 @@
                         <tbody>
                             {% for co in courses|lookup:active_slug %}
                                 <tr>
-                                    <td>{% if co.is_open %}<span data-title="{% trans "CS club course" %}" class="__club"></span>{% endif %}<a href="{{ co.url }}" class="__course">{{ co.name }}</a></td>
+                                    <td>{% if co.is_club_course %}<span data-title="{% trans "CS club course" %}" class="__club"></span>{% endif %}<a href="{{ co.url }}" class="__course">{{ co.name }}</a></td>
                                     <td>
                                         {% for teacher in co.teachers %}
                                             <a class="__teacher text-nowrap" href="/teachers/{{ teacher.id }}/">{{ teacher.name }}</a>{% if not forloop.last %}, {% endif %}
