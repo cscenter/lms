@@ -519,6 +519,10 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         return self.meta_course.name
 
     @property
+    def is_club_course(self):
+        return self.branch.site.id == settings.CLUB_SITE_ID
+
+    @property
     def is_completed(self):
         return self.completed_at <= now_local(self.get_timezone()).date()
 
