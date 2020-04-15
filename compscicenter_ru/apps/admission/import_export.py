@@ -26,7 +26,7 @@ class JsonFieldWidget(widgets.Widget):
 
 
 class ContestDetailsMixin:
-    # Other fields will be aggregated for the `details` json field
+    # Other fields will be aggregated to the `details` json field
     known_fields = (
         'created',
         'applicant',
@@ -55,6 +55,20 @@ class ContestDetailsMixin:
             for i, h in enumerate(headers):
                 if h not in self.known_fields:
                     details[h] = row[i]
+            # All column values with pattern in a header go
+            # to the `scores` attribute
+            if details:
+                to_delete = []
+                scores = []
+                patterns = ("Задача", "Задание")
+                for k, v in details.items():
+                    if any(p in k for p in patterns):
+                        to_delete.append(k)
+                        scores.append(v)
+                for k in to_delete:
+                    del details[k]
+                if scores:
+                    details["scores"] = scores
             return details
         return wrapper
 
