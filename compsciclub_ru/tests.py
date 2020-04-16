@@ -14,20 +14,30 @@ from users.tests.factories import StudentFactory
 
 
 @pytest.mark.django_db
-@pytest.mark.skip
-def test_courses_list(client):
-    """Сlub students can't see center courses"""
+def test_course_list(client, settings):
+    """
+    Сlub students can see all Club or CS Center courses that have been shared with their branch
+    """
     current_semester = SemesterFactory.create_current()
-    co_center = CourseFactory(semester=current_semester,
-                              is_open=False)
-    co_spb = CourseFactory(semester=current_semester,
-                           is_open=True)
-    co_kzn = CourseFactory.create(semester=current_semester,
-                                  branch__code="kzn")
+    branch_spb_center = BranchFactory(code=Branches.SPB,
+                                      site__domain=settings.ANOTHER_DOMAIN)
+    branch_spb_club = BranchFactory(code=Branches.SPB,
+                                    site__domain=settings.TEST_DOMAIN)
+    course_center_private = CourseFactory(semester=current_semester,
+                                          branch=branch_spb_center)
+    course_center_public = CourseFactory(semester=current_semester,
+                                         branch=branch_spb_center)
+    course_club_kzn_shared = CourseFactory(semester=current_semester,
+                                           branch__code="kzn")
+
+    # Courses were shared with CS Club
+    course_center_public.additional_branches.add(branch_spb_club)
+    course_club_kzn_shared.additional_branches.add(branch_spb_club)
+
     response = client.get(reverse('course_list'))
-    assert smart_bytes(co_center.meta_course.name) not in response.content
-    assert smart_bytes(co_spb.meta_course.name) in response.content
-    assert smart_bytes(co_kzn.meta_course.name) not in response.content
+    assert smart_bytes(course_center_private.meta_course.name) not in response.content
+    assert smart_bytes(course_center_public.meta_course.name) in response.content
+    assert smart_bytes(course_club_kzn_shared.meta_course.name) in response.content
 
 
 @pytest.mark.django_db
