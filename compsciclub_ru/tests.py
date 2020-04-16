@@ -33,25 +33,27 @@ def test_courses_list(client):
 @pytest.mark.django_db
 def test_enrollment(client, settings):
     """ Club Student can enroll only on open courses """
-    # settings.SITE_ID = settings.CLUB_SITE_ID
-    branch_spb = BranchFactory(code=Branches.SPB)
+    branch_spb = BranchFactory(code=Branches.SPB,
+                               site__domain=settings.TEST_DOMAIN)
     today = now_local(branch_spb.get_timezone())
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    co = CourseFactory(semester=term, is_open=False)
-    assert co.enrollment_is_open
+    course = CourseFactory(semester=term, is_open=False)
+    assert course.enrollment_is_open
     student_center = StudentFactory(
         required_groups__site_id=settings.CENTER_SITE_ID,
         branch__code=Branches.SPB)
     student_club = StudentFactory(
         required_groups__site_id=settings.CLUB_SITE_ID,
-        branch__code=Branches.SPB)
-    form = {'course_pk': co.pk}
+        branch=branch_spb)
+    form = {'course_pk': course.pk}
     client.login(student_center)
-    response = client.post(co.get_enroll_url(), form)
-    assert response.status_code == 302
-    assert Enrollment.objects.count() == 1
+    response = client.post(course.get_enroll_url(), form)
+    assert response.status_code == 404
+    assert Enrollment.objects.count() == 0
+    course.is_open = True
+    course.save()
     client.login(student_club)
-    response = client.post(co.get_enroll_url(), form)
+    response = client.post(course.get_enroll_url(), form)
     assert response.status_code == 302
     assert Enrollment.objects.count() == 1

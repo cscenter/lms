@@ -29,9 +29,9 @@ DATABASES = {
 
 
 TEST_DOMAIN = 'compsciclub.ru'
-TEST_DOMAIN_ID = 1
+TEST_DOMAIN_ID = 2
 ANOTHER_DOMAIN = 'compscicenter.ru'
-ANOTHER_DOMAIN_ID = 2
+ANOTHER_DOMAIN_ID = 1
 SITE_ID = TEST_DOMAIN_ID
 ALLOWED_HOSTS = [f".{TEST_DOMAIN}", f".{ANOTHER_DOMAIN}"]
 # This makes tests almost 2x faster; we don't need strong security and DEBUG

@@ -1,14 +1,13 @@
 from urllib.parse import urlparse
 
 import pytest
+from django.apps import apps
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.urls import resolve
 from post_office.models import EmailTemplate
 from pytest_django.lazy_django import skip_if_no_django
 
-from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
-    INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
 from core.tests.factories import BranchFactory, CityFactory
 from core.tests.utils import TestClient, CSCTestCase
 from learning.settings import Branches
@@ -132,14 +131,16 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
                 }
             )
 
-        # Create email templates
-
-        template_names = (
-            APPOINTMENT_INVITATION_TEMPLATE,
-            INTERVIEW_FEEDBACK_TEMPLATE,
-            INTERVIEW_REMINDER_TEMPLATE,
-        )
-        for template_name in template_names:
-            EmailTemplate.objects.update_or_create(
-                name=template_name
+        if apps.is_installed('admission'):
+            # Create email templates
+            from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
+                INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
+            template_names = (
+                APPOINTMENT_INVITATION_TEMPLATE,
+                INTERVIEW_FEEDBACK_TEMPLATE,
+                INTERVIEW_REMINDER_TEMPLATE,
             )
+            for template_name in template_names:
+                EmailTemplate.objects.update_or_create(
+                    name=template_name
+                )
