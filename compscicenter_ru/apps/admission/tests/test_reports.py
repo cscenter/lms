@@ -1,8 +1,8 @@
 import pytest
 
-from admission.reports import AdmissionReport
+from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
 from admission.tests.factories import CampaignFactory, ApplicantFactory, \
-    CommentFactory, InterviewFactory
+    CommentFactory, InterviewFactory, ExamFactory
 from learning.settings import Branches
 
 
@@ -24,6 +24,36 @@ def test_report_smoke():
     applicant = ApplicantFactory(campaign=campaign)
     interview = InterviewFactory(applicant=applicant)
     CommentFactory(score=1, interview=interview)
-    report = AdmissionReport(campaign=campaign)
+    report = AdmissionApplicantsReport(campaign=campaign)
     assert len(report.data) == 1
     check_value_for_header(report, 'Результаты интервью', 0, '1.00')
+
+
+@pytest.mark.django_db
+def test_exam_report():
+    campaign = CampaignFactory(branch__code=Branches.SPB)
+    report = AdmissionExamReport(campaign)
+    df = report.generate()
+    rows, columns = df.shape
+    assert rows == 0
+    static_headers_len = columns
+    exam = ExamFactory(score=None, applicant__campaign=campaign)
+    df = report.generate()
+    rows, columns = df.shape
+    assert rows == 1
+    exam2 = ExamFactory(applicant__campaign=campaign, score=0,
+                        details={'scores': ['1']})
+    df = report.generate()
+    rows, columns = df.shape
+    assert rows == 2
+    assert columns == static_headers_len + 1
+    assert df.loc[0, 'ID'] == exam.applicant_id
+    assert df.loc[0, 'Итого'] == '-'
+    assert df.loc[0, 'Задача 1'] == ''
+    assert str(df.loc[1, 'Итого']) == '0'
+    assert df.loc[1, 'Задача 1'] == '1'
+    exam3 = ExamFactory(applicant__campaign=campaign, score=0,
+                        details={'scores': ['42', '43']})
+    # Different `scores` dimensions for exam2 and exam3
+    with pytest.raises(AssertionError):
+        df = report.generate()

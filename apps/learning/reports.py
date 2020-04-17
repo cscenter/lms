@@ -26,6 +26,14 @@ from users.constants import Roles
 from users.models import User, SHADCourseRecord
 
 
+def dataframe_to_response(df: DataFrame, output_format: str, filename: str):
+    if output_format == 'csv':
+        return DataFrameResponse.as_csv(df, filename)
+    elif output_format == 'xlsx':
+        return DataFrameResponse.as_xlsx(df, filename)
+    raise ValueError("Supported output formats: csv, xlsx")
+
+
 class DataFrameResponse:
     @staticmethod
     def as_csv(df: DataFrame, filename):
