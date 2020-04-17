@@ -319,6 +319,7 @@ class Applicant(TimezoneAwareModel, TimeStampedModel):
         verbose_name=_("Applicant|University"),
         on_delete=models.PROTECT,
         related_name="applicants")
+    # TODO: remove
     university2 = models.CharField(
         _("University_legacy"),
         help_text=_("Applicant|university_legacy"),
