@@ -527,7 +527,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
     @property
     def enrollment_is_open(self):
-        if self.is_open:
+        if self.is_club_course:
             return True
         if self.is_completed:
             return False
