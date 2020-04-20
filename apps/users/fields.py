@@ -11,7 +11,7 @@ class MonitorStatusField(models.ForeignKey):
         logging_model (cls):
             Model responsible for logging.
         monitored (string):
-            Monitored field name
+            Trigger logging handler on changing monitored field
         when (iter):
             If monitored field get values from `when` attribute, monitoring
             field updated. Defaults to None, allows all values. [Optional]
@@ -56,14 +56,13 @@ class MonitorStatusField(models.ForeignKey):
                 self._save_initial(model_instance.__class__, model_instance)
         return super().pre_save(model_instance, add)
 
-    def create_log_entry(self, instance, new_model):
-        if new_model:
+    def create_log_entry(self, instance, is_new_model):
+        if is_new_model:
             return False
         attrs = {self.monitored: self.get_monitored_value(instance)}
         instance_fields = [f.attname for f in instance._meta.fields]
         for field in self.logging_model._meta.fields:
-            # Do not override PK
-            if isinstance(field, models.AutoField):
+            if isinstance(field, models.AutoField):  # skip PK
                 continue
             if field.attname not in instance_fields:
                 continue
