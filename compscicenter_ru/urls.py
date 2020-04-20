@@ -47,7 +47,7 @@ urlpatterns += [
     path('enrollment/checklist/', views.EnrollmentChecklistView.as_view(), name='enrollment_checklist'),
     path('enrollment/program/', views.EnrollmentPreparationProgramView.as_view(), name='enrollment_preparation_program'),
     path('faq/', views.QAListView.as_view(), name='faq'),
-    path('', include('admission.urls_application')),
+    path('', include('application.urls')),
     # Online education
     path('', include('online_courses.urls')),
     path('videos/', views.CourseVideoListView.as_view(), name='video_list'),

@@ -25,25 +25,6 @@ from users.tests.factories import UserFactory, CuratorFactory
 
 
 @pytest.mark.django_db
-def test_application_form_availability(client):
-    today = timezone.now()
-    campaign = CampaignFactory(year=today.year, current=True)
-    url = reverse("application:form")
-    response = client.get(url)
-    assert response.status_code == 200
-    campaign.current = False
-    campaign.save()
-    response = client.get(url)
-    assert response.status_code == 200
-    assert not response.context_data["show_form"]
-    campaign.current = True
-    campaign.application_ends_at = today - datetime.timedelta(days=1)
-    campaign.save()
-    response = client.get(url)
-    assert not response.context_data["show_form"]
-
-
-@pytest.mark.django_db
 def test_simple_interviews_list(client, curator, settings):
     settings.LANGUAGE_CODE = 'ru'
     curator.branch = Branch.objects.get(code=Branches.NSK,

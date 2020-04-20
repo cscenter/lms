@@ -1,8 +1,7 @@
-from rest_pandas import PandasSerializer
 from django.utils.translation import ugettext_lazy as _
+from rest_pandas import PandasSerializer
 
 from learning.settings import AcademicDegreeLevels
-from users.models import User
 
 
 def _index_to_name(course_index):
@@ -55,7 +54,7 @@ class ScoreByCoursesSerializer(PandasSerializer):
     def transform_dataframe(self, dataframe):
         df = (dataframe
               .pivot_table(index='score',
-                           columns='applicant__course',
+                           columns='applicant__level_of_education',
                            values='total',
                            fill_value=0))
         to_rename = {c: _index_to_name(c) for c in df.columns}

@@ -1,8 +1,7 @@
 import json
 
 from django.conf import settings
-from pandas import DataFrame
-from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
+from rest_framework.renderers import BrowsableAPIRenderer
 from rest_pandas import PandasCSVRenderer, PandasJSONRenderer
 
 

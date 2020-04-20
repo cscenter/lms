@@ -12,12 +12,12 @@ from admission.models import Applicant, Test, Exam, Campaign
 from api.permissions import CuratorAccessPermission
 from core.db.functions import TruncDateInTZ
 from core.timezone import now_local
-from stats.admission.pandas_serializers import \
+from .pandas_serializers import \
     CampaignResultsTimelineSerializer, \
     ScoreByUniversitiesSerializer, ScoreByCoursesSerializer, \
     CampaignResultsByUniversitiesSerializer, \
     CampaignResultsByCoursesSerializer, ApplicationSubmissionPandasSerializer
-from stats.admission.serializers import StageByYearSerializer
+from .serializers import StageByYearSerializer
 from stats.renderers import ListRenderersMixin
 
 logger = logging.getLogger(__name__)
@@ -233,7 +233,7 @@ class CampaignStatsTestingScoreByUniversities(ListRenderersMixin, PandasView):
 
 
 class CampaignStatsTestingScoreByCourses(ListRenderersMixin, PandasView):
-    """Distribution of online test results by courses."""
+    """Distribution of online test results by level of education"""
     permission_classes = [CuratorAccessPermission]
     serializer_class = SimpleSerializer
     pandas_serializer_class = ScoreByCoursesSerializer
@@ -242,9 +242,9 @@ class CampaignStatsTestingScoreByCourses(ListRenderersMixin, PandasView):
         campaign_id = self.kwargs.get('campaign_id')
         return (Test.objects
                 .filter(applicant__campaign_id=campaign_id)
-                .values('score', 'applicant__course')
+                .values('score', 'applicant__level_of_education')
                 .annotate(total=Count('score'))
-                .order_by('applicant__course'))
+                .order_by('applicant__level_of_education'))
 
 
 class CampaignStatsExamScoreByUniversities(ListRenderersMixin, PandasView):
@@ -262,7 +262,7 @@ class CampaignStatsExamScoreByUniversities(ListRenderersMixin, PandasView):
 
 
 class CampaignStatsExamScoreByCourses(ListRenderersMixin, PandasView):
-    """Distribution of exam results by courses."""
+    """Distribution of exam results by level of education"""
     permission_classes = [CuratorAccessPermission]
     serializer_class = SimpleSerializer
     pandas_serializer_class = ScoreByCoursesSerializer
@@ -271,9 +271,9 @@ class CampaignStatsExamScoreByCourses(ListRenderersMixin, PandasView):
         campaign_id = self.kwargs.get('campaign_id')
         return (Exam.objects
                 .filter(applicant__campaign_id=campaign_id)
-                .values('score', 'applicant__course')
+                .values('score', 'applicant__level_of_education')
                 .annotate(total=Count('score'))
-                .order_by('applicant__course'))
+                .order_by('applicant__level_of_education'))
 
 
 class ApplicationSubmission(ListRenderersMixin, PandasView):

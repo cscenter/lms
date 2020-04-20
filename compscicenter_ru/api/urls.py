@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from admission.api.views import ApplicantCreateAPIView
+from application.api.views import ApplicantCreateAPIView
 from publications.api.views import RecordedEventList
 from . import views as v
 
