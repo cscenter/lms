@@ -1,9 +1,8 @@
-from rest_framework import serializers
 from django.utils.translation import ugettext_lazy as _
+from rest_framework import serializers
 from rest_pandas import SimpleSerializer
 
 from learning.settings import AcademicDegreeLevels
-from users.models import User
 
 
 class StageByYearSerializer(serializers.Serializer):

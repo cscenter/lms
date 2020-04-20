@@ -66,6 +66,7 @@ INSTALLED_APPS += [
     'projects.apps.ProjectsConfig',
     'stats.apps.StatisticsConfig',
     'admission.apps.AdmissionConfig',
+    'application.apps.ApplicationConfig',
     'staff',
     'surveys.apps.SurveysConfig',
     'online_courses.apps.Config',

@@ -3,12 +3,10 @@ import random
 
 import factory
 import pytz
-from django.db import models
 from django.db.models.signals import post_save
 from django.utils import timezone
 from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate
 
-from admission.api.serializers import ApplicantSerializer
 from admission.constants import WHERE_DID_YOU_LEARN, \
     APPOINTMENT_INVITATION_TEMPLATE, INTERVIEW_REMINDER_TEMPLATE
 from admission.models import Campaign, Applicant, Contest, Test, \
@@ -73,19 +71,6 @@ class ApplicantFactory(factory.DjangoModelFactory):
                                                     AcademicDegreeLevels.choices])
     where_did_you_learn = factory.fuzzy.FuzzyChoice([x for x, _ in
                                                      WHERE_DID_YOU_LEARN])
-
-    @classmethod
-    def build_application_form(cls, **kwargs):
-        form_data = factory.build(dict, FACTORY_CLASS=cls, **kwargs)
-        for k in list(form_data.keys()):
-            if k not in ApplicantSerializer.Meta.fields:
-                del form_data[k]
-            elif isinstance(form_data[k], models.Model):
-                if form_data[k].pk is None:
-                    del form_data[k]
-                else:
-                    form_data[k] = form_data[k].pk
-        return form_data
 
 
 class ContestFactory(factory.DjangoModelFactory):

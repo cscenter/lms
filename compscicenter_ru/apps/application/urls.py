@@ -1,7 +1,7 @@
 from django.conf.urls import include, url
 from django.urls import path
 
-from admission.views import yandex_login_access, yandex_login_access_complete, \
+from .views import yandex_login_access, yandex_login_access_complete, \
     ApplicationFormView
 
 app_name = 'application'

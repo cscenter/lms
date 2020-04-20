@@ -1,17 +1,50 @@
-# TODO: Нельзя сохранить и university и university_other (приоритет у university_other)
-# TODO: where_did_you_learn , если есть с суффиксом _other, то убедиться, что в where_did_you_learn другое? выставить самим
-# FIXME: тест на создание нового универа, т.к. уже было падение по этой причине
 from datetime import timedelta
 
+import factory
 import pytest
+from django.db import models
+from django.utils import timezone
 
 from admission.tests.factories import CampaignFactory, ApplicantFactory, \
     UniversityFactory
-from admission.views import SESSION_LOGIN_KEY
+from application.api.serializers import ApplicationFormSerializer
+from application.views import SESSION_LOGIN_KEY
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
 from learning.settings import Branches
+
+
+def build_application_form(**kwargs):
+    form_data = factory.build(dict, FACTORY_CLASS=ApplicantFactory, **kwargs)
+    for k in list(form_data.keys()):
+        if k not in ApplicationFormSerializer.Meta.fields:
+            del form_data[k]
+        elif isinstance(form_data[k], models.Model):
+            if form_data[k].pk is None:
+                del form_data[k]
+            else:
+                form_data[k] = form_data[k].pk
+    return form_data
+
+
+@pytest.mark.django_db
+def test_application_form_availability(client):
+    today = timezone.now()
+    campaign = CampaignFactory(year=today.year, current=True)
+    url = reverse("application:form")
+    response = client.get(url)
+    assert response.status_code == 200
+    campaign.current = False
+    campaign.save()
+    response = client.get(url)
+    assert response.status_code == 200
+    assert not response.context_data["show_form"]
+    campaign.current = True
+    campaign.application_ends_at = today - timedelta(days=1)
+    campaign.save()
+    response = client.get(url)
+    assert not response.context_data["show_form"]
 
 
 @pytest.mark.django_db
@@ -45,9 +78,7 @@ def test_application_form_preferred_study_programs(client):
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))
     university = UniversityFactory()
-    form_data = ApplicantFactory.build_application_form(
-        campaign=campaign,
-        university=university)
+    form_data = build_application_form(campaign=campaign, university=university)
     if "preferred_study_programs" in form_data:
         del form_data["preferred_study_programs"]
     # preferred_study_programs are not specified for the distance branch
@@ -74,9 +105,7 @@ def test_application_form_living_place(client):
                                application_starts_at=today - timedelta(days=2),
                                application_ends_at=today + timedelta(days=2))
     university = UniversityFactory()
-    form_data = ApplicantFactory.build_application_form(
-        campaign=campaign,
-        university=university)
+    form_data = build_application_form(campaign=campaign, university=university)
     if "living_place" in form_data:
         del form_data["living_place"]
     # Yandex.Login stored in client session and will override form value

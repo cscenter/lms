@@ -1,7 +1,7 @@
-from django.conf.urls import include, url
+from django.conf.urls import url
 from django.urls import path
 
-from stats.admission.views import CampaignsStagesByYears, \
+from .views import CampaignsStagesByYears, \
     CampaignStatsApplicantsResults, CampaignStatsStudentsResults, \
     CampaignStatsTestingScoreByUniversities, \
     CampaignStatsExamScoreByUniversities, \
