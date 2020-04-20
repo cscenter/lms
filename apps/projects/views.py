@@ -849,7 +849,7 @@ class ReportAttachmentDownloadView(LoginRequiredMixin, generic.View):
     def get(self, request, *args, **kwargs):
         try:
             attachment_type, pk = hashids.decode(kwargs['sid'])
-        except IndexError:
+        except (ValueError, IndexError):
             raise Http404
         projects_app = apps.get_app_config("projects")
         user = request.user
