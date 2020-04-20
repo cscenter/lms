@@ -206,7 +206,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
             if attachment_type not in (ASSIGNMENT_TASK_ATTACHMENT,
                                        ASSIGNMENT_COMMENT_ATTACHMENT):
                 return HttpResponseBadRequest()
-        except IndexError:
+        except (ValueError, IndexError):
             raise Http404
 
         user = request.user
