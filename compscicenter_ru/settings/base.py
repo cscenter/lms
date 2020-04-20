@@ -181,7 +181,7 @@ TEMPLATES = [
         'APP_DIRS': False,
         'DIRS': [
             str(PROJECT_DIR / "templates"),
-            str(PROJECT_DIR / "apps" / "admission" / "templates"),
+            str(SHARED_APPS_DIR / "admission" / "templates"),
             str(SHARED_APPS_DIR / "staff" / "templates"),
             str(SHARED_APPS_DIR / "templates"),
             django.__path__[0] + '/forms/templates',
@@ -212,7 +212,7 @@ FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 LOCALE_PATHS += [
     str(PROJECT_DIR / "locale"),
     str(SHARED_APPS_DIR / "projects" / "locale"),
-    str(PROJECT_DIR / "apps" / "admission" / "locale"),
+    str(SHARED_APPS_DIR / "admission" / "locale"),
     str(SHARED_APPS_DIR / "surveys" / "locale"),
 ]
 
