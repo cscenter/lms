@@ -43,6 +43,10 @@ class TermPair:
     def slug(self) -> str:
         return f"{self.year}-{self.type}"
 
+    @property
+    def label(self) -> str:
+        return "{0} {1}".format(SemesterTypes.values[self.type], self.year)
+
     def get_next(self) -> "TermPair":
         return get_term_by_index(self.index + 1)
 
