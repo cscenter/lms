@@ -80,9 +80,9 @@ class Migration(migrations.Migration):
                 ('application_ends_at', models.DateTimeField(help_text='Last day for submitting application', verbose_name='Application Ends on')),
                 ('access_token', models.CharField(blank=True, help_text='Yandex.Contest Access Token', max_length=255, verbose_name='Access Token')),
                 ('refresh_token', models.CharField(blank=True, help_text='Yandex.Contest Refresh Token', max_length=255, verbose_name='Refresh Token')),
-                ('template_registration', models.CharField(help_text='Template name for contest registration email', max_length=255, validators=[admission.models.validate_template_name], verbose_name='Registration Template')),
-                ('template_appointment', models.CharField(help_text='Template name for interview invitation email', max_length=255, validators=[admission.models.validate_template_name], verbose_name='Invitation Template')),
-                ('template_interview_reminder', models.CharField(help_text='Template name for interview reminder email', max_length=255, validators=[admission.models.validate_template_name], verbose_name='Interview Reminder Template')),
+                ('template_registration', models.CharField(help_text='Template name for contest registration email', max_length=255, validators=[admission.models.validate_email_template_name], verbose_name='Registration Template')),
+                ('template_appointment', models.CharField(help_text='Template name for interview invitation email', max_length=255, validators=[admission.models.validate_email_template_name], verbose_name='Invitation Template')),
+                ('template_interview_reminder', models.CharField(help_text='Template name for interview reminder email', max_length=255, validators=[admission.models.validate_email_template_name], verbose_name='Interview Reminder Template')),
             ],
             options={
                 'verbose_name': 'Campaign',
