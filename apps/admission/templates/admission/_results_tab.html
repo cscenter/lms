@@ -38,7 +38,7 @@
 
 {% if exam %}
     <h4>
-        Экзамен: {{ exam.score_display }} / <span>{{ campaign.exam_max_score }}</span>{% if request.user.is_curator %} <a href="{% url "admin:admission_exam_change" exam.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>{% endif %}
+        Экзамен: {{ exam.score_display }} / <span>{{ campaign.exam_max_score|default_if_none:'макс. балл не указан' }}</span>{% if request.user.is_curator %} <a href="{% url "admin:admission_exam_change" exam.pk %}" target="_blank"><i class="icon fa fa-pencil-square-o"></i></a>{% endif %}
     </h4>
     <ul class="list-unstyled">
         {% if contests.exam and contests.exam.file %}<li><b>Контест</b>: <a href="{{ contests.exam.file_url }}" target="_blank">{% if exam.yandex_contest_id %}{{ exam.yandex_contest_id }}{% endif %}</a></li>

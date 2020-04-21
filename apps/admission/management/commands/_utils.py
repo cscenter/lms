@@ -10,7 +10,7 @@ from admission.models import Campaign
 
 class CurrentCampaignMixin:
     CURRENT_CAMPAIGNS_AGREE = "The action will affect campaigns above. " \
-                              "Continue? (y/n): "
+                              "Continue? (y/[n]): "
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
@@ -34,7 +34,7 @@ class CurrentCampaignMixin:
                      .select_related("branch")
                      .filter(**filter_params)
                      .all())
-        self.stdout.write("Selected current campaigns ({} total):".format(
+        self.stdout.write("Selected campaigns ({} total):".format(
             len(campaigns)))
         for campaign in campaigns:
             self.stdout.write(f"  {campaign} [{campaign.branch}]")

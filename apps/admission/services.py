@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from operator import attrgetter
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from django.conf import settings
 from django.db import transaction
@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from post_office import mail
 from post_office.models import EmailTemplate, Email, STATUS as EMAIL_STATUS
+from post_office.utils import get_email_template
 
 from admission.constants import INVITATION_EXPIRED_IN_HOURS, \
     INTERVIEW_FEEDBACK_TEMPLATE
@@ -125,6 +126,28 @@ class EmailQueueService:
             render_on_delivery=False,
             backend='ses',
         )
+
+    @staticmethod
+    def new_exam_invitation(applicant: Applicant,
+                            allow_duplicates=False) -> Tuple[Email, bool]:
+        recipient = applicant.email
+        template_name = applicant.campaign.template_exam_invitation
+        template = get_email_template(template_name)
+        if not allow_duplicates:
+            email = Email.objects.filter(to=recipient, template=template).first()
+            if email:
+                return email, False
+        return mail.send(
+            [recipient],
+            sender=get_email_from(applicant.campaign),
+            template=template,
+            context={
+                'CONTEST_ID': applicant.online_test.yandex_contest_id,
+                'YANDEX_LOGIN': applicant.yandex_login,
+            },
+            render_on_delivery=True,
+            backend='ses',
+        ), True
 
     @staticmethod
     def generate_interview_invitation(interview_invitation) -> Email:
