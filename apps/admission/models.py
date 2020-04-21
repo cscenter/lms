@@ -705,9 +705,12 @@ class YandexContestIntegration(models.Model):
             if registered:
                 participant_id = registered.contest_participant_id
                 update_fields["contest_participant_id"] = participant_id
-        (self.__class__.objects
-         .filter(applicant=applicant)
-         .update(**update_fields))
+        updated = (self.__class__.objects
+                   .filter(applicant=applicant)
+                   .update(**update_fields))
+        if updated:
+            for k, v in update_fields:
+                setattr(self, k, v)
 
     @classmethod
     def import_results(cls, api, contest: Contest) -> YandexContestImportResults:
