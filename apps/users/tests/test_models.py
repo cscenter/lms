@@ -96,7 +96,8 @@ def test_passed_courses():
                                     grade=GradeTypes.GOOD)
                   for co in (co1, co2, co3))
     next_term = SemesterFactory.create_next(co1.semester)
-    co4 = CourseFactory(meta_course=co1.meta_course, semester=next_term)
+    co4 = CourseFactory(meta_course=co1.meta_course, is_open=False,
+                        semester=next_term)
     e4 = EnrollmentFactory(course=co4, student=student, grade=GradeTypes.GOOD)
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 3
@@ -108,21 +109,6 @@ def test_passed_courses():
     e2.save()
     stats = student.stats(next_term)
     assert stats['passed']['total'] == 2
-
-
-@pytest.mark.django_db
-def test_passed_club_courses(settings):
-    """Make sure club courses are determined correctly"""
-    student = StudentFactory()
-    branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
-    center_course = CourseFactory()
-    club_course = CourseFactory(branch=branch_club)
-    e_center, e_club = (EnrollmentFactory(course=course, student=student, grade=GradeTypes.GOOD)
-                        for course in (center_course, club_course))
-    next_term = SemesterFactory.create_next(center_course.semester)
-    stats = student.stats(next_term)
-    assert center_course.meta_course_id not in stats['passed']['center_courses']
-    assert club_course.meta_course_id in stats['passed']['club_courses']
 
 
 @pytest.mark.django_db
