@@ -134,15 +134,18 @@ class EmailQueueService:
         template_name = applicant.campaign.template_exam_invitation
         template = get_email_template(template_name)
         if not allow_duplicates:
-            email = Email.objects.filter(to=recipient, template=template).first()
-            if email:
-                return email, False
+            latest_email = (Email.objects
+                            .filter(to=recipient, template=template)
+                            .order_by('-pk')
+                            .first())
+            if latest_email:
+                return latest_email, False
         return mail.send(
             [recipient],
             sender=get_email_from(applicant.campaign),
             template=template,
             context={
-                'CONTEST_ID': applicant.online_test.yandex_contest_id,
+                'CONTEST_ID': applicant.exam.yandex_contest_id,
                 'YANDEX_LOGIN': applicant.yandex_login,
             },
             render_on_delivery=True,
