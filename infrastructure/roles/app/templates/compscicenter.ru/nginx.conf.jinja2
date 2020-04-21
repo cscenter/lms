@@ -1,4 +1,7 @@
+#jinja2: trim_blocks: False, lstrip_blocks: True
 # {{ ansible_managed }}
+{% from '_nginx.cors.jinja2' import common_cors_headers %}
+
 upstream django_{{ site_user }} {
     server unix:///tmp/uwsgi_{{ settings_module_parent_dir }}.socket;
 }
@@ -12,39 +15,58 @@ map $http_referer $frame_options {
 map $http_origin $cors_enabled {
     default 0;
 
-    # Support all known subdomains except www.*
-    {% for domain in certbot_domains %}{% if not domain.startswith('www') -%}
-    "http{% if enable_https %}s{% endif %}://{{ domain }}" 1;
-    {% endif %}{% endfor -%}
+    {# Support all known subdomains except `www.*` -#}
+    {% for domain in certbot_domains -%}
+    {% if not domain.startswith('www') -%}
+        "http{% if enable_https %}s{% endif %}://{{ domain }}" 1;
+    {% endif -%}
+    {%- endfor -%}
     {% if hosts_override is defined and hosts_override == 'vagrant-test-hosts' -%}
     "http{% if enable_https %}s{% endif %}://csc.vagrant" 1;
     "http{% if enable_https %}s{% endif %}://my.csc.vagrant" 1;
     {%- endif %}
-
 }
 
-map $cors_enabled $cors_allow_origin {
+map $cors_enabled $cors_origin_header {
     default "";
 
     1 "$http_origin";
-}
-
-map $cors_enabled $cors_allow_methods {
-    default "";
-
-    1 "GET,POST,OPTIONS";
-}
-
-map $cors_enabled $cors_allow_headers {
-    default "";
-
-    1 "DNT,X-Requested-With,Range,X-CSRFToken";
 }
 
 map $cors_enabled $cors_allow_credentials {
     default "";
 
     1 "true";
+}
+
+map $cors_enabled $cors_allow_headers {
+    default "";
+
+    1 "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,X-CSRFToken";
+}
+
+map $cors_enabled $cors_allow_methods {
+    default "";
+
+    1 "GET,HEAD,POST,OPTIONS";
+}
+
+map $cors_enabled $cors_access_control_max_age {
+    default "";
+    # Max value for Firefox
+    1 "86400";
+}
+
+map $cors_enabled $cors_allow_headers_static_dir {
+    default "";
+
+    1 "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range";
+}
+
+map $cors_enabled $cors_allow_methods_static_dir {
+    default "";
+
+    1 "GET,HEAD,OPTIONS";
 }
 
 {% if enable_https -%}
@@ -77,7 +99,7 @@ server {
     return 301 https://{{ main_domain }}$request_uri;
 }
 {% endif -%}
-{% endif %}
+{%- endif %}
 
 server {
     listen {% if enable_https %}443 ssl http2{% else %}80{% endif %};
@@ -86,11 +108,11 @@ server {
     charset utf-8;
     client_max_body_size 42m;
 
-    {% if enable_https -%}
+    {%- if enable_https %}
         {% filter indent(width=4) %}
             {% include '_nginx.ssl.jinja2' %}
         {% endfilter %}
-    {% endif %}
+    {%- endif %}
 
     resolver 8.8.8.8;
 
@@ -111,12 +133,20 @@ server {
     {% include '_nginx.locations.jinja2' %}
     {% endfilter %}
 
-
     # Django
     location / {
-        {%- filter indent(width=8) -%}
-        {% include '_nginx.cors.jinja2' %}
-        {% endfilter %}
+        {% if CORS_enabled %}
+            {{ common_cors_headers() }}
+            if ($request_method = 'OPTIONS') {
+                add_header Access-Control-Allow-Methods "$cors_allow_methods";
+                add_header Access-Control-Allow-Headers "$cors_allow_headers";
+                {{ common_cors_headers() }}
+                add_header 'Access-Control-Max-Age' "$cors_access_control_max_age";
+                add_header 'Content-Type' 'text/plain; charset=utf-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+        {% endif %}
 
         add_header X-Frame-Options $frame_options;
         add_header Cache-Control no-cache,no-store,must-revalidate;

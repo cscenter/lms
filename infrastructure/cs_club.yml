@@ -22,6 +22,7 @@
         apps_dir_name: apps
         app_environment: production
         setup_cronjobs: no
+        CORS_enabled: no
         certbot_domains:
           - "{{ main_domain }}"
           - "www.{{ main_domain }}"
