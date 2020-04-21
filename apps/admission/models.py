@@ -39,8 +39,8 @@ def current_year():
     return timezone.now().year
 
 
-def validate_template_name(value):
-    if not EmailTemplate.objects.filter(name=value).exists():
+def validate_email_template_name(value):
+    if value and not EmailTemplate.objects.filter(name=value).exists():
         raise ValidationError(
             _("Email template with name `%(template_name)s` doesn't exist"),
             params={'template_name': value},
@@ -92,17 +92,23 @@ class Campaign(TimezoneAwareModel, models.Model):
     template_registration = models.CharField(
         _("Registration Template"),
         help_text=_("Template name for contest registration email"),
-        validators=[validate_template_name],
+        validators=[validate_email_template_name],
+        max_length=255)
+    template_exam_invitation = models.CharField(
+        _("Exam Invitation Email Template"),
+        help_text=_("Template name for the exam registration email"),
+        validators=[validate_email_template_name],
+        blank=True,
         max_length=255)
     template_appointment = models.CharField(
         _("Invitation Template"),
         help_text=_("Template name for interview invitation email"),
-        validators=[validate_template_name],
+        validators=[validate_email_template_name],
         max_length=255)
     template_interview_reminder = models.CharField(
         _("Interview Reminder Template"),
         help_text=_("Template name for interview reminder email"),
-        validators=[validate_template_name],
+        validators=[validate_email_template_name],
         max_length=255)
 
     class Meta:
