@@ -709,7 +709,7 @@ class YandexContestIntegration(models.Model):
                    .filter(applicant=applicant)
                    .update(**update_fields))
         if updated:
-            for k, v in update_fields:
+            for k, v in update_fields.items():
                 setattr(self, k, v)
 
     @classmethod
