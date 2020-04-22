@@ -92,9 +92,8 @@ class IndexView(generic.TemplateView):
                                     .order_by('date', 'starts_at'))
             courses = list(
                 Course.objects
-                .filter(is_open=True,
-                        main_branch_id=self.request.branch.id,
-                        semester=featured_term.pk)
+                .in_branches(self.request.branch.id)
+                .filter(semester=featured_term.pk)
                 .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(
                     'teachers',
