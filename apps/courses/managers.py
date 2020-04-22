@@ -92,7 +92,15 @@ class CourseClassQuerySet(query.QuerySet):
         return self.filter(materials_visibility=MaterialVisibilityTypes.VISIBLE)
 
 
-CourseClassManager = models.Manager.from_queryset(CourseClassQuerySet)
+class _CourseClassManager(models.Manager):
+    def get_queryset(self):
+        if is_club_site():
+            return super().get_queryset().filter(course__is_open=True)
+        else:
+            return super().get_queryset()
+
+
+CourseClassManager = _CourseClassManager.from_queryset(CourseClassQuerySet)
 
 
 class CourseQuerySet(models.QuerySet):

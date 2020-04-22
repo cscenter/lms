@@ -125,7 +125,8 @@ class TeachersView(generic.ListView):
     @property
     def get_queryset(self):
         lecturers = list(Course.objects
-                         .in_branches(self.request.branch.id)
+                         .filter(is_open=True,
+                                 branch=self.request.branch,)
                          .distinct()
                          .values_list("teachers__pk", flat=True))
         # FIXME: lots of unused fields provided, e.g. password - remove?
@@ -141,7 +142,8 @@ class TeacherDetailView(DetailView):
 
     def get_queryset(self):
         co_queryset = (Course.objects
-                       .in_branches(self.request.branch.id)
+                       .filter(is_open=True,
+                               branch=self.request.branch,)
                        .select_related('semester', 'meta_course', 'branch'))
         return (get_user_model()._default_manager
                 .prefetch_related(
@@ -188,7 +190,8 @@ class ClubClassesFeed(ICalFeed):
 
     def items(self, request):
         return (CourseClass.objects
-                .in_branches(request.branch.id)
+                .filter(course__is_open=True,
+                        course__branch=request.branch)
                 .select_related('venue',
                                 'venue__location',
                                 'course',
