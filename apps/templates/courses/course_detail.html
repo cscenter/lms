@@ -11,7 +11,7 @@
 {% block body_attrs %} data-init-sections="courseDetails"{% endblock body_attrs %}
 
 {% block javascripts %}
-    {% if user.is_curator %}{% render_bundle "supervising" "js" %}{% endif %}
+    {% if user.is_curator %}{% render_bundle "supervising" "js" "V1" %}{% endif %}
 {% endblock javascripts %}
 
 

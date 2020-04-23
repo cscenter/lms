@@ -105,10 +105,10 @@
     <script type="text/javascript" src="//code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript">window.jQuery || document.write('<script src="{% static "v1/js/vendor/jquery-3.4.1.min.js" %}"><\/script>')</script>
 
-    {% render_bundle 'runtime' 'js' %}
-    {% render_bundle 'vendor' 'js' %}
-    {% render_bundle 'main' 'js' %}
-    {% render_bundle 'club' 'js' %}
+    {% render_bundle 'runtime' 'js' 'V1' %}
+    {% render_bundle 'vendor' 'js' 'V1' %}
+    {% render_bundle 'main' 'js' 'V1' %}
+    {% render_bundle 'club' 'js' 'V1' %}
 
     {% if messages %}
       <script type="text/javascript">

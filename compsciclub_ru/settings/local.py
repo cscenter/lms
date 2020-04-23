@@ -112,3 +112,14 @@ LOGGING = {
 FILE_UPLOAD_HANDLERS = ("django.core.files.uploadhandler.TemporaryFileUploadHandler",)
 
 SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+
+WEBPACK_LOADER = {
+    'V1': {
+        'BUNDLE_DIR_NAME': 'v1/dist/.local/',  # relative to the ASSETS_ROOT
+        'STATS_FILE': str(ASSETS_ROOT / "v1" / "dist" / ".local" / "webpack-stats-v1.json"),
+    },
+    'V2': {
+        'BUNDLE_DIR_NAME': 'v2/dist/.local/',  # relative to the ASSETS_ROOT
+        'STATS_FILE': str(ASSETS_ROOT / "v2" / "dist" / ".local" / "webpack-stats-v2.json"),
+    }
+}
