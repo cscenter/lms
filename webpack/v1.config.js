@@ -5,12 +5,13 @@ const merge = require('webpack-merge');  // merge webpack configs
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
 const Dotenv = require('dotenv-webpack');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const DEBUG = (process.env.NODE_ENV !== "production");
 
+const DEBUG = (process.env.NODE_ENV !== "production");
+const LOCAL_BUILD = (process.env.LOCAL_BUILD === "1");
 
 const development = require('./dev.config');
 const production = require('./prod.config');
-const TARGET = process.env.npm_lifecycle_event;
+const localConfiguration = require('./local.config');
 
 process.env.BABEL_ENV = process.env.NODE_ENV;
 
@@ -18,7 +19,8 @@ const APP_VERSION = "v1";
 
 const __srcdir = path.join(__dirname, `../src/${APP_VERSION}`);
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
-let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
+let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist`);
+let __outputdir = path.join(__bundlesdir, `js`);
 
 // All dependencies will be copied to path, relative to bundles output
 const STATIC_URL = path.join('/static/');
@@ -59,7 +61,7 @@ const common = {
 
     output: {
         filename: '[name]-[hash].js',
-        path: __bundlesdir,
+        path: __outputdir,
     },
 
     externals: {
@@ -176,7 +178,11 @@ const common = {
             path: path.join(__dirname, '.env'),
             silent: false,
         }),
-        new BundleTracker({filename: './webpack-stats.json'}),
+        new BundleTracker({
+            // TODO: override plugin with webpack-merge, merge.unique store the first entry, need something else
+            path: !LOCAL_BUILD ? __bundlesdir : path.join(__bundlesdir, '.local'),
+            filename: `webpack-stats-${APP_VERSION}.json`
+        }),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...
         new webpack.IgnorePlugin(/^\.\/locale$/),
@@ -213,7 +219,11 @@ const common = {
 
 let appConfig;
 if (process.env.NODE_ENV !== "development") {
-    appConfig = merge(common, production);
+    let configs = [common, production];
+    if (LOCAL_BUILD) {
+        configs.push(localConfiguration);
+    }
+    appConfig = merge(configs);
 } else {
     appConfig = merge(common, development);
 }
