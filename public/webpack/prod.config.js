@@ -62,14 +62,16 @@ const prodConfiguration = {
         // Need this plugin for deterministic hashing
         // until this issue is resolved: https://github.com/webpack/webpack/issues/1315
         //new webpack.HashedModuleIdsPlugin(),
-        new BundleTracker({
-            path: path.join(__rootdir, '..'),
-            filename: `webpack-stats-${APP_VERSION}.json`,
-        }),
     ],
 };
 
 if (!LOCAL_BUILD) {
+    prodConfiguration.plugins.push(
+        new BundleTracker({
+            path: path.join(__rootdir, '..'),
+            filename: `webpack-stats-${APP_VERSION}.json`,
+        })
+    );
     const sentryPlugins = [
         new SentryWebpackPlugin({
             include: [
