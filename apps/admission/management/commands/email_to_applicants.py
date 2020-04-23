@@ -1,12 +1,16 @@
+from datetime import datetime
+
+import pytz
 from django.core.management.base import BaseCommand, CommandError
+from django.utils import formats
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
 from admission.models import Applicant
+from admission.services import get_email_from
 from ._utils import CurrentCampaignMixin, EmailTemplateMixin, \
     CustomizeQueryMixin
-from admission.services import get_email_from
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin,
@@ -30,6 +34,9 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
         parser.add_argument(
             '--from', type=str,
             help='`From` header')
+        parser.add_argument(
+            '--scheduled_time', type=str,
+            help='Scheduled time in UTC [YYYY-MM-DD HH:MM]')
 
     def get_template_name(self, campaign, template):
         return template
@@ -44,6 +51,21 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
         if not template_name:
             raise CommandError(f"Provide email template name")
         self.validate_templates(campaigns, types=[template_name])
+
+        scheduled_time = options['scheduled_time']
+        time_display = 'now'
+        if scheduled_time is not None:
+            try:
+                scheduled_time = datetime.fromisoformat(scheduled_time)
+                scheduled_time = pytz.utc.localize(scheduled_time)
+                time_display = formats.date_format(scheduled_time,
+                                                   'DATETIME_FORMAT')
+            except ValueError:
+                raise CommandError(f"Wrong scheduled time format")
+        self.stdout.write(f"Scheduled Time [UTC]: {time_display}")
+        if input("Continue? y/[n]") != "y":
+            self.stdout.write("Canceled")
+            return
 
         manager = self.get_manager(Applicant, options)
 
@@ -67,6 +89,7 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin,
                         recipient,
                         sender=email_from,
                         template=template,
+                        scheduled_time=scheduled_time,
                         # If emails rendered on delivery, they will store
                         # value of the template id. It makes `exists`
                         # method above works correctly.
