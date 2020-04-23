@@ -8,9 +8,12 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 from .base import *
 
 MEDIA_ROOT = str(Path('/shared', 'media'))
-# STATIC_URL = 'https://resources.compscicenter.ru/'
-# for webpack_config in WEBPACK_LOADER.values():
-#    webpack_config['LOADER_CLASS'] = 'core.webpack_loader.BundleDirectoryWebpackLoader'
+STATICFILES_STORAGE = 'core.storage.CloudFrontManifestStaticFilesStorage'
+CDN_SOURCE_STATIC_URL = STATIC_URL
+CDN_STATIC_URL = 'https://resources.compscicenter.ru/'
+STATIC_URL = CDN_STATIC_URL
+for webpack_config in WEBPACK_LOADER.values():
+   webpack_config['LOADER_CLASS'] = 'core.webpack_loader.BundleDirectoryWebpackLoader'
 
 # Default scheme for `core.urls.reverse`
 DEFAULT_URL_SCHEME = "https"
