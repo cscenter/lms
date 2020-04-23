@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
 const Dotenv = require('dotenv-webpack');
@@ -177,11 +176,6 @@ const common = {
         new Dotenv({
             path: path.join(__dirname, '.env'),
             silent: false,
-        }),
-        new BundleTracker({
-            // TODO: override plugin with webpack-merge, merge.unique store the first entry, need something else
-            path: !LOCAL_BUILD ? __bundlesdir : path.join(__bundlesdir, '.local'),
-            filename: `webpack-stats-${APP_VERSION}.json`
         }),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...

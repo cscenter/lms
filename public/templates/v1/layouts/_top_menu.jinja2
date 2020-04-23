@@ -19,19 +19,13 @@
             {% if user.is_authenticated %}
                 <div class="dropdown">
                   <a href="#" id="user-menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% set im = userpreview(user, "60x60") %}
-                    {% if im %}
-                        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-                      {% else %}
-                        <img src="{% if user.gender == "F" %}{{ static("v1/img/csc_girl_head.svg") }}{% else %}{{ static("v1/img/csc_boy_head.svg") }}{% endif %}" class="_empty">
-                    {% endif %}
+                  {%- with im = user.get_thumbnail("60x60", use_stub=True) -%}
+                          <img src="{{ im.url }}" width="32" height="32" alt="{{ user.get_full_name() }}">
+                      {%- endwith %}
                     <span class="caret"></span>
                   </a>
                   <ul class="dropdown-menu pull-right" aria-labelledby="user-menu">
                       <li class="dropdown-header">{{ user.get_short_name() }}</li>
-                      {% if user.is_staff %}
-                          <li><a href="{{ url('admin:index') }}" target="_blank">Админ-панель</a></li>
-                      {% endif %}
                       <li><a href="{{ user.get_absolute_url() }}">{% trans %}Profile{% endtrans %}</a></li>
                       <li><a href="{{ url('logout') }}">{% trans %}Logout{% endtrans %}</a></li>
                   </ul>

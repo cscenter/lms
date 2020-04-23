@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
+const BundleTracker = require('webpack-bundle-tracker');
 const TerserPlugin = require('terser-webpack-plugin');
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 const DeleteSourceMapWebpackPlugin = require('delete-sourcemap-webpack-plugin');
@@ -8,6 +9,7 @@ const DeleteSourceMapWebpackPlugin = require('delete-sourcemap-webpack-plugin');
 const APP_VERSION = process.env.APP_VERSION || "v1";
 const LOCAL_BUILD = (process.env.LOCAL_BUILD === "1");
 
+const __rootdir = path.join(__dirname, '..');
 let __outputdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
 
 // TODO: add css minimization
@@ -60,6 +62,10 @@ const prodConfiguration = {
         // Need this plugin for deterministic hashing
         // until this issue is resolved: https://github.com/webpack/webpack/issues/1315
         //new webpack.HashedModuleIdsPlugin(),
+        new BundleTracker({
+            path: path.join(__rootdir, '..'),
+            filename: `webpack-stats-${APP_VERSION}.json`,
+        }),
     ],
 };
 
@@ -82,7 +88,7 @@ if (!LOCAL_BUILD) {
         // Delete source maps after uploading to sentry.io
        new DeleteSourceMapWebpackPlugin()
     ];
-    prodConfiguration.plugins.push(sentryPlugins);
+    prodConfiguration.plugins.push(...sentryPlugins);
 }
 
 module.exports = prodConfiguration;
