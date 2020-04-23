@@ -9,7 +9,7 @@ media/
 apps/coverage/
 .idea/
 csc3/
-apps/static/
+static/
 local/
 .cache/
 .pytest_cache/

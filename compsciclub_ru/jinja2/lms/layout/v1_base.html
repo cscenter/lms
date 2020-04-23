@@ -101,10 +101,10 @@
     <script type="text/javascript" src="//code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type="text/javascript">window.jQuery || document.write('<script src="{{ static("v1/js/vendor/jquery-3.4.1.min.js") }}"><\/script>')</script>
 
-    {{ render_bundle('runtime', extension='js') }}
-    {{ render_bundle('vendor', extension='js') }}
-    {{ render_bundle('main', extension='js') }}
-    {{ render_bundle('club', extension='js') }}
+    {{ render_bundle('runtime', config='V1', extension='js') }}
+    {{ render_bundle('vendor', config='V1', extension='js') }}
+    {{ render_bundle('main', config='V1', extension='js') }}
+    {{ render_bundle('club', config='V1', extension='js') }}
 
     {% block javascripts %}{% endblock javascripts %}
 
