@@ -92,8 +92,9 @@ class IndexView(generic.TemplateView):
                                     .order_by('date', 'starts_at'))
             courses = list(
                 Course.objects
-                .in_branches(self.request.branch.id)
+                .available_in(self.request.branch.id, distinct=False)
                 .filter(semester=featured_term.pk)
+                .distinct('completed_at', 'meta_course__name', 'pk')
                 .select_related('meta_course', 'semester', 'branch')
                 .prefetch_related(
                     'teachers',
@@ -102,7 +103,7 @@ class IndexView(generic.TemplateView):
                         queryset=courseclass_queryset,
                         to_attr='classes'
                     ))
-                .order_by('completed_at', 'meta_course__name'))
+                .order_by('completed_at', 'meta_course__name', 'pk'))
             # Sort courses by nearest class
             courses.sort(key=self.cmp_courses_by_nearest_class)
             context['courses'] = courses
@@ -238,7 +239,7 @@ class CoursesListView(generic.ListView):
 
     def get_queryset(self):
         courses_qs = (Course.objects
-                      .in_branches(self.request.branch.id)
+                      .available_in(self.request.branch.id)
                       .select_related('meta_course', 'branch')
                       .prefetch_related('teachers')
                       .order_by('meta_course__name'))

@@ -22,7 +22,7 @@ class BranchCodeFilter(ChoiceFilter):
         branch = next(b for b in self.parent.branches if b.code == value)
         term_index = get_term_index(branch.established, SemesterTypes.AUTUMN)
         qs = (qs
-              .available_in(branch=branch.pk)
+              .available_in(branch.pk)
               .filter(semester__index__gte=term_index))
         return qs
 

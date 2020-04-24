@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import Tuple
 
 from django.db import models
 from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
@@ -12,11 +12,12 @@ from courses.constants import MaterialVisibilityTypes
 class CourseTeacherQuerySet(query.QuerySet):
     # FIXME: do I need subquery here?
     def for_course(self, course_slug):
-        course_pks = (self.model.course.field.related_model.objects
-                         .filter(meta_course__slug=course_slug)
-                         # Note: can't reset default ordering in a Subquery
-                         .order_by("pk")
-                         .values("pk"))
+        course_pks = (self
+                      .model.course.field.related_model.objects
+                      .filter(meta_course__slug=course_slug)
+                      # Note: can't reset default ordering in a Subquery
+                      .order_by("pk")
+                      .values("pk"))
         return self.filter(course__in=Subquery(course_pks))
 
 
@@ -104,21 +105,23 @@ CourseClassManager = _CourseClassManager.from_queryset(CourseClassQuerySet)
 
 
 class CourseQuerySet(models.QuerySet):
-    def available_in(self, branch: Union[int, List[int]]):
-        if isinstance(branch, int):
-            branch = [branch]
-        return (self.in_branches(*branch)
-                .distinct('semester__index', 'meta_course__name', 'pk')
-                .order_by('-semester__index', 'meta_course__name', 'pk'))
+    def available_in(self, *branches: Tuple[int], distinct=True):
+        """
+        Branch filter returns multiple rows for the same course due to the JOIN with Course.additional_branches.
+        Use distinct=True to ensure that no duplicate courses will be listed.
+        """
+        branch_filtered = self.filter(Q(branch__in=branches) |
+                                      Q(additional_branches__in=branches))
+        if distinct:
+            return (branch_filtered
+                    .distinct('semester__index', 'meta_course__name', 'pk')
+                    .order_by('-semester__index', 'meta_course__name', 'pk'))
+        else:
+            return branch_filtered
 
-    def in_branches(self, *branches):
-        if not branches:
-            return self
-        return (self.filter(Q(branch__in=branches) |
-                            Q(additional_branches__in=branches)))
 
-    def for_teacher(self, user):
-        return self.filter(teachers=user)
+def for_teacher(self, user):
+    return self.filter(teachers=user)
 
 
 CourseDefaultManager = models.Manager.from_queryset(CourseQuerySet)
