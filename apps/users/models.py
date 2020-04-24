@@ -756,6 +756,7 @@ class OnlineCourseRecord(TimeStampedModel):
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
     name = models.CharField(_("Course|name"), max_length=255)
+    url = models.URLField(_("Online Course URL"), blank=True)
 
     class Meta:
         ordering = ["name"]
