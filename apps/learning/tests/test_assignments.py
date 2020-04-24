@@ -125,7 +125,7 @@ def test_first_comment_after_deadline(client):
     dt = datetime.datetime(2017, 1, 1, 23, 58, 0, 0, tzinfo=pytz.UTC)
     branch_spb = BranchFactory(code=Branches.SPB)
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course__branch=branch_spb)
+                                   course__main_branch=branch_spb)
     sa = StudentAssignmentFactory(assignment=assignment,
                                   student__branch=branch_spb)
     student = sa.student

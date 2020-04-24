@@ -53,7 +53,7 @@ def test_assignment_public_form(settings, client):
     time_input = widget.find('input', {"name": 'deadline_at_1'})
     assert time_input.get('value') == '00:00'
     # Clone CO from msk
-    co_in_nsk = CourseFactory(branch__code=Branches.NSK,
+    co_in_nsk = CourseFactory(main_branch__code=Branches.NSK,
                               meta_course=course_spb.meta_course,
                               teachers=[teacher])
     add_url = co_in_nsk.get_create_assignment_url()
@@ -73,7 +73,7 @@ def test_assignment_detail_deadline_l10n(settings, client):
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherFactory()
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course__branch__code=Branches.SPB,
+                                   course__main_branch__code=Branches.SPB,
                                    course__teachers=[teacher])
     url_for_teacher = assignment.get_teacher_url()
     client.login(teacher)

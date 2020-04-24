@@ -266,7 +266,7 @@ def test_course_enrollment_is_open(settings, mocker):
     assert term.year == year
     term_start_dt = get_term_starts_at(year, term_type, pytz.UTC)
     assert term.enrollment_start_at == term_start_dt.date()
-    co_spb = CourseFactory(semester=term, branch__code=Branches.SPB,
+    co_spb = CourseFactory(semester=term, main_branch__code=Branches.SPB,
                            is_open=False)
     # We are inside enrollment period right now
     assert co_spb.enrollment_is_open

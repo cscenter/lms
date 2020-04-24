@@ -22,4 +22,4 @@ def get_study_programs(meta_course: MetaCourse, filters: List = None):
                    .select_related('academic_discipline', 'branch')
                    .distinct()
                    .order_by('year'))
-    return bucketize(disciplines, key=lambda c: c.branch.code)
+    return bucketize(disciplines, key=lambda sp: sp.branch.code)

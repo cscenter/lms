@@ -518,13 +518,13 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
         courses = (Course.objects
                    .filter(meta_course=self.object)
                    .available_in(branches)
-                   .select_related("meta_course", "semester", "branch")
+                   .select_related("meta_course", "semester", "main_branch")
                    .prefetch_related(CourseTeacher.lecturers_prefetch())
                    .order_by('-semester__index'))
         # Don't divide center and club courses from the same city
         courses_by_branch = bucketize(
             courses,
-            key=lambda c: (c.branch.code, c.branch.name))
+            key=lambda c: (c.main_branch.code, c.main_branch.name))
         # Aggregate tabs
         tabs = TabList()
         for (code, name), values in courses_by_branch.items():
@@ -560,7 +560,7 @@ class TeacherDetailView(PublicURLMixin, DetailView):
                    .available_in(branches)
                    .filter(semester__year__gte=min_established,
                            teachers=self.object.pk)
-                   .select_related('semester', 'meta_course', 'branch')
+                   .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index')
                    .prefetch_related('additional_branches'))
         context['courses'] = courses
@@ -631,7 +631,7 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
                                              .order_by('teacher__last_name',
                                                        'teacher__first_name')))
         return (super().get_course_queryset()
-                .select_related('meta_course', 'semester', 'branch')
+                .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(course_teachers))
 
     def get_object(self, queryset=None):
@@ -686,7 +686,7 @@ class CourseClassDetailView(PublicURLMixin, generic.DetailView):
                 .select_related("course",
                                 "course__meta_course",
                                 "course__semester",
-                                "course__branch",
+                                "course__main_branch",
                                 "venue",
                                 "venue__location"))
 

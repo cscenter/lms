@@ -32,7 +32,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
                                              .order_by('teacher__last_name',
                                                        'teacher__first_name')))
         return (super().get_course_queryset()
-                .select_related('meta_course', 'semester', 'branch')
+                .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(course_teachers,
                                   "additional_branches"))
 

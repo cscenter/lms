@@ -15,8 +15,8 @@ def test_assignment_admin_view(settings, client):
     client.login(curator)
     # Datetime widget formatting depends on locale, change it
     settings.LANGUAGE_CODE = 'ru'
-    co_in_spb = CourseFactory(branch__code=Branches.SPB)
-    co_in_nsk = CourseFactory(branch__code=Branches.NSK)
+    co_in_spb = CourseFactory(main_branch__code=Branches.SPB)
+    co_in_nsk = CourseFactory(main_branch__code=Branches.NSK)
     form_data = {
         "course": "",
         "submission_type": AssignmentSubmissionTypes.ONLINE,

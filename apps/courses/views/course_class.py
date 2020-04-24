@@ -31,7 +31,7 @@ class CourseClassDetailView(generic.DetailView):
         return (CourseClass.objects
                 .select_related("course",
                                 "course__meta_course",
-                                "course__branch",
+                                "course__main_branch",
                                 "course__semester",
                                 "venue",
                                 "venue__location",))

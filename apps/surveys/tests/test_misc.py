@@ -202,7 +202,7 @@ def test_conditional_logic_prefill_class(mocker):
     today_fixed = datetime.datetime(2018, month=3, day=8, hour=13, minute=0,
                                     tzinfo=datetime.timezone.utc)
     mocked_timezone.return_value = today_fixed
-    co = CourseFactory.create(branch__code='spb')
+    co = CourseFactory(main_branch__code='spb')
     past = today_fixed - datetime.timedelta(days=3)
     future = today_fixed + datetime.timedelta(days=3)
     class1 = CourseClassFactory(course=co, date=past)

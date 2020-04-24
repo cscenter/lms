@@ -23,7 +23,7 @@ def test_courses_list(client):
     co_spb = CourseFactory(semester=current_semester,
                            is_open=True)
     co_kzn = CourseFactory.create(semester=current_semester,
-                                  branch__code="kzn")
+                                  main_branch__code="kzn")
     response = client.get(reverse('course_list'))
     assert smart_bytes(co_center.meta_course.name) not in response.content
     assert smart_bytes(co_spb.meta_course.name) in response.content

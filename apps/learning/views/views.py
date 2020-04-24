@@ -51,7 +51,7 @@ class StudentAssignmentURLParamsMixin:
                 .select_related('student',
                                 'assignment',
                                 'assignment__course',
-                                'assignment__course__branch',
+                                'assignment__course__main_branch',
                                 'assignment__course__meta_course',
                                 'assignment__course__semester'))
 

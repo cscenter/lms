@@ -44,7 +44,7 @@ def test_course_news(settings, client):
     nsk_offset = get_timezone_gmt_offset(branch_nsk.get_timezone())
     curator = CuratorFactory()
     client.login(curator)
-    course = CourseFactory(branch=branch_spb)
+    course = CourseFactory(main_branch=branch_spb)
     created_utc = datetime.datetime(2017, 1, 13, 20, 0, 0, 0, tzinfo=pytz.UTC)
     news = CourseNewsFactory(course=course, created=created_utc)
     created_local = created_utc.astimezone(branch_spb.get_timezone())
@@ -58,8 +58,8 @@ def test_course_news(settings, client):
     assert any(date_str in s.string for s in
                html.find_all('div', {"class": "date"}))
     # In NSK we live in the next day
-    course.branch = Branch.objects.get_by_natural_key(Branches.NSK,
-                                                      settings.SITE_ID)
+    course.main_branch = Branch.objects.get_by_natural_key(Branches.NSK,
+                                                           settings.SITE_ID)
     course.save()
     created_local = created_utc.astimezone(branch_nsk.get_timezone())
     assert created_local.utcoffset() == datetime.timedelta(
@@ -80,7 +80,7 @@ def test_course_assignment_deadline_l10n(settings, client):
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     teacher = TeacherFactory()
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course__branch__code=Branches.SPB,
+                                   course__main_branch__code=Branches.SPB,
                                    course__teachers=[teacher])
     co = assignment.course
     client.login(teacher)
@@ -134,7 +134,7 @@ def test_course_assignment_timezone(settings, client):
     # 12 january 2017 23:59 (time in UTC)
     deadline_at = datetime.datetime(2017, 1, 12, 23, 59, 0, 0,
                                     tzinfo=pytz.UTC)
-    course_spb = CourseFactory(branch=branch_spb)
+    course_spb = CourseFactory(main_branch=branch_spb)
     course_spb.additional_branches.add(branch_nsk)
     assignment = AssignmentFactory(deadline_at=deadline_at, course=course_spb)
     assignments_tab_url = course_spb.get_url_for_tab("assignments")

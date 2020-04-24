@@ -246,7 +246,7 @@ class StudentGroupTypes(DjangoChoices):
 
 
 class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
-    TIMEZONE_AWARE_FIELD_NAME = 'branch'
+    TIMEZONE_AWARE_FIELD_NAME = 'main_branch'
 
     meta_course = models.ForeignKey(
         MetaCourse,
@@ -293,10 +293,10 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("This course offering will be available on Computer"
                     "Science Club website so anyone can join"),
         default=False)
-    branch = models.ForeignKey(Branch,
-                               verbose_name=_("Main Branch"),
-                               related_name="courses",
-                               on_delete=models.PROTECT)
+    main_branch = models.ForeignKey(Branch,
+                                    verbose_name=_("Main Branch"),
+                                    related_name="courses",
+                                    on_delete=models.PROTECT)
     additional_branches = models.ManyToManyField(
         Branch,
         verbose_name=_("Additional Branches"),
@@ -360,8 +360,8 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         verbose_name_plural = _("Course offerings")
         constraints = [
             models.UniqueConstraint(
-                fields=('meta_course', 'semester', 'branch'),
-                name='unique_course_for_branch_in_a_term'
+                fields=('meta_course', 'semester', 'main_branch'),
+                name='unique_course_for_main_branch_in_a_term'
             ),
         ]
 
@@ -446,7 +446,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
             "course_slug": self.meta_course.slug,
             "semester_year": self.semester.year,
             "semester_type": self.semester.type,
-            "branch_code_request": self.branch.code
+            "branch_code_request": self.main_branch.code
         }
 
     def get_absolute_url(self, tab=None, **kwargs):
@@ -724,7 +724,7 @@ def course_class_slides_upload_to(instance: "CourseClass", filename) -> str:
     course_prefix = course_slug.replace("-", "_")
     filename = f"{course_prefix}_{instance.type}_{class_date}{ext}".lower()
     return os.path.join("courses", course.semester.slug,
-                        f"{course.branch.code}-{course_slug}",
+                        f"{course.main_branch.code}-{course_slug}",
                         "slides", filename)
 
 
@@ -917,7 +917,7 @@ def course_class_attachment_upload_to(instance: "CourseClassAttachment",
     filename = filename.replace(" ", "_")
     # TODO: transliterate?
     return os.path.join("courses", course.semester.slug,
-                        f"{course.branch.code}-{course_slug}",
+                        f"{course.main_branch.code}-{course_slug}",
                         "materials", filename)
 
 

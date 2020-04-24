@@ -46,7 +46,7 @@ class EnrollmentAdmin(BaseModelAdmin):
                     'grade_changed_local']
     ordering = ['-pk']
     list_filter = [
-        'course__branch',
+        'course__main_branch',
         ('course__semester', AdminRelatedDropdownFilter)
     ]
     search_fields = ['course__meta_course__name']

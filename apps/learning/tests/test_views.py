@@ -153,7 +153,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         teacher = TeacherFactory()
         student = StudentFactory()
         s = SemesterFactory.create_current()
-        co = CourseFactory(branch=student.branch, semester=s,
+        co = CourseFactory(main_branch=student.branch, semester=s,
                            teachers=[teacher])
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
@@ -183,7 +183,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_assignment_contents(self):
         student = StudentFactory()
         semester = SemesterFactory.create_current()
-        co = CourseFactory(branch=student.branch, semester=semester)
+        co = CourseFactory(main_branch=student.branch, semester=semester)
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects
@@ -197,7 +197,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
         student = StudentFactory()
         teacher = TeacherFactory()
         semester = SemesterFactory.create_current()
-        co = CourseFactory(branch=student.branch, teachers=[teacher],
+        co = CourseFactory(main_branch=student.branch, teachers=[teacher],
                            semester=semester)
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
@@ -215,7 +215,7 @@ class ASStudentDetailTests(MyUtilitiesMixin, CSCTestCase):
     def test_comment(self):
         student = StudentFactory()
         # Create open reading to make sure student has access to CO
-        co = CourseFactory(branch=student.branch, is_open=True)
+        co = CourseFactory(main_branch=student.branch, is_open=True)
         EnrollmentFactory.create(student=student, course=co)
         a = AssignmentFactory.create(course=co)
         a_s = (StudentAssignment.objects

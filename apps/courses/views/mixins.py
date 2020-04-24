@@ -52,12 +52,12 @@ class CourseURLParamsMixin:
             course = self._get_course_by_branch_id()
         else:
             courses = list(self.get_course_queryset()
-                           .filter(branch__code=self.request.branch.code)
+                           .filter(main_branch__code=self.request.branch.code)
                            .order_by())
             if not courses:
                 raise Http404
             for c in courses:
-                if c.branch_id == self.request.branch.id:
+                if c.main_branch_id == self.request.branch.id:
                     course = c
                     break
             else:
@@ -66,7 +66,7 @@ class CourseURLParamsMixin:
 
     def _get_course_by_branch_id(self):
         return get_object_or_404(self.get_course_queryset()
-                                 .filter(branch_id=self.request.branch.pk))
+                                 .filter(main_branch_id=self.request.branch.pk))
 
     def get_course_queryset(self):
         """

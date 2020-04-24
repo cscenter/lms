@@ -59,11 +59,11 @@ class CourseClassQuerySet(query.QuerySet):
                 .select_related('course',
                                 'course__meta_course',
                                 'course__semester',
-                                'course__branch')
+                                'course__main_branch')
                 .defer('course__description',
                        'course__description_en',
                        'course__description_ru',
-                       'course__branch__description',
+                       'course__main_branch__description',
                        'course__meta_course__description',
                        'course__meta_course__description_en',
                        'course__meta_course__description_ru',
@@ -74,7 +74,7 @@ class CourseClassQuerySet(query.QuerySet):
     def in_branches(self, *branches):
         if not branches:
             return self
-        return (self.filter(Q(course__branch__in=branches) |
+        return (self.filter(Q(course__main_branch__in=branches) |
                             Q(course__additional_branches__in=branches)))
 
     def for_student(self, user):
@@ -116,7 +116,7 @@ class CourseQuerySet(models.QuerySet):
     def available_in(self, branch: Union[int, List[int]]):
         if isinstance(branch, int):
             branch = [branch]
-        return (self.filter(Q(branch__in=branch) |
+        return (self.filter(Q(main_branch__in=branch) |
                             Q(additional_branches__in=branch))
                 .distinct('semester__index', 'meta_course__name', 'pk')
                 .order_by('-semester__index', 'meta_course__name', 'pk'))

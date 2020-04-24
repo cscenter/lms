@@ -23,10 +23,10 @@ from users.tests.factories import StudentFactory, TeacherFactory, \
 def test_course_news_tab_permissions(client):
     current_semester = SemesterFactory.create_current()
     prev_term = SemesterFactory.create_prev(current_semester)
-    news: CourseNews = CourseNewsFactory(course__branch__code=Branches.SPB,
+    news: CourseNews = CourseNewsFactory(course__main_branch__code=Branches.SPB,
                                          course__semester=current_semester)
     course = news.course
-    news_prev: CourseNews = CourseNewsFactory(course__branch__code=Branches.SPB,
+    news_prev: CourseNews = CourseNewsFactory(course__main_branch__code=Branches.SPB,
                                               course__meta_course=course.meta_course,
                                               course__semester=prev_term)
     co_prev = news_prev.course
@@ -123,15 +123,15 @@ def test_course_reviews_tab_permissions(client, curator):
 @pytest.mark.django_db
 def test_get_course_reviews(settings):
     meta_course1, meta_course2 = MetaCourseFactory.create_batch(2)
-    c1 = CourseFactory(meta_course=meta_course1, branch__code=Branches.SPB,
+    c1 = CourseFactory(meta_course=meta_course1, main_branch__code=Branches.SPB,
                        semester__year=2015)
-    c2 = CourseFactory(meta_course=meta_course1, branch__code=Branches.SPB,
+    c2 = CourseFactory(meta_course=meta_course1, main_branch__code=Branches.SPB,
                        semester__year=2016)
     cr1 = CourseReviewFactory(course=c1)
     cr2 = CourseReviewFactory(course=c2)
-    c3 = CourseFactory(meta_course=meta_course1, branch__code=Branches.NSK,
+    c3 = CourseFactory(meta_course=meta_course1, main_branch__code=Branches.NSK,
                        semester__year=2016)
-    c4 = CourseFactory(meta_course=meta_course2, branch__code=Branches.SPB,
+    c4 = CourseFactory(meta_course=meta_course2, main_branch__code=Branches.SPB,
                        semester__year=2015)
     cr3 = CourseReviewFactory(course=c3)
     CourseReview(course=c4, text='zzz').save()

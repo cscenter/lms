@@ -45,7 +45,7 @@ def test_course_class_create(client):
     course = CourseFactory.create(teachers=[teacher], semester=s)
     co_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    venue = LearningSpaceFactory(branch=course.branch)
+    venue = LearningSpaceFactory(branch=course.main_branch)
     form.update({'venue': venue.pk})
     url = course.get_create_class_url()
     client.login(teacher)
@@ -66,7 +66,7 @@ def test_course_class_create_and_add(client, assert_redirect):
     course = CourseFactory.create(teachers=[teacher], semester=s)
     course_other = CourseFactory.create(semester=s)
     form = factory.build(dict, FACTORY_CLASS=CourseClassFactory)
-    location = LearningSpaceFactory(branch=course.branch)
+    location = LearningSpaceFactory(branch=course.main_branch)
     form.update({'venue': location.pk, '_addanother': True})
     client.login(teacher)
     url = course.get_create_class_url()
@@ -286,7 +286,7 @@ def test_course_class_form_available(client, curator, settings):
     next_day = today + datetime.timedelta(days=1)
     course.completed_at = next_day
     course.save()
-    venue = LearningSpaceFactory(branch=course.branch)
+    venue = LearningSpaceFactory(branch=course.main_branch)
     date_format = CourseClassForm.base_fields['date'].widget.format
     form = {
         "type": "lecture",
@@ -308,7 +308,7 @@ def test_manager_for_student():
     new_branch = BranchFactory()
     student = StudentFactory()
     teacher = TeacherFactory()
-    course = CourseFactory(branch=student.branch,
+    course = CourseFactory(main_branch=student.branch,
                            additional_branches=[new_branch])
     # Active enrollment
     enrollment = EnrollmentService.enroll(student, course)
@@ -338,7 +338,7 @@ def test_manager_for_student():
     assert CourseClass.objects.for_student(student).count() == 2
     assert CourseClass.objects.for_student(teacher).count() == 0
     # Student is not enrolled in the course
-    course2 = CourseFactory(branch=student.branch)
+    course2 = CourseFactory(main_branch=student.branch)
     CourseClassFactory(course=course2)
     assert CourseClass.objects.for_student(student).count() == 2
     EnrollmentFactory(student=student, course=course2)
