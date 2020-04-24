@@ -170,7 +170,7 @@ def revoke_add_patch_set_permission(client, project_name):
 
 
 def get_project_name(course):
-    branch_code = course.branch.code
+    branch_code = course.main_branch.code
     course_name = course.meta_course.slug.replace("-", "_")
     if course.additional_branches.all():
         return f"{course_name}_{course.semester.year}"

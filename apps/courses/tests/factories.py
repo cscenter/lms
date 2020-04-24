@@ -70,8 +70,8 @@ class CourseFactory(factory.DjangoModelFactory):
     meta_course = factory.SubFactory(MetaCourseFactory)
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
-    branch = factory.SubFactory(BranchFactory,
-                                code=settings.DEFAULT_BRANCH_CODE)
+    main_branch = factory.SubFactory(BranchFactory,
+                                     code=settings.DEFAULT_BRANCH_CODE)
 
     @factory.post_generation
     def teachers(self, create, extracted, **kwargs):
@@ -134,7 +134,7 @@ class CourseClassFactory(factory.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     venue = factory.SubFactory(
         LearningSpaceFactory,
-        branch=factory.SelfAttribute('..course.branch'))
+        branch=factory.SelfAttribute('..course.main_branch'))
     type = 'lecture'
     name = factory.Sequence(lambda n: "Test class %03d" % n)
     description = factory.Sequence(

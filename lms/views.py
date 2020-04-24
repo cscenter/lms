@@ -61,13 +61,13 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                                 'teacher__last_name')))
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
-                .select_related('meta_course', 'semester', 'branch')
-                .only("pk", "branch_id", "is_open", "grading_type",
+                .select_related('meta_course', 'semester', 'main_branch')
+                .only("pk", "main_branch_id", "is_open", "grading_type",
                       "public_videos_count", "public_slides_count",
                       "public_attachments_count",
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
-                      "branch__code")
+                      "main_branch__code")
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',
                           'meta_course__name'))

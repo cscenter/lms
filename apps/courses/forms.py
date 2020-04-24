@@ -197,7 +197,7 @@ class CourseClassForm(forms.ModelForm):
         assert course is not None
         super().__init__(*args, **kwargs)
         self.fields['venue'].queryset = self.fields['venue'].queryset.filter(
-            branch_id=course.branch_id)
+            branch_id=course.main_branch_id)
         self.fields['materials_visibility'].help_text = _("Note that some materials would be available by direct link")
         field_restrict_to = self.fields['restricted_to']
         field_restrict_to.choices = StudentGroupService.get_choices(course)

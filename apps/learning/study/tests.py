@@ -38,7 +38,7 @@ def test_access_student_assignment_teacher(client, assert_login_redirect):
     other_teacher = TeacherFactory()
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
-    course = CourseFactory(branch__code=Branches.SPB, teachers=[teacher],
+    course = CourseFactory(main_branch__code=Branches.SPB, teachers=[teacher],
                            semester=past_semester)
     enrollment = EnrollmentFactory(course=course,
                                    grade=GradeTypes.UNSATISFACTORY)
@@ -59,7 +59,7 @@ def test_access_student_assignment_regular_student(client):
     teacher = TeacherFactory()
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
-    course = CourseFactory(branch__code=Branches.SPB, teachers=[teacher],
+    course = CourseFactory(main_branch__code=Branches.SPB, teachers=[teacher],
                            semester=past_semester)
     student_assignment = StudentAssignmentFactory(assignment__course=course,
                                                   score=None)
@@ -82,7 +82,7 @@ def test_access_student_assignment_regular_student(client):
     assert response.status_code == 403
     # Test access for the active course
     current_semester = SemesterFactory.create_current()
-    active_course = CourseFactory(branch__code=Branches.SPB,
+    active_course = CourseFactory(main_branch__code=Branches.SPB,
                                   semester=current_semester)
     EnrollmentFactory(course=active_course, student=student,
                       grade=GradeTypes.NOT_GRADED)
@@ -99,7 +99,7 @@ def test_access_student_assignment_failed_course(client):
     past_year = datetime.datetime.now().year - 3
     past_semester = SemesterFactory.create(year=past_year)
     teacher = TeacherFactory()
-    course = CourseFactory(branch__code=Branches.SPB, teachers=[teacher],
+    course = CourseFactory(main_branch__code=Branches.SPB, teachers=[teacher],
                            semester=past_semester)
     student_assignment = StudentAssignmentFactory(assignment__course=course,
                                                   assignment__maximum_score=80,
@@ -183,8 +183,8 @@ def test_course_list(client, settings):
     student = StudentFactory(branch__code=Branches.SPB)
     client.login(student)
     s = SemesterFactory.create_current()
-    course_spb = CourseFactory(semester=s, branch__code=Branches.SPB)
-    course_nsk = CourseFactory(semester=s, branch__code=Branches.NSK)
+    course_spb = CourseFactory(semester=s, main_branch__code=Branches.SPB)
+    course_nsk = CourseFactory(semester=s, main_branch__code=Branches.NSK)
     response = client.get(reverse('study:course_list'))
     assert len(response.context['ongoing_rest']) == 1
 
@@ -374,7 +374,7 @@ def test_deadline_l10n_on_student_assignment_list_page(settings, client):
     # assignments page since course offering semester set to current
     current_term = SemesterFactory.create_current()
     assignment = AssignmentFactory(deadline_at=dt,
-                                   course__branch__code=Branches.SPB,
+                                   course__main_branch__code=Branches.SPB,
                                    course__semester_id=current_term.pk)
     student = StudentFactory(branch__code=Branches.SPB)
     sa = StudentAssignmentFactory(assignment=assignment, student=student)
@@ -409,7 +409,7 @@ def test_deadline_l10n_on_student_assignment_list_page(settings, client):
     # Deadlines depends on authenticated user timezone
     dt = datetime.datetime(2017, 1, 1, 15, 0, 0, 0, tzinfo=pytz.UTC)
     assignment_nsk = AssignmentFactory(deadline_at=dt,
-                                       course__branch=branch_nsk,
+                                       course__main_branch=branch_nsk,
                                        course__semester=current_term)
     StudentAssignmentFactory(assignment=assignment_nsk, student=student)
     client.login(student)
@@ -472,7 +472,8 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     current_term_spb = SemesterFactory(year=current_term.year,
                                        type=current_term.type)
     cos = CourseFactory.create_batch(4, semester=current_term_spb,
-                                     branch=student_spb.branch, is_open=False)
+                                     main_branch=student_spb.branch,
+                                     is_open=False)
     cos_available = cos[:2]
     cos_enrolled = cos[2:]
     prev_year = current_term.year - 1
@@ -492,7 +493,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     # Add courses from other branch
     current_term_nsk = SemesterFactory.create_current(for_branch=Branches.NSK)
     co_nsk = CourseFactory.create(semester=current_term_nsk,
-                                  branch__code=Branches.NSK, is_open=False)
+                                  main_branch__code=Branches.NSK, is_open=False)
     response = client.get(url)
     assert len(cos_enrolled) == len(response.context['ongoing_enrolled'])
     assert len(cos_available) == len(response.context['ongoing_rest'])
@@ -500,7 +501,8 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     # Test for student from nsk
     student_nsk = StudentFactory(branch__code=Branches.NSK)
     client.login(student_nsk)
-    CourseFactory.create(semester__year=prev_year, branch=student_nsk.branch,
+    CourseFactory.create(semester__year=prev_year,
+                         main_branch=student_nsk.branch,
                          is_open=False)
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
@@ -509,7 +511,7 @@ def test_student_courses_list(client, lms_resolver, assert_login_redirect):
     assert len(response.context['archive_enrolled']) == 0
     # Add open reading, it should be available on compscicenter.ru
     co_open = CourseFactory.create(semester=current_term_nsk,
-                                   branch=student_nsk.branch, is_open=True)
+                                   main_branch=student_nsk.branch, is_open=True)
     response = client.get(url)
     assert len(response.context['ongoing_enrolled']) == 0
     assert len(response.context['ongoing_rest']) == 2

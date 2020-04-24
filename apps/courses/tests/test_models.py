@@ -19,10 +19,10 @@ from learning.settings import Branches
 def test_news_get_timezone(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    news = CourseNewsFactory(course__branch__code=Branches.NSK)
+    news = CourseNewsFactory(course__main_branch__code=Branches.NSK)
     assert news.get_timezone() == branch_nsk.get_timezone()
-    news.course.branch = Branch.objects.get(code=Branches.SPB,
-                                            site_id=settings.SITE_ID)
+    news.course.main_branch = Branch.objects.get(code=Branches.SPB,
+                                                 site_id=settings.SITE_ID)
     news.course.save()
     news.refresh_from_db()
     assert news.get_timezone() == branch_spb.get_timezone()

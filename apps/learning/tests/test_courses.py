@@ -18,7 +18,7 @@ def test_course_detail_view_timezone(settings, client):
                                     tzinfo=pytz.UTC)
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    course_spb = CourseFactory(branch=branch_spb)
+    course_spb = CourseFactory(main_branch=branch_spb)
     assignment = AssignmentFactory(deadline_at=deadline_at,
                                    course=course_spb)
     teacher_nsk = TeacherFactory(branch=branch_nsk)

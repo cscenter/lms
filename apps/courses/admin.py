@@ -71,7 +71,7 @@ class CourseAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        main_branch = cleaned_data.get('branch')
+        main_branch = cleaned_data.get('main_branch')
         if main_branch:
             additional = cleaned_data['additional_branches']
             # TODO: Add guard to the additional_branches.through model
@@ -94,7 +94,7 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
-    list_filter = ['branch', 'semester']
+    list_filter = ['main_branch', 'semester']
     list_display = ['meta_course', 'semester', 'is_published_in_video',
                     'is_open']
     inlines = (CourseTeacherInline,)

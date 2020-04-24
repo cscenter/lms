@@ -33,7 +33,7 @@ def test_service_enroll():
     student = StudentFactory()
     student2 = StudentFactory(branch=student.branch)
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory(semester=current_semester, branch=student.branch)
+    course = CourseFactory(main_branch=student.branch, semester=current_semester)
     enrollment = EnrollmentService.enroll(student, course, 'test enrollment')
     reason_entry = EnrollmentService._format_reason_record('test enrollment', course)
     assert enrollment.reason_entry == reason_entry
@@ -49,7 +49,7 @@ def test_service_enroll():
 def test_enrollment_capacity():
     student = StudentFactory()
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(branch=student.branch,
+    course = CourseFactory.create(main_branch=student.branch,
                                   semester=current_semester,
                                   capacity=1,
                                   is_open=True)
@@ -70,7 +70,7 @@ def test_enrollment_capacity_view(client):
     s = StudentFactory()
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(branch=s.branch,
+    course = CourseFactory.create(main_branch=s.branch,
                                   semester=current_semester,
                                   is_open=True)
     response = client.get(course.get_absolute_url())
@@ -86,7 +86,7 @@ def test_enrollment_capacity_view(client):
     course.refresh_from_db()
     assert course.learners_count == 1
     assert course.places_left == 0
-    s2 = StudentFactory(branch=course.branch)
+    s2 = StudentFactory(branch=course.main_branch)
     client.login(s2)
     response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Enroll in")) not in response.content
@@ -136,7 +136,7 @@ def test_enrollment(client):
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    course = CourseFactory(semester=current_semester, branch=student1.branch)
+    course = CourseFactory(main_branch=student1.branch, semester=current_semester)
     url = course.get_enroll_url()
     form = {'course_pk': course.pk}
     response = client.post(url, form)
@@ -168,7 +168,7 @@ def test_enrollment_reason_entry(client):
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    course = CourseFactory(semester=current_semester, branch=student.branch)
+    course = CourseFactory(main_branch=student.branch, semester=current_semester)
     form = {'course_pk': course.pk, 'reason': 'foo'}
     client.post(course.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
@@ -192,7 +192,7 @@ def test_enrollment_leave_reason(client):
     current_semester = SemesterFactory.create_current()
     current_semester.enrollment_end_at = today.date()
     current_semester.save()
-    co = CourseFactory(semester=current_semester, branch=student.branch)
+    co = CourseFactory(main_branch=student.branch, semester=current_semester)
     form = {'course_pk': co.pk}
     client.post(co.get_enroll_url(), form)
     assert Enrollment.active.count() == 1
@@ -224,7 +224,7 @@ def test_unenrollment(client, assert_redirect):
     s = StudentFactory()
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(semester=current_semester, branch=s.branch)
+    course = CourseFactory.create(semester=current_semester, main_branch=s.branch)
     as_ = AssignmentFactory.create_batch(3, course=course)
     form = {'course_pk': course.pk}
     # Enrollment already closed
@@ -287,7 +287,7 @@ def test_reenrollment(client):
     student = StudentFactory(branch=branch_spb)
     tomorrow = now_local(branch_spb.get_timezone()) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    course = CourseFactory(branch=branch_spb, semester=term,
+    course = CourseFactory(main_branch=branch_spb, semester=term,
                            additional_branches=[branch_other])
     assignment = AssignmentFactory(course=course)
     e = EnrollmentFactory(student=student, course=course)
@@ -317,7 +317,7 @@ def test_enrollment_in_other_branch(client):
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
     course_spb = CourseFactory(semester=term, is_open=False,
-                               branch__code=Branches.SPB)
+                               main_branch__code=Branches.SPB)
     assert course_spb.enrollment_is_open
     student_spb = StudentFactory(branch__code=Branches.SPB)
     student_nsk = StudentFactory(branch__code=Branches.NSK)
@@ -355,11 +355,11 @@ def test_view_course_additional_branches(client):
     today = now_local(branch_spb.get_timezone())
     tomorrow = today + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
-    course_spb = CourseFactory(branch__code=Branches.SPB,
+    course_spb = CourseFactory(main_branch__code=Branches.SPB,
                                semester=term,
                                is_open=False)
     assert course_spb.enrollment_is_open
-    student_spb = StudentFactory(branch=course_spb.branch)
+    student_spb = StudentFactory(branch=course_spb.main_branch)
     branch_nsk = BranchFactory(code=Branches.NSK)
     student_nsk = StudentFactory(branch=branch_nsk)
     form = {'course_pk': course_spb.pk}
@@ -427,7 +427,7 @@ def test_enrollment_by_invitation(settings, client):
     course_invitation = CourseInvitationFactory(course__semester=term)
     course = course_invitation.course
     enroll_url = course_invitation.get_absolute_url()
-    invited = InvitedStudentFactory(branch=course.branch)
+    invited = InvitedStudentFactory(branch=course.main_branch)
     client.login(invited)
     wrong_url = branch_aware_reverse(
         "course_enroll_by_invitation",

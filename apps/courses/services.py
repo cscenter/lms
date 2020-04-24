@@ -34,10 +34,10 @@ class CourseService:
         reviews = (CourseReview.objects
                    .filter(course__meta_course_id=course.meta_course_id)
                    .select_related('course', 'course__semester',
-                                   'course__branch')
+                                   'course__main_branch')
                    .only('pk', 'modified', 'text',
                          'course__semester__year', 'course__semester__type',
-                         'course__branch__name'))
+                         'course__main_branch__name'))
         return list(reviews)
 
     @staticmethod
@@ -66,7 +66,7 @@ def get_teacher_branches(user, start_date, end_date):
     branches = set(Course.objects
                    .filter(semester__index__in=term_indexes,
                            teachers=user)
-                   .values_list("branch_id", flat=True)
+                   .values_list("main_branch_id", flat=True)
                    .distinct())
     branches.add(user.branch_id)
     return branches

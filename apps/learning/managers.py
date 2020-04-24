@@ -11,7 +11,7 @@ class StudentAssignmentQuerySet(query.QuerySet):
         return (self.filter(student=user)
                 .select_related('assignment',
                                 'assignment__course',
-                                'assignment__course__branch',
+                                'assignment__course__main_branch',
                                 'assignment__course__meta_course',
                                 'assignment__course__semester'))
 

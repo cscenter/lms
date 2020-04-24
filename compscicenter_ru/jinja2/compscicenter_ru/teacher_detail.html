@@ -40,9 +40,9 @@
                                         <div class="card__title mb-2">
                                             {{ course.meta_course.name }}
                                         </div>
-                                        <div class="card__subtitle">{{ course.branch.name }}{% if course.additional_branches.all() -%}
+                                        <div class="card__subtitle">{{ course.main_branch.name }}{% if course.additional_branches.all() -%}
                                             {% for branch in course.additional_branches.all() -%}
-                                                {% if branch.name != course.branch.name %}, {{ branch.name }}{% endif -%}
+                                                {% if branch.name != course.main_branch.name %}, {{ branch.name }}{% endif -%}
                                             {% endfor %}{% endif %}</div>
                                     </div>
                                     <div class="card__content _meta">

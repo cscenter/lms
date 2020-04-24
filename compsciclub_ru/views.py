@@ -93,9 +93,9 @@ class IndexView(generic.TemplateView):
             courses = list(
                 Course.objects
                 .filter(is_open=True,
-                        branch_id=self.request.branch.id,
+                        main_branch_id=self.request.branch.id,
                         semester=featured_term.pk)
-                .select_related('meta_course', 'semester', 'branch')
+                .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(
                     'teachers',
                     Prefetch(
@@ -127,7 +127,7 @@ class TeachersView(generic.ListView):
     def get_queryset(self):
         lecturers = list(Course.objects
                          .filter(is_open=True,
-                                 branch=self.request.branch,)
+                                 main_branch=self.request.branch, )
                          .distinct()
                          .values_list("teachers__pk", flat=True))
         return (User.objects
@@ -143,8 +143,9 @@ class TeacherDetailView(DetailView):
     def get_queryset(self):
         co_queryset = (Course.objects
                        .filter(is_open=True,
-                               branch=self.request.branch,)
-                       .select_related('semester', 'meta_course', 'branch'))
+                               main_branch=self.request.branch, )
+                       .select_related('semester', 'meta_course',
+                                       'main_branch'))
         return (get_user_model()._default_manager
                 .prefetch_related(
                     Prefetch('teaching_set',
@@ -191,11 +192,11 @@ class ClubClassesFeed(ICalFeed):
     def items(self, request):
         return (CourseClass.objects
                 .filter(course__is_open=True,
-                        course__branch=request.branch)
+                        course__main_branch=request.branch)
                 .select_related('venue',
                                 'venue__location',
                                 'course',
-                                'course__branch',
+                                'course__main_branch',
                                 'course__semester',
                                 'course__meta_course'))
 
@@ -238,8 +239,8 @@ class CoursesListView(generic.ListView):
 
     def get_queryset(self):
         courses_qs = (Course.objects
-                      .filter(branch_id=self.request.branch.id,)
-                      .select_related('meta_course', 'branch')
+                      .filter(main_branch_id=self.request.branch.id, )
+                      .select_related('meta_course', 'main_branch')
                       .prefetch_related('teachers')
                       .order_by('meta_course__name'))
         courses_set = Prefetch('course_set',

@@ -8,7 +8,7 @@
         {% with course=enrollment.course %}
         <h2 class="course-main-title mb-20">
             {{ course.meta_course.name }}<br>
-            <small>{{ course.branch.name }} / {{ course.semester }}</small>
+            <small>{{ course.main_branch.name }} / {{ course.semester }}</small>
         </h2>
         {% endwith %}
         <form action="" method="post">{% csrf_token %}

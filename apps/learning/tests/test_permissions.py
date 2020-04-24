@@ -126,7 +126,7 @@ def test_enroll_in_course(inactive_status, settings):
     course = CourseFactory(
         semester=term, is_open=False,
         completed_at=(today_local + datetime.timedelta(days=10)).date(),
-        capacity=0, branch=branch_spb)
+        capacity=0, main_branch=branch_spb)
     assert course.enrollment_is_open
     student_spb = StudentFactory(branch=branch_spb, status="")
     assert student_spb.has_perm("learning.enroll_in_course", course)
@@ -147,7 +147,7 @@ def test_enroll_in_course(inactive_status, settings):
     course.learners_count = 0
     assert student_spb.has_perm("learning.enroll_in_course", course)
     # Compare student and course branches
-    course.branch = branch_nsk
+    course.main_branch = branch_nsk
     course.save()
     assert not student_spb.has_perm("learning.enroll_in_course", course)
     course.additional_branches.add(branch_spb)
@@ -187,10 +187,10 @@ def test_enroll_in_course_by_invitation():
     branch_spb = BranchFactory(code=Branches.SPB)
     term = SemesterFactory.create_current(for_branch=branch_spb.code,
                                           enrollment_end_at=tomorrow.date())
-    course = CourseFactory(semester=term, is_open=False, branch=branch_spb,
+    course = CourseFactory(semester=term, is_open=False, main_branch=branch_spb,
                            capacity=0)
     assert course.enrollment_is_open
-    student = StudentFactory(branch=course.branch)
+    student = StudentFactory(branch=course.main_branch)
     assert student.has_perm("learning.enroll_in_course", course)
     course_invitation = CourseInvitationFactory(course=course)
     assert student.has_perm("learning.enroll_in_course_by_invitation",
