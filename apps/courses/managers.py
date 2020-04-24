@@ -119,9 +119,8 @@ class CourseQuerySet(models.QuerySet):
         else:
             return branch_filtered
 
-
-def for_teacher(self, user):
-    return self.filter(teachers=user)
+    def for_teacher(self, user):
+        return self.filter(teachers=user)
 
 
 CourseDefaultManager = models.Manager.from_queryset(CourseQuerySet)
