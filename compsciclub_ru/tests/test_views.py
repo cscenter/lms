@@ -25,7 +25,7 @@ def test_index_view_course_list(client, settings):
     course_center_public = CourseFactory(semester=current_semester,
                                          branch=branch_spb_center)
     course_center_outdated = CourseFactory(semester=previous_semester,
-                                         branch=branch_spb_center)
+                                           branch=branch_spb_center)
     course_club_actual = CourseFactory(semester=current_semester)
     course_club_outdated = CourseFactory(semester=previous_semester)
 
@@ -34,6 +34,7 @@ def test_index_view_course_list(client, settings):
     course_center_outdated.additional_branches.add(branch_spb_club)
 
     response = client.get(reverse('index'))
+    assert response.status_code == 200
     assert smart_bytes(course_center_private.meta_course.name) not in response.content
     assert smart_bytes(course_center_public.meta_course.name) in response.content
     assert smart_bytes(course_center_outdated.meta_course.name) not in response.content
@@ -63,6 +64,7 @@ def test_course_list(client, settings):
     course_club_kzn_shared.additional_branches.add(branch_spb_club)
 
     response = client.get(reverse('course_list'))
+    assert response.status_code == 200
     assert smart_bytes(course_center_private.meta_course.name) not in response.content
     assert smart_bytes(course_center_public.meta_course.name) in response.content
     assert smart_bytes(course_club_kzn_shared.meta_course.name) in response.content

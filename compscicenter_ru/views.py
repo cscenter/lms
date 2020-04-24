@@ -517,7 +517,7 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
         courses = (Course.objects
                    .filter(meta_course=self.object)
-                   .available_in(branches)
+                   .available_in(*branches)
                    .select_related("meta_course", "semester", "branch")
                    .prefetch_related(CourseTeacher.lecturers_prefetch())
                    .order_by('-semester__index'))
@@ -557,7 +557,7 @@ class TeacherDetailView(PublicURLMixin, DetailView):
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
         min_established = min(b.established for b in branches)
         courses = (Course.objects
-                   .available_in(branches)
+                   .available_in(*branches)
                    .filter(semester__year__gte=min_established,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'branch')

@@ -20,7 +20,7 @@ class TeacherDetailView(DetailView):
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
         min_established = min(b.established for b in branches)
         courses = (Course.objects
-                   .available_in(branches)
+                   .available_in(*branches)
                    .filter(semester__year__gte=min_established,
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'branch'))
