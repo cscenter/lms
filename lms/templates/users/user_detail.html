@@ -431,7 +431,7 @@
                                             {% endfor %}
                                         </ul>
                                     </li>
-                                    {% elif user.is_curator %}
+                                {% elif user.is_curator %}
                                     <li>Нет зачтённых онлайн-курсов</li>
                                 {% endif %}
                             {% endwith %}
