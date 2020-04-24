@@ -21,7 +21,7 @@ from users.constants import Roles, GenderTypes
 from users.forms import UserCreationForm
 from users.models import User, UserGroup
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
-    StudentFactory, add_user_groups, StudentFactory, CuratorFactory
+    StudentFactory, add_user_groups, StudentFactory, CuratorFactory, OnlineCourseRecordFactory
 
 
 class UserTests(MyUtilitiesMixin, CSCTestCase):
@@ -268,6 +268,63 @@ def test_shads(client):
     client.login(student2)
     response = client.get(student.get_absolute_url())
     assert smart_bytes(sc.name) in response.content
+
+
+@pytest.mark.django_db
+def test_user_detail_view_should_show_online_courses_for_student(client):
+    """
+    Student should see his/her online courses
+    """
+    student = StudentFactory()
+    oc = OnlineCourseRecordFactory(student=student)
+    client.login(student)
+    response = client.get(student.get_absolute_url())
+    assert smart_bytes(oc.name) in response.content
+
+
+@pytest.mark.django_db
+def test_user_detail_view_should_show_online_courses_for_curators(client):
+    """
+    Curators should see online courses that students have passed
+    """
+    student = StudentFactory()
+    curator = CuratorFactory()
+    oc = OnlineCourseRecordFactory(student=student)
+    client.login(curator)
+    response = client.get(student.get_absolute_url())
+    assert smart_bytes(oc.name) in response.content
+
+
+@pytest.mark.django_db
+def test_user_detail_view_should_not_show_online_courses_for_other_people(client):
+    """
+    People except student and curators should not see online courses of the student
+    """
+    student = StudentFactory()
+    user = UserFactory()
+    oc = OnlineCourseRecordFactory(student=student)
+    response = client.get(student.get_absolute_url())
+    # Unauthenticated users
+    assert smart_bytes(oc.name) not in response.content
+    # Other users without curator permissions
+    client.login(user)
+    assert smart_bytes(oc.name) not in response.content
+
+
+@pytest.mark.django_db
+def test_user_detail_view_should_show_links_for_online_courses(client):
+    """
+    Test that online course name is shown as an <a> link with correct href
+    """
+    student = StudentFactory()
+    oc = OnlineCourseRecordFactory(student=student,
+                                   url="http://course-page.org")
+    client.login(student)
+    response = client.get(student.get_absolute_url())
+    soup = BeautifulSoup(response.content, 'html.parser')
+    links = soup.find_all(href=oc.url)
+    assert len(links) == 1
+    assert oc.name == links[0].text
 
 
 @pytest.mark.django_db
