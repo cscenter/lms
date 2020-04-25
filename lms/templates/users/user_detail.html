@@ -421,11 +421,17 @@
                                         <h4>{% trans "Online courses" %}</h4>
                                         <ul>
                                             {% for rec in recs %}
-                                                <li>{{ rec.name }}</li>
+                                                <li>
+                                                    {% if rec.url %}
+                                                        <a href="{{ rec.url }}">{{ rec.name }}</a>
+                                                    {% else %}
+                                                        {{ rec.name }}
+                                                    {% endif %}
+                                                </li>
                                             {% endfor %}
                                         </ul>
                                     </li>
-                                    {% elif user.is_curator %}
+                                {% elif user.is_curator %}
                                     <li>Нет зачтённых онлайн-курсов</li>
                                 {% endif %}
                             {% endwith %}
