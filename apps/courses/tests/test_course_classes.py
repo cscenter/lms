@@ -309,7 +309,7 @@ def test_manager_for_student():
     student = StudentFactory()
     teacher = TeacherFactory()
     course = CourseFactory(main_branch=student.branch,
-                           additional_branches=[new_branch])
+                           branches=[new_branch])
     # Active enrollment
     enrollment = EnrollmentService.enroll(student, course)
     enrollment.student_group = StudentGroupService.resolve(course, student)

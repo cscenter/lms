@@ -71,6 +71,7 @@ class CourseClassQuerySet(query.QuerySet):
                        'course__meta_course__short_description_en',
                        'course__meta_course__short_description_ru'))
 
+    # FIXME: possible duplicates. Add tests
     def in_branches(self, *branches):
         if not branches:
             return self

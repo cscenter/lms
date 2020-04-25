@@ -152,7 +152,7 @@ def test_assignment_restricted_to(settings):
     branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(main_branch=branch_spb,
                            group_mode=StudentGroupTypes.BRANCH,
-                           additional_branches=[branch_nsk])
+                           branches=[branch_nsk])
     assert StudentGroup.objects.filter(course=course).count() == 2
     sg_spb, sg_nsk = StudentGroup.objects.filter(course=course).all()
     if sg_spb.branch != branch_spb:

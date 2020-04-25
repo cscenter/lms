@@ -134,8 +134,7 @@ def test_course_assignment_timezone(settings, client):
     # 12 january 2017 23:59 (time in UTC)
     deadline_at = datetime.datetime(2017, 1, 12, 23, 59, 0, 0,
                                     tzinfo=pytz.UTC)
-    course_spb = CourseFactory(main_branch=branch_spb)
-    course_spb.additional_branches.add(branch_nsk)
+    course_spb = CourseFactory(main_branch=branch_spb, branches=[branch_nsk])
     assignment = AssignmentFactory(deadline_at=deadline_at, course=course_spb)
     assignments_tab_url = course_spb.get_url_for_tab("assignments")
     teacher_nsk = TeacherFactory(branch=branch_nsk)

@@ -47,7 +47,7 @@ def test_assignment_service_create_student_assignments():
     branch_other = BranchFactory()
     course = CourseFactory(main_branch=branch_spb,
                            group_mode=StudentGroupTypes.BRANCH,
-                           additional_branches=[branch_nsk])
+                           branches=[branch_nsk])
     group_spb = StudentGroup.objects.get(course=course, branch=branch_spb)
     group_nsk = StudentGroup.objects.get(course=course, branch=branch_nsk)
     student_spb = StudentFactory(branch=branch_spb)
@@ -110,7 +110,7 @@ def test_assignment_service_remove_student_assignments():
     branch_other = BranchFactory()
     course = CourseFactory(main_branch=branch_spb,
                            group_mode=StudentGroupTypes.BRANCH,
-                           additional_branches=[branch_nsk])
+                           branches=[branch_nsk])
     group_spb = StudentGroup.objects.get(course=course, branch=branch_spb)
     group_nsk = StudentGroup.objects.get(course=course, branch=branch_nsk)
     student_spb = StudentFactory(branch=branch_spb)
@@ -151,7 +151,7 @@ def test_assignment_service_sync_student_assignments():
     branch_other = BranchFactory()
     course = CourseFactory(main_branch=branch_spb,
                            group_mode=StudentGroupTypes.BRANCH,
-                           additional_branches=[branch_nsk])
+                           branches=[branch_nsk])
     group_spb = StudentGroup.objects.get(course=course, branch=branch_spb)
     group_nsk = StudentGroup.objects.get(course=course, branch=branch_nsk)
     student_spb = StudentFactory(branch=branch_spb)

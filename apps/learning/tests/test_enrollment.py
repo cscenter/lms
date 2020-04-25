@@ -288,7 +288,7 @@ def test_reenrollment(client):
     tomorrow = now_local(branch_spb.get_timezone()) + datetime.timedelta(days=1)
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
     course = CourseFactory(main_branch=branch_spb, semester=term,
-                           additional_branches=[branch_other])
+                           branches=[branch_other])
     assignment = AssignmentFactory(course=course)
     e = EnrollmentFactory(student=student, course=course)
     assert not e.is_deleted
@@ -348,8 +348,7 @@ def test_enrollment_in_other_branch(client):
 @pytest.mark.django_db
 def test_view_course_additional_branches(client):
     """
-    Student attached to the  `branch` that doesn't match main course branch
-    but listed in course.additional_branches could enroll in this course
+    Student could enroll in the course if it is available to the student branch
     """
     branch_spb = BranchFactory(code=Branches.SPB)
     today = now_local(branch_spb.get_timezone())

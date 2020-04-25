@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
 from django.db.models import ForeignKey
+from django.forms import BaseInlineFormSet
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
@@ -16,7 +17,8 @@ from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseTeacher, Course, CourseClassAttachment, \
     Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
-    AssignmentAttachment, LearningSpace, CourseReview
+    AssignmentAttachment, LearningSpace, CourseReview, CourseBranch
+from courses.services import CourseService
 from learning.models import AssignmentGroup, StudentGroup
 from learning.services import AssignmentService
 from users.constants import Roles
@@ -64,22 +66,26 @@ class CourseTeacherInline(admin.TabularInline):
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
+class CourseBranchFormSet(BaseInlineFormSet):
+    def save(self, commit=True):
+        saved_objects = super().save(commit)
+        if commit:
+            CourseService.sync_branches(course=self.instance)
+        return saved_objects
+
+
+
+class CourseBranchInline(admin.TabularInline):
+    model = CourseBranch
+    formset = CourseBranchFormSet
+    extra = 0
+    min_num = 0
+
+
 class CourseAdminForm(forms.ModelForm):
     class Meta:
         model = Course
         fields = '__all__'
-
-    def clean(self):
-        cleaned_data = super().clean()
-        main_branch = cleaned_data.get('main_branch')
-        if main_branch:
-            additional = cleaned_data['additional_branches']
-            # TODO: Add guard to the additional_branches.through model
-            # Main branch is not allowed among additional branches to avoid
-            # duplicates.
-            cleaned_data['additional_branches'] = (additional
-                                                   .exclude(pk=main_branch.pk))
-        return cleaned_data
 
     def clean_is_open(self):
         is_open = self.cleaned_data['is_open']
@@ -97,9 +103,8 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_filter = ['main_branch', 'semester']
     list_display = ['meta_course', 'semester', 'is_published_in_video',
                     'is_open']
-    inlines = (CourseTeacherInline,)
+    inlines = (CourseTeacherInline, CourseBranchInline,)
     raw_id_fields = ('meta_course',)
-    filter_horizontal = ('additional_branches',)
 
 
 class LearningSpaceAdmin(admin.ModelAdmin):
