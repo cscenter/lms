@@ -150,7 +150,8 @@ def test_enroll_in_course(inactive_status, settings):
     course.main_branch = branch_nsk
     course.save()
     assert not student_spb.has_perm("learning.enroll_in_course", course)
-    course.additional_branches.add(branch_spb)
+    course.additional_branches.add(branch_spb)  # FIXME: remove
+    course.branches.add(branch_spb)
     course.refresh_from_db()
     assert student_spb.has_perm("learning.enroll_in_course", course)
 
