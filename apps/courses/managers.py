@@ -114,11 +114,16 @@ class _CourseDefaultManager(models.Manager):
 
 
 class CourseQuerySet(models.QuerySet):
-    def available_in(self, branch: Union[int, List[int]]):
-        if isinstance(branch, int):
-            branch = [branch]
-        return (self.filter(Q(main_branch__in=branch) |
-                            Q(additional_branches__in=branch))
+    def available_in(self, branch):
+        branches = [branch]
+        return (self.filter(Q(main_branch__in=branches) |
+                            Q(additional_branches__in=branches))
+                .distinct('semester__index', 'meta_course__name', 'pk')
+                .order_by('-semester__index', 'meta_course__name', 'pk'))
+
+    def in_branches(self, branches: List[int]):
+        return (self.filter(Q(main_branch__in=branches) |
+                            Q(additional_branches__in=branches))
                 .distinct('semester__index', 'meta_course__name', 'pk')
                 .order_by('-semester__index', 'meta_course__name', 'pk'))
 

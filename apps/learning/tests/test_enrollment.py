@@ -369,7 +369,8 @@ def test_view_course_additional_branches(client):
     client.login(student_nsk)
     response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 403
-    course_spb.additional_branches.add(branch_nsk)
+    course_spb.additional_branches.add(branch_nsk)  # FIXME: remove
+    course_spb.branches.add(branch_nsk)
     response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 302
     assert Enrollment.objects.count() == 2

@@ -35,7 +35,8 @@ def test_upsert_student_group_from_additional_branch(settings):
     course = CourseFactory(main_branch=branch_spb,
                            group_mode=StudentGroupTypes.BRANCH)
     assert StudentGroup.objects.filter(course=course).count() == 1
-    course.additional_branches.add(branch_nsk)
+    course.additional_branches.add(branch_nsk)  # FIXME: remove
+    course.branches.add(branch_nsk)
     groups = StudentGroup.objects.filter(course=course)
     assert len(groups) == 2
     sg1, sg2 = groups
@@ -50,8 +51,10 @@ def test_upsert_student_group_from_additional_branch(settings):
     assert {sg1.branch_id, sg2.branch_id} == {branch_spb.pk, branch_nsk.pk}
     # Update by removing branch
     branch = BranchFactory()
-    course.additional_branches.remove(branch_nsk)
-    course.additional_branches.add(branch)
+    course.additional_branches.remove(branch_nsk)  # FIXME: remove
+    course.branches.remove(branch_nsk)
+    course.additional_branches.add(branch)  # FIXME: remove
+    course.branches.add(branch)
     groups = StudentGroup.objects.filter(course=course)
     assert len(groups) == 2
     sg1, sg2 = groups
