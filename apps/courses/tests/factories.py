@@ -11,6 +11,7 @@ from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     AssignmentAttachment, LearningSpace, CourseReview, \
     AssignmentSubmissionTypes
 from courses.constants import MaterialVisibilityTypes
+from courses.services import CourseService
 from courses.utils import get_current_term_pair, get_term_by_index
 from learning.services import AssignmentService
 from users.tests.factories import TeacherFactory
@@ -84,12 +85,23 @@ class CourseFactory(factory.DjangoModelFactory):
                               notify_by_default=True).save()
 
     @factory.post_generation
-    def additional_branches(self, create, extracted, **kwargs):
+    def branches(self, create, extracted, **kwargs):
+        """
+        Main branch will be added by `sync_branches` post generation hook, so
+        it's possible to omit main branch in this list
+        """
         if not create:
             return
         if extracted:
             for branch in extracted:
-                self.additional_branches.add(branch)
+                self.additional_branches.add(branch)  # FIXME: remove
+                self.branches.add(branch)
+
+    @factory.post_generation
+    def sync_branches(self, create, extracted, **kwargs):
+        if not create:
+            return
+        CourseService.sync_branches(self)
 
 
 class CourseTeacherFactory(factory.DjangoModelFactory):

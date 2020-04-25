@@ -304,6 +304,12 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
         help_text=_("Branches where the course is also available for "
                     "enrollment"),
         blank=True)
+    branches = models.ManyToManyField(
+        Branch,
+        verbose_name=_("Course Branches"),
+        related_name='branches',
+        help_text=_("All branches where the course is available for enrollment"),
+        through='courses.CourseBranch')
     group_mode = models.CharField(
         verbose_name=_("Student Group Mode"),
         max_length=100,
@@ -550,6 +556,43 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
     def is_actual_teacher(self, teacher_id):
         return teacher_id in (co.teacher_id for co in
                               self.course_teachers.all())
+
+
+class CourseBranch(models.Model):
+    branch = models.ForeignKey(
+        Branch,
+        verbose_name=_("Branch"),
+        on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        Course,
+        verbose_name=_("Course"),
+        on_delete=models.CASCADE)
+    is_main = models.BooleanField(
+        verbose_name=_("Main Branch"),
+        default=False)
+
+    class Meta:
+        verbose_name = _("Course Branch")
+        verbose_name_plural = _("Course Branches")
+        constraints = [
+            models.UniqueConstraint(fields=('course', 'branch'),
+                                    name='unique_course_branch'),
+        ]
+
+    def save(self, *args, **kwargs):
+        created = self.pk is None
+        is_main_branch = (self.branch_id == self.course.main_branch_id)
+        if self.is_main and not is_main_branch:
+            raise ValidationError("Inconsistent state")
+        self.is_main = is_main_branch  # For Course.branches.add() calls
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if self.is_main and self.branch_id != self.course.main_branch_id:
+            raise ValidationError("You can't mark additional branch as main. "
+                                  "Don't forget to update or delete the "
+                                  "previous record if you change main branch "
+                                  "value.")
 
 
 class CourseTeacher(models.Model):
