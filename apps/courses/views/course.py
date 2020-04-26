@@ -34,7 +34,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
         return (super().get_course_queryset()
                 .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(course_teachers,
-                                  "additional_branches"))
+                                  "branches"))
 
     def get_object(self):
         return self.course
@@ -73,7 +73,7 @@ class CourseDetailView(CourseURLParamsMixin, DetailView):
         # For correspondence course try to override timezone
         tz_override = None
         # FIXME: cache additional branch count?
-        if not is_actual_teacher and len(course.additional_branches.all()):
+        if not is_actual_teacher and len(course.branches.all()) > 1:
             tz_override = request_user.get_timezone()
 
         if request_user.has_perm("study.view_own_enrollments"):

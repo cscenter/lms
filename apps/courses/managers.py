@@ -75,8 +75,7 @@ class CourseClassQuerySet(query.QuerySet):
     def in_branches(self, *branches):
         if not branches:
             return self
-        return (self.filter(Q(course__main_branch__in=branches) |
-                            Q(course__additional_branches__in=branches)))
+        return self.filter(course__coursebranch__branch__in=branches)
 
     def for_student(self, user):
         # Get common courses classes and restricted to the student group
@@ -115,16 +114,10 @@ class _CourseDefaultManager(models.Manager):
 
 class CourseQuerySet(models.QuerySet):
     def available_in(self, branch):
-        branches = [branch]
-        # FIXME: coursebranch__branch_id__in=[] + remove distinct
-        return (self.filter(Q(main_branch__in=branches) |
-                            Q(additional_branches__in=branches))
-                .distinct('semester__index', 'meta_course__name', 'pk')
-                .order_by('-semester__index', 'meta_course__name', 'pk'))
+        return self.filter(coursebranch__branch=branch)
 
     def in_branches(self, branches: List[int]):
-        return (self.filter(Q(main_branch__in=branches) |
-                            Q(additional_branches__in=branches))
+        return (self.filter(coursebranch__branch__in=branches)
                 .distinct('semester__index', 'meta_course__name', 'pk')
                 .order_by('-semester__index', 'meta_course__name', 'pk'))
 

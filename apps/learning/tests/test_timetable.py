@@ -89,7 +89,7 @@ def test_student_timetable_view_security(client, lms_resolver):
 def test_student_timetable(client):
     student = StudentFactory()
     client.login(student)
-    co = CourseFactory.create(main_branch=student.branch)
+    co = CourseFactory(main_branch=student.branch)
     e = EnrollmentFactory.create(course=co, student=student)
     timetable_url = reverse('study:timetable')
     response = client.get(timetable_url)

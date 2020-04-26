@@ -1,11 +1,11 @@
 from typing import Set
 
-from django.db.models.signals import post_save, m2m_changed
+from django.db.models.signals import post_save, m2m_changed, post_delete
 from django.dispatch import receiver
 
 from core.models import Branch
 from courses.models import Assignment, CourseNews, CourseTeacher, Course, \
-    StudentGroupTypes
+    StudentGroupTypes, CourseBranch
 from learning.models import AssignmentNotification, \
     StudentAssignment, Enrollment, CourseNewsNotification
 from learning.services import StudentGroupService, update_course_learners_count
@@ -14,30 +14,23 @@ from learning.services import StudentGroupService, update_course_learners_count
 # FIXME: post_delete нужен? Что лучше - удалять StudentGroup + SET_NULL у Enrollment или делать soft-delete?
 # FIXME: группу лучше удалить, т.к. она будет предлагаться для новых заданий, хотя типа уже удалена.
 @receiver(post_save, sender=Course)
-def add_student_group_for_course_root_branch(sender, instance, created,
-                                             **kwargs):
-    # FIXME: Как взять предыдущее значение? Нужно ли его удалять?
-    if created:
-        StudentGroupService.add(instance, instance.main_branch)
+def manage_student_group_for_course_root_branch(sender, instance, created,
+                                                **kwargs):
     # TODO: What if a root branch were changed?
+    pass
 
 
-@receiver(m2m_changed, sender=Course.additional_branches.through)
-def manage_student_group_for_course_additional_branch(sender, **kwargs):
-    action = kwargs.pop("action")
-    if action not in ("post_add", "post_remove"):
-        return
-    course = kwargs.pop("instance")
-    branches: Set[int] = kwargs.pop("pk_set", set())
-    for branch_id in branches:
-        # Case when the main branch was added as an additional one
-        if branch_id == course.main_branch_id:
-            continue
-        branch = Branch.objects.get_by_pk(branch_id)
-        if action == "post_add":
-            StudentGroupService.add(course, branch)
-        elif action == "post_remove":
-            StudentGroupService.remove(course, branch)
+@receiver(post_save, sender=CourseBranch)
+def create_student_group_from_course_branch(sender, instance: CourseBranch,
+                                            created, *args, **kwargs):
+    if created:
+        StudentGroupService.add(instance.course, instance.branch)
+
+
+@receiver(post_delete, sender=CourseBranch)
+def delete_student_group_if_course_branch_deleted(sender, instance: CourseBranch,
+                                                  *args, **kwargs):
+    StudentGroupService.remove(instance.course, instance.branch)
 
 
 @receiver(post_save, sender=Enrollment)

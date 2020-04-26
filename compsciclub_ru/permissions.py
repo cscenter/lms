@@ -21,7 +21,7 @@ def enroll_in_course(user, course: Course):
         # on compsciclub.ru
         if course.main_branch.site_id != settings.SITE_ID:
             if not any(branch.site_id == settings.SITE_ID for branch
-                       in course.additional_branches.all()):
+                       in course.branches.all()):
                 return False
     if course.is_capacity_limited and not course.places_left:
         return False

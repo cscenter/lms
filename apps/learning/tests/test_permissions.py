@@ -6,7 +6,8 @@ from auth.permissions import perm_registry
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.utils import instance_memoize
-from courses.models import Course
+from courses.models import Course, CourseBranch
+from courses.services import CourseService
 from courses.tests.factories import CourseFactory, SemesterFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment
@@ -149,9 +150,9 @@ def test_enroll_in_course(inactive_status, settings):
     # Compare student and course branches
     course.main_branch = branch_nsk
     course.save()
+    CourseService.sync_branches(course)
     assert not student_spb.has_perm("learning.enroll_in_course", course)
-    course.additional_branches.add(branch_spb)  # FIXME: remove
-    course.branches.add(branch_spb)
+    CourseBranch(course=course, branch=branch_spb).save()
     course.refresh_from_db()
     assert student_spb.has_perm("learning.enroll_in_course", course)
 
@@ -188,7 +189,7 @@ def test_enroll_in_course_by_invitation():
     branch_spb = BranchFactory(code=Branches.SPB)
     term = SemesterFactory.create_current(for_branch=branch_spb.code,
                                           enrollment_end_at=tomorrow.date())
-    course = CourseFactory(semester=term, is_open=False, main_branch=branch_spb,
+    course = CourseFactory(main_branch=branch_spb, semester=term, is_open=False,
                            capacity=0)
     assert course.enrollment_is_open
     student = StudentFactory(branch=course.main_branch)
