@@ -116,6 +116,7 @@ class _CourseDefaultManager(models.Manager):
 class CourseQuerySet(models.QuerySet):
     def available_in(self, branch):
         branches = [branch]
+        # FIXME: coursebranch__branch_id__in=[] + remove distinct
         return (self.filter(Q(main_branch__in=branches) |
                             Q(additional_branches__in=branches))
                 .distinct('semester__index', 'meta_course__name', 'pk')

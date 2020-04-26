@@ -584,7 +584,6 @@ class CourseBranch(models.Model):
         is_main_branch = (self.branch_id == self.course.main_branch_id)
         if self.is_main and not is_main_branch:
             raise ValidationError("Inconsistent state")
-        self.is_main = is_main_branch  # For Course.branches.add() calls
         super().save(*args, **kwargs)
 
     def clean(self):
