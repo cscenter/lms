@@ -562,7 +562,7 @@ class TeacherDetailView(PublicURLMixin, DetailView):
                            teachers=self.object.pk)
                    .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index')
-                   .prefetch_related('additional_branches'))
+                   .prefetch_related('branches'))
         context['courses'] = courses
         return context
 

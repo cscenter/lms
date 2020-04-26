@@ -78,13 +78,13 @@ def course_form_builder(survey: CourseSurvey):
     today_local = now_local(course.get_timezone())
     form_templates = Form.objects.filter(status=STATUS_TEMPLATE,
                                          slug__in=templates)
+    has_additional_branches = course.branches.count() > 1
     for form_template in form_templates:
         fields = form_template.fields.all()
         for field in fields:
             # Crunch: For correspondence course hide questions about
             # offline lectures
-            if (course.additional_branches.exists() and
-                    field.name in OFFLINE_COURSES_Q):
+            if has_additional_branches and field.name in OFFLINE_COURSES_Q:
                 continue
             source_field_choices = list(field.choices.all())
             # Mutate original field

@@ -11,6 +11,7 @@ from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from core.urls import reverse, branch_aware_reverse
+from courses.models import CourseBranch
 from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment, StudentGroup
@@ -224,7 +225,7 @@ def test_unenrollment(client, assert_redirect):
     s = StudentFactory()
     client.login(s)
     current_semester = SemesterFactory.create_current()
-    course = CourseFactory.create(semester=current_semester, main_branch=s.branch)
+    course = CourseFactory.create(main_branch=s.branch, semester=current_semester)
     as_ = AssignmentFactory.create_batch(3, course=course)
     form = {'course_pk': course.pk}
     # Enrollment already closed
@@ -369,8 +370,7 @@ def test_view_course_additional_branches(client):
     client.login(student_nsk)
     response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 403
-    course_spb.additional_branches.add(branch_nsk)  # FIXME: remove
-    course_spb.branches.add(branch_nsk)
+    CourseBranch(course=course_spb, branch=branch_nsk).save()
     response = client.post(course_spb.get_enroll_url(), form)
     assert response.status_code == 302
     assert Enrollment.objects.count() == 2

@@ -3,7 +3,7 @@ import datetime
 import pytest
 
 from core.tests.factories import BranchFactory
-from courses.models import Course, CourseClass
+from courses.models import Course, CourseClass, CourseBranch
 from courses.tests.factories import CourseFactory, CourseClassFactory
 from learning.settings import Branches
 
@@ -29,8 +29,7 @@ def test_course_class_manager_in_branches():
     cc1 = CourseClassFactory(course=course, date=date_on, starts_at=starts_at)
     assert CourseClass.objects.in_branches(branch_spb.pk).count() == 1
     # Make sure no duplicates even if course root branch added as additional
-    course.additional_branches.add(branch_spb)  # FIXME: remove
-    course.branches.add(branch_spb)
+    CourseBranch(course=course, branch=branch_spb).save()
     assert CourseClass.objects.in_branches(branch_spb.pk).count() == 1
     course2 = CourseFactory(main_branch=branch_nsk)
     assert course2.pk > course.pk
@@ -39,8 +38,7 @@ def test_course_class_manager_in_branches():
                              date=date_on - datetime.timedelta(days=1),
                              starts_at=starts_at)
     assert CourseClass.objects.in_branches(branch_spb.pk).count() == 1
-    course2.additional_branches.add(branch_spb)  # FIXME: remove
-    course2.branches.add(branch_spb)
+    CourseBranch(course=course2, branch=branch_spb).save()
     classes = list(CourseClass.objects.in_branches(branch_spb.pk))
     assert len(classes) == 2
     assert classes[0] == cc2

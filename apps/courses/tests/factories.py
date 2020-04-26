@@ -9,7 +9,7 @@ from core.tests.factories import LocationFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, LearningSpace, CourseReview, \
-    AssignmentSubmissionTypes
+    AssignmentSubmissionTypes, CourseBranch
 from courses.constants import MaterialVisibilityTypes
 from courses.services import CourseService
 from courses.utils import get_current_term_pair, get_term_by_index
@@ -94,8 +94,7 @@ class CourseFactory(factory.DjangoModelFactory):
             return
         if extracted:
             for branch in extracted:
-                self.additional_branches.add(branch)  # FIXME: remove
-                self.branches.add(branch)
+                CourseBranch(course=self, branch=branch).save()
 
     @factory.post_generation
     def sync_branches(self, create, extracted, **kwargs):
