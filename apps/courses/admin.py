@@ -10,6 +10,7 @@ from django.forms import BaseInlineFormSet
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
+from core.models import Branch
 from core.timezone import TimezoneAwareDateTimeField
 from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
@@ -51,19 +52,11 @@ class CourseTeacherInline(admin.TabularInline):
     model = CourseTeacher
     extra = 0
     min_num = 1
+    raw_id_fields = ('teacher',)
     formfield_overrides = {
         BitField: {'widget': BitFieldCheckboxSelectMultiple},
-        ForeignKey: {
-            'widget': ListSelect2()
-        }
     }
-
-    def formfield_for_foreignkey(self, db_field, *args, **kwargs):
-        if db_field.name == "teacher":
-            kwargs["queryset"] = (User.objects
-                                  .filter(group__role=Roles.TEACHER)
-                                  .distinct())
-        return super().formfield_for_foreignkey(db_field, *args, **kwargs)
+    # FIXME: customize template (hide link `show on site`, now it's hidden by css)
 
 
 class CourseBranchFormSet(BaseInlineFormSet):
@@ -74,12 +67,16 @@ class CourseBranchFormSet(BaseInlineFormSet):
         return saved_objects
 
 
-
 class CourseBranchInline(admin.TabularInline):
     model = CourseBranch
     formset = CourseBranchFormSet
     extra = 0
     min_num = 0
+
+    def formfield_for_foreignkey(self, db_field, *args, **kwargs):
+        if db_field.name == "branch":
+            kwargs["queryset"] = (Branch.objects.select_related('site'))
+        return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
 class CourseAdminForm(forms.ModelForm):
@@ -103,8 +100,13 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     list_filter = ['main_branch', 'semester']
     list_display = ['meta_course', 'semester', 'is_published_in_video',
                     'is_open']
-    inlines = (CourseTeacherInline, CourseBranchInline,)
+    inlines = (CourseBranchInline, CourseTeacherInline,)
     raw_id_fields = ('meta_course',)
+
+    class Media:
+        css = {
+            'all': ('v2/css/django_admin.css',)
+        }
 
 
 class LearningSpaceAdmin(admin.ModelAdmin):
