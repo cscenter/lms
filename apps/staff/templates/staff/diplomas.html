@@ -22,9 +22,12 @@
     <div class="alert alert-info">
         Направления обучения берутся из профилей выпускников, которые можно <a href="/staff/exports/#will-graduate">сгенерировать здесь</a>.
     </div>
+    <div class="alert alert-danger">
+        Для выпуска 2020 направления уже указали у пользователя, поэтому сейчас они берутся из профиля пользователя, а не выпускника.
+    </div>
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
 {% for s in students %}\diploma{{ '{' }}{{ s.pk }}{{ '}' }}{{ '{' }}{{s.first_name}}{{ '}' }}{{ '{' }}{{s.patronymic}}{{ '}' }}{{ '{' }}{{s.last_name}}{{ '}' }}{{ '{' }}{% if s.gender == 'F' %}a{% endif %}{{ '}' }}
-{{ '{' }}\направлени{{ s.graduate_profile.academic_disciplines.all|pluralize:"я,й" }} {% for program in s.graduate_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}\направлени{{ s.academic_disciplines.all|pluralize:"я,й" }} {% for program in s.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
 {{ '{' }}{{s.enrollment_year}}{{ '}' }}
 {{ '{' }}{% for course in s.courses %}
 {% spaceless %}\{{course.type}}{{ '{' }}{{course.name}}{{ '}' }}{% if course.type == "course" %}{{ '{' }}1 семестр{{ '}' }}{{ '{' }}{% if course.class_count > 0 %}{{course.class_count}}{% endif %}{{ '}' }}{% endif %}{{ '{' }}{{course.final_grade}}{{ '}' }}

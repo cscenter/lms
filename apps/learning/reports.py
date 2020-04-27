@@ -283,6 +283,8 @@ class ProgressReportForDiplomas(ProgressReport):
             disciplines = student.graduate_profile.academic_disciplines.all()
         else:
             disciplines = []
+        # FIXME: remove. Hack - alumni 2020 have disciplines in user profile instead of graduate profile
+        disciplines = student.academic_disciplines.all()
         return [
             student.pk,
             student.last_name,
