@@ -2,12 +2,8 @@
 from datetime import datetime
 
 from django.core.management import BaseCommand
-from django.db import transaction
 
-from learning.models import GraduateProfile
-from learning.settings import StudentStatuses
-from users.constants import Roles
-from users.models import User
+from learning.services import create_graduate_profiles
 
 
 class Command(BaseCommand):
@@ -20,20 +16,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         graduated_on_str = options['graduated_on']
         graduated_on = datetime.strptime(graduated_on_str, "%d.%m.%Y").date()
-        will_graduate_list = (User.objects
-                              .has_role(Roles.STUDENT,
-                                        Roles.VOLUNTEER)
-                              .filter(status=StudentStatuses.WILL_GRADUATE))
-
-        for student in will_graduate_list:
-            with transaction.atomic():
-                defaults = {
-                    "graduated_on": graduated_on,
-                    "details": {},
-                    "is_active": False
-                }
-                profile, created = GraduateProfile.objects.get_or_create(
-                    student=student,
-                    defaults=defaults)
-                if not created:
-                    profile.save()
+        create_graduate_profiles(graduated_on)
