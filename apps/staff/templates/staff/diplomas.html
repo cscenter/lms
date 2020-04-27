@@ -27,7 +27,7 @@
     </div>
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
 {% for s in students %}\diploma{{ '{' }}{{ s.pk }}{{ '}' }}{{ '{' }}{{s.first_name}}{{ '}' }}{{ '{' }}{{s.patronymic}}{{ '}' }}{{ '{' }}{{s.last_name}}{{ '}' }}{{ '{' }}{% if s.gender == 'F' %}a{% endif %}{{ '}' }}
-{{ '{' }}\направлени{{ s.academic_disciplines.all|pluralize:"я,й" }} {% for program in s.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}\\[3.5mm]направлени{{ s.academic_disciplines.all|pluralize:"я,й" }} {% for program in s.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
 {{ '{' }}{{s.enrollment_year}}{{ '}' }}
 {{ '{' }}{% for course in s.courses %}
 {% spaceless %}\{{course.type}}{{ '{' }}{{course.name}}{{ '}' }}{% if course.type == "course" %}{{ '{' }}1 семестр{{ '}' }}{{ '{' }}{% if course.class_count > 0 %}{{course.class_count}}{% endif %}{{ '}' }}{% endif %}{{ '{' }}{{course.final_grade}}{{ '}' }}
