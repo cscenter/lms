@@ -74,6 +74,7 @@ class _GraduateProfileActiveManager(models.Manager):
     def get_queryset(self):
         return (super().get_queryset()
                 .filter(is_active=True)
+                # FIXME: move to the queryset method
                 .select_related("student", "student__branch")
                 .only("pk",
                       "modified",
