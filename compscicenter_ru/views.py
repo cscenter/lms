@@ -265,18 +265,25 @@ class AlumniView(TemplateView):
     template_name = "compscicenter_ru/alumni/index.html"
 
     def get_context_data(self):
-        first_graduation = 2013
+        # TODO: aggregate from `Branch.established`
+        the_first_graduation = 2013
         cache_key = 'cscenter_last_graduation_year'
-        last_graduation_year = cache.get(cache_key)
-        if last_graduation_year is None:
-            d = GraduateProfile.objects.aggregate(year=Max('graduation_year'))
-            last_graduation_year = d['year'] if d['year'] else first_graduation
-            cache.set(cache_key, last_graduation_year, 86400 * 31)
-        years_range = range(first_graduation, last_graduation_year + 1)
+        latest_graduation_year = cache.get(cache_key)
+        if latest_graduation_year is None:
+            d = (GraduateProfile.objects
+                 .filter(is_active=True)
+                 .aggregate(year=Max('graduation_year')))
+            if d['year']:
+                latest_graduation_year = d['year']
+            else:
+                # TODO: Better to show empty results if no graduate profiles
+                latest_graduation_year = the_first_graduation
+            cache.set(cache_key, latest_graduation_year, 86400 * 31)
+        years_range = range(the_first_graduation, latest_graduation_year + 1)
         years = [{"label": str(y), "value": y} for y in reversed(years_range)]
         year = self.kwargs.get("year")
         if year not in years_range:
-            year = last_graduation_year
+            year = latest_graduation_year
         year = next((y for y in years if y['value'] == year))
         # Area state and props
         areas = [{"label": a.name, "value": a.code} for a in
