@@ -686,14 +686,16 @@ class Report(TimezoneAwareModel, DerivableFieldsMixin, TimeStampedModel):
             if created:
                 self.final_score = 0
             else:
-                # FIXME: call .save method
-                self.compute_fields("final_score")
+                self.compute_fields("final_score", commit=False)
         super().save(*args, **kwargs)
 
     def _compute_final_score(self):
         final_score = Decimal(0)
         scores = {}
-        for review in self.review_set.prefetch_related("criteria").all():
+        reviews = (Review.objects
+                   .filter(report=self, is_completed=True)
+                   .prefetch_related("criteria"))
+        for review in reviews:
             for field_name, score in review.get_scores().items():
                 if field_name not in scores:
                     scores[field_name] = (score, 1)
@@ -784,17 +786,6 @@ class Review(TimeStampedModel):
         verbose_name = _("Review")
         verbose_name_plural = _("Reviews")
         unique_together = [('report', 'reviewer')]
-
-    def save(self, *args, **kwargs):
-        created = self.pk is None
-        super().save(*args, **kwargs)
-        r = self.report
-        if self.is_completed and self.criteria and r.status == Report.REVIEW:
-            reviewers_total = len(r.project_student.project.reviewers.all())
-            reviews_completed = sum(r.is_completed for r in r.review_set.all())
-            if reviews_completed == reviewers_total:
-                r.status = Report.SUMMARY
-                r.save(update_fields=("status",))
 
     def get_scores(self):
         if self.criteria:
