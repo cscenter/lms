@@ -16,7 +16,7 @@ from projects.models import Report, ProjectStudent, Review, \
     PracticeCriteria, Project
 from projects.tests.factories import ProjectFactory, ReportFactory, \
     ReportingPeriodFactory, ReviewFactory, \
-    review_form_factory, ReportCommentFactory, ProjectReviewerFactory
+    review_form_data_factory, ReportCommentFactory, ProjectReviewerFactory
 from users.constants import Roles
 from users.tests.factories import StudentFactory, UserFactory, CuratorFactory
 
@@ -492,7 +492,7 @@ def test_review_form_permissions(client, curator, assert_login_redirect):
     reviewer1 = ProjectReviewerFactory()
     report = ReportFactory(status=Report.REVIEW,
                            project_student__project__reviewers=[reviewer1])
-    review_form = review_form_factory()
+    review_form = review_form_data_factory()
     assert_login_redirect(report.get_review_url(), form=review_form,
                           method='post')
     client.login(reviewer1)
@@ -510,30 +510,42 @@ def test_review_form_permissions(client, curator, assert_login_redirect):
 @pytest.mark.django_db
 def test_review(client, curator, assert_login_redirect):
     reviewer1 = ProjectReviewerFactory()
+    client.login(reviewer1)
     report = ReportFactory(status=Report.REVIEW,
                            project_student__project__reviewers=[reviewer1])
-    review_form = review_form_factory(is_completed=False)
-    review_form[f"{PracticeCriteriaForm.prefix}-score_problems"] = 2
-    client.login(reviewer1)
-    response = client.post(report.get_review_url(), review_form)
+    # Send draft
+    form_data = review_form_data_factory(is_completed=False)
+    form_data[f"{PracticeCriteriaForm.prefix}-score_problems"] = 2
+    response = client.post(report.get_review_url(), form_data)
     assert response.status_code == 302
     assert Review.objects.count() == 1
     assert PracticeCriteria.objects.count() == 1
     review = Review.objects.get(report=report)
+    assert not review.is_completed
     assert review.reviewer == reviewer1
     assert review.criteria
     assert review.criteria.score_problems == 2
     assert review.criteria.review == review
-    review_form[f"{PracticeCriteriaForm.prefix}-score_problems"] = 1
-    response = client.post(report.get_review_url(), review_form)
+    report.refresh_from_db()
+    assert report.final_score is None
+    form_data[f"{PracticeCriteriaForm.prefix}-score_problems"] = 1
+    response = client.post(report.get_review_url(), form_data)
     assert response.status_code == 302
     assert Review.objects.count() == 1
     assert PracticeCriteria.objects.count() == 1
-    review_form[f"{ReportReviewForm.prefix}-is_completed"] = True
-    response = client.post(report.get_review_url(), review_form)
+    report.refresh_from_db()
+    assert report.final_score is None
+    assert report.status == Report.REVIEW
+    form_data[f"{ReportReviewForm.prefix}-is_completed"] = True
+    response = client.post(report.get_review_url(), form_data)
     assert response.status_code == 302
     assert Review.objects.count() == 1
     assert PracticeCriteria.objects.count() == 1
+    review.refresh_from_db()
+    assert review.is_completed
+    report.refresh_from_db()
+    assert report.status == Report.SUMMARY
+    assert report.final_score == 1
 
 
 @pytest.mark.django_db
@@ -545,7 +557,7 @@ def test_review_notifications(client, curator, assert_login_redirect):
     report = ReportFactory(status=Report.REVIEW,
                            project_student__project__reviewers=[reviewer1])
     client.login(reviewer1)
-    review_form = review_form_factory()
+    review_form = review_form_data_factory()
     response = client.post(report.get_review_url(), review_form)
     assert response.status_code == 302
     assert Review.objects.count() == 1

@@ -41,7 +41,8 @@ class DerivableFieldsMixin:
             logger.exception(e)
         return False
 
-    def compute_fields(self, *derivable_fields, prefetch=False) -> bool:
+    def compute_fields(self, *derivable_fields, prefetch=False,
+                       commit=True) -> bool:
         """
         Use async version to avoid caching problem with `.prefetch_related`
         """
@@ -66,8 +67,9 @@ class DerivableFieldsMixin:
                 derived_fields.append(field)
 
         if derived_fields:
+            if commit:
             # FIXME: This one recall save method. Replace with .update?
-            self.save(update_fields=derived_fields)
+                self.save(update_fields=derived_fields)
             return True
 
         return False
