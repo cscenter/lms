@@ -16,12 +16,12 @@ def course_is_open(user, course):
 def enroll_in_course(user, course: Course):
     if not course.enrollment_is_open:
         return False
-    if course.branch_id != user.branch_id:
+    if course.main_branch_id != user.branch_id:
         # Course have to be shared for any club branch to be available
         # on compsciclub.ru
-        if course.branch.site_id != settings.SITE_ID:
+        if course.main_branch.site_id != settings.SITE_ID:
             if not any(branch.site_id == settings.SITE_ID for branch
-                       in course.additional_branches.all()):
+                       in course.branches.all()):
                 return False
     if course.is_capacity_limited and not course.places_left:
         return False

@@ -265,18 +265,25 @@ class AlumniView(TemplateView):
     template_name = "compscicenter_ru/alumni/index.html"
 
     def get_context_data(self):
-        first_graduation = 2013
+        # TODO: aggregate from `Branch.established`
+        the_first_graduation = 2013
         cache_key = 'cscenter_last_graduation_year'
-        last_graduation_year = cache.get(cache_key)
-        if last_graduation_year is None:
-            d = GraduateProfile.objects.aggregate(year=Max('graduation_year'))
-            last_graduation_year = d['year'] if d['year'] else first_graduation
-            cache.set(cache_key, last_graduation_year, 86400 * 31)
-        years_range = range(first_graduation, last_graduation_year + 1)
+        latest_graduation_year = cache.get(cache_key)
+        if latest_graduation_year is None:
+            d = (GraduateProfile.objects
+                 .filter(is_active=True)
+                 .aggregate(year=Max('graduation_year')))
+            if d['year']:
+                latest_graduation_year = d['year']
+            else:
+                # TODO: Better to show empty results if no graduate profiles
+                latest_graduation_year = the_first_graduation
+            cache.set(cache_key, latest_graduation_year, 86400 * 31)
+        years_range = range(the_first_graduation, latest_graduation_year + 1)
         years = [{"label": str(y), "value": y} for y in reversed(years_range)]
         year = self.kwargs.get("year")
         if year not in years_range:
-            year = last_graduation_year
+            year = latest_graduation_year
         year = next((y for y in years if y['value'] == year))
         # Area state and props
         areas = [{"label": a.name, "value": a.code} for a in
@@ -517,14 +524,14 @@ class MetaCourseDetailView(PublicURLMixin, generic.DetailView):
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
         courses = (Course.objects
                    .filter(meta_course=self.object)
-                   .available_in(*branches)
-                   .select_related("meta_course", "semester", "branch")
+                   .in_branches(branches)
+                   .select_related("meta_course", "semester", "main_branch")
                    .prefetch_related(CourseTeacher.lecturers_prefetch())
                    .order_by('-semester__index'))
         # Don't divide center and club courses from the same city
         courses_by_branch = bucketize(
             courses,
-            key=lambda c: (c.branch.code, c.branch.name))
+            key=lambda c: (c.main_branch.code, c.main_branch.name))
         # Aggregate tabs
         tabs = TabList()
         for (code, name), values in courses_by_branch.items():
@@ -557,12 +564,12 @@ class TeacherDetailView(PublicURLMixin, DetailView):
         branches = Branch.objects.for_site(site_id=self.request.site.pk)
         min_established = min(b.established for b in branches)
         courses = (Course.objects
-                   .available_in(*branches)
+                   .in_branches(branches)
                    .filter(semester__year__gte=min_established,
                            teachers=self.object.pk)
-                   .select_related('semester', 'meta_course', 'branch')
+                   .select_related('semester', 'meta_course', 'main_branch')
                    .order_by('-semester__index')
-                   .prefetch_related('additional_branches'))
+                   .prefetch_related('branches'))
         context['courses'] = courses
         return context
 
@@ -631,7 +638,7 @@ class CourseDetailView(PublicURLMixin, CourseURLParamsMixin, generic.DetailView)
                                              .order_by('teacher__last_name',
                                                        'teacher__first_name')))
         return (super().get_course_queryset()
-                .select_related('meta_course', 'semester', 'branch')
+                .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(course_teachers))
 
     def get_object(self, queryset=None):
@@ -686,7 +693,7 @@ class CourseClassDetailView(PublicURLMixin, generic.DetailView):
                 .select_related("course",
                                 "course__meta_course",
                                 "course__semester",
-                                "course__branch",
+                                "course__main_branch",
                                 "venue",
                                 "venue__location"))
 

@@ -1,30 +1,29 @@
 import datetime
 import logging
-import os
 import posixpath
 
 from django.contrib import messages
-from django.core.exceptions import ImproperlyConfigured
 from django.db.models import Prefetch
-from django.http import HttpResponseBadRequest, Http404, HttpResponse, \
-    HttpResponseForbidden, HttpResponseNotFound, JsonResponse, \
+from django.http import HttpResponseBadRequest, Http404, HttpResponseForbidden, HttpResponseNotFound, JsonResponse, \
     HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.views import generic
-from nbconvert import HTMLExporter
-from vanilla import TemplateView, CreateView, GenericModelView
+from nbformat.validator import NotebookValidationError
+from vanilla import TemplateView, GenericModelView
 
 from core import comment_persistence
+from core.response import ProtectedMediaFileResponse
 from core.utils import hashids
 from core.views import LoginRequiredMixin
-from courses.models import AssignmentAttachment
 from courses.constants import ASSIGNMENT_TASK_ATTACHMENT
+from courses.models import AssignmentAttachment
 from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, AssignmentComment, \
     AssignmentNotification, Event, CourseNewsNotification
 from learning.permissions import course_access_role, CourseRole
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT
+from learning.utils import convert_ipynb_to_html
 from users.mixins import TeacherOnlyMixin
 
 logger = logging.getLogger(__name__)
@@ -52,7 +51,7 @@ class StudentAssignmentURLParamsMixin:
                 .select_related('student',
                                 'assignment',
                                 'assignment__course',
-                                'assignment__course__branch',
+                                'assignment__course__main_branch',
                                 'assignment__course__meta_course',
                                 'assignment__course__semester'))
 
@@ -151,54 +150,6 @@ class EventDetailView(generic.DetailView):
     template_name = "learning/event_detail.html"
 
 
-# FIXME: move
-class ProtectedMediaFileResponse(HttpResponse):
-    """
-    Files under `media/assignments/` location are protected by nginx `internal`
-    directive and could be returned by providing `X-Accel-Redirect`
-    response header.
-    Without this header the client error 404 (Not Found) is returned.
-    Note:
-        FileSystemStorage is the main storage for the media/ directory.
-    """
-    def __init__(self, file_uri, content_disposition='inline', **kwargs):
-        """
-        file_uri (X-Accel-Redirect header value) is a URL where the contents
-        of the file can be accessed if `internal` directive wasn't set.
-        In case of FileSystemStorage this URL starts with
-        `settings.MEDIA_URL` value.
-        """
-        super().__init__(**kwargs)
-        if content_disposition == 'attachment':
-            # FIXME: Does it necessary to delete content type here?
-            del self['Content-Type']
-            file_name = os.path.basename(file_uri)
-            # XXX: Content-Disposition doesn't have appropriate non-ascii
-            # symbols support
-            self['Content-Disposition'] = f"attachment; filename={file_name}"
-        self['X-Accel-Redirect'] = file_uri
-
-
-# FIXME: move to utils
-def export_ipynb_to_html(ipynb_src_path, html_ext='.html'):
-    """
-    Converts *.ipynb to html and saves the new file in the same directory with
-    `html_ext` extension.
-    """
-    converted_path = ipynb_src_path + html_ext
-    if not os.path.exists(converted_path):
-        try:
-            # TODO: disable warnings 404 for css and ico in media folder for ipynb files?
-            html_exporter = HTMLExporter()
-            nb_node, _ = html_exporter.from_filename(ipynb_src_path)
-            with open(converted_path, 'w') as f:
-                f.write(nb_node)
-            return True
-        except (FileNotFoundError, AttributeError):
-            return False
-    return True
-
-
 class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
     def get(self, request, *args, **kwargs):
         try:
@@ -206,7 +157,7 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
             if attachment_type not in (ASSIGNMENT_TASK_ATTACHMENT,
                                        ASSIGNMENT_COMMENT_ATTACHMENT):
                 return HttpResponseBadRequest()
-        except IndexError:
+        except (ValueError, IndexError):
             raise Http404
 
         user = request.user
@@ -242,8 +193,14 @@ class AssignmentAttachmentDownloadView(LoginRequiredMixin, generic.View):
         if self.request.GET.get("html", False):
             _, ext = posixpath.splitext(media_file_uri)
             if ext == ".ipynb":
+                ipynb_src_path = file_field.path
                 html_ext = ".html"
-                exported = export_ipynb_to_html(file_field.path, html_ext)
+                html_dest_path = ipynb_src_path + html_ext
+                try:
+                    exported = convert_ipynb_to_html(ipynb_src_path,
+                                                     html_dest_path)
+                except NotebookValidationError as e:
+                    return HttpResponseBadRequest(e.message)
                 if exported:
                     media_file_uri = media_file_uri + html_ext
                     content_disposition = 'inline'

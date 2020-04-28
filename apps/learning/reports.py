@@ -26,6 +26,14 @@ from users.constants import Roles
 from users.models import User, SHADCourseRecord
 
 
+def dataframe_to_response(df: DataFrame, output_format: str, filename: str):
+    if output_format == 'csv':
+        return DataFrameResponse.as_csv(df, filename)
+    elif output_format == 'xlsx':
+        return DataFrameResponse.as_xlsx(df, filename)
+    raise ValueError("Supported output formats: csv, xlsx")
+
+
 class DataFrameResponse:
     @staticmethod
     def as_csv(df: DataFrame, filename):
@@ -275,6 +283,8 @@ class ProgressReportForDiplomas(ProgressReport):
             disciplines = student.graduate_profile.academic_disciplines.all()
         else:
             disciplines = []
+        # FIXME: remove. Hack - alumni 2020 have disciplines in user profile instead of graduate profile
+        disciplines = student.academic_disciplines.all()
         return [
             student.pk,
             student.last_name,

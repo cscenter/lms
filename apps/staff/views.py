@@ -19,19 +19,18 @@ from vanilla import TemplateView
 
 import core.utils
 from admission.models import Campaign, Interview
-from admission.reports import AdmissionReport
+from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
 from core.models import Branch
 from core.templatetags.core_tags import tex
 from core.urls import reverse
 from courses.constants import SemesterTypes
 from courses.models import Course, Semester
-from courses.utils import get_current_term_pair, get_term_index, \
-    get_term_by_index
+from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment, Invitation
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
-    ProgressReportForInvitation, DataFrameResponse
+    ProgressReportForInvitation, dataframe_to_response
 from learning.settings import AcademicDegreeLevels, StudentStatuses, \
     GradeTypes
 from staff.forms import GraduationForm
@@ -60,8 +59,8 @@ class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
             queryset = self.filterset.queryset.none()
         report = ProgressReportFull(grade_getter="grade_honest")
         custom_qs = report.get_queryset(base_queryset=queryset)
-        return DataFrameResponse.as_csv(report.generate(queryset=custom_qs),
-                                        report.get_filename())
+        df = report.generate(queryset=custom_qs)
+        return dataframe_to_response(df, 'csv', report.get_filename())
 
 
 class StudentSearchView(CuratorOnlyMixin, TemplateView):
@@ -106,7 +105,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (Campaign.objects
                           .select_related("branch")
-                          .order_by("-branch__name", "-year")),
+                          .order_by("-year", "branch__name",)),
             "invitations": invitations,
             "branches": Branch.objects.filter(site_id=settings.SITE_ID)
         }
@@ -343,20 +342,14 @@ class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, branch_id, *args, **kwargs):
         report = ProgressReportForDiplomas()
         df = report.generate(report.get_queryset().filter(branch_id=branch_id))
-        return DataFrameResponse.as_csv(df, report.get_filename())
+        return dataframe_to_response(df, 'csv', report.get_filename())
 
 
 class ProgressReportFullView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, output_format, *args, **kwargs):
         report = ProgressReportFull(grade_getter="grade_honest")
         filename = report.get_filename()
-        if output_format == "csv":
-            return DataFrameResponse.as_csv(report.generate(), filename)
-        elif output_format == "xlsx":
-            return DataFrameResponse.as_xlsx(report.generate(), filename)
-        else:
-            return HttpResponseBadRequest(f"{output_format} format "
-                                          f"is not supported")
+        return dataframe_to_response(report.generate(), output_format, filename)
 
 
 class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
@@ -375,13 +368,7 @@ class ProgressReportForSemesterView(CuratorOnlyMixin, generic.base.View):
             return HttpResponseBadRequest()
         report = ProgressReportForSemester(semester)
         filename = report.get_filename()
-        if output_format == "csv":
-            return DataFrameResponse.as_csv(report.generate(), filename)
-        elif output_format == "xlsx":
-            return DataFrameResponse.as_xlsx(report.generate(), filename)
-        else:
-            return HttpResponseBadRequest(f"{output_format} format "
-                                          f"is not supported")
+        return dataframe_to_response(report.generate(), output_format, filename)
 
 
 class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
@@ -389,28 +376,26 @@ class InvitationStudentsProgressReportView(CuratorOnlyMixin, View):
         invitation = get_object_or_404(Invitation.objects
                                        .filter(pk=invitation_id))
         report = ProgressReportForInvitation(invitation)
-        filename = report.get_filename()
-        if output_format == "csv":
-            return DataFrameResponse.as_csv(report.generate(), filename)
-        elif output_format == "xlsx":
-            return DataFrameResponse.as_xlsx(report.generate(), filename)
-        else:
-            return HttpResponseBadRequest(f"{output_format} format "
-                                          f"is not supported")
+        return dataframe_to_response(report.generate(), output_format,
+                                     report.get_filename())
 
 
-class AdmissionReportView(CuratorOnlyMixin, generic.base.View):
-    FORMATS = ('csv', 'xlsx')
-
+class AdmissionApplicantsReportView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, campaign_id, output_format, **kwargs):
-        if output_format not in self.FORMATS:
-            return HttpResponseBadRequest(f"Supported formats {self.FORMATS}")
         campaign = get_object_or_404(Campaign.objects.filter(pk=campaign_id))
-        report = AdmissionReport(campaign=campaign)
+        report = AdmissionApplicantsReport(campaign=campaign)
         if output_format == "csv":
             return report.output_csv()
         elif output_format == "xlsx":
             return report.output_xlsx()
+
+
+class AdmissionExamReportView(CuratorOnlyMixin, generic.base.View):
+    def get(self, request, campaign_id, output_format, **kwargs):
+        campaign = get_object_or_404(Campaign.objects.filter(pk=campaign_id))
+        report = AdmissionExamReport(campaign=campaign)
+        return dataframe_to_response(report.generate(), output_format,
+                                     report.get_filename())
 
 
 class WillGraduateStatsReportView(CuratorOnlyMixin, generic.base.View):

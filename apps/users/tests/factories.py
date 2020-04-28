@@ -122,8 +122,6 @@ class TeacherFactory(UserFactory):
         self.add_group(role=Roles.TEACHER, site_id=site_id)
 
 
-
-
 class OnlineCourseRecordFactory(factory.DjangoModelFactory):
     class Meta:
         model = OnlineCourseRecord

@@ -231,7 +231,7 @@ def test_reporting_period_score_to_grade():
 
 
 @pytest.mark.django_db
-def test_mean_reviewing_score():
+def test_report_final_score():
     report = ReportFactory(score_quality=0, score_activity=0)
     project = report.project_student.project
     reviewer1, reviewer2 = ProjectReviewerFactory.create_batch(2)
@@ -248,15 +248,23 @@ def test_mean_reviewing_score():
     review2.criteria.save()
     report.compute_fields("final_score")
     assert report.final_score == 0
-    add = len(PracticeCriteria.PLANS_CRITERION) - 1
-    review1.criteria.score_plans = add
+    score_planes_value = 2
+    review1.criteria.score_plans = score_planes_value
     review1.criteria.save()
     report.compute_fields("final_score")
-    assert report.final_score == math.ceil(add / 2)
-    review2.criteria.score_plans = add
+    # All reviews are not completed
+    assert report.final_score == 0
+    review1.is_completed = True
+    review1.save()
+    review2.is_completed = True
+    review2.save()
+    report.compute_fields("final_score")
+    assert report.final_score == math.ceil(score_planes_value / 2)
+    review2.criteria.score_plans = score_planes_value
     review2.criteria.save()
     report.compute_fields("final_score")
-    assert report.final_score == add
-    report.score_activity += 1
+    assert report.final_score == score_planes_value
+    score_activity_value = 1
+    report.score_activity = score_activity_value
     report.compute_fields("final_score")
-    assert report.final_score == add + 1
+    assert report.final_score == score_planes_value + score_activity_value

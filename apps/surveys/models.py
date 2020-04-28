@@ -283,7 +283,7 @@ class CourseSurvey(TimezoneAwareModel, models.Model):
         unique_together = [('course', 'type')]
 
     def __str__(self):
-        branch = self.course.branch
+        branch = self.course.main_branch
         return f"{self.course}, {branch} [{self.type}]"
 
     def expire_at_local(self, tz=None, format=None):

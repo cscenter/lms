@@ -5,7 +5,6 @@ from bitfield import BitField
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models, router
-from django.db.models.deletion import Collector
 from django.utils.encoding import smart_text
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _

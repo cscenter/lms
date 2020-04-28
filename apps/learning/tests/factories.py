@@ -63,7 +63,7 @@ class EnrollmentFactory(factory.DjangoModelFactory):
 
     student = factory.SubFactory(StudentFactory)
     course = factory.SubFactory(CourseFactory,
-                                branch_id=factory.SelfAttribute('..student.branch_id'))
+                                main_branch_id=factory.SelfAttribute('..student.branch_id'))
 
     @factory.post_generation
     def student_group(self, create, extracted, **kwargs):

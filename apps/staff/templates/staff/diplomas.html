@@ -12,17 +12,23 @@
 {% block javascripts %}
     <script type="text/javascript" src="//yastatic.net/highlightjs/8.2/highlight.min.js"></script>
     <script type="text/javascript" src="//yastatic.net/highlightjs/8.2/languages/tex.min.js"></script>
-    {% render_bundle 'supervising' 'js' %}
+    {% render_bundle 'supervising' 'js' 'V1' %}
 {% endblock javascripts %}
 
-{# Note: Feel the fear below. #}
+
 {% block content %}
     <div class="container">
     <h3>{{ branch }}</h3>
+    <div class="alert alert-info">
+        Направления обучения берутся из профилей выпускников, которые можно <a href="/staff/exports/#will-graduate">сгенерировать здесь</a>.
+    </div>
+    <div class="alert alert-danger">
+        Для выпуска 2020 направления уже указали у пользователя, поэтому сейчас они берутся из профиля пользователя, а не выпускника.
+    </div>
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
 {% for s in students %}\diploma{{ '{' }}{{ s.pk }}{{ '}' }}{{ '{' }}{{s.first_name}}{{ '}' }}{{ '{' }}{{s.patronymic}}{{ '}' }}{{ '{' }}{{s.last_name}}{{ '}' }}{{ '{' }}{% if s.gender == 'F' %}a{% endif %}{{ '}' }}
-{{ '{' }}направлени{{ s.graduate_profile.academic_disciplines.all|pluralize:"ю,ям" }} {% for program in s.graduate_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.index != forloop.last %} и {% endif %}{% endfor %}{{ '}' }}
-{{ '{' }}{{s.enrollment_year}} года{{ '}' }}
+{{ '{' }}{% if s.academic_disciplines.all|length == 1 %}\\[3.5mm]направления {% else %}направлений\\[3.5mm]{% endif %}{% for program in s.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}{{s.enrollment_year}}{{ '}' }}
 {{ '{' }}{% for course in s.courses %}
 {% spaceless %}\{{course.type}}{{ '{' }}{{course.name}}{{ '}' }}{% if course.type == "course" %}{{ '{' }}1 семестр{{ '}' }}{{ '{' }}{% if course.class_count > 0 %}{{course.class_count}}{% endif %}{{ '}' }}{% endif %}{{ '{' }}{{course.final_grade}}{{ '}' }}
        {{ '{' }}{{ course.teachers }}{{ '}' }}
@@ -30,7 +36,7 @@
 {% endif %}{% endfor %}{{ '}' }}
 {{ '{' }}{% if s.projects_progress|length > 0 %}
 {% for ps in s.projects_progress %}{% with project=ps.project %}{% spaceless %}
-\{% if project.project_type == 'research' %}theory{% else %}practice{% endif %}{{ '{' }}{{project.supervisor}}{{ '}' }}
+\{% if project.project_type == 'research' %}theory{% else %}practice{% endif %}{{ '{' }}{% for s in project.supervisors.all %}{{ s.get_abbreviated_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
          {{ '{' }}{{project.name|tex}}{{ '}' }}{{ '{' }}{{project.semester}}{{ '}' }}{{ '{' }}{{ps.get_final_grade_display|lower}}{{ '}' }}{% endspaceless %}
 {% endwith %}{% endfor %}{% endif %}{{ '}' }}
 

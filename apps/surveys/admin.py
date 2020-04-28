@@ -50,7 +50,7 @@ class CourseSurveyAdmin(admin.ModelAdmin):
     list_display = ("course", "type", "get_form_status", "get_form_actions",
                     "get_survey_actions", "expire_at_local")
     list_filter = (
-        'course__branch',
+        'course__main_branch',
         ('course__semester', AdminRelatedDropdownFilter),
     )
     raw_id_fields = ["course", "email_template"]
@@ -96,7 +96,7 @@ class CourseSurveyAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         return (qs.select_related("course",
-                                  "course__branch",
+                                  "course__main_branch",
                                   "course__semester",
                                   "course__meta_course",
                                   "form"))

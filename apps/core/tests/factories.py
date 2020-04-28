@@ -37,6 +37,8 @@ class EmailTemplateFactory(factory.DjangoModelFactory):
         model = EmailTemplate
         django_get_or_create = ["name"]
 
+    name = factory.Sequence(lambda n: "email-template-%03d" % n)
+
 
 class BranchFactory(factory.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Branch %03d" % n)

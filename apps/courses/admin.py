@@ -6,9 +6,11 @@ from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
 from django.db.models import ForeignKey
+from django.forms import BaseInlineFormSet
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
 
+from core.models import Branch
 from core.timezone import TimezoneAwareDateTimeField
 from core.timezone.forms import TimezoneAwareAdminForm, \
     TimezoneAwareAdminSplitDateTimeWidget, TimezoneAwareSplitDateTimeField
@@ -16,7 +18,8 @@ from core.utils import is_club_site, admin_datetime
 from core.widgets import AdminRichTextAreaWidget
 from courses.models import CourseTeacher, Course, CourseClassAttachment, \
     Assignment, MetaCourse, Semester, CourseClass, CourseNews, \
-    AssignmentAttachment, LearningSpace, CourseReview
+    AssignmentAttachment, LearningSpace, CourseReview, CourseBranch
+from courses.services import CourseService
 from learning.models import AssignmentGroup, StudentGroup
 from learning.services import AssignmentService
 from users.constants import Roles
@@ -49,18 +52,30 @@ class CourseTeacherInline(admin.TabularInline):
     model = CourseTeacher
     extra = 0
     min_num = 1
+    raw_id_fields = ('teacher',)
     formfield_overrides = {
         BitField: {'widget': BitFieldCheckboxSelectMultiple},
-        ForeignKey: {
-            'widget': ListSelect2()
-        }
     }
+    # FIXME: customize template (hide link `show on site`, now it's hidden by css)
+
+
+class CourseBranchFormSet(BaseInlineFormSet):
+    def save(self, commit=True):
+        saved_objects = super().save(commit)
+        if commit:
+            CourseService.sync_branches(course=self.instance)
+        return saved_objects
+
+
+class CourseBranchInline(admin.TabularInline):
+    model = CourseBranch
+    formset = CourseBranchFormSet
+    extra = 0
+    min_num = 0
 
     def formfield_for_foreignkey(self, db_field, *args, **kwargs):
-        if db_field.name == "teacher":
-            kwargs["queryset"] = (User.objects
-                                  .filter(group__role=Roles.TEACHER)
-                                  .distinct())
+        if db_field.name == "branch":
+            kwargs["queryset"] = (Branch.objects.select_related('site'))
         return super().formfield_for_foreignkey(db_field, *args, **kwargs)
 
 
@@ -68,18 +83,6 @@ class CourseAdminForm(forms.ModelForm):
     class Meta:
         model = Course
         fields = '__all__'
-
-    def clean(self):
-        cleaned_data = super().clean()
-        main_branch = cleaned_data.get('branch')
-        if main_branch:
-            additional = cleaned_data['additional_branches']
-            # TODO: Add guard to the additional_branches.through model
-            # Main branch is not allowed among additional branches to avoid
-            # duplicates.
-            cleaned_data['additional_branches'] = (additional
-                                                   .exclude(pk=main_branch.pk))
-        return cleaned_data
 
     def clean_is_open(self):
         is_open = self.cleaned_data['is_open']
@@ -94,12 +97,17 @@ class CourseAdmin(TranslationAdmin, admin.ModelAdmin):
     formfield_overrides = {
         db_models.TextField: {'widget': AdminRichTextAreaWidget},
     }
-    list_filter = ['branch', 'semester']
+    exclude = ('additional_branches',)
+    list_filter = ['main_branch', 'semester']
     list_display = ['meta_course', 'semester', 'is_published_in_video',
                     'is_open']
-    inlines = (CourseTeacherInline,)
+    inlines = (CourseBranchInline, CourseTeacherInline,)
     raw_id_fields = ('meta_course',)
-    filter_horizontal = ('additional_branches',)
+
+    class Media:
+        css = {
+            'all': ('v2/css/django_admin.css',)
+        }
 
 
 class LearningSpaceAdmin(admin.ModelAdmin):

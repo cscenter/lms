@@ -6,6 +6,7 @@ from django.core.cache import cache
 from core.models import Branch
 from core.tests.factories import CityFactory, BranchFactory
 from core.urls import reverse
+from courses.services import CourseService
 from learning.settings import Branches
 from learning.tests.factories import GraduateProfileFactory, MetaCourseFactory, CourseFactory
 from study_programs.tests.factories import AcademicDisciplineFactory
@@ -78,15 +79,17 @@ def test_meta_course_detail(client, settings):
     assert len(response.context_data['tabs']) == 1
     # Relocate course to the non-target branch
     branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
-    course2.branch = branch
+    course2.main_branch = branch
     course2.save()
+    CourseService.sync_branches(course2)
     response = client.get(meta_course_url)
     grouped_courses = response.context_data['grouped_courses']
     assert {c.pk for c in grouped_courses[key]} == {course1.pk}
     # Return to another cs center branch
-    course2.branch = Branch.objects.get(code=Branches.NSK,
-                                        site_id=settings.SITE_ID)
+    course2.main_branch = Branch.objects.get(code=Branches.NSK,
+                                             site_id=settings.SITE_ID)
     course2.save()
+    CourseService.sync_branches(course2)
     response = client.get(meta_course_url)
     assert len(response.context_data['tabs']) == 2
     assert len(response.context_data['grouped_courses']) == 2

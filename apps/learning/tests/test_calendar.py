@@ -183,8 +183,7 @@ def test_correspondence_courses_in_a_full_calendar(client):
     this_month_date = datetime.datetime.utcnow()
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    course = CourseFactory(branch=branch_spb)
-    course.additional_branches.add(branch_nsk)
+    course = CourseFactory(main_branch=branch_spb, branches=[branch_nsk])
     CourseClassFactory.create_batch(
             3, course=course, date=this_month_date)
     classes = flatten_calendar_month_events(

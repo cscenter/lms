@@ -141,4 +141,16 @@ SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
 # django-js-reverse app settings
 JS_REVERSE_JS_VAR_NAME = 'URLS'
 JS_REVERSE_INCLUDE_ONLY_NAMESPACES = ['stats-api', 'admission-api']
-JS_REVERSE_OUTPUT_PATH = str(SHARED_APPS_DIR / "assets" / "v1" / "js" / "vendor")
+JS_REVERSE_OUTPUT_PATH = str(ASSETS_ROOT / "v1" / "js" / "vendor")
+
+
+WEBPACK_LOADER = {
+    'V1': {
+        'BUNDLE_DIR_NAME': 'v1/dist/.local/',  # relative to the ASSETS_ROOT
+        'STATS_FILE': str(ASSETS_ROOT / "v1" / "dist" / ".local" / "webpack-stats-v1.json"),
+    },
+    'V2': {
+        'BUNDLE_DIR_NAME': 'v2/dist/.local/',  # relative to the ASSETS_ROOT
+        'STATS_FILE': str(ASSETS_ROOT / "v2" / "dist" / ".local" / "webpack-stats-v2.json"),
+    }
+}

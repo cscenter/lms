@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load bootstrap_pagination %}
+{% load crispy_forms_tags %}
+{% load replace from core_tags %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}Анкеты - CSC{% endblock title %}
+
+{% block body_attrs %} class="gray" data-init-sections="applicant_list"{% endblock body_attrs %}
+
+{% block javascripts %}
+    {% render_bundle 'admission' 'js' 'V1' %}
+{% endblock javascripts %}
+
+{% block stylesheets %}
+    <style>
+        {# FIXME: move to css file #}
+        .dashed {
+          background-image: linear-gradient(to right, #337ab7 75%, transparent 75%);
+          background-position: 0 1.2em;
+          background-repeat: repeat-x;
+          background-size: 6px 1px;
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+<div class="admission-list-page">
+    {% crispy filter.form %}
+
+{% if import_testing_results != None %}
+    <a href="#import_testing_results" data-toggle="collapse" aria-expanded="false" class="dashed pb-10" style="display: inline-block; text-decoration: dashed!important;">Импорт результатов</a><br>
+    <div class="collapse" id="import_testing_results">
+        <div class="pb-10">
+            <a href="{% url 'admission:import_testing_results' %}" class="btn btn-default _btn-import-testings-results mr-10">
+                <i class="fa fa-refresh" aria-hidden="true"></i> Результаты теста
+            </a>{% if import_testing_results %} Задача добавлена {{ import_testing_results.date }} [{{ import_testing_results.status }}]{% endif %}
+        </div>
+    </div>
+{% endif %}
+
+    <div class="page-content">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Анкеты поступающих / {{ paginator.count }}</h3>
+        </div>
+
+        <div class="panel-body">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Поступающий</th>
+                <th>Набор</th>
+                <th>Направление</th>
+                <th style="width: 60px;">Тест</th>
+                <th style="width: 60px;">Экз.</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for applicant in applicants %}
+                    <tr>
+                        <td class="applicant">
+                            {% if applicant.interview.in_transition_state %}<span class="label label-warning">{{ applicant.interview.get_status_display }}</span><br>{% endif %}
+                            <a href="{%  url "admission:applicant_detail" applicant.pk %}">{{ applicant.full_name }}</a>
+                            {% if request.user.is_curator %}
+                                {% if applicant.user_id %}
+                                    <a style="float: left; margin-bottom: 30px;" class="btn btn-link" title="Профиль на сайте" href="{% url "user_detail" applicant.user_id %}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+                                {% elif applicant.status in applicant.ACCEPT_STATUSES and applicant.campaign.current %}
+                                    <form method="post" action="{% url "admission:applicant_create_user" applicant.pk %}">
+                                        {% csrf_token %}
+                                        <button title="Создать профиль на сайте" type="submit" class="btn btn-link"><i class="fa fa-user-plus" aria-hidden="true"></i></button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}<br>
+                            {% if applicant.university_other %}{{ applicant.university_other }}{% else %}{{ applicant.university }}{% endif %}
+                            {% if applicant.course %}<br>{{ applicant.get_course_display }}{% endif %}
+
+                        </td>
+                        <td>{{ applicant.campaign.branch.name }},&nbsp;{{ applicant.campaign.year }}</td>
+                        <td>{% if applicant.preferred_study_programs %}
+                            {% for p in applicant.preferred_study_programs %}{{ p|upper }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>{% if applicant.online_test %}{{ applicant.online_test.score_display }}{% else %}-{% endif %}</td>
+                        <td>{% if applicant.exam %}{{ applicant.exam.score_display }}{% else %}-{% endif %}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                    <td colspan="6" class="empty-results">Измените параметры поиска.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+
+        {% if is_paginated %}
+            {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
+        {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

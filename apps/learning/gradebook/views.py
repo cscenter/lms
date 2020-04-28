@@ -35,7 +35,7 @@ class GradeBookListBaseView(generic.ListView):
 
     def get_course_queryset(self):
         return (Course.objects
-                .select_related("meta_course", "branch")
+                .select_related("meta_course", "main_branch")
                 .order_by("meta_course__name"))
 
     def get_term_threshold(self):
@@ -145,7 +145,7 @@ class GradeBookView(PermissionRequiredMixin, CourseURLParamsMixin, FormView):
         courses = (Course.objects
                    .filter(**filter_kwargs)
                    .order_by('-semester__index', '-pk')
-                   .select_related('semester', 'meta_course', 'branch'))
+                   .select_related('semester', 'meta_course', 'main_branch'))
         context['course_offering_list'] = courses
         context['user_type'] = self.user_type
 

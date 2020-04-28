@@ -36,7 +36,7 @@ class CourseList(ListAPIView):
     def get_queryset(self):
         return (Course.objects
                 .filter(teachers=self.request.user)
-                .select_related('meta_course', 'semester', 'branch'))
+                .select_related('meta_course', 'semester', 'main_branch'))
 
 
 class EnrollmentList(ListAPIView):

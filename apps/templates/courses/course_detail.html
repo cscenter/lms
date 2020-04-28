@@ -11,7 +11,7 @@
 {% block body_attrs %} data-init-sections="courseDetails"{% endblock body_attrs %}
 
 {% block javascripts %}
-    {% if user.is_curator %}{% render_bundle "supervising" "js" %}{% endif %}
+    {% if user.is_curator %}{% render_bundle "supervising" "js" "V1" %}{% endif %}
 {% endblock javascripts %}
 
 
@@ -21,7 +21,7 @@
         <div class="col-xs-9">
             <h2 class="course-main-title">
             {{ course.meta_course.name }}{% if request.user.is_curator %} <a href="{% url "admin:courses_course_change" course.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a>{% endif %}<br>
-              <small>{{ course.branch.name }} / {{ course.semester }}, <a href="{{ course.meta_course.get_absolute_url }}">посмотреть все семестры</a></small>
+              <small>{{ course.main_branch.name }} / {{ course.semester }}, <a href="{{ course.meta_course.get_absolute_url }}">посмотреть все семестры</a></small>
             </h2>
 
             {% if request.site.domain == 'compsciclub.ru' and not user.is_authenticated %}
@@ -87,7 +87,7 @@
                 {% with tab=course_tabs.reviews %}
                     <div class="tab-pane {% if tab.is_default %}active{% endif %}" role="tabpanel" id="course-{{ tab.type }}">
                         {% for review in tab.tab_panel.context.items %}
-                            <h4>{{ review.course.semester|title }}, {{ review.course.branch.name }}</h4>
+                            <h4>{{ review.course.semester|title }}, {{ review.course.main_branch.name }}</h4>
                               {% markdown 3600 "course_reviews" review.pk review.modified %}
                                 {{ review.text }}
                               {% endmarkdown %}
