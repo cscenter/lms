@@ -1,17 +1,19 @@
 const path = require('path');
 const webpack = require('webpack');
 
+const BundleTracker = require('webpack-bundle-tracker');
 const TerserPlugin = require('terser-webpack-plugin');
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 const DeleteSourceMapWebpackPlugin = require('delete-sourcemap-webpack-plugin');
 
 const APP_VERSION = process.env.APP_VERSION || "v1";
-const SENTRY_ENABLED = (process.env.SENTRY !== "0");
+const LOCAL_BUILD = (process.env.LOCAL_BUILD === "1");
 
-let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
+const __rootdir = path.join(__dirname, '..');
+let __outputdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
 
 // TODO: add css minimization
-module.exports = {
+const prodConfiguration = {
     mode: "production",
 
     devtool: "hidden-source-map",
@@ -60,15 +62,26 @@ module.exports = {
         // Need this plugin for deterministic hashing
         // until this issue is resolved: https://github.com/webpack/webpack/issues/1315
         //new webpack.HashedModuleIdsPlugin(),
+    ],
+};
+
+if (!LOCAL_BUILD) {
+    prodConfiguration.plugins.push(
+        new BundleTracker({
+            path: path.join(__rootdir, '..'),
+            filename: `webpack-stats-${APP_VERSION}.json`,
+        })
+    );
+    const sentryPlugins = [
         new SentryWebpackPlugin({
             include: [
-                __bundlesdir
+                __outputdir
             ],
             ignoreFile: '.sentrycliignore',
             ignore: ['node_modules'],
             urlPrefix: `~/static/${APP_VERSION}/dist/js`,
             debug: true,
-            dryRun: !SENTRY_ENABLED,
+            dryRun: LOCAL_BUILD,
             // Fail silently in case no auth data provided to the sentry-cli
             errorHandler: function(err, invokeErr) {
                 console.log(`Sentry CLI Plugin: ${err.message}`);
@@ -76,5 +89,9 @@ module.exports = {
         }),
         // Delete source maps after uploading to sentry.io
        new DeleteSourceMapWebpackPlugin()
-    ],
-};
+    ];
+    prodConfiguration.plugins.push(...sentryPlugins);
+}
+
+module.exports = prodConfiguration;
+

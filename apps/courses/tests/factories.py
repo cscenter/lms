@@ -9,8 +9,9 @@ from core.tests.factories import LocationFactory, BranchFactory
 from courses.models import MetaCourse, Semester, Course, CourseTeacher, \
     CourseNews, CourseClass, CourseClassAttachment, Assignment, \
     AssignmentAttachment, LearningSpace, CourseReview, \
-    AssignmentSubmissionTypes
+    AssignmentSubmissionTypes, CourseBranch
 from courses.constants import MaterialVisibilityTypes
+from courses.services import CourseService
 from courses.utils import get_current_term_pair, get_term_by_index
 from learning.services import AssignmentService
 from users.tests.factories import TeacherFactory
@@ -70,8 +71,8 @@ class CourseFactory(factory.DjangoModelFactory):
     meta_course = factory.SubFactory(MetaCourseFactory)
     semester = factory.SubFactory(SemesterFactory)
     description = "This course offering will be very different"
-    branch = factory.SubFactory(BranchFactory,
-                                code=settings.DEFAULT_BRANCH_CODE)
+    main_branch = factory.SubFactory(BranchFactory,
+                                     code=settings.DEFAULT_BRANCH_CODE)
 
     @factory.post_generation
     def teachers(self, create, extracted, **kwargs):
@@ -84,12 +85,22 @@ class CourseFactory(factory.DjangoModelFactory):
                               notify_by_default=True).save()
 
     @factory.post_generation
-    def additional_branches(self, create, extracted, **kwargs):
+    def branches(self, create, extracted, **kwargs):
+        """
+        Main branch will be added by `sync_branches` post generation hook, so
+        it's possible to omit main branch in this list
+        """
         if not create:
             return
         if extracted:
             for branch in extracted:
-                self.additional_branches.add(branch)
+                CourseBranch(course=self, branch=branch).save()
+
+    @factory.post_generation
+    def sync_branches(self, create, extracted, **kwargs):
+        if not create:
+            return
+        CourseService.sync_branches(self)
 
 
 class CourseTeacherFactory(factory.DjangoModelFactory):
@@ -134,7 +145,7 @@ class CourseClassFactory(factory.DjangoModelFactory):
     course = factory.SubFactory(CourseFactory)
     venue = factory.SubFactory(
         LearningSpaceFactory,
-        branch=factory.SelfAttribute('..course.branch'))
+        branch=factory.SelfAttribute('..course.main_branch'))
     type = 'lecture'
     name = factory.Sequence(lambda n: "Test class %03d" % n)
     description = factory.Sequence(

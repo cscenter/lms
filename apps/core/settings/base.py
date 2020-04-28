@@ -116,9 +116,10 @@ YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/"
 
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = str(SHARED_APPS_DIR / "static")
+STATIC_ROOT = str(ROOT_DIR / "static")
+ASSETS_ROOT = ROOT_DIR / "assets"
 STATICFILES_DIRS = [
-    str(SHARED_APPS_DIR / "assets"),
+    str(ASSETS_ROOT),
 ]
 STATICFILES_STORAGE = 'static_compress.storage.CompressedManifestStaticFilesStorage'
 STATIC_COMPRESS_FILE_EXTS = ['css', 'js', 'svg']
@@ -148,13 +149,13 @@ REST_FRAMEWORK = {
 }
 
 WEBPACK_LOADER = {
-    'DEFAULT': {
-        'BUNDLE_DIR_NAME': 'v1/dist/js/',  # relative to STATIC_URL
-        'STATS_FILE': str(ROOT_DIR / "public" / "webpack-stats.json"),
+    'V1': {
+        'BUNDLE_DIR_NAME': 'v1/dist/js/',  # relative to the ASSETS_ROOT
+        'STATS_FILE': str(ROOT_DIR / "webpack-stats-v1.json"),
     },
     'V2': {
         'BUNDLE_DIR_NAME': 'v2/dist/js/',
-        'STATS_FILE': str(ROOT_DIR / "public" / "webpack-stats-v2.json"),
+        'STATS_FILE': str(ROOT_DIR / "webpack-stats-v2.json"),
     }
 }
 

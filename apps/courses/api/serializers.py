@@ -33,7 +33,7 @@ class CourseSerializer(serializers.ModelSerializer):
     semester = SemesterSerializer()
     teachers = CourseTeacherSerializer(source="course_teachers",
                                        many=True, read_only=True)
-    branch = BranchSerializer()
+    branch = BranchSerializer(source="main_branch")
     materials = serializers.SerializerMethodField()
 
     class Meta:

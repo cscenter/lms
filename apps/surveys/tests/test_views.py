@@ -18,7 +18,7 @@ def test_course_survey_detail_deadline(client, mocker, settings):
     mocked_timezone.return_value = nsk_tz.localize(datetime(2018, 4, 1, 12, 0))
     expire_at = nsk_tz.localize(datetime(2018, 4, 1, 13, 42))
     branch_nsk = BranchFactory(code=Branches.SPB)
-    course_survey = CourseSurveyFactory(course__branch=branch_nsk,
+    course_survey = CourseSurveyFactory(course__main_branch=branch_nsk,
                                         expire_at=expire_at)
     url = course_survey.get_absolute_url()
     response = client.get(url)

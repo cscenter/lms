@@ -15,7 +15,7 @@
         window.jsonData = JSON.parse('{{ json_data|escapejs }}');
     </script>
     <script src="{% static 'v1/js/vendor/reverse.js' %}"></script>
-    {% render_bundle 'stats' 'js' %}
+    {% render_bundle 'stats' 'js' 'V1' %}
 
     {% include "stats/_js_templates.html" %}
 {% endblock javascripts %}

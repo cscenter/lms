@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const BundleTracker = require('webpack-bundle-tracker');
 const merge = require('webpack-merge');  // merge webpack configs
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
 const Dotenv = require('dotenv-webpack');
@@ -8,9 +7,11 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
 const DEBUG = (process.env.NODE_ENV !== "production");
+const LOCAL_BUILD = (process.env.LOCAL_BUILD === "1");
 
 const development = require('./dev.config');
 const production = require('./prod.config');
+const localConfiguration = require('./local.config');
 
 process.env.BABEL_ENV = process.env.NODE_ENV;
 
@@ -18,7 +19,8 @@ const APP_VERSION = "v2";
 
 const __srcdir = path.join(__dirname, `../src/${APP_VERSION}`);
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
-let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
+let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist`);
+let __outputdir = path.join(__bundlesdir, `js`);
 
 // All dependencies will be copied to path, relative to bundles output
 const STATIC_URL = path.join('/static/');
@@ -26,6 +28,7 @@ const STATIC_URL = path.join('/static/');
 const PATHS = {
     common: path.join(__srcdir, '/js/main.js'),
 };
+
 
 const common = {
 
@@ -46,7 +49,7 @@ const common = {
 
     output: {
         filename: '[name]-[hash].js',
-        path: __bundlesdir,
+        path: __outputdir,
     },
 
     externals: {},
@@ -193,7 +196,6 @@ const common = {
             path: path.join(__dirname, '.env'),
             silent: false,
         }),
-        new BundleTracker({filename: './webpack-stats-v2.json'}),
         new CleanWebpackPlugin({
             verbose: true,
             cleanOnceBeforeBuildPatterns: ['**/*', '!.gitattributes'],
@@ -250,7 +252,11 @@ const common = {
 
 let appConfig;
 if (process.env.NODE_ENV !== "development") {
-    appConfig = merge(common, production);
+    let configs = [common, production];
+    if (LOCAL_BUILD) {
+        configs.push(localConfiguration);
+    }
+    appConfig = merge(configs);
 } else {
     appConfig = merge(common, development);
 }

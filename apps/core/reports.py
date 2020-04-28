@@ -1,21 +1,21 @@
+import csv
 import io
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod, ABC
 from datetime import datetime
 
-import csv
-from django.conf import settings
 from django.http import HttpResponse
 from django.utils import formats
 from django.utils.encoding import force_text
 from xlsxwriter import Workbook
 
 
-class ReportFileOutput:
-    """Methods to output csv and xlsx"""
+class ReportFileOutput(ABC):
+    """Interface for exporting a report in csv or xlsx formats"""
 
-    __metaclass__ = ABCMeta
+    def __init__(self):
+        self.headers = []
+        self.data = []
 
-    # TODO: Create base cls for ReportFile?
     @abstractmethod
     def export_row(self, row):
         raise NotImplementedError()

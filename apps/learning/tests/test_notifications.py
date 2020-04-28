@@ -249,7 +249,7 @@ def test_new_assignment_create_notification_context(settings):
     current_domain = get_domain()
     assert current_domain == settings.TEST_DOMAIN
     branch_spb = BranchFactory(code=Branches.SPB)
-    course = CourseFactory(branch=branch_spb)
+    course = CourseFactory(main_branch=branch_spb)
     enrollment = EnrollmentFactory(course=course, student__branch=branch_spb)
     student = enrollment.student
     assignment = AssignmentFactory(course=course)
@@ -278,7 +278,7 @@ def test_new_course_news_notification_context(settings):
     settings.DEFAULT_URL_SCHEME = 'https'
     assert get_domain() == settings.TEST_DOMAIN
     course = CourseFactory()
-    student = StudentFactory(branch=course.branch)
+    student = StudentFactory(branch=course.main_branch)
     enrollment = EnrollmentFactory(course=course, student=student)
     cn = CourseNewsNotificationFactory(course_offering_news__course=course,
                                        user=student)
@@ -299,7 +299,7 @@ def test_new_assignment_timezone(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    assignment = AssignmentFactory(course__branch=branch_spb, deadline_at=dt)
+    assignment = AssignmentFactory(course__main_branch=branch_spb, deadline_at=dt)
     student = StudentFactory(branch=branch_spb)
     sa = StudentAssignmentFactory(assignment=assignment, student=student)
     dt_local = assignment.deadline_at_local()
@@ -347,7 +347,7 @@ def test_deadline_changed_timezone(settings):
     branch_nsk = BranchFactory(code=Branches.NSK)
     student = StudentFactory(branch=branch_spb)
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)
-    assignment = AssignmentFactory(course__branch=branch_spb, deadline_at=dt)
+    assignment = AssignmentFactory(course__main_branch=branch_spb, deadline_at=dt)
     sa = StudentAssignmentFactory(assignment=assignment, student=student)
     dt_local = assignment.deadline_at_local()
     assert dt_local.hour == 18
@@ -363,7 +363,7 @@ def test_deadline_changed_timezone(settings):
     # timezone of the student.
     student.branch = branch_nsk
     student.save()
-    sa.assignment.course.branch = branch_nsk
+    sa.assignment.course.main_branch = branch_nsk
     sa.assignment.course.save()
     AssignmentNotificationFactory(is_about_deadline=True, user=sa.student,
                                   student_assignment=sa)
@@ -381,7 +381,7 @@ def test_new_assignment_comment(auth_user, client, assert_redirect):
     student = StudentFactory()
     teacher = TeacherFactory()
     teacher2 = TeacherFactory()
-    course = CourseFactory(branch=student.branch, semester=semester,
+    course = CourseFactory(main_branch=student.branch, semester=semester,
                            teachers=[teacher, teacher2])
     EnrollmentFactory.create(student=student, course=course)
     a = AssignmentFactory.create(course=course)

@@ -1,9 +1,11 @@
+{% from '_nginx.cors.jinja2' import common_cors_headers %}
+
 location /media/  {
-    {% if media_root.endswith("/") -%}
-        root {{ media_root[:-1] | dirname }};
-    {% else -%}
-        root {{ media_root | dirname }};
-    {% endif -%}
+    {% if media_root.endswith("/") %}
+    root {{ media_root[:-1] | dirname }};
+    {% else %}
+    root {{ media_root | dirname }};
+    {% endif %}
     access_log off;
     tcp_nodelay off;
     # gzip_static on;
@@ -20,11 +22,11 @@ location /media/  {
 }
 
 location /static/ {
-    {% if static_root.endswith("/") -%}
-        root {{ static_root[:-1] | dirname }};
-    {% else -%}
-        root {{ static_root | dirname }};
-    {% endif -%}
+    {% if static_root.endswith("/") %}
+    root {{ static_root[:-1] | dirname }};
+    {% else %}
+    root {{ static_root | dirname }};
+    {% endif %}
     access_log off;
     tcp_nodelay off;
     gzip_static off;
@@ -36,6 +38,20 @@ location /static/ {
     {% filter indent(width=4) %}
         {% include '_nginx.hsts.jinja2' %}
     {% endfilter %}
+
+    {% if CORS_enabled %}
+        {{ common_cors_headers() }}
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Methods "$cors_allow_methods_static_dir";
+            add_header Access-Control-Allow-Headers "$cors_allow_headers_static_dir";
+            {{ common_cors_headers() }}
+            # Preflight response is valid for 20 days
+            add_header 'Access-Control-Max-Age' "$cors_access_control_max_age";
+            add_header 'Content-Type' 'text/plain; charset=utf-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+    {% endif %}
 }
 
 location ~ ^/apple-touch-icon(|-\d+x\d+)(|-precomposed).png {

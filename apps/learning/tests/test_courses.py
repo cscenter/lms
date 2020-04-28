@@ -4,6 +4,7 @@ import pytest
 import pytz
 
 from core.tests.factories import BranchFactory
+from courses.models import CourseBranch
 from courses.tests.factories import CourseTeacherFactory, AssignmentFactory, \
     CourseFactory
 from learning.settings import Branches
@@ -18,7 +19,7 @@ def test_course_detail_view_timezone(settings, client):
                                     tzinfo=pytz.UTC)
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    course_spb = CourseFactory(branch=branch_spb)
+    course_spb = CourseFactory(main_branch=branch_spb)
     assignment = AssignmentFactory(deadline_at=deadline_at,
                                    course=course_spb)
     teacher_nsk = TeacherFactory(branch=branch_nsk)
@@ -36,7 +37,7 @@ def test_course_detail_view_timezone(settings, client):
         response = client.get(assignments_tab_url)
         assert response.status_code == 200
         assert response.context["tz_override"] is None
-    course_spb.additional_branches.add(branch_nsk)
+    CourseBranch(course=course_spb, branch=branch_nsk).save()
     client.logout()
     # Any authenticated user (this teacher is not actual teacher of the course)
     client.login(teacher_nsk)

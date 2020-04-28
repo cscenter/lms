@@ -25,6 +25,7 @@ app_required_vars:
   - db_user
   - db_user_password
   - setup_cronjobs
+  - CORS_enabled
   - certbot_domains
   - nginx_configs
   - certbot_config_dir

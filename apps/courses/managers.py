@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List
 
 from django.db import models
 from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
@@ -60,11 +60,11 @@ class CourseClassQuerySet(query.QuerySet):
                 .select_related('course',
                                 'course__meta_course',
                                 'course__semester',
-                                'course__branch')
+                                'course__main_branch')
                 .defer('course__description',
                        'course__description_en',
                        'course__description_ru',
-                       'course__branch__description',
+                       'course__main_branch__description',
                        'course__meta_course__description',
                        'course__meta_course__description_en',
                        'course__meta_course__description_ru',
@@ -72,11 +72,11 @@ class CourseClassQuerySet(query.QuerySet):
                        'course__meta_course__short_description_en',
                        'course__meta_course__short_description_ru'))
 
+    # FIXME: possible duplicates. Add tests
     def in_branches(self, *branches):
         if not branches:
             return self
-        return (self.filter(Q(course__branch__in=branches) |
-                            Q(course__additional_branches__in=branches)))
+        return self.filter(course__coursebranch__branch__in=branches)
 
     def for_student(self, user):
         # Get common courses classes and restricted to the student group
@@ -105,19 +105,13 @@ CourseClassManager = _CourseClassManager.from_queryset(CourseClassQuerySet)
 
 
 class CourseQuerySet(models.QuerySet):
-    def available_in(self, *branches: Tuple[int], distinct=True):
-        """
-        Branch filter returns multiple rows for the same course due to the JOIN with Course.additional_branches.
-        Use distinct=True to ensure that no duplicate courses will be listed.
-        """
-        branch_filtered = self.filter(Q(branch__in=branches) |
-                                      Q(additional_branches__in=branches))
-        if distinct:
-            return (branch_filtered
-                    .distinct('semester__index', 'meta_course__name', 'pk')
-                    .order_by('-semester__index', 'meta_course__name', 'pk'))
-        else:
-            return branch_filtered
+    def available_in(self, branch):
+        return self.filter(coursebranch__branch=branch)
+
+    def in_branches(self, branches: List[int]):
+        return (self.filter(coursebranch__branch__in=branches)
+                .distinct('semester__index', 'meta_course__name', 'pk')
+                .order_by('-semester__index', 'meta_course__name', 'pk'))
 
     def for_teacher(self, user):
         return self.filter(teachers=user)

@@ -60,8 +60,8 @@ def enroll_in_course(user, course: Course):
         logger.debug("Enrollment is closed")
         return False
     # Check that course is available for student branch
-    if course.branch_id != user.branch_id:
-        if user.branch not in course.additional_branches.all():
+    if course.main_branch_id != user.branch_id:  # avoid possible db hit
+        if user.branch not in course.branches.all():
             logger.debug("Student with branch %s could not enroll in the "
                          "course %s", user.branch_id, course)
             return False

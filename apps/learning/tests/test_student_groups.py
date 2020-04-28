@@ -3,7 +3,7 @@ import pytest
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
 from core.urls import reverse
-from courses.models import StudentGroupTypes
+from courses.models import StudentGroupTypes, CourseBranch
 from courses.tests.factories import CourseFactory, AssignmentFactory, \
     SemesterFactory
 from learning.models import StudentGroup, StudentAssignment, Enrollment
@@ -16,7 +16,7 @@ from users.tests.factories import StudentFactory, CuratorFactory, \
 @pytest.mark.django_db
 def test_create_student_group_from_root_branch(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
-    course = CourseFactory(branch=branch_spb,
+    course = CourseFactory(main_branch=branch_spb,
                            group_mode=StudentGroupTypes.BRANCH)
     student_groups = StudentGroup.objects.filter(course=course).all()
     assert len(student_groups) == 1
@@ -32,10 +32,10 @@ def test_create_student_group_from_root_branch(settings):
 def test_upsert_student_group_from_additional_branch(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    course = CourseFactory(branch=branch_spb,
+    course = CourseFactory(main_branch=branch_spb,
                            group_mode=StudentGroupTypes.BRANCH)
     assert StudentGroup.objects.filter(course=course).count() == 1
-    course.additional_branches.add(branch_nsk)
+    CourseBranch(course=course, branch=branch_nsk).save()
     groups = StudentGroup.objects.filter(course=course)
     assert len(groups) == 2
     sg1, sg2 = groups
@@ -50,8 +50,8 @@ def test_upsert_student_group_from_additional_branch(settings):
     assert {sg1.branch_id, sg2.branch_id} == {branch_spb.pk, branch_nsk.pk}
     # Update by removing branch
     branch = BranchFactory()
-    course.additional_branches.remove(branch_nsk)
-    course.additional_branches.add(branch)
+    course.branches.remove(branch_nsk)
+    CourseBranch(course=course, branch=branch).save()
     groups = StudentGroup.objects.filter(course=course)
     assert len(groups) == 2
     sg1, sg2 = groups
@@ -71,7 +71,8 @@ def test_student_group_resolving_on_enrollment(client):
     student2 = StudentFactory(branch=BranchFactory())
     today = now_local(student1.get_timezone()).date()
     current_semester = SemesterFactory.create_current(enrollment_end_at=today)
-    course = CourseFactory(semester=current_semester, branch=student1.branch)
+    course = CourseFactory(main_branch=student1.branch,
+                           semester=current_semester)
     student_groups = StudentGroup.objects.filter(course=course).all()
     assert len(student_groups) == 1
     student_group = student_groups[0]
@@ -100,7 +101,8 @@ def test_student_group_resolving_on_enrollment_admin(client):
     student, student2 = StudentFactory.create_batch(2, branch=BranchFactory())
     today = now_local(student.get_timezone()).date()
     current_semester = SemesterFactory.create_current(enrollment_end_at=today)
-    course = CourseFactory(semester=current_semester, branch=BranchFactory())
+    course = CourseFactory(main_branch=BranchFactory(),
+                           semester=current_semester)
     post_data = {
         'course': course.pk,
         'student': student.pk,
@@ -129,7 +131,7 @@ def test_student_group_resolving_enrollment_by_invitation(settings, client):
     invited = InvitedStudentFactory(branch=branch_spb)
     today = now_local(invited.get_timezone()).date()
     term = SemesterFactory.create_current(enrollment_end_at=today)
-    course = CourseFactory(semester=term, branch=branch_spb)
+    course = CourseFactory(main_branch=branch_spb, semester=term)
     student_groups = StudentGroup.objects.filter(course=course).all()
     assert len(student_groups) == 1
     student_group = student_groups[0]
@@ -148,9 +150,9 @@ def test_student_group_resolving_enrollment_by_invitation(settings, client):
 def test_assignment_restricted_to(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
-    course = CourseFactory(branch=branch_spb,
+    course = CourseFactory(main_branch=branch_spb,
                            group_mode=StudentGroupTypes.BRANCH,
-                           additional_branches=[branch_nsk])
+                           branches=[branch_nsk])
     assert StudentGroup.objects.filter(course=course).count() == 2
     sg_spb, sg_nsk = StudentGroup.objects.filter(course=course).all()
     if sg_spb.branch != branch_spb:

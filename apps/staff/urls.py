@@ -1,21 +1,37 @@
 from django.conf.urls import include, url
-from django.urls import path, re_path
+from django.urls import path, re_path, register_converter
 
 from courses.urls import RE_COURSE_URI
 from learning.gradebook.views import GradeBookView, GradeBookCSVView, \
     AssignmentScoresImportByStepikIDView, \
     AssignmentScoresImportByYandexLoginView
-from staff.views import HintListView, StudentSearchView, ExportsView, StudentsDiplomasStatsView, StudentsDiplomasTexView, \
+from staff.views import HintListView, StudentSearchView, ExportsView, \
+    StudentsDiplomasStatsView, StudentsDiplomasTexView, \
     StudentsDiplomasCSVView, ProgressReportFullView, \
-    ProgressReportForSemesterView, AdmissionReportView, \
+    ProgressReportForSemesterView, AdmissionApplicantsReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
     CourseParticipantsIntersectionView, WillGraduateStatsReportView, \
     SurveySubmissionsReportView, \
     SurveySubmissionsStatsView, GradeBookListView, create_alumni_profiles, \
-    InvitationStudentsProgressReportView, StudentSearchCSVView
+    InvitationStudentsProgressReportView, StudentSearchCSVView, \
+    AdmissionExamReportView
 from staff.api.views import StudentSearchJSONView
 
 app_name = 'staff'
+
+
+class SupportedExportFormatConverter:
+    regex = 'csv|xlsx'
+
+    def to_python(self, value):
+        return value
+
+    def to_url(self, value):
+        return value
+
+
+register_converter(SupportedExportFormatConverter, 'export_fmt')
+
 
 urlpatterns = [
     path('gradebooks/', include([
@@ -57,7 +73,8 @@ urlpatterns = [
         url(r'^terms/(?P<term_year>\d+)/(?P<term_type>\w+)/(?P<output_format>csv|xlsx)/$', ProgressReportForSemesterView.as_view(), name='students_progress_report_for_term'),
         url(r'^invitations/(?P<invitation_id>\d+)/(?P<output_format>csv|xlsx)/$', InvitationStudentsProgressReportView.as_view(), name='students_progress_report_for_invitation'),
     ])),
-    path('reports/admission/<int:campaign_id>/<str:output_format>/', AdmissionReportView.as_view(), name='exports_report_admission'),
+    path('reports/admission/<int:campaign_id>/applicants/<export_fmt:output_format>/', AdmissionApplicantsReportView.as_view(), name='exports_report_admission_applicants'),
+    path('reports/admission/<int:campaign_id>/exam/<export_fmt:output_format>/', AdmissionExamReportView.as_view(), name='exports_report_admission_exam'),
     url(r'^reports/surveys/(?P<survey_pk>\d+)/(?P<output_format>csv|xlsx)/$', SurveySubmissionsReportView.as_view(), name='exports_report_survey_submissions'),
     url(r'^reports/surveys/(?P<survey_pk>\d+)/txt/$', SurveySubmissionsStatsView.as_view(), name='exports_report_survey_submissions_stats'),
 

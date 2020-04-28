@@ -1,5 +1,10 @@
 const path = require('path');
 const webpack = require('webpack');
+const BundleTracker = require('webpack-bundle-tracker');
+
+const APP_VERSION = process.env.APP_VERSION || "v1";
+
+let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist`);
 
 module.exports = {
     mode: "development",
@@ -15,7 +20,11 @@ module.exports = {
                 NODE_ENV: '"development"'
             },
         }),
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin(),
+        new BundleTracker({
+            path: path.join(__bundlesdir, '.local'),
+            filename: `webpack-stats-${APP_VERSION}.json`
+        }),
     ],
 
     // This is default settings for development mode, but lets set it explicitly

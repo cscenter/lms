@@ -18,13 +18,20 @@ from .models import User, EnrollmentCertificate, \
 
 
 class UserStatusLogAdmin(admin.TabularInline):
-    list_select_related = ['semester', 'student']
+    list_select_related = ['student']
     model = UserStatusLog
     extra = 0
-    readonly_fields = ('created', 'status')
+    show_change_link = True
+    readonly_fields = ('get_semester', 'status')
 
     def has_add_permission(self, request, obj=None):
         return False
+
+    @meta(_("Semester"))
+    def get_semester(self, obj):
+        from courses.utils import get_terms_in_range
+        term = next(get_terms_in_range(obj.created, obj.created), None)
+        return term.label if term else '-'
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):

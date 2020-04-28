@@ -41,6 +41,7 @@ from projects.forms import ReportCommentForm, ReportReviewForm, \
 from projects.models import Project, ProjectStudent, Report, \
     ReportComment, Review, ReportingPeriod, ReportingPeriodKey, PracticeCriteria
 from projects.permissions import UpdateReportComment
+from projects.services import autocomplete_review_stage
 from users.constants import Roles, GenderTypes
 from users.mixins import ProjectReviewerGroupOnlyMixin, StudentOnlyMixin, \
     CuratorOnlyMixin
@@ -632,18 +633,14 @@ class ProcessReviewFormView(LoginRequiredMixin, ModelFormMixin, View):
                                              instance=criteria)
         if review_form.is_valid() and criteria_form.is_valid():
             with transaction.atomic():
-                # After saving review without attached criteria report model
-                # can't be updated if it meets all other requirements
-                # (see `Review.save` method) since it updates final score
-                # which depends on reviews criteria.
                 review = review_form.save()
-                # FIXME: mb save criteria first, then review and then add
-                # review info to the criteria?
                 criteria_form.instance.review = review
                 criteria = criteria_form.save()
                 review.criteria = criteria
-                # Here we could update report state if meet all the requirements
                 review.save()
+                # Trying to update report status that will trigger
+                # final score calculation
+                autocomplete_review_stage(review)
             if review.is_completed:
                 self.send_notification_to_curators(review)
             if ReportReviewForm.prefix + "-draft" in request.POST:
@@ -849,7 +846,7 @@ class ReportAttachmentDownloadView(LoginRequiredMixin, generic.View):
     def get(self, request, *args, **kwargs):
         try:
             attachment_type, pk = hashids.decode(kwargs['sid'])
-        except IndexError:
+        except (ValueError, IndexError):
             raise Http404
         projects_app = apps.get_app_config("projects")
         user = request.user

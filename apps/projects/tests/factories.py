@@ -85,8 +85,8 @@ class ReportFactory(factory.DjangoModelFactory):
 
     project_student = factory.SubFactory(ProjectStudentFactory)
     reporting_period = factory.SubFactory(ReportingPeriodFactory)
-    score_activity = FuzzyChoice([v for v, _ in Report.ACTIVITY])
-    score_quality = FuzzyChoice([v for v, _ in Report.QUALITY])
+    score_activity = 0
+    score_quality = 0
 
 
 class ReportCommentFactory(factory.DjangoModelFactory):
@@ -119,18 +119,15 @@ class ReviewPracticeCriteriaFactory(factory.DjangoModelFactory):
         model = PracticeCriteria
 
     review = factory.SubFactory(ReviewFactory)
-    score_global_issue = FuzzyChoice([v for v, _ in
-                                      PracticeCriteria.GLOBAL_ISSUE_CRITERION])
-    score_usefulness = FuzzyChoice([v for v, _ in
-                                    PracticeCriteria.USEFULNESS_CRITERION])
-    score_progress = FuzzyChoice([v for v, _ in PracticeCriteria.PROGRESS_CRITERION])
-    score_problems = FuzzyChoice([v for v, _ in PracticeCriteria.PROBLEMS_CRITERION])
-    score_technologies = FuzzyChoice([v for v, _ in
-                                      PracticeCriteria.TECHNOLOGIES_CRITERION])
-    score_plans = FuzzyChoice([v for v, _ in PracticeCriteria.PLANS_CRITERION])
+    score_global_issue = 0
+    score_usefulness = 0
+    score_progress = 0
+    score_problems = 0
+    score_technologies = 0
+    score_plans = 0
 
 
-def review_form_factory(is_completed=True):
+def review_form_data_factory(is_completed=True):
     criteria = factory.build(dict, FACTORY_CLASS=ReviewPracticeCriteriaFactory,
                              review=None)
     del criteria["review"]

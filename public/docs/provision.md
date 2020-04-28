@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 ```
 cd <project root>
-npm i
+npm ci
 ```
 
 ```

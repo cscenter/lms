@@ -20,15 +20,15 @@ class MetaCourseDetailView(generic.DetailView):
         context = super().get_context_data(**kwargs)
         filters = {}
         if hasattr(self.request, 'branch'):
-            filters['branch'] = self.request.branch
+            filters['main_branch'] = self.request.branch
         else:
-            filters['branch__in'] = (Branch.objects
-                                     .filter(site_id=settings.SITE_ID)
-                                     .values_list('pk', flat=True))
+            filters['main_branch__in'] = (Branch.objects
+                                          .filter(site_id=settings.SITE_ID)
+                                          .values_list('pk', flat=True))
         courses = (Course.objects
                    .filter(meta_course=self.object,
                            **filters)
-                   .select_related("meta_course", "semester", "branch")
+                   .select_related("meta_course", "semester", "main_branch")
                    .order_by('-semester__index'))
         context['courses'] = courses
         return context

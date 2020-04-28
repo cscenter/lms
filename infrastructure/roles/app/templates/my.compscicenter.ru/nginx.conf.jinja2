@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
-{# FIXME: This configuration depends on compscicenter.ru conf (see `django_{{ site_user }}` upstream and `map $http_origin`) #}
+{% from '_nginx.cors.jinja2' import common_cors_headers %}
 
 server {
     listen {% if enable_https %}443 ssl http2{% else %}80{% endif %};
@@ -30,9 +30,18 @@ server {
 
     # Django
     location / {
-        {% filter indent(width=8) -%}
-        {% include '_nginx.cors.jinja2' %}
-        {% endfilter %}
+        {% if CORS_enabled %}
+            {{ common_cors_headers() }}
+            if ($request_method = 'OPTIONS') {
+                {{ common_cors_headers() }}
+                add_header Access-Control-Allow-Methods "$cors_allow_methods";
+                add_header Access-Control-Allow-Headers "$cors_allow_headers";
+                add_header 'Access-Control-Max-Age' "$cors_access_control_max_age";
+                add_header 'Content-Type' 'text/plain; charset=utf-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+        {% endif %}
 
         add_header X-Frame-Options $frame_options;
         add_header Cache-Control no-cache,no-store,must-revalidate;

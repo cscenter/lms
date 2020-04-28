@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load i18n %}
+{% load user_thumbnail from user_thumbnail %}
+{% load bootstrap_pagination %}
+{% load static %}
+{% load tz %}
+{% load floatdot from core_tags %}
+{% load render_bundle from webpack_loader %}
+
+{% block title %}Собеседования - CSC{% endblock title %}
+
+{% block body_attrs %} class="gray" data-init-sections="datetimepickers,tooltips"{% endblock body_attrs %}
+
+{% block javascripts %}
+    {% render_bundle 'admission' config='V1' %}
+{% endblock javascripts %}
+
+{% block content %}
+{% localtime off %}
+<div class="admission-list-page">
+    {% crispy filter.form %}
+    <div class="page-content">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+              {{ results_title }} / {{ paginator.count }}
+          </h3>
+        </div>
+        <div class="panel-body">
+          <table class="table">
+            <thead>
+              <tr>
+                  <th>Время</th>
+                  <th>Поступающий</th>
+                  <th>Собеседующие</th>
+                  <th>{% if not filter.form.status.value or filter.form.status.value == "completed" or filter.form.status.value == "agreed" %}Средний&nbsp;балл{% endif %}</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for interview in interviews %}
+                    <tr>
+                        <td class="date">
+                            <div class="time">{{ interview.date_local|date:"H:i" }}</div>
+                            {{ interview.date_local|date:"d E" }}
+                        </td>
+                        <td class="applicant">
+                            <a href="{{ interview.get_absolute_url }}">{{ interview.applicant.full_name }}</a>
+                        </td>
+                        <td class="members">
+                            <ul>
+                                {% for interviewer in interview.interviewers.all %}
+                                <li>
+                                    {% if interviewer.photo %}
+                                        {% user_thumbnail interviewer interviewer.ThumbnailSize.INTERVIEW_LIST as im %}
+                                            <a target="_blank" href="{{ interviewer.get_absolute_url }}">
+                                                <img data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}" alt="{{ interviewer.get_full_name }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                                            </a>
+                                        {% enduser_thumbnail %}
+                                    {% else %}
+                                        <div class="square" data-toggle="tooltip" data-placement="top" title="{{ interviewer.get_full_name }}">{{ interviewer.first_name|slice:":1" }}{{ interviewer.last_name|slice:":1" }}</div>
+                                    {% endif %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            {% if interview.status == "completed" %}
+                                {{ interview.average|floatdot:2 }}
+                            {% elif not filter.form.status.value or filter.form.status.value|length > 1 %}
+                                <span>{{ interview.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                    <td colspan="4" class="empty-results">Измените параметры поиска.</td>
+                    </tr>
+                {% endfor %}
+
+            </tbody>
+          </table>
+
+            {% if is_paginated %}
+                {% bootstrap_paginate page_obj range=10 show_prev_next="false" show_first_last="true" last_label="<i class='fa fa-angle-double-right'></i>" first_label="<i class='fa fa-angle-double-left'></i>" %}
+            {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endlocaltime %}
+{% endblock content %}

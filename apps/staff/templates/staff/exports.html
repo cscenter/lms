@@ -56,7 +56,7 @@
                     </ul>
                 </div>
             </div>
-            <h2 class="content-title">Будущий выпуск</h2>
+            <a name="will-graduate"></a><h2 class="content-title">Будущий выпуск</h2>
             <div class="list-group">
                 <div  class="list-group-item">
                     <p>Форма сгенерирует профили будущих выпускников. После добавления направлений обучения, отзывов и т.д., их нужно дополнительно активировать для показа на странице выпуска.</p>
@@ -66,14 +66,23 @@
                     {% endfor %}
                 </div>
             </div>
-            <h2>Поступление. Отчетность по набору</h2>
-            <div class="list-group">
-                <div class="list-group-item">
+            <h2>Набор</h2>
+
+                    <table class="table table-bordered bg-white">
+                    <tr>
+                        <th>Кампания по набору</th>
+                        <th>Анкеты</th>
+                        <th>Результаты экзамена</th>
+                    </tr>
                     {% for campaign in campaigns %}
-                        <a target="_blank" href="{% url 'staff:exports_report_admission' campaign.pk 'csv' %}">{{ campaign }}</a><br>
+                        <tr>
+                        <td>{{ campaign }}</td>
+                        <td><a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'csv' %}">csv</a>,  <a target="_blank" href="{% url 'staff:exports_report_admission_applicants' campaign.pk 'xlsx' %}">xlsx</a></td>
+                        <td><a target="_blank" href="{% url 'staff:exports_report_admission_exam' campaign.pk 'csv' %}">csv</a>, <a target="_blank" href="{% url 'staff:exports_report_admission_exam' campaign.pk 'xlsx' %}">xlsx</a></td>
+                        </tr>
                     {% endfor %}
-                </div>
-            </div>
+
+                    </table>
         </div>
     </div>
 </div>

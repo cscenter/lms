@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from courses.constants import TeacherRoles
-from courses.models import CourseReview, Course
+from courses.models import CourseReview, Course, CourseBranch
 from courses.utils import get_terms_in_range
 
 
@@ -30,14 +30,43 @@ def group_teachers(teachers, multiple_roles=False) -> Dict[str, List]:
 
 class CourseService:
     @staticmethod
+    def sync_branches(course):
+        """
+        Make sure Course.main_branch is always presented among `Course.branches`
+        values and there is only one branch with `.is_main` attribute
+        set to True.
+        """
+        existing_branches = CourseBranch.objects.filter(course=course)
+        has_main_branch = False
+        for course_branch in existing_branches:
+            is_main = (course_branch.branch_id == course.main_branch_id)
+            if course_branch.is_main:
+                # Case when main branch were changed without
+                # updating .branches values. Admin in that case should
+                # raise ValidationError
+                if not is_main:
+                    course_branch.delete()
+                else:
+                    has_main_branch = True
+            elif is_main:
+                has_main_branch = True
+                course_branch.is_main = True
+                course_branch.save(update_fields=['is_main'])
+        if not has_main_branch:
+            main_course_branch = CourseBranch(course=course,
+                                              branch=course.main_branch,
+                                              is_main=True)
+            main_course_branch.save()
+
+    @staticmethod
     def get_reviews(course):
         reviews = (CourseReview.objects
                    .filter(course__meta_course_id=course.meta_course_id)
                    .select_related('course', 'course__semester',
-                                   'course__branch')
+                                   'course__main_branch')
                    .only('pk', 'modified', 'text',
                          'course__semester__year', 'course__semester__type',
-                         'course__branch__name'))
+                         'course__main_branch__name'))
         return list(reviews)
 
     @staticmethod
@@ -66,7 +95,7 @@ def get_teacher_branches(user, start_date, end_date):
     branches = set(Course.objects
                    .filter(semester__index__in=term_indexes,
                            teachers=user)
-                   .values_list("branch_id", flat=True)
+                   .values_list("main_branch_id", flat=True)
                    .distinct())
     branches.add(user.branch_id)
     return branches

@@ -52,10 +52,6 @@ GITHUB_LOGIN_VALIDATOR = RegexValidator(regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*$")
 # FIXME: rename to student status log and move to learning app (and all User.status* fields to StudentProfile)
 class UserStatusLog(models.Model):
     created = models.DateField(_("created"), default=timezone.now)
-    semester = models.ForeignKey(
-        "courses.Semester",
-        verbose_name=_("Semester"),
-        on_delete=models.CASCADE)
     status = models.CharField(
         choices=StudentStatuses.choices,
         verbose_name=_("Status"),
@@ -71,13 +67,9 @@ class UserStatusLog(models.Model):
     def prepare_fields(self, monitored_instance, monitoring_field_attname):
         if not self.student_id:
             self.student_id = monitored_instance.pk
-        # Prevent additional queries in admin
-        if not self.semester_id:
-            self.semester_id = Semester.get_current().pk
 
     def __str__(self):
-        return smart_text("{} [{}]".format(
-            self.student.get_full_name(True), self.semester))
+        return self.student.get_full_name(last_name_first=True)
 
 
 class LearningPermissionsMixin:
@@ -217,7 +209,7 @@ class UserGroup(models.Model):
             self.user_id, self.role, self.site_id)
 
 
-class StudentProfile(models.Model):
+class StudentProfileAbstract(models.Model):
     enrollment_year = models.PositiveSmallIntegerField(
         _("CSCUser|enrollment year"),
         validators=[MinValueValidator(1990)],
@@ -255,12 +247,45 @@ class StudentProfile(models.Model):
         verbose_name=_("Fields of study"),
         help_text=_("Academic disciplines from which student plans to graduate"),
         blank=True)
+    status = models.CharField(
+        choices=StudentStatuses.choices,
+        verbose_name=_("Status"),
+        max_length=15,
+        blank=True)
+    status_last_change = MonitorStatusField(
+        UserStatusLog,
+        verbose_name=_("Status changed"),
+        blank=True,
+        null=True,
+        editable=False,
+        monitored='status',
+        logging_model=UserStatusLog,
+        on_delete=models.CASCADE)
+    comment = models.TextField(
+        _("Comment"),
+        help_text=LATEX_MARKDOWN_ENABLED,
+        blank=True)
+    comment_changed_at = MonitorField(
+        monitor='comment',
+        verbose_name=_("Comment changed"))
+    comment_last_author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        verbose_name=_("Author of last edit"),
+        on_delete=models.PROTECT,
+        related_name='user_commented',
+        blank=True,
+        null=True)
+    index_redirect = models.CharField(
+        _("Index Redirect Option"),
+        max_length=200,
+        choices=PublicRoute.choices(),
+        blank=True)
 
     class Meta:
         abstract = True
 
 
-class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
+class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
            UserThumbnailMixin, AbstractBaseUser):
     TIMEZONE_AWARE_FIELD_NAME = TimezoneAwareModel.SELF_AWARE
 
@@ -362,43 +387,9 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfile,
                    .format(_("LaTeX+Markdown is enabled"),
                            _("will be shown only to logged-in users"))),
         blank=True)
-    status = models.CharField(
-        choices=StudentStatuses.choices,
-        verbose_name=_("Status"),
-        help_text=_("Status|HelpText"),
-        max_length=15,
-        blank=True)
-    status_last_change = MonitorStatusField(
-        UserStatusLog,
-        verbose_name=_("Status changed"),
-        blank=True,
-        null=True,
-        editable=False,
-        monitored='status',
-        logging_model=UserStatusLog,
-        on_delete=models.CASCADE)
-    comment = models.TextField(
-        _("Comment"),
-        help_text=LATEX_MARKDOWN_ENABLED,
-        blank=True)
-    comment_changed_at = MonitorField(
-        monitor='comment',
-        verbose_name=_("Comment changed"))
-    comment_last_author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Author of last edit"),
-        on_delete=models.PROTECT,
-        related_name='user_commented',
-        blank=True,
-        null=True)
     workplace = models.CharField(
         _("Workplace"),
         max_length=200,
-        blank=True)
-    index_redirect = models.CharField(
-        _("Index Redirect Option"),
-        max_length=200,
-        choices=PublicRoute.choices(),
         blank=True)
 
     objects = CustomUserManager()
@@ -765,6 +756,7 @@ class OnlineCourseRecord(TimeStampedModel):
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
     name = models.CharField(_("Course|name"), max_length=255)
+    url = models.URLField(_("Online Course URL"), blank=True)
 
     class Meta:
         ordering = ["name"]

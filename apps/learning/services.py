@@ -1,3 +1,4 @@
+import datetime
 from itertools import islice
 from operator import attrgetter
 from typing import List, Iterable, Union
@@ -17,8 +18,9 @@ from courses.managers import CourseClassQuerySet
 from courses.models import Course, Assignment, AssignmentAttachment, \
     StudentGroupTypes, CourseClass
 from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, StudentGroup, Event
+    AssignmentNotification, StudentGroup, Event, GraduateProfile
 from learning.settings import StudentStatuses
+from users.constants import Roles
 from users.models import User
 
 
@@ -129,7 +131,7 @@ class StudentGroupService:
     @staticmethod
     def _get_choice_label(student_group, sites_count):
         if student_group.type == StudentGroupTypes.BRANCH and sites_count > 1:
-            return f"{student_group.name} [{student_group.branch.site}]"
+            return f"{student_group.name} [{student_group.main_branch.site}]"
         return student_group.name
 
 
@@ -457,3 +459,28 @@ def get_study_events(filters: List[Q] = None) -> QuerySet:
             .filter(*filters)
             .select_related('venue')
             .order_by('date', 'starts_at'))
+
+
+# TODO: support `site_id`
+def create_graduate_profiles(graduated_on: datetime.date):
+    """
+    Create graduate profiles in inactive state for all students with
+    `will graduate` status.
+    """
+    will_graduate_list = (User.objects
+                          .filter(status=StudentStatuses.WILL_GRADUATE)
+                          .has_role(Roles.STUDENT,
+                                    Roles.VOLUNTEER))
+
+    for student in will_graduate_list:
+        with transaction.atomic():
+            defaults = {
+                "graduated_on": graduated_on,
+                "details": {},
+                "is_active": False
+            }
+            profile, created = GraduateProfile.objects.get_or_create(
+                student=student,
+                defaults=defaults)
+            if not created:
+                profile.save()
