@@ -112,9 +112,9 @@ def test_course_is_club_course(settings):
     """
     branch_spb_center = BranchFactory(site__domain=settings.TEST_DOMAIN)
     branch_spb_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
-    course_center = CourseFactory(branch=branch_spb_center)
-    course_club = CourseFactory(branch=branch_spb_club)
-    course_center.additional_branches.add(branch_spb_club)
+    course_center = CourseFactory(main_branch=branch_spb_center)
+    course_club = CourseFactory(main_branch=branch_spb_club)
+    course_center.branches.add(branch_spb_club)
 
     assert not course_center.is_club_course
     assert course_club.is_club_course
