@@ -21,17 +21,17 @@ def test_index_view_course_list(client, settings):
                                     site__domain=settings.TEST_DOMAIN)
 
     course_center_private = CourseFactory(semester=current_semester,
-                                          branch=branch_spb_center)
+                                          main_branch=branch_spb_center)
     course_center_public = CourseFactory(semester=current_semester,
-                                         branch=branch_spb_center)
+                                         main_branch=branch_spb_center)
     course_center_outdated = CourseFactory(semester=previous_semester,
-                                           branch=branch_spb_center)
+                                           main_branch=branch_spb_center)
     course_club_actual = CourseFactory(semester=current_semester)
     course_club_outdated = CourseFactory(semester=previous_semester)
 
     # Some of CS Courses were shared with CS Club
-    course_center_public.additional_branches.add(branch_spb_club)
-    course_center_outdated.additional_branches.add(branch_spb_club)
+    course_center_public.branches.add(branch_spb_club)
+    course_center_outdated.branches.add(branch_spb_club)
 
     response = client.get(reverse('index'))
     assert response.status_code == 200
@@ -53,15 +53,15 @@ def test_course_list(client, settings):
     branch_spb_club = BranchFactory(code=Branches.SPB,
                                     site__domain=settings.TEST_DOMAIN)
     course_center_private = CourseFactory(semester=current_semester,
-                                          branch=branch_spb_center)
+                                          main_branch=branch_spb_center)
     course_center_public = CourseFactory(semester=current_semester,
-                                         branch=branch_spb_center)
+                                         main_branch=branch_spb_center)
     course_club_kzn_shared = CourseFactory(semester=current_semester,
-                                           branch__code="kzn")
+                                           main_branch__code="kzn")
 
     # Courses were shared with CS Club
-    course_center_public.additional_branches.add(branch_spb_club)
-    course_club_kzn_shared.additional_branches.add(branch_spb_club)
+    course_center_public.branches.add(branch_spb_club)
+    course_club_kzn_shared.branches.add(branch_spb_club)
 
     response = client.get(reverse('course_list'))
     assert response.status_code == 200
