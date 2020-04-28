@@ -62,6 +62,7 @@ def test_course_list(client, settings):
     # Courses were shared with CS Club
     course_center_public.additional_branches.add(branch_spb_club)
     course_club_kzn_shared.additional_branches.add(branch_spb_club)
+
     response = client.get(reverse('course_list'))
     assert response.status_code == 200
     assert smart_bytes(course_center_private.meta_course.name) not in response.content
