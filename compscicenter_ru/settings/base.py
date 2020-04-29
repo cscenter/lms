@@ -131,7 +131,7 @@ TEMPLATES = [
             str(ROOT_DIR / "lms" / "jinja2"),
             str(SHARED_APPS_DIR / "surveys" / "jinja2"),
             # svg inline support
-            str(SHARED_APPS_DIR / "assets" / "v2" / "dist" / "img"),
+            str(ASSETS_ROOT / "v2" / "dist" / "img"),
         ],
         "NAME": "jinja2",
         "OPTIONS": {
