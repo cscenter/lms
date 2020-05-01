@@ -19,7 +19,7 @@ class TermIndexError(Exception):
     pass
 
 
-@attr.s(cmp=True, frozen=True, slots=True)
+@attr.s(eq=True, order=True, frozen=True, slots=True)
 class TermPair:
     index: int = attr.ib(init=False, repr=False)
     year: int = attr.ib(cmp=False)
