@@ -66,7 +66,7 @@ class CourseURLParamsMixin:
 
     def _get_course_by_branch_id(self):
         return get_object_or_404(self.get_course_queryset()
-                                 .filter(main_branch_id=self.request.branch.pk))
+                                 .available_in(self.request.branch))
 
     def get_course_queryset(self):
         """

@@ -92,9 +92,8 @@ class IndexView(generic.TemplateView):
                                     .order_by('date', 'starts_at'))
             courses = list(
                 Course.objects
-                .filter(is_open=True,
-                        main_branch_id=self.request.branch.id,
-                        semester=featured_term.pk)
+                .available_in(self.request.branch)
+                .filter(semester=featured_term.pk)
                 .select_related('meta_course', 'semester', 'main_branch')
                 .prefetch_related(
                     'teachers',
@@ -239,7 +238,7 @@ class CoursesListView(generic.ListView):
 
     def get_queryset(self):
         courses_qs = (Course.objects
-                      .filter(main_branch_id=self.request.branch.id, )
+                      .available_in(self.request.branch)
                       .select_related('meta_course', 'main_branch')
                       .prefetch_related('teachers')
                       .order_by('meta_course__name'))

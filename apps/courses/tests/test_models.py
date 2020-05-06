@@ -106,6 +106,21 @@ def test_course_completed_at_default_value():
 
 
 @pytest.mark.django_db
+def test_course_is_club_course(settings):
+    """
+    Center courses should not be considered as Club courses even if they were shared with CS Club
+    """
+    branch_spb_center = BranchFactory(site__domain=settings.TEST_DOMAIN)
+    branch_spb_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
+    course_center = CourseFactory(main_branch=branch_spb_center)
+    course_club = CourseFactory(main_branch=branch_spb_club)
+    course_center.branches.add(branch_spb_club)
+
+    assert not course_center.is_club_course
+    assert course_club.is_club_course
+
+
+@pytest.mark.django_db
 def test_in_current_term(client):
     """
     In the near future only one course should be "ongoing".

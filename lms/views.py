@@ -62,7 +62,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')
-                .only("pk", "main_branch_id", "is_open", "grading_type",
+                .only("pk", "main_branch_id", "grading_type",
                       "public_videos_count", "public_slides_count",
                       "public_attachments_count",
                       "meta_course__name", "meta_course__slug",
