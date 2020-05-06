@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List
 
 from django.db import models
 from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
@@ -12,11 +12,12 @@ from courses.constants import MaterialVisibilityTypes
 class CourseTeacherQuerySet(query.QuerySet):
     # FIXME: do I need subquery here?
     def for_course(self, course_slug):
-        course_pks = (self.model.course.field.related_model.objects
-                         .filter(meta_course__slug=course_slug)
-                         # Note: can't reset default ordering in a Subquery
-                         .order_by("pk")
-                         .values("pk"))
+        course_pks = (self
+                      .model.course.field.related_model.objects
+                      .filter(meta_course__slug=course_slug)
+                      # Note: can't reset default ordering in a Subquery
+                      .order_by("pk")
+                      .values("pk"))
         return self.filter(course__in=Subquery(course_pks))
 
 
@@ -103,15 +104,6 @@ class _CourseClassManager(models.Manager):
 CourseClassManager = _CourseClassManager.from_queryset(CourseClassQuerySet)
 
 
-class _CourseDefaultManager(models.Manager):
-    """On compsciclub.ru always restrict selection by open readings"""
-    def get_queryset(self):
-        if is_club_site():
-            return super().get_queryset().filter(is_open=True)
-        else:
-            return super().get_queryset()
-
-
 class CourseQuerySet(models.QuerySet):
     def available_in(self, branch):
         return self.filter(coursebranch__branch=branch)
@@ -125,4 +117,4 @@ class CourseQuerySet(models.QuerySet):
         return self.filter(teachers=user)
 
 
-CourseDefaultManager = _CourseDefaultManager.from_queryset(CourseQuerySet)
+CourseDefaultManager = models.Manager.from_queryset(CourseQuerySet)
