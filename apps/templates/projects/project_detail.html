@@ -158,7 +158,9 @@
                                                 <dl class="dl-horizontal m-0">
                                                     <dt>Отправлен</dt><dd>{{ report.created|date:"d.m.Y H:i" }} <a href="{{ report.get_absolute_url }}">Смотреть отчет</a></dd>
                                                     <dt>Статус</dt><dd>{{ report.get_status_display }}</dd>
-                                                    <dt>Финальный балл</dt><dd>{{ report.final_score|default_if_none:"-" }}</dd>
+                                                    {% if report.is_completed %}
+                                                        <dt>Финальный балл</dt><dd>{{ report.final_score|default_if_none:"-" }}</dd>
+                                                    {% endif %}
                                                 </dl>
                                         {% elif project.is_active and can_send_report %}
                                             {% call_method reporting_period "is_started" project as reporting_period_is_started %}
