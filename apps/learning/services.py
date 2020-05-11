@@ -131,7 +131,7 @@ class StudentGroupService:
     @staticmethod
     def _get_choice_label(student_group, sites_count):
         if student_group.type == StudentGroupTypes.BRANCH and sites_count > 1:
-            return f"{student_group.name} [{student_group.main_branch.site}]"
+            return f"{student_group.name} [{student_group.branch.site}]"
         return student_group.name
 
 
