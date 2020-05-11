@@ -32,7 +32,7 @@ class CKEditorWidget(CKEditorUploadingWidget):
     def _set_config(self):
         super()._set_config()
         css = self.config.get('contentsCss', [])
-        for f in utils.get_files('main', 'css'):
+        for f in utils.get_files('main', 'css', config='V1'):
             css.append(f["url"])
         css.append('html {margin: 20px;}')
         # TODO: move to settings? how?
