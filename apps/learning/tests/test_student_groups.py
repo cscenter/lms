@@ -1,12 +1,13 @@
 import pytest
 
-from core.tests.factories import BranchFactory
+from core.tests.factories import BranchFactory, SiteFactory
 from core.timezone import now_local
 from core.urls import reverse
 from courses.models import StudentGroupTypes, CourseBranch
 from courses.tests.factories import CourseFactory, AssignmentFactory, \
     SemesterFactory
 from learning.models import StudentGroup, StudentAssignment, Enrollment
+from learning.services import StudentGroupService
 from learning.settings import Branches, GradeTypes
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
 from users.tests.factories import StudentFactory, CuratorFactory, \
@@ -165,3 +166,24 @@ def test_assignment_restricted_to(settings):
     student_assignments = StudentAssignment.objects.filter(assignment=a)
     assert len(student_assignments) == 1
     assert student_assignments[0].student == student_spb
+
+
+@pytest.mark.django_db
+def test_student_group_service_get_choices(settings):
+    branch_spb = BranchFactory(code=Branches.SPB)
+    course = CourseFactory(main_branch=branch_spb,
+                           group_mode=StudentGroupTypes.BRANCH)
+    assert StudentGroup.objects.filter(course=course).count() == 1
+    groups = list(StudentGroup.objects.filter(course=course).order_by('pk'))
+    choices = StudentGroupService.get_choices(course)
+    assert len(choices) == 1
+    assert choices[0] == (str(groups[0].pk), groups[0].name)
+    branch_nsk = BranchFactory(code=Branches.NSK,
+                               site=SiteFactory(domain=settings.ANOTHER_DOMAIN))
+    assert branch_nsk.site_id == settings.ANOTHER_DOMAIN_ID
+    CourseBranch(course=course, branch=branch_nsk).save()
+    assert StudentGroup.objects.filter(course=course).count() == 2
+    sg1, sg2 = list(StudentGroup.objects.filter(course=course).order_by('pk'))
+    choices = StudentGroupService.get_choices(course)
+    assert choices[0] == (str(sg1.pk), f"{sg1.name} [{settings.TEST_DOMAIN}]")
+    assert choices[1] == (str(sg2.pk), f"{sg2.name} [{settings.ANOTHER_DOMAIN}]")
