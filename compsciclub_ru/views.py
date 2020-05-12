@@ -125,8 +125,7 @@ class TeachersView(generic.ListView):
     @property
     def get_queryset(self):
         lecturers = list(Course.objects
-                         .filter(is_open=True,
-                                 main_branch=self.request.branch, )
+                         .filter(main_branch=self.request.branch)
                          .distinct()
                          .values_list("teachers__pk", flat=True))
         return (User.objects
@@ -141,8 +140,7 @@ class TeacherDetailView(DetailView):
 
     def get_queryset(self):
         co_queryset = (Course.objects
-                       .filter(is_open=True,
-                               main_branch=self.request.branch, )
+                       .filter(main_branch=self.request.branch)
                        .select_related('semester', 'meta_course',
                                        'main_branch'))
         return (get_user_model()._default_manager
