@@ -5,6 +5,7 @@ from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.settings import Branches
+from users.tests.factories import StudentFactory
 
 
 @pytest.mark.django_db
@@ -68,3 +69,34 @@ def test_course_list(client, settings):
     assert smart_bytes(course_center_private.meta_course.name) not in response.content
     assert smart_bytes(course_center_public.meta_course.name) in response.content
     assert smart_bytes(course_club_kzn_shared.meta_course.name) in response.content
+
+
+@pytest.mark.django_db
+def test_course_url_params_mixin(client, settings):
+    """
+    CourseURLParamsMixin should prioritize courses from the same site as request.site
+    if metacourse names are the same.
+    """
+    current_semester = SemesterFactory.create_current()
+    branch_club = BranchFactory(code=Branches.SPB,
+                                site__domain=settings.TEST_DOMAIN)
+    branch_center = BranchFactory(code=Branches.SPB,
+                                  site__domain=settings.ANOTHER_DOMAIN)
+    course_club = CourseFactory(semester=current_semester,
+                                main_branch=branch_club)
+    course_center = CourseFactory(semester=current_semester,
+                                  meta_course=course_club.meta_course,
+                                  main_branch=branch_center,
+                                  branches=[branch_club])
+    assert course_club.get_absolute_url() == course_center.get_absolute_url()
+    # When course2 is accessed, course1 should be opened
+    response = client.get(course_center.get_absolute_url())
+    assert smart_bytes(course_club.main_branch.name) in response.content
+    assert smart_bytes(course_center.main_branch.name) not in response.content
+
+    # Lookup from another branch
+    s = StudentFactory(branch__code='kzn')
+    client.login(s)
+    response = client.get(course_center.get_absolute_url())
+    assert smart_bytes(course_club.main_branch.name) in response.content
+    assert smart_bytes(course_center.main_branch.name) not in response.content

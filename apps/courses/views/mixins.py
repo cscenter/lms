@@ -49,24 +49,35 @@ class CourseURLParamsMixin:
         super().setup(request, *args, **kwargs)
 
         if COURSE_FRIENDLY_URL_USE_SITE:
-            course = self._get_course_by_branch_id()
+            courses = self._get_courses_by_branch_id()
         else:
             courses = list(self.get_course_queryset()
                            .filter(main_branch__code=self.request.branch.code)
                            .order_by())
-            if not courses:
-                raise Http404
+        if not courses:
+            raise Http404
+        if len(courses) == 1:
+            course = courses[0]
+        else:
+            # Prioritize courses from the same branch
             for c in courses:
                 if c.main_branch_id == self.request.branch.id:
                     course = c
                     break
             else:
-                course = courses[0]
+                # Then prioritize courses from the same site
+                for c in courses:
+                    if c.main_branch.site_id == self.request.site.id:
+                        course = c
+                        break
+                else:
+                    # If there are several courses available, and none of them is hosted by
+                    # the same branch or at least site, URL might be unstable and needs to be reworked
+                    course = courses[0]
         self.course: Course = course
 
-    def _get_course_by_branch_id(self):
-        return get_object_or_404(self.get_course_queryset()
-                                 .available_in(self.request.branch))
+    def _get_courses_by_branch_id(self):
+        return self.get_course_queryset().available_in(self.request.branch)
 
     def get_course_queryset(self):
         """
