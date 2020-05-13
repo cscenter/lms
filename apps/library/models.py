@@ -1,13 +1,26 @@
-
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
 from sorl.thumbnail import ImageField
 from taggit.managers import TaggableManager
+from taggit.models import TagBase, GenericTaggedItemBase
 
-from core.urls import reverse
 from core.models import Branch
+from core.urls import reverse
+
+
+class BookTag(TagBase):
+    class Meta:
+        verbose_name = _("Book Tag")
+        verbose_name_plural = _("Book Tags")
+
+
+class TaggedBook(GenericTaggedItemBase):
+    tag = models.ForeignKey(
+        BookTag,
+        on_delete=models.CASCADE,
+        related_name="tagged_books"
+    )
 
 
 class Book(models.Model):
@@ -18,7 +31,7 @@ class Book(models.Model):
     cover = ImageField(
         _("Book|cover"), upload_to="books", null=True, blank=True)
 
-    tags = TaggableManager()
+    tags = TaggableManager(through=TaggedBook)
 
     class Meta:
         ordering = ["title"]

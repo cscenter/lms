@@ -1,5 +1,5 @@
-from dal import autocomplete
 from dal_select2.widgets import Select2Multiple
+from dal_select2_taggit.widgets import TaggitSelect2
 from django import forms
 from django.contrib import admin
 from django.db import models
@@ -19,7 +19,7 @@ class AnnouncementForm(forms.ModelForm):
         model = Announcement
         fields = '__all__'
         widgets = {
-            'tags': autocomplete.TaggitSelect2(
+            'tags': TaggitSelect2(
                 url='announcements:tags_autocomplete',
                 attrs={"data-width": 'style'})
         }

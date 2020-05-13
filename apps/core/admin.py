@@ -9,6 +9,7 @@ from django.urls import reverse, NoReverseMatch
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _, gettext_noop
 from modeltranslation.admin import TranslationAdmin
+from taggit.models import Tag
 
 from core.models import Location
 from core.widgets import AdminRichTextAreaWidget
@@ -17,6 +18,9 @@ from .models import City, Branch
 # Hide applications in the admin
 admin.site.unregister(Group)
 admin.site.unregister(Site)
+
+# Hide taggit application
+admin.site.unregister(Tag)
 
 
 class BaseModelAdmin(admin.ModelAdmin):

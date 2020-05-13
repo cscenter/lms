@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
+from taggit.admin import TagAdmin, TaggedItemInline
 
 from core.admin import meta, BaseModelAdmin
 from core.widgets import AdminRichTextAreaWidget
-from .models import Book, Borrow, Stock
+from .models import Book, Borrow, Stock, BookTag, TaggedBook
 
 
 class BorrowInline(admin.TabularInline):
@@ -12,6 +13,15 @@ class BorrowInline(admin.TabularInline):
     model = Borrow
     extra = 0
     raw_id_fields = ("student",)
+
+
+class TaggedBookInline(TaggedItemInline):
+    model = TaggedBook
+
+
+@admin.register(BookTag)
+class BookTagAdmin(TagAdmin):
+    inlines = [TaggedBookInline]
 
 
 @admin.register(Book)
@@ -49,4 +59,3 @@ class BorrowAdmin(BaseModelAdmin):
     search_fields = ('student__last_name', 'student__first_name',
                      'stock__book__title')
     raw_id_fields = ('stock', 'student')
-
