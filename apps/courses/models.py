@@ -520,7 +520,7 @@ class Course(TimezoneAwareModel, TimeStampedModel, DerivableFieldsMixin):
 
     @property
     def is_club_course(self):
-        return self.main_branch.site.id == settings.CLUB_SITE_ID
+        return self.main_branch.site_id == settings.CLUB_SITE_ID
 
     @property
     def is_completed(self):
