@@ -1,75 +1,41 @@
 import logging
-from enum import Enum, auto
 
 import rules
+from django.conf import settings
 
 from auth.permissions import add_perm, Permission
 from courses.models import Course, CourseTeacher
 from learning.models import StudentAssignment, CourseInvitation
+from learning.services import course_failed_by_student, CourseRole, \
+    course_access_role
 from learning.settings import StudentStatuses
-from learning.services import course_failed_by_student
 
 logger = logging.getLogger(__name__)
 
 
-class CourseRole(Enum):
-    NO_ROLE = auto()
-    STUDENT_REGULAR = auto()  # Enrolled active student
-    # Restrict access to the course for enrolled students in next cases:
-    #   * student failed the course
-    #   * student was expelled or in academic leave
-    STUDENT_RESTRICT = auto()
-    TEACHER = auto()  # Any teacher from the same meta course
-    CURATOR = auto()
-
-
-def course_access_role(*, course, user) -> CourseRole:
-    """
-    Some course data (e.g. assignments, news) are private and accessible
-    depending on the user role: curator, course teacher or
-    enrolled student. This UserRoles do not overlap in the same course.
-    """
-    if not user.is_authenticated:
-        return CourseRole.NO_ROLE
-    if user.is_curator:
-        return CourseRole.CURATOR
-    role = CourseRole.NO_ROLE
-    enrollment = user.get_enrollment(course.pk)
-    if enrollment:
-        failed = course_failed_by_student(course, user, enrollment)
-        if not failed and not StudentStatuses.is_inactive(user.status):
-            role = CourseRole.STUDENT_REGULAR
-        else:
-            role = CourseRole.STUDENT_RESTRICT
-    # Teachers from the same course permits to view the news/assignments/etc
-    all_course_teachers = (course.course_teachers.field.model.objects
-                           .for_course(course.meta_course.slug)
-                           .values_list('teacher_id', flat=True))
-    if user.is_teacher and user.pk in all_course_teachers:
-        # Overrides student role if a teacher enrolled in his own course
-        role = CourseRole.TEACHER
-    return role
-
-
 @rules.predicate
 def enroll_in_course(user, course: Course):
-    if StudentStatuses.is_inactive(user.status):
-        logger.debug("Permissions for student with inactive status are restricted")
-        return False
     if not course.enrollment_is_open:
         logger.debug("Enrollment is closed")
         return False
-    # Check that course is available for student branch
-    if course.main_branch_id != user.branch_id:  # avoid possible db hit
-        if user.branch not in course.branches.all():
+    if course.is_capacity_limited and not course.places_left:
+        return False
+    student_profile = user.get_student_profile(settings.SITE_ID)
+    if not student_profile:
+        return
+    if not student_profile.is_active:
+        logger.debug("Permissions for student with inactive profile "
+                     "are restricted")
+        return False
+    if course.main_branch_id != student_profile.branch_id:  # avoid db hit
+        if not any(b.pk == student_profile.branch_id for b in course.branches.all()):
             logger.debug("Student with branch %s could not enroll in the "
                          "course %s", user.branch_id, course)
             return False
-    if course.is_capacity_limited and not course.places_left:
-        return False
     return True
 
 
+# FIXME: перевесить на StudentProfile
 @rules.predicate
 def has_active_status(user):
     return user.status not in StudentStatuses.inactive_statuses
@@ -111,9 +77,15 @@ class ViewEnrollments(Permission):
     """
     User with this permission has access to view all course enrollments.
 
-    As an object this Permission should accept `course` instance.
+    Note:
+        Related Permissions use `course` instance as a permission object.
     """
     name = "learning.view_enrollment"
+
+    @staticmethod
+    @rules.predicate
+    def rule(user, course: Course):
+        return True
 
 
 @add_perm
@@ -138,6 +110,11 @@ class ViewLibrary(Permission):
 class ViewOwnEnrollments(Permission):
     name = "study.view_own_enrollments"
     rule = has_active_status
+
+
+@add_perm
+class ViewStudentAssignmentList(Permission):
+    name = "learning.view_studentassignments"
 
 
 @add_perm
@@ -182,13 +159,13 @@ class EditOwnStudentAssignment(Permission):
 # FIXME: возможно, view_assignments надо отдать куратору и преподавателю. А студенту явный view_own_assignments.
 #  Но, блин, этот дурацкий случай для отчисленных студентов :< И own ничего не чекает, никакой бизнес-логики на самом деле не приаттачено(((((((((
 @add_perm
-class ViewOwnAssignments(Permission):
+class ViewOwnStudentAssignments(Permission):
     name = "study.view_own_assignments"
     rule = has_active_status
 
 
 @add_perm
-class ViewOwnAssignment(Permission):
+class ViewOwnStudentAssignment(Permission):
     name = "study.view_own_assignment"
 
     @staticmethod

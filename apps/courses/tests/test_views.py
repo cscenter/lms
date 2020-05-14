@@ -16,7 +16,8 @@ from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory
 from learning.settings import Branches
 from users.constants import Roles
-from users.tests.factories import TeacherFactory, CuratorFactory, UserFactory
+from users.tests.factories import TeacherFactory, CuratorFactory, UserFactory, \
+    StudentProfileFactory
 
 
 def get_timezone_gmt_offset(tz: pytz.timezone) -> Optional[datetime.timedelta]:
@@ -125,7 +126,7 @@ def test_update_derivable_fields(curator, client, mocker):
 
 
 @pytest.mark.django_db
-def test_course_assignment_timezone(settings, client):
+def test_course_assignment_timezone(client):
     """
     Course teacher always must see assignments in the timezone of the course
     """
@@ -142,7 +143,7 @@ def test_course_assignment_timezone(settings, client):
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
     assert response.context["tz_override"] == branch_nsk.get_timezone()
-    teacher_nsk.add_group(Roles.STUDENT)
+    StudentProfileFactory(user=teacher_nsk, branch=branch_nsk)
     response = client.get(assignments_tab_url)
     assert response.status_code == 200
     assert response.context["tz_override"] == branch_nsk.get_timezone()

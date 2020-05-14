@@ -8,20 +8,40 @@ from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
     ViewCourseAssignments, CreateAssignment, CreateOwnAssignment, \
     EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, \
     DeleteCourseClass, EditAssignment, EditOwnAssignment, \
-    ViewCourseClassMaterials
+    ViewCourseClassMaterials, ViewAssignment, ViewOwnAssignment
 from .permissions import CreateAssignmentComment, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
     ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
-    ViewOwnAssignments, ViewOwnAssignment, ViewCourses, ViewSchedule, ViewFAQ, \
+    ViewOwnStudentAssignments, ViewOwnStudentAssignment, ViewCourses, ViewSchedule, ViewFAQ, \
     ViewLibrary, ViewInternships, EnrollInCourse, EnrollInCourseByInvitation, \
     LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook, \
     ViewStudentAssignment, ViewRelatedStudentAssignment, EditStudentAssignment, \
     EditOwnStudentAssignment, ViewEnrollments, ViewRelatedEnrollments, \
-    EditOwnAssignmentExecutionTime
+    EditOwnAssignmentExecutionTime, ViewStudentAssignmentList
 
 
 # TODO: Add description of each role
 class Roles(DjangoChoices):
+    CURATOR = C(5, _('Curator'), permissions=(
+        ChangeMetaCourse,
+        CreateAssignment,
+        EditAssignment,
+        ViewAssignment,
+        ViewCourseContacts,
+        ViewCourseAssignments,
+        ViewStudentAssignment,
+        ViewStudentAssignmentList,
+        EditStudentAssignment,
+        EditCourseClass,
+        DeleteCourseClass,
+        ViewCourseNews,
+        ViewCourseReviews,
+        ViewLibrary,
+        ViewEnrollments,
+        CreateAssignmentCommentTeacher,
+        ViewGradebook,
+        CreateAssignmentComment,
+    ))
     STUDENT = C(1, _('Student'), permissions=(
         ViewStudyMenu,
         ViewCourseContacts,
@@ -29,8 +49,8 @@ class Roles(DjangoChoices):
         ViewCourseNews,
         ViewCourseReviews,
         ViewOwnEnrollments,
-        ViewOwnAssignments,
-        ViewOwnAssignment,
+        ViewOwnStudentAssignments,
+        ViewOwnStudentAssignment,
         CreateAssignmentCommentStudent,
         EditOwnAssignmentExecutionTime,
         ViewCourses,
@@ -43,15 +63,15 @@ class Roles(DjangoChoices):
         LeaveCourse,
     ))
     # FIXME: copy permissions from student role, there are identical
-    VOLUNTEER = C(4, _('Volunteer'), permissions=(
+    VOLUNTEER = C(4, _('Co-worker'), permissions=(
         ViewStudyMenu,
         ViewCourseContacts,
         ViewCourseAssignments,
         ViewCourseNews,
         ViewCourseReviews,
         ViewOwnEnrollments,
-        ViewOwnAssignments,
-        ViewOwnAssignment,
+        ViewOwnStudentAssignments,
+        ViewOwnStudentAssignment,
         CreateAssignmentCommentStudent,
         EditOwnAssignmentExecutionTime,
         ViewCourses,
@@ -70,8 +90,8 @@ class Roles(DjangoChoices):
         ViewCourseNews,
         ViewCourseReviews,
         ViewOwnEnrollments,
-        ViewOwnAssignments,
-        ViewOwnAssignment,
+        ViewOwnStudentAssignments,
+        ViewOwnStudentAssignment,
         CreateAssignmentCommentStudent,
         ViewCourses,
         ViewSchedule,
@@ -83,7 +103,7 @@ class Roles(DjangoChoices):
     ))
     GRADUATE = C(3, _('Graduate'), permissions=(
         ViewOwnEnrollments,
-        ViewOwnAssignment,
+        ViewOwnStudentAssignment,
     ))
     TEACHER = C(2, _('Teacher'), permissions=(
         ViewTeachingMenu,
@@ -91,32 +111,16 @@ class Roles(DjangoChoices):
         ViewCourseNews,
         CreateOwnAssignment,
         EditOwnAssignment,
+        ViewOwnAssignment,
         ViewCourseAssignments,
         ViewRelatedStudentAssignment,
+        ViewStudentAssignmentList,
         EditOwnStudentAssignment,
         EditOwnCourseClass,
         DeleteOwnCourseClass,
         ViewRelatedEnrollments,
         CreateAssignmentCommentTeacher,
         ViewOwnGradebook,
-    ))
-    CURATOR = C(5, _('Curator'), permissions=(
-        ChangeMetaCourse,
-        CreateAssignment,
-        EditAssignment,
-        ViewCourseContacts,
-        ViewCourseAssignments,
-        ViewStudentAssignment,
-        EditStudentAssignment,
-        EditCourseClass,
-        DeleteCourseClass,
-        ViewCourseNews,
-        ViewCourseReviews,
-        ViewLibrary,
-        ViewEnrollments,
-        CreateAssignmentCommentTeacher,
-        ViewGradebook,
-        CreateAssignmentComment,
     ))
 
 
@@ -133,6 +137,7 @@ teacher_role.add_relation(EditCourseClass, EditOwnCourseClass)
 teacher_role.add_relation(DeleteCourseClass, DeleteOwnCourseClass)
 teacher_role.add_relation(CreateAssignment, CreateOwnAssignment)
 teacher_role.add_relation(EditAssignment, EditOwnAssignment)
+teacher_role.add_relation(ViewAssignment, ViewOwnAssignment)
 teacher_role.add_relation(ViewEnrollments, ViewRelatedEnrollments)
 
 student_role = role_registry[Roles.STUDENT]

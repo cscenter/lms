@@ -389,7 +389,6 @@ def test_create_interview_with_invitation_view(curator, client, settings):
 @pytest.mark.django_db
 def test_create_student_from_applicant(client, curator, assert_redirect):
     applicant = ApplicantFactory()
-    applicant_reapplied = ApplicantFactory(email=applicant.email)
     client.login(curator)
     assert not applicant.user_id
     response = client.post(reverse("admission:applicant_create_user",
@@ -401,6 +400,7 @@ def test_create_student_from_applicant(client, curator, assert_redirect):
     assert_redirect(response, admin_url)
     # Student who was expelled in the first semester still could reapply
     # on general terms
+    applicant_reapplied = ApplicantFactory(email=applicant.email)
     response = client.post(reverse("admission:applicant_create_user",
                                    kwargs={"pk": applicant_reapplied.pk}))
     assert response.status_code == 302

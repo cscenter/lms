@@ -1,8 +1,9 @@
 import datetime
+from enum import Enum, auto
 from itertools import islice
-from operator import attrgetter
-from typing import List, Iterable, Union
+from typing import List, Iterable, Union, Optional, NamedTuple
 
+from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction, router
 from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet
@@ -16,15 +17,40 @@ from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from courses.managers import CourseClassQuerySet
 from courses.models import Course, Assignment, AssignmentAttachment, \
-    StudentGroupTypes, CourseClass
+    StudentGroupTypes, CourseClass, CourseTeacher
 from learning.models import Enrollment, StudentAssignment, \
     AssignmentNotification, StudentGroup, Event, GraduateProfile
 from learning.settings import StudentStatuses
 from users.constants import Roles
-from users.models import User
+from users.models import User, StudentProfile, UserGroup
 
 
-# FIXME: move to enrollment service?
+def get_student_profile(user: User, site,
+                        profile_type=None) -> Optional[StudentProfile]:
+    """
+    Returns the most actual student profile on site for user.
+
+    User could have multiple student profiles in different cases, e.g.:
+    * They passed distance branch in 2011 and then applied to the
+        offline branch in 2013
+    * Student didn't meet the requirements and was expelled in the first
+        semester but reapplied on general terms for the second time
+    * Regular student "came back" as invited
+    """
+    filters = []
+    if profile_type is not None:
+        filters.append(Q(type=profile_type))
+    student_profile = (StudentProfile.objects
+                       .filter(*filters, user=user, site=site)
+                       .select_related('branch')
+                       .order_by('-year_of_admission', '-priority')
+                       .first())
+    if student_profile is not None:
+        # It helps to invalidate cache on user model if profile were changed
+        student_profile.user = user
+    return student_profile
+
+
 def populate_assignments_for_student(enrollment):
     for a in enrollment.course.assignment_set.all():
         AssignmentService.create_student_assignment(a, enrollment)
@@ -89,7 +115,8 @@ class StudentGroupService:
                                         pk=instance.pk).delete()
 
     @staticmethod
-    def resolve(course: Course, student: User, enrollment_key: str = None):
+    def resolve(course: Course, student: User, site: Union[Site, int],
+                enrollment_key: str = None):
         """
         Returns the target or associated student group for the course.
         """
@@ -97,8 +124,11 @@ class StudentGroupService:
             # It's possible to miss student group here since student could be
             # added to the course through the admin interface without
             # checking all the requirements
+            student_profile = student.get_student_profile(site)
+            if not student_profile:
+                return
             return (StudentGroup.objects
-                    .filter(course=course, branch_id=student.branch_id)
+                    .filter(course=course, branch_id=student_profile.branch_id)
                     .first())
         elif course.group_mode == StudentGroupTypes.MANUAL:
             try:
@@ -484,3 +514,42 @@ def create_graduate_profiles(graduated_on: datetime.date):
                 defaults=defaults)
             if not created:
                 profile.save()
+
+
+class CourseRole(Enum):
+    NO_ROLE = auto()
+    STUDENT_REGULAR = auto()  # Enrolled active student
+    # Restrict access to the course for enrolled students in next cases:
+    #   * student failed the course
+    #   * student was expelled or in academic leave
+    STUDENT_RESTRICT = auto()
+    TEACHER = auto()  # Any teacher from the same meta course
+    CURATOR = auto()
+
+
+def course_access_role(*, course, user) -> CourseRole:
+    """
+    Some course data (e.g. assignments, news) are private and accessible
+    depending on the user role: curator, course teacher or
+    enrolled student. This UserRoles do not overlap in the same course.
+    """
+    if not user.is_authenticated:
+        return CourseRole.NO_ROLE
+    if user.is_curator:
+        return CourseRole.CURATOR
+    role = CourseRole.NO_ROLE
+    enrollment = user.get_enrollment(course.pk)
+    if enrollment:
+        failed = course_failed_by_student(course, user, enrollment)
+        if not failed and not StudentStatuses.is_inactive(user.status):
+            role = CourseRole.STUDENT_REGULAR
+        else:
+            role = CourseRole.STUDENT_RESTRICT
+    # Teachers from the same course permits to view the news/assignments/etc
+    all_course_teachers = (CourseTeacher.objects
+                           .for_meta_course(course.meta_course)
+                           .values_list('teacher_id', flat=True))
+    if user.is_teacher and user.pk in all_course_teachers:
+        # Overrides student role if a teacher enrolled in his own course
+        role = CourseRole.TEACHER
+    return role

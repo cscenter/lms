@@ -326,7 +326,7 @@ def add_test_student_to_project(client: Gerrit, course: Course,
     Add user with uid=student for test purposes.
 
     Note:
-        Make sure LDAP account for test student exist.
+        Make sure LDAP account for test student exists.
     """
     logger.debug("Add test student to the project")
     branch = Branch.objects.get_by_natural_key('spb', site_id=settings.SITE_ID)

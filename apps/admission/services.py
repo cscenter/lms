@@ -17,7 +17,7 @@ from admission.models import InterviewStream, InterviewInvitation, \
 from admission.utils import logger
 from core.timezone.constants import DATE_FORMAT_RU
 from learning.roles import Roles
-from users.models import User
+from users.models import User, StudentProfile, UserGroup, StudentTypes
 
 
 def get_email_from(campaign: Campaign, default=None):
@@ -54,7 +54,7 @@ class UsernameError(Exception):
 
 def create_student_from_applicant(applicant):
     """
-    Create new model or override existent with data from applicant form.
+    Creates new model or override existent with data from application form.
     """
     try:
         user = User.objects.get(email=applicant.email)
@@ -68,37 +68,33 @@ def create_student_from_applicant(applicant):
         random_password = User.objects.make_random_password()
         user = User.objects.create_user(username=username,
                                         email=applicant.email,
-                                        password=random_password,
-                                        branch=applicant.campaign.branch)
-    if applicant.status == Applicant.VOLUNTEER:
-        user.add_group(Roles.VOLUNTEER)
-    else:
-        user.add_group(Roles.STUDENT)
-    user.add_group(Roles.STUDENT, site_id=settings.CLUB_SITE_ID)
-    # Copy data from application form to the user profile
-    same_attrs = [
-        "first_name",
-        "phone"
-    ]
-    for attr_name in same_attrs:
-        setattr(user, attr_name, getattr(applicant, attr_name))
+                                        password=random_password)
+    StudentProfile.objects.update_or_create(
+        type=StudentTypes.REGULAR,
+        user=user,
+        branch=applicant.campaign.branch,
+        year_of_admission=applicant.campaign.year,
+        defaults={
+            "year_of_curriculum": applicant.campaign.year,
+            "level_of_education_on_admission": applicant.level_of_education,
+            "university": applicant.university.name
+        }
+    )
+    user.first_name = applicant.first_name
+    user.last_name = applicant.surname
+    user.patronymic = applicant.patronymic if applicant.patronymic else ""
+    user.phone = applicant.phone
+    user.workplace = applicant.workplace if applicant.workplace else ""
+    # Social accounts info
     try:
         user.stepic_id = int(applicant.stepic_id)
     except (TypeError, ValueError):
         pass
-    user.last_name = applicant.surname
-    user.patronymic = applicant.patronymic if applicant.patronymic else ""
-    user.enrollment_year = user.curriculum_year = timezone.now().year
-    # Looks like the same fields below
     user.yandex_login = applicant.yandex_login if applicant.yandex_login else ""
-    # For github store part after github.com/
+    # For github.com store part after github.com/
     if applicant.github_login:
         user.github_login = applicant.github_login.split("github.com/",
-                                                      maxsplit=1)[-1]
-    user.workplace = applicant.workplace if applicant.workplace else ""
-    user.uni_year_at_enrollment = applicant.level_of_education
-    user.branch = applicant.campaign.branch
-    user.university = applicant.university.name
+                                                         maxsplit=1)[-1]
     user.save()
     return user
 

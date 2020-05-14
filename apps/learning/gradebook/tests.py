@@ -1,3 +1,4 @@
+import csv
 import datetime
 import io
 from decimal import Decimal
@@ -5,14 +6,12 @@ from io import StringIO, BytesIO
 
 import pytest
 import pytz
-import csv
 from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.utils.encoding import smart_bytes, force_bytes
 
 from auth.mixins import PermissionRequiredMixin
 from auth.permissions import perm_registry
-from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.models import AssignmentSubmissionTypes
 from courses.tests.factories import SemesterFactory, CourseFactory, \
@@ -24,8 +23,6 @@ from learning.models import StudentAssignment, Enrollment
 from learning.settings import GradingSystems, \
     StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory
-from learning.tests.mixins import MyUtilitiesMixin
-from users.constants import Roles
 from users.tests.factories import TeacherFactory, UserFactory, StudentFactory, \
     CuratorFactory
 
@@ -66,6 +63,7 @@ def test_gradebook_csv_view_security(client, lms_resolver):
     assert resolver.func.view_class.permission_required in perm_registry
 
 
+# FIXME: remove logic with auto-casting grading system!
 @pytest.mark.django_db
 def test_recalculate_course_grading_system(client):
     teacher = TeacherFactory()
@@ -140,66 +138,65 @@ def test_recalculate_course_grading_system(client):
     assert smart_bytes("/satisfactory/") in response.content
 
 
-class MarksSheetCSVTest(MyUtilitiesMixin, CSCTestCase):
-    def test_csv(self):
-        teacher = TeacherFactory()
-        student1, student2 = StudentFactory.create_batch(2)
-        co = CourseFactory.create(teachers=[teacher])
-        a1, a2 = AssignmentFactory.create_batch(2, course=co)
-        for s in [student1, student2]:
-            EnrollmentFactory.create(student=s, course=co)
-        gradebook_url = co.get_gradebook_url(format="csv")
-        combos = [(a, s, grade + 1)
-                  for ((a, s), grade)
-                  in zip([(a, s)
-                          for a in [a1, a2]
-                          for s in [student1, student2]],
-                         range(4))]
-        for a, s, score in combos:
-            a_s = StudentAssignment.objects.get(student=s, assignment=a)
-            a_s.score = score
-            a_s.save()
-        self.doLogin(teacher)
-        gradebook_csv = self.client.get(gradebook_url).content.decode('utf-8')
-        data = [s for s in csv.reader(io.StringIO(gradebook_csv)) if s]
-        self.assertEqual(3, len(data))
-        self.assertIn(a1.title, data[0])
-        row_last_names = [row[0] for row in data]
-        for a, s, grade in combos:
-            row = row_last_names.index(s.last_name)
-            col = data[0].index(a.title)
-            self.assertEqual(grade, int(data[row][col]))
+@pytest.mark.django_db
+def test_gradebook_in_csv_format(client):
+    teacher = TeacherFactory()
+    student1, student2 = StudentFactory.create_batch(2)
+    co = CourseFactory.create(teachers=[teacher])
+    a1, a2 = AssignmentFactory.create_batch(2, course=co)
+    for s in [student1, student2]:
+        EnrollmentFactory.create(student=s, course=co)
+    gradebook_url = co.get_gradebook_url(format="csv")
+    combos = [(a, s, grade + 1)
+              for ((a, s), grade)
+              in zip([(a, s)
+                      for a in [a1, a2]
+                      for s in [student1, student2]],
+                     range(4))]
+    for a, s, score in combos:
+        a_s = StudentAssignment.objects.get(student=s, assignment=a)
+        a_s.score = score
+        a_s.save()
+    client.login(teacher)
+    gradebook_csv = client.get(gradebook_url).content.decode('utf-8')
+    data = [s for s in csv.reader(io.StringIO(gradebook_csv)) if s]
+    assert len(data) == 3
+    assert a1.title in data[0]
+    row_last_names = [row[0] for row in data]
+    for a, s, grade in combos:
+        row = row_last_names.index(s.last_name)
+        col = data[0].index(a.title)
+        assert grade == int(data[row][col])
 
 
-class MarksSheetTeacherTests(MyUtilitiesMixin, CSCTestCase):
-    def test_nonempty_gradebook(self):
-        teacher = TeacherFactory()
-        students = StudentFactory.create_batch(3)
-        co = CourseFactory.create(teachers=[teacher])
-        for student in students:
-            EnrollmentFactory.create(student=student, course=co)
-        as_online = AssignmentFactory.create_batch(2, course=co)
-        as_offline = AssignmentFactory.create_batch(
-            3, course=co,
-            submission_type=AssignmentSubmissionTypes.OTHER)
-        url = co.get_gradebook_url()
-        self.doLogin(teacher)
-        response = self.client.get(url)
-        for student in students:
-            name = "{} {}.".format(student.last_name,
-                                        student.first_name[0])
-            self.assertContains(response, name)
-        for as_ in as_online:
-            self.assertContains(response, as_.title)
-            for s in students:
-                a_s = StudentAssignment.objects.get(student=s, assignment=as_)
-                self.assertContains(response, a_s.get_teacher_url())
-        for as_ in as_offline:
-            self.assertContains(response, as_.title)
-            for s in students:
-                a_s = StudentAssignment.objects.get(student=s, assignment=as_)
-                self.assertIn(response.context['form'].GRADE_PREFIX + str(a_s.pk),
-                              response.context['form'].fields)
+@pytest.mark.django_db
+def test_nonempty_gradebook_view(client):
+    teacher = TeacherFactory()
+    students = StudentFactory.create_batch(3)
+    course = CourseFactory(teachers=[teacher])
+    for student in students:
+        EnrollmentFactory.create(student=student, course=course)
+    as_online = AssignmentFactory.create_batch(2, course=course)
+    as_offline = AssignmentFactory.create_batch(
+        3, course=course,
+        submission_type=AssignmentSubmissionTypes.OTHER)
+    url = course.get_gradebook_url()
+    client.login(teacher)
+    response = client.get(url)
+    for student in students:
+        name = "{} {}.".format(student.last_name,
+                                    student.first_name[0])
+        assert smart_bytes(name) in response.content
+    for as_ in as_online:
+        assert smart_bytes(as_.title) in response.content
+        for s in students:
+            a_s = StudentAssignment.objects.get(student=s, assignment=as_)
+            assert smart_bytes(a_s.get_teacher_url()) in response.content
+    for as_ in as_offline:
+        assert smart_bytes(as_.title) in response.content
+        for s in students:
+            a_s = StudentAssignment.objects.get(student=s, assignment=as_)
+            assert response.context['form'].GRADE_PREFIX + str(a_s.pk) in response.context['form'].fields
 
 
 @pytest.mark.django_db

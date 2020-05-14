@@ -1,10 +1,12 @@
 from django.conf import settings
 from django.views import generic
 
+from auth.mixins import PermissionRequiredMixin
 from core.models import Branch
 from core.views import ProtectedFormMixin
 from courses.forms import CourseForm
 from courses.models import Course, MetaCourse
+from courses.permissions import ChangeMetaCourse
 from users.mixins import CuratorOnlyMixin
 
 __all__ = ('MetaCourseDetailView', 'MetaCourseUpdateView')
@@ -34,12 +36,9 @@ class MetaCourseDetailView(generic.DetailView):
         return context
 
 
-class MetaCourseUpdateView(CuratorOnlyMixin, ProtectedFormMixin,
-                           generic.UpdateView):
+class MetaCourseUpdateView(PermissionRequiredMixin, generic.UpdateView):
+    permission_required = ChangeMetaCourse.name
     model = MetaCourse
     slug_url_kwarg = 'course_slug'
     template_name = "courses/simple_crispy_form.html"
     form_class = CourseForm
-
-    def is_form_allowed(self, user, obj):
-        return user.is_authenticated and user.is_curator

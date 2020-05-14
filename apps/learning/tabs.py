@@ -8,7 +8,7 @@ from courses.models import Assignment
 from courses.services import CourseService
 from courses.tabs import CourseTab, CourseTabPanel
 from courses.tabs_registry import register
-from learning.permissions import course_access_role, CourseRole
+from learning.services import CourseRole, course_access_role
 
 logger = logging.getLogger(__name__)
 

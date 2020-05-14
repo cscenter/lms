@@ -80,16 +80,10 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
             (settings.ANOTHER_DOMAIN_ID, settings.ANOTHER_DOMAIN),
         ]
         for site_id, domain in domains:
-            try:
-                site = Site.objects.get(id=site_id)
-                site.domain = domain
-                site.name = domain
-                site.save()
-            except Site.DoesNotExist:
-                site = Site(domain=domain, name=domain)
-                site.save()
-                site.id = site_id
-                site.save()
+            Site.objects.update_or_create(id=site_id, defaults={
+                "domain": domain,
+                "name": domain
+            })
 
         # Create cities
         city_spb = CityFactory(name="Saint Petersburg", code="spb", abbr="spb")

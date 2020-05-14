@@ -22,11 +22,13 @@ def test_enrollment(client, settings):
     term = SemesterFactory.create_current(enrollment_end_at=tomorrow.date())
     course = CourseFactory(semester=term)
     assert course.enrollment_is_open
+    branch_center = BranchFactory(site_id=settings.CENTER_SITE_ID)
     student_center = StudentFactory(
-        required_groups__site_id=settings.CENTER_SITE_ID,
+        student_profile__branch=branch_center,
         branch__code=Branches.SPB)
+    branch_club = BranchFactory(site_id=settings.CLUB_SITE_ID)
     student_club = StudentFactory(
-        required_groups__site_id=settings.CLUB_SITE_ID,
+        student_profile__branch=branch_club,
         branch=branch_spb)
     form = {'course_pk': course.pk}
     client.login(student_center)

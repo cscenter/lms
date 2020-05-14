@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -37,7 +38,8 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
         reason_entry = form.cleaned_data["reason"].strip()
         student = self.request.user
         try:
-            student_group = StudentGroupService.resolve(self.course, student)
+            student_group = StudentGroupService.resolve(self.course, student,
+                                                        settings.SITE_ID)
         except GroupEnrollmentKeyError:
             # In fact, there is no enrollment key support right now
             msg = _("Please, check your group enrollment key")
@@ -124,7 +126,8 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
         invitation = self.course_invitation.invitation
         student = request.user
         try:
-            resolved_group = StudentGroupService.resolve(self.course, student)
+            resolved_group = StudentGroupService.resolve(self.course, student,
+                                                         settings.SITE_ID)
         except GroupEnrollmentKeyError:
             # In fact, there is no enrollment key support right now
             msg = _("Please, check your group enrollment key")
