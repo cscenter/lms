@@ -67,7 +67,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                       "public_attachments_count",
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
-                      "main_branch__code")
+                      "main_branch__code", "main_branch__site_id")
                 .prefetch_related(prefetch_teachers)
                 .order_by('-semester__year', '-semester__index',
                           'meta_course__name'))

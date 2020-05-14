@@ -35,7 +35,7 @@ from courses.utils import get_current_term_pair, \
 from courses.views.mixins import CourseURLParamsMixin
 from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
-from learning.permissions import course_access_role
+from learning.services import course_access_role, get_student_profile
 from learning.roles import Roles
 from learning.settings import Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
@@ -44,7 +44,7 @@ from projects.models import ProjectStudent
 from stats.views import StudentsDiplomasStats
 from study_programs.models import StudyProgram, AcademicDiscipline
 from study_programs.services import get_study_programs
-from users.models import User, SHADCourseRecord
+from users.models import User, SHADCourseRecord, StudentProfile
 
 # FIXME: remove?
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
@@ -467,49 +467,55 @@ def timeline_element_factory(obj) -> TimelineElement:
 
 
 class StudentProfileView(generic.DetailView):
-    pk_url_kwarg = "student_id"
-    context_object_name = "student"
+    slug_field = 'student_id'
+    slug_url_kwarg = "student_id"
+    context_object_name = "graduate_profile"
+    template_name = "compscicenter_ru/profiles/graduate.html"
 
     def get_queryset(self):
-        return User.objects.select_related("branch", "graduate_profile")
-
-    def get_template_names(self):
-        if hasattr(self.object, 'graduate_profile'):
-            return "compscicenter_ru/profiles/graduate.html"
-        raise Http404
+        return GraduateProfile.objects.select_related("student")
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        student = self.object
+        graduate_profile = self.object
+        student_profile = get_student_profile(graduate_profile.student,
+                                              site=self.request.site)
         timeline_elements = []
         # TODO: move to timeline queryset
         exclude_grades = [Enrollment.GRADES.NOT_GRADED,
                           Enrollment.GRADES.UNSATISFACTORY]
         enrollments = (Enrollment.active
-                       .filter(student=student)
+                       .filter(student_id=graduate_profile.student_id)
                        .exclude(grade__in=exclude_grades)
                        .select_related('course',
                                        'course__semester',
+                                       'course__main_branch',
                                        'course__meta_course')
                        .order_by("course__semester__index",
                                  "course__meta_course__name"))
         for e in enrollments:
             timeline_elements.append(timeline_element_factory(e))
         shad_courses = (SHADCourseRecord.objects
-                        .filter(student=student)
+                        .filter(student_id=graduate_profile.student_id)
                         .exclude(grade__in=exclude_grades)
                         .select_related("semester")
                         .order_by("semester__index", "name"))
         for c in shad_courses:
             timeline_elements.append(timeline_element_factory(c))
-        projects = (student.get_projects_queryset()
-                    .exclude(final_grade__in=exclude_grades))
+        projects = (ProjectStudent.objects
+                    .filter(student_id=graduate_profile.student_id)
+                    .exclude(final_grade__in=exclude_grades)
+                    .select_related('project', 'project__semester')
+                    .order_by('project__semester__index'))
         for c in projects:
             timeline_elements.append(timeline_element_factory(c))
         timeline_elements.sort(key=lambda o: (o.term.index, o.type.value))
         timeline = bucketize(timeline_elements, key=lambda o: o.term)
-        context["timeline"] = timeline
-        context["timeline_element_types"] = TimelineElementTypes
+        context = {
+            "graduate_profile": graduate_profile,
+            "student_profile": student_profile,
+            "timeline": timeline,
+            "timeline_element_types": TimelineElementTypes
+        }
         return context
 
 

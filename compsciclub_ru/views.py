@@ -4,8 +4,10 @@ import pytz
 from django.contrib.auth import get_user_model
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.cache import caches
+from django.db import transaction
 from django.db.models import Prefetch, Q
 from django.http import Http404
+from django.utils import timezone
 from django.utils.timezone import now
 from django.views import generic
 from django_ical.views import ICalFeed
@@ -25,8 +27,7 @@ from courses.views.calendar import MonthEventsCalendarView
 from learning.gallery.models import Image
 from learning.services import get_classes
 from users.constants import Roles
-from users.models import User
-
+from users.models import User, StudentProfile
 
 _TIME_ZONE = pytz.timezone('Europe/Moscow')
 
@@ -35,18 +36,26 @@ class AsyncEmailRegistrationView(RegistrationView):
     """Send activation email using redis queue"""
     def register(self, form):
         site = get_current_site(self.request)
-        new_user_instance = form.save(commit=False)
-        new_user_instance.branch = self.request.branch
-        new_user = self.registration_profile.objects.create_inactive_user(
-            new_user=new_user_instance,
-            site=site,
-            send_email=False,
-            request=self.request,
-        )
+        new_user = form.save(commit=False)
+        new_user.branch = self.request.branch
+        new_user.is_active = False
+        # Since we calculate the RegistrationProfile expiration from this date,
+        # we want to ensure that it is current
+        new_user.date_joined = timezone.now()
+
+        with transaction.atomic():
+            new_user.save()
+            student_profile = StudentProfile(
+                user=new_user,
+                branch=new_user.branch,
+                year_of_admission=new_user.date_joined.year)
+            student_profile.save()
+            new_user.add_group(Roles.STUDENT)
+            self.registration_profile.objects.create_profile(new_user)
+
         signals.user_registered.send(sender=self.__class__,
                                      user=new_user,
                                      request=self.request)
-        new_user.add_group(Roles.STUDENT)
         activation_url = reverse("registration_activate", kwargs={
             "activation_key": new_user.registrationprofile.activation_key
         })

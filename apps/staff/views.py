@@ -283,9 +283,9 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, branch_id, **kwargs):
-        report = ProgressReportForDiplomas()
-        students = (report.get_queryset()
-                    .filter(branch_id=branch_id))
+        branch = Branch.objects.get(pk=branch_id)
+        report = ProgressReportForDiplomas(branch)
+        students = report.get_queryset()
         courses_qs = (report.get_courses_queryset(students)
                       .annotate(classes_total=Count('courseclass')))
         courses = {c.pk: c for c in courses_qs}
@@ -332,7 +332,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             delattr(student, "shads")
 
         context = {
-            "branch": Branch.objects.get(pk=branch_id),
+            "branch": branch,
             "students": students
         }
         return context
@@ -340,8 +340,9 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
 
 class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, branch_id, *args, **kwargs):
-        report = ProgressReportForDiplomas()
-        df = report.generate(report.get_queryset().filter(branch_id=branch_id))
+        branch = get_object_or_404(Branch.objects.filter(pk=branch_id))
+        report = ProgressReportForDiplomas(branch)
+        df = report.generate()
         return dataframe_to_response(df, 'csv', report.get_filename())
 
 
@@ -423,25 +424,26 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
         query_params = FacesQueryParams(data=request.GET)
         if not query_params.is_valid():
             return HttpResponseRedirect(request.path)
+        context = self.get_context_data(query_params, **kwargs)
+        return self.render_to_response(context)
+
+    def get_context_data(self, query_params, **kwargs):
         branch_code = query_params.validated_data.get('branch',
                                                       settings.DEFAULT_BRANCH_CODE)
         branch = get_object_or_404(Branch.objects
                                    .filter(code=branch_code,
                                            site_id=settings.SITE_ID))
-        enrollment_year = query_params.validated_data.get('year')
-        if not enrollment_year:
-            enrollment_year = get_current_term_pair(branch.get_timezone()).year
-        context = self.get_context_data(branch, enrollment_year, **kwargs)
-        return self.render_to_response(context)
-
-    def get_context_data(self, branch, enrollment_year, **kwargs):
+        year_of_admission = query_params.validated_data.get('year')
+        if not year_of_admission:
+            year_of_admission = get_current_term_pair(
+                branch.get_timezone()).year
         current_year = get_current_term_pair(branch.get_timezone()).year
         context = {
-            'students': self.get_queryset(branch, enrollment_year),
+            'students': self.get_queryset(branch, year_of_admission),
             "years": reversed(range(branch.established, current_year + 1)),
-            "current_year": enrollment_year,
+            "current_year": year_of_admission,
             "current_branch": branch,
-            "branches": Branch.objects.filter(site_id=settings.SITE_ID).order_by('order')
+            "branches": Branch.objects.for_site(site_id=settings.SITE_ID)
         }
         return context
 
@@ -450,12 +452,10 @@ class StudentFacesView(CuratorOnlyMixin, TemplateView):
             self.template_name = "staff/student_faces_printable.html"
         return super(StudentFacesView, self).get_template_names()
 
-    def get_queryset(self, branch, enrollment_year):
-        roles = (Roles.STUDENT, Roles.VOLUNTEER)
+    def get_queryset(self, branch, year_of_admission):
         qs = (User.objects
-              .has_role(*roles)
-              .filter(branch=branch,
-                      enrollment_year=enrollment_year)
+              .filter(student_profiles__branch=branch,
+                      student_profiles__year_of_admission=year_of_admission)
               .distinct('last_name', 'first_name', 'pk')
               .order_by('last_name', 'first_name', 'pk')
               .prefetch_related("groups"))

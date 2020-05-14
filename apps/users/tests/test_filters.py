@@ -35,9 +35,10 @@ def test_student_search(client, curator, search_url, settings):
                    status=StudentStatuses.EXPELLED,
                    last_name='Иванов',
                    first_name='Иван')
+    branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
     StudentFactory(enrollment_year=2011,
                    last_name='Сидоров',
-                   required_groups__site_id=settings.ANOTHER_DOMAIN_ID,
+                   student_profile__branch=branch,
                    first_name='Сидор')
     volunteer = VolunteerFactory(enrollment_year=2011, status="")
 
@@ -178,7 +179,8 @@ def test_student_search_enrollments(client, curator, search_url):
 def test_student_search_by_groups(client, curator, search_url, settings):
     client.login(curator)
     # All users below are considered as `studying` due to empty status
-    StudentFactory.create_batch(2, required_groups__site_id=settings.ANOTHER_DOMAIN_ID,)
+    branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
+    StudentFactory.create_batch(2, student_profile__branch=branch)
     students = StudentFactory.create_batch(3, enrollment_year=2011,
                                               curriculum_year=2011,
                                               status="")
@@ -197,8 +199,8 @@ def test_student_search_by_groups(client, curator, search_url, settings):
     json_data = response.json()
     assert json_data["count"] == len(students) + len(volunteers)
     graduated = GraduateFactory(enrollment_year=2012, curriculum_year=2012,
-                                status="")
-    graduated.add_group(Roles.STUDENT, site_id=settings.ANOTHER_DOMAIN_ID)
+                                status="",
+                                student_profile__site_id=settings.ANOTHER_DOMAIN_ID)
     url = f"{search_url}?status=studying&groups={Roles.STUDENT}&curriculum_year=2011,2012"
     response = client.get(url)
     # Fail in case of multiple joins with users_user_groups table

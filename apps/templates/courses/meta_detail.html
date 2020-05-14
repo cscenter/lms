@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load markdown from core_tags %}
+{% load markdown call_method from core_tags %}
 
 {% block content %}
     <div class="container">
         <div class="row">
             <div class="col-xs-12 h2-and-buttons">
                 <h2>{{ meta_course.name }}</h2>
-                {% if user.is_curator %}
+                {% call_method request.user "has_perm" "courses.change_metacourse" course as can_update_meta_course %}
+                {% if can_update_meta_course %}
                     <div class="btn-toolbar">
                         <a href="{{ meta_course.get_update_url }}" class="btn btn-primary" role="button">{% trans "Edit" %}</a>
                     </div>

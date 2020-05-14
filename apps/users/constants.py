@@ -29,7 +29,7 @@ class Roles(DjangoChoices):
     STUDENT = C(1, _('Student'))
     TEACHER = C(2, _('Teacher'))
     GRADUATE = C(3, _('Graduate'))
-    VOLUNTEER = C(4, _('Volunteer'))
+    VOLUNTEER = C(4, _('Co-worker'))
     CURATOR = C(5, _('Curator'))
     INTERVIEWER = C(7, _('Interviewer [Admission]'))
     # Should be always set with one of the student group

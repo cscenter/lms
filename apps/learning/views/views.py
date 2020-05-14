@@ -21,7 +21,7 @@ from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import AssignmentCommentForm
 from learning.models import StudentAssignment, AssignmentComment, \
     AssignmentNotification, Event, CourseNewsNotification
-from learning.permissions import course_access_role, CourseRole
+from learning.services import CourseRole, course_access_role
 from learning.settings import ASSIGNMENT_COMMENT_ATTACHMENT
 from learning.utils import convert_ipynb_to_html
 from users.mixins import TeacherOnlyMixin

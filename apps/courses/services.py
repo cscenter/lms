@@ -97,5 +97,6 @@ def get_teacher_branches(user, start_date, end_date):
                            teachers=user)
                    .values_list("main_branch_id", flat=True)
                    .distinct())
-    branches.add(user.branch_id)
+    if user.branch_id is not None:
+        branches.add(user.branch_id)
     return branches

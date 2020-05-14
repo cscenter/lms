@@ -26,8 +26,8 @@ from learning.services import get_student_classes, get_classes
 from learning.forms import AssignmentExecutionTimeForm
 from learning.internships.models import Internship
 from learning.models import Useful, StudentAssignment, Enrollment
-from learning.permissions import ViewOwnAssignments, \
-    EditOwnAssignmentExecutionTime
+from learning.permissions import ViewOwnStudentAssignments, \
+    EditOwnAssignmentExecutionTime, ViewOwnStudentAssignment, ViewCourses
 from learning.roles import Roles
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView, \
@@ -80,7 +80,7 @@ class TimetableView(PermissionRequiredMixin, WeekEventsView):
 class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
     """Shows assignments for the current term."""
     template_name = "learning/study/assignment_list.html"
-    permission_required = ViewOwnAssignments.name
+    permission_required = ViewOwnStudentAssignments.name
 
     def get_queryset(self, current_term):
         return (StudentAssignment.objects
@@ -120,15 +120,19 @@ class StudentAssignmentListView(PermissionRequiredMixin, TemplateView):
 class StudentAssignmentDetailView(PermissionRequiredMixin,
                                   AssignmentSubmissionBaseView):
     template_name = "learning/study/student_assignment_detail.html"
+    permission_required = ViewOwnStudentAssignment.name
 
-    def has_permission(self):
+    def get_permission_object(self):
+        return self.student_assignment
+
+    def handle_no_permission(self):
         user = self.request.user
-        if user.has_perm("study.view_own_assignment", self.student_assignment):
-            return True
-        course = self.student_assignment.assignment.course
-        if Roles.TEACHER in user.roles and user in course.teachers.all():
-            # Redirects actual course teacher to the teaching/ section
-            raise Redirect(to=self.student_assignment.get_teacher_url())
+        if user.is_authenticated:
+            course = self.student_assignment.assignment.course
+            if Roles.TEACHER in user.roles and user in course.teachers.all():
+                # Redirects actual course teacher to the teaching/ section
+                raise Redirect(to=self.student_assignment.get_teacher_url())
+        return super().handle_no_permission()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -207,7 +211,7 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
     model = Course
     context_object_name = 'course_list'
     template_name = "learning/study/course_list.html"
-    permission_required = "study.view_courses"
+    permission_required = ViewCourses.name
 
     def get_context_data(self, **kwargs):
         # Student enrollments
