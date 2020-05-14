@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-14 18:18+0000\n"
-"PO-Revision-Date: 2020-05-14 18:18+0000\n"
+"POT-Creation-Date: 2020-05-14 20:01+0000\n"
+"PO-Revision-Date: 2020-05-14 20:01+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -690,7 +690,7 @@ msgstr "Системное поле. Используется для сорти�
 #: apps/templates/learning/study/course_list.html:84
 #: apps/templates/learning/teaching/course_list.html:11
 #: apps/templates/users/teacher_detail.html:40 apps/users/admin.py:32
-#: apps/users/admin.py:174 apps/users/models.py:962
+#: apps/users/admin.py:172 apps/users/models.py:962
 msgid "Semester"
 msgstr "Семестр"
 
@@ -2618,23 +2618,23 @@ msgstr "Персональная информация"
 msgid "External services"
 msgstr "Внешние сервисы"
 
-#: apps/users/admin.py:136 lms/templates/users/user_detail.html:225
-msgid "Student info record"
-msgstr "Карточка студента"
+#: apps/users/admin.py:136
+msgid "Student info record [DEPRECETED, DONT EDIT THIS SECTION]"
+msgstr ""
 
-#: apps/users/admin.py:141 apps/users/admin.py:199
-msgid "Curator's note"
-msgstr "Заметка куратора"
-
-#: apps/users/admin.py:143
+#: apps/users/admin.py:141
 msgid "Important dates"
 msgstr "Важные даты"
 
-#: apps/users/admin.py:196
+#: apps/users/admin.py:194
 msgid "Official Student Info"
 msgstr "Официальный студент"
 
-#: apps/users/admin.py:239
+#: apps/users/admin.py:197
+msgid "Curator's note"
+msgstr "Заметка куратора"
+
+#: apps/users/admin.py:237
 msgid "Anytask"
 msgstr ""
 
@@ -2907,13 +2907,11 @@ msgid "CSCUser|users"
 msgstr "Пользователи"
 
 #: apps/users/models.py:769
-#, fuzzy
 #| msgid "Only Students"
 msgid "Regular Student"
-msgstr "Только студенты"
+msgstr "Студент"
 
 #: apps/users/models.py:771
-#, fuzzy
 #| msgid "Invited User"
 msgid "Invited Student"
 msgstr "Приглашенный студент"
@@ -3186,6 +3184,10 @@ msgstr "Отзыв о CS центре"
 #: lms/templates/users/user_detail.html:141
 msgid "Email"
 msgstr "Email"
+
+#: lms/templates/users/user_detail.html:225
+msgid "Student info record"
+msgstr "Карточка студента"
 
 #: lms/templates/users/user_detail.html:245
 msgid "Curriculum year"
