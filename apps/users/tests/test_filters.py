@@ -59,11 +59,6 @@ def test_student_search(client, curator, search_url, settings):
     # Now test groups filter
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={}".format(Roles.MASTERS_DEGREE)
-    ))
-    assert response.json()["count"] == 0
-    response = client.get("{}?{}".format(
-        search_url,
         "curriculum_year=2011&groups={}".format(Roles.STUDENT)
     ))
     assert response.json()["count"] == 2
@@ -280,9 +275,3 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
                                                   Roles.GRADUATE)
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == len(volunteers) + len(graduated)
-    # Edge case #2 - graduate can have `master` subgroup
-    add_user_groups(graduated[0], [Roles.MASTERS_DEGREE])
-    query = "status=studying&groups={},{}".format(Roles.GRADUATE,
-                                                  Roles.MASTERS_DEGREE)
-    response = client.get("{}?{}".format(search_url, query))
-    assert response.json()["count"] == len(graduated)
