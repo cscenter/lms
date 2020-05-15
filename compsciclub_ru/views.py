@@ -27,7 +27,7 @@ from courses.views.calendar import MonthEventsCalendarView
 from learning.gallery.models import Image
 from learning.services import get_classes
 from users.constants import Roles
-from users.models import User, StudentProfile
+from users.models import User, StudentProfile, StudentTypes
 
 _TIME_ZONE = pytz.timezone('Europe/Moscow')
 
@@ -47,6 +47,7 @@ class AsyncEmailRegistrationView(RegistrationView):
             new_user.save()
             student_profile = StudentProfile(
                 user=new_user,
+                type=StudentTypes.REGULAR,
                 branch=new_user.branch,
                 year_of_admission=new_user.date_joined.year)
             student_profile.save()
