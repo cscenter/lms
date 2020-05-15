@@ -55,7 +55,6 @@ class RolesInFilter(MultipleChoiceFilter):
         (Roles.VOLUNTEER, Roles.values[Roles.VOLUNTEER]),
         (Roles.INVITED, Roles.values[Roles.INVITED]),
         (Roles.GRADUATE, Roles.values[Roles.GRADUATE]),
-        (Roles.MASTERS_DEGREE, Roles.values[Roles.MASTERS_DEGREE]),
     ]
 
     def __init__(self, choices=None, *args, **kwargs):
