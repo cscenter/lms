@@ -1,11 +1,12 @@
+from django.db.models import F
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import LimitOffsetPagination
 
 from api.permissions import CuratorAccessPermission
-from users.filters import UserFilter
-from users.models import User
-from .serializers import UserSearchSerializer
+from users.filters import StudentFilter
+from users.models import User, StudentProfile
+from .serializers import StudentSearchSerializer
 
 
 class StudentOffsetPagination(LimitOffsetPagination):
@@ -14,12 +15,18 @@ class StudentOffsetPagination(LimitOffsetPagination):
 
 class StudentSearchJSONView(ListAPIView):
     permission_classes = [CuratorAccessPermission]
-    serializer_class = UserSearchSerializer
+    serializer_class = StudentSearchSerializer
     pagination_class = StudentOffsetPagination
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = UserFilter
+    filterset_class = StudentFilter
 
     def get_queryset(self):
-        return (User.objects
-                .only('username', 'first_name', 'last_name', 'pk')
-                .order_by('last_name', 'first_name'))
+        return (StudentProfile.objects
+                .filter(site=self.request.site)
+                .select_related('user')
+                .annotate(username=F('user__username'),
+                          first_name=F('user__first_name'),
+                          last_name=F('user__last_name'))
+                .only('user__username', 'user__first_name',
+                      'user__last_name', 'user_id')
+                .order_by('last_name', 'first_name', 'user_id'))
