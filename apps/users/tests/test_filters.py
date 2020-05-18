@@ -76,8 +76,9 @@ def test_student_search(client, curator, search_url, settings):
         )
     ))
     assert response.json()["count"] == 3
-    volunteer.status = StudentStatuses.EXPELLED
-    volunteer.save()
+    volunteer_profile = volunteer.get_student_profile(settings.SITE_ID)
+    volunteer_profile.status = StudentStatuses.EXPELLED
+    volunteer_profile.save()
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups[]={}&groups[]={}&status={}".format(
@@ -87,8 +88,9 @@ def test_student_search(client, curator, search_url, settings):
         )
     ))
     assert response.json()["count"] == 1
-    student.status = StudentStatuses.REINSTATED
-    student.save()
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    student_profile.status = StudentStatuses.REINSTATED
+    student_profile.save()
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups[]={}&groups[]={}&status={},{}".format(

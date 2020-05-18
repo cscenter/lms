@@ -17,7 +17,7 @@ class SiteFactory(factory.DjangoModelFactory):
         model = Site
         django_get_or_create = ('domain',)
 
-    domain = factory.Iterator(x for x in (settings.TEST_DOMAIN, settings.ANOTHER_DOMAIN))
+    domain = settings.TEST_DOMAIN
     name = factory.Sequence(lambda n: "Site Name %03d" % n)
 
 

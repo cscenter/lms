@@ -39,7 +39,7 @@ from staff.serializers import FacesQueryParams
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.constants import Roles
-from users.filters import UserFilter
+from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
 from users.models import User
 
@@ -47,7 +47,7 @@ from users.models import User
 class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
     context_object_name = 'applicants'
     model = User
-    filterset_class = UserFilter
+    filterset_class = StudentFilter
 
     def get(self, request, *args, **kwargs):
         filterset_class = self.get_filterset_class()
@@ -80,9 +80,9 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                                  .filter(curriculum_year__isnull=False)
                                  .order_by('curriculum_year')
                                  .distinct()),
-            'groups': UserFilter.get_filters()['groups'].choices,
+            'groups': StudentFilter.get_filters()['groups'].choices,
             "status": StudentStatuses.values,
-            "cnt_enrollments": range(UserFilter.ENROLLMENTS_MAX + 1)
+            "cnt_enrollments": range(StudentFilter.ENROLLMENTS_MAX + 1)
         }
         return context
 

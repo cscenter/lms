@@ -96,6 +96,10 @@ class StudentFactory(UserFactory):
             return
         kwargs.setdefault('branch', self.branch)
         kwargs.setdefault('status', self.status)
+        if self.enrollment_year:
+            kwargs.setdefault('year_of_admission', self.enrollment_year)
+        if self.curriculum_year:
+            kwargs.setdefault('year_of_curriculum', self.curriculum_year)
         StudentProfileFactory(user=self, **kwargs)
 
 
@@ -119,6 +123,10 @@ class VolunteerFactory(UserFactory):
             return
         kwargs.setdefault('branch', self.branch)
         kwargs.setdefault('status', self.status)
+        if self.enrollment_year:
+            kwargs.setdefault('year_of_admission', self.enrollment_year)
+        if self.curriculum_year:
+            kwargs.setdefault('year_of_curriculum', self.curriculum_year)
         StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
