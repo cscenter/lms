@@ -120,7 +120,8 @@ class ExamAdmin(ImportExportMixin, admin.ModelAdmin):
     raw_id_fields = ("applicant",)
     list_display = ('__str__', 'score', 'yandex_contest_id', 'status')
     search_fields = ['applicant__yandex_login', 'applicant__surname',
-                     'applicant__first_name', 'yandex_contest_id']
+                     'applicant__first_name', 'yandex_contest_id',
+                     'contest_participant_id']
     list_filter = ['applicant__campaign']
     formfield_overrides = {
         JSONField: {'widget': PrettyJSONWidget}
