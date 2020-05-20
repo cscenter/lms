@@ -10,30 +10,12 @@ from import_export.admin import ImportMixin
 from core.admin import meta, BaseModelAdmin
 from core.filters import AdminRelatedDropdownFilter
 from core.widgets import AdminRichTextAreaWidget
-from learning.services import get_student_profile
 from users.constants import Roles
 from users.forms import UserCreationForm, UserChangeForm
 from .import_export import UserRecordResource
 from .models import User, EnrollmentCertificate, \
-    OnlineCourseRecord, SHADCourseRecord, UserStatusLog, UserGroup, \
+    OnlineCourseRecord, SHADCourseRecord, UserGroup, \
     StudentProfile, StudentStatusLog, StudentTypes
-
-
-class UserStatusLogAdmin(admin.TabularInline):
-    list_select_related = ['student']
-    model = UserStatusLog
-    extra = 0
-    show_change_link = True
-    readonly_fields = ('get_semester', 'status')
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    @meta(_("Semester"))
-    def get_semester(self, obj):
-        from courses.utils import get_terms_in_range
-        term = next(get_terms_in_range(obj.created, obj.created), None)
-        return term.label if term else '-'
 
 
 class OnlineCourseRecordAdmin(admin.StackedInline):
