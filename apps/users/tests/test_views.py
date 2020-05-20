@@ -349,8 +349,6 @@ def test_student_should_have_profile(client):
     del form_data['photo']
     form_data.update({
         # Django wants all inline formsets
-        'userstatuslog_set-INITIAL_FORMS': '0',
-        'userstatuslog_set-TOTAL_FORMS': '0',
         'onlinecourserecord_set-INITIAL_FORMS': '0',
         'onlinecourserecord_set-TOTAL_FORMS': '0',
         'shadcourserecord_set-TOTAL_FORMS': '0',

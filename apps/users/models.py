@@ -26,17 +26,15 @@ from sorl.thumbnail import ImageField
 
 from auth.permissions import perm_registry
 from auth.tasks import update_password_in_gerrit
-from lms.utils import PublicRoute
 from core.models import LATEX_MARKDOWN_ENABLED, Branch
 from core.timezone import Timezone, TimezoneAwareModel
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping, instance_memoize
-from courses.models import Semester
 from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeLevels
 from learning.utils import is_negative_grade
+from lms.utils import PublicRoute
 from users.constants import GROUPS_IMPORT_TO_GERRIT, Roles, \
     SHADCourseGradeTypes, GenderTypes, Roles as UserRoles
-from users.fields import MonitorStatusField
 from users.thumbnails import UserThumbnailMixin
 from .managers import CustomUserManager
 
@@ -50,29 +48,6 @@ logger = logging.getLogger(__name__)
 # Github username may only contain alphanumeric characters or
 # single hyphens, and cannot begin or end with a hyphen
 GITHUB_LOGIN_VALIDATOR = RegexValidator(regex="^[a-zA-Z0-9](-?[a-zA-Z0-9])*$")
-
-
-# FIXME: rename to student status log and move to learning app (and all User.status* fields to StudentProfile)
-class UserStatusLog(models.Model):
-    created = models.DateField(_("created"), default=timezone.now)
-    status = models.CharField(
-        choices=StudentStatuses.choices,
-        verbose_name=_("Status"),
-        max_length=15)
-    student = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Student"),
-        on_delete=models.CASCADE)
-
-    class Meta:
-        ordering = ['-pk']
-
-    def prepare_fields(self, monitored_instance, monitoring_field_attname):
-        if not self.student_id:
-            self.student_id = monitored_instance.pk
-
-    def __str__(self):
-        return self.student.get_full_name(last_name_first=True)
 
 
 class LearningPermissionsMixin:
@@ -264,15 +239,6 @@ class StudentProfileAbstract(models.Model):
         verbose_name=_("Status"),
         max_length=15,
         blank=True)
-    status_last_change = MonitorStatusField(
-        UserStatusLog,
-        verbose_name=_("Status changed"),
-        blank=True,
-        null=True,
-        editable=False,
-        monitored='status',
-        logging_model=UserStatusLog,
-        on_delete=models.CASCADE)
     comment = models.TextField(
         _("Comment"),
         help_text=LATEX_MARKDOWN_ENABLED,
