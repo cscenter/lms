@@ -33,6 +33,8 @@ from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForInvitation, dataframe_to_response
 from learning.settings import AcademicDegreeLevels, StudentStatuses, \
     GradeTypes
+from projects.constants import ProjectTypes
+from projects.models import Project
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import FacesQueryParams
@@ -303,6 +305,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             teachers: str
             final_grade: str
             class_count: int = 0
+            term: str = ''
 
         def is_project_active(ps):
             return (not ps.project.is_external and
@@ -314,13 +317,19 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             student.projects_progress = list(filter(is_project_active,
                                                     student.projects_progress))
             student_courses = []
+            student.enrollments_progress.sort(key=lambda e: e.course.semester.index)
+            enrollments = {}
+            # Store the last passed course
             for e in student.enrollments_progress:
+                meta_course_id = e.course.meta_course_id
+                enrollments[meta_course_id] = e
+            for e in enrollments.values():
                 course = courses[e.course_id]
                 diploma_course = DiplomaCourse(
                     type="course",
                     name=tex(course.meta_course.name),
-                    teachers=", ".join(t.get_abbreviated_name() for t in
-                                       course.teachers.all()),
+                    teachers=", ".join(t.get_abbreviated_name(delimiter="~")
+                                       for t in course.teachers.all()),
                     final_grade=str(e.grade_honest).lower(),
                     class_count=course.classes_total * 2
                 )
@@ -337,6 +346,24 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             student.courses = student_courses
             delattr(student, "enrollments_progress")
             delattr(student, "shads")
+
+            projects = []
+            for ps in student.projects_progress:
+                project = ps.project
+                if project.project_type == ProjectTypes.research:
+                    project_type  = 'theory'
+                else:
+                    project_type = project.project_type
+                diploma_course = DiplomaCourse(
+                    type=project_type,
+                    name=tex(project.name),
+                    teachers=", ".join(t.get_abbreviated_name(delimiter="~")
+                                       for t in project.supervisors.all()),
+                    final_grade=str(ps.get_final_grade_display()).lower(),
+                    term=str(project.semester)
+                )
+                projects.append(diploma_course)
+            student.projects = projects
 
         context = {
             "branch": branch,

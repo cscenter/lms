@@ -577,11 +577,10 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         return (smart_text(" ".join([self.first_name, self.last_name]).strip())
                 or self.username)
 
-    def get_abbreviated_name(self):
+    def get_abbreviated_name(self, delimiter=chr(160)):  # non-breaking space
         parts = [self.first_name[:1], self.patronymic[:1], self.last_name]
-        nbs = chr(160)  # non-breaking space
-        abbrev_name = smart_text(f".{nbs}".join(p for p in parts if p).strip())
-        return abbrev_name or self.username
+        name = smart_text(f".{delimiter}".join(p for p in parts if p).strip())
+        return name or self.username
 
     def get_abbreviated_short_name(self, last_name_first=True):
         first_letter = self.first_name[:1] + "." if self.first_name else ""

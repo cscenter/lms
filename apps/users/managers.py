@@ -31,7 +31,7 @@ class UserQuerySet(query.QuerySet):
         from projects.models import ProjectStudent
 
         enrollment_qs = (Enrollment.active
-                         .select_related('course')
+                         .select_related('course', 'course__semester')
                          .annotate(grade_weight=GradeTypes.to_int_case_expr())
                          .only('pk', 'created', 'student_id', 'course_id',
                                'grade'))

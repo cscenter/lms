@@ -438,10 +438,9 @@ class Supervisor(models.Model):
         parts = (self.first_name, self.patronymic, self.last_name)
         return " ".join(p for p in parts if p).strip()
 
-    def get_abbreviated_name(self):
+    def get_abbreviated_name(self, delimiter=chr(160)):  # non-breaking space
         parts = (self.first_name[:1], self.patronymic[:1], self.last_name)
-        nbs = chr(160)  # non-breaking space
-        return smart_text(f".{nbs}".join(p for p in parts if p).strip())
+        return smart_text(f".{delimiter}".join(p for p in parts if p).strip())
 
 
 class ProjectQuerySet(models.QuerySet):
