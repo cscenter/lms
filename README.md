@@ -19,7 +19,7 @@ Section | Description
 return HttpResponse("<html><body>body tag should be returned</body></html>", content_type='text/html; charset=utf-8')
 
 # Recreate DB
-psql -h localhost postgres -c "DROP DATABASE cscdb;"; psql -h localhost postgres -c "CREATE DATABASE cscdb;"; psql -h localhost postgres -c "GRANT ALL privileges ON DATABASE cscdb TO csc;"
+psql -h localhost postgres -c "DROP DATABASE cscdb;"; psql -h localhost postgres -c "CREATE DATABASE cscdb WITH encoding 'UTF-8' LC_COLLATE='C' TEMPLATE=template0;"; psql -h localhost postgres -c "GRANT ALL privileges ON DATABASE cscdb TO csc;"
 psql -h localhost cscdb csc < 
 psql -h localhost cscdb csc -c "update django_site set domain='csc.test' where id = 1; update django_site set domain = 'club.ru' where id = 2;"
 ./manage.py changepassword admin
