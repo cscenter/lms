@@ -54,7 +54,7 @@
                 <i class="fa fa-pencil-square-o"></i> {% trans "Edit in admin" %}
             </a>
         {% endif %}
-        {% if has_curator_permissions and profile_user.enrollment_year %}
+        {% if has_curator_permissions and student_profile %}
             {% if has_curator_permissions and profile_user.studentinfo %}
                 <a href="{% url 'student_info_update' profile_user.studentinfo.pk %}" class="list-group-item">{% trans "Edit info record" %}</a>
             {% endif %}
@@ -83,7 +83,7 @@
     {% endif %}
 
     <ul class="list-unstyled">
-    {% if profile_user.enrollment_year %}
+    {% if student_profile %}
         {% if profile_user.enrollment_set.all %}
         <li>
         <h4>{% trans "Courses" %}</h4>

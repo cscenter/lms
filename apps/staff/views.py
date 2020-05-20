@@ -27,7 +27,7 @@ from courses.constants import SemesterTypes
 from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import Enrollment, Invitation
+from learning.models import Enrollment, Invitation, GraduateProfile
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
     ProgressReportForInvitation, dataframe_to_response
@@ -41,7 +41,8 @@ from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.constants import Roles
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
-from users.models import User
+from users.models import User, StudentProfile, StudentTypes
+from users.services import get_student_progress
 
 
 class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
@@ -117,16 +118,14 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
     BAD_GRADES = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
 
     def get_context_data(self, branch_id, **kwargs):
-        students = (User.objects
-                    .has_role(Roles.STUDENT,
-                              Roles.GRADUATE,
-                              Roles.VOLUNTEER)
-                    .filter(branch_id=branch_id,
-                            status=StudentStatuses.WILL_GRADUATE)
-                    .student_progress()
-                    .order_by('last_name', 'first_name', 'pk')
-                    .distinct('last_name', 'first_name', 'pk'))
-
+        student_profiles = (StudentProfile.objects
+                            .filter(type=StudentTypes.REGULAR,
+                                    branch_id=branch_id,
+                                    status=StudentStatuses.WILL_GRADUATE)
+                            .select_related('user')
+                            .order_by('user__last_name', 'user__first_name',
+                                      'user_id'))
+        progress = get_student_progress(student_profiles)
         unique_teachers = set()
         total_hours = 0
         total_passed_courses = 0
@@ -138,7 +137,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         most_courses_in_term_students = set()
         most_open_courses_students = set()
         enrolled_on_first_course = set()
-        by_enrollment_year = defaultdict(set)
+        by_year_of_admission = defaultdict(set)
         finished_two_or_more_programs = set()
         all_three_practicies_are_internal = set()
         passed_practicies_in_first_two_years = set()
@@ -146,26 +145,33 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         most_failed_courses = set()
         less_failed_courses = set()
 
-        for s in students:
-            if s.graduate_profile and len(s.graduate_profile.academic_disciplines.all()) >= 2:
+        for student_profile in student_profiles:
+            s = student_profile.user
+            enrollments = progress[s.id].get('enrollments', [])
+            projects = progress[s.id].get('projects', [])
+            shad = progress[s.id].get('shad', [])
+            try:
+                graduate_profile = s.graduate_profile
+            except GraduateProfile.DoesNotExist:
+                graduate_profile = None
+            if graduate_profile and len(graduate_profile.academic_disciplines.all()) >= 2:
                 finished_two_or_more_programs.add(s)
-            by_enrollment_year[s.enrollment_year].add(s)
+            by_year_of_admission[student_profile.year_of_admission].add(student_profile)
             degree_year = AcademicDegreeLevels.BACHELOR_SPECIALITY_1
-            if s.uni_year_at_enrollment == degree_year:
+            if student_profile.level_of_education_on_admission == degree_year:
                 enrolled_on_first_course.add(s)
             # Count most_courses_students
-            s.passed_courses = sum(1 for e in s.enrollments if e.grade not in self.BAD_GRADES)
-            s.passed_courses += sum(1 for c in s.shads if c.grade not in self.BAD_GRADES)
+            s.passed_courses = sum(1 for e in enrollments if e.grade not in self.BAD_GRADES)
+            s.passed_courses += sum(1 for c in shad if c.grade not in self.BAD_GRADES)
             if not most_courses_students:
                 most_courses_students = {s}
             else:
-                # FIXME: most_courses_student и most_courses_student interm
                 most_courses_student = next(iter(most_courses_students))
                 if s.passed_courses == most_courses_student.passed_courses:
                     most_courses_students.add(s)
                 elif s.passed_courses > most_courses_student.passed_courses:
                     most_courses_students = {s}
-            s.pass_open_courses = sum(e.course.is_open for e in s.enrollments
+            s.pass_open_courses = sum(e.course.is_club_course for e in enrollments
                                       if e.grade not in self.BAD_GRADES)
             if not most_open_courses_students:
                 most_open_courses_students.add(s)
@@ -179,9 +185,10 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             internal_projects_cnt = 0
             projects_in_first_two_years_of_learning = 0
             internal_projects_in_first_two_years_of_learning = 0
-            enrollment_term_index = get_term_index(s.enrollment_year,
-                                                   SemesterTypes.AUTUMN)
-            for ps in s.projects_progress:
+            enrollment_term_index = get_term_index(
+                student_profile.year_of_admission,
+                SemesterTypes.AUTUMN)
+            for ps in projects:
                 if ps.final_grade in self.BAD_GRADES or ps.project.is_canceled:
                     continue
                 unique_projects.add(ps.project)
@@ -200,12 +207,12 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             courses_by_term = defaultdict(int)
             failed_courses = 0
             # Add shad courses
-            for c in s.shads:
+            for c in shad:
                 if c.grade in self.BAD_GRADES:
                     failed_courses += 1
                     continue
                 courses_by_term[c.semester_id] += 1
-            for enrollment in s.enrollments:
+            for enrollment in enrollments:
                 # Skip summer courses
                 if enrollment.course.semester.type == SemesterTypes.SUMMER:
                     continue
@@ -262,12 +269,12 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             'passed_practicies_in_first_two_years': passed_practicies_in_first_two_years,
             'passed_internal_practicies_in_first_two_years': passed_internal_practicies_in_first_two_years,
             'finished_two_or_more_programs': finished_two_or_more_programs,
-            'by_enrollment_year': dict(by_enrollment_year),
+            'by_enrollment_year': dict(by_year_of_admission),
             'enrolled_on_first_course': enrolled_on_first_course,
             'most_courses_students': most_courses_students,
             'most_courses_in_term_students': most_courses_in_term_students,
             'most_open_courses_students': most_open_courses_students,
-            'students': students,
+            'student_profiles': student_profiles,
             "unique_teachers_count": len(unique_teachers),
             "total_hours": int(total_hours),
             "unique_courses": unique_courses, "good_total": good_total,

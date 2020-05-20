@@ -48,7 +48,7 @@ def test_create_reference(client, assert_redirect):
 def test_user_detail_view(client):
     """Show reference-add button only to curators (superusers)"""
     # check user page without curator credentials
-    student = StudentFactory(enrollment_year=2011)
+    student = StudentFactory()
     client.login(student)
     response = client.get(student.get_absolute_url())
     soup = BeautifulSoup(response.content, "html.parser")

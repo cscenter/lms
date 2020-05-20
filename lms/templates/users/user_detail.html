@@ -59,19 +59,19 @@
                 {% endif %}</h2>
 
             {% if profile_user.is_graduate %}
+                {% with graduate_profile=profile_user.graduate_profile %}
+                    <div class="progress-info">
+                        С сентября {{ student_profile.year_of_admission }} года по июнь {{ graduate_profile.graduation_year }} года<br>
+                            {% if profile_user.gender == profile_user.GENDER_FEMALE %}прошла{% else %}прошёл{% endif %}
+                            обучение по направлени{{ graduate_profile.academic_disciplines.all|pluralize:"ю,ям" }}
+                            {% for program in graduate_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
+                    </div>
+                {% endwith %}
+            {% elif student_profile %}
                 <div class="progress-info">
-                    {% with gp=profile_user.graduate_profile %}
-                    С сентября {{ profile_user.enrollment_year }} года по июнь {{ gp.graduation_year }} года<br>
-                        {% if profile_user.gender == profile_user.GENDER_FEMALE %}прошла{% else %}прошёл{% endif %}
-                        обучение по направлени{{ gp.academic_disciplines.all|pluralize:"ю,ям" }}
-                        {% for program in gp.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
-                    {% endwith %}
+                    {% trans "student"|title %}{% if student_profile.year_of_admission %} {{ student_profile.year_of_admission }} {% trans "enrolled in" context "user_detail" %}{% endif %}{% if not student_profile.is_active %}, {{ student_profile.get_status_display|lower }}{% endif %}
                 </div>
-                {% elif profile_user.is_student or profile_user.is_volunteer %}
-                <div class="progress-info">
-                    {% trans "student"|title %}{% if profile_user.enrollment_year %} {{ profile_user.enrollment_year }} {% trans "enrolled in" context "user_detail" %}{% endif %}{% if profile_user.status == "expelled" %}, {{ profile_user.get_status_display|lower }}{% endif %}
-                </div>
-                {% elif profile_user.is_teacher %}
+            {% elif profile_user.is_teacher %}
                 <div class="progress-info">
                     {% trans "teacher"|title %}
                 </div>

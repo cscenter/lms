@@ -134,7 +134,7 @@ class UserAdmin(_UserAdmin):
         (_('External services'), {'fields': ['yandex_login', 'stepic_id',
                                              'github_login', 'anytask_url']}),
         (_('Student info record [DEPRECETED, DONT EDIT THIS SECTION]'),
-         {'fields': ['status', 'enrollment_year', 'curriculum_year',
+         {'fields': ['status', 'curriculum_year',
                      'university', 'uni_year_at_enrollment',
                      'official_student', 'diploma_number',
                      'academic_disciplines']}),
