@@ -11,8 +11,7 @@ from users.tests.factories import StudentFactory, CuratorFactory, \
 
 @pytest.mark.django_db
 def test_staff_diplomas_view(curator, client):
-    student = StudentFactory(enrollment_year='2013',
-                             status=StudentStatuses.WILL_GRADUATE)
+    student = StudentFactory(status=StudentStatuses.WILL_GRADUATE)
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
     sp = p.projectstudent_set.all()[0]

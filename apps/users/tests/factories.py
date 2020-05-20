@@ -52,14 +52,6 @@ class UserFactory(factory.DjangoModelFactory):
         self.save()
         self.raw_password = raw_password
 
-    @factory.post_generation
-    def curriculum_year(self, create, extracted, **kwargs):
-        if not create:
-            return
-        self.curriculum_year = extracted
-        if not extracted and self.enrollment_year:
-            self.curriculum_year = self.enrollment_year
-
 
 class UserGroupFactory(factory.DjangoModelFactory):
     class Meta:
@@ -86,7 +78,6 @@ class StudentFactory(UserFactory):
     """
     Student access role will be created by student profile post save signal
     """
-    enrollment_year = 2015
     username = factory.Sequence(lambda n: "student%03d" % n)
     email = factory.Sequence(lambda n: "student%03d@test.email" % n)
 
@@ -96,16 +87,10 @@ class StudentFactory(UserFactory):
             return
         kwargs.setdefault('branch', self.branch)
         kwargs.setdefault('status', self.status)
-        if self.enrollment_year:
-            kwargs.setdefault('year_of_admission', self.enrollment_year)
-        if self.curriculum_year:
-            kwargs.setdefault('year_of_curriculum', self.curriculum_year)
         StudentProfileFactory(user=self, **kwargs)
 
 
 class InvitedStudentFactory(UserFactory):
-    enrollment_year = 2015
-
     @factory.post_generation
     def student_profile(self, create, extracted, **kwargs):
         if not create:
@@ -123,8 +108,6 @@ class VolunteerFactory(UserFactory):
             return
         kwargs.setdefault('branch', self.branch)
         kwargs.setdefault('status', self.status)
-        if self.enrollment_year:
-            kwargs.setdefault('year_of_admission', self.enrollment_year)
         if self.curriculum_year:
             kwargs.setdefault('year_of_curriculum', self.curriculum_year)
         StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)

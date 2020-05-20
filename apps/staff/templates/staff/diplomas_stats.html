@@ -57,7 +57,7 @@
             <b>{{ year }}</b>:<br>
             <ul>
                 {% for s in students %}
-                    <li><a href="{{ s.get_absolute_url }}">{{ s }}</a></li>
+                    <li><a href="{{ s.get_absolute_url }}">{{ s.user.get_full_name }}</a></li>
                 {% endfor %}
             </ul>
         {% endfor %}
