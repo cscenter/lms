@@ -317,6 +317,42 @@ def test_course_branches_same_metacourse_already_available_in_the_additional_bra
 
 
 @pytest.mark.django_db
+def test_course_branches_same_metacourse_already_available_in_the_main_branch(client):
+    """
+    Checks that admin panel forbids creating a course with a main_branch where the same meta_course is
+    already available.
+    """
+    client.login(CuratorFactory())
+    branch1, branch2 = BranchFactory.create_batch(2)
+    current_semester = SemesterFactory.create_current()
+    course1 = CourseFactory(semester=current_semester,
+                            main_branch=branch1,
+                            branches=[branch2])
+    assert Course.objects.count() == 1
+
+    # Construct course to be added
+    course2 = CourseFactory.build(meta_course=course1.meta_course,
+                                  semester=current_semester,
+                                  main_branch=branch2)
+
+    # Construct a form to add course2
+    form_data = _get_course_post_data(course=course2)
+    course_teachers_form_data = _get_course_teachers_post_data(course=course2)
+    form_data.update(course_teachers_form_data)
+    branches_form_data = _get_course_branch_post_data(course=course2)
+    form_data.update(branches_form_data)
+
+    # Validation Error
+    add_url = reverse('admin:courses_course_add')
+    response = client.post(add_url, form_data)
+    assert response.status_code == 200
+    assert 'course with the same name is already available' in response.context_data['errors'].as_text()
+
+    # No courses were added
+    assert Course.objects.count() == 1
+
+
+@pytest.mark.django_db
 def test_assignment_admin_view(settings, client):
     curator = CuratorFactory()
     client.login(curator)

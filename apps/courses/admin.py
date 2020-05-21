@@ -55,6 +55,16 @@ class CourseTeacherInline(admin.TabularInline):
     # FIXME: customize template (hide link `show on site`, now it's hidden by css)
 
 
+def check_existing_courses_for_branch(meta_course, semester, branch, course_pk=None):
+    return (Course
+            .objects
+            .filter(meta_course=meta_course,
+                    semester=semester)
+            .available_in(branch)
+            .exclude(pk=course_pk)
+            .count())
+
+
 class CourseBranchFormSet(BaseInlineFormSet):
     def clean(self):
         """Checks that no course with the same name is available in branches"""
@@ -64,13 +74,8 @@ class CourseBranchFormSet(BaseInlineFormSet):
             branch = form.cleaned_data.get('branch')
             course = form.cleaned_data.get('course')
             if branch:
-                existing_courses = (Course
-                                    .objects
-                                    .filter(meta_course=course.meta_course,
-                                            semester=course.semester)
-                                    .available_in(branch)
-                                    .exclude(pk=course.pk)
-                                    .count())
+                existing_courses = check_existing_courses_for_branch(course.meta_course, course.semester,
+                                                                     branch, course_pk=course.pk)
                 if existing_courses:
                     msg = _("Another course with the same name is already available for branch %(branch)s"
                             " in current semester")
@@ -99,6 +104,20 @@ class CourseAdminForm(forms.ModelForm):
     class Meta:
         model = Course
         fields = '__all__'
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if ('main_branch' in cleaned_data and
+                'meta_course' in cleaned_data and
+                'semester' in cleaned_data):
+            main_branch = cleaned_data['main_branch']
+            meta_course = cleaned_data['meta_course']
+            semester = cleaned_data['semester']
+            existing_courses = check_existing_courses_for_branch(meta_course, semester, main_branch)
+            if existing_courses:
+                msg = _("Another course with the same name is already available for branch %(branch)s"
+                        " in current semester")
+                self.add_error('main_branch', ValidationError(msg % {'branch': str(main_branch)}))
 
     def clean_is_open(self):
         is_open = self.cleaned_data['is_open']
@@ -170,6 +189,7 @@ class CourseNewsAdmin(admin.ModelAdmin):
 
     def created_local(self, obj):
         return admin_datetime(obj.created_local())
+
     created_local.admin_order_field = 'created'
     created_local.short_description = _("Created")
 
@@ -189,8 +209,8 @@ class AssignmentAdminForm(TimezoneAwareAdminForm):
             co_teachers = [t.pk for t in co.course_teachers.all()]
             if any(t.pk not in co_teachers for t in cleaned_data['notify_teachers']):
                 self.add_error('notify_teachers', ValidationError(
-                        _("Please, double check teacher list. Some "
-                          "users are not related to the selected course")))
+                    _("Please, double check teacher list. Some "
+                      "users are not related to the selected course")))
 
 
 class AssignmentAttachmentAdmin(admin.ModelAdmin):
@@ -255,11 +275,13 @@ class AssignmentAdmin(admin.ModelAdmin):
 
     def created_local(self, obj):
         return admin_datetime(obj.created_local())
+
     created_local.admin_order_field = 'created'
     created_local.short_description = _("Created")
 
     def deadline_at_local(self, obj):
         return admin_datetime(obj.deadline_at_local())
+
     deadline_at_local.admin_order_field = 'deadline_at'
     deadline_at_local.short_description = _("Assignment|deadline")
 
