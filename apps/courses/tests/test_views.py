@@ -7,12 +7,13 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.forms import model_to_dict
+from django.http import Http404
 from django.utils import formats
-from django.utils.encoding import smart_bytes
 
 from core.models import Branch
 from core.tests.factories import LocationFactory, BranchFactory
 from core.urls import reverse
+from courses.services import CourseService
 from courses.tests.factories import CourseFactory, CourseNewsFactory, \
     AssignmentFactory, CourseClassFactory, CourseTeacherFactory, SemesterFactory
 from learning.settings import Branches
@@ -62,6 +63,7 @@ def test_course_news(settings, client):
     course.main_branch = Branch.objects.get_by_natural_key(Branches.NSK,
                                                            settings.SITE_ID)
     course.save()
+    CourseService.sync_branches(course)
     created_local = created_utc.astimezone(branch_nsk.get_timezone())
     assert created_local.utcoffset() == datetime.timedelta(
         seconds=nsk_offset.total_seconds())
@@ -164,9 +166,32 @@ def test_venue_list(client):
 
 
 @pytest.mark.django_db
-def test_course_url_params_mixin(client):
+@pytest.mark.skip("WIP CourseURLParamsMixin")
+def test_course_url_params_mixin_should_not_resolve_unshared_courses(client):
     """
-    CourseURLParamsMixin should prioritize courses from the same site as request.site
+    CourseURLParamsMixin should not resolve course absolute url if it was not
+    shared with user's branch.
+    """
+    current_semester = SemesterFactory.create_current()
+    branch_center = BranchFactory(code=Branches.SPB,
+                                  site__domain=settings.TEST_DOMAIN)
+    branch_club = BranchFactory(code=Branches.SPB,
+                                site__domain=settings.ANOTHER_DOMAIN)
+    course_center = CourseFactory(semester=current_semester,
+                                  main_branch=branch_center)
+
+    # Lookup from another branch
+    s = StudentFactory(branch=branch_club)
+    client.login(s)
+    with pytest.raises(Http404):
+        client.get(course_center.get_absolute_url())
+
+
+@pytest.mark.django_db
+@pytest.mark.skip("WIP CourseURLParamsMixin")
+def test_course_url_params_mixin_should_not_resolve_unshared_courses(client):
+    """
+    CourseURLParamsMixin should prioritize courses from the request.site
     if metacourse names are the same.
     """
     current_semester = SemesterFactory.create_current()
@@ -188,7 +213,7 @@ def test_course_url_params_mixin(client):
 
     # Lookup from another branch
     s = StudentFactory(branch__code=Branches.NSK)
-    client.login(s)
+    client.login(s.user)
     response = client.get(course_club.get_absolute_url())
     assert smart_bytes(course_center.main_branch.name) in response.content
     assert smart_bytes(course_club.main_branch.name) not in response.content

@@ -1,11 +1,9 @@
 from bitfield import BitField
 from bitfield.forms import BitFieldCheckboxSelectMultiple
-from dal_select2.widgets import ListSelect2, Select2Multiple
 from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.db import models as db_models
-from django.db.models import ForeignKey
 from django.forms import BaseInlineFormSet
 from django.utils.translation import ugettext_lazy as _
 from modeltranslation.admin import TranslationAdmin
@@ -22,8 +20,6 @@ from courses.models import CourseTeacher, Course, CourseClassAttachment, \
 from courses.services import CourseService
 from learning.models import AssignmentGroup, StudentGroup
 from learning.services import AssignmentService
-from users.constants import Roles
-from users.models import User
 
 
 class SemesterAdmin(admin.ModelAdmin):
@@ -60,6 +56,26 @@ class CourseTeacherInline(admin.TabularInline):
 
 
 class CourseBranchFormSet(BaseInlineFormSet):
+    def clean(self):
+        """Checks that no course with the same name is available in branches"""
+        if any(self.errors):
+            return
+        for form in self.forms:
+            branch = form.cleaned_data.get('branch')
+            course = form.cleaned_data.get('course')
+            if branch:
+                existing_courses = (Course
+                                    .objects
+                                    .filter(meta_course=course.meta_course,
+                                            semester=course.semester)
+                                    .available_in(branch)
+                                    .exclude(pk=course.pk)
+                                    .count())
+                if existing_courses:
+                    msg = _("Another course with the same name is already available for branch %(branch)s"
+                            " in current semester")
+                    form.add_error('branch', ValidationError(msg % {'branch': str(branch)}))
+
     def save(self, commit=True):
         saved_objects = super().save(commit)
         if commit:
