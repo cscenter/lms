@@ -64,6 +64,10 @@ class EnrollmentFactory(factory.DjangoModelFactory):
         model = Enrollment
 
     student = factory.SubFactory(StudentFactory)
+    student_profile = factory.SubFactory(
+        StudentProfileFactory,
+        user=factory.SelfAttribute('..student'),
+        branch=factory.SelfAttribute('..student.branch'))
     course = factory.SubFactory(CourseFactory)
 
     @factory.post_generation

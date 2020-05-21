@@ -500,7 +500,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
                        subdomain=settings.LMS_SUBDOMAIN)
 
     @instance_memoize
-    def get_student_profile(self, site, **kwargs):
+    def get_student_profile(self, site=settings.SITE_ID, **kwargs):
         from learning.services import get_student_profile
         return get_student_profile(self, site, **kwargs)
 
@@ -613,6 +613,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         from learning.models import Enrollment
         return (Enrollment.active
                 .filter(student=self, course_id=course_id)
+                .select_related('student_profile')
                 .order_by()
                 .first())
 

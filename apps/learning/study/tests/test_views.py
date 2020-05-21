@@ -21,9 +21,11 @@ def test_student_assignment_detail_view_permissions(client, lms_resolver,
     from auth.permissions import perm_registry
     teacher = TeacherFactory()
     student = StudentFactory()
-    course = CourseFactory(teachers=[teacher])
-    student_assignment = StudentAssignmentFactory(student=student,
-                                                  assignment__course=course)
+    course = CourseFactory(teachers=[teacher],
+                           semester=SemesterFactory.create_current())
+    AssignmentFactory(course=course)
+    EnrollmentFactory(student=student, course=course)
+    student_assignment = StudentAssignment.objects.get(student=student)
     url = student_assignment.get_student_url()
     resolver = lms_resolver(url)
     assert issubclass(resolver.func.view_class, PermissionRequiredMixin)

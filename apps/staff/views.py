@@ -77,11 +77,11 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
         context = {
             'json_api_uri': reverse('staff:student_search_json'),
             'branches': {b.pk: b.name for b in branches},
-            'curriculum_years': (User.objects
-                                 .values_list('curriculum_year',
+            'curriculum_years': (StudentProfile.objects
+                                 .values_list('year_of_curriculum',
                                               flat=True)
-                                 .filter(curriculum_year__isnull=False)
-                                 .order_by('curriculum_year')
+                                 .filter(year_of_curriculum__isnull=False)
+                                 .order_by('year_of_curriculum')
                                  .distinct()),
             'groups': StudentFilter.get_filters()['groups'].choices,
             "status": StudentStatuses.values,
@@ -352,7 +352,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             for ps in student.projects_progress:
                 project = ps.project
                 if project.project_type == ProjectTypes.research:
-                    project_type  = 'theory'
+                    project_type = 'theory'
                 else:
                     project_type = project.project_type
                 diploma_course = DiplomaCourse(

@@ -13,7 +13,8 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from courses.utils import get_current_term_pair
 from learning.permissions import ViewOwnStudentAssignments, ViewCourses
-from learning.services import EnrollmentService, CourseRole, course_access_role
+from learning.services import EnrollmentService, CourseRole, course_access_role, \
+    get_student_profile
 from learning.settings import GradeTypes, StudentStatuses, Branches
 from learning.tests.factories import *
 from learning.tests.factories import EnrollmentFactory, StudentAssignmentFactory
@@ -131,7 +132,8 @@ def test_access_student_assignment_failed_course(client):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
-def test_access_student_assignment_inactive_student(inactive_status, client):
+def test_access_student_assignment_inactive_student(inactive_status, client,
+                                                    settings):
     """
     Inactive student could see student assignment only if he has any
     submission or score, no matter course was failed/passed/still active
@@ -144,8 +146,9 @@ def test_access_student_assignment_inactive_student(inactive_status, client):
     student = student_assignment.student
     EnrollmentFactory(course=active_course, student=student, grade=GradeTypes.GOOD)
     assert course_access_role(course=active_course, user=student) == CourseRole.STUDENT_REGULAR
-    student.status = inactive_status
-    student.save()
+    student_profile = get_student_profile(student, settings.SITE_ID)
+    student_profile.status = inactive_status
+    student_profile.save()
     assert course_access_role(course=active_course, user=student) == CourseRole.STUDENT_RESTRICT
     client.login(student)
     student_url = student_assignment.get_student_url()
@@ -239,14 +242,15 @@ def test_projects_on_assignment_list_page(client):
 
 
 @pytest.mark.django_db
-def test_student_assignment_execution_time_form(client, assert_redirect):
+def test_student_assignment_execution_time_form(client, settings, assert_redirect):
     """
     Execution time form is unavailable until student get score on assignment
     """
     term = SemesterFactory.create_current()
     assignment = AssignmentFactory(course__semester=term, maximum_score=10)
     student = StudentFactory()
-    EnrollmentService.enroll(student, assignment.course)
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    EnrollmentService.enroll(student_profile, assignment.course)
     sa = StudentAssignment.objects.get(assignment=assignment, student=student)
     assert sa.execution_time is None
     update_url = reverse('study:student_assignment_execution_time_update',
@@ -425,8 +429,8 @@ def test_deadline_l10n_on_student_assignment_list_page(learner_factory,
 @pytest.mark.django_db
 @pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
 def test_course_list_student_with_inactive_status(inactive_status, client):
-    student = StudentFactory(status=inactive_status)
-    client.login(student)
+    inactive_student = StudentFactory(student_profile__status=inactive_status)
+    client.login(inactive_student)
     url = reverse('study:course_list')
     response = client.get(url)
     assert response.status_code == 403

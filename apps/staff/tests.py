@@ -10,8 +10,8 @@ from users.tests.factories import StudentFactory, CuratorFactory, \
 
 
 @pytest.mark.django_db
-def test_staff_diplomas_view(curator, client):
-    student = StudentFactory(status=StudentStatuses.WILL_GRADUATE)
+def test_staff_diplomas_view(curator, client, settings):
+    student = StudentFactory(student_profile__status=StudentStatuses.WILL_GRADUATE)
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
     sp = p.projectstudent_set.all()[0]

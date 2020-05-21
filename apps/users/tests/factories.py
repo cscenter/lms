@@ -86,7 +86,6 @@ class StudentFactory(UserFactory):
         if not create:
             return
         kwargs.setdefault('branch', self.branch)
-        kwargs.setdefault('status', self.status)
         StudentProfileFactory(user=self, **kwargs)
 
 
@@ -96,7 +95,6 @@ class InvitedStudentFactory(UserFactory):
         if not create:
             return
         kwargs.setdefault('branch', self.branch)
-        kwargs.setdefault('status', self.status)
         StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
@@ -107,9 +105,6 @@ class VolunteerFactory(UserFactory):
         if not create:
             return
         kwargs.setdefault('branch', self.branch)
-        kwargs.setdefault('status', self.status)
-        if self.curriculum_year:
-            kwargs.setdefault('year_of_curriculum', self.curriculum_year)
         StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
@@ -125,6 +120,7 @@ class TeacherFactory(UserFactory):
 class StudentProfileFactory(factory.DjangoModelFactory):
     class Meta:
         model = StudentProfile
+        django_get_or_create = ('user', 'branch', 'year_of_admission')
 
     type = StudentTypes.REGULAR
     user = factory.SubFactory(UserFactory)

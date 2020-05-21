@@ -9,7 +9,7 @@ from django.utils.timezone import now
 from learning.models import GraduateProfile
 from learning.settings import StudentStatuses
 from users.constants import Roles
-from users.models import User
+from users.models import User, StudentProfile, StudentTypes
 
 
 class Command(BaseCommand):
@@ -24,25 +24,24 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         graduated_on_str = options['graduated_on']
         graduated_on = datetime.strptime(graduated_on_str, "%d.%m.%Y").date()
-        will_graduate_list = (User.objects
-                              .has_role(Roles.STUDENT,
-                                        Roles.VOLUNTEER)
-                              .filter(status=StudentStatuses.WILL_GRADUATE))
+        will_graduate_list = (StudentProfile.objects
+                              .filter(type=StudentTypes.REGULAR,
+                                      status=StudentStatuses.WILL_GRADUATE))
 
-        for student in will_graduate_list:
+        for student_profile in will_graduate_list:
+            user_account = student_profile.user
             with transaction.atomic():
-                student.remove_group(Roles.STUDENT)
-                student.remove_group(Roles.VOLUNTEER)
-                student.add_group(Roles.GRADUATE)
-                student.status = ""
-                student.save()
+                user_account.remove_group(Roles.STUDENT)
+                user_account.remove_group(Roles.VOLUNTEER)
+                user_account.add_group(Roles.GRADUATE)
                 defaults = {
+                    "status": "",
                     "is_active": True,
                     "graduated_on": graduated_on,
                     "details": {}
                 }
                 profile, created = GraduateProfile.objects.get_or_create(
-                    student=student,
+                    student=user_account,
                     defaults=defaults)
                 if not created:
                     profile.is_active = True
