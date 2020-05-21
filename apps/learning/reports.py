@@ -244,19 +244,22 @@ class ProgressReport:
 
 
 class ProgressReportForDiplomas(ProgressReport):
+    def __init__(self, branch, **kwargs):
+        super().__init__(**kwargs)
+        self.branch = branch
+
     def get_queryset(self):
         """
-        Explicitly exclude rows with bad grades (or without) on query level.
+        Explicitly exclude rows with bad grade or without any.
         """
         return (User.objects
-                .has_role(Roles.STUDENT,
-                          Roles.GRADUATE,
-                          Roles.VOLUNTEER)
-                .filter(status=StudentStatuses.WILL_GRADUATE)
+                .filter(student_profiles__status=StudentStatuses.WILL_GRADUATE,
+                        student_profiles__branch=self.branch)
                 .student_progress(exclude_grades=[GradeTypes.UNSATISFACTORY,
                                                   GradeTypes.NOT_GRADED])
                 .select_related('graduate_profile')
-                .prefetch_related('graduate_profile__academic_disciplines')
+                .prefetch_related('graduate_profile__academic_disciplines',
+                                  'academic_disciplines')
                 .order_by('last_name', 'first_name', 'pk')
                 .distinct('last_name', 'first_name', 'pk'))
 

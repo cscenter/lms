@@ -5,7 +5,8 @@ from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.settings import StudentStatuses, GradeTypes
 from projects.tests.factories import ProjectFactory
-from users.tests.factories import StudentFactory, CuratorFactory
+from users.tests.factories import StudentFactory, CuratorFactory, \
+    StudentProfileFactory
 
 
 @pytest.mark.django_db

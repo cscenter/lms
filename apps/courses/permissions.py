@@ -1,8 +1,8 @@
 from rules import predicate
 
 from auth.permissions import add_perm, Permission
-from courses.models import Course, CourseClass
-from learning.permissions import course_access_role, CourseRole
+from courses.models import Course, CourseClass, CourseTeacher
+from learning.services import CourseRole, course_access_role
 
 
 def can_view_private_materials(role: CourseRole) -> bool:
@@ -28,6 +28,26 @@ class ViewCourseContacts(Permission):
 @add_perm
 class ViewCourseAssignments(Permission):
     name = "courses.can_view_assignments"
+
+
+@add_perm
+class ViewAssignment(Permission):
+    name = "courses.view_assignment"
+
+
+@add_perm
+class ViewOwnAssignment(Permission):
+    name = "teaching.view_assignment"
+
+    @staticmethod
+    @predicate
+    def rule(user, course: Course):
+        if user.is_teacher:
+            return (CourseTeacher.objects
+                    .filter(course__meta_course_id=course.meta_course_id,
+                            teacher_id=user.pk)
+                    .exists())
+        return False
 
 
 @add_perm

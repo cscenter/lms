@@ -30,7 +30,7 @@ def test_smoke(client, curator, settings):
 
 @pytest.mark.django_db
 def test_course_classes(client):
-    user = UserFactory(groups=[Roles.STUDENT, Roles.TEACHER])
+    user = StudentFactory(groups=[Roles.TEACHER])
     client.login(user)
     fname = 'csc_classes.ics'
     # Empty calendar
@@ -59,8 +59,8 @@ def test_course_classes(client):
 
 @pytest.mark.django_db
 def test_assignments(client):
-    user = UserFactory(groups=[Roles.STUDENT, Roles.TEACHER],
-                       branch__code=Branches.SPB)
+    user = StudentFactory(groups=[Roles.TEACHER],
+                          branch__code=Branches.SPB)
     client.login(user)
     fname = 'csc_assignments.ics'
     # Empty calendar

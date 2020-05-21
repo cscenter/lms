@@ -14,7 +14,7 @@ from users.tests.factories import StudentFactory
 
 
 @pytest.mark.django_db
-def test_student_group_service_resolve():
+def test_student_group_service_resolve(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(main_branch=branch_spb,
@@ -24,20 +24,20 @@ def test_student_group_service_resolve():
     sg_other = StudentGroupFactory(course=course)
     student_spb = StudentFactory(branch=branch_spb)
     student_nsk = StudentFactory(branch=branch_nsk)
-    assert StudentGroupService.resolve(course, student_spb) == student_group
-    assert StudentGroupService.resolve(course, student_spb,
+    assert StudentGroupService.resolve(course, student_spb, settings.SITE_ID) == student_group
+    assert StudentGroupService.resolve(course, student_spb, settings.SITE_ID,
                                        enrollment_key='wrong_key') == student_group
     found = StudentGroupService.resolve(
-        course, student_spb,
+        course, student_spb, settings.SITE_ID,
         enrollment_key=sg_other.enrollment_key)
     assert found == student_group
-    assert StudentGroupService.resolve(course, student_nsk) is None
+    assert StudentGroupService.resolve(course, student_nsk, settings.SITE_ID) is None
     course.group_mode = StudentGroupTypes.MANUAL
     assert StudentGroupService.resolve(
-        course, student_spb,
+        course, student_spb, settings.SITE_ID,
         enrollment_key=sg_other.enrollment_key) == sg_other
     with pytest.raises(GroupEnrollmentKeyError):
-        StudentGroupService.resolve(course, student_spb, enrollment_key='wrong')
+        StudentGroupService.resolve(course, student_spb, settings.SITE_ID, enrollment_key='wrong')
 
 
 @pytest.mark.django_db

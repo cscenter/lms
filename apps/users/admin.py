@@ -7,14 +7,16 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from import_export.admin import ImportMixin
 
-from core.admin import meta
+from core.admin import meta, BaseModelAdmin
 from core.filters import AdminRelatedDropdownFilter
 from core.widgets import AdminRichTextAreaWidget
+from learning.services import get_student_profile
 from users.constants import Roles
 from users.forms import UserCreationForm, UserChangeForm
 from .import_export import UserRecordResource
 from .models import User, EnrollmentCertificate, \
-    OnlineCourseRecord, SHADCourseRecord, UserStatusLog, UserGroup
+    OnlineCourseRecord, SHADCourseRecord, UserStatusLog, UserGroup, \
+    StudentProfile, StudentStatusLog, StudentTypes
 
 
 class UserStatusLogAdmin(admin.TabularInline):
@@ -49,35 +51,50 @@ class UserGroupForm(forms.ModelForm):
 
     class Meta:
         model = UserGroup
-        fields = '__all__'
-
-    # ACCESS_ROLES = [(role_name, _(cls.verbose_name)) for role_name, cls
-    #                 in REGISTERED_ACCESS_ROLES.items()]
-    # FIXME: Use registred roles
-    ACCESS_ROLES = Roles.choices
-    role = forms.ChoiceField(choices=ACCESS_ROLES)
+        fields = ('site', 'branch', 'role')
 
     def clean(self):
         cleaned_data = super().clean()
-        role = int(cleaned_data['role'])
         user = cleaned_data['user']
-        if role == Roles.STUDENT:
-            if user.enrollment_year is None:
-                msg = _("Enrollment year should be provided for students")
-                self.add_error(None, ValidationError(msg))
-        if role == Roles.VOLUNTEER:
-            if user.enrollment_year is None:
-                msg = _("CSCUser|enrollment year should be provided for "
-                        "volunteers")
-                self.add_error(None, ValidationError(msg))
+        site = cleaned_data['site']
+        branch = cleaned_data.get('branch')
+        permission_role = cleaned_data.get('role')
+        if permission_role:
+            permission_role = int(permission_role)
+            if permission_role in {Roles.INVITED, Roles.VOLUNTEER, Roles.STUDENT}:
+                profile_type = StudentTypes.from_permission_role(permission_role)
+                student_profile = user.get_student_profile(
+                    site, profile_type=profile_type)
+                if not student_profile:
+                    msg = _("Create Student Profile before assign student role")
+                    self.add_error(None, ValidationError(msg))
+                elif branch and branch.pk != student_profile.branch_id:
+                    # TODO: add link to the student profile
+                    msg = _("Selected branch does not match branch {} from "
+                            "the student profile")
+                    msg = msg.format(student_profile.branch)
+                    self.add_error('branch', ValidationError(msg))
+            # For student branch will be populated from the student profile
+            if permission_role in {Roles.INVITED, Roles.VOLUNTEER} and not branch:
+                msg = _("You have to specify branch for this role")
+                self.add_error('branch', ValidationError(msg))
+        if branch and branch.site_id != site.pk:
+            msg = _("Assign branch relative to the selected site")
+            self.add_error('branch', ValidationError(msg))
 
 
 class UserGroupInlineAdmin(admin.TabularInline):
     form = UserGroupForm
     model = UserGroup
     extra = 0
-    # XXX: fieldset name should be unique and not None
+    raw_id_fields = ('branch',)
+    # readonly_fields = ('role', 'site', 'branch')
     insert_after_fieldset = _('Permissions')
+
+    class Media:
+        css = {
+            'all': ('v2/css/django_admin.css',)
+        }
 
 
 class UserAdmin(_UserAdmin):
@@ -93,7 +110,7 @@ class UserAdmin(_UserAdmin):
     change_form_template = 'admin/user_change_form.html'
     ordering = ['last_name', 'first_name']
     inlines = [OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
-               UserStatusLogAdmin, UserGroupInlineAdmin]
+               UserGroupInlineAdmin]
     readonly_fields = ['comment_changed_at', 'comment_last_author',
                        'last_login', 'date_joined']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
@@ -116,13 +133,11 @@ class UserAdmin(_UserAdmin):
                                        ]}),
         (_('External services'), {'fields': ['yandex_login', 'stepic_id',
                                              'github_login', 'anytask_url']}),
-        (_('Student info record'),
+        (_('Student info record [DEPRECETED, DONT EDIT THIS SECTION]'),
          {'fields': ['status', 'enrollment_year', 'curriculum_year',
                      'university', 'uni_year_at_enrollment',
                      'official_student', 'diploma_number',
                      'academic_disciplines']}),
-        (_("Curator's note"),
-         {'fields': ['comment', 'comment_changed_at', 'comment_last_author']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
     def get_formsets_with_inlines(self, request, obj=None):
@@ -137,6 +152,74 @@ class UserAdmin(_UserAdmin):
     def save_model(self, request, obj, form, change):
         if "comment" in form.changed_data:
             obj.comment_last_author = request.user
+        super().save_model(request, obj, form, change)
+
+
+class StudentStatusLogAdminInline(admin.TabularInline):
+    list_select_related = ['student_profile', 'entry_author']
+    model = StudentStatusLog
+    extra = 0
+    show_change_link = True
+    readonly_fields = ('get_semester', 'status', 'entry_author')
+    ordering = ['-status_changed_at']
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    @meta(_("Semester"))
+    def get_semester(self, obj):
+        from courses.utils import get_terms_in_range
+        changed_at = obj.status_changed_at
+        term = next(get_terms_in_range(changed_at, changed_at), None)
+        return term.label if term else '-'
+
+
+class StudentProfileAdmin(BaseModelAdmin):
+    list_select_related = ['user', 'branch', 'branch__site']
+    list_display = ('user', 'branch', 'status')
+    list_filter = ('type', 'branch', 'site',)
+    raw_id_fields = ('user', 'comment_last_author')
+    search_fields = ['user__last_name']
+    inlines = [StudentStatusLogAdminInline]
+    fieldsets = [
+        (None, {
+            'fields': ['type', 'branch', 'user',
+                       'status', 'year_of_admission', 'year_of_curriculum',
+                       'university', 'level_of_education_on_admission',
+                       'academic_disciplines']
+        }),
+        (_('Official Student Info'), {
+            'fields': ['is_official_student', 'diploma_number']
+        }),
+        (_("Curator's note"), {
+            'fields': ['comment', 'comment_changed_at', 'comment_last_author']
+        }),
+    ]
+
+    class Media:
+        css = {
+            'all': ('v2/css/django_admin.css',)
+        }
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj is not None and obj.pk:
+            # TODO: add user change url
+            return ['type', 'site', 'branch', 'year_of_admission',
+                    'level_of_education_on_admission',
+                    'comment_changed_at', 'comment_last_author',]
+        return []
+
+    def save_model(self, request, obj, form, change):
+        if "comment" in form.changed_data:
+            obj.comment_last_author = request.user
+        if "status" in form.changed_data and obj.pk:
+            log_entry = StudentStatusLog(status=form.cleaned_data['status'],
+                                         student_profile=obj,
+                                         entry_author=request.user)
+            log_entry.save()
         super().save_model(request, obj, form, change)
 
 
@@ -170,5 +253,6 @@ class EnrollmentCertificateAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, UserRecordResourceAdmin)
+admin.site.register(StudentProfile, StudentProfileAdmin)
 admin.site.register(EnrollmentCertificate, EnrollmentCertificateAdmin)
 admin.site.register(SHADCourseRecord, SHADCourseRecordAdmin)

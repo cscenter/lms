@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import admin
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
@@ -71,7 +72,8 @@ class EnrollmentAdmin(BaseModelAdmin):
             course = instance.course
             student = instance.student
             if course.group_mode == StudentGroupTypes.BRANCH:
-                student_group = StudentGroupService.resolve(course, student)
+                student_group = StudentGroupService.resolve(course, student,
+                                                            settings.SITE_ID)
                 if student_group is None:
                     student_group, _ = StudentGroup.objects.get_or_create(
                         course=course,
@@ -117,6 +119,7 @@ class UsefulAdmin(BaseModelAdmin):
 
 
 class GraduateProfileAdmin(BaseModelAdmin):
+    list_select_related = ('student',)
     list_display = ('student', 'graduation_year')
     list_filter = ('graduation_year',)
     search_fields = ('student__last_name',)

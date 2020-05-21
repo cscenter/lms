@@ -1,5 +1,7 @@
 from django.apps import apps
+from django.conf import settings
 from django.core.checks import register, Error
+from django.contrib.admin.checks import _contains_subclass
 
 
 class Tags:
@@ -34,6 +36,17 @@ def check_dependencies(app_configs, **kwargs):
         errors.append(Error(
             "'learning' app must be follow after 'courses' in INSTALLED_APPS "
             "in order to use it",
-            id='lms.E501',
+            id='lms.E201',
         ))
+    middleware_dependencies = [
+        ('auth.middleware.AuthenticationMiddleware', 301),
+        ('django.contrib.sites.middleware.CurrentSiteMiddleware', 302),
+    ]
+    for middleware_path, error_code in middleware_dependencies:
+        if not _contains_subclass(middleware_path, settings.MIDDLEWARE):
+            errors.append(Error(
+                f"'{middleware_path}' must be in MIDDLEWARE in order to "
+                f"use the learning application.",
+                id='lms.E%d' % error_code,
+            ))
     return errors

@@ -304,7 +304,7 @@ def test_course_class_form_available(client, curator, settings):
 
 
 @pytest.mark.django_db
-def test_manager_for_student():
+def test_manager_for_student(settings):
     new_branch = BranchFactory()
     student = StudentFactory()
     teacher = TeacherFactory()
@@ -312,7 +312,8 @@ def test_manager_for_student():
                            branches=[new_branch])
     # Active enrollment
     enrollment = EnrollmentService.enroll(student, course)
-    enrollment.student_group = StudentGroupService.resolve(course, student)
+    enrollment.student_group = StudentGroupService.resolve(course, student,
+                                                           settings.SITE_ID)
     enrollment.save()
     assert CourseClass.objects.for_student(student).count() == 0
     assert CourseClass.objects.for_student(teacher).count() == 0

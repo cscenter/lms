@@ -4,6 +4,7 @@ import json
 import os
 from collections import OrderedDict
 
+from django.apps import apps
 from django.conf import settings
 from django.contrib import auth
 from django.db import transaction
@@ -23,6 +24,7 @@ from courses.models import Course, Semester
 from learning.forms import TestimonialForm
 from learning.models import StudentAssignment, \
     Enrollment
+from learning.services import get_student_profile
 from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
 from users.constants import Roles
@@ -89,7 +91,13 @@ class UserDetailView(generic.DetailView):
         u = self.request.user
         profile_user = context[self.context_object_name]
         context['is_editing_allowed'] = (u == profile_user or u.is_curator)
-        context['student_projects'] = profile_user.get_projects_queryset()
+        if apps.is_installed("projects"):
+            from projects.models import ProjectStudent
+            context['student_projects'] = (ProjectStudent.objects
+                                           .filter(student_id=profile_user.pk)
+                                           .select_related('project',
+                                                           'project__semester')
+                                           .order_by('project__semester__index'))
         context['current_semester'] = Semester.get_current()
         # Assignments sorted by course name
         assignments_qs = (StudentAssignment.objects
@@ -110,14 +118,16 @@ class UserDetailView(generic.DetailView):
         # Collect stats about successfully passed courses
         if u.is_curator:
             context['stats'] = profile_user.stats(context['current_semester'])
+        student_profile = get_student_profile(profile_user, self.request.site)
         syllabus = None
-        if profile_user.curriculum_year:
+        if student_profile:
             syllabus = (StudyProgram.objects
                         .select_related("academic_discipline")
                         .prefetch_core_courses_groups()
-                        .filter(year=profile_user.curriculum_year,
-                                branch_id=profile_user.branch_id))
+                        .filter(year=student_profile.year_of_curriculum,
+                                branch_id=student_profile.branch_id))
         context['syllabus'] = syllabus
+        context['student_profile'] = student_profile
         return context
 
 

@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.timezone import now
 
 from auth.tasks import ActivationEmailContext
+from core.tests.factories import SiteFactory
 from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.invitation.forms import InvitationRegistrationForm
@@ -37,10 +38,11 @@ def test_invitation_view(client, lms_resolver, assert_redirect, settings):
     user = UserFactory()
     client.login(user)
     response = client.get(url)
-    assert not student_profile_is_valid(user, invitation)
+    site = SiteFactory(id=settings.SITE_ID)
+    assert not student_profile_is_valid(user, site, invitation)
     assert response.status_code == 302
     # FIXME check url to complete profile view
-    complete_student_profile(user, invitation)
+    complete_student_profile(user, site, invitation)
     response = client.get(url)
     assert response.status_code == 200
     assert 'view' in response.context_data
@@ -113,8 +115,10 @@ def test_invitation_register_view(client, assert_redirect, settings, mocker):
     assert not new_user.is_active
     assert new_user.last_name == 'Last Name'
     assert Roles.INVITED in new_user.roles
-    assert new_user.enrollment_year == timezone.now().year
-    assert new_user.branch == invitation.branch
+    student_profile = new_user.get_student_profile(site=invitation.branch.site)
+    assert student_profile
+    assert student_profile.year_of_admission == invitation.semester.academic_year
+    assert student_profile.branch == invitation.branch
     assert mocked_task.delay.called
     called_args, called_kwargs = mocked_task.delay.call_args
     email_context, reg_profile_id = called_args

@@ -11,10 +11,10 @@ from courses.constants import MaterialVisibilityTypes
 
 class CourseTeacherQuerySet(query.QuerySet):
     # FIXME: do I need subquery here?
-    def for_course(self, course_slug):
+    def for_meta_course(self, meta_course):
         course_pks = (self
                       .model.course.field.related_model.objects
-                      .filter(meta_course__slug=course_slug)
+                      .filter(meta_course=meta_course)
                       # Note: can't reset default ordering in a Subquery
                       .order_by("pk")
                       .values("pk"))

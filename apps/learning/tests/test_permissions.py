@@ -11,18 +11,19 @@ from courses.services import CourseService
 from courses.tests.factories import CourseFactory, SemesterFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment
-from learning.permissions import course_access_role, CourseRole, \
-    CreateAssignmentComment, CreateAssignmentCommentTeacher, \
+from learning.permissions import CreateAssignmentComment, CreateAssignmentCommentTeacher, \
     CreateAssignmentCommentStudent, ViewRelatedStudentAssignment, \
     ViewStudentAssignment, EditOwnStudentAssignment, \
     EditOwnAssignmentExecutionTime
+from learning.services import get_student_profile, CourseRole, \
+    course_access_role
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory, \
     AssignmentCommentFactory, StudentAssignmentFactory
 from users.constants import Roles
-from users.models import ExtendedAnonymousUser, User
+from users.models import ExtendedAnonymousUser, User, StudentTypes
 from users.tests.factories import CuratorFactory, TeacherFactory, \
-    StudentFactory, UserFactory
+    StudentFactory, UserFactory, StudentProfileFactory
 
 
 def delete_enrollment_cache(user: User, course: Course):
@@ -54,7 +55,7 @@ def test_course_access_role_teacher():
     assert role == CourseRole.TEACHER
     role = course_access_role(course=course, user=teacher_other)
     assert role == CourseRole.NO_ROLE
-    # Teacher for the same meta course has access to all readings
+    # Teacher of the same meta course has access to all readings
     meta_course = course.meta_course
     teacher2 = TeacherFactory()
     course2 = CourseFactory(meta_course=meta_course, teachers=[teacher2])
@@ -66,12 +67,13 @@ def test_course_access_role_teacher():
     role = course_access_role(course=course2, user=teacher2)
     assert role == CourseRole.TEACHER
     # Now make sure that teacher role is prevailed on any student role
-    teacher2.add_group(Roles.STUDENT)
+    student_profile = StudentProfileFactory(user=teacher2,
+                                            branch=course.main_branch)
     role = course_access_role(course=course, user=teacher2)
     assert role == CourseRole.TEACHER
     delete_enrollment_cache(teacher2, course)
-    teacher2.status = StudentStatuses.EXPELLED
-    teacher2.save()
+    student_profile.status = StudentStatuses.EXPELLED
+    student_profile.save()
     role = course_access_role(course=course, user=teacher2)
     assert role == CourseRole.TEACHER
     EnrollmentFactory(student=teacher2, course=course,
@@ -137,9 +139,12 @@ def test_enroll_in_course(inactive_status, settings):
     course.semester.enrollment_end_at = tomorrow.date()
     assert student_spb.has_perm("learning.enroll_in_course", course)
     # Student with inactive status
-    student_spb.status = inactive_status
+    student_spb_profile = get_student_profile(student_spb, settings.SITE_ID)
+    student_spb_profile.status = inactive_status
+    student_spb_profile.save()
     assert not student_spb.has_perm("learning.enroll_in_course", course)
-    student_spb.status = ''
+    student_spb_profile.status = ''
+    student_spb_profile.save()
     assert student_spb.has_perm("learning.enroll_in_course", course)
     # Full course capacity
     course.capacity = 1
@@ -234,10 +239,9 @@ def test_create_assignment_comment():
     assert not student_other.has_perm(CreateAssignmentComment.name, sa)
     assert student.has_perm(CreateAssignmentComment.name, sa)
     assert not user.has_perm(CreateAssignmentComment.name, sa)
-    # User has both roles: user and teacher
-    teacher.add_group(Roles.STUDENT)
-    # Make sure we don't use any cache
-    teacher = User.objects.get(pk=teacher.pk)
+    # User is teacher and volunteer
+    StudentProfileFactory(type=StudentTypes.VOLUNTEER, user=teacher)
+    teacher.refresh_from_db()
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
     assert teacher.has_perm(CreateAssignmentCommentTeacher.name, sa)
     assert not teacher.has_perm(CreateAssignmentCommentStudent.name, sa)

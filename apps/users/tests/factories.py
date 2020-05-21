@@ -3,10 +3,11 @@
 import factory
 from django.conf import settings
 
-from learning.settings import GradeTypes
+from core.tests.factories import BranchFactory
+from learning.settings import GradeTypes, Branches
 from users.constants import Roles, GenderTypes
 from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
-    OnlineCourseRecord, UserGroup
+    OnlineCourseRecord, UserGroup, StudentProfile, StudentTypes
 
 __all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
@@ -82,35 +83,51 @@ class CuratorFactory(UserFactory):
 
 
 class StudentFactory(UserFactory):
+    """
+    Student access role will be created by student profile post save signal
+    """
     enrollment_year = 2015
+    username = factory.Sequence(lambda n: "student%03d" % n)
+    email = factory.Sequence(lambda n: "student%03d@test.email" % n)
 
     @factory.post_generation
-    def required_groups(self, create, extracted, **kwargs):
+    def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        site_id = kwargs.pop("site_id", None)
-        self.add_group(role=Roles.STUDENT, site_id=site_id)
+        kwargs.setdefault('branch', self.branch)
+        kwargs.setdefault('status', self.status)
+        if self.enrollment_year:
+            kwargs.setdefault('year_of_admission', self.enrollment_year)
+        if self.curriculum_year:
+            kwargs.setdefault('year_of_curriculum', self.curriculum_year)
+        StudentProfileFactory(user=self, **kwargs)
 
 
 class InvitedStudentFactory(UserFactory):
     enrollment_year = 2015
 
     @factory.post_generation
-    def required_groups(self, create, extracted, **kwargs):
+    def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        site_id = kwargs.pop("site_id", None)
-        self.add_group(role=Roles.INVITED, site_id=site_id)
+        kwargs.setdefault('branch', self.branch)
+        kwargs.setdefault('status', self.status)
+        StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
 class VolunteerFactory(UserFactory):
 
     @factory.post_generation
-    def required_groups(self, create, extracted, **kwargs):
+    def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        site_id = kwargs.pop("site_id", None)
-        self.add_group(role=Roles.VOLUNTEER, site_id=site_id)
+        kwargs.setdefault('branch', self.branch)
+        kwargs.setdefault('status', self.status)
+        if self.enrollment_year:
+            kwargs.setdefault('year_of_admission', self.enrollment_year)
+        if self.curriculum_year:
+            kwargs.setdefault('year_of_curriculum', self.curriculum_year)
+        StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
 class TeacherFactory(UserFactory):
@@ -120,6 +137,16 @@ class TeacherFactory(UserFactory):
             return
         site_id = kwargs.pop("site_id", None)
         self.add_group(role=Roles.TEACHER, site_id=site_id)
+
+
+class StudentProfileFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = StudentProfile
+
+    type = StudentTypes.REGULAR
+    user = factory.SubFactory(UserFactory)
+    branch = factory.SubFactory(BranchFactory)
+    year_of_admission = factory.SelfAttribute('user.date_joined.year')
 
 
 class OnlineCourseRecordFactory(factory.DjangoModelFactory):

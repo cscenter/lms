@@ -18,26 +18,29 @@ from core.urls import reverse
 from core.utils import render_markdown
 from courses.calendar import CalendarEvent
 from courses.constants import SemesterTypes
-from courses.models import CourseClass, Course, Assignment
-from courses.utils import get_current_term_pair, MonthPeriod, get_start_of_week, \
-    get_end_of_week, extended_month_date_range
+from courses.models import Course, Assignment
+from courses.permissions import ViewAssignment
+from courses.services import get_teacher_branches
+from courses.utils import get_current_term_pair, MonthPeriod, \
+    extended_month_date_range
 from courses.views.calendar import MonthEventsCalendarView
 from learning.api.serializers import AssignmentScoreSerializer
 from learning.calendar import get_teacher_calendar_events, get_calendar_events
-from courses.services import get_teacher_branches
 from learning.forms import AssignmentModalCommentForm, AssignmentScoreForm
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import AssignmentComment, StudentAssignment, Enrollment
-from learning.permissions import course_access_role, CourseRole, \
-    CreateAssignmentComment, ViewStudentAssignment, EditOwnStudentAssignment
-from learning.services import get_teacher_classes
+from learning.permissions import CreateAssignmentComment, ViewStudentAssignment, \
+    EditOwnStudentAssignment, ViewStudentAssignmentList
+from learning.services import get_teacher_classes, CourseRole, \
+    course_access_role
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import logger, AssignmentCommentUpsertView
 from users.mixins import TeacherOnlyMixin
 
 
 # Note: Wow, looks like a shit
-class AssignmentListView(TeacherOnlyMixin, TemplateView):
+class AssignmentListView(PermissionRequiredMixin, TemplateView):
+    permission_required = ViewStudentAssignmentList.name
     model = StudentAssignment
     context_object_name = 'student_assignment_list'
     template_name = "learning/teaching/assignment_list.html"
@@ -355,10 +358,19 @@ class AssignmentCommentUpdateView(generic.UpdateView):
         return super(BaseUpdateView, self).post(request, *args, **kwargs)
 
 
-class AssignmentDetailView(TeacherOnlyMixin, generic.DetailView):
+class AssignmentDetailView(PermissionRequiredMixin, generic.DetailView):
     model = Assignment
     template_name = "learning/teaching/assignment_detail.html"
     context_object_name = 'assignment'
+    permission_required = ViewAssignment.name
+
+    def get_permission_object(self):
+        self.object = self.get_object()
+        return self.object.course
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
 
     def get_queryset(self):
         return (Assignment.objects
@@ -370,10 +382,6 @@ class AssignmentDetailView(TeacherOnlyMixin, generic.DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        role = course_access_role(course=self.object.course,
-                                  user=self.request.user)
-        if role not in [CourseRole.CURATOR, CourseRole.TEACHER]:
-            raise PermissionDenied
         context['a_s_list'] = (
             StudentAssignment.objects
             .filter(assignment__pk=self.object.pk)

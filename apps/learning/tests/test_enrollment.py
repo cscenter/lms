@@ -16,7 +16,7 @@ from courses.tests.factories import SemesterFactory, CourseFactory, \
     AssignmentFactory
 from learning.models import Enrollment, StudentAssignment, StudentGroup
 from learning.services import EnrollmentService, CourseCapacityFull, \
-    StudentGroupService
+    StudentGroupService, get_student_profile
 from learning.settings import StudentStatuses, Branches
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory
 from users.tests.factories import StudentFactory, InvitedStudentFactory
@@ -30,7 +30,7 @@ from users.tests.factories import StudentFactory, InvitedStudentFactory
 
 
 @pytest.mark.django_db
-def test_service_enroll():
+def test_service_enroll(settings):
     student = StudentFactory()
     student2 = StudentFactory(branch=student.branch)
     current_semester = SemesterFactory.create_current()
@@ -40,7 +40,8 @@ def test_service_enroll():
     assert enrollment.reason_entry == reason_entry
     assert not enrollment.is_deleted
     assert enrollment.student_group_id is None
-    student_group = StudentGroupService.resolve(course, student2)
+    student_group = StudentGroupService.resolve(course, student2,
+                                                settings.SITE_ID)
     enrollment = EnrollmentService.enroll(student2, course, 'test enrollment',
                                           student_group=student_group)
     assert enrollment.student_group == student_group
@@ -112,7 +113,7 @@ def test_enrollment_capacity_view(client):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
-def test_enrollment_inactive_student(inactive_status, client):
+def test_enrollment_inactive_student(inactive_status, client, settings):
     student = StudentFactory(branch__code=Branches.SPB)
     client.login(student)
     tomorrow = now_local(student.get_timezone()) + datetime.timedelta(days=1)
@@ -123,8 +124,9 @@ def test_enrollment_inactive_student(inactive_status, client):
     response = client.get(course.get_absolute_url())
     assert response.status_code == 200
     assert smart_bytes(_("Enroll in")) in response.content
-    student.status = inactive_status
-    student.save()
+    student_profile = get_student_profile(student, settings.SITE_ID)
+    student_profile.status = inactive_status
+    student_profile.save()
     response = client.get(course.get_absolute_url())
     assert smart_bytes(_("Enroll in")) not in response.content
 
