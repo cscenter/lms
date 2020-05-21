@@ -21,7 +21,7 @@ from courses.admin import AssignmentAdmin
 from courses.models import CourseTeacher, Assignment, AssignmentSubmissionTypes
 from courses.tests.factories import CourseFactory, AssignmentFactory, \
     SemesterFactory
-from learning.services import course_failed_by_student
+from learning.services import course_failed_by_student, get_student_profile
 from learning.models import AssignmentNotification
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import *
@@ -236,8 +236,9 @@ def test_new_assignment_create_notification(settings):
     # Don't create new assignment for expelled students
     AssignmentNotification.objects.all().delete()
     student = enrollments[1].student
-    student.status = StudentStatuses.EXPELLED
-    student.save()
+    student_profile = get_student_profile(student, settings.SITE_ID)
+    student_profile.status = StudentStatuses.EXPELLED
+    student_profile.save()
     assignment = AssignmentFactory(course=course)
     assert AssignmentNotification.objects.count() == 3
 
@@ -330,8 +331,9 @@ def test_create_deadline_change_notification(settings):
     co = CourseFactory()
     e1, e2 = EnrollmentFactory.create_batch(2, course=co)
     s1 = e1.student
-    s1.status = StudentStatuses.EXPELLED
-    s1.save()
+    s1_profile = get_student_profile(e1.student, settings.SITE_ID)
+    s1_profile.status = StudentStatuses.EXPELLED
+    s1_profile.save()
     a = AssignmentFactory(course=co)
     assert AssignmentNotification.objects.count() == 1
     dt = datetime.datetime(2017, 2, 4, 15, 0, 0, 0, tzinfo=pytz.UTC)

@@ -1,4 +1,5 @@
 import logging
+from typing import NamedTuple, Union
 
 import rules
 from django.conf import settings
@@ -9,18 +10,30 @@ from learning.models import StudentAssignment, CourseInvitation
 from learning.services import course_failed_by_student, CourseRole, \
     course_access_role
 from learning.settings import StudentStatuses
+from users.models import StudentProfile
 
 logger = logging.getLogger(__name__)
 
 
+class EnrollPermissionObject(NamedTuple):
+    course: Course
+    student_profile: StudentProfile
+
+
+class InvitationEnrollPermissionObject(NamedTuple):
+    course_invitation: CourseInvitation
+    student_profile: StudentProfile
+
+
 @rules.predicate
-def enroll_in_course(user, course: Course):
+def enroll_in_course(user, permission_object: EnrollPermissionObject):
+    course = permission_object.course
+    student_profile = permission_object.student_profile
     if not course.enrollment_is_open:
         logger.debug("Enrollment is closed")
         return False
     if course.is_capacity_limited and not course.places_left:
         return False
-    student_profile = user.get_student_profile(settings.SITE_ID)
     if not student_profile:
         return
     if not student_profile.is_active:
@@ -35,10 +48,14 @@ def enroll_in_course(user, course: Course):
     return True
 
 
-# FIXME: перевесить на StudentProfile
 @rules.predicate
 def has_active_status(user):
-    return user.status not in StudentStatuses.inactive_statuses
+    if user.is_curator:
+        return True
+    student_profile = user.get_student_profile(settings.SITE_ID)
+    if not student_profile:
+        return False
+    return not StudentStatuses.is_inactive(student_profile.status)
 
 
 @add_perm
@@ -173,9 +190,13 @@ class ViewOwnStudentAssignment(Permission):
     def rule(user, student_assignment: StudentAssignment):
         if user.id != student_assignment.student_id:
             return False
-
+        student = student_assignment.student
         course = student_assignment.assignment.course
-        is_inactive = user.status in StudentStatuses.inactive_statuses
+        enrollment = student.get_enrollment(course.pk)
+        if not enrollment:
+            return False
+        student_profile = enrollment.student_profile
+        is_inactive = StudentStatuses.is_inactive(student_profile.status)
         if not is_inactive and not course_failed_by_student(course, user):
             return True
         # If student failed the course or was expelled at all, deny
@@ -277,10 +298,14 @@ class EnrollInCourseByInvitation(Permission):
 
     @staticmethod
     @rules.predicate
-    def rule(user, course_invitation: CourseInvitation):
+    def rule(user, permission_object: InvitationEnrollPermissionObject):
+        course_invitation = permission_object.course_invitation
         if not course_invitation or not course_invitation.is_active:
             return False
-        return enroll_in_course(user, course_invitation.course)
+        perm_obj = EnrollPermissionObject(
+            course_invitation.course,
+            permission_object.student_profile)
+        return enroll_in_course(user, perm_obj)
 
 
 @add_perm

@@ -145,18 +145,15 @@ class ProgressReport:
 
     def process_row(self, student, unique_courses, unique_meta_courses):
         enrollments = {}
+        # `enrollments_progress` have to be sorted by term index to store
+        # the last grade for each meta course
         for e in student.enrollments_progress:
             if self.skip_enrollment(e, student, unique_courses):
                 continue
             course = unique_courses[e.course_id]
             meta_course_id = course.meta_course_id
             unique_meta_courses[meta_course_id] = course.meta_course
-            if meta_course_id in enrollments:
-                # Get the highest grade
-                if e.grade_weight > enrollments[meta_course_id].grade_weight:
-                    enrollments[meta_course_id] = e
-            else:
-                enrollments[meta_course_id] = e
+            enrollments[meta_course_id] = e
         student.unique_enrollments = enrollments
 
     def skip_enrollment(self, enrollment, student, courses):

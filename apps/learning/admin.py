@@ -43,20 +43,24 @@ class AssignmentCommentAdmin(BaseModelAdmin):
 
 
 class EnrollmentAdmin(BaseModelAdmin):
+    list_select_related = ['course', 'course__semester', 'course__meta_course',
+                           'course__main_branch', 'student']
     list_display = ['student', 'course', 'is_deleted', 'grade',
                     'grade_changed_local']
     ordering = ['-pk']
     list_filter = [
+        'course__main_branch__site',
         'course__main_branch',
         ('course__semester', AdminRelatedDropdownFilter)
     ]
-    search_fields = ['course__meta_course__name']
+    search_fields = ['course__meta_course__name', 'student__last_name']
     exclude = ['grade_changed']
-    raw_id_fields = ("student", "course", "invitation", "student_group")
+    raw_id_fields = ("student", "course", "invitation", "student_profile",
+                     "student_group")
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['student', 'course', 'grade_changed_local', 'modified']
+            return ['course', 'student', 'grade_changed_local', 'modified']
         else:
             return ['grade_changed_local', 'modified']
 

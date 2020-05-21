@@ -34,7 +34,8 @@ class UserQuerySet(query.QuerySet):
                          .select_related('course', 'course__semester')
                          .annotate(grade_weight=GradeTypes.to_int_case_expr())
                          .only('pk', 'created', 'student_id', 'course_id',
-                               'grade'))
+                               'grade')
+                         .order_by('course__semester__index'))
         if until_term:
             enrollment_qs = enrollment_qs.filter(
                 course__semester__index__lte=until_term.index)

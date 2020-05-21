@@ -41,7 +41,7 @@ def test_student_group_service_resolve(settings):
 
 
 @pytest.mark.django_db
-def test_assignment_service_create_student_assignments():
+def test_assignment_service_create_student_assignments(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     branch_other = BranchFactory()
@@ -80,14 +80,15 @@ def test_assignment_service_create_student_assignments():
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.count() == 2
     # Inactive status prevents generating student assignment too
-    student_spb.status = StudentStatuses.ACADEMIC_LEAVE
-    student_spb.save()
+    student_spb_profile = student_spb.get_student_profile(settings.SITE_ID)
+    student_spb_profile.status = StudentStatuses.ACADEMIC_LEAVE
+    student_spb_profile.save()
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.count() == 1
     # Now test assignment settings
-    student_spb.status = ''
-    student_spb.save()
+    student_spb_profile.status = ''
+    student_spb_profile.save()
     e_nsk.is_deleted = False
     e_nsk.save()
     assignment.restricted_to.add(group_spb)

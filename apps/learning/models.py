@@ -33,6 +33,7 @@ from learning.managers import EnrollmentDefaultManager, \
     GraduateProfileActiveManager, AssignmentCommentPublishedManager
 from learning.settings import GradingSystems, GradeTypes
 from users.constants import ThumbnailSizes
+from users.models import StudentProfile
 from users.thumbnails import UserThumbnailMixin
 
 logger = logging.getLogger(__name__)
@@ -131,6 +132,10 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
+    student_profile = models.ForeignKey(
+        StudentProfile,
+        verbose_name=_("Student Profile"),
+        on_delete=models.CASCADE)
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course offering"),
@@ -184,6 +189,11 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
         super().save(*args, **kwargs)
         if created or not self.is_deleted:
             populate_assignments_for_student(self)
+
+    def clean(self):
+        if self.student_profile_id and self.student_profile.user_id != self.student_id:
+            raise ValidationError(_("Student profile does not match "
+                                    "selected user"))
 
     def grade_changed_local(self, tz=None):
         if not tz:

@@ -222,7 +222,7 @@ class AssignmentService:
         """
         filters = [
             Q(course_id=assignment.course_id),
-            ~Q(student__status__in=StudentStatuses.inactive_statuses)
+            ~Q(student_profile__status__in=StudentStatuses.inactive_statuses)
         ]
         restrict_to = list(sg.pk for sg in assignment.restricted_to.all())
         if for_groups is not None:
@@ -345,7 +345,8 @@ class EnrollmentService:
         return f'{today}\n{reason_text}\n\n'
 
     @classmethod
-    def enroll(cls, user: User, course: Course, reason_entry='', **attrs):
+    def enroll(cls, student: StudentProfile, course: Course,
+               reason_entry='', **attrs):
         if reason_entry:
             new_record = cls._format_reason_record(reason_entry, course)
             reason_entry = Concat(Value(new_record),
@@ -353,8 +354,8 @@ class EnrollmentService:
                                   output_field=TextField())
         with transaction.atomic():
             enrollment, created = (Enrollment.objects.get_or_create(
-                student=user, course=course,
-                defaults={'is_deleted': True}))
+                student=student.user, course=course,
+                defaults={'is_deleted': True, 'student_profile': student}))
             if not enrollment.is_deleted:
                 raise AlreadyEnrolled
             # Use sharable lock for concurrent enrollments if necessary to
@@ -371,6 +372,7 @@ class EnrollmentService:
                 filters.append(Q(course__capacity__gt=learners_count))
             attrs.update({
                 "is_deleted": False,
+                "student_profile": student,
                 "reason_entry": reason_entry
             })
             updated = (Enrollment.objects
@@ -392,7 +394,6 @@ class EnrollmentService:
         enrollment.refresh_from_db()
         return enrollment
 
-    # TODO: replace `enrollment` with `student + course` like in `enroll` method?
     @classmethod
     def leave(cls, enrollment: Enrollment, reason_leave=''):
         update_fields = ['is_deleted']
@@ -541,7 +542,8 @@ def course_access_role(*, course, user) -> CourseRole:
     enrollment = user.get_enrollment(course.pk)
     if enrollment:
         failed = course_failed_by_student(course, user, enrollment)
-        if not failed and not StudentStatuses.is_inactive(user.status):
+        student_status = enrollment.student_profile.status
+        if not failed and not StudentStatuses.is_inactive(student_status):
             role = CourseRole.STUDENT_REGULAR
         else:
             role = CourseRole.STUDENT_RESTRICT

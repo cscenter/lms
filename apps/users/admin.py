@@ -160,7 +160,7 @@ class StudentStatusLogAdminInline(admin.TabularInline):
 
 class StudentProfileAdmin(BaseModelAdmin):
     list_select_related = ['user', 'branch', 'branch__site']
-    list_display = ('user', 'branch', 'status')
+    list_display = ('user', 'branch', 'type', 'year_of_admission', 'status')
     list_filter = ('type', 'branch', 'site',)
     raw_id_fields = ('user', 'comment_last_author')
     search_fields = ['user__last_name']
