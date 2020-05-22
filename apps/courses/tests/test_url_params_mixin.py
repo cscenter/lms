@@ -55,7 +55,9 @@ def test_should_resolve_courses_from_different_branches_of_same_site(client, set
     s = StudentFactory(branch=branch_spb)
     client.login(s)
     response = client.get(course_spb.get_absolute_url())
+    assert response.status_code == 200
     assert branch_spb.name in get_branch_from_course_detail_view(response)
+    assert response.status_code == 200
     response = client.get(course_nsk.get_absolute_url())
     assert branch_nsk.name in get_branch_from_course_detail_view(response)
 
@@ -109,6 +111,7 @@ def test_should_resolve_courses_with_the_same_branch_code_from_different_sites_i
     client.login(s)
     assert course_spb.get_absolute_url() == course_other.get_absolute_url()
     response = client.get(course_other.get_absolute_url())
+    assert response.status_code == 200
     assert smart_bytes(course_spb.description) in response.content
     assert smart_bytes(course_other.description) not in response.content
 
@@ -117,6 +120,7 @@ def test_should_resolve_courses_with_the_same_branch_code_from_different_sites_i
     client.login(s)
     assert course_spb.get_absolute_url() == course_other.get_absolute_url()
     response = client.get(course_other.get_absolute_url())
+    assert response.status_code == 200
     assert smart_bytes(course_spb.description) in response.content
     assert smart_bytes(course_other.description) not in response.content
 
@@ -144,8 +148,10 @@ def test_should_resolve_courses_with_different_branch_codes_from_different_sites
     client.login(s)
     assert course_spb.get_absolute_url() != course_nsk.get_absolute_url()
     response = client.get(course_spb.get_absolute_url())
+    assert response.status_code == 200
     assert branch_spb.name in get_branch_from_course_detail_view(response)
     response = client.get(course_nsk.get_absolute_url())
+    assert response.status_code == 200
     print(get_branch_from_course_detail_view(response))
     assert branch_nsk.name in get_branch_from_course_detail_view(response)
 
@@ -182,4 +188,5 @@ def test_should_return_stably_if_impossible_to_resolve(client, settings):
     client.login(s)
     assert course_club.get_absolute_url() == course_shad.get_absolute_url()
     response = client.get(course_shad.get_absolute_url())
+    assert response.status_code == 200
     assert branch_club.name in get_branch_from_course_detail_view(response)

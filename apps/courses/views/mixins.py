@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from django.db.models import Q, Case, When, PositiveSmallIntegerField
 from django.http import Http404
-from django.shortcuts import get_object_or_404
 
 from courses.models import Course
 
