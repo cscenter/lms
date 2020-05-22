@@ -48,20 +48,20 @@ class CourseURLParamsMixin:
             # request.branch = None
         super().setup(request, *args, **kwargs)
 
-        courses = list(self
-                       .get_course_queryset()
+        same_branch = Q(main_branch=self.request.branch)
+        same_site = Q(main_branch__site=self.request.site)
+        courses = list(self.get_course_queryset()
                        .available_in(self.request.branch)
                        .filter(main_branch__code=self.request.branch.code)
-                       .order_by())
+                       .annotate(priority=Case(
+                           When(same_branch, then=2),
+                           When(same_site, then=1),
+                           default=0,
+                           output_field=PositiveSmallIntegerField()
+                       ))
+                       .order_by('-priority', 'pk'))
         if not courses:
             raise Http404
-
-        for c in courses:
-            if c.main_branch_id == self.request.branch.id:
-                course = c
-                break
-        else:
-            course = courses[0]
 
         self.course: Course = courses[0]
 
