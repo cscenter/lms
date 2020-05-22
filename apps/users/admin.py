@@ -118,7 +118,6 @@ class UserAdmin(_UserAdmin):
         (_('Student info record [DEPRECETED, DONT EDIT THIS SECTION]'),
          {'fields': ['status', 'curriculum_year',
                      'university', 'uni_year_at_enrollment',
-                     'official_student', 'diploma_number',
                      'academic_disciplines']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
