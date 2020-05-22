@@ -37,7 +37,6 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                                     ChallengeStatuses.REGISTERED])
                 .select_related("applicant")
             )
-            print(exam_results.query)
 
             for e in exam_results:
                 if e.status == ChallengeStatuses.NEW:
