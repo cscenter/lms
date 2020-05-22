@@ -811,6 +811,15 @@ class StudentProfile(models.Model):
         help_text=_("Number of higher education diploma"),
         blank=True
     )
+    diploma_issued_on = models.DateField(
+        verbose_name=_("Diploma Issued on"),
+        blank=True, null=True
+    )
+    diploma_issued_by = models.CharField(
+        verbose_name=_("Diploma Issued by"),
+        max_length=255,
+        blank=True,
+    )
     academic_disciplines = models.ManyToManyField(
         'study_programs.AcademicDiscipline',
         verbose_name=_("Fields of study"),
