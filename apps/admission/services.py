@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from operator import attrgetter
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Type
 
 from django.conf import settings
 from django.db import transaction
@@ -13,8 +13,10 @@ from post_office.utils import get_email_template
 from admission.constants import INVITATION_EXPIRED_IN_HOURS, \
     INTERVIEW_FEEDBACK_TEMPLATE
 from admission.models import InterviewStream, InterviewInvitation, \
-    Applicant, Campaign
+    Applicant, Campaign, Contest, YandexContestIntegration, Exam
 from admission.utils import logger
+from api.providers.yandex_contest import YandexContestAPI, ContestAPIError, \
+    ResponseStatus
 from core.timezone.constants import DATE_FORMAT_RU
 from learning.roles import Roles
 from users.models import User, StudentProfile, UserGroup, StudentTypes
@@ -45,6 +47,24 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant):
         invitation.save()
         invitation.streams.add(*streams)
         EmailQueueService.generate_interview_invitation(invitation)
+
+
+def import_campaign_contest_results(*, campaign: Campaign, model_class):
+    api = YandexContestAPI(access_token=campaign.access_token)
+    on_scoreboard_total = 0
+    updated_total = 0
+    for contest in campaign.contests.filter(type=model_class.CONTEST_TYPE):
+        logger.debug(f"Starting processing contest {contest.pk}")
+        on_scoreboard, updated = model_class.import_results(api, contest)
+        on_scoreboard_total += on_scoreboard
+        updated_total += updated
+        logger.debug(f"Scoreboard total = {on_scoreboard}")
+        logger.debug(f"Updated = {updated}")
+    return on_scoreboard_total, updated_total
+
+
+def import_exam_results(*, campaign: Campaign):
+    import_campaign_contest_results(campaign=campaign, model_class=Exam)
 
 
 class UsernameError(Exception):
