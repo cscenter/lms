@@ -70,20 +70,22 @@ def test_user_detail_view(client):
 
 @pytest.mark.django_db
 def test_user_detail_reference_list_view(client):
-    """Check reference list appears on student profile page for curators only"""
-    student = StudentFactory()
-    EnrollmentFactory()
-    CertificateOfParticipationFactory(student=student)
+    """Check reference list appears on student profile page"""
     curator = CuratorFactory()
-    url = student.get_absolute_url()
     client.login(curator)
-    response = client.get(url)
-    assert response.context['profile_user'].enrollment_certificates.count() == 1
+    student_profile = StudentProfileFactory()
+    EnrollmentFactory()
+    CertificateOfParticipationFactory(student_profile=student_profile)
+    student_detail_url = student_profile.user.get_absolute_url()
+    response = client.get(student_detail_url)
+    assert 'student_profile' in response.context_data
+    assert response.context_data['student_profile'] is not None
+    assert response.context_data['student_profile'].certificates_of_participation.count() == 1
     soup = BeautifulSoup(response.content, "html.parser")
     list_header = soup.find('h4', text=re.compile(_("Student references")))
     assert list_header is not None
-    client.login(student)
-    response = client.get(url)
+    client.login(student_profile.user)
+    response = client.get(student_detail_url)
     soup = BeautifulSoup(response.content, "html.parser")
     list_header = soup.find('h4', text=_("Student references"))
     assert list_header is None
@@ -97,15 +99,17 @@ def test_reference_detail(client, assert_login_redirect, settings):
     meta_course = MetaCourseFactory.create()
     semesters = SemesterFactory.create_batch(2, year=2014)
     enrollments = []
+    student_profile = student.get_student_profile(settings.SITE_ID)
     for s in semesters:
         e = EnrollmentFactory(
             course=CourseFactory(meta_course=meta_course, semester=s),
-            student=student,
+            student=student_profile.user,
+            student_profile=student_profile,
             grade=GradeTypes.GOOD
         )
         enrollments.append(e)
     reference = CertificateOfParticipationFactory(
-        student_profile=student.get_student_profile(settings.SITE_ID),
+        student_profile=student_profile,
         note="TEST",
         signature="SIGNATURE")
     url = reference.get_absolute_url()

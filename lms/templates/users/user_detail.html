@@ -209,7 +209,7 @@
 
                     {% if student_profile %}
                         <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
-                        {% if student_profile.certificates_of_participation.count > 0 %}
+                        {% if student_profile.certificates_of_participation.all %}
                             <ul>
                                 {% for reference in student_profile.certificates_of_participation.all %}
                                     <li>

@@ -962,13 +962,6 @@ class SHADCourseRecord(TimeStampedModel):
 class EnrollmentCertificate(TimeStampedModel):
     signature = models.CharField(_("Reference|signature"), max_length=255)
     note = models.TextField(_("Reference|note"), blank=True)
-
-    student = models.ForeignKey(
-        User,
-        verbose_name=_("Student"),
-        on_delete=models.CASCADE,
-        null=True, blank=True,
-        related_name="enrollment_certificates")
     student_profile = models.ForeignKey(
         StudentProfile,
         verbose_name=_("Student"),
@@ -980,7 +973,7 @@ class EnrollmentCertificate(TimeStampedModel):
         verbose_name_plural = _("Student References")
 
     def __str__(self):
-        return smart_text(self.student)
+        return smart_text(self.student_profile)
 
     def get_absolute_url(self):
         return reverse('student_reference_detail',

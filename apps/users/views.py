@@ -8,7 +8,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib import auth
 from django.db import transaction
-from django.db.models import Prefetch, Count
+from django.db.models import Prefetch, Count, prefetch_related_objects
 from django.http import HttpResponseBadRequest, \
     JsonResponse
 from django.utils.decorators import method_decorator
@@ -75,8 +75,7 @@ class UserDetailView(generic.DetailView):
             prefetch_list += ['borrows',
                               'borrows__stock',
                               'borrows__stock__book',
-                              'onlinecourserecord_set',
-                              'enrollment_certificates']
+                              'onlinecourserecord_set']
         filters = {}
         if not self.request.user.is_curator:
             filters["is_active"] = True
@@ -122,6 +121,8 @@ class UserDetailView(generic.DetailView):
         student_profile = get_student_profile(profile_user, self.request.site)
         syllabus = None
         if student_profile:
+            prefetch_related_objects([student_profile],
+                                     'certificates_of_participation')
             syllabus = (StudyProgram.objects
                         .select_related("academic_discipline")
                         .prefetch_core_courses_groups()
