@@ -72,28 +72,31 @@ EnrollmentActiveManager = _EnrollmentActiveManager.from_queryset(
 
 class _GraduateProfileActiveManager(models.Manager):
     def get_queryset(self):
-        return (super().get_queryset()
-                .filter(is_active=True)
-                # FIXME: move to the queryset method
-                .select_related("student", "student__branch")
-                .only("pk",
-                      "modified",
-                      "graduation_year",
-                      "photo",
-                      "testimonial",
-                      "student_id",
-                      "student__branch__code",
-                      "student__photo",
-                      "student__cropbox_data",
-                      "student__first_name",
-                      "student__last_name",
-                      "student__patronymic",
-                      "student__gender",))
+        return super().get_queryset().filter(is_active=True)
 
 
 class GraduateProfileQuerySet(models.QuerySet):
     def with_testimonial(self):
         return self.exclude(testimonial='')
+
+    def get_only_required_fields(self):
+        return (self.select_related("student_profile",
+                                    "student_profile__branch",
+                                    "student_profile__user", )
+                .only("pk",
+                      "student_profile_id",
+                      "modified",
+                      "graduation_year",
+                      "photo",
+                      "testimonial",
+                      "student_profile__user_id",
+                      "student_profile__branch__code",
+                      "student_profile__user__photo",
+                      "student_profile__user__cropbox_data",
+                      "student_profile__user__first_name",
+                      "student_profile__user__last_name",
+                      "student_profile__user__patronymic",
+                      "student_profile__user__gender", ))
 
 
 GraduateProfileActiveManager = _GraduateProfileActiveManager.from_queryset(
