@@ -165,5 +165,6 @@ class GraduateProfileFactory(factory.DjangoModelFactory):
     class Meta:
         model = GraduateProfile
 
+    student_profile = factory.SubFactory(StudentProfileFactory)
     student = factory.SubFactory(GraduateFactory, graduate_profile=None)
     graduated_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)

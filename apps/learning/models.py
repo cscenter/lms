@@ -690,6 +690,12 @@ class GraduateProfile(UserThumbnailMixin, TimeStampedModel):
         verbose_name=_("Student"),
         on_delete=models.CASCADE,
         related_name="graduate_profile")
+    student_profile = models.OneToOneField(
+        StudentProfile,
+        verbose_name=_("Student Profile"),
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name="graduate_profile")
     is_active = models.BooleanField(
         _("Activity"),
         default=True)
