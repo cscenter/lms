@@ -34,7 +34,8 @@ from learning.managers import EnrollmentDefaultManager, \
 from learning.settings import GradingSystems, GradeTypes
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
-from users.thumbnails import UserThumbnailMixin
+from users.thumbnails import UserThumbnailMixin, ThumbnailMixin, \
+    get_thumbnail_or_stub, get_stub_factory
 
 logger = logging.getLogger(__name__)
 
@@ -678,11 +679,11 @@ class Useful(models.Model):
 
 def graduate_photo_upload_to(instance: "GraduateProfile", filename):
     _, ext = os.path.splitext(filename)
-    filename = instance.student.get_abbreviated_name_in_latin()
+    filename = instance.student_profile.user.get_abbreviated_name_in_latin()
     return f"alumni/{instance.graduated_on.year}/{filename}{ext}"
 
 
-class GraduateProfile(UserThumbnailMixin, TimeStampedModel):
+class GraduateProfile(ThumbnailMixin, TimeStampedModel):
     TESTIMONIAL_CACHE_KEY = "csc_review"
 
     student = models.OneToOneField(
@@ -741,17 +742,18 @@ class GraduateProfile(UserThumbnailMixin, TimeStampedModel):
         super().save(**kwargs)
 
     def get_absolute_url(self):
-        return reverse('student_profile', args=[self.student_id], subdomain=None)
-
-    @property
-    def gender(self):
-        return self.student.gender
+        return reverse('student_profile', args=[self.student_profile.user_id],
+                       subdomain=None)
 
     def get_thumbnail(self, geometry=ThumbnailSizes.BASE, **options):
         thumbnail_options = {
-            "use_stub": True,
-            "stub_official": False,
             "cropbox": None,
             **options
         }
-        return super().get_thumbnail(geometry, **thumbnail_options)
+        stub_factory = get_stub_factory(self.student_profile.user.gender,
+                                        official=False)
+        return get_thumbnail_or_stub(
+            path_to_img=self.photo,
+            geometry=geometry,
+            stub_factory=stub_factory,
+            **thumbnail_options)
