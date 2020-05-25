@@ -119,10 +119,11 @@ class AlumniList(ListAPIView):
 
     def get_queryset(self):
         return (GraduateProfile.active
+                .get_only_required_fields()
                 .prefetch_related("academic_disciplines")
                 .order_by("-graduation_year",
-                          "student__last_name",
-                          "student__first_name"))
+                          "student_profile__user__last_name",
+                          "student_profile__user__first_name"))
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -147,6 +148,7 @@ class TestimonialList(ListAPIView):
     def get_queryset(self):
         return (GraduateProfile.active
                 .with_testimonial()
+                .get_only_required_fields()
                 .prefetch_related("academic_disciplines")
                 .order_by("-graduation_year", "pk"))
 

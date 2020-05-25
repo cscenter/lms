@@ -61,7 +61,7 @@
             {% if profile_user.is_graduate %}
                 {% with graduate_profile=profile_user.graduate_profile %}
                     <div class="progress-info">
-                        С сентября {{ student_profile.year_of_admission }} года по июнь {{ graduate_profile.graduation_year }} года<br>
+                        С сентября {{ graduate_profile.student_profile.year_of_admission }} года по июнь {{ graduate_profile.graduation_year }} года<br>
                             {% if profile_user.gender == profile_user.GENDER_FEMALE %}прошла{% else %}прошёл{% endif %}
                             обучение по направлени{{ graduate_profile.academic_disciplines.all|pluralize:"ю,ям" }}
                             {% for program in graduate_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
