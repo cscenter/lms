@@ -230,8 +230,8 @@ class UserRecordResourceAdmin(ImportMixin, UserAdmin):
 
 
 class EnrollmentCertificateAdmin(admin.ModelAdmin):
-    list_display = ["student", "created"]
-    raw_id_fields = ["student"]
+    list_display = ["student_profile", "created"]
+    raw_id_fields = ["student_profile"]
 
 
 admin.site.register(User, UserRecordResourceAdmin)

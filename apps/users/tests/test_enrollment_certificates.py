@@ -12,8 +12,9 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
 from users.models import EnrollmentCertificate
-from users.tests.factories import UserFactory, EnrollmentCertificateFactory, \
-    StudentFactory, CuratorFactory
+from users.tests.factories import UserFactory, \
+    CertificateOfParticipationFactory, \
+    StudentFactory, CuratorFactory, StudentProfileFactory
 
 
 @pytest.mark.django_db
@@ -21,22 +22,25 @@ def test_create_reference(client, assert_redirect):
     """Check FIO substitute in signature input field
        Check redirect to reference detail after form submit
     """
-    user = UserFactory()
-    UserFactory.reset_sequence(1)
     curator = CuratorFactory()
     client.login(curator)
-    form_url = reverse('user_reference_add',
+    student_profile = StudentProfileFactory()
+    form_url = reverse('student_reference_add',
                        subdomain=settings.LMS_SUBDOMAIN,
-                       args=[user.id])
+                       args=[student_profile.id])
     response = client.get(form_url)
     soup = BeautifulSoup(response.content, "html.parser")
     sig_input = soup.find(id="id_signature")
     assert sig_input.attrs.get('value') == curator.get_full_name()
 
-    student = StudentFactory()
-    form_url = reverse('user_reference_add',
-                       subdomain=settings.LMS_SUBDOMAIN, args=[student.id])
-    form_data = factory.build(dict, FACTORY_CLASS=EnrollmentCertificateFactory)
+    student_profile = StudentProfileFactory()
+    form_url = reverse('student_reference_add',
+                       subdomain=settings.LMS_SUBDOMAIN,
+                       args=[student_profile.id])
+    form_data = {
+        'note': '',
+        'signature': 'admin'
+    }
     response = client.post(form_url, form_data)
     assert EnrollmentCertificate.objects.count() == 1
     ref = EnrollmentCertificate.objects.first()
@@ -69,7 +73,7 @@ def test_user_detail_reference_list_view(client):
     """Check reference list appears on student profile page for curators only"""
     student = StudentFactory()
     EnrollmentFactory()
-    EnrollmentCertificateFactory(student=student)
+    CertificateOfParticipationFactory(student=student)
     curator = CuratorFactory()
     url = student.get_absolute_url()
     client.login(curator)
@@ -86,7 +90,7 @@ def test_user_detail_reference_list_view(client):
 
 
 @pytest.mark.django_db
-def test_reference_detail(client, assert_login_redirect):
+def test_reference_detail(client, assert_login_redirect, settings):
     """Check enrollments duplicates, reference fields"""
     student = StudentFactory()
     # add 2 enrollments from 1 course reading exactly
@@ -94,25 +98,24 @@ def test_reference_detail(client, assert_login_redirect):
     semesters = SemesterFactory.create_batch(2, year=2014)
     enrollments = []
     for s in semesters:
-        e = EnrollmentFactory.create(
-            course=CourseFactory.create(
-                meta_course=meta_course,
-                semester=s),
+        e = EnrollmentFactory(
+            course=CourseFactory(meta_course=meta_course, semester=s),
             student=student,
             grade=GradeTypes.GOOD
         )
         enrollments.append(e)
-    reference = EnrollmentCertificateFactory.create(
-        student=student,
+    reference = CertificateOfParticipationFactory(
+        student_profile=student.get_student_profile(settings.SITE_ID),
         note="TEST",
         signature="SIGNATURE")
     url = reference.get_absolute_url()
     client.login(student)
-    assert_login_redirect(url)
+    response = client.get(url)
+    assert response.status_code == 403
     curator = CuratorFactory()
     client.login(curator)
     response = client.get(url)
-    assert response.context['object'].note == "TEST"
+    assert response.context['certificate_of_participation'].note == "TEST"
     soup = BeautifulSoup(response.content, "html.parser")
     sig_text = soup.find(text=re.compile('SIGNATURE'))
     assert sig_text is not None

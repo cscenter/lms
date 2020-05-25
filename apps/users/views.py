@@ -19,6 +19,7 @@ from ajaxuploader.backends import ProfileImageUploadBackend
 from ajaxuploader.handlers import MemoryImageUploadHandler, \
     TemporaryImageUploadHandler
 from ajaxuploader.signals import file_uploaded
+from auth.mixins import PermissionRequiredMixin
 from core.views import ProtectedFormMixin
 from courses.models import Course, Semester
 from learning.forms import TestimonialForm
@@ -27,12 +28,12 @@ from learning.models import StudentAssignment, \
 from learning.services import get_student_profile
 from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
-from users.constants import Roles
-from users.mixins import CuratorOnlyMixin
 from users.models import SHADCourseRecord
 from users.thumbnails import get_user_thumbnail, photo_thumbnail_cropbox
 from .forms import UserProfileForm, EnrollmentCertificateCreateForm
 from .models import User, EnrollmentCertificate
+from .permissions import CreateCertificateOfParticipation, \
+    ViewCertificateOfParticipation
 
 
 class UserDetailView(generic.DetailView):
@@ -164,60 +165,57 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
         return super().form_valid(form)
 
 
-class EnrollmentCertificateCreateView(ProtectedFormMixin, generic.CreateView):
+class CertificateOfParticipationCreateView(PermissionRequiredMixin,
+                                           generic.CreateView):
     model = EnrollmentCertificate
     template_name = "users/reference_add.html"
     form_class = EnrollmentCertificateCreateForm
+    permission_required = CreateCertificateOfParticipation.name
 
     def get_initial(self):
-        initial = super(EnrollmentCertificateCreateView, self).get_initial()
+        initial = super().get_initial()
         initial['signature'] = self.request.user.get_full_name()
         return initial
 
     def form_valid(self, form):
-        form.instance.student_id = self.kwargs['pk']
-        return super(EnrollmentCertificateCreateView, self).form_valid(form)
+        form.instance.student_profile_id = self.kwargs['student_profile_id']
+        return super().form_valid(form)
 
     def get_success_url(self):
         return self.object.get_absolute_url()
 
-    def is_form_allowed(self, user, obj):
-        return user.is_curator
 
-
-class EnrollmentCertificateDetailView(CuratorOnlyMixin, generic.DetailView):
-    model = EnrollmentCertificate
+class CertificateOfParticipationDetailView(PermissionRequiredMixin,
+                                           generic.DetailView):
     pk_url_kwarg = 'reference_pk'
     template_name = "users/reference_detail.html"
+    permission_required = ViewCertificateOfParticipation.name
+
+    def get_queryset(self):
+        return (EnrollmentCertificate.objects
+                .filter(student_profile_id=self.kwargs['student_profile_id'])
+                .select_related('student_profile'))
 
     def get_context_data(self, **kwargs):
         from learning.reports import ProgressReport
         student_info = (User.objects
-                        .has_role(Roles.STUDENT,
-                                  Roles.GRADUATE,
-                                  Roles.VOLUNTEER)
                         .student_progress(exclude_grades=[
                             GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED
                         ])
-                        .get(pk=self.object.student.pk))
+                        .get(pk=self.object.student_profile.user_id))
         courses_qs = (ProgressReport().get_courses_queryset((student_info,)))
         courses = {c.pk: c for c in courses_qs}
         for e in student_info.enrollments_progress:
             e.course = courses[e.course_id]
         enrollments = OrderedDict()
-        # Among enrollments for the same course get one with the highest grade
+        # Among enrollments for the same course get the latest one
         student_info.enrollments_progress.sort(key=lambda e: e.course.meta_course.name)
         for e in student_info.enrollments_progress:
             if e.created > self.object.created:
                 continue
-            meta_course_id = e.course.meta_course_id
-            if meta_course_id in enrollments:
-                if e.grade_weight > enrollments[meta_course_id].grade_weight:
-                    enrollments[meta_course_id] = e
-            else:
-                enrollments[meta_course_id] = e
+            enrollments[e.course.meta_course_id] = e
         context = {
-            'object': self.object,
+            'certificate_of_participation': self.object,
             'user_enrollments': enrollments,
             'shads': filter(lambda x: x.created < self.object.created,
                             student_info.shads)

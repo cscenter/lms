@@ -967,10 +967,15 @@ class EnrollmentCertificate(TimeStampedModel):
         User,
         verbose_name=_("Student"),
         on_delete=models.CASCADE,
+        null=True, blank=True,
         related_name="enrollment_certificates")
+    student_profile = models.ForeignKey(
+        StudentProfile,
+        verbose_name=_("Student"),
+        on_delete=models.CASCADE,
+        related_name="certificates_of_participation")
 
     class Meta:
-        ordering = ["signature"]
         verbose_name = _("Student Reference")
         verbose_name_plural = _("Student References")
 
@@ -978,6 +983,6 @@ class EnrollmentCertificate(TimeStampedModel):
         return smart_text(self.student)
 
     def get_absolute_url(self):
-        return reverse('user_reference_detail',
+        return reverse('student_reference_detail',
                        subdomain=settings.LMS_SUBDOMAIN,
-                       args=[self.student_id, self.pk])
+                       args=[self.student_profile_id, self.pk])

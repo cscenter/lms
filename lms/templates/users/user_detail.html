@@ -209,16 +209,16 @@
 
                     {% if student_profile %}
                         <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
-                        {% if profile_user.enrollment_certificates.count > 0 %}
+                        {% if student_profile.certificates_of_participation.count > 0 %}
                             <ul>
-                                {% for reference in profile_user.enrollment_certificates.all %}
+                                {% for reference in student_profile.certificates_of_participation.all %}
                                     <li>
                                         <a target="_blank" href="{{ reference.get_absolute_url }}">{{ reference.created|date:"d.m.Y" }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>
                         {% endif %}
-                        <a href="{% url 'user_reference_add' subdomain=LMS_SUBDOMAIN pk=profile_user.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
+                        <a href="{% url 'student_reference_add' subdomain=LMS_SUBDOMAIN student_profile_id=student_profile.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
                     {% endif %}
 
                     {% if student_profile %}

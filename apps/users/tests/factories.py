@@ -13,7 +13,7 @@ __all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
            'StudentFactory', 'TeacherFactory', 'VolunteerFactory',
            'OnlineCourseRecordFactory',
-           'SHADCourseRecordFactory', 'EnrollmentCertificateFactory')
+           'SHADCourseRecordFactory', 'CertificateOfParticipationFactory')
 
 
 def add_user_groups(user, groups):
@@ -147,10 +147,11 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     semester = factory.SubFactory('learning.tests.factories.SemesterFactory')
 
 
-class EnrollmentCertificateFactory(factory.DjangoModelFactory):
+class CertificateOfParticipationFactory(factory.DjangoModelFactory):
     class Meta:
         model = EnrollmentCertificate
 
     signature = "FIO"
     note = ""
-    student = factory.SubFactory(StudentFactory)
+    student_profile = factory.SubFactory(StudentProfileFactory)
+    student = factory.SelfAttribute('student_profile.user')
