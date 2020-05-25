@@ -40,7 +40,7 @@
             <div class="left">
                 {% trans "Reference|Detail|signature" %}
             </div>
-            <div class="date">{% now "d.m.Y" %}</div>
+            <div class="date">{{ certificate_of_participation.created|date:"d.m.Y" }}</div>
         </div>
         <div id="reference-page-footer">
             <div class="title">{% trans "Reference|Detail|info" %}:</div>
