@@ -25,6 +25,8 @@ from users.constants import Roles
 from users.models import User, StudentProfile, UserGroup
 
 
+# FIXME: get profile for Invited students from the current term ONLY
+# FIXME: store term of registration or get date range for the term of registration
 def get_student_profile(user: User, site,
                         profile_type=None) -> Optional[StudentProfile]:
     """
