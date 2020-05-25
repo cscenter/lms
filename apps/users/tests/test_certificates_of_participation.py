@@ -11,7 +11,7 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
     CourseFactory
 from learning.settings import GradeTypes
 from learning.tests.factories import EnrollmentFactory
-from users.models import EnrollmentCertificate
+from users.models import CertificateOfParticipation
 from users.tests.factories import UserFactory, \
     CertificateOfParticipationFactory, \
     StudentFactory, CuratorFactory, StudentProfileFactory
@@ -42,8 +42,8 @@ def test_create_reference(client, assert_redirect):
         'signature': 'admin'
     }
     response = client.post(form_url, form_data)
-    assert EnrollmentCertificate.objects.count() == 1
-    ref = EnrollmentCertificate.objects.first()
+    assert CertificateOfParticipation.objects.count() == 1
+    ref = CertificateOfParticipation.objects.first()
     expected_url = ref.get_absolute_url()
     assert_redirect(response, expected_url)
 

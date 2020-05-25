@@ -30,8 +30,8 @@ from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
 from users.models import SHADCourseRecord
 from users.thumbnails import get_user_thumbnail, photo_thumbnail_cropbox
-from .forms import UserProfileForm, EnrollmentCertificateCreateForm
-from .models import User, EnrollmentCertificate
+from .forms import UserProfileForm, CertificateOfParticipationCreateForm
+from .models import User, CertificateOfParticipation
 from .permissions import CreateCertificateOfParticipation, \
     ViewCertificateOfParticipation
 
@@ -168,9 +168,9 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
 
 class CertificateOfParticipationCreateView(PermissionRequiredMixin,
                                            generic.CreateView):
-    model = EnrollmentCertificate
+    model = CertificateOfParticipation
     template_name = "users/reference_add.html"
-    form_class = EnrollmentCertificateCreateForm
+    form_class = CertificateOfParticipationCreateForm
     permission_required = CreateCertificateOfParticipation.name
 
     def get_initial(self):
@@ -193,7 +193,7 @@ class CertificateOfParticipationDetailView(PermissionRequiredMixin,
     permission_required = ViewCertificateOfParticipation.name
 
     def get_queryset(self):
-        return (EnrollmentCertificate.objects
+        return (CertificateOfParticipation.objects
                 .filter(student_profile_id=self.kwargs['student_profile_id'])
                 .select_related('student_profile'))
 

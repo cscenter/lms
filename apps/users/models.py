@@ -959,7 +959,7 @@ class SHADCourseRecord(TimeStampedModel):
         return smart_text("{} [{}]".format(self.name, self.student_id))
 
 
-class EnrollmentCertificate(TimeStampedModel):
+class CertificateOfParticipation(TimeStampedModel):
     signature = models.CharField(_("Reference|signature"), max_length=255)
     note = models.TextField(_("Reference|note"), blank=True)
     student_profile = models.ForeignKey(
