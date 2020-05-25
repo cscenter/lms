@@ -265,39 +265,32 @@ class AlumniView(TemplateView):
     template_name = "compscicenter_ru/alumni/index.html"
 
     def get_context_data(self):
-        # TODO: aggregate from `Branch.established`
-        the_first_graduation = 2013
         cache_key = 'cscenter_last_graduation_year'
-        latest_graduation_year = cache.get(cache_key)
-        if latest_graduation_year is None:
-            d = (GraduateProfile.objects
-                 .filter(is_active=True)
-                 .aggregate(year=Max('graduation_year')))
-            if d['year']:
-                latest_graduation_year = d['year']
-            else:
-                # TODO: Better to show empty results if no graduate profiles
-                latest_graduation_year = the_first_graduation
-            cache.set(cache_key, latest_graduation_year, 86400 * 31)
-        years_range = range(the_first_graduation, latest_graduation_year + 1)
+        history = cache.get(cache_key)
+        if history is None:
+            history = (GraduateProfile.active
+                       .aggregate(latest_graduation=Max('graduation_year'),
+                                  first_graduation=Min('graduation_year')))
+            cache.set(cache_key, history, 86400 * 31)
+        if history['first_graduation'] is None:
+            raise Http404
+        the_first_graduation = history['first_graduation']
+        latest_graduation = history['latest_graduation']
+        years_range = range(the_first_graduation, latest_graduation + 1)
         years = [{"label": str(y), "value": y} for y in reversed(years_range)]
-        year = self.kwargs.get("year")
-        if year not in years_range:
-            year = latest_graduation_year
-        year = next((y for y in years if y['value'] == year))
+        show_year = self.kwargs.get("year")
+        if show_year not in years_range:
+            show_year = latest_graduation
+        year_option = next((y for y in years if y['value'] == show_year))
         # Area state and props
         areas = [{"label": a.name, "value": a.code} for a in
                  AcademicDiscipline.objects.all()]
         area = self.kwargs.get("area", None)
-        if area:
-            try:
-                area = next((a for a in areas if a['value'] == area))
-            except StopIteration:
-                raise Http404
+        area_option = next((a for a in areas if a['value'] == area), None)
         app_data = {
             "state": {
-                "year": year,
-                "area": area,
+                "year": year_option,
+                "area": area_option,
                 "branch": self.kwargs.get("city", None),
             },
             "props": {
