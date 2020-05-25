@@ -67,6 +67,7 @@ def get_random_testimonials(count, cache_key, **filters):
         testimonials = (GraduateProfile.active
                         .filter(**filters)
                         .with_testimonial()
+                        .get_only_required_fields()
                         .prefetch_related("academic_disciplines")
                         .order_by('?'))[:count]
         cache.set(cache_key, testimonials, 3600)
@@ -231,11 +232,12 @@ class AlumniHonorBoardView(TemplateView):
         if not preview or not self.request.user.is_curator:
             manager = GraduateProfile.active
         else:
-            manager = GraduateProfile.objects.select_related("student")
+            manager = GraduateProfile.objects
         graduates = list(manager
                          .filter(graduation_year=graduation_year)
-                         .prefetch_related("academic_disciplines")
-                         .order_by("student__last_name"))
+                         .get_only_required_fields()
+                         .order_by("student_profile__user__last_name",
+                                   "student_profile__user__first_name"))
         if not len(graduates):
             raise Http404
         # Get random testimonials

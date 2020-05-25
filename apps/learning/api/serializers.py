@@ -4,7 +4,7 @@ from rest_framework import serializers
 from courses.api.serializers import CourseSerializer, AssignmentSerializer
 from learning.models import CourseNewsNotification, StudentAssignment, \
     Enrollment
-from users.models import User
+from users.models import User, StudentProfile
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -14,24 +14,20 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class StudentSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
-    name = serializers.CharField(source="first_name")
-    surname = serializers.CharField(source="last_name")
+    id = serializers.IntegerField(source="user_id")
+    name = serializers.CharField(source="user.first_name")
+    surname = serializers.CharField(source="user.last_name")
+    patronymic = serializers.CharField(source="user.patronymic")
     branch = serializers.CharField(source="branch.code")
-    sex = serializers.CharField(source="gender")
+    sex = serializers.CharField(source="user.gender")
 
     class Meta:
-        model = User
+        model = StudentProfile
         fields = ('id', 'name', 'surname', 'patronymic', 'sex', 'branch')
 
 
-class EnrollmentStudentSerializer(StudentSerializer):
-    class Meta(StudentSerializer.Meta):
-        fields = ('id', 'name', 'surname', 'patronymic', 'branch')
-
-
 class EnrollmentSerializer(serializers.ModelSerializer):
-    student = EnrollmentStudentSerializer()
+    student = StudentSerializer()
 
     class Meta:
         model = Enrollment
