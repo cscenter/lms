@@ -6,10 +6,10 @@ from django.conf import settings
 from core.tests.factories import BranchFactory
 from learning.settings import GradeTypes, Branches
 from users.constants import Roles, GenderTypes
-from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
+from users.models import User, SHADCourseRecord, CertificateOfParticipation, \
     OnlineCourseRecord, UserGroup, StudentProfile, StudentTypes
 
-__all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',
+__all__ = ('User', 'SHADCourseRecord', 'CertificateOfParticipation',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
            'StudentFactory', 'TeacherFactory', 'VolunteerFactory',
            'OnlineCourseRecordFactory',
@@ -149,7 +149,7 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
 
 class CertificateOfParticipationFactory(factory.DjangoModelFactory):
     class Meta:
-        model = EnrollmentCertificate
+        model = CertificateOfParticipation
 
     signature = "FIO"
     note = ""

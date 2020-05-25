@@ -13,7 +13,7 @@ from core.widgets import AdminRichTextAreaWidget
 from users.constants import Roles
 from users.forms import UserCreationForm, UserChangeForm
 from .import_export import UserRecordResource
-from .models import User, EnrollmentCertificate, \
+from .models import User, CertificateOfParticipation, \
     OnlineCourseRecord, SHADCourseRecord, UserGroup, \
     StudentProfile, StudentStatusLog, StudentTypes
 
@@ -229,12 +229,12 @@ class UserRecordResourceAdmin(ImportMixin, UserAdmin):
     import_template_name = 'admin/import_export/import_users.html'
 
 
-class EnrollmentCertificateAdmin(admin.ModelAdmin):
+class CertificateOfParticipationAdmin(admin.ModelAdmin):
     list_display = ["student_profile", "created"]
     raw_id_fields = ["student_profile"]
 
 
 admin.site.register(User, UserRecordResourceAdmin)
 admin.site.register(StudentProfile, StudentProfileAdmin)
-admin.site.register(EnrollmentCertificate, EnrollmentCertificateAdmin)
+admin.site.register(CertificateOfParticipation, CertificateOfParticipationAdmin)
 admin.site.register(SHADCourseRecord, SHADCourseRecordAdmin)
