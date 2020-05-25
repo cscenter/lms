@@ -173,7 +173,7 @@ class StudentProfileAdmin(BaseModelAdmin):
                        'academic_disciplines']
         }),
         (_('Official Student Info'), {
-            'fields': ['is_official_student', 'diploma_number',
+            'fields': ['is_official_student', 'birthday', 'diploma_number',
                        'diploma_issued_on', 'diploma_issued_by']
         }),
         (_("Curator's note"), {

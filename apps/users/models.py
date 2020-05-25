@@ -811,6 +811,10 @@ class StudentProfile(models.Model):
         help_text=_("Number of higher education diploma"),
         blank=True
     )
+    birthday = models.DateField(
+        verbose_name=_("Birthday"),
+        blank=True, null=True
+    )
     diploma_issued_on = models.DateField(
         verbose_name=_("Diploma Issued on"),
         blank=True, null=True
