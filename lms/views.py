@@ -47,18 +47,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
     template_name = "lms/course_offerings.html"
 
     def get_queryset(self):
-        most_priority_role = CourseTeacher.get_most_priority_role_expr()
-        prefetch_teachers = Prefetch(
-            'course_teachers',
-            queryset=(CourseTeacher.objects
-                      .select_related('teacher')
-                      .annotate(most_priority_role=most_priority_role)
-                      .only('id', 'course_id', 'teacher_id',
-                            'teacher__first_name',
-                            'teacher__last_name',
-                            'teacher__patronymic')
-                      .order_by('-most_priority_role',
-                                'teacher__last_name')))
+        course_teachers = CourseTeacher.get_most_priority_role_prefetch()
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')
@@ -68,7 +57,7 @@ class CourseOfferingsView(FilterMixin, TemplateView):
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
                       "main_branch__code", "main_branch__site_id")
-                .prefetch_related(prefetch_teachers)
+                .prefetch_related(course_teachers)
                 .order_by('-semester__year', '-semester__index',
                           'meta_course__name'))
 

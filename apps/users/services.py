@@ -25,13 +25,13 @@ def get_student_progress(queryset,
 
     users = set(queryset.values_list('user_id', flat=True))
     progress: Dict[AccountId, Dict] = defaultdict(dict)
-
     enrollment_qs = (Enrollment.active
                      .filter(student_id__in=users)
                      .select_related('course',
                                      'course__meta_course',
                                      'course__semester',
                                      'course__main_branch')
+                     .prefetch_related('course__course_teachers')
                      .annotate(grade_weight=GradeTypes.to_int_case_expr())
                      .only('pk', 'created', 'student_id', 'course_id',
                            'grade'))

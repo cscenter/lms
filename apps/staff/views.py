@@ -229,8 +229,8 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                     good_total += 1
                 unique_courses.add(enrollment.course.meta_course)
                 total_hours += enrollment.course.courseclass_set.count() * 1.5
-                for teacher in enrollment.course.teachers.all():
-                    unique_teachers.add(teacher.pk)
+                for course_teacher in enrollment.course.course_teachers.all():
+                    unique_teachers.add(course_teacher.teacher_id)
 
             s.failed_courses = failed_courses
             if not most_failed_courses:
@@ -325,11 +325,12 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
                 enrollments[meta_course_id] = e
             for e in enrollments.values():
                 course = courses[e.course_id]
+                teachers = ", ".join(ct.teacher.get_abbreviated_name(delimiter="~")
+                                     for ct in course.course_teachers.all())
                 diploma_course = DiplomaCourse(
                     type="course",
                     name=tex(course.meta_course.name),
-                    teachers=", ".join(t.get_abbreviated_name(delimiter="~")
-                                       for t in course.teachers.all()),
+                    teachers=teachers,
                     final_grade=str(e.grade_honest).lower(),
                     class_count=course.classes_total * 2
                 )

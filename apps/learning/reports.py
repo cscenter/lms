@@ -99,14 +99,7 @@ class ProgressReport:
         for student in students_queryset:
             for e in student.enrollments_progress:
                 unique_courses.add(e.course_id)
-        # Note: Show lecturers first, then seminarians, then others
-        teachers_qs = User.objects.extra(
-            select={
-                'is_lecturer': '"%s"."roles" & %s' % (CourseTeacher._meta.db_table, int(CourseTeacher.roles.lecturer)),
-                'is_seminarian': '"%s"."roles" & %s' % (CourseTeacher._meta.db_table, int(CourseTeacher.roles.seminar)),
-            },
-            order_by=["-is_lecturer", "-is_seminarian", "last_name", "first_name"]
-        )
+        course_teachers = CourseTeacher.get_most_priority_role_prefetch()
         qs = (Course.objects
               .filter(pk__in=unique_courses)
               .select_related('meta_course', 'semester')
@@ -116,7 +109,7 @@ class ProgressReport:
                     'grading_type',
                     'meta_course__name',
                     'meta_course__name_ru',)
-              .prefetch_related(Prefetch("teachers", queryset=teachers_qs)))
+              .prefetch_related(course_teachers))
         return qs
 
     def generate(self, queryset=None) -> DataFrame:
@@ -205,8 +198,8 @@ class ProgressReport:
             if meta_course_id in student.unique_enrollments:
                 enrollment = student.unique_enrollments[meta_course_id]
                 course = courses[enrollment.course_id]
-                teachers = ", ".join(t.get_full_name() for t in
-                                     course.teachers.all())
+                teachers = ", ".join(ct.teacher.get_abbreviated_name() for ct in
+                                     course.course_teachers.all())
                 values[i * step] = self.grade_getter(enrollment).lower()
                 values[i * step + 1] = teachers
         return values
