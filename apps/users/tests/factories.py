@@ -154,4 +154,3 @@ class CertificateOfParticipationFactory(factory.DjangoModelFactory):
     signature = "FIO"
     note = ""
     student_profile = factory.SubFactory(StudentProfileFactory)
-    student = factory.SelfAttribute('student_profile.user')
