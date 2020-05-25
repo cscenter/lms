@@ -10,7 +10,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q, Max, Prefetch, F, Count
+from django.db.models import Q, Max, Prefetch, F, Count, \
+    prefetch_related_objects, Min
 from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -238,11 +239,12 @@ class AlumniHonorBoardView(TemplateView):
         if not len(graduates):
             raise Http404
         # Get random testimonials
-        # FIXME: Prefetch areas_of_study for random testimonials only
         with_testimonial = [gp for gp in graduates if gp.testimonial]
         indexes = random.sample(range(len(with_testimonial)),
                                 min(len(with_testimonial), 4))
         random_testimonials = [with_testimonial[index] for index in indexes]
+        if random_testimonials:
+            prefetch_related_objects(random_testimonials, 'academic_disciplines')
         context = {
             "graduation_year": graduation_year,
             "graduates": graduates,
