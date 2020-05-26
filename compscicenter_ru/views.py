@@ -470,7 +470,7 @@ class GraduateProfileView(generic.DetailView):
     template_name = "compscicenter_ru/profiles/graduate.html"
 
     def get_queryset(self):
-        return (GraduateProfile.objects
+        return (GraduateProfile.active
                 .filter(student_profile__branch__site_id=self.request.site.pk)
                 .select_related("student_profile"))
 
