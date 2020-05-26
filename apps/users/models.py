@@ -28,6 +28,7 @@ from auth.permissions import perm_registry
 from auth.tasks import update_password_in_gerrit
 from core.models import LATEX_MARKDOWN_ENABLED, Branch
 from core.timezone import Timezone, TimezoneAwareModel
+from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping, instance_memoize
 from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeLevels
@@ -884,6 +885,11 @@ class StudentProfile(models.Model):
     @property
     def is_active(self):
         return not StudentStatuses.is_inactive(self.status)
+
+    def get_comment_changed_at_display(self, default=''):
+        if self.comment_changed_at:
+            return self.comment_changed_at.strftime(DATETIME_FORMAT_RU)
+        return default
 
 
 class StudentStatusLog(models.Model):

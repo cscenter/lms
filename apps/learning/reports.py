@@ -5,6 +5,7 @@ from datetime import datetime
 from operator import attrgetter
 from typing import List, Dict
 
+from django.conf import settings
 from django.db.models import Q, Prefetch, Count, Case, When, Value, F, \
     IntegerField
 from django.http import HttpResponse
@@ -18,12 +19,14 @@ from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU, \
 from courses.constants import SemesterTypes
 from courses.models import Semester, Course, CourseTeacher, MetaCourse
 from courses.utils import get_term_index
-from learning.models import AssignmentComment, Enrollment
+from learning.models import AssignmentComment, Enrollment, GraduateProfile
 from learning.settings import StudentStatuses, GradeTypes
 from projects.constants import ProjectTypes
 from projects.models import ReportComment, ProjectStudent, Project
 from users.constants import Roles
-from users.models import User, SHADCourseRecord
+from users.managers import get_enrollments_progress, get_shad_courses_progress, \
+    get_projects_progress
+from users.models import User, SHADCourseRecord, StudentProfile, StudentTypes
 
 
 def dataframe_to_response(df: DataFrame, output_format: str, filename: str):
@@ -78,7 +81,7 @@ class ProgressReport:
 
     @abstractmethod
     def get_queryset(self):
-        return User.objects.none()
+        return StudentProfile.objects.none()
 
     @abstractmethod
     def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
@@ -86,7 +89,7 @@ class ProgressReport:
         return []
 
     @abstractmethod
-    def _export_row(self, student, *, courses, meta_courses, shads_max,
+    def _export_row(self, student_profile, *, courses, meta_courses, shads_max,
                     online_max, projects_max):
         return []
 
@@ -94,9 +97,9 @@ class ProgressReport:
     def get_filename(self):
         return "report.txt"
 
-    def get_courses_queryset(self, students_queryset):
+    def get_courses_queryset(self, students):
         unique_courses = set()
-        for student in students_queryset:
+        for student in students:
             for e in student.enrollments_progress:
                 unique_courses.add(e.course_id)
         course_teachers = CourseTeacher.get_most_priority_role_prefetch()
@@ -113,9 +116,10 @@ class ProgressReport:
         return qs
 
     def generate(self, queryset=None) -> DataFrame:
-        students = queryset if queryset is not None else self.get_queryset()
+        student_profiles = queryset or self.get_queryset()
         # It's possible to prefetch all related courses but nested
         # .prefetch_related() is extremely slow, that's why we use map instead
+        students = (sp.user for sp in student_profiles)
         unique_courses: Dict[int, Course] = {}
         for c in self.get_courses_queryset(students):
             unique_courses[c.pk] = c
@@ -124,7 +128,8 @@ class ProgressReport:
         # Aggregate max number of courses for each type. Result headers
         # depend on these values.
         shads_max, online_max, projects_max = 0, 0, 0
-        for student in students:
+        for student_profile in student_profiles:
+            student = student_profile.user
             self.process_row(student, unique_courses, unique_meta_courses)
             shads_max = max(shads_max, len(student.shads))
             online_max = max(online_max, len(student.online_courses))
@@ -135,12 +140,15 @@ class ProgressReport:
                                          shads_max=shads_max,
                                          online_max=online_max,
                                          projects_max=projects_max)
-        data = [self._export_row(s,
-                                 courses=unique_courses,
-                                 meta_courses=unique_meta_courses,
-                                 shads_max=shads_max,
-                                 online_max=online_max,
-                                 projects_max=projects_max) for s in students]
+        data = []
+        for student_profile in student_profiles:
+            row = self._export_row(student_profile,
+                                   courses=unique_courses,
+                                   meta_courses=unique_meta_courses,
+                                   shads_max=shads_max,
+                                   online_max=online_max,
+                                   projects_max=projects_max)
+            data.append(row)
         return DataFrame.from_records(columns=headers, data=data, index='ID')
 
     def process_row(self, student, unique_courses, unique_meta_courses):
@@ -239,17 +247,32 @@ class ProgressReportForDiplomas(ProgressReport):
         self.branch = branch
 
     def get_queryset(self):
-        """
-        Explicitly exclude rows with bad grade or without any.
-        """
-        return (User.objects
-                .filter(student_profiles__status=StudentStatuses.WILL_GRADUATE,
-                        student_profiles__branch=self.branch)
-                .student_progress(exclude_grades=[GradeTypes.UNSATISFACTORY,
-                                                  GradeTypes.NOT_GRADED])
-                .prefetch_related('academic_disciplines')
-                .order_by('last_name', 'first_name', 'pk')
-                .distinct('last_name', 'first_name', 'pk'))
+        exclude_grades = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+        enrollments_prefetch = get_enrollments_progress(
+            lookup='user__enrollment_set',
+            filters=[~Q(grade__in=exclude_grades)]
+        )
+        shad_courses_prefetch = get_shad_courses_progress(
+            lookup='user__shadcourserecord_set',
+            filters=[~Q(grade__in=exclude_grades)]
+        )
+        projects_prefetch = get_projects_progress(
+            lookup='user__projectstudent_set')
+        online_courses_prefetch = Prefetch('user__onlinecourserecord_set',
+                                           to_attr='online_courses')
+        return (StudentProfile.objects
+                .filter(status=StudentStatuses.WILL_GRADUATE,
+                        branch=self.branch)
+                .select_related('user', 'graduate_profile')
+                .prefetch_related(
+                    'academic_disciplines',
+                    'user__applicant_set',
+                    projects_prefetch,
+                    enrollments_prefetch,
+                    shad_courses_prefetch,
+                    online_courses_prefetch
+                )
+                .order_by('user__last_name', 'user__first_name', 'user_id'))
 
     def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
                           projects_max):
@@ -268,15 +291,13 @@ class ProgressReportForDiplomas(ProgressReport):
             *self.generate_projects_headers(projects_max),
         ]
 
-    def _export_row(self, student, *, courses, meta_courses, shads_max,
+    def _export_row(self, student_profile, *, courses, meta_courses, shads_max,
                     online_max, projects_max):
-        # FIXME: GraduateProfile reference StudentProfile now
-        if hasattr(student, "graduate_profile"):
-            disciplines = student.graduate_profile.academic_disciplines.all()
-        else:
+        try:
+            disciplines = student_profile.graduate_profile.academic_disciplines.all()
+        except GraduateProfile.DoesNotExist:
             disciplines = []
-        # FIXME: remove. Hack - alumni 2020 have disciplines in user profile instead of graduate profile
-        disciplines = student.academic_disciplines.all()
+        student = student_profile.user
         return [
             student.pk,
             student.last_name,
@@ -317,54 +338,58 @@ class ProgressReportForDiplomas(ProgressReport):
 
 class ProgressReportFull(ProgressReport):
     def generate(self, queryset=None) -> DataFrame:
-        students = queryset if queryset is not None else self.get_queryset()
+        student_profiles = queryset or self.get_queryset()
         headers = self._generate_headers()
-        data = [self._export_row(s) for s in students]
+        data = [self._export_row(sp) for sp in student_profiles]
         return DataFrame.from_records(columns=headers, data=data, index='ID')
 
     def get_queryset(self, base_queryset=None):
         if base_queryset is None:
-            # Can't use distinct here since later we use .annotation()
-            base_queryset = (User.objects
-                             .has_role(Roles.STUDENT,
-                                       Roles.GRADUATE,
-                                       Roles.VOLUNTEER)
-                             .order_by('last_name', 'first_name', 'pk'))
+            base_queryset = (StudentProfile.objects
+                             .filter(type__in=[StudentTypes.REGULAR,
+                                               StudentTypes.VOLUNTEER],
+                                     branch__site_id=settings.SITE_ID)
+                             .select_related('user', 'branch',
+                                             'graduate_profile')
+                             .order_by('user__last_name',
+                                       'user__first_name',
+                                       'user__pk'))
         success_practice = Count(
-            Case(When(Q(projectstudent__final_grade__in=GradeTypes.satisfactory_grades) &
-                      Q(projectstudent__project__project_type=ProjectTypes.practice) &
-                      ~Q(projectstudent__project__status=Project.Statuses.CANCELED),
-                      then=F('projectstudent__id')),
+            Case(When(Q(user__projectstudent__final_grade__in=GradeTypes.satisfactory_grades) &
+                      Q(user__projectstudent__project__project_type=ProjectTypes.practice) &
+                      ~Q(user__projectstudent__project__status=Project.Statuses.CANCELED),
+                      then=F('user__projectstudent__id')),
                  output_field=IntegerField()),
             distinct=True
         )
         success_research = Count(
-            Case(When(Q(projectstudent__final_grade__in=GradeTypes.satisfactory_grades) &
-                      Q(projectstudent__project__project_type=ProjectTypes.research) &
-                      ~Q(projectstudent__project__status=Project.Statuses.CANCELED),
-                      then=F('projectstudent__id')),
+            Case(When(Q(user__projectstudent__final_grade__in=GradeTypes.satisfactory_grades) &
+                      Q(user__projectstudent__project__project_type=ProjectTypes.research) &
+                      ~Q(user__projectstudent__project__status=Project.Statuses.CANCELED),
+                      then=F('user__projectstudent__id')),
                  output_field=IntegerField()),
             distinct=True
         )
         # Take into account only 1 enrollment if student passed the course twice
         success_enrollments_total = Count(
-            Case(When(Q(enrollment__grade__in=GradeTypes.satisfactory_grades) &
-                      Q(enrollment__is_deleted=False),
-                      then=F('enrollment__course__meta_course_id')),
+            Case(When(Q(user__enrollment__grade__in=GradeTypes.satisfactory_grades) &
+                      Q(user__enrollment__is_deleted=False),
+                      then=F('user__enrollment__course__meta_course_id')),
                  output_field=IntegerField()),
             distinct=True
         )
         success_shad = Count(
-            Case(When(shadcourserecord__grade__in=GradeTypes.satisfactory_grades,
-                      then=F('shadcourserecord__id')),
+            Case(When(user__shadcourserecord__grade__in=GradeTypes.satisfactory_grades,
+                      then=F('user__shadcourserecord__id')),
                  output_field=IntegerField()),
             distinct=True
         )
-        success_online = Count('onlinecourserecord', distinct=True)
+        success_online = Count('user__onlinecourserecord', distinct=True)
         return (base_queryset
-                .select_related('branch', 'graduate_profile')
-                .defer('graduate_profile__testimonial', 'private_contacts',
-                       'social_networks', 'bio')
+                .defer('graduate_profile__testimonial',
+                       'user__private_contacts',
+                       'user__social_networks',
+                       'user__bio')
                 .annotate(success_enrollments=success_enrollments_total,
                           success_shad=success_shad,
                           success_online=success_online,
@@ -374,7 +399,7 @@ class ProgressReportFull(ProgressReport):
                                                 F('success_shad') +
                                                 F('success_online')))
                 .prefetch_related(
-                    Prefetch('applicant_set',
+                    Prefetch('user__applicant_set',
                              queryset=Applicant.objects.only('pk', 'user_id')),
                     'academic_disciplines',
                     'graduate_profile__academic_disciplines'))
@@ -411,16 +436,18 @@ class ProgressReportFull(ProgressReport):
             'Пройдено семестров НИР (закончили, успех)',
         ]
 
-    def _export_row(self, student, **kwargs):
-        if hasattr(student, "graduate_profile"):
-            disciplines = student.graduate_profile.academic_disciplines
-            graduation_year = student.graduate_profile.graduation_year
-        else:
-            disciplines = student.academic_disciplines
+    def _export_row(self, student_profile, **kwargs):
+        try:
+            disciplines = student_profile.graduate_profile.academic_disciplines.all()
+            graduation_year = student_profile.graduate_profile.graduation_year
+        except GraduateProfile.DoesNotExist:
+            disciplines = student_profile.academic_disciplines.all()
             graduation_year = ""
+
+        student = student_profile.user
         return [
             student.pk,
-            student.branch.name,
+            student_profile.branch.name,
             student.last_name,
             student.first_name,
             student.patronymic,
@@ -428,25 +455,25 @@ class ProgressReportFull(ProgressReport):
             student.get_gender_display(),
             student.email,
             student.phone,
-            student.university,
-            student.get_uni_year_at_enrollment_display(),
-            student.enrollment_year,
-            student.curriculum_year,
+            student_profile.university,
+            student_profile.get_level_of_education_on_admission_display(),
+            student_profile.year_of_admission,
+            student_profile.year_of_curriculum if student_profile.year_of_curriculum else "",
             graduation_year,
             student.yandex_login,
-            student.stepic_id,
-            student.github_login,
-            'да' if student.official_student else 'нет',
-            student.diploma_number,
-            " и ".join(s.name for s in disciplines.all()),
-            student.get_status_display(),
-            student.comment,
-            student.comment_changed_at.strftime(DATETIME_FORMAT_RU),
+            student.stepic_id if student.stepic_id else "",
+            student.github_login if student.github_login else "",
+            'да' if student_profile.is_official_student else 'нет',
+            student_profile.diploma_number if student_profile.diploma_number else "",
+            " и ".join(s.name for s in disciplines),
+            student_profile.get_status_display(),
+            student_profile.comment,
+            student_profile.get_comment_changed_at_display(),
             student.workplace,
             self.links_to_application_forms(student),
-            student.total_success_passed,
-            student.success_practice,
-            student.success_research,
+            student_profile.total_success_passed,
+            student_profile.success_practice,
+            student_profile.success_research,
         ]
 
     def get_filename(self):
@@ -469,15 +496,38 @@ class ProgressReportForSemester(ProgressReport):
         return (super().get_courses_queryset(students_queryset)
                 .filter(semester__index__lte=self.target_semester.index))
 
+    def get_queryset_filters(self):
+        return [
+            Q(type__in=[StudentTypes.REGULAR, StudentTypes.VOLUNTEER]),
+            Q(branch__site_id=settings.SITE_ID),
+        ]
+
     def get_queryset(self):
-        return (User.objects
-                .has_role(Roles.STUDENT, Roles.VOLUNTEER)
+        enrollments_prefetch = get_enrollments_progress(
+            lookup='user__enrollment_set',
+            filters=[Q(course__semester__index__lte=self.target_semester.index)]
+        )
+        shad_courses_prefetch = get_shad_courses_progress(
+            lookup='user__shadcourserecord_set',
+            filters=[Q(semester__index__lte=self.target_semester.index)]
+        )
+        projects_prefetch = get_projects_progress(
+            lookup='user__projectstudent_set')
+        online_courses_prefetch = Prefetch('user__onlinecourserecord_set',
+                                           to_attr='online_courses')
+        return (StudentProfile.objects
+                .filter(*self.get_queryset_filters())
                 .exclude(status__in=StudentStatuses.inactive_statuses)
-                .student_progress(until_term=self.target_semester)
-                .select_related('branch')
-                .prefetch_related('groups', 'academic_disciplines')
-                .order_by('last_name', 'first_name', 'pk')
-                .distinct('last_name', 'first_name', 'pk'))
+                .select_related('user', 'branch')
+                .prefetch_related(
+                    'academic_disciplines',
+                    projects_prefetch,
+                    enrollments_prefetch,
+                    shad_courses_prefetch,
+                    online_courses_prefetch)
+                .order_by('user__last_name',
+                          'user__first_name',
+                          'user__pk'))
 
     def process_row(self, student, unique_courses, unique_meta_courses):
         student.enrollments_eq_target_semester = 0
@@ -556,21 +606,21 @@ class ProgressReportForSemester(ProgressReport):
             'Профиль на сайте',
             'Почта',
             'Телефон',
+            'Работа',
+            'Яндекс ID',
+            'Stepik ID',
+            'Github Login',
             'ВУЗ',
             'Курс (на момент поступления)',
             'Год поступления',
             'Год программы обучения',
             'Номер семестра обучения',
-            'Яндекс ID',
-            'Stepik ID',
-            'Github Login',
             'Официальный студент',
             'Номер диплома о высшем образовании',
             'Направления обучения',
             'Статус',
             'Комментарий',
             'Дата последнего изменения комментария',
-            'Работа',
             'Успешно сдано (Центр/Клуб/ШАД/Онлайн) до семестра "%s"' % self.target_semester,
             'Успешно сдано (Центр/Клуб/ШАД) за семестр "%s"' % self.target_semester,
             'Записей на курсы (Центр/Клуб/ШАД) за семестр "%s"' % self.target_semester,
@@ -590,8 +640,9 @@ class ProgressReportForSemester(ProgressReport):
                 values[i] = self.grade_getter(enrollment).lower()
         return values
 
-    def _export_row(self, student, *, courses, meta_courses, shads_max,
+    def _export_row(self, student_profile, *, courses, meta_courses, shads_max,
                     online_max, projects_max):
+        student = student_profile.user
         success_total_lt_target_semester = (
             student.success_lt_target_semester +
             student.success_shad_lt_target_semester +
@@ -603,37 +654,37 @@ class ProgressReportForSemester(ProgressReport):
             student.enrollments_eq_target_semester +
             student.shad_eq_target_semester
         )
-        dt_format = f"{TIME_FORMAT_RU} {DATE_FORMAT_RU}"
-        if student.curriculum_year:
-            target_term_index = get_term_index(student.curriculum_year,
-                                               SemesterTypes.AUTUMN)
-            term_order = self.target_semester.index - target_term_index + 1
+        if student_profile.year_of_curriculum:
+            curriculum_term_index = get_term_index(
+                student_profile.year_of_curriculum,
+                SemesterTypes.AUTUMN)
+            term_order = self.target_semester.index - curriculum_term_index + 1
         else:
             term_order = "-"
         return [
             student.pk,
-            student.branch.name,
+            student_profile.branch.name,
             student.last_name,
             student.first_name,
             student.patronymic,
             student.get_absolute_url(),
             student.email,
             student.phone,
-            student.university,
-            student.get_uni_year_at_enrollment_display(),
-            student.enrollment_year,
-            student.curriculum_year,
-            term_order,
-            student.yandex_login,
-            student.stepic_id,
-            student.github_login,
-            'да' if student.official_student else 'нет',
-            student.diploma_number,
-            " и ".join(s.name for s in student.academic_disciplines.all()),
-            student.get_status_display(),
-            student.comment,
-            student.comment_changed_at.strftime(dt_format),
             student.workplace,
+            student.yandex_login,
+            student.stepic_id if student.stepic_id else "",
+            student.github_login if student.github_login else "",
+            student_profile.university,
+            student_profile.get_level_of_education_on_admission_display(),
+            student_profile.year_of_admission,
+            student_profile.year_of_curriculum if student_profile.year_of_curriculum else "",
+            term_order,
+            'да' if student_profile.is_official_student else 'нет',
+            student_profile.diploma_number if student_profile.diploma_number else "",
+            " и ".join(s.name for s in student_profile.academic_disciplines.all()),
+            student_profile.get_status_display(),
+            student_profile.comment,
+            student_profile.get_comment_changed_at_display(),
             success_total_lt_target_semester,
             success_total_eq_target_semester,
             enrollments_eq_target_semester,
@@ -656,19 +707,14 @@ class ProgressReportForInvitation(ProgressReportForSemester):
         term = invitation.courses.first().semester
         super().__init__(term)
 
-    def get_queryset(self):
+    def get_queryset_filters(self):
         invited_students = (Enrollment.objects
                             .filter(invitation_id=self.invitation.pk)
                             .values('student_id'))
-        return (User.objects
-                .has_role(Roles.INVITED)
-                .exclude(status__in=StudentStatuses.inactive_statuses)
-                .filter(pk__in=invited_students)
-                .student_progress(until_term=self.target_semester)
-                .select_related('branch')
-                .prefetch_related('groups', 'academic_disciplines')
-                .order_by('last_name', 'first_name', 'pk')
-                .distinct('last_name', 'first_name', 'pk'))
+        return [
+            Q(type=StudentTypes.INVITED),
+            Q(pk__in=invited_students)
+        ]
 
 
 class WillGraduateStatsReport(ReportFileOutput):

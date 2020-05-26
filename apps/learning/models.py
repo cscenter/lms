@@ -706,6 +706,7 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
     academic_disciplines = models.ManyToManyField(
         'study_programs.AcademicDiscipline',
         verbose_name=_("Fields of study"),
+        help_text=_("Academic disciplines that the student graduated from"),
         blank=True)
     graduation_year = models.PositiveSmallIntegerField(
         verbose_name=_("Graduation Year"),

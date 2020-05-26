@@ -27,20 +27,18 @@ from courses.constants import SemesterTypes
 from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import Enrollment, Invitation, GraduateProfile
+from learning.models import Enrollment, Invitation
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
     ProgressReportForInvitation, dataframe_to_response
 from learning.settings import AcademicDegreeLevels, StudentStatuses, \
     GradeTypes
 from projects.constants import ProjectTypes
-from projects.models import Project
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import FacesQueryParams
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
-from users.constants import Roles
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
 from users.models import User, StudentProfile, StudentTypes
@@ -50,8 +48,12 @@ from users.services import get_student_progress, create_graduate_profiles, \
 
 class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
     context_object_name = 'applicants'
-    model = User
+    model = StudentProfile
     filterset_class = StudentFilter
+
+    def get_queryset(self):
+        return (StudentProfile.objects
+                .select_related('user', 'branch', 'graduate_profile'))
 
     def get(self, request, *args, **kwargs):
         filterset_class = self.get_filterset_class()
@@ -285,14 +287,14 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         return context
 
 
-# FIXME: можно ли это объединить с csv/xlsx импортами?
 class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, branch_id, **kwargs):
         branch = Branch.objects.get(pk=branch_id)
         report = ProgressReportForDiplomas(branch)
-        students = report.get_queryset()
+        student_profiles = report.get_queryset()
+        students = (sp.user for sp in student_profiles)
         courses_qs = (report.get_courses_queryset(students)
                       .annotate(classes_total=Count('courseclass')))
         courses = {c.pk: c for c in courses_qs}
@@ -305,17 +307,17 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             class_count: int = 0
             term: str = ''
 
-        def is_project_active(ps):
+        def is_active_project(ps):
             return (not ps.project.is_external and
                     not ps.project.is_canceled and
                     ps.final_grade != GradeTypes.NOT_GRADED and
                     ps.final_grade != GradeTypes.UNSATISFACTORY)
 
-        for student in students:
-            student.projects_progress = list(filter(is_project_active,
+        for student_profile in student_profiles:
+            student = student_profile.user
+            student.projects_progress = list(filter(is_active_project,
                                                     student.projects_progress))
             student_courses = []
-            student.enrollments_progress.sort(key=lambda e: e.course.semester.index)
             enrollments = {}
             # Store the last passed course
             for e in student.enrollments_progress:
@@ -366,7 +368,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
 
         context = {
             "branch": branch,
-            "students": students
+            "student_profiles": student_profiles
         }
         return context
 
