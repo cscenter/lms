@@ -155,6 +155,7 @@ class StudentsDiplomasStats(APIView):
     http_method_names = ['get']
 
     def get(self, request, graduation_year, format=None):
+        return Response({})
         filters = (Q(group__role=Roles.GRADUATE) &
                    Q(graduate_profile__graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
