@@ -1,8 +1,13 @@
+import datetime
 from collections import defaultdict
 from typing import List, Dict
 
-from learning.settings import GradeTypes
-from users.models import OnlineCourseRecord
+from django.contrib.sites.models import Site
+from django.db import transaction
+
+from learning.models import GraduateProfile
+from learning.settings import GradeTypes, StudentStatuses
+from users.models import OnlineCourseRecord, StudentProfile
 
 AccountId = int
 
@@ -81,3 +86,26 @@ def get_student_progress(queryset,
         progress[obj.student_id]['online'].append(obj)
 
     return progress
+
+
+def create_graduate_profiles(site: Site, graduated_on: datetime.date):
+    """
+    Create graduate profiles in draft state for all students with
+    `will graduate` status.
+    """
+    student_profiles = (StudentProfile.objects
+                        .filter(status=StudentStatuses.WILL_GRADUATE,
+                                branch__site=site))
+    for student_profile in student_profiles:
+        with transaction.atomic():
+            defaults = {
+                "graduated_on": graduated_on,
+                "details": {},
+                "is_active": False
+            }
+            profile, created = GraduateProfile.objects.get_or_create(
+                student_profile=student_profile,
+                student=student_profile.user,  # FIXME: remove
+                defaults=defaults)
+            if not created:
+                profile.save()
