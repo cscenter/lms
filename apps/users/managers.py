@@ -16,8 +16,7 @@ def get_enrollments_progress(lookup='enrollment_set',
                 .filter(*filters)
                 .select_related('course',
                                 'course__meta_course',
-                                'course__semester',
-                                'course__main_branch')
+                                'course__semester')
                 .annotate(grade_weight=GradeTypes.to_int_case_expr())
                 .only('pk', 'created', 'student_id', 'course_id',
                       'grade')

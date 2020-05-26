@@ -4,7 +4,7 @@ from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import BaseModelAdmin
+from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
@@ -123,11 +123,15 @@ class UsefulAdmin(BaseModelAdmin):
 
 
 class GraduateProfileAdmin(BaseModelAdmin):
-    list_select_related = ('student',)
-    list_display = ('student', 'graduation_year')
-    list_filter = ('graduation_year',)
-    search_fields = ('student__last_name',)
-    raw_id_fields = ('student',)
+    list_select_related = ('student_profile', 'student_profile__user')
+    list_display = ('student_name', 'graduation_year', 'is_active')
+    list_filter = ('student_profile__site', 'graduation_year')
+    search_fields = ('student_profile__user__last_name',)
+    raw_id_fields = ('student_profile', 'student')
+
+    @meta(_("Student"))
+    def student_name(self, obj):
+        return obj.student_profile.user.get_full_name()
 
 
 class CourseInlineAdmin(admin.TabularInline):
