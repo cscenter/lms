@@ -1,7 +1,6 @@
-import datetime
 from enum import Enum, auto
 from itertools import islice
-from typing import List, Iterable, Union, Optional, NamedTuple
+from typing import List, Iterable, Union, Optional
 
 from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import UploadedFile
@@ -19,10 +18,9 @@ from courses.managers import CourseClassQuerySet
 from courses.models import Course, Assignment, AssignmentAttachment, \
     StudentGroupTypes, CourseClass, CourseTeacher
 from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, StudentGroup, Event, GraduateProfile
+    AssignmentNotification, StudentGroup, Event
 from learning.settings import StudentStatuses
-from users.constants import Roles
-from users.models import User, StudentProfile, UserGroup
+from users.models import User, StudentProfile
 
 
 # FIXME: get profile for Invited students from the current term ONLY
@@ -492,31 +490,6 @@ def get_study_events(filters: List[Q] = None) -> QuerySet:
             .filter(*filters)
             .select_related('venue')
             .order_by('date', 'starts_at'))
-
-
-# TODO: support `site_id`
-def create_graduate_profiles(graduated_on: datetime.date):
-    """
-    Create graduate profiles in inactive state for all students with
-    `will graduate` status.
-    """
-    will_graduate_list = (User.objects
-                          .filter(status=StudentStatuses.WILL_GRADUATE)
-                          .has_role(Roles.STUDENT,
-                                    Roles.VOLUNTEER))
-
-    for student in will_graduate_list:
-        with transaction.atomic():
-            defaults = {
-                "graduated_on": graduated_on,
-                "details": {},
-                "is_active": False
-            }
-            profile, created = GraduateProfile.objects.get_or_create(
-                student=student,
-                defaults=defaults)
-            if not created:
-                profile.save()
 
 
 class CourseRole(Enum):

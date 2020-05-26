@@ -44,7 +44,7 @@ from users.constants import Roles
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
 from users.models import User, StudentProfile, StudentTypes
-from users.services import get_student_progress
+from users.services import get_student_progress, create_graduate_profiles
 
 
 class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
@@ -579,12 +579,8 @@ def create_alumni_profiles(request):
     form = GraduationForm(data=request.POST)
     if form.is_valid():
         graduated_on = form.cleaned_data['graduated_on']
-        try:
-            cmd = call_command('create_alumni_profiles',
-                               graduated_on.strftime('%d.%m.%Y'))
-            messages.success(request, f"Операция выполнена успешно.")
-        except CommandError as e:
-            messages.error(request, str(e))
+        create_graduate_profiles(request.site, graduated_on)
+        messages.success(request, f"Операция выполнена успешно.")
     else:
         messages.error(request, str('Неверный формат даты выпуска'))
     return HttpResponseRedirect(reverse("staff:exports"))
