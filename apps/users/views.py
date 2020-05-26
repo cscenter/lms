@@ -28,12 +28,14 @@ from learning.models import StudentAssignment, \
 from learning.services import get_student_profile
 from learning.settings import GradeTypes
 from study_programs.models import StudyProgram
+from users.compat import get_graduate_profile as get_graduate_profile_compat
 from users.models import SHADCourseRecord
 from users.thumbnails import get_user_thumbnail, photo_thumbnail_cropbox
 from .forms import UserProfileForm, CertificateOfParticipationCreateForm
 from .models import User, CertificateOfParticipation
 from .permissions import CreateCertificateOfParticipation, \
     ViewCertificateOfParticipation
+from .services import get_graduate_profile
 
 
 class UserDetailView(generic.DetailView):
@@ -71,7 +73,6 @@ class UserDetailView(generic.DetailView):
         ]
         select_list = []
         if self.request.user.is_curator:
-            select_list += ['graduate_profile']
             prefetch_list += ['borrows',
                               'borrows__stock',
                               'borrows__stock__book',
@@ -120,6 +121,7 @@ class UserDetailView(generic.DetailView):
             context['stats'] = profile_user.stats(context['current_semester'])
         student_profile = get_student_profile(profile_user, self.request.site)
         syllabus = None
+        graduate_profile = None
         if student_profile:
             prefetch_related_objects([student_profile],
                                      'certificates_of_participation')
@@ -128,8 +130,10 @@ class UserDetailView(generic.DetailView):
                         .prefetch_core_courses_groups()
                         .filter(year=student_profile.year_of_curriculum,
                                 branch_id=student_profile.branch_id))
+            graduate_profile = get_graduate_profile(student_profile)
         context['syllabus'] = syllabus
         context['student_profile'] = student_profile
+        context['graduate_profile'] = graduate_profile
         return context
 
 
@@ -141,28 +145,28 @@ class UserUpdateView(ProtectedFormMixin, generic.UpdateView):
     def is_form_allowed(self, user, obj):
         return obj.pk == user.pk or user.is_curator
 
-    def get_queryset(self):
-        return super().get_queryset().select_related("graduate_profile")
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if hasattr(self.object, "graduate_profile"):
-            profile = self.object.graduate_profile
-            context["testimonial_form"] = TestimonialForm(instance=profile)
+        graduate_profile = get_graduate_profile_compat(self.object,
+                                                       self.request.site)
+        if graduate_profile:
+            context["testimonial_form"] = TestimonialForm(
+                instance=graduate_profile)
         return context
 
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
         with transaction.atomic():
             self.object = form.save()
-            if hasattr(self.object, "graduate_profile"):
-                profile = self.object.graduate_profile
-                testimonial_form = TestimonialForm(instance=profile,
+            graduate_profile = get_graduate_profile_compat(self.object,
+                                                           self.request.site)
+            if graduate_profile:
+                testimonial_form = TestimonialForm(instance=graduate_profile,
                                                    data=self.request.POST)
-                # This one always should be valid
                 assert testimonial_form.is_valid()
-                profile.testimonial = testimonial_form.cleaned_data['testimonial']
-                profile.save()
+                testimonial = testimonial_form.cleaned_data['testimonial']
+                graduate_profile.testimonial = testimonial
+                graduate_profile.save()
         return super().form_valid(form)
 
 

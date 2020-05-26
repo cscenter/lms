@@ -247,9 +247,7 @@ class ProgressReportForDiplomas(ProgressReport):
                         student_profiles__branch=self.branch)
                 .student_progress(exclude_grades=[GradeTypes.UNSATISFACTORY,
                                                   GradeTypes.NOT_GRADED])
-                .select_related('graduate_profile')
-                .prefetch_related('graduate_profile__academic_disciplines',
-                                  'academic_disciplines')
+                .prefetch_related('academic_disciplines')
                 .order_by('last_name', 'first_name', 'pk')
                 .distinct('last_name', 'first_name', 'pk'))
 
@@ -272,6 +270,7 @@ class ProgressReportForDiplomas(ProgressReport):
 
     def _export_row(self, student, *, courses, meta_courses, shads_max,
                     online_max, projects_max):
+        # FIXME: GraduateProfile reference StudentProfile now
         if hasattr(student, "graduate_profile"):
             disciplines = student.graduate_profile.academic_disciplines.all()
         else:

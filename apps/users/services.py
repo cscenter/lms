@@ -7,7 +7,7 @@ from django.db import transaction
 
 from learning.models import GraduateProfile
 from learning.settings import GradeTypes, StudentStatuses
-from users.models import OnlineCourseRecord, StudentProfile
+from users.models import OnlineCourseRecord, StudentProfile, User
 
 AccountId = int
 
@@ -109,3 +109,10 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date):
                 defaults=defaults)
             if not created:
                 profile.save()
+
+
+def get_graduate_profile(student_profile: StudentProfile):
+    return (GraduateProfile.active
+            .filter(student_profile=student_profile)
+            .prefetch_related('academic_disciplines')
+            .first())

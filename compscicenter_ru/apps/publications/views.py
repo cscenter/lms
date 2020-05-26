@@ -9,6 +9,7 @@ from core.utils import bucketize
 from projects.constants import ProjectTypes
 
 from projects.models import Project
+from users.compat import get_graduate_profile
 from publications.models import ProjectPublication, RecordedEvent
 from users.models import User
 
@@ -23,13 +24,17 @@ class ProjectPublicationView(DetailView):
             queryset=(User.objects
                       .only("id", "first_name", "last_name", "patronymic",
                             "photo", "cropbox_data")
-                      .select_related("graduate_profile")
-                      .order_by("last_name")))
+                      .order_by("last_name", "first_name")))
         projects = Prefetch(
             "projects",
             queryset=(Project.objects.prefetch_related(participants))
         )
         return ProjectPublication.objects.prefetch_related(projects)
+
+    # FIXME: N + 1 problem
+    @staticmethod
+    def get_graduate_profile(user, site):
+        return get_graduate_profile(user, site)
 
 
 class RecordedEventView(DetailView):

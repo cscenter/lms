@@ -44,7 +44,8 @@ from users.constants import Roles
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
 from users.models import User, StudentProfile, StudentTypes
-from users.services import get_student_progress, create_graduate_profiles
+from users.services import get_student_progress, create_graduate_profiles, \
+    get_graduate_profile
 
 
 class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
@@ -152,10 +153,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             enrollments = progress[s.id].get('enrollments', [])
             projects = progress[s.id].get('projects', [])
             shad = progress[s.id].get('shad', [])
-            try:
-                graduate_profile = s.graduate_profile
-            except GraduateProfile.DoesNotExist:
-                graduate_profile = None
+            graduate_profile = get_graduate_profile(student_profile)
             if graduate_profile and len(graduate_profile.academic_disciplines.all()) >= 2:
                 finished_two_or_more_programs.add(s)
             by_year_of_admission[student_profile.year_of_admission].add(student_profile)
