@@ -141,11 +141,6 @@ class EventFactory(factory.DjangoModelFactory):
 
 
 class GraduateFactory(UserFactory):
-    graduate_profile = factory.RelatedFactory(
-        'learning.tests.factories.GraduateProfileFactory',
-        'student'
-    )
-
     @factory.post_generation
     def required_groups(self, create, extracted, **kwargs):
         if not create:
@@ -157,8 +152,15 @@ class GraduateFactory(UserFactory):
     def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        StudentProfileFactory(user=self, **kwargs)
+        student_profile = StudentProfileFactory(user=self, **kwargs)
+        self.__student_profile_id = student_profile.pk
         UserGroup.objects.filter(role=Roles.STUDENT, user=self).delete()
+
+    @factory.post_generation
+    def graduate_profile(self, create, extracted, **kwargs):
+        if not create:
+            return
+        GraduateProfileFactory(student_profile_id=self.__student_profile_id)
 
 
 class GraduateProfileFactory(factory.DjangoModelFactory):
@@ -166,5 +168,4 @@ class GraduateProfileFactory(factory.DjangoModelFactory):
         model = GraduateProfile
 
     student_profile = factory.SubFactory(StudentProfileFactory)
-    student = factory.SubFactory(GraduateFactory, graduate_profile=None)
     graduated_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)

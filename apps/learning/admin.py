@@ -127,7 +127,7 @@ class GraduateProfileAdmin(BaseModelAdmin):
     list_display = ('student_name', 'graduation_year', 'is_active')
     list_filter = ('student_profile__site', 'graduation_year')
     search_fields = ('student_profile__user__last_name',)
-    raw_id_fields = ('student_profile', 'student')
+    raw_id_fields = ('student_profile',)
 
     @meta(_("Student"))
     def student_name(self, obj):
@@ -148,10 +148,10 @@ class InvitationAdmin(BaseModelAdmin):
     readonly_fields = ('token',)
     exclude = ('courses',)
 
+    @meta(_("Invitation Link"))
     def get_link(self, obj):
         url = obj.get_absolute_url()
         return mark_safe(f"<a target='_blank' href='{url}'>Смотреть на сайте</a>")
-    get_link.short_description = _("Invitation Link")
 
 
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)

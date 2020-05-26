@@ -105,7 +105,6 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date):
             }
             profile, created = GraduateProfile.objects.get_or_create(
                 student_profile=student_profile,
-                student=student_profile.user,  # FIXME: remove
                 defaults=defaults)
             if not created:
                 profile.save()

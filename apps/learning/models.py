@@ -686,16 +686,10 @@ def graduate_photo_upload_to(instance: "GraduateProfile", filename):
 class GraduateProfile(ThumbnailMixin, TimeStampedModel):
     TESTIMONIAL_CACHE_KEY = "csc_review"
 
-    student = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Student"),
-        on_delete=models.CASCADE,
-        related_name="graduate_profile")
     student_profile = models.OneToOneField(
         StudentProfile,
         verbose_name=_("Student Profile"),
         on_delete=models.CASCADE,
-        null=True, blank=True,
         related_name="graduate_profile")
     is_active = models.BooleanField(
         _("Activity"),
@@ -733,7 +727,7 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
         verbose_name_plural = _("Graduate Profiles")
 
     def __str__(self):
-        return smart_text(self.student)
+        return smart_text(self.student_profile)
 
     def save(self, **kwargs):
         created = self.pk is None
