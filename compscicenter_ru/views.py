@@ -463,25 +463,26 @@ def timeline_element_factory(obj) -> TimelineElement:
         raise TypeError("timeline_element_factory: Unsupported object")
 
 
-class StudentProfileView(generic.DetailView):
-    slug_field = 'student_id'
+class GraduateProfileView(generic.DetailView):
+    # FIXME: directly use student profile id (or slug?)
+    slug_field = 'student_profile__user_id'
     slug_url_kwarg = "student_id"
-    context_object_name = "graduate_profile"
     template_name = "compscicenter_ru/profiles/graduate.html"
 
     def get_queryset(self):
-        return GraduateProfile.objects.select_related("student")
+        return (GraduateProfile.objects
+                .filter(student_profile__branch__site_id=self.request.site.pk)
+                .select_related("student_profile"))
 
     def get_context_data(self, **kwargs):
         graduate_profile = self.object
-        student_profile = get_student_profile(graduate_profile.student,
-                                              site=self.request.site)
+        student_profile = graduate_profile.student_profile
         timeline_elements = []
         # TODO: move to timeline queryset
         exclude_grades = [Enrollment.GRADES.NOT_GRADED,
                           Enrollment.GRADES.UNSATISFACTORY]
         enrollments = (Enrollment.active
-                       .filter(student_id=graduate_profile.student_id)
+                       .filter(student_id=student_profile.user_id)
                        .exclude(grade__in=exclude_grades)
                        .select_related('course',
                                        'course__semester',
@@ -492,14 +493,14 @@ class StudentProfileView(generic.DetailView):
         for e in enrollments:
             timeline_elements.append(timeline_element_factory(e))
         shad_courses = (SHADCourseRecord.objects
-                        .filter(student_id=graduate_profile.student_id)
+                        .filter(student_id=student_profile.user_id)
                         .exclude(grade__in=exclude_grades)
                         .select_related("semester")
                         .order_by("semester__index", "name"))
         for c in shad_courses:
             timeline_elements.append(timeline_element_factory(c))
         projects = (ProjectStudent.objects
-                    .filter(student_id=graduate_profile.student_id)
+                    .filter(student_id=student_profile.user_id)
                     .exclude(final_grade__in=exclude_grades)
                     .select_related('project', 'project__semester')
                     .order_by('project__semester__index'))
