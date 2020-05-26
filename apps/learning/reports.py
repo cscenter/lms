@@ -304,7 +304,7 @@ class ProgressReportForDiplomas(ProgressReport):
             student.first_name,
             student.patronymic,
             student.email,
-            student.university,
+            student_profile.university,
             " и ".join(s.name for s in disciplines),
             self.passed_courses_total(student, courses),
             self.links_to_application_forms(student),

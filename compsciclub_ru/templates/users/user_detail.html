@@ -216,71 +216,17 @@
 
     {% with borrows=profile_user.borrows.all %}
     {% if has_curator_permissions and borrows and request.site.domain == "compscicenter.ru" %}
-      <h4 class="_mtop-30">{% trans "books" %}:</h4>
-      <ul>
-        {% for borrow in borrows %}
-        <li><a href="{{ borrow.book.get_absolute_url }}">{{ borrow.book.title }}</a></li>
-        {% endfor %}
-      </ul>
-        {% elif has_curator_permissions and borrows %}
+        <h4 class="_mtop-30">{% trans "books" %}:</h4>
+          <ul>
+            {% for borrow in borrows %}
+            <li><a href="{{ borrow.book.get_absolute_url }}">{{ borrow.book.title }}</a></li>
+            {% endfor %}
+          </ul>
+    {% elif has_curator_permissions and borrows %}
         <h4 class="_mtop-30">{% trans "books" %}:</h4>
         Со списком книг можно ознакомиться на сайте центра.
     {% endif %}
     {% endwith %}
-
-    {% if profile_user.is_student or profile_user.is_graduate %}
-    {% if has_curator_permissions %}
-        <h4 class="_mtop-30">{% trans "Student info record" %}:</h4>
-        <table class="table table-condensed table-striped">
-        <tr>
-          <td width="25%">{% trans "University" %}:</td>
-          <td>{{ profile_user.university|default:"—" }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Phone" %}:</td>
-          <td>{{ profile_user.phone|default:"—" }}</td>
-        </tr>
-        {% if has_curator_permissions %}
-          <tr>
-            <td>{% trans "Email" %}:</td>
-            <td>
-              {{ profile_user.email }}
-            </td>
-          </tr>
-        {% endif %}
-        <tr>
-          <td>{% trans "StudentInfo|University year" %}:</td>
-          <td>{{ profile_user.get_uni_year_at_enrollment_display|default:"—" }}</td>
-        </tr>
-        <tr>
-          <td>{% trans "Comment" %}:</td>
-          <td>
-            <div class="ubertext">
-              {% markdown 3600 "user_comment" profile_user.pk profile_user.modified %}
-                {{ profile_user.comment|default:"—" }}
-              {% endmarkdown %}
-            </div>
-            {% if profile_user.comment %}
-            <span class="student-comment-metainfo pull-right">
-              {{ profile_user.comment_last_author.get_short_name }}{% if profile_user.comment_last_author %}, {% endif %}
-              {{ profile_user.comment_changed_at|date:"d.m.Y H:i" }}
-            </span>
-            {% endif %}
-          </td>
-        </tr>
-        <tr>
-          <td>{% trans "Status" %}:</td>
-          <td>
-            {{ profile_user.get_status_display|default:"—" }} {% if profile_user.is_volunteer %}({% trans "Non-degree student"|lower %}){% endif %}
-          </td>
-        </tr>
-        <tr>
-          <td>{% trans "Workplace" %}:</td>
-          <td>{{ profile_user.workplace|default:"—" }}</td>
-        </tr>
-      </table>
-    {% endif %}
-    {% endif %}
 
     </div>
 </div>

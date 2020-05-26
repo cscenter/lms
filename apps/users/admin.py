@@ -93,8 +93,7 @@ class UserAdmin(_UserAdmin):
     ordering = ['last_name', 'first_name']
     inlines = [OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
                UserGroupInlineAdmin]
-    readonly_fields = ['comment_changed_at', 'comment_last_author',
-                       'last_login', 'date_joined']
+    readonly_fields = ['last_login', 'date_joined']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
                     'is_staff']
     list_filter = ['is_active', 'branch', 'group__site', 'group__role',
@@ -115,10 +114,6 @@ class UserAdmin(_UserAdmin):
                                        ]}),
         (_('External services'), {'fields': ['yandex_login', 'stepic_id',
                                              'github_login', 'anytask_url']}),
-        (_('Student info record [DEPRECATED, DONT EDIT THIS SECTION]'),
-         {'fields': ['status', 'curriculum_year',
-                     'university', 'uni_year_at_enrollment',
-                     'academic_disciplines']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
     def get_formsets_with_inlines(self, request, obj=None):
