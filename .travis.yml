@@ -31,3 +31,4 @@ before_script:
   - python manage.py migrate --noinput --settings=compscicenter_ru.settings.test
 script:
   - pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
+  - pytest -c compsciclub_ru/pytest.ini --create-db --cov=./compsciclub_ru/apps/
