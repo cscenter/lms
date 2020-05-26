@@ -655,7 +655,8 @@ class Useful(models.Model):
     sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
     site = models.ForeignKey(Site, verbose_name=_("Site"),
                              default=settings.SITE_ID,
-                             on_delete=models.CASCADE)
+                             on_delete=models.CASCADE,
+                             related_name='old_useful_set')
 
     class Meta:
         ordering = ["sort"]

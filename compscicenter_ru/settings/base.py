@@ -71,6 +71,7 @@ INSTALLED_APPS += [
     'surveys.apps.SurveysConfig',
     'online_courses.apps.Config',
     'learning.internships.apps.InternshipsConfig',
+    'learning.useful.apps.UsefulConfig',
     'publications.apps.PublicationsConfig',
     'announcements.apps.AnnouncementsConfig',
     'faq.apps.FAQConfig',

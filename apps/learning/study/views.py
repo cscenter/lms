@@ -186,27 +186,6 @@ class StudentAssignmentCommentCreateView(PermissionRequiredMixin,
         return self.student_assignment.get_student_url()
 
 
-class UsefulListView(PermissionRequiredMixin, generic.ListView):
-    context_object_name = "faq"
-    template_name = "learning/study/useful.html"
-    permission_required = "study.view_faq"
-
-    def get_queryset(self):
-        return (Useful.objects
-                .filter(site=settings.SITE_ID)
-                .order_by("sort"))
-
-
-class InternshipListView(PermissionRequiredMixin, generic.ListView):
-    context_object_name = "faq"
-    template_name = "learning/study/internships.html"
-    permission_required = "study.view_internships"
-
-    def get_queryset(self):
-        return (Internship.objects
-                .order_by("sort"))
-
-
 class CourseListView(PermissionRequiredMixin, generic.TemplateView):
     model = Course
     context_object_name = 'course_list'
@@ -267,7 +246,3 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
                 current_term.year).capitalize()
         }
         return context
-
-
-class HonorCodeView(generic.TemplateView):
-    template_name = "learning/study/honor_code.html"

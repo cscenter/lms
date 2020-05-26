@@ -11,11 +11,11 @@
             <div class="panel-group panel-group-continuous">
                 {% for qa in faq %}
                     <div class="panel">
-                        <a class="panel-heading" id="question-{{ qa.pk }}" aria-expanded="false" href="#answer-{{ qa.pk }}">{{ qa.question }}</a>
+                        <a class="panel-heading" id="question-{{ qa.pk }}" aria-expanded="false" href="#answer-{{ qa.pk }}">{{ qa.title }}</a>
                         <div class="panel-collapse collapse" id="answer-{{ qa.pk }}"  aria-expanded="false">
                             <div class="panel-body">
                             {% markdown 3600 "internships_answers" qa.pk qa.modified %}
-                                {{ qa.answer }}
+                                {{ qa.content }}
                             {% endmarkdown %}
                             </div>
                         </div>
