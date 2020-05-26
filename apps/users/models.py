@@ -197,63 +197,18 @@ class UserGroup(models.Model):
             self.user_id, self.role, self.site_id)
 
 
+# FIXME: .curriculum_year and status are used at least in stats :<
 class StudentProfileAbstract(models.Model):
-    enrollment_year = models.PositiveSmallIntegerField(
-        _("CSCUser|enrollment year"),
-        validators=[MinValueValidator(1990)],
-        blank=True,
-        null=True)
     curriculum_year = models.PositiveSmallIntegerField(
         _("CSCUser|Curriculum year"),
         validators=[MinValueValidator(2000)],
         blank=True,
         null=True)
-    university = models.CharField(
-        _("University"),
-        max_length=255,
-        blank=True)
-    uni_year_at_enrollment = models.CharField(
-        _("StudentInfo|University year"),
-        choices=AcademicDegreeLevels.choices,
-        max_length=2,
-        help_text=_("at enrollment"),
-        null=True,
-        blank=True)
-    official_student = models.BooleanField(
-        verbose_name=_("Official Student"),
-        help_text=_("Passport, consent for processing personal data, "
-                    "diploma (optional)"),
-        default=False)
-    diploma_number = models.CharField(
-        verbose_name=_("Diploma Number"),
-        max_length=64,
-        help_text=_("Number of higher education diploma"),
-        blank=True
-    )
-    academic_disciplines = models.ManyToManyField(
-        'study_programs.AcademicDiscipline',
-        verbose_name=_("Fields of study"),
-        help_text=_("Academic disciplines from which student plans to graduate"),
-        blank=True)
     status = models.CharField(
         choices=StudentStatuses.choices,
         verbose_name=_("Status"),
         max_length=15,
         blank=True)
-    comment = models.TextField(
-        _("Comment"),
-        help_text=LATEX_MARKDOWN_ENABLED,
-        blank=True)
-    comment_changed_at = MonitorField(
-        monitor='comment',
-        verbose_name=_("Comment changed"))
-    comment_last_author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Author of last edit"),
-        on_delete=models.PROTECT,
-        related_name='user_commented',
-        blank=True,
-        null=True)
     index_redirect = models.CharField(
         _("Index Redirect Option"),
         max_length=200,
