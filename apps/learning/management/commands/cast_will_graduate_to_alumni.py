@@ -47,6 +47,6 @@ class Command(BaseCommand):
                     profile.is_active = True
                     profile.save()
 
-        cache.delete("cscenter_last_graduation_year")
+        cache.delete("csc_graduation_history")
         # Drop cache on /{YEAR}/ page
         cache.delete("alumni_{}_stats".format(now().year))
