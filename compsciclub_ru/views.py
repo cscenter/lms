@@ -199,8 +199,7 @@ class ClubClassesFeed(ICalFeed):
 
     def items(self, request):
         return (CourseClass.objects
-                .filter(course__is_open=True,
-                        course__main_branch=request.branch)
+                .in_branches(request.branch.pk)
                 .select_related('venue',
                                 'venue__location',
                                 'course',
