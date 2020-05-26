@@ -169,11 +169,10 @@ class StudentFilter(FilterSet):
             return queryset
         else:
             qs = (queryset
-                    .extra(where=["to_tsvector(first_name || ' ' || last_name) "
-                                  "@@ to_tsquery(%s)"],
-                           params=[tsquery])
-                    .exclude(first_name__exact='',
-                             last_name__exact=''))
+                  .extra(where=["to_tsvector(users_user.first_name || ' ' || users_user.last_name) @@ to_tsquery(%s)"],
+                         params=[tsquery])
+                  .exclude(user__first_name__exact='',
+                           user__last_name__exact=''))
             return qs
 
     def _form_name_tsquery(self, qstr):
