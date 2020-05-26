@@ -269,7 +269,7 @@ class AlumniView(TemplateView):
     template_name = "compscicenter_ru/alumni/index.html"
 
     def get_context_data(self):
-        cache_key = 'cscenter_last_graduation_year'
+        cache_key = 'csc_graduation_history'
         history = cache.get(cache_key)
         if history is None:
             history = (GraduateProfile.active
