@@ -25,9 +25,11 @@ install:
   - pip3 list
 before_script:
   - cp compscicenter_ru/settings/.env.example compscicenter_ru/settings/.env
+  - cp compsciclub_ru/settings/.env.example compsciclub_ru/settings/.env
   - psql --version
   - psql -c 'CREATE DATABASE travis_ci_test;' -U postgres
   - psql -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB;' -U postgres
   - python manage.py migrate --noinput --settings=compscicenter_ru.settings.test
 script:
   - pytest --create-db --cov=./apps/ --cov=./compscicenter_ru/apps/
+  - pytest -c compsciclub_ru/pytest.ini --create-db --cov=./compsciclub_ru/apps/

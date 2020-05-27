@@ -21,7 +21,7 @@ from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, \
     AssignmentCommentFactory, \
     StudentAssignmentFactory
-from learning.services import course_failed_by_student
+from learning.services import course_failed_by_student, get_student_profile
 from projects.tests.factories import ProjectReviewerFactory
 from users.tests.factories import TeacherFactory, \
     StudentFactory, VolunteerFactory, CuratorFactory
@@ -206,7 +206,8 @@ def test_assignment_attachment_permissions(curator, client, tmpdir):
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
-def test_assignment_attachment_inactive_student(inactive_status, client):
+def test_assignment_attachment_inactive_student(inactive_status, client,
+                                                settings):
     """Inactive student can't view assignment attachments"""
     course = CourseFactory(semester=SemesterFactory.create_current())
     student_spb = StudentFactory(branch__code=Branches.SPB)
@@ -216,8 +217,9 @@ def test_assignment_attachment_inactive_student(inactive_status, client):
     client.login(student_spb)
     response = client.get(task_attachment_url)
     assert response.status_code == 200
-    student_spb.status = inactive_status
-    student_spb.save()
+    student_profile = get_student_profile(student_spb, settings.SITE_ID)
+    student_profile.status = inactive_status
+    student_profile.save()
     response = client.get(task_attachment_url)
     assert response.status_code == 403
 

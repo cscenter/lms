@@ -10,7 +10,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 from django.core.cache import cache, caches
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_integer
-from django.db.models import Q, Max, Prefetch, F, Count
+from django.db.models import Q, Max, Prefetch, F, Count, \
+    prefetch_related_objects, Min
 from django.http import Http404
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -35,7 +36,7 @@ from courses.utils import get_current_term_pair, \
 from courses.views.mixins import CourseURLParamsMixin
 from faq.models import Question
 from learning.models import Enrollment, GraduateProfile
-from learning.permissions import course_access_role
+from learning.services import course_access_role, get_student_profile
 from learning.roles import Roles
 from learning.settings import Branches
 from online_courses.models import OnlineCourse, OnlineCourseTuple
@@ -44,7 +45,7 @@ from projects.models import ProjectStudent
 from stats.views import StudentsDiplomasStats
 from study_programs.models import StudyProgram, AcademicDiscipline
 from study_programs.services import get_study_programs
-from users.models import User, SHADCourseRecord
+from users.models import User, SHADCourseRecord, StudentProfile
 
 # FIXME: remove?
 TESTIMONIALS_CACHE_KEY = 'v2_index_page_testimonials'
@@ -66,6 +67,7 @@ def get_random_testimonials(count, cache_key, **filters):
         testimonials = (GraduateProfile.active
                         .filter(**filters)
                         .with_testimonial()
+                        .get_only_required_fields()
                         .prefetch_related("academic_disciplines")
                         .order_by('?'))[:count]
         cache.set(cache_key, testimonials, 3600)
@@ -230,19 +232,21 @@ class AlumniHonorBoardView(TemplateView):
         if not preview or not self.request.user.is_curator:
             manager = GraduateProfile.active
         else:
-            manager = GraduateProfile.objects.select_related("student")
+            manager = GraduateProfile.objects
         graduates = list(manager
                          .filter(graduation_year=graduation_year)
-                         .prefetch_related("academic_disciplines")
-                         .order_by("student__last_name"))
+                         .get_only_required_fields()
+                         .order_by("student_profile__user__last_name",
+                                   "student_profile__user__first_name"))
         if not len(graduates):
             raise Http404
         # Get random testimonials
-        # FIXME: Prefetch areas_of_study for random testimonials only
         with_testimonial = [gp for gp in graduates if gp.testimonial]
         indexes = random.sample(range(len(with_testimonial)),
                                 min(len(with_testimonial), 4))
         random_testimonials = [with_testimonial[index] for index in indexes]
+        if random_testimonials:
+            prefetch_related_objects(random_testimonials, 'academic_disciplines')
         context = {
             "graduation_year": graduation_year,
             "graduates": graduates,
@@ -265,39 +269,32 @@ class AlumniView(TemplateView):
     template_name = "compscicenter_ru/alumni/index.html"
 
     def get_context_data(self):
-        # TODO: aggregate from `Branch.established`
-        the_first_graduation = 2013
-        cache_key = 'cscenter_last_graduation_year'
-        latest_graduation_year = cache.get(cache_key)
-        if latest_graduation_year is None:
-            d = (GraduateProfile.objects
-                 .filter(is_active=True)
-                 .aggregate(year=Max('graduation_year')))
-            if d['year']:
-                latest_graduation_year = d['year']
-            else:
-                # TODO: Better to show empty results if no graduate profiles
-                latest_graduation_year = the_first_graduation
-            cache.set(cache_key, latest_graduation_year, 86400 * 31)
-        years_range = range(the_first_graduation, latest_graduation_year + 1)
+        cache_key = 'csc_graduation_history'
+        history = cache.get(cache_key)
+        if history is None:
+            history = (GraduateProfile.active
+                       .aggregate(latest_graduation=Max('graduation_year'),
+                                  first_graduation=Min('graduation_year')))
+            cache.set(cache_key, history, 86400 * 31)
+        if history['first_graduation'] is None:
+            raise Http404
+        the_first_graduation = history['first_graduation']
+        latest_graduation = history['latest_graduation']
+        years_range = range(the_first_graduation, latest_graduation + 1)
         years = [{"label": str(y), "value": y} for y in reversed(years_range)]
-        year = self.kwargs.get("year")
-        if year not in years_range:
-            year = latest_graduation_year
-        year = next((y for y in years if y['value'] == year))
+        show_year = self.kwargs.get("year")
+        if show_year not in years_range:
+            show_year = latest_graduation
+        year_option = next((y for y in years if y['value'] == show_year))
         # Area state and props
         areas = [{"label": a.name, "value": a.code} for a in
                  AcademicDiscipline.objects.all()]
         area = self.kwargs.get("area", None)
-        if area:
-            try:
-                area = next((a for a in areas if a['value'] == area))
-            except StopIteration:
-                raise Http404
+        area_option = next((a for a in areas if a['value'] == area), None)
         app_data = {
             "state": {
-                "year": year,
-                "area": area,
+                "year": year_option,
+                "area": area_option,
                 "branch": self.kwargs.get("city", None),
             },
             "props": {
@@ -466,50 +463,57 @@ def timeline_element_factory(obj) -> TimelineElement:
         raise TypeError("timeline_element_factory: Unsupported object")
 
 
-class StudentProfileView(generic.DetailView):
-    pk_url_kwarg = "student_id"
-    context_object_name = "student"
+class GraduateProfileView(generic.DetailView):
+    # FIXME: directly use student profile id (or slug?)
+    slug_field = 'student_profile__user_id'
+    slug_url_kwarg = "student_id"
+    template_name = "compscicenter_ru/profiles/graduate.html"
 
     def get_queryset(self):
-        return User.objects.select_related("branch", "graduate_profile")
-
-    def get_template_names(self):
-        if hasattr(self.object, 'graduate_profile'):
-            return "compscicenter_ru/profiles/graduate.html"
-        raise Http404
+        return (GraduateProfile.active
+                .filter(student_profile__branch__site_id=self.request.site.pk)
+                .select_related("student_profile"))
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        student = self.object
+        graduate_profile = self.object
+        student_profile = graduate_profile.student_profile
         timeline_elements = []
         # TODO: move to timeline queryset
         exclude_grades = [Enrollment.GRADES.NOT_GRADED,
                           Enrollment.GRADES.UNSATISFACTORY]
         enrollments = (Enrollment.active
-                       .filter(student=student)
+                       .filter(student_id=student_profile.user_id)
                        .exclude(grade__in=exclude_grades)
                        .select_related('course',
                                        'course__semester',
+                                       'course__main_branch',
                                        'course__meta_course')
                        .order_by("course__semester__index",
                                  "course__meta_course__name"))
         for e in enrollments:
             timeline_elements.append(timeline_element_factory(e))
         shad_courses = (SHADCourseRecord.objects
-                        .filter(student=student)
+                        .filter(student_id=student_profile.user_id)
                         .exclude(grade__in=exclude_grades)
                         .select_related("semester")
                         .order_by("semester__index", "name"))
         for c in shad_courses:
             timeline_elements.append(timeline_element_factory(c))
-        projects = (student.get_projects_queryset()
-                    .exclude(final_grade__in=exclude_grades))
+        projects = (ProjectStudent.objects
+                    .filter(student_id=student_profile.user_id)
+                    .exclude(final_grade__in=exclude_grades)
+                    .select_related('project', 'project__semester')
+                    .order_by('project__semester__index'))
         for c in projects:
             timeline_elements.append(timeline_element_factory(c))
         timeline_elements.sort(key=lambda o: (o.term.index, o.type.value))
         timeline = bucketize(timeline_elements, key=lambda o: o.term)
-        context["timeline"] = timeline
-        context["timeline_element_types"] = TimelineElementTypes
+        context = {
+            "graduate_profile": graduate_profile,
+            "student_profile": student_profile,
+            "timeline": timeline,
+            "timeline_element_types": TimelineElementTypes
+        }
         return context
 
 

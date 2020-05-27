@@ -14,7 +14,7 @@ from users.tests.factories import StudentFactory
 
 
 @pytest.mark.django_db
-def test_student_group_service_resolve():
+def test_student_group_service_resolve(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     course = CourseFactory(main_branch=branch_spb,
@@ -24,24 +24,24 @@ def test_student_group_service_resolve():
     sg_other = StudentGroupFactory(course=course)
     student_spb = StudentFactory(branch=branch_spb)
     student_nsk = StudentFactory(branch=branch_nsk)
-    assert StudentGroupService.resolve(course, student_spb) == student_group
-    assert StudentGroupService.resolve(course, student_spb,
+    assert StudentGroupService.resolve(course, student_spb, settings.SITE_ID) == student_group
+    assert StudentGroupService.resolve(course, student_spb, settings.SITE_ID,
                                        enrollment_key='wrong_key') == student_group
     found = StudentGroupService.resolve(
-        course, student_spb,
+        course, student_spb, settings.SITE_ID,
         enrollment_key=sg_other.enrollment_key)
     assert found == student_group
-    assert StudentGroupService.resolve(course, student_nsk) is None
+    assert StudentGroupService.resolve(course, student_nsk, settings.SITE_ID) is None
     course.group_mode = StudentGroupTypes.MANUAL
     assert StudentGroupService.resolve(
-        course, student_spb,
+        course, student_spb, settings.SITE_ID,
         enrollment_key=sg_other.enrollment_key) == sg_other
     with pytest.raises(GroupEnrollmentKeyError):
-        StudentGroupService.resolve(course, student_spb, enrollment_key='wrong')
+        StudentGroupService.resolve(course, student_spb, settings.SITE_ID, enrollment_key='wrong')
 
 
 @pytest.mark.django_db
-def test_assignment_service_create_student_assignments():
+def test_assignment_service_create_student_assignments(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     branch_other = BranchFactory()
@@ -80,14 +80,15 @@ def test_assignment_service_create_student_assignments():
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.count() == 2
     # Inactive status prevents generating student assignment too
-    student_spb.status = StudentStatuses.ACADEMIC_LEAVE
-    student_spb.save()
+    student_spb_profile = student_spb.get_student_profile(settings.SITE_ID)
+    student_spb_profile.status = StudentStatuses.ACADEMIC_LEAVE
+    student_spb_profile.save()
     StudentAssignment.objects.all().delete()
     AssignmentService.bulk_create_student_assignments(assignment)
     assert StudentAssignment.objects.count() == 1
     # Now test assignment settings
-    student_spb.status = ''
-    student_spb.save()
+    student_spb_profile.status = ''
+    student_spb_profile.save()
     e_nsk.is_deleted = False
     e_nsk.save()
     assignment.restricted_to.add(group_spb)

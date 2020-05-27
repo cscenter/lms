@@ -2,7 +2,7 @@
 {% load tz %}
 {% load i18n %}
 {% load thumbnail %}
-{% load markdown call_method lookup from core_tags %}
+{% load markdown call_method lookup can_enroll_in_course from core_tags %}
 {% load render_bundle from webpack_loader %}
 {% load user_thumbnail from user_thumbnail %}
 
@@ -229,7 +229,7 @@
             {% if can_leave_course %}
                 <a href="{{ course.get_unenroll_url }}" class="btn btn-danger btn-block">{% trans "Unenroll from the course" %}</a>
             {% else %}
-                {% call_method request.user "has_perm" "learning.enroll_in_course" course as can_enroll %}
+                {% can_enroll_in_course request.user course request.user.get_student_profile as can_enroll %}
                 {% if can_enroll %}
                     <a href="{{ course.get_enroll_url }}" class="btn btn-primary btn-block">
                         {% trans "Enroll in the course" %}

@@ -2,7 +2,7 @@
 
 {% load i18n %}
 {% load static %}
-{% load call_method from core_tags %}
+{% load call_method can_enroll_in_course_by_invitation from core_tags %}
 
 {% block title %}Приглашение пройти курсы{% endblock title %}
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
@@ -31,8 +31,8 @@
                                     {% if can_leave_course %}
                                         <a href="{{ course.get_unenroll_url }}" class="btn btn-danger btn-block">{% trans "Unenroll from the course" %}</a>
                                     {% else %}
-                                        {% call_method request.user "has_perm" "learning.enroll_in_course_by_invitation" course_invitation as has_perm %}
-                                        {% if has_perm %}
+                                        {% can_enroll_in_course_by_invitation request.user course_invitation request.user.get_student_profile as can_enroll %}
+                                        {% if can_enroll %}
                                             <form method="post" action="{{ course_invitation.get_absolute_url }}">{% csrf_token %}<button class="btn btn-primary" type="submit">Записаться</button></form>
                                         {% endif %}
                                     {% endif %}

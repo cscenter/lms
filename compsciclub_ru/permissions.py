@@ -4,16 +4,20 @@ from django.conf import settings
 from auth.permissions import Permission
 from auth.utils import override_perm
 from courses.models import Course
-from learning.permissions import EnrollInCourse
+from learning.permissions import EnrollInCourse, EnrollPermissionObject
 
 
 @rules.predicate
-def course_is_open(user, course):
-    return course.is_open
+def course_is_open(user, permission_object: EnrollPermissionObject):
+    return permission_object.course.is_open
 
 
 @rules.predicate
-def enroll_in_course(user, course: Course):
+def enroll_in_course(user, permission_object: EnrollPermissionObject):
+    course = permission_object.course
+    student_profile = permission_object.student_profile
+    if student_profile.site_id != settings.SITE_ID:
+        return False
     if not course.enrollment_is_open:
         return False
     if course.main_branch_id != user.branch_id:

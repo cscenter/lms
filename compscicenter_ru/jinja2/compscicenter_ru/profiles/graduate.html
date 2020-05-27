@@ -1,13 +1,14 @@
 {% extends "compscicenter_ru/layouts/base.html" %}
 
+{% set student = student_profile.user %}
+
 {% block title %}{{ student.get_abbreviated_name() }} - {% if student.gender == student.GENDER_MALE %}выпускник{% else %}выпускница{% endif %} CS центра{% endblock title %}
 
 {% block content %}
-    {% with graduate_profile = student.graduate_profile %}
     <div class="cover _green-gradient">
         <div class="cover__content">
             <div class="cover-student-avatar mt-8 mb-4">
-                <img class="img-fluid" src="{{ graduate_profile.get_thumbnail(student.ThumbnailSize.SQUARE).url }}" alt="">
+                <img class="img-fluid" src="{{ graduate_profile.get_thumbnail(graduate_profile.ThumbnailSize.SQUARE).url }}" alt="">
             </div>
             <div class="mb-1">{% if student.gender == student.GENDER_MALE %}Выпускник{% else %}Выпускница{% endif %} CS центра</div>
             <h1 class="mb-0">{{ student.get_short_name() }}</h1>
@@ -39,7 +40,7 @@
                 <div class="timeline _person-history">
                     <div class="timeline__element active">
                         <div class="timeline__content">
-                            <div class="timeline__date">Весной {{ student.enrollment_year }} года</div>
+                            <div class="timeline__date">Весной {{ student_profile.year_of_admission }} года</div>
                             <p>Отправил{% if student.gender == student.GENDER_FEMALE %}а{% endif %} заявление</p>
                         </div>
                     </div>
@@ -52,8 +53,8 @@
 
                         </div>
                         <div class="timeline__content">
-                            <div class="timeline__date _important">31 июля {{ student.enrollment_year }} года</div>
-                            <h3>Зачислен{% if student.gender == student.GENDER_FEMALE %}а{% endif %} в CS центр{% if student.branch.city_id == 'spb' %} в Санкт-Петербурге{% elif student.branch.city_id == 'nsk' %} в Новосибирске{% endif %}</h3>
+                            <div class="timeline__date _important">31 июля {{ student_profile.year_of_admission }} года</div>
+                            <h3>Зачислен{% if student.gender == student.GENDER_FEMALE %}а{% endif %} в CS центр{% if student_profile.branch.city_id == 'spb' %} в Санкт-Петербурге{% elif student_profile.branch.city_id == 'nsk' %} в Новосибирске{% endif %}</h3>
                         </div>
                     </div>
 
@@ -95,7 +96,7 @@
 
                     <div class="timeline__element">
                         <div class="timeline__img">
-                            <img class="img-fluid" src="{{ graduate_profile.get_thumbnail(student.ThumbnailSize.SQUARE).url }}" alt="">
+                            <img class="img-fluid" src="{{ graduate_profile.get_thumbnail(graduate_profile.ThumbnailSize.SQUARE).url }}" alt="">
                         </div>
                         <div class="timeline__content">
                             <span class="timeline__date _important">{{ graduate_profile.graduated_on|date("j E Y") }} года</span>
@@ -106,6 +107,5 @@
             </div>
         </div>
     </div>
-    {% endwith %}
 {% endblock content %}
 

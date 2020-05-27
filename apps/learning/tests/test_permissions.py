@@ -11,18 +11,21 @@ from courses.services import CourseService
 from courses.tests.factories import CourseFactory, SemesterFactory, \
     AssignmentFactory
 from learning.models import StudentAssignment
-from learning.permissions import course_access_role, CourseRole, \
-    CreateAssignmentComment, CreateAssignmentCommentTeacher, \
+from learning.permissions import CreateAssignmentComment, \
+    CreateAssignmentCommentTeacher, \
     CreateAssignmentCommentStudent, ViewRelatedStudentAssignment, \
     ViewStudentAssignment, EditOwnStudentAssignment, \
-    EditOwnAssignmentExecutionTime
+    EditOwnAssignmentExecutionTime, EnrollInCourse, EnrollPermissionObject, \
+    InvitationEnrollPermissionObject
+from learning.services import get_student_profile, CourseRole, \
+    course_access_role
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, CourseInvitationFactory, \
     AssignmentCommentFactory, StudentAssignmentFactory
 from users.constants import Roles
-from users.models import ExtendedAnonymousUser, User
+from users.models import ExtendedAnonymousUser, User, StudentTypes
 from users.tests.factories import CuratorFactory, TeacherFactory, \
-    StudentFactory, UserFactory
+    StudentFactory, UserFactory, StudentProfileFactory
 
 
 def delete_enrollment_cache(user: User, course: Course):
@@ -54,7 +57,7 @@ def test_course_access_role_teacher():
     assert role == CourseRole.TEACHER
     role = course_access_role(course=course, user=teacher_other)
     assert role == CourseRole.NO_ROLE
-    # Teacher for the same meta course has access to all readings
+    # Teacher of the same meta course has access to all readings
     meta_course = course.meta_course
     teacher2 = TeacherFactory()
     course2 = CourseFactory(meta_course=meta_course, teachers=[teacher2])
@@ -66,12 +69,13 @@ def test_course_access_role_teacher():
     role = course_access_role(course=course2, user=teacher2)
     assert role == CourseRole.TEACHER
     # Now make sure that teacher role is prevailed on any student role
-    teacher2.add_group(Roles.STUDENT)
+    student_profile = StudentProfileFactory(user=teacher2,
+                                            branch=course.main_branch)
     role = course_access_role(course=course, user=teacher2)
     assert role == CourseRole.TEACHER
     delete_enrollment_cache(teacher2, course)
-    teacher2.status = StudentStatuses.EXPELLED
-    teacher2.save()
+    student_profile.status = StudentStatuses.EXPELLED
+    student_profile.save()
     role = course_access_role(course=course, user=teacher2)
     assert role == CourseRole.TEACHER
     EnrollmentFactory(student=teacher2, course=course,
@@ -82,7 +86,7 @@ def test_course_access_role_teacher():
 
 @pytest.mark.django_db
 @pytest.mark.parametrize("inactive_status", StudentStatuses.inactive_statuses)
-def test_course_access_role_student(inactive_status):
+def test_course_access_role_student(inactive_status, settings):
     semester = SemesterFactory.create_current()
     prev_semester = SemesterFactory.create_prev(semester)
     course = CourseFactory(semester=semester, is_open=False)
@@ -91,6 +95,7 @@ def test_course_access_role_student(inactive_status):
     role = course_access_role(course=course, user=student)
     assert role == CourseRole.NO_ROLE
     delete_enrollment_cache(student, course)
+    student_profile = student.get_student_profile(settings.SITE_ID)
     e = EnrollmentFactory(student=student, course=course,
                           grade=GradeTypes.NOT_GRADED)
     # The course from the current semester and student has no grade.
@@ -98,15 +103,16 @@ def test_course_access_role_student(inactive_status):
     role = course_access_role(course=course, user=student)
     assert role == CourseRole.STUDENT_REGULAR
     # Failed course enrollment
-    EnrollmentFactory(student=student, course=prev_course,
-                      grade=GradeTypes.UNSATISFACTORY)
+    e2 = EnrollmentFactory(student=student, course=prev_course,
+                           grade=GradeTypes.UNSATISFACTORY)
     role = course_access_role(course=prev_course, user=student)
     assert role == CourseRole.STUDENT_RESTRICT
     # Inactive student has restricted access to all courses they enrolled in
     delete_enrollment_cache(student, course)
     delete_enrollment_cache(student, prev_course)
-    student.status = inactive_status
-    student.save()
+    assert student_profile == e.student_profile
+    student_profile.status = inactive_status
+    student_profile.save()
     role = course_access_role(course=prev_course, user=student)
     assert role == CourseRole.STUDENT_RESTRICT
     role = course_access_role(course=course, user=student)
@@ -130,31 +136,35 @@ def test_enroll_in_course(inactive_status, settings):
         capacity=0, main_branch=branch_spb)
     assert course.enrollment_is_open
     student_spb = StudentFactory(branch=branch_spb, status="")
-    assert student_spb.has_perm("learning.enroll_in_course", course)
+    student_spb_profile = student_spb.get_student_profile(settings.SITE_ID)
+    perm_obj = EnrollPermissionObject(course, student_spb_profile)
+    assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
     # Enrollment is closed
     course.semester.enrollment_end_at = yesterday.date()
-    assert not student_spb.has_perm("learning.enroll_in_course", course)
+    assert not student_spb.has_perm(EnrollInCourse.name, perm_obj)
     course.semester.enrollment_end_at = tomorrow.date()
-    assert student_spb.has_perm("learning.enroll_in_course", course)
+    assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
     # Student with inactive status
-    student_spb.status = inactive_status
-    assert not student_spb.has_perm("learning.enroll_in_course", course)
-    student_spb.status = ''
-    assert student_spb.has_perm("learning.enroll_in_course", course)
+    student_spb_profile.status = inactive_status
+    student_spb_profile.save()
+    assert not student_spb.has_perm(EnrollInCourse.name, perm_obj)
+    student_spb_profile.status = ''
+    student_spb_profile.save()
+    assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
     # Full course capacity
     course.capacity = 1
     course.learners_count = 1
-    assert not student_spb.has_perm("learning.enroll_in_course", course)
+    assert not student_spb.has_perm(EnrollInCourse.name, perm_obj)
     course.learners_count = 0
-    assert student_spb.has_perm("learning.enroll_in_course", course)
+    assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
     # Compare student and course branches
     course.main_branch = branch_nsk
     course.save()
     CourseService.sync_branches(course)
-    assert not student_spb.has_perm("learning.enroll_in_course", course)
+    assert not student_spb.has_perm(EnrollInCourse.name, perm_obj)
     CourseBranch(course=course, branch=branch_spb).save()
     course.refresh_from_db()
-    assert student_spb.has_perm("learning.enroll_in_course", course)
+    assert student_spb.has_perm(EnrollInCourse.name, perm_obj)
 
 
 @pytest.mark.django_db
@@ -181,7 +191,7 @@ def test_leave_course():
 
 
 @pytest.mark.django_db
-def test_enroll_in_course_by_invitation():
+def test_enroll_in_course_by_invitation(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
     today = now_local(branch_spb.get_timezone())
     yesterday = today - datetime.timedelta(days=1)
@@ -193,10 +203,14 @@ def test_enroll_in_course_by_invitation():
                            capacity=0)
     assert course.enrollment_is_open
     student = StudentFactory(branch=course.main_branch)
-    assert student.has_perm("learning.enroll_in_course", course)
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    assert student.has_perm(EnrollInCourse.name,
+                            EnrollPermissionObject(course, student_profile))
     course_invitation = CourseInvitationFactory(course=course)
+    perm_obj = InvitationEnrollPermissionObject(course_invitation,
+                                                student_profile)
     assert student.has_perm("learning.enroll_in_course_by_invitation",
-                            course_invitation)
+                            perm_obj)
     # Invitation activity depends on semester settings.
     # Also this condition checked internally in `learning.enroll_in_course`
     # predicate
@@ -204,7 +218,7 @@ def test_enroll_in_course_by_invitation():
     course.semester.save()
     assert not course.enrollment_is_open
     assert not student.has_perm("learning.enroll_in_course_by_invitation",
-                                course_invitation)
+                                perm_obj)
 
 
 @pytest.mark.django_db
@@ -234,10 +248,9 @@ def test_create_assignment_comment():
     assert not student_other.has_perm(CreateAssignmentComment.name, sa)
     assert student.has_perm(CreateAssignmentComment.name, sa)
     assert not user.has_perm(CreateAssignmentComment.name, sa)
-    # User has both roles: user and teacher
-    teacher.add_group(Roles.STUDENT)
-    # Make sure we don't use any cache
-    teacher = User.objects.get(pk=teacher.pk)
+    # User is teacher and volunteer
+    StudentProfileFactory(type=StudentTypes.VOLUNTEER, user=teacher)
+    teacher.refresh_from_db()
     assert teacher.has_perm(CreateAssignmentComment.name, sa)
     assert teacher.has_perm(CreateAssignmentCommentTeacher.name, sa)
     assert not teacher.has_perm(CreateAssignmentCommentStudent.name, sa)

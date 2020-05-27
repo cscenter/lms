@@ -22,24 +22,28 @@ def search_url():
 @pytest.mark.django_db
 def test_student_search(client, curator, search_url, settings):
     """Simple test cases to make sure, multi values still works"""
-    # XXX: `name` filter not tested now due to postgres specific syntax
-    student = StudentFactory(enrollment_year=2011,
-                             status="",
+    student = StudentFactory(student_profile__year_of_admission=2011,
+                             student_profile__year_of_curriculum=2011,
+                             student_profile__status="",
                              last_name='Иванов',
                              first_name='Иван')
-    StudentFactory(enrollment_year=2011,
-                   status="",
+    StudentFactory(student_profile__year_of_admission=2011,
+                   student_profile__year_of_curriculum=2011,
+                   student_profile__status="",
                    last_name='Иванов',
                    first_name='Иван')
-    StudentFactory(enrollment_year=2012,
-                   status=StudentStatuses.EXPELLED,
+    StudentFactory(student_profile__year_of_admission=2012,
+                   student_profile__year_of_curriculum=2012,
+                   student_profile__status=StudentStatuses.EXPELLED,
                    last_name='Иванов',
                    first_name='Иван')
-    StudentFactory(enrollment_year=2011,
-                   last_name='Сидоров',
-                   required_groups__site_id=settings.ANOTHER_DOMAIN_ID,
-                   first_name='Сидор')
-    volunteer = VolunteerFactory(enrollment_year=2011, status="")
+    branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
+    StudentFactory(last_name='Сидоров', first_name='Сидор',
+                   student_profile__year_of_admission=2011,
+                   student_profile__year_of_curriculum=2011,
+                   student_profile__branch=branch)
+    volunteer = VolunteerFactory(student_profile__year_of_admission=2011,
+                                 student_profile__status="")
 
     response = client.get(search_url)
     assert response.status_code == 401
@@ -49,18 +53,13 @@ def test_student_search(client, curator, search_url, settings):
     assert response.status_code == 200
     assert response.json()["count"] == 0
     response = client.get("{}?{}".format(search_url, "curriculum_year=2011"))
-    # Club users not included
-    assert response.json()["count"] == 3
+    # Club users, volunteers are not included since curriculum year is empty
+    assert response.json()["count"] == 2
     # 2011 | 2012 years
     response = client.get("{}?{}".format(search_url,
                                          "curriculum_year=2011%2C2012"))
-    assert response.json()["count"] == 4
+    assert response.json()["count"] == 3
     # Now test groups filter
-    response = client.get("{}?{}".format(
-        search_url,
-        "curriculum_year=2011&groups={}".format(Roles.MASTERS_DEGREE)
-    ))
-    assert response.json()["count"] == 0
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups={}".format(Roles.STUDENT)
@@ -70,8 +69,8 @@ def test_student_search(client, curator, search_url, settings):
         search_url,
         "curriculum_year=2011&groups={}".format(Roles.VOLUNTEER)
     ))
-    assert response.json()["count"] == 1
-    assert response.json()["results"][0]["short_name"] == volunteer.get_short_name()
+    assert response.json()[
+               "count"] == 0, "curriculum year for volunteer is not set"
     response = client.get("{}?{}".format(
         search_url,
         "curriculum_year=2011&groups[]={}&groups[]={}".format(
@@ -79,53 +78,38 @@ def test_student_search(client, curator, search_url, settings):
             Roles.VOLUNTEER
         )
     ))
-    assert response.json()["count"] == 3
-    volunteer.status = StudentStatuses.EXPELLED
-    volunteer.save()
+    assert response.json()["count"] == 2
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    student_profile.status = StudentStatuses.REINSTATED
+    student_profile.save()
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups[]={}&groups[]={}&status={}".format(
+        "curriculum_year=2011&groups[]={}&status={}".format(
             Roles.STUDENT,
-            Roles.VOLUNTEER,
-            StudentStatuses.EXPELLED
-        )
-    ))
-    assert response.json()["count"] == 1
-    student.status = StudentStatuses.REINSTATED
-    student.save()
-    response = client.get("{}?{}".format(
-        search_url,
-        "curriculum_year=2011&groups[]={}&groups[]={}&status={},{}".format(
-            Roles.STUDENT,
-            Roles.VOLUNTEER,
-            StudentStatuses.EXPELLED,
             StudentStatuses.REINSTATED
         )
     ))
-    assert response.json()["count"] == 2
+    assert response.json()["count"] == 1
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
+        "curriculum_year=2011&groups={},{}&status={}&cnt_enrollments={}".format(
             Roles.STUDENT,
             Roles.VOLUNTEER,
-            StudentStatuses.EXPELLED,
             StudentStatuses.REINSTATED,
-            "cnt_enrollments=2"
+            "2"
         )
     ))
     assert response.json()["count"] == 0
     # Check multi values still works for cnt_enrollments
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={},{}&status={},{}&{}".format(
+        "curriculum_year=2011&groups={}&status={}&cnt_enrollments={}".format(
             Roles.STUDENT,
-            Roles.VOLUNTEER,
-            StudentStatuses.EXPELLED,
             StudentStatuses.REINSTATED,
-            "cnt_enrollments=0,2"
+            "0,2"
         )
     ))
-    assert response.json()["count"] == 2
+    assert response.json()["count"] == 1
 
 
 @pytest.mark.django_db
@@ -134,8 +118,9 @@ def test_student_search_enrollments(client, curator, search_url):
     Count successfully passed courses instead of course_offerings.
     """
     client.login(curator)
-    student = StudentFactory(curriculum_year=2011, status="",
-                                   last_name='Иванов', first_name='Иван')
+    student = StudentFactory(student_profile__year_of_curriculum=2011,
+                             student_profile__status="",
+                             last_name='Иванов', first_name='Иван')
     ENROLLMENTS_URL = "{}?{}".format(
         search_url,
         "curriculum_year=2011&groups={},{}&cnt_enrollments={{}}".format(
@@ -166,7 +151,7 @@ def test_student_search_enrollments(client, curator, search_url):
     EnrollmentFactory.create(student=student, grade=GradeTypes.GOOD, course=co3)
     response = client.get(ENROLLMENTS_URL.format("2"))
     assert response.json()["count"] == 1
-    other_student = StudentFactory(curriculum_year=2011)
+    other_student = StudentFactory(student_profile__year_of_curriculum=2011)
     e3 = EnrollmentFactory.create(student=other_student, grade=GradeTypes.GOOD)
     response = client.get(ENROLLMENTS_URL.format("2"))
     assert response.json()["count"] == 1
@@ -178,13 +163,16 @@ def test_student_search_enrollments(client, curator, search_url):
 def test_student_search_by_groups(client, curator, search_url, settings):
     client.login(curator)
     # All users below are considered as `studying` due to empty status
-    StudentFactory.create_batch(2, required_groups__site_id=settings.ANOTHER_DOMAIN_ID,)
-    students = StudentFactory.create_batch(3, enrollment_year=2011,
-                                              curriculum_year=2011,
-                                              status="")
-    volunteers = VolunteerFactory.create_batch(4, enrollment_year=2011,
-                                               curriculum_year=2011,
-                                               status="")
+    branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
+    StudentFactory.create_batch(2, student_profile__branch=branch)
+    students = StudentFactory.create_batch(3,
+                                           student_profile__year_of_admission=2011,
+                                           student_profile__year_of_curriculum=2011,
+                                           student_profile__status="")
+    volunteers = VolunteerFactory.create_batch(4,
+                                               student_profile__year_of_admission=2011,
+                                               student_profile__year_of_curriculum=2011,
+                                               student_profile__status="")
     # Empty results if no query provided
     response = client.get(search_url)
     assert response.json()["count"] == 0
@@ -196,9 +184,10 @@ def test_student_search_by_groups(client, curator, search_url, settings):
     response = client.get("{}?{}".format(search_url, "status=studying&groups="))
     json_data = response.json()
     assert json_data["count"] == len(students) + len(volunteers)
-    graduated = GraduateFactory(enrollment_year=2012, curriculum_year=2012,
-                                status="")
-    graduated.add_group(Roles.STUDENT, site_id=settings.ANOTHER_DOMAIN_ID)
+    graduated = GraduateFactory(student_profile__year_of_admission=2012,
+                                student_profile__year_of_curriculum=2012,
+                                student_profile__status="",
+                                student_profile__site_id=settings.ANOTHER_DOMAIN_ID)
     url = f"{search_url}?status=studying&groups={Roles.STUDENT}&curriculum_year=2011,2012"
     response = client.get(url)
     # Fail in case of multiple joins with users_user_groups table
@@ -212,17 +201,21 @@ def test_student_search_by_branch(client, curator, search_url):
     branch_nsk = BranchFactory(code=Branches.NSK)
     _ = UserFactory.create(branch=branch_spb)  # random user
     students_spb = StudentFactory.create_batch(3,
-        enrollment_year=2011, status="", branch=branch_spb)
+                                               student_profile__year_of_admission=2011,
+                                               student_profile__status="", branch=branch_spb)
     students_nsk = StudentFactory.create_batch(2,
-        enrollment_year=2011, status="", branch=branch_nsk)
+                                               student_profile__year_of_admission=2011,
+                                               student_profile__status="", branch=branch_nsk)
     # Send empty query
     response = client.get("{}?{}".format(search_url, "branches="))
     assert response.json()["count"] == 0
     response = client.get("{}?branches={}".format(search_url, branch_spb.pk))
     json_data = response.json()
     assert json_data["count"] == len(students_spb)
-    assert {s.pk for s in students_spb} == {r["pk"] for r in json_data["results"]}
-    response = client.get(f"{search_url}?branches={branch_spb.pk},{branch_nsk.pk}")
+    assert {s.pk for s in students_spb} == {r["pk"] for r in
+                                            json_data["results"]}
+    response = client.get(
+        f"{search_url}?branches={branch_spb.pk},{branch_nsk.pk}")
     json_data = response.json()
     assert json_data["count"] == len(students_spb) + len(students_nsk)
     # All with status `studying`
@@ -236,24 +229,29 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
     branch_spb = BranchFactory(code=Branches.SPB)
     branch_nsk = BranchFactory(code=Branches.NSK)
     client.login(curator)
-    students_spb = StudentFactory.create_batch(4,
-        enrollment_year=2011, status="", branch=branch_spb)
-    students_nsk = StudentFactory.create_batch(7,
-        enrollment_year=2011, status="", branch=branch_nsk)
+    students_spb = StudentFactory.create_batch(
+        4, student_profile__year_of_admission=2011, student_profile__status="",
+        branch=branch_spb)
+    students_nsk = StudentFactory.create_batch(
+        7, student_profile__year_of_admission=2011, student_profile__status="",
+        branch=branch_nsk)
     volunteers = VolunteerFactory.create_batch(
-        3, enrollment_year=2011, status="", branch=branch_spb)
+        3, student_profile__year_of_admission=2011, student_profile__status="",
+        branch=branch_spb)
     graduated_on = datetime.date(year=2017, month=1, day=1)
     graduated = GraduateFactory.create_batch(
-        5, branch=branch_spb, status='', enrollment_year=2011,
+        5, branch=branch_spb, student_profile__status='',
+        student_profile__year_of_admission=2011,
         graduate_profile__graduated_on=graduated_on)
     response = client.get("{}?{}".format(search_url, "status=studying"))
     json_data = response.json()
-    total_studying = len(students_spb) + len(students_nsk) + len(volunteers)
+    total_studying = len(students_spb) + len(students_nsk) + len(volunteers) + len(graduated)
     assert json_data["count"] == total_studying
     expelled = StudentFactory.create_batch(
-        2, enrollment_year=2011, status=StudentStatuses.EXPELLED,
+        2, student_profile__year_of_admission=2011,
+        student_profile__status=StudentStatuses.EXPELLED,
         branch=branch_spb)
-    # If no groups specified - `GRADUATE_CENTER` group excluded from results
+    # No groups specified
     response = client.get("{}?{}".format(search_url, "status=studying"))
     json_data = response.json()
     assert json_data["count"] == total_studying
@@ -278,9 +276,3 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
                                                   Roles.GRADUATE)
     response = client.get("{}?{}".format(search_url, query))
     assert response.json()["count"] == len(volunteers) + len(graduated)
-    # Edge case #2 - graduate can have `master` subgroup
-    add_user_groups(graduated[0], [Roles.MASTERS_DEGREE])
-    query = "status=studying&groups={},{}".format(Roles.GRADUATE,
-                                                  Roles.MASTERS_DEGREE)
-    response = client.get("{}?{}".format(search_url, query))
-    assert response.json()["count"] == len(graduated)

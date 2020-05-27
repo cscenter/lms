@@ -304,15 +304,17 @@ def test_course_class_form_available(client, curator, settings):
 
 
 @pytest.mark.django_db
-def test_manager_for_student():
+def test_manager_for_student(settings):
     new_branch = BranchFactory()
     student = StudentFactory()
     teacher = TeacherFactory()
     course = CourseFactory(main_branch=student.branch,
                            branches=[new_branch])
     # Active enrollment
-    enrollment = EnrollmentService.enroll(student, course)
-    enrollment.student_group = StudentGroupService.resolve(course, student)
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    enrollment = EnrollmentService.enroll(student_profile, course)
+    enrollment.student_group = StudentGroupService.resolve(course, student,
+                                                           settings.SITE_ID)
     enrollment.save()
     assert CourseClass.objects.for_student(student).count() == 0
     assert CourseClass.objects.for_student(teacher).count() == 0
@@ -326,7 +328,8 @@ def test_manager_for_student():
     # Course class is visible to main course branch students
     cc = CourseClassFactory(course=course,
                             restricted_to=[enrollment.student_group])
-    EnrollmentService.enroll(student, course)
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    EnrollmentService.enroll(student_profile, course)
     assert CourseClass.objects.for_student(student).count() == 2
     assert CourseClass.objects.for_student(teacher).count() == 0
     # This one is hidden to main branch

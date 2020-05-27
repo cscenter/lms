@@ -1,8 +1,8 @@
-import datetime
+from enum import Enum, auto
 from itertools import islice
-from operator import attrgetter
-from typing import List, Iterable, Union
+from typing import List, Iterable, Union, Optional
 
+from django.contrib.sites.models import Site
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction, router
 from django.db.models import Q, OuterRef, Value, F, TextField, QuerySet
@@ -16,15 +16,41 @@ from core.timezone import now_local
 from core.timezone.constants import DATE_FORMAT_RU
 from courses.managers import CourseClassQuerySet
 from courses.models import Course, Assignment, AssignmentAttachment, \
-    StudentGroupTypes, CourseClass
+    StudentGroupTypes, CourseClass, CourseTeacher
 from learning.models import Enrollment, StudentAssignment, \
-    AssignmentNotification, StudentGroup, Event, GraduateProfile
+    AssignmentNotification, StudentGroup, Event
 from learning.settings import StudentStatuses
-from users.constants import Roles
-from users.models import User
+from users.models import User, StudentProfile
 
 
-# FIXME: move to enrollment service?
+# FIXME: get profile for Invited students from the current term ONLY
+# FIXME: store term of registration or get date range for the term of registration
+def get_student_profile(user: User, site,
+                        profile_type=None) -> Optional[StudentProfile]:
+    """
+    Returns the most actual student profile on site for user.
+
+    User could have multiple student profiles in different cases, e.g.:
+    * They passed distance branch in 2011 and then applied to the
+        offline branch in 2013
+    * Student didn't meet the requirements and was expelled in the first
+        semester but reapplied on general terms for the second time
+    * Regular student "came back" as invited
+    """
+    filters = []
+    if profile_type is not None:
+        filters.append(Q(type=profile_type))
+    student_profile = (StudentProfile.objects
+                       .filter(*filters, user=user, site=site)
+                       .select_related('branch')
+                       .order_by('-year_of_admission', '-priority')
+                       .first())
+    if student_profile is not None:
+        # It helps to invalidate cache on user model if profile were changed
+        student_profile.user = user
+    return student_profile
+
+
 def populate_assignments_for_student(enrollment):
     for a in enrollment.course.assignment_set.all():
         AssignmentService.create_student_assignment(a, enrollment)
@@ -89,7 +115,8 @@ class StudentGroupService:
                                         pk=instance.pk).delete()
 
     @staticmethod
-    def resolve(course: Course, student: User, enrollment_key: str = None):
+    def resolve(course: Course, student: User, site: Union[Site, int],
+                enrollment_key: str = None):
         """
         Returns the target or associated student group for the course.
         """
@@ -97,8 +124,11 @@ class StudentGroupService:
             # It's possible to miss student group here since student could be
             # added to the course through the admin interface without
             # checking all the requirements
+            student_profile = student.get_student_profile(site)
+            if not student_profile:
+                return
             return (StudentGroup.objects
-                    .filter(course=course, branch_id=student.branch_id)
+                    .filter(course=course, branch_id=student_profile.branch_id)
                     .first())
         elif course.group_mode == StudentGroupTypes.MANUAL:
             try:
@@ -192,7 +222,7 @@ class AssignmentService:
         """
         filters = [
             Q(course_id=assignment.course_id),
-            ~Q(student__status__in=StudentStatuses.inactive_statuses)
+            ~Q(student_profile__status__in=StudentStatuses.inactive_statuses)
         ]
         restrict_to = list(sg.pk for sg in assignment.restricted_to.all())
         if for_groups is not None:
@@ -315,7 +345,8 @@ class EnrollmentService:
         return f'{today}\n{reason_text}\n\n'
 
     @classmethod
-    def enroll(cls, user: User, course: Course, reason_entry='', **attrs):
+    def enroll(cls, student: StudentProfile, course: Course,
+               reason_entry='', **attrs):
         if reason_entry:
             new_record = cls._format_reason_record(reason_entry, course)
             reason_entry = Concat(Value(new_record),
@@ -323,8 +354,8 @@ class EnrollmentService:
                                   output_field=TextField())
         with transaction.atomic():
             enrollment, created = (Enrollment.objects.get_or_create(
-                student=user, course=course,
-                defaults={'is_deleted': True}))
+                student=student.user, course=course,
+                defaults={'is_deleted': True, 'student_profile': student}))
             if not enrollment.is_deleted:
                 raise AlreadyEnrolled
             # Use sharable lock for concurrent enrollments if necessary to
@@ -341,6 +372,7 @@ class EnrollmentService:
                 filters.append(Q(course__capacity__gt=learners_count))
             attrs.update({
                 "is_deleted": False,
+                "student_profile": student,
                 "reason_entry": reason_entry
             })
             updated = (Enrollment.objects
@@ -362,7 +394,6 @@ class EnrollmentService:
         enrollment.refresh_from_db()
         return enrollment
 
-    # TODO: replace `enrollment` with `student + course` like in `enroll` method?
     @classmethod
     def leave(cls, enrollment: Enrollment, reason_leave=''):
         update_fields = ['is_deleted']
@@ -461,26 +492,41 @@ def get_study_events(filters: List[Q] = None) -> QuerySet:
             .order_by('date', 'starts_at'))
 
 
-# TODO: support `site_id`
-def create_graduate_profiles(graduated_on: datetime.date):
-    """
-    Create graduate profiles in inactive state for all students with
-    `will graduate` status.
-    """
-    will_graduate_list = (User.objects
-                          .filter(status=StudentStatuses.WILL_GRADUATE)
-                          .has_role(Roles.STUDENT,
-                                    Roles.VOLUNTEER))
+class CourseRole(Enum):
+    NO_ROLE = auto()
+    STUDENT_REGULAR = auto()  # Enrolled active student
+    # Restrict access to the course for enrolled students in next cases:
+    #   * student failed the course
+    #   * student was expelled or in academic leave
+    STUDENT_RESTRICT = auto()
+    TEACHER = auto()  # Any teacher from the same meta course
+    CURATOR = auto()
 
-    for student in will_graduate_list:
-        with transaction.atomic():
-            defaults = {
-                "graduated_on": graduated_on,
-                "details": {},
-                "is_active": False
-            }
-            profile, created = GraduateProfile.objects.get_or_create(
-                student=student,
-                defaults=defaults)
-            if not created:
-                profile.save()
+
+def course_access_role(*, course, user) -> CourseRole:
+    """
+    Some course data (e.g. assignments, news) are private and accessible
+    depending on the user role: curator, course teacher or
+    enrolled student. This UserRoles do not overlap in the same course.
+    """
+    if not user.is_authenticated:
+        return CourseRole.NO_ROLE
+    if user.is_curator:
+        return CourseRole.CURATOR
+    role = CourseRole.NO_ROLE
+    enrollment = user.get_enrollment(course.pk)
+    if enrollment:
+        failed = course_failed_by_student(course, user, enrollment)
+        student_status = enrollment.student_profile.status
+        if not failed and not StudentStatuses.is_inactive(student_status):
+            role = CourseRole.STUDENT_REGULAR
+        else:
+            role = CourseRole.STUDENT_RESTRICT
+    # Teachers from the same course permits to view the news/assignments/etc
+    all_course_teachers = (CourseTeacher.objects
+                           .for_meta_course(course.meta_course)
+                           .values_list('teacher_id', flat=True))
+    if user.is_teacher and user.pk in all_course_teachers:
+        # Overrides student role if a teacher enrolled in his own course
+        role = CourseRole.TEACHER
+    return role

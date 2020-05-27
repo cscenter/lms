@@ -58,20 +58,18 @@
                        target="_blank"><i class="fa fa-pencil-square-o"></i></a> <a title="Войти под пользователем" class="loginas-user" href="{% url 'loginas-user-login' user_id=profile_user.pk %}"><i class="fa fa-ils" aria-hidden="true"></i></a>
                 {% endif %}</h2>
 
-            {% if profile_user.is_graduate %}
+            {% if graduate_profile %}
                 <div class="progress-info">
-                    {% with gp=profile_user.graduate_profile %}
-                    С сентября {{ profile_user.enrollment_year }} года по июнь {{ gp.graduation_year }} года<br>
+                    С сентября {{ graduate_profile.student_profile.year_of_admission }} года по июнь {{ graduate_profile.graduation_year }} года<br>
                         {% if profile_user.gender == profile_user.GENDER_FEMALE %}прошла{% else %}прошёл{% endif %}
-                        обучение по направлени{{ gp.academic_disciplines.all|pluralize:"ю,ям" }}
-                        {% for program in gp.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
-                    {% endwith %}
+                        обучение по направлени{{ graduate_profile.academic_disciplines.all|pluralize:"ю,ям" }}
+                        {% for program in graduate_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
                 </div>
-                {% elif profile_user.is_student or profile_user.is_volunteer %}
+            {% elif student_profile %}
                 <div class="progress-info">
-                    {% trans "student"|title %}{% if profile_user.enrollment_year %} {{ profile_user.enrollment_year }} {% trans "enrolled in" context "user_detail" %}{% endif %}{% if profile_user.status == "expelled" %}, {{ profile_user.get_status_display|lower }}{% endif %}
+                    {% trans "student"|title %}{% if student_profile.year_of_admission %} {{ student_profile.year_of_admission }} {% trans "enrolled in" context "user_detail" %}{% endif %}{% if not student_profile.is_active %}, {{ student_profile.get_status_display|lower }}{% endif %}
                 </div>
-                {% elif profile_user.is_teacher %}
+            {% elif profile_user.is_teacher %}
                 <div class="progress-info">
                     {% trans "teacher"|title %}
                 </div>
@@ -90,12 +88,13 @@
             {% elif profile_user.pk == user.pk or user.is_curator %}
                 <div class="about-me"></div>
             {% endif %}
-            {% if profile_user.is_graduate and profile_user.graduate_profile and profile_user.graduate_profile.testimonial %}
+            {% if graduate_profile and graduate_profile.testimonial %}
                 <div class="review">
                     <h4>{% trans "Review of Computer Science Center" %}</h4>
                     <div class="ubertext">
-                        {% markdown 3600 profile_user.graduate_profile.TESTIMONIAL_CACHE_KEY profile_user.graduate_profile.pk profile_user.graduate_profile.modified %}
-                            {{ profile_user.graduate_profile.testimonial }}{% endmarkdown %}
+                        {% markdown 3600 graduate_profile.TESTIMONIAL_CACHE_KEY graduate_profile.pk graduate_profile.modified %}
+                            {{ graduate_profile.testimonial }}
+                        {% endmarkdown %}
                     </div>
                 </div>
             {% endif %}
@@ -116,7 +115,7 @@
                                     <i class="fa fa-user-secret"></i> Для куратора
                                 </a>
                             </li>
-                            {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
+                            {% if student_profile %}
                                 <li role="presentation">
                                     <a href="#student-assignments-tab" role="tab" data-toggle="tab">
                                         <i class="fa fa-list"></i>&nbsp;Задания
@@ -134,12 +133,18 @@
                 <div class="tab-pane" role="tabpanel" id="for-curator-tab">
                     <table class="table table-condensed table-striped">
                         <tr>
-                            <td>Отделение</td>
-                            <td>{{ profile_user.branch }}</td>
+                            <td>{% trans "Phone" %}:</td>
+                            <td>{{ profile_user.phone|default:"—" }}</td>
                         </tr>
                         <tr>
-                            <td>Статус</td>
-                            <td>{{ profile_user.get_status_display|default:"—" }}</td>
+                            <td>{% trans "Email" %}:</td>
+                            <td>
+                                {{ profile_user.email }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>{% trans "Workplace" %}:</td>
+                            <td>{{ profile_user.workplace|default:"—" }}</td>
                         </tr>
                         <tr>
                             <td>Группы</td>
@@ -186,20 +191,6 @@
                         </tr>
                     </table>
 
-                    {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
-                        <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
-                        {% if profile_user.enrollment_certificates.count > 0 %}
-                            <ul>
-                                {% for reference in profile_user.enrollment_certificates.all %}
-                                    <li>
-                                        <a target="_blank" href="{{ reference.get_absolute_url }}">{{ reference.created|date:"d.m.Y" }}</a>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                        <a href="{% url 'user_reference_add' subdomain=LMS_SUBDOMAIN pk=profile_user.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
-                    {% endif %}
-
                     {% with borrows=profile_user.borrows.all %}
                         <h4 class="_mtop-30">{% trans "books" %}:</h4>
                         {% if borrows %}
@@ -215,57 +206,44 @@
                         {% endif %}
                     {% endwith %}
 
-                    {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
-                        <h4 class="_mtop-30">{% trans "Student info record" %}:</h4>
+                    {% if student_profile %}
+                        <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
+                        {% if student_profile.certificates_of_participation.all %}
+                            <ul>
+                                {% for reference in student_profile.certificates_of_participation.all %}
+                                    <li>
+                                        <a target="_blank" href="{{ reference.get_absolute_url }}">{{ reference.created|date:"d.m.Y" }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <a href="{% url 'student_reference_add' subdomain=LMS_SUBDOMAIN student_profile_id=student_profile.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
+                    {% endif %}
+
+                    {% if student_profile %}
+                        <h4 class="_mtop-30">{% trans "Student info record" %} <small><a href="{% url 'admin:users_studentprofile_change' object_id=student_profile.pk %}" target="_blank"><i class="fa fa-pencil-square-o"></i></a></small></h4>
                         <table class="table table-condensed table-striped">
                             <tr>
+                                <td>Отделение</td>
+                                <td>{{ student_profile.branch }}</td>
+                            </tr>
+                            <tr>
+                                <td>Статус</td>
+                                <td>{{ student_profile.get_status_display|default:"—" }}</td>
+                            </tr>
+                            <tr>
                                 <td width="25%">{% trans "University" %}:</td>
-                                <td>{{ profile_user.university|default:"—" }}</td>
-                            </tr>
-                            <tr>
-                                <td>{% trans "Phone" %}:</td>
-                                <td>{{ profile_user.phone|default:"—" }}</td>
-                            </tr>
-                            <tr>
-                                <td>{% trans "Email" %}:</td>
-                                <td>
-                                    {{ profile_user.email }}
-                                </td>
+                                <td>{{ student_profile.university|default:"—" }}</td>
                             </tr>
                             <tr>
                                 <td>{% trans "StudentInfo|University year" %}:</td>
                                 <td>
-                                    {{ profile_user.get_uni_year_at_enrollment_display|default:"—" }}</td>
-                            </tr>
-                            <tr>
-                                <td>{% trans "Comment" %}:</td>
-                                <td>
-                                    <div class="ubertext">
-                                        {% markdown 3600 "user_comment" profile_user.pk profile_user.modified %}
-                                            {{ profile_user.comment|default:"—" }}
-                                        {% endmarkdown %}
-                                    </div>
-                                    {% if profile_user.comment %}
-                                        <span class="student-comment-metainfo pull-right">
-                                            {% if profile_user.comment_last_author_id %}{{ profile_user.comment_last_author.get_short_name }}, {% endif %}
-                                            {{ profile_user.comment_changed_at|date:"d.m.Y H:i" }}
-                                        </span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>{% trans "Status" %}:</td>
-                                <td>
-                                    {{ profile_user.get_status_display|default:"—" }}
-                                    {% if profile_user.is_volunteer %}(
-                                        {% trans "Non-degree student"|lower %}
-                                        ){% endif %}
-                                </td>
+                                    {{ student_profile.get_level_of_education_on_admission_display|default:"—" }}</td>
                             </tr>
                             <tr>
                                 <td>{% trans "Curriculum year" %}:</td>
                                 <td>
-                                    {{ profile_user.curriculum_year|default:'—' }}<br>
+                                    {{ student_profile.year_of_curriculum|default:'—' }}<br>
                                     {% if syllabus %}
                                         {% for program in syllabus %}
                                             <b>{{ program.academic_discipline.name_en }}</b>
@@ -291,29 +269,22 @@
                                         <br>Обозначения: <span class="text-success">зелёный</span> - курс сдан / <span class="text-info">синий</span> - запись в текущем семестре<br>
                                     {% endif %}
                                 </td>
-                            <tr>
-                                <td>{% trans "StudentInfo|Study program" %}:</td>
-                                <td>
-                                    {% if profile_user.graduate_profile %}
-                                        {% with sps=profile_user.graduate_profile.academic_disciplines.all %}
-                                            {% if sps %}
-                                                <ul class="list-unstyled">
-                                                    {% for sp in sps %}
-                                                        <li>{{ sp.name }}</li>
-                                                    {% endfor %}
-                                                </ul>
-                                            {% else %}
-                                                —
-                                            {% endif %}
-                                        {% endwith %}
-                                    {% else %}
-                                        —
-                                    {% endif %}
-                                </td>
                             </tr>
                             <tr>
-                                <td>{% trans "Workplace" %}:</td>
-                                <td>{{ profile_user.workplace|default:"—" }}</td>
+                                <td>{% trans "Comment" %}:</td>
+                                <td>
+                                    <div class="ubertext">
+                                        {% markdown 3600 "curator_note_about_student" student_profile.pk student_profile.modified %}
+                                            {{ student_profile.comment|default:"—" }}
+                                        {% endmarkdown %}
+                                    </div>
+                                    {% if student_profile.comment %}
+                                        <span class="student-comment-metainfo pull-right">
+                                            {% if student_profile.comment_last_author_id %}{{ student_profile.comment_last_author.get_short_name }}, {% endif %}
+                                            {{ student_profile.comment_changed_at|date:"d.m.Y H:i" }}
+                                        </span>
+                                    {% endif %}
+                                </td>
                             </tr>
                         </table>
                     {% endif %}
@@ -370,74 +341,72 @@
 
             <div class="tab-pane active" role="tabpanel" id="profile-tab">
                 <ul class="list-unstyled">
-                    {% if profile_user.enrollment_year %}
-                        {% if profile_user.enrollment_set.all or profile_user.shadcourserecord_set.all %}
-                            <li>
-                                <h4>{{ profile_user.first_name }} {% if profile_user.gender == 'F' %}прослушала и сдала{% else %}прослушал и сдал{% endif %} следующие курсы:</h4>
-                                <ul>
-                                    {% for enrollment in profile_user.enrollment_set.all %}
-                                        <li>
-                                            <a href="{{ enrollment.course.get_absolute_url }}">{{ enrollment.course }}</a> /{{ enrollment.grade_honest|lower }}/
-                                        </li>
-                                    {% endfor %}
-                                    {% for shad in profile_user.shadcourserecord_set.all %}
-                                        <li>
-                                            {{ shad.name }} (ШАД), {{ shad.semester }} - {{ shad.teachers }} /{{ shad.grade_display|lower }}/
-                                        </li>
-                                        {% empty %}
-                                        {% if user.is_curator %}<li>Нет зачтённых ШАД-курсов</li>{% endif %}
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                        {% endif %}
-
-                        {% if student_projects %}
-                            <li>
-                                <h4>Кроме того, участвовал{% if profile_user.gender == 'F' %}а{% endif %} в проектах:</h4>
-                                <ul>
-                                    {% for ps in student_projects %}
-                                        <li>
-                                            {% if user.is_authenticated %}<a href="{{ ps.project.get_absolute_url }}">{% endif %}{{ ps.project.name }}, {{ ps.project.semester }}{% if user.is_authenticated %}</a>{% endif %} /{% spaceless %}
-                                            {% if ps.project.status is None %}
-                                                {{ ps.final_grade_display|lower }}
-                                            {% elif ps.project.status == ps.project.Statuses.CONTINUED %}
-                                                {% trans "Shifted"|lower context "Project" %}
-                                            {% elif ps.project.is_canceled %}
-                                                {% trans "Canceled"|lower context "Project" %}
-                                            {% endif %}
-                                            {% endspaceless %}/<br>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                            {% elif user.is_curator %}
-                            <li>Нет студенческих проектов</li>
-                        {% endif %}
-
-                        {% if profile_user.pk == user.pk or user.is_curator %}
-                            {% with recs=profile_user.onlinecourserecord_set.all %}
-                                {% if recs %}
+                    {% if profile_user.enrollment_set.all or profile_user.shadcourserecord_set.all %}
+                        <li>
+                            <h4>{{ profile_user.first_name }} {% if profile_user.gender == 'F' %}прослушала и сдала{% else %}прослушал и сдал{% endif %} следующие курсы:</h4>
+                            <ul>
+                                {% for enrollment in profile_user.enrollment_set.all %}
                                     <li>
-                                        <h4>{% trans "Online courses" %}</h4>
-                                        <ul>
-                                            {% for rec in recs %}
-                                                <li>
-                                                    {% if rec.url %}
-                                                        <a href="{{ rec.url }}">{{ rec.name }}</a>
-                                                    {% else %}
-                                                        {{ rec.name }}
-                                                    {% endif %}
-                                                </li>
-                                            {% endfor %}
-                                        </ul>
+                                        <a href="{{ enrollment.course.get_absolute_url }}">{{ enrollment.course }}</a> /{{ enrollment.grade_honest|lower }}/
                                     </li>
-                                {% elif user.is_curator %}
-                                    <li>Нет зачтённых онлайн-курсов</li>
-                                {% endif %}
-                            {% endwith %}
-                        {% endif %}
-
+                                {% endfor %}
+                                {% for shad in profile_user.shadcourserecord_set.all %}
+                                    <li>
+                                        {{ shad.name }} (ШАД), {{ shad.semester }} - {{ shad.teachers }} /{{ shad.grade_display|lower }}/
+                                    </li>
+                                    {% empty %}
+                                    {% if user.is_curator %}<li>Нет зачтённых ШАД-курсов</li>{% endif %}
+                                {% endfor %}
+                            </ul>
+                        </li>
                     {% endif %}
+
+                    {% if student_projects %}
+                        <li>
+                            <h4>Кроме того, участвовал{% if profile_user.gender == 'F' %}а{% endif %} в проектах:</h4>
+                            <ul>
+                                {% for ps in student_projects %}
+                                    <li>
+                                        {% if user.is_authenticated %}<a href="{{ ps.project.get_absolute_url }}">{% endif %}{{ ps.project.name }}, {{ ps.project.semester }}{% if user.is_authenticated %}</a>{% endif %} /{% spaceless %}
+                                        {% if ps.project.status is None %}
+                                            {{ ps.final_grade_display|lower }}
+                                        {% elif ps.project.status == ps.project.Statuses.CONTINUED %}
+                                            {% trans "Shifted"|lower context "Project" %}
+                                        {% elif ps.project.is_canceled %}
+                                            {% trans "Canceled"|lower context "Project" %}
+                                        {% endif %}
+                                        {% endspaceless %}/<br>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        {% elif user.is_curator %}
+                        <li>Нет студенческих проектов</li>
+                    {% endif %}
+
+                    {% if profile_user.pk == user.pk or user.is_curator %}
+                        {% with recs=profile_user.onlinecourserecord_set.all %}
+                            {% if recs %}
+                                <li>
+                                    <h4>{% trans "Online courses" %}</h4>
+                                    <ul>
+                                        {% for rec in recs %}
+                                            <li>
+                                                {% if rec.url %}
+                                                    <a href="{{ rec.url }}">{{ rec.name }}</a>
+                                                {% else %}
+                                                    {{ rec.name }}
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </li>
+                            {% elif user.is_curator %}
+                                <li>Нет зачтённых онлайн-курсов</li>
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+
                     {% if profile_user.is_teacher %}
                         <li>
                             {% if profile_user.teaching_set.all %}

@@ -53,15 +53,9 @@
 
 - name: Ensure a cron job to auto-renew the certificate exists
   cron:
-    name: "re-creating and updating existing certificate"
+    name: "Update certificates"
     special_time: daily
-    job: >
-      {{ certbot_script }} certonly --webroot
-      --noninteractive --agree-tos --quiet
-      --email {{ certbot_admin_email }}
-      -w {{ certbot_webroot_path }}
-      -d {{ certbot_domains|join(' -d ') }}
-      --deploy-hook 'service nginx reload'
+    job: {{ certbot_script }} renew --deploy-hook 'service nginx reload'
     state: present
   when: certbot_auto_renew
   tags:

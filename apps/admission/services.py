@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from operator import attrgetter
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Type
 
 from django.conf import settings
 from django.db import transaction
@@ -13,11 +13,13 @@ from post_office.utils import get_email_template
 from admission.constants import INVITATION_EXPIRED_IN_HOURS, \
     INTERVIEW_FEEDBACK_TEMPLATE
 from admission.models import InterviewStream, InterviewInvitation, \
-    Applicant, Campaign
+    Applicant, Campaign, Contest, YandexContestIntegration, Exam
 from admission.utils import logger
+from api.providers.yandex_contest import YandexContestAPI, ContestAPIError, \
+    ResponseStatus
 from core.timezone.constants import DATE_FORMAT_RU
 from learning.roles import Roles
-from users.models import User
+from users.models import User, StudentProfile, UserGroup, StudentTypes
 
 
 def get_email_from(campaign: Campaign, default=None):
@@ -47,6 +49,24 @@ def create_invitation(streams: List[InterviewStream], applicant: Applicant):
         EmailQueueService.generate_interview_invitation(invitation)
 
 
+def import_campaign_contest_results(*, campaign: Campaign, model_class):
+    api = YandexContestAPI(access_token=campaign.access_token)
+    on_scoreboard_total = 0
+    updated_total = 0
+    for contest in campaign.contests.filter(type=model_class.CONTEST_TYPE):
+        logger.debug(f"Starting processing contest {contest.pk}")
+        on_scoreboard, updated = model_class.import_results(api, contest)
+        on_scoreboard_total += on_scoreboard
+        updated_total += updated
+        logger.debug(f"Scoreboard total = {on_scoreboard}")
+        logger.debug(f"Updated = {updated}")
+    return on_scoreboard_total, updated_total
+
+
+def import_exam_results(*, campaign: Campaign):
+    import_campaign_contest_results(campaign=campaign, model_class=Exam)
+
+
 class UsernameError(Exception):
     """Raise this exception if fail to create a unique username"""
     pass
@@ -54,7 +74,7 @@ class UsernameError(Exception):
 
 def create_student_from_applicant(applicant):
     """
-    Create new model or override existent with data from applicant form.
+    Creates new model or override existent with data from application form.
     """
     try:
         user = User.objects.get(email=applicant.email)
@@ -68,37 +88,33 @@ def create_student_from_applicant(applicant):
         random_password = User.objects.make_random_password()
         user = User.objects.create_user(username=username,
                                         email=applicant.email,
-                                        password=random_password,
-                                        branch=applicant.campaign.branch)
-    if applicant.status == Applicant.VOLUNTEER:
-        user.add_group(Roles.VOLUNTEER)
-    else:
-        user.add_group(Roles.STUDENT)
-    user.add_group(Roles.STUDENT, site_id=settings.CLUB_SITE_ID)
-    # Copy data from application form to the user profile
-    same_attrs = [
-        "first_name",
-        "phone"
-    ]
-    for attr_name in same_attrs:
-        setattr(user, attr_name, getattr(applicant, attr_name))
+                                        password=random_password)
+    StudentProfile.objects.update_or_create(
+        type=StudentTypes.REGULAR,
+        user=user,
+        branch=applicant.campaign.branch,
+        year_of_admission=applicant.campaign.year,
+        defaults={
+            "year_of_curriculum": applicant.campaign.year,
+            "level_of_education_on_admission": applicant.level_of_education,
+            "university": applicant.university.name
+        }
+    )
+    user.first_name = applicant.first_name
+    user.last_name = applicant.surname
+    user.patronymic = applicant.patronymic if applicant.patronymic else ""
+    user.phone = applicant.phone
+    user.workplace = applicant.workplace if applicant.workplace else ""
+    # Social accounts info
     try:
         user.stepic_id = int(applicant.stepic_id)
     except (TypeError, ValueError):
         pass
-    user.last_name = applicant.surname
-    user.patronymic = applicant.patronymic if applicant.patronymic else ""
-    user.enrollment_year = user.curriculum_year = timezone.now().year
-    # Looks like the same fields below
     user.yandex_login = applicant.yandex_login if applicant.yandex_login else ""
-    # For github store part after github.com/
+    # For github.com store part after github.com/
     if applicant.github_login:
         user.github_login = applicant.github_login.split("github.com/",
-                                                      maxsplit=1)[-1]
-    user.workplace = applicant.workplace if applicant.workplace else ""
-    user.uni_year_at_enrollment = applicant.level_of_education
-    user.branch = applicant.campaign.branch
-    user.university = applicant.university.name
+                                                         maxsplit=1)[-1]
     user.save()
     return user
 

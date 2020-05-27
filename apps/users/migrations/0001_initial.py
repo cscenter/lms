@@ -11,7 +11,6 @@ import jsonfield.fields
 import learning.permissions
 import model_utils.fields
 import sorl.thumbnail.fields
-import users.fields
 import users.models
 import users.thumbnails
 
@@ -163,7 +162,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='status_last_change',
-            field=users.fields.MonitorStatusField(blank=True, editable=False, logging_model=users.models.UserStatusLog, monitored='status', null=True, on_delete=django.db.models.deletion.CASCADE, to='users.UserStatusLog', verbose_name='Status changed'),
+            field=models.ForeignKey(blank=True, editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, to='users.UserStatusLog', verbose_name='Status changed'),
         ),
         migrations.AddConstraint(
             model_name='usergroup',

@@ -13,7 +13,7 @@ from admission.services import get_email_from
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
     TEMPLATE_TYPE = "exam-contest-checked"
-    help = 'Generate mails about contest check completeness'
+    help = 'Generate notifications about contest check completeness'
 
     def handle(self, *args, **options):
         campaigns = self.get_current_campaigns(options)
@@ -32,11 +32,11 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 Exam.objects
                 .filter(applicant__campaign=campaign.pk,
                         applicant__status=Applicant.PERMIT_TO_EXAM,
+                        applicant__is_unsubscribed=False,
                         status__in=[ChallengeStatuses.NEW,
                                     ChallengeStatuses.REGISTERED])
                 .select_related("applicant")
             )
-            print(exam_results.query)
 
             for e in exam_results:
                 if e.status == ChallengeStatuses.NEW:
@@ -46,10 +46,15 @@ class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
                 recipients = [applicant.email]
                 if not Email.objects.filter(to=recipients,
                                             template=template).exists():
+                    context = {
+                        'SCORE': str(e.score if e.score is not None else 0),
+                        'CONTEST_ID': e.yandex_contest_id,
+                    }
                     mail.send(
                         recipients,
                         sender=email_from,
                         template=template,
+                        context=context,
                         # If emails rendered on delivery, they will store
                         # value of the template id. It makes
                         # `Email.objects.exists()` work correctly.

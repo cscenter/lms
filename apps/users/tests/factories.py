@@ -3,16 +3,17 @@
 import factory
 from django.conf import settings
 
-from learning.settings import GradeTypes
+from core.tests.factories import BranchFactory
+from learning.settings import GradeTypes, Branches
 from users.constants import Roles, GenderTypes
-from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
-    OnlineCourseRecord, UserGroup
+from users.models import User, SHADCourseRecord, CertificateOfParticipation, \
+    OnlineCourseRecord, UserGroup, StudentProfile, StudentTypes
 
-__all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',
+__all__ = ('User', 'SHADCourseRecord', 'CertificateOfParticipation',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
            'StudentFactory', 'TeacherFactory', 'VolunteerFactory',
            'OnlineCourseRecordFactory',
-           'SHADCourseRecordFactory', 'EnrollmentCertificateFactory')
+           'SHADCourseRecordFactory', 'CertificateOfParticipationFactory')
 
 
 def add_user_groups(user, groups):
@@ -51,14 +52,6 @@ class UserFactory(factory.DjangoModelFactory):
         self.save()
         self.raw_password = raw_password
 
-    @factory.post_generation
-    def curriculum_year(self, create, extracted, **kwargs):
-        if not create:
-            return
-        self.curriculum_year = extracted
-        if not extracted and self.enrollment_year:
-            self.curriculum_year = self.enrollment_year
-
 
 class UserGroupFactory(factory.DjangoModelFactory):
     class Meta:
@@ -82,35 +75,37 @@ class CuratorFactory(UserFactory):
 
 
 class StudentFactory(UserFactory):
-    enrollment_year = 2015
+    """
+    Student access role will be created by student profile post save signal
+    """
+    username = factory.Sequence(lambda n: "student%03d" % n)
+    email = factory.Sequence(lambda n: "student%03d@test.email" % n)
 
     @factory.post_generation
-    def required_groups(self, create, extracted, **kwargs):
+    def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        site_id = kwargs.pop("site_id", None)
-        self.add_group(role=Roles.STUDENT, site_id=site_id)
+        kwargs.setdefault('branch', self.branch)
+        StudentProfileFactory(user=self, **kwargs)
 
 
 class InvitedStudentFactory(UserFactory):
-    enrollment_year = 2015
-
     @factory.post_generation
-    def required_groups(self, create, extracted, **kwargs):
+    def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        site_id = kwargs.pop("site_id", None)
-        self.add_group(role=Roles.INVITED, site_id=site_id)
+        kwargs.setdefault('branch', self.branch)
+        StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
 class VolunteerFactory(UserFactory):
 
     @factory.post_generation
-    def required_groups(self, create, extracted, **kwargs):
+    def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
-        site_id = kwargs.pop("site_id", None)
-        self.add_group(role=Roles.VOLUNTEER, site_id=site_id)
+        kwargs.setdefault('branch', self.branch)
+        StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
 class TeacherFactory(UserFactory):
@@ -120,6 +115,17 @@ class TeacherFactory(UserFactory):
             return
         site_id = kwargs.pop("site_id", None)
         self.add_group(role=Roles.TEACHER, site_id=site_id)
+
+
+class StudentProfileFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = StudentProfile
+        django_get_or_create = ('user', 'branch', 'year_of_admission')
+
+    type = StudentTypes.REGULAR
+    user = factory.SubFactory(UserFactory)
+    branch = factory.SubFactory(BranchFactory)
+    year_of_admission = factory.SelfAttribute('user.date_joined.year')
 
 
 class OnlineCourseRecordFactory(factory.DjangoModelFactory):
@@ -141,10 +147,10 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     semester = factory.SubFactory('learning.tests.factories.SemesterFactory')
 
 
-class EnrollmentCertificateFactory(factory.DjangoModelFactory):
+class CertificateOfParticipationFactory(factory.DjangoModelFactory):
     class Meta:
-        model = EnrollmentCertificate
+        model = CertificateOfParticipation
 
     signature = "FIO"
     note = ""
-    student = factory.SubFactory(StudentFactory)
+    student_profile = factory.SubFactory(StudentProfileFactory)

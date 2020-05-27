@@ -1,6 +1,6 @@
 /* Hide model object title in inline form */
 .inline-group .tabular tr.has_original td {
-    padding-top: 10px;
+    padding-top: inherit;
 }
 
 .original {
