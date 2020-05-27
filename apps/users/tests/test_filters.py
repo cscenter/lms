@@ -11,12 +11,38 @@ from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from users.constants import Roles
 from users.tests.factories import UserFactory, VolunteerFactory, \
-    add_user_groups, StudentFactory
+    add_user_groups, StudentFactory, CuratorFactory
 
 
 @pytest.fixture(scope="module")
 def search_url():
     return reverse_lazy('staff:student_search_json')
+
+
+@pytest.mark.django_db
+def test_student_search_by_name(client, search_url, settings):
+    curator = CuratorFactory()
+    client.login(curator)
+    student = StudentFactory(student_profile__year_of_admission=2011,
+                             student_profile__year_of_curriculum=2011,
+                             student_profile__status="",
+                             last_name="Иванов",
+                             first_name="Иван")
+    response = client.get(f"{search_url}?name=лол")
+    assert response.status_code == 200
+    assert response.json()["count"] == 0
+    # 1 symbol is too short to apply filter by name
+    # but students will be searched anyway since lookup isn't empty
+    response = client.get(f"{search_url}?name=и")
+    assert response.status_code == 200
+    assert response.json()["count"] == 1
+    response = client.get(f"{search_url}?name=ан")
+    assert response.status_code == 200
+    assert response.json()["count"] == 0
+    # Make sure `ts_vector` works fine with single quotes
+    response = client.get(f"{search_url}?name=%27d")
+    assert response.status_code == 200
+    assert response.json()["count"] == 0
 
 
 @pytest.mark.django_db
