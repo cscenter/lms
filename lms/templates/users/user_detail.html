@@ -274,14 +274,14 @@
                                 <td>{% trans "Comment" %}:</td>
                                 <td>
                                     <div class="ubertext">
-                                        {% markdown 3600 "user_comment" profile_user.pk profile_user.modified %}
-                                            {{ profile_user.comment|default:"—" }}
+                                        {% markdown 3600 "curator_note_about_student" student_profile.pk student_profile.modified %}
+                                            {{ student_profile.comment|default:"—" }}
                                         {% endmarkdown %}
                                     </div>
-                                    {% if profile_user.comment %}
+                                    {% if student_profile.comment %}
                                         <span class="student-comment-metainfo pull-right">
-                                            {% if profile_user.comment_last_author_id %}{{ profile_user.comment_last_author.get_short_name }}, {% endif %}
-                                            {{ profile_user.comment_changed_at|date:"d.m.Y H:i" }}
+                                            {% if student_profile.comment_last_author_id %}{{ student_profile.comment_last_author.get_short_name }}, {% endif %}
+                                            {{ student_profile.comment_changed_at|date:"d.m.Y H:i" }}
                                         </span>
                                     {% endif %}
                                 </td>
