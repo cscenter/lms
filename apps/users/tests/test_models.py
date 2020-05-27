@@ -13,11 +13,13 @@ from users.tests.factories import StudentFactory, CuratorFactory, UserFactory, \
 
 
 @pytest.mark.django_db
-def test_enrolled_on_the_course():
+def test_enrolled_on_the_course(settings):
     student = StudentFactory.create()
     co = CourseFactory()
     assert student.get_enrollment(co.pk) is None
-    enrollment = EnrollmentFactory(student=student, course=co)
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    enrollment = EnrollmentFactory(student=student, course=co,
+                                   student_profile=student_profile)
     assert student.get_enrollment(co.pk) is None  # query was cached
     instance_memoize.delete_cache(student)
     assert student.get_enrollment(co.pk) is not None
@@ -30,14 +32,14 @@ def test_user_add_group(settings):
     settings.SITE_ID = settings.TEST_DOMAIN_ID
     user = UserFactory()
     user.save()
-    user.add_group(Roles.STUDENT)
+    user.add_group(Roles.INTERVIEWER)
     assert user.groups.count() == 1
     user_group = user.groups.first()
     assert user_group.site_id == settings.TEST_DOMAIN_ID
     settings.SITE_ID = settings.ANOTHER_DOMAIN_ID
     user = UserFactory()
     user.save()
-    user.add_group(Roles.STUDENT)
+    user.add_group(Roles.INTERVIEWER)
     assert user.groups.count() == 1
     user_group = user.groups.first()
     assert user_group.site_id == settings.ANOTHER_DOMAIN_ID
@@ -47,9 +49,9 @@ def test_user_add_group(settings):
 def test_user_add_group_already_exists():
     user = UserFactory()
     user.save()
-    user.add_group(Roles.STUDENT)
+    user.add_group(Roles.CURATOR)
     assert user.groups.count() == 1
-    user.add_group(Roles.STUDENT)
+    user.add_group(Roles.CURATOR)
     assert user.groups.count() == 1
 
 
@@ -64,22 +66,23 @@ def test_user_remove_group():
 
 @pytest.mark.django_db
 def test_roles(settings):
-    user = UserFactory(groups=[Roles.STUDENT,
-                               Roles.TEACHER])
+    user = StudentFactory(groups=[Roles.TEACHER])
     assert set(user.roles) == {Roles.STUDENT, Roles.TEACHER}
-    user.status = StudentStatuses.EXPELLED
-    user.groups.add(UserGroupFactory(user=user, role=Roles.VOLUNTEER))
+    UserGroupFactory(user=user, role=Roles.INTERVIEWER)
     # Invalidate cache
-    del user.site_groups
+    user.refresh_from_db()
     del user.roles
+    del user.site_groups
+    instance_memoize.delete_cache(user)
     assert user.roles == {Roles.TEACHER,
                           Roles.STUDENT,
-                          Roles.VOLUNTEER}
+                          Roles.INTERVIEWER}
     user.groups.all().delete()
     user.add_group(role=Roles.STUDENT)
-    user.status = ''
     user.save()
     settings.SITE_ID = settings.CLUB_SITE_ID
+    user.refresh_from_db()
+    instance_memoize.delete_cache(user)
     del user.site_groups
     del user.roles
     assert not set(user.site_groups)

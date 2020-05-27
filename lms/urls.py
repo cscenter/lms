@@ -10,8 +10,8 @@ from announcements.views import AnnouncementTagAutocomplete
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.views import TeacherDetailView
 from lms.views import IndexView, CourseOfferingsView
-from users.views import EnrollmentCertificateCreateView, \
-    EnrollmentCertificateDetailView
+from users.views import CertificateOfParticipationCreateView, \
+    CertificateOfParticipationDetailView
 
 admin.autodiscover()
 
@@ -37,8 +37,8 @@ urlpatterns = [
     path("courses/", include('learning.invitation.urls')),
     path('teachers/<int:pk>/', TeacherDetailView.as_view(), name='teacher_detail'),
 
-    path('users/<int:pk>/reference/add/', EnrollmentCertificateCreateView.as_view(), name='user_reference_add'),
-    path('users/<int:pk>/reference/<int:reference_pk>/', EnrollmentCertificateDetailView.as_view(), name='user_reference_detail'),
+    path('users/<int:student_profile_id>/reference/add/', CertificateOfParticipationCreateView.as_view(), name='student_reference_add'),
+    path('users/<int:student_profile_id>/reference/<int:reference_pk>/', CertificateOfParticipationDetailView.as_view(), name='student_reference_detail'),
     path('', include('users.urls')),
 
     path('notifications/', include("notifications.urls")),

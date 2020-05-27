@@ -31,7 +31,7 @@ def test_user_detail(client):
 
     Just a simple test to check something appears.
     """
-    student = StudentFactory(enrollment_year='2013')
+    student = StudentFactory()
     semester1 = SemesterFactory.create(year=2014, type='spring')
     semester2 = SemesterFactory.create(year=2014, type='autumn')
     p1 = ProjectFactory.create(students=[student], semester=semester1)

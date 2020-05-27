@@ -640,6 +640,31 @@ class YandexContestIntegration(models.Model):
     def check(cls, **kwargs):
         errors = super().check(**kwargs)
         errors.extend(cls._check_applicant_fk())
+        errors.extend(cls._check_type_attr())
+        return errors
+
+    @classmethod
+    def _check_type_attr(cls):
+        errors = []
+        if not hasattr(cls, "CONTEST_TYPE"):
+            errors.append(
+                checks.Error(
+                    f'`{cls} is a subclass of YandexContestIntegration but no '
+                    f'contest type information was provided',
+                    hint=f'define {cls.__name__}.CONTEST_TYPE attribute value',
+                    obj=cls,
+                    id='admission.E003',
+                ))
+        else:
+            types = (k for k, v in Contest._meta.get_field('type').choices)
+            if cls.CONTEST_TYPE not in types:
+                errors.append(
+                    checks.Error(
+                        f'`{cls.__name__}.CONTEST_TYPE value must be defined '
+                        f'in Contest.type field choices',
+                        obj=cls,
+                        id='admission.E004',
+                    ))
         return errors
 
     @classmethod
@@ -787,6 +812,8 @@ class ApplicantRandomizeContestMixin:
 
 class Test(TimeStampedModel, YandexContestIntegration,
            ApplicantRandomizeContestMixin):
+    CONTEST_TYPE = Contest.TYPE_TEST
+
     NEW = ChallengeStatuses.NEW
     REGISTERED = ChallengeStatuses.REGISTERED
     MANUAL = ChallengeStatuses.MANUAL
@@ -830,6 +857,8 @@ class Test(TimeStampedModel, YandexContestIntegration,
 
 class Exam(TimeStampedModel, YandexContestIntegration,
            ApplicantRandomizeContestMixin):
+    CONTEST_TYPE = Contest.TYPE_EXAM
+
     applicant = models.OneToOneField(
         Applicant,
         verbose_name=_("Applicant"),

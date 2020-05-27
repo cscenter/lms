@@ -15,7 +15,9 @@ from learning.models import StudentAssignment, \
     CourseInvitation, StudentGroup
 from learning.services import StudentGroupService
 from users.constants import Roles
-from users.tests.factories import UserFactory, StudentFactory
+from users.models import UserGroup
+from users.tests.factories import UserFactory, StudentFactory, \
+    StudentProfileFactory
 
 __all__ = ('StudentGroupFactory', 'StudentAssignmentFactory',
            'AssignmentCommentFactory', 'EnrollmentFactory', 'InvitationFactory',
@@ -62,8 +64,11 @@ class EnrollmentFactory(factory.DjangoModelFactory):
         model = Enrollment
 
     student = factory.SubFactory(StudentFactory)
-    course = factory.SubFactory(CourseFactory,
-                                main_branch_id=factory.SelfAttribute('..student.branch_id'))
+    student_profile = factory.SubFactory(
+        StudentProfileFactory,
+        user=factory.SelfAttribute('..student'),
+        branch=factory.SelfAttribute('..student.branch'))
+    course = factory.SubFactory(CourseFactory)
 
     @factory.post_generation
     def student_group(self, create, extracted, **kwargs):
@@ -73,7 +78,8 @@ class EnrollmentFactory(factory.DjangoModelFactory):
             self.student_group = extracted
         else:
             self.student_group = StudentGroupService.resolve(self.course,
-                                                             self.student)
+                                                             self.student,
+                                                             settings.SITE_ID)
 
 
 class InvitationFactory(factory.DjangoModelFactory):
@@ -135,11 +141,6 @@ class EventFactory(factory.DjangoModelFactory):
 
 
 class GraduateFactory(UserFactory):
-    graduate_profile = factory.RelatedFactory(
-        'learning.tests.factories.GraduateProfileFactory',
-        'student'
-    )
-
     @factory.post_generation
     def required_groups(self, create, extracted, **kwargs):
         if not create:
@@ -147,10 +148,24 @@ class GraduateFactory(UserFactory):
         site_id = kwargs.pop("site_id", None)
         self.add_group(role=Roles.GRADUATE, site_id=site_id)
 
+    @factory.post_generation
+    def student_profile(self, create, extracted, **kwargs):
+        if not create:
+            return
+        student_profile = StudentProfileFactory(user=self, **kwargs)
+        self.__student_profile_id = student_profile.pk
+        UserGroup.objects.filter(role=Roles.STUDENT, user=self).delete()
+
+    @factory.post_generation
+    def graduate_profile(self, create, extracted, **kwargs):
+        if not create:
+            return
+        GraduateProfileFactory(student_profile_id=self.__student_profile_id)
+
 
 class GraduateProfileFactory(factory.DjangoModelFactory):
     class Meta:
         model = GraduateProfile
 
-    student = factory.SubFactory(GraduateFactory, graduate_profile=None)
+    student_profile = factory.SubFactory(StudentProfileFactory)
     graduated_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)

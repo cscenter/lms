@@ -23,24 +23,24 @@
         Направления обучения берутся из профилей выпускников, которые можно <a href="/staff/exports/#will-graduate">сгенерировать здесь</a>.
     </div>
     <div class="alert alert-danger">
-        Для выпуска 2020 направления уже указали у пользователя, поэтому сейчас они берутся из профиля пользователя, а не выпускника.
+        Направления сейчас берутся из профиля пользователя, а не выпускника.
     </div>
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
-{% for s in students %}\diploma{{ '{' }}{{ s.pk }}{{ '}' }}{{ '{' }}{{s.first_name}}{{ '}' }}{{ '{' }}{{s.patronymic}}{{ '}' }}{{ '{' }}{{s.last_name}}{{ '}' }}{{ '{' }}{% if s.gender == 'F' %}a{% endif %}{{ '}' }}
-{{ '{' }}{% if s.academic_disciplines.all|length == 1 %}\\[3.5mm]направления {% else %}направлений\\[3.5mm]{% endif %}{% for program in s.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
-{{ '{' }}{{s.enrollment_year}}{{ '}' }}
-{{ '{' }}{% for course in s.courses %}
+{% for student_profile in student_profiles %}{% with student=student_profile.user %}\diploma{{ '{' }}{{ student.pk }}{{ '}' }}{{ '{' }}{{student.first_name}}{{ '}' }}{{ '{' }}{{student.patronymic}}{{ '}' }}{{ '{' }}{{student.last_name}}{{ '}' }}{{ '{' }}{% if student.gender == 'F' %}a{% endif %}{{ '}' }}
+{{ '{' }}{% if student_profile.academic_disciplines.all|length == 1 %}\\направления {% else %}направлений\\{% endif %}{% for program in student_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}{{student_profile.year_of_admission}}{{ '}' }}
+{{ '{' }}{% for course in student.courses %}
 {% spaceless %}\{{course.type}}{{ '{' }}{{course.name}}{{ '}' }}{% if course.type == "course" %}{{ '{' }}1 семестр{{ '}' }}{{ '{' }}{% if course.class_count > 0 %}{{course.class_count}}{% endif %}{{ '}' }}{% endif %}{{ '{' }}{{course.final_grade}}{{ '}' }}
        {{ '{' }}{{ course.teachers }}{{ '}' }}
 {% endspaceless %}{% if forloop.last %}
 {% endif %}{% endfor %}{{ '}' }}
-{{ '{' }}{% if s.projects_progress|length > 0 %}
-{% for ps in s.projects_progress %}{% with project=ps.project %}{% spaceless %}
-\{% if project.project_type == 'research' %}theory{% else %}practice{% endif %}{{ '{' }}{% for s in project.supervisors.all %}{{ s.get_abbreviated_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
-         {{ '{' }}{{project.name|tex}}{{ '}' }}{{ '{' }}{{project.semester}}{{ '}' }}{{ '{' }}{{ps.get_final_grade_display|lower}}{{ '}' }}{% endspaceless %}
-{% endwith %}{% endfor %}{% endif %}{{ '}' }}
+{{ '{' }}{% if student.projects|length > 0 %}
+{% for project in student.projects %}{% spaceless %}
+\{{ project.type }}{{ '{' }}{{ project.teachers }}{{ '}' }}
+         {{ '{' }}{{ project.name }}{{ '}' }}{{ '{' }}{{ project.term }}{{ '}' }}{{ '{' }}{{ project.final_grade }}{{ '}' }}{% endspaceless %}
+{% endfor %}{% endif %}{{ '}' }}
 
-{% empty %}
+{% endwith %}{% empty %}
     Нет студентов со статусом "Будет выпускаться"
 {% endfor %}
 </code></pre>

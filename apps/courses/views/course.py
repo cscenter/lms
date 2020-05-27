@@ -14,7 +14,7 @@ from courses.services import group_teachers
 from courses.tabs import get_course_tab_list, CourseInfoTab, TabNotFound
 from courses.views.mixins import CourseURLParamsMixin
 from learning.models import CourseNewsNotification
-from learning.permissions import course_access_role
+from learning.services import course_access_role
 from users.mixins import TeacherOnlyMixin
 
 __all__ = ('CourseDetailView', 'CourseEditView')

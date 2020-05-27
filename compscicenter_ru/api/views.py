@@ -119,10 +119,11 @@ class AlumniList(ListAPIView):
 
     def get_queryset(self):
         return (GraduateProfile.active
+                .get_only_required_fields()
                 .prefetch_related("academic_disciplines")
                 .order_by("-graduation_year",
-                          "student__last_name",
-                          "student__first_name"))
+                          "student_profile__user__last_name",
+                          "student_profile__user__first_name"))
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -147,6 +148,7 @@ class TestimonialList(ListAPIView):
     def get_queryset(self):
         return (GraduateProfile.active
                 .with_testimonial()
+                .get_only_required_fields()
                 .prefetch_related("academic_disciplines")
                 .order_by("-graduation_year", "pk"))
 
@@ -173,18 +175,7 @@ class CourseList(ListAPIView):
     serializer_class = CoursePublicSerializer
 
     def get_queryset(self):
-        most_priority_role = CourseTeacher.get_most_priority_role_expr()
-        prefetch_teachers = Prefetch(
-            'course_teachers',
-            queryset=(CourseTeacher.objects
-                      .select_related('teacher')
-                      .annotate(most_priority_role=most_priority_role)
-                      .only('id', 'course_id', 'teacher_id',
-                            'teacher__first_name',
-                            'teacher__last_name',
-                            'teacher__patronymic')
-                      .order_by('-most_priority_role',
-                                'teacher__last_name')))
+        course_teachers = CourseTeacher.get_most_priority_role_prefetch()
         return (Course.objects
                 .exclude(semester__type=SemesterTypes.SUMMER)
                 .select_related('meta_course', 'semester', 'main_branch')
@@ -194,7 +185,7 @@ class CourseList(ListAPIView):
                       "meta_course__name", "meta_course__slug",
                       "semester__year", "semester__index", "semester__type",
                       "main_branch__code", "main_branch__site_id")
-                .prefetch_related(prefetch_teachers)
+                .prefetch_related(course_teachers)
                 .order_by('-semester__year', '-semester__index',
                           'meta_course__name')
                 )

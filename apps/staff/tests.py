@@ -5,13 +5,13 @@ from core.urls import reverse
 from courses.tests.factories import SemesterFactory
 from learning.settings import StudentStatuses, GradeTypes
 from projects.tests.factories import ProjectFactory
-from users.tests.factories import StudentFactory, CuratorFactory
+from users.tests.factories import StudentFactory, CuratorFactory, \
+    StudentProfileFactory
 
 
 @pytest.mark.django_db
-def test_staff_diplomas_view(curator, client):
-    student = StudentFactory(enrollment_year='2013',
-                             status=StudentStatuses.WILL_GRADUATE)
+def test_staff_diplomas_view(curator, client, settings):
+    student = StudentFactory(student_profile__status=StudentStatuses.WILL_GRADUATE)
     semester1 = SemesterFactory.create(year=2014, type='spring')
     p = ProjectFactory.create(students=[student], semester=semester1)
     sp = p.projectstudent_set.all()[0]

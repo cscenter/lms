@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load call_method from core_tags %}
+{% load call_method can_enroll_in_course from core_tags %}
 
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 
@@ -61,7 +61,7 @@
                 {% endfor %}
               </td>
               <td>
-                {% call_method request.user "has_perm" "learning.enroll_in_course" course as can_enroll %}
+                  {% can_enroll_in_course request.user course request.user.get_student_profile as can_enroll %}
                   {% if can_enroll %}
                     <a href="{{ course.get_enroll_url }}" class="btn btn-default btn-sm btn-block">{% trans "Enroll" %}</a>
                   {% endif %}

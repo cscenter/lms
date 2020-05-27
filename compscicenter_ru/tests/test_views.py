@@ -37,18 +37,16 @@ def test_enrollment_checklist(client):
 def test_alumni(client):
     url_alumni_all = reverse('alumni')
     response = client.get(url_alumni_all)
-    assert response.status_code == 200
-    json_data = response.context_data['app_data']
-    assert json_data['props']['yearOptions'] == [{'label': '2013', 'value': 2013}]
-    assert not json_data['props']['areaOptions']
+    assert response.status_code == 404  # No graduates yet
     graduated_on = datetime.date(year=2015, month=1, day=1)
     graduated = GraduateProfileFactory(graduated_on=graduated_on)
-    cache.delete('cscenter_last_graduation_year')
+    cache.delete('csc_graduation_history')
     response = client.get(url_alumni_all)
     assert response.status_code == 200
     json_data = response.context_data['app_data']
-    assert len(json_data['props']['yearOptions']) == 3
-    assert json_data['props']['yearOptions'][0]['value'] == 2015
+    assert not json_data['props']['areaOptions']
+    assert len(json_data['props']['yearOptions']) == 1
+    assert json_data['props']['yearOptions'] == [{'label': '2015', 'value': 2015}]
     assert json_data['state']['year'] == json_data['props']['yearOptions'][0]
     a = AcademicDisciplineFactory()
     response = client.get(url_alumni_all)

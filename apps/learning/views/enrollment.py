@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -10,8 +11,9 @@ from core.exceptions import Redirect
 from core.urls import reverse
 from courses.views.mixins import CourseURLParamsMixin
 from learning.forms import CourseEnrollmentForm
-from learning.models import Enrollment, CourseInvitation, StudentGroup
-from learning.permissions import EnrollInCourse, EnrollInCourseByInvitation
+from learning.models import Enrollment, CourseInvitation
+from learning.permissions import EnrollInCourse, EnrollInCourseByInvitation, \
+    EnrollPermissionObject, InvitationEnrollPermissionObject
 from learning.services import EnrollmentService, AlreadyEnrolled, \
     CourseCapacityFull, StudentGroupService, GroupEnrollmentKeyError
 
@@ -22,7 +24,9 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
     permission_required = EnrollInCourse.name
 
     def get_permission_object(self):
-        return self.course
+        site = self.request.site
+        student_profile = self.request.user.get_student_profile(site)
+        return EnrollPermissionObject(self.course, student_profile)
 
     def has_permission(self):
         has_perm = super().has_permission()
@@ -35,16 +39,19 @@ class CourseEnrollView(CourseURLParamsMixin, PermissionRequiredMixin, FormView):
 
     def form_valid(self, form):
         reason_entry = form.cleaned_data["reason"].strip()
-        student = self.request.user
+        user = self.request.user
         try:
-            student_group = StudentGroupService.resolve(self.course, student)
+            student_group = StudentGroupService.resolve(self.course, user,
+                                                        settings.SITE_ID)
         except GroupEnrollmentKeyError:
             # In fact, there is no enrollment key support right now
             msg = _("Please, check your group enrollment key")
             messages.error(self.request, msg, extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
         try:
-            EnrollmentService.enroll(student, self.course,
+            site = self.request.site
+            student_profile = user.get_student_profile(site)
+            EnrollmentService.enroll(student_profile, self.course,
                                      reason_entry=reason_entry,
                                      student_group=student_group)
             msg = _("You are successfully enrolled in the course")
@@ -100,7 +107,10 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
     permission_required = EnrollInCourseByInvitation.name
 
     def get_permission_object(self):
-        return self.course_invitation
+        site = self.request.site
+        student_profile = self.request.user.get_student_profile(site)
+        return InvitationEnrollPermissionObject(self.course_invitation,
+                                                student_profile)
 
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
@@ -122,16 +132,19 @@ class CourseInvitationEnrollView(PermissionRequiredMixin,
 
     def post(self, request, *args, **kwargs):
         invitation = self.course_invitation.invitation
-        student = request.user
+        user = request.user
         try:
-            resolved_group = StudentGroupService.resolve(self.course, student)
+            resolved_group = StudentGroupService.resolve(self.course, user,
+                                                         settings.SITE_ID)
         except GroupEnrollmentKeyError:
             # In fact, there is no enrollment key support right now
             msg = _("Please, check your group enrollment key")
             messages.error(self.request, msg, extra_tags='timeout')
             raise Redirect(to=self.course.get_absolute_url())
         try:
-            EnrollmentService.enroll(student, self.course,
+            site = self.request.site
+            student_profile = user.get_student_profile(site)
+            EnrollmentService.enroll(student_profile, self.course,
                                      reason_entry='',
                                      invitation=invitation,
                                      student_group=resolved_group)

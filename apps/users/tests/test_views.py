@@ -1,5 +1,4 @@
 import copy
-import unittest
 
 import factory
 import pytest
@@ -11,223 +10,238 @@ from django.utils.encoding import smart_text, smart_bytes
 from core.admin import get_admin_url
 from core.models import Branch
 from core.tests.factories import BranchFactory
-from core.tests.utils import CSCTestCase
 from core.urls import reverse
 from courses.tests.factories import CourseFactory
-from learning.settings import StudentStatuses, GradeTypes, Branches
+from learning.settings import GradeTypes, Branches
 from learning.tests.factories import GraduateProfileFactory
-from learning.tests.mixins import MyUtilitiesMixin
 from users.constants import Roles, GenderTypes
 from users.forms import UserCreationForm
 from users.models import User, UserGroup
 from users.tests.factories import UserFactory, SHADCourseRecordFactory, \
-    StudentFactory, add_user_groups, StudentFactory, CuratorFactory, OnlineCourseRecordFactory
+    add_user_groups, StudentFactory, CuratorFactory, \
+    OnlineCourseRecordFactory, StudentProfileFactory
 
 
-class UserTests(MyUtilitiesMixin, CSCTestCase):
-    def test_full_name_contains_patronymic(self):
-        """
-        If "patronymic" is set, get_full_name's result should contain it
-        """
-        user = User(first_name=u"Анна", last_name=u"Иванова",
-                    patronymic=u"Васильевна")
-        self.assertEqual(user.get_full_name(), u"Анна Васильевна Иванова")
-        self.assertEqual(user.get_full_name(True), u"Иванова Анна Васильевна")
-        user = User(first_name=u"Анна", last_name=u"Иванова")
-        self.assertEqual(user.get_full_name(), u"Анна Иванова")
+@pytest.mark.django_db
+def test_full_name_contains_patronymic(client):
+    """
+    If "patronymic" is set, get_full_name's result should contain it
+    """
+    user = User(first_name=u"Анна", last_name=u"Иванова",
+                patronymic=u"Васильевна")
+    assert user.get_full_name() == u"Анна Васильевна Иванова"
+    assert user.get_full_name(True) == u"Иванова Анна Васильевна"
+    user = User(first_name=u"Анна", last_name=u"Иванова")
+    assert user.get_full_name() == u"Анна Иванова"
 
-    def test_abbreviated_name(self):
-        user = User(first_name=u"Анна", last_name=u"Иванова",
-                    patronymic=u"Васильевна")
-        self.assertEqual(user.get_abbreviated_name(),
-                         u"А. В. Иванова")
-        user = User(first_name=u"Анна", last_name=u"Иванова")
-        self.assertEqual(user.get_abbreviated_name(),
-                         u"А. Иванова")
 
-    def test_short_name(self):
-        user = User(first_name="Анна", last_name="Иванова",
-                    patronymic="Васильевна")
-        non_breaking_space = chr(160)
-        assert user.get_short_name() == "Анна Иванова"
-        user = User(first_name=u"Анна", last_name=u"Иванова")
-        assert user.get_short_name() == "Анна Иванова"
+@pytest.mark.django_db
+def test_abbreviated_name(client):
+    user = User(first_name=u"Анна", last_name=u"Иванова",
+                patronymic=u"Васильевна")
+    assert user.get_abbreviated_name() == "А. В. Иванова"
+    user = User(first_name=u"Анна", last_name=u"Иванова")
+    assert user.get_abbreviated_name() == "А. Иванова"
 
-    def test_to_string(self):
-        user = User(first_name=u"Анна", last_name=u"Иванова",
-                    patronymic=u"Васильевна")
-        self.assertEqual(smart_text(user), user.get_full_name(True))
 
-    def test_login_page(self):
-        response = self.client.get(reverse('auth:login'))
-        soup = BeautifulSoup(response.content, "html.parser")
-        maybe_form = soup.find_all("form")
-        self.assertEqual(len(maybe_form), 1)
-        form = maybe_form[0]
-        self.assertEqual(len(form.select('input[name="username"]')), 1)
-        self.assertEqual(len(form.select('input[name="password"]')), 1)
-        self.assertEqual(len(form.select('input[type="submit"]')), 1)
+@pytest.mark.django_db
+def test_short_name(client):
+    user = User(first_name="Анна", last_name="Иванова",
+                patronymic="Васильевна")
+    non_breaking_space = chr(160)
+    assert user.get_short_name() == "Анна Иванова"
+    user = User(first_name=u"Анна", last_name=u"Иванова")
+    assert user.get_short_name() == "Анна Иванова"
 
-    def test_login_works(self):
-        good_user_attrs = factory.build(dict, FACTORY_CLASS=UserFactory)
-        good_user_attrs["branch"] = BranchFactory()
-        good_user = UserFactory(**good_user_attrs)
-        # graduated students redirected to LOGIN_REDIRECT_URL
-        add_user_groups(good_user, [Roles.GRADUATE])
-        self.assertNotIn('_auth_user_id', self.client.session)
-        bad_user = copy.copy(good_user_attrs)
-        bad_user['password'] = "BAD"
-        resp = self.client.post(reverse('auth:login'), bad_user)
-        self.assertNotIn('_auth_user_id', self.client.session)
-        self.assertEqual(resp.status_code, 200)
-        assert len(resp.context['form'].errors) > 0
-        resp = self.client.post(reverse('auth:login'), good_user_attrs)
-        self.assertRedirects(resp, settings.LOGIN_REDIRECT_URL)
-        self.assertIn('_auth_user_id', self.client.session)
 
-    def test_auth_restriction_works(self):
-        user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
-        user_data["branch"] = BranchFactory()
-        user = User.objects.create_user(**user_data)
-        url = reverse('teaching:assignment_list')
-        self.assertLoginRedirect(url)
-        response = self.client.post(reverse('auth:login'), user_data)
-        assert response.status_code == 200
-        self.assertLoginRedirect(url)
-        add_user_groups(user, [Roles.STUDENT])
-        user.branch = Branch.objects.get_by_natural_key(Branches.SPB,
-                                                        settings.SITE_ID)
-        user.save()
-        response = self.client.post(reverse('auth:login'), user_data)
-        assert response.status_code == 302
-        resp = self.client.get(reverse('teaching:assignment_list'))
-        self.assertLoginRedirect(url)
-        add_user_groups(user, [Roles.STUDENT, Roles.TEACHER])
-        user.save()
-        resp = self.client.get(reverse('teaching:assignment_list'))
-        # Teacher has no course offering and redirects to courses list
-        self.assertEqual(resp.status_code, 302)
-        # Now he has one
-        CourseFactory.create(teachers=[user])
-        resp = self.client.get(reverse('teaching:assignment_list'))
-        self.assertEqual(resp.status_code, 200)
+@pytest.mark.django_db
+def test_to_string(client):
+    user = User(first_name=u"Анна", last_name=u"Иванова",
+                patronymic=u"Васильевна")
+    assert smart_text(user) == user.get_full_name(True)
 
-    def test_logout_works(self):
-        user = UserFactory()
-        login = self.client.login(user)
-        self.assertTrue(login)
-        self.assertIn('_auth_user_id', self.client.session)
-        resp = self.client.get(reverse('auth:logout'))
-        self.assertRedirects(resp, settings.LOGOUT_REDIRECT_URL,
-                             status_code=302)
-        self.assertNotIn('_auth_user_id', self.client.session)
 
-    def test_logout_redirect_works(self):
-        user = UserFactory()
-        login = self.client.login(user)
-        resp = self.client.get(reverse('auth:logout'),
-                               {'next': "/abc"})
-        self.assertRedirects(resp, "/abc", status_code=302)
+@pytest.mark.django_db
+def test_login_page(client):
+    response = client.get(reverse('auth:login'))
+    soup = BeautifulSoup(response.content, "html.parser")
+    maybe_form = soup.find_all("form")
+    assert len(maybe_form) == 1
+    form = maybe_form[0]
+    assert len(form.select('input[name="username"]')) == 1
+    assert len(form.select('input[name="password"]')) == 1
+    assert len(form.select('input[type="submit"]')) == 1
 
-    def test_yandex_login_from_email(self):
-        """
-        yandex_login can be exctracted from email if email is on @yandex.ru
-        """
-        branch = BranchFactory()
-        user = User.objects.create_user("testuser1", "foo@bar.net",
-                                        "test123foobar@!", branch=branch)
-        self.assertFalse(user.yandex_login)
-        user = User.objects.create_user("testuser2", "foo@yandex.ru",
-                                        "test123foobar@!", branch=branch)
-        self.assertEqual(user.yandex_login, "foo")
 
-    def test_short_bio(self):
-        """
-        `get_short_bio` split bio on the first paragraph
-        """
-        user = UserFactory()
-        user.bio = "Some small text"
-        self.assertEqual(user.get_short_bio(), "Some small text")
-        user.bio = """Some large text.
+@pytest.mark.django_db
+def test_login_works(client):
+    good_user_attrs = factory.build(dict, FACTORY_CLASS=UserFactory)
+    good_user_attrs["branch"] = BranchFactory()
+    good_user = UserFactory(**good_user_attrs)
+    # graduated students redirected to LOGIN_REDIRECT_URL
+    add_user_groups(good_user, [Roles.GRADUATE])
+    assert '_auth_user_id' not in client.session
+    bad_user = copy.copy(good_user_attrs)
+    bad_user['password'] = "BAD"
+    response = client.post(reverse('auth:login'), bad_user)
+    assert '_auth_user_id' not in client.session
+    assert response.status_code == 200
+    assert len(response.context['form'].errors) > 0
+    response = client.post(reverse('auth:login'), good_user_attrs)
+    assert response.status_code == 302
+    assert response.url == settings.LOGIN_REDIRECT_URL
+    assert '_auth_user_id' in client.session
 
-        It has several paragraphs, by the way."""
-        self.assertEqual(user.get_short_bio(), "Some large text.")
 
-    def test_user_detail_view(self):
-        user = UserFactory()
-        response = self.client.get(user.get_absolute_url())
-        assert response.status_code == 404
-        user.add_group(Roles.STUDENT)
-        response = self.client.get(user.get_absolute_url())
-        assert response.status_code == 200
-        assert response.context['profile_user'] == user
-        assert not response.context['is_editing_allowed']
+@pytest.mark.django_db
+def test_logout_works(client):
+    user = UserFactory()
+    client.login(user)
+    assert '_auth_user_id' in client.session
+    response = client.get(reverse('auth:logout'))
+    assert response.status_code == 302
+    assert response.url == settings.LOGOUT_REDIRECT_URL
+    assert '_auth_user_id' not in client.session
 
-    def test_graduate_can_edit_testimonial(self):
-        """
-        Only graduates can (and should) have "CSC review" field in their
-        profiles
-        """
-        test_review = "CSC are the bollocks"
-        user = UserFactory()
-        self.client.login(user)
-        response = self.client.post(user.get_update_profile_url(),
-                                    {'testimonial': test_review})
-        self.assertRedirects(response, user.get_absolute_url(),
-                             status_code=302)
-        response = self.client.get(user.get_absolute_url())
-        assert smart_bytes(test_review) not in response.content
-        add_user_groups(user, [Roles.GRADUATE])
-        user.save()
-        GraduateProfileFactory(student=user)
-        response = self.client.post(user.get_update_profile_url(),
-                                    {'testimonial': test_review})
-        self.assertRedirects(response, user.get_absolute_url(),
-                             status_code=302)
-        response = self.client.get(user.get_absolute_url())
-        assert smart_bytes(test_review) in response.content
 
-    def test_duplicate_check(self):
-        """
-        It should be impossible to create users with equal names
-        """
-        user = UserFactory()
-        branch = BranchFactory()
-        form_data = {'username': user.username,
-                     'email': user.email,
-                     'gender': GenderTypes.MALE,
-                     'branch': branch.pk,
-                     'password1': "test123foobar@!",
-                     'password2': "test123foobar@!"}
-        form = UserCreationForm(data=form_data)
-        assert not form.is_valid()
-        new_user = UserFactory.build()
-        form_data.update({
-            'username': new_user.username,
-            'email': new_user.email
-        })
-        form = UserCreationForm(data=form_data)
-        assert form.is_valid()
+@pytest.mark.django_db
+def test_logout_redirect_works(client):
+    user = UserFactory()
+    client.login(user)
+    response = client.get(reverse('auth:logout'),
+                           {'next': "/abc"})
+    assert response.status_code == 302
+    assert response.url == "/abc"
 
-    @unittest.skip("not implemented")
-    def test_completed_courses(self):
-        """On profile page unauthenticated users cant' see uncompleted or
-        failed courses
-        """
 
-    def test_email_on_detail(self):
-        """Email field should be displayed only to curators (superuser)"""
-        student_mail = "student@student.mail"
-        student = StudentFactory(email=student_mail)
-        self.doLogin(student)
-        url = student.get_absolute_url()
-        resp = self.client.get(url)
-        self.assertNotContains(resp, student_mail)
-        # check with curator credentials
-        curator = CuratorFactory()
-        self.doLogin(curator)
-        resp = self.client.get(url)
-        self.assertContains(resp, student_mail)
+@pytest.mark.django_db
+def test_yandex_login_from_email(client):
+    """
+    yandex_login can be exctracted from email if email is on @yandex.ru
+    """
+    branch = BranchFactory()
+    user = User.objects.create_user("testuser1", "foo@bar.net",
+                                    "test123foobar@!", branch=branch)
+    assert not user.yandex_login
+    user = User.objects.create_user("testuser2", "foo@yandex.ru",
+                                    "test123foobar@!", branch=branch)
+    assert user.yandex_login == "foo"
+
+
+@pytest.mark.django_db
+def test_short_bio(client):
+    """
+    `get_short_bio` split bio on the first paragraph
+    """
+    user = UserFactory()
+    user.bio = "Some small text"
+    assert user.get_short_bio() == "Some small text"
+    user.bio = """Some large text.
+
+    It has several paragraphs, by the way."""
+    assert user.get_short_bio() == "Some large text."
+
+
+@pytest.mark.django_db
+def test_graduate_can_edit_testimonial(client, settings):
+    """
+    Only graduates can (and should) have "CSC review" field in their
+    profiles
+    """
+    test_review = "CSC are the bollocks"
+    form_data = {'testimonial': test_review}
+    student = StudentFactory()
+    client.login(student)
+    response = client.post(student.get_update_profile_url(), form_data)
+    assert response.status_code == 302
+    assert response.url == student.get_absolute_url()
+    response = client.get(student.get_absolute_url())
+    assert smart_bytes(test_review) not in response.content
+    add_user_groups(student, [Roles.GRADUATE])
+    student.save()
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    GraduateProfileFactory(student_profile=student_profile)
+    response = client.post(student.get_update_profile_url(), form_data)
+    assert response.status_code == 302
+    assert response.url == student.get_absolute_url()
+    response = client.get(student.get_absolute_url())
+    assert smart_bytes(test_review) in response.content
+
+
+@pytest.mark.django_db
+def test_duplicate_check(client):
+    """
+    It should be impossible to create users with equal names
+    """
+    user = UserFactory()
+    branch = BranchFactory()
+    form_data = {'username': user.username,
+                 'email': user.email,
+                 'gender': GenderTypes.MALE,
+                 'branch': branch.pk,
+                 'password1': "test123foobar@!",
+                 'password2': "test123foobar@!"}
+    form = UserCreationForm(data=form_data)
+    assert not form.is_valid()
+    new_user = UserFactory.build()
+    form_data.update({
+        'username': new_user.username,
+        'email': new_user.email
+    })
+    form = UserCreationForm(data=form_data)
+    assert form.is_valid()
+
+
+@pytest.mark.django_db
+def test_email_on_detail(client):
+    """Email field should be displayed only to curators (superuser)"""
+    student_mail = "student@student.mail"
+    student = StudentFactory(email=student_mail)
+    client.login(student)
+    url = student.get_absolute_url()
+    response = client.get(url)
+    assert smart_bytes(student_mail) not in response.content
+    # check with curator credentials
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(url)
+    assert smart_bytes(student_mail) in response.content
+
+
+@pytest.mark.django_db
+def test_auth_restrictions(client, assert_login_redirect):
+    user_data = factory.build(dict, FACTORY_CLASS=UserFactory)
+    user_data["branch"] = BranchFactory()
+    user = User.objects.create_user(**user_data)
+    teaching_assignments_url = reverse('teaching:assignment_list')
+    assert_login_redirect(teaching_assignments_url)
+    response = client.post(reverse('auth:login'), user_data)
+    assert response.status_code == 200
+    branch_spb = Branch.objects.get_by_natural_key(Branches.SPB, settings.SITE_ID)
+    student = StudentFactory(branch=branch_spb)
+    auth_data = {'username': student.username, 'password': student.raw_password}
+    response = client.post(reverse('auth:login'), auth_data)
+    assert response.status_code == 302
+    assert client.get(teaching_assignments_url).status_code == 403
+    add_user_groups(student, [Roles.TEACHER])
+    response = client.get(teaching_assignments_url)
+    # Teacher has no course offerings and will be redirected to the course list
+    assert response.status_code == 302
+    CourseFactory(teachers=[student])
+    response = client.get(teaching_assignments_url)
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_user_detail_view(client):
+    user = UserFactory()
+    response = client.get(user.get_absolute_url())
+    assert response.status_code == 404
+    student = StudentFactory()
+    response = client.get(student.get_absolute_url())
+    assert response.status_code == 200
+    assert response.context['profile_user'] == student
+    assert not response.context['is_editing_allowed']
 
 
 @pytest.mark.django_db
@@ -328,12 +342,7 @@ def test_user_detail_view_should_show_links_for_online_courses(client):
 
 
 @pytest.mark.django_db
-def test_student_should_have_enrollment_year(client):
-    """
-    If user set "student" group (pk=1 in initial_data fixture), they
-    should also provide an enrollment year, otherwise they should get
-    ValidationError
-    """
+def test_student_should_have_profile(client):
     client.login(CuratorFactory())
     user = UserFactory(photo='/a/b/c')
     assert user.groups.count() == 0
@@ -341,8 +350,6 @@ def test_student_should_have_enrollment_year(client):
     del form_data['photo']
     form_data.update({
         # Django wants all inline formsets
-        'userstatuslog_set-INITIAL_FORMS': '0',
-        'userstatuslog_set-TOTAL_FORMS': '0',
         'onlinecourserecord_set-INITIAL_FORMS': '0',
         'onlinecourserecord_set-TOTAL_FORMS': '0',
         'shadcourserecord_set-TOTAL_FORMS': '0',
@@ -358,17 +365,17 @@ def test_student_should_have_enrollment_year(client):
     response = client.post(admin_url, form_data)
     assert response.status_code == 200
 
-    # Empty enrollment_year
     def get_user_group_formset(response):
         form = None
         for inline_formset_obj in response.context['inline_admin_formsets']:
             if issubclass(inline_formset_obj.formset.model, UserGroup):
                 form = inline_formset_obj.formset
+        assert form, "Inline form for UserGroup is missing"
         return form
     user_group_form = get_user_group_formset(response)
-    assert user_group_form, "Inline form for UserGroup is missing"
     assert not user_group_form.is_valid()
-    form_data.update({'enrollment_year': 2010})
+    StudentProfileFactory(user=user)
+    UserGroup.objects.filter(user=user).delete()
     response = client.post(admin_url, form_data)
     assert response.status_code == 302
     user.refresh_from_db()

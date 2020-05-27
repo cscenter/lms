@@ -112,7 +112,7 @@ class City(TimezoneAwareModel, models.Model):
 
 
 class BranchManager(models.Manager):
-    use_in_migrations = True
+    use_in_migrations = False
 
     def get_by_pk(self, branch_id: int):
         pk = BranchId(branch_id)

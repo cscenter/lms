@@ -5,16 +5,15 @@ from django.db.models import query, Subquery, Q, Prefetch, Count, Case, When, \
     Value, IntegerField, F
 from django.utils import timezone
 
-from core.utils import is_club_site
 from courses.constants import MaterialVisibilityTypes
 
 
 class CourseTeacherQuerySet(query.QuerySet):
     # FIXME: do I need subquery here?
-    def for_course(self, course_slug):
+    def for_meta_course(self, meta_course):
         course_pks = (self
                       .model.course.field.related_model.objects
-                      .filter(meta_course__slug=course_slug)
+                      .filter(meta_course=meta_course)
                       # Note: can't reset default ordering in a Subquery
                       .order_by("pk")
                       .values("pk"))
@@ -72,11 +71,13 @@ class CourseClassQuerySet(query.QuerySet):
                        'course__meta_course__short_description_en',
                        'course__meta_course__short_description_ru'))
 
-    # FIXME: possible duplicates. Add tests
     def in_branches(self, *branches):
+        """
+        Returns distinct course classes for a given list of branches
+        """
         if not branches:
             return self
-        return self.filter(course__coursebranch__branch__in=branches)
+        return self.filter(course__coursebranch__branch__in=branches).distinct()
 
     def for_student(self, user):
         # Get common courses classes and restricted to the student group
@@ -93,15 +94,7 @@ class CourseClassQuerySet(query.QuerySet):
         return self.filter(materials_visibility=MaterialVisibilityTypes.VISIBLE)
 
 
-class _CourseClassManager(models.Manager):
-    def get_queryset(self):
-        if is_club_site():
-            return super().get_queryset().filter(course__is_open=True)
-        else:
-            return super().get_queryset()
-
-
-CourseClassManager = _CourseClassManager.from_queryset(CourseClassQuerySet)
+CourseClassManager = models.Manager.from_queryset(CourseClassQuerySet)
 
 
 class CourseQuerySet(models.QuerySet):

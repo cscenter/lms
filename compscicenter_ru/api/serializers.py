@@ -88,8 +88,8 @@ class TeacherCourseSerializer(serializers.ModelSerializer):
 # TODO: add detail_url?
 class GraduateProfileSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source="pk")
-    student = StudentSerializer()
-    photo = PhotoSerializerField(User.ThumbnailSize.BASE,
+    student = StudentSerializer(source="student_profile")
+    photo = PhotoSerializerField(GraduateProfile.ThumbnailSize.BASE,
                                  thumbnail_options={"stub_official": False})
     year = serializers.IntegerField(source="graduation_year")
     areas = serializers.PrimaryKeyRelatedField(many=True, read_only=True,
@@ -129,7 +129,7 @@ class TestimonialCardSerializer(GraduateProfileSerializer):
                                  thumbnail_options={"stub_official": False})
 
     def get_student(self, graduate_profile):
-        return graduate_profile.student.get_full_name()
+        return graduate_profile.student_profile.user.get_full_name()
 
 
 class CoursePublicSerializer(CourseSerializer):

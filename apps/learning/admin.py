@@ -1,9 +1,10 @@
+from django.conf import settings
 from django.contrib import admin
 from django.db import models as db_models
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import BaseModelAdmin
+from core.admin import BaseModelAdmin, meta
 from core.filters import AdminRelatedDropdownFilter
 from core.utils import admin_datetime
 from core.widgets import AdminRichTextAreaWidget
@@ -42,20 +43,24 @@ class AssignmentCommentAdmin(BaseModelAdmin):
 
 
 class EnrollmentAdmin(BaseModelAdmin):
+    list_select_related = ['course', 'course__semester', 'course__meta_course',
+                           'course__main_branch', 'student']
     list_display = ['student', 'course', 'is_deleted', 'grade',
                     'grade_changed_local']
     ordering = ['-pk']
     list_filter = [
+        'course__main_branch__site',
         'course__main_branch',
         ('course__semester', AdminRelatedDropdownFilter)
     ]
-    search_fields = ['course__meta_course__name']
+    search_fields = ['course__meta_course__name', 'student__last_name']
     exclude = ['grade_changed']
-    raw_id_fields = ("student", "course", "invitation", "student_group")
+    raw_id_fields = ("student", "course", "invitation", "student_profile",
+                     "student_group")
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return ['student', 'course', 'grade_changed_local', 'modified']
+            return ['course', 'student', 'grade_changed_local', 'modified']
         else:
             return ['grade_changed_local', 'modified']
 
@@ -71,7 +76,8 @@ class EnrollmentAdmin(BaseModelAdmin):
             course = instance.course
             student = instance.student
             if course.group_mode == StudentGroupTypes.BRANCH:
-                student_group = StudentGroupService.resolve(course, student)
+                student_group = StudentGroupService.resolve(course, student,
+                                                            settings.SITE_ID)
                 if student_group is None:
                     student_group, _ = StudentGroup.objects.get_or_create(
                         course=course,
@@ -117,10 +123,15 @@ class UsefulAdmin(BaseModelAdmin):
 
 
 class GraduateProfileAdmin(BaseModelAdmin):
-    list_display = ('student', 'graduation_year')
-    list_filter = ('graduation_year',)
-    search_fields = ('student__last_name',)
-    raw_id_fields = ('student',)
+    list_select_related = ('student_profile', 'student_profile__user')
+    list_display = ('student_name', 'graduation_year', 'is_active')
+    list_filter = ('student_profile__site', 'graduation_year')
+    search_fields = ('student_profile__user__last_name',)
+    raw_id_fields = ('student_profile',)
+
+    @meta(_("Student"))
+    def student_name(self, obj):
+        return obj.student_profile.user.get_full_name()
 
 
 class CourseInlineAdmin(admin.TabularInline):
@@ -137,10 +148,10 @@ class InvitationAdmin(BaseModelAdmin):
     readonly_fields = ('token',)
     exclude = ('courses',)
 
+    @meta(_("Invitation Link"))
     def get_link(self, obj):
         url = obj.get_absolute_url()
         return mark_safe(f"<a target='_blank' href='{url}'>Смотреть на сайте</a>")
-    get_link.short_description = _("Invitation Link")
 
 
 admin.site.register(AssignmentComment, AssignmentCommentAdmin)

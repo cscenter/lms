@@ -55,10 +55,10 @@ def test_notifications(client, settings):
 @pytest.mark.parametrize("notification_factory",  [AssignmentNotificationFactory, CourseNewsNotificationFactory])
 def test_notify_get_base_url(notification_factory, settings):
     settings.LMS_SUBDOMAIN = 'my'
-    branch = BranchFactory(site=SiteFactory(domain='test.domain'))
+    branch = BranchFactory(site=SiteFactory(domain='test.cc'))
     user = UserFactory(branch=branch)
     notification = notification_factory(user=user)
-    assert _get_base_domain(notification) == f"{settings.LMS_SUBDOMAIN}.test.domain"
+    assert _get_base_domain(notification) == f"{settings.LMS_SUBDOMAIN}.test.cc"
     # Test subdomain resolving (supported on club site)
     settings.LMS_SUBDOMAIN = None
     new_branch = BranchFactory()

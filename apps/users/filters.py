@@ -10,7 +10,7 @@ from django_filters.rest_framework import BaseInFilter, NumberFilter, \
 
 from learning.settings import StudentStatuses, GradeTypes
 from users.constants import Roles
-from users.models import User
+from users.models import User, StudentProfile
 
 
 class NumberInFilter(BaseInFilter, NumberFilter):
@@ -55,7 +55,6 @@ class RolesInFilter(MultipleChoiceFilter):
         (Roles.VOLUNTEER, Roles.values[Roles.VOLUNTEER]),
         (Roles.INVITED, Roles.values[Roles.INVITED]),
         (Roles.GRADUATE, Roles.values[Roles.GRADUATE]),
-        (Roles.MASTERS_DEGREE, Roles.values[Roles.MASTERS_DEGREE]),
     ]
 
     def __init__(self, choices=None, *args, **kwargs):
@@ -67,12 +66,12 @@ class RolesInFilter(MultipleChoiceFilter):
         if value in EMPTY_VALUES:
             return qs
         return (qs
-                .filter(group__site_id=settings.SITE_ID,
-                        group__role__in=value)
+                .filter(user__group__site_id=settings.SITE_ID,
+                        user__group__role__in=value)
                 .distinct())
 
 
-class UserFilterForm(forms.Form):
+class StudentFilterForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         if ("studying" in cleaned_data["status"] and
@@ -85,26 +84,28 @@ class UserFilterForm(forms.Form):
             cleaned_data['groups'] = groups
 
 
-class UserFilter(FilterSet):
+class StudentFilter(FilterSet):
     ENROLLMENTS_MAX = 12
 
     _lexeme_trans_map = dict((ord(c), None) for c in '*|&:')
 
     name = CharFilter(method='name_filter')
     branches = CharInFilter(field_name='branch_id')
-    curriculum_year = NumberInFilter(field_name='curriculum_year')
-    groups = RolesInFilter(label='Roles', field_name='group__role',
+    profile_types = CharInFilter(field_name='type')
+    curriculum_year = NumberInFilter(field_name='year_of_curriculum')
+    # FIXME: add `graduate` type? then remove `groups` filter
+    groups = RolesInFilter(label='Roles', field_name='user__group__role',
                            distinct=True)
     # FIXME: choice validation
     status = CharFilter(label='Student Status', method='status_filter')
     cnt_enrollments = CharFilter(label='Enrollments',
-                                 method='cnt_enrollments_filter')
+                                 method='courses_filter')
 
     class Meta:
-        form = UserFilterForm
-        model = User
+        form = StudentFilterForm
+        model = StudentProfile
         fields = ("name", "branches", "curriculum_year", "groups", "status",
-                  "cnt_enrollments",)
+                  "cnt_enrollments", "profile_types")
 
     @property
     def qs(self):
@@ -112,7 +113,7 @@ class UserFilter(FilterSet):
             return self.queryset.none()
         return super().qs
 
-    def cnt_enrollments_filter(self, queryset, name, value):
+    def courses_filter(self, queryset, name, value):
         value_list = value.split(u',')
         try:
             value_list = [int(v) for v in value_list if v]
@@ -122,27 +123,27 @@ class UserFilter(FilterSet):
             return queryset
 
         queryset = queryset.annotate(
-            courses_cnt=
+            courses_total=
             # Remove unsuccessful grades, then distinctly count by pk
             Count(Case(
-                When(Q(enrollment__grade=GradeTypes.NOT_GRADED) |
-                     Q(enrollment__grade=GradeTypes.UNSATISFACTORY),
+                When(Q(user__enrollment__grade=GradeTypes.NOT_GRADED) |
+                     Q(user__enrollment__grade=GradeTypes.UNSATISFACTORY),
                      then=Value(None)),
-                default=F("enrollment__course__meta_course_id")
+                default=F("user__enrollment__course__meta_course_id")
             ), distinct=True) +
             Count(Case(
-                When(Q(shadcourserecord__grade=GradeTypes.NOT_GRADED) |
-                     Q(shadcourserecord__grade=GradeTypes.UNSATISFACTORY),
+                When(Q(user__shadcourserecord__grade=GradeTypes.NOT_GRADED) |
+                     Q(user__shadcourserecord__grade=GradeTypes.UNSATISFACTORY),
                      then=Value(None)),
-                default=F("shadcourserecord")
+                default=F("user__shadcourserecord")
             ), distinct=True) +
             # No need to filter online courses by grade
-            Count("onlinecourserecord", distinct=True)
+            Count("user__onlinecourserecord", distinct=True)
         )
-        condition = Q(courses_cnt__in=value_list)
+        condition = Q(courses_total__in=[v for v in value_list
+                                         if v <= self.ENROLLMENTS_MAX])
         if any(value > self.ENROLLMENTS_MAX for value in value_list):
-            condition |= Q(courses_cnt__gt=self.ENROLLMENTS_MAX)
-
+            condition |= Q(courses_total__gt=self.ENROLLMENTS_MAX)
         return queryset.filter(condition)
 
     def status_filter(self, queryset, name, value):
@@ -168,11 +169,10 @@ class UserFilter(FilterSet):
             return queryset
         else:
             qs = (queryset
-                    .extra(where=["to_tsvector(first_name || ' ' || last_name) "
-                                  "@@ to_tsquery(%s)"],
-                           params=[tsquery])
-                    .exclude(first_name__exact='',
-                             last_name__exact=''))
+                  .extra(where=["to_tsvector(users_user.first_name || ' ' || users_user.last_name) @@ to_tsquery(%s)"],
+                         params=[tsquery])
+                  .exclude(user__first_name__exact='',
+                           user__last_name__exact=''))
             return qs
 
     def _form_name_tsquery(self, qstr):

@@ -2,7 +2,6 @@ import os
 
 from django.conf import settings
 from django.db import models
-from django.db.models import Prefetch
 from django.utils.encoding import smart_text
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
@@ -14,7 +13,6 @@ from core.utils import ru_en_mapping
 from projects.constants import ProjectTypes
 from projects.models import Project, Supervisor
 from users.constants import ThumbnailSizes, GenderTypes
-from users.models import User
 from users.thumbnails import UserThumbnailMixin
 
 
