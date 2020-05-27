@@ -3,7 +3,7 @@ from django.conf import settings
 from django.views import generic
 
 from auth.mixins import PermissionRequiredMixin
-from learning.useful.models import Useful, CurrentUsefulTags
+from useful.models import Useful, CurrentUsefulTags
 from .models import UsefulTag
 
 

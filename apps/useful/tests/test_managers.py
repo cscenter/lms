@@ -1,7 +1,7 @@
 import pytest
 
-from learning.useful.models import CurrentUsefulTags, Useful
-from learning.useful.tests.factories import UsefulFactory
+from useful.models import CurrentUsefulTags, Useful
+from useful.tests.factories import UsefulFactory
 
 
 @pytest.mark.django_db

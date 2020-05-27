@@ -7,7 +7,7 @@ from model_utils.models import TimeStampedModel
 from taggit.managers import TaggableManager
 from taggit.models import TagBase, GenericTaggedItemBase
 
-from learning.useful.managers import UsefulDefaultManager
+from useful.managers import UsefulDefaultManager
 
 
 class CurrentUsefulTags:

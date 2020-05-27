@@ -3,8 +3,8 @@ from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
 from learning.views import CourseInvitationEnrollView, ICalEventsView
-from learning.useful.views import UsefulListView, InternshipListView, \
-    HonorCodeView, UsefulTagAutocomplete
+from useful.views import UsefulListView, InternshipListView, \
+    HonorCodeView
 from .views import EventDetailView, CourseNewsNotificationUpdate, \
     CourseStudentsView, CourseEnrollView, CourseUnenrollView
 
@@ -29,9 +29,4 @@ urlpatterns = [
 
     path("events/<int:pk>/", EventDetailView.as_view(), name="non_course_event_detail"),
     re_path(r'^csc_events.ics', ICalEventsView.as_view(), name='ical_events'),
-
-    # Place tags-autocomplete under `learning.useful` namespace
-    path("", include(([
-        path("learning/useful/tags-autocomplete/", UsefulTagAutocomplete.as_view(), name="tags_autocomplete"),
-    ], "learning.useful"))),
 ]

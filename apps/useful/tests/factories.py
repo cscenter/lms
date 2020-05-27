@@ -1,7 +1,7 @@
 import factory
 
 from core.tests.factories import SiteFactory
-from learning.useful.models import Useful
+from useful.models import Useful
 
 
 class UsefulFactory(factory.django.DjangoModelFactory):

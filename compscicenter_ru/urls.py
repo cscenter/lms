@@ -13,6 +13,7 @@ from compscicenter_ru import views
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.urls import RE_COURSE_URI
 from htmlpages.views import flatpage
+from useful.views import UsefulTagAutocomplete
 
 admin.autodiscover()
 
@@ -69,10 +70,15 @@ urlpatterns += [
     # Used in admin interface
     path('tools/markdown/preview/', MarkdownRenderView.as_view(), name='render_markdown'),
     path('commenting-the-right-way/', MarkdownHowToHelpView.as_view(), name='commenting_the_right_way'),
-    # Place tags-autocomplete under `announcements` namespace
+
+    # Autocomplete for tags in admin
     path("", include(([
         path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
     ], "announcements"))),
+    path("", include(([
+        path("narnia/useful/tags-autocomplete/", UsefulTagAutocomplete.as_view(), name="tags_autocomplete"),
+    ], "useful"))),
+
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),
     path('narnia/django-rq/', include('django_rq.urls')),

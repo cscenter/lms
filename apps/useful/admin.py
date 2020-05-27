@@ -4,7 +4,8 @@ from django.contrib import admin
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.utils.translation import ugettext_lazy as _
 
-from learning.useful.models import Useful, UsefulTag
+from core.admin import meta
+from useful.models import Useful, UsefulTag
 
 admin.site.register(UsefulTag)
 
@@ -15,7 +16,7 @@ class UsefulAdminForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'tags': autocomplete.TaggitSelect2(
-                url='learning.useful:tags_autocomplete',
+                url='useful:tags_autocomplete',
                 attrs={"data-width": 'style'})
         }
 
@@ -33,7 +34,6 @@ class UsefulAdmin(admin.ModelAdmin):
         queryset = super().get_queryset(request)
         return queryset.annotate(tag_list=ArrayAgg('tags__name'))
 
+    @meta(text=_("Useful Tags"))
     def tag_list(self, obj):
         return ', '.join(obj.tag_list)
-
-    tag_list.short_description = _("Useful Tags")
