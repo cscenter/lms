@@ -9,6 +9,8 @@ from courses.permissions import ChangeMetaCourse, ViewCourseContacts, \
     EditCourseClass, EditOwnCourseClass, DeleteOwnCourseClass, \
     DeleteCourseClass, EditAssignment, EditOwnAssignment, \
     ViewCourseClassMaterials, ViewAssignment, ViewOwnAssignment
+from users.permissions import CreateCertificateOfParticipation, \
+    ViewCertificateOfParticipation
 from .permissions import CreateAssignmentComment, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
     ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
@@ -23,6 +25,8 @@ from .permissions import CreateAssignmentComment, \
 # TODO: Add description of each role
 class Roles(DjangoChoices):
     CURATOR = C(5, _('Curator'), permissions=(
+        CreateCertificateOfParticipation,
+        ViewCertificateOfParticipation,
         ChangeMetaCourse,
         CreateAssignment,
         EditAssignment,

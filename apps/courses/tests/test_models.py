@@ -5,12 +5,12 @@ from django.core.exceptions import ValidationError
 
 from core.models import Branch
 from core.tests.factories import BranchFactory
-from courses.constants import SemesterTypes
-from courses.models import Assignment
+from courses.constants import SemesterTypes, TeacherRoles
+from courses.models import Assignment, CourseTeacher, Course
 from courses.tests.factories import CourseNewsFactory, SemesterFactory, \
     CourseFactory, \
     CourseClassFactory, CourseClassAttachmentFactory, MetaCourseFactory, \
-    AssignmentFactory, AssignmentAttachmentFactory
+    AssignmentFactory, AssignmentAttachmentFactory, CourseTeacherFactory
 from courses.utils import TermPair
 from learning.settings import Branches
 
@@ -26,6 +26,30 @@ def test_news_get_timezone(settings):
     news.course.save()
     news.refresh_from_db()
     assert news.get_timezone() == branch_spb.get_timezone()
+
+
+@pytest.mark.django_db
+def test_course_teacher_get_most_priority_role_prefetch(django_assert_num_queries):
+    """Make sure teachers are ordered by the most priority role"""
+    course = CourseFactory()
+    ct1, ct2, ct3, ct4 = CourseTeacherFactory.create_batch(4, course=course)
+    ct1.roles = CourseTeacher.roles.seminar
+    ct1.save()
+    ct2.roles = CourseTeacher.roles.lecturer | CourseTeacher.roles.seminar
+    ct2.save()
+    ct3.roles = CourseTeacher.roles.reviewer
+    ct3.save()
+    ct4.roles = CourseTeacher.roles.lecturer
+    ct4.save()
+    course_teachers = CourseTeacher.get_most_priority_role_prefetch()
+    with django_assert_num_queries(2):
+        course = (Course.objects
+                  .filter(pk=course.pk)
+                  .prefetch_related(course_teachers)
+                  .get())
+        prefetched = [ct.pk for ct in course.course_teachers.all()]
+        assert prefetched == [ct2.pk, ct4.pk, ct1.pk, ct3.pk]
+        assert course.course_teachers.all()[0].get_abbreviated_name() == ct2.teacher.get_abbreviated_name()
 
 
 @pytest.mark.django_db

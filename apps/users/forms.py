@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from core.models import LATEX_MARKDOWN_ENABLED
 from core.utils import is_club_site
 from core.widgets import UbereditorWidget
-from .models import User, EnrollmentCertificate
+from .models import User, CertificateOfParticipation
 
 
 class UserProfileForm(forms.ModelForm):
@@ -71,7 +71,7 @@ class UserProfileForm(forms.ModelForm):
         }
 
 
-class EnrollmentCertificateCreateForm(forms.ModelForm):
+class CertificateOfParticipationCreateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.layout = Layout(
@@ -84,7 +84,7 @@ class EnrollmentCertificateCreateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
     class Meta:
-        model = EnrollmentCertificate
+        model = CertificateOfParticipation
         fields = ['signature', 'note']
 
 

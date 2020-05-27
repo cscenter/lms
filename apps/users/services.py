@@ -1,8 +1,13 @@
+import datetime
 from collections import defaultdict
 from typing import List, Dict
 
-from learning.settings import GradeTypes
-from users.models import OnlineCourseRecord
+from django.contrib.sites.models import Site
+from django.db import transaction
+
+from learning.models import GraduateProfile
+from learning.settings import GradeTypes, StudentStatuses
+from users.models import OnlineCourseRecord, StudentProfile, User
 
 AccountId = int
 
@@ -25,13 +30,13 @@ def get_student_progress(queryset,
 
     users = set(queryset.values_list('user_id', flat=True))
     progress: Dict[AccountId, Dict] = defaultdict(dict)
-
     enrollment_qs = (Enrollment.active
                      .filter(student_id__in=users)
                      .select_related('course',
                                      'course__meta_course',
                                      'course__semester',
                                      'course__main_branch')
+                     .prefetch_related('course__course_teachers')
                      .annotate(grade_weight=GradeTypes.to_int_case_expr())
                      .only('pk', 'created', 'student_id', 'course_id',
                            'grade'))
@@ -81,3 +86,32 @@ def get_student_progress(queryset,
         progress[obj.student_id]['online'].append(obj)
 
     return progress
+
+
+def create_graduate_profiles(site: Site, graduated_on: datetime.date):
+    """
+    Create graduate profiles in draft state for all students with
+    `will graduate` status.
+    """
+    student_profiles = (StudentProfile.objects
+                        .filter(status=StudentStatuses.WILL_GRADUATE,
+                                branch__site=site))
+    for student_profile in student_profiles:
+        with transaction.atomic():
+            defaults = {
+                "graduated_on": graduated_on,
+                "details": {},
+                "is_active": False
+            }
+            profile, created = GraduateProfile.objects.get_or_create(
+                student_profile=student_profile,
+                defaults=defaults)
+            if not created:
+                profile.save()
+
+
+def get_graduate_profile(student_profile: StudentProfile):
+    return (GraduateProfile.active
+            .filter(student_profile=student_profile)
+            .prefetch_related('academic_disciplines')
+            .first())

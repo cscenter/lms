@@ -155,6 +155,7 @@ class StudentsDiplomasStats(APIView):
     http_method_names = ['get']
 
     def get(self, request, graduation_year, format=None):
+        return Response({})
         filters = (Q(group__role=Roles.GRADUATE) &
                    Q(graduate_profile__graduation_year=graduation_year))
         if graduation_year == now().year and self.request.user.is_curator:
@@ -183,8 +184,8 @@ class StudentsDiplomasStats(APIView):
                     good_total += 1
                 unique_courses.add(enrollment.course.meta_course)
                 hours += enrollment.course.courseclass_set.count() * 1.5
-                for teacher in enrollment.course.teachers.all():
-                    unique_teachers.add(teacher.pk)
+                for course_teacher in enrollment.course.course_teachers.all():
+                    unique_teachers.add(course_teacher.teacher_id)
         stats = {
             "total": len(students),
             "teachers_total": len(unique_teachers),

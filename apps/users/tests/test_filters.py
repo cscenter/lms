@@ -245,13 +245,13 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
         graduate_profile__graduated_on=graduated_on)
     response = client.get("{}?{}".format(search_url, "status=studying"))
     json_data = response.json()
-    total_studying = len(students_spb) + len(students_nsk) + len(volunteers)
+    total_studying = len(students_spb) + len(students_nsk) + len(volunteers) + len(graduated)
     assert json_data["count"] == total_studying
     expelled = StudentFactory.create_batch(
         2, student_profile__year_of_admission=2011,
         student_profile__status=StudentStatuses.EXPELLED,
         branch=branch_spb)
-    # If no groups specified - `GRADUATE_CENTER` group excluded from results
+    # No groups specified
     response = client.get("{}?{}".format(search_url, "status=studying"))
     json_data = response.json()
     assert json_data["count"] == total_studying

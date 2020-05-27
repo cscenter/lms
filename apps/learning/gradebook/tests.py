@@ -20,6 +20,7 @@ from learning.gradebook import gradebook_data, BaseGradebookForm, \
     GradeBookFormFactory
 from learning.gradebook.imports import AssignmentGradesImport
 from learning.models import StudentAssignment, Enrollment
+from learning.services import get_student_profile
 from learning.settings import GradingSystems, \
     StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory
@@ -235,7 +236,7 @@ def test_save_gradebook(client, assert_redirect):
 
 
 @pytest.mark.django_db
-def test_gradebook_data():
+def test_gradebook_data(settings):
     co = CourseFactory()
     e1, e2, e3, e4, e5 = EnrollmentFactory.create_batch(5, course=co)
     a1, a2, a3 = AssignmentFactory.create_batch(3, course=co,
@@ -289,8 +290,9 @@ def test_gradebook_data():
     assert data.students[e4.student_id].total_score == 0
     assert data.students[e5.student_id].total_score == 0
     # Check grid for student with inactive status
-    e5.student.status = StudentStatuses.EXPELLED
-    e5.student.save()
+    student_profile = get_student_profile(e5.student, settings.SITE_ID)
+    student_profile.status = StudentStatuses.EXPELLED
+    student_profile.save()
     a_new = AssignmentFactory(course=co, passing_score=3, maximum_score=7)
     data = gradebook_data(co)
     s5_index = 4

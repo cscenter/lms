@@ -93,7 +93,7 @@ def test_student_group_resolving_on_enrollment(client):
 
 
 @pytest.mark.django_db
-def test_student_group_resolving_on_enrollment_admin(client):
+def test_student_group_resolving_on_enrollment_admin(client, settings):
     """
     Admin interface doesn't check all the requirements to enroll student.
     If it's impossible to resolve student group - add student to the
@@ -107,6 +107,7 @@ def test_student_group_resolving_on_enrollment_admin(client):
     post_data = {
         'course': course.pk,
         'student': student.pk,
+        'student_profile': student.get_student_profile(settings.SITE_ID).pk,
         'grade': GradeTypes.NOT_GRADED
     }
     curator = CuratorFactory()
@@ -120,6 +121,7 @@ def test_student_group_resolving_on_enrollment_admin(client):
     assert e.student_group.type == StudentGroupTypes.MANUAL
     # Enroll the second student
     post_data['student'] = student2.pk
+    post_data['student_profile'] = student2.get_student_profile().pk
     response = client.post(reverse('admin:learning_enrollment_add'), post_data)
     e2 = Enrollment.active.filter(student=student2, course=course)
     assert e2.exists()

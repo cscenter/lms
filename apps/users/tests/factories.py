@@ -6,14 +6,14 @@ from django.conf import settings
 from core.tests.factories import BranchFactory
 from learning.settings import GradeTypes, Branches
 from users.constants import Roles, GenderTypes
-from users.models import User, SHADCourseRecord, EnrollmentCertificate, \
+from users.models import User, SHADCourseRecord, CertificateOfParticipation, \
     OnlineCourseRecord, UserGroup, StudentProfile, StudentTypes
 
-__all__ = ('User', 'SHADCourseRecord', 'EnrollmentCertificate',
+__all__ = ('User', 'SHADCourseRecord', 'CertificateOfParticipation',
            'OnlineCourseRecord', 'UserFactory', 'CuratorFactory',
            'StudentFactory', 'TeacherFactory', 'VolunteerFactory',
            'OnlineCourseRecordFactory',
-           'SHADCourseRecordFactory', 'EnrollmentCertificateFactory')
+           'SHADCourseRecordFactory', 'CertificateOfParticipationFactory')
 
 
 def add_user_groups(user, groups):
@@ -86,7 +86,6 @@ class StudentFactory(UserFactory):
         if not create:
             return
         kwargs.setdefault('branch', self.branch)
-        kwargs.setdefault('status', self.status)
         StudentProfileFactory(user=self, **kwargs)
 
 
@@ -96,7 +95,6 @@ class InvitedStudentFactory(UserFactory):
         if not create:
             return
         kwargs.setdefault('branch', self.branch)
-        kwargs.setdefault('status', self.status)
         StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
@@ -107,9 +105,6 @@ class VolunteerFactory(UserFactory):
         if not create:
             return
         kwargs.setdefault('branch', self.branch)
-        kwargs.setdefault('status', self.status)
-        if self.curriculum_year:
-            kwargs.setdefault('year_of_curriculum', self.curriculum_year)
         StudentProfileFactory(user=self, type=StudentTypes.VOLUNTEER, **kwargs)
 
 
@@ -125,6 +120,7 @@ class TeacherFactory(UserFactory):
 class StudentProfileFactory(factory.DjangoModelFactory):
     class Meta:
         model = StudentProfile
+        django_get_or_create = ('user', 'branch', 'year_of_admission')
 
     type = StudentTypes.REGULAR
     user = factory.SubFactory(UserFactory)
@@ -151,10 +147,10 @@ class SHADCourseRecordFactory(factory.DjangoModelFactory):
     semester = factory.SubFactory('learning.tests.factories.SemesterFactory')
 
 
-class EnrollmentCertificateFactory(factory.DjangoModelFactory):
+class CertificateOfParticipationFactory(factory.DjangoModelFactory):
     class Meta:
-        model = EnrollmentCertificate
+        model = CertificateOfParticipation
 
     signature = "FIO"
     note = ""
-    student = factory.SubFactory(StudentFactory)
+    student_profile = factory.SubFactory(StudentProfileFactory)

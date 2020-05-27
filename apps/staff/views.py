@@ -27,30 +27,33 @@ from courses.constants import SemesterTypes
 from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import Enrollment, Invitation, GraduateProfile
+from learning.models import Enrollment, Invitation
 from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
     ProgressReportForInvitation, dataframe_to_response
 from learning.settings import AcademicDegreeLevels, StudentStatuses, \
     GradeTypes
 from projects.constants import ProjectTypes
-from projects.models import Project
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import FacesQueryParams
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
-from users.constants import Roles
 from users.filters import StudentFilter
 from users.mixins import CuratorOnlyMixin
 from users.models import User, StudentProfile, StudentTypes
-from users.services import get_student_progress
+from users.services import get_student_progress, create_graduate_profiles, \
+    get_graduate_profile
 
 
 class StudentSearchCSVView(CuratorOnlyMixin, BaseFilterView):
     context_object_name = 'applicants'
-    model = User
+    model = StudentProfile
     filterset_class = StudentFilter
+
+    def get_queryset(self):
+        return (StudentProfile.objects
+                .select_related('user', 'branch', 'graduate_profile'))
 
     def get(self, request, *args, **kwargs):
         filterset_class = self.get_filterset_class()
@@ -77,11 +80,11 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
         context = {
             'json_api_uri': reverse('staff:student_search_json'),
             'branches': {b.pk: b.name for b in branches},
-            'curriculum_years': (User.objects
-                                 .values_list('curriculum_year',
+            'curriculum_years': (StudentProfile.objects
+                                 .values_list('year_of_curriculum',
                                               flat=True)
-                                 .filter(curriculum_year__isnull=False)
-                                 .order_by('curriculum_year')
+                                 .filter(year_of_curriculum__isnull=False)
+                                 .order_by('year_of_curriculum')
                                  .distinct()),
             'groups': StudentFilter.get_filters()['groups'].choices,
             "status": StudentStatuses.values,
@@ -152,10 +155,7 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
             enrollments = progress[s.id].get('enrollments', [])
             projects = progress[s.id].get('projects', [])
             shad = progress[s.id].get('shad', [])
-            try:
-                graduate_profile = s.graduate_profile
-            except GraduateProfile.DoesNotExist:
-                graduate_profile = None
+            graduate_profile = get_graduate_profile(student_profile)
             if graduate_profile and len(graduate_profile.academic_disciplines.all()) >= 2:
                 finished_two_or_more_programs.add(s)
             by_year_of_admission[student_profile.year_of_admission].add(student_profile)
@@ -229,8 +229,8 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
                     good_total += 1
                 unique_courses.add(enrollment.course.meta_course)
                 total_hours += enrollment.course.courseclass_set.count() * 1.5
-                for teacher in enrollment.course.teachers.all():
-                    unique_teachers.add(teacher.pk)
+                for course_teacher in enrollment.course.course_teachers.all():
+                    unique_teachers.add(course_teacher.teacher_id)
 
             s.failed_courses = failed_courses
             if not most_failed_courses:
@@ -287,14 +287,14 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         return context
 
 
-# FIXME: можно ли это объединить с csv/xlsx импортами?
 class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, branch_id, **kwargs):
         branch = Branch.objects.get(pk=branch_id)
         report = ProgressReportForDiplomas(branch)
-        students = report.get_queryset()
+        student_profiles = report.get_queryset()
+        students = (sp.user for sp in student_profiles)
         courses_qs = (report.get_courses_queryset(students)
                       .annotate(classes_total=Count('courseclass')))
         courses = {c.pk: c for c in courses_qs}
@@ -307,17 +307,17 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             class_count: int = 0
             term: str = ''
 
-        def is_project_active(ps):
+        def is_active_project(ps):
             return (not ps.project.is_external and
                     not ps.project.is_canceled and
                     ps.final_grade != GradeTypes.NOT_GRADED and
                     ps.final_grade != GradeTypes.UNSATISFACTORY)
 
-        for student in students:
-            student.projects_progress = list(filter(is_project_active,
+        for student_profile in student_profiles:
+            student = student_profile.user
+            student.projects_progress = list(filter(is_active_project,
                                                     student.projects_progress))
             student_courses = []
-            student.enrollments_progress.sort(key=lambda e: e.course.semester.index)
             enrollments = {}
             # Store the last passed course
             for e in student.enrollments_progress:
@@ -325,11 +325,12 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
                 enrollments[meta_course_id] = e
             for e in enrollments.values():
                 course = courses[e.course_id]
+                teachers = ", ".join(ct.teacher.get_abbreviated_name(delimiter="~")
+                                     for ct in course.course_teachers.all())
                 diploma_course = DiplomaCourse(
                     type="course",
                     name=tex(course.meta_course.name),
-                    teachers=", ".join(t.get_abbreviated_name(delimiter="~")
-                                       for t in course.teachers.all()),
+                    teachers=teachers,
                     final_grade=str(e.grade_honest).lower(),
                     class_count=course.classes_total * 2
                 )
@@ -351,7 +352,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
             for ps in student.projects_progress:
                 project = ps.project
                 if project.project_type == ProjectTypes.research:
-                    project_type  = 'theory'
+                    project_type = 'theory'
                 else:
                     project_type = project.project_type
                 diploma_course = DiplomaCourse(
@@ -367,7 +368,7 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
 
         context = {
             "branch": branch,
-            "students": students
+            "student_profiles": student_profiles
         }
         return context
 
@@ -578,12 +579,8 @@ def create_alumni_profiles(request):
     form = GraduationForm(data=request.POST)
     if form.is_valid():
         graduated_on = form.cleaned_data['graduated_on']
-        try:
-            cmd = call_command('create_alumni_profiles',
-                               graduated_on.strftime('%d.%m.%Y'))
-            messages.success(request, f"Операция выполнена успешно.")
-        except CommandError as e:
-            messages.error(request, str(e))
+        create_graduate_profiles(request.site, graduated_on)
+        messages.success(request, f"Операция выполнена успешно.")
     else:
         messages.error(request, str('Неверный формат даты выпуска'))
     return HttpResponseRedirect(reverse("staff:exports"))

@@ -1,6 +1,7 @@
 from vanilla import DetailView, ListView
 
 from auth.mixins import PermissionRequiredMixin
+from learning.permissions import ViewLibrary
 from .models import Stock, Borrow
 
 
@@ -8,7 +9,7 @@ class BookListView(PermissionRequiredMixin, ListView):
     context_object_name = "stocks"
     http_method_names = ["head", "get", "options"]
     template_name = "library/stock_list.html"
-    permission_required = "study.view_library"
+    permission_required = ViewLibrary.name
 
     def get_queryset(self):
         qs = (Stock.objects
@@ -34,7 +35,7 @@ class BookDetailView(PermissionRequiredMixin, DetailView):
     context_object_name = "stock"
     http_method_names = ["head", "get", "options"]
     model = Stock
-    permission_required = "study.view_library"
+    permission_required = ViewLibrary.name
 
     def get_queryset(self):
         qs = (Stock.objects

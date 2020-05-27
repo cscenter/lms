@@ -13,7 +13,7 @@ from core.widgets import AdminRichTextAreaWidget
 from users.constants import Roles
 from users.forms import UserCreationForm, UserChangeForm
 from .import_export import UserRecordResource
-from .models import User, EnrollmentCertificate, \
+from .models import User, CertificateOfParticipation, \
     OnlineCourseRecord, SHADCourseRecord, UserGroup, \
     StudentProfile, StudentStatusLog, StudentTypes
 
@@ -93,8 +93,7 @@ class UserAdmin(_UserAdmin):
     ordering = ['last_name', 'first_name']
     inlines = [OnlineCourseRecordAdmin, SHADCourseRecordInlineAdmin,
                UserGroupInlineAdmin]
-    readonly_fields = ['comment_changed_at', 'comment_last_author',
-                       'last_login', 'date_joined']
+    readonly_fields = ['last_login', 'date_joined']
     list_display = ['id', 'username', 'email', 'first_name', 'last_name',
                     'is_staff']
     list_filter = ['is_active', 'branch', 'group__site', 'group__role',
@@ -115,10 +114,6 @@ class UserAdmin(_UserAdmin):
                                        ]}),
         (_('External services'), {'fields': ['yandex_login', 'stepic_id',
                                              'github_login', 'anytask_url']}),
-        (_('Student info record [DEPRECATED, DONT EDIT THIS SECTION]'),
-         {'fields': ['status', 'curriculum_year',
-                     'university', 'uni_year_at_enrollment',
-                     'academic_disciplines']}),
         (_('Important dates'), {'fields': ['last_login', 'date_joined']})]
 
     def get_formsets_with_inlines(self, request, obj=None):
@@ -160,7 +155,7 @@ class StudentStatusLogAdminInline(admin.TabularInline):
 
 class StudentProfileAdmin(BaseModelAdmin):
     list_select_related = ['user', 'branch', 'branch__site']
-    list_display = ('user', 'branch', 'status')
+    list_display = ('user', 'branch', 'type', 'year_of_admission', 'status')
     list_filter = ('type', 'branch', 'site',)
     raw_id_fields = ('user', 'comment_last_author')
     search_fields = ['user__last_name']
@@ -173,7 +168,7 @@ class StudentProfileAdmin(BaseModelAdmin):
                        'academic_disciplines']
         }),
         (_('Official Student Info'), {
-            'fields': ['is_official_student', 'diploma_number',
+            'fields': ['is_official_student', 'birthday', 'diploma_number',
                        'diploma_issued_on', 'diploma_issued_by']
         }),
         (_("Curator's note"), {
@@ -229,12 +224,12 @@ class UserRecordResourceAdmin(ImportMixin, UserAdmin):
     import_template_name = 'admin/import_export/import_users.html'
 
 
-class EnrollmentCertificateAdmin(admin.ModelAdmin):
-    list_display = ["student", "created"]
-    raw_id_fields = ["student"]
+class CertificateOfParticipationAdmin(admin.ModelAdmin):
+    list_display = ["student_profile", "created"]
+    raw_id_fields = ["student_profile"]
 
 
 admin.site.register(User, UserRecordResourceAdmin)
 admin.site.register(StudentProfile, StudentProfileAdmin)
-admin.site.register(EnrollmentCertificate, EnrollmentCertificateAdmin)
+admin.site.register(CertificateOfParticipation, CertificateOfParticipationAdmin)
 admin.site.register(SHADCourseRecord, SHADCourseRecordAdmin)

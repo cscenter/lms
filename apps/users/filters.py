@@ -111,12 +111,7 @@ class StudentFilter(FilterSet):
     def qs(self):
         if not self.form.changed_data:
             return self.queryset.none()
-        # .annotate + .distinct is not implemented in Django
-        return (User.objects
-                .filter(id__in=super().qs.values('user_id'))
-                .only('username', 'first_name',
-                      'last_name', 'id')
-                .order_by('last_name', 'first_name'))
+        return super().qs
 
     def courses_filter(self, queryset, name, value):
         value_list = value.split(u',')
@@ -174,11 +169,10 @@ class StudentFilter(FilterSet):
             return queryset
         else:
             qs = (queryset
-                    .extra(where=["to_tsvector(first_name || ' ' || last_name) "
-                                  "@@ to_tsquery(%s)"],
-                           params=[tsquery])
-                    .exclude(first_name__exact='',
-                             last_name__exact=''))
+                  .extra(where=["to_tsvector(users_user.first_name || ' ' || users_user.last_name) @@ to_tsquery(%s)"],
+                         params=[tsquery])
+                  .exclude(user__first_name__exact='',
+                           user__last_name__exact=''))
             return qs
 
     def _form_name_tsquery(self, qstr):

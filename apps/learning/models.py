@@ -33,7 +33,9 @@ from learning.managers import EnrollmentDefaultManager, \
     GraduateProfileActiveManager, AssignmentCommentPublishedManager
 from learning.settings import GradingSystems, GradeTypes
 from users.constants import ThumbnailSizes
-from users.thumbnails import UserThumbnailMixin
+from users.models import StudentProfile
+from users.thumbnails import UserThumbnailMixin, ThumbnailMixin, \
+    get_thumbnail_or_stub, get_stub_factory
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +133,10 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Student"),
         on_delete=models.CASCADE)
+    student_profile = models.ForeignKey(
+        StudentProfile,
+        verbose_name=_("Student Profile"),
+        on_delete=models.CASCADE)
     course = models.ForeignKey(
         Course,
         verbose_name=_("Course offering"),
@@ -184,6 +190,11 @@ class Enrollment(TimezoneAwareModel, TimeStampedModel):
         super().save(*args, **kwargs)
         if created or not self.is_deleted:
             populate_assignments_for_student(self)
+
+    def clean(self):
+        if self.student_profile_id and self.student_profile.user_id != self.student_id:
+            raise ValidationError(_("Student profile does not match "
+                                    "selected user"))
 
     def grade_changed_local(self, tz=None):
         if not tz:
@@ -669,16 +680,16 @@ class Useful(models.Model):
 
 def graduate_photo_upload_to(instance: "GraduateProfile", filename):
     _, ext = os.path.splitext(filename)
-    filename = instance.student.get_abbreviated_name_in_latin()
+    filename = instance.student_profile.user.get_abbreviated_name_in_latin()
     return f"alumni/{instance.graduated_on.year}/{filename}{ext}"
 
 
-class GraduateProfile(UserThumbnailMixin, TimeStampedModel):
+class GraduateProfile(ThumbnailMixin, TimeStampedModel):
     TESTIMONIAL_CACHE_KEY = "csc_review"
 
-    student = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Student"),
+    student_profile = models.OneToOneField(
+        StudentProfile,
+        verbose_name=_("Student Profile"),
         on_delete=models.CASCADE,
         related_name="graduate_profile")
     is_active = models.BooleanField(
@@ -690,6 +701,7 @@ class GraduateProfile(UserThumbnailMixin, TimeStampedModel):
     academic_disciplines = models.ManyToManyField(
         'study_programs.AcademicDiscipline',
         verbose_name=_("Fields of study"),
+        help_text=_("Academic disciplines that the student graduated from"),
         blank=True)
     graduation_year = models.PositiveSmallIntegerField(
         verbose_name=_("Graduation Year"),
@@ -716,7 +728,7 @@ class GraduateProfile(UserThumbnailMixin, TimeStampedModel):
         verbose_name_plural = _("Graduate Profiles")
 
     def __str__(self):
-        return smart_text(self.student)
+        return smart_text(self.student_profile)
 
     def save(self, **kwargs):
         created = self.pk is None
@@ -726,17 +738,18 @@ class GraduateProfile(UserThumbnailMixin, TimeStampedModel):
         super().save(**kwargs)
 
     def get_absolute_url(self):
-        return reverse('student_profile', args=[self.student_id], subdomain=None)
-
-    @property
-    def gender(self):
-        return self.student.gender
+        return reverse('student_profile', args=[self.student_profile.user_id],
+                       subdomain=None)
 
     def get_thumbnail(self, geometry=ThumbnailSizes.BASE, **options):
         thumbnail_options = {
-            "use_stub": True,
-            "stub_official": False,
             "cropbox": None,
             **options
         }
-        return super().get_thumbnail(geometry, **thumbnail_options)
+        stub_factory = get_stub_factory(self.student_profile.user.gender,
+                                        official=False)
+        return get_thumbnail_or_stub(
+            path_to_img=self.photo,
+            geometry=geometry,
+            stub_factory=stub_factory,
+            **thumbnail_options)

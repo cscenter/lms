@@ -628,6 +628,9 @@ class CourseTeacher(models.Model):
         return reverse('teacher_detail', args=[self.teacher_id],
                        subdomain=subdomain)
 
+    def get_abbreviated_name(self, delimiter=chr(160)):  # non-breaking space
+        return self.teacher.get_abbreviated_name(delimiter=delimiter)
+
     @property
     def is_lecturer(self):
         return bool(self.roles.lecturer)
@@ -640,6 +643,23 @@ class CourseTeacher(models.Model):
             queryset=(cls.objects
                       .filter(roles=lecturer)
                       .select_related('teacher')))
+
+    @classmethod
+    def get_most_priority_role_prefetch(cls,
+                                        lookup='course_teachers') -> Prefetch:
+        most_priority_role = cls.get_most_priority_role_expr()
+        return Prefetch(
+            lookup,
+            queryset=(cls.objects
+                      .select_related('teacher')
+                      .annotate(most_priority_role=most_priority_role)
+                      .only('id', 'course_id', 'teacher_id',
+                            'teacher__first_name',
+                            'teacher__last_name',
+                            'teacher__patronymic')
+                      .order_by('-most_priority_role',
+                                'teacher__last_name',
+                                'teacher__first_name')))
 
     @staticmethod
     def get_most_priority_role_expr():

@@ -28,6 +28,7 @@ from auth.permissions import perm_registry
 from auth.tasks import update_password_in_gerrit
 from core.models import LATEX_MARKDOWN_ENABLED, Branch
 from core.timezone import Timezone, TimezoneAwareModel
+from core.timezone.constants import DATETIME_FORMAT_RU
 from core.urls import reverse
 from core.utils import is_club_site, ru_en_mapping, instance_memoize
 from learning.settings import StudentStatuses, GradeTypes, AcademicDegreeLevels
@@ -196,63 +197,18 @@ class UserGroup(models.Model):
             self.user_id, self.role, self.site_id)
 
 
+# FIXME: .curriculum_year and status are used at least in stats :<
 class StudentProfileAbstract(models.Model):
-    enrollment_year = models.PositiveSmallIntegerField(
-        _("CSCUser|enrollment year"),
-        validators=[MinValueValidator(1990)],
-        blank=True,
-        null=True)
     curriculum_year = models.PositiveSmallIntegerField(
         _("CSCUser|Curriculum year"),
         validators=[MinValueValidator(2000)],
         blank=True,
         null=True)
-    university = models.CharField(
-        _("University"),
-        max_length=255,
-        blank=True)
-    uni_year_at_enrollment = models.CharField(
-        _("StudentInfo|University year"),
-        choices=AcademicDegreeLevels.choices,
-        max_length=2,
-        help_text=_("at enrollment"),
-        null=True,
-        blank=True)
-    official_student = models.BooleanField(
-        verbose_name=_("Official Student"),
-        help_text=_("Passport, consent for processing personal data, "
-                    "diploma (optional)"),
-        default=False)
-    diploma_number = models.CharField(
-        verbose_name=_("Diploma Number"),
-        max_length=64,
-        help_text=_("Number of higher education diploma"),
-        blank=True
-    )
-    academic_disciplines = models.ManyToManyField(
-        'study_programs.AcademicDiscipline',
-        verbose_name=_("Fields of study"),
-        help_text=_("Academic disciplines from which student plans to graduate"),
-        blank=True)
     status = models.CharField(
         choices=StudentStatuses.choices,
         verbose_name=_("Status"),
         max_length=15,
         blank=True)
-    comment = models.TextField(
-        _("Comment"),
-        help_text=LATEX_MARKDOWN_ENABLED,
-        blank=True)
-    comment_changed_at = MonitorField(
-        monitor='comment',
-        verbose_name=_("Comment changed"))
-    comment_last_author = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        verbose_name=_("Author of last edit"),
-        on_delete=models.PROTECT,
-        related_name='user_commented',
-        blank=True,
-        null=True)
     index_redirect = models.CharField(
         _("Index Redirect Option"),
         max_length=200,
@@ -500,7 +456,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
                        subdomain=settings.LMS_SUBDOMAIN)
 
     @instance_memoize
-    def get_student_profile(self, site, **kwargs):
+    def get_student_profile(self, site=settings.SITE_ID, **kwargs):
         from learning.services import get_student_profile
         return get_student_profile(self, site, **kwargs)
 
@@ -613,6 +569,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
         from learning.models import Enrollment
         return (Enrollment.active
                 .filter(student=self, course_id=course_id)
+                .select_related('student_profile')
                 .order_by()
                 .first())
 
@@ -811,6 +768,10 @@ class StudentProfile(models.Model):
         help_text=_("Number of higher education diploma"),
         blank=True
     )
+    birthday = models.DateField(
+        verbose_name=_("Birthday"),
+        blank=True, null=True
+    )
     diploma_issued_on = models.DateField(
         verbose_name=_("Diploma Issued on"),
         blank=True, null=True
@@ -879,6 +840,11 @@ class StudentProfile(models.Model):
     @property
     def is_active(self):
         return not StudentStatuses.is_inactive(self.status)
+
+    def get_comment_changed_at_display(self, default=''):
+        if self.comment_changed_at:
+            return self.comment_changed_at.strftime(DATETIME_FORMAT_RU)
+        return default
 
 
 class StudentStatusLog(models.Model):
@@ -954,25 +920,23 @@ class SHADCourseRecord(TimeStampedModel):
         return smart_text("{} [{}]".format(self.name, self.student_id))
 
 
-class EnrollmentCertificate(TimeStampedModel):
+class CertificateOfParticipation(TimeStampedModel):
     signature = models.CharField(_("Reference|signature"), max_length=255)
     note = models.TextField(_("Reference|note"), blank=True)
-
-    student = models.ForeignKey(
-        User,
+    student_profile = models.ForeignKey(
+        StudentProfile,
         verbose_name=_("Student"),
         on_delete=models.CASCADE,
-        related_name="enrollment_certificates")
+        related_name="certificates_of_participation")
 
     class Meta:
-        ordering = ["signature"]
         verbose_name = _("Student Reference")
         verbose_name_plural = _("Student References")
 
     def __str__(self):
-        return smart_text(self.student)
+        return smart_text(self.student_profile)
 
     def get_absolute_url(self):
-        return reverse('user_reference_detail',
+        return reverse('student_reference_detail',
                        subdomain=settings.LMS_SUBDOMAIN,
-                       args=[self.student_id, self.pk])
+                       args=[self.student_profile_id, self.pk])

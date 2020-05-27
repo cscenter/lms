@@ -58,15 +58,13 @@
                        target="_blank"><i class="fa fa-pencil-square-o"></i></a> <a title="Войти под пользователем" class="loginas-user" href="{% url 'loginas-user-login' user_id=profile_user.pk %}"><i class="fa fa-ils" aria-hidden="true"></i></a>
                 {% endif %}</h2>
 
-            {% if profile_user.is_graduate %}
-                {% with graduate_profile=profile_user.graduate_profile %}
-                    <div class="progress-info">
-                        С сентября {{ student_profile.year_of_admission }} года по июнь {{ graduate_profile.graduation_year }} года<br>
-                            {% if profile_user.gender == profile_user.GENDER_FEMALE %}прошла{% else %}прошёл{% endif %}
-                            обучение по направлени{{ graduate_profile.academic_disciplines.all|pluralize:"ю,ям" }}
-                            {% for program in graduate_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
-                    </div>
-                {% endwith %}
+            {% if graduate_profile %}
+                <div class="progress-info">
+                    С сентября {{ graduate_profile.student_profile.year_of_admission }} года по июнь {{ graduate_profile.graduation_year }} года<br>
+                        {% if profile_user.gender == profile_user.GENDER_FEMALE %}прошла{% else %}прошёл{% endif %}
+                        обучение по направлени{{ graduate_profile.academic_disciplines.all|pluralize:"ю,ям" }}
+                        {% for program in graduate_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last and forloop.first != forloop.last %} и {% endif %}{% endfor %}
+                </div>
             {% elif student_profile %}
                 <div class="progress-info">
                     {% trans "student"|title %}{% if student_profile.year_of_admission %} {{ student_profile.year_of_admission }} {% trans "enrolled in" context "user_detail" %}{% endif %}{% if not student_profile.is_active %}, {{ student_profile.get_status_display|lower }}{% endif %}
@@ -90,12 +88,13 @@
             {% elif profile_user.pk == user.pk or user.is_curator %}
                 <div class="about-me"></div>
             {% endif %}
-            {% if profile_user.is_graduate and profile_user.graduate_profile and profile_user.graduate_profile.testimonial %}
+            {% if graduate_profile and graduate_profile.testimonial %}
                 <div class="review">
                     <h4>{% trans "Review of Computer Science Center" %}</h4>
                     <div class="ubertext">
-                        {% markdown 3600 profile_user.graduate_profile.TESTIMONIAL_CACHE_KEY profile_user.graduate_profile.pk profile_user.graduate_profile.modified %}
-                            {{ profile_user.graduate_profile.testimonial }}{% endmarkdown %}
+                        {% markdown 3600 graduate_profile.TESTIMONIAL_CACHE_KEY graduate_profile.pk graduate_profile.modified %}
+                            {{ graduate_profile.testimonial }}
+                        {% endmarkdown %}
                     </div>
                 </div>
             {% endif %}
@@ -116,7 +115,7 @@
                                     <i class="fa fa-user-secret"></i> Для куратора
                                 </a>
                             </li>
-                            {% if profile_user.is_student or profile_user.is_volunteer or profile_user.is_graduate %}
+                            {% if student_profile %}
                                 <li role="presentation">
                                     <a href="#student-assignments-tab" role="tab" data-toggle="tab">
                                         <i class="fa fa-list"></i>&nbsp;Задания
@@ -209,16 +208,16 @@
 
                     {% if student_profile %}
                         <h4 class="_mtop-30">{% trans "Student references" %}:</h4>
-                        {% if profile_user.enrollment_certificates.count > 0 %}
+                        {% if student_profile.certificates_of_participation.all %}
                             <ul>
-                                {% for reference in profile_user.enrollment_certificates.all %}
+                                {% for reference in student_profile.certificates_of_participation.all %}
                                     <li>
                                         <a target="_blank" href="{{ reference.get_absolute_url }}">{{ reference.created|date:"d.m.Y" }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>
                         {% endif %}
-                        <a href="{% url 'user_reference_add' subdomain=LMS_SUBDOMAIN pk=profile_user.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
+                        <a href="{% url 'student_reference_add' subdomain=LMS_SUBDOMAIN student_profile_id=student_profile.pk %}" class="btn btn-primary btn-outline">{% trans "Create reference" %}</a>
                     {% endif %}
 
                     {% if student_profile %}
@@ -275,14 +274,14 @@
                                 <td>{% trans "Comment" %}:</td>
                                 <td>
                                     <div class="ubertext">
-                                        {% markdown 3600 "user_comment" profile_user.pk profile_user.modified %}
-                                            {{ profile_user.comment|default:"—" }}
+                                        {% markdown 3600 "curator_note_about_student" student_profile.pk student_profile.modified %}
+                                            {{ student_profile.comment|default:"—" }}
                                         {% endmarkdown %}
                                     </div>
-                                    {% if profile_user.comment %}
+                                    {% if student_profile.comment %}
                                         <span class="student-comment-metainfo pull-right">
-                                            {% if profile_user.comment_last_author_id %}{{ profile_user.comment_last_author.get_short_name }}, {% endif %}
-                                            {{ profile_user.comment_changed_at|date:"d.m.Y H:i" }}
+                                            {% if student_profile.comment_last_author_id %}{{ student_profile.comment_last_author.get_short_name }}, {% endif %}
+                                            {{ student_profile.comment_changed_at|date:"d.m.Y H:i" }}
                                         </span>
                                     {% endif %}
                                 </td>

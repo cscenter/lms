@@ -311,7 +311,8 @@ def test_manager_for_student(settings):
     course = CourseFactory(main_branch=student.branch,
                            branches=[new_branch])
     # Active enrollment
-    enrollment = EnrollmentService.enroll(student, course)
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    enrollment = EnrollmentService.enroll(student_profile, course)
     enrollment.student_group = StudentGroupService.resolve(course, student,
                                                            settings.SITE_ID)
     enrollment.save()
@@ -327,7 +328,8 @@ def test_manager_for_student(settings):
     # Course class is visible to main course branch students
     cc = CourseClassFactory(course=course,
                             restricted_to=[enrollment.student_group])
-    EnrollmentService.enroll(student, course)
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    EnrollmentService.enroll(student_profile, course)
     assert CourseClass.objects.for_student(student).count() == 2
     assert CourseClass.objects.for_student(teacher).count() == 0
     # This one is hidden to main branch

@@ -35,20 +35,23 @@ def test_service_enroll(settings):
     student2 = StudentFactory(branch=student.branch)
     current_semester = SemesterFactory.create_current()
     course = CourseFactory(main_branch=student.branch, semester=current_semester)
-    enrollment = EnrollmentService.enroll(student, course, 'test enrollment')
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    enrollment = EnrollmentService.enroll(student_profile, course, 'test enrollment')
     reason_entry = EnrollmentService._format_reason_record('test enrollment', course)
     assert enrollment.reason_entry == reason_entry
     assert not enrollment.is_deleted
     assert enrollment.student_group_id is None
     student_group = StudentGroupService.resolve(course, student2,
                                                 settings.SITE_ID)
-    enrollment = EnrollmentService.enroll(student2, course, 'test enrollment',
+    student_profile2 = student2.get_student_profile(settings.SITE_ID)
+    enrollment = EnrollmentService.enroll(student_profile2, course,
+                                          'test enrollment',
                                           student_group=student_group)
     assert enrollment.student_group == student_group
 
 
 @pytest.mark.django_db
-def test_enrollment_capacity():
+def test_enrollment_capacity(settings):
     student = StudentFactory()
     current_semester = SemesterFactory.create_current()
     course = CourseFactory.create(main_branch=student.branch,
@@ -61,7 +64,8 @@ def test_enrollment_capacity():
     # 1 active enrollment
     assert Enrollment.objects.count() == 1
     with pytest.raises(CourseCapacityFull):
-        EnrollmentService.enroll(student, course, reason_entry='')
+        student_profile = student.get_student_profile(settings.SITE_ID)
+        EnrollmentService.enroll(student_profile, course, reason_entry='')
     # Make sure enrollment record created by enrollment service
     # was rollbacked by transaction context manager
     assert Enrollment.objects.count() == 1

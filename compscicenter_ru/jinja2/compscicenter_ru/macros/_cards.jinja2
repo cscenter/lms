@@ -33,9 +33,9 @@
 <div class="card mb-2">
     <div class="card__content _middle">
         {% set parts = ["Выпуск ", graduate_profile.graduation_year, ", ", graduate_profile.academic_disciplines.all()|join(", ")] %}
-        {% with im = graduate_profile.get_thumbnail(graduate_profile.student.ThumbnailSize.SQUARE) %}
+        {% with im = graduate_profile.get_thumbnail(graduate_profile.ThumbnailSize.SQUARE) %}
             {{ author_card(im.url,
-                           full_name=graduate_profile.student.get_short_name(),
+                           full_name=graduate_profile.student_profile.user.get_short_name(),
                            details=parts|join(''),
                            testimonial=graduate_profile.testimonial|markdown(graduate_profile.TESTIMONIAL_CACHE_KEY, 3600, graduate_profile.pk, graduate_profile.modified),
                            modifiers='_testimonial') }}
@@ -73,12 +73,12 @@
 {%- endmacro %}
 
 {% macro graduate_card_link(graduate_profile) -%}
-    {% with im = graduate_profile.get_thumbnail(use_stub=True, stub_official=False) -%}
+    {% with im = graduate_profile.get_thumbnail() -%}
         {{ _user_card_link(
             url=graduate_profile.get_absolute_url(),
             image=im,
-            title=graduate_profile.student.get_short_name(),
-            user_id=graduate_profile.student_id) }}
+            title=graduate_profile.student_profile.user.get_short_name(),
+            user_id=graduate_profile.student_profile.user_id) }}
     {%- endwith %}
 {%- endmacro %}
 

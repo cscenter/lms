@@ -143,27 +143,28 @@ def test_short_bio(client):
 
 
 @pytest.mark.django_db
-def test_graduate_can_edit_testimonial(client):
+def test_graduate_can_edit_testimonial(client, settings):
     """
     Only graduates can (and should) have "CSC review" field in their
     profiles
     """
     test_review = "CSC are the bollocks"
     form_data = {'testimonial': test_review}
-    user = UserFactory()
-    client.login(user)
-    response = client.post(user.get_update_profile_url(), form_data)
+    student = StudentFactory()
+    client.login(student)
+    response = client.post(student.get_update_profile_url(), form_data)
     assert response.status_code == 302
-    assert response.url == user.get_absolute_url()
-    response = client.get(user.get_absolute_url())
+    assert response.url == student.get_absolute_url()
+    response = client.get(student.get_absolute_url())
     assert smart_bytes(test_review) not in response.content
-    add_user_groups(user, [Roles.GRADUATE])
-    user.save()
-    GraduateProfileFactory(student=user)
-    response = client.post(user.get_update_profile_url(), form_data)
+    add_user_groups(student, [Roles.GRADUATE])
+    student.save()
+    student_profile = student.get_student_profile(settings.SITE_ID)
+    GraduateProfileFactory(student_profile=student_profile)
+    response = client.post(student.get_update_profile_url(), form_data)
     assert response.status_code == 302
-    assert response.url == user.get_absolute_url()
-    response = client.get(user.get_absolute_url())
+    assert response.url == student.get_absolute_url()
+    response = client.get(student.get_absolute_url())
     assert smart_bytes(test_review) in response.content
 
 
