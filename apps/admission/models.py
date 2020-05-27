@@ -15,6 +15,7 @@ from django.db.models import query, Q, FieldDoesNotExist
 from django.utils import timezone, numberformat
 from django.utils.encoding import smart_text
 from django.utils.formats import date_format, time_format
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _
 from jsonfield import JSONField
 from model_utils.models import TimeStampedModel
@@ -22,7 +23,8 @@ from multiselectfield import MultiSelectField
 from post_office.models import Email, EmailTemplate, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
-from admission.constants import ChallengeStatuses, INTERVIEW_FEEDBACK_TEMPLATE
+from admission.constants import ChallengeStatuses, INTERVIEW_FEEDBACK_TEMPLATE, \
+    InterviewFormats
 from admission.utils import slot_range, get_next_process
 from api.providers.yandex_contest import RegisterStatus, \
     Error as YandexContestError
@@ -924,6 +926,57 @@ class InterviewAssignment(models.Model):
         return smart_text(self.name)
 
 
+class InterviewFormat(models.Model):
+    campaign = models.ForeignKey(
+        Campaign,
+        verbose_name=_("Campaign"),
+        on_delete=models.CASCADE,
+        related_name="interview_formats")
+    format = models.CharField(
+        verbose_name=_("Format Name"),
+        choices=InterviewFormats.choices,
+        max_length=255)
+    appointment_template = models.ForeignKey(
+        EmailTemplate,
+        verbose_name=_("Invitation Template"),
+        on_delete=models.PROTECT)
+    confirmation_template = models.ForeignKey(
+        EmailTemplate,
+        verbose_name=_("Confirmation Template"),
+        related_name="+",
+        help_text=_("Template for confirmation email that the interview was "
+                    "scheduled. Leave blank if there is no need to send "
+                    "confirmation email"),
+        blank=True, null=True,
+        on_delete=models.PROTECT)
+    reminder_template = models.ForeignKey(
+        EmailTemplate,
+        verbose_name=_("Reminder Template"),
+        related_name="+",
+        help_text=_("Template for interview reminder email. Notification will "
+                    "be generated only on interview creation through slots "
+                    "mechanism."),
+        on_delete=models.PROTECT)
+    remind_before_start = models.DurationField(
+        verbose_name=_("Remind Before Start"),
+        help_text=_("Helps to calculate schedule time of the reminder. "
+                    "Specify timedelta that will be subtracted from the "
+                    "interview start time."),
+        default='23:59:59'
+    )
+
+    class Meta:
+        verbose_name = _("Interview Format")
+        verbose_name_plural = _("Interview Formats")
+        constraints = [
+            models.UniqueConstraint(fields=('campaign', 'format'),
+                                    name='unique_format_per_campaign'),
+        ]
+
+    def __str__(self):
+        return self.format
+
+
 class Interview(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'applicant'
 
@@ -1064,6 +1117,21 @@ class InterviewStream(TimezoneAwareModel, TimeStampedModel):
     # to applicant
     WITH_ASSIGNMENTS_TIMEDELTA = datetime.timedelta(minutes=30)
 
+    campaign = models.ForeignKey(
+        Campaign,
+        verbose_name=_("Campaign"),
+        on_delete=models.CASCADE,
+        related_name="interview_streams")
+    format = models.CharField(
+        verbose_name=_("Interview Format"),
+        choices=InterviewFormats.choices,
+        max_length=42)
+    interview_format = models.ForeignKey(
+        InterviewFormat,
+        verbose_name=_("Interview Format"),
+        on_delete=models.CASCADE,
+        editable=False,
+        related_name="+")
     date = models.DateField(_("Interview day"))
     start_at = models.TimeField(_("Period start"))
     end_at = models.TimeField(_("Period end"))
@@ -1085,11 +1153,6 @@ class InterviewStream(TimezoneAwareModel, TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
         limit_choices_to={'group__role': Roles.INTERVIEWER})
-    campaign = models.ForeignKey(
-        Campaign,
-        verbose_name=_("Campaign"),
-        on_delete=models.CASCADE,
-        related_name="interview_streams")
 
     class Meta:
         verbose_name = _("Interview stream")
@@ -1097,6 +1160,9 @@ class InterviewStream(TimezoneAwareModel, TimeStampedModel):
 
     def save(self, **kwargs):
         created = self.pk is None
+        self.interview_format = (InterviewFormat.objects
+                                 .get(campaign=self.campaign,
+                                      format=self.format))
         super().save(**kwargs)
         if created:
             # Generate slots from stream settings
@@ -1113,6 +1179,14 @@ class InterviewStream(TimezoneAwareModel, TimeStampedModel):
             time_format(self.end_at))
 
     def clean(self):
+        if self.format and self.campaign:
+            if not InterviewFormat.objects.filter(
+                    format=self.format, campaign=self.campaign).exists():
+                error_msg = _("Interview format settings are not found. "
+                              "Create settings <a href='{}'>here</a>.")
+                add_url = reverse('admin:admission_interviewformat_add')
+                msg = mark_safe(error_msg.format(add_url))
+                raise ValidationError(msg)
         if self.start_at and self.end_at and self.duration:
             self.start_at = self.start_at.replace(second=0, microsecond=0)
             self.end_at = self.end_at.replace(second=0, microsecond=0)

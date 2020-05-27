@@ -21,3 +21,8 @@ class ChallengeStatuses(DjangoChoices):
     # Results could be imported from a contest
     REGISTERED = ChoiceItem('registered', _("Syncing with a contest"))
     MANUAL = ChoiceItem('manual', _("Manual score input"))
+
+
+class InterviewFormats(DjangoChoices):
+    OFFLINE = ChoiceItem('offline', _("Offline"))
+    ONLINE = ChoiceItem('online', _("Online"))

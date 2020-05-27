@@ -15,7 +15,7 @@ from admission.import_export import OnlineTestRecordResource, \
     ExamRecordResource
 from admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
-    InterviewInvitation, University
+    InterviewInvitation, University, InterviewFormat
 from core.admin import meta
 from core.timezone import TimezoneAwareDateTimeField
 from core.timezone.forms import TimezoneAwareAdminForm, \
@@ -195,6 +195,13 @@ class ContestAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+class InterviewFormatAdmin(admin.ModelAdmin):
+    raw_id_fields = ('appointment_template', 'confirmation_template',
+                     'reminder_template')
+    list_display = ['campaign', 'format']
+    list_filter = ['campaign']
+
+
 class InterviewAdmin(admin.ModelAdmin):
     form = TimezoneAwareAdminForm
     formfield_overrides = {
@@ -309,7 +316,8 @@ class InterviewStreamsInline(admin.TabularInline):
 
 class InterviewInvitationAdmin(admin.ModelAdmin):
     model = InterviewInvitation
-    list_select_related = ["applicant", "applicant__campaign__branch"]
+    list_select_related = ["applicant", "applicant__campaign__branch",
+                           "applicant__campaign__branch__site"]
     list_display = ['get_applicant', 'get_campaign_branch', 'get_accepted']
     raw_id_fields = ("applicant", "interview")
     readonly_fields = ("secret_code",)
@@ -334,6 +342,7 @@ admin.site.register(Campaign, CampaignAdmin)
 admin.site.register(Applicant, ApplicantAdmin)
 admin.site.register(Test, OnlineTestAdmin)
 admin.site.register(Exam, ExamAdmin)
+admin.site.register(InterviewFormat, InterviewFormatAdmin)
 admin.site.register(Interview, InterviewAdmin)
 admin.site.register(InterviewAssignment, InterviewAssignmentAdmin)
 admin.site.register(Contest, ContestAdmin)
