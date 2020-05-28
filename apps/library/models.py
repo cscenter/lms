@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from sorl.thumbnail import ImageField
 from taggit.managers import TaggableManager
-from taggit.models import TagBase, GenericTaggedItemBase
+from taggit.models import TagBase, TaggedItemBase
 
 from core.models import Branch
 from core.urls import reverse
@@ -15,7 +15,9 @@ class BookTag(TagBase):
         verbose_name_plural = _("Book Tags")
 
 
-class TaggedBook(GenericTaggedItemBase):
+class TaggedBook(TaggedItemBase):
+    content_object = models.ForeignKey('Book',
+                                       on_delete=models.CASCADE)
     tag = models.ForeignKey(
         BookTag,
         on_delete=models.CASCADE,
