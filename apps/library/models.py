@@ -7,12 +7,18 @@ from taggit.models import TagBase, TaggedItemBase
 
 from core.models import Branch
 from core.urls import reverse
+from core.utils import ru_en_mapping
 
 
 class BookTag(TagBase):
     class Meta:
         verbose_name = _("Book Tag")
         verbose_name_plural = _("Book Tags")
+
+    def slugify(self, tag, i=None):
+        """Transliterates cyrillic symbols before slugify"""
+        tag = tag.translate(ru_en_mapping)
+        return super().slugify(tag, i)
 
 
 class TaggedBook(TaggedItemBase):
