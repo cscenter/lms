@@ -107,11 +107,6 @@ class Campaign(TimezoneAwareModel, models.Model):
         help_text=_("Template name for interview invitation email"),
         validators=[validate_email_template_name],
         max_length=255)
-    template_interview_reminder = models.CharField(
-        _("Interview Reminder Template"),
-        help_text=_("Template name for interview reminder email"),
-        validators=[validate_email_template_name],
-        max_length=255)
 
     class Meta:
         verbose_name = _("Campaign")
