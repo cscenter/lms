@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from post_office import mail
 from post_office.models import Email
 from post_office.utils import get_email_template
 
-from ._utils import EmailTemplateMixin, CurrentCampaignMixin
-from admission.models import Applicant, Exam
+from admission.models import Applicant
 from admission.services import get_email_from
+from ._utils import EmailTemplateMixin, CurrentCampaignMixin
 
 
 class Command(EmailTemplateMixin, CurrentCampaignMixin, BaseCommand):
