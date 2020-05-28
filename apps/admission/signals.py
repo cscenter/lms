@@ -30,8 +30,8 @@ def post_save_interview(sender, instance, created, *args, **kwargs):
     interview = instance
     __sync_applicant_status(interview)
     if interview.status in [Interview.CANCELED, Interview.DEFERRED]:
-        interview.delete_reminder()
-        interview.delete_feedback()
+        EmailQueueService.remove_interview_reminder(interview)
+        EmailQueueService.remove_interview_feedback_emails(interview)
     elif interview.status == Interview.COMPLETED:
         EmailQueueService.generate_interview_feedback_email(interview)
 
@@ -43,8 +43,8 @@ def post_delete_interview(sender, instance, *args, **kwargs):
     applicant = interview.applicant
     Applicant.objects.filter(pk=applicant.pk).update(
         status=Applicant.INTERVIEW_TOBE_SCHEDULED)
-    interview.delete_reminder()
-    interview.delete_feedback()
+    EmailQueueService.remove_interview_reminder(interview)
+    EmailQueueService.remove_interview_feedback_emails(interview)
 
 
 # FIXME: Doesn't work through admin interface, what about tests on public?

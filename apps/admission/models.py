@@ -936,10 +936,6 @@ class InterviewFormat(models.Model):
         verbose_name=_("Format Name"),
         choices=InterviewFormats.choices,
         max_length=255)
-    appointment_template = models.ForeignKey(
-        EmailTemplate,
-        verbose_name=_("Invitation Template"),
-        on_delete=models.PROTECT)
     confirmation_template = models.ForeignKey(
         EmailTemplate,
         verbose_name=_("Confirmation Template"),
@@ -1004,17 +1000,19 @@ class Interview(TimezoneAwareModel, TimeStampedModel):
         settings.AUTH_USER_MODEL,
         verbose_name=_("Interview|Interviewers"),
         limit_choices_to={'group__role': Roles.INTERVIEWER})
-
     assignments = models.ManyToManyField(
         'InterviewAssignment',
         verbose_name=_("Interview|Assignments"),
         blank=True)
-
     status = models.CharField(
         choices=STATUSES,
         default=APPROVAL,
         verbose_name=_("Interview|Status"),
         max_length=15)
+    secret_code = models.UUIDField(
+        verbose_name=_("Secret code"),
+        editable=False,
+        default=uuid.uuid4)
     note = models.TextField(
         _("Note"),
         blank=True,
@@ -1036,6 +1034,14 @@ class Interview(TimezoneAwareModel, TimeStampedModel):
     def get_absolute_url(self):
         return reverse('admission:interview_detail', args=[self.pk])
 
+    def get_public_assignments_url(self):
+        return reverse(
+            'admission:interview_appointment_assignments',
+            kwargs={
+                'year': self.applicant.campaign.year,
+                'secret_code': str(self.secret_code).replace("-", "")
+            })
+
     def in_transition_state(self):
         return self.status in self.TRANSITION_STATUSES
 
@@ -1055,27 +1061,6 @@ class Interview(TimezoneAwareModel, TimeStampedModel):
 
     def __str__(self):
         return smart_text(self.applicant)
-
-    def delete_reminder(self):
-        try:
-            template_name = self.applicant.campaign.template_interview_reminder
-            template = get_email_template(template_name)
-            (Email.objects
-             .filter(template=template, to=self.applicant.email)
-             .exclude(status=EMAIL_STATUS.sent)
-             .delete())
-        except EmailTemplate.DoesNotExist:
-            pass
-
-    def delete_feedback(self):
-        try:
-            template = get_email_template(INTERVIEW_FEEDBACK_TEMPLATE)
-            (Email.objects
-             .filter(template=template, to=self.applicant.email)
-             .exclude(status=EMAIL_STATUS.sent)
-             .delete())
-        except EmailTemplate.DoesNotExist:
-            pass
 
 
 class Comment(TimeStampedModel):
@@ -1113,9 +1098,7 @@ class Comment(TimeStampedModel):
 
 class InterviewStream(TimezoneAwareModel, TimeStampedModel):
     TIMEZONE_AWARE_FIELD_NAME = 'venue'
-    # Extract this value from interview datetime before sending notification
-    # to applicant
-    WITH_ASSIGNMENTS_TIMEDELTA = datetime.timedelta(minutes=30)
+    formats = InterviewFormats
 
     campaign = models.ForeignKey(
         Campaign,
@@ -1238,6 +1221,11 @@ class InterviewSlot(TimeStampedModel):
     def is_empty(self):
         return not bool(self.interview_id)
 
+    @property
+    def datetime_local(self):
+        date = datetime.datetime.combine(self.stream.date, self.start_at)
+        return timezone.make_aware(date, self.stream.get_timezone())
+
 
 class InterviewInvitationQuerySet(query.QuerySet):
     def for_applicant(self, applicant):
@@ -1301,7 +1289,6 @@ class InterviewInvitation(TimeStampedModel):
 
     @property
     def is_expired(self):
-        print(timezone.now())
         return timezone.now() >= self.expired_at
 
     @property

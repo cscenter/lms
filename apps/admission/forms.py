@@ -50,13 +50,11 @@ class InterviewForm(forms.ModelForm):
 
     @staticmethod
     def build_data(applicant, slot):
-        date = datetime.combine(slot.stream.date, slot.start_at)
-        date = timezone.make_aware(date, applicant.get_timezone())
         return {
             'applicant': applicant.pk,
             'status': Interview.APPROVED,
             'interviewers': slot.stream.interviewers.all(),
-            'date': date
+            'date': slot.datetime_local
         }
 
 
