@@ -1,3 +1,5 @@
+from dal_select2_taggit.widgets import TaggitSelect2
+from django import forms
 from django.contrib import admin
 from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
@@ -19,6 +21,17 @@ class TaggedBookInline(TaggedItemInline):
     model = TaggedBook
 
 
+class BookAdminForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = '__all__'
+        widgets = {
+            'tags': TaggitSelect2(
+                url='library_tags_autocomplete',
+                attrs={"data-width": 'style'})
+        }
+
+
 @admin.register(BookTag)
 class BookTagAdmin(TagAdmin):
     inlines = [TaggedBookInline]
@@ -26,6 +39,7 @@ class BookTagAdmin(TagAdmin):
 
 @admin.register(Book)
 class BookAdmin(BaseModelAdmin):
+    form = BookAdminForm
     list_select_related = True
     list_display = ["author", "title"]
     list_display_links = ["author", "title"]
