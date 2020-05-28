@@ -1,3 +1,5 @@
+from bitfield import BitField
+from bitfield.forms import BitFieldCheckboxSelectMultiple
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group
@@ -124,6 +126,9 @@ class LocationAdminForm(forms.ModelForm):
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     form = LocationAdminForm
+    formfield_overrides = {
+        BitField: {'widget': BitFieldCheckboxSelectMultiple},
+    }
     list_display = ('name', 'city')
     list_filter = ('city',)
     list_select_related = ("city",)
