@@ -3,21 +3,6 @@
 from django.db import migrations
 
 
-def create_interview_formats(apps, schema_editor):
-    EmailTemplate = apps.get_model('post_office', 'EmailTemplate')
-    Campaign = apps.get_model('admission', 'Campaign')
-    InterviewFormat = apps.get_model('admission', 'InterviewFormat')
-    for c in Campaign.objects.all():
-        ta = EmailTemplate.objects.get(name=c.template_appointment or 'admission-interview-invitation')
-        tir = EmailTemplate.objects.get(name=c.template_interview_reminder or 'admission-interview-reminder')
-        InterviewFormat.objects.update_or_create(
-            campaign=c, format='offline',
-            defaults={
-                "appointment_template": ta,
-                "reminder_template": tir,
-                "remind_before_start": '23:59:59'})
-
-
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -25,5 +10,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_interview_formats),
     ]
