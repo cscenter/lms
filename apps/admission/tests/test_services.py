@@ -1,11 +1,14 @@
+import datetime
+
 import pytest
 
-from admission.constants import ChallengeStatuses
-from admission.models import Exam
+from admission.constants import ChallengeStatuses, InterviewFormats
+from admission.models import Exam, InterviewSlot
 from admission.services import EmailQueueService
 from admission.tests.factories import CampaignFactory, ApplicantFactory, \
-    ExamFactory
-from core.tests.factories import EmailTemplateFactory
+    ExamFactory, InterviewStreamFactory
+from core.tests.factories import EmailTemplateFactory, BranchFactory
+from learning.settings import Branches
 
 
 @pytest.mark.django_db

@@ -2,6 +2,7 @@
 
 import uuid
 from collections import Counter
+from datetime import timedelta
 from typing import Optional
 from urllib import parse
 
@@ -31,10 +32,9 @@ from admission.forms import InterviewCommentForm, \
     ResultsModelForm, InterviewAssignmentsForm, InterviewFromStreamForm
 from admission.models import Interview, Comment, Contest, Applicant, Campaign, \
     InterviewAssignment, InterviewSlot, \
-    InterviewInvitation, InterviewStream, Test, Exam
+    InterviewInvitation, Test, Exam
 from admission.services import create_invitation, create_student_from_applicant, \
-    EmailQueueService, UsernameError
-from admission.utils import calculate_time
+    EmailQueueService, UsernameError, get_meeting_time
 from core.settings.base import DEFAULT_BRANCH_CODE
 from core.timezone import now_local
 from core.urls import reverse
@@ -250,7 +250,8 @@ class ApplicantDetailView(InterviewerOnlyMixin, ApplicantContextMixin,
                 sid = transaction.savepoint()
                 interview = self.object = form.save()
                 slot_has_taken = InterviewSlot.objects.lock(slot, interview)
-                EmailQueueService.generate_interview_reminder(interview, slot)
+                EmailQueueService.generate_interview_reminder(interview,
+                                                              slot.stream)
                 if not slot_has_taken:
                     transaction.savepoint_rollback(sid)
                     messages.error(
@@ -680,21 +681,23 @@ class ApplicantCreateUserView(CuratorOnlyMixin, generic.View):
 class InterviewAppointmentView(generic.TemplateView):
     template_name = "admission/interview_appointment.html"
 
-    def get_invitation(self):
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
         try:
-            # FIXME: если кампания закончилась? тупо 404 или показывать страницу об окончании?
             secret_code = uuid.UUID(self.kwargs['secret_code'], version=4)
-            return (InterviewInvitation.objects
-                    .select_related("applicant")
-                    .prefetch_related("streams")
-                    .get(secret_code=secret_code,
-                         # FIXME: инфу о годе из ссылки использовать?
-                         applicant__campaign__current=True))
-        except (ValueError, InterviewInvitation.DoesNotExist):
+        except ValueError:
             raise Http404
+        campaign_year = self.kwargs['year']
+        # FIXME: если кампания закончилась? тупо 404 или показывать страницу об окончании?
+        self.invitation = get_object_or_404(
+            InterviewInvitation.objects
+                .select_related("applicant")
+                .prefetch_related("streams")
+                .filter(secret_code=secret_code,
+                        applicant__campaign__year=campaign_year))
 
     def get_context_data(self, **kwargs):
-        invitation = self.get_invitation()
+        invitation = self.invitation
         context = {
             "invitation": invitation,
             "interview": None,
@@ -707,6 +710,7 @@ class InterviewAppointmentView(generic.TemplateView):
                             interview__applicant_id=invitation.applicant_id)
                     .select_related("interview",
                                     "stream",
+                                    "stream__interview_format",
                                     "interview__applicant__campaign"))
             slot = get_object_or_404(slot)
             if slot.interview.applicant_id != invitation.applicant_id:
@@ -715,22 +719,21 @@ class InterviewAppointmentView(generic.TemplateView):
                 # TODO: 404 or show relevant error?
                 raise Http404
             interview = slot.interview
-            if interview.slot.stream.with_assignments:
-                interview.date -= InterviewStream.WITH_ASSIGNMENTS_TIMEDELTA
+            interview.date = get_meeting_time(interview.date, slot.stream)
             context["interview"] = interview
         elif not invitation.is_expired:
             streams = [s.id for s in invitation.streams.all()]
             slots = (InterviewSlot.objects
                      .filter(stream_id__in=streams)
-                     .select_related("stream", "stream__venue")
+                     .select_related("stream", "stream__interview_format",
+                                     "stream__venue", "stream__venue__city")
                      .order_by("stream__date", "start_at"))
-            time_diff = InterviewStream.WITH_ASSIGNMENTS_TIMEDELTA
             any_slot_is_empty = False
             for slot in slots:
                 if slot.is_empty:
                     any_slot_is_empty = True
-                if slot.stream.with_assignments:
-                    slot.start_at = calculate_time(slot.start_at, time_diff)
+                meeting_at = get_meeting_time(slot.datetime_local, slot.stream)
+                slot.start_at = meeting_at.time()
             context["grouped_slots"] = bucketize(slots, key=lambda s: s.stream)
             if not any_slot_is_empty:
                 # TODO: Do something bad
@@ -738,7 +741,7 @@ class InterviewAppointmentView(generic.TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        invitation = self.get_invitation()
+        invitation = self.invitation
         if invitation.is_accepted:
             messages.error(self.request, "Приглашение уже принято",
                            extra_tags="timeout")
@@ -760,7 +763,10 @@ class InterviewAppointmentView(generic.TemplateView):
                 sid = transaction.savepoint()
                 interview = form.save()
                 slot_has_taken = InterviewSlot.objects.lock(slot, interview)
-                EmailQueueService.generate_interview_reminder(interview, slot)
+                EmailQueueService.generate_interview_confirmation(interview,
+                                                                  slot.stream)
+                EmailQueueService.generate_interview_reminder(interview,
+                                                              slot.stream)
                 # Mark invitation as accepted
                 (InterviewInvitation.objects
                  .filter(pk=invitation.pk)
@@ -775,3 +781,39 @@ class InterviewAppointmentView(generic.TemplateView):
                     transaction.savepoint_commit(sid)
             return HttpResponseRedirect(invitation.get_absolute_url())
         return HttpResponseBadRequest()
+
+
+class InterviewAppointmentAssignmentsView(generic.TemplateView):
+    template_name = "admission/interview_appointment_assignments.html"
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        try:
+            secret_code = uuid.UUID(self.kwargs['secret_code'], version=4)
+        except ValueError:
+            raise Http404
+        campaign_year = self.kwargs['year']
+        interview = get_object_or_404(
+            Interview.objects
+                .filter(secret_code=secret_code,
+                        applicant__campaign__year=campaign_year)
+                .select_related("applicant")
+                .prefetch_related('assignments'))
+        if interview.status != interview.APPROVED:
+            raise Http404
+        today = timezone.now()
+        # Close access in 2 hours after interview started
+        ends_at = interview.date_local() + timedelta(hours=2)
+        if today > ends_at:
+            raise Http404
+        self.interview = interview
+
+    def get_context_data(self, **kwargs):
+        today = timezone.now()
+        starts_at = self.interview.date_local() - timedelta(minutes=30)
+        ends_at = self.interview.date_local() + timedelta(hours=2)
+        context = {
+            "interview": self.interview,
+            "is_open": starts_at <= today <= ends_at,
+        }
+        return context

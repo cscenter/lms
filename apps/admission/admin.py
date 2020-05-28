@@ -196,8 +196,7 @@ class ContestAdmin(admin.ModelAdmin):
 
 
 class InterviewFormatAdmin(admin.ModelAdmin):
-    raw_id_fields = ('appointment_template', 'confirmation_template',
-                     'reminder_template')
+    raw_id_fields = ('confirmation_template', 'reminder_template')
     list_display = ['campaign', 'format']
     list_filter = ['campaign']
 
@@ -212,6 +211,7 @@ class InterviewAdmin(admin.ModelAdmin):
     }
     list_display = ['get_date_local', 'applicant', 'status']
     list_filter = ['status', ApplicantCampaignListFilter]
+    readonly_fields = ['secret_code']
     raw_id_fields = ["applicant"]
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):

@@ -6,12 +6,13 @@ from django.utils import timezone, formats
 from django.utils.timezone import now
 from post_office.models import Email
 
-from admission.constants import INVITATION_EXPIRED_IN_HOURS
+from admission.constants import INVITATION_EXPIRED_IN_HOURS, InterviewFormats
 from admission.forms import InterviewFromStreamForm
 from admission.models import Applicant, Interview, InterviewInvitation
+from admission.services import get_meeting_time
 from admission.tests.factories import ApplicantFactory, InterviewFactory, \
     CampaignFactory, InterviewerFactory, CommentFactory, \
-    InterviewInvitationFactory, InterviewStreamFactory
+    InterviewInvitationFactory, InterviewStreamFactory, InterviewFormatFactory
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from core.timezone import now_local
@@ -236,7 +237,7 @@ def test_interview_comment_create(curator, client, settings):
 
 
 @pytest.mark.django_db
-def test_invitation_creation(curator, client, settings):
+def test_create_invitation(curator, client, settings):
     """Create invitation from single stream"""
     settings.LANGUAGE_CODE = 'ru'
     campaign = CampaignFactory()
@@ -313,39 +314,52 @@ def test_create_interview_from_slot(curator, client, settings):
 @pytest.mark.django_db
 def test_invitation_slots(curator, client, settings):
     settings.LANGUAGE_CODE = 'ru'
+    branch_spb = BranchFactory(code=Branches.SPB)
+    campaign = CampaignFactory(current=True, branch=branch_spb)
     expired_after = INVITATION_EXPIRED_IN_HOURS
     # Make sure invitation will be active
     dt = timezone.now() + datetime.timedelta(hours=expired_after + 30)
-    stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
-                                    end_at=datetime.time(15, 0),
+    stream = InterviewStreamFactory(start_at=datetime.time(14, 10),
+                                    end_at=datetime.time(15, 10),
                                     duration=20,
                                     date=dt.date(),
                                     with_assignments=False,
-                                    campaign__current=True)
+                                    campaign=campaign,
+                                    format=InterviewFormats.OFFLINE,)
     assert stream.slots.count() == 3
+    slot = stream.slots.order_by('start_at').first()
+    meeting_at = get_meeting_time(slot.datetime_local, stream)
+    assert meeting_at.time() == datetime.time(hour=14, minute=10)
     invitation = InterviewInvitationFactory(
         expired_at=dt,
         applicant__campaign=stream.campaign,
-        interview=None)
-    invitation.streams.add(stream)
-    client.login(curator)
+        interview=None,
+        streams=[stream])
     response = client.get(invitation.get_absolute_url())
+    assert response.status_code == 200
     html = BeautifulSoup(response.content, "html.parser")
-    assert any("14:40" in s.text for s in
+    assert any("14:30" in s.text for s in
                html.find_all('label', {"class": "btn"}))
     # 30 min diff if stream with assignments
     stream.with_assignments = True
     stream.save()
     response = client.get(invitation.get_absolute_url())
     html = BeautifulSoup(response.content, "html.parser")
-    assert any("13:30" in s.text for s in
+    assert any("13:40" in s.text for s in
+               html.find_all('label', {"class": "btn"}))
+    # Don't adjust time for online interview format
+    InterviewFormatFactory(campaign=campaign, format=InterviewFormats.ONLINE)
+    stream.format = InterviewFormats.ONLINE
+    stream.save()
+    response = client.get(invitation.get_absolute_url())
+    html = BeautifulSoup(response.content, "html.parser")
+    assert any("14:10" in s.text for s in
                html.find_all('label', {"class": "btn"}))
 
 
 @pytest.mark.django_db
 def test_create_interview_with_invitation_view(curator, client, settings):
     settings.LANGUAGE_CODE = 'ru'
-    # Invitation have to be active
     dt = timezone.now() + datetime.timedelta(days=3)
     stream = InterviewStreamFactory(start_at=datetime.time(14, 0),
                                     end_at=datetime.time(15, 0),
@@ -355,7 +369,7 @@ def test_create_interview_with_invitation_view(curator, client, settings):
                                     campaign__current=True,
                                     interviewers=[InterviewerFactory()])
     assert stream.slots.count() == 3
-    slot = stream.slots.first()
+    slot = stream.slots.order_by('start_at').first()
     invitation = InterviewInvitationFactory(
         expired_at=dt,
         applicant__campaign=stream.campaign,
@@ -369,6 +383,8 @@ def test_create_interview_with_invitation_view(curator, client, settings):
     assert response.status_code == 302
     assert Interview.objects.count() == 1
     interview = Interview.objects.first()
+    assert interview.date.date() == dt.date()
+    assert interview.date_local().hour == 14
     invitation.refresh_from_db()
     assert invitation.interview_id == interview.id
     response = client.post(invitation.get_absolute_url(), form_data, follow=True)

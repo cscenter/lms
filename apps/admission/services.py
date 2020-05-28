@@ -1,25 +1,23 @@
 from datetime import datetime, timedelta
 from operator import attrgetter
-from typing import List, Optional, Tuple, Type
+from typing import List, Optional, Tuple
 
 from django.conf import settings
 from django.db import transaction
-from django.utils import timezone
+from django.utils import timezone, formats, translation
 from django.utils.formats import date_format
 from post_office import mail
 from post_office.models import EmailTemplate, Email, STATUS as EMAIL_STATUS
 from post_office.utils import get_email_template
 
 from admission.constants import INVITATION_EXPIRED_IN_HOURS, \
-    INTERVIEW_FEEDBACK_TEMPLATE
+    INTERVIEW_FEEDBACK_TEMPLATE, InterviewFormats
 from admission.models import InterviewStream, InterviewInvitation, \
-    Applicant, Campaign, Contest, YandexContestIntegration, Exam
+    Applicant, Campaign, Exam, Interview, InterviewSlot
 from admission.utils import logger
-from api.providers.yandex_contest import YandexContestAPI, ContestAPIError, \
-    ResponseStatus
+from api.providers.yandex_contest import YandexContestAPI
 from core.timezone.constants import DATE_FORMAT_RU
-from learning.roles import Roles
-from users.models import User, StudentProfile, UserGroup, StudentTypes
+from users.models import User, StudentProfile, StudentTypes
 
 
 def get_email_from(campaign: Campaign, default=None):
@@ -119,6 +117,14 @@ def create_student_from_applicant(applicant):
     return user
 
 
+def get_meeting_time(meeting_at: datetime, stream: InterviewStream):
+    if stream.interview_format.format == InterviewFormats.OFFLINE:
+        # Applicants have to solve some assignments before interview part
+        if stream.with_assignments:
+            meeting_at -= timedelta(minutes=30)
+    return meeting_at
+
+
 class EmailQueueService:
     """
     Adds email to the db queue instead of sending email directly.
@@ -172,54 +178,107 @@ class EmailQueueService:
     def generate_interview_invitation(interview_invitation) -> Email:
         streams = []
         for stream in interview_invitation.streams.select_related("venue").all():
+            with translation.override('ru'):
+                date = date_format(stream.date, "j E")
             s = {
-                "city": stream.venue.city.name,
-                "date": date_format(stream.date, "j E"),
-                "office": stream.venue.name,
-                "with_assignments": stream.with_assignments,
-                "directions": stream.venue.directions,
+                "CITY": stream.venue.city.name,
+                "FORMAT": stream.format,
+                "DATE": date,
+                "VENUE": stream.venue.name,
+                "WITH_ASSIGNMENTS": stream.with_assignments,
+                "DIRECTIONS": stream.venue.directions,
             }
             streams.append(s)
+        campaign = interview_invitation.applicant.campaign
         context = {
-            "BRANCH": interview_invitation.applicant.campaign.branch.name,
+            "BRANCH": campaign.branch.name,
             "SECRET_LINK": interview_invitation.get_absolute_url(),
             "STREAMS": streams
         }
         return mail.send(
             [interview_invitation.applicant.email],
-            sender='CS центр <info@compscicenter.ru>',
-            template=interview_invitation.applicant.campaign.template_appointment,
+            sender=get_email_from(campaign),
+            template=campaign.template_appointment,
+            context=context,
+            render_on_delivery=False,
+            backend='ses',
+        )
+
+    # noinspection DuplicatedCode
+    @staticmethod
+    def generate_interview_confirmation(interview: Interview,
+                                        stream: InterviewStream):
+        interview_format = stream.interview_format
+        if interview_format.confirmation_template_id is None:
+            return
+        campaign = interview.applicant.campaign
+        meeting_at = get_meeting_time(interview.date_local(), stream)
+        with translation.override('ru'):
+            date = date_format(meeting_at, "j E")
+        context = {
+            "BRANCH": campaign.branch.name,
+            "DATE": date,
+            "TIME": meeting_at.strftime("%H:%M"),
+            "DIRECTIONS": stream.venue.directions
+        }
+        is_online = (stream.format == InterviewFormats.ONLINE)
+        if stream.with_assignments and is_online:
+            public_url = interview.get_public_assignments_url()
+            context['ASSIGNMENTS_LINK'] = public_url
+        return mail.send(
+            [interview.applicant.email],
+            sender=get_email_from(campaign),
+            template=interview_format.confirmation_template,
             context=context,
             render_on_delivery=False,
             backend='ses',
         )
 
     @staticmethod
-    def generate_interview_reminder(interview, slot) -> Optional[Email]:
+    def generate_interview_reminder(interview: Interview,
+                                    stream: InterviewStream) -> Optional[Email]:
         today = timezone.now()
-        if interview.date - today > timedelta(days=1):
+        interview_format = stream.interview_format
+        scheduled_time = interview.date - interview_format.remind_before_start
+        # It's not late to send a reminder
+        if scheduled_time > today:
             campaign = interview.applicant.campaign
-            meeting_at = interview.date_local()
-            # Give them time to solve some assignments before interview part
-            if slot.stream.with_assignments:
-                meeting_at -= timedelta(minutes=30)
-            scheduled_time = interview.date - timedelta(days=1)
+            meeting_at = get_meeting_time(interview.date_local(), stream)
+            context = {
+                "BRANCH": campaign.branch.name,
+                "DATE": meeting_at.strftime(DATE_FORMAT_RU),
+                "TIME": meeting_at.strftime("%H:%M"),
+                "DIRECTIONS": stream.venue.directions
+            }
+            is_online = (stream.format == InterviewFormats.ONLINE)
+            if stream.with_assignments and is_online:
+                public_url = interview.get_public_assignments_url()
+                context['ASSIGNMENTS_LINK'] = public_url
             return mail.send(
                 [interview.applicant.email],
                 scheduled_time=scheduled_time,
-                sender='info@compscicenter.ru',
-                template=campaign.template_interview_reminder,
-                context={
-                    "BRANCH": campaign.branch.name,
-                    "DATE": meeting_at.strftime(DATE_FORMAT_RU),
-                    "TIME": meeting_at.strftime("%H:%M"),
-                    "DIRECTIONS": slot.stream.venue.directions
-                },
-                # Render on delivery, we have no really big amount of
-                # emails to think about saving CPU time
-                render_on_delivery=True,
+                sender=get_email_from(campaign),
+                template=interview_format.reminder_template,
+                context=context,
+                render_on_delivery=False,
                 backend='ses',
             )
+
+    @staticmethod
+    def remove_interview_reminder(interview: Interview):
+        slot = (InterviewSlot.objects
+                .filter(interview=interview)
+                .select_related('stream', 'stream__interview_format')
+                .first())
+        # Interview was created without steam-slots mechanism
+        if not slot:
+            return
+        interview_format = slot.stream.interview_format
+        (Email.objects
+         .filter(template_id=interview_format.reminder_template_id,
+                 to=interview.applicant.email)
+         .exclude(status=EMAIL_STATUS.sent)
+         .delete())
 
     @staticmethod
     def generate_interview_feedback_email(interview) -> Optional[Email]:
@@ -263,3 +322,11 @@ class EmailQueueService:
                 render_on_delivery=True,
                 backend='ses',
             )
+
+    @staticmethod
+    def remove_interview_feedback_emails(interview):
+        (Email.objects
+         .filter(template__name=INTERVIEW_FEEDBACK_TEMPLATE,
+                 to=interview.applicant.email)
+         .exclude(status=EMAIL_STATUS.sent)
+         .delete())

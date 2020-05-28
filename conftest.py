@@ -133,12 +133,11 @@ def _prepopulate_db_with_data(django_db_setup, django_db_blocker):
 
         if apps.is_installed('admission'):
             # Create email templates
-            from admission.constants import INTERVIEW_REMINDER_TEMPLATE, \
-                INTERVIEW_FEEDBACK_TEMPLATE, APPOINTMENT_INVITATION_TEMPLATE
+            from admission.constants import INTERVIEW_FEEDBACK_TEMPLATE, \
+                APPOINTMENT_INVITATION_TEMPLATE
             template_names = (
                 APPOINTMENT_INVITATION_TEMPLATE,
                 INTERVIEW_FEEDBACK_TEMPLATE,
-                INTERVIEW_REMINDER_TEMPLATE,
             )
             for template_name in template_names:
                 EmailTemplate.objects.update_or_create(

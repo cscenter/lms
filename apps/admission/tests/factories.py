@@ -5,17 +5,18 @@ import factory
 import pytz
 from django.db.models.signals import post_save
 from django.utils import timezone
-from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime, FuzzyDate
+from factory.fuzzy import FuzzyInteger, FuzzyNaiveDateTime
 
 from admission.constants import WHERE_DID_YOU_LEARN, \
-    APPOINTMENT_INVITATION_TEMPLATE, INTERVIEW_REMINDER_TEMPLATE
+    APPOINTMENT_INVITATION_TEMPLATE, InterviewFormats
 from admission.models import Campaign, Applicant, Contest, Test, \
     Exam, InterviewAssignment, Interview, Comment, \
-    InterviewSlot, InterviewStream, InterviewInvitation, University
+    InterviewSlot, InterviewStream, InterviewInvitation, University, \
+    InterviewFormat
 from admission.signals import post_save_interview
-from core.models import Branch
+from core.tests.factories import BranchFactory, LocationFactory, \
+    EmailTemplateFactory
 from learning.settings import AcademicDegreeLevels
-from core.tests.factories import BranchFactory, LocationFactory
 from users.constants import Roles
 from users.tests.factories import UserFactory, add_user_groups
 
@@ -51,7 +52,6 @@ class CampaignFactory(factory.DjangoModelFactory):
                                         tzinfo=timezone.utc)
     # FIXME: generate registration template name
     template_appointment = APPOINTMENT_INVITATION_TEMPLATE
-    template_interview_reminder = INTERVIEW_REMINDER_TEMPLATE
 
 
 class ApplicantFactory(factory.DjangoModelFactory):
@@ -116,6 +116,17 @@ class InterviewerFactory(UserFactory):
         add_user_groups(self, required_groups)
 
 
+class InterviewFormatFactory(factory.DjangoModelFactory):
+    class Meta:
+        model = InterviewFormat
+        django_get_or_create = ('campaign', 'format')
+
+    format = InterviewFormats.OFFLINE
+    campaign = factory.SubFactory(CampaignFactory)
+    reminder_template = factory.SubFactory(EmailTemplateFactory)
+    remind_before_start = '1 00:00:00'  # 1 day
+
+
 class InterviewFactory(factory.DjangoModelFactory):
     class Meta:
         model = Interview
@@ -158,10 +169,17 @@ class InterviewStreamFactory(factory.DjangoModelFactory):
     class Meta:
         model = InterviewStream
 
-    #
-    venue = factory.SubFactory(LocationFactory)
     campaign = factory.SubFactory(CampaignFactory)
-    date = FuzzyDate(datetime.date(2011, 1, 1))
+    format = InterviewFormats.OFFLINE
+    interview_format = factory.SubFactory(
+        InterviewFormatFactory,
+        campaign=factory.SelfAttribute('..campaign'),
+        format=factory.SelfAttribute('..format'))
+    venue = factory.SubFactory(
+        LocationFactory,
+        city=factory.SelfAttribute('..campaign.branch.city'))
+
+    date = factory.Faker('future_date', end_date="+10d")
     # 13:00 - 15:00
     start_at = FuzzyTime(datetime.datetime(2011, 1, 1, 13, 0, 0),
                          datetime.datetime(2011, 1, 1, 15, 0, 0))
@@ -197,3 +215,11 @@ class InterviewInvitationFactory(factory.DjangoModelFactory):
     expired_at = factory.Faker('date_time_between',
                                start_date="now", end_date="+30d",
                                tzinfo=timezone.utc)
+
+    @factory.post_generation
+    def streams(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for stream in extracted:
+                self.streams.add(stream)
