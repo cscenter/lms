@@ -19,6 +19,8 @@ class BorrowInline(admin.TabularInline):
 
 class TaggedBookInline(TaggedItemInline):
     model = TaggedBook
+    extra = 1
+    raw_id_fields = ('content_object',)
 
 
 class BookAdminForm(forms.ModelForm):
@@ -68,8 +70,13 @@ class StockAdmin(BaseModelAdmin):
 
 @admin.register(Borrow)
 class BorrowAdmin(BaseModelAdmin):
-    list_display = ('stock', 'student', 'borrowed_on')
+    list_select_related = ['stock', 'stock__book', 'student']
+    list_display = ('book_name', 'student', 'borrowed_on')
     list_filter = ('stock__branch',)
     search_fields = ('student__last_name', 'student__first_name',
                      'stock__book__title')
     raw_id_fields = ('stock', 'student')
+
+    @meta(_("Book"))
+    def book_name(self, obj):
+        return obj.stock.book.title
