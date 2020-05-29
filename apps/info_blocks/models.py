@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.sites.models import Site
 from django.db import models
 from django.utils.encoding import smart_text
+from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from taggit.managers import TaggableManager
@@ -16,9 +17,9 @@ class CurrentInfoBlockTags:
     These tags are used to display relevant items in current views for useful, honor code and internships.
     Need to be kept in sync with actual DB values, will be removed in favor of tabs in the new design.
     """
-    USEFUL = _("Infoblock|Useful")
-    HONOR_CODE = _("Infoblock|Honor Code")
-    INTERNSHIP = _("Infoblock|Internships")
+    USEFUL = ugettext("Infoblock|Useful")
+    HONOR_CODE = ugettext("Infoblock|Honor Code")
+    INTERNSHIP = ugettext("Infoblock|Internships")
 
 
 class InfoBlockTag(TagBase):

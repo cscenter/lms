@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-26 20:38+0000\n"
+"POT-Creation-Date: 2020-05-29 15:23+0300\n"
 "PO-Revision-Date: 2020-05-26 20:39+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -238,8 +238,9 @@ msgid "Branch Location"
 msgstr "Местонахождение"
 
 #: apps/core/models.py:186 apps/faq/models.py:11 apps/faq/models.py:27
-#: apps/learning/internships/models.py:12 apps/learning/models.py:667
-#: apps/users/models.py:153 apps/users/models.py:761
+#: apps/info_blocks/models.py:52 apps/learning/internships/models.py:12
+#: apps/learning/models.py:667 apps/users/models.py:153
+#: apps/users/models.py:716
 msgid "Site"
 msgstr "Сайт"
 
@@ -255,11 +256,10 @@ msgstr "Описание"
 msgid "Branch|Description"
 msgstr "Общее описание, правила обучения"
 
-#: apps/core/models.py:203 apps/courses/models.py:51
-#: apps/courses/models.py:245 apps/courses/models.py:568
-#: apps/learning/models.py:65 apps/learning/models.py:270
-#: apps/learning/models.py:619 apps/library/models.py:38
-#: apps/study_programs/models.py:54
+#: apps/core/models.py:203 apps/courses/models.py:51 apps/courses/models.py:245
+#: apps/courses/models.py:568 apps/learning/models.py:65
+#: apps/learning/models.py:270 apps/learning/models.py:619
+#: apps/library/models.py:38 apps/study_programs/models.py:54
 #: apps/templates/learning/invitation/complete_profile.html:23
 #: apps/users/models.py:159 apps/users/models.py:339 apps/users/models.py:779
 msgid "Branch"
@@ -465,7 +465,7 @@ msgid "Course|description"
 msgstr "Описание"
 
 #: apps/courses/forms.py:117 apps/courses/forms.py:250
-#: apps/learning/gallery/models.py:33
+#: apps/info_blocks/models.py:49 apps/learning/gallery/models.py:33
 #: apps/templates/courses/course_detail.html:146
 #: apps/templates/international_schools/international_schools.html:16
 msgid "Title"
@@ -1089,7 +1089,7 @@ msgstr "Новость не была создана! Неизвестная ош
 msgid "FAQ"
 msgstr "FAQ"
 
-#: apps/faq/models.py:10 apps/faq/models.py:26
+#: apps/faq/models.py:10 apps/faq/models.py:26 apps/info_blocks/models.py:51
 #: apps/learning/internships/models.py:11
 #: apps/learning/internships/models.py:29 apps/learning/models.py:666
 #: apps/staff/models.py:12
@@ -1118,6 +1118,38 @@ msgstr "Ответ"
 #: apps/faq/models.py:38
 msgid "Questions"
 msgstr "Вопросы"
+
+#: apps/info_blocks/admin.py:37 apps/info_blocks/models.py:28
+msgid "Infoblock Tags"
+msgstr "Теги"
+
+#: apps/info_blocks/models.py:19
+msgid "Infoblock|Useful"
+msgstr "Полезное"
+
+#: apps/info_blocks/models.py:20
+msgid "Infoblock|Honor Code"
+msgstr "Кодекс чести"
+
+#: apps/info_blocks/models.py:21
+msgid "Infoblock|Internships"
+msgstr "Проекты организаторов"
+
+#: apps/info_blocks/models.py:27
+msgid "Infoblock Tag"
+msgstr "Тег инфоблока"
+
+#: apps/info_blocks/models.py:50
+msgid "Content"
+msgstr "Содержимое"
+
+#: apps/info_blocks/models.py:62
+msgid "Infoblock"
+msgstr "Инфоблок"
+
+#: apps/info_blocks/models.py:63
+msgid "Infoblocks"
+msgstr "Инфоблоки"
 
 #: apps/learning/admin.py:37
 msgid "Assignment|assigned_to"

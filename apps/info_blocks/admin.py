@@ -7,8 +7,6 @@ from django.utils.translation import ugettext_lazy as _
 from core.admin import meta
 from info_blocks.models import InfoBlock, InfoBlockTag
 
-admin.site.register(InfoBlockTag)
-
 
 class InfoBlockAdminForm(forms.ModelForm):
     class Meta:
@@ -19,6 +17,11 @@ class InfoBlockAdminForm(forms.ModelForm):
                 url='info_blocks_tags_autocomplete',
                 attrs={"data-width": 'style'})
         }
+
+
+@admin.register(InfoBlockTag)
+class InfoBlockTagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug')
 
 
 @admin.register(InfoBlock)
