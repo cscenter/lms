@@ -13,7 +13,7 @@ from compscicenter_ru import views
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.urls import RE_COURSE_URI
 from htmlpages.views import flatpage
-from useful.views import UsefulTagAutocomplete
+from info_blocks.views import InfoBlockTagAutocomplete
 
 admin.autodiscover()
 
@@ -75,9 +75,7 @@ urlpatterns += [
     path("", include(([
         path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
     ], "announcements"))),
-    path("", include(([
-        path("narnia/useful/tags-autocomplete/", UsefulTagAutocomplete.as_view(), name="tags_autocomplete"),
-    ], "useful"))),
+    path("narnia/info_blocks/tags-autocomplete/", InfoBlockTagAutocomplete.as_view(), name="info_blocks_tags_autocomplete"),
 
     path('narnia/', admin.site.urls),
     path('narnia/', include(loginas_urls)),

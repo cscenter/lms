@@ -9,6 +9,7 @@ from loginas import urls as loginas_urls
 from announcements.views import AnnouncementTagAutocomplete
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.views import TeacherDetailView
+from info_blocks.views import InfoBlockTagAutocomplete
 from lms.views import IndexView, CourseOfferingsView
 from users.views import CertificateOfParticipationCreateView, \
     CertificateOfParticipationDetailView
@@ -56,6 +57,7 @@ urlpatterns = [
     path("", include(([
         path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
     ], "announcements"))),
+    path("narnia/info_blocks/tags-autocomplete/", InfoBlockTagAutocomplete.as_view(), name="info_blocks_tags_autocomplete"),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
