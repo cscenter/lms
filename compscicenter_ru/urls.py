@@ -71,9 +71,7 @@ urlpatterns += [
 
     # URLs for autocompletion of tags, placed under separates namespaces
     # Available only for curators
-    path("", include(([
-        path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
-    ], "announcements"))),
+    path("narnia/announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="announcements_tags_autocomplete"),
     path("narnia/library/tags-autocomplete/", BookTagAutocomplete.as_view(), name="library_tags_autocomplete"),
     path("narnia/info_blocks/tags-autocomplete/", InfoBlockTagAutocomplete.as_view(), name="info_blocks_tags_autocomplete"),
 
