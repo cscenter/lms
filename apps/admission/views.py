@@ -810,7 +810,8 @@ class InterviewAppointmentAssignmentsView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         today = timezone.now()
-        starts_at = self.interview.date_local() - timedelta(minutes=30)
+        # Open assignments 5 minutes earlier than we notify students
+        starts_at = self.interview.date_local() - timedelta(minutes=35)
         ends_at = self.interview.date_local() + timedelta(hours=2)
         context = {
             "interview": self.interview,
