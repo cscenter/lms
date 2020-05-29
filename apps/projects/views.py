@@ -84,6 +84,7 @@ class ReportListViewMixin:
               .select_related("project_student",
                               "project_student__student",
                               "project_student__project",
+                              "project_student__project__branch",
                               "reporting_period")
               .order_by("project_student__project__name",
                         "project_student__project__id",
