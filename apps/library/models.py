@@ -1,13 +1,34 @@
-
 from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
 from sorl.thumbnail import ImageField
 from taggit.managers import TaggableManager
+from taggit.models import TagBase, TaggedItemBase
 
-from core.urls import reverse
 from core.models import Branch
+from core.urls import reverse
+from core.utils import ru_en_mapping
+
+
+class BookTag(TagBase):
+    class Meta:
+        verbose_name = _("Book Tag")
+        verbose_name_plural = _("Book Tags")
+
+    def slugify(self, tag, i=None):
+        """Transliterates cyrillic symbols before slugify"""
+        tag = tag.translate(ru_en_mapping)
+        return super().slugify(tag, i)
+
+
+class TaggedBook(TaggedItemBase):
+    content_object = models.ForeignKey('Book',
+                                       on_delete=models.CASCADE)
+    tag = models.ForeignKey(
+        BookTag,
+        on_delete=models.CASCADE,
+        related_name="tagged_books"
+    )
 
 
 class Book(models.Model):
@@ -18,7 +39,7 @@ class Book(models.Model):
     cover = ImageField(
         _("Book|cover"), upload_to="books", null=True, blank=True)
 
-    tags = TaggableManager()
+    tags = TaggableManager(through=TaggedBook)
 
     class Meta:
         ordering = ["title"]
