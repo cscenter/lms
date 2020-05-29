@@ -258,7 +258,7 @@ msgstr "Общее описание, правила обучения"
 #: apps/core/models.py:203 apps/courses/models.py:51
 #: apps/courses/models.py:245 apps/courses/models.py:568
 #: apps/learning/models.py:65 apps/learning/models.py:270
-#: apps/learning/models.py:619 apps/library/models.py:38
+#: apps/learning/models.py:619 apps/library/models.py:51
 #: apps/study_programs/models.py:54
 #: apps/templates/learning/invitation/complete_profile.html:23
 #: apps/users/models.py:159 apps/users/models.py:339 apps/users/models.py:779
@@ -1841,7 +1841,7 @@ msgstr "Вы успешно записались на курс"
 msgid "You are already enrolled in the course"
 msgstr "Вы уже записаны на этот курс"
 
-#: apps/library/admin.py:40
+#: apps/library/admin.py:50
 msgid "Copies available"
 msgstr "Доступно"
 
@@ -1849,59 +1849,69 @@ msgstr "Доступно"
 msgid "Library"
 msgstr "Библиотека"
 
-#: apps/library/models.py:14 apps/library/templates/library/stock_list.html:29
+#: apps/library/models.py:14
+#| msgid "Book"
+msgid "Book Tag"
+msgstr "Тег книги"
+
+#: apps/library/models.py:15
+#| msgid "Book"
+msgid "Book Tags"
+msgstr "Теги"
+
+#: apps/library/models.py:27 apps/library/templates/library/stock_list.html:29
 msgid "Book|author"
 msgstr "Автор"
 
-#: apps/library/models.py:15 apps/library/templates/library/stock_list.html:28
+#: apps/library/models.py:28 apps/library/templates/library/stock_list.html:28
 msgid "Book|title"
 msgstr "Заголовок"
 
-#: apps/library/models.py:17
+#: apps/library/models.py:30
 msgid "Book|description"
 msgstr "Описание"
 
-#: apps/library/models.py:19
+#: apps/library/models.py:32
 msgid "Book|cover"
 msgstr "Обложка"
 
-#: apps/library/models.py:25
+#: apps/library/models.py:38
 msgid "book"
 msgstr "Книга"
 
-#: apps/library/models.py:26 lms/templates/users/user_detail.html:195
+#: apps/library/models.py:39 lms/templates/users/user_detail.html:195
 msgid "books"
 msgstr "Книги"
 
-#: apps/library/models.py:33
+#: apps/library/models.py:46
 msgid "Book"
 msgstr "Книга"
 
-#: apps/library/models.py:42
+#: apps/library/models.py:55
 msgid "Book|number of copies"
 msgstr "Количество копий"
 
-#: apps/library/models.py:47
+#: apps/library/models.py:60
 msgid "Stock"
 msgstr "Резерв"
 
-#: apps/library/models.py:48
+#: apps/library/models.py:61
 msgid "Stocks"
 msgstr "Резервы"
 
-#: apps/library/models.py:72
+#: apps/library/models.py:85
 msgid "Borrow|student"
 msgstr "Студент"
 
-#: apps/library/models.py:73
+#: apps/library/models.py:86
 msgid "Borrow|borrowed on"
 msgstr "Взято"
 
-#: apps/library/models.py:76
+#: apps/library/models.py:89
 msgid "Borrowed Book"
 msgstr "Взятая книга"
 
-#: apps/library/models.py:77
+#: apps/library/models.py:90
 msgid "Borrowed Books"
 msgstr "Взятые книги"
 

@@ -1,10 +1,13 @@
+from dal_select2_taggit.widgets import TaggitSelect2
+from django import forms
 from django.contrib import admin
 from django.db import models as db_models
 from django.utils.translation import ugettext_lazy as _
+from taggit.admin import TagAdmin, TaggedItemInline
 
 from core.admin import meta, BaseModelAdmin
 from core.widgets import AdminRichTextAreaWidget
-from .models import Book, Borrow, Stock
+from .models import Book, Borrow, Stock, BookTag, TaggedBook
 
 
 class BorrowInline(admin.TabularInline):
@@ -14,8 +17,29 @@ class BorrowInline(admin.TabularInline):
     raw_id_fields = ("student",)
 
 
+class TaggedBookInline(TaggedItemInline):
+    model = TaggedBook
+
+
+class BookAdminForm(forms.ModelForm):
+    class Meta:
+        model = Book
+        fields = '__all__'
+        widgets = {
+            'tags': TaggitSelect2(
+                url='library_tags_autocomplete',
+                attrs={"data-width": 'style'})
+        }
+
+
+@admin.register(BookTag)
+class BookTagAdmin(TagAdmin):
+    inlines = [TaggedBookInline]
+
+
 @admin.register(Book)
 class BookAdmin(BaseModelAdmin):
+    form = BookAdminForm
     list_select_related = True
     list_display = ["author", "title"]
     list_display_links = ["author", "title"]
@@ -49,4 +73,3 @@ class BorrowAdmin(BaseModelAdmin):
     search_fields = ('student__last_name', 'student__first_name',
                      'stock__book__title')
     raw_id_fields = ('stock', 'student')
-
