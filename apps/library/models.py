@@ -22,10 +22,13 @@ class BookTag(TagBase):
 
 
 class TaggedBook(TaggedItemBase):
-    content_object = models.ForeignKey('Book',
-                                       on_delete=models.CASCADE)
+    content_object = models.ForeignKey(
+        'library.Book',
+        verbose_name=_("Book"),
+        on_delete=models.CASCADE)
     tag = models.ForeignKey(
         BookTag,
+        verbose_name=_("Tag"),
         on_delete=models.CASCADE,
         related_name="tagged_books"
     )

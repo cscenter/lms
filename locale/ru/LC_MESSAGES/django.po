@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-26 20:38+0000\n"
-"PO-Revision-Date: 2020-05-26 20:39+0000\n"
+"PO-Revision-Date: 2020-05-29 15:08+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -3171,10 +3171,9 @@ msgid "on site"
 msgstr ""
 
 #: lms/templates/users/user_detail.html:49
-#, fuzzy
 #| msgid "Change password"
 msgid "Change photo"
-msgstr "Сменить пароль"
+msgstr "Изменить фото"
 
 #: lms/templates/users/user_detail.html:70
 #, fuzzy
