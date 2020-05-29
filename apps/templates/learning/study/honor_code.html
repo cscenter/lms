@@ -9,14 +9,13 @@
         <h3 class="content-title">Кодекс чести студента CS центра</h3>
         {% if faq %}
             Проходя курсы CS центра, я
-            <br/>
-            <br>
+            <br><br>
             <ul>
-            {% for qa in faq %}
-                <li>{{ qa.content }}</li>
-            {% endfor %}
+                {% for qa in faq %}
+                    <li>{{ qa.content }}</li>
+                {% endfor %}
+            </ul>
         {% endif %}
-        </ul>
     </div>
   </div>
 </div>
