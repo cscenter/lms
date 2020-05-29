@@ -24,7 +24,7 @@ class CurrentInfoBlockTags:
 
 class InfoBlockTag(TagBase):
     class Meta:
-        db_table = "infoblock_tags"
+        db_table = "info_blocks_tags"
         verbose_name = _("Infoblock Tag")
         verbose_name_plural = _("Infoblock Tags")
 

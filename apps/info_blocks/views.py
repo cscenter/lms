@@ -20,7 +20,7 @@ class InfoBlockTagAutocomplete(CuratorOnlyMixin, autocomplete.Select2QuerySetVie
 
 class UsefulListView(PermissionRequiredMixin, generic.ListView):
     context_object_name = "faq"
-    template_name = "info_blocks/useful.html"
+    template_name = "learning/study/useful.html"
     permission_required = "study.view_faq"
 
     def get_queryset(self):
@@ -32,7 +32,7 @@ class UsefulListView(PermissionRequiredMixin, generic.ListView):
 
 class InternshipListView(PermissionRequiredMixin, generic.ListView):
     context_object_name = "faq"
-    template_name = "info_blocks/internships.html"
+    template_name = "learning/study/internships.html"
     permission_required = "study.view_internships"
 
     def get_queryset(self):
@@ -44,7 +44,7 @@ class InternshipListView(PermissionRequiredMixin, generic.ListView):
 
 class HonorCodeView(generic.ListView):
     context_object_name = "faq"
-    template_name = "info_blocks/honor_code.html"
+    template_name = "learning/study/honor_code.html"
 
     def get_queryset(self):
         return (InfoBlock.objects
