@@ -1031,7 +1031,7 @@ class Interview(TimezoneAwareModel, TimeStampedModel):
 
     def get_public_assignments_url(self):
         return reverse(
-            'admission:interview_appointment_assignments',
+            'appointment:interview_assignments',
             kwargs={
                 'year': self.applicant.campaign.year,
                 'secret_code': str(self.secret_code).replace("-", "")
@@ -1291,7 +1291,7 @@ class InterviewInvitation(TimeStampedModel):
         return bool(self.interview_id)
 
     def get_absolute_url(self):
-        return reverse("admission:interview_appointment", kwargs={
+        return reverse("appointment:choosing_interview_date", kwargs={
             "year": self.applicant.campaign.year,
             "secret_code": str(self.secret_code).replace("-", "")
         })
