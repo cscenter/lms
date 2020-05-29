@@ -9,6 +9,7 @@ from loginas import urls as loginas_urls
 from announcements.views import AnnouncementTagAutocomplete
 from core.views import MarkdownRenderView, MarkdownHowToHelpView
 from courses.views import TeacherDetailView
+from library.views import BookTagAutocomplete
 from info_blocks.views import InfoBlockTagAutocomplete
 from lms.views import IndexView, CourseOfferingsView
 from users.views import CertificateOfParticipationCreateView, \
@@ -50,14 +51,17 @@ urlpatterns = [
 
     path('', include('admission.urls')),
 
-    path('narnia/', admin.site.urls),
-    path('narnia/', include(loginas_urls)),
-    path('narnia/django-rq/', include('django_rq.urls')),
-    # Quick fix for admin page. Better to separate projects into private/public parts
+    # URLs for autocompletion of tags, placed under separates namespaces
+    # Available only for curators
     path("", include(([
         path("announcements/tags-autocomplete/", AnnouncementTagAutocomplete.as_view(), name="tags_autocomplete"),
     ], "announcements"))),
+    path("narnia/library/tags-autocomplete/", BookTagAutocomplete.as_view(), name="library_tags_autocomplete"),
     path("narnia/info_blocks/tags-autocomplete/", InfoBlockTagAutocomplete.as_view(), name="info_blocks_tags_autocomplete"),
+
+    path('narnia/', admin.site.urls),
+    path('narnia/', include(loginas_urls)),
+    path('narnia/django-rq/', include('django_rq.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

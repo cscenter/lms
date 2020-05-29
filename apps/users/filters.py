@@ -84,6 +84,11 @@ class StudentFilterForm(forms.Form):
             cleaned_data['groups'] = groups
 
 
+def replace_single_quotes(column_name):
+    """Returns `replace` postgres function call that removes single quotes"""
+    return f"replace({column_name}, '''', '')"
+
+
 class StudentFilter(FilterSet):
     ENROLLMENTS_MAX = 12
 
@@ -161,15 +166,17 @@ class StudentFilter(FilterSet):
                     "UserFilter: unrecognized status_filter choice")
         return queryset.filter(status__in=value_list).distinct()
 
-    # FIXME: Can I rewrite it with new __search lookup expr?
     def name_filter(self, queryset, name, value):
         qstr = value.strip()
         tsquery = self._form_name_tsquery(qstr)
         if tsquery is None:
             return queryset
         else:
+            tsvector_text = (f"{replace_single_quotes('users_user.first_name')}"
+                             f" || ' ' || "
+                             f"{replace_single_quotes('users_user.last_name')}")
             qs = (queryset
-                  .extra(where=["to_tsvector(users_user.first_name || ' ' || users_user.last_name) @@ to_tsquery(%s)"],
+                  .extra(where=[f"to_tsvector({tsvector_text}) @@ to_tsquery({replace_single_quotes('%s')})"],
                          params=[tsquery])
                   .exclude(user__first_name__exact='',
                            user__last_name__exact=''))

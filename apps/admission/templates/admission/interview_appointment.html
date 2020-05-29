@@ -2,9 +2,10 @@
 {% load i18n %}
 {% load tz %}
 {% load bootstrap_pagination %}
+{% load markdown from core_tags %}
 {% load crispy_forms_tags %}
 
-{% block title %}Выбор даты собеседования в CS центр{% endblock title %}
+{% block title %}Выбор даты собеседования{% endblock title %}
 {% block body_attrs %} class="gray"{% endblock body_attrs %}
 
 {% block content %}{% localtime off %}
@@ -18,7 +19,7 @@
                 <p>Ждём вас на собеседование в CS центр {{ interview.date_local|date:"d E" }} к {{ interview.date_local|date:"H:i" }}.</p>
                 {% if interview.slot.stream.venue.directions %}
                     <b>Как добраться</b><br>
-                    {{ interview.slot.stream.venue.directions }}
+                    {% markdown 0 "venue_directions" %}{{ interview.slot.stream.venue.directions }}{% endmarkdown %}
                 {% endif %}
             {% elif invitation.is_expired %}
                 Приглашение больше не актуально.
@@ -26,12 +27,26 @@
                 <form action="" method="POST" class="margin-bottom-0">
                     {% csrf_token %}
                     <div class="form-group">
-                        <p>Выберите из доступных вариантов время, в которое сможете подъехать:</p>
+                        <p>Выберите время, когда сможете поучаствовать в собеседовании:</p>
                             <div class="btn-group" data-toggle="buttons">
                             {% for stream, slots in grouped_slots.items %}
                                 <div class="info">
                                     <b>{{ stream.date|date:"j E" }}</b><br>
-                                    <div class="margin-bottom-5">Место проведения: {{ stream.venue.address }}</div>
+                                    <div class="mb-5">
+                                        {% if stream.format == stream.formats.ONLINE %}
+                                            Собеседование пройдёт онлайн.<br>
+                                            Инструкцию и ссылку для присоединения пришлём письмом после выбора слота.<br>
+                                            {% if stream.with_assignments %}
+                                                За полчаса до разговора отправим напоминание и задачи, которые нужно будет решить к началу.<br>
+                                            {% endif %}
+                                        {% elif stream.format == stream.formats.OFFLINE %}
+                                            Место проведения: {{ stream.venue.address }}<br>
+                                            Инструкцию, как добраться, пришлём письмом после выбора слота.<br>
+                                            {% if stream.with_assignments %}
+                                                В первые полчаса предложим несколько задач, затем пригласим на разговор.<br>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
                                 </div>
                                 {% for slot in slots %}
                                     <label class="btn btn-default {% if not slot.is_empty %}disabled{% endif %}">

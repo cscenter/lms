@@ -17,7 +17,7 @@ function streamSelectChanged(event) {
     if (streamValues.length > 0) {
         $.ajax({
             dataType: "json",
-            url: window.URLS["admission-api:v2:interview_slots"],
+            url: window.URLS["admission-api:v2:interview_slots"](),
             data: {
                 streams: streamValues,
             },

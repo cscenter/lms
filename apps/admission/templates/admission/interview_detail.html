@@ -66,10 +66,11 @@
         </div>
         <div class="tab-pane" id="assignments" role="tabpanel">
             <div class="interview-info visible-print-block">{{ applicant.full_name }}<br>{{ interview.date_local }}</div>
+                <div class="clear hidden-print mb-15">
+                    <a class="btn btn-default" target="_blank" href="{{ interview.get_public_assignments_url }}">Публичная ссылка на задания</a>
+                    {% if interview.assignments.all %}<button class="btn btn-default _print-without-solution">Печать условий</button> <div class="btn btn-default _print-with-solution">Печать решений</div>{% endif %}
+                </div>
                 {% if interview.assignments.all %}
-                    <div class="clear hidden-print">
-                        <button class="btn btn-default _print-without-solution">Печать условий</button> <div class="btn btn-default _print-with-solution">Печать решений</div>
-                    </div>
                     {% for assignment in interview.assignments.all %}
                         <h3 class="hidden-print">{{ assignment.name }}</h3>
                         <h3 class="visible-print-block">Задание {{ forloop.counter }}</h3>

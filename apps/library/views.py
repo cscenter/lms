@@ -1,8 +1,20 @@
+from dal import autocomplete
 from vanilla import DetailView, ListView
 
 from auth.mixins import PermissionRequiredMixin
 from learning.permissions import ViewLibrary
-from .models import Stock, Borrow
+from users.mixins import CuratorOnlyMixin
+from .models import Stock, Borrow, BookTag
+
+
+class BookTagAutocomplete(CuratorOnlyMixin, autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        qs = BookTag.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs.order_by('name')
 
 
 class BookListView(PermissionRequiredMixin, ListView):

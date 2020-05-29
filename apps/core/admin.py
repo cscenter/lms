@@ -1,3 +1,5 @@
+from bitfield import BitField
+from bitfield.forms import BitFieldCheckboxSelectMultiple
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group
@@ -9,6 +11,7 @@ from django.urls import reverse, NoReverseMatch
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _, gettext_noop
 from modeltranslation.admin import TranslationAdmin
+from taggit.models import Tag
 
 from core.models import Location
 from core.widgets import AdminRichTextAreaWidget
@@ -17,6 +20,9 @@ from .models import City, Branch
 # Hide applications in the admin
 admin.site.unregister(Group)
 admin.site.unregister(Site)
+
+# Hide taggit application
+admin.site.unregister(Tag)
 
 
 class BaseModelAdmin(admin.ModelAdmin):
@@ -124,6 +130,9 @@ class LocationAdminForm(forms.ModelForm):
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
     form = LocationAdminForm
+    formfield_overrides = {
+        BitField: {'widget': BitFieldCheckboxSelectMultiple},
+    }
     list_display = ('name', 'city')
     list_filter = ('city',)
     list_select_related = ("city",)

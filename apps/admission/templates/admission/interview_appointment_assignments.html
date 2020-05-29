@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load tz %}
+{% load markdown from core_tags %}
+{% load crispy_forms_tags %}
+
+{% block title %}Задания для собеседования{% endblock title %}
+{% block body_attrs %} class="gray"{% endblock body_attrs %}
+
+{% block content %}{% localtime off %}
+<div class="container page-inverse" id="admission-appointment">
+    <ol class="breadcrumb gray">
+      <li class="active">Задачи для самостоятельного решения</li>
+    </ol>
+    <div class="panel">
+        <div class="panel-body">
+            {% if is_open %}
+                {% if interview.assignments.all %}
+                    {% for assignment in interview.assignments.all %}
+                        <h3 class="hidden-print">Задание {{ forloop.counter }}</h3>
+                        <div class="ubertext">
+                            {% markdown 0 "assignment" %}{{ assignment.description|safe }}{% endmarkdown %}
+                        </div>
+                        <hr>
+                    {% endfor %}
+                {% else %}
+                        <p>Список задач, предложенных перед прохождением собеседования, пуст.</p>
+                {% endif %}
+            {% else %}
+                Задачи станут доступны за 30 минут до начала собеседования. Не забудьте обновить страницу.
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endlocaltime %}{% endblock content %}
