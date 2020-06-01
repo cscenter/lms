@@ -12,6 +12,7 @@ from core.urls import reverse
 from core.utils import admin_datetime
 from surveys.constants import STATUS_PUBLISHED
 from surveys.models import Form, Field, FieldChoice, CourseSurvey
+from surveys.services import create_survey_notifications
 
 
 class FormFieldAdmin(admin.StackedInline):
@@ -32,11 +33,15 @@ class FormAdmin(admin.ModelAdmin):
         "slug": ("title",)
     }
 
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = []
-        if obj and obj.status == STATUS_PUBLISHED:
-            readonly_fields.append("status")
-        return readonly_fields
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if "status" in form.changed_data:
+            status = form.cleaned_data["status"]
+            if status == STATUS_PUBLISHED:
+                try:
+                    create_survey_notifications(obj.survey)
+                except CourseSurvey.DoesNotExist:
+                    pass
 
 
 class CourseSurveyAdmin(admin.ModelAdmin):

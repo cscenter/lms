@@ -1,12 +1,38 @@
 from django.db.models import Q
+from post_office import mail
 
 from courses.models import CourseClass
 from courses.constants import ClassTypes
 from core.timezone import now_local
+from learning.models import Enrollment
 from surveys.constants import FormTemplates, STATUS_DRAFT, STATUS_TEMPLATE
 from surveys.models import Form, FieldChoice, CourseSurvey
 
 OFFLINE_COURSES_Q = ['lectures_assessment', 'attendance_frequency']
+
+
+def create_survey_notifications(survey):
+    if not survey.email_template_id or survey.students_notified:
+        return
+    course = survey.course
+    context = {
+        "COURSE_NAME": str(course),
+        "SURVEY_URL": survey.get_absolute_url()
+    }
+    active_enrollments = (Enrollment.active
+                          .filter(course=course.pk)
+                          .select_related("student"))
+    for e in active_enrollments.iterator():
+        mail.send(
+            [e.student.email],
+            sender="noreply@compscicenter.ru",
+            template=survey.email_template,
+            context=context,
+            render_on_delivery=True,
+            backend='ses',
+        )
+    survey.students_notified = True
+    survey.save(update_fields=["students_notified"])
 
 
 def _update_field_label(survey, field):
