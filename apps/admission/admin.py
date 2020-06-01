@@ -16,6 +16,7 @@ from admission.import_export import OnlineTestRecordResource, \
 from admission.models import Campaign, Interview, Applicant, Test, \
     Exam, Comment, InterviewAssignment, Contest, InterviewSlot, InterviewStream, \
     InterviewInvitation, University, InterviewFormat
+from admission.services import EmailQueueService
 from core.admin import meta
 from core.timezone import TimezoneAwareDateTimeField
 from core.timezone.forms import TimezoneAwareAdminForm, \
@@ -226,6 +227,16 @@ class InterviewAdmin(admin.ModelAdmin):
         return admin_datetime(obj.date_local())
     get_date_local.admin_order_field = 'date'
     get_date_local.short_description = _("Date")
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if "date" in form.changed_data:
+            EmailQueueService.remove_interview_reminder(obj)
+            slots = (InterviewSlot.objects
+                     .filter(interview_id=obj.pk)
+                     .select_related('stream', 'stream__interview_format'))
+            for slot in slots:
+                EmailQueueService.generate_interview_reminder(obj, slot.stream)
 
 
 class InterviewCommentAdmin(admin.ModelAdmin):

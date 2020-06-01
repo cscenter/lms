@@ -260,25 +260,24 @@ class EmailQueueService:
                 sender=get_email_from(campaign),
                 template=interview_format.reminder_template,
                 context=context,
-                render_on_delivery=False,
+                # Rendering on delivery stores template id and allowing
+                # filtering emails in the future
+                render_on_delivery=True,
                 backend='ses',
             )
 
     @staticmethod
     def remove_interview_reminder(interview: Interview):
-        slot = (InterviewSlot.objects
-                .filter(interview=interview)
-                .select_related('stream', 'stream__interview_format')
-                .first())
-        # Interview was created without steam-slots mechanism
-        if not slot:
-            return
-        interview_format = slot.stream.interview_format
-        (Email.objects
-         .filter(template_id=interview_format.reminder_template_id,
-                 to=interview.applicant.email)
-         .exclude(status=EMAIL_STATUS.sent)
-         .delete())
+        slots = (InterviewSlot.objects
+                 .filter(interview=interview)
+                 .select_related('stream', 'stream__interview_format'))
+        for slot in slots:
+            interview_format = slot.stream.interview_format
+            (Email.objects
+             .filter(template_id=interview_format.reminder_template_id,
+                     to=interview.applicant.email)
+             .exclude(status=EMAIL_STATUS.sent)
+             .delete())
 
     @staticmethod
     def generate_interview_feedback_email(interview) -> Optional[Email]:
