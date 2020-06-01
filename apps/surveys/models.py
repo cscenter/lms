@@ -213,35 +213,23 @@ class AbstractFieldEntry(models.Model):
 
 
 class Form(AbstractForm):
+    def clean(self):
+        if self.status == STATUS_PUBLISHED:
+            try:
+                survey = self.survey
+                today = now()
+                if survey.expire_at <= today:
+                    raise ValidationError({
+                        "status": "Publishing expired course survey is not "
+                                  "permitted"
+                    })
+            except CourseSurvey.DoesNotExist:
+                pass
+
     @transaction.atomic
     def save(self, *args, **kwargs):
         created = self.pk is None
         super().save(*args, **kwargs)
-        if self.status == STATUS_PUBLISHED and hasattr(self, "survey"):
-            survey = self.survey
-            if survey.email_template_id and not survey.students_notified:
-                self._create_survey_notifications(survey)
-                survey.students_notified = True
-                survey.save(update_fields=["students_notified"])
-
-    def _create_survey_notifications(self, survey):
-        course = survey.course
-        context = {
-            "COURSE_NAME": str(course),
-            "SURVEY_URL": survey.get_absolute_url()
-        }
-        active_enrollments = (Enrollment.active
-                              .filter(course=course.pk)
-                              .select_related("student"))
-        for e in active_enrollments.iterator():
-            mail.send(
-                [e.student.email],
-                sender="noreply@compscicenter.ru",
-                template=survey.email_template,
-                context=context,
-                render_on_delivery=True,
-                backend='ses',
-            )
 
 
 class CourseSurvey(TimezoneAwareModel, models.Model):
