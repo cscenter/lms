@@ -290,7 +290,6 @@ class InterviewStreamAdmin(admin.ModelAdmin):
             'widget': Select2Multiple(attrs={"data-width": 'style'})
         }
     }
-    # TODO: how to customize time widget format to H:M?
 
     def get_readonly_fields(self, request, obj=None):
         """
@@ -301,10 +300,12 @@ class InterviewStreamAdmin(admin.ModelAdmin):
         """
         if not obj:
             return []
-        elif obj.date < timezone.now().date():
-            return ['start_at', 'end_at', 'duration', 'interviewers', 'date']
-        else:
-            return ['start_at', 'end_at', 'duration', 'date']
+        readonly_fields = ['start_at', 'end_at', 'duration']
+        if obj.interview_invitations.exists():
+            readonly_fields.append('date')
+        if obj.date < timezone.now().date():
+            readonly_fields.append('interviewers')
+        return readonly_fields
 
 
 class InterviewStreamsInline(admin.TabularInline):

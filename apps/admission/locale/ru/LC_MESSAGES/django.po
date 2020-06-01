@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-05-27 16:27+0000\n"
-"PO-Revision-Date: 2020-05-27 17:11+0000\n"
+"PO-Revision-Date: 2020-06-01 09:54+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -847,11 +847,11 @@ msgstr "День проведения"
 
 #: apps/admission/models.py:1126
 msgid "Period start"
-msgstr "Начинается"
+msgstr "Начало потока"
 
 #: apps/admission/models.py:1127
 msgid "Period end"
-msgstr "Заканчивается"
+msgstr "Конец потока"
 
 #: apps/admission/models.py:1129
 msgid "Slot duration"
