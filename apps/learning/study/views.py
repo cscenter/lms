@@ -1,7 +1,6 @@
 from typing import Iterable
 
 from django.apps import apps
-from django.conf import settings
 from django.contrib import messages
 from django.db.models import Q, Prefetch
 from django.http import HttpResponseRedirect
@@ -16,19 +15,20 @@ from core.urls import reverse
 from core.utils import is_club_site
 from courses.calendar import CalendarEvent
 from courses.constants import SemesterTypes
-from courses.models import CourseClass, Semester, Course
+from courses.models import Semester, Course
 from courses.utils import get_current_term_pair, MonthPeriod, \
-    get_start_of_week, get_end_of_week, extended_month_date_range
+    extended_month_date_range
 from courses.views import WeekEventsView, MonthEventsCalendarView
+from info_blocks.constants import CurrentInfoBlockTags
+from info_blocks.models import InfoBlock
 from learning import utils
 from learning.calendar import get_student_calendar_events, get_calendar_events
-from learning.services import get_student_classes, get_classes
 from learning.forms import AssignmentExecutionTimeForm
-from learning.internships.models import Internship
-from learning.models import Useful, StudentAssignment, Enrollment
+from learning.models import StudentAssignment, Enrollment
 from learning.permissions import ViewOwnStudentAssignments, \
     EditOwnAssignmentExecutionTime, ViewOwnStudentAssignment, ViewCourses
 from learning.roles import Roles
+from learning.services import get_student_classes
 from learning.views import AssignmentSubmissionBaseView
 from learning.views.views import AssignmentCommentUpsertView, \
     StudentAssignmentURLParamsMixin
@@ -246,3 +246,38 @@ class CourseListView(PermissionRequiredMixin, generic.TemplateView):
                 current_term.year).capitalize()
         }
         return context
+
+
+class UsefulListView(PermissionRequiredMixin, generic.ListView):
+    context_object_name = "faq"
+    template_name = "learning/study/useful.html"
+    permission_required = "study.view_faq"
+
+    def get_queryset(self):
+        return (InfoBlock.objects
+                .for_site(self.request.site)
+                .with_tag(CurrentInfoBlockTags.USEFUL)
+                .order_by("sort"))
+
+
+class InternshipListView(PermissionRequiredMixin, generic.ListView):
+    context_object_name = "faq"
+    template_name = "learning/study/internships.html"
+    permission_required = "study.view_internships"
+
+    def get_queryset(self):
+        return (InfoBlock.objects
+                .for_site(self.request.site)
+                .with_tag(CurrentInfoBlockTags.INTERNSHIP)
+                .order_by("sort"))
+
+
+class HonorCodeView(generic.ListView):
+    context_object_name = "faq"
+    template_name = "learning/study/honor_code.html"
+
+    def get_queryset(self):
+        return (InfoBlock.objects
+                .for_site(self.request.site)
+                .with_tag(CurrentInfoBlockTags.HONOR_CODE)
+                .order_by("sort"))

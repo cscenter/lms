@@ -15,6 +15,10 @@
                     <li>{{ qa.content }}</li>
                 {% endfor %}
             </ul>
+        {% else %}
+            <div class="alert alert-info">
+                Кодекс пока пуст.
+            </div>
         {% endif %}
     </div>
   </div>
