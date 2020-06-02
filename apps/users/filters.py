@@ -47,43 +47,6 @@ class MultipleChoiceCSVField(MultipleChoiceField):
     widget = SelectMultipleCSVSupport
 
 
-class RolesInFilter(MultipleChoiceFilter):
-    field_class = MultipleChoiceCSVField
-
-    choices = [
-        (Roles.STUDENT, Roles.values[Roles.STUDENT]),
-        (Roles.VOLUNTEER, Roles.values[Roles.VOLUNTEER]),
-        (Roles.INVITED, Roles.values[Roles.INVITED]),
-        (Roles.GRADUATE, Roles.values[Roles.GRADUATE]),
-    ]
-
-    def __init__(self, choices=None, *args, **kwargs):
-        if choices is not None:
-            self.choices = choices
-        super().__init__(choices=self.choices, *args, **kwargs)
-
-    def filter(self, qs, value):
-        if value in EMPTY_VALUES:
-            return qs
-        return (qs
-                .filter(user__group__site_id=settings.SITE_ID,
-                        user__group__role__in=value)
-                .distinct())
-
-
-class StudentFilterForm(forms.Form):
-    def clean(self):
-        cleaned_data = super().clean()
-        if ("studying" in cleaned_data["status"] and
-                cleaned_data['groups'] == [str(Roles.GRADUATE)]):
-            raise ValidationError("Graduates are not studying")
-        if "groups" not in self.changed_data and len(self.changed_data):
-            groups = [v for v, _ in RolesInFilter.choices]
-            if "studying" in cleaned_data["status"]:
-                groups.remove(Roles.GRADUATE)
-            cleaned_data['groups'] = groups
-
-
 def replace_single_quotes(column_name):
     """Returns `replace` postgres function call that removes single quotes"""
     return f"replace({column_name}, '''', '')"
@@ -98,18 +61,15 @@ class StudentFilter(FilterSet):
     branches = CharInFilter(field_name='branch_id')
     profile_types = CharInFilter(field_name='type')
     curriculum_year = NumberInFilter(field_name='year_of_curriculum')
-    # FIXME: add `graduate` type? then remove `groups` filter
-    groups = RolesInFilter(label='Roles', field_name='user__group__role',
-                           distinct=True)
+    types = CharInFilter(field_name='type')
     # FIXME: choice validation
     status = CharFilter(label='Student Status', method='status_filter')
     cnt_enrollments = CharFilter(label='Enrollments',
                                  method='courses_filter')
 
     class Meta:
-        form = StudentFilterForm
         model = StudentProfile
-        fields = ("name", "branches", "curriculum_year", "groups", "status",
+        fields = ("name", "branches", "curriculum_year", "types", "status",
                   "cnt_enrollments", "profile_types")
 
     @property
@@ -154,16 +114,14 @@ class StudentFilter(FilterSet):
     def status_filter(self, queryset, name, value):
         value_list = value.split(u',')
         value_list = [v for v in value_list if v]
-        has_inactive_status = any(True for v in value_list
-                                  if v in StudentStatuses.inactive_statuses)
-        if "studying" in value_list and has_inactive_status:
-            return queryset
-        elif "studying" in value_list:
-            return queryset.exclude(status__in=StudentStatuses.inactive_statuses)
+        if "studying" in value_list:
+            value_list.append('')
         for value in value_list:
+            # TODO: remove after adding explicit status
+            if not value or value == "studying":
+                continue
             if value not in StudentStatuses.values:
-                raise ValueError(
-                    "UserFilter: unrecognized status_filter choice")
+                raise ValueError("StudentFilter: unrecognized status")
         return queryset.filter(status__in=value_list).distinct()
 
     def name_filter(self, queryset, name, value):

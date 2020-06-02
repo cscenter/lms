@@ -10,8 +10,9 @@ from courses.tests.factories import MetaCourseFactory, SemesterFactory, \
 from learning.settings import StudentStatuses, GradeTypes, Branches
 from learning.tests.factories import EnrollmentFactory, GraduateFactory
 from users.constants import Roles
+from users.models import StudentTypes
 from users.tests.factories import UserFactory, VolunteerFactory, \
-    add_user_groups, StudentFactory, CuratorFactory
+    StudentFactory, CuratorFactory
 
 
 @pytest.fixture(scope="module")
@@ -88,20 +89,18 @@ def test_student_search(client, curator, search_url, settings):
     # Now test groups filter
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={}".format(Roles.STUDENT)
+        "curriculum_year=2011&types={}".format(StudentTypes.REGULAR)
     ))
     assert response.json()["count"] == 2
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={}".format(Roles.VOLUNTEER)
+        "curriculum_year=2011&types={}".format(StudentTypes.VOLUNTEER)
     ))
-    assert response.json()[
-               "count"] == 0, "curriculum year for volunteer is not set"
+    assert response.json()["count"] == 0, "curriculum year for volunteer is not set"
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups[]={}&groups[]={}".format(
-            Roles.STUDENT,
-            Roles.VOLUNTEER
+        "curriculum_year=2011&types[]={}&types[]={}".format(
+            StudentTypes.REGULAR, StudentTypes.VOLUNTEER
         )
     ))
     assert response.json()["count"] == 2
@@ -110,17 +109,17 @@ def test_student_search(client, curator, search_url, settings):
     student_profile.save()
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups[]={}&status={}".format(
-            Roles.STUDENT,
+        "curriculum_year=2011&types[]={}&status={}".format(
+            StudentTypes.REGULAR,
             StudentStatuses.REINSTATED
         )
     ))
     assert response.json()["count"] == 1
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={},{}&status={}&cnt_enrollments={}".format(
-            Roles.STUDENT,
-            Roles.VOLUNTEER,
+        "curriculum_year=2011&types={},{}&status={}&cnt_enrollments={}".format(
+            StudentTypes.REGULAR,
+            StudentTypes.VOLUNTEER,
             StudentStatuses.REINSTATED,
             "2"
         )
@@ -129,8 +128,8 @@ def test_student_search(client, curator, search_url, settings):
     # Check multi values still works for cnt_enrollments
     response = client.get("{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={}&status={}&cnt_enrollments={}".format(
-            Roles.STUDENT,
+        "curriculum_year=2011&types={}&status={}&cnt_enrollments={}".format(
+            StudentTypes.REGULAR,
             StudentStatuses.REINSTATED,
             "0,2"
         )
@@ -149,9 +148,9 @@ def test_student_search_enrollments(client, curator, search_url):
                              last_name='Иванов', first_name='Иван')
     ENROLLMENTS_URL = "{}?{}".format(
         search_url,
-        "curriculum_year=2011&groups={},{}&cnt_enrollments={{}}".format(
-            Roles.STUDENT,
-            Roles.VOLUNTEER,
+        "curriculum_year=2011&types={},{}&cnt_enrollments={{}}".format(
+            StudentTypes.REGULAR,
+            StudentTypes.VOLUNTEER,
         )
     )
     response = client.get(ENROLLMENTS_URL.format("2"))
@@ -186,37 +185,36 @@ def test_student_search_enrollments(client, curator, search_url):
 
 
 @pytest.mark.django_db
-def test_student_search_by_groups(client, curator, search_url, settings):
+def test_student_search_by_types(client, curator, search_url, settings):
     client.login(curator)
     # All users below are considered as `studying` due to empty status
     branch = BranchFactory(site_id=settings.ANOTHER_DOMAIN_ID)
     StudentFactory.create_batch(2, student_profile__branch=branch)
-    students = StudentFactory.create_batch(3,
-                                           student_profile__year_of_admission=2011,
-                                           student_profile__year_of_curriculum=2011,
-                                           student_profile__status="")
-    volunteers = VolunteerFactory.create_batch(4,
-                                               student_profile__year_of_admission=2011,
-                                               student_profile__year_of_curriculum=2011,
-                                               student_profile__status="")
+    students = StudentFactory.create_batch(
+        3,
+        student_profile__year_of_admission=2011,
+        student_profile__year_of_curriculum=2011,
+        student_profile__status="")
+    volunteers = VolunteerFactory.create_batch(
+        4,
+        student_profile__year_of_admission=2011,
+        student_profile__year_of_curriculum=2011,
+        student_profile__status="")
     # Empty results if no query provided
     response = client.get(search_url)
     assert response.json()["count"] == 0
     # And without any value it still empty
-    response = client.get("{}?{}".format(search_url, "groups="))
+    response = client.get("{}?{}".format(search_url, "types="))
     assert response.json()["count"] == 0
-    # With any non-empty query field we filter by predefined
-    # set of UserFilter.FILTERING_GROUPS
-    response = client.get("{}?{}".format(search_url, "status=studying&groups="))
+    response = client.get("{}?{}".format(search_url, "status=studying&types="))
     json_data = response.json()
     assert json_data["count"] == len(students) + len(volunteers)
     graduated = GraduateFactory(student_profile__year_of_admission=2012,
                                 student_profile__year_of_curriculum=2012,
                                 student_profile__status="",
                                 student_profile__site_id=settings.ANOTHER_DOMAIN_ID)
-    url = f"{search_url}?status=studying&groups={Roles.STUDENT}&curriculum_year=2011,2012"
+    url = f"{search_url}?status=studying&types={StudentTypes.REGULAR}&curriculum_year=2011,2012"
     response = client.get(url)
-    # Fail in case of multiple joins with users_user_groups table
     assert response.json()["count"] == len(students)
 
 
@@ -271,13 +269,13 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
         graduate_profile__graduated_on=graduated_on)
     response = client.get("{}?{}".format(search_url, "status=studying"))
     json_data = response.json()
-    total_studying = len(students_spb) + len(students_nsk) + len(volunteers) + len(graduated)
+    total_studying = len(students_spb) + len(students_nsk) + len(volunteers)
     assert json_data["count"] == total_studying
+    # Add some students with inactive status
     expelled = StudentFactory.create_batch(
         2, student_profile__year_of_admission=2011,
         student_profile__status=StudentStatuses.EXPELLED,
         branch=branch_spb)
-    # No groups specified
     response = client.get("{}?{}".format(search_url, "status=studying"))
     json_data = response.json()
     assert json_data["count"] == total_studying
@@ -290,15 +288,9 @@ def test_student_by_virtual_status_studying(client, curator, search_url):
     assert response.json()["count"] == total_studying
     # More precisely by group
     url = "{}?{}".format(
-        search_url, "status=studying&groups={}".format(Roles.VOLUNTEER))
+        search_url, "status=studying&types={}".format(StudentTypes.VOLUNTEER))
     response = client.get(url)
     assert response.json()["count"] == len(volunteers)
-    # Edge case - show `studying` among graduated
-    url = f"{search_url}?status=studying&groups={Roles.GRADUATE}"
-    response = client.get(url)
-    assert response.status_code == 400
-    # If some group added except graduate group - concat results
-    query = "status=studying&groups={},{}".format(Roles.VOLUNTEER,
-                                                  Roles.GRADUATE)
+    query = f"status=studying,{StudentStatuses.GRADUATE}&types={StudentTypes.VOLUNTEER}"
     response = client.get("{}?{}".format(search_url, query))
-    assert response.json()["count"] == len(volunteers) + len(graduated)
+    assert response.json()["count"] == len(volunteers)
