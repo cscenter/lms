@@ -86,7 +86,7 @@ class StudentSearchView(CuratorOnlyMixin, TemplateView):
                                  .filter(year_of_curriculum__isnull=False)
                                  .order_by('year_of_curriculum')
                                  .distinct()),
-            'groups': StudentFilter.get_filters()['groups'].choices,
+            "types": StudentTypes.choices,
             "status": StudentStatuses.values,
             "cnt_enrollments": range(StudentFilter.ENROLLMENTS_MAX + 1)
         }
