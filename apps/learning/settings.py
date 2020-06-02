@@ -37,6 +37,7 @@ class StudentStatuses(DjangoChoices):
     ACADEMIC_LEAVE = C('academic', _("StudentStatus|Academic leave"))
     REINSTATED = C('reinstated', _("StudentInfo|Reinstalled"))
     WILL_GRADUATE = C('will_graduate', _("StudentInfo|Will graduate"))
+    GRADUATE = C('graduate', _("StudentInfo|Graduate"))
 
     inactive_statuses = {EXPELLED.value, ACADEMIC_LEAVE.value}
 

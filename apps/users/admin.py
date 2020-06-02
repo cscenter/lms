@@ -192,6 +192,7 @@ class StudentProfileAdmin(BaseModelAdmin):
     def save_model(self, request, obj, form, change):
         if "comment" in form.changed_data:
             obj.comment_last_author = request.user
+        # Don't save initial status
         if "status" in form.changed_data and obj.pk:
             log_entry = StudentStatusLog(status=form.cleaned_data['status'],
                                          student_profile=obj,
