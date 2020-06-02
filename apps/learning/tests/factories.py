@@ -14,6 +14,7 @@ from learning.models import StudentAssignment, \
     CourseNewsNotification, Event, GraduateProfile, Invitation, \
     CourseInvitation, StudentGroup
 from learning.services import StudentGroupService
+from learning.settings import StudentStatuses
 from users.constants import Roles
 from users.models import UserGroup
 from users.tests.factories import UserFactory, StudentFactory, \
@@ -152,6 +153,7 @@ class GraduateFactory(UserFactory):
     def student_profile(self, create, extracted, **kwargs):
         if not create:
             return
+        kwargs['status'] = StudentStatuses.GRADUATE
         student_profile = StudentProfileFactory(user=self, **kwargs)
         self.__student_profile_id = student_profile.pk
         UserGroup.objects.filter(role=Roles.STUDENT, user=self).delete()
@@ -167,5 +169,6 @@ class GraduateProfileFactory(factory.DjangoModelFactory):
     class Meta:
         model = GraduateProfile
 
-    student_profile = factory.SubFactory(StudentProfileFactory)
+    student_profile = factory.SubFactory(StudentProfileFactory,
+                                         status=StudentStatuses.GRADUATE)
     graduated_on = factory.Faker('future_date', end_date="+10d", tzinfo=None)
