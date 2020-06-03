@@ -689,7 +689,7 @@ class User(TimezoneAwareModel, LearningPermissionsMixin, StudentProfileAbstract,
 
 class StudentTypes(DjangoChoices):
     REGULAR = C('regular', _("Regular Student"), priority=300)
-    VOLUNTEER = C('volunteer', _("Volunteer"), priority=200)
+    VOLUNTEER = C('volunteer', _("Co-worker"), priority=200)
     INVITED = C('invited', _("Invited Student"), priority=100)
 
     @classmethod
