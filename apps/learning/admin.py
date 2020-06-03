@@ -11,8 +11,10 @@ from core.widgets import AdminRichTextAreaWidget
 from courses.models import StudentGroupTypes
 from learning.models import GraduateProfile, Invitation, CourseInvitation, \
     StudentAssignment, StudentGroup
+from users.models import StudentStatusLog
 from .models import AssignmentComment, Enrollment, Event, Useful
 from .services import StudentGroupService
+from .settings import StudentStatuses
 
 
 class AssignmentCommentAdmin(BaseModelAdmin):
@@ -132,6 +134,19 @@ class GraduateProfileAdmin(BaseModelAdmin):
     @meta(_("Student"))
     def student_name(self, obj):
         return obj.student_profile.user.get_full_name()
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if "is_active" in form.changed_data:
+            is_active = form.cleaned_data['is_active']
+            student_profile = obj.student_profile
+            if is_active and student_profile.status != StudentStatuses.GRADUATE:
+                student_profile.status = StudentStatuses.GRADUATE
+                student_profile.save(update_fields=['status'])
+                log_entry = StudentStatusLog(status=StudentStatuses.GRADUATE,
+                                             student_profile=student_profile,
+                                             entry_author=request.user)
+                log_entry.save()
 
 
 class CourseInlineAdmin(admin.TabularInline):

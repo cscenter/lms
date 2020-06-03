@@ -4,7 +4,7 @@ const ENTRY_POINT = $('.user-search #ajax-uri').val();
 let queryName = "";
 let branches = {};
 let curriculumYears = {};
-let groups = {};
+let types = {};
 let status = {};
 let cnt_enrollments = {};
 
@@ -27,15 +27,15 @@ const fn = {
                 .filter(key => cnt_enrollments[key])
                 .join(",");
 
-            let selectedGroups = Object.keys(groups)
-                .filter(key => groups[key])
+            let selectedTypes = Object.keys(types)
+                .filter(key => types[key])
                 .join(",");
 
             let queryData = {
                 name: queryName,
                 branches: selectedBranches,
                 curriculum_year: selectedYears,
-                groups: selectedGroups,
+                types: selectedTypes,
                 status: selectedStatuses,
                 cnt_enrollments: selectedEnrollmentsCount,
             };
@@ -95,8 +95,8 @@ const fn = {
                 curriculumYears[$(this).val()] = this.checked;
                 query();
             })
-            .on('change', '[name="group"]', function (e) {
-                groups[$(this).val()] = this.checked;
+            .on('change', '[name="type"]', function (e) {
+                types[$(this).val()] = this.checked;
                 query();
             })
             .on('change', '[name="status"]', function (e) {

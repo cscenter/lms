@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-03 11:28+0000\n"
-"PO-Revision-Date: 2020-05-29 15:08+0000\n"
+"PO-Revision-Date: 2020-06-01 16:58+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -166,7 +166,8 @@ msgstr "Проверяющий [Отчеты по проектам]"
 msgid "Core"
 msgstr ""
 
-#: apps/core/forms.py:7 apps/templates/forms/simple_delete_confirmation.html:22
+#: apps/core/forms.py:7
+#: apps/templates/forms/simple_delete_confirmation.html:22
 #: apps/templates/learning/enrollment/enrollment_leave.html:25
 #: lms/jinja2/lms/courses/course_class_form.html:78
 msgid "Cancel"
@@ -255,10 +256,11 @@ msgstr "Описание"
 msgid "Branch|Description"
 msgstr "Общее описание, правила обучения"
 
-#: apps/core/models.py:203 apps/courses/models.py:51 apps/courses/models.py:245
-#: apps/courses/models.py:568 apps/learning/models.py:65
-#: apps/learning/models.py:270 apps/learning/models.py:619
-#: apps/library/models.py:62 apps/study_programs/models.py:54
+#: apps/core/models.py:203 apps/courses/models.py:51
+#: apps/courses/models.py:245 apps/courses/models.py:568
+#: apps/learning/models.py:65 apps/learning/models.py:270
+#: apps/learning/models.py:619 apps/library/models.py:62
+#: apps/study_programs/models.py:54
 #: apps/templates/learning/invitation/complete_profile.html:23
 #: apps/users/models.py:159 apps/users/models.py:294 apps/users/models.py:734
 msgid "Branch"
@@ -453,8 +455,8 @@ msgstr "Только студенты"
 msgid "All groups"
 msgstr "Все группы"
 
-#: apps/courses/forms.py:54 apps/courses/models.py:200 apps/users/models.py:881
-#: apps/users/models.py:898
+#: apps/courses/forms.py:54 apps/courses/models.py:200
+#: apps/users/models.py:881 apps/users/models.py:898
 msgid "Course|name"
 msgstr "Название"
 
@@ -1627,7 +1629,6 @@ msgid "Fields of study"
 msgstr "Направления обучения"
 
 #: apps/learning/models.py:703
-#| msgid "Academic disciplines from which student plans to graduate"
 msgid "Academic disciplines that the student graduated from"
 msgstr "Направления, с которых выпустился студент."
 
@@ -1739,31 +1740,36 @@ msgstr "Восстановлен"
 msgid "StudentInfo|Will graduate"
 msgstr "Будет выпускаться"
 
-#: apps/learning/settings.py:53
+#: apps/learning/settings.py:40
+#| msgid "StudentInfo|Will graduate"
+msgid "StudentInfo|Graduate"
+msgstr "Выпускник"
+
+#: apps/learning/settings.py:54
 msgid "Default"
 msgstr "По-умолчанию"
 
-#: apps/learning/settings.py:54
+#: apps/learning/settings.py:55
 msgid "Binary"
 msgstr "Зачет-Незачет"
 
-#: apps/learning/settings.py:63 apps/users/constants.py:59
+#: apps/learning/settings.py:64 apps/users/constants.py:59
 msgid "Not graded"
 msgstr "Без оценки"
 
-#: apps/learning/settings.py:64
+#: apps/learning/settings.py:65
 msgid "Enrollment|Unsatisfactory"
 msgstr "Незачёт"
 
-#: apps/learning/settings.py:65
+#: apps/learning/settings.py:66
 msgid "Enrollment|Pass"
 msgstr "Зачёт"
 
-#: apps/learning/settings.py:66 apps/users/constants.py:62
+#: apps/learning/settings.py:67 apps/users/constants.py:62
 msgid "Good"
 msgstr "Хорошо"
 
-#: apps/learning/settings.py:67 apps/users/constants.py:63
+#: apps/learning/settings.py:68 apps/users/constants.py:63
 msgid "Excellent"
 msgstr "Отлично"
 
@@ -1874,7 +1880,8 @@ msgstr "Вы уже записаны на этот курс"
 msgid "Copies available"
 msgstr "Доступно"
 
-#: apps/library/admin.py:80 apps/library/models.py:27 apps/library/models.py:57
+#: apps/library/admin.py:80 apps/library/models.py:27
+#: apps/library/models.py:57
 msgid "Book"
 msgstr "Книга"
 
@@ -2062,8 +2069,8 @@ msgstr "Направление обучения"
 
 #: apps/study_programs/models.py:64
 msgid ""
-"Show on syllabus page. Other activity flags for selected branch and academic "
-"discipline will be deactivated."
+"Show on syllabus page. Other activity flags for selected branch and academic"
+" discipline will be deactivated."
 msgstr ""
 "Активная программа будет показана на странице программы. Все другие записи "
 "для выбранного отделения и направления обучения будут деактивированы."
@@ -2915,7 +2922,7 @@ msgstr "Университет"
 
 #: apps/users/models.py:755 lms/templates/users/user_detail.html:239
 msgid "StudentInfo|University year"
-msgstr "Курс"
+msgstr "Курс при поступлении"
 
 #: apps/users/models.py:758
 msgid "at enrollment"
@@ -3195,10 +3202,9 @@ msgid "Change photo"
 msgstr "Изменить фото"
 
 #: lms/templates/users/user_detail.html:70
-#, fuzzy
 #| msgid "Student"
 msgid "student"
-msgstr "Студент"
+msgstr "студент"
 
 #: lms/templates/users/user_detail.html:70
 #, fuzzy
@@ -3354,11 +3360,10 @@ msgstr "весенний"
 #~ msgstr "Перейти к курсу"
 
 #~ msgid ""
-#~ "The course was developed in collaboration with the <a href='http://mit."
-#~ "spbau.ru/'>Academic University</a>."
+#~ "The course was developed in collaboration with the <a "
+#~ "href='http://mit.spbau.ru/'>Academic University</a>."
 #~ msgstr ""
-#~ "Cовместно с <a href='http://mit.spbau.ru/'>Академическим университетом</"
-#~ "a>."
+#~ "Cовместно с <a href='http://mit.spbau.ru/'>Академическим университетом</a>."
 
 #~ msgid "No online courses for now"
 #~ msgstr "На текущий момент нет открытых онлайн-курсов."
@@ -3503,8 +3508,8 @@ msgstr "весенний"
 
 #~ msgid "Leave blank to use course enrollment deadline from semester settings"
 #~ msgstr ""
-#~ "Оставьте поле пустым, чтобы использовать дедлайн записи на курсы из "
-#~ "настроек семестра"
+#~ "Оставьте поле пустым, чтобы использовать дедлайн записи на курсы из настроек"
+#~ " семестра"
 
 #~ msgid "No places available"
 #~ msgstr "Нет свободных мест"
@@ -3526,14 +3531,12 @@ msgstr "весенний"
 
 #~ msgid "Specify patterns when item is selected. One pattern for each line."
 #~ msgstr ""
-#~ "Дополнительные условия, когда пункт считается выбранным (1 regexp на "
-#~ "строку)"
+#~ "Дополнительные условия, когда пункт считается выбранным (1 regexp на строку)"
 
-#~ msgid ""
-#~ "Specify patterns when item is not selected. One pattern for each line."
+#~ msgid "Specify patterns when item is not selected. One pattern for each line."
 #~ msgstr ""
-#~ "Укажите паттерны, когда элемент не будет считаться выбранным. Одна строка "
-#~ "- один паттерн."
+#~ "Укажите паттерны, когда элемент не будет считаться выбранным. Одна строка - "
+#~ "один паттерн."
 
 #~ msgid "Menu extensions"
 #~ msgstr "Дополнительные поля для меню"
@@ -3658,13 +3661,12 @@ msgstr "весенний"
 #~ msgstr "Для выпускника должен быть указан год выпуска"
 
 #~ msgid "User can't be volunteer and student at the same time"
-#~ msgstr ""
-#~ "Пользователь не должен быть одновременно Вольнослушателем и Студентом"
+#~ msgstr "Пользователь не должен быть одновременно Вольнослушателем и Студентом"
 
 #~ msgid "User can't be graduated and student at the same time"
 #~ msgstr ""
-#~ "Пользователь не должен быть одновременно Выпускником и Студентом центра/"
-#~ "Вольнослушателем"
+#~ "Пользователь не должен быть одновременно Выпускником и Студентом "
+#~ "центра/Вольнослушателем"
 
 #, fuzzy
 #~ msgid "Graduation on"
@@ -3696,8 +3698,8 @@ msgstr "весенний"
 
 #~ msgid "Semester|projects_grade_good"
 #~ msgstr ""
-#~ "Сумма баллов >= указанного значения считается как \"Хорошо\", если "
-#~ "значение не превышает границу для \"Отлично\"."
+#~ "Сумма баллов >= указанного значения считается как \"Хорошо\", если значение "
+#~ "не превышает границу для \"Отлично\"."
 
 #~ msgid "Projects|Border for pass"
 #~ msgstr "Проекты, граница для pass"

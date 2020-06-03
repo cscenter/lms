@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 const BundleTracker = require('webpack-bundle-tracker');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');  // clean build dir before building
 const TerserPlugin = require('terser-webpack-plugin');
 const SentryWebpackPlugin = require('@sentry/webpack-plugin');
 const DeleteSourceMapWebpackPlugin = require('delete-sourcemap-webpack-plugin');
@@ -54,6 +55,10 @@ const prodConfiguration = {
     },
 
     plugins: [
+        new CleanWebpackPlugin({
+            verbose: true,
+            cleanOnceBeforeBuildPatterns: ['**/*', '!.gitattributes'],
+        }),
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: '"production"'

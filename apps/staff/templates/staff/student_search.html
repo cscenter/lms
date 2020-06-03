@@ -50,12 +50,10 @@
         </div>
         <div class="form-group">
           <label>{% trans "Groups" %}</label><br>
-          <div class="btn-group btn-group-sm" data-toggle="buttons">
-            {% for group_id, group_name in groups %}
+          <div class="btn-group btn-group-sm" data-toggle="buttons" >
+            {% for type_id, type_name in types %}
               <label class="btn btn-default">
-                <input type="checkbox" name="group"
-                       value="{{ group_id }}"
-                       autocomplete="off">{% trans group_name %}
+                <input type="checkbox" name="type" value="{{ type_id }}" autocomplete="off">{% trans type_name %}
               </label>
             {% endfor %}
           </div>

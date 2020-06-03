@@ -156,7 +156,7 @@ class StudentStatusLogAdminInline(admin.TabularInline):
 class StudentProfileAdmin(BaseModelAdmin):
     list_select_related = ['user', 'branch', 'branch__site']
     list_display = ('user', 'branch', 'type', 'year_of_admission', 'status')
-    list_filter = ('type', 'branch', 'site',)
+    list_filter = ('type', 'site', 'branch', 'status',)
     raw_id_fields = ('user', 'comment_last_author')
     search_fields = ['user__last_name']
     inlines = [StudentStatusLogAdminInline]
@@ -192,6 +192,7 @@ class StudentProfileAdmin(BaseModelAdmin):
     def save_model(self, request, obj, form, change):
         if "comment" in form.changed_data:
             obj.comment_last_author = request.user
+        # Don't save initial status
         if "status" in form.changed_data and obj.pk:
             log_entry = StudentStatusLog(status=form.cleaned_data['status'],
                                          student_profile=obj,
