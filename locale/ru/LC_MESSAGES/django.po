@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-01 16:53+0000\n"
+"POT-Creation-Date: 2020-06-03 11:28+0000\n"
 "PO-Revision-Date: 2020-06-01 16:58+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -238,8 +238,9 @@ msgid "Branch Location"
 msgstr "Местонахождение"
 
 #: apps/core/models.py:186 apps/faq/models.py:11 apps/faq/models.py:27
-#: apps/learning/internships/models.py:12 apps/learning/models.py:667
-#: apps/users/models.py:153 apps/users/models.py:716
+#: apps/info_blocks/models.py:42 apps/learning/internships/models.py:12
+#: apps/learning/models.py:667 apps/users/models.py:153
+#: apps/users/models.py:716
 msgid "Site"
 msgstr "Сайт"
 
@@ -357,8 +358,7 @@ msgstr ""
 msgid "You can create only open courses from CS club site"
 msgstr "Забыли сделать прочтение открытым?"
 
-#: apps/courses/admin.py:158 apps/courses/admin.py:243
-#: apps/users/models.py:852
+#: apps/courses/admin.py:158 apps/courses/admin.py:243 apps/users/models.py:852
 msgid "Created"
 msgstr "Дата создания"
 
@@ -465,7 +465,7 @@ msgid "Course|description"
 msgstr "Описание"
 
 #: apps/courses/forms.py:117 apps/courses/forms.py:250
-#: apps/learning/gallery/models.py:33
+#: apps/info_blocks/models.py:39 apps/learning/gallery/models.py:33
 #: apps/templates/courses/course_detail.html:146
 #: apps/templates/international_schools/international_schools.html:16
 msgid "Title"
@@ -1089,7 +1089,7 @@ msgstr "Новость не была создана! Неизвестная ош
 msgid "FAQ"
 msgstr "FAQ"
 
-#: apps/faq/models.py:10 apps/faq/models.py:26
+#: apps/faq/models.py:10 apps/faq/models.py:26 apps/info_blocks/models.py:41
 #: apps/learning/internships/models.py:11
 #: apps/learning/internships/models.py:29 apps/learning/models.py:666
 #: apps/staff/models.py:12
@@ -1118,6 +1118,38 @@ msgstr "Ответ"
 #: apps/faq/models.py:38
 msgid "Questions"
 msgstr "Вопросы"
+
+#: apps/info_blocks/admin.py:40 apps/info_blocks/models.py:18
+msgid "Infoblock Tags"
+msgstr "Теги"
+
+#: apps/info_blocks/apps.py:7 apps/info_blocks/models.py:53
+msgid "Infoblocks"
+msgstr "Инфоблоки"
+
+#: apps/info_blocks/constants.py:9
+msgid "Infoblock|Useful"
+msgstr "Полезное"
+
+#: apps/info_blocks/constants.py:10
+msgid "Infoblock|Honor Code"
+msgstr "Кодекс чести"
+
+#: apps/info_blocks/constants.py:11
+msgid "Infoblock|Internships"
+msgstr "Проекты организаторов"
+
+#: apps/info_blocks/models.py:17
+msgid "Infoblock Tag"
+msgstr "Тег инфоблока"
+
+#: apps/info_blocks/models.py:40
+msgid "Content"
+msgstr "Содержимое"
+
+#: apps/info_blocks/models.py:52
+msgid "Infoblock"
+msgstr "Инфоблок"
 
 #: apps/learning/admin.py:37
 msgid "Assignment|assigned_to"
