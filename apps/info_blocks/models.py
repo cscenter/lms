@@ -42,7 +42,7 @@ class InfoBlock(TimeStampedModel):
     site = models.ForeignKey(Site, verbose_name=_("Site"),
                              default=settings.SITE_ID,
                              on_delete=models.CASCADE,
-                             related_name='infoblock_set')
+                             related_name='+')
     tags = TaggableManager(through=TaggedInfoBlock)
 
     objects = InfoBlockDefaultManager()
@@ -53,6 +53,4 @@ class InfoBlock(TimeStampedModel):
         verbose_name_plural = _("Infoblocks")
 
     def __str__(self):
-        if not self.title:
-            return smart_text(self.content)
         return smart_text(self.title)

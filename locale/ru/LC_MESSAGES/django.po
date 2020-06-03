@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-03 11:28+0000\n"
+"POT-Creation-Date: 2020-06-03 17:35+0000\n"
 "PO-Revision-Date: 2020-06-01 16:58+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1126,18 +1126,6 @@ msgstr "Теги"
 #: apps/info_blocks/apps.py:7 apps/info_blocks/models.py:53
 msgid "Infoblocks"
 msgstr "Инфоблоки"
-
-#: apps/info_blocks/constants.py:9
-msgid "Infoblock|Useful"
-msgstr "Полезное"
-
-#: apps/info_blocks/constants.py:10
-msgid "Infoblock|Honor Code"
-msgstr "Кодекс чести"
-
-#: apps/info_blocks/constants.py:11
-msgid "Infoblock|Internships"
-msgstr "Проекты организаторов"
 
 #: apps/info_blocks/models.py:17
 msgid "Infoblock Tag"
