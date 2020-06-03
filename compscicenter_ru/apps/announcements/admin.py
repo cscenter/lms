@@ -20,7 +20,7 @@ class AnnouncementForm(forms.ModelForm):
         fields = '__all__'
         widgets = {
             'tags': TaggitSelect2(
-                url='announcements:tags_autocomplete',
+                url='announcements_tags_autocomplete',
                 attrs={"data-width": 'style'})
         }
 

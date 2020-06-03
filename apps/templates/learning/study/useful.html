@@ -8,9 +8,9 @@
         <div class="panel-group panel-group-continuous" id="questions">
             {% for qa in faq %}
                 <div class="panel">
-                    <div class="panel-heading" id="question-{{ qa.pk }}" aria-expanded="false" href="#answer-{{ qa.pk }}">{{ qa.question }}</div>
+                    <div class="panel-heading" id="question-{{ qa.pk }}" aria-expanded="false" href="#answer-{{ qa.pk }}">{{ qa.title }}</div>
                     <div class="panel-collapse collapse" id="answer-{{ qa.pk }}"  aria-expanded="false">
-                        <div class="panel-body">{{ qa.answer|safe }}</div>
+                        <div class="panel-body">{{ qa.content|safe }}</div>
                     </div>
                 </div>
             {% endfor %}

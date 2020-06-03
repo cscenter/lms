@@ -3,8 +3,7 @@ from django.urls import path, re_path
 
 from courses.urls import RE_COURSE_URI
 from learning.views import CourseInvitationEnrollView, ICalEventsView
-from learning.study.views import UsefulListView, InternshipListView, \
-    HonorCodeView
+from learning.study.views import UsefulListView, InternshipListView, HonorCodeView
 from .views import EventDetailView, CourseNewsNotificationUpdate, \
     CourseStudentsView, CourseEnrollView, CourseUnenrollView
 
