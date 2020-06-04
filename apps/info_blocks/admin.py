@@ -29,13 +29,11 @@ class InfoBlockAdmin(admin.ModelAdmin):
     form = InfoBlockAdminForm
     list_filter = ('site', 'tags')
     list_display = ('title', 'site', 'tag_list', 'sort')
-    ordering = ('site',)
-    sortable_by = ('site', 'tag_list', 'sort')
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         return queryset.annotate(tag_list=ArrayAgg('tags__name'))
 
-    @meta(text=_("Infoblock Tags"))
+    @meta(text=_("Infoblock Tags"), admin_order_field='tag_list')
     def tag_list(self, obj):
         return ', '.join(obj.tag_list)
