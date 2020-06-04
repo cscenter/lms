@@ -187,9 +187,9 @@ class ProgressReport:
     @staticmethod
     def generate_shad_courses_headers(headers_number):
         return [h for i in range(1, headers_number + 1)
-                for h in ('ШАД, курс {}, название'.format(i),
-                          'ШАД, курс {}, преподаватели'.format(i),
-                          'ШАД, курс {}, оценка'.format(i))]
+                for h in (f'ШАД, курс {i}, название',
+                          f'ШАД, курс {i}, преподаватели',
+                          f'ШАД, курс {i}, оценка')]
 
     @staticmethod
     def generate_online_courses_headers(headers_number):
@@ -274,6 +274,23 @@ class ProgressReportForDiplomas(ProgressReport):
                 )
                 .order_by('user__last_name', 'user__first_name', 'user_id'))
 
+    @staticmethod
+    def get_courses_headers(meta_courses):
+        if not meta_courses:
+            return []
+        return [h for c in meta_courses.values()
+                for h in (f'{c.name}, оценка',
+                          f'{c.name}, преподаватели',
+                          f'{c.name}, семестр')]
+
+    @staticmethod
+    def generate_shad_courses_headers(headers_number):
+        return [h for i in range(1, headers_number + 1)
+                for h in (f'ШАД, курс {i}, название',
+                          f'ШАД, курс {i}, преподаватели',
+                          f'ШАД, курс {i}, оценка',
+                          f'ШАД, курс {i}, семестр')]
+
     def _generate_headers(self, *, courses, meta_courses, shads_max, online_max,
                           projects_max):
         return [
@@ -290,6 +307,20 @@ class ProgressReportForDiplomas(ProgressReport):
             *self.generate_shad_courses_headers(shads_max),
             *self.generate_projects_headers(projects_max),
         ]
+
+    def _export_courses(self, student, courses, meta_courses) -> List[str]:
+        step = 3  # Number of columns for each course
+        values = [''] * len(meta_courses) * step
+        for i, meta_course_id in enumerate(meta_courses):
+            if meta_course_id in student.unique_enrollments:
+                enrollment = student.unique_enrollments[meta_course_id]
+                course = courses[enrollment.course_id]
+                teachers = ", ".join(ct.teacher.get_abbreviated_name() for ct in
+                                     course.course_teachers.all())
+                values[i * step] = self.grade_getter(enrollment).lower()
+                values[i * step + 1] = teachers
+                values[i * step + 2] = course.semester
+        return values
 
     def _export_row(self, student_profile, *, courses, meta_courses, shads_max,
                     online_max, projects_max):
@@ -312,6 +343,16 @@ class ProgressReportForDiplomas(ProgressReport):
             *self._export_shad_courses(student, shads_max),
             *self._export_projects(student, projects_max),
         ]
+
+    def _export_shad_courses(self, student, shads_max) -> List[str]:
+        step = 4  # Number of columns for each shad course
+        values = [''] * shads_max * step
+        for i, course in enumerate(student.shads):
+            values[i * step] = course.name
+            values[i * step + 1] = course.teachers
+            values[i * step + 2] = course.grade_display.lower()
+            values[i * step + 3] = course.semester
+        return values
 
     def get_filename(self):
         today = datetime.now()
