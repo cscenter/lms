@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-06-03 17:35+0000\n"
-"PO-Revision-Date: 2020-06-01 16:58+0000\n"
+"PO-Revision-Date: 2020-06-04 09:37+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -358,7 +358,8 @@ msgstr ""
 msgid "You can create only open courses from CS club site"
 msgstr "Забыли сделать прочтение открытым?"
 
-#: apps/courses/admin.py:158 apps/courses/admin.py:243 apps/users/models.py:852
+#: apps/courses/admin.py:158 apps/courses/admin.py:243
+#: apps/users/models.py:852
 msgid "Created"
 msgstr "Дата создания"
 
