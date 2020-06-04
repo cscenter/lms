@@ -18,13 +18,7 @@
 
 {% block content %}
     <div class="container">
-    <h3>{{ branch }}</h3>
-    <div class="alert alert-info">
-        Направления обучения берутся из профилей выпускников, которые можно <a href="/staff/exports/#will-graduate">сгенерировать здесь</a>.
-    </div>
-    <div class="alert alert-danger">
-        Направления сейчас берутся из профиля пользователя, а не выпускника.
-    </div>
+    <h3>Будущий выпуск {{ branch }}</h3>
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
 {% for student_profile in student_profiles %}{% with student=student_profile.user %}\diploma{{ '{' }}{{ student.pk }}{{ '}' }}{{ '{' }}{{student.first_name}}{{ '}' }}{{ '{' }}{{student.patronymic}}{{ '}' }}{{ '{' }}{{student.last_name}}{{ '}' }}{{ '{' }}{% if student.gender == 'F' %}a{% endif %}{{ '}' }}
 {{ '{' }}{% if student_profile.academic_disciplines.all|length == 1 %}\\направления {% else %}направлений\\{% endif %}{% for program in student_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}

@@ -6,7 +6,7 @@ from operator import attrgetter
 from typing import List, Dict
 
 from django.conf import settings
-from django.db.models import Q, Prefetch, Count, Case, When, Value, F, \
+from django.db.models import Q, Prefetch, Count, Case, When, F, \
     IntegerField
 from django.http import HttpResponse
 from django.utils import formats
@@ -14,8 +14,6 @@ from pandas import DataFrame, ExcelWriter
 
 from admission.models import Applicant
 from core.reports import ReportFileOutput
-from core.timezone.constants import DATE_FORMAT_RU, TIME_FORMAT_RU, \
-    DATETIME_FORMAT_RU
 from courses.constants import SemesterTypes
 from courses.models import Semester, Course, CourseTeacher, MetaCourse
 from courses.utils import get_term_index
@@ -23,7 +21,6 @@ from learning.models import AssignmentComment, Enrollment, GraduateProfile
 from learning.settings import StudentStatuses, GradeTypes
 from projects.constants import ProjectTypes
 from projects.models import ReportComment, ProjectStudent, Project
-from users.constants import Roles
 from users.managers import get_enrollments_progress, get_shad_courses_progress, \
     get_projects_progress
 from users.models import User, SHADCourseRecord, StudentProfile, StudentTypes
@@ -241,7 +238,7 @@ class ProgressReport:
                            student.applicant_set.all())
 
 
-class ProgressReportForDiplomas(ProgressReport):
+class FutureGraduateDiplomasReport(ProgressReport):
     def __init__(self, branch, **kwargs):
         super().__init__(**kwargs)
         self.branch = branch
@@ -263,7 +260,7 @@ class ProgressReportForDiplomas(ProgressReport):
         return (StudentProfile.objects
                 .filter(status=StudentStatuses.WILL_GRADUATE,
                         branch=self.branch)
-                .select_related('user', 'graduate_profile')
+                .select_related('user')
                 .prefetch_related(
                     'academic_disciplines',
                     'user__applicant_set',
@@ -324,10 +321,7 @@ class ProgressReportForDiplomas(ProgressReport):
 
     def _export_row(self, student_profile, *, courses, meta_courses, shads_max,
                     online_max, projects_max):
-        try:
-            disciplines = student_profile.graduate_profile.academic_disciplines.all()
-        except GraduateProfile.DoesNotExist:
-            disciplines = []
+        disciplines = student_profile.academic_disciplines.all()
         student = student_profile.user
         return [
             student.pk,

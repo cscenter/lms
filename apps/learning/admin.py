@@ -127,7 +127,8 @@ class UsefulAdmin(BaseModelAdmin):
 class GraduateProfileAdmin(BaseModelAdmin):
     list_select_related = ('student_profile', 'student_profile__user')
     list_display = ('student_name', 'graduation_year', 'is_active')
-    list_filter = ('student_profile__site', 'graduation_year')
+    list_filter = ('student_profile__site', 'student_profile__branch',
+                   'graduation_year')
     search_fields = ('student_profile__user__last_name',)
     raw_id_fields = ('student_profile',)
 
