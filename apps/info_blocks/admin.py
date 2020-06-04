@@ -27,9 +27,8 @@ class InfoBlockTagAdmin(admin.ModelAdmin):
 @admin.register(InfoBlock)
 class InfoBlockAdmin(admin.ModelAdmin):
     form = InfoBlockAdminForm
-    model = InfoBlock
     list_filter = ('site', 'tags')
-    list_display = ('__str__', 'site', 'tag_list', 'sort')
+    list_display = ('title', 'site', 'tag_list', 'sort')
     ordering = ('site',)
     sortable_by = ('site', 'tag_list', 'sort')
 

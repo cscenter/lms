@@ -11,4 +11,4 @@ class InfoBlockTagAutocomplete(CuratorOnlyMixin, autocomplete.Select2QuerySetVie
         if self.q:
             qs = qs.filter(name__istartswith=self.q)
 
-        return qs.order('name')
+        return qs.order_by('name')

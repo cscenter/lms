@@ -1,10 +1,18 @@
 import factory
 
 from core.tests.factories import SiteFactory
-from info_blocks.models import InfoBlock
+from info_blocks.models import InfoBlock, InfoBlockTag
 
 
-class InfoBlockFactory(factory.django.DjangoModelFactory):
+class InfoBlockTagFactory(factory.DjangoModelFactory):
+    name = factory.Sequence(lambda n: f'Tag {n}')
+    slug = factory.Sequence(lambda n: f'slug_{n}')
+
+    class Meta:
+        model = InfoBlockTag
+
+
+class InfoBlockFactory(factory.DjangoModelFactory):
     title = factory.Sequence(lambda n: f'Title {n}')
     content = factory.Sequence(lambda n: f'Content {n}')
     sort = factory.Sequence(lambda n: n + 1)
