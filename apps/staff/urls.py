@@ -6,8 +6,8 @@ from learning.gradebook.views import GradeBookView, GradeBookCSVView, \
     AssignmentScoresImportByStepikIDView, \
     AssignmentScoresImportByYandexLoginView
 from staff.views import HintListView, StudentSearchView, ExportsView, \
-    StudentsDiplomasStatsView, StudentsDiplomasTexView, \
-    StudentsDiplomasCSVView, ProgressReportFullView, \
+    FutureGraduateStatsView, FutureGraduateDiplomasTexView, \
+    FutureGraduateDiplomasCSVView, ProgressReportFullView, \
     ProgressReportForSemesterView, AdmissionApplicantsReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
     CourseParticipantsIntersectionView, WillGraduateStatsReportView, \
@@ -63,10 +63,10 @@ urlpatterns = [
 
     # FIXME: Is it useful?
     url(r'^reports/learning/will_graduate/(?P<output_format>csv|xlsx)/$', WillGraduateStatsReportView.as_view(), name='exports_report_will_graduate'),
-    url(r'^reports/alumni/(?P<branch_id>\d+)/', include([
-        url(r'^stats/$', StudentsDiplomasStatsView.as_view(), name='exports_alumni_stats'),
-        url(r'^tex/$', StudentsDiplomasTexView.as_view(), name='exports_students_diplomas_tex'),
-        url(r'^csv/$', StudentsDiplomasCSVView.as_view(), name='exports_students_diplomas_csv'),
+    url(r'^reports/future-graduates/(?P<branch_id>\d+)/', include([
+        url(r'^stats/$', FutureGraduateStatsView.as_view(), name='export_future_graduates_stats'),
+        url(r'^tex/$', FutureGraduateDiplomasTexView.as_view(), name='exports_students_diplomas_tex'),
+        url(r'^csv/$', FutureGraduateDiplomasCSVView.as_view(), name='exports_students_diplomas_csv'),
     ])),
     url(r'^reports/students-progress/', include([
         url(r'^(?P<output_format>csv|xlsx)/$', ProgressReportFullView.as_view(), name='students_progress_report'),

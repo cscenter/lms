@@ -59,10 +59,10 @@
             <a name="will-graduate"></a><h2 class="content-title">Будущий выпуск</h2>
             <div class="list-group">
                 <div  class="list-group-item">
-                    <p>Форма сгенерирует профили будущих выпускников. После добавления направлений обучения, отзывов и т.д., их нужно дополнительно активировать для показа на странице выпуска.</p>
+                    <p>Форма генерирует профили выпускников и переводит профили студента в статус "Выпускник".</p>
                     {% crispy alumni_profiles_form %}
                     {% for branch in branches %}
-                        <b>{{ branch.name }}</b>: <a href="{% url 'staff:exports_students_diplomas_tex' branch.pk %}">TeX</a> или <a href="{% url 'staff:exports_students_diplomas_csv' branch.pk %}">CSV</a><br><a href="{% url 'staff:exports_alumni_stats' branch.pk %}">Статистика</a><br>
+                        <b>{{ branch.name }}</b>: <a href="{% url 'staff:exports_students_diplomas_tex' branch.pk %}">TeX</a> или <a href="{% url 'staff:exports_students_diplomas_csv' branch.pk %}">CSV</a><br><a href="{% url 'staff:export_future_graduates_stats' branch.pk %}">Статистика</a><br>
                     {% endfor %}
                 </div>
             </div>

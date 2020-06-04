@@ -28,7 +28,7 @@ from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment, Invitation
-from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
+from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
     ProgressReportForInvitation, dataframe_to_response
 from learning.settings import AcademicDegreeLevels, StudentStatuses, \
@@ -118,7 +118,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
         return context
 
 
-class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
+class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas_stats.html"
     BAD_GRADES = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
 
@@ -287,12 +287,12 @@ class StudentsDiplomasStatsView(CuratorOnlyMixin, generic.TemplateView):
         return context
 
 
-class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
+class FutureGraduateDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, branch_id, **kwargs):
         branch = Branch.objects.get(pk=branch_id)
-        report = ProgressReportForDiplomas(branch)
+        report = FutureGraduateDiplomasReport(branch)
         student_profiles = report.get_queryset()
         students = (sp.user for sp in student_profiles)
         courses_qs = (report.get_courses_queryset(students)
@@ -373,10 +373,10 @@ class StudentsDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
         return context
 
 
-class StudentsDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
+class FutureGraduateDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, branch_id, *args, **kwargs):
         branch = get_object_or_404(Branch.objects.filter(pk=branch_id))
-        report = ProgressReportForDiplomas(branch)
+        report = FutureGraduateDiplomasReport(branch)
         df = report.generate()
         return dataframe_to_response(df, 'csv', report.get_filename())
 

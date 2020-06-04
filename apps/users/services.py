@@ -90,24 +90,42 @@ def get_student_progress(queryset,
 
 def create_graduate_profiles(site: Site, graduated_on: datetime.date):
     """
-    Create graduate profiles in draft state for all students with
-    `will graduate` status.
+    Generate graduate profile for students with `will graduate` status, then
+    update student profile status to `graduate`.
     """
     student_profiles = (StudentProfile.objects
                         .filter(status=StudentStatuses.WILL_GRADUATE,
-                                branch__site=site))
+                                branch__site=site)
+                        .prefetch_related('academic_disciplines'))
     for student_profile in student_profiles:
         with transaction.atomic():
-            defaults = {
-                "graduated_on": graduated_on,
-                "details": {},
-                "is_active": False
-            }
-            profile, created = GraduateProfile.objects.get_or_create(
-                student_profile=student_profile,
-                defaults=defaults)
+            # Get or create profile without using transaction mechanism
+            try:
+                graduate = (GraduateProfile.objects
+                            .select_for_update()
+                            .get(student_profile=student_profile))
+                created = False
+            except GraduateProfile.DoesNotExist:
+                graduate = GraduateProfile(student_profile=student_profile,
+                                           details={})
+                created = True
+            graduate.graduated_on = graduated_on
+            graduate.is_active = True
+            graduate.save()
             if not created:
-                profile.save()
+                graduate.academic_disciplines.clear()
+            # Bulk copy academic disciplines without creating new transactions
+            model_class = GraduateProfile.academic_disciplines.through
+            disciplines = []
+            for discipline in student_profile.academic_disciplines.all():
+                d = model_class(academicdiscipline_id=discipline.pk,
+                                graduateprofile_id=graduate.pk)
+                disciplines.append(d)
+            model_class.objects.bulk_create(disciplines)
+            # Update student profile status
+            (StudentProfile.objects
+             .filter(pk=student_profile.pk)
+             .update(status=StudentStatuses.GRADUATE))
 
 
 def get_graduate_profile(student_profile: StudentProfile):

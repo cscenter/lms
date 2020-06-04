@@ -7,7 +7,7 @@ from pandas import DataFrame
 from core.models import Branch
 from core.tests.factories import BranchFactory
 from courses.utils import get_term_by_index
-from learning.reports import ProgressReportForDiplomas, ProgressReportFull, \
+from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
     ProgressReportForSemester, ProgressReport
 from learning.settings import GradingSystems, StudentStatuses, GradeTypes, \
     Branches
@@ -343,7 +343,7 @@ def test_report_diplomas_csv(settings):
     branch_spb = BranchFactory(code=Branches.SPB)
 
     def get_report() -> DataFrame:
-        return ProgressReportForDiplomas(branch_spb).generate()
+        return FutureGraduateDiplomasReport(branch_spb).generate()
 
     STATIC_HEADERS_CNT = len(get_report().columns)
     ENROLLMENT_HEADERS_CNT = 3  # grade, teachers, semester
@@ -445,9 +445,9 @@ def test_report_diplomas_by_branch():
     student_profile3 = s3.student_profiles.get()
     student_profile3.status = ''
     student_profile3.save()
-    progress_report = ProgressReportForDiplomas(branch_spb).generate()
+    progress_report = FutureGraduateDiplomasReport(branch_spb).generate()
     assert len(progress_report) == 2
-    progress_report = ProgressReportForDiplomas(branch_nsk)
+    progress_report = FutureGraduateDiplomasReport(branch_nsk)
     qs = progress_report.get_queryset()
     assert qs.count() == 0
     progress_report = progress_report.generate(queryset=qs)
@@ -455,10 +455,10 @@ def test_report_diplomas_by_branch():
     student_profile3.status = StudentStatuses.WILL_GRADUATE
     student_profile3.branch = branch_nsk
     student_profile3.save()
-    progress_report = ProgressReportForDiplomas(branch_spb)
+    progress_report = FutureGraduateDiplomasReport(branch_spb)
     progress_report = progress_report.generate()
     assert len(progress_report) == 2
-    progress_report = ProgressReportForDiplomas(branch_nsk)
+    progress_report = FutureGraduateDiplomasReport(branch_nsk)
     progress_report = progress_report.generate()
     assert len(progress_report) == 1
     assert progress_report.index[0] == s3.pk

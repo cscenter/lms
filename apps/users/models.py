@@ -755,7 +755,6 @@ class StudentProfile(models.Model):
         _("StudentInfo|University year"),
         choices=AcademicDegreeLevels.choices,
         max_length=2,
-        help_text=_("at enrollment"),
         null=True, blank=True)
     is_official_student = models.BooleanField(
         verbose_name=_("Official Student"),
@@ -784,7 +783,6 @@ class StudentProfile(models.Model):
     academic_disciplines = models.ManyToManyField(
         'study_programs.AcademicDiscipline',
         verbose_name=_("Fields of study"),
-        help_text=_("Academic disciplines from which student plans to graduate"),
         blank=True)
     comment = models.TextField(
         _("Comment"),
