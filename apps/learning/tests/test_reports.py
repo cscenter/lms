@@ -346,6 +346,10 @@ def test_report_diplomas_csv(settings):
         return ProgressReportForDiplomas(branch_spb).generate()
 
     STATIC_HEADERS_CNT = len(get_report().columns)
+    ENROLLMENT_HEADERS_CNT = 3  # grade, teachers, semester
+    SHAD_HEADERS_CNT = 4        # name, teachers, grade, semester
+    PROJECT_HEADERS_CNT = 4     # name, grade, supervisors, semester
+
     teacher = TeacherFactory()
     s = SemesterFactory.create_current()
     prev_s = SemesterFactory.create_prev(s)
@@ -364,29 +368,29 @@ def test_report_diplomas_csv(settings):
     # Will graduate only student1 now
     progress_report = get_report()
     assert len(progress_report) == 1
-    # No we have 1 passed enrollment for student1, so +2 headers except static
-    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 2
+    # No we have 1 passed enrollment for student1, so +3 headers except static
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + ENROLLMENT_HEADERS_CNT
     # student2 will graduate too. He enrolled to the same course as student1
     student_profile2.status = StudentStatuses.WILL_GRADUATE
     student_profile2.save()
     progress_report = get_report()
     assert len(progress_report) == 2
-    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 2
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + ENROLLMENT_HEADERS_CNT
     # Enroll student2 to new course without any grade
     co2 = CourseFactory.create(semester=s, teachers=[teacher])
     e_s2_co2 = EnrollmentFactory.create(student=student2, course=co2)
     progress_report = get_report()
-    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 2
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + ENROLLMENT_HEADERS_CNT
     # Now change grade to unsatisfied and check again
     e_s2_co2.grade = GradeTypes.UNSATISFACTORY
     e_s2_co2.save()
     progress_report = get_report()
-    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 2
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + ENROLLMENT_HEADERS_CNT
     # Set success grade value
     e_s2_co2.grade = GradeTypes.GOOD
     e_s2_co2.save()
     progress_report = get_report()
-    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 4
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 2 * ENROLLMENT_HEADERS_CNT
     # Grade should be printed with `default` grading type style
     e_s1_co1.grade = GradeTypes.CREDIT
     e_s1_co1.save()
@@ -405,22 +409,23 @@ def test_report_diplomas_csv(settings):
     EnrollmentFactory.create(student=student1, course=course_prev,
                              grade=GradeTypes.GOOD)
     progress_report = get_report()
-    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 6
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 3 * ENROLLMENT_HEADERS_CNT
     # Add shad course
     SHADCourseRecordFactory(student=student1, grade=GradeTypes.GOOD)
     # This one shouldn't be in report due to grade value
     SHADCourseRecordFactory(student=student1, grade=GradeTypes.NOT_GRADED)
     progress_report = get_report()
     # +3 headers for 1 shad course
-    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 9
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 3 * ENROLLMENT_HEADERS_CNT + SHAD_HEADERS_CNT
     # Online course not included
     OnlineCourseRecordFactory.create(student=student1)
     progress_report = get_report()
-    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 9
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 3 * ENROLLMENT_HEADERS_CNT + SHAD_HEADERS_CNT
     ProjectFactory.create(students=[student1, student2])
     progress_report = get_report()
     # +4 headers for project
-    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 13
+    assert len(progress_report.columns) == (STATIC_HEADERS_CNT + 3 * ENROLLMENT_HEADERS_CNT +
+                                            SHAD_HEADERS_CNT + PROJECT_HEADERS_CNT)
 
     student_profile1.branch = Branch.objects.get_by_natural_key(Branches.NSK,
                                                                 settings.SITE_ID)
