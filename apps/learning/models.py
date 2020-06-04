@@ -684,6 +684,7 @@ def graduate_photo_upload_to(instance: "GraduateProfile", filename):
 
 
 class GraduateProfile(ThumbnailMixin, TimeStampedModel):
+    HISTORY_CACHE_KEY_PATTERN = "graduation_history_{site_id}"
     TESTIMONIAL_CACHE_KEY = "csc_review"
 
     student_profile = models.OneToOneField(

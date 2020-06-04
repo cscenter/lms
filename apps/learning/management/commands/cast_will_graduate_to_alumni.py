@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
+from django.conf import settings
 from django.core.cache import cache
 from django.core.management import BaseCommand
 from django.db import transaction
@@ -30,6 +31,7 @@ class Command(BaseCommand):
             with transaction.atomic():
                 user_account.remove_group(Roles.STUDENT)
                 user_account.add_group(Roles.GRADUATE)
+                # FIXME: use `creat_graduate_profiles` instead
                 GraduateProfile.objects.update_or_create(
                     student_profile=student_profile,
                     defaults={
@@ -44,7 +46,8 @@ class Command(BaseCommand):
                                              student_profile=student_profile,
                                              entry_author=admin)
                 log_entry.save()
-
-        cache.delete("csc_graduation_history")
+        cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
+        cache_key = cache_key_pattern.format(site_id=settings.SITE_ID)
+        cache.delete(cache_key)
         # Drop cache on /{YEAR}/ page
         cache.delete("alumni_{}_stats".format(now().year))

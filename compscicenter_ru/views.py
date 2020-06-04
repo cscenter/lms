@@ -269,13 +269,16 @@ class AlumniView(TemplateView):
     template_name = "compscicenter_ru/alumni/index.html"
 
     def get_context_data(self):
-        cache_key = 'csc_graduation_history'
+        cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
+        cache_key = cache_key_pattern.format(site_id=self.request.site.pk)
         history = cache.get(cache_key)
+        today = now().date()
         if history is None:
             history = (GraduateProfile.active
+                       .filter(graduated_on__lte=today)
                        .aggregate(latest_graduation=Max('graduation_year'),
                                   first_graduation=Min('graduation_year')))
-            cache.set(cache_key, history, 86400 * 31)
+            cache.set(cache_key, history, 86400)  # cache for 1 day
         if history['first_graduation'] is None:
             raise Http404
         the_first_graduation = history['first_graduation']
