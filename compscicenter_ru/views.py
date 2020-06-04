@@ -274,6 +274,7 @@ class AlumniView(TemplateView):
         history = cache.get(cache_key)
         today = now().date()
         if history is None:
+            # TODO: filter by site (+ support site in API)
             history = (GraduateProfile.active
                        .filter(graduated_on__lte=today)
                        .aggregate(latest_graduation=Max('graduation_year'),

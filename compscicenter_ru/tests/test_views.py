@@ -1,14 +1,17 @@
 import datetime
 
 import pytest
+from django.contrib.sites.models import Site
 from django.core.cache import cache
 
 from core.models import Branch
-from core.tests.factories import CityFactory, BranchFactory
+from core.tests.factories import BranchFactory
 from core.urls import reverse
 from courses.services import CourseService
+from learning.models import GraduateProfile
 from learning.settings import Branches
-from learning.tests.factories import GraduateProfileFactory, MetaCourseFactory, CourseFactory
+from learning.tests.factories import GraduateProfileFactory, MetaCourseFactory, \
+    CourseFactory
 from study_programs.tests.factories import AcademicDisciplineFactory
 
 
@@ -34,13 +37,16 @@ def test_enrollment_checklist(client):
 
 
 @pytest.mark.django_db
-def test_alumni(client):
+def test_alumni(client, settings):
     url_alumni_all = reverse('alumni')
     response = client.get(url_alumni_all)
     assert response.status_code == 404  # No graduates yet
     graduated_on = datetime.date(year=2015, month=1, day=1)
     graduated = GraduateProfileFactory(graduated_on=graduated_on)
-    cache.delete('csc_graduation_history')
+    cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
+    site = Site.objects.get(pk=settings.SITE_ID)
+    cache_key = cache_key_pattern.format(site_id=site.pk)
+    cache.delete(cache_key)
     response = client.get(url_alumni_all)
     assert response.status_code == 200
     json_data = response.context_data['app_data']
