@@ -718,6 +718,21 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
         verbose_name=_("Details"),
         blank=True,
     )
+    diploma_number = models.CharField(
+        verbose_name=_("Diploma Number"),
+        max_length=64,
+        blank=True
+    )
+    diploma_registration_number = models.CharField(
+        verbose_name=_("Registration Number"),
+        help_text=_("Registration number in the registry of education"),
+        max_length=255,
+        blank=True,
+    )
+    diploma_issued_on = models.DateField(
+        verbose_name=_("Diploma Issued on"),
+        blank=True, null=True
+    )
 
     objects = models.Manager()
     active = GraduateProfileActiveManager()
