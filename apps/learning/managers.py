@@ -102,6 +102,7 @@ class GraduateProfileQuerySet(models.QuerySet):
                       "student_profile__user__gender", ))
 
 
+GraduateProfileDefaultManager = models.Manager.from_queryset(GraduateProfileQuerySet)
 GraduateProfileActiveManager = _GraduateProfileActiveManager.from_queryset(
     GraduateProfileQuerySet)
 
