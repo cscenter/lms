@@ -14,12 +14,14 @@ from users.tests.factories import StudentProfileFactory
 def test_create_graduate_profiles():
     site1 = SiteFactory(domain='test.domain')
     site2 = SiteFactory()
-    s1, s2, s3 = StudentProfileFactory.create_batch(
-        3, status=StudentStatuses.WILL_GRADUATE, branch__site=site1)
     ad = AcademicDisciplineFactory()
+    s1 = StudentProfileFactory(status=StudentStatuses.WILL_GRADUATE,
+                               branch__site=site1)
     s1.academic_disciplines.add(ad)
-    s2.status = StudentStatuses.EXPELLED
-    s2.save()
+    s2 = StudentProfileFactory(status=StudentStatuses.EXPELLED,
+                               branch__site=site1)
+    s3 = StudentProfileFactory(status=StudentStatuses.WILL_GRADUATE,
+                               branch__site=site1)
     s4 = StudentProfileFactory(status=StudentStatuses.WILL_GRADUATE,
                                branch__site=site2)
     assert GraduateProfile.objects.count() == 0
@@ -27,7 +29,7 @@ def test_create_graduate_profiles():
     create_graduate_profiles(site1, graduated_on)
     assert GraduateProfile.objects.count() == 2
     assert GraduateProfile.objects.filter(is_active=True).exists()
-    graduate_profiles = list(GraduateProfile.objects.order_by('pk'))
+    graduate_profiles = list(GraduateProfile.objects.order_by('student_profile_id'))
     student_profiles = {g.student_profile_id for g in graduate_profiles}
     assert s1.pk in student_profiles
     assert s3.pk in student_profiles
