@@ -93,7 +93,7 @@ class DerivableFieldsMixin:
 
     @classmethod
     def _check_mixin_contract(cls):
-        from collections import Iterable
+        from collections.abc import Iterable
         errors = []
         if not issubclass(cls, models.Model):
             errors.append(
