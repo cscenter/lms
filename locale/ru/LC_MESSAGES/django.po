@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-04 16:41+0000\n"
-"PO-Revision-Date: 2020-06-04 16:48+0000\n"
+"POT-Creation-Date: 2020-06-05 12:57+0000\n"
+"PO-Revision-Date: 2020-06-05 13:04+0000\n"
 "Last-Translator: b'  <pacabest@gmail.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -238,9 +238,8 @@ msgid "Branch Location"
 msgstr "Местонахождение"
 
 #: apps/core/models.py:186 apps/faq/models.py:11 apps/faq/models.py:27
-#: apps/info_blocks/models.py:42 apps/learning/internships/models.py:12
-#: apps/learning/models.py:667 apps/users/models.py:153
-#: apps/users/models.py:716
+#: apps/info_blocks/models.py:42 apps/learning/models.py:667
+#: apps/users/models.py:153 apps/users/models.py:716
 msgid "Site"
 msgstr "Сайт"
 
@@ -1091,9 +1090,7 @@ msgid "FAQ"
 msgstr "FAQ"
 
 #: apps/faq/models.py:10 apps/faq/models.py:26 apps/info_blocks/models.py:41
-#: apps/learning/internships/models.py:11
-#: apps/learning/internships/models.py:29 apps/learning/models.py:666
-#: apps/staff/models.py:12
+#: apps/learning/models.py:666 apps/staff/models.py:12
 msgid "Sort order"
 msgstr "Сортировка"
 
@@ -1105,14 +1102,12 @@ msgstr "Категория"
 msgid "Categories"
 msgstr "Категории"
 
-#: apps/faq/models.py:24 apps/faq/models.py:37
-#: apps/learning/internships/models.py:27 apps/learning/models.py:664
+#: apps/faq/models.py:24 apps/faq/models.py:37 apps/learning/models.py:664
 #: apps/staff/models.py:10
 msgid "Question"
 msgstr "Вопрос"
 
-#: apps/faq/models.py:25 apps/learning/internships/models.py:28
-#: apps/learning/models.py:665 apps/staff/models.py:11
+#: apps/faq/models.py:25 apps/learning/models.py:665 apps/staff/models.py:11
 msgid "Answer"
 msgstr "Ответ"
 
@@ -1309,30 +1304,6 @@ msgstr "Сумма баллов"
 msgid "Successfully imported {} results"
 msgstr "Успешно импортировано оценок: {}"
 
-#: apps/learning/internships/apps.py:7 apps/learning/internships/models.py:40
-msgid "Internships"
-msgstr "Стажировки"
-
-#: apps/learning/internships/models.py:10
-msgid "Category name"
-msgstr "Название категории"
-
-#: apps/learning/internships/models.py:19
-msgid "Internship Category"
-msgstr "Категория"
-
-#: apps/learning/internships/models.py:20
-msgid "Internship Categories"
-msgstr "Категории"
-
-#: apps/learning/internships/models.py:31
-msgid "Internship Сategory"
-msgstr "Категория"
-
-#: apps/learning/internships/models.py:39
-msgid "Internship"
-msgstr "Стажировка"
-
 #: apps/learning/invitation/forms.py:35
 msgid "Submit"
 msgstr "Отправить"
@@ -1369,7 +1340,7 @@ msgstr "Группы для задания"
 msgid "Course Class"
 msgstr "Занятие"
 
-#: apps/learning/models.py:138 apps/learning/models.py:691
+#: apps/learning/models.py:138 apps/learning/models.py:692
 #: apps/users/models.py:806
 msgid "Student Profile"
 msgstr "Профиль студента"
@@ -1601,72 +1572,71 @@ msgstr "Конец события должен быть позже начала"
 msgid "Useful"
 msgstr "Полезное"
 
-#: apps/learning/models.py:695 apps/study_programs/models.py:63
+#: apps/learning/models.py:696 apps/study_programs/models.py:63
 msgid "Activity"
 msgstr "Активность"
 
-#: apps/learning/models.py:698
+#: apps/learning/models.py:699
 msgid "Graduated on"
 msgstr "Дата выпуска"
 
-#: apps/learning/models.py:699
+#: apps/learning/models.py:700
 msgid "Graduation ceremony date"
 msgstr "Дата выпускного считается датой выпуска студента"
 
-#: apps/learning/models.py:702 apps/users/models.py:785
+#: apps/learning/models.py:703 apps/users/models.py:785
 msgid "Fields of study"
 msgstr "Направления обучения"
 
-#: apps/learning/models.py:703
+#: apps/learning/models.py:704
 msgid "Academic disciplines that the student graduated from"
 msgstr "Направления, с которых выпустился студент."
 
-#: apps/learning/models.py:706
+#: apps/learning/models.py:707
 msgid "Graduation Year"
 msgstr "Год выпуска"
 
-#: apps/learning/models.py:707
+#: apps/learning/models.py:708
 msgid "Helps filtering by year"
 msgstr ""
 
-#: apps/learning/models.py:710
+#: apps/learning/models.py:711
 msgid "Photo"
 msgstr "Фото"
 
-#: apps/learning/models.py:714
+#: apps/learning/models.py:715
 msgid "Testimonial"
 msgstr "Отзыв"
 
-#: apps/learning/models.py:715
+#: apps/learning/models.py:716
 msgid "Testimonial about Computer Science Center"
 msgstr "Отзыв о CS центре"
 
-#: apps/learning/models.py:718
+#: apps/learning/models.py:719
 msgid "Details"
 msgstr ""
 
-#: apps/learning/models.py:722 apps/users/models.py:765
+#: apps/learning/models.py:723 apps/users/models.py:765
 msgid "Diploma Number"
 msgstr "Номер диплома"
 
-#: apps/learning/models.py:727
-#| msgid "Registration"
+#: apps/learning/models.py:728
 msgid "Registration Number"
 msgstr "Регистрационный номер"
 
-#: apps/learning/models.py:728
+#: apps/learning/models.py:729
 msgid "Registration number in the registry of education"
 msgstr "Номер в федеральном реестре (ФРДО)"
 
-#: apps/learning/models.py:733 apps/users/models.py:775
+#: apps/learning/models.py:734 apps/users/models.py:775
 msgid "Diploma Issued on"
 msgstr "Дата выдачи диплома"
 
-#: apps/learning/models.py:741
+#: apps/learning/models.py:742
 msgid "Graduate Profile"
 msgstr "Профиль выпускника"
 
-#: apps/learning/models.py:742
+#: apps/learning/models.py:743
 msgid "Graduate Profiles"
 msgstr "Профили выпускников"
 
@@ -3230,11 +3200,10 @@ msgid "Shifted"
 msgstr ""
 
 #: lms/templates/users/user_detail.html:376
-#, fuzzy
 #| msgid "Cancel"
 msgctxt "Project"
 msgid "Canceled"
-msgstr "Отмена"
+msgstr "Отменен"
 
 #: lms/templates/users/user_detail.html:391
 msgid "Online courses"
@@ -3267,526 +3236,3 @@ msgstr "осенний"
 msgctxt "adjective"
 msgid "spring"
 msgstr "весенний"
-
-#~ msgid "at enrollment"
-#~ msgstr "при поступлении"
-
-#~ msgid "Academic disciplines from which student plans to graduate"
-#~ msgstr "Отметьте, если студент уже определился с направлениями обучения."
-
-#~ msgid "CSCUser|enrollment year"
-#~ msgstr "Год поступления"
-
-#~ msgid "Studying for a master degree"
-#~ msgstr "Магистры"
-
-#~ msgid "created"
-#~ msgstr "Дата создания"
-
-#~ msgid "Status changed"
-#~ msgstr "Статус изменён"
-
-#~ msgid "Status|HelpText"
-#~ msgstr ""
-#~ "Если нужно выставить статус задним числом, то изменить дату можно в логе."
-
-#~ msgid "Enrollment year should be provided for students"
-#~ msgstr "Для студента должен быть указан год поступления"
-
-#~ msgid "CSCUser|enrollment year should be provided for volunteers"
-#~ msgstr "Для вольнослушателя должен быть указан год поступления"
-
-#~ msgid "Account"
-#~ msgstr "Аккаунт"
-
-#~ msgid "Non-degree student"
-#~ msgstr "Вольный слушатель"
-
-#~ msgid "StudentInfo|Study program"
-#~ msgstr "Учебная программа"
-
-#~ msgid "Other"
-#~ msgstr "Другое"
-
-#~ msgid "Main Settings"
-#~ msgstr "Основные настройки"
-
-#~ msgid "Course Class Settings"
-#~ msgstr "Настройки занятия"
-
-#~ msgid "<i class=\"fa fa-plus\"></i> Save and add"
-#~ msgstr "<i class=\"fa fa-plus\"></i> Сохранить и добавить ещё"
-
-#~ msgid "CourseClass|other materials"
-#~ msgstr "другие материалы"
-
-#~ msgid "CourseClass|Other [materials]"
-#~ msgstr "Другие"
-
-#~ msgid "Video URL"
-#~ msgstr "Ссылка на видео"
-
-#~ msgid "Update Profile"
-#~ msgstr "Обновить профиль"
-
-#~ msgid "Yes,No"
-#~ msgstr "Да,Нет"
-
-#~ msgid "Online"
-#~ msgstr "Онлайн"
-
-#~ msgid "Can be passed online "
-#~ msgstr "Можно сдать через сайт CS центра"
-
-#~ msgid "Can be passed online"
-#~ msgstr "Можно сдать через сайт CS центра"
-
-#~ msgid "Leave blank if you want to populate list from the course settings"
-#~ msgstr ""
-#~ "Заполняется автоматически из настроек курса, если оставить поле пустым"
-
-#~ msgid "Without deadlines"
-#~ msgstr "Без дедлайнов"
-
-#~ msgid "The course starts on "
-#~ msgstr "Начало курса "
-
-#~ msgid "Go to course"
-#~ msgstr "Перейти к курсу"
-
-#~ msgid ""
-#~ "The course was developed in collaboration with the <a "
-#~ "href='http://mit.spbau.ru/'>Academic University</a>."
-#~ msgstr ""
-#~ "Cовместно с <a href='http://mit.spbau.ru/'>Академическим университетом</a>."
-
-#~ msgid "No online courses for now"
-#~ msgstr "На текущий момент нет открытых онлайн-курсов."
-
-#~ msgid "Problem Weight"
-#~ msgstr "Вес задания"
-
-#~ msgid "Assignment|can be passed online"
-#~ msgstr "Можно сдать через сайт"
-
-#~ msgid "Format"
-#~ msgstr "Формат"
-
-#~ msgid "Attached file"
-#~ msgstr "Приложенный файл"
-
-#~ msgid "Reads lectures"
-#~ msgstr "Читает лекции"
-
-#~ msgid "Checks assignments"
-#~ msgstr "Проверяет задания"
-
-#~ msgid "Leads seminars"
-#~ msgstr "Ведёт семинары"
-
-#~ msgid "SPb"
-#~ msgstr "СПб"
-
-#~ msgid "Nsk"
-#~ msgstr "Нск"
-
-#~ msgid "Distance"
-#~ msgstr "Заочное"
-
-#~ msgid "Correspondence course"
-#~ msgstr "Заочный курс"
-
-#~ msgid "CSCUser|graduation year"
-#~ msgstr "Год выпуска"
-
-#~ msgid "Default city"
-#~ msgstr "Город"
-
-#~ msgid "CSCUser|city"
-#~ msgstr ""
-#~ "Для студента - это обязательно город обучения. Для остальных - влияет на "
-#~ "значения фильтров по-умолчанию. "
-
-#~ msgid "StudentInfo|Areas of study"
-#~ msgstr "Направления обучения"
-
-#~ msgid "Yandex ID"
-#~ msgstr "Yandex ID"
-
-#~ msgid "Only the part before \"@yandex.ru\" is expected"
-#~ msgstr "Ожидается часть до «@yandex.ru»"
-
-#~ msgid "Course reviews"
-#~ msgstr "Отзывы о прошедшем курсе"
-
-#~ msgid "Online Course"
-#~ msgstr "Заочный курс"
-
-#~ msgid "Preferred"
-#~ msgstr "Приоритетный"
-
-#, fuzzy
-#~ msgid "Will be displayed on top of the location list"
-#~ msgstr "Отображается  в начале списка мест проведения"
-
-#~ msgid "Distance Branch"
-#~ msgstr "Заочное"
-
-#~ msgid "Venue|Name"
-#~ msgstr "Название"
-
-#~ msgid "Venues"
-#~ msgstr "Места проведения"
-
-#~ msgid "Provide city for student"
-#~ msgstr "Для учащегося в CS центре обязательно нужно указать город обучения."
-
-#~ msgid "Book Borrow"
-#~ msgstr "Взятая книга"
-
-#~ msgid "Book Borrows"
-#~ msgstr "Взятые книги"
-
-#~ msgid "FAQ category"
-#~ msgstr "Раздел для FAQ"
-
-#~ msgid "FAQ categories"
-#~ msgstr "Разделы для FAQ"
-
-#~ msgid "Questions&Answers"
-#~ msgstr "FAQ"
-
-#~ msgid "borrow"
-#~ msgstr "Взятие"
-
-#~ msgid "Perhaps also the faculty."
-#~ msgstr "Университет и иногда факультет"
-
-#~ msgid "University abbreviation"
-#~ msgstr "Аббревиатура (если есть)"
-
-#~ msgid "Universities"
-#~ msgstr "Университеты"
-
-#~ msgid "International Schools"
-#~ msgstr "Международные школы"
-
-#~ msgid "InternationalSchool|name"
-#~ msgstr "Название международной школы"
-
-#~ msgid "InternationalSchool|Link"
-#~ msgstr "Ссылка на подробную информацию"
-
-#~ msgid "InternationalSchool|place"
-#~ msgstr "Место проведения"
-
-#~ msgid "InternationalSchool|Deadline"
-#~ msgstr "Крайний срок подачи заявок"
-
-#~ msgid "InternationalSchool|Start"
-#~ msgstr "Начало обучения"
-
-#~ msgid "InternationalSchool|End"
-#~ msgstr "Окончание обучения"
-
-#~ msgid "InternationalSchool|Grants"
-#~ msgstr "Гранты"
-
-#~ msgid "International school"
-#~ msgstr "Международная школа"
-
-#~ msgid "International schools"
-#~ msgstr "Международные школы"
-
-#~ msgid "Only students can enroll to courses"
-#~ msgstr "Только студенты могут записываться на курсы"
-
-#~ msgid "Leave blank to use course enrollment deadline from semester settings"
-#~ msgstr ""
-#~ "Оставьте поле пустым, чтобы использовать дедлайн записи на курсы из настроек"
-#~ " семестра"
-
-#~ msgid "No places available"
-#~ msgstr "Нет свободных мест"
-
-#~ msgid "Open link in new tab is selected"
-#~ msgstr "Если выбрано, ссылка будет открываться в новом окне"
-
-#~ msgid "Check if visible only for authenticated user"
-#~ msgstr "Показывать только авторизованным пользователям."
-
-#~ msgid "Check if visible only for unauthenticated user"
-#~ msgstr "Показывать только неавторизованным пользователям."
-
-#~ msgid "Check if visible only for staff"
-#~ msgstr "Показывать только кураторам."
-
-#~ msgid "Variable name for unred_notifications_cache"
-#~ msgstr "Переменная для unred_notifications_cache"
-
-#~ msgid "Specify patterns when item is selected. One pattern for each line."
-#~ msgstr ""
-#~ "Дополнительные условия, когда пункт считается выбранным (1 regexp на строку)"
-
-#~ msgid "Specify patterns when item is not selected. One pattern for each line."
-#~ msgstr ""
-#~ "Укажите паттерны, когда элемент не будет считаться выбранным. Одна строка - "
-#~ "один паттерн."
-
-#~ msgid "Menu extensions"
-#~ msgstr "Дополнительные поля для меню"
-
-#~ msgctxt "menu"
-#~ msgid "About CSC"
-#~ msgstr "О центре"
-
-#~ msgctxt "menu"
-#~ msgid "Syllabus"
-#~ msgstr "Программа"
-
-#~ msgctxt "menu"
-#~ msgid "Organizers"
-#~ msgstr "Организаторы"
-
-#~ msgctxt "menu"
-#~ msgid "Professors"
-#~ msgstr "Преподаватели"
-
-#~ msgctxt "menu"
-#~ msgid "Alumni"
-#~ msgstr "Выпускники"
-
-#~ msgctxt "menu"
-#~ msgid "Online"
-#~ msgstr "Онлайн"
-
-#~ msgctxt "menu"
-#~ msgid "Video"
-#~ msgstr "Видео"
-
-#~ msgctxt "menu"
-#~ msgid "Lyceum"
-#~ msgstr "Лекторий"
-
-#~ msgctxt "menu"
-#~ msgid "Learning"
-#~ msgstr "Обучение"
-
-#~ msgctxt "menu"
-#~ msgid "Assignments"
-#~ msgstr "Задания"
-
-#~ msgctxt "menu"
-#~ msgid "My timetable"
-#~ msgstr "Моё расписание"
-
-#~ msgctxt "menu"
-#~ msgid "Calendar"
-#~ msgstr "Календарь"
-
-#~ msgctxt "menu"
-#~ msgid "My courses"
-#~ msgstr "Мои курсы"
-
-#~ msgctxt "menu"
-#~ msgid "Library"
-#~ msgstr "Библиотека"
-
-#~ msgctxt "menu"
-#~ msgid "Tips"
-#~ msgstr "Полезное"
-
-#~ msgctxt "menu"
-#~ msgid "Supervision"
-#~ msgstr "Курирование"
-
-#~ msgctxt "menu"
-#~ msgid "Student search"
-#~ msgstr "Поиск студентов"
-
-#~ msgctxt "menu"
-#~ msgid "Generate diplomas"
-#~ msgstr "Сгенерировать дипломы"
-
-#~ msgctxt "menu"
-#~ msgid "Exports"
-#~ msgstr "Файлы"
-
-#~ msgctxt "menu"
-#~ msgid "Teaching"
-#~ msgstr "Преподавание"
-
-#~ msgctxt "menu"
-#~ msgid "Timetable"
-#~ msgstr "Расписание"
-
-#~ msgctxt "menu"
-#~ msgid "Marks sheet"
-#~ msgstr "Ведомость"
-
-#~ msgctxt "menu"
-#~ msgid "Enrollment"
-#~ msgstr "Поступление"
-
-#~ msgctxt "menu"
-#~ msgid "Information"
-#~ msgstr "Информация"
-
-#~ msgctxt "menu"
-#~ msgid "Application"
-#~ msgstr "Анкета"
-
-#~ msgctxt "menu"
-#~ msgid "Contacts"
-#~ msgstr "Контакты"
-
-#~ msgid "Student [CENTER]"
-#~ msgstr "Студент центра"
-
-#~ msgid "Teacher [CENTER]"
-#~ msgstr "Преподаватель центра"
-
-#~ msgid "Student [CLUB]"
-#~ msgstr "Студент клуба"
-
-#~ msgid "Teacher [CLUB]"
-#~ msgstr "Преподаватель клуба"
-
-#~ msgid "CSCUser|graduation year should be provided for graduates"
-#~ msgstr "Для выпускника должен быть указан год выпуска"
-
-#~ msgid "User can't be volunteer and student at the same time"
-#~ msgstr "Пользователь не должен быть одновременно Вольнослушателем и Студентом"
-
-#~ msgid "User can't be graduated and student at the same time"
-#~ msgstr ""
-#~ "Пользователь не должен быть одновременно Выпускником и Студентом "
-#~ "центра/Вольнослушателем"
-
-#, fuzzy
-#~ msgid "Graduation on"
-#~ msgstr "Выпускается"
-
-#~ msgid "CSC review"
-#~ msgstr "Отзыв о CSC"
-
-#~ msgid "Report start"
-#~ msgstr "Начало отчетного периода"
-
-#~ msgid "Start point of project report period."
-#~ msgstr "Начало периода, когда нужно сдать отчет по проекту."
-
-#~ msgid "Report end"
-#~ msgstr "Конец отчетного периода"
-
-#~ msgid "End point of project report period."
-#~ msgstr "Окончание периода, когда нужно было сдать отчет по проекту."
-
-#~ msgid "Projects|Border for excellent"
-#~ msgstr "Проекты, граница для excellent"
-
-#~ msgid "Semester|projects_grade_excellent"
-#~ msgstr "Сумма баллов >= указанного значения считается как \"Отлично\"."
-
-#~ msgid "Projects|Border for good"
-#~ msgstr "Проекты, граница для good"
-
-#~ msgid "Semester|projects_grade_good"
-#~ msgstr ""
-#~ "Сумма баллов >= указанного значения считается как \"Хорошо\", если значение "
-#~ "не превышает границу для \"Отлично\"."
-
-#~ msgid "Projects|Border for pass"
-#~ msgstr "Проекты, граница для pass"
-
-#~ msgid "Semester|projects_grade_pass"
-#~ msgstr ""
-#~ "Сумма баллов >= указанного значения считается как \"Зачет\", если не "
-#~ "превышает границу \"Хорошо\". Если ниже - трактуем как \"Незачет\"."
-
-#~ msgid "Send report form"
-#~ msgstr "Форма отправки отчета"
-
-#~ msgid "Link to Survey"
-#~ msgstr "URL опроса по прочтению курса"
-
-#, fuzzy
-#~ msgid "Patronymic"
-#~ msgstr "Отчество"
-
-#, fuzzy
-#~ msgid "Applicant|email"
-#~ msgstr "Анкета"
-
-#, fuzzy
-#~ msgid "Stepik ID"
-#~ msgstr "stepik.org ID"
-
-#~ msgid "Online Course|teachers"
-#~ msgstr "Преподаватели"
-
-#~ msgid "Online Course|description"
-#~ msgstr "Описание онлайн-курса"
-
-#~ msgid "Online Course|Link"
-#~ msgstr "Ссылка на курс"
-
-#~ msgid "Online Course|photo"
-#~ msgstr "Фото"
-
-#~ msgid "Collaboration with AY"
-#~ msgstr "Совместно с АУ"
-
-#~ msgid "Online course"
-#~ msgstr "Онлайн-курс"
-
-#~ msgid "Videos"
-#~ msgstr "Видео"
-
-#~ msgid "No videos yet"
-#~ msgstr "Список видео пуст"
-
-#~ msgctxt "alumni"
-#~ msgid "graduate"
-#~ msgid_plural "graduates"
-#~ msgstr[0] "выпускник"
-#~ msgstr[1] "выпускника"
-#~ msgstr[2] "выпускников"
-
-#~ msgctxt "alumni"
-#~ msgid "teacher"
-#~ msgid_plural "teachers"
-#~ msgstr[0] "преподаватель"
-#~ msgstr[1] "преподавателя"
-#~ msgstr[2] "преподавателей"
-
-#~ msgctxt "alumni"
-#~ msgid "hour"
-#~ msgid_plural "hours"
-#~ msgstr[0] "час"
-#~ msgstr[1] "часа"
-#~ msgstr[2] "часов"
-
-#~ msgctxt "alumni"
-#~ msgid " project and research work"
-#~ msgid_plural "projects and research works"
-#~ msgstr[0] "практика или научная работа"
-#~ msgstr[1] "практики и НИРов"
-#~ msgstr[2] "практик и НИРов"
-
-#~ msgctxt "alumni"
-#~ msgid "passed course"
-#~ msgid_plural "passed courses"
-#~ msgstr[0] "пройденный курс"
-#~ msgstr[1] "пройденных курса"
-#~ msgstr[2] "пройденных курсов"
-
-#~ msgid "All areas"
-#~ msgstr "Все направления"
-
-#~ msgid "No alumni yet"
-#~ msgstr "Список выпускников пуст"
-
-#, fuzzy
-#~ msgid "Internship category"
-#~ msgstr "Категория"

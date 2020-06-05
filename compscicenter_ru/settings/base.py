@@ -70,7 +70,6 @@ INSTALLED_APPS += [
     'staff',
     'surveys.apps.SurveysConfig',
     'online_courses.apps.Config',
-    'learning.internships.apps.InternshipsConfig',
     'info_blocks.apps.InfoBlocksConfig',
     'publications.apps.PublicationsConfig',
     'announcements.apps.AnnouncementsConfig',
