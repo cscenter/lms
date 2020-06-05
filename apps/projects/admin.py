@@ -143,7 +143,8 @@ class ProjectStudentAdmin(ExportMixin, admin.ModelAdmin):
         # breaks .prefetch_related() optimization
         # https://github.com/django-import-export/django-import-export/issues/774
         return queryset_iterator(super().get_export_queryset(request)
-                                 .select_related("project__branch")
+                                 .select_related("project__branch",
+                                                 "project__branch__site")
                                  .prefetch_related("reports"))
 
     @meta(_("Semester"), admin_order_field="project__semester")
