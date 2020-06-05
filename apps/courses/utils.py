@@ -22,8 +22,8 @@ class TermIndexError(Exception):
 @attr.s(eq=True, order=True, frozen=True, slots=True)
 class TermPair:
     index: int = attr.ib(init=False, repr=False)
-    year: int = attr.ib(cmp=False)
-    type: str = attr.ib(cmp=False)
+    year: int = attr.ib(eq=False, order=False)
+    type: str = attr.ib(eq=False, order=False)
 
     def __attrs_post_init__(self):
         if self.type not in SemesterTypes.values:
