@@ -660,23 +660,6 @@ class Event(TimeStampedModel):
                        args=[self.pk])
 
 
-class Useful(models.Model):
-    question = models.CharField(_("Question"), max_length=255)
-    answer = models.TextField(_("Answer"))
-    sort = models.SmallIntegerField(_("Sort order"), blank=True, null=True)
-    site = models.ForeignKey(Site, verbose_name=_("Site"),
-                             default=settings.SITE_ID,
-                             on_delete=models.CASCADE)
-
-    class Meta:
-        ordering = ["sort"]
-        verbose_name = _("Useful")
-        verbose_name_plural = _("Useful")
-
-    def __str__(self):
-        return smart_text(self.question)
-
-
 def graduate_photo_upload_to(instance: "GraduateProfile", filename):
     _, ext = os.path.splitext(filename)
     filename = instance.student_profile.user.get_abbreviated_name_in_latin()
