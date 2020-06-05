@@ -76,6 +76,9 @@ class _GraduateProfileActiveManager(models.Manager):
 
 
 class GraduateProfileQuerySet(models.QuerySet):
+    def with_official_diploma(self):
+        return self.exclude(diploma_issued_on__isnull=True)
+
     def with_testimonial(self):
         return self.exclude(testimonial='')
 

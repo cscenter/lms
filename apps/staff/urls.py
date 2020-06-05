@@ -8,6 +8,7 @@ from learning.gradebook.views import GradeBookView, GradeBookCSVView, \
 from staff.views import HintListView, StudentSearchView, ExportsView, \
     FutureGraduateStatsView, FutureGraduateDiplomasTexView, \
     FutureGraduateDiplomasCSVView, ProgressReportFullView, \
+    OfficialDiplomasListView, \
     ProgressReportForSemesterView, AdmissionApplicantsReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
     CourseParticipantsIntersectionView, WillGraduateStatsReportView, \
@@ -72,6 +73,9 @@ urlpatterns = [
         url(r'^(?P<output_format>csv|xlsx)/$', ProgressReportFullView.as_view(), name='students_progress_report'),
         url(r'^terms/(?P<term_year>\d+)/(?P<term_type>\w+)/(?P<output_format>csv|xlsx)/$', ProgressReportForSemesterView.as_view(), name='students_progress_report_for_term'),
         url(r'^invitations/(?P<invitation_id>\d+)/(?P<output_format>csv|xlsx)/$', InvitationStudentsProgressReportView.as_view(), name='students_progress_report_for_invitation'),
+    ])),
+    url(r'^reports/official-diplomas/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/$', include([
+        url(r'', OfficialDiplomasListView.as_view(), name='exports_official_diplomas_list'),
     ])),
     path('reports/admission/<int:campaign_id>/applicants/<export_fmt:output_format>/', AdmissionApplicantsReportView.as_view(), name='exports_report_admission_applicants'),
     path('reports/admission/<int:campaign_id>/exam/<export_fmt:output_format>/', AdmissionExamReportView.as_view(), name='exports_report_admission_exam'),

@@ -66,6 +66,24 @@
                     {% endfor %}
                 </div>
             </div>
+            <h2 class="content-title">Официальные дипломы</h2>
+            <div class="list-group">
+                <div class="list-group-item">
+                    {% if official_diplomas_dates %}
+                        Выпускники сгруппированы по дате выдачи официальных дипломов:
+                        <ul>
+                            {% for date in official_diplomas_dates %}
+                                <li>
+                                    {{ date }}:
+                                    <a href="{% url 'staff:exports_official_diplomas_list' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">список</a>, TeX или CSV
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>В этом блоке будут показаны сведения о выданных официальных дипломах.</p>
+                    {% endif %}
+                </div>
+            </div>
             <h2>Набор</h2>
 
                     <table class="table table-bordered bg-white">

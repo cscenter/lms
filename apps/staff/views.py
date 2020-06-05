@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import datetime
 from collections import defaultdict
 from typing import NamedTuple
 
@@ -27,7 +27,7 @@ from courses.constants import SemesterTypes
 from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import Enrollment, Invitation
+from learning.models import Enrollment, Invitation, GraduateProfile
 from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
     ProgressReportForInvitation, dataframe_to_response
@@ -105,15 +105,21 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
                                            .select_related('branch')
                                            .order_by('branch', 'name'),
                                            key=lambda i: i.branch)
+        official_diplomas_dates = (GraduateProfile.objects
+                                   .with_official_diploma()
+                                   .distinct('diploma_issued_on')
+                                   .order_by('-diploma_issued_on')
+                                   .values_list('diploma_issued_on', flat=True))
         context = {
             "alumni_profiles_form": graduation_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (Campaign.objects
                           .select_related("branch")
-                          .order_by("-year", "branch__name",)),
+                          .order_by("-year", "branch__name")),
             "invitations": invitations,
-            "branches": Branch.objects.filter(site_id=settings.SITE_ID)
+            "branches": Branch.objects.filter(site_id=settings.SITE_ID),
+            "official_diplomas_dates": official_diplomas_dates,
         }
         return context
 
@@ -648,4 +654,29 @@ class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
             semester_list.insert(0, term)
         context["semester_list"] = [(a, s) for s, a in
                                     core.utils.chunks(semester_list, 2)]
+        return context
+
+
+class OfficialDiplomasListView(CuratorOnlyMixin, TemplateView):
+    template_name = 'staff/official_diplomas_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        year = int(self.kwargs['year'])
+        month = int(self.kwargs['month'])
+        day = int(self.kwargs['day'])
+        date = datetime.date(year, month, day)
+        graduate_profiles = (GraduateProfile.active
+                             .with_official_diploma()
+                             .filter(diploma_issued_on=date)
+                             .select_related('student_profile__user')
+                             .only('student_profile__user'))
+        graduated_users = [g.student_profile.user for g in graduate_profiles]
+        graduates_data = sorted([(g.get_absolute_url(), g.get_full_name(last_name_first=True))
+                                 for g in graduated_users], key=lambda el: el[1])
+        context.update({
+            'date': date,
+            'graduates_data': graduates_data
+        })
         return context
