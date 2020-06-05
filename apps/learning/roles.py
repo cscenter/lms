@@ -15,11 +15,12 @@ from .permissions import CreateAssignmentComment, \
     CreateAssignmentCommentTeacher, CreateAssignmentCommentStudent, \
     ViewStudyMenu, ViewCourseNews, ViewCourseReviews, ViewOwnEnrollments, \
     ViewOwnStudentAssignments, ViewOwnStudentAssignment, ViewCourses, ViewSchedule, ViewFAQ, \
-    ViewLibrary, ViewInternships, EnrollInCourse, EnrollInCourseByInvitation, \
+    ViewLibrary, EnrollInCourse, EnrollInCourseByInvitation, \
     LeaveCourse, ViewTeachingMenu, ViewOwnGradebook, ViewGradebook, \
     ViewStudentAssignment, ViewRelatedStudentAssignment, EditStudentAssignment, \
     EditOwnStudentAssignment, ViewEnrollments, ViewRelatedEnrollments, \
     EditOwnAssignmentExecutionTime, ViewStudentAssignmentList
+from info_blocks.permissions import ViewInternships
 
 
 # TODO: Add description of each role
