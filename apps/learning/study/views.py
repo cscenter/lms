@@ -27,6 +27,7 @@ from learning.forms import AssignmentExecutionTimeForm
 from learning.models import StudentAssignment, Enrollment
 from learning.permissions import ViewOwnStudentAssignments, \
     EditOwnAssignmentExecutionTime, ViewOwnStudentAssignment, ViewCourses
+from info_blocks.permissions import ViewInternships
 from learning.roles import Roles
 from learning.services import get_student_classes
 from learning.views import AssignmentSubmissionBaseView
@@ -263,7 +264,7 @@ class UsefulListView(PermissionRequiredMixin, generic.ListView):
 class InternshipListView(PermissionRequiredMixin, generic.ListView):
     context_object_name = "faq"
     template_name = "learning/study/internships.html"
-    permission_required = "study.view_internships"
+    permission_required = ViewInternships.name
 
     def get_queryset(self):
         return (InfoBlock.objects

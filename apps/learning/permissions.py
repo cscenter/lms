@@ -1,5 +1,5 @@
 import logging
-from typing import NamedTuple, Union
+from typing import NamedTuple
 
 import rules
 from django.conf import settings
@@ -216,12 +216,6 @@ class ViewSchedule(Permission):
 @add_perm
 class ViewCourses(Permission):
     name = "study.view_courses"
-    rule = has_active_status
-
-
-@add_perm
-class ViewInternships(Permission):
-    name = "study.view_internships"
     rule = has_active_status
 
 
