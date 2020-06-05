@@ -667,7 +667,7 @@ class OfficialDiplomasListView(CuratorOnlyMixin, TemplateView):
         month = int(self.kwargs['month'])
         day = int(self.kwargs['day'])
         date = datetime.date(year, month, day)
-        graduate_profiles = (GraduateProfile.active
+        graduate_profiles = (GraduateProfile.objects
                              .with_official_diploma()
                              .filter(diploma_issued_on=date)
                              .select_related('student_profile__user')
