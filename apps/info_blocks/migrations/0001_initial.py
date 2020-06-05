@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=255, verbose_name='Title')),
                 ('content', models.TextField(verbose_name='Content')),
                 ('sort', models.SmallIntegerField(blank=True, null=True, verbose_name='Sort order')),
-                ('site', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='infoblock_set', to='sites.Site', verbose_name='Site')),
+                ('site', models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='sites.Site', verbose_name='Site')),
             ],
             options={
                 'verbose_name': 'Infoblock',
