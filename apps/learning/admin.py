@@ -12,7 +12,7 @@ from courses.models import StudentGroupTypes
 from learning.models import GraduateProfile, Invitation, CourseInvitation, \
     StudentAssignment, StudentGroup
 from users.models import StudentStatusLog
-from .models import AssignmentComment, Enrollment, Event, Useful
+from .models import AssignmentComment, Enrollment, Event
 from .services import StudentGroupService
 from .settings import StudentStatuses
 
@@ -119,11 +119,6 @@ class EventAdmin(BaseModelAdmin):
     list_display = ['name', 'date', 'venue']
 
 
-class UsefulAdmin(BaseModelAdmin):
-    list_filter = ['site']
-    list_display = ['question', 'sort']
-
-
 class GraduateProfileAdmin(BaseModelAdmin):
     list_select_related = ('student_profile', 'student_profile__user')
     list_display = ('student_name', 'graduation_year', 'is_active')
@@ -174,5 +169,4 @@ admin.site.register(AssignmentComment, AssignmentCommentAdmin)
 admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(Invitation, InvitationAdmin)
 admin.site.register(Event, EventAdmin)
-admin.site.register(Useful, UsefulAdmin)
 admin.site.register(GraduateProfile, GraduateProfileAdmin)
