@@ -74,7 +74,7 @@
                             <li>
                                 от {{ date }}:
                                 <a href="{% url 'staff:exports_official_diplomas_csv' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">CSV</a>,
-                                {# TeX, #}
+                                <a href="{% url 'staff:exports_official_diplomas_tex' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">TeX</a>,
                                 <a href="{% url 'staff:exports_official_diplomas_list' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">список</a>
                             </li>
                         {% endfor %}

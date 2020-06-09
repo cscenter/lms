@@ -6,7 +6,7 @@ from learning.gradebook.views import GradeBookView, GradeBookCSVView, \
     AssignmentScoresImportByStepikIDView, \
     AssignmentScoresImportByYandexLoginView
 from staff.views import HintListView, StudentSearchView, ExportsView, \
-    FutureGraduateStatsView, FutureGraduateDiplomasTexView, \
+    FutureGraduateStatsView, FutureGraduateDiplomasTeXView, \
     FutureGraduateDiplomasCSVView, ProgressReportFullView, \
     OfficialDiplomasListView, \
     ProgressReportForSemesterView, AdmissionApplicantsReportView, \
@@ -15,7 +15,7 @@ from staff.views import HintListView, StudentSearchView, ExportsView, \
     SurveySubmissionsReportView, \
     SurveySubmissionsStatsView, GradeBookListView, create_alumni_profiles, \
     InvitationStudentsProgressReportView, StudentSearchCSVView, \
-    AdmissionExamReportView, OfficialDiplomasCSVView
+    AdmissionExamReportView, OfficialDiplomasCSVView, OfficialDiplomasTeXView
 from staff.api.views import StudentSearchJSONView
 
 app_name = 'staff'
@@ -66,7 +66,7 @@ urlpatterns = [
     url(r'^reports/learning/will_graduate/(?P<output_format>csv|xlsx)/$', WillGraduateStatsReportView.as_view(), name='exports_report_will_graduate'),
     url(r'^reports/future-graduates/(?P<branch_id>\d+)/', include([
         url(r'^stats/$', FutureGraduateStatsView.as_view(), name='export_future_graduates_stats'),
-        url(r'^tex/$', FutureGraduateDiplomasTexView.as_view(), name='exports_students_diplomas_tex'),
+        url(r'^tex/$', FutureGraduateDiplomasTeXView.as_view(), name='exports_students_diplomas_tex'),
         url(r'^csv/$', FutureGraduateDiplomasCSVView.as_view(), name='exports_students_diplomas_csv'),
     ])),
     url(r'^reports/students-progress/', include([
@@ -76,7 +76,7 @@ urlpatterns = [
     ])),
     url(r'^reports/official-diplomas/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/', include([
         url(r'^list/$', OfficialDiplomasListView.as_view(), name='exports_official_diplomas_list'),
-        # url(r'^tex/$', FutureGraduateDiplomasTexView.as_view(), name='exports_students_diplomas_tex'),
+        url(r'^tex/$', OfficialDiplomasTeXView.as_view(), name='exports_official_diplomas_tex'),
         url(r'^csv/$', OfficialDiplomasCSVView.as_view(), name='exports_official_diplomas_csv'),
     ])),
     path('reports/admission/<int:campaign_id>/applicants/<export_fmt:output_format>/', AdmissionApplicantsReportView.as_view(), name='exports_report_admission_applicants'),

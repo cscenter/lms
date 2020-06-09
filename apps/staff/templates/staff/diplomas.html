@@ -18,9 +18,11 @@
 
 {% block content %}
     <div class="container">
-    <h3>Будущий выпуск {{ branch }}</h3>
+    {% block description %}
+        <h3>Будущий выпуск {{ branch }}</h3>
+    {% endblock description %}
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
-{% for student_profile in student_profiles %}{% with student=student_profile.user %}\diploma{{ '{' }}{{ student.pk }}{{ '}' }}{{ '{' }}{{student.first_name}}{{ '}' }}{{ '{' }}{{student.patronymic}}{{ '}' }}{{ '{' }}{{student.last_name}}{{ '}' }}{{ '{' }}{% if student.gender == 'F' %}a{% endif %}{{ '}' }}
+{% for student_profile in student_profiles %}{% with student=student_profile.user %}\diploma{{ '{' }}{{ student.pk }}{{ '}' }}{{ '{' }}{{student.first_name}}{{ '}' }}{{ '{' }}{{student.patronymic}}{{ '}' }}{{ '{' }}{{student.last_name}}{{ '}' }}{{ '{' }}{% if student.gender == 'F' %}a{% endif %}{{ '}' }}{% if is_official %}{% with graduate_profile=student_profile.graduate_profile %}{{ '{' }}{{graduate_profile.diploma_registration_number}}{{ '}' }}{{ '{' }}{{graduate_profile.diploma_number}}{{ '}' }}{{ '{' }}{{graduate_profile.diploma_issued_on}}{{ '}' }}{% endwith %}{% endif %}
 {{ '{' }}{% if student_profile.academic_disciplines.all|length == 1 %}\\направления {% else %}направлений\\{% endif %}{% for program in student_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
 {{ '{' }}{{student_profile.year_of_admission}}{{ '}' }}
 {{ '{' }}{% for course in student.courses %}

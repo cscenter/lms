@@ -432,8 +432,8 @@ class OfficialDiplomasReport(ProgressReport):
         online_courses_prefetch = Prefetch('user__onlinecourserecord_set',
                                            to_attr='online_courses')
         return (StudentProfile.objects
+                .select_related('user', 'graduate_profile')
                 .filter(graduate_profile__diploma_issued_on=self.diploma_issued_on)
-                .select_related('user')
                 .prefetch_related(
                     'academic_disciplines',
                     'user__applicant_set',
