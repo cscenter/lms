@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import datetime
 from collections import defaultdict
-from typing import NamedTuple
 
 from django.conf import settings
 from django.contrib import messages
@@ -21,7 +20,6 @@ import core.utils
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
 from core.models import Branch
-from core.templatetags.core_tags import tex
 from core.urls import reverse
 from courses.constants import SemesterTypes
 from courses.models import Course, Semester
@@ -626,11 +624,8 @@ class OfficialDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
 class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/official_diplomas.html"
 
-    def get_context_data(self, **kwargs):
-        year = int(self.kwargs['year'])
-        month = int(self.kwargs['month'])
-        day = int(self.kwargs['day'])
-        diploma_issued_on = datetime.date(year, month, day)
+    def get_context_data(self, year, month, day, **kwargs):
+        diploma_issued_on = datetime.date(int(year), int(month), int(day))
         report = OfficialDiplomasReport(diploma_issued_on)
         student_profiles = generate_student_profiles_for_tex_diplomas(report)
 

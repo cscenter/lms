@@ -8,14 +8,14 @@ from learning.gradebook.views import GradeBookView, GradeBookCSVView, \
 from staff.views import HintListView, StudentSearchView, ExportsView, \
     FutureGraduateStatsView, FutureGraduateDiplomasTeXView, \
     FutureGraduateDiplomasCSVView, ProgressReportFullView, \
-    OfficialDiplomasListView, \
+    OfficialDiplomasListView, OfficialDiplomasCSVView, OfficialDiplomasTeXView, \
     ProgressReportForSemesterView, AdmissionApplicantsReportView, \
     StudentFacesView, InterviewerFacesView, autograde_projects, \
     CourseParticipantsIntersectionView, WillGraduateStatsReportView, \
     SurveySubmissionsReportView, \
     SurveySubmissionsStatsView, GradeBookListView, create_alumni_profiles, \
     InvitationStudentsProgressReportView, StudentSearchCSVView, \
-    AdmissionExamReportView, OfficialDiplomasCSVView, OfficialDiplomasTeXView
+    AdmissionExamReportView
 from staff.api.views import StudentSearchJSONView
 
 app_name = 'staff'
