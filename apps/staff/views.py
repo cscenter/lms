@@ -10,8 +10,8 @@ from django.core.management import call_command
 from django.db.models import Prefetch, Count
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
-from django.http.response import HttpResponseForbidden
-from django.shortcuts import get_object_or_404
+from django.http.response import HttpResponseForbidden, Http404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic, View
 from django_filters.views import BaseFilterView
@@ -30,7 +30,7 @@ from learning.gradebook.views import GradeBookListBaseView
 from learning.models import Enrollment, Invitation, GraduateProfile
 from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
-    ProgressReportForInvitation, dataframe_to_response
+    ProgressReportForInvitation, dataframe_to_response, OfficialDiplomasReport
 from learning.settings import AcademicDegreeLevels, StudentStatuses, \
     GradeTypes
 from projects.constants import ProjectTypes
@@ -667,11 +667,11 @@ class OfficialDiplomasListView(CuratorOnlyMixin, TemplateView):
         month = int(self.kwargs['month'])
         day = int(self.kwargs['day'])
         date = datetime.date(year, month, day)
-        graduate_profiles = (GraduateProfile.objects
-                             .with_official_diploma()
-                             .filter(diploma_issued_on=date)
-                             .select_related('student_profile__user')
-                             .only('student_profile__user'))
+        graduate_profiles = get_list_or_404(GraduateProfile.objects
+                                            .with_official_diploma()
+                                            .filter(diploma_issued_on=date)
+                                            .select_related('student_profile__user')
+                                            .only('student_profile__user'))
         graduated_users = [g.student_profile.user for g in graduate_profiles]
         graduates_data = sorted([(g.get_absolute_url(), g.get_full_name(last_name_first=True))
                                  for g in graduated_users], key=lambda el: el[1])
@@ -680,3 +680,16 @@ class OfficialDiplomasListView(CuratorOnlyMixin, TemplateView):
             'graduates_data': graduates_data
         })
         return context
+
+
+class OfficialDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
+    def get(self, request, year, month, day, *args, **kwargs):
+        year = int(year)
+        month = int(month)
+        day = int(day)
+        diploma_issued_on = datetime.date(year, month, day)
+        report = OfficialDiplomasReport(diploma_issued_on)
+        if not report.get_queryset().count():
+            raise Http404
+        df = report.generate()
+        return dataframe_to_response(df, 'csv', report.get_filename())
