@@ -37,7 +37,9 @@
 {% endfor %}{% endif %}{{ '}' }}
 
 {% endwith %}{% empty %}
-    Нет студентов со статусом "Будет выпускаться"
+    {% block empty_message %}
+        Нет студентов со статусом "Будет выпускаться"
+    {% endblock empty_message %}
 {% endfor %}
 </code></pre>
     </div>
