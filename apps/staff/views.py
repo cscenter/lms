@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.management import CommandError
 from django.core.management import call_command
-from django.db.models import Prefetch, Count
+from django.db.models import Prefetch
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponseForbidden, Http404
@@ -31,7 +31,6 @@ from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
     ProgressReportForInvitation, dataframe_to_response, OfficialDiplomasReport
 from learning.settings import AcademicDegreeLevels, StudentStatuses, \
     GradeTypes
-from projects.constants import ProjectTypes
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import FacesQueryParams
@@ -600,10 +599,13 @@ class OfficialDiplomasListView(CuratorOnlyMixin, TemplateView):
                                             .with_official_diploma()
                                             .filter(diploma_issued_on=date)
                                             .select_related('student_profile__user')
-                                            .only('student_profile__user'))
+                                            .only('student_profile__user')
+                                            .order_by('student_profile__user__last_name',
+                                                      'student_profile__user__first_name',
+                                                      'student_profile__user__patronymic'))
         graduated_users = [g.student_profile.user for g in graduate_profiles]
-        graduates_data = sorted([(g.get_absolute_url(), g.get_full_name(last_name_first=True))
-                                 for g in graduated_users], key=lambda el: el[1])
+        graduates_data = [(g.get_absolute_url(), g.get_full_name(last_name_first=True))
+                          for g in graduated_users]
         context.update({
             'date': date,
             'graduates_data': graduates_data

@@ -1,6 +1,7 @@
 from datetime import date
 
 import pytest
+from bs4 import BeautifulSoup
 from django.utils.encoding import smart_bytes
 
 from core.urls import reverse
@@ -70,6 +71,33 @@ def test_official_diplomas_list_view(client):
     response = client.get(reverse('staff:exports_official_diplomas_list', kwargs={
         'year': date1.year, 'month': date1.month, 'day': date1.day
     }))
-    assert smart_bytes(g1.student_profile.user.get_full_name(last_name_first=True)) in response.content
-    assert smart_bytes(g2.student_profile.user.get_full_name(last_name_first=True)) in response.content
-    assert smart_bytes(g3.student_profile.user.get_full_name(last_name_first=True)) not in response.content
+
+    def get_full_name(graduate_profile):
+        return graduate_profile.student_profile.user.get_full_name(last_name_first=True)
+
+    assert smart_bytes(get_full_name(g1)) in response.content
+    assert smart_bytes(get_full_name(g2)) in response.content
+    assert smart_bytes(get_full_name(g3)) not in response.content
+
+
+@pytest.mark.django_db
+def test_official_diplomas_list_should_be_sorted(client):
+    # 2-digit day and month to avoid bothering with zero padding
+    diploma_issued_on = date(2020, 12, 20)
+
+    # Expected order after sorting: [g2, g1]
+    g1 = GraduateProfileFactory(student_profile__user__last_name='Sidorov',
+                                diploma_issued_on=diploma_issued_on)
+    g2 = GraduateProfileFactory(student_profile__user__last_name='Ivanov',
+                                diploma_issued_on=diploma_issued_on)
+
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(reverse('staff:exports_official_diplomas_list', kwargs={
+        'year': diploma_issued_on.year, 'month': diploma_issued_on.month, 'day': diploma_issued_on.day
+    }))
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    user_links = [a['href'] for a in soup.select('div.container > ul > li > a')]
+    assert user_links[0] == g2.student_profile.user.get_absolute_url()
+    assert user_links[1] == g1.student_profile.user.get_absolute_url()
