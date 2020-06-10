@@ -21,7 +21,7 @@ def test_staff_diplomas_view(curator, client, settings):
     sp.final_grade = GradeTypes.GOOD
     sp.save()
     client.login(curator)
-    response = client.get(reverse('staff:exports_students_diplomas_tex',
+    response = client.get(reverse('staff:exports_future_graduates_diplomas_tex',
                                   kwargs={"branch_id": student.branch_id}))
     assert smart_bytes(p.name) in response.content
 
