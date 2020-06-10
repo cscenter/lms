@@ -62,7 +62,7 @@
                     <p>Форма генерирует профили выпускников и переводит профили студента в статус "Выпускник".</p>
                     {% crispy alumni_profiles_form %}
                     {% for branch in branches %}
-                        <b>{{ branch.name }}</b>: <a href="{% url 'staff:exports_students_diplomas_tex' branch.pk %}">TeX</a> или <a href="{% url 'staff:exports_students_diplomas_csv' branch.pk %}">CSV</a><br><a href="{% url 'staff:export_future_graduates_stats' branch.pk %}">Статистика</a><br>
+                        <b>{{ branch.name }}</b>: <a href="{% url 'staff:exports_future_graduates_diplomas_tex' branch.pk %}">TeX</a> или <a href="{% url 'staff:exports_future_graduates_diplomas_csv' branch.pk %}">CSV</a><br><a href="{% url 'staff:export_future_graduates_stats' branch.pk %}">Статистика</a><br>
                     {% endfor %}
                 </div>
             </div>

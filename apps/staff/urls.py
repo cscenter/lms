@@ -66,8 +66,8 @@ urlpatterns = [
     url(r'^reports/learning/will_graduate/(?P<output_format>csv|xlsx)/$', WillGraduateStatsReportView.as_view(), name='exports_report_will_graduate'),
     url(r'^reports/future-graduates/(?P<branch_id>\d+)/', include([
         url(r'^stats/$', FutureGraduateStatsView.as_view(), name='export_future_graduates_stats'),
-        url(r'^tex/$', FutureGraduateDiplomasTeXView.as_view(), name='exports_students_diplomas_tex'),
-        url(r'^csv/$', FutureGraduateDiplomasCSVView.as_view(), name='exports_students_diplomas_csv'),
+        url(r'^tex/$', FutureGraduateDiplomasTeXView.as_view(), name='exports_future_graduates_diplomas_tex'),
+        url(r'^csv/$', FutureGraduateDiplomasCSVView.as_view(), name='exports_future_graduates_diplomas_csv'),
     ])),
     url(r'^reports/students-progress/', include([
         url(r'^(?P<output_format>csv|xlsx)/$', ProgressReportFullView.as_view(), name='students_progress_report'),
