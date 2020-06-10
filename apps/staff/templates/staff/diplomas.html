@@ -24,7 +24,7 @@
     {% endblock description %}
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
 {% for student in students %}\diploma{{ '{' }}{{ student.pk }}{{ '}' }}{{ '{' }}{{student.first_name}}{{ '}' }}{{ '{' }}{{student.patronymic}}{{ '}' }}{{ '{' }}{{student.last_name}}{{ '}' }}{{ '{' }}{% if student.gender == 'F' %}a{% endif %}{{ '}' }}{% if is_official %}{{ '{' }}{{student.diploma_registration_number}}{{ '}' }}{{ '{' }}{{student.diploma_number}}{{ '}' }}{{ '{' }}{{student.diploma_issued_on}}{{ '}' }}{% endif %}
-{{ '{' }}{% if student.academic_disciplines.all|length == 1 %}\\направления {% else %}направлений\\{% endif %}{% for program in student.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}{% if student.academic_disciplines|length == 1 %}\\направления {% else %}направлений\\{% endif %}{% for program in student.academic_disciplines %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
 {{ '{' }}{{student.year_of_admission}}{{ '}' }}
 {{ '{' }}{% for course in student.courses %}
 {% spaceless %}\{{course.type}}{{ '{' }}{{course.name}}{{ '}' }}{% if course.type == "course" %}{{ '{' }}1 семестр{{ '}' }}{{ '{' }}{% if course.class_count > 0 %}{{course.class_count}}{% endif %}{{ '}' }}{% endif %}{{ '{' }}{{course.final_grade}}{{ '}' }}

@@ -253,6 +253,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
             lookup='user__shadcourserecord_set',
             filters=[~Q(grade__in=exclude_grades)]
         )
+        # Include all info about projects in CSV. Note: only successful projects are shown in the diplomas
         projects_prefetch = get_projects_progress(
             lookup='user__projectstudent_set')
         online_courses_prefetch = Prefetch('user__onlinecourserecord_set',
@@ -426,6 +427,7 @@ class OfficialDiplomasReport(ProgressReport):
             lookup='user__shadcourserecord_set',
             filters=[~Q(grade__in=exclude_grades)]
         )
+        # Include all info about projects in CSV. Note: only successful projects are shown in the diplomas
         projects_prefetch = get_projects_progress(
             lookup='user__projectstudent_set',
             filters=[~Q(final_grade__in=exclude_grades)])

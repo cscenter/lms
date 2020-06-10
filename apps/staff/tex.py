@@ -4,6 +4,7 @@ from typing import NamedTuple, List
 from core.templatetags.core_tags import tex
 from learning.settings import GradeTypes
 from projects.constants import ProjectTypes
+from study_programs.models import AcademicDiscipline
 
 
 class DiplomaEntry(NamedTuple):
@@ -21,7 +22,7 @@ class DiplomaStudent(NamedTuple):
     patronymic: str
     last_name: str
     gender: str
-    academic_disciplines: List[str]
+    academic_disciplines: List[AcademicDiscipline]
     year_of_admission: int
     courses: List[DiplomaEntry]
     projects: List[DiplomaEntry]
@@ -31,6 +32,10 @@ class DiplomaStudent(NamedTuple):
 
 
 def is_active_project(ps):
+    """
+    Only internal projects that were finished (not cancelled) with a satisfactory grade should be shown
+    in the usual or official diplomas. Note: on the contrary, in corresponding CSV files all projects are shown.
+    """
     return (not ps.project.is_external and
             not ps.project.is_canceled and
             ps.final_grade != GradeTypes.NOT_GRADED and
@@ -97,7 +102,7 @@ def generate_tex_student_profile_for_diplomas(student_profile, courses, is_offic
         'patronymic': student.patronymic,
         'last_name': student.last_name,
         'gender': student.gender,
-        'academic_disciplines': student_profile.academic_disciplines,
+        'academic_disciplines': list(student_profile.academic_disciplines.all()),
         'year_of_admission': student_profile.year_of_admission,
         'courses': student_courses,
         'projects': projects,
