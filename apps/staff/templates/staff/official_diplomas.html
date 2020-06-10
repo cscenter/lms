@@ -1,0 +1,9 @@
+{% extends "staff/diplomas.html" %}
+
+{% block description %}
+    <h3>Официальные дипломы от {{ diploma_issued_on }}</h3>
+{% endblock description %}
+
+{% block empty_message %}
+    Нет официальных дипломов, выданных в выбранный день.
+{% endblock empty_message %}

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 
 import pytest
 from django.utils.encoding import smart_bytes
@@ -8,11 +9,11 @@ from core.models import Branch
 from core.tests.factories import BranchFactory
 from courses.utils import get_term_by_index
 from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
-    ProgressReportForSemester, ProgressReport
+    ProgressReportForSemester, ProgressReport, OfficialDiplomasReport
 from learning.settings import GradingSystems, StudentStatuses, GradeTypes, \
     Branches
 from learning.tests.factories import SemesterFactory, CourseFactory, \
-    EnrollmentFactory
+    EnrollmentFactory, GraduateProfileFactory
 from projects.constants import ProjectTypes
 from projects.models import Project
 from projects.tests.factories import ProjectFactory, SupervisorFactory, \
@@ -462,3 +463,62 @@ def test_report_diplomas_by_branch():
     progress_report = progress_report.generate()
     assert len(progress_report) == 1
     assert progress_report.index[0] == s3.pk
+
+
+@pytest.mark.django_db
+def test_report_official_diplomas_csv(settings):
+    diploma_issued_on = datetime.date(2020, 6, 12)
+
+    def get_report() -> DataFrame:
+        return OfficialDiplomasReport(diploma_issued_on).generate()
+
+    STATIC_HEADERS_CNT = len(get_report().columns)
+
+    student1, student2, student3 = StudentFactory.create_batch(3)
+    student_profile1 = student1.student_profiles.get()
+    student_profile2 = student2.student_profiles.get()
+    student_profile3 = student3.student_profiles.get()
+
+    # Two students received their diploma on 12-06-2020
+    graduate_profile1 = GraduateProfileFactory(student_profile=student_profile1,
+                                               diploma_issued_on=diploma_issued_on)
+    graduate_profile2 = GraduateProfileFactory(student_profile=student_profile2,
+                                               diploma_issued_on=diploma_issued_on)
+    graduate_profile3 = GraduateProfileFactory(student_profile=student_profile3)
+
+    # Check number of students included in the report
+    progress_report = get_report()
+    assert len(progress_report) == 2
+
+    # Add an enrollment to a club course, it should not be shown in the report
+    branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
+    course_club = CourseFactory(main_branch=branch_club,
+                                branches=[student1.branch])
+    EnrollmentFactory(course=course_club, student=student1, student_profile=student_profile1)
+
+    # No courses to show, no additional header columns expected
+    progress_report = get_report()
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT
+
+    # Add shad course
+    shad_course = SHADCourseRecordFactory(student=student1, grade=GradeTypes.GOOD)
+    # This one shouldn't be in report due to grade value
+    SHADCourseRecordFactory(student=student1, grade=GradeTypes.NOT_GRADED)
+    progress_report = get_report()
+    # 1 additional header for the shad course
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 1
+
+    # Online course not included
+    OnlineCourseRecordFactory.create(student=student1)
+    progress_report = get_report()
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 1
+
+    # Only graded projects should be shown
+    project1, project2, project3 = ProjectFactory.create_batch(3)
+    ProjectStudentFactory(project=project1, student=student1, final_grade=GradeTypes.NOT_GRADED)
+    ProjectStudentFactory(project=project2, student=student1, final_grade=GradeTypes.UNSATISFACTORY)
+    ProjectStudentFactory(project=project3, student=student2, final_grade=GradeTypes.GOOD)
+
+    progress_report = get_report()
+    # +1 headers for one valid project
+    assert len(progress_report.columns) == STATIC_HEADERS_CNT + 2

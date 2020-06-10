@@ -3,7 +3,7 @@ import io
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 from operator import attrgetter
-from typing import List, Dict
+from typing import List, Dict, Set
 
 from django.conf import settings
 from django.db.models import Q, Prefetch, Count, Case, When, F, \
@@ -253,6 +253,7 @@ class FutureGraduateDiplomasReport(ProgressReport):
             lookup='user__shadcourserecord_set',
             filters=[~Q(grade__in=exclude_grades)]
         )
+        # Include all info about projects in CSV. Note: only successful projects are shown in the diplomas
         projects_prefetch = get_projects_progress(
             lookup='user__projectstudent_set')
         online_courses_prefetch = Prefetch('user__onlinecourserecord_set',
@@ -272,13 +273,29 @@ class FutureGraduateDiplomasReport(ProgressReport):
                 .order_by('user__last_name', 'user__first_name', 'user_id'))
 
     @staticmethod
-    def get_courses_headers(meta_courses):
+    def get_courses_headers_with_club_prefix(courses, meta_courses):
         if not meta_courses:
             return []
-        return [h for c in meta_courses.values()
-                for h in (f'{c.name}, оценка',
-                          f'{c.name}, преподаватели',
-                          f'{c.name}, семестр')]
+
+        meta_course_is_club: Dict[int, bool] = {}
+
+        def cs_club_prefix(meta_course_id):
+            return "CS клуб: " if meta_course_is_club[meta_course_id] else ""
+
+        for course in courses.values():
+            key = course.meta_course_id
+            if key in meta_course_is_club:
+                # TODO: keep in mind that a metacourse could be a CSC course and a CS Club course in different terms.
+                # In CSV for 2020 graduates only "Functional programming" was held both in CSC and CS Club at some
+                # point, currently considered as a CSC course
+                if meta_course_is_club[key] != course.is_club_course:
+                    meta_course_is_club[key] = False
+            else:
+                meta_course_is_club[key] = course.is_club_course
+        return [h for meta_course_id, c in meta_courses.items()
+                for h in (f'{cs_club_prefix(meta_course_id)}{c.name}, оценка',
+                          f'{cs_club_prefix(meta_course_id)}{c.name}, преподаватели',
+                          f'{cs_club_prefix(meta_course_id)}{c.name}, семестр')]
 
     @staticmethod
     def generate_shad_courses_headers(headers_number):
@@ -297,10 +314,15 @@ class FutureGraduateDiplomasReport(ProgressReport):
             'Отчество',
             'Почта',
             'Университет',
+            'Официальный студент',
+            'Дата рождения',
+            'Номер диплома ВУЗа',
+            'Когда выдан',
+            'Кем выдан',
             'Направления выпуска',
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
             'Анкеты',
-            *self.get_courses_headers(meta_courses),
+            *self.get_courses_headers_with_club_prefix(courses, meta_courses),
             *self.generate_shad_courses_headers(shads_max),
             *self.generate_projects_headers(projects_max),
         ]
@@ -330,6 +352,11 @@ class FutureGraduateDiplomasReport(ProgressReport):
             student.patronymic,
             student.email,
             student_profile.university,
+            'да' if student_profile.is_official_student else 'нет',
+            student_profile.birthday,
+            student_profile.diploma_number,
+            student_profile.diploma_issued_on,
+            student_profile.diploma_issued_by,
             " и ".join(s.name for s in disciplines),
             self.passed_courses_total(student, courses),
             self.links_to_application_forms(student),
@@ -369,6 +396,171 @@ class FutureGraduateDiplomasReport(ProgressReport):
         for course in student.shads:
             shad += int(course.grade in GradeTypes.satisfactory_grades)
         return center + club + shad + online
+
+
+class OfficialDiplomasReport(ProgressReport):
+    def __init__(self, diploma_issued_on, **kwargs):
+        super().__init__(**kwargs)
+        self.diploma_issued_on = diploma_issued_on
+
+    def generate(self, queryset=None) -> DataFrame:
+        student_profiles = queryset or self.get_queryset()
+        # It's possible to prefetch all related courses but nested
+        # .prefetch_related() is extremely slow, that's why we use map instead
+        students = (sp.user for sp in student_profiles)
+        unique_courses: Dict[int, Course] = {}
+        for c in self.get_courses_queryset(students):
+            unique_courses[c.pk] = c
+
+        unique_meta_courses: Dict[int, MetaCourse] = {}
+        unique_shad_courses: Set[str] = set()
+        # Aggregate max number of courses for each type. Result headers
+        # depend on these values.
+        shads_max, online_max, projects_max = 0, 0, 0
+        for student_profile in student_profiles:
+            student = student_profile.user
+            self.process_row(student, unique_courses, unique_meta_courses)
+            self.process_shad(student, unique_shad_courses)
+            shads_max = max(shads_max, len(student.shads))
+            online_max = max(online_max, len(student.online_courses))
+            projects_max = max(projects_max, len(student.projects_progress))
+
+        headers = self._generate_headers(courses=unique_courses,
+                                         meta_courses=unique_meta_courses,
+                                         shad_courses=unique_shad_courses,
+                                         shads_max=shads_max,
+                                         online_max=online_max,
+                                         projects_max=projects_max)
+        data = []
+        for student_profile in student_profiles:
+            row = self._export_row(student_profile,
+                                   courses=unique_courses,
+                                   meta_courses=unique_meta_courses,
+                                   shad_courses=unique_shad_courses,
+                                   shads_max=shads_max,
+                                   online_max=online_max,
+                                   projects_max=projects_max)
+            data.append(row)
+        return DataFrame.from_records(columns=headers, data=data, index='ID')
+
+    def get_queryset(self):
+        exclude_grades = [GradeTypes.UNSATISFACTORY, GradeTypes.NOT_GRADED]
+        enrollments_prefetch = get_enrollments_progress(
+            lookup='user__enrollment_set',
+            filters=[~Q(grade__in=exclude_grades)]
+        )
+        shad_courses_prefetch = get_shad_courses_progress(
+            lookup='user__shadcourserecord_set',
+            filters=[~Q(grade__in=exclude_grades)]
+        )
+        # Include all info about projects in CSV. Note: only successful projects are shown in the diplomas
+        projects_prefetch = get_projects_progress(
+            lookup='user__projectstudent_set',
+            filters=[~Q(final_grade__in=exclude_grades)])
+        online_courses_prefetch = Prefetch('user__onlinecourserecord_set',
+                                           to_attr='online_courses')
+        return (StudentProfile.objects
+                .select_related('user', 'graduate_profile')
+                .filter(graduate_profile__diploma_issued_on=self.diploma_issued_on)
+                .prefetch_related(
+                    'academic_disciplines',
+                    'user__applicant_set',
+                    projects_prefetch,
+                    enrollments_prefetch,
+                    shad_courses_prefetch,
+                    online_courses_prefetch
+                )
+                .order_by('user__last_name', 'user__first_name', 'user_id'))
+
+    @staticmethod
+    def get_courses_headers(meta_courses):
+        if not meta_courses:
+            return []
+        return [c.name for c in meta_courses.values()]
+
+    @staticmethod
+    def generate_shad_courses_headers(shad_courses):
+        return [f'{c} (ШАД)' for c in shad_courses]
+
+    @staticmethod
+    def generate_projects_headers(headers_number):
+        return [f'Проект {i}' for i in range(1, headers_number + 1)]
+
+    def _generate_headers(self, *, courses, meta_courses, shad_courses, shads_max, online_max,
+                          projects_max):
+        return [
+            'ID',
+            'Фамилия',
+            'Имя',
+            'Отчество',
+            'Регистрационный номер в АНО ДПО',
+            'Номер диплома АНО ДПО',
+            'Дата выдачи',
+            'Дата рождения',
+            'Номер диплома ВУЗа',
+            'Когда выдан',
+            'Кем выдан',
+            *self.get_courses_headers(meta_courses),
+            *self.generate_shad_courses_headers(shad_courses),
+            *self.generate_projects_headers(projects_max),
+        ]
+
+    def _export_courses(self, student, courses, meta_courses) -> List[str]:
+        values = [''] * len(meta_courses)
+        for i, meta_course_id in enumerate(meta_courses):
+            if meta_course_id in student.unique_enrollments:
+                enrollment = student.unique_enrollments[meta_course_id]
+                values[i] = self.grade_getter(enrollment).lower()
+        return values
+
+    def _export_projects(self, student, projects_max) -> List[str]:
+        values = [''] * projects_max
+        for i, ps in enumerate(student.projects_progress):
+            values[i] = f'{ps.project.name}, {ps.get_final_grade_display().lower()}'
+        return values
+
+    def _export_row(self, student_profile, *, courses, meta_courses, shad_courses, shads_max,
+                    online_max, projects_max):
+        student = student_profile.user
+        graduate_profile = student_profile.graduate_profile
+        return [
+            student.pk,
+            student.last_name,
+            student.first_name,
+            student.patronymic,
+            graduate_profile.diploma_registration_number,
+            graduate_profile.diploma_number,
+            graduate_profile.diploma_issued_on,
+            student_profile.birthday,
+            student_profile.diploma_number,
+            student_profile.diploma_issued_on,
+            student_profile.diploma_issued_by,
+            *self._export_courses(student, courses, meta_courses),
+            *self._export_shad_courses(student, shad_courses),
+            *self._export_projects(student, projects_max),
+        ]
+
+    def _export_shad_courses(self, student, shad_courses) -> List[str]:
+        values = [''] * len(shad_courses)
+        student_shad_courses = {c.name: c for c in student.shads}
+        for i, shad_course in enumerate(shad_courses):
+            if shad_course in student_shad_courses:
+                course = student_shad_courses[shad_course]
+                values[i] = course.grade_display.lower()
+        return values
+
+    def get_filename(self):
+        date_issued = self.diploma_issued_on.isoformat().replace('-', '_')
+        return "official_diplomas_{}".format(date_issued)
+
+    def skip_enrollment(self, enrollment, student, courses):
+        """Skip club courses"""
+        course = courses[enrollment.course_id]
+        return course.is_club_course
+
+    def process_shad(self, student, unique_shad_courses):
+        student_shad_courses = set(c.name for c in student.shads)
+        unique_shad_courses |= student_shad_courses
 
 
 class ProgressReportFull(ProgressReport):
