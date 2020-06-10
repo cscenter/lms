@@ -7,8 +7,8 @@ sudo apt-get install libjpeg-dev libpng-dev libpq-dev libxml2-dev libxslt1-dev l
 # For mac users
 brew install libpng libjpeg libpqxx libmagic
 # Install pycurl on Mac OS
-brew install curl --with-openssl
-PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib" CPPFLAGS="-I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include" pip install --no-cache-dir pycurl
+brew install curl-openssl
+PYCURL_SSL_LIBRARY=openssl LDFLAGS="-L/usr/local/opt/openssl@1.1/lib -L/usr/local/opt/curl-openssl/lib" CPPFLAGS="-I/usr/local/opt/openssl@1.1/include -I/usr/local/opt/curl-openssl/include" pip install --compile --no-cache-dir pycurl
 
 ```
 * Login to postgres client:
