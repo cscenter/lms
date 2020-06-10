@@ -104,6 +104,7 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
                                            .order_by('branch', 'name'),
                                            key=lambda i: i.branch)
         official_diplomas_dates = (GraduateProfile.objects
+                                   .for_site(self.request.site)
                                    .with_official_diploma()
                                    .distinct('diploma_issued_on')
                                    .order_by('-diploma_issued_on')
@@ -596,6 +597,7 @@ class OfficialDiplomasListView(CuratorOnlyMixin, TemplateView):
         day = int(self.kwargs['day'])
         date = datetime.date(year, month, day)
         graduate_profiles = get_list_or_404(GraduateProfile.objects
+                                            .for_site(self.request.site)
                                             .with_official_diploma()
                                             .filter(diploma_issued_on=date)
                                             .select_related('student_profile__user')
@@ -617,9 +619,10 @@ class OfficialDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
     def get(self, request, year, month, day, *args, **kwargs):
         diploma_issued_on = datetime.date(int(year), int(month), int(day))
         report = OfficialDiplomasReport(diploma_issued_on)
-        if not report.get_queryset().count():
+        site_aware_queryset = report.get_queryset().filter(branch__site=self.request.site)
+        if not site_aware_queryset.count():
             raise Http404
-        df = report.generate()
+        df = report.generate(site_aware_queryset)
         return dataframe_to_response(df, 'csv', report.get_filename())
 
 
@@ -629,6 +632,7 @@ class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, year, month, day, **kwargs):
         diploma_issued_on = datetime.date(int(year), int(month), int(day))
         report = OfficialDiplomasReport(diploma_issued_on)
+        # TODO: pass site aware queryset to TeX generator
         student_profiles = generate_student_profiles_for_tex_diplomas(report)
 
         context = {

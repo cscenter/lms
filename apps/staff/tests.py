@@ -81,6 +81,27 @@ def test_official_diplomas_list_view(client):
 
 
 @pytest.mark.django_db
+def test_official_diplomas_views_should_be_site_aware(client, settings):
+    # 2-digit day and month to avoid bothering with zero padding
+    diploma_issued_on = date(2020, 12, 20)
+    g1 = GraduateProfileFactory(student_profile__branch__site__domain=settings.ANOTHER_DOMAIN,
+                                diploma_issued_on=diploma_issued_on)
+
+    # No graduates from current site, status codes should be 404
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(reverse('staff:exports_official_diplomas_list', kwargs={
+        'year': diploma_issued_on.year, 'month': diploma_issued_on.month, 'day': diploma_issued_on.day
+    }))
+    assert response.status_code == 404
+
+    response = client.get(reverse('staff:exports_official_diplomas_csv', kwargs={
+        'year': diploma_issued_on.year, 'month': diploma_issued_on.month, 'day': diploma_issued_on.day
+    }))
+    assert response.status_code == 404
+
+
+@pytest.mark.django_db
 def test_official_diplomas_list_should_be_sorted(client):
     # 2-digit day and month to avoid bothering with zero padding
     diploma_issued_on = date(2020, 12, 20)

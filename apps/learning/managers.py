@@ -76,6 +76,9 @@ class _GraduateProfileActiveManager(models.Manager):
 
 
 class GraduateProfileQuerySet(models.QuerySet):
+    def for_site(self, site):
+        return self.filter(student_profile__branch__site=site)
+
     def with_official_diploma(self):
         return self.exclude(diploma_issued_on__isnull=True)
 
