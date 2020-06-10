@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+{% load i18n %}
+{% load thumbnail %}
+{% load core_tags %}
+
+{% block content %}
+    <div class="container">
+        <h3>Официальные выпускники от {{ date }}</h3>
+        <ul>
+            {% for link, name in graduates_data %}
+                <li><a href="{{ link }}">{{ name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}
