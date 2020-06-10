@@ -11,7 +11,7 @@ from core.settings.base import *
 sys.path.append(str(ROOT_DIR / "compsciclub_ru" / "apps"))
 
 env = environ.Env()
-environ.Env.read_env()  # reading .env file
+environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 
 SITE_ID = 2
 
