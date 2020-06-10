@@ -272,13 +272,29 @@ class FutureGraduateDiplomasReport(ProgressReport):
                 .order_by('user__last_name', 'user__first_name', 'user_id'))
 
     @staticmethod
-    def get_courses_headers(meta_courses):
+    def get_courses_headers_with_club_prefix(courses, meta_courses):
         if not meta_courses:
             return []
-        return [h for c in meta_courses.values()
-                for h in (f'{c.name}, оценка',
-                          f'{c.name}, преподаватели',
-                          f'{c.name}, семестр')]
+
+        meta_course_is_club: Dict[int, bool] = {}
+
+        def cs_club_prefix(meta_course_id):
+            return "CS клуб: " if meta_course_is_club[meta_course_id] else ""
+
+        for course in courses.values():
+            key = course.meta_course_id
+            if key in meta_course_is_club:
+                # TODO: keep in mind that a metacourse could be a CSC course and a CS Club course in different terms.
+                # In CSV for 2020 graduates only "Functional programming" was held both in CSC and CS Club at some
+                # point, currently considered as a CSC course
+                if meta_course_is_club[key] != course.is_club_course:
+                    meta_course_is_club[key] = False
+            else:
+                meta_course_is_club[key] = course.is_club_course
+        return [h for meta_course_id, c in meta_courses.items()
+                for h in (f'{cs_club_prefix(meta_course_id)}{c.name}, оценка',
+                          f'{cs_club_prefix(meta_course_id)}{c.name}, преподаватели',
+                          f'{cs_club_prefix(meta_course_id)}{c.name}, семестр')]
 
     @staticmethod
     def generate_shad_courses_headers(headers_number):
@@ -297,10 +313,15 @@ class FutureGraduateDiplomasReport(ProgressReport):
             'Отчество',
             'Почта',
             'Университет',
+            'Официальный студент',
+            'Дата рождения',
+            'Номер диплома ВУЗа',
+            'Когда выдан',
+            'Кем выдан',
             'Направления выпуска',
             'Успешно сдано курсов (Центр/Клуб/ШАД/Онлайн) всего',
             'Анкеты',
-            *self.get_courses_headers(meta_courses),
+            *self.get_courses_headers_with_club_prefix(courses, meta_courses),
             *self.generate_shad_courses_headers(shads_max),
             *self.generate_projects_headers(projects_max),
         ]
@@ -330,6 +351,11 @@ class FutureGraduateDiplomasReport(ProgressReport):
             student.patronymic,
             student.email,
             student_profile.university,
+            'да' if student_profile.is_official_student else 'нет',
+            student_profile.birthday,
+            student_profile.diploma_number,
+            student_profile.diploma_issued_on,
+            student_profile.diploma_issued_by,
             " и ".join(s.name for s in disciplines),
             self.passed_courses_total(student, courses),
             self.links_to_application_forms(student),
