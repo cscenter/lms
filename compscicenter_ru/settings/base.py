@@ -10,7 +10,7 @@ import environ
 from core.settings.base import *
 
 env = environ.Env()
-environ.Env.read_env()  # reading .env file
+environ.Env.read_env(env_file=env.str('ENV_FILE', default=None))
 
 PROJECT_DIR = Path(__file__).parents[1]
 
