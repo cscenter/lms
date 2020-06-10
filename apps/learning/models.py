@@ -30,7 +30,7 @@ from courses.models import Course, CourseNews, Assignment, StudentGroupTypes
 from learning import settings as learn_conf
 from learning.managers import EnrollmentDefaultManager, \
     EnrollmentActiveManager, EventQuerySet, StudentAssignmentManager, \
-    GraduateProfileActiveManager, AssignmentCommentPublishedManager
+    GraduateProfileActiveManager, AssignmentCommentPublishedManager, GraduateProfileDefaultManager
 from learning.settings import GradingSystems, GradeTypes
 from users.constants import ThumbnailSizes
 from users.models import StudentProfile
@@ -718,7 +718,7 @@ class GraduateProfile(ThumbnailMixin, TimeStampedModel):
         blank=True, null=True
     )
 
-    objects = models.Manager()
+    objects = GraduateProfileDefaultManager()
     active = GraduateProfileActiveManager()
 
     class Meta:

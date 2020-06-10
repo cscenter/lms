@@ -62,8 +62,25 @@
                     <p>Форма генерирует профили выпускников и переводит профили студента в статус "Выпускник".</p>
                     {% crispy alumni_profiles_form %}
                     {% for branch in branches %}
-                        <b>{{ branch.name }}</b>: <a href="{% url 'staff:exports_students_diplomas_tex' branch.pk %}">TeX</a> или <a href="{% url 'staff:exports_students_diplomas_csv' branch.pk %}">CSV</a><br><a href="{% url 'staff:export_future_graduates_stats' branch.pk %}">Статистика</a><br>
+                        <b>{{ branch.name }}</b>: <a href="{% url 'staff:exports_future_graduates_diplomas_tex' branch.pk %}">TeX</a> или <a href="{% url 'staff:exports_future_graduates_diplomas_csv' branch.pk %}">CSV</a><br><a href="{% url 'staff:export_future_graduates_stats' branch.pk %}">Статистика</a><br>
                     {% endfor %}
+                </div>
+            </div>
+            <h2 class="content-title">Официальные дипломы</h2>
+            <div class="list-group">
+                <div class="list-group-item list-unstyled">
+                    {% if official_diplomas_dates %}
+                        {% for date in official_diplomas_dates %}
+                            <li>
+                                от {{ date }}:
+                                <a href="{% url 'staff:exports_official_diplomas_csv' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">CSV</a>,
+                                <a href="{% url 'staff:exports_official_diplomas_tex' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">TeX</a>,
+                                <a href="{% url 'staff:exports_official_diplomas_list' date.year date.month|stringformat:"02d" date.day|stringformat:"02d" %}">список</a>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <p>В этом блоке будут показаны сведения о выданных официальных дипломах.</p>
+                    {% endif %}
                 </div>
             </div>
             <h2>Набор</h2>

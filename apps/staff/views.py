@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-
+import datetime
 from collections import defaultdict
-from typing import NamedTuple
 
 from django.conf import settings
 from django.contrib import messages
@@ -10,8 +9,8 @@ from django.core.management import call_command
 from django.db.models import Prefetch, Count
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
-from django.http.response import HttpResponseForbidden
-from django.shortcuts import get_object_or_404
+from django.http.response import HttpResponseForbidden, Http404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic, View
 from django_filters.views import BaseFilterView
@@ -21,22 +20,21 @@ import core.utils
 from admission.models import Campaign, Interview
 from admission.reports import AdmissionApplicantsReport, AdmissionExamReport
 from core.models import Branch
-from core.templatetags.core_tags import tex
 from core.urls import reverse
 from courses.constants import SemesterTypes
 from courses.models import Course, Semester
 from courses.utils import get_current_term_pair, get_term_index
 from learning.gradebook.views import GradeBookListBaseView
-from learning.models import Enrollment, Invitation
+from learning.models import Enrollment, Invitation, GraduateProfile
 from learning.reports import FutureGraduateDiplomasReport, ProgressReportFull, \
     ProgressReportForSemester, WillGraduateStatsReport, \
-    ProgressReportForInvitation, dataframe_to_response
+    ProgressReportForInvitation, dataframe_to_response, OfficialDiplomasReport
 from learning.settings import AcademicDegreeLevels, StudentStatuses, \
     GradeTypes
-from projects.constants import ProjectTypes
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import FacesQueryParams
+from staff.tex import generate_tex_student_profile_for_diplomas
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import StudentFilter
@@ -105,15 +103,22 @@ class ExportsView(CuratorOnlyMixin, generic.TemplateView):
                                            .select_related('branch')
                                            .order_by('branch', 'name'),
                                            key=lambda i: i.branch)
+        official_diplomas_dates = (GraduateProfile.objects
+                                   .for_site(self.request.site)
+                                   .with_official_diploma()
+                                   .distinct('diploma_issued_on')
+                                   .order_by('-diploma_issued_on')
+                                   .values_list('diploma_issued_on', flat=True))
         context = {
             "alumni_profiles_form": graduation_form,
             "current_term": current_term,
             "prev_term": {"year": prev_term.year, "type": prev_term.type},
             "campaigns": (Campaign.objects
                           .select_related("branch")
-                          .order_by("-year", "branch__name",)),
+                          .order_by("-year", "branch__name")),
             "invitations": invitations,
-            "branches": Branch.objects.filter(site_id=settings.SITE_ID)
+            "branches": Branch.objects.filter(site_id=settings.SITE_ID),
+            "official_diplomas_dates": official_diplomas_dates,
         }
         return context
 
@@ -287,7 +292,7 @@ class FutureGraduateStatsView(CuratorOnlyMixin, generic.TemplateView):
         return context
 
 
-class FutureGraduateDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
+class FutureGraduateDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
     template_name = "staff/diplomas.html"
 
     def get_context_data(self, branch_id, **kwargs):
@@ -299,76 +304,13 @@ class FutureGraduateDiplomasTexView(CuratorOnlyMixin, generic.TemplateView):
                       .annotate(classes_total=Count('courseclass')))
         courses = {c.pk: c for c in courses_qs}
 
-        class DiplomaCourse(NamedTuple):
-            type: str
-            name: str
-            teachers: str
-            final_grade: str
-            class_count: int = 0
-            term: str = ''
-
-        def is_active_project(ps):
-            return (not ps.project.is_external and
-                    not ps.project.is_canceled and
-                    ps.final_grade != GradeTypes.NOT_GRADED and
-                    ps.final_grade != GradeTypes.UNSATISFACTORY)
-
-        for student_profile in student_profiles:
-            student = student_profile.user
-            student.projects_progress = list(filter(is_active_project,
-                                                    student.projects_progress))
-            student_courses = []
-            enrollments = {}
-            # Store the last passed course
-            for e in student.enrollments_progress:
-                meta_course_id = e.course.meta_course_id
-                enrollments[meta_course_id] = e
-            for e in enrollments.values():
-                course = courses[e.course_id]
-                teachers = ", ".join(ct.teacher.get_abbreviated_name(delimiter="~")
-                                     for ct in course.course_teachers.all())
-                diploma_course = DiplomaCourse(
-                    type="course",
-                    name=tex(course.meta_course.name),
-                    teachers=teachers,
-                    final_grade=str(e.grade_honest).lower(),
-                    class_count=course.classes_total * 2
-                )
-                student_courses.append(diploma_course)
-            for c in student.shads:
-                diploma_course = DiplomaCourse(
-                    type="shad",
-                    name=tex(c.name),
-                    teachers=c.teachers,
-                    final_grade=str(c.grade_display).lower(),
-                )
-                student_courses.append(diploma_course)
-            student_courses.sort(key=lambda c: c.name)
-            student.courses = student_courses
-            delattr(student, "enrollments_progress")
-            delattr(student, "shads")
-
-            projects = []
-            for ps in student.projects_progress:
-                project = ps.project
-                if project.project_type == ProjectTypes.research:
-                    project_type = 'theory'
-                else:
-                    project_type = project.project_type
-                diploma_course = DiplomaCourse(
-                    type=project_type,
-                    name=tex(project.name),
-                    teachers=", ".join(t.get_abbreviated_name(delimiter="~")
-                                       for t in project.supervisors.all()),
-                    final_grade=str(ps.get_final_grade_display()).lower(),
-                    term=str(project.semester)
-                )
-                projects.append(diploma_course)
-            student.projects = projects
+        diploma_student_profiles = [generate_tex_student_profile_for_diplomas(sp, courses)
+                                    for sp in student_profiles]
 
         context = {
             "branch": branch,
-            "student_profiles": student_profiles
+            "is_official": False,
+            "students": diploma_student_profiles
         }
         return context
 
@@ -648,4 +590,67 @@ class GradeBookListView(CuratorOnlyMixin, GradeBookListBaseView):
             semester_list.insert(0, term)
         context["semester_list"] = [(a, s) for s, a in
                                     core.utils.chunks(semester_list, 2)]
+        return context
+
+
+class OfficialDiplomasListView(CuratorOnlyMixin, TemplateView):
+    template_name = 'staff/official_diplomas_list.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        year = int(self.kwargs['year'])
+        month = int(self.kwargs['month'])
+        day = int(self.kwargs['day'])
+        date = datetime.date(year, month, day)
+        graduate_profiles = get_list_or_404(GraduateProfile.objects
+                                            .for_site(self.request.site)
+                                            .with_official_diploma()
+                                            .filter(diploma_issued_on=date)
+                                            .select_related('student_profile__user')
+                                            .only('student_profile__user')
+                                            .order_by('student_profile__user__last_name',
+                                                      'student_profile__user__first_name',
+                                                      'student_profile__user__patronymic'))
+        graduated_users = [g.student_profile.user for g in graduate_profiles]
+        graduates_data = [(g.get_absolute_url(), g.get_full_name(last_name_first=True))
+                          for g in graduated_users]
+        context.update({
+            'date': date,
+            'graduates_data': graduates_data
+        })
+        return context
+
+
+class OfficialDiplomasCSVView(CuratorOnlyMixin, generic.base.View):
+    def get(self, request, year, month, day, *args, **kwargs):
+        diploma_issued_on = datetime.date(int(year), int(month), int(day))
+        report = OfficialDiplomasReport(diploma_issued_on)
+        site_aware_queryset = report.get_queryset().filter(branch__site=self.request.site)
+        if not site_aware_queryset.count():
+            raise Http404
+        df = report.generate(site_aware_queryset)
+        return dataframe_to_response(df, 'csv', report.get_filename())
+
+
+class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
+    template_name = "staff/official_diplomas.html"
+
+    def get_context_data(self, year, month, day, **kwargs):
+        diploma_issued_on = datetime.date(int(year), int(month), int(day))
+        report = OfficialDiplomasReport(diploma_issued_on)
+        student_profiles = report.get_queryset().filter(branch__site=self.request.site)
+        students = (sp.user for sp in student_profiles)
+        courses_qs = (report.get_courses_queryset(students)
+                      .annotate(classes_total=Count('courseclass')))
+        courses = {c.pk: c for c in courses_qs}
+
+        diploma_student_profiles = [generate_tex_student_profile_for_diplomas(sp, courses, is_official=True)
+                                    for sp in student_profiles]
+
+        context = {
+            "diploma_issued_on": diploma_issued_on,
+            "is_official": True,
+            "students": diploma_student_profiles
+        }
         return context
