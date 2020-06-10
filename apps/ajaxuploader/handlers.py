@@ -13,12 +13,8 @@ from django.core.files.uploadhandler import MemoryFileUploadHandler, \
 logger = logging.getLogger(__name__)
 
 
-
-
-
 class FileSizeUploadHandlerMixin:
     pass
-
 
 
 class MimeTypeUploadHandlerMixin:
@@ -56,15 +52,16 @@ class MimeTypeUploadHandlerMixin:
             raise StopUpload
         return super().receive_data_chunk(raw_data, start)
 
-    # FIXME: and where do you read mime type? idiot
+    # FIXME: Could fail if too much EXIF data, should read the whole file in that case
+    # e.g. https://github.com/django/django/blob/9bfa6a35f014a5164a8a5f42cd7b1fe25e43c353/django/core/files/images.py#L33
     def is_valid_mime_type(self, chunk):
         try:
             # Lazy open image and read headers
             im = Image.open(BytesIO(chunk))
             im.close()
             return True
-        except IOError:
-            logger.debug("PIL can't open file and read image headers")
+        except IOError as e:
+            logger.debug("PIL failed reading mime type from the first chunk")
         return False
 
 
