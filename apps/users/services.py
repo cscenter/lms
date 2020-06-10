@@ -5,6 +5,7 @@ from typing import List, Dict
 from django.contrib.sites.models import Site
 from django.core.cache import cache
 from django.db import transaction
+from django.utils.timezone import now
 
 from learning.models import GraduateProfile
 from learning.settings import GradeTypes, StudentStatuses
@@ -91,13 +92,14 @@ def get_student_progress(queryset,
 
 def create_graduate_profiles(site: Site, graduated_on: datetime.date):
     """
-    Generate graduate profile for students with `will graduate` status, then
-    update student profile status to `graduate`.
+    Generate graduate profile for students with `will graduate` status. Update
+    student profile status to `graduate` if graduation date already passed.
     """
     student_profiles = (StudentProfile.objects
                         .filter(status=StudentStatuses.WILL_GRADUATE,
                                 branch__site=site)
                         .prefetch_related('academic_disciplines'))
+    update_student_status = now().date() >= graduated_on
     for student_profile in student_profiles:
         with transaction.atomic():
             # Get or create profile without using transaction mechanism
@@ -123,10 +125,10 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date):
                                 graduateprofile_id=graduate.pk)
                 disciplines.append(d)
             model_class.objects.bulk_create(disciplines)
-            # Update student profile status
-            (StudentProfile.objects
-             .filter(pk=student_profile.pk)
-             .update(status=StudentStatuses.GRADUATE))
+            if update_student_status:
+                (StudentProfile.objects
+                 .filter(pk=student_profile.pk)
+                 .update(status=StudentStatuses.GRADUATE))
     cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
     cache_key = cache_key_pattern.format(site_id=site.pk)
     cache.delete(cache_key)
