@@ -23,9 +23,9 @@
         <h3>Будущий выпуск {{ branch }}</h3>
     {% endblock description %}
     <pre id="diplomas-code"><span class="btn-clipboard">Copy</span><code class="tex">
-{% for student_profile in student_profiles %}{% with student=student_profile.user %}\diploma{{ '{' }}{{ student.pk }}{{ '}' }}{{ '{' }}{{student.first_name}}{{ '}' }}{{ '{' }}{{student.patronymic}}{{ '}' }}{{ '{' }}{{student.last_name}}{{ '}' }}{{ '{' }}{% if student.gender == 'F' %}a{% endif %}{{ '}' }}{% if is_official %}{% with graduate_profile=student_profile.graduate_profile %}{{ '{' }}{{graduate_profile.diploma_registration_number}}{{ '}' }}{{ '{' }}{{graduate_profile.diploma_number}}{{ '}' }}{{ '{' }}{{graduate_profile.diploma_issued_on}}{{ '}' }}{% endwith %}{% endif %}
-{{ '{' }}{% if student_profile.academic_disciplines.all|length == 1 %}\\направления {% else %}направлений\\{% endif %}{% for program in student_profile.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
-{{ '{' }}{{student_profile.year_of_admission}}{{ '}' }}
+{% for student in students %}\diploma{{ '{' }}{{ student.pk }}{{ '}' }}{{ '{' }}{{student.first_name}}{{ '}' }}{{ '{' }}{{student.patronymic}}{{ '}' }}{{ '{' }}{{student.last_name}}{{ '}' }}{{ '{' }}{% if student.gender == 'F' %}a{% endif %}{{ '}' }}{% if is_official %}{{ '{' }}{{student.diploma_registration_number}}{{ '}' }}{{ '{' }}{{student.diploma_number}}{{ '}' }}{{ '{' }}{{student.diploma_issued_on}}{{ '}' }}{% endif %}
+{{ '{' }}{% if student.academic_disciplines.all|length == 1 %}\\направления {% else %}направлений\\{% endif %}{% for program in student.academic_disciplines.all %}{{ program.name_en }}{% if not forloop.last %}, {% endif %}{% endfor %}{{ '}' }}
+{{ '{' }}{{student.year_of_admission}}{{ '}' }}
 {{ '{' }}{% for course in student.courses %}
 {% spaceless %}\{{course.type}}{{ '{' }}{{course.name}}{{ '}' }}{% if course.type == "course" %}{{ '{' }}1 семестр{{ '}' }}{{ '{' }}{% if course.class_count > 0 %}{{course.class_count}}{% endif %}{{ '}' }}{% endif %}{{ '{' }}{{course.final_grade}}{{ '}' }}
        {{ '{' }}{{ course.teachers }}{{ '}' }}
@@ -37,7 +37,7 @@
          {{ '{' }}{{ project.name }}{{ '}' }}{{ '{' }}{{ project.term }}{{ '}' }}{{ '{' }}{{ project.final_grade }}{{ '}' }}{% endspaceless %}
 {% endfor %}{% endif %}{{ '}' }}
 
-{% endwith %}{% empty %}
+{% empty %}
     {% block empty_message %}
         Нет студентов со статусом "Будет выпускаться"
     {% endblock empty_message %}

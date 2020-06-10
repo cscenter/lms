@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.management import CommandError
 from django.core.management import call_command
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseRedirect
 from django.http.response import HttpResponseForbidden, Http404
@@ -34,7 +34,7 @@ from learning.settings import AcademicDegreeLevels, StudentStatuses, \
 from staff.forms import GraduationForm
 from staff.models import Hint
 from staff.serializers import FacesQueryParams
-from staff.tex import generate_student_profiles_for_tex_diplomas
+from staff.tex import generate_tex_student_profile_for_diplomas
 from surveys.models import CourseSurvey
 from surveys.reports import SurveySubmissionsReport, SurveySubmissionsStats
 from users.filters import StudentFilter
@@ -298,12 +298,19 @@ class FutureGraduateDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, branch_id, **kwargs):
         branch = Branch.objects.get(pk=branch_id)
         report = FutureGraduateDiplomasReport(branch)
-        student_profiles = generate_student_profiles_for_tex_diplomas(report)
+        student_profiles = report.get_queryset()
+        students = (sp.user for sp in student_profiles)
+        courses_qs = (report.get_courses_queryset(students)
+                      .annotate(classes_total=Count('courseclass')))
+        courses = {c.pk: c for c in courses_qs}
+
+        diploma_student_profiles = [generate_tex_student_profile_for_diplomas(sp, courses)
+                                    for sp in student_profiles]
 
         context = {
             "branch": branch,
             "is_official": False,
-            "student_profiles": student_profiles
+            "students": diploma_student_profiles
         }
         return context
 
@@ -632,12 +639,18 @@ class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
     def get_context_data(self, year, month, day, **kwargs):
         diploma_issued_on = datetime.date(int(year), int(month), int(day))
         report = OfficialDiplomasReport(diploma_issued_on)
-        # TODO: pass site aware queryset to TeX generator
-        student_profiles = generate_student_profiles_for_tex_diplomas(report)
+        student_profiles = report.get_queryset().filter(branch__site=self.request.site)
+        students = (sp.user for sp in student_profiles)
+        courses_qs = (report.get_courses_queryset(students)
+                      .annotate(classes_total=Count('courseclass')))
+        courses = {c.pk: c for c in courses_qs}
+
+        diploma_student_profiles = [generate_tex_student_profile_for_diplomas(sp, courses, is_official=True)
+                                    for sp in student_profiles]
 
         context = {
             "diploma_issued_on": diploma_issued_on,
             "is_official": True,
-            "student_profiles": student_profiles
+            "students": diploma_student_profiles
         }
         return context
