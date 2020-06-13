@@ -1,0 +1,12 @@
+.dockerignore
+.travis.yml
+.git
+__pycache__
+db.sqlite3
+infrastructure/
+static/
+media/
+public/*
+!public/assets/
+docs/
+setup.cfg
