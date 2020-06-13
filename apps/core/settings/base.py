@@ -150,11 +150,11 @@ REST_FRAMEWORK = {
 
 WEBPACK_LOADER = {
     'V1': {
-        'BUNDLE_DIR_NAME': 'v1/dist/js/',  # relative to the ASSETS_ROOT
+        'BUNDLE_DIR_NAME': 'v1/dist/prod/',  # relative to the ASSETS_ROOT
         'STATS_FILE': str(ROOT_DIR / "webpack-stats-v1.json"),
     },
     'V2': {
-        'BUNDLE_DIR_NAME': 'v2/dist/js/',
+        'BUNDLE_DIR_NAME': 'v2/dist/prod/',
         'STATS_FILE': str(ROOT_DIR / "webpack-stats-v2.json"),
     }
 }
