@@ -146,11 +146,11 @@ JS_REVERSE_OUTPUT_PATH = str(ASSETS_ROOT / "v1" / "js" / "vendor")
 
 WEBPACK_LOADER = {
     'V1': {
-        'BUNDLE_DIR_NAME': 'v1/dist/.local/',  # relative to the ASSETS_ROOT
-        'STATS_FILE': str(ASSETS_ROOT / "v1" / "dist" / ".local" / "webpack-stats-v1.json"),
+        'BUNDLE_DIR_NAME': 'v1/dist/local/',  # relative to the ASSETS_ROOT
+        'STATS_FILE': str(ASSETS_ROOT / "v1" / "dist" / "local" / "webpack-stats-v1.json"),
     },
     'V2': {
-        'BUNDLE_DIR_NAME': 'v2/dist/.local/',  # relative to the ASSETS_ROOT
-        'STATS_FILE': str(ASSETS_ROOT / "v2" / "dist" / ".local" / "webpack-stats-v2.json"),
+        'BUNDLE_DIR_NAME': 'v2/dist/local/',  # relative to the ASSETS_ROOT
+        'STATS_FILE': str(ASSETS_ROOT / "v2" / "dist" / "local" / "webpack-stats-v2.json"),
     }
 }
