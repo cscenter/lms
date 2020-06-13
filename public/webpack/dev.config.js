@@ -4,7 +4,7 @@ const BundleTracker = require('webpack-bundle-tracker');
 
 const APP_VERSION = process.env.APP_VERSION || "v1";
 
-let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist`);
+let __outputdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/local`);
 
 module.exports = {
     mode: "development",
@@ -22,8 +22,8 @@ module.exports = {
         }),
         new webpack.HotModuleReplacementPlugin(),
         new BundleTracker({
-            path: path.join(__bundlesdir, '.local'),
-            filename: `webpack-stats-${APP_VERSION}.json`
+            path: __outputdir,
+            filename: `webpack-stats-${APP_VERSION}-dev.json`
         }),
     ],
 

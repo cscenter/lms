@@ -1,0 +1,6 @@
+.dockerignore
+templates/
+media/
+docs/
+design/
+gulp/

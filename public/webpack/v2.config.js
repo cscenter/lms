@@ -19,8 +19,6 @@ const APP_VERSION = "v2";
 
 const __srcdir = path.join(__dirname, `../src/${APP_VERSION}`);
 const __nodemodulesdir = path.join(__dirname, '../node_modules');
-let __bundlesdir = path.join(__dirname, `../assets/${APP_VERSION}/dist`);
-let __outputdir = path.join(__bundlesdir, `js`);
 
 // All dependencies will be copied to path, relative to bundles output
 const STATIC_URL = path.join('/static/');
@@ -49,7 +47,6 @@ const common = {
 
     output: {
         filename: '[name]-[hash].js',
-        path: __outputdir,
     },
 
     externals: {},

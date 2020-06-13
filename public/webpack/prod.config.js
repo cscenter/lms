@@ -11,7 +11,7 @@ const APP_VERSION = process.env.APP_VERSION || "v1";
 const LOCAL_BUILD = (process.env.LOCAL_BUILD === "1");
 
 const __rootdir = path.join(__dirname, '..');
-let __outputdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/js`);
+let __outputdir = path.join(__dirname, `../assets/${APP_VERSION}/dist/prod`);
 
 // TODO: add css minimization
 const prodConfiguration = {
@@ -20,6 +20,7 @@ const prodConfiguration = {
     devtool: "hidden-source-map",
 
     output: {
+        path: __outputdir,
         filename: '[name]-[chunkhash].js',
         sourceMapFilename: '[name]-[chunkhash].js.map',
         chunkFilename: '[name]-[chunkhash].js',
