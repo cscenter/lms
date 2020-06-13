@@ -129,6 +129,7 @@ def create_graduate_profiles(site: Site, graduated_on: datetime.date):
                 (StudentProfile.objects
                  .filter(pk=student_profile.pk)
                  .update(status=StudentStatuses.GRADUATE))
+                # TODO: add student status log record
     cache_key_pattern = GraduateProfile.HISTORY_CACHE_KEY_PATTERN
     cache_key = cache_key_pattern.format(site_id=site.pk)
     cache.delete(cache_key)
