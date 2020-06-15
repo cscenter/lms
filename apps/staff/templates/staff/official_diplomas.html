@@ -4,6 +4,8 @@
     <h3>Официальные дипломы от {{ diploma_issued_on }}</h3>
 {% endblock description %}
 
+{% block diploma %}\diploma{{ '{' }}{{student.first_name}}{{ '}' }}{{ '{' }}{{student.patronymic}}{{ '}' }}{{ '{' }}{{student.last_name}}{{ '}' }}{{ '{' }}{% if student.gender == 'F' %}a{% endif %}{{ '}' }}{{ '{' }}{{student.diploma_registration_number}}{{ '}' }}{{ '{' }}{{student.diploma_number}}{{ '}' }}{{ '{' }}{{student.diploma_issued_on}}{{ '}' }}{% endblock %}
+
 {% block empty_message %}
     Нет официальных дипломов, выданных в выбранный день.
 {% endblock empty_message %}

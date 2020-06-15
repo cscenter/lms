@@ -309,7 +309,6 @@ class FutureGraduateDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
 
         context = {
             "branch": branch,
-            "is_official": False,
             "students": diploma_student_profiles
         }
         return context
@@ -650,7 +649,6 @@ class OfficialDiplomasTeXView(CuratorOnlyMixin, generic.TemplateView):
 
         context = {
             "diploma_issued_on": diploma_issued_on,
-            "is_official": True,
             "students": diploma_student_profiles
         }
         return context
