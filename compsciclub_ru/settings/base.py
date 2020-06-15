@@ -56,16 +56,17 @@ INSTALLED_APPS += [
 
 REDIS_PASSWORD = env.str('REDIS_PASSWORD', default=None)
 REDIS_HOST = env.str('REDIS_HOST', default='127.0.0.1')
+REDIS_PORT = env.int('REDIS_PORT', default=6379)
 RQ_QUEUES = {
     'default': {
         'HOST': REDIS_HOST,
-        'PORT': 6379,
+        'PORT': REDIS_PORT,
         'DB': 0,
         'PASSWORD': REDIS_PASSWORD,
     },
     'high': {
         'HOST': REDIS_HOST,
-        'PORT': 6379,
+        'PORT': REDIS_PORT,
         'DB': 0,
         'PASSWORD': REDIS_PASSWORD,
     },
@@ -77,6 +78,7 @@ THUMBNAIL_DEBUG = DEBUG
 THUMBNAIL_DUMMY = True
 THUMBNAIL_PRESERVE_FORMAT = True
 THUMBNAIL_KVSTORE = 'sorl.thumbnail.kvstores.redis_kvstore.KVStore'
+THUMBNAIL_REDIS_PORT = REDIS_PORT
 THUMBNAIL_REDIS_HOST = REDIS_HOST
 THUMBNAIL_REDIS_PASSWORD = REDIS_PASSWORD
 
