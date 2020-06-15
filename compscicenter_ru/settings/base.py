@@ -89,16 +89,16 @@ CACHES = {
 }
 
 REDIS_PASSWORD = env.str('REDIS_PASSWORD', default=None)
-REDIS_HOST = '127.0.0.1'
+REDIS_HOST = env.str('REDIS_HOST', default='127.0.0.1')
 RQ_QUEUES = {
     'default': {
-        'HOST': '127.0.0.1',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 0,
         'PASSWORD': REDIS_PASSWORD,
     },
     'high': {
-        'HOST': '127.0.0.1',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 0,
         'PASSWORD': REDIS_PASSWORD,
