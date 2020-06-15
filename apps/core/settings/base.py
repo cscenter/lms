@@ -116,7 +116,6 @@ YANDEX_DISK_SLIDES_ROOT = "/CSCenterMaterials/"
 
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 STATIC_URL = '/static/'
-STATIC_ROOT = str(ROOT_DIR / "static")
 ASSETS_ROOT = ROOT_DIR / "assets"
 STATICFILES_DIRS = [
     str(ASSETS_ROOT),
