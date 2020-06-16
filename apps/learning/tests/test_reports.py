@@ -494,7 +494,7 @@ def test_report_official_diplomas_csv(settings):
     branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
     course_club = CourseFactory(main_branch=branch_club,
                                 branches=[student1.branch])
-    EnrollmentFactory(course=course_club, student=student1, student_profile=student_profile1)
+    EnrollmentFactory(course=course_club, student=student1, student_profile=student_profile1, grade=GradeTypes.GOOD)
 
     # No courses to show, no additional header columns expected
     progress_report = get_report()

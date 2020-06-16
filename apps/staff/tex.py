@@ -55,6 +55,9 @@ def generate_tex_student_profile_for_diplomas(student_profile, courses, is_offic
     enrollments = {}
     # Store the last passed course
     for e in student.enrollments_progress:
+        # Ignore club courses for official diplomas
+        if e.course.is_club_course:
+            continue
         meta_course_id = e.course.meta_course_id
         enrollments[meta_course_id] = e
     for e in enrollments.values():
