@@ -4,10 +4,11 @@ import pytest
 from bs4 import BeautifulSoup
 from django.utils.encoding import smart_bytes
 
+from core.tests.factories import BranchFactory
 from core.urls import reverse
-from courses.tests.factories import SemesterFactory
+from courses.tests.factories import SemesterFactory, CourseFactory
 from learning.settings import StudentStatuses, GradeTypes
-from learning.tests.factories import GraduateProfileFactory
+from learning.tests.factories import GraduateProfileFactory, EnrollmentFactory
 from projects.tests.factories import ProjectFactory
 from users.tests.factories import StudentFactory, CuratorFactory
 
@@ -122,3 +123,30 @@ def test_official_diplomas_list_should_be_sorted(client):
     user_links = [a['href'] for a in soup.select('div.container > ul > li > a')]
     assert user_links[0] == g2.student_profile.user.get_absolute_url()
     assert user_links[1] == g1.student_profile.user.get_absolute_url()
+
+
+@pytest.mark.django_db
+def test_official_diplomas_tex_should_not_contain_club_courses(client, settings):
+    # 2-digit day and month to avoid bothering with zero padding
+    diploma_issued_on = date(2020, 12, 20)
+    g1 = GraduateProfileFactory(diploma_issued_on=diploma_issued_on)
+    student_profile1 = g1.student_profile
+    student1 = student_profile1.user
+
+    course1 = CourseFactory(main_branch=student1.branch)
+    EnrollmentFactory(course=course1, student=student1, student_profile=student_profile1, grade=GradeTypes.GOOD)
+
+    # Add an enrollment to a club course, it should not be shown in the TeX template
+    branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
+    course_club = CourseFactory(main_branch=branch_club,
+                                branches=[student1.branch])
+    EnrollmentFactory(course=course_club, student=student1, student_profile=student_profile1, grade=GradeTypes.GOOD)
+
+    curator = CuratorFactory()
+    client.login(curator)
+    response = client.get(reverse('staff:exports_official_diplomas_tex', kwargs={
+        'year': diploma_issued_on.year, 'month': diploma_issued_on.month, 'day': diploma_issued_on.day
+    }))
+
+    assert smart_bytes(course1.name) in response.content
+    assert smart_bytes(course_club.name) not in response.content
