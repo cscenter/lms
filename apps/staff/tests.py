@@ -28,6 +28,24 @@ def test_staff_diplomas_view(curator, client, settings):
 
 
 @pytest.mark.django_db
+def test_staff_diplomas_view_should_contain_club_courses(curator, client, settings):
+    student = StudentFactory(student_profile__status=StudentStatuses.WILL_GRADUATE)
+    student_profile = student.student_profiles.first()
+
+    # Add an enrollment to a club course, it should be shown in the TeX template
+    branch_club = BranchFactory(site__domain=settings.ANOTHER_DOMAIN)
+    course_club = CourseFactory(main_branch=branch_club,
+                                branches=[student.branch])
+    EnrollmentFactory(course=course_club, student=student,
+                      student_profile=student_profile, grade=GradeTypes.GOOD)
+
+    client.login(curator)
+    response = client.get(reverse('staff:exports_future_graduates_diplomas_tex',
+                                  kwargs={"branch_id": student.branch_id}))
+    assert smart_bytes(course_club.name) in response.content
+
+
+@pytest.mark.django_db
 def test_view_student_progress_report_full_download_csv(client):
     url = reverse("staff:students_progress_report",
                   kwargs={'output_format': 'csv'})
