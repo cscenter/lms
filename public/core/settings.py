@@ -146,10 +146,10 @@ USE_TZ = True
 WEBPACK_LOADER = {
     'V1': {
         'BUNDLE_DIR_NAME': 'v1/dist/.local/',  # relative to the ASSETS_ROOT
-        'STATS_FILE': str(ASSETS_ROOT / "v1" / "dist" / ".local" / "webpack-stats-v1.json"),
+        'STATS_FILE': str(ASSETS_ROOT / "v1" / "dist" / "local" / "webpack-stats-v1.json"),
     },
     'V2': {
         'BUNDLE_DIR_NAME': 'v2/dist/.local/',  # relative to the ASSETS_ROOT
-        'STATS_FILE': str(ASSETS_ROOT / "v2" / "dist" / ".local" / "webpack-stats-v2.json"),
+        'STATS_FILE': str(ASSETS_ROOT / "v2" / "dist" / "local" / "webpack-stats-v2.json"),
     }
 }

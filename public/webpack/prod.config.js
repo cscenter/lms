@@ -24,7 +24,7 @@ const prodConfiguration = {
         filename: '[name]-[chunkhash].js',
         sourceMapFilename: '[name]-[chunkhash].js.map',
         chunkFilename: '[name]-[chunkhash].js',
-        publicPath: `/static/${APP_VERSION}/dist/js/`,
+        publicPath: `/static/${APP_VERSION}/dist/prod/`,
     },
 
     stats: {
