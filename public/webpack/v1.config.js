@@ -171,7 +171,7 @@ const common = {
     plugins: [
         new Dotenv({
             path: path.join(__dirname, '.env'),
-            silent: false,
+            silent: true,
         }),
         // Fixes warning in moment-with-locales.min.js
         //   Module not found: Error: Can't resolve './locale' in ...

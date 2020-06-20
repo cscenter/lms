@@ -77,7 +77,7 @@ export default class UberEditor {
         // Append MathJax src file
         const mathjax = previewer.createElement('script');
         mathjax.type = 'text/javascript';
-        mathjax.src = window.CSC.config.JS_SRC.MATHJAX;
+        mathjax.src = window.__CSC__.config.JS_SRC.MATHJAX;
         previewer.body.appendChild(mathjax);
 
         const previewerDocument = editor.getElement('previewer');
@@ -159,8 +159,8 @@ export default class UberEditor {
     static preload(callback = function() {}) {
         // Stop automatic processing
         $("body").addClass("tex2jax_ignore");
-        const scripts = [CSC.config.JS_SRC.MATHJAX,
-                         CSC.config.JS_SRC.HIGHLIGHTJS];
+        const scripts = [window.__CSC__.config.JS_SRC.MATHJAX,
+                         window.__CSC__.config.JS_SRC.HIGHLIGHTJS];
         const deferred = $.Deferred();
         let chained = deferred;
         $.each(scripts, function(i, url) {
@@ -199,7 +199,7 @@ export default class UberEditor {
         editorIframes.each(function(i, iframe) {
             editorIDs.push($(iframe).attr('id'));
         });
-        $(CSC.config.uberEditors).each(function(i, editor) {
+        $(window.__CSC__.config.uberEditors).each(function(i, editor) {
             if ($.inArray(editor._instanceId, editorIDs) !== -1) {
                 editor.emit('__update');
             }
@@ -216,10 +216,10 @@ export default class UberEditor {
                 const hoursOld = (((new Date()) - (new Date(f.modified))) / (1000 * 60 * 60));
                 if (hoursOld > 24) {
                     editor.remove(fileKey);
-                } else if (CSC.config.localStorage.hashes) {
+                } else if (window.__CSC__.config.localStorage.hashes) {
                     let text = editor.exportFile(fileKey).replace(/\s+/g, '');
                     let hash = md5(text).toString();
-                    if (hash in CSC.config.localStorage.hashes) {
+                    if (hash in window.__CSC__.config.localStorage.hashes) {
                         editor.remove(fileKey);
                     }
                 }

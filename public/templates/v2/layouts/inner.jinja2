@@ -17,6 +17,10 @@
 
     <script type="text/javascript">
         window.__CSC__ = {
+            config: {
+                csrfCookieName: "csrftoken",
+                sentryDSN: "",
+            },
             notifications: {{ messages(request)|tojson }},
             sprites: ["{{ static("v2/dist/img/sprites/common.svg") }}"]
         };

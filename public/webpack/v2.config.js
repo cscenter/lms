@@ -191,7 +191,7 @@ const common = {
     plugins: [
         new Dotenv({
             path: path.join(__dirname, '.env'),
-            silent: false,
+            silent: true,
         }),
         new CleanWebpackPlugin({
             verbose: true,
